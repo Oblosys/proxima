@@ -37,7 +37,7 @@ import IOExts
 import Directory
 
 initialWindowSize :: Size
-initialWindowSize = sz 900 800
+initialWindowSize = sz 1200 900
 
 startGUI :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) -> (RenderingLevel, EditRendering) -> IO ()
 startGUI handler (initRenderingLvl, initEvent) = run $
@@ -83,7 +83,7 @@ startGUI handler (initRenderingLvl, initEvent) = run $
 
     ; return ()
     }    
-    
+
 onPaint :: Var RenderingLevel -> DC () -> Rect -> IO ()          
 onPaint renderingLvlVar dc viewRect =
  do { dcClear dc

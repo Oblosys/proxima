@@ -100,7 +100,7 @@ presHole focus typeStr nd pth = loc nd $
 presParseErr node pres =
   loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} 
                                                                                      -- empty trick
-                          --`withbgColor` whiteSmoke
+                          `withbgColor` whiteSmoke
 
 
 row'  = RowP (NoIDP) 0 
@@ -209,10 +209,10 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
     in  (DocumentLevel d' path cl)
 
 
-itemStart i (Bullet _) = text "- "
-itemStart i (Number _) = text (show (i+1) ++ ") ")
-itemStart i (Alpha  _) = text (chr (ord 'a' + i):") ")
-itemStart i (_)        = text "  "
+itemStart i (Bullet _) typeLoc = typeLoc $ text "- "
+itemStart i (Number _) typeLoc = typeLoc $ text (show (i+1) ++ ") ")
+itemStart i (Alpha  _) typeLoc = typeLoc $ text (chr (ord 'a' + i):") ")
+itemStart i (_)        typeLoc = typeLoc $ text "  "
 
 
 presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
@@ -1458,6 +1458,7 @@ sem_ConsList_Exp_Nil_Exp  =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      typeLoc              : Presentation -> Presentation
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -1489,6 +1490,7 @@ type T_ConsList_Item = (FocusDoc) ->
                        (Int) ->
                        ([Int]) ->
                        (([PathDoc],[PathDoc],[PathDoc])) ->
+                       (Presentation -> Presentation) ->
                        (FiniteMap String (PathDoc, String)) ->
                        (FiniteMap String (PathDoc, String)) ->
                        ( (Int),([Presentation]),([Presentation]),([Presentation]),([Presentation]),(ConsList_Item),(FiniteMap String (PathDoc, String)))
@@ -1509,14 +1511,15 @@ sem_ConsList_Item_Cons_Item (_head) (_tail) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 Cons_Item _head_self _tail_self
             ( _head_pIdC,_head_pres,_head_pres2,_head_presTree,_head_presXML,_head_self,_head_varsInScopeAtFocus) =
-                (_head (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+                (_head (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_typeLoc) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
             ( _tail_pIdC,_tail_press,_tail_press2,_tail_pressTree,_tail_pressXML,_tail_self,_tail_varsInScopeAtFocus) =
-                (_tail (_lhs_focusD) (_lhs_ix + 1) (_lhs_listType) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+                (_tail (_lhs_focusD) (_lhs_ix + 1) (_lhs_listType) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_typeLoc) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
         in  ( _tail_pIdC,_head_pres : _tail_press,_head_pres2 : _tail_press2,_head_presTree : _tail_pressTree,_head_presXML : _tail_pressXML,_self,_tail_varsInScopeAtFocus)
 sem_ConsList_Item_Nil_Item :: (T_ConsList_Item)
 sem_ConsList_Item_Nil_Item  =
@@ -1526,6 +1529,7 @@ sem_ConsList_Item_Nil_Item  =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3552,6 +3556,7 @@ sem_Int__ParseErrInt_ (_node) (_presentation) =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      typeLoc              : Presentation -> Presentation
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -3598,6 +3603,7 @@ type T_Item = (FocusDoc) ->
               (Int) ->
               ([Int]) ->
               (([PathDoc],[PathDoc],[PathDoc])) ->
+              (Presentation -> Presentation) ->
               (FiniteMap String (PathDoc, String)) ->
               (FiniteMap String (PathDoc, String)) ->
               ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(Item),(FiniteMap String (PathDoc, String)))
@@ -3624,6 +3630,7 @@ sem_Item_HeliumItem (_idd) (_exp) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3636,7 +3643,7 @@ sem_Item_HeliumItem (_idd) (_exp) =
                      , row [text "  ", _exp_pres]
                      ]
              ,loc (HeliumItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [itemStart _lhs_ix _lhs_listType, _exp_pres
+                row' [itemStart _lhs_ix _lhs_listType _lhs_typeLoc, _exp_pres
                                                           `withColor` black
                                                           `withbgColor` white
                                                           `withFontFam` "Courier New" ]
@@ -3653,6 +3660,7 @@ sem_Item_HoleItem  =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3668,6 +3676,7 @@ sem_Item_ListItem (_idd) (_itemList) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3699,6 +3708,7 @@ sem_Item_ParseErrItem (_node) (_presentation) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3714,6 +3724,7 @@ sem_Item_StringItem (_idd) (_string) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -3728,7 +3739,7 @@ sem_Item_StringItem (_idd) (_string) =
                              , text "\""
                              ] `withColor` darkViolet ]
              ,loc (StringItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [itemStart _lhs_ix _lhs_listType, _string_pres]
+                row' [itemStart _lhs_ix _lhs_listType _lhs_typeLoc, _string_pres]
              ,presentElementTree _lhs_focusD (StringItemNode _self _lhs_path) _lhs_path "StringItem" [ _string_presTree ]
              ,presentElementXML _lhs_focusD (StringItemNode _self _lhs_path) _lhs_path "StringItem" [ _string_presXML ]
              ,_self
@@ -3814,10 +3825,10 @@ sem_ItemList_ItemList (_idd) (_listType) (_items) =
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 ItemList _idd _listType_self _items_self
-            ( _listType_pIdC,_listType_pres,_listType_pres2,_listType_presTree,_listType_presXML,_listType_self,_listType_varsInScopeAtFocus) =
+            ( _listType_pIdC,_listType_pres,_listType_pres2,_listType_presTree,_listType_presXML,_listType_self,_listType_typeLoc,_listType_varsInScopeAtFocus) =
                 (_listType (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
             ( _items_pIdC,_items_pres,_items_pres2,_items_presTree,_items_presXML,_items_press,_items_press2,_items_self,_items_varsInScopeAtFocus) =
-                (_items (_lhs_focusD) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
+                (_items (_lhs_focusD) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_listType_typeLoc) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
         in  ( _items_pIdC
              ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 col' [ row' [ text "ItemList ", _listType_pres, text " $"]
@@ -3865,6 +3876,7 @@ sem_ItemList_ParseErrItemList (_node) (_presentation) =
       presTree             : Presentation
       presXML              : Presentation
       self                 : SELF
+      typeLoc              : Presentation -> Presentation
 
 -}
 {-
@@ -3900,7 +3912,7 @@ type T_ListType = (FocusDoc) ->
                   (([PathDoc],[PathDoc],[PathDoc])) ->
                   (FiniteMap String (PathDoc, String)) ->
                   (FiniteMap String (PathDoc, String)) ->
-                  ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(ListType),(FiniteMap String (PathDoc, String)))
+                  ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(ListType),(Presentation -> Presentation),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ListType :: (ListType) ->
                 (T_ListType)
@@ -3934,6 +3946,7 @@ sem_ListType_Alpha (_idd) =
              ,presentElementTree _lhs_focusD (AlphaNode _self _lhs_path) _lhs_path "Alpha" [  ]
              ,presentElementXML _lhs_focusD (AlphaNode _self _lhs_path) _lhs_path "Alpha" [  ]
              ,_self
+             ,loc (AlphaNode _self _lhs_path)
              ,_lhs_varsInScopeAtFocus
              )
 sem_ListType_Bullet :: (IDD) ->
@@ -3956,6 +3969,7 @@ sem_ListType_Bullet (_idd) =
              ,presentElementTree _lhs_focusD (BulletNode _self _lhs_path) _lhs_path "Bullet" [  ]
              ,presentElementXML _lhs_focusD (BulletNode _self _lhs_path) _lhs_path "Bullet" [  ]
              ,_self
+             ,loc (BulletNode _self _lhs_path)
              ,_lhs_varsInScopeAtFocus
              )
 sem_ListType_HoleListType :: (T_ListType)
@@ -3969,7 +3983,7 @@ sem_ListType_HoleListType  =
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 HoleListType
-        in  ( _lhs_pIdC,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+        in  ( _lhs_pIdC,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ListType" (HoleListTypeNode _self _lhs_path) _lhs_path,_self,id,_lhs_varsInScopeAtFocus)
 sem_ListType_Number :: (IDD) ->
                        (T_ListType)
 sem_ListType_Number (_idd) =
@@ -3990,6 +4004,7 @@ sem_ListType_Number (_idd) =
              ,presentElementTree _lhs_focusD (NumberNode _self _lhs_path) _lhs_path "Number" [  ]
              ,presentElementXML _lhs_focusD (NumberNode _self _lhs_path) _lhs_path "Number" [  ]
              ,_self
+             ,loc (NumberNode _self _lhs_path)
              ,_lhs_varsInScopeAtFocus
              )
 sem_ListType_ParseErrListType :: (Node) ->
@@ -4005,7 +4020,7 @@ sem_ListType_ParseErrListType (_node) (_presentation) =
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 ParseErrListType _node _presentation
-        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,id,_lhs_varsInScopeAtFocus)
 -- List_Alt ----------------------------------------------------
 {-
    inherited attributes:
@@ -4573,6 +4588,7 @@ sem_List_Exp_ParseErrList_Exp (_node) (_presentation) =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      typeLoc              : Presentation -> Presentation
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -4610,6 +4626,7 @@ type T_List_Item = (FocusDoc) ->
                    (Int) ->
                    ([Int]) ->
                    (([PathDoc],[PathDoc],[PathDoc])) ->
+                   (Presentation -> Presentation) ->
                    (FiniteMap String (PathDoc, String)) ->
                    (FiniteMap String (PathDoc, String)) ->
                    ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),([Presentation]),([Presentation]),(List_Item),(FiniteMap String (PathDoc, String)))
@@ -4629,6 +4646,7 @@ sem_List_Item_HoleList_Item  =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -4656,12 +4674,13 @@ sem_List_Item_List_Item (_idd) (_elts) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 List_Item _idd _elts_self
             ( _elts_pIdC,_elts_press,_elts_press2,_elts_pressTree,_elts_pressXML,_elts_self,_elts_varsInScopeAtFocus) =
-                (_elts (_lhs_focusD) (0) (_lhs_listType) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+                (_elts (_lhs_focusD) (0) (_lhs_listType) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_typeLoc) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _elts_pIdC
              ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 presentList _elts_press
@@ -4687,6 +4706,7 @@ sem_List_Item_ParseErrList_Item (_node) (_presentation) =
       _lhs_pIdC
       _lhs_path
       _lhs_ranges
+      _lhs_typeLoc
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
@@ -5058,7 +5078,8 @@ sem_Slide_Slide (_idd) (_title) (_itemList) =
                 (_itemList (_lhs_focusD) (_lhs_ix) (_title_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _itemList_pIdC
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ row' [ text "Slide ", _title_pres, text " $"]
+                col' [ row' [ text "Slide ", row' [ text "\"", _title_pres, text "\""
+                                                           ] `withColor` darkViolet  , text " $"]
                      , row' [ text "  ", _itemList_pres ]
                      ]
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $

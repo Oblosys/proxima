@@ -134,12 +134,12 @@ slide title body = overlay [
                  move 0 30 $
                   col [ hAlignCenter $ title `withColor` white
                                                     `withFont'` ("cmr10", 20) 
-                      , row [ hSpace 20, body `withbgColor` blue ]
+                      , row [ hSpace 20, body `withbgColor` myBlue ]
                       ] `withHStretch` True
                       
-                , rect 500 300 `withfColor` blue `withColor` blue
-                ] `withColor` yellow `withbgColor` blue `withFont'` ("Arial", 15)
-
+                , rect 500 300 `withfColor` myBlue `withColor` myBlue
+                ] `withColor` yellow `withbgColor` myBlue `withFont'` ("Arial", 15)
+  where myBlue = (0,0,192)
 
 
 

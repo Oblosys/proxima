@@ -50,8 +50,8 @@ recognizeRootEnr = pStr' $
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (Structural (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
 
-      <*> parseIDListList_Decl {- <* (pStr' $ pStructural List_DeclNode) -} <*> recognizeList_Decl
-                                   {- tree or xml view-}
+      <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -} <*> recognizeList_Decl
+                                {- tree or xml view-}
 -- ?remove pStr from this parser?
 parseIDListList_Decl :: ListParser List_Decl
 parseIDListList_Decl = pStr $
@@ -158,6 +158,8 @@ recognizeExp = pStr $ -- div&power recognizers are copied here, separating is ha
      <$> pStructural PowerExpNode
      <*> recognizeExp
      <*> recognizeExp
+  <|>    HoleExp
+     <$ pStructural HoleExpNode
 
 -------------------- Helium parser:
 
@@ -293,7 +295,7 @@ parseFactor'' =
   <|> parseLetExp
   <|> recognizeExp'
 
--- **  ' can the two be merged?
+-- **  can recognizeExp and recognizeExp' be merged?
 recognizeExp' = pStr $ 
          (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
      <$> pStructural DivExpNode
@@ -303,7 +305,9 @@ recognizeExp' = pStr $
      <$> pStructural PowerExpNode
      <*> recognizeExp
      <*> recognizeExp
-
+  <|>    HoleExp
+     <$ pStructural HoleExpNode
+     
 parseIdent = 
          (\strTk -> reuseIdent [tokenNode strTk] Nothing (Just $ tokenIDP strTk) Nothing (Just $ mkString_ strTk))
      <$> pLIdent

@@ -116,8 +116,10 @@ SEM EnrichedDoc
                               , row[ text " ", @idListDecls.idsPres] `withFontSize` 10
                               ] 
                        , vSpace 4
+                       -- tree & XML
                        --, structural $ row [ hSpace 3, box $ row [  hSpace 3, @decls.presTree, text "   ", vLine, text "   ", @decls.presXML `withFont'` ("Courier New",8), hSpace 3]]
                        --, vSpace 14
+                       -- end tree & XML
                        , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                        , row' [ hSpace 3, @decls.pres ]
                        , vSpace 10                                     
@@ -433,7 +435,7 @@ presHole focus typeStr nd pth = loc nd $
 presParseErr node pres =
   loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} 
                                                                                      -- empty trick
-                          --`withbgColor` whiteSmoke
+                          `withbgColor` whiteSmoke
 
 
 row'  = RowP (NoIDP) 0 
@@ -1183,7 +1185,8 @@ presentList (p:ps) = col' $  [ row' [sep NoIDP "  [ ", p ] ]
                                         
 SEM Slide
   | Slide lhs.pres = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       col' [ row' [ text "Slide ", @title.pres, text " $"]
+                       col' [ row' [ text "Slide ", row' [ text "\"", @title.pres, text "\""
+                                                                  ] `withColor` darkViolet  , text " $"]
                             , row' [ text "  ", @itemList.pres ]
                             ]
                            
@@ -1281,14 +1284,21 @@ SEM ItemList
                                 ]
                             -- list gets loc and structural
             items.listType = @listType.self
-
-SEM ListType [ || pres2 : Presentation ]
+            items.typeLoc = @listType.typeLoc
+            
+SEM ListType [ || pres2 : Presentation typeLoc :  {Presentation -> Presentation}]
   | Bullet         lhs.pres2 = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
+                   lhs.typeLoc = loc (BulletNode @self @lhs.path) 
   | Number         lhs.pres2 = loc (NumberNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
+                   lhs.typeLoc = loc (NumberNode @self @lhs.path) 
   | Alpha          lhs.pres2 = loc (AlphaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
+                   lhs.typeLoc = loc (AlphaNode @self @lhs.path) 
+  | ParseErrListType lhs.typeLoc = id
+  | HoleListType lhs.typeLoc = id
+  
 
 
 SEM List_Item [ || pres2 : Presentation ]
@@ -1303,11 +1313,12 @@ SEM List_Item [ || pres2 : Presentation ]
                    presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path
 
 
-SEM Item [ listType : ListType || ]
+
+SEM Item [ listType : ListType typeLoc :  {Presentation -> Presentation} ||  ]
   | StringItem     lhs.pres2 = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                                 row' [itemStart @lhs.ix @lhs.listType, @string.pres]
+                                 row' [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @string.pres]
   | HeliumItem     lhs.pres2 = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                                 row' [itemStart @lhs.ix @lhs.listType, @exp.pres 
+                                 row' [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @exp.pres 
                                                                            `withColor` black 
                                                                            `withbgColor` white
                                                                            `withFontFam` "Courier New" ]
@@ -1320,10 +1331,10 @@ SEM Item [ listType : ListType || ]
             
 
 {
-itemStart i (Bullet _) = text "- "
-itemStart i (Number _) = text (show (i+1) ++ ") ")
-itemStart i (Alpha  _) = text (chr (ord 'a' + i):") ")
-itemStart i (_)        = text "  "
+itemStart i (Bullet _) typeLoc = typeLoc $ text "- "
+itemStart i (Number _) typeLoc = typeLoc $ text (show (i+1) ++ ") ")
+itemStart i (Alpha  _) typeLoc = typeLoc $ text (chr (ord 'a' + i):") ")
+itemStart i (_)        typeLoc = typeLoc $ text "  "
 }
 
 
@@ -1332,10 +1343,11 @@ SEM ConsList_Slide
   | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
   | Nil_Slide  lhs.press2 = []
 
-ATTR List_Item [ listType : ListType || ]
-SEM ConsList_Item [ listType : ListType || ]
+ATTR List_Item [ listType : ListType typeLoc :  {Presentation -> Presentation} || ]
+SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation -> Presentation} || ]
   | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
               head.listType = @lhs.listType
+              head.typeLoc = @lhs.typeLoc
   | Nil_Item  lhs.press2 = []
 
 SEM List_Slide
