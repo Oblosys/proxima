@@ -18,7 +18,14 @@ genDocumentTypes include parsedFile =
                  ++ genDataTypes extendedTypes 
                  ++ ["\n\n-- Generated Types --\n"]
                  ++ genClipDoc   extendedTypes 
-                 ++ genNode      extendedTypes 
+                 ++ genNode      extendedTypes
+{-
+                 ++ ["{- !!!!!!!!!!!!!"]
+                 ++ (removeRepeat(getFields extendedTypes))
+                 ++ ["-- !!!!!!!!!!!!! extended types"]
+                 ++ [(show extendedTypes)]     
+                 ++ ["!!!!!!!!!!!!! -}"]
+-}
                  where
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
@@ -26,10 +33,10 @@ genDocumentTypes include parsedFile =
 
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line
-genNode parsedFile    = [    "data Node = NoNode "]
+genNode extendedTypes = [    "data Node = NoNode "]
                         ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
                         ++ indent 10 (map makeNodeAlt fields)  where
-                        fields = removeRepeat(getFields' parsedFile)
+                        fields = removeRepeat(getFields' extendedTypes)
                         makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
                         makeNodeAlt e = "| "++fieldType e ++"Node "++fieldType e++" Path "
 ---

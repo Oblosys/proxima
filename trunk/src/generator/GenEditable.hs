@@ -20,7 +20,7 @@ genDocumentEdit include parsedFile =
                  ++ genEditableInstances extendedTypes
                  ++ concatMap primitiveEdit primTypes
                  ++ ["\n\n\n\n\n\n-- ProxParser_Generated --\n"] ---
-                 ++ genProxParser        extendedTypes
+--                 ++ genProxParser        extendedTypes
                  where
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
@@ -377,7 +377,7 @@ instanceList (Decl e prods _) =
  
  
  
-       
+ {-     
        
 --- below are some generated functions for a new module "../src/presentation/ProxParser_Generated"
 --- this module should be similar to the other generated modules (with a "DON'T EDIT.." line)
@@ -469,5 +469,4 @@ genReuseN arity =
 ---------
        
        
-       
-       
+-}    

@@ -8,6 +8,7 @@ import GenAG
 import GenTypes
 import GenEditable
 import GenDocUtils
+import GenProxParser 
 
 --- All lines containing a --- have been altered by Martijn.
 --- For changed or added functions, a --- has been put in front of it rather than on each line
@@ -46,7 +47,7 @@ generateFiles fname
           generate "../evaluation/DocumentEdit_Generated.hs"     genDocumentEdit    parsedFile
           generate "../evaluation/DocUtils_Generated.hs"         genDocUtils        parsedFile
           generate "../presentation/PresentationAG_Generated.ag" genPresentationAG  parsedFile
-
+          generate "../presentation/ProxParser_Generated.hs"     genProxParser      parsedFile
 
 -- make this function more clear
 generate filename func parsedFile
