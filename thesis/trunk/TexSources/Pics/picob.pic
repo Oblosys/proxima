@@ -1,0 +1,124 @@
+set Graphics(arrowshape) {16.0000000002 20.0000000002 8.0}
+set Graphics(fill,color) #000000
+set Graphics(fill,style) {}
+set Graphics(font,bold) 0
+set Graphics(font,color) black
+set Graphics(font,italic) 0
+set Graphics(font,normal) 0
+set Graphics(font,overstrike) 0
+set Graphics(font,roman) 0
+set Graphics(font,size) 20
+set Graphics(font,stipple) {}
+set Graphics(font,style) {}
+set Graphics(font,type) Arial
+set Graphics(font,underline) 0
+set Graphics(grid,on) 0
+set Graphics(grid,size) 20
+set Graphics(grid,snap) 1
+set Graphics(line,arrow) none
+set Graphics(line,capstyle) butt
+set Graphics(line,color) black
+set Graphics(line,dash) {}
+set Graphics(line,joinstyle) miter
+set Graphics(line,smooth) 0
+set Graphics(line,style) {}
+set Graphics(line,width) 0.8
+set Graphics(mode) NULL
+set Graphics(shape) circle
+set Graphics(snap,on) 0
+set Graphics(snap,size) 10
+set Graphics(splinesteps) 20
+set Graphics(text,anchor) c
+set Graphics(ticks,on) 0
+set Graphics(mode) NULL
+### End of Graphics parameters
+
+
+set Zoom(button,text) 200%
+set Zoom(caller) {}
+set Zoom(factor) 2
+set Zoom(font,size) 20.0000000002
+set Zoom(selected,button) 2
+set Zoom(utag1,line,width) 1.0
+set Zoom(utag11,line,width) 2.00000000002
+set Zoom(utag12,line,width) 2.00000000002
+set Zoom(utag13,font,size) 20.0000000002
+set Zoom(utag13,line,width) 0.0
+set Zoom(utag14,font,size) 20.0000000002
+set Zoom(utag14,line,width) 0.0
+set Zoom(utag2,line,width) 20.9999999999
+set Zoom(utag20,line,width) 2.00000000002
+set Zoom(utag21,line,width) 2.00000000002
+set Zoom(utag22,font,size) 20.0
+set Zoom(utag22,line,width) 0.0
+set Zoom(utag25,font,size) 20.0
+set Zoom(utag25,line,width) 0.0
+set Zoom(utag27,line,width) 5.0
+set Zoom(utag28,line,width) 5.0
+set Zoom(utag29,line,width) 2.5
+set Zoom(utag3,line,width) 20.9999999999
+set Zoom(utag30,line,width) 2.5
+set Zoom(utag35,font,size) 20.0000000002
+set Zoom(utag35,line,width) 0.0
+set Zoom(utag36,line,width) 2.00000000002
+set Zoom(utag38,line,width) 2.00000000002
+set Zoom(utag4,line,width) 20.9999999999
+set Zoom(utag42,line,width) 2.00000000002
+set Zoom(utag43,font,size) 20.0000000002
+set Zoom(utag43,line,width) 0.0
+set Zoom(utag46,font,size) 20.0000000002
+set Zoom(utag46,line,width) 0.0
+set Zoom(utag5,line,width) 20.9999999999
+set Zoom(utag6,line,width) 20.9999999999
+set Zoom(utag9,line,width) 2.00000000002
+set utagCounter 57
+
+
+set Image(ctr) 0
+
+
+set Canv(H) 479
+set Canv(W) 830
+set Canv(SH) 3000.00000002
+set Canv(SW) 3000.00000002
+set Canv(bg) white
+.c config -width $Canv(W)  -height $Canv(H)  -bg $Canv(bg)  -scrollregion "0 0 $Canv(SW) $Canv(SH)"
+wm geometry . ""
+.c xview moveto 0
+.c yview moveto 0
+set TextInfo(utag52) {}
+set TextInfo(utag53) {}
+set TextInfo(utag35) (x,y)
+set TextInfo(utag54) {}
+set TextInfo(utag55) {}
+set TextInfo(utag56) {}
+set TextInfo(utag57) {}
+set TextInfo(utag22) height
+set TextInfo(utag23) {}
+set TextInfo(utag24) {}
+set TextInfo(utag25) width
+set TextInfo(utag43) minWidth
+set TextInfo(utag26) {}
+set TextInfo(utag44) {}
+set TextInfo(utag45) {}
+set TextInfo(utag46) minHeight
+set TextInfo(utag47) {}
+set TextInfo(utag48) {}
+set TextInfo(utag13) vRef
+set TextInfo(utag50) {}
+set TextInfo(utag49) {}
+set TextInfo(utag14) hRef
+set TextInfo(utag51) {}
+.c create rectangle 240.0 120.0 640.0 360.0 -disabledwidth 0 -width 2.0 -tags {Rectangle obj utag9}
+.c create line 380.0 80.0 380.0 400.0 -arrowshape {16 20 6} -dash - -joinstyle miter -width 2.0 -tags {Line obj utag11}
+.c create line 200.0 280.0 680.0 280.0 -arrowshape {16 20 6} -dash - -joinstyle miter -width 2.0 -tags {Line obj utag12}
+.c create text 380.0 54.0 -font {Arial 20 {}} -text vRef -tags {text obj utag13}
+.c create text 153.0 276.0 -font {Arial 20 {}} -text hRef -tags {text obj utag14}
+.c create line 658.0 120.0 698.0 120.0 698.0 240.0 738.0 240.0 698.0 240.0 698.0 360.0 658.0 360.0 -arrowshape {16 20 6} -joinstyle miter -smooth 1 -width 2.0 -tags {Line obj utag20}
+.c create line 240.0 384.0 240.0 424.0 440.0 424.0 440.0 464.0 440.0 424.0 640.0 424.0 640.0 384.0 -arrowshape {16 20 6} -joinstyle miter -smooth 1 -width 2.0 -tags {Line obj utag21}
+.c create text 202.0 84.0 -font {Arial 20 {}} -text (x,y) -tags {text obj utag35}
+.c create line 200.0 120.0 200.0 125.0 200.0 200.0 -arrow last -arrowshape {16 20 8} -joinstyle miter -width 2.0 -tags {Line obj utag36}
+.c create line 240.0 80.0 320.0 80.0 -arrow last -arrowshape {16 20 8} -joinstyle miter -width 2.0 -tags {Line obj utag38}
+.c create oval 235.0 115.0 245.0 125.0 -disabledwidth 0 -fill #000000 -width 2.0 -tags {Circle obj utag42}
+.c create text 440.0 480.0 -font {Arial 20 {}} -text minWidth -tags {text obj utag43}
+.c create text 813.0 236.0 -font {Arial 20 {}} -text minHeight -tags {text obj utag46}
