@@ -117,12 +117,19 @@ Similarly, the translation invariant is satisfied if and only if the higher leve
 Translate ::  Level_{Low} \rightarrow Level_{High} \\
 \end{math}
 
+** they are not functions but relations
 \note{not functions but relations because of extra state}
 The functions $Present$ and $Translate$ are abstract concepts used to express a property of two levels, not actual functions that can be evaluated. The functions are used specify the behavior of a layer.
 
+
+
 Figure~\ref{layerEditProcess} shows how the invariants can be used to specify the data level updates. The precondition before the edit operation takes place is that the lower level is a correct presentation of the higher level, that is $level_{Low} = Present~level_{High}$. In the levels below, an edit operation takes place, which results in an updated lower level: $level'_{Low}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the translation invariant:
 $level'_{High} = Translate~level'_{Low}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $level''_{High}$. Finally, the postcondition is established by updating the lower level to $level''_{Low}$ for which 
-$level''_{Low} = Present~level''_{High}$ holds. Expressed as equations, the invariants \note{are these things really invariants?} are:
+$level''_{Low} = Present~level''_{High}$ holds. 
+
+** use Edit to bla and trans bla because one layer. next chapter connect everything:
+
+Expressed as equations, the invariants \note{are these things really invariants?} are:
 
 \begin{math}
 level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
@@ -159,23 +166,24 @@ The reason why $level'_{High}$ is not immediately presented, is that it has to b
 \end{figure}
 
 % why two:
-The reason why two invariants are used instead of one, is to make it possible to distinguish between the intermediate condition and the postcondition. The alternative would be a single invariant, stating that the lower level is a presentation of the higher level, as well as that the higher level is a translation of the lower level. However, now we cannot express the situation that a higher level is a correct translation of a lower level, without this lower level being a correct presentation of the higher level.
+We use two invariants instead of one, to make it possible to distinguish between the intermediate condition and the postcondition. The alternative would be a single invariant, stating that the lower level is a presentation of the higher level, as well as that the higher level is a translation of the lower level. However, now we cannot express the situation that a higher level is a correct translation of a lower level, without this lower level being a correct presentation of the higher level.
 
 % example of this
 As an example, consider an editor in which an enriched document node \verb|Plus (Int 1) (Int 2)| is presented as a list of presentation level tokens, colored according to the syntax. The integer values are presented in black, and the operator in green. If we denote a token as a string value with a color in between braces, the presentation is \verb|["1" {black}, "+" {green}, "2" {black}]|. Because the presentation level is a correct presentation of the document level, the presentation invariant is satisfied. But now consider a list of tokens typed by the user, which do not have the correct coloring: \verb|["1" {black}, "+" {black}, "2" {black}]|. If we want to be able to express with only one invariant that the enriched document \verb|Plus (Int 1) (Int 2)| is the appropriate translation of this list, then the uncolored sequence must also be a correct presentation of the sum. Hence, with a single invariant, we cannot express that in the final state the colored presentation is a correct presentation of the sum, whereas the uncolored presentation is not. \note{are we saying that with one invariant, pres is inverse of trans?}
 
 
-******** NOT TRUE, this will appear somewhere more downward, probably in ES section
-The functions $Present$ and $Translate$ are closely related, but in contrast to what the types might suggest, the functions are in general not each others inverse. Because translating a presented document should not change the document, we do have: 
-
-\begin{math}
-Translate \cdot Present = id_{High}
-\end{math}
-
-\note{what about ambiguity?}
-
-However, the reverse ($Present \cdot Translate = id_{Low}$) does not necessarily hold. The condition implies that an edited lower level does not change when it is translated and presented \note{also say that higher layers should not change it?}, which is not always true. The syntax coloring example provides a case in which it does not hold; if an uncolored presentation is translated and then presented, the result is a colored presentation. 
-\note{pres is injective, and trans isn't?}
+\note{mention that these things need to be each other's inverse}
+%******** NOT TRUE, this will appear somewhere more downward, probably in ES section
+%The functions $Present$ and $Translate$ are closely related, but in contrast to what the types might %suggest, the functions are in general not each others inverse. Because translating a presented document %should not change the document, we do have: 
+%
+%\begin{math}
+%Translate \cdot Present = id_{High}
+%\end{math}
+%
+%\note{what about ambiguity?}
+%
+%However, the reverse ($Present \cdot Translate = id_{Low}$) does not necessarily hold. The condition %implies that an edited lower level does not change when it is translated and presented \note{also say that %higher layers should not change it?}, which is not always true. The syntax coloring example provides a case %in which it does not hold; if an uncolored presentation is translated and then presented, the result is a %colored presentation. 
+%\note{pres is injective, and trans isn't?}
 
 %summary
 Summarizing, the $Presentation$ invariant specifies that two levels are in a final state, in which the lower is a correct presentation of the higher. When the lower level is updated, the $Translation$ invariant specifies a correct new higher level, which is passed on to the higher levels. The higher levels return a final for this edit step value for the higher level, for which a correct final lower level is specified by the $Presentation$ invariant. The layer in between each pair of levels takes care of maintaining the invariants, by invoking functions that establish the presentation and translation invariants.
@@ -203,6 +211,7 @@ Vice versa? Fix by remembering extra?
  it seems true, translate.present cycles should not alter the doc. In case of ambiguity, the system should
  take care of conservative behavior. On an edit, the doc may change, but that's not a (translate.present) cycle
 
+
  ****** When this is figured out, update sheet paragraph
 \ec
 
@@ -211,7 +220,8 @@ Vice versa? Fix by remembering extra?
 
 % mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-The presentation and translation invariants are expressed using two functions\note{incorrect:relations}: $Present$ and $Translate$. The functions are of type $Level_i \rightarrow Level_j$ (where $j = i+1$ or $j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
+The presentation and translation invariants are expressed using two functions\note{incorrect:relations}: $Present$ and $Translate$. The functions are of type $Level_i \rightarrow Level_j$ (where $j = i+1$ or
+$j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
 
 By mapping between tree nodes, we mean a mapping that relates only the nodes, and not the subtrees rooted at theses nodes. Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, this is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
 
