@@ -237,123 +237,127 @@ SEM Item
 -- anyway attribution seems wrong. For IntExp, no increment is done.
 -- it should be: 
 --  | Constructor
---      child1.idC = @lhs.idC;
---      child2.idC = @child1.idC
+--      child1.idC = @lhs.pIdC;
+--      child2.pIdC = @child1.pIdC
 --      ...
---      lhs.idC = childn.idC + used id's by presentation of Constructor itself
+--      lhs.pIdC = childn.pIdC + used id's by presentation of Constructor itself
 
-ATTR Decls Decl Ident Exp Exps Alts Alt
+
+-- moreover, this is a silly and unsafe way of creating unique id's
+ATTR EnrichedDoc
+     Decls Decl Ident Exp Exps Alts Alt
      Board BoardRow BoardSquare 
-     PPPresentation Slides Slide ItemList ListType Items Item [ | idC : Int | ]
+     PPPresentation Slides Slide ItemList ListType Items Item [ | pIdC : Int | ]
 
 SEM EnrichedDoc
   | RootEnr
-      idListDecls.idC = 1000
-      decls.idC = @idListDecls.idC
+      idListDecls.pIdC = @lhs.pIdC
+      decls.pIdC       = @idListDecls.pIdC
+      lhs.pIdC         = @decls.pIdC
             
 SEM Decls
-  | ConsDecls   decl.idC  = @lhs.idC + 0
-                decls.idC = @decl.idC
-                lhs.idC   = @decls.idC
+  | ConsDecls   decl.pIdC  = @lhs.pIdC + 0
+                decls.pIdC = @decl.pIdC
+                lhs.pIdC   = @decls.pIdC
 
 SEM Decl
-  | Decl        ident.idC = @lhs.idC + 3 
-                exp.idC   = @ident.idC
-                lhs.idC   = @exp.idC
+  | Decl        ident.pIdC = @lhs.pIdC + 3 
+                exp.pIdC   = @ident.pIdC
+                lhs.pIdC   = @exp.pIdC
 
 SEM Ident
-  | Ident       lhs.idC   = @lhs.idC + 1
+  | Ident       lhs.pIdC   = @lhs.pIdC + 1
 
 SEM Exp
-  | PlusExp     exp1.idC  = @lhs.idC + 1
-                exp2.idC  = @exp1.idC
-                lhs.idC   = @exp2.idC
-  | TimesExp    exp1.idC  = @lhs.idC + 1
-                exp2.idC  = @exp1.idC
-                lhs.idC   = @exp2.idC
-  | DivExp      exp1.idC  = @lhs.idC + 1
-                exp2.idC  = @exp1.idC
-                lhs.idC   = @exp2.idC
-  | PowerExp    exp1.idC  = @lhs.idC + 1
-                exp2.idC  = @exp1.idC
-                lhs.idC   = @exp2.idC
-  | LamExp      ident.idC = @lhs.idC + 2
-                exp.idC   = @ident.idC
-                lhs.idC   = @exp.idC
-  | AppExp      exp1.idC  = @lhs.idC + 0
-                exp2.idC  = @exp1.idC
-                lhs.idC   = @exp2.idC
-  | CaseExp     exp.idC   = @lhs.idC + 2
-                alts.idC  = @exp.idC
-                lhs.idC   = @alts.idC
-  | LetExp      decls.idC = @lhs.idC + 2
-                exp.idC   = @decls.idC
-                lhs.idC   = @exp.idC
-  | IdentExp    ident.idC = @lhs.idC + 2
-                lhs.idC   = @ident.idC
-  | IfExp       exp1.idC  = @lhs.idC + 3
-                exp2.idC  = @exp1.idC
-                exp3.idC  = @exp2.idC
-                lhs.idC   = @exp3.idC
-  | ParenExp    exp.idC   = @lhs.idC + 2
-                lhs.idC   = @exp.idC
-  | ListExp     exps.idC   = @lhs.idC + 2
-                lhs.idC   = @exps.idC
-  | ProductExp  exps.idC   = @lhs.idC + 2
-                lhs.idC   = @exps.idC
+  | PlusExp     exp1.pIdC  = @lhs.pIdC + 1
+                exp2.pIdC  = @exp1.pIdC
+                lhs.pIdC   = @exp2.pIdC
+  | TimesExp    exp1.pIdC  = @lhs.pIdC + 1
+                exp2.pIdC  = @exp1.pIdC
+                lhs.pIdC   = @exp2.pIdC
+  | DivExp      exp1.pIdC  = @lhs.pIdC + 1
+                exp2.pIdC  = @exp1.pIdC
+                lhs.pIdC   = @exp2.pIdC
+  | PowerExp    exp1.pIdC  = @lhs.pIdC + 1
+                exp2.pIdC  = @exp1.pIdC
+                lhs.pIdC   = @exp2.pIdC
+  | LamExp      ident.pIdC = @lhs.pIdC + 2
+                exp.pIdC   = @ident.pIdC
+                lhs.pIdC   = @exp.pIdC
+  | AppExp      exp1.pIdC  = @lhs.pIdC + 0
+                exp2.pIdC  = @exp1.pIdC
+                lhs.pIdC   = @exp2.pIdC
+  | CaseExp     exp.pIdC   = @lhs.pIdC + 2
+                alts.pIdC  = @exp.pIdC
+                lhs.pIdC   = @alts.pIdC
+  | LetExp      decls.pIdC = @lhs.pIdC + 2
+                exp.pIdC   = @decls.pIdC
+                lhs.pIdC   = @exp.pIdC
+  | IdentExp    ident.pIdC = @lhs.pIdC + 2
+                lhs.pIdC   = @ident.pIdC
+  | IfExp       exp1.pIdC  = @lhs.pIdC + 3
+                exp2.pIdC  = @exp1.pIdC
+                exp3.pIdC  = @exp2.pIdC
+                lhs.pIdC   = @exp3.pIdC
+  | ParenExp    exp.pIdC   = @lhs.pIdC + 2
+                lhs.pIdC   = @exp.pIdC
+  | ListExp     exps.pIdC   = @lhs.pIdC + 2
+                lhs.pIdC   = @exps.pIdC
+  | ProductExp  exps.pIdC   = @lhs.pIdC + 2
+                lhs.pIdC   = @exps.pIdC
 
 SEM Exps
-  | ConsExps    exp.idC  = @lhs.idC + 100
-                exps.idC = @exp.idC
-                lhs.idC   = @exps.idC
+  | ConsExps    exp.pIdC  = @lhs.pIdC + 100
+                exps.pIdC = @exp.pIdC
+                lhs.pIdC   = @exps.pIdC
 
 SEM Alts
-  | ConsAlts    alt.idC   = @lhs.idC + 0
-                alts.idC  = @alt.idC
-                lhs.idC   = @alts.idC
+  | ConsAlts    alt.pIdC   = @lhs.pIdC + 0
+                alts.pIdC  = @alt.pIdC
+                lhs.pIdC   = @alts.pIdC
 
 SEM Alt
-  | Alt         ident.idC = @lhs.idC + 2
-                exp.idC   = @lhs.idC
+  | Alt         ident.pIdC = @lhs.pIdC + 2
+                exp.pIdC   = @lhs.pIdC
 
 SEM Decl
-  | BoardDecl   lhs.idC = @lhs.idC + 1 
+  | BoardDecl   lhs.pIdC = @lhs.pIdC + 1 
 
 -- no pres elts with ids in chess board, so attribution is standard chaining
 
 
 SEM PPPresentation
-  | PPPresentation slides.idC = @lhs.idC + 1
-                   lhs.idC   = @slides.idC
+  | PPPresentation slides.pIdC = @lhs.pIdC + 1
+                   lhs.pIdC   = @slides.pIdC
   
 SEM Slides
-  | ConsSlides     slide.idC  = @lhs.idC + 1
-                   slides.idC = @slide.idC
-                   lhs.idC   = @slides.idC
+  | ConsSlides     slide.pIdC  = @lhs.pIdC + 1
+                   slides.pIdC = @slide.pIdC
+                   lhs.pIdC   = @slides.pIdC
 
 SEM Slide
-  | Slide          itemList.idC  = @lhs.idC + 1
-                   lhs.idC   = @itemList.idC
+  | Slide          itemList.pIdC  = @lhs.pIdC + 1
+                   lhs.pIdC   = @itemList.pIdC
 
 SEM ItemList
-  | ItemList       listType.idC = @lhs.idC + 10
-                   items.idC = @listType.idC
-                   lhs.idC   = @items.idC
+  | ItemList       listType.pIdC = @lhs.pIdC + 10
+                   items.pIdC = @listType.pIdC
+                   lhs.pIdC   = @items.pIdC
 
 SEM ListType
-  | Bullet         lhs.idC = @lhs.idC + 10
-  | Number         lhs.idC = @lhs.idC + 10
-  | Alpha          lhs.idC = @lhs.idC + 10
+  | Bullet         lhs.pIdC = @lhs.pIdC + 10
+  | Number         lhs.pIdC = @lhs.pIdC + 10
+  | Alpha          lhs.pIdC = @lhs.pIdC + 10
 
 SEM Items
-  | ConsItems    item.idC  = @lhs.idC + 100
-                 items.idC = @item.idC
-                 lhs.idC   = @items.idC
+  | ConsItems    item.pIdC  = @lhs.pIdC + 100
+                 items.pIdC = @item.pIdC
+                 lhs.pIdC   = @items.pIdC
 
 SEM Item
-  | StringItem     lhs.idC  = @lhs.idC + 10
-  | HeliumItem     lhs.idC  = @lhs.idC + 10
-  | ListItem       lhs.idC  = @lhs.idC + 10
+  | StringItem     lhs.pIdC  = @lhs.pIdC + 10
+  | HeliumItem     lhs.pIdC  = @lhs.pIdC + 10
+  | ListItem       lhs.pIdC  = @lhs.pIdC + 10
 
 -- SEM String_
 

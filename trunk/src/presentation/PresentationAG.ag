@@ -138,7 +138,7 @@ SEM Decl
                    squiggleRanges @lhs.ranges @lhs.path $
                      (row' $  
                         (if @lhs.level == 0
-                         then let sigIDP    = mkIDP @idP2 @lhs.idC 2
+                         then let sigIDP    = mkIDP @idP2 @lhs.pIdC 2
                                   autoLStr = if @autoLayout then "             {auto layout}" else ""
                               in  case @typeStr of
                                     Nothing ->                                  
@@ -166,9 +166,9 @@ SEM Decl
                                       ]
                          else [empty])
                            ++ 
-                              [ @ident.pres, key (mkIDP @idP0 @lhs.idC 0) "="]
+                              [ @ident.pres, key (mkIDP @idP0 @lhs.pIdC 0) "="]
                            ++ (if @expanded then
-                                 [ @exp.pres,  sep (mkIDP @idP1 @lhs.idC 1) ";"
+                                 [ @exp.pres,  sep (mkIDP @idP1 @lhs.pIdC 1) ";"
                                  ] else [text " ", box (text "...") `withColor` black `withbgColor` yellow
                                                                     `withMouseDown` expand @lhs.path @self])
                            
@@ -182,7 +182,7 @@ SEM Ident
   | Ident
       lhs.pres = loc (IdentNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
-                   row' [text' (mkIDP @idP0 @lhs.idC 0) @string, text' NoIDP ""]
+                   row' [text' (mkIDP @idP0 @lhs.pIdC 0) @string, text' NoIDP ""]
 
 
 
@@ -196,12 +196,12 @@ SEM Exp
   | PlusExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [@exp1.pres , op (mkIDP @idP0 @lhs.idC 0) "+", @exp2.pres]
+                   row' [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "+", @exp2.pres]
 
   | TimesExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [@exp1.pres , op (mkIDP @idP0 @lhs.idC 0) "*", @exp2.pres]
+                   row' [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "*", @exp2.pres]
 
   | DivExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -217,23 +217,23 @@ SEM Exp
   | BoolExp     
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [cons (mkIDP @idP0 @lhs.idC 0) (show @bool), text' NoIDP ""]
+                   row' [cons (mkIDP @idP0 @lhs.pIdC 0) (show @bool), text' NoIDP ""]
   
   | IntExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [cons (mkIDP @idP0 @lhs.idC 0) (show @int), text' NoIDP ""]
+                   row' [cons (mkIDP @idP0 @lhs.pIdC 0) (show @int), text' NoIDP ""]
             
   | LamExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row' [
-                          key (mkIDP @idP0 @lhs.idC 0) "\\"
-                       --   key (mkIDP @idP0 @lhs.idC 0) "l" `withFontFam` "symbol"
+                          key (mkIDP @idP0 @lhs.pIdC 0) "\\"
+                       --   key (mkIDP @idP0 @lhs.pIdC 0) "l" `withFontFam` "symbol"
                         , @ident.pres
-                        , text' (mkIDP @idP1 @lhs.idC 1) "" -- trick because "symbol" spaces have wrong width
+                        , text' (mkIDP @idP1 @lhs.pIdC 1) "" -- trick because "symbol" spaces have wrong width
                           , key NoIDP "\174" `withFontFam` "symbol"
-                       -- , key (mkIDP @idP1 @lhs.idC 1) "->"
+                       -- , key (mkIDP @idP1 @lhs.pIdC 1) "->"
                         , @exp.pres ] 
                                      
 
@@ -245,17 +245,17 @@ SEM Exp
   | CaseExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [ key (mkIDP @idP0 @lhs.idC 0) "case"
+                   row' [ key (mkIDP @idP0 @lhs.pIdC 0) "case"
                         , @exp.pres
-                        , key (mkIDP @idP1 @lhs.idC 1) "of"
+                        , key (mkIDP @idP1 @lhs.pIdC 1) "of"
                         , loc (AltsNode @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press 
                         ] 
   | LetExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' [ key (mkIDP @idP0 @lhs.idC 0) "let"
+                   row' [ key (mkIDP @idP0 @lhs.pIdC 0) "let"
                         , loc (DeclsNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press 
-                        , key (mkIDP @idP1 @lhs.idC 1) "in", @exp.pres ] 
+                        , key (mkIDP @idP1 @lhs.pIdC 1) "in", @exp.pres ] 
                                      
 
   | IdentExp
@@ -272,37 +272,37 @@ SEM Exp
   | IfExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
 	               squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row'  $ [ key (mkIDP @idP0 @lhs.idC 0) "if",   @exp1.pres 
-	                       , key (mkIDP @idP1 @lhs.idC 1) "then", @exp2.pres
-	                       , key (mkIDP @idP2 @lhs.idC 2) "else", @exp3.pres ]          
+                   row'  $ [ key (mkIDP @idP0 @lhs.pIdC 0) "if",   @exp1.pres 
+	                       , key (mkIDP @idP1 @lhs.pIdC 1) "then", @exp2.pres
+	                       , key (mkIDP @idP2 @lhs.pIdC 2) "else", @exp3.pres ]          
 	                            
 
   | ParenExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row'  [sep (mkIDP @idP0 @lhs.idC 0) "(", @exp.pres , sep (mkIDP @idP1 @lhs.idC 1) ")"]
+                   row'  [sep (mkIDP @idP0 @lhs.pIdC 0) "(", @exp.pres , sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
 
 
   | ListExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' $    [sep (mkIDP @idP0 @lhs.idC 0) "["]
+                   row' $    [sep (mkIDP @idP0 @lhs.pIdC 0) "["]
                           ++ let xps = map (loc (ExpsNode @exps.self @exps.path) . parsing . presentFocus @lhs.focusD @exps.path) @exps.press
-                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.idC .. ] )  
+                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )  
                              in (if null xps
                                  then []
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
-                          ++ [sep (mkIDP @idP1 @lhs.idC 1) "]"]
+                          ++ [sep (mkIDP @idP1 @lhs.pIdC 1) "]"]
   | ProductExp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row' $    [sep (mkIDP @idP0 @lhs.idC 0) "("]
+                   row' $    [sep (mkIDP @idP0 @lhs.pIdC 0) "("]
                           ++ let xps = map (loc (ExpsNode @exps.self @exps.path) . parsing . presentFocus @lhs.focusD @exps.path) @exps.press
-                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.idC .. ] )  
+                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )  
                              in  if null xps
                                  then []
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
-                          ++ [sep (mkIDP @idP1 @lhs.idC 1) ")"]
+                          ++ [sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
 
 
 
@@ -311,11 +311,11 @@ SEM Alt
       lhs.pres = loc (AltNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                    row'  $ [ @ident.pres
-                         --  , key (mkIDP @idP0 @lhs.idC 0) "->"
-                           , text' (mkIDP @idP0 @lhs.idC 0) "",
+                         --  , key (mkIDP @idP0 @lhs.pIdC 0) "->"
+                           , text' (mkIDP @idP0 @lhs.pIdC 0) "",
                                     key NoIDP "\174" `withFontFam` "symbol"
                            , @exp.pres
-                           , sep (mkIDP @idP1 @lhs.idC 1) ";"
+                           , sep (mkIDP @idP1 @lhs.pIdC 1) ";"
                            ] 
 
 
@@ -461,22 +461,24 @@ mkIDP id@(IDP _) _ _   = id
 
 {-
 CREATION OF NEW PRES ELTS:
-Can't change the doc->pres mapping, but if we make new pres elts, just give them a unique id, and on parsing, the
-doc->pres mapping will be set correctly
+Can't change the doc->pres mapping, but if we make new pres elts, just give them a unique id, 
+and on parsing, the doc->pres mapping will be set correctly
 -}
 
 -- merge the counters
 
-ATTR EnrichedDoc Decls Decl Ident Exp Exps Alts Alt [ | layoutMap : LayoutMap pIdC : IDPCounter | ]
+ATTR EnrichedDoc Decls Decl Ident Exp Exps Alts Alt [ | layoutMap : LayoutMap | ]
 
 ATTR Decls Decl Ident Exp Exps Alts Alt [ | newlines, spaces, col : Int | ]
 
 SEM EnrichedDoc
   | RootEnr 
            --lhs.layoutMap = @lhs.layoutMap -- no auto layout
+            decls.layoutMap = @lhs.layoutMap
             decls.col = 0
             decls.newlines = 1
             decls.spaces = 0
+            lhs.layoutMap = @decls.layoutMap
             
             
 -- to get good type sig layout behaviour, layout must be fixed when sig appears for the first time,
@@ -488,9 +490,9 @@ SEM Decl -- nested decls do produce auto layout, so top level decl can determine
   | Decl    lhs.layoutMap   = let lm = if @autoLayout || @lhs.level /= 0 then @exp.layoutMap else @lhs.layoutMap
                               in if @idP2 /= NoIDP || @lhs.level /= 0 then lm
                                  else case lookupFM lm (@ident.firstToken) of
-                                        Just (nwln,sp) -> addListToFM lm [ (mkIDP @idP2 @lhs.idC 2,(nwln,sp)) 
+                                        Just (nwln,sp) -> addListToFM lm [ (mkIDP @idP2 @lhs.pIdC 2,(nwln,sp)) 
                                                                                      , (@ident.firstToken, (1,sp)) ]
-                                        _        -> addToFM lm (mkIDP @idP2 @lhs.idC 2) (1,0) 
+                                        _        -> addToFM lm (mkIDP @idP2 @lhs.pIdC 2) (1,0) 
                                         
                -- the whitespace from the first token is used to create whitespace for the type sig
             
@@ -881,16 +883,16 @@ SEM Exp [ env : Bindings | | val : Value ]
   | IntExp      lhs.val   = IntVal @int
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg -> 
-                                     let (_,_,_,_,_,_,_,_,_,_,_,v,_) = 
-                                           @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                                     let (_,_,_,_,_,_,_,_,_,_,v,_) = 
+                                           @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                                      in  v)  -- dirty hack because AG does not allow this easily
   | AppExp      lhs.val   = case @exp1.val of LamVal f -> f @exp2.val
                                               _        -> ErrVal
 
   | CaseExp     lhs.val   = case lookup "a" @alts.alts of {Just v -> v; Nothing -> ErrVal}
   | LetExp      lhs.val   = --@exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
-                            let (_,_,_,_,_,_,_,_,_,_,_,v,_) = 
-                                  @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                            let (_,_,_,_,_,_,_,_,_,_,v,_) = 
+                                  @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                             in  v  -- dirty hack because AG does not allow this easily
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }
   | IfExp       lhs.val   = case @exp1.val of BoolVal b -> if b then @exp2.val else @exp3.val
@@ -932,7 +934,7 @@ SEM Alt [ env : Bindings | | alt : Binding ]
 SEM Decl
   | BoardDecl         
       lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row' [text' (mkIDP @idP0 @lhs.idC 0) "Chess: ", @board.pres]
+                   row' [text' (mkIDP @idP0 @lhs.pIdC 0) "Chess: ", @board.pres]
                            
 
 SEM Board [ | | pres : Presentation ] 
@@ -1089,7 +1091,7 @@ ATTR PPPresentation Slides Slide ItemList ListType Items Item [ ranges : {([Path
 SEM Decl
   | PPPresentationDecl         
       lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row' [ text' (mkIDP @idP0 @lhs.idC 0) "PPT: ", @pPPresentation.pres ]
+                   row' [ text' (mkIDP @idP0 @lhs.pIdC 0) "PPT: ", @pPPresentation.pres ]
 
 
 SEM PPPresentation

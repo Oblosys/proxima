@@ -520,17 +520,23 @@ rightNavigatePath (PathP path offset) pres =
   else case showDebug Prs $ pathToNearestAncestorRightSibling path pres of
          Nothing              -> PathP path offset
          Just siblingTreePath -> let leafPath = siblingTreePath ++ pathToLeftmostLeaf (selectTree siblingTreePath pres)
-                                     pathP = PathP leafPath 0 
-                                 in  pathP
-{- This solution for navigating over empties is too simple, if we pass through a column, we do want to navigate to
+                                     pathP = PathP leafPath 0
+                                 in  -- pathP
+{- If we pass through a column, we do want to navigate to
    the empty, otherwise we skip empty lines. Also apart from skipping empties, in a string we should go to 1 instead o 0
    Also, if these things are implemented, we still need a way to do the fine grained navigation
    Same issues apply to leftNavigatePath
-                                       -- if leaf is empty go to next one
-                                     if leafLength (selectTree leafPath pres) == 0 
-                                     then rightNavigatePath pathP pres
-                                     else pathP
+   
+   eg row [ col [ ...,"..|"], col ["..",..]] gives [ col [ ...,".."], col ["|..",..]]
+   for rows with singleton colums this may give an unexpected result, but in order to change
+   that a more sophisticated navigation is required.
 -}
+                                     if passedColumn path leafPath pres
+                                     then pathP
+                                     else -- no column encountered, so if leaf is empty go to next one
+                                          if leafLength (selectTree leafPath pres) == 0 
+                                          then rightNavigatePath pathP pres
+                                          else PathP leafPath 1 -- and skip first pos
 
 leftNavigatePath  (PathP path offset) pres = 
   if offset > 0 
@@ -540,15 +546,41 @@ leftNavigatePath  (PathP path offset) pres =
          Just siblingTreePath -> let leafPath = siblingTreePath ++ pathToRightmostLeaf (selectTree siblingTreePath pres)
                                      leafLn = (leafLength (selectTree leafPath pres)) 
                                      pathP = PathP leafPath leafLn
-                                 in  pathP
-{-                                     -- if leaf is empty go to prev. one
-                                     if leafLength (selectTree leafPath pres) == 0 
+                                 in  -- pathP
+                                     if passedColumn path leafPath pres
+                                     then pathP
+                                     else -- no column encountered, so if leaf is empty go to previous one
+                                     if leafLn == 0 
                                      then leftNavigatePath pathP pres
-                                     else pathP
+                                     else PathP leafPath (leafLn -1 ) -- and skip last pos
 
--}
-
-
+-- passedColumn returns true if a column is present from the common prefix of fromPath and toPath to
+-- fromPath and toPath. Meaning that if a column is encountered if we move from fromPath to 
+-- toPath in the shortest way then True is returned.
+passedColumn :: [Int] -> [Int] -> Presentation -> Bool
+passedColumn fromPath toPath pres =
+  let commonPath = commonPrefix fromPath toPath
+      commonTree = selectTree commonPath pres
+      commonToFrom = drop (length commonPath) fromPath
+      commonToTo   = drop (length commonPath) toPath
+  in -- debug Err (   show commonTree ++"\n"
+     --            ++ show (selectTree fromPath pres) ++"\n"
+     --            ++ show (selectTree toPath pres) ++"\n"
+     --            ++ show commonToFrom ++"\n"++ show commonToTo) $
+      containsColPres commonToFrom commonTree || containsColPres commonToTo commonTree
+  
+-- return True if any node on the path, including the root, is a column
+containsColPres _        (StringP id str)           = False
+containsColPres _        (ImageP _ _)               = False
+containsColPres _        (PolyP _ _ _)              = False
+containsColPres (p:path) (RowP id rf press)         = containsColPres path (press!!!p)
+containsColPres (p:path) (ColP id rf press)         = True
+containsColPres (0:path) (OverlayP id press@(pres:_)) = containsColPres path (press!!!0)                                            
+containsColPres (p:path) (WithP ar pres)            = containsColPres path pres
+containsColPres (p:path) (StructuralP id pres)      = containsColPres path pres
+containsColPres (p:path) (ParsingP id pres)         = containsColPres path pres
+containsColPres (p:path) (LocatorP _ pres)          = containsColPres path pres
+containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
 
 

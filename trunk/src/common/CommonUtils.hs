@@ -25,6 +25,10 @@ l !!! i = let i' = if i < 0 then debug Err "**** !!!: index < 0 **** "  0
 clip lo hi x = if x<lo then lo else if x>hi then hi else x
 --
 
+commonPrefix :: Eq a => [a] -> [a] -> [a]
+commonPrefix xs ys = map fst . takeWhile (uncurry (==)) $ zip xs ys
+
+
 -- scaling seems to be rather expensive. For now it is turned off.
 scaleInt :: Double -> Int -> Int
 scaleInt scale x = x -- round (fromIntegral x * scale)  

@@ -191,7 +191,6 @@ markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self
                                             ++ [markDirty pth (dts !! p)]
                                             ++ drop (p+1) dts
 
-commonPrefix xs ys = [ x | (x,y) <- zip xs ys, x == y]
 
 
 {-
