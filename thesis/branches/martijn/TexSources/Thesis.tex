@@ -1,0 +1,49 @@
+% draft?
+% 11pt?
+% conclusions?
+\documentclass[twoside]{report}
+\usepackage{thesis}
+
+\begin{document}
+\selectlanguage{english}
+
+\pagenumbering{roman}
+%\include{P_Titlepages}
+
+  %\include{P_Preface}
+
+%\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+
+%\setcounter{chapter}{0} \include{Ch_Introduction}
+%\setcounter{chapter}{1} \include{Ch_XML}
+%\setcounter{chapter}{2} \include{Ch_ProxArch}
+%\setcounter{chapter}{3} \include{Ch_EditModel}
+\setcounter{chapter}{4} \include{Ch_SingleLayer}		% yet to be written
+%\setcounter{chapter}{5} \include{Ch_LayeredArchs}		% invariant paper 
+
+%\setcounter{chapter}{6} \input{Ch_Xprez}			% Xprez paper 
+%\setcounter{chapter}{7} \include{Ch_ArchCombs}		% combinator paper
+
+
+%                                          \include{Chs_LayersAndIncr} % contains: 
+				%       \include{Ch_Xprez}	Xprez paper
+				% and \include{Ch_Parser}	Yet to be written?
+
+%\include{Ch_ArchCombs}		% combinator paper
+%\include{Ch_Prototype}		% yet to be written
+%\include{Ch_Conclusions}		% yet to be written (including its Ch_ and D_ latex files)
+
+%\bibliographystyle{abbrv}
+\bibliography{thesis}
+
+\selectlanguage{dutch}
+ %\include{P_Dankwoord}
+ %\include{P_Samenvatting}
+\selectlanguage{english}
+ %\include{P_CV}
+\thispagestyle{empty}
+\cleardoublepage
+\end{document}
