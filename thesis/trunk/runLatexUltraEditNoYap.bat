@@ -1,8 +1,8 @@
 @echo off         
-rem runLatexEditPlus <top-level latex document file without extension> <source file> <linenr>  
-rem runLatex for calling from editor, with current line indication in yap
+rem runLatexUltraEdit <top-level latex document file without extension> <source file> <linenr>  
+rem for calling from editor
 rem current directory will be source directory, so cd ..
-echo Editplus: Running  latex on %1.tex from source %2:%3
+echo Running  latex without yap on %1.tex from source %2:%3
 cd ..
 
 latex %1.tex -src-specials=cr -quiet -halt-on-error -include-directory TexSources -include-directory Styles -include-directory TexOutput -output-directory TexOutput

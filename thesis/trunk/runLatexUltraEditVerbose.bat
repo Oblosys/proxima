@@ -1,8 +1,8 @@
 @echo off         
-rem runLatexEditPlusVerbose <top-level latex document file without extension> <source file> <linenr>  
-rem runLatex for calling from editor, with current line indication in yap
+rem runLatexUltraEditVerbose <top-level latex document file without extension> <source file> <linenr>  
+rem for calling from editor, with current line indication in yap
 rem current directory will be source directory, so cd ..
-echo Editplus: Running verbose latex on %1.tex from source %2:%3
+echo Running  latex verbose on %1.tex from source %2:%3
 cd ..
  
 latex %1.tex -src-specials=cr -halt-on-error -include-directory TexSources -include-directory Styles -include-directory TexOutput -output-directory TexOutput
