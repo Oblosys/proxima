@@ -183,7 +183,7 @@ The rendering level is not edited directly and therefore has no focus or edit fu
   
 
 %																
-\subsection{Arrangement}
+\subsection{Arrangement}\label{sect:editArr} 
 
 The arrangement level is structurally very similar to the presentation level, except that line breaking has been performed and elements have absolute positions. Edit operations targeted at the arrangement are edit operations concerned with lines and absolute positions, such as navigating to the end of the line that contains the focus, or selecting all elements in a rectangular area.
 
@@ -274,9 +274,23 @@ different high than in tree.
 In fact, the ambiguity examples from the previous section are problems with the ambiguity of the focus
 \ec
 
-\note{add pictures to explanation?}
+\bc modeless & levels. Focus on diff. levels. When edit op on one level needs that focus, translate it. Problem Doc focus not always visible in pres, and pres not always sensible on doc. ES further complicates it
+\ec
 
-Because Proxima is a modeless editor, the concept of focus exists simultaneously on several levels.  Similar to the way in which the presentation and translation processes maintain a mapping between each pair of adjacent levels, a mapping between the foci on adjacent levels is maintained. Whenever the focus changes on one of the levels, the focus on the other levels is updated as well. This section explains the issues that come into play when maintaining the focus on different levels. In Proxima, only a prototype focus model has been implemented. The focus model is therefore preliminary and requires further research as well as practical experience from building and using editor instances. 
+
+\bc Old
+Because Proxima is a modeless editor, the concept of focus exists simultaneously on several levels.  Similar to the way in which the presentation and translation processes maintain a mapping between each pair of adjacent levels, a mapping between the foci on adjacent levels is maintained. 
+\ec
+
+The property of modelesness has several consequences for the focus model. Since edit operations on different levels may be mixed, a navigation operation on one level can be followed by an edit operation on a different level. For example, after textually selecting an subexpression in an equation editor (eg. "2*(3+4)"), a document level transformation may be applied (eg. a distribution transformation, yielding "2*3+2*4"). This means that the layout level focus (the textual selection) must be mapped onto a document level focus, before the transformation can be performed. A similar thing happens when a lower level edit operation is performed after a higher level navigation operation. Therefore, it must be possible to map focus on one level onto focus on another level without user intervention.
+
+Proxima handles focus by keeping a separate focus on each level. Whenever an edit operation on a certain level changes the focus on that level, the focus for the rest of the levels is recomputed. For levels above the edited level, the focus is translated, wheras for levels below, it is presented.
+
+This section explains the issues that come into play when maintaining the focus on different levels. Since only a prototype focus model has been implemented, the model is still preliminary and requires further research as well as practical experience from building and using editor instances. 
+
+ 
+%																
+\subsection{Focus on one level}
 
 \begin{figure}
 \begin{small}
@@ -288,17 +302,16 @@ Because Proxima is a modeless editor, the concept of focus exists simultaneously
  / \       / \    |     / \
 B*  C*    B*  C*  |    B   C*
                   |
-correct           | incorrect (because B is not in focus)
+correct           | not possible (because B is not in focus)
 \end{verbatim}
-\caption{Correct and incorrect focus (draft)}\label{correctIncorrect focus} 
+\caption{Non-list node focus examples (draft)}\label{correctIncorrect focus} 
 \end{center}
 \end{small}
 \end{figure}
 
+Focus is modeled as a property of each node in a level, with a distinction between list and non-list nodes. For a non-list node, the focus is modeled as a boolean property specifying that the node and its children are in focus (see Figure~\ref{correctIncorrectFocus}). As a consequence, it is not possible for a parent node alone (ie. without its children) to have focus, but it is possible for the children of a parent to have focus, without the parent being in focus (the second example in Figure~\ref{correctIncorrectFocus}).
 
-The focus is modeled as a boolean property of each element in a level. Only subtrees can be in focus. Therefore, if an element is in focus, its children are also in focus, and if one of its children is not in focus, then the parent element cannot be in focus either. (see Figure~\ref{correctIncorrectFocus}). 
-
-For a list element, the focus is not a boolean property, but rather a set of ranges of children that are in focus. The whole list element is in focus if the set contains one range that spans all elements, and the list element is not in focus if the set of ranges is empty. The set may also contain empty ranges that correspond to insertion points in the list. Figure~\ref{listFocus} shows a list element with three ranges that are in focus. The first range spans elements B and C, the second range is an empty range between elements D and E, and the third range contains only element F. Note that although \verb|B|, \verb|C| and \verb|F| must have focus, since they are part of a range that is in focus in the parent, it is not the case that elements in unfocused ranges may not have focus. Hence \verb|A|, \verb|D|, and \verb|E| may have focus without being part of a focused range.
+For a list, the focus is not a boolean property, but rather a set of ranges of children that are in focus. The entire list element is in focus if the set contains one range that spans all elements, and the list element is not in focus if the set of ranges is empty. The set may also contain empty ranges that correspond to insertion points in the list. Figure~\ref{listFocus} shows a list element with three ranges that are in focus. The first range spans elements \verb|B| and \verb|C| (but not \verb|A|), the second range is an empty range between elements D and E, and the third range contains only element F. Note that although \verb|B|, \verb|C| and \verb|F| have focus, since they are part of a range that is in focus in the parent, it is not the case that elements in unfocused ranges may not have focus. For example, \verb|A| has focus, even though it is not part of a focused range. 
 
 \begin{figure}
 \begin{small}
@@ -317,16 +330,18 @@ For a list element, the focus is not a boolean property, but rather a set of ran
 
 %optional elements?
 
-The focus properties of all elements on a data level together constitute the focus on that level. Because only a subtree or a range in a list of subtrees can be in focus (as opposed to single parent element without its children), the focus can also be regarded as a set of subtrees and ranges of subtrees. One of the subtrees or ranges is the main focus, which is used for insertion and navigation, since these operations are not clearly defined on a multiple focus. \note{??? not entirely right if focus is two ranges "...$<$...","...$>$..."?}
+The focus properties of all elements on a data level together constitute the focus on that level. Because only a subtree or a range in a list of subtrees can be in focus (as opposed to single parent element without its children), the focus can also be regarded as a set of subtrees and ranges of subtrees. One of these subtrees or ranges is the main focus, which is used for edit operations that are not clearly defined on a multiple focus, such as insertion.
  
  
 %																
 \subsection{Navigation}
 \note{add examples and pictures?}
 
-Just as any other edit operation, a navigation operation may be targeted at various levels in Proxima. However, unlike the other edit operations, a user explicitly specifies the level on which navigation takes place. Pressing arrow keys and clicking with the mouse results in navigation on the layout level, whereas a modifier key (shift, control, or alt) can be used to navigate on the document and enriched document levels. More exotic navigation operations such as selecting rectangular areas in the arrangement navigation are available through menus. Furthermore, a presentation element may bind a mouse click to an edit operation, and hence also to a navigation operation. Clicking in a presentation may therefore result in a change of focus.
+Just as any other edit operation, a navigation operation may be targeted at various levels in Proxima. However, unlike the other edit operations, a user explicitly specifies the level on which navigation takes place. Pressing arrow keys and clicking with the mouse results in navigation on the layout level, whereas a modifier key (shift, control, or alt) can be used to navigate on the document and enriched document levels. \bc More exotic navigation operations such as selecting rectangular areas in the arrangement navigation are available through menus. \ec Furthermore, a presentation element may bind a mouse click to an edit operation, and hence also to a navigation operation. Clicking in a presentation may therefore cause the focus not to be moved to the clicked element, but somewhere else. For example, a mouse click on a type error in a Haskell editor may move the focus to the location of the error in the source.
 
-Because of the different characteristics of each level, different navigation operations are used. On the document and enriched document levels, navigation is mainly tree oriented: moving up and down to parent and child elements, or left and right to sibling elements. On the layout level, most elements are in lists, and the focus consist mainly of ranges. Moving the layout focus means changing it to an adjacent empty range. The direction of the elements in the arrangement tree (horizontal or vertical) is taken into account when the new focus position is computed. Document navigation can also include list navigation, but subtree navigation is not a common operation on the layout level.
+Currently, only those levels that are directly editable (document, enriched document and layout) support navigation. Even though the presentation, arrangement and rendering levels have a focus, it is not directly editable and can only be changed by navigating on one of the other levels. However, a future version of Proxima may support arrangement navigation in order to allow column selections (see also Section~\ref{sect:editArr}).
+
+Because of the different characteristics of each level, different kinds of navigation operations are used. On the document and enriched document levels, navigation is mainly tree oriented: moving up and down to parent and child elements, or left and right to sibling elements. On the layout level, most elements are in lists, and the focus consist mainly of ranges. Moving the layout focus means changing it to an adjacent empty range. The direction of the elements in the arrangement tree (horizontal or vertical) is taken into account when the new focus position is computed. Document navigation can also include list navigation, but subtree navigation is not a common operation on the layout level.
 
 \note{mention widening of focus? (shift-arrows \& shift-click)}
 
@@ -337,11 +352,43 @@ Formatter elements of the presentation level, which are used for line breaking (
 %																
 \subsection{Presenting and translating the focus}
 
+Because higher levels can contain information that is not present in lower levels (eg. part of a document that is not presented), and lower levels can contain information not present in higher levels (eg. whitespace), it is not possible to keep track of the focus at a fixed level. If focus is kept track of in the higher levels, focus on whitespace cannot be modeled, and analogously, if focus is kept track of in a lower level, then focus in non-presented parts of the document cannot be modeled. Hence, we keep track of the focus simultaneously at all levels, and whenever it is changed on a particular level, the focus on other levels is updated by presenting and translating the updated focus.
+
+The 
+Figure~\ref{focusUpdates}
+Don't follow the cycle. because of:
+focus in partial stuff   >if then< else: no higher focus. problem when presenting
+focus in extra state whitespace: do want higher focus.
+
+Focus does not follow normal edit cycle, of first translating up to doc and then presenting to ren. Reason is that this is a tricky thing to do in the presence of extra state. EG. if then selected, no focus on higher level. So when presenting this, need to remember bla. 
+
+Therefore. Just present downward and translate upward. Problem may occur when translating and presenting restructures. But not a logical thing to do. When tested maybe add full cycle focus.
+
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{verbatim}
+Doc --            /----             /--- update --------
+Enr --- update --------            /---           \-----
+Pre --            \----- update -------            \----
+Lay --             \---            \---             \---
+Arr --              \--             \--              \--
+Ren --               \-              \-               \-
+
+/: translate     \: present
+\end{verbatim}
+\caption{Focus updates on different levels}\label{focusUpdates} 
+\end{center}
+\end{small}
+\end{figure}
+
 % focus is presented and translated
+% AANPASSEN
 When the focus changes on one level, it is updated on the other levels in the same way as the data levels are updated; it is {\em presented} and {\em translated}. The presentation of a focus is the computation of a lower level focus from an upper level focus and hence can be seen as having a downward direction, whereas the translation of a focus is the reverse computation of an upper level focus from a lower level one. Because each level has a focus, each layer maintains a focus mapping, hence the upper and lower levels mentioned in this section may denote any pair of adjacent levels. By presentation in this context we mean the mapping from a level to an adjacent lower level. It can denote any of the downward mappings in the presentation proces (Section~\ref{sect:presprocess}): evaluation, presentation, layout, arrangement, or rendering.
 
 % extra mapping info is used
-Between a pair of adjacent levels, Proxima keeps track of exactly which element is mapped onto which during presentation and translation.  One upper level element may be mapped onto several lower level elements, or none if the element is part of the upper level's local state. On the other hand, a lower level element may be mapped onto at most one upper level element (or zero if it is part of the lower level's local state). The information about the mappings is used when presenting and translating the focus. Note that when saying that an element is mapped onto elements in another level, we regard the elements separate from their children. Thus, an element can be mapped onto another element without being mapped onto its children, or only on some of its children.Figure~\ref{elementmapping} shows an element A, which is mapped onto \verb|A1|, \verb|A2|, and \verb|A3|, even though \verb|A1| is the only root. \verb|A| is not mapped onto \verb|B1| and \verb|C1|, since \verb|B1| and \verb|C1| come from respectively \verb|B| and \verb|C|.  
+Between a pair of adjacent levels, Proxima keeps track of exactly which element is mapped onto which during presentation and translation.  One upper level element may be mapped onto several lower level elements, or none if the element is part of the upper level's extra state. On the other hand, a lower level element may be mapped onto at most one upper level element (or zero if it is part of the lower level's extra state). The information about the mappings is used when presenting and translating the focus. Note that when saying that an element is mapped onto elements in another level, we regard the elements separate from their children. Thus, an element can be mapped onto another element without being mapped onto its children, or only on some of its children. Figure~\ref{elementmapping} shows an element A, which is mapped onto \verb|A1|, \verb|A2|, and \verb|A3|, even though \verb|A1| is the only root. \verb|A| is not mapped onto \verb|B1| and \verb|C1|, since \verb|B1| and \verb|C1| come from respectively \verb|B| and \verb|C|.  
 
 \note{somewhere: forward ref to single layer}
 \begin{figure}
@@ -363,10 +410,13 @@ B   C              A2 |    |   A3
 \end{small}
 \end{figure}
 
+
+\bc MAYBE WE CAN REUSE THIS ONE?
 Basically, if a higher level element is in higher level focus, then all lower level elements that are part of its presentation are in lower level focus. And vice versa, if all lower level elements that are translated to a higher level element are in lower level focus, then the higher level element is in higher level focus. The asymmetry is caused by the fact that one higher level element may be presented on several lower level elements, whereas one lower level may only be translated to a single higher level element.
-
+\ec
+\bc MAYBE WE CAN REUSE THIS ONE?
 Because of the subtree restriction on focus, an element can only be in focus if all its children are in focus as well. \note{mention homomorphic?} A consequence is that if a presentation of a higher level element \verb|A| contains a descendent which is the presentation of a higher level element that is not a descendent of \verb|A|. Figure~\ref{unpresentableFocus} shows an example. The \verb|C| node is in document focus, and is mapped onto \verb|C'|. However, \verb|C'| contains \verb|B'| which has no enriched document focus since it is the presentation of document node \verb|B| that has no document focus. Therefore \verb|C'| does not have enriched document focus in this case. Although an editor designer can override automatic focus computations for such special cases, it may be desirable to have a more relaxed focus model, in which a node can be in focus even when its children are not. This \note{mention that more research is req'd?}
-
+\ec
 % token press don't suffer from this because they are not trees
 
 \begin{figure}
@@ -389,28 +439,19 @@ B   C*...............C'
 \end{figure}
 
 
-% need to remember when focus is not translated
-From the focus mappings it follows that focus on one level does not always result in focus on another level. For example, if an enriched document element \verb|Plus (Int 1) (Int 2)| is presented as the tokens \verb|1|, \verb|"+"|, and \verb|2| (see Figure~\ref{lowerLevelFocus}) and only the first two tokens are in presentation focus, then only the first integer (\verb|Int 1|) is in enriched documentfocus, and not the sum. However, if the document is subsequently presented, we do want the "+" token to be in presentation focus, even though the originating enriched document element (\verb|Plus|) is not in focus. This can be achieved by regarding the focus as a special kind of extra state, which may be set to true on translation or presentation, but if it is not, the previous value is reused. If an explicit navigation command was issued on one of the other levels, then all old focus information is cleared before the new focus is computed. 
 
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{verbatim}
-    Enriched Document          Presentation
-    
-          Plus        <-           [ o  ,  o  ,  o ]
-         /    \                     /      |      \   
-      *Int 1  Int 2      IntToken 1*  OpToken "+"* IntToken 2
-\end{verbatim}
-\caption{Focus in lower level only (draft)} \label{lowerLevelFocus} 
-\end{center}
-\end{small}
-\end{figure}
+%list focus
+List elements form a special case in the focus presentation and translation process. If the elements of a list on one level are mapped onto elements of a list of equal length on another level, while preserving the order, then the focus ranges can simply be copied. If the the list is mapped onto a list that has different lenght or is reordered, then the editor designer must provide a function that maps ranges in one list onto ranges in the other. If a list is mapped onto a structure that is not a list, or vice versa, then focus handling is left to the editor designer. If no mapping is provided, then the focus cannot be translated to the other level. For example when the presentation focus is on a "then" token in an if expression, there is no corresponding enriched document focus.
 
-% extra state focus
-Extra state elements on both upper and lower level may also have focus, which by definition is not visible on the adjacent level. Focus in upper level extra state is not visible for a user, since it is not present in the the lower level and hence also not in the rendering. The mechanisms for handling focus in extra state elements are the same as those for handling extra state in general. The information remains local to the level and is reused on a subsequent presentation or translation. \note{mention that just like other ES, es focus may get lost?}
+QUESTION: Focus between elts in a list? Handled correctly now?
+ 
+ 
+QUESTION: if focus inside layout of "then", then no doc focus on If, so delete does not remove the if. However, maybe we do want to want to be able to perform edit ops on the If node. After all, focus is on it in some way.
 
-% problem with es focus
+
+%																
+\subsection{Extra state focus}
+
 The proposed focus translation mapping is not ideal for handling focus in extra state. Because extra state in a lower level represents non-essential information, it can be useful when focus on the extra state is not considered when computing the higher level focus. However, a lower level element can only have focus if all its children, including extra state children are in focus. As an example, consider Figure~\ref{extraStateFocus}: the enriched document element \verb|Int 2|, with a presentation \verb|IntToken (0,2) 2| and corresponding layout \verb|"|\textvisiblespace\textvisiblespace\verb|2"|. If the \verb|'2'| and only part of the preceding whitespace is in layout focus ({\tt \textvisiblespace\framebox{\textvisiblespace 2}}), then the presentation focus will include the \verb|2| child of the token, but not the whitespace child \verb|(0,2)|, since its arrangement is not entirely in focus. Therefore, the \verb|IntToken| parent cannot be in focus either, which in turn means that the \verb|Int| element is not in enriched document focus. 
 
 \begin{figure}
@@ -423,7 +464,6 @@ Int 2                   IntToken
                         /      \           
                      (0,2)      2*                  "  2"
                                                       **
-
 \end{verbatim}
 \caption{Focus in extra state}\label{extraStateFocusunpresentableFocus} 
 \end{center}
@@ -433,10 +473,7 @@ Int 2                   IntToken
 % how to fix this problem
 In order to disregard the extra state focus, the relaxed focus model that was mentioned before may provide a solution. If each element can have focus regardless of its children, we can define an element to have {\em non-extra focus} if both it is in focus itself, and its non-extra state children (with regard to the considered direction: presentation or translation) recursively have non-extra focus. However, further research is required to establish the exact details of this focus model, as well as its necessity.
 
-%list focus
-List elements form a special case in the focus presentation and translation process. If the elements of a list on one level are mapped onto elements of a list of equal length on another level, while preserving the order, then the focus ranges can simply be copied. If the the list is mapped onto a list that has different lenght or is reordered, then the editor designer must provide a function that maps ranges in one list onto ranges in the other. If a list is mapped onto a structure that is not a list, or vice versa, then focus handling is left to the editor designer. If no mapping is provided, then the focus cannot be translated to the other level. For example when the presentation focus is on a "then" token in an if expression, there is no corresponding enriched document focus.
- 
- 
+
 %																
 \subsection{Focus ambiguity}
 
@@ -454,7 +491,7 @@ data Ident$_{Enr}$ = Ident$_{Enr}$ String
 \end{tabbing}
 \rmfamily \normalsize
 
-has a presentation such that the expression \verb|IdentExp (Ident "x")| is presented only as the lower case token \verb|"x"|. If the token is in presentation focus, it is unclear whether the enriched document focus is on the string, the identifier, or the expression. The problem can be approached by either merging the possible edit operations for each of the possibilities, or by marking one possibility as the main one that should receive the focus on selection. The Cornell Synthesizer Generator (see Section~\ref{sect:synDirEditors}) employs the latter solution and denotes the element that receives the focus as a {\em resting place}. For Proxima, no final choice has been made, since the merging solution requires further research.
+has a presentation such that the expression \verb|IdentExp (Ident "x")| is presented only as the lower case token \verb|"x"|. If the token is in presentation focus, it is unclear whether the enriched document focus is on the string, the identifier, or the expression. The problem can be approached by either merging the possible edit operations for each of the possibilities, or by specifying in the presentation sheet which alternative should get the focus. The Cornell Synthesizer Generator (see Section~\ref{sect:synDirEditors}) employs the latter solution and denotes the element that receives the focus as a {\em resting place}. For Proxima, no final choice has been made, since the merging solution still requires further research.
 
 \bc
 resting place correct?
