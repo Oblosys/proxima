@@ -15,6 +15,7 @@
 \bl
 \* what identifiers to use, $\present, \Present$?
 \* how to layout the equations and put label at the right?
+\* How to use increased vertical spacing in proofs?
 \* Operators between identifiers look asymmetrical: $\Level_H \times \Level_L$. Fix using \verb|\:|? (eg. \verb|\times\:| \rarr $\Level_H \times\, \Level_L$) solution: use \verb|\!|
 \el
 
@@ -63,34 +64,42 @@ Useless, result of interpret/present will in general not be equal up to ES to ol
 
 \bigskip {\bf {\sc Extra} property}
 
-{\sc Correctness}  is not enough. Following is not a valid pres/intr with e.s., but it does not break {\sc Correctness}:
+{\sc InterPresent}  is not enough. Following is not a valid pres/intr with e.s., but it does not break {\sc InterPresent}:
 
-This one is not allowed by {\sc Correctness}
+This one is not allowed by {\sc InterPresent}
 \begin{math}
-{a,aa} = present 1\\
-{1} = interpret~a\\
-{2} = interpret~aa
+\{a,aa\} = present 1\\
+\{1\} = interpret~a\\
+\{2\} = interpret~aa
 \end{math}
 
-This one is incorrect, but allowed by  {\sc Correctness}
+This one is incorrect, but allowed by  {\sc InterPresent}
 
-a is not in all presentations of (interpret a). 
+Problem is that a is not in all presentations of (interpret a). 
 \begin{math}
-{1,2} = interpret~a\\
-{a} = present~1\\
-{aa} = present~2\\
-\end{math}
-
-"drrie" is not in every presentation of (interpret  "drrie"). But it's okay, since there is no h: "drrie" = pres h.
-\begin{math}
-{3} = interpret~"drie"\\
-{3} = interpret~"drrie"\\
-{drie} = present~3
+\{a\} = present~1\\
+\{aa\} = present~2\\
+\{1,2\} = interpret~a\\
+\{1,2\} = interpret~aa\\
 \end{math}
 
 However, if this is allowed, then interpreting a valid presentation $l'$ and presenting it, does not necessarily lead to $l'$ again. 
 
-If we add this requirement then second example is not allowed anymore. The requirement states that if the lower level $l$ is a presentation of some higher level, then all interpretations of $l$ have $l$ in their presentation.
+
+In the next example "drrie" is not in every presentation of (interpret  "drrie"). But it's okay, since there is no h such that "drrie" = pres h.
+\begin{math}
+\{3\} = interpret~"drie"\\
+\{3\} = interpret~"drrie"\\
+\{drie\} = present~3
+\end{math}
+
+This property prevents the problem from occurring.
+
+\xprlab{
+l \in \present~h' \imp (h \in \interpret~l \imp l \in \present~h)
+}{Extra}
+
+If we add the {\sc Extra} requirement then second example is not allowed anymore. The requirement states that if the lower level $l$ is a presentation of some higher level, then all interpretations of $l$ have $l$ in their presentation.
 
 %																
 %																
@@ -113,7 +122,7 @@ If we add this requirement then second example is not allowed anymore. The requi
 %structural updates. Incomplete. No duplicates.
 
 \bl
-\* Specification
+\* Specification of interpret
 \* Process we use is to start with basic case: an abstract editor. 
 \* Then step by step add complications.
 \el
@@ -151,20 +160,22 @@ Given a $\present$, we specify an $\interpret$.
 
 \xprlab{
 \level_{L} & \equ & \present~\level_{H}
-}{Presentation-Inv}
+}{Present}
 
-\bigskip {\bf Correctness}
+$present$ is total function. all docs have pres. but not surjective. not all pres have doc. mention injective here?
+
+\bigskip {\bf InterPresent}
 
 \bl
-\* Property Correctness\note{name: Correctness/Well behaved/\dots?} 
-\* Presenting followed by interpreting is identity on higher level: 
+\* Property {\sc InterPresent}\note{name: Correctness/Well behaved/\dots?} 
+\* Presenting followed by interpreting is identity on higher level: \note{normalizing doc may not occur}
 \el
 
 \xprlab{
 \level_{L} \equ \present~\level_{H} \imp \level_{H} \equ \interpret~\level_{L}  
-}{Correctness}
+}{InterPresent}
 
-Equivalently, we can express the correctness property using a function composition: \note{worry about domain?}
+Equivalently, we can express the {\sc InterPresent} property using function composition: \note{worry about domain?}
 
 \xpr{
 \interpret \oo \present = id_{\Level_H} 
@@ -190,7 +201,9 @@ Equivalently, we can express the correctness property using a function compositi
 \* Lower level is updated by a user. Need to find updates on both levels.
 \el
 
-An edit operation takes place when {\sc Presentation-Inv} holds:
+Explain that from now on $level_L$ and $level_H$ etc. are global. initial, $level_L$ and $level_H$. update and final.
+
+An edit operation takes place when {\sc Present} holds:
 
 \xpr{
 & & \level_{L} = \present~\level_{H}\\
@@ -220,6 +233,15 @@ Summarizing, we need:
 \right.
 }
 
+We also want:
+
+$\level'_L = \present~h \imp \level''_{L} = \level'_{L}$ \note{$h$ instead of $\level_H''$?}
+
+\note {"close to" zachte req unless equality is possible? Isn't that logical?}
+
+$\level'_L = \present~\level_H \imp \level''_{H} = \level_{H}$
+
+
 The solution is this computation: \note{align label with last eq.? how?}
 
 \xprlab{
@@ -227,25 +249,27 @@ The solution is this computation: \note{align label with last eq.? how?}
 \level''_{L} & \equ & \present~\level''_{H} 
 }{Compute}
 
-Because $\present$ is assumed to be given, $\interpret$ is specified here.
+no unn. ll change:
 
-If the updated lower level ($\level'_{L}$) is a valid presentation of some $h \tp Level_H$, then the correctness property guarantees that final value the lower level is equal to $\level'_{L}$.
+If the updated lower level ($\level'_{L}$) is a valid presentation of some $h \tp Level_H$, then the {\sc InterPresent} guarantees that final value the lower level is equal to $\level'_{L}$.
 
 If we assume $\level''_{H}$ and $\level''_{L}$ to be defined according to {\sc Compute} then:
 
 $\level'_L = \present~h \imp \level''_{L} = \level'_{L}$
+
 \begin{proof} Assume $\level'_L = \present~h$ then
 \prf{
 \level''_{L}						& \Eqv{\sc Compute}\\
 \present~\level''_{H}				& \Eqv{\sc Compute}\\
 \present~(\interpret~\level'_{L})		& \Eqv{$\level'_L = \present~h$}\\
 \present~(\interpret~(\present~h))	& \Eqv{definition of $\oo$}\\
-\present~((\interpret \oo \present)~h)	& \Eqv{\sc Correctness}\\
+\present~((\interpret \oo \present)~h)	& \Eqv{\sc InterPresent}\\
 \present~h 						& \Eqv{$\level'_L = \present~h$}\\
 \level'_L
 }
 \end{proof}
 
+Other one (no unn. hl change) is trivial
 
 On the other hand, if $\level'_{L}$ is not a valid presentation, $interpret$ needs to choose a  $\level''_{L}$ that resembles what the user intended by performing the edit operation. This is reflected in the specification by the requirement $\level'_{L}~\text{"close to"}~\level''_{L}$.
 
@@ -262,14 +286,15 @@ On the other hand, if $\level'_{L}$ is not a valid presentation, $interpret$ nee
 %range of present.
 
 
-
 %																
 %																
 %																
 \section{Extra state}
 
 
-Extra state: present and translate are no longer functions, but relations. example
+Extra state: present and translate are no longer functions, but binary relations. example
+
+Next section we give a concrete instance of these classes
 
 \bl
 \* Simple example a declaration (identifier \& rhs) in a source editor is presented by leaving out the righthand side:
@@ -284,12 +309,13 @@ Extra state: present and translate are no longer functions, but relations. examp
 \el
 
 \bl
+\* move these to first half (or previous chapter)
 \* Examples Pres: tree browser expansion state, table view sorting, file manager details/icons (positions), layout.
-\* Intr: Structure view, Scrolled window.
+\* Intr: Structure view.
 \el
 
 \bl
-\* Model as multi-valued functions. 
+\* Model as eq. classes on doc and on pres.
 \* Elements of result are equal except for E.S nodes.
 \* New types:
 \el
@@ -308,57 +334,42 @@ Extra state: present and translate are no longer functions, but relations. examp
 
 \xprlab{
 \level_{L} \in \present~\level_{H}\\
-}{Presentation-Inv}
+}{Present}
 
-\bigskip {\bf Correctness}
+\bigskip {\bf {\sc InterPresent} property}
 
 \bl
-\* Correctness property also changes. 
+\* {\sc InterPresent}  also changes. 
 \* Cannot compose $present$ and $interpret$ because $interpret$ returns several higher level values.
 \* Therefore restate: if l is a presentation of h then H must be an interpretation of L.
 \el
 
 \xprlab{
 \level_{L} \in \present~\level_{H} \imp \level_{H} \in \interpret~\level_{L}
-}{Correctness}
+}{InterPresent}
 
-
-Or equivalently:
-
-\xpr{
-\exists \level_{L}: level_{H} ~\in  \interpret~\level_{L} \wedge \level_{L}~\in  \present~\level_{H}
-}
-
-
-express it using a Kleisli composition for sets ($f \klei g$) \cite{?}\note{add citation here?/explain?}   \note{prove this?}
+% l in (pres  `kleisli` int) l       is not True, because that alread holds if there is s single h in int l
+% for which l in pres h, but we want for all h in int l that l in pres h
  
-\xpr{
-(f \klei g)~x = \{z\:|\:\exists y : z \in f  y \land y \in g x \}
-}
-
-\xpr{
-\level_{H}~ \in (\interpret \klei \present)~\level_{H}
-}
-
-Is Kleisli true? What if $present$ is partial? (some documents have no presentation) Or do we assume total pres. and intr.?
 
 
-Extra property:
+Extra property: (3 different notations, 2nd is probably the best)
 
 \xprlab{
-\exists h' : l \in \present~h' \imp \forall h : h \in \interpret~l \imp l \in \present~h\\
+(\exists h' : l \in \present~h') \imp \forall h : h \in \interpret~l \imp l \in \present~h\\
 l \in \present~h' \imp (h \in \interpret~l \imp l \in \present~h)\\
+l \in \present~h' \land h \in \interpret~l \imp l \in \present~h\\
 }{Extra}
 
-It's reverse:
+Its reverse:
  
-\xprlab{
-\exists l' : h \in \interpret~l' \imp \forall l : l \in \present~h \imp h \in \interpret~l
-}{Extra-reverse}
+\xpr{
+(\exists l' : h \in \interpret~l') \imp \forall l : l \in \present~h \imp h \in \interpret~l
+}
 
-is superfluous because it follows from {\sc Correctness}.
+is superfluous because it follows immediately from {\sc InterPresent}.
 
-For an editor without extra state (see previous section), {\sc Extra} (with $=$ instead of $\in$) also follows from {\sc Correctness}
+For an editor without extra state (see previous section), {\sc Extra} (with $=$ instead of $\in$) also follows from {\sc InterPresent}
 
 \subsection{Edit}
 
@@ -384,6 +395,12 @@ Both $\interpret$ and $\present$ (may) provide several results, so we have to ch
 \right.
 }
 
+$\level'_L \in \present~h \imp \level''_{L} = \level'_{L}$
+
+$\level'_L \in \present~\level_H \imp \level''_{H} = \level_{H}$
+
+Solution:
+
 Because we cannot use $\present$ and $\interpret$ directly, since both have a set as result type, we introduce two functions $\present*$ and $\interpret*$, which select the appropriate element from the resulting set:
 
 \xpr{
@@ -396,19 +413,12 @@ Because we cannot use $\present$ and $\interpret$ directly, since both have a se
 \level''_{L} = \present^* (\level''_{H}, level'_{L})
 }{Compute}
 
-$\present*$ and $\interpret*$ only return results that are valid, and moreover, if old level is argument, then that one is returned: \note{only seem to need half of these reqs for the proofs.}
-
-\xpr{
-h' = \interpret^* (l,h) \imp h' \in \interpret~l		& \qquad \text{\sc Valid-Intr*}\\ 
-h \in \interpret~l \imp h = \interpret^* (l,h) 		& \qquad \text{\sc Idempotent-Intr*}\\ 
-l' = \present^* (h,l) \imp l' \in \present~h		& \qquad \text{\sc Valid-Pres*}\\ 
-l \in \present~h \imp l = \present^* (h,l)  		& \qquad \text{\sc Idempotent-Pres*}\\ }
-
 \bl
 \* Two "close to"s, explain more. One is for correct behavior of intended edit. Other is for maintaining extra state
 \el
 
 \bigskip {\bf No unnecessary lower level changes}
+
 If result of edit is presentation of something, it is unchanged by {\sc Compute}: 
 
 $\exists h : level'_L \in \present~h \imp level''_L = level'_L$\note{how to make clear that $\level''_H$ comes from {\sc Compute}?}
@@ -423,7 +433,7 @@ $\level_H = \interpret^* (\level'_{L},\level_{H})$
 \prf{
 True 						& \Imp{assumption}\\
 \level'_L \in \present~h 			& \Imp{\sc Extra}\\
-\level_H \in \interpret~\level'_L 	& \Imp{\sc Idempotent-Intr*}\\
+\level_H \in \interpret~\level'_L 	& \Imp{\sc Intr$^*$-Idem}\\
 \level_H = \interpret^* (\level'_{L},\level_{H})
 }
 
@@ -433,8 +443,8 @@ And $\level'_{L} = \present^* (\level_{H}, level'_{L})$
 \prf{
 True 						& \Imp{assumption}\\
 \level'_L \in \present~h 			& \Imp{\sc Extra}\\
-\level_H \in \interpret~\level'_L 	& \Imp{\sc Correctness}\\
-\level'_L \in \present~\level_H	& \Imp{\sc Idempotent-Pres*}\\
+\level_H \in \interpret~\level'_L 	& \Imp{\sc InterPresent}\\
+\level'_L \in \present~\level_H	& \Imp{\sc Pres$^*$-Idem}\\
 \level'_{L} = \present^* (\level_{H}, level'_{L})\\
 }
 
@@ -457,38 +467,59 @@ $\level'_L \in \present~\level_H \imp \level''_H = \level_H$\\
 
 \begin{proof} 
 \prf{
-\level'_L \in \present~\level_H	& \Imp{\sc Correctness}\\
-\level_H \in \interpret~\level'_L	& \Imp{\sc Idempotent-Intr*}\\
+\level'_L \in \present~\level_H	& \Imp{\sc InterPresent}\\
+\level_H \in \interpret~\level'_L	& \Imp{\sc Intr$^*$-Idem}\\
 \level_{H} = \interpret^* (\level'_{L},\level_{H}) & \Imp{\sc Compute}\\ 
 \level_{H} = \level''_{H} 
 }
 \end{proof}
 
-\note{Doing this proof by starting with $\level_H$ and substituting is tricky, because {\sc Correctness} is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
+\note{Doing this proof by starting with $\level_H$ and substituting is tricky, because {\sc InterPresent} is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
 
 \bl
 \* If $\level'_{L}$ is not a valid presentation, $\level''_{L}$ must resemble what the user intended (requirement $\level'_{L}~\text{"close to"}~\level''_{L}$).
 \el
 
-\subsection{Definition of $\present*$ and $\interpret*$}
 
 
-Introduce datatype with 'holes'. Not placeholders, but holes. Holes represent any value (of correct type)
+\section{Finite representation for equivalence classes}
+
+will give $present$ and $interpret$ that satisfy laws from prev. section.
+
+\subsection{Trees with holes}
+Introduce datatype with 'holes'. Not placeholders from prev. chapters, but holes. Holes represent any value (of correct type)
+
+A simple tree data type with boolean values in the leafs:
+
+\xpr{
+\data~Tree  = Bin~Tree~Tree~|~Leaf~Bool\\
+\data~Bool = True~|~False\\
+}
+
+becomes
+
+\xpr{
+\data~Tree^*  = Bin~Tree^*~Tree^*~|~Leaf~Bool^*~|~*_{Tree}\\
+\data~Bool^* = True~|~False~|~*_{Bool}\\
+}
+
+$Bin *_{Tree} (Leaf~*_{Bool})$ 
+Or, more generally:
 
 \xpr{
 \data~T  & = & C_0~T_{0,0} \dots T_{0,m_0} | \dots | C_n~T_{n,0} \dots T_{n,m_n} \\
 \data~T^* & = & C_0~T^*_{0,0} \dots T^*_{0,m_0} | \dots | C_n~T^*_{n,0} \dots T^*_{n,m_n} | *_T
 }\note{braces around * don't affect spacing}
 
-Same constructor. thus all vals of T are also values of $T^*$
+Same constructor, thus all vals of T are also values of $T^*$
 
 Stars represent sets. All $t^*$ are sets, but not reverse. example
 
 \xprlab{
-\para{\hole} \tp T^* \to \Set{T} \\
-\para{*_ T} \eq \Set{x | x \tp T}\\
-\para{C~x^*_0 \dots x^*_n} \eq \Set{ C~x_0 \dots x_n | x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
-}{Def-$\para{\hole}$}\note{name it {\sc $\para{\hole}$-Def} (or {\sc $\para{\hole}$-Char})?} \note{use $x^*_i$?}
+\para{\hole} \tp T^* \to \set{T} \\
+\para{*_ T} \eq \setof{x}{x \tp T}\\
+\para{C~x^*_0 \dots x^*_n} \eq \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
+}{$\para{\hole}$-Def}\note{name it {\sc $\para{\hole}$-Def} (or {\sc $\para{\hole}$-Char})?} \note{use $x^*_i$?}
 
 Restrict ourselves to reversible. So no longer all sets, but only those that have hole-representations.
 
@@ -497,13 +528,11 @@ interpret~l = \para{interpret'~l}\\
 present~h = \para{present'~h}
 }{Restrict}
 
-
-Reusing may fail. So we need a default function:
+Reusing may fail. So we need a default function: $default \tp a^* \rightarrow a$.
 
 \xprlab{
-default \tp a^* \rightarrow a\\
 default~x^* \in \para{x^*}\\
-}{Def-Default}
+}{$default$-Valid}
 
 \bl
 \* A default value is equal to its arg, except for the $*$'s, which are filled in with initial values.
@@ -518,7 +547,7 @@ Now we define a function for reusing stuff. when *, just use righthand side. Whe
 *_a \triangleright  y = y\\
 C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n = C~(x^*_0 \triangleright y_0) \dots (x^*_n  \triangleright y_n) \\
 C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*_n)
-}{Def-$\triangleright$}
+}{$\triangleright$-Def}
 
 
 \bl
@@ -533,62 +562,80 @@ C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*
 \* IMPORTANT: Look at reuse for tokens, is this correct? 
 \el
 
-With $\triangleright$ we can define $\interpret^*$ and $\present^*$: \note{remove ' and ''?}
+With $\triangleright$ we can define $\interpret^*$ and $\present^*$. Define in terms of $\interpret'$ and $present'$. 
 
 \xpr{
 \interpret^* \tp \Level_{L} \times \Level_{H} \rightarrow \Level_{H}\\
-\interpret^*~(level'_{L}, level_{H}) = \interpret'~\level'_{L} \triangleright \level_{H}\\ 
+\interpret^*~(l, h) = \interpret'~l \triangleright h\\ 
 \present^* \tp \Level_{H} \times \Level_{L} \rightarrow \Level_{L}\\
-\present^*~(\level''_{H}, \level'_{L}) = \present'~\level''_{H} \triangleright \level'_{L}
+\present^*~(h, l) = \present'~h \triangleright l
 }
 
-$\interpret^*$ and $\present^*$ meet the requirements from Section~\ref{bla}. We show the proofs for $\interpret$. The $\present^*$ proofs are obtained by substituting $present$ for $interpret$ in the proofs.
+$\interpret^*$ and $\present^*$ meet following requirements. We show the proofs for $\interpret$. The $\present^*$ proofs are obtained by substituting $present$ for $interpret$ in the proofs.
+
+$\present*$ and $\interpret*$ only return results that are valid, and moreover, if old level is argument, then that one is returned: \note{only seem to need half of these reqs for the proofs.}
+
+\xprlab{
+\interpret^* (l,h) \in \interpret~l}{Intr$^*$-Valid} 
+\xprlab{
+h \in \interpret~l \imp h = \interpret^* (l,h)}{Intr$^*$-Idem} 
+\xprlab{
+\present^* (h,l) \in \present~h}{Pres$^*$-Valid}  %never used!
+\xprlab{
+l \in \present~h \imp l = \present^* (h,l)}{Pres$^*$-Idem}
+\note{find out when (and if) these are used}
+
 
 \xpr{
-\interpret^* (l, h) \in \interpret~l		& \qquad \text{\sc Valid-Intr*}\\
-h \in \interpret~l \imp h = \interpret^* (l,h) 		& \qquad \text{\sc Idempotent-Intr*}\\ 
+\interpret^* (l, h) \in \interpret~l		& \qquad \text{\sc Intr$^*$-Valid}\\ %Intr$^*$-Valid
+h \in \interpret~l \imp h = \interpret^* (l,h) 		& \qquad \text{\sc Intr$^*$-Idem}\\ 
 }
 
 \bigskip
 {\bf Validity}
 
-In order to prove {\sc Valid-Intr*}, we use the property $x \triangleright y \in \para{x}$, which can be proved by structural induction on $x$ \note{and y?}
+In order to prove {\sc Intr$^*$-Valid}, we use the property $x \triangleright y \in \para{x}$, which can be proved by structural induction on $x$
 
 \begin{proof} 
 {\bf case} $x = *_T$:\\
 \prf{
 True & \Imp{$y \tp T$} \\
-y 				\in \Set{t | t \tp T}	& \Imp{{\sc Def-$\para{\hole}$}}\\
-y 				\in \para{*_T}		& \Imp{{\sc Def-$\triangleright$}}\\
+y 				\in \setof{t}{t \tp T}	& \Imp{{\sc $\para{\hole}$-Def}}\\
+y 				\in \para{*_T}		& \Imp{{\sc $\triangleright$-Def}}\\
 *_T \triangleright y 	\in \para{*_T}
 }
 
+
 {\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C~y_0 \dots y_n$\\
-Induction Hypothesis is $x^*_i \triangleright y_i \in \para{x*_i}$ \note{How to make this first step a bit nicer?}\\ 
+Induction Hypothesis is $x^*_i \triangleright y_i \in \para{x*_i}$ \note{How to make this first step a bit nicer?}
 \prf{
-True
-				& \Imp{Induction Hypothesis}\\
-C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in  \Set{ C~x_0 \dots x_n | x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
-				& \Eqv{{\sc Def-$\para{\hole}$}}\\
-C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in \para{C~x^*_0 \dots x^*_n}
-				& \Eqv{{\sc Def-$\triangleright$}}\\
+True\\
+				 \Imp{Induction Hypothesis}\\
+C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in  \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} \\
+				 \Eqv{{\sc $\para{\hole}$-Def}}\\
+C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in \para{C~x^*_0 \dots x^*_n}\\
+				 \Eqv{{\sc $\triangleright$-Def}}\\
 C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}
 }
 
 {\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C'~y_0 \dots y_m$, with $C \neq C'$\\
 \prf{
-True & \Imp{property of default (name?)}\\
-default (C~x^*_0 \dots x^*_n) \in \para{C~x^*_0 \dots x^*_n} & \Eqv{{\sc Def-$\triangleright$}}\\
-C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} & 
+True\\
+		\Imp{{\sc $default$-Valid}}\\
+default (C~x^*_0 \dots x^*_n) \in \para{C~x^*_0 \dots x^*_n}\\
+		\Eqv{{\sc $\triangleright$-Def}}\\
+C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} 
 }
 \end{proof}
 
-Now we can prove {\sc Valid-Intr*}: 
+Now we can prove {\sc Intr$^*$-Valid}: 
 
 \begin{proof}
 \prf{
-True 									& \Imp{$y \triangleright x \in \para{y}$}\\
-\interpret'~l \triangleright h \in \para{interpret' l}	& \Imp{\sc Restrict}\\
+True 									\\
+		\Imp{$y \triangleright x \in \para{y}$}\\
+\interpret'~l \triangleright h \in \para{interpret' l}	\\
+		\Imp{\sc Restrict}\\
 \interpret'~l \triangleright h \in \interpret~l		& \Imp{definition of $interpret^*$}\\
 \interpret^* (l, h) \in \interpret~l
 }
@@ -597,7 +644,7 @@ True 									& \Imp{$y \triangleright x \in \para{y}$}\\
 \bigskip
 {\bf Idempotency}
 
-We prove the idempotency: {\sc Idempotent-Intr*}.
+We prove the idempotency: {\sc Intr$^*$-Idem}.
 
 Need this property:  $y \in \para{x} \imp x \triangleright y = y$, structural induction on $x$:
 
@@ -605,7 +652,7 @@ Need this property:  $y \in \para{x} \imp x \triangleright y = y$, structural in
 {\bf case} $x = *_T$:\\
 \prf{
 True					& \Eqv{reflexivity of $=$} \\
-y = y				& \Eqv {\sc Def-$\triangleright$}\\
+y = y				& \Eqv {\sc $\triangleright$-Def}\\
 *_T \triangleright y = y	& \Imp{how do we call this?}\\
 y \in \para{*_T} \imp {*_T \triangleright y = y} % braces are for spacing around \triangle
 }
@@ -617,15 +664,15 @@ $y^i \in \para{x*^i} \imp  x^*_i \triangleright y_i = y_i$\\
 y \in \para{x}
 				& \Eqv{definitions of $x$ and $y$}\\
 C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}
-				& \Eqv{{\sc Def-$\para{\hole}$}}\\
-C~y_0 \dots y_n \in \Set{ C~x_0 \dots x_n | x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
+				& \Eqv{{\sc $\para{\hole}$-Def}}\\
+C~y_0 \dots y_n \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
 				& \Imp{property of set comprehension}\\
 y_0 \in \para{x^*_0} \land \dots \land y^n \in \para{x^*_n}
 				& \Eqv{Induction Hypothesis}\\
 x^*_0 \triangleright y_0 = y_0  \land \dots \land  x^*_n \triangleright y_n = y_n
 				& \Imp{$n$ times {\sc Leibniz}}\\
 C~(x^*_0 \triangleright y_0) \dots (x^*_n  \triangleright y_n) = C~y_0 \dots y_n
-				& \Eqv{{\sc Def-$\triangleright$}}\\
+				& \Eqv{{\sc $\triangleright$-Def}}\\
 C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n = C~y_0 \dots y_n
 				& \Eqv{definitions of $x$ and $y$}\\
 x \triangleright y = y
@@ -637,9 +684,9 @@ The third case will not occur.\\
 y \in \para{x}
 				& \Eqv{definitions of $x$ and $y$}\\
 C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} 
-				& \Eqv{{\sc Def-$\para{\hole}$}}\\
-C'~y_0 \dots y_m \in \Set{ C~x_0 \dots x_n | x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
-				& \Eqv{property of set comprehension$}\\
+				& \Eqv{{\sc $\para{\hole}$-Def}}\\
+C'~y_0 \dots y_m \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
+				& \Eqv{property of set comprehension}\\
 \exists x_0 \dots x_n : C'~y_0 \dots y_m = C'~x_0 \dots x_n 
 				& \Eqv{$C \neq C'$}\\
 False
@@ -660,6 +707,7 @@ h = \interpret'~l \triangleright h 	& \Imp{definition of $interpret^*$}\\
 h = \interpret^* (l,h)
 }
 \end{proof}
+
 
 
 
@@ -704,10 +752,10 @@ Presentation invariant for combination:
 
 \xprlab{
 \level_{L} \in \present~\level_{H}\\
-}{Presentation-Inv-HL}
+}{Present-HL}
 
 Equivalent to (?): 
-%there is an $\level_{M}$ such that {\sc Presentation-Inv-H} and {\sc Presentation-Inv-L} hold:
+%there is an $\level_{M}$ such that {\sc Present-H} and {\sc Present-L} hold:
 
 \xpr{
 \exists \level_{M}: \level_{L} \in \present_L~\level_{M} \wedge \level_{M} \in \present_H~\level_{H}\\
@@ -721,30 +769,30 @@ Can express it with Kleisli as well:
 
 \xprlab{
 \level_{L} \in (\present_{L} \klei \present_{H})~\level_{H}
-}{Presentation-Inv-HL}
+}{Present-HL}
 
 
 
-\bigskip {\bf Correctness}
+\bigskip {\bf InterPresent}
 
 Using:
 
 \xprlab{
 \level_{M} \in \present_H~\level_{H} \imp \level_{H} \in \interpret_H~\level_{M}
-}{Correctness-H}
+}{InterPresent-H}
 
 and
 
 \xprlab{
 \level_{L} \in \present_L~\level_{M} \imp \level_{M} \in \interpret_L~\level_{L}
-}{Correctness-L}
+}{InterPresent-L}
 
 
 we want to get:
 
 \xprlab{
 \level_{L} \in \present~\level_{H} \imp \level_{H} \in \interpret~\level_{L}
-}{Correctness-B}
+}{InterPresent}
 
 
 \begin{proof}
@@ -752,16 +800,16 @@ we want to get:
 \level_{L} \in \present~\level_{H} 
 		& \Imp{definition of $present$} \\
 \exists \level_M : \level_L = \present_L~\level_M \land \level_M = \present_L~\level_H 
-		& \Imp{\sc Correctness-H} \\
+		& \Imp{\sc InterPresent-H} \\
 \exists \level_M : \level_L = \present_L~\level_M \land \level_{H} \in \interpret_H~\level_{M}
-		& \Imp{\sc Correctness-L} \\
+		& \Imp{\sc InterPresent-L} \\
 \exists \level_M : \level_M = \interpret_L~\level_L \land \level_{H} \in \interpret_H~\level_{M} 
 		& \Imp{definition of $interpret$} \\
 \level_{H} \in \interpret~\level_{L}
 }
 \end{proof}
 
-%Kleisli bits for {\sc Correctness-L} and {\sc Correctness-H}
+%Kleisli bits for {\sc InterPresent-L} and {\sc InterPresent-H}
 %
 %\xpr{
 %\level_{H}~ \in (\interpret_{H} \klei \present_{H})~\level_{H}\\
@@ -804,8 +852,10 @@ Solution is these computations:
 \level'_{M} = \interpret_L^* (\level'_{L},\level_{M})\\ 
 \level''_{H} = \interpret_H^* (\level'_{M},\level_{H})\\
 \level''_{M} = \present_H^* (\level''_{H}, level'_{M})\\
-\level''_{L} = \present_L^* (\level''_{H}, level'_{L})
+\level''_{L} = \present_L^* (\level''_{M}, level'_{L})
 }{Compute}
+
+
 not exactly the same. Upper is the same, but lower is split. Kind of nested: lowerUp (upper ) lowerDwn
 
 Mention that this can be made more uniform by always using $level' = \interpret$ and add $\level''_{H} = \level'_{H}$?
@@ -826,14 +876,32 @@ Mention that this can be made more uniform by always using $level' = \interpret$
 \* Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
 \el
 
+UNCLEAR: how do we relate old val for $level_M$? put it in presentation inv? We need it for es.
+
+\bigskip {\bf No unnecessary lower level changes}
+
 If result of edit is presentation of something, it is unchanged by {\sc Compute}: \note{How to formulate this one?}
 
 \xpr{
-\exists m,h : \level'_{L} \in \present_L~m \wedge m \in \present_H~h  \imp \\
-\forall level_M : \level_M~\text{"close to"}~m \imp level''_L = level'_L\\
+\exists h : level'_L \in \present~h \imp level''_L = level'_L
 }
 
 Unfortunately, this is not true:
+
+\xpr{
+\present_H x\ = (x,x)   & \hspace{1cm} & \present_L\ (x,y) = y \\
+\interpret_H\ (x,y) = x &                     & \interpret_L\ y = (*,y)\\
+}
+
+we have $1 \in present 1$, but according to compute: 
+
+\xpr{
+0			&		& (0,0)	  & \\ 
+\downarrow	&		& \uparrow & \downarrow\\
+(0,0)			&		& (0,1)	  & (0,0)\\
+\downarrow	&		& \uparrow & \downarrow\\
+0			&\leadsto	& 1		  & 0
+}
 
 \bl
 \* Counter example
@@ -842,37 +910,10 @@ Unfortunately, this is not true:
 \* if higher interpret gives H' for which M' Pres H' then Extra says M'' = M' and L'' = L', so (not M' Pres H')
 \el
 
-%\xprlab{
-%\exists h' : m \in \present_H~h' \imp \forall h : h \in \interpret_H~m \imp m \in \present_H~h
-%}{Extra-H}
-%\xprlab{
-%\exists m' : l \in \present_L~m' \imp \forall m : m \in \interpret_L~l \imp l \in \present_H~m
-%}{Extra-L}
+\bigskip {\bf No unnecessary higher level changes}
 
-%Lemma 2: 
-%$h \in \interpret~\level'_L \imp \level'_L \in \present~h$\\
-
-%\prf{
-%\exists h : \level'_L \in \present~h & \Imp{def. binary present}\\
-%\exists h,m : \level'_L \in \present_L~m \land m \in \present_H~h & \Imp{\sc Extra-H \& Extra-L}\\
-%\forall m : m \in \interpret_H~\level'_L \imp \level'_L \in \present~m \land \\
-%\forall h : h \in \interpret_H~\level'_H \imp \level'_L \in \present~m \land
-%}
-
-%From {\sc Compute}:
-%
-%\prf{
-%\level'_{M} = \interpret_L^* (\level'_{L},\level_{M}) & \Imp{\sc Valid-Intr*-L} \\
-%\level'_{M} \in \interpret'~\level'_L & \Imp{Lemma2}\\
-%
-%\level'_L \in \present~\level'_{M} & \\
-%\level'_L = \present^* (\level''_{H},\level'_L) & \Imp{\sc Compute}\\
-%\level'_L =\level''_L 
-%}
-
-
-
-
+$\level'_L \in \present~\level_H \imp \level''_H = \level_H$\\
+We should probably use the fact that $\level_M$ is related by {\sc Present}.
 
 %																
 %																
@@ -901,7 +942,7 @@ We define $\present$ and $\interpret$:
 
 \bigskip {\bf Presentation invariant}
 
-\bigskip {\bf Correctness}
+\bigskip {\bf InterPresent}
 
 \subsection{Edit}
 
@@ -955,6 +996,8 @@ Informal
 \* $1 \to "one"$ can be seen as three partial duplicates. 
 \el
 
+Old statement: if there are several choices for interpret, which all obey {\sc InterPresent}, then there are duplicates. This does not seem to be true. (eg. $present n = 2n$)
+
 %																
 %																
 %																
@@ -969,6 +1012,8 @@ Informal
 \bl
 \* what about error nodes in document?
 \* what about inserting pres elts that resemble a chapter title? Is this handled well?
+\* difference between {\em presentation extra state} and {\em interpretion extra state}
+\* what if present is not total?
 \el
 
 
@@ -988,3 +1033,4 @@ Skipping higher layers
 
 \renewcommand{\present}[0]{{\tt present}}					%56
 \renewcommand{\interpret}[0]{{\tt interpret}}				%56
+                                                                          
