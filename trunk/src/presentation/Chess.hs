@@ -58,9 +58,10 @@ piece pc color sqColor rowNr colNr moves focus path =
 
 
 moveHere tPath focus (Prox.DocumentLevel d path cl) =
-  let (Prox.DocumentLevel d' path' pCl ) = editCutD (Prox.DocumentLevel d focus cl)
-      (Prox.DocumentLevel d'' path'' cl'') = editPasteD (Prox.DocumentLevel d' (Prox.PathD tPath) pCl)
-  in  (Prox.DocumentLevel d'' path'' cl)
+  let (Prox.DocumentLevel d' path' pCl )    = editCopyD (Prox.DocumentLevel d focus cl)
+      (Prox.DocumentLevel d'' _ _ )         = editPasteD (Prox.DocumentLevel d focus (Prox.Clip_BoardSquare Prox.Empty)) 
+      (Prox.DocumentLevel d''' path'' cl'') = editPasteD (Prox.DocumentLevel d'' (Prox.PathD tPath) pCl)
+  in  (Prox.DocumentLevel d''' path'' cl)
                
 
 -- talking to Prometheus
