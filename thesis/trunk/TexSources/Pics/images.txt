@@ -7,3 +7,17 @@ frac: capture image, save as png
 !!
 change align.png.eps to align.bmp.eps
 change tree.png.eps to tree.bmp.eps
+
+
+
+
+
+
+
+
+Visio drawings:
+save as Intermediate\*.wmf         (only selected part of drawing is saved)
+Open Coreldraw, drop wmf images on it, and export as Eps\*.eps
+
+other methods often cause Coreldraw to crash on opening the file.
+
