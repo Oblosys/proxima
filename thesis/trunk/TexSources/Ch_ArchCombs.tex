@@ -3,6 +3,8 @@
 \bc
 TODO: !!!!!!!!! complete *niet af * piece
 
+smaller font for code fragments
+
 change case for titles and headings
 mention that it's not Haskell98
 
@@ -13,11 +15,11 @@ params for step Step ... a b = a->b or Step a b ... = a->b
 
 
 
-In this chapter we use the functional programming language Haskell to give a domain specific embedded language (DSEL) for describing the layered architecture of Proxima that is described in Chapter~\ref{chap:proxArch} and specified in the previous Chapter. ***Layered archs in general, not only prox. Also used for a ...??
+In this chapter we use the functional programming language Haskell to give a domain specific embedded language (DSEL) for describing the layered architecture of Proxima, which was described in Chapter~\ref{chap:proxArch} and specified in the previous Chapter. The method was designed for describing ***Layered archs in general, not only prox. Also used for a ...?? \todo{afmaken Jurre Laven}
 
 Haskell is a functional language with strong support for abstraction. Describing the architecture in an actual programming language not only makes it possible to verify the types of the components of the architecture, but also provides a framework for implementing the system that is described by the architecture. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
-In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Higher-order typed (HOT) functional programming languages, such as Haskell, Clean, and ML offer possibilies for describing the main components of an architecture, and treating all of these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
+In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Higher-order typed (HOT) functional programming languages, such as Haskell, Clean~\cite{plasmeijer01clean}, and ML~\cite{milner97ML} offer possibilies for describing the main components of an architecture, and treating all of these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
 
 Higher-order typed functional languages offer excellent possibilities for embedding domain specific languages~\cite{hudak98DSLs}. Embedding a domain specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. We give a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
 
@@ -34,10 +36,21 @@ In this chapter we give four implementation models for layered architectures. Fi
 \section{A Simple editor}
 
 
-In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures** discussed in Chapter~\ref{chap:formalSpec} \note{is chapter now}. 
-*****
-\bc
-\bigskip {\bf The edit process: }The main loop of the simple editor consists of the following 5 phases: 
+We introduce a simple layered architecture for an editor, which is used in the next sections to explain the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture is simple, it contains the essential features of the Proxima architecture discussed in Chapter~\ref{chap:proxArch}. Section~\ref{sect:proxima} \todo{}
+
+
+
+
+\bl
+\o ref to informal spec
+\o not incremental. 
+\o doc is kept at the top
+\o doc is presented by \texttt{present}, shown to the user
+\o interpreted.
+\el
+
+The main loop of the simple editor consists of the following 5 phases: 
+ 
  \begin{enumerate}
  \item Compute a rendering, or {\it presentation}, of the document  (presentation phase)
  \item Show the presentation to the user
@@ -46,6 +59,11 @@ In this section, we introduce a simple layered architecture for an editor that i
  \item Compute the updated document
  \end{enumerate} \note{add backward ref to \ref{sect:editDifferentLevels}, and also sync the two descriptions}
 
+Both pres as interpr are layered functions. 
+
+example of hor is values of the levels, so vertical are just edit ops. This is what is done in Proxima (see Section~\ref{sect:proxima})
+
+\bc
 Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and interpretation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
 \ec
 
@@ -59,26 +77,26 @@ Figure~\ref{simpleeditprocess} contains a schematic representation of the edit p
 & present & interpret\ar[u]& present & interpret \ar[u]& present & interpret \ar[u] & \\ 
 & \ar[d] & & \ar[d] & & \ar[d] & & \\ 
  & \dataa{$pres$} \ar@{.>}[r] &  \dataa{$gest$}\ar[u] & \dataa{$pres$} \ar@{.>}[r]&  \dataa{$gest$}\ar[u] & \dataa{$pres$} \ar@{.>}[r]&  \dataa{$gest$}\ar[u] &
-% \save"2,2"."3,2"*!=<6.105em,3.2ex>[F.]\frm{}\restore 
-% \save"2,2"."3,3"*!=<14.47em,12.2ex>[F]\frm{}\restore 
-% \save"2,4"."3,4"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
-% \save"2,4"."3,5"*!=<14.47em,12.2ex>[F]\frm{}\restore 
-% \save"2,6"."3,6"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
-% \save"2,6"."3,7"*!=<14.47em,12.2ex>[F]\frm{}\restore 
+ \save"2,2"."3,2"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
+ \save"2,2"."3,3"*!=<14.47em,12.2ex>[F]\frm{}\restore 
+ \save"2,4"."3,4"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
+ \save"2,4"."3,5"*!=<14.47em,12.2ex>[F]\frm{}\restore 
+ \save"2,6"."3,6"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
+ \save"2,6"."3,7"*!=<14.47em,12.2ex>[F]\frm{}\restore 
 }
 \end{scriptsize}
-\end{center}\caption{Three cycles in the edit process.}\label{simpleeditprocess} 
+\end{center}\caption{Three cycles in the edit process. (draft)}\label{simpleeditprocess} 
 \end{center}
 \end{small}
 \end{figure}
 
-
-\bigskip {\bf The layers: } Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret} shows a more detailed view of a single edit cycle. For now, we focus on the presentation and interpretation phases (phase 1 and phase 4). Both the presentation and the interpretation functions (we will call them {\em present} and {\em interpret}) are compositions of a number of subfunctions, similar to the layered editor in Chapter~\ref{chap:formalSpec}. The presentation of a document is computed via a number of intermediate data structures that are increasingly concrete, and the edit operation on the document is computed via edit operations on the same intermediate data structures. Therefore, the subfunctions of {\em present} and {\em interpret} are grouped pairwise in horizontal layers. Another reason for grouping the subfunctions is that each subfunction in a layer has some parameters that are the result of the subfunction immediately to the left of it. We will refer to the subfunctions as {\em layer functions}.
+\bc
+\head{\bf The layers:}  Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret} shows a more detailed view of a single edit cycle. For now, we focus on the presentation and interpretation phases (phase 1 and phase 4). Both the presentation and the interpretation functions (we will call them {\em present} and {\em interpret}) are compositions of a number of subfunctions, similar to the layered editor in Chapter~\ref{chap:formalSpec}. The presentation of a document is computed via a number of intermediate data structures that are increasingly concrete, and the edit operation on the document is computed via edit operations on the same intermediate data structures. Therefore, the subfunctions of {\em present} and {\em interpret} are grouped pairwise in horizontal layers. Another reason for grouping the subfunctions is that each subfunction in a layer has some parameters that are the result of the subfunction immediately to the left of it. We will refer to the subfunctions as {\em layer functions}. \ec
 
 If we look at the figure, we see that there are values that go from left to right, and values that go either up or down. The values that go in horizontal direction are computed by the functions in the corresponding layer, although not necessarily in the same edit cycle. The vertical direction parameter for a layer function, on the other hand, is the result of that function in a neighboring layer (i.e.\ a {\em present} layer function gets its vertical parameter from another {\em present} function, and an {\em interpret} layer function gets it from another {\em interpret} function). When composing layers, the vertical results from one layer are passed as parameters to the next layer. The outermost vertical parameter is the parameter to the combined layer, and the outermost vertical result is the result of the combined layer. 
 
 ******* Extra state verhaal nog even bekijken  niet 2 x ref formalSpec
-\bigskip {\bf A single layer: }Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is somewhat more complex than Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret}, because not all horizontal parameters to $interpret$ are results of $present$ \note{i.e.\ wg?} (i.e.\ $state$ is not a result of $present$). The data flow is a simplification of the data flow of the layered editor with extra state from ****Chapter~\ref{chap:formalSpec}. $present$ maps a high level data structure $doc$ to a low level data structure $pres$. The $state$ parameter contains state that is local to the layer, as described in ****Chapter~\ref{chap:formalSpec} \note{change to internal ref}. The $interpret$ function works in the opposite direction of $present$ and maps an edit operation ($gest$) on the $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure. Besides $pres$, $present$ also returns a value $mapping$. It is used to encode information that is required by $interpret$ in order to map $gest$ to $upd$. An example of such information is a table of pointing information, that relates objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit operation on the extra state, $interpret$ also has $state$ as a parameter. In that case, $state'$ is the result of performing the update on the extra state. In any other case, $state'$ is equal to $state$. 
+\head{\bf A single layer:}  Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is somewhat more complex than Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret}, because not all horizontal parameters to $interpret$ are results of $present$ \note{i.e.\ wg?} (i.e.\ $state$ is not a result of $present$). The data flow is a simplification of the data flow of the layered editor with extra state from ****Chapter~\ref{chap:formalSpec}. $present$ maps a high level data structure $doc$ to a low level data structure $pres$. The $state$ parameter contains state that is local to the layer, as described in ****Chapter~\ref{chap:formalSpec} \note{change to internal ref}. The $interpret$ function works in the opposite direction of $present$ and maps an edit operation ($gest$) on the $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure. Besides $pres$, $present$ also returns a value $mapping$. It is used to encode information that is required by $interpret$ in order to map $gest$ to $upd$. An example of such information is a table of pointing information, that relates objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit operation on the extra state, $interpret$ also has $state$ as a parameter. In that case, $state'$ is the result of performing the update on the extra state. In any other case, $state'$ is equal to $state$. 
 
 \begin{figure}
 \begin{small}
@@ -92,12 +110,12 @@ If we look at the figure, we see that there are values that go from left to righ
  & \ar@{.>}[d] & \ar@{.>}[u]  & \\ 
  \ar[r] & \dimcomponent{5em}{2ex}{present$_{n-1}$} \ar[d] \ar[r] & \dimcomponent{6em}{2ex}{interpret$_{n-1}$} \ar@{.>}[u] \ar[r] &  \\
  & \dataa{$pres$} &  \dataa{$gest$}\ar[u] &
-% \save"2,2"."2,3"*!+<2.8em>[F]\frm{}\restore 
-% \save"3,2"."3,3"*!+<2.8em>[F]\frm{}\restore 
-% \save"5,2"."5,3"*!+<2.8em>[F]\frm{}\restore 
+ \save"2,2"."2,3"*!+<2.8em>[F]\frm{}\restore 
+ \save"3,2"."3,3"*!+<2.8em>[F]\frm{}\restore 
+ \save"5,2"."5,3"*!+<2.8em>[F]\frm{}\restore 
 }
 \end{scriptsize}
-\end{center}\caption{The layered edit cycle.} \label{simplelayers} 
+\end{center}\caption{The layered edit cycle. (draft)} \label{simplelayers} 
 \end{center}
 \end{small}
 \end{figure}
@@ -107,16 +125,16 @@ If we look at the figure, we see that there are values that go from left to righ
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\xymatrix{
+\xymatrix @R=1pc{
  & \dataa{$doc$}\ar[d] & & & \dataa{$upd$} & \\
  \dataa{$state$}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar[r] &
      \dataa{$mapping$} \ar[rr] & & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
  & & & & \hspace{3.5em} &  \\
  & \dataa{$pres$} & & & \dataa{$gest$}\ar[uu] & 
- \save"2,2"."3,5"*+<2em>[F]\frm{}\restore 
+ \save {"2,2"."3,5"*+<2em> [F] \frm{}}\restore
 }
 \end{scriptsize}
-\end{center}\caption{A single layer.}\label{simplesinglelayer} 
+\end{center}\caption{A single layer.  (draft)}\label{simplesinglelayer} 
 \end{center}
 \end{small}
 \end{figure}
@@ -127,7 +145,7 @@ If we look at the figure, we see that there are values that go from left to righ
 %																
 \section{A layer in Haskell}
 
-In the following sections, we explore the possibilities of implementing the layered architecture described in the previous section, using the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra interpretation step that could possibly lead to errors.
+In the following sections, we explore the possibilities of implementing the layered architecture from the previous section in the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra interpretation step that could possibly lead to errors.
 
 There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. The layer functions can simply be modeled with Haskell functions that are put in a record to model a layer. Connecting the layer functions is more complicated. We will present three alternatives in the next sections, but first we give the precise types of the layer functions. 
 
@@ -190,7 +208,7 @@ Now that the building blocks have been established, we need a way to connect the
  \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
 }
 \end{scriptsize}
-\end{center}\caption{Data flow in layer.}\label{wrapped} 
+\end{center}\caption{Data flow in layer. (draft)}\label{wrapped} 
 \end{center}
 \end{small}
 \end{figure}
@@ -222,12 +240,12 @@ The components of the editor are modeled with layers, but to get a working imple
      \dataa{{\tt mapping2}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state2'}} \\
  & & {\tt layer2} & & \hspace{3.5em} &  \\
  & \dataa{{\tt pres3}} & & & \dataa{{\tt gest3}}\ar[uu] & 
- \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
- \save"5,2"."6,5"*+<2em>[F.]\frm{}\restore 
- \save"8,2"."9,5"*+<2em>[F.]\frm{}\restore 
+\save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
+\save"5,2"."6,5"*+<2em>[F.]\frm{}\restore 
+\save"8,2"."9,5"*+<2em>[F.]\frm{}\restore 
 }
 \end{scriptsize}
-\end{center}\caption{Data flow in and between layers.} \label{explicit} 
+\end{center}\caption{Data flow in and between layers. (draft)} \label{explicit} 
 \end{center}
 \end{small}
 \end{figure}
@@ -295,7 +313,7 @@ A disadvantage of the implementation of the edit loop sketched in this section i
 & \dataa{vertRes} & \dataa{(horRes$_0$, (horRes$_1$, ($\dots$)))} \\
 }
 \end{scriptsize}
-\end{center}\caption{ Horizontal parameters in nested cartesian products.}\label{ncp} 
+\end{center}\caption{ Horizontal parameters in nested cartesian products. (draft)}\label{ncp} 
 \end{center}
 \end{small}
 \end{figure}
@@ -370,7 +388,7 @@ composeDown higher lower =
 \save"12,6"."13,6"*+<2em>[F.]\frm{}\restore 
 }
 \end{tiny}
-\end{center}\caption{\texttt{composeDown} and \texttt{composeUp}}\label{composeDownUp} 
+\end{center}\caption{\texttt{composeDown} and \texttt{composeUp} (draft)} \label{composeDownUp} 
 \end{center}
 \end{small}
 \end{figure}
@@ -388,11 +406,12 @@ composeUp :: LayerFunction horArgsH interm horRessH res ->
 \end{small}
 
 
-\bigskip {\bf Combining layers: } Using \texttt{composeUp} and \texttt{composeDown}, we can define a combinator to combine \texttt{Simple} layers. From now on, we use the type \texttt{Simple} instead of \texttt{Simple'} because the matching horizontal parameter types in \texttt{Simple} make the connection easier. 
+\head {\bf Combining layers:}  Using \texttt{composeUp} and \texttt{composeDown}, we can define a combinator to combine \texttt{Simple} layers. From now on, we use the type \texttt{Simple} instead of \texttt{Simple'} because the matching horizontal parameter types in \texttt{Simple} make the connection easier. 
 
 First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot put the compositions of the layer functions in a \texttt{Simple} record. According to the definition of \texttt{Simple}, the horizontal parameter of the first layer function (\texttt{present}) has type \texttt{state}, and the result has type (\texttt{mapping}, \texttt{state}). In contrast, for \texttt{present} in the composed layer, the horizontal parameter is a collection of states and the result a collection of mapping and state tuples. We cannot specify the collection types in the type signature, so we will simply use single type variables for the types.
 
-The type \texttt{LayerC} is a more general version of \texttt{Simple}; it does not specify the exact structure of the horizontal parameters. The parameter \texttt{states} represents the nested cartesian product of \texttt{state} values, and the parameter \texttt{mappingsStates} represents the nested cartesian product of \texttt{mapping} and \texttt{state} tuples.
+\todo{Johan: "enforce that the horizontal parameters are tuples (ook niet helemaal)"}
+The type \texttt{LayerC} is a more general version of \texttt{Simple}: it does not * specify the exact structure of the horizontal parameters*. The parameter \texttt{states} represents the nested cartesian product of \texttt{state} values, and the parameter \texttt{mappingsStates} represents the nested cartesian product of \texttt{mapping} and \texttt{state} tuples.
 
 \begin{small}
 \begin{verbatim}
@@ -430,7 +449,7 @@ combine higher lower =
 \end{small}
 
 
-\bigskip {\bf Simple editor: } The main editor loop from the previous section now reads:
+\head{Simple editor:}  The main editor loop from the previous section now reads:
  
  \begin{small}
  \begin{verbatim}
@@ -465,7 +484,7 @@ main layer0 layer1 layer2 =
 \end{small}
 
 
-\bigskip {\bf Conclusions: }The nested cartesian products solution is more compositional than the approach of the previous section, and a lot of data flow is hidden from the main loop by automatically passing the results of one layer into another. However, all horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Consequently, the type of the composite layer is parameterized with all types appearing in the layers, leading to huge type signatures. We will therefore show yet another approach in which the horizontal parameters stay within each layer and are not visible in the main editor loop.
+\head{Conclusions:} The nested cartesian products solution is more compositional than the approach of the previous section, and a lot of data flow is hidden from the main loop by automatically passing the results of one layer into another. However, all horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Consequently, the type of the composite layer is parameterized with all types appearing in the layers, leading to huge type signatures. We will therefore show yet another approach in which the horizontal parameters stay within each layer and are not visible in the main editor loop.
 
 
 %																
@@ -497,7 +516,7 @@ But with the direct parameter passing method, it will contain:
 In other words, each combined layer function application returns the result together with the next combined layer function. Horizontal parameters are now completely hidden from the main loop. The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Note that the order in which the layer functions are evaluated is now enforced by the layer model. It is not possible to evaluate \texttt{interpretStep} before \texttt{presentStep}.
 
 
-\bigskip {\bf Type definitions: }The type of the layer needs to have the following structure: \texttt{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}. Unfortunately, we cannot use a type declaration: \texttt{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))}, because Haskell does not allow recursive type synonyms. A \texttt{newtype} declaration must be used with the disadvantage that values of the type have to be wrapped with constructor functions.
+\head{Type definitions:} The type of the layer needs to have the following structure: \texttt{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}. Unfortunately, we cannot use a type declaration: \texttt{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))}, because Haskell does not allow recursive type synonyms. A \texttt{newtype} declaration must be used with the disadvantage that values of the type have to be wrapped with constructor functions.
 
 We encode the type by dividing the computation in {\em steps}; one step for each layer function. Because the number of steps is always equal to the number of layer functions, the statement that a layer has $n$ layer functions, amounts to the same as that it is an $n$ step layer. From now on, we will use the term number of layer functions of a layer interchangebly with number of steps of a layer.
 
@@ -531,7 +550,7 @@ We prefer the mutually recursive types because they are more symmetric than the 
 We define two combinators for constructing and combining \texttt{Layer} values. The first combinator, \texttt{lift}, takes a \texttt{Simple} layer, which is a record with layer functions, and converts it to a direct parameter passing layer of type \texttt{Layer}. To combine layers of type \texttt{Layer}, we define a combinator \texttt{combine}. Both combinators in this section are specific to the \texttt{Simple} type. In the next section, we define a library to construct \texttt{lift} and \texttt{combine} for arbitrary layers.
 
 
-\bigskip {\bf Lift: }The combinator \texttt{lift} takes a layer of type \texttt{Simple} and returns a \texttt{Layer} value:
+\head{Lift:} The combinator \texttt{lift} takes a layer of type \texttt{Simple} and returns a \texttt{Layer} value:
 
 \begin{small}
 \begin{verbatim}
@@ -550,7 +569,7 @@ lift layer state = presStep state
 Besides the \texttt{layer} parameter, \texttt{lift} gets a second parameter, \texttt{state}, which is the initial value of the horizontal \texttt{state} parameter in the layer. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \texttt{lift}. Moreover, the \texttt{state} type is not visible in the result of \texttt{lift}, so once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \texttt{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. This state hiding helps to keep the architecture description transparent, because now the horizontal parameters do not play a r\^o le anymore when the layers are connected.
 
 
-\bigskip {\bf Combine: }With \texttt{lift} we can instantiate layer values of type \texttt{Layer doc pres gest upd}. To combine layers, we define a combinator \texttt{combine} with the following type:
+\head{Combine:} With \texttt{lift} we can instantiate layer values of type \texttt{Layer doc pres gest upd}. To combine layers, we define a combinator \texttt{combine} with the following type:
 
 \begin{small}
 \begin{verbatim}
@@ -580,7 +599,7 @@ combine = presStep
 \end{small}
 
 
-\bigskip {\bf Simple editor: }The edit loop of the simple editor no longer has a reference to the horizontal parameters. Furthermore, the combined layer is called \texttt{presentStep} instead of \texttt{layers}, to reflect that it is the present step of the computation.
+\head{Simple editor:} The edit loop of the simple editor no longer has a reference to the horizontal parameters. Furthermore, the combined layer is called \texttt{presentStep} instead of \texttt{layers}, to reflect that it is the present step of the computation.
 
 \begin{small}
 \begin{verbatim}
@@ -615,7 +634,7 @@ main layer0 layer1 layer2 =
 \end{small}
 
 
-\bigskip {\bf Conclusions: }The direct parameter passing model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters are hidden from the type of the composed layer, similar to the way in which the type of the intermediate result for a composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from the type of the composition $f \oo g :: a \arr c$. As a result, both horizontal and vertical data flow are made more transparent. \note{say something about layers with different horizontal dataflow?}\note{monads arrows?} \note{relation to existential types. arrows?} \note{io?}
+\head{Conclusions:} The direct parameter passing model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters are hidden from the type of the composed layer, similar to the way in which the type of the intermediate result for a composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from the type of the composition $f \oo g :: a \arr c$. As a result, both horizontal and vertical data flow are made more transparent. \note{say something about layers with different horizontal dataflow?}\note{monads arrows?} \note{relation to existential types. arrows?} \note{io?}
 
 %In the implemented layers, the layer functions themselves do not perform any IO 
 %actions. However, it is straightforward to extend the combinators to an IO type, 
@@ -711,13 +730,15 @@ lift simple state = step1 state
 \end{verbatim}
 \end{small}
 
-The definitions of the local functions \texttt{step1} and \texttt{step2} contain mutually recursive references. We can take the mutual recursion out of the definitions by supplying the next step as a parameter to each function.  \note{duidelijk genoeg?}
+The definitions of the local functions \texttt{step1} and \texttt{step2} contain mutually recursive references. We can take the mutual recursion out of the definitions by supplying the next step as a parameter to each function.
 
 %first drop state
 %param now step1 gets step2 as param. but step2 has step1. instead of infinite
 %definition lift simple = step1 (step2 (step1 ...., we make the observation that
 %lift simple is step1 with the correct parameters, and hence pass lift simple as
 %the parameter to step2, yielding the following finite definition:</comment></p> 
+\todo{Johan: (over \texttt{lift simple} hieronder) "hier introduceer je een fixed point. Misschien iet meer woorden aan besteden?"} 
+% ref: Augustson ICFP??
       
 \begin{small}
 \begin{verbatim}
@@ -785,7 +806,7 @@ liftStep pack layerF next horArgs = pack $
 \end{small}
 
 
-\bigskip {\bf \texttt{liftStep} works for layers with arbitrary numbers of steps: }The definition of \texttt{liftStep} does not depend on the number of steps of a layer, even though the derivation starts with the definition of \texttt{lift} for layers with two layer functions. In the case of $n$ steps, there will be $n$ local step functions, each one containing a reference to the next, except for the last one, which contains a reference to the first function. 
+\head{\texttt{liftStep} works for layers with arbitrary numbers of steps:} The definition of \texttt{liftStep} does not depend on the number of steps of a layer, even though the derivation starts with the definition of \texttt{lift} for layers with two layer functions. In the case of $n$ steps, there will be $n$ local step functions, each one containing a reference to the next, except for the last one, which contains a reference to the first function. 
 
 We can now perform the same steps to the $n$-step \texttt{lift} as we did for the 2-step \texttt{lift}. We only sketch the process here. After renaming the variables, the explicit recursion is removed from the local function definitions, by passing the next step as a parameter, and \texttt{lift} will look like:
 
@@ -1087,10 +1108,11 @@ combineStepUp nextStep hghr lwr = pack $
 Figure~\ref{metacombinators} contains the final definitions of the meta combinators together with the \texttt{Pack} type class, the \texttt{fix} combinator, and the \texttt{LayerFunction} type synonym. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
 
 
-\bigskip {\bf General use: }The general case that we consider is of a layered architecture in which the layers have $n$ layer functions. The record type \texttt{TheLayer} contains the layer functions. The type has a number of type variables. The \texttt{h$_i$} variables are the types that appear in the horizontal parameters of the layer, and the \texttt{a$_i$} and \texttt{r$_i$} are the types of the vertical arguments and result. The horizontal type variables need not be equal to the types of the horizontal parameters in the layer. See for example the type \texttt{Simple}. It has two horizontal type variables (\texttt{mapping} and \texttt{state}), but the horizontal parameters in the layer are \texttt{state} and \texttt{(mapping, state)}. As a result, the number of horizontal type variables ($m$) is not necessarily equal to the number of layer functions ($n$), and the types of the horizontal arguments and results in the \texttt{layerFunction} types below have to be denoted with \texttt{(\dots)}.
+\head{General use:} The general case that we consider is of a layered architecture in which the layers have $n$ layer functions. The record type \texttt{TheLayer} contains the layer functions. The type has a number of type variables. The \texttt{h$_i$} variables are the types that appear in the horizontal parameters of the layer, and the \texttt{a$_i$} and \texttt{r$_i$} are the types of the vertical arguments and result. The horizontal type variables need not be equal to the types of the horizontal parameters in the layer. See for example the type \texttt{Simple}. It has two horizontal type variables (\texttt{mapping} and \texttt{state}), but the horizontal parameters in the layer are \texttt{state} and \texttt{(mapping, state)}. As a result, the number of horizontal type variables ($m$) is not necessarily equal to the number of layer functions ($n$), and the types of the horizontal arguments and results in the \texttt{layerFunction} types below have to be denoted with \texttt{(\dots)}.
 
+\todo{"a1 r1 a2 r2 .." or "a1 r1 .."}
 \begin{tabbing}
-{\tt data Th}\={\tt eLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = }\\
+{\tt data Th}\={\tt eLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
 \> {\tt TheLayer~ \{~}\={\tt layerFunction$_1$}\verb| :: |{\tt LayerFunction (\dots) a$_1$ (\dots) r$_1$}\\
 \>\> {\tt \dots }\\
 \>\> {\tt layerFunction$_n$}\verb| :: |{\tt LayerFunction (\dots) a$_n$ (\dots) r$_n$ \}}\\
@@ -1102,7 +1124,7 @@ First, we define the \texttt{Step} type synonym that captures the explicit funct
 {\tt type St}\={\tt ep next a$_1$ r$_1$ \dots~a$_n$ r$_n$ = (a$_1$ -> (r$_1$, next a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$))}
 \end{tabbing}
 
-Using \texttt{Step} the mutually recursive data definitions for each of the steps are straightforward. Each definition \texttt{Step$_i$} contains a reference to the next definition \texttt{Step$_{i+1}$}, except for \texttt{Step$_n$}, which contains a reference to the first step: \texttt{Step$_1$}. Note that write the type definition with the Haskell record syntax to define the \texttt{step$_i$} selector functions.
+Using \texttt{Step} the mutually recursive data definitions for each of the steps are straightforward. Each definition \texttt{Step$_i$} contains a reference to the next definition \texttt{Step$_{i+1}$}, except for \texttt{Step$_n$}, which contains a reference to the first step: \texttt{Step$_1$}. Note that write the type definition with the Haskell record syntax to define the \texttt{step$_i$} selector functions. \todo{mention that we define \texttt{step} functions here}
 
 {\tt newtype Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_1$ \{step$_1$}\verb| :: |{\tt Step Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
 {\tt newtype Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_2$ \{step$_1$}\verb| :: |{\tt Step Step$_3$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
@@ -1116,7 +1138,7 @@ The type synonym \texttt{Layer} is introduced for the type \texttt{Step$_1$}:
 All \texttt{Step$_i$} types are made instances of \texttt{Pack} with $n$ instance declarations of the following form:
 
 \begin{tabbing}
-{\tt i}\={\tt nstance Step$_i$ (Step$_i$ a$_1$ r$_1$ \dots~a$_n$  r$_n$) a$_1$ r$_1$ (Step$_{i+1}$ a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$)}\\
+{\tt i}\={\tt nstance Pack (Step$_i$ a$_1$ r$_1$ \dots~a$_n$  r$_n$) a$_1$ r$_1$ (Step$_{i+1}$ a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$)}\\
 \> {\tt where }\={\tt pack = Step$_i$}\\
 \>\> {\tt unpack = step$_i$}
 \end{tabbing}
@@ -1155,7 +1177,7 @@ However, instead of computing the type by hand, the compiler can be asked for th
 This concludes the definitions that are necessary to be able to describe an architecture. 
 
 
-\bigskip {\bf Simple editor:} As an example application of the library, we give the definitions that are required for implementing the simple editor architecture. Recall that the data type containing the layer functions is:
+\head{Simple editor:} As an example application of the library, we give the definitions that are required for implementing the simple editor architecture. Recall that the data type containing the layer functions is:
 
 \begin{small}
 \begin{verbatim}
@@ -1208,7 +1230,7 @@ combine =
 The definitions of the \texttt{main} and \texttt{editLoop} functions are the same as in Section~\ref{sectdpp} so they are not reproduced here.
 
 
-\bigskip {\bf Conclusions: }
+\head{Conclusions:} 
 
 The simplicity of the definitions of the \texttt{lift} and \texttt{combine} combinators leads to the question whether it is possible to define generic \texttt{lift} and \texttt{combine} combinators, using a type class that contains the step specific aspects. This would eliminate the need to explicitly define the combinators. It would be sufficient to define the step data types and make them instances of the type class. 
 
@@ -1220,7 +1242,7 @@ The meta combinator library has the same advantages as the direct parameter pass
 %																
 %																
 %																
-\section{The Proxima editor} \label{sectproxima}
+\section{The Proxima editor} \label{sect:proxima}
 
 \bl
 \o Introduce monadic combinators
@@ -1235,7 +1257,7 @@ The meta combinator library has the same advantages as the direct parameter pass
 **********
 The motivation for using Haskell to describe editor architectures has come from the Proxima project. Proxima is a generic incremental XML editor, which is being developed at Utrecht University. The editor is parameterized with a presentation sheet that specifies how a document is presented. Furthermore, it is parameterized with a computation sheet that specifies derived values, such as chapter numbers, or a table of contents. A user can only see and edit the final presentation of the document. Because the mapping of the document on the presentation is a stepwise process, and hence the interpretation*** from edit commands on the presentation to updates on the document as well, Proxima has a layered architecture.
 
-
+\bc
 \begin{figure}
 \begin{small}
 \begin{center}
@@ -1261,6 +1283,7 @@ Figure~\ref{proxlayers} schematically shows the layers of Proxima. The figure sh
 The {\em document} at the top of the architecture is mapped on the {\em rendering} at the bottom, which is shown to the user. The {\em evaluator} takes the document and a computation sheet and produces the {\em enriched document}, which is the document together with all derived values. Similarly, the {\em presenter} takes the enriched document together with a presentation sheet, and computes the {\em abstract presentation}. Until this point, the presentation does not contain any absolute layout; all elements in the presentation are positioned relative to each other and do not yet have an absolute size.
 
 The absolute coordinates are computed by the {\em arranger}. It maps the abstract presentation on an {\em arrangement}, which is a absolute positioning of all elements of the presentation. The arranger also takes care of hyphenation, line and page breaking. Finally, the arrangement is rendered to an image by the {\em renderer}.
+\ec
 
 A prototype of the Proxima editor has been implemented with the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
 
