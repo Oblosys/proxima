@@ -3,122 +3,211 @@
 
 {\em *** Version: \today~***}
 
+\bc
 
-% SOMEWHERE: emphasize that focus is not implemented.
-
-%Big questions:
-%Focus paths/from to? no, local element property
-%mapping from paths to paths? no
-%result is nodes or from to? is there a difference?  no
-%Invisible stuff?  seems to be solved
-%
-%
-%Focus is subtrees, except for lists, then it is ranges 
-
-%mouse handling?
-%edit evts die meer input nodig hebben?
-
-%alles al (lazy) opslaan, of edit cycle maken?
-
-%fall back on lower level?
-% macros?
-
-% presentation oriented editing is done at layout. 
-% would be nice to call it presentation. However:
-% enr.doc --- present -> presentation. level gets name from producing function. 
+Screen width similar to latex output width:
+ii                                                                                                                       
 
 
+SOMEWHERE: emphasize that focus is not implemented.
 
-%important: Extra state/local state    ------>  Chapter 2
-% relative to an adjacent level.
-% All data that cannot be computed via pres or trans from the other level
+Big questions:
+Focus paths/from to? no, local element property
+mapping from paths to paths? no
+result is nodes or from to? is there a difference?  no
+Invisible stuff?  seems to be solved
+
+
+Focus is subtrees, except for lists, then it is ranges 
+
+mouse handling?
+edit evts die meer input nodig hebben?
+
+alles al (lazy) opslaan, of edit cycle maken?
+
+fall back on lower level?
+macros?
+
+presentation oriented editing is done at layout. 
+would be nice to call it presentation. However:
+enr.doc --- present -> presentation. level gets name from producing function. 
+
+important: Extra state/local state    ------>  Chapter 2
+relative to an adjacent level.
+All data that cannot be computed via pres or trans from the other level
+\ec
+
 
 
 % what is chapter about
-This chapter explains the edit model of the Proxima editor. We focus on how an edit gesture from the user is translated to edit operations on the data levels of Proxima. Because Proxima is a generic editor, it is not possible to give a very detailed description of the edit model, since different instances have different edit behavior. Much of the edit functionality for an actual instance of the editor is described in the sheets that specifiy the instance (evaluation/reduction, presentation/parsing, and ). Here, we present only a general description of the edit model.
-
+This chapter explains the edit model of the Proxima editor. We focus on how an edit gesture from the user is translated to edit operations on the data levels of Proxima. Because Proxima is a generic editor, it is only possible to give a general description of the edit model, since different instances have different edit behavior. Much of the edit functionality for an actual instance of the editor is described in the sheets that specifiy the instance (evaluation/reduction sheet, presentation/parsing sheet, and scanner sheet). 
 
 % structural view
 Almost all structure editors can provide a structural view that shows the underlying document structure, which may not be apparent in the presentation. For example, in a word processor, it may be hard to distinguish between a heading and a single line of text with a larger font size. In Proxima, such a structural view is defined in the same way as any other presentation. A structural view is a presentation in which each element is presented with its type name, all elements of the document are presented, and in which the structure of the document is made explicit. The exact details may vary for different structural presentations. For example, a structural presentation can be a tree presentation of the document, in which the layout of the tree nodes shows the structure, but it can also be an XML source presentation that uses text to show the structure. A default structural presentation will be available for each element type, but other than that no built-in primitive support for structural presentations is necessary.
 
 Although the user only sees a presentation, it is possible to target edit operations at other levels besides the presentation. One way to do this is by switching to a structural presentation before performing the edit operation. However, in practice it turns out that higher level edit operations are useful also in a non-structural presentation. For example, in a word processor it is useful to be able to move sections around without having to switch views. Similarly, in a source editor it is desirable to be able to select entire declarations, sub-expressions, etc.\ in the regular source text view. Therefore, Proxima offers editing on all editable levels at any time. We explicitly mention the term editable, because not every level has sensible edit operations. \note{mention here which ones don't?}
 
+\bc
+\section{Presentation oriented editing}
+a whole section?
 
-%\section{Presentation oriented editing}
-%a whole section?
+\subsection{Ceci n'est pas un document}
+
+also navigation here? ( If document works. then doc. Otherwise presentation. Always  possible to override.)
+
+[62] from Pan paper point vs extended cursor problem
+
+if selection is not structural, assume the structural that results from a click with the mouse.
+
+weird behavior of left right arrow vs up/down? 
+\ec
 
 
-%\subsection{Ceci n'est pas un document}
-
-%also navigation here? ( If document works. then doc. Otherwise presentation. Always possible to override.)
-
-%[62] from Pan paper point vs extended cursor problem
-%if selection is not structural, assume the structural that results from a click with the mouse.
-
-% weird behavior of left right arrow vs up/down? 
-
-
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Editing at different levels}
 
+Before we explain how the layered architecture of Proxima affects its edit model, we give a description of the edit process, which basically consists of repeatedly going through the following 5 phases:
+
+\begin{enumerate}
+\item Compute a rendering, or {\it presentation}, of the document (and intermediate levels)
+\item Show the presentation to the user
+\item Receive an edit gesture from the user
+\item Translate the edit gesture to an update on the document (and intermediate levels)
+\item Update the document
+\end{enumerate}
+
+Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and translation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\begin{scriptsize}
+\xymatrix{
+ & \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \\
+ & present & translate\ar[u]& present & translate \ar[u]& present & translate \ar[u] & \\ 
+ & \ar[d] & & \ar[d] & & \ar[d] & & \\ 
+ & \data{$pres$} \ar@{.>}[r] &  \data{$gest$}\ar[u] & \data{$pres$} \ar@{.>}[r]&  \data{$gest$}\ar[u] & \data{$pres$} \ar@{.>}[r]&  \data{$gest$}\ar[u] &
+\bc
+ \save"2,2"."3,2"*!=<6.105em,12.2ex>[F.]\frm{}\restore
+ \save"2,2"."3,3"*!=<14.47em,12.2ex>[F]\frm{}\restore
+ \save"2,4"."3,4"*!=<6.105em,12.2ex>[F.]\frm{}\restore
+ \save"2,4"."3,5"*!=<14.47em,12.2ex>[F]\frm{}\restore
+ \save"2,6"."3,6"*!=<6.105em,12.2ex>[F.]\frm{}\restore
+ \save"2,6"."3,7"*!=<14.47em,12.2ex>[F]\frm{}\restore
+\ec
+}
+\end{scriptsize}
+\end{center}\caption{Three cycles in the edit process.}\label{simpleeditprocess} 
+\end{center}
+\end{small}
+\end{figure}
+
+The present and translate phases are not atomic actions, but consist of several steps, each of which is handled by a single layer. Therefore, we need to refine Figure~\ref{simpleeditprocess}. Figure~\ref{simplelayers} shows a more detailed view of a single edit cycle, in which the layered character of Proxima becomes apparent. 
+
+explain figure. doc is mapped onto lower structures until rendering. Edit gesture is mapped onto higher level updates. Besides mapping also update the level.
+In the actual architecture, the downward arrows map edit operations rather than levels, causing a symmetrical picture, but conceptually easier as values mapping. (increm.)
+
+\bc
+Both the presentation and the translation functions (we will call them {\em present} and {\em translate}) are compositions of a number of subfunctions, similar to the layered editor in~\cite{architecture}. The presentation of the document is computed via a number of intermediate data structures that are increasingly concrete, and the edit operation on the document is computed via edit operations on the same intermediate data structures. Therefore, the subfunctions of {\em present} and {\em translate} are grouped pairwise in horizontal layers. Another reason for grouping the subfunctions is that each subfunction in a layer has some parameters that are the result of the subfunction immediately to the left of it. We will refer to the subfunctions as {\em layer functions}.
+\ec
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\begin{scriptsize}
+\begin{verbatim}
+        EditDoc     --update-->   Doc         
+       (Reducer)                 (Eval)       
+        Edit Enr                 Enr Doc      
+       (Parser)                (Presenter)    
+                                              
+         ...                      ...         
+ (Gesture Interpreter)         (Renderer)     
+     Edit Gesture              Rendering      
+           ^                      |           
+user    ---|                      -->     user
+\end{verbatim}
+\end{scriptsize}
+\end{center}\caption{The layered edit cycle.} \label{simplelayers} 
+\end{center}
+\end{small}
+\end{figure}
 
 
-************
-************ put layer picture here and explain gesture update stuff. check next chapter to see what is needed there
-************
+% targeting different levels
 
-Edit operations may be targeted at different levels in the Proxima architecture. When an edit gesture is received from the user, it is translated to an edit operation on one of the data levels, and from there to updates on all higher levels up to the document. Subsequently, the document is presented again and also the lower levels, including the rendering, are updated. The higher layers may be skipped when the edit operation takes place on local state that is not present in the higher levels. Furthermore, it is possible that the translation and presentation process does not pass through the higher layers for every edit operation, but only after a sequence of edit operations or after an explicit request from the user. Section~\ref{sect:bypassingLayers}, explains this process of bypassing layers in more detail.
+\bc Edit operations may be targeted at different levels in the Proxima architecture. When an edit gesture is received from the user, it is translated to an edit operation on one of the data levels, and from there to updates on all higher levels up to the document. Subsequently, the document is presented again and also the lower levels, including the rendering, are updated. \ec
 
-\note{explain cycles from architecture paper here?}
+Chapter~\ref{chap:proxarch} already mentioned that the translation of edit operations in proxima does not in fact start with an edit operation on the rendering, that is translated to an edit operation on the arrangement, and so on to an edit operation on the document. Instead, the lowest level that can be edited directly is the layout level. If it is edited, for example by typing a keyword, the levels above are updated by subsequently tokenizing, parsing and reducing the updated level.
 
+%also higher
+Apart from editing the layout level, resulting in indirect edit operations on the higher levels, it is also possible to directly target these higher levels, after which indirect edit operations on levels above is computed, similar to what happens when the layout is edited. For example, moving a section entry in a table of contents is a direct edit operation on the enriched document level. An indirect document edit operation that moves the corresponding section (rather than just the entry) is computed from it by the reducer. Because the levels below the targeted level are skipped during translation in this case, these levels are not updated until the document is presented again. 
 
+Currently, besides the layout level, only the enriched document and document levels can be edited directly. The presentation level does not need to be edited directly due to its high similarity to the layout level. The only difference between the two is that the presentation contains lists of tokens that are represented by strings and explicit whitespace in the layout level. Hence the only reason for supporting direct presentation-level editing is for manipulating tokens as lists, which can be done at layout level as well.
 
-% not document-oriented because these are just the rough categories
+Summarizing, the following three levels can be directly edited in Proxima:
+
+\begin{description}
+\item{Document} Structure-oriented edit operations, such as moving section in wordprocessor document; deleting a declaration in Haskell source; or moving the focus to a certain subtree of the document.
+\item{Enriched Document} Also structure-oriented, but on derived structures such as a table of contents.
+\item{Layout} Mainly text-oriented editing. For example: typing keywords (eg.\ "\verb|if|", "\verb|then|", or "\verb|else|"); moving the focus one character to the right; etc.
+\end{description}
+
+\bc
+% pres oriented and structural
 Although various levels may be targeted, edit operations can be divided roughly in two categories: {\em presentation-oriented edit operations} and {\em structural edit operations}. Presentation-oriented edit operations are targeted at the structure of the presentation, whereas structural edit operations are tree based edit operations on the structure of the document. \note{examples?} Presentation-oriented editing includes all textual editing. However, because a presentation is not necessarily purely textual, also non-textual presentation oriented-edit operations exist. Structural edit operations are performed at the document and the enriched document levels, and presentation-oriented edit operations are performed at the layout level. Contrary to what the name might suggest, presentation-oriented editing is not done at the presentation level itself. In order to be able to edit the whitespace of a presentation textually (by inserting spaces, tabs and newlines), presentation-oriented editing is performed at the layout level rather than the presentation level. 
+% not document-oriented because these are just the rough categories
+\ec
 
-%Rest does have focus edit (navigation). pres, layout, arrangement are more similar than doc and enr. 
-%doc. vs pres. 
+\bc
+Rest does have focus edit (navigation). pres, layout, arrangement are more similar than doc  and enr.
+doc. vs pres.
+\ec
 
-The fact that Proxima has several levels has consequences for the focus model as well. \note{repeat definition for focus here?} Editing may take place at several levels, and therefore each level has its own representation of the focus and the clipboard. \note{also rendering and presentation?}
+The layered nature of Proxima has consequences for the focus model as well. A document-oriented edit operation requires a document level focus, whereas an operation on the layout level requires a layout focus. Therefore, each level from the layout up to the document has its own focus. During presentation and translation, a layer also maps the focus on one level onto the focus on another level. Section~\ref{sect:focus} contains a more detailed description of the focus model and the way focus is presented and translated.
+
+% edit ops at higher levels
+A final issue regarding the edit model and the Proxima layers is that not every layer needs to be involved on each cycle of the edit process. Firstly, higher layers may be skipped when the edit operation takes place on extra state that is not present in the higher levels. And secondly, it is possible that the translation and presentation process does not pass through the higher layers for every edit operation, but only after a sequence of edit operations or after an explicit request from the user. Section~\ref{sect:bypassingLayers}, explains this process of bypassing layers in more detail.
 
 The following subsections provide a short description of the edit functionality at each level. 
-% doc+enr should also be paths.
  
-%									
+ 
+%																
 \subsection{Rendering}
 
 The rendering level is not edited directly and therefore has no focus or edit functionality. A direct edit operation would consist of moving around bitmaps, which would subsequently be translated to updates on the arrangement. The semantics of such edit behavior are unclear and supporting it will probably be difficult, but since direct rendering editing is not required by any of the use cases that drive the design of Proxima (Section~\ref{sect:usecases}), it is not supported.
- 
- 
-%									
+  
+
+%																
 \subsection{Arrangement}
 
 The arrangement level is structurally very similar to the presentation level, except that line breaking has been performed and elements have absolute positions. Edit operations targeted at the arrangement are edit operations concerned with lines and absolute positions, such as navigating to the end of the line that contains the focus, or selecting all elements in a rectangular area.
 
 Currently, Proxima does not support direct editing on the arrangement level. It is not possible to update the arrangement level and compute an edit operation on the presentation level. Edit operations targeted at the arrangement only involve the focus. A consequence is that although rectangular areas may be selected and deleted (the deletion takes place at a higher level), it is not possible to insert a rectangular area. Such edit behavior, often referred to as column editing in text editors, is not a big requirement for Proxima. In text editors, column editing is used to edit a text that is organized in columns, but since Proxima is a structure editor, a document whose data needs to be presented in columns can use a presentation level matrix, whose elements can be selected columnwise at presentation level.
 
-%If the presentation language is extended with a construct for absolutely positioning elements, the %positions 
-%are typically edited at the arrangement level. An example is a file manager window in which files are 
-%represented by icons that may be freely moved in the window. Icon positions can be stored in the local 
-%arrangement state. However, at the moment, absolute positions in the presentation are not yet allowed.
-%?????????? not true, position can be stored at pres level in percentages.
+\bc
+If the presentation language is extended with a construct for absolutely positioning elements, the positions are typically edited at the arrangement level. An example is a  file manager window in which files are represented by icons that may be freely moved in  the window. Icon positions can be stored in the local arrangement state. However, at the  moment, absolute positions in the presentation are not yet allowed. 
+?????????? not true, position can be stored at pres level in percentages.
+\ec
+
  
- 
-%									
+%																
 \subsection{Layout}
 
-The layout level is where all presentation-oriented editing takes place. This includes the typing in program text in a source editor, but also text entry in the tax form editor or the word processor. Besides text insertion and deletion, also cut, copy and paste operations are supported. The focus model at the layout level is a set of contiguous areas in the layout tree.
+The layout level is where all presentation-oriented editing takes place. This includes the typing in program text in a source editor, but also text entry in the tax form editor or the word processor. Besides text insertion and deletion, also cut, copy and paste operations are supported. The focus model at the layout level is a set of ranges of subtrees in the layout tree.
  
  
-%									
+%																
 \subsection{Presentation}
 
 As mentioned before, the presentation level is not directly editable. All information in the presentation level is also present in the layout level, and can therefore be edited at that level. The only reason for directly editing the presentation level would be when a user wishes to manipulate tokens without paying attention to their whitespace. Such behavior seems appropriate only in an editor with automatic whitespace handling, but in that case editing may just as well be performed at the layout level, since the whitespace will be ignored. 
  
  
-%									
+%																
 \subsection{Enriched document and document}
 
 Because the enriched document is a tree, similar to the document, the edit functionality on both levels is the same. The only difference between the two is that if the enriched document is edited, a subsequent translation takes place to compute the document update. Because of the similarities, both levels are discussed together.
@@ -127,30 +216,38 @@ Because the enriched document is a tree, similar to the document, the edit funct
 The edit operations at the document level are basic tree operations, such as cut, copy and paste on subtrees. If an list element has a parent that is also a list (eg. a list of subsections in a list of sections), split and join operations can be applied. Besides the standard edit operations, an editor designer may specify other generic transformations, or domain specific transformations. \note{implemented only single subtree focus, is set of paths correct and feasible? or should it be from-to}
 
 %placeholders
-Child elements that are not of optional or list type are required and hence cannot be left out of the parent element. In order to still be able to manipulate an element without its children, Proxima employs the concept of a placeholder. A placeholder of a type $T$ is a dummy value that can be used in any place where an element of type $T$ is required. A built-in presentation is available for placeholders, but it can be overridden in a presentation sheet. If a document contains a placeholder it is not valid. The placeholders are typically present only during the construction of a document (or part of it), or as an intermediate situation during a document modification that consists of several steps. Lists and optional types do not require placeholders: for a list type, the empty list is the placeholder, and for an optional it is the nothing alternative \note{how to call this thing?}.
-% what about extra children that are not allowed? in XML that's a rather natural situation
-% doesn't fit our model since we don't have rose trees
+Child elements that are not of optional or list type are required and hence cannot be left out of the parent element. In order to still be able to manipulate an element without its children, Proxima employs the concept of a placeholder (eg.~\cite{syngen}). A placeholder of a type $T$ is a dummy value that can be used in any place where an element of type $T$ is required. A built-in presentation is available for placeholders, but it can be overridden in a presentation sheet. If a document contains a placeholder it is not valid. The placeholders are typically present only during the construction of a document (or part of it), or as an intermediate situation during a document modification that consists of several steps. Lists and optional types do not require placeholders: for a list type, the empty list is the placeholder, and for an optional it is the empty alternative.
 
+\bc
+what about extra children that are not allowed? in XML that's a rather natural situation doesn't fit our model since we don't have rose trees
+\ec
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Modeless editing}
+
+\bc
+not the same as VI, command mode. nothing is said about that. menus and dialogues are kind % of command mode. ref to humane stuff?
+Mention in chapter one?
+\ec
 
 % also if doc is not parsable, structure edit is important
 One of the requirements for the Proxima editor is the possibility of modeless editing; it must be possible to freely mix edit gestures targeted at different levels without having to switch to a different editor mode. Because the structure of the presentation is often closely related to the structure of the document, many structural edit operations are also presentation edit operations, and therefore it does not matter at what level the edit operation is performed. However, in some cases it makes a difference whether an edit operation is interpreted as a structural edit operation, or as a presentation edit operation.
 
-%The reverse is not true because if part of an element's presentation is edited, this does not constitute 
-%a document edit operation.
+%The reverse is not true because if part of an element's presentation is edited, 
+%this does not constitute a document edit operation.
 
 One example concerns a date element that appears in several places in a document, but with different presentations. In one place, it is presented in the US format (month/day/year), whereas somewhere else it is presented in the European style (day/month/year). However, at document level, both are represented by the same type of date element. Now, if for example the date January the twelfth in the year 1900 is copied from a US date field ("1/12/1900") to a European one, two interpretations are possible. Interpreted as a presentation copy, the resulting date looks similar to the source date (ie. "1/12/1900"), but it now refers to the first of December. Interpreted as a document edit operation, on the other hand, the copied date gets a different appearance ("12/1/1900"), but it refers to the same date as its source.
 
 A second example is if the element \verb|1| is deleted from the Haskell list \verb|[1,2]|. This can be interpreted as a presentation deletion of the character \verb|1|, leading to \verb|[,2]|. \note{explain that this one fails during parse?} On the other hand, it can also be interpreted as the structural deletion of the first element of the list, since the comma can be argued to belong more to the presentation of the list than to the presentation of the element. Interpreted structurally, the result of the edit operation is \verb|[2]|. 
 
 Ambiguity arises when parsing an element's presentation at the destination of a paste operation results in a different element (as in the date example), or when the presentation of a parent element depends on its children, as is the case in the Haskell example since the number of commas depends on the number of elements in the list. \note{don't know exactly when. Should we try to say this?}
-% counter example, different repr in doc but appearance important? not very likely
+% counter example, different repr in doc but appearance important? not very
+% likely
 
-% maybe when both are succesful do  highest, and if only high is successful then unclear.
+% maybe when both are succesful do  highest, and if only high is successful then
+% unclear.
 
 In case of ambiguity, an edit operation is performed by default on the highest possible level. For the date example, the appearance of the date changes but the meaning is preserved. In the Haskell example, the delete operation takes place at the document level and the comma is removed as well. However, the ideal choice of the target level may vary for different editor instances, because the usability of the editor is not only determined by the consistency of the underlying edit model, but also by the habits of a user. It is not unthinkable that a user finds it strange or annoying when a comma automatically disappears in a source editor. 
 
@@ -158,21 +255,24 @@ There are several alternative ways to handle ambiguities. Firstly, backspace and
 
 Practical experience with several editor instances is required to decide what is the best choice of the target level in case of ambiguity. In any case, a user can always override the automatic choice made by the editor, possibly after first performing an undo.
 
-%Word processing?
-%Popup menus, buttons, etc?
+% Word processing?
+% Popup menus, buttons, etc?
 
 
-%									
-%									
-%									
-\section{Focus model}
+%																
+%																
+%																
+\section{Focus model} \label{sect:focus}
 
-%is this linked to consistency between levels?
-%The ambiguity is mainly a focus question, as it is not clear how what exactly is in focus, the lower or 
-%higher level structures. Focus is as high in the level structure as possible. What about the clipboard?
-% different high than in tree.
+\bc
+is this linked to consistency between levels?
+The ambiguity is mainly a focus question, as it is not clear how what exactly is in focus, the lower or higher level structures. Focus is as high in the level structure as possible.
 
-% In fact, the ambiguity examples from the previous section are problems with the ambiguity of the focus
+What about the clipboard?
+different high than in tree.
+
+In fact, the ambiguity examples from the previous section are problems with the ambiguity of the focus
+\ec
 
 \note{add pictures to explanation?}
 
@@ -220,7 +320,7 @@ For a list element, the focus is not a boolean property, but rather a set of ran
 The focus properties of all elements on a data level together constitute the focus on that level. Because only a subtree or a range in a list of subtrees can be in focus (as opposed to single parent element without its children), the focus can also be regarded as a set of subtrees and ranges of subtrees. One of the subtrees or ranges is the main focus, which is used for insertion and navigation, since these operations are not clearly defined on a multiple focus. \note{??? not entirely right if focus is two ranges "...$<$...","...$>$..."?}
  
  
-%									
+%																
 \subsection{Navigation}
 \note{add examples and pictures?}
 
@@ -234,7 +334,7 @@ Formatter elements of the presentation level, which are used for line breaking (
 %\note{mention that nested formatters make it trickier, but still possible?}
  
  
-%									
+%																
 \subsection{Presenting and translating the focus}
 
 % focus is presented and translated
@@ -337,7 +437,7 @@ In order to disregard the extra state focus, the relaxed focus model that was me
 List elements form a special case in the focus presentation and translation process. If the elements of a list on one level are mapped onto elements of a list of equal length on another level, while preserving the order, then the focus ranges can simply be copied. If the the list is mapped onto a list that has different lenght or is reordered, then the editor designer must provide a function that maps ranges in one list onto ranges in the other. If a list is mapped onto a structure that is not a list, or vice versa, then focus handling is left to the editor designer. If no mapping is provided, then the focus cannot be translated to the other level. For example when the presentation focus is on a "then" token in an if expression, there is no corresponding enriched document focus.
  
  
-%									
+%																
 \subsection{Focus ambiguity}
 
 Besides ambiguity concerning the level at which an edit operation is targeted, there can also be  ambiguity regarding the element that is in focus on a single level. If a parent element does not have any presentation elements of its own, then there is no difference at the lower level between the selection of its children alone or the selection of the children together with the parent. An example is the following fictitious element (\verb|Italic (Word "bla")|) of a word processor editor. It is presented as {\it bla}. If the focus is in front of the first letter, it is not clear whether it is inside the italic region or not. 
@@ -355,30 +455,31 @@ data Ident$_{Enr}$ = Ident$_{Enr}$ String
 \rmfamily \normalsize
 
 has a presentation such that the expression \verb|IdentExp (Ident "x")| is presented only as the lower case token \verb|"x"|. If the token is in presentation focus, it is unclear whether the enriched document focus is on the string, the identifier, or the expression. The problem can be approached by either merging the possible edit operations for each of the possibilities, or by marking one possibility as the main one that should receive the focus on selection. The Cornell Synthesizer Generator (see Section~\ref{sect:synDirEditors}) employs the latter solution and denotes the element that receives the focus as a {\em resting place}. For Proxima, no final choice has been made, since the merging solution requires further research.
-%resting place correct?
-% merge all possible edit operations, is that possible?
 
-% is this also the comma thing? Or can we make it so?
-%What does this have to do with the focus translation mapping? Shouldn't that select all possible foci?
+\bc
+resting place correct?
+merge all possible edit operations, is that possible?
 
-% can we use some kind of post-processing phase that finds ambiguities left and right, after level focus is % established?
+is this also the comma thing? Or can we make it so?
+What does this have to do with the focus translation mapping? Shouldn't that select all possible foci?
 
-% what about moving in row [row [row [1,2,3]]] , ambiguities must be skipped. 
+can we use some kind of post-processing phase that finds ambiguities left and right, after level focus is established?
 
-%Could choose to not allow invisible hl foci. unrelated.
-%Could choose to merge similar looking ones, by offering all edit behaviour. Does it solve bold italic 
-%problem in a comprehensible way?
-% where to mention these two?
+what about moving in row [row [row [1,2,3]]] , ambiguities must be skipped. 
+
+Could choose to not allow invisible hl foci. unrelated.
+Could choose to merge similar looking ones, by offering all edit behaviour. Does it solve bold italic problem in a comprehensible way?
+where to mention these two?
+\ec
 
 Until now, we assume that an edit operation works on the element that is in focus. However, in some cases, it is useful if ancestors of the currently focused element can be edited. For example when the focus is somewhere in a chapter, but not on the entire chapter, it is still useful to be able to perform chapter specific edit commands and transformations for that chapter. Similarly, we want to be able to select or move a declaration by clicking somewhere in its presentation. Therefore, apart from the edit operations on the currently focused element, Proxima also gives access to the edit operations on its ancestors. 
 % maybe with popups or something similar.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Bypassing higher layers} \label{sect:bypassingLayers}
-
 
 During editing, it is possible to temporarily skip updates on higher levels. The main reason for this is efficiency, but in some cases it also increases the usability of the editor. An example of the efficiency reason is that when a user is typing program text, the invocation of the parser can be postponed until the user inserts a whitespace character or performs a navigation. However, even when a higher layer is not computationally expensive, it may be desirable not to invoke it on every edit action because the constantly changing presentation may be confusing for a user. For example when a field in a tax form editor is changed by typing a number, it may distracting to see the computated fields updated on every key press.
 
@@ -394,51 +495,30 @@ When one or more higher layers have been skipped, the data levels may not be con
 \item Local/extra state and the structure watching behavior following from it?
 \end{itemize}
 
-
-% what if evaluation is impossible?
-
-%Figure out when to parse when to evaluate. And how to signal that old evaluation results are no
-%longer valid. Helium is a good example. During editing, we do want to see type info.
+\bc
+what if evaluation is impossible?
 
 
-%\section{Multiple document views/presentations}
-%
-%Single presentations may already have several views, multiple views should be trivial, is this true?
-%
-%Splitting is possible at several layers.
-%
-%%\section{Generalized paste}    % only if we have time
-%%
-%%Copy/Paste on pres and doc level. (Generalized paste)
-%
-%\section{?Editing partial presentations}
-%\note{Partial is a bit weird}
-%
-%Structure watching for free.
-%
-%A partial presentation is parsed as the whole thing. Duplications also here?
-%
-%\section{?Local State}
-%Here, or already in architecture.
-%
-%What is local state? Data that does not belong in the tree.
-%Or: Data that cannot always be computed from the higher level data. (sometimes it can, e.g. when pretty %printing a free layout document)
-%
-%
-%examples.  % move to architecture chapter
-%document. Annotations in document
-%Enriched document. Redundant elements like parentheses/ choices in concrete syntax/ etc.
-%Enriched document. Tree view: expansion state of the tree
-%Arrangement. Lexing stuff, squigglies?
-%Rendering. Pixel offsets of elements in the rendering.
-%futuristic. Angles and lighting conditions in a CAD environment
-%
-%Proxima is generic. LS is not always needed. Because LS places burden on editor builder, it can be left
-%out. Fallbacks for focus, white space, etc.
-%
-%Local state question:: what if node is collapsed and expanded? LS (layout, expansion, etc.) should remain 
-%the same. But if LS is really in lower level, it will get lost.
-%
-%
-%
-%big parts not implemented. So no hard evidence. Anyhow Proxima allows many different things. 
+Figure out when to parse when to evaluate. And how to signal that old evaluation results are no longer valid. Helium is a good example. During editing, we do want to see type info.
+
+
+\section{Multiple document views/presentations}
+ 
+Single presentations may already have several views, multiple views should be trivial, is  this true?
+
+Splitting is possible at several layers.
+
+\section{Generalized paste}    % only if we have time
+
+Copy/Paste on pres and doc level. (Generalized paste)
+
+\section{?Editing partial presentations}
+\note{Partial is a bit weird}
+
+Structure watching for free.
+
+A partial presentation is parsed as the whole thing. Duplications also here?
+
+
+big parts not implemented. So no hard evidence. Anyhow Proxima allows many different  things. 
+\ec
