@@ -14,3 +14,56 @@ TODO::: integrate foci
 Find out: what are doc id's for exactly
 Find out: where should local state be stored
 
+------------ Application reqs ------------
+
+Macro processor
+File open in same directory
+Icon of current file with normal filemanager support. (drag/drop, rename, etc.)
+Project facility
+
+
+------------ Braindump ------------
+
+Incrementality in rendering:
+
+Need customized buffer manipulation. 
+Single buffer is not okay, since a window move would entail redrawing the rendering, which is too slow. Instead, we want a bitmap for the rendering, which is redrawn when the window is redrawn. However, ordinary double buffered would mean that the entire rendering is displayed in the double buffer. This is too expensive. 
+
+----
+Change management:
+
+Distinction between children and fields (primitive types such as String, Int, etc.)? If not, then a node can never be dirty.
+
+Node dirtyChildren : [Bool]          -- True means child is dirty, or has dirty children.
+Prim... dirty : Bool
+
+Node dirtyChildren Bool               -- True means that node has dirty children or children that have dirty children.
+Prim... dirty : Bool
+
+In arrangement, we probably do want a distinction between fields (eg. color) and children. If children of a row change, without changing the row, then no redraw. But if the background color changes, we do want a redraw.
+
+
+Node selfDirty : Bool  childrenDirty
+Entirely clean when  not (selfDirty||childrenDirty)
+
+From Proxima implementation (True is clean instead of dirty):
+self and children clean, self clean
+True is Clean, False is Dirty       
+True True: all clean
+False True: children dirty self clean
+False False: all dirty
+True False: not possible
+self dirty, children clean cannot be expressed.
+Different representation. However, this requires pattern matching on two args in most algorithms
+
+
+Do we want to 'inline' (keep dirty bits in parent)? Is dirtyness property of a node or of a node in relation to a parent? Also important how the representation will affect the algorithms, since they need to be elegant but fast.
+----
+Focus:
+
+
+
+
+
+
+
