@@ -35,6 +35,7 @@ genDocumentTypes include parsedFile =
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line
 genNode (File _ ds) = [    "data Node = NoNode "]
+                        ++ [ "          | DocumentNode Document Path" ] 
                         ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
                         ++ indent 10 (map makeNodeAlt (allConstructors ds))
  where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) 
