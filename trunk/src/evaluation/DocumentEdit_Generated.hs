@@ -40,6 +40,76 @@ class Editable a where
 
 
 
+{-
+-- editable instances for boxed values
+
+instance Editable String_ where
+  select []    x                  = Clip_String_ x
+  select (0:p) (String_ _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_String_ c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on String_")   x
+  paste (0:p) c (String_ i1 x1) = String_ i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("String_ "  , Clip_String_ $ String_ NoIDD hole)
+                   ,("{String_}", Clip_String_ hole)
+                   ]
+
+  arity (String_ _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrString_
+
+  hole = HoleString_
+
+
+
+instance Editable Bool_ where
+  select []    x                  = Clip_Bool_ x
+  select (0:p) (Bool_ _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Bool_ c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Bool_")   x
+  paste (0:p) c (Bool_ i1 x1) = Bool_ i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Bool_ "  , Clip_Bool_ $ Bool_ NoIDD hole)
+                   ,("{Bool_}", Clip_Bool_ hole)
+                   ]
+
+  arity (Bool_ _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrBool_
+
+  hole = HoleBool_
+
+
+
+instance Editable Int_ where
+  select []    x                  = Clip_Int_ x
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Int_ c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Int_")   x
+  paste (0:p) c (Int_ i1 x1) = Int_ i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Int_ "  , Clip_Int_ $ Int_ NoIDD hole)
+                   ,("{Int_}", Clip_Int_ hole)
+                   ]
+
+  arity _                        = 0
+
+  parseErr = ParseErrInt_
+
+  hole = HoleInt_
+
+-}
+
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 {- ------------------------------------
@@ -707,7 +777,6 @@ instance Editable Bool_ where
 
 instance Editable Int_ where
   select []    x                  = Clip_Int_ x
-  select (0:p) (Int_ _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Int_ c) _      = c
@@ -719,7 +788,6 @@ instance Editable Int_ where
                    ,("{Int_}", Clip_Int_ hole)
                    ]
 
-  arity (Int_ _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrInt_
