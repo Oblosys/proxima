@@ -9,8 +9,24 @@ voor~gestructureerde~documenten}
 
 \thispagestyle{empty}
 
-\parbox{141mm}{
+%%% zichtbare breedte is 165mm
+
+% dus 5 mm naar rechts, maar centreren gaat 2.5 naar links. In totaal dus 2.5 naar rechts, wat we 
+% doen we door area 5mm groter te maken
+\newlength{\oddCenterArea} % because we can't seem to subtract two lengths except in a variable
+%\setlength{\templen}{\columnwidth} \addtolength{\templen}{-\mathindent}
+\setlength{\oddCenterArea}{210mm}
+\addtolength{\oddCenterArea}{-2in}
+\addtolength{\oddCenterArea}{-2\oddsidemargin}
+\addtolength{\oddCenterArea}{5mm} % make parbox 5mm wider to account for space lost in binding process
+
+%{\vrule height1ex width\oddCenterArea depth1ex}
+%{\vrule height1ex width131mm depth1ex}
+
+\parbox{\oddCenterArea}{
 \begin{center}
+%{\vrule height1ex width131mm depth1ex}
+%I\\
   {\sffamily\bfseries\Huge\engtitle\\
   \vspace{0.1cm}
   \huge\engsubtitle\\}
@@ -25,19 +41,20 @@ voor~gestructureerde~documenten}
 %  \selectlanguage{dutch}
 %  {\sffamily\Large\nltitle\\}
   
-  \bc \vspace{4mm}
+  \vspace{4mm}
    (met een samenvatting in het Nederlands)  \\
-  \vspace{1.9cm} \ec
-  \vspace{2.2cm}%    spacing without "samenvatting"
+%\rule{65.5mm}{1pt}\rule{65.5mm}{2pt}\\ 
+\vspace{1.6cm}
+%  \vspace{2.2cm}%    spacing without "samenvatting"
   {\sffamily\Large PROEFSCHRIFT\\}
-  \vspace{2.2cm}%    spacing without "samenvatting"
-  \bc \vspace{1.8cm} \ec
+%  \vspace{2.2cm}%    spacing without "samenvatting"
+  \vspace{1.6cm}
   ter verkrijging van de graad van\\
   doctor aan de Universiteit Utrecht\\
   op gezag van de Rector Magnificus, Prof.\,Dr.~W.\,H.~Gispen,\\
   ingevolge het besluit van het College voor Promoties\\
   in het openbaar te verdedigen\\
-  op vrijdag 15 oktober des middags te 12.45 uur\\
+  op vrijdag 15 oktober 2004 des middags te 12.45 uur\\
 \bc
   ter verkrijging van de graad van\\
   doctor aan de Universiteit Utrecht\\
@@ -47,7 +64,7 @@ voor~gestructureerde~documenten}
   op vrijdag 15 oktober des middags te 12.45 uur\\ \ec
   \vspace{1.1cm} % was 2cm
   door\\
-  \vspace{1.1cm} % was 2cm
+  \vspace{0.9cm} % was 2cm
   {\sffamily\Large Martijn Michiel Schrage\\}
   \vspace{1cm}
   geboren op 4 juni 1973, te Veendam
@@ -68,24 +85,49 @@ promotores:
 \end{tabular}
 }}
 
-\vfill
+\selectlanguage{english}
 
+\vfill
+\hspace{-\marginparwidth}\hspace{-\marginparsep}\begin{tabular}{l} % margin par doesn't seem to work with \vfill
+\vspace{0.5ex}
+\\
+\hspace{-4.2mm} \epsfbox{Pics/ipalogo.ps}\\
+The work in this thesis has been carried out under the auspices of the\\
+research school IPA (Institute for Programming research and Algorithmics).\\
+\\
+ISBN 90-393-3803-5\\
+\\
+Copyright \copyright\ Martijn Schrage, 2004\\
+\\
+Printed by Febodruk BV, Enschede \\
+\end{tabular}\\
+
+%\vspace{-4.1in}
+%\hspace{-1.2mm}\epsfbox{Pics/ipalogo.ps}
 % ?? LaTeX warns that a marginpar on this page is removed (2x).
 
-\marginpar{\parbox{147mm}{
-\vspace{-4.1in}
-\hspace{-1.2mm}\epsfbox{Pics/ipalogo.ps}
-\vspace{.2in}
+
+%\vspace{-4.1in}
+%\marginpar{\parbox{147mm}{
+%\begin{tabular}{l}
+%ISBN 12-345-6789-0\\
+%\\
+%\\
+%The work in this thesis has been carried out under the auspices of the research\\
+%school IPA (Institute for Programming research and Algorithmics).\\
+%\end{tabular}
+
+%\vspace{.2in}
 
 %\begin{figure}[h]
 %\epsfig{file=Pics/ipalogo.eps,bbllx=90,bblly=230}
 %\end{figure}
 
 
-\begin{tabular}{l}
-The work in this thesis has been carried out under the auspices of the research\\
-school IPA (Institute for Programming research and Algorithmics).\\
-\\
-ISBN 12-345-6789-0\\
-\end{tabular}}}
-\selectlanguage{english}
+%\begin{tabular}{l}
+%\end{tabular}
+%}}
+\clearpage \thispagestyle{empty} 
+\vspace*{0cm}
+\hfill {\em \Large voor Joke}
+\clearpage \thispagestyle{empty} \cleardoublepage

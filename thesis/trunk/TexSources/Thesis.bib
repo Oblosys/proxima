@@ -1,12 +1,9 @@
 ------------------------ Thesis: annotated bibtex file
 
-TODO 
 ASK: "van den Brand" at B? Bibtex doesn't handle 'von' tokens correctly
+
 @PREAMBLE{ {\providecommand{\noopsort}[1]{}} }
 
-
-LATER: check if AG manual is tech report
-check if wxHaskell was accepted
 
 
 @phdthesis{schrage04Proxima,
@@ -21,7 +18,23 @@ check if wxHaskell was accepted
 
 
 
+
 GENERAL PAPERS ON EDITING
+
+
+@article{fraser80generalizedEditor,
+ author = {Christopher W. Fraser},
+ title = {A generalized text editor},
+ journal = {Communications of the ACM},
+ volume = {23},
+ number = {3},
+ year = {1980},
+ issn = {0001-0782},
+ pages = {154--158},
+ doi = {http://doi.acm.org/10.1145/358826.358834},
+ publisher = {ACM Press},
+ }
+
 
 @inproceedings{lang86usefulness,
  author = {Bernard Lang},
@@ -289,7 +302,7 @@ put Editors in Author field
 
 @article{xhtml11,
   author = {Murray Altheim and Shane McCarron},
-  title = {{XHTML}\texttrademark\ 1.1 -- Module-based XHTML},
+  title = {{XHTML} 1.1 -- {Module-based} {XHTML}},
   journal = {W3C Recommendation 31 May 2001},
   volume = {\url|http://www.w3.org/TR/2001/REC-xhtml11-20010531/|},
   year = {2001},
@@ -385,7 +398,6 @@ put Editors in Author field
   school =       {Utrecht University, The Netherlands},
   year =         {2004},
   month =        sep,
-  note =         {To appear.}
 }
 
 @techreport{clarke02genericHaskell,
@@ -398,12 +410,18 @@ put Editors in Author field
   pubcat      = {report},
 }
 
-@misc{leijen04wxHaskell,
- author    = {Daan Leijen},
- title     = {{wxHaskell}},
- booktitle = {{ACM} Sigplan 2004 {Haskell} Workshop},
- note = {submitted to {\em {ACM} Sigplan 2004 {Haskell} Workshop}}
+
+@INPROCEEDINGS{leijen04wxHaskell,
+  author    = {Daan Leijen},
+  title     = {{wxHaskell} -- A portable and concise {GUI} library for {Haskell}},
+  booktitle = {{ACM SIGPLAN} Haskell Workshop ({HW'04})},
+  year      = 2004,
+  month     = sep,
+  publisher = {ACM Press},
+  location  = {Snowbird, Utah}
 }
+
+
 -- 
 inproceedings{leijen04wxHaskell,
  author    = {Daan Leijen},
@@ -561,7 +579,7 @@ EDITORS
 
 @article{teitelbaum81progSynth,
  author = {Tim Teitelbaum and Thomas Reps},
- title = {The {Cornell} {Program} {Synthesizer:} a syntax-directed programming environment},
+ title = {The {Cornell} {Program} {Synthesizer:} {A} syntax-directed programming environment},
  journal = {Communications of the ACM},
  volume = {24},
  number = {9},
@@ -697,6 +715,17 @@ EDITORS
   institution = "University of Amsterdam",
   year = "1992",
   url = "citeseer.nj.nec.com/koorn92gse.html" }
+
+
+
+@InProceedings{brand00rewriteLayout,
+  author = "{\noopsort{Brand}M. G. J. van den Brand and Vinju, J.J.}",
+  title  = {Rewriting with Layout},
+  year   = 2000,
+  booktitle =  "Proceedings of {RULE2000}",
+  editor = "Claude Kirchner and Nachum Dershowitz",
+}
+
 
 @inproceedings{ magnusson90orm,
     author = "B. Magnusson and M. Bengtsson and L.O. Dahlin and G. Fries and A. Gustavsson and G. Hedin and S. Minor and D. Oscarsson and M. Taube",
@@ -1005,7 +1034,6 @@ booktitle = "Mathematics of Program Construction (MPC 2004)",
 publisher = {Springer-Verlag},
 series    = {LNCS},
 year = "2004",
-note = {To appear},
 }
 
 %author = {Shin-Cheng Mu and Zhenjiang Hu and Masato Takeichi},
@@ -1101,7 +1129,7 @@ year = 1998
 
 @book{milner97ML,
  author = {Robin Milner and Mads Tofte and David MacQueen},
- title = {The  Definition of Standard ML},
+ title = {The  Definition of {Standard} {ML}},
  year = {1997},
  isbn = {0262631814},
  publisher = {MIT Press},

@@ -68,6 +68,7 @@ In the remainder of this chapter, we focus on presentation target languages, bec
 
 In most presentation languages, a presentation is a tree structure, in which the leaves are atomic presentations and the nodes are composite presentations. An atomic presentation is a string or a simple graphical objects such as a line, a box, or an image. On the other hand, a composite presentation specifies for a number of child presentations how these are put together. We distinguish three different layout models for composite presentations: a box, a matrix, and a flow layout.
 
+\finallongpage
 \begin{description}
 \item[Box layout]
 In a box layout, child presentations are positioned relative to each other, for example horizontally in a row, or vertically in a column. The exact positioning may be specified for the entire list of children (e.g.\ by using a row or column combinator), or for each child itself, by specifying how it should be positioned relative to its sibling. A box model may provide facilities for aligning and stretching child presentations.
@@ -76,16 +77,17 @@ In a box layout, child presentations are positioned relative to each other, for 
 \item[Matrix layout]
 A matrix model is similar to a box model, but aligns its children both horizontally and vertically. Because it is more general than a row or a column, a matrix may be used to create a box layout. 
 
-\bc  be used to align a grid of elements, usually a list of rows that each contain a list of elements. The elements are aligned along the rows as well as the columns. This is difficult to specify just using rules for each row and cell, as the width of the n-th cell %has to be related to the n-th cells in the other rows instead of to properties \todo{properties?} of its parent or sibling cells.** 
+\bc  be used to align a grid of elements, usually a list of rows that each contain a list of elements. The elements are aligned along the rows as well as the columns. This is difficult to specify just using rules for each row and cell, as the width of the n-th cell %has to be related to the n-th cells in the other rows instead of to properties of its parent or sibling cells.**  % properties?
 
 Matrices can be used to create box presentations, but the extent to which this is possible depends on the expressivity of the matrix model; for example, whether or not cells may overlap.
 \ec
 
+\finallongpage
 \item[Flow layout]
  % does not depend on doc structure, but on available space. final presentation is not tree of target, but split 
  %along lines and pages
 
-A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matrix layout, the structure of the presentation as it is finally rendered is only partially determined by the structure of the presentation definition.\nonote{niet duidelijk}
+A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matrix layout, the structure of the presentation as it is finally rendered is only partially determined by the structure of the presentation definition.
 
 % How the presentations are divided over the lines and pages depends on the size of the presentation
 %
@@ -125,7 +127,7 @@ PSL supports a flow model and a constraint-based box model, but lacks a matrix m
 
 The languages discussed above are all declarative and domain-specific languages that vary in expressive power. The languages CSS~2.0, CCSS, and PSL allow simple presentations to be specified in a simple way, but cannot be used to specify more complex presentations, such as mathematical formulas. In contrast, XSL and P allow complex presentations to be specified, but due to the lack of abstraction, simple presentations also have rather elaborate specifications, especially in P. 
 
-Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position attributes relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned\nonote{lambert: tops and bottoms, even verduidelijken}, or that two presentations should have the same widths. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
+Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position attributes relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned, or that two presentations should have the same widths. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
 
 Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the order of the children depends on an attribute of the parent, then the presentation definition of each child needs to access this parent attribute and use its value to determine the alignment of the child.
 
@@ -309,7 +311,7 @@ Figure~\ref{withDataFlow} shows the data flow for the attributes of \p{pres} and
 In the specification of an attribute value, the original values of attributes can be used (e.g.\ the font size can be set to the old font size increased with 2 points). Therefore, the second argument of \p{with\symbol{95}} is a function that %takes as arguments the inherited attributes coming from the parent and the synthesized attributes coming from the %child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
 \fromHere \ec
 
-Because the inherited and synthesized attributes are modeled as Haskell records, we use the Haskell record syntax for  accessing and updating presentation attribute values. Hence, for a record of inherited attributes \p{inh :: Inh}, the expression \p{fontSize inh} denotes the value of the \p{fontSize} attribute in \p{inh}. Furthermore, \p{inh $\{$ fontSize = 10 $\}$} denotes a copy of \p{inh} in which the \p{fontSize} field is updated to 10. Thus, we can define a  \p{withFontSize} combinator: 
+Because the inherited and synthesized attributes are modeled as Haskell records, we use the Haskell record syntax for  accessing and updating presentation attribute values. Hence, for a record of inherited attributes \p{inh~::~Inh}, the expression \p{fontSize inh} denotes the value of the \p{fontSize} attribute in \p{inh}. Furthermore, \p{inh $\{$ fontSize = 10 $\}$} denotes a copy of \p{inh} in which the \p{fontSize} field is updated to 10. Thus, we can define a  \p{withFontSize} combinator: 
 
 \begin{small}
 \begin{verbatim}
@@ -341,12 +343,14 @@ A future version of {\Xprez} will support a domain-specific special syntax for \
 
 \begin{small}
 \p{pres\{ child.fontSize = 2*parent.fontSize, child.color = red, height = 1ex \}}
-\end{small}\nonote{niet duidelijk of ex voor ouderlijk of huidig font is}
+\end{small}%\nonote{niet duidelijk of ex voor ouderlijk of huidig font is}
 
 %																
 \subsection{Advanced examples} \label{sect:xprezFrac}
 
 Because a presentation in {\Xprez} is a first-class value, it is possible to manipulate a child presentation (e.g.\ change its position or modify the font size) at the level of its parent.  This is illustrated in the presentation for a mathematical fraction: 
+
+\finalshortpage
 
 \begin{small}
 \begin{verbatim}
@@ -362,8 +366,8 @@ shrink e = e `withFontSize_` (\fs -> (70 `percent` fs) `max` 10)
 \end{verbatim}
 \end{small}
 
-The non-primitive library function \p{hAlignCenter} centers its argument horizontally, and the \p{shrink} function reduces the font size to 70\%
-, with a minimum of 10. The result of \p{(text "x" `frac` text "2") `frac` text "1 + y"} is:
+\finalshortpage
+The non-primitive library function \p{hAlignCenter} centers its argument horizontally, and the \p{shrink} function reduces the font size to 70\%, with a minimum of 10. The result of \p{(text "x" `frac` text "2") `frac` text "1 + y"} is:
 
 \begin{center}
 \epsfig{file=pics/eps/frac.png.eps, width=0.5in}
@@ -371,8 +375,7 @@ The non-primitive library function \p{hAlignCenter} centers its argument horizon
 
 The \p{pad} and \p{shrink} functions illustrate the {\em first-class} and {\em abstraction} requirements. Because a presentation is a first-class value, the presentations of the numerator and the denominator can be resized and positioned in the presentation of the fraction itself. Furthermore, we can abstract over positioning and resizing by using the functions \p{pad} and \p{shrink}. 
 
-In contrast, child presentations in both P or PSL cannot be addressed at parent level. Hence, the numerator, the denominator, and even the fraction bar, each have to specify their own size and relative position. As a result, it is difficult to reuse parts of a presentation in another presentation, since all parts refer to each other. Furthermore,  the manipulations on the appearance are harder to read, because no abstraction can be used. 
-
+In contrast, child presentations in both P or PSL cannot be addressed at parent level. Hence, the numerator, the denominator, and even the fraction bar, each have to specify their own size and relative position. As a result, it is difficult to reuse parts of a presentation in another presentation, since all parts refer to each other. Furthermore, the manipulations on the appearance are harder to read, because no abstraction can be used. 
 
 The second example is a pair of combinators that can be used to create tree-browser presentations:
 
@@ -438,7 +441,7 @@ In a flow layout, spacing between two presentations should be visible when they 
 
 Although support for primitive user-interface widgets to {\Xprez} will not have a large impact on the language, it is closely linked to the Proxima edit model. Hence, more experience with building editors in Proxima is needed in order to establish the right model.
 
-Finally, a domain-specific syntax may be supported using the mechanism of syntax macros~\cite{leavenworth66synMacros}, for which a Haskell implementation has been developed. Until a domain-specific syntax is available, the syntax required for attribute modification may be reduced by using techniques similar to the property specification method of wxHaskell~\cite{leijen04wxHaskell}.
+Finally, a domain-specific syntax may be supported using syntax macros~\cite{leavenworth66synMacros}, for which a Haskell implementation has been developed. Until a domain-specific syntax is available, the syntax required for attribute modification may be reduced by using techniques similar to the property specification method of wxHaskell~\cite{leijen04wxHaskell}.
 
 \bc A domain-specific syntax may be supported by using a syntax macro . Until a .. is available, the syntax of attribute specifications may be .. by using the property specification method of wxHaskell.
 \ec
@@ -452,7 +455,7 @@ Syntax macro's - maybe intermediate sol. for syntax is properties as wxHaskell.
 \bc Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \p{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. 
 \ec
 
-In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possible to define presentations that crash, or to create cycles in the attribution.  A more restricted presentation language may guarantee safety, but will most likely not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to achieve safety.\nonote{relativeren}
+In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possible to define presentations that crash, or to create cycles in the attribution.  A more restricted presentation language may guarantee safety, but will most likely not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to achieve safety.%\nonote{relativeren}
 
 %Of course better to have, but when confronted with weak pres lang building custom editor is unsafer. Nevertheless, conditions %on app of with. 
 
