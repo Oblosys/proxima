@@ -21,3 +21,7 @@ Open Coreldraw, drop wmf images on it, and export as Eps\*.eps
 
 other methods often cause Coreldraw to crash on opening the file.
 
+
+Problem. Coreldraws EPS is incorrect. Usually pictures get an extra page.
+
+If latex cannot import the picture, try dragging the file in a new empty Coreldraw document, selecting it, and export selected only.

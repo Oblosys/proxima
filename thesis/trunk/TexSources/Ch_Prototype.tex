@@ -1,27 +1,157 @@
-\chapter{The Proxima Prototype}
+\chapter{The Proxima Prototype} \label{chap:prototype}
 % Reuse from Ch_EditModel
 
-A layer in proxima
-One layer
-show edit diff etc. 
+\bl
+\o Architecture from Section~\ref{sect:proxArch} has been implemented (not completely) in Functional language Haskell
+\o editor generator. compile for datatype and sheets, although sheets in future dynamic
+\o Evaluation layer still only tentatively
+\o Platform-independent, Windows, Linux,  Unix, Mac. 
+\o No effort in incremental, but simple fixes have been shown to make system run at acceptable speed.
+\el
 
 \section{Implemented editors}
 
+
+\subsection{Building an editor with Proxima}
+
+\bl
+\o doc type
+\o pres ag
+\o parser
+\el
+
 \subsection{A Helium source editor}
+subset of Helium~\cite{heeren03helium} similar to \ref{sect:sourceeditor}
+
+Source with fraction, and types, and values (not useful, but similar to spread sheet)
+\head{structural editing}
+SCREENSHOT
+\head{Jump to definition}
+SCREENSHOT
+\head{Beta reduction}
+SCREENSHOT
 \subsection{Slide editor}
+
+Slide with Haskell and a type error
+SCREENSHOT
 \subsection{Chess board}
 
-\section{Architecture}
+Chess board with computed possible moves
+SCREENSHOT
 
-Implemented with combinators
+
+
+\section{Implementation}
+
+
+\subsection{General}
+
+Haskell is not generic: code generator for type decls. Flexible solution. GH other possibility.
+
+Mappings. not everywhere
+
+\subsection{Architecture}
+
+Implemented with combinators from Section
 
 %No hierarchical modules because of editor problem (all look the same). %? mention this at all?
 
 
+\subsection{Evaluation}
+
+\bl
+\o Not really implemented
+\o New type is a hassle. same type is not nice for doc type
+\o Need support maybe in language. 
+\el
+
+\bl
+\o Doc editing is by code generation.
+\el
+
+\subsection{Presentation}
+
+%If presenter/parser is explained in more detail here, then add a forward ref in chapter proxArch
+\bl
+\o Structural/Parsing in presentation
+\o parser/recognizer combinators in parser
+\o reuse combinator
+\el
 
 
+\begin{verbatim}
+SEM Exp
+  | PlusExp
+      lhs.pres = loc (PlusExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
+                   row' [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "+", @exp2.pres]
 
-\section{Renderer}
+| DivExp      
+      lhs.pres = loc (DivExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
+                   frac @exp1.pres @exp2.pres
+
+-- already in Xprez chapter?
+frac e1 e2 = let numerator   = hAlignCenter (shrink e1)
+                 bar         = hLine
+                 denominator = hAlignCenter (shrink e2)
+             in centerline $ row [ hSpace 2, colR 1 [ numerator, bar, denominator] `withHStretch` False
+                                 , hSpace 2 ]
+\end{verbatim}
+
+parser:
+\begin{verbatim}
+..
+     <??> (    (\tk e t-> reusePlusExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just t) (Just e))
+           <$> pKey "+" <*> parseExp 
+          )
+..
+
+recognizeExp' = pStr $ 
+         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
+     <$> pStructural DivExpNode
+     <*> recognizeExp
+     <*> recognizeExp
+
+\end{verbatim}
+
+\bl
+\o Presentation transformation formalism is UUAG system.
+\o pres attribute
+\o generated attributes
+\o Target is {\sc Xprez}
+\el
+
+\bl
+\o Parsers and structure recognizers
+\el
+
+\bl
+\o still a lot of code is added by hand. Need nice abstractions
+\el
+\subsection{Layout}
+
+\bl
+\o Layouter is simple. Just add whitespace
+\el
+\bl
+\o Scanner processes presentation tree.
+\el
+
+\subsection{Arrangement}
+
+\bl
+\o AG implements Xprez
+\o Unarranger is simple
+\el
+
+\subsection{Rendering}
+
+\bl
+\o Why wxHaskell~\cite{wxHaskell}.
+\el
+
+\bc
 Why wxHaskell.
 Why ObjectIO. 
 Easy and fast.
@@ -32,9 +162,9 @@ Prent C renderer by Xander is incomplete, hard to update and not very portable. 
 For now platform dependence is not a problem.
 Porting to different Renderer is relatively easy, because of Layered implementation.
 Future Proxima will perhaps use a standard Haskell GUI, or dedicated Renderer.
+\ec
 
-
-Krasimir:
+\bc Krasimir:
 
   * Gtk+HS
    * iHaskell
@@ -61,6 +191,28 @@ because I think that development of nice libraries
 requires agreement of the entire Haskell Community on
 basic design lines. I looking for peoples which are
 interested in the development of "standard" GUI
-library.
---
+library. \ec
+
 \section{Future work and conclusions}
+Straightforward:
+
+\bl
+\o Parameterizable scanner.
+\o Matrix.
+\o Editing in formatter.
+\o Standard stuff, file menu, search, keyboard macros, etc.
+\o use dynamic module loading to change presentation dynamically. changing datatype dyn. is probably not an option
+\o Extensions to presentation formalism. windows/frames/widgets/formatters
+\o error correcting parser
+\el
+
+Requiring research:
+\bl
+\o Incrementality.
+\o formalism for declaring pres Extra state
+\o Libraries for easy editor building.
+\o Focus handling
+\o Full evaluator layer.
+\o Graph support.
+\o Storing presentation extra state.
+\el

@@ -1,9 +1,32 @@
 % draft?
 % 11pt?
 % conclusions?
+
+
+
 \documentclass[twoside,epsf]{report}
 \setcounter{errorcontextlines}{\maxdimen}
+
 \usepackage{thesis}
+
+% dummy labels for Ch_FormalSpec
+\newlabel{chap:requirements}{{2}{13}}
+\newlabel{sect:sourceeditor}{{2.1.1}{14}}
+\newlabel{sect:editingExtraState}{{2.2.6}{35}}
+\newlabel{sect:extraState}{{4.2}{95}}
+\newlabel{sect:informalDuplicates}{{4.3}{103}}
+
+% dummy labels for Ch_ArchCombs
+%\newlabel{chap:proxArch}{{3}{49}}
+%\newlabel{chap:formalSpec}{{5}{1}}
+
+% dummy labels for Ch_Xprez (none)
+
+% dummy labels for Ch_Prototype
+%\newlabel{sect:sourceeditor}{{2.1.1}{14}}
+%\newlabel{chap:proxArch}{{3}{49}}
+
+
 
 \begin{document}
 
@@ -11,7 +34,7 @@
 
 \pagenumbering{roman}
 
-\newcommand{\subtitle}{Chapter 1}     \include{P_AltTitlePages}
+\newcommand{\subtitle}{Chapter 5}     \include{P_AltTitlePages}
 %\include{P_Titlepages}
 
  %\include{P_Preface}
@@ -20,13 +43,13 @@
 \clearpage
 \pagenumbering{arabic}
 
-\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
-\setcounter{chapter}{1} \include{Ch_XML}   		% 2
-\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
-%          %%%\setcounter{chapter}{3} \include{Ch_EditModel}   	% 
-\setcounter{chapter}{3} \include{Ch_InformalSpec}	% 4
+%\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
+%\setcounter{chapter}{1} \include{Ch_XML}   		% 2
+%\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
+%\setcounter{chapter}{3} \include{Ch_InformalSpec}	% 4
+\setcounter{page}{91}
 \setcounter{chapter}{4} \include{Ch_FormalSpec}	% 5
-\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
+%\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
 %\setcounter{chapter}{6} \include{Ch_Xprez}   		% 7
 %\setcounter{chapter}{7} \include{Ch_Prototype}    	% 8 yet to be written
 %\setcounter{chapter}{8} \include{Ch_Conclusions}	% 9 yet to be written
@@ -49,9 +72,11 @@
 \end{document}
 
 \bc
+IMPORTANT
+incrementality vs reuse? check what Proxima really does.
 
 Urgent problems:
-- direct/indirect editing? direct interpretation in editmodel is op->op without applying. However, directly editing a level is applying.
+presentation/rendering image?  mention that lower layers are fixed and hence presentation often used for rendering
 
 General TODOs
 * Fix math fonts.

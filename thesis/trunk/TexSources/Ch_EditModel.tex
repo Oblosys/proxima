@@ -140,6 +140,8 @@ user edit ---|                      -->     user edit
 
 \bc Edit operations may be targeted at different levels in the Proxima architecture. When an edit gesture is received from the user, it is interpreted as an edit operation on one of the data levels, and from there to updates on all higher levels up to the document. Subsequently, the document is presented again and also the lower levels, including the rendering, are updated. \ec
 
+
+*********** move to proxArch
 Chapter~\ref{chap:proxarch} already mentioned that the interpretation of edit operations in Proxima in fact does not start with an edit operation on the rendering that is mapped to an edit operation on the arrangement, and so on to an edit operation on the document. Instead, the lowest level that can be edited directly is the layout level. If it is edited, for example by typing a keyword, the levels above are updated by subsequently tokenizing, parsing and reducing the updated level.
 
 %also higher
@@ -154,6 +156,7 @@ Summarizing, the following three levels can be directly edited in Proxima:
 \item[Enriched Document] Also structure-oriented, but on derived structures such as a table of contents.
 \item[Layout] Mainly text-oriented editing. For example: typing keywords (eg.\ "\verb|if|", "\verb|then|", or "\verb|else|"); moving the focus one character to the right; etc.
 \end{description}
+************************
 
 \bc
 % pres oriented and structural
@@ -230,7 +233,7 @@ Mention in chapter one?
 \ec
 
 % also if doc is not parsable, structure edit is important
-One of the requirements for the Proxima editor is the possibility of modeless editing; it must be possible to freely mix edit gestures targeted at different levels without having to switch to a different editor mode. Because the structure of the presentation is often closely related to the structure of the document, many structural edit operations are also presentation edit operations, and therefore it does not matter at what level the edit operation is performed. However, in some cases it makes a difference whether an edit operation is interpreted as a structural edit operation, or as a presentation edit operation.
+One of the requirements for the Proxima editor is the possibility of modeless editing; it must be possible to freely mix edit gestures targeted at different levels without having to switch to a different editor mode. Because the structure of the presentation is often closely related to the structure of the document, many document-oriented edit operations are also presentation-oriented edit operations, and therefore it does not matter at what level the edit operation is performed. However, in some cases it makes a difference whether an edit operation is interpreted as a structural edit operation, or as a presentation-oriented edit operation.
 
 %The reverse is not true because if part of an element's presentation is edited, 
 %this does not constitute a document edit operation.
@@ -248,7 +251,7 @@ Ambiguity arises when parsing an element's presentation at the destination of a 
 
 In case of ambiguity, an edit operation is performed by default on the highest possible level. For the date example, the appearance of the date changes but the meaning is preserved. In the Haskell example, the delete operation takes place at the document level and the comma is removed as well. However, the ideal choice of the target level may vary for different editor instances, because the usability of the editor is not only determined by the consistency of the underlying edit model, but also by the habits of a user. It is not unthinkable that a user finds it strange or annoying when a comma automatically disappears in a source editor. 
 
-There are several alternative ways to handle ambiguities. Firstly, backspace and delete operations, which are mainly used for deleting characters, could always be interpreted as presentation edit operations, while cut, copy, and paste may be document operations that automatically insert and remove commas. Secondly, a document delete operation may cause the creation of a volatile placeholder, which disappears when the focus is changed. When a list element is deleted, a comma remains, but changes color. If the user starts to type, the comma changes back to the text color, whereas if the user changes the focus, the comma disappears completely. Finally, a source editor may simply give priority to presentation editing over document editing. 
+There are several alternative ways to handle ambiguities. Firstly, backspace and delete operations, which are mainly used for deleting characters, can always be interpreted as presentation-oriented edit operations, while cut, copy, and paste may be document operations that automatically insert and remove commas. Secondly, a document-oriented delete operation may cause the creation of a volatile placeholder, which disappears when the focus is changed. When a list element is deleted, a comma remains, but changes color. If the user starts to type, the comma changes back to the text color, whereas if the user changes the focus, the comma disappears completely. Finally, a source editor may simply give priority to presentation-oriented editing over document-oriented editing. 
 
 Practical experience with several editor instances is required to decide what is the best choice of the target level in case of ambiguity. In any case, a user can always override the automatic choice made by the editor, possibly after first performing an undo.
 
@@ -363,7 +366,7 @@ Formatter elements of the presentation level, which are used for line breaking (
 \subsection{Presenting and interpreting the focus}
 
 \bc
-Stress that presentation as focus is not always nec. For presentation editing, it is nice, but sometimes doc
+Stress that presentation as focus is not always nec. For presentation-oriented editing, it is nice, but sometimes doc
 focus will have a presentation of its own (actual pres, not focus). For example. Tree, where in between two nodes a line is shown where paste would be. This is not just a presentation focus, but a presentation element.
 \ec 
 

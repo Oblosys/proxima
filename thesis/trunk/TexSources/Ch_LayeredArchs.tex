@@ -119,7 +119,7 @@ At the top, edit operations coming out of the interpretation phase need to be pu
 
 \note{gesture depends on level, not edit. Also on other levels?}
 
-At the top, the result of the combined interpret mappings is a document edit operation $e_{\Level_0}$. Because the target update of each layer has been dropped, the operation is not performed on the document $\level_0$. Furthermore, due to the missing $\Transform$ we need to specify how to get from $e_{\Level_0}$ to $e'_{\Level_0}$. Rather than explicitly adding an update on $\level_0$, we put the level and the edit operation back into the presentation part of the combined layers. This way, the document update is performed by the presentation phase of the top layer.
+At the top, the result of the combined interpret mappings is a document-oriented edit operation $e_{\Level_0}$. Because the target update of each layer has been dropped, the operation is not performed on the document $\level_0$. Furthermore, due to the missing $\Transform$ we need to specify how to get from $e_{\Level_0}$ to $e'_{\Level_0}$. Rather than explicitly adding an update on $\level_0$, we put the level and the edit operation back into the presentation part of the combined layers. This way, the document update is performed by the presentation phase of the top layer.
 
 Similar to the top, the bottom also misses an update. Therefore, we add an update at the bottom right, which applies $e'_{\Level_n}$ to $\level'_n$. For sake of clarity, we use the explicit notation rather than a dashed arrow. 
 

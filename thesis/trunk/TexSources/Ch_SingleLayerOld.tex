@@ -84,7 +84,7 @@ SOMEWHERE: mappings important for extra state, but also for editing on several l
 
 MAPPING INFO INCONSISTENCY: figure out how to express that two cycles are needed to restore it.
                                                   %is probably related to edit ops starting at higher level
-ALSO ALL IS ON TREES, for other things, eg, sum of leafs, it does not work, do it yourself
+ALSO ALL IS ON TREES, for other things, eg, sum of leaves, it does not work, do it yourself
 EXTRA STATE, also tree ordering? precedence op tree -> non ordered op tree?
 SOMEWHERE, explain why this is all necessary, refer to Editing Chapter
 
@@ -437,7 +437,7 @@ Need more experience
 
 The presentation of a higher level element may consist of several lower level elements, as shown in in Figure~\ref{interpretExample}. In this case, the \verb|If| node is the interpretation of all three tokens together. However, it is also possible that a higher level element is duplicated in the presentation, in which case interpretation of the lower level may yield conflicting values for the higher level element. An example of such a duplication is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is interpreted, several alternatives for one element may arise, and a choice has to be made.
 
-Note that having several lower level elements does not automatically mean that an element is duplicated. Furthermore, the interpretation of duplicates only needs to be dealt with if the duplicate structure is edited on the lower level. If a duplicate only needs to support document editing and no presentation editing, no extra work needs to be done.
+Note that having several lower level elements does not automatically mean that an element is duplicated. Furthermore, the interpretation of duplicates only needs to be dealt with if the duplicate structure is edited on the lower level. If a duplicate only needs to support document editing and no presentation-oriented editing, no extra work needs to be done.
 
 The only two layers suitable for specifying duplicates are the evaluation and the presentation layer. The presentation mappings for the other layers are largely predefined and do not duplicate any structures. To avoid having to deal with duplicates when parsing, duplicating is currently only allowed at the evaluation layer. This restriction may be lifted in a future version, but for now, if a presentation contains duplicates, the evaluation sheet specifies how the involved structures are duplicated, and the reduction sheet specifies how updates on duplicate structures are handled.
 
