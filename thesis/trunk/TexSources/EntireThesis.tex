@@ -1,19 +1,20 @@
-% Contains everything.
-% Useful for getting cross-chapter references right when texing a single chapter.
+\documentclass[twoside,epsf]{report}
 
-\documentclass[twoside]{report}
+\setcounter{errorcontextlines}{\maxdimen}
+
 \usepackage{thesis}
 \begin{document}
+
 \selectlanguage{english}
 
 \pagenumbering{roman}
-
+%        \newcommand{\subtitle}{Chapters 1\&2: Introduction and requirements}\include{P_AltTitlePages}
 \include{P_Titlepages}
 
-\include{P_Preface}
 \tableofcontents
 
-\clearpage
+\clearpage \thispagestyle{empty} \cleardoublepage
+
 \pagenumbering{arabic}
 
 \setcounter{chapter}{0} \include{Ch_Introduction}	% 1
@@ -21,19 +22,24 @@
 \setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
 \setcounter{chapter}{3} \include{Ch_InformalSpec}	% 4
 \setcounter{chapter}{4} \include{Ch_FormalSpec}	% 5
-\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
-\setcounter{chapter}{6} \include{Ch_Xprez}   		% 7
-\setcounter{chapter}{7} \include{Ch_Prototype}    	% 8 yet to be written
-\setcounter{chapter}{8} \include{Ch_Conclusions}	% 9 yet to be written
-
-
+\setcounter{chapter}{5} \include{Ch_Xprez}   		% 7
+\setcounter{chapter}{6} \include{Ch_Prototype}    	% 8
+\setcounter{chapter}{7} \include{Ch_Conclusions}	% 9
+ 
 \bibliographystyle{abbrv}
 \bibliography{thesis}
 
-\include{P_Dankwoord}
+% for chapter with correct bib:
+% uncomment "\bibliography.." above 
+% tex chapter, bibthesis.bat, tex chapter, texall.bat  (so chap refs are ok), tex chapter
+% (biball.bat is only for checking entire thesis for bib problems)
+
 \include{P_Samenvatting}
+\include{P_Dankwoord}
 \include{P_CV}
+\include{P_IpaDissertations}
 
 \thispagestyle{empty}
 \cleardoublepage
+
 \end{document}
