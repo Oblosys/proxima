@@ -20,36 +20,6 @@
         {\begin{Exercise}\rm}%
         {\end{Exercise}}
 
-%%% \newdimen in environment causes latex to run out of dimension space
-\newdimen\Proof@stepwidth
-\newdimen\Proof@label
-%%%%%%%%%%%%% from Frank:
-\newcounter{proofstep}
-\def\ardlabel#1{\let\@currentlabel=\theproofstep\label{#1}}
-\def\Proofstep#1{\refstepcounter{proofstep}(\theproofstep)\ardlabel{#1}}
-\def\Proofstepref#1{(\ref{#1})}
-\def\Proof@indent{3em}
-\def\Proof@opwidth{1.5em}
-\def\Proof@opspace{1em}
-\newenvironment{Prf}{%
-\vspace{1ex}\noindent%
-\setcounter{proofstep}{0}%
-\tabskip=\Proof@indent%
-\let\\\cr%
-%\newdimen\Proof@stepwidth\Proof@stepwidth=\hsize		%% Error: \newdimen in env
-\Proof@stepwidth=\hsize
-\advance\Proof@stepwidth by -\Proof@indent
-%\newdimen\Proof@label\Proof@label=-\Proof@stepwidth	%% Error: \newdimen in env
-\Proof@label=-\Proof@stepwidth
-\advance\Proof@label by -2em
-\advance\Proof@stepwidth by -\Proof@opspace
-\advance\Proof@stepwidth by -\Proof@opwidth
-\halign\bgroup% Martijn: figure out optimal vspaces
-  \vspace{1ex}\makebox[\Proof@opwidth]{$##$}\tabskip=\Proof@opspace&%
-  \vspace{0ex}\makebox[\Proof@stepwidth][l]{$##$}\tabskip=0pt&%
-  \rlap{\kern\Proof@label\makebox[2em][r]{\small##}}&\llap{##}\cr}
-{\crcr\egroup\vspace{0ex}}
-%%%%%%%%%%%%% end 
 
 
 

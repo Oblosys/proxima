@@ -1,8 +1,7 @@
-\chapter{Requirements for a structure editor} %\chapter{Editing structured documents}
+\chapter{Requirements for a structure editor}
 \label{chap:requirements}
 
 %{\em *** Version: \today~ ***}
-
 
 
 \bc
@@ -124,7 +123,7 @@ isSuffixOf~x~y~=~reverse~x~~~`isPrefixOf`~~~reverse~y~~~~~~\\
 \rmfamily
 }{}{after Apply Layout}
 
-The screen-shot shows the automatic-layout operation applied to the selected function {\tt isPrefixOf}. The layed-out function on the right-hand side is still freely editable, including its whitespace.
+The screenshot \note{The screenshots in this chapter are still drafts because they may be replaced by actual Proxima screenshots.} shows the automatic-layout operation applied to the selected function {\tt isPrefixOf}. The layed-out function on the right-hand side is still freely editable, including its whitespace.
 % comment handling?
 
 \head{Structural edit operations}
@@ -317,6 +316,7 @@ In this section we present five example applications of a generic structure edit
 \dots
 \end{tabular}
 }{}{after typing: 'T', 'h', 'e', ' ', 'u'}
+% In final picture maybe use Lambert's idea instead of dots? (3 different blocks, each with zigzag ends)
 
 The screenshot shows a document with a table of contents. The dots (\dots) are not part of the actual screenshot, but have been added to show the table of contents together with the section headings. The second entry in the table of contents is edited by entering the text ``The u'' over the selected letter 'U' at the beginning of the title. The result is that both the entry in the table of contents as well as the title in the presentation of the section itself change to ``The use cases''.
 
@@ -516,6 +516,8 @@ Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
 \end{tabular}
 }{A much simplified tax form}
 
+% Lambert:  income -> job income
+%                job income = salary (??)
 
 The tax-form editor has two different kinds of users: a user who designs the tax form, and a user who fills out the form. Both users use the same document type, albeit with different presentations. The form designer uses a presentation that shows the building blocks and structure of the form, as well as the formulas for the derived values. On the other hand, the user who fills out the form sees the input fields, the derived values, and the accompanying fragments of text. The structure of the form and the formulas for the derived values are not explicitly visible and cannot be modified in this presentation.
 
@@ -611,7 +613,7 @@ With the use cases of the previous section in mind, we now provide a number of f
 %																
 \subsection{Genericity}
 
-In order to support the five use cases, the editor must be generic in the sense that it is not built for a specific document type, or class of document types. However, as mentioned in Section~\ref{sect:structdocs}, we do restrict ourselves to trees rather than graphs. Most documents can be represented by trees, including our five use cases. A formalism for specifying cross-links between tree nodes is desirable, but full graph editing is not a requirement.
+In order to support the five use cases, the editor must be generic in the sense that it is not built for a specific document type, or class of document types. However, as mentioned in Section~\ref{sect:structdocs}, we restrict ourselves to trees rather than graphs. Most documents can be represented by trees, including our five use cases. A formalism for specifying cross-links between tree nodes is desirable, but full graph editing is not a requirement.
 
 %Although a distinction can be made between editor generators and generic editors, we regard both as generic editors.
 
@@ -637,9 +639,8 @@ The presentation formalism has two different aspects, which we consider together
 In many editors the {\em presentation target language} consists of just plain text, sometimes with color and font attributes. However, in order to support the graphical presentations of the equation editor and outline view use cases, a more advanced target formalism is required. It must be possible to specify graphical elements such as lines and boxes, as well as to show images. Furthermore, the presentation of a mathematical formula requires an advanced alignment model that offers full control over the positioning of presentation elements.
 
 Another requirement for the presentation target language comes from the tax-form example. The tax form typically contains user-interface widgets, such as buttons, selection lists, and menus. Therefore, the target language must support user-interface widgets.
-% The presentation language may provide built-in support for such widgets, but if
-% it the language is powerful enough, 
-%they may also be emulated.
+% The presentation language may provide built-in support for such widgets, but if  the language
+% is powerful enough, they may also be emulated.
 
 
 Finally, the word-processor use case requires that the presentation target language supports line and page breaking, preferably optimal~\cite{knuth82breaking}. 
@@ -865,7 +866,7 @@ Lapis, text only
 \head{Intentional Programming Editor}
 Interesting structure editor with powerful presentations, discontinued, little publications on
 internals. Monolithic system, program oriented. Transformations. No evidence of full 
-integrated computations. Editing model mimics text editing, but apparently no integrated
+integrated computations. Edit model mimics text editing, but apparently no integrated
 both level editing
 \ec
 

@@ -112,13 +112,20 @@ Where say that mapping back is only when we need automatic editing: is it only i
 
 % during editing one of the levels is changed, other changes along. in this section first give updates for entire editor
 %, then refine it for layers
-An editor maintains a relation between a document and its presentation. We denote the document by $level\H \tp Level\H$, and the presentation by $level\L \tp Level\L$. The relation between the two is $\Present \tp \Level_{H} \rel \Level_{L}$. 
+
+
+An editor maintains a presentation relation between a document and its presentation. We denote the document by 
+$level\H \tp Level\H$, and the presentation by $level\L \tp Level\L$. The relation between the two is
+$\Present \tp \Level_{L} \rel \Level_{H}$.  The level order in the relation type is such that the notation $l~Present~h$ looks similar to the notation for a presentation mapping represented by a function: $l = \present~h$. 
+
+%$R \tp Range \rel Domain$ versus $f \tp Domain \to Range$
 
 The invariant, maintained by the editor is that the lower level is a valid presentation of the higher level:
 
 \begin{math}
 \text{\bf Presentation invariant:~~~} \level_{L}~\Present~\level_{H}\\
 \end{math}
+
 
 The precondition of an edit step is that the presentation invariant holds. The user then modifies the presentation (giving $\level'\L$), and most likely breaks the invariant. In order to restore the invariant, the editor updates the document level by interpreting the modified presentation, which yields $\level''\H$. However, because the user-updated lower level is often not a completely valid presentation, the document update alone may not yet restore the presentation invariant. For example, a program fragment may have been entered without proper syntax coloring, or a chapter title may have been modified in the chapter itself but not in the table of contents. In order to guarantee the restoration of the presentation invariant, the updated document is presented again ($\level''L$).
 
@@ -182,7 +189,7 @@ $\Transform :: \Level_{H} \rightarrow \Level_{H}$. In the next chapter, when lay
 
 % why layers?
 In order to describe the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), we refine the simple editor by splitting the presentation relation. A $Present$ relation that is split into $n$ components 
-($Present_{i} \tp Level_{i-1} \rel \Level_{i}$) gives rise to $n+1$ data levels ($Level_{0 \dots n}$). Lower levels get higher indices, with $Level_{0}$ being the document level and $Level_{n}$ the presentation level. 
+($Present_{i} \tp Level_{i} \rel \Level_{i-1}$) gives rise to $n+1$ data levels ($Level_{0 \dots n}$). Lower levels get higher indices, with $Level_{0}$ being the document level and $Level_{n}$ the presentation level. 
 
 From the perspective of a single layer, we only need to consider a single $Present_i$ relation and two data levels $Level_{i-1}$ and $Level_{i}$. We drop the subscript of the relation and refer to the data levels as $Level\H$ and $Level\L$. Figure~\ref{layerEditProcess} shows the updates during an edit step from the perspective of a single layer. It is similar to the simple editor without layers, except at the top. Instead of directly computing $level''\H$, the layer first computes an intermediate $level'\H$. This $level'\H$ is then processed by the layers above, yielding $level''\H$. At the top level, $level'\H$ is copied to $level''\H$. \note{mention: user \rarr lower layers?} \note{mention doc edit on intermediate levels?} \note{Mention: Here no intermediate results go horizontally}
 

@@ -38,10 +38,23 @@
 %\newlabel{sect:ImplPres}{{8.2.4}{194}}
 
 % dummy labels for Ch_Prototype
+\newlabel{chap:requirements}{{2}{13}}
 \newlabel{sect:sourceeditor}{{2.1.1}{14}}
 \newlabel{chap:proxArch}{{3}{49}}
+\newlabel{sect:docLevel}{{3.1.1}{49}}
+\newlabel{sect:archProximaLayers}{{3.3}{56}}
 \newlabel{chap:archCombs}{{6}{139}}
+\newlabel{chap:presenting}{{7}{175}}
+\newlabel{sect:xprezFrac}{{7.2.4}{185}}
 
+% dummy labels for Ch_Conclusions
+%\newlabel{chap:requirements}{{2}{13}}
+%\newlabel{chap:proxArch}{{3}{49}}
+\newlabel{chap:informalSpec}{{4}{77}}
+\newlabel{chap:formalSpec}{{5}{91}}
+%\newlabel{chap:archCombs}{{6}{139}}
+%\newlabel{chap:presenting}{{7}{175}}
+%\newlabel{chap:prototype}{{8}{191}}
 
 
 \begin{document}
@@ -50,7 +63,7 @@
 
 \pagenumbering{roman}
 
-%\newcommand{\subtitle}{Chapter 6: Presenting structured documents with {\Xprez}}     \include{P_AltTitlePages}
+\newcommand{\subtitle}{Chapters 7\&8: Prototype and Conclusions}     \include{P_AltTitlePages}
 %\include{P_Titlepages}
 
  %\include{P_Preface}
@@ -60,16 +73,15 @@
 
 \pagenumbering{arabic}
 
-\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
+%\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
 %\setcounter{chapter}{1} \include{Ch_XML}   		% 2
 %\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
 %\setcounter{chapter}{3} \include{Ch_InformalSpec}	% 4
-%\setcounter{chapter}{4} \include{Ch_FormalSpec}	% 5
-%\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
-%\setcounter{chapter}{6} \include{Ch_Xprez}   		% 7
-\setcounter{page}{189}
-\setcounter{chapter}{7} \include{Ch_Prototype}    	% 8 yet to be written
-%\setcounter{chapter}{8} \include{Ch_Conclusions}	% 9 yet to be written
+%\setcounter{chapter}{4} \bc \setcounter{page}{89}\ec \include{Ch_FormalSpec}	% 5
+               %%%%%\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
+%\setcounter{chapter}{5} \include{Ch_Xprez}   		% 7
+\setcounter{chapter}{7} \setcounter{page}{157} \include{Ch_Prototype}    	% 8
+\setcounter{chapter}{8} \bc \setcounter{page}{177} \ec \include{Ch_Conclusions}	% 9 yet to be written
 
 \bibliographystyle{abbrv}
 \bibliography{thesis}
@@ -94,6 +106,7 @@ IMPORTANT
 incrementality vs reuse? check what Proxima really does.
 
 Urgent problems:
+!!!figure out reqs and levels in intro and requirements chapters
 presentation/rendering image?  mention that lower layers are fixed and hence presentation often used for rendering
 
 General TODOs
@@ -106,9 +119,18 @@ General TODOs
 
 * Fix math fonts.
 
-* explain Parsing/Structure recognizing model somewhere
+* E elimination vs E introduction
+
 * mention that doc-oriented is always easy. Even for a syn dir editor, the hard bits are in pointing, which is a pres-oriented op.
-* stress that document is internal data structure and not what people usually think (eg. something coming out of a printer) . Perhaps even repeat this a few times.
+
+
+
+
+
+Before defense:
+
+what happens if mappings are not maintained, what behavior is lost exactly?
+
 
 
 NOTES

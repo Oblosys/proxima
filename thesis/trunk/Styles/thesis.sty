@@ -231,8 +231,8 @@
 \renewcommand{\core}{\fn{core}}
 \newcommand{\default}{\fn{default}}
 \newcommand{\valid}{\fn{valid}}
-\newcommand{\close}{~\text{``close to''}~}
-
+\newcommand{\close}{\ \text{``close to''}\ }
+\DeclareMathOperator{\cloze}{\ \text{``close to''}\ }
 
 % not used, so we redefine these commands
 \renewcommand{\H}{_{\, \mathrm H}}  % old \H seems to put '' above the next character
@@ -274,13 +274,26 @@
 \newcommand{\semi}{\smi~}
 \newcommand{\assert}[1]{\{ \ensuremath{#1} \}}
 \newcommand{\hoare}[3]{{\assert{#1}\:{#2}\;\assert{#3}}} % #2 is italic, so space looks bigger
+\newcommand{\hoareWide}[3]{\assert{#1}\\{#2}\\ \assert{#3}} % on three separate lines
+% bug? This doesn't work! \newcommand{\hoareWide}[3]{{\assert{#1}\\{#2}\\ \assert{#3}}} 
 
 \newsavebox{\wpbox}
 \sbox{\wpbox}{$\wp$}
 \newcommand{\powerset}{\usebox{\wpbox}}
+
+
 \renewcommand{\wp}[2]{\fn{wp}(#1,~#2)}
 
+\newcommand{\wpWide}[2]{%
+\renewcommand{\arraystretch}{1.2} % Need to increase vspace here, but cannot add to \arraystretch!
+{\begin{array}[t]{@{}l@{}l@{}l}
+\fn{wp}&(~&#1\\
+&,&#2~)\\
+\end{array}}
+\renewcommand{\arraystretch}{1} % 
+}
 
+%
 \newcommand{\Xprez}{{\sc Xprez}}
 
 
