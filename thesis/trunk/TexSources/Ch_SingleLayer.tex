@@ -42,7 +42,15 @@ P x   \eq   x \in { x |  P x }
 \newcommand{\reuzestar}{\ensuremath{\stackrel{*}{\triangleright}}}
 \newcommand{\rel}{\ensuremath{\sim}}
 
-\newcommand{\powerset}{\mathcal{P}}
+
+
+
+\newsavebox{\wpbox}
+\sbox{\wpbox}{$\wp$}
+\newcommand{\powerset}{\usebox{\wpbox}}
+
+
+
 {\em *** Version: \today~ ***}
 
 
@@ -118,6 +126,7 @@ Mention Pierce's lenses.
 \o Then step by step add complications.
 \el
 
+
 \note{Add small examples (a la $7 \leftrightarrow $"sevven")}
 
 
@@ -126,36 +135,44 @@ Mention Pierce's lenses.
 %																
 \section{Single layer} \label{sect:singleSimple}
 
+First we consider a simple abstract editor consisting of a single layer, between two data levels. The bl
+
 \bl
 \o Simple abstract editor: Two levels: document and presentation.
 \o Immediate presentation.
-\o Editing is changing presentation. (unrealistic)
 \o Duplicates are allowed, but cannot be handled in a way that a user would expect.
 \el
 
 %The presentation invariant is satisfied if and only if the lower level is a correct presentation of the higher %level. The invariant is expressed using an abstract function  
 %$\Present \tp \Level\H \rightarrow \Level_L$.
 
-Given a $\present$, we specify an $\interpret$.
+We assume that a function $\present$, which maps a document onto its presentation, is given:
 
 \xpr{
 \present & \tp &  \Level\H \rightarrow \Level_L\\
+}
+
+The function is $\present$ Because it is likely that On the other hand, $\present$ is not necessarily surjective.
+\bl
+\o $present$ total+explanation (what if not total)
+\o present is injective ($present h = present h' \imp h = h'$)
+\o present is not surjective. not all pres have a doc
+\el
+
+Given such a function present, we now specify a function $\interpret$, that maps 
+
+\xpr{
 \interpret  & \tp & \Level_L \rightarrow \Level\H\\
 }
 
 \bl
-\o $present$ total+explanation (what if not total)
 \o $interpret$ is total as well + expl. (easy to make total)
-\o present is injective ($present h = present h' \imp h = h'$)
-\o present is not surjective. not all pres have a doc
 \o we also want interpret to be total. So it is more than just the inverse. 
 \el
 
 \head{Presentation invariant}
 
-\bl
-\o The presentation invariant states that the lower level is a correct presentation of the higher level.
-\el
+The presentation invariant states that the lower level is a correct presentation of the higher level:
 
 \xprlab{
 \level_L & \equ & \present~\level\H
@@ -167,8 +184,8 @@ Given a $\present$, we specify an $\interpret$.
 \o Property {\sc InterPresent}\note{name: Correctness/Well behaved/\dots?} 
 \o Presenting followed by interpreting is identity on higher level: \note{normalizing doc may not occur}
 \o sequence of presenting and interpreting therefore converges
-\o Reverse does not hold.
 \o name comes from compose interpret and present
+\o IntPr is a minimal condition for an editor to work ok.
 \el
 
 \xprlab{
@@ -196,16 +213,22 @@ Equivalently, we can express the {\sc InterPresent} property using function comp
 \o Reverse also does not hold for duplicates, but these are not explained until later.
 \el
 
+
 \subsection{Editing}
+
+
 
 \bl
 \o We are modeling an Editor, so values change.
 \o On a higher level update, simply re-present. No problem
+\o Editing is changing presentation. (unrealistic)
 \o Lower level is updated by a user. Need to find updates on both levels.
 \el
 
-
-From now on $level\L$ and $level\H$ are state of editor before edit. $Level'\L$ is result of update, and  $level''\L$ and $level''\H$ are final values after computation.
+\bl
+\o From now on $level\L$ and $level\H$ are state of editor before edit. $Level'\L$ is result of update, and  $level''\L$ and $level''\H$ are final values after computation.
+\o add figure.
+\el
 
 An edit operation takes place when {\sc Present} holds:
 
@@ -214,11 +237,21 @@ An edit operation takes place when {\sc Present} holds:
 & & \level\L \leadsto \level'\L 
 }
 
+Most likely, the presentation invariant does not hold between $\level'\L$ and $\level\H$. Hence, we need to find a new value for the higher level. Furthermore, since  $\level''\H$. Furthermore, since $\level'\L$ may not be a valid presentation.
 \bl
 \o Most likely the invariant no longer holds: $\level'\L \neq \present~\level\H$
 \o Find new upper level (and lower).
 \el
 
+reqs:
+
+Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change after the edit operation. 
+
+Secondly, if a user edits the lower level in such a way that it is a valid presentation, then the editor should not change 
+$\level'\L$ is a valid presentation of some higher level value $h$, then the final 
+
+
+Finally, it is also possible that the 
 \bl 
 \o If  $\level'$ is a presentation of some $\level''\H$, this is the one we want. (cannot guarantee that with extra state)  \note{Do we req. and will we prove this?}
 \o explain  {\sc Doc-Inert} and {\sc Pres-Inert}
@@ -227,71 +260,216 @@ An edit operation takes place when {\sc Present} holds:
 \o Interpret chooses.
 \el
 
-Summarizing, we need:
+Summarizing, we need
 
 \xpr{
 (level''\H, level''\L)~\text{such that:}
 }
+
 \xpr{
-\level''\L = \present~\level''\H 				& \jstf{Postcondition}\\
-\level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit}\\
-\level'\L = \present~\level\H \imp \level''\H = \level\H & \jstf{{\sc Doc-Inert}}
-(\exists h : \level'\L = \present~h) \imp \level''\L = \level'\L	& \jstf{\sc Pres-Inert}\\
+\level''\L = \present~\level''\H 						& \jstf{Postcondition}\\
+\level''\L~\text{"close to"}~\level'\L 					& \jstf{Imprecise edit}\\
+\level'\L = \present~\level\H \imp \level''\H = \level\H 		& \jstf{\sc Doc-Inert}\\
+\level'\L = \present~h \imp \level''\L = \level'\L			& \jstf{\sc Pres-Inert}\\
 }
 
 Mention that {\sc Doc-Inert} also implies $\level''\L = \level'\L$ by {\sc Pres-Inert}.
 
 We could add that if there is an $h$ then $level''\H = h$ but in next section we will lose this.
 
-The solution is this computation: \note{align label with last eq.? how?}
+The solution is this computation:
+
+\newcommand{\is}{\widehat{=}} % instead of {\stackrel{\wedge}{=}}
+\newcommand{\gts}{\text{\tt :=}}
+\renewcommand{\gets}{~\gts~}
+\newcommand{\smi}{\text{\tt ;}}
+\newcommand{\semi}{\smi~}
+\newcommand{\assert}[1]{\{ \ensuremath{#1} \}}
+\newcommand{\fn}[1]{{\ensuremath{\sf #1}}}
+\newcommand{\law}[1]{{\sc #1}}
+
+\renewcommand{\wp}[2]{\fn{wp}(#1,#2)}
+\xprlab{
+Comp ~~\is~~ 	& \level''\H \gets \interpret~\level'\L \semi\\
+				&\level''\L \gets  \present~\level''\H
+}{$Comp$-Def}
+
+%\xprlab{
+%\level''\H & \equ & \interpret~\level'\L\\
+%\level''\L & \equ & \present~\level''\H 
+%}{Compute}
+
+
+\head{Hoare} \note{say this somewhere else}
 
 \xprlab{
-\level''\H & \equ & \interpret~\level'\L\\
-\level''\L & \equ & \present~\level''\H 
-}{Compute}
+\assert{P} S \assert{Q} ~\eqv~ P \imp wp(S,Q)
+}{\fn{wp}-Char}
+
+\xprlab{
+\wp{~x \gets e~}{P} \eqv P[x/e]\\
+}{\fn{wp}-$\gts$}
+
+\xprlab{
+\wp{~S \semi T~}{P} \eqv \wp{S}{ \wp{T}{P} }\\
+}{\fn{wp}-$\smi$}
+
+or with Hoare triples \note{change compute to $\gts$ notation}
+\note{say something about termination}
+
 
 \head{Postcondition}
 
-by definition, the postcondition holds.
+$\assert{True} {Comp} \assert{ \level''\L = \present~\level''\H }$,
 
 \head{{\sc Doc-Inert}}
 
-$\level'\L = \present~\level\H \imp \level''\H = \level\H$ has a simple proof:
+%$\level'\L = \present~\level\H \imp \level''\H = \level\H$ has a simple proof:
+%
+%
+%\begin{proof} Assume $\level'\L = \present~\level\H$ then
+%\prf{
+%\level''\H 						& \Equ{\sc Compute}\\
+%\interpret~\level'\L				& \Equ{$\level'\L = \present~\level\H$}\\
+%\interpret~(\present~\level\H)		& \Equ{\sc InterPresent}\\
+%\level\H
+%}
+%\end{proof}
 
 
-\begin{proof} Assume $\level'\L = \present~\level\H$ then
-\prf{
-\level''\H 						& \Equ{\sc Compute}\\
-\interpret~\level'\L				& \Equ{$\level'\L = \present~\level\H$}\\
-\interpret~(\present~\level\H)		& \Equ{\sc InterPresent}\\
-\level\H
+
+\begin{proof} 
+$\assert{ \level'\L = \present~\level\H } {Comp} \assert{ \level''\H = \level\H }$, or equivalently, due to \law{\fn{wp}-Char}:
+
+$\level'\L = \present~\level\H ~\imp~ \wp{Comp}{ \level''\H = \level\H}$
+
+\prf{ 
+\level'\L = \present~\level\H\\
+	\Imp{\sc InterPresent}\\
+\level\H = \interpret~\level'\L\\
+	\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{\level''\H \gets \interpret~\level'\L}{\level\H = \level''\H} \\
+	\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{\level''\H \gets \interpret~\level'\L}{ \wp{ \level''\L \gets \present~\level''\H}{\level\H = \level''\H}} \\
+	\Eqv{{\sc \fn{wp}-$\smi$}}\\
+\wp{\level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level\H = \level''\H} \\
+	\Eqv{\law{$Comp$-Def}}\\
+\wp{Comp}{\level\H = \level''\H}
 }
+
+%This leaves us to prove: $\level'\L = \present~\level\H \imp \level\H = \interpret~\level'\L $, which corresponds to %{\sc InterPresent}.
+
+%We can prove 
+%$\assert{ \level'\L = \present~\level\H } {Compute} \assert{ \level''\H = \level\H }$
+%
+%using Hoare logic:
+%
+%\prf{ 
+%\assert{ \level'\L = \present~\level\H }\\
+%\qquad \level''\H \gets \interpret~\level'\L \\
+%\assert{ \level\H = \level''\H  }\\
+%\qquad \level''\L \gets \present~\level''\H \\
+%\assert{ \level\H = \level''\H  }
+%}
+%
+%This leaves us to prove: $\level'\L = \present~\level\H \imp \level\H = \interpret~\level'\L $, which corresponds to %{\sc InterPresent}.
 \end{proof}
 
 \head{{\sc Pres-Inert}}
 
-If the updated lower level ($\level'\L$) is a valid presentation of some $h \tp Level\H$, then the {\sc InterPresent} guarantees that final value the lower level is equal to $\level'\L$.
+If the updated lower level ($\level'\L$) is a valid presentation of some $h \tp Level\H$, then {\sc InterPresent} guarantees that final value the lower level is equal to $\level'\L$.
 
-If we assume $\level''\H$ and $\level''\L$ to be defined according to {\sc Compute} then:
 
-$\level'\L = \present~h \imp \level''\L = \level'\L$
 
-\begin{proof} Assume $\level'\L = \present~h$ then
+% old proof:
+%
+%If we assume $\level''\H$ and $\level''\L$ to be defined according to {\sc Compute} then:
+%
+%$\level'\L = \present~h \imp \level''\L = \level'\L$
+%
+%\begin{proof} Assume $\level'\L = \present~h$ then
+%\prf{
+%\level''\L						& \Equ{\sc Compute}\\
+%\present~\level''\H				& \Equ{\sc Compute}\\
+%\present~(\interpret~\level'\L)		& \Equ{$\level'\L = \present~h$}\\
+%\present~(\interpret~(\present~h))	& \Equ{\sc InterPresent}\\ % \Equ{definition of $\oo$}\\
+%%\present~((\interpret \oo \present)~h)	& 
+%\present~h 						& \Equ{$\level'\L = \present~h$}\\
+%\level'\L
+%}
+%\end{proof}
+%
+% Old Hoare proof
+%
+%$\assert{\level'\L = \present~h} Compute \assert{ \level''\H = \level\H }$
+%
+%Using assignment rule twice, we prove:
+%
+%$\assert{\level'\L = \present~(\interpret~\level'\L) } Compute \assert{ \level''\H = \level\H }$
+%
+%\begin{proof}
+%\prf{
+%\assert{ \level'\L = \present~(\interpret~\level'\L) }\\
+%\qquad \level''\H \gets \interpret~\level'\L \\
+%\assert{ \level'\L = \present~\level''\H }\\
+%\qquad \level''\L \gets \present~\level''\H \\
+%\assert{ \level'\L = \level''\L  }
+%}
+%
+%And:
+%
+%$(\level'\L = \present~h) ~\imp~ \level'\L = \present~(\interpret~\level'\L)$
+%
+%In the proof, assume $\level'\L = \present~h$:
+%
+%\prf{
+%\level'\L = \present~(\interpret~\level'\L)\\
+%\Ffr{assumption}\\
+%\level'\L = \present~(\interpret~(\present~h_0))\\
+%\Eqv{\sc InterPresent}\\
+%\level'\L = \present~h_0 \}\\
+%\Ffr{assumption}\\
+%True
+%}
+%
+%Giving us:
+%
+%$\assert{\level'\L = \present~h } Compute \assert{ \level''\H = \level\H }$
+%\end{proof}
+%
+$\assert{ \level'\L = \present~h } {Comp} \assert{\level'\L = \level''\L}$, or equivalently,:
+
+$\level'\L = \present~h ~~\imp~~\wp{Compute}{\level'\L = \level''\L}$
+
+\begin{proof}
+In the proof, assume $\level'\L = \present~h$:
+
 \prf{
-\level''\L						& \Equ{\sc Compute}\\
-\present~\level''\H				& \Equ{\sc Compute}\\
-\present~(\interpret~\level'\L)		& \Equ{$\level'\L = \present~h$}\\
-\present~(\interpret~(\present~h))	& \Equ{\sc InterPresent}\\ % \Equ{definition of $\oo$}\\
-%\present~((\interpret \oo \present)~h)	& 
-\present~h 						& \Equ{$\level'\L = \present~h$}\\
-\level'\L
+True\\
+\Imp{assumption}\\
+\level'\L = \present~h_0 \}\\
+\Eqv{\sc InterPresent}\\
+\level'\L = \present~(\interpret~(\present~h_0))\\
+\Imp{assumption}\\
+\level'\L = \present~(\interpret~\level'\L)\\
+\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{\level''\H \gets \interpret~\level'\L}{ \level'\L = \present~\level''\H}\\
+\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{\level''\H \gets \interpret~\level'\L}{ \wp {\level''\L \gets \present~\level''\H}{\level'\L = \level''\L} }\\
+\Eqv{{\sc \fn{wp}-$\smi$}}\\
+\wp{ \level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level'\L = \level''\L }\\
+\Eqv{{\sc Compute}}\\
+\wp{Compute}{\level'\L = \level''\L}\\
 }
 \end{proof}
+
+%%%%%%%%%
+
 
 
 \head{Imprecise edit}
 
-On the other hand, if $\level'\L$ is not a valid presentation, $interpret$ needs to choose a  $\level''\L$ that resembles what the user intended by performing the edit operation. This is reflected in the specification by the requirement $\level'\L~\text{"close to"}~\level''\L$.
+If $\level'\L$ is not a valid presentation, $interpret$ needs to choose a  $\level''\L$ that resembles what the user intended by performing the edit operation. This is reflected in the specification by the requirement $\level'\L~\text{"close to"}~\level''\L$.
 
 \bl
 \o $\interpret$ must be defined in such a way that we get the closest one.
@@ -416,14 +594,10 @@ Interpret &\tp& \Level\L \rel \Level\H
 
 % here L and H
 
-In a layer, two types: $Level\H$ $Level\L$ each with an equivalence class and two eq. classes:
+For both types, we have an equivalence relation: $H$ and $L$. 
 
 $\Eqcl{Level\H}{H}$ and $\eqcl{h}{H}$ vs $\Eqcl{Level\L}{L}$ and $\eqcl{l}{L}$ 
 
-and value:
-\xpr{
-(\eqcl{\hole}{H}) \tp Level\H \to \eqcl{\Level\H}{H}
-}
 
 Something about what the equivalence classes are: Lower is underspecified: 
 PER story
@@ -585,10 +759,20 @@ If $y \in X$, then {\sc $\reuz$-Idem} guarantees close to, because we have equal
 
 With $\reuz$ function we can extract, and with $\eqcl{\hole}{X}$ we can inject, so now we can give compute:
 
+%\xprlab{
+%\level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H  \\ %(\level'\L,\level\H)\\ 
+%\level''\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L % ^* (\level''\H, level'\L)
+%}{Compute}
 \xprlab{
-\level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H  \\ %(\level'\L,\level\H)\\ 
-\level''\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L % ^* (\level''\H, level'\L)
-}{Compute}
+Comp ~~\is~~ 	& \level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H \semi\\
+				& \level''\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L
+}{$Comp$-Def}
+\xprlab{
+Comp ~~\is~~ 	& Up \semi Dwn}{$Comp$-Def}
+\xprlab{
+Up ~~\is~~		& \level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{$Up$-Def}
+\xprlab{
+Dwn ~~\is~~		& \level''\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{$Dwn$-Def}
 
 The levels defined by compute meet the requirements:
 
@@ -600,42 +784,84 @@ Rather trivial again.
 \head{{\sc Doc-Inert}}
 
 
-%\level''\H = \interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H  \\
-%\level''\L =  \present~ \eqcl{\level''\H}{H}   \reuz   \level'\L 
-\pagebreak
-$\level'\L~\Present~\level\H \imp \level''\H = \level\H $
-
-
-\begin{proof} Assume $\level'\L~\Present~\level\H$ , which is equivalent to:
-
-$\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}$  by  {\sc \present-Char}.
-
-then:
-
-\prf{
-\level''\H 						                 	& \Equ{\sc Compute}\\
-\interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H 	& \Equ{assumption}\\
-\interpret~(\present~\eqcl{\level\H}{H})  \reuz  \level\H 	& \Equ{\sc InterPresent}\\
-\eqcl{\level\H}{H}  \reuz  \level\H 				& \Equ{{\sc $\reuz$-Idem} and $\level\H \in \eqcl{\level\H}{H}$} \\
-\level\H
-}
-\end{proof}
-
-
-%With extra state, also possible to edit while preserving the invariant. (only add spaces in language %without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not %change. This is only an issue with extra state, since in previous section, $present$ was injective, and %hence $\level\L' = present~\level\H \land \level\L'' = present~\level\H \imp \level'\L = \level''\L$ %\dots \note{explain more?} 
+%$\level'\L~\Present~\level\H \imp \level''\H = \level\H $
 %
-%$\level'\L \in \present~\level\H \imp \level''\H = \level\H$\\
 %
-%\begin{proof} 
+%\begin{proof} Assume $\level'\L~\Present~\level\H$ , which is equivalent to:
+%
+%$\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}$  by  {\sc \present-Char}.
+%
+%then:
+%
 %\prf{
-%\level'\L \in \present~\level\H	& \Imp{\sc InterPresent}\\
-%\level\H \in \interpret~\level'\L	& \Imp{\sc Intr$^*$-Idem}\\
-%\level\H = \interpret^* (\level'\L,\level\H) & \Imp{\sc Compute}\\ 
-%\level\H = \level''\H 
+%\level''\H 						                 	& \Equ{\sc Compute}\\
+%\interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H 	& \Equ{assumption}\\
+%\interpret~(\present~\eqcl{\level\H}{H})  \reuz  \level\H 	& \Equ{\sc InterPresent}\\
+%\eqcl{\level\H}{H}  \reuz  \level\H 				& \Equ{{\sc $\reuz$-Idem} and $\level\H \in %\eqcl{\level\H}{H}$} \\
+%\level\H
 %}
 %\end{proof}
 %
-%\note{Doing this proof by starting with $\level\H$ and substituting is tricky, because {\sc InterPresent} %is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
+
+$\assert{\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}} Compute \assert{ \level\H = \level''\H }$
+
+$\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H} ~\imp~ \wp{Comp}{\level\H = \level''\H}$
+\note{compress this thing a bit?}
+\prf{
+\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}\\
+\Eqv{\sc InterPresent}\\
+\eqcl{\level\H}{H} = interpret~\eqcl{\level'\L}{L} \\
+\Eqv{bla char}\\
+\level\H \in interpret~\eqcl{\level'\L}{L} \\
+\Imp{{\sc $\reuz$-Idem} ?+ result of $interpret$ is eq. class?}\\
+\level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H \\
+	\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{ \level\H = \level''\H }\\
+	\Eqv{\law{$Up$-Def}}\\
+\wp{Up}{ \level\H = \level''\H }\\
+	\Eqv{{\sc \fn{wp}-$\gts$}}\\
+\wp{Up}{ \wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level\H = \level''\H }}\\
+	\Eqv{{\sc \fn{wp}-$\smi$}}\\
+\wp{Up \semi \level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level\H = \level''\H }\\
+	\Eqv{\law{$Dwn$-Def}}\\
+\wp{Up \semi Dwn}{ \level\H = \level''\H }\\
+	\Eqv{\law{$Comp$-Def}}\\
+\wp{Comp}{\level\H = \level''\H}\\
+}
+
+
+%old Hoare proof:
+%
+%$\assert{\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}} Compute \assert{ \level\H = \level''\H }$
+%
+%\begin{proof}
+%
+%Assignment rule gives us:
+%\prf{
+%\assert{ \level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H }\\
+%\qquad \level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H\\
+%\assert{ \level\H = \level''\H }\\
+%\qquad \level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L\\
+%\assert{ \level\H = \level''\H }
+%}
+%
+%From which we can prove {\sc Doc-Inert} by weakening the precondition, if we have:
+%
+%$\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H} ~\imp~ \level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~ %  \level\H\\$
+%
+%\prf{
+%\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}\\
+%\Eqv{\sc InterPresent}\\
+%\eqcl{\level\H}{H} = interpret~\eqcl{\level'\L}{L} \\
+%\Eqv{bla char}\\
+%\level\H \in interpret~\eqcl{\level'\L}{L} \\
+%\Imp{{\sc $\reuz$-Idem} ?+ result of $interpret$ is eq. class?}\\
+%\level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H\\
+%}
+%
+%\end{proof}
+
+%With extra state, also possible to edit while preserving the invariant. (only add spaces in language %without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not %change. This is only an issue with extra state, since in previous section, $present$ was injective, and %hence $\level\L' = present~\level\H \land \level\L'' = present~\level\H \imp \level'\L = \level''\L$ %\dots \note{explain more?} 
 
 \head{{\sc Pres-Inert}}
 
@@ -675,6 +901,42 @@ True
 			\Equ{ {\sc $\reuz$-Idem} and $\level'\L \in \eqcl{\level'\L}{L}$ }\\
 \level'\L
 } 
+
+Or with Hoare:
+
+\prf{
+\assert{\exists h : \eqcl{\level'\L}{L} = \present~\eqcl{h}{H}} Compute \assert{ \level'\L = \level''\L}\\
+}
+
+\prf{
+\assert{ \level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{H}   ~\reuze{L}~   \level'\L }\\
+\qquad \level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H\\
+\assert{ \level'\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L }\\
+\qquad \level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L\\
+\assert{ \level'\L = \level''\L  }
+}
+
+Leaves:
+
+$\eqcl{\level'\L}{L} = \present~\eqcl{h}{H} ~~\imp~~ \level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{H}   ~\reuze{L}~   \level'\L $
+
+Assume $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$, then: \note{existential quant. for $h$?}
+
+\prf{
+\level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{H}   ~\reuze{L}~   \level'\L
+			\Eqv{assumption}\\
+\level'\L = \present~ \eqcl{(\interpret~(\present~\eqcl{h}{H})  ~\reuze{H}~  \level\H)}{H}   ~\reuze{L}~   \level'\L\\
+			\Eqv{\sc InterPresent }\\
+\level'\L  = \present~ \eqcl{(\eqcl{h}{H}  ~\reuze{H}~   \level\H)}{H}   ~\reuze{L}~   \level'\L\\
+			\Eqv{ $\eqcl{\eqcl{x}{R}  ~\reuz~  y}{R}  = \eqcl{x}{R}$}\\
+\level'\L  = \present~\eqcl{h}{H}  ~\reuze{L}~  \level'\L\\
+			\Eqv{ assumption}\\
+\level'\L  = \eqcl{\level'\L}{L}~\reuz~  \level'\L\\
+			\Eqv{ {\sc $\reuz$-Idem} }\\
+\level'\L \in \eqcl{\level'\L}{L}\\
+\Eqv{prop of eqcl}\\
+True
+}
 
 \end{proof}
 
