@@ -286,13 +286,13 @@ genPresentTreeDecl (Decl e _ DeclList) =
   [ "SEM List_"++listTp++" [ || presTree : Presentation ]"
   , "  | List_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    col @elts.pressTree"
+  , "                       col @elts.pressTree"
   , "  | ParseErrList_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presParseErr @node @presentation"
+  , "                       presParseErr @node @presentation"
   , "  | HoleList_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
+  , "                       presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
   , ""
   ]
  where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
