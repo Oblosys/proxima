@@ -143,14 +143,10 @@ type PresentationList = [Presentation]
 -}
 {-
    local variables for Presentation.ColP:
-      vRf
-      hRf
-      vStretch
-      hStretch
-      minHeight
-      minWidth
-      minRightWidth
-      minLeftWidth
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       bottomChildSpace
       topChildSpace
       bottomVStretches
@@ -161,38 +157,42 @@ type PresentationList = [Presentation]
       topCorrection
       stretchMinHeights
       assignedHeights
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
+      vRf
+      hRf
+      vStretch
+      hStretch
+      minHeight
+      minWidth
+      minRightWidth
+      minLeftWidth
 
 -}
 {-
    local variables for Presentation.EmptyP:
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       vRf
       hRf
       vStretch
       hStretch
       minHeight
       minWidth
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
 
 -}
 {-
    local variables for Presentation.ImageP:
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       vRf
       hRf
       vStretch
       hStretch
       minHeight
       minWidth
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
 
 -}
 {-
@@ -201,6 +201,10 @@ type PresentationList = [Presentation]
 -}
 {-
    local variables for Presentation.OverlayP:
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       vRf
       hRf
       vStretch
@@ -211,10 +215,6 @@ type PresentationList = [Presentation]
       minWidth
       minRightWidth
       minLeftWidth
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
 
 -}
 {-
@@ -223,42 +223,38 @@ type PresentationList = [Presentation]
 -}
 {-
    local variables for Presentation.PolyP:
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       vRf
       hRf
       vStretch
       hStretch
       minHeight
       minWidth
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
 
 -}
 {-
    local variables for Presentation.RectangleP:
-      vRf
-      hRf
-      vStretch
-      hStretch
-      minHeight
-      minWidth
       finalVRef
       finalHRef
       finalHeight
       finalWidth
-
--}
-{-
-   local variables for Presentation.RowP:
       vRf
       hRf
       vStretch
       hStretch
       minHeight
       minWidth
-      minBottomHeight
-      minTopHeight
+
+-}
+{-
+   local variables for Presentation.RowP:
+      finalVRef
+      finalHRef
+      finalHeight
+      finalWidth
       rightChildSpace
       leftChildSpace
       rightHStretches
@@ -269,24 +265,28 @@ type PresentationList = [Presentation]
       leftCorrection
       stretchMinWidths
       assignedWidths
-      finalVRef
-      finalHRef
-      finalHeight
-      finalWidth
-
--}
-{-
-   local variables for Presentation.StringP:
       vRf
       hRf
       vStretch
       hStretch
       minHeight
       minWidth
+      minBottomHeight
+      minTopHeight
+
+-}
+{-
+   local variables for Presentation.StringP:
       finalVRef
       finalHRef
       finalHeight
       finalWidth
+      vRf
+      hRf
+      vStretch
+      hStretch
+      minHeight
+      minWidth
 
 -}
 {-
@@ -349,2080 +349,757 @@ sem_Presentation ((WithP (_attrRule) (_child))) =
     (sem_Presentation_WithP (_attrRule) ((sem_Presentation (_child))))
 sem_Presentation_ArrangedP :: (T_Presentation)
 sem_Presentation_ArrangedP  =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 872, column 7)
-            (_lhsOarrangement@_) =
-                setXYWHA _lhsIx _lhsIy _finalWidth _finalHeight _lhsIoldArr
-            -- "ArrangerAG.ag"(line 889, column 7)
-            (_maxFormatterDepth@_) =
-                0
-            -- "ArrangerAG.ag"(line 888, column 7)
-            (_unfoldedTree@_) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
+                _finalWidth
+            (_minHeight) =
+                _finalHeight
+            (_hStretch) =
+                False
+            (_vStretch) =
+                False
+            (_hRf) =
+                hRefA _lhs_oldArr
+            (_vRf) =
+                vRefA _lhs_oldArr
+            (_finalWidth) =
+                widthA _lhs_oldArr
+            (_finalHeight) =
+                heightA _lhs_oldArr
+            (_finalHRef) =
+                hRefA _lhs_oldArr
+            (_finalVRef) =
+                vRefA _lhs_oldArr
+            (_unfoldedTree) =
                 ArrangedP
-            -- "ArrangerAG.ag"(line 887, column 7)
-            (_finalVRef@_) =
-                vRefA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 886, column 7)
-            (_finalHRef@_) =
-                hRefA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 885, column 7)
-            (_finalHeight@_) =
-                heightA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 884, column 7)
-            (_finalWidth@_) =
-                widthA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 883, column 7)
-            (_vRf@_) =
-                vRefA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 882, column 7)
-            (_hRf@_) =
-                hRefA _lhsIoldArr
-            -- "ArrangerAG.ag"(line 881, column 7)
-            (_vStretch@_) =
-                False
-            -- "ArrangerAG.ag"(line 880, column 7)
-            (_hStretch@_) =
-                False
-            -- "ArrangerAG.ag"(line 879, column 7)
-            (_minHeight@_) =
-                _finalHeight
-            -- "ArrangerAG.ag"(line 878, column 7)
-            (_minWidth@_) =
-                _finalWidth
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOmaxFormatterDepth@_) =
-                _maxFormatterDepth
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOunfoldedTree@_) =
-                _unfoldedTree
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_maxFormatterDepth) =
+                0
+        in  ( _lhs_allFonts,setXYWHA _lhs_x _lhs_y _finalWidth _finalHeight _lhs_oldArr,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,_maxFormatterDepth,_minHeight,_minWidth,_unfoldedTree,_vRf,_vStretch)
 sem_Presentation_ColP :: (IDP) ->
                          (Int) ->
                          (T_PresentationList) ->
                          (T_Presentation)
-sem_Presentation_ColP (id_) (hRefNr_) (presentationList_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _presentationListIallFonts :: ([Font])
-            _presentationListIarrangementList :: ([Arrangement])
-            _presentationListIfinalHRefList :: ([Int])
-            _presentationListIfinalHeightList :: ([Int])
-            _presentationListIfinalVRefList :: ([Int])
-            _presentationListIfinalWidthList :: ([Int])
-            _presentationListIhRfList :: ([Int])
-            _presentationListIhStretchList :: ([Bool])
-            _presentationListImaxFormatterDepthList :: ([Int])
-            _presentationListIminHeightList :: ([Int])
-            _presentationListIminWidthList :: ([Int])
-            _presentationListIunfoldedTreeList :: ([Presentation])
-            _presentationListIvRfList :: ([Int])
-            _presentationListIvStretchList :: ([Bool])
-            _presentationListOallFonts :: ([Font])
-            _presentationListOassignedHRefList :: ([Int])
-            _presentationListOassignedHeightList :: ([Int])
-            _presentationListOassignedVRefList :: ([Int])
-            _presentationListOassignedWidthList :: ([Int])
-            _presentationListObackgroundColor :: (Color)
-            _presentationListOfillColor :: (Color)
-            _presentationListOfont :: (Font)
-            _presentationListOfontMetrics :: (FontMetrics)
-            _presentationListOlineColor :: (Color)
-            _presentationListOmouseDown :: (Maybe UpdateDoc)
-            _presentationListOoldArrList :: ([Arrangement])
-            _presentationListOpopupMenuItems :: ([ PopupMenuItem ])
-            _presentationListOtextColor :: (Color)
-            _presentationListOxList :: ([Int])
-            _presentationListOyList :: ([Int])
-            ( _presentationListIallFonts
-             ,_presentationListIarrangementList
-             ,_presentationListIfinalHRefList
-             ,_presentationListIfinalHeightList
-             ,_presentationListIfinalVRefList
-             ,_presentationListIfinalWidthList
-             ,_presentationListIhRfList
-             ,_presentationListIhStretchList
-             ,_presentationListImaxFormatterDepthList
-             ,_presentationListIminHeightList
-             ,_presentationListIminWidthList
-             ,_presentationListIunfoldedTreeList
-             ,_presentationListIvRfList
-             ,_presentationListIvStretchList
-             ) =
-                (presentationList_ (_presentationListOallFonts)
-                                   (_presentationListOassignedHRefList)
-                                   (_presentationListOassignedHeightList)
-                                   (_presentationListOassignedVRefList)
-                                   (_presentationListOassignedWidthList)
-                                   (_presentationListObackgroundColor)
-                                   (_presentationListOfillColor)
-                                   (_presentationListOfont)
-                                   (_presentationListOfontMetrics)
-                                   (_presentationListOlineColor)
-                                   (_presentationListOmouseDown)
-                                   (_presentationListOoldArrList)
-                                   (_presentationListOpopupMenuItems)
-                                   (_presentationListOtextColor)
-                                   (_presentationListOxList)
-                                   (_presentationListOyList))
-            -- "ArrangerAG.ag"(line 246, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                maximum _presentationListImaxFormatterDepthList
-            -- "ArrangerAG.ag"(line 291, column 7)
-            (_lhsOunfoldedTree@_) =
-                ColP id_ hRefNr_ _presentationListIunfoldedTreeList
-            -- "ArrangerAG.ag"(line 397, column 7)
-            (_vRf@_) =
-                _minLeftWidth
-            -- "ArrangerAG.ag"(line 395, column 7)
-            (_hRf@_) =
-                if null _presentationListIhRfList then 0
-                else sum (take hRefNr_ _presentationListIminHeightList) + _presentationListIhRfList !! hRefNr_
-            -- "ArrangerAG.ag"(line 394, column 7)
-            (_vStretch@_) =
-                or _presentationListIvStretchList
-            -- "ArrangerAG.ag"(line 393, column 7)
-            (_hStretch@_) =
-                and _presentationListIhStretchList
-            -- "ArrangerAG.ag"(line 392, column 7)
-            (_minHeight@_) =
-                sum _presentationListIminHeightList
-            -- "ArrangerAG.ag"(line 391, column 7)
-            (_minWidth@_) =
+sem_Presentation_ColP (_id) (_hRefNr) (_presentationList) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minLeftWidth) =
+                if null _presentationList_vRfList then 0
+                else maximum _presentationList_vRfList
+            (_minRightWidth) =
+                if null _presentationList_vRfList then 0
+                else maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationList_minWidthList _presentationList_vRfList ]
+            (_minWidth) =
                 _minLeftWidth + _minRightWidth
-            -- "ArrangerAG.ag"(line 389, column 7)
-            (_minRightWidth@_) =
-                if null _presentationListIvRfList then 0
-                else maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationListIminWidthList _presentationListIvRfList ]
-            -- "ArrangerAG.ag"(line 387, column 7)
-            (_minLeftWidth@_) =
-                if null _presentationListIvRfList then 0
-                else maximum _presentationListIvRfList
-            -- "ArrangerAG.ag"(line 587, column 7)
-            (_bottomChildSpace@_) =
-                round (fromIntegral _bottomTotalSpace / fromIntegral _bottomVStretches )
-            -- "ArrangerAG.ag"(line 586, column 7)
-            (_topChildSpace@_) =
-                round (fromIntegral _topTotalSpace / fromIntegral _topVStretches )
-            -- "ArrangerAG.ag"(line 585, column 7)
-            (_bottomVStretches@_) =
-                length . filter (==True) . drop (hRefNr_+1) $ _presentationListIvStretchList
-            -- "ArrangerAG.ag"(line 584, column 7)
-            (_topVStretches@_) =
-                length . filter (==True) . take hRefNr_ $ _presentationListIvStretchList
-            -- "ArrangerAG.ag"(line 583, column 7)
-            (_bottomTotalSpace@_) =
-                _lhsIassignedHeight - _minHeight - _topTotalSpace   + _bottomCorrection
-            -- "ArrangerAG.ag"(line 582, column 7)
-            (_topTotalSpace@_) =
-                _lhsIassignedHRef - _hRf  + _topCorrection
-            -- "ArrangerAG.ag"(line 577, column 7)
-            (_bottomCorrection@_) =
-                sum (drop (hRefNr_+1) _stretchMinHeights)
-            -- "ArrangerAG.ag"(line 575, column 7)
-            (_topCorrection@_) =
-                sum (take hRefNr_ _stretchMinHeights)
-                    + if _presentationListIvStretchList!! hRefNr_ then _stretchMinHeights !! hRefNr_ else 0
-            -- "ArrangerAG.ag"(line 572, column 7)
-            (_stretchMinHeights@_) =
-                assign _presentationListIvStretchList _presentationListIminHeightList (repeat 0)
-            -- "ArrangerAG.ag"(line 562, column 7)
-            (_presentationListOassignedHRefList@_) =
-                _presentationListIhRfList
-            -- "ArrangerAG.ag"(line 561, column 7)
-            (_presentationListOassignedHeightList@_) =
-                _assignedHeights
-            -- "ArrangerAG.ag"(line 549, column 7)
-            (_assignedHeights@_) =
-                if _presentationListIvStretchList!! hRefNr_
-                then assign _presentationListIvStretchList
+            (_minHeight) =
+                sum _presentationList_minHeightList
+            (_hStretch) =
+                and _presentationList_hStretchList
+            (_vStretch) =
+                or _presentationList_vStretchList
+            (_hRf) =
+                if null _presentationList_hRfList then 0
+                else sum (take _hRefNr _presentationList_minHeightList) + _presentationList_hRfList !! _hRefNr
+            (_vRf) =
+                _minLeftWidth
+            (_assignedHeights) =
+                if _presentationList_vStretchList!! _hRefNr
+                then assign _presentationList_vStretchList
                                    (repeat((_topTotalSpace+ _bottomTotalSpace)`div`(_topVStretches+1+ _bottomVStretches))
                                    )
-                                   _presentationListIminHeightList
-                else assign _presentationListIvStretchList
-                                   (  replicate hRefNr_ (_topChildSpace)
+                                   _presentationList_minHeightList
+                else assign _presentationList_vStretchList
+                                   (  replicate _hRefNr (_topChildSpace)
                                    ++ [0]
                                    ++ repeat _bottomChildSpace
                                    )
-                                   _presentationListIminHeightList
-            -- "ArrangerAG.ag"(line 546, column 7)
-            (_presentationListOassignedVRefList@_) =
-                assign _presentationListIhStretchList
-                (repeat _lhsIassignedVRef)
-                _presentationListIvRfList
-            -- "ArrangerAG.ag"(line 543, column 7)
-            (_presentationListOassignedWidthList@_) =
-                assign _presentationListIhStretchList
-                (repeat _lhsIassignedWidth) _presentationListIminWidthList
-            -- "ArrangerAG.ag"(line 688, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 685, column 7)
-            (_finalHRef@_) =
-                if null _presentationListIhRfList then 0
-                else if _presentationListIvStretchList!! hRefNr_ then _lhsIassignedHRef
-                        else sum (take hRefNr_ _assignedHeights) + (_presentationListIhRfList !! hRefNr_)
-            -- "ArrangerAG.ag"(line 684, column 7)
-            (_finalHeight@_) =
-                sum _presentationListIfinalHeightList
-            -- "ArrangerAG.ag"(line 683, column 7)
-            (_finalWidth@_) =
-                _lhsIassignedWidth
-            -- "ArrangerAG.ag"(line 764, column 7)
-            (_presentationListOyList@_) =
-                init.scanl (+) 0 $ _presentationListIfinalHeightList
-            -- "ArrangerAG.ag"(line 763, column 7)
-            (_presentationListOxList@_) =
-                [ _finalVRef - cvRf | cvRf <- _presentationListIfinalVRefList ]
-            -- "ArrangerAG.ag"(line 842, column 7)
-            (_lhsOarrangement@_) =
-                ColA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-            -- "ArrangerAG.ag"(line 904, column 7)
-            (_presentationListOoldArrList@_) =
-                case _lhsIoldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
-                                    _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _presentationListIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-            -- copy rule (down)
-            (_presentationListOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_presentationListObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_presentationListOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_presentationListOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_presentationListOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_presentationListOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_presentationListOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_presentationListOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_presentationListOtextColor@_) =
-                _lhsItextColor
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+                                   _presentationList_minHeightList
+            (_stretchMinHeights) =
+                assign _presentationList_vStretchList _presentationList_minHeightList (repeat 0)
+            (_topCorrection) =
+                sum (take _hRefNr _stretchMinHeights)
+                    + if _presentationList_vStretchList!! _hRefNr then _stretchMinHeights !! _hRefNr else 0
+            (_bottomCorrection) =
+                sum (drop (_hRefNr+1) _stretchMinHeights)
+            (_topTotalSpace) =
+                _lhs_assignedHRef - _hRf  + _topCorrection
+            (_bottomTotalSpace) =
+                _lhs_assignedHeight - _minHeight - _topTotalSpace   + _bottomCorrection
+            (_topVStretches) =
+                length . filter (==True) . take _hRefNr $ _presentationList_vStretchList
+            (_bottomVStretches) =
+                length . filter (==True) . drop (_hRefNr+1) $ _presentationList_vStretchList
+            (_topChildSpace) =
+                round (fromIntegral _topTotalSpace / fromIntegral _topVStretches )
+            (_bottomChildSpace) =
+                round (fromIntegral _bottomTotalSpace / fromIntegral _bottomVStretches )
+            (_finalWidth) =
+                _lhs_assignedWidth
+            (_finalHeight) =
+                sum _presentationList_finalHeightList
+            (_finalHRef) =
+                if null _presentationList_hRfList then 0
+                else if _presentationList_vStretchList!! _hRefNr then _lhs_assignedHRef
+                        else sum (take _hRefNr _assignedHeights) + (_presentationList_hRfList !! _hRefNr)
+            (_finalVRef) =
+                _lhs_assignedVRef
+            ( _presentationList_allFonts
+             ,_presentationList_arrangementList
+             ,_presentationList_finalHRefList
+             ,_presentationList_finalHeightList
+             ,_presentationList_finalVRefList
+             ,_presentationList_finalWidthList
+             ,_presentationList_hRfList
+             ,_presentationList_hStretchList
+             ,_presentationList_maxFormatterDepthList
+             ,_presentationList_minHeightList
+             ,_presentationList_minWidthList
+             ,_presentationList_unfoldedTreeList
+             ,_presentationList_vRfList
+             ,_presentationList_vStretchList
+             ) =
+                (_presentationList (_lhs_allFonts)
+                                   (_presentationList_hRfList)
+                                   (_assignedHeights)
+                                   (assign _presentationList_hStretchList
+                                    (repeat _lhs_assignedVRef)
+                                    _presentationList_vRfList)
+                                   (assign _presentationList_hStretchList
+                                    (repeat _lhs_assignedWidth) _presentationList_minWidthList)
+                                   (_lhs_backgroundColor)
+                                   (_lhs_fillColor)
+                                   (_lhs_font)
+                                   (_lhs_fontMetrics)
+                                   (_lhs_lineColor)
+                                   (_lhs_mouseDown)
+                                   (case _lhs_oldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0)
+                                   (_lhs_popupMenuItems)
+                                   (_lhs_textColor)
+                                   ([ _finalVRef - cvRf | cvRf <- _presentationList_finalVRefList ])
+                                   (init.scanl (+) 0 $ _presentationList_finalHeightList))
+        in  ( _presentationList_allFonts,ColA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _lhs_backgroundColor _presentationList_arrangementList,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,maximum _presentationList_maxFormatterDepthList,_minHeight,_minWidth,ColP _id _hRefNr _presentationList_unfoldedTreeList,_vRf,_vStretch)
 sem_Presentation_EmptyP :: (IDP) ->
                            (T_Presentation)
-sem_Presentation_EmptyP (id_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 234, column 7)
-            (_lhsOmaxFormatterDepth@_) =
+sem_Presentation_EmptyP (_id) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
                 0
-            -- "ArrangerAG.ag"(line 279, column 7)
-            (_lhsOunfoldedTree@_) =
-                EmptyP id_
-            -- "ArrangerAG.ag"(line 345, column 7)
-            (_vRf@_) =
+            (_minHeight) =
                 0
-            -- "ArrangerAG.ag"(line 344, column 7)
-            (_hRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 343, column 7)
-            (_vStretch@_) =
+            (_hStretch) =
                 False
-            -- "ArrangerAG.ag"(line 342, column 7)
-            (_hStretch@_) =
+            (_vStretch) =
                 False
-            -- "ArrangerAG.ag"(line 341, column 7)
-            (_minHeight@_) =
+            (_hRf) =
                 0
-            -- "ArrangerAG.ag"(line 340, column 7)
-            (_minWidth@_) =
+            (_vRf) =
                 0
-            -- "ArrangerAG.ag"(line 654, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 653, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 652, column 7)
-            (_finalHeight@_) =
-                _lhsIassignedHeight
-            -- "ArrangerAG.ag"(line 651, column 7)
-            (_finalWidth@_) =
-                _lhsIassignedWidth
-            -- "ArrangerAG.ag"(line 813, column 7)
-            (_lhsOarrangement@_) =
-                EmptyA (idAFromP id_) 0 0 0 0 0 0
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_finalWidth) =
+                _lhs_assignedWidth
+            (_finalHeight) =
+                _lhs_assignedHeight
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+        in  ( _lhs_allFonts,EmptyA (idAFromP _id) 0 0 0 0 0 0,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,0,_minHeight,_minWidth,EmptyP _id,_vRf,_vStretch)
 sem_Presentation_ImageP :: (IDP) ->
                            (String) ->
                            (T_Presentation)
-sem_Presentation_ImageP (id_) (src_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 240, column 7)
-            (_lhsOmaxFormatterDepth@_) =
+sem_Presentation_ImageP (_id) (_src) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
                 0
-            -- "ArrangerAG.ag"(line 285, column 7)
-            (_lhsOunfoldedTree@_) =
-                ImageP id_ src_
-            -- "ArrangerAG.ag"(line 366, column 7)
-            (_vRf@_) =
+            (_minHeight) =
                 0
-            -- "ArrangerAG.ag"(line 365, column 7)
-            (_hRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 364, column 7)
-            (_vStretch@_) =
+            (_hStretch) =
                 True
-            -- "ArrangerAG.ag"(line 363, column 7)
-            (_hStretch@_) =
+            (_vStretch) =
                 True
-            -- "ArrangerAG.ag"(line 362, column 7)
-            (_minHeight@_) =
+            (_hRf) =
                 0
-            -- "ArrangerAG.ag"(line 361, column 7)
-            (_minWidth@_) =
+            (_vRf) =
                 0
-            -- "ArrangerAG.ag"(line 669, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 668, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 667, column 7)
-            (_finalHeight@_) =
-                _lhsIassignedHeight
-            -- "ArrangerAG.ag"(line 666, column 7)
-            (_finalWidth@_) =
-                _lhsIassignedWidth
-            -- "ArrangerAG.ag"(line 819, column 7)
-            (_lhsOarrangement@_) =
-                ImageA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef src_ Tile _lhsIlineColor _lhsIbackgroundColor
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_finalWidth) =
+                _lhs_assignedWidth
+            (_finalHeight) =
+                _lhs_assignedHeight
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+        in  ( _lhs_allFonts,ImageA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _src Tile _lhs_lineColor _lhs_backgroundColor,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,0,_minHeight,_minWidth,ImageP _id _src,_vRf,_vStretch)
 sem_Presentation_LocatorP :: (Node) ->
                              (T_Presentation) ->
                              (T_Presentation)
-sem_Presentation_LocatorP (location_) (child_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _childIallFonts :: ([Font])
-            _childIarrangement :: (Arrangement)
-            _childIfinalHRef :: (Int)
-            _childIfinalHeight :: (Int)
-            _childIfinalVRef :: (Int)
-            _childIfinalWidth :: (Int)
-            _childIhRf :: (Int)
-            _childIhStretch :: (Bool)
-            _childImaxFormatterDepth :: (Int)
-            _childIminHeight :: (Int)
-            _childIminWidth :: (Int)
-            _childIunfoldedTree :: (Presentation)
-            _childIvRf :: (Int)
-            _childIvStretch :: (Bool)
-            _childOallFonts :: ([Font])
-            _childOassignedHRef :: (Int)
-            _childOassignedHeight :: (Int)
-            _childOassignedVRef :: (Int)
-            _childOassignedWidth :: (Int)
-            _childObackgroundColor :: (Color)
-            _childOfillColor :: (Color)
-            _childOfont :: (Font)
-            _childOfontMetrics :: (FontMetrics)
-            _childOlineColor :: (Color)
-            _childOmouseDown :: (Maybe UpdateDoc)
-            _childOoldArr :: (Arrangement)
-            _childOpopupMenuItems :: ([ PopupMenuItem ])
-            _childOtextColor :: (Color)
-            _childOx :: (Int)
-            _childOy :: (Int)
-            ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
-                (child_ (_childOallFonts) (_childOassignedHRef) (_childOassignedHeight) (_childOassignedVRef) (_childOassignedWidth) (_childObackgroundColor) (_childOfillColor) (_childOfont) (_childOfontMetrics) (_childOlineColor) (_childOmouseDown) (_childOoldArr) (_childOpopupMenuItems) (_childOtextColor) (_childOx) (_childOy))
-            -- "ArrangerAG.ag"(line 313, column 7)
-            (_lhsOunfoldedTree@_) =
-                LocatorP location_ _childIunfoldedTree
-            -- "ArrangerAG.ag"(line 870, column 7)
-            (_lhsOarrangement@_) =
-                LocatorA location_ _childIarrangement
-            -- "ArrangerAG.ag"(line 924, column 7)
-            (_childOoldArr@_) =
-                case _lhsIoldArr of LocatorA _ arr -> arr
-                                    _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _childIallFonts
-            -- copy rule (up)
-            (_lhsOfinalHRef@_) =
-                _childIfinalHRef
-            -- copy rule (up)
-            (_lhsOfinalHeight@_) =
-                _childIfinalHeight
-            -- copy rule (up)
-            (_lhsOfinalVRef@_) =
-                _childIfinalVRef
-            -- copy rule (up)
-            (_lhsOfinalWidth@_) =
-                _childIfinalWidth
-            -- copy rule (up)
-            (_lhsOhRf@_) =
-                _childIhRf
-            -- copy rule (up)
-            (_lhsOhStretch@_) =
-                _childIhStretch
-            -- copy rule (up)
-            (_lhsOmaxFormatterDepth@_) =
-                _childImaxFormatterDepth
-            -- copy rule (up)
-            (_lhsOminHeight@_) =
-                _childIminHeight
-            -- copy rule (up)
-            (_lhsOminWidth@_) =
-                _childIminWidth
-            -- copy rule (up)
-            (_lhsOvRf@_) =
-                _childIvRf
-            -- copy rule (up)
-            (_lhsOvStretch@_) =
-                _childIvStretch
-            -- copy rule (down)
-            (_childOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_childOassignedHRef@_) =
-                _lhsIassignedHRef
-            -- copy rule (down)
-            (_childOassignedHeight@_) =
-                _lhsIassignedHeight
-            -- copy rule (down)
-            (_childOassignedVRef@_) =
-                _lhsIassignedVRef
-            -- copy rule (down)
-            (_childOassignedWidth@_) =
-                _lhsIassignedWidth
-            -- copy rule (down)
-            (_childObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_childOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_childOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_childOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_childOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_childOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_childOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_childOtextColor@_) =
-                _lhsItextColor
-            -- copy rule (down)
-            (_childOx@_) =
-                _lhsIx
-            -- copy rule (down)
-            (_childOy@_) =
-                _lhsIy
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+sem_Presentation_LocatorP (_location) (_child) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let ( _child_allFonts,_child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,_child_unfoldedTree,_child_vRf,_child_vStretch) =
+                (_child (_lhs_allFonts)
+                        (_lhs_assignedHRef)
+                        (_lhs_assignedHeight)
+                        (_lhs_assignedVRef)
+                        (_lhs_assignedWidth)
+                        (_lhs_backgroundColor)
+                        (_lhs_fillColor)
+                        (_lhs_font)
+                        (_lhs_fontMetrics)
+                        (_lhs_lineColor)
+                        (_lhs_mouseDown)
+                        (case _lhs_oldArr of LocatorA _ arr -> arr
+                                             _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0)
+                        (_lhs_popupMenuItems)
+                        (_lhs_textColor)
+                        (_lhs_x)
+                        (_lhs_y))
+        in  ( _child_allFonts,LocatorA _location _child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,LocatorP _location _child_unfoldedTree,_child_vRf,_child_vStretch)
 sem_Presentation_OverlayP :: (IDP) ->
                              (T_PresentationList) ->
                              (T_Presentation)
-sem_Presentation_OverlayP (id_) (presentationList_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _presentationListIallFonts :: ([Font])
-            _presentationListIarrangementList :: ([Arrangement])
-            _presentationListIfinalHRefList :: ([Int])
-            _presentationListIfinalHeightList :: ([Int])
-            _presentationListIfinalVRefList :: ([Int])
-            _presentationListIfinalWidthList :: ([Int])
-            _presentationListIhRfList :: ([Int])
-            _presentationListIhStretchList :: ([Bool])
-            _presentationListImaxFormatterDepthList :: ([Int])
-            _presentationListIminHeightList :: ([Int])
-            _presentationListIminWidthList :: ([Int])
-            _presentationListIunfoldedTreeList :: ([Presentation])
-            _presentationListIvRfList :: ([Int])
-            _presentationListIvStretchList :: ([Bool])
-            _presentationListOallFonts :: ([Font])
-            _presentationListOassignedHRefList :: ([Int])
-            _presentationListOassignedHeightList :: ([Int])
-            _presentationListOassignedVRefList :: ([Int])
-            _presentationListOassignedWidthList :: ([Int])
-            _presentationListObackgroundColor :: (Color)
-            _presentationListOfillColor :: (Color)
-            _presentationListOfont :: (Font)
-            _presentationListOfontMetrics :: (FontMetrics)
-            _presentationListOlineColor :: (Color)
-            _presentationListOmouseDown :: (Maybe UpdateDoc)
-            _presentationListOoldArrList :: ([Arrangement])
-            _presentationListOpopupMenuItems :: ([ PopupMenuItem ])
-            _presentationListOtextColor :: (Color)
-            _presentationListOxList :: ([Int])
-            _presentationListOyList :: ([Int])
-            ( _presentationListIallFonts
-             ,_presentationListIarrangementList
-             ,_presentationListIfinalHRefList
-             ,_presentationListIfinalHeightList
-             ,_presentationListIfinalVRefList
-             ,_presentationListIfinalWidthList
-             ,_presentationListIhRfList
-             ,_presentationListIhStretchList
-             ,_presentationListImaxFormatterDepthList
-             ,_presentationListIminHeightList
-             ,_presentationListIminWidthList
-             ,_presentationListIunfoldedTreeList
-             ,_presentationListIvRfList
-             ,_presentationListIvStretchList
-             ) =
-                (presentationList_ (_presentationListOallFonts)
-                                   (_presentationListOassignedHRefList)
-                                   (_presentationListOassignedHeightList)
-                                   (_presentationListOassignedVRefList)
-                                   (_presentationListOassignedWidthList)
-                                   (_presentationListObackgroundColor)
-                                   (_presentationListOfillColor)
-                                   (_presentationListOfont)
-                                   (_presentationListOfontMetrics)
-                                   (_presentationListOlineColor)
-                                   (_presentationListOmouseDown)
-                                   (_presentationListOoldArrList)
-                                   (_presentationListOpopupMenuItems)
-                                   (_presentationListOtextColor)
-                                   (_presentationListOxList)
-                                   (_presentationListOyList))
-            -- "ArrangerAG.ag"(line 248, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                maximum _presentationListImaxFormatterDepthList
-            -- "ArrangerAG.ag"(line 293, column 7)
-            (_lhsOunfoldedTree@_) =
-                OverlayP id_ _presentationListIunfoldedTreeList
-            -- "ArrangerAG.ag"(line 408, column 7)
-            (_vRf@_) =
-                _minLeftWidth
-            -- "ArrangerAG.ag"(line 407, column 7)
-            (_hRf@_) =
-                _minTopHeight
-            -- "ArrangerAG.ag"(line 406, column 7)
-            (_vStretch@_) =
-                and _presentationListIvStretchList
-            -- "ArrangerAG.ag"(line 405, column 7)
-            (_hStretch@_) =
-                and _presentationListIhStretchList
-            -- "ArrangerAG.ag"(line 404, column 7)
-            (_minHeight@_) =
-                _minTopHeight + _minBottomHeight
-            -- "ArrangerAG.ag"(line 403, column 7)
-            (_minBottomHeight@_) =
-                maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationListIminHeightList _presentationListIhRfList ]
-            -- "ArrangerAG.ag"(line 402, column 7)
-            (_minTopHeight@_) =
-                maximum _presentationListIhRfList
-            -- "ArrangerAG.ag"(line 401, column 7)
-            (_minWidth@_) =
+sem_Presentation_OverlayP (_id) (_presentationList) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minLeftWidth) =
+                maximum _presentationList_vRfList
+            (_minRightWidth) =
+                maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationList_minWidthList _presentationList_vRfList ]
+            (_minWidth) =
                 _minLeftWidth + _minRightWidth
-            -- "ArrangerAG.ag"(line 400, column 7)
-            (_minRightWidth@_) =
-                maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationListIminWidthList _presentationListIvRfList ]
-            -- "ArrangerAG.ag"(line 399, column 7)
-            (_minLeftWidth@_) =
-                maximum _presentationListIvRfList
-            -- "ArrangerAG.ag"(line 595, column 7)
-            (_presentationListOassignedVRefList@_) =
-                assign _presentationListIhStretchList
-                (repeat _lhsIassignedVRef) _presentationListIvRfList
-            -- "ArrangerAG.ag"(line 593, column 7)
-            (_presentationListOassignedWidthList@_) =
-                assign _presentationListIhStretchList
-                (repeat _lhsIassignedWidth) _presentationListIminWidthList
-            -- "ArrangerAG.ag"(line 591, column 7)
-            (_presentationListOassignedHRefList@_) =
-                assign _presentationListIvStretchList
-                (repeat _lhsIassignedHRef) _presentationListIhRfList
-            -- "ArrangerAG.ag"(line 589, column 7)
-            (_presentationListOassignedHeightList@_) =
-                assign _presentationListIvStretchList
-                (repeat _lhsIassignedHeight) _presentationListIminHeightList
-            -- "ArrangerAG.ag"(line 693, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 692, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 691, column 7)
-            (_finalHeight@_) =
-                _lhsIassignedHeight
-            -- "ArrangerAG.ag"(line 690, column 7)
-            (_finalWidth@_) =
-                _lhsIassignedWidth
-            -- "ArrangerAG.ag"(line 767, column 7)
-            (_presentationListOyList@_) =
-                [ _finalHRef - chRf | chRf <- _presentationListIfinalHRefList ]
-            -- "ArrangerAG.ag"(line 766, column 7)
-            (_presentationListOxList@_) =
-                [ _finalVRef - cvRf | cvRf <- _presentationListIfinalVRefList ]
-            -- "ArrangerAG.ag"(line 852, column 7)
-            (_lhsOarrangement@_) =
-                OverlayA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-            -- "ArrangerAG.ag"(line 909, column 7)
-            (_presentationListOoldArrList@_) =
-                case _lhsIoldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
-                                    _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _presentationListIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-            -- copy rule (down)
-            (_presentationListOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_presentationListObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_presentationListOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_presentationListOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_presentationListOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_presentationListOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_presentationListOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_presentationListOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_presentationListOtextColor@_) =
-                _lhsItextColor
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_minTopHeight) =
+                maximum _presentationList_hRfList
+            (_minBottomHeight) =
+                maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationList_minHeightList _presentationList_hRfList ]
+            (_minHeight) =
+                _minTopHeight + _minBottomHeight
+            (_hStretch) =
+                and _presentationList_hStretchList
+            (_vStretch) =
+                and _presentationList_vStretchList
+            (_hRf) =
+                _minTopHeight
+            (_vRf) =
+                _minLeftWidth
+            (_finalWidth) =
+                _lhs_assignedWidth
+            (_finalHeight) =
+                _lhs_assignedHeight
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+            ( _presentationList_allFonts
+             ,_presentationList_arrangementList
+             ,_presentationList_finalHRefList
+             ,_presentationList_finalHeightList
+             ,_presentationList_finalVRefList
+             ,_presentationList_finalWidthList
+             ,_presentationList_hRfList
+             ,_presentationList_hStretchList
+             ,_presentationList_maxFormatterDepthList
+             ,_presentationList_minHeightList
+             ,_presentationList_minWidthList
+             ,_presentationList_unfoldedTreeList
+             ,_presentationList_vRfList
+             ,_presentationList_vStretchList
+             ) =
+                (_presentationList (_lhs_allFonts)
+                                   (assign _presentationList_vStretchList
+                                    (repeat _lhs_assignedHRef) _presentationList_hRfList)
+                                   (assign _presentationList_vStretchList
+                                    (repeat _lhs_assignedHeight) _presentationList_minHeightList)
+                                   (assign _presentationList_hStretchList
+                                    (repeat _lhs_assignedVRef) _presentationList_vRfList)
+                                   (assign _presentationList_hStretchList
+                                    (repeat _lhs_assignedWidth) _presentationList_minWidthList)
+                                   (_lhs_backgroundColor)
+                                   (_lhs_fillColor)
+                                   (_lhs_font)
+                                   (_lhs_fontMetrics)
+                                   (_lhs_lineColor)
+                                   (_lhs_mouseDown)
+                                   (case _lhs_oldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0)
+                                   (_lhs_popupMenuItems)
+                                   (_lhs_textColor)
+                                   ([ _finalVRef - cvRf | cvRf <- _presentationList_finalVRefList ])
+                                   ([ _finalHRef - chRf | chRf <- _presentationList_finalHRefList ]))
+        in  ( _presentationList_allFonts,OverlayA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _lhs_backgroundColor _presentationList_arrangementList,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,maximum _presentationList_maxFormatterDepthList,_minHeight,_minWidth,OverlayP _id _presentationList_unfoldedTreeList,_vRf,_vStretch)
 sem_Presentation_ParsingP :: (IDP) ->
                              (T_Presentation) ->
                              (T_Presentation)
-sem_Presentation_ParsingP (id_) (child_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _childIallFonts :: ([Font])
-            _childIarrangement :: (Arrangement)
-            _childIfinalHRef :: (Int)
-            _childIfinalHeight :: (Int)
-            _childIfinalVRef :: (Int)
-            _childIfinalWidth :: (Int)
-            _childIhRf :: (Int)
-            _childIhStretch :: (Bool)
-            _childImaxFormatterDepth :: (Int)
-            _childIminHeight :: (Int)
-            _childIminWidth :: (Int)
-            _childIunfoldedTree :: (Presentation)
-            _childIvRf :: (Int)
-            _childIvStretch :: (Bool)
-            _childOallFonts :: ([Font])
-            _childOassignedHRef :: (Int)
-            _childOassignedHeight :: (Int)
-            _childOassignedVRef :: (Int)
-            _childOassignedWidth :: (Int)
-            _childObackgroundColor :: (Color)
-            _childOfillColor :: (Color)
-            _childOfont :: (Font)
-            _childOfontMetrics :: (FontMetrics)
-            _childOlineColor :: (Color)
-            _childOmouseDown :: (Maybe UpdateDoc)
-            _childOoldArr :: (Arrangement)
-            _childOpopupMenuItems :: ([ PopupMenuItem ])
-            _childOtextColor :: (Color)
-            _childOx :: (Int)
-            _childOy :: (Int)
-            ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
-                (child_ (_childOallFonts) (_childOassignedHRef) (_childOassignedHeight) (_childOassignedVRef) (_childOassignedWidth) (_childObackgroundColor) (_childOfillColor) (_childOfont) (_childOfontMetrics) (_childOlineColor) (_childOmouseDown) (_childOoldArr) (_childOpopupMenuItems) (_childOtextColor) (_childOx) (_childOy))
-            -- "ArrangerAG.ag"(line 311, column 7)
-            (_lhsOunfoldedTree@_) =
-                ParsingP id_  _childIunfoldedTree
-            -- "ArrangerAG.ag"(line 868, column 7)
-            (_lhsOarrangement@_) =
-                ParsingA (idAFromP id_) _childIarrangement
-            -- "ArrangerAG.ag"(line 919, column 7)
-            (_childOoldArr@_) =
-                case _lhsIoldArr of ParsingA _ arr -> arr
-                                    _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _childIallFonts
-            -- copy rule (up)
-            (_lhsOfinalHRef@_) =
-                _childIfinalHRef
-            -- copy rule (up)
-            (_lhsOfinalHeight@_) =
-                _childIfinalHeight
-            -- copy rule (up)
-            (_lhsOfinalVRef@_) =
-                _childIfinalVRef
-            -- copy rule (up)
-            (_lhsOfinalWidth@_) =
-                _childIfinalWidth
-            -- copy rule (up)
-            (_lhsOhRf@_) =
-                _childIhRf
-            -- copy rule (up)
-            (_lhsOhStretch@_) =
-                _childIhStretch
-            -- copy rule (up)
-            (_lhsOmaxFormatterDepth@_) =
-                _childImaxFormatterDepth
-            -- copy rule (up)
-            (_lhsOminHeight@_) =
-                _childIminHeight
-            -- copy rule (up)
-            (_lhsOminWidth@_) =
-                _childIminWidth
-            -- copy rule (up)
-            (_lhsOvRf@_) =
-                _childIvRf
-            -- copy rule (up)
-            (_lhsOvStretch@_) =
-                _childIvStretch
-            -- copy rule (down)
-            (_childOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_childOassignedHRef@_) =
-                _lhsIassignedHRef
-            -- copy rule (down)
-            (_childOassignedHeight@_) =
-                _lhsIassignedHeight
-            -- copy rule (down)
-            (_childOassignedVRef@_) =
-                _lhsIassignedVRef
-            -- copy rule (down)
-            (_childOassignedWidth@_) =
-                _lhsIassignedWidth
-            -- copy rule (down)
-            (_childObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_childOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_childOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_childOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_childOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_childOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_childOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_childOtextColor@_) =
-                _lhsItextColor
-            -- copy rule (down)
-            (_childOx@_) =
-                _lhsIx
-            -- copy rule (down)
-            (_childOy@_) =
-                _lhsIy
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+sem_Presentation_ParsingP (_id) (_child) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let ( _child_allFonts,_child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,_child_unfoldedTree,_child_vRf,_child_vStretch) =
+                (_child (_lhs_allFonts)
+                        (_lhs_assignedHRef)
+                        (_lhs_assignedHeight)
+                        (_lhs_assignedVRef)
+                        (_lhs_assignedWidth)
+                        (_lhs_backgroundColor)
+                        (_lhs_fillColor)
+                        (_lhs_font)
+                        (_lhs_fontMetrics)
+                        (_lhs_lineColor)
+                        (_lhs_mouseDown)
+                        (case _lhs_oldArr of ParsingA _ arr -> arr
+                                             _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0)
+                        (_lhs_popupMenuItems)
+                        (_lhs_textColor)
+                        (_lhs_x)
+                        (_lhs_y))
+        in  ( _child_allFonts,ParsingA (idAFromP _id) _child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,ParsingP _id  _child_unfoldedTree,_child_vRf,_child_vStretch)
 sem_Presentation_PolyP :: (IDP) ->
                           ([ (Float, Float) ]) ->
                           (Int) ->
                           (T_Presentation)
-sem_Presentation_PolyP (id_) (pointList_) (lineWidth_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 242, column 7)
-            (_lhsOmaxFormatterDepth@_) =
+sem_Presentation_PolyP (_id) (_pointList) (_lineWidth) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
                 0
-            -- "ArrangerAG.ag"(line 287, column 7)
-            (_lhsOunfoldedTree@_) =
-                PolyP id_ pointList_ lineWidth_
-            -- "ArrangerAG.ag"(line 373, column 7)
-            (_vRf@_) =
+            (_minHeight) =
                 0
-            -- "ArrangerAG.ag"(line 372, column 7)
-            (_hRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 371, column 7)
-            (_vStretch@_) =
+            (_hStretch) =
                 True
-            -- "ArrangerAG.ag"(line 370, column 7)
-            (_hStretch@_) =
+            (_vStretch) =
                 True
-            -- "ArrangerAG.ag"(line 369, column 7)
-            (_minHeight@_) =
+            (_hRf) =
                 0
-            -- "ArrangerAG.ag"(line 368, column 7)
-            (_minWidth@_) =
+            (_vRf) =
                 0
-            -- "ArrangerAG.ag"(line 674, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 673, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 672, column 7)
-            (_finalHeight@_) =
-                _lhsIassignedHeight
-            -- "ArrangerAG.ag"(line 671, column 7)
-            (_finalWidth@_) =
-                _lhsIassignedWidth
-            -- "ArrangerAG.ag"(line 821, column 7)
-            (_lhsOarrangement@_) =
-                let mkPoint (rx, ry) = ( round (rx * fromIntegral (_finalWidth-1))
-                                                   , round (ry * fromIntegral (_finalHeight-1)) )
-                in  PolyA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef (map mkPoint pointList_) lineWidth_ _lhsIlineColor _lhsIbackgroundColor
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_finalWidth) =
+                _lhs_assignedWidth
+            (_finalHeight) =
+                _lhs_assignedHeight
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+        in  ( _lhs_allFonts
+             ,let mkPoint (rx, ry) = ( round (rx * fromIntegral (_finalWidth-1))
+                                                 , round (ry * fromIntegral (_finalHeight-1)) )
+              in  PolyA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef (map mkPoint _pointList) _lineWidth _lhs_lineColor _lhs_backgroundColor
+             ,_finalHRef
+             ,_finalHeight
+             ,_finalVRef
+             ,_finalWidth
+             ,_hRf
+             ,_hStretch
+             ,0
+             ,_minHeight
+             ,_minWidth
+             ,PolyP _id _pointList _lineWidth
+             ,_vRf
+             ,_vStretch
+             )
 sem_Presentation_RectangleP :: (IDP) ->
                                (Int) ->
                                (Int) ->
                                (Int) ->
                                (T_Presentation)
-sem_Presentation_RectangleP (id_) (w_) (h_) (lineWidth_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 238, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                0
-            -- "ArrangerAG.ag"(line 283, column 7)
-            (_lhsOunfoldedTree@_) =
-                RectangleP id_ w_ h_ lineWidth_
-            -- "ArrangerAG.ag"(line 359, column 7)
-            (_vRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 358, column 7)
-            (_hRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 357, column 7)
-            (_vStretch@_) =
+sem_Presentation_RectangleP (_id) (_w) (_h) (_lineWidth) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
+                _w
+            (_minHeight) =
+                _h
+            (_hStretch) =
                 False
-            -- "ArrangerAG.ag"(line 356, column 7)
-            (_hStretch@_) =
+            (_vStretch) =
                 False
-            -- "ArrangerAG.ag"(line 355, column 7)
-            (_minHeight@_) =
-                h_
-            -- "ArrangerAG.ag"(line 354, column 7)
-            (_minWidth@_) =
-                w_
-            -- "ArrangerAG.ag"(line 664, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 663, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 662, column 7)
-            (_finalHeight@_) =
-                _minHeight
-            -- "ArrangerAG.ag"(line 661, column 7)
-            (_finalWidth@_) =
+            (_hRf) =
+                0
+            (_vRf) =
+                0
+            (_finalWidth) =
                 _minWidth
-            -- "ArrangerAG.ag"(line 817, column 7)
-            (_lhsOarrangement@_) =
-                RectangleA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef lineWidth_ Solid _lhsIlineColor _lhsIfillColor
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
+            (_finalHeight) =
                 _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+        in  ( _lhs_allFonts,RectangleA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _lineWidth Solid _lhs_lineColor _lhs_fillColor,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,0,_minHeight,_minWidth,RectangleP _id _w _h _lineWidth,_vRf,_vStretch)
 sem_Presentation_RowP :: (IDP) ->
                          (Int) ->
                          (T_PresentationList) ->
                          (T_Presentation)
-sem_Presentation_RowP (id_) (vRefNr_) (presentationList_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _presentationListIallFonts :: ([Font])
-            _presentationListIarrangementList :: ([Arrangement])
-            _presentationListIfinalHRefList :: ([Int])
-            _presentationListIfinalHeightList :: ([Int])
-            _presentationListIfinalVRefList :: ([Int])
-            _presentationListIfinalWidthList :: ([Int])
-            _presentationListIhRfList :: ([Int])
-            _presentationListIhStretchList :: ([Bool])
-            _presentationListImaxFormatterDepthList :: ([Int])
-            _presentationListIminHeightList :: ([Int])
-            _presentationListIminWidthList :: ([Int])
-            _presentationListIunfoldedTreeList :: ([Presentation])
-            _presentationListIvRfList :: ([Int])
-            _presentationListIvStretchList :: ([Bool])
-            _presentationListOallFonts :: ([Font])
-            _presentationListOassignedHRefList :: ([Int])
-            _presentationListOassignedHeightList :: ([Int])
-            _presentationListOassignedVRefList :: ([Int])
-            _presentationListOassignedWidthList :: ([Int])
-            _presentationListObackgroundColor :: (Color)
-            _presentationListOfillColor :: (Color)
-            _presentationListOfont :: (Font)
-            _presentationListOfontMetrics :: (FontMetrics)
-            _presentationListOlineColor :: (Color)
-            _presentationListOmouseDown :: (Maybe UpdateDoc)
-            _presentationListOoldArrList :: ([Arrangement])
-            _presentationListOpopupMenuItems :: ([ PopupMenuItem ])
-            _presentationListOtextColor :: (Color)
-            _presentationListOxList :: ([Int])
-            _presentationListOyList :: ([Int])
-            ( _presentationListIallFonts
-             ,_presentationListIarrangementList
-             ,_presentationListIfinalHRefList
-             ,_presentationListIfinalHeightList
-             ,_presentationListIfinalVRefList
-             ,_presentationListIfinalWidthList
-             ,_presentationListIhRfList
-             ,_presentationListIhStretchList
-             ,_presentationListImaxFormatterDepthList
-             ,_presentationListIminHeightList
-             ,_presentationListIminWidthList
-             ,_presentationListIunfoldedTreeList
-             ,_presentationListIvRfList
-             ,_presentationListIvStretchList
-             ) =
-                (presentationList_ (_presentationListOallFonts)
-                                   (_presentationListOassignedHRefList)
-                                   (_presentationListOassignedHeightList)
-                                   (_presentationListOassignedVRefList)
-                                   (_presentationListOassignedWidthList)
-                                   (_presentationListObackgroundColor)
-                                   (_presentationListOfillColor)
-                                   (_presentationListOfont)
-                                   (_presentationListOfontMetrics)
-                                   (_presentationListOlineColor)
-                                   (_presentationListOmouseDown)
-                                   (_presentationListOoldArrList)
-                                   (_presentationListOpopupMenuItems)
-                                   (_presentationListOtextColor)
-                                   (_presentationListOxList)
-                                   (_presentationListOyList))
-            -- "ArrangerAG.ag"(line 244, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                maximum _presentationListImaxFormatterDepthList
-            -- "ArrangerAG.ag"(line 289, column 7)
-            (_lhsOunfoldedTree@_) =
-                RowP id_ vRefNr_ _presentationListIunfoldedTreeList
-            -- "ArrangerAG.ag"(line 384, column 7)
-            (_vRf@_) =
-                if null _presentationListIvRfList then 0
-                else sum (take vRefNr_ _presentationListIminWidthList) + _presentationListIvRfList !! vRefNr_
-            -- "ArrangerAG.ag"(line 383, column 7)
-            (_hRf@_) =
-                _minTopHeight
-            -- "ArrangerAG.ag"(line 382, column 7)
-            (_vStretch@_) =
-                and _presentationListIvStretchList
-            -- "ArrangerAG.ag"(line 381, column 7)
-            (_hStretch@_) =
-                or _presentationListIhStretchList
-            -- "ArrangerAG.ag"(line 380, column 7)
-            (_minHeight@_) =
+sem_Presentation_RowP (_id) (_vRefNr) (_presentationList) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minTopHeight) =
+                if null _presentationList_hRfList then 0
+                   else maximum _presentationList_hRfList
+            (_minBottomHeight) =
+                if null _presentationList_hRfList then 0
+                else maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationList_minHeightList _presentationList_hRfList ]
+            (_minWidth) =
+                sum _presentationList_minWidthList
+            (_minHeight) =
                 _minTopHeight + _minBottomHeight
-            -- "ArrangerAG.ag"(line 379, column 7)
-            (_minWidth@_) =
-                sum _presentationListIminWidthList
-            -- "ArrangerAG.ag"(line 377, column 7)
-            (_minBottomHeight@_) =
-                if null _presentationListIhRfList then 0
-                else maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationListIminHeightList _presentationListIhRfList ]
-            -- "ArrangerAG.ag"(line 375, column 7)
-            (_minTopHeight@_) =
-                if null _presentationListIhRfList then 0
-                   else maximum _presentationListIhRfList
-            -- "ArrangerAG.ag"(line 538, column 7)
-            (_rightChildSpace@_) =
-                round (fromIntegral _rightTotalSpace / fromIntegral _rightHStretches )
-            -- "ArrangerAG.ag"(line 537, column 7)
-            (_leftChildSpace@_) =
-                round (fromIntegral _leftTotalSpace / fromIntegral _leftHStretches )
-            -- "ArrangerAG.ag"(line 536, column 7)
-            (_rightHStretches@_) =
-                length . filter (==True) . drop (vRefNr_+1) $ _presentationListIhStretchList
-            -- "ArrangerAG.ag"(line 535, column 7)
-            (_leftHStretches@_) =
-                length . filter (==True) . take vRefNr_ $ _presentationListIhStretchList
-            -- "ArrangerAG.ag"(line 534, column 7)
-            (_rightTotalSpace@_) =
-                _lhsIassignedWidth - _minWidth - _leftTotalSpace  + _rightCorrection
-            -- "ArrangerAG.ag"(line 533, column 7)
-            (_leftTotalSpace@_) =
-                _lhsIassignedVRef - _vRf    + _leftCorrection
-            -- "ArrangerAG.ag"(line 531, column 7)
-            (_rightCorrection@_) =
-                sum (drop (vRefNr_+1) _stretchMinWidths)
-            -- "ArrangerAG.ag"(line 529, column 7)
-            (_leftCorrection@_) =
-                sum (take vRefNr_ _stretchMinWidths)
-                   + if _presentationListIhStretchList!! vRefNr_ then _stretchMinWidths !! vRefNr_ else 0
-            -- "ArrangerAG.ag"(line 526, column 7)
-            (_stretchMinWidths@_) =
-                assign _presentationListIhStretchList _presentationListIminWidthList (repeat 0)
-            -- "ArrangerAG.ag"(line 520, column 7)
-            (_presentationListOassignedHRefList@_) =
-                assign _presentationListIvStretchList
-                (repeat _hRf)
-                                     _presentationListIhRfList
-            -- "ArrangerAG.ag"(line 518, column 7)
-            (_presentationListOassignedHeightList@_) =
-                assign _presentationListIvStretchList
-                (repeat _lhsIassignedHeight) _presentationListIminHeightList
-            -- "ArrangerAG.ag"(line 516, column 7)
-            (_presentationListOassignedVRefList@_) =
-                _presentationListIvRfList
-            -- "ArrangerAG.ag"(line 515, column 7)
-            (_presentationListOassignedWidthList@_) =
-                _assignedWidths
-            -- "ArrangerAG.ag"(line 503, column 7)
-            (_assignedWidths@_) =
-                if _presentationListIhStretchList!! vRefNr_
-                      then assign _presentationListIhStretchList
+            (_hStretch) =
+                or _presentationList_hStretchList
+            (_vStretch) =
+                and _presentationList_vStretchList
+            (_hRf) =
+                _minTopHeight
+            (_vRf) =
+                if null _presentationList_vRfList then 0
+                else sum (take _vRefNr _presentationList_minWidthList) + _presentationList_vRfList !! _vRefNr
+            (_assignedWidths) =
+                if _presentationList_hStretchList!! _vRefNr
+                      then assign _presentationList_hStretchList
                                     (repeat((_leftTotalSpace+ _rightTotalSpace)`div`(_leftHStretches+1+ _rightHStretches))
                                     )
-                                    _presentationListIminWidthList
-                      else assign _presentationListIhStretchList
-                                    (  replicate vRefNr_ (_leftChildSpace)
+                                    _presentationList_minWidthList
+                      else assign _presentationList_hStretchList
+                                    (  replicate _vRefNr (_leftChildSpace)
                                     ++ [0]
                                     ++ repeat _rightChildSpace
                                     )
-                                    _presentationListIminWidthList
-            -- "ArrangerAG.ag"(line 679, column 7)
-            (_finalVRef@_) =
-                if null _presentationListIvRfList then 0
-                else if _presentationListIhStretchList!! vRefNr_ then _lhsIassignedVRef
-                        else sum (take vRefNr_ _assignedWidths) + (_presentationListIvRfList !! vRefNr_)
-            -- "ArrangerAG.ag"(line 678, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 677, column 7)
-            (_finalHeight@_) =
-                _lhsIassignedHeight
-            -- "ArrangerAG.ag"(line 676, column 7)
-            (_finalWidth@_) =
-                sum _presentationListIfinalWidthList
-            -- "ArrangerAG.ag"(line 761, column 7)
-            (_presentationListOyList@_) =
-                [ _finalHRef - chRf | chRf <- _presentationListIfinalHRefList ]
-            -- "ArrangerAG.ag"(line 760, column 7)
-            (_presentationListOxList@_) =
-                init.scanl (+) 0 $ _presentationListIfinalWidthList
-            -- "ArrangerAG.ag"(line 830, column 7)
-            (_lhsOarrangement@_) =
-                RowA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-            -- "ArrangerAG.ag"(line 899, column 7)
-            (_presentationListOoldArrList@_) =
-                case _lhsIoldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
-                                    _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _presentationListIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
-                _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-            -- copy rule (down)
-            (_presentationListOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_presentationListObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_presentationListOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_presentationListOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_presentationListOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_presentationListOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_presentationListOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_presentationListOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_presentationListOtextColor@_) =
-                _lhsItextColor
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+                                    _presentationList_minWidthList
+            (_stretchMinWidths) =
+                assign _presentationList_hStretchList _presentationList_minWidthList (repeat 0)
+            (_leftCorrection) =
+                sum (take _vRefNr _stretchMinWidths)
+                   + if _presentationList_hStretchList!! _vRefNr then _stretchMinWidths !! _vRefNr else 0
+            (_rightCorrection) =
+                sum (drop (_vRefNr+1) _stretchMinWidths)
+            (_leftTotalSpace) =
+                _lhs_assignedVRef - _vRf    + _leftCorrection
+            (_rightTotalSpace) =
+                _lhs_assignedWidth - _minWidth - _leftTotalSpace  + _rightCorrection
+            (_leftHStretches) =
+                length . filter (==True) . take _vRefNr $ _presentationList_hStretchList
+            (_rightHStretches) =
+                length . filter (==True) . drop (_vRefNr+1) $ _presentationList_hStretchList
+            (_leftChildSpace) =
+                round (fromIntegral _leftTotalSpace / fromIntegral _leftHStretches )
+            (_rightChildSpace) =
+                round (fromIntegral _rightTotalSpace / fromIntegral _rightHStretches )
+            (_finalWidth) =
+                sum _presentationList_finalWidthList
+            (_finalHeight) =
+                _lhs_assignedHeight
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                if null _presentationList_vRfList then 0
+                else if _presentationList_hStretchList!! _vRefNr then _lhs_assignedVRef
+                        else sum (take _vRefNr _assignedWidths) + (_presentationList_vRfList !! _vRefNr)
+            ( _presentationList_allFonts
+             ,_presentationList_arrangementList
+             ,_presentationList_finalHRefList
+             ,_presentationList_finalHeightList
+             ,_presentationList_finalVRefList
+             ,_presentationList_finalWidthList
+             ,_presentationList_hRfList
+             ,_presentationList_hStretchList
+             ,_presentationList_maxFormatterDepthList
+             ,_presentationList_minHeightList
+             ,_presentationList_minWidthList
+             ,_presentationList_unfoldedTreeList
+             ,_presentationList_vRfList
+             ,_presentationList_vStretchList
+             ) =
+                (_presentationList (_lhs_allFonts)
+                                   (assign _presentationList_vStretchList
+                                    (repeat _hRf)
+                                                         _presentationList_hRfList)
+                                   (assign _presentationList_vStretchList
+                                    (repeat _lhs_assignedHeight) _presentationList_minHeightList)
+                                   (_presentationList_vRfList)
+                                   (_assignedWidths)
+                                   (_lhs_backgroundColor)
+                                   (_lhs_fillColor)
+                                   (_lhs_font)
+                                   (_lhs_fontMetrics)
+                                   (_lhs_lineColor)
+                                   (_lhs_mouseDown)
+                                   (case _lhs_oldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0)
+                                   (_lhs_popupMenuItems)
+                                   (_lhs_textColor)
+                                   (init.scanl (+) 0 $ _presentationList_finalWidthList)
+                                   ([ _finalHRef - chRf | chRf <- _presentationList_finalHRefList ]))
+        in  ( _presentationList_allFonts,RowA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _lhs_backgroundColor _presentationList_arrangementList,_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,maximum _presentationList_maxFormatterDepthList,_minHeight,_minWidth,RowP _id _vRefNr _presentationList_unfoldedTreeList,_vRf,_vStretch)
 sem_Presentation_StringP :: (IDP) ->
                             (String) ->
                             (T_Presentation)
-sem_Presentation_StringP (id_) (text_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            -- "ArrangerAG.ag"(line 236, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                0
-            -- "ArrangerAG.ag"(line 281, column 7)
-            (_lhsOunfoldedTree@_) =
-                StringP id_ text_
-            -- "ArrangerAG.ag"(line 352, column 7)
-            (_vRf@_) =
-                0
-            -- "ArrangerAG.ag"(line 351, column 7)
-            (_hRf@_) =
-                baseLine _lhsIfontMetrics _lhsIfont
-            -- "ArrangerAG.ag"(line 350, column 7)
-            (_vStretch@_) =
+sem_Presentation_StringP (_id) (_text) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_minWidth) =
+                textWidth _lhs_fontMetrics _lhs_font _text
+            (_minHeight) =
+                charHeight _lhs_fontMetrics _lhs_font
+            (_hStretch) =
                 False
-            -- "ArrangerAG.ag"(line 349, column 7)
-            (_hStretch@_) =
+            (_vStretch) =
                 False
-            -- "ArrangerAG.ag"(line 348, column 7)
-            (_minHeight@_) =
-                charHeight _lhsIfontMetrics _lhsIfont
-            -- "ArrangerAG.ag"(line 347, column 7)
-            (_minWidth@_) =
-                textWidth _lhsIfontMetrics _lhsIfont text_
-            -- "ArrangerAG.ag"(line 659, column 7)
-            (_finalVRef@_) =
-                _lhsIassignedVRef
-            -- "ArrangerAG.ag"(line 658, column 7)
-            (_finalHRef@_) =
-                _lhsIassignedHRef
-            -- "ArrangerAG.ag"(line 657, column 7)
-            (_finalHeight@_) =
-                _minHeight
-            -- "ArrangerAG.ag"(line 656, column 7)
-            (_finalWidth@_) =
+            (_hRf) =
+                baseLine _lhs_fontMetrics _lhs_font
+            (_vRf) =
+                0
+            (_finalWidth) =
                 _minWidth
-            -- "ArrangerAG.ag"(line 815, column 7)
-            (_lhsOarrangement@_) =
-                StringA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef text_ _lhsItextColor _lhsIfont (cumulativeCharWidths _lhsIfontMetrics _lhsIfont text_)
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (from local)
-            (_lhsOfinalHRef@_) =
-                _finalHRef
-            -- copy rule (from local)
-            (_lhsOfinalHeight@_) =
-                _finalHeight
-            -- copy rule (from local)
-            (_lhsOfinalVRef@_) =
-                _finalVRef
-            -- copy rule (from local)
-            (_lhsOfinalWidth@_) =
-                _finalWidth
-            -- copy rule (from local)
-            (_lhsOhRf@_) =
-                _hRf
-            -- copy rule (from local)
-            (_lhsOhStretch@_) =
-                _hStretch
-            -- copy rule (from local)
-            (_lhsOminHeight@_) =
+            (_finalHeight) =
                 _minHeight
-            -- copy rule (from local)
-            (_lhsOminWidth@_) =
-                _minWidth
-            -- copy rule (from local)
-            (_lhsOvRf@_) =
-                _vRf
-            -- copy rule (from local)
-            (_lhsOvStretch@_) =
-                _vStretch
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_finalHRef) =
+                _lhs_assignedHRef
+            (_finalVRef) =
+                _lhs_assignedVRef
+        in  ( _lhs_allFonts,StringA (idAFromP _id) _lhs_x _lhs_y _finalWidth _finalHeight _finalHRef _finalVRef _text _lhs_textColor _lhs_font (cumulativeCharWidths _lhs_fontMetrics _lhs_font _text),_finalHRef,_finalHeight,_finalVRef,_finalWidth,_hRf,_hStretch,0,_minHeight,_minWidth,StringP _id _text,_vRf,_vStretch)
 sem_Presentation_StructuralP :: (IDP) ->
                                 (T_Presentation) ->
                                 (T_Presentation)
-sem_Presentation_StructuralP (id_) (child_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _childIallFonts :: ([Font])
-            _childIarrangement :: (Arrangement)
-            _childIfinalHRef :: (Int)
-            _childIfinalHeight :: (Int)
-            _childIfinalVRef :: (Int)
-            _childIfinalWidth :: (Int)
-            _childIhRf :: (Int)
-            _childIhStretch :: (Bool)
-            _childImaxFormatterDepth :: (Int)
-            _childIminHeight :: (Int)
-            _childIminWidth :: (Int)
-            _childIunfoldedTree :: (Presentation)
-            _childIvRf :: (Int)
-            _childIvStretch :: (Bool)
-            _childOallFonts :: ([Font])
-            _childOassignedHRef :: (Int)
-            _childOassignedHeight :: (Int)
-            _childOassignedVRef :: (Int)
-            _childOassignedWidth :: (Int)
-            _childObackgroundColor :: (Color)
-            _childOfillColor :: (Color)
-            _childOfont :: (Font)
-            _childOfontMetrics :: (FontMetrics)
-            _childOlineColor :: (Color)
-            _childOmouseDown :: (Maybe UpdateDoc)
-            _childOoldArr :: (Arrangement)
-            _childOpopupMenuItems :: ([ PopupMenuItem ])
-            _childOtextColor :: (Color)
-            _childOx :: (Int)
-            _childOy :: (Int)
-            ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
-                (child_ (_childOallFonts) (_childOassignedHRef) (_childOassignedHeight) (_childOassignedVRef) (_childOassignedWidth) (_childObackgroundColor) (_childOfillColor) (_childOfont) (_childOfontMetrics) (_childOlineColor) (_childOmouseDown) (_childOoldArr) (_childOpopupMenuItems) (_childOtextColor) (_childOx) (_childOy))
-            -- "ArrangerAG.ag"(line 309, column 7)
-            (_lhsOunfoldedTree@_) =
-                StructuralP id_  _childIunfoldedTree
-            -- "ArrangerAG.ag"(line 866, column 7)
-            (_lhsOarrangement@_) =
-                StructuralA (idAFromP id_) _childIarrangement
-            -- "ArrangerAG.ag"(line 914, column 7)
-            (_childOoldArr@_) =
-                case _lhsIoldArr of StructuralA _ arr -> arr
-                                    _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _childIallFonts
-            -- copy rule (up)
-            (_lhsOfinalHRef@_) =
-                _childIfinalHRef
-            -- copy rule (up)
-            (_lhsOfinalHeight@_) =
-                _childIfinalHeight
-            -- copy rule (up)
-            (_lhsOfinalVRef@_) =
-                _childIfinalVRef
-            -- copy rule (up)
-            (_lhsOfinalWidth@_) =
-                _childIfinalWidth
-            -- copy rule (up)
-            (_lhsOhRf@_) =
-                _childIhRf
-            -- copy rule (up)
-            (_lhsOhStretch@_) =
-                _childIhStretch
-            -- copy rule (up)
-            (_lhsOmaxFormatterDepth@_) =
-                _childImaxFormatterDepth
-            -- copy rule (up)
-            (_lhsOminHeight@_) =
-                _childIminHeight
-            -- copy rule (up)
-            (_lhsOminWidth@_) =
-                _childIminWidth
-            -- copy rule (up)
-            (_lhsOvRf@_) =
-                _childIvRf
-            -- copy rule (up)
-            (_lhsOvStretch@_) =
-                _childIvStretch
-            -- copy rule (down)
-            (_childOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_childOassignedHRef@_) =
-                _lhsIassignedHRef
-            -- copy rule (down)
-            (_childOassignedHeight@_) =
-                _lhsIassignedHeight
-            -- copy rule (down)
-            (_childOassignedVRef@_) =
-                _lhsIassignedVRef
-            -- copy rule (down)
-            (_childOassignedWidth@_) =
-                _lhsIassignedWidth
-            -- copy rule (down)
-            (_childObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_childOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_childOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_childOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_childOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_childOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_childOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_childOtextColor@_) =
-                _lhsItextColor
-            -- copy rule (down)
-            (_childOx@_) =
-                _lhsIx
-            -- copy rule (down)
-            (_childOy@_) =
-                _lhsIy
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+sem_Presentation_StructuralP (_id) (_child) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let ( _child_allFonts,_child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,_child_unfoldedTree,_child_vRf,_child_vStretch) =
+                (_child (_lhs_allFonts)
+                        (_lhs_assignedHRef)
+                        (_lhs_assignedHeight)
+                        (_lhs_assignedVRef)
+                        (_lhs_assignedWidth)
+                        (_lhs_backgroundColor)
+                        (_lhs_fillColor)
+                        (_lhs_font)
+                        (_lhs_fontMetrics)
+                        (_lhs_lineColor)
+                        (_lhs_mouseDown)
+                        (case _lhs_oldArr of StructuralA _ arr -> arr
+                                             _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0)
+                        (_lhs_popupMenuItems)
+                        (_lhs_textColor)
+                        (_lhs_x)
+                        (_lhs_y))
+        in  ( _child_allFonts,StructuralA (idAFromP _id) _child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,StructuralP _id  _child_unfoldedTree,_child_vRf,_child_vStretch)
 sem_Presentation_WithP :: (AttrRule) ->
                           (T_Presentation) ->
                           (T_Presentation)
-sem_Presentation_WithP (attrRule_) (child_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRef
-      _lhsIassignedHeight
-      _lhsIassignedVRef
-      _lhsIassignedWidth
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIx
-      _lhsIy ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOfinalHRef :: (Int)
-            _lhsOfinalHeight :: (Int)
-            _lhsOfinalVRef :: (Int)
-            _lhsOfinalWidth :: (Int)
-            _lhsOhRf :: (Int)
-            _lhsOhStretch :: (Bool)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOminHeight :: (Int)
-            _lhsOminWidth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _lhsOvRf :: (Int)
-            _lhsOvStretch :: (Bool)
-            _childIallFonts :: ([Font])
-            _childIarrangement :: (Arrangement)
-            _childIfinalHRef :: (Int)
-            _childIfinalHeight :: (Int)
-            _childIfinalVRef :: (Int)
-            _childIfinalWidth :: (Int)
-            _childIhRf :: (Int)
-            _childIhStretch :: (Bool)
-            _childImaxFormatterDepth :: (Int)
-            _childIminHeight :: (Int)
-            _childIminWidth :: (Int)
-            _childIunfoldedTree :: (Presentation)
-            _childIvRf :: (Int)
-            _childIvStretch :: (Bool)
-            _childOallFonts :: ([Font])
-            _childOassignedHRef :: (Int)
-            _childOassignedHeight :: (Int)
-            _childOassignedVRef :: (Int)
-            _childOassignedWidth :: (Int)
-            _childObackgroundColor :: (Color)
-            _childOfillColor :: (Color)
-            _childOfont :: (Font)
-            _childOfontMetrics :: (FontMetrics)
-            _childOlineColor :: (Color)
-            _childOmouseDown :: (Maybe UpdateDoc)
-            _childOoldArr :: (Arrangement)
-            _childOpopupMenuItems :: ([ PopupMenuItem ])
-            _childOtextColor :: (Color)
-            _childOx :: (Int)
-            _childOy :: (Int)
-            ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
-                (child_ (_childOallFonts) (_childOassignedHRef) (_childOassignedHeight) (_childOassignedVRef) (_childOassignedWidth) (_childObackgroundColor) (_childOfillColor) (_childOfont) (_childOfontMetrics) (_childOlineColor) (_childOmouseDown) (_childOoldArr) (_childOpopupMenuItems) (_childOtextColor) (_childOx) (_childOy))
-            -- "ArrangerAG.ag"(line 184, column 7)
-            (_lhsOfinalVRef@_) =
-                finalVRef _newInh
-            -- "ArrangerAG.ag"(line 183, column 7)
-            (_lhsOfinalHRef@_) =
-                finalHRef _newInh
-            -- "ArrangerAG.ag"(line 182, column 7)
-            (_lhsOfinalHeight@_) =
-                finalHeight _newInh
-            -- "ArrangerAG.ag"(line 181, column 7)
-            (_lhsOfinalWidth@_) =
-                finalWidth _newInh
-            -- "ArrangerAG.ag"(line 180, column 7)
-            (_lhsOvStretch@_) =
-                vStretch _newInh
-            -- "ArrangerAG.ag"(line 179, column 7)
-            (_lhsOhStretch@_) =
-                hStretch _newInh
-            -- "ArrangerAG.ag"(line 178, column 7)
-            (_lhsOminHeight@_) =
-                minHeight _newInh
-            -- "ArrangerAG.ag"(line 177, column 7)
-            (_lhsOminWidth@_) =
-                minWidth _newInh
-            -- "ArrangerAG.ag"(line 176, column 7)
-            (_lhsOvRf@_) =
-                vRef _newInh
-            -- "ArrangerAG.ag"(line 175, column 7)
-            (_lhsOhRf@_) =
-                hRef _newInh
-            -- "ArrangerAG.ag"(line 174, column 7)
-            (_childOassignedVRef@_) =
-                assignedVRef _newSyn
-            -- "ArrangerAG.ag"(line 173, column 7)
-            (_childOassignedHRef@_) =
-                assignedHRef _newSyn
-            -- "ArrangerAG.ag"(line 172, column 7)
-            (_childOassignedHeight@_) =
-                assignedHeight _newSyn
-            -- "ArrangerAG.ag"(line 171, column 7)
-            (_childOassignedWidth@_) =
-                assignedWidth _newSyn
-            -- "ArrangerAG.ag"(line 170, column 7)
-            (_childOpopupMenuItems@_) =
-                popupMenuItems _newSyn
-            -- "ArrangerAG.ag"(line 169, column 7)
-            (_childOmouseDown@_) =
-                mouseDown _newSyn
-            -- "ArrangerAG.ag"(line 168, column 7)
-            (_childObackgroundColor@_) =
-                backgroundColor _newSyn
-            -- "ArrangerAG.ag"(line 167, column 7)
-            (_childOfillColor@_) =
-                fillColor _newSyn
-            -- "ArrangerAG.ag"(line 166, column 7)
-            (_childOlineColor@_) =
-                lineColor _newSyn
-            -- "ArrangerAG.ag"(line 165, column 7)
-            (_childOtextColor@_) =
-                textColor _newSyn
-            -- "ArrangerAG.ag"(line 164, column 7)
-            (_childOfont@_) =
-                font _newSyn
-            -- "ArrangerAG.ag"(line 163, column 7)
-            (_newInh@_) =
-                snd _newAttrs
-            -- "ArrangerAG.ag"(line 162, column 7)
-            (_newSyn@_) =
+sem_Presentation_WithP (_attrRule) (_child) =
+    \ _lhs_allFonts
+      _lhs_assignedHRef
+      _lhs_assignedHeight
+      _lhs_assignedVRef
+      _lhs_assignedWidth
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_x
+      _lhs_y ->
+        let (_newAttrs) =
+                _attrRule ( Inh _lhs_font
+                               _lhs_textColor _lhs_lineColor _lhs_fillColor _lhs_backgroundColor
+                               _lhs_mouseDown _lhs_popupMenuItems
+                               _lhs_assignedWidth _lhs_assignedHeight _lhs_assignedHRef _lhs_assignedVRef
+                         , Syn _child_hRf _child_vRf _child_minWidth _child_minHeight
+                               _child_hStretch _child_vStretch
+                               _child_finalWidth _child_finalHeight _child_finalHRef _child_finalVRef)
+            (_newSyn) =
                 fst _newAttrs
-            -- "ArrangerAG.ag"(line 154, column 7)
-            (_newAttrs@_) =
-                attrRule_ ( Inh _lhsIfont
-                               _lhsItextColor _lhsIlineColor _lhsIfillColor _lhsIbackgroundColor
-                               _lhsImouseDown _lhsIpopupMenuItems
-                               _lhsIassignedWidth _lhsIassignedHeight _lhsIassignedHRef _lhsIassignedVRef
-                         , Syn _childIhRf _childIvRf _childIminWidth _childIminHeight
-                               _childIhStretch _childIvStretch
-                               _childIfinalWidth _childIfinalHeight _childIfinalHRef _childIfinalVRef)
-            -- "ArrangerAG.ag"(line 204, column 7)
-            (_childOallFonts@_) =
-                let inhs = _newSyn
-                in  font inhs : _lhsIallFonts
-            -- "ArrangerAG.ag"(line 307, column 7)
-            (_lhsOunfoldedTree@_) =
-                WithP attrRule_ _childIunfoldedTree
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _childIallFonts
-            -- copy rule (up)
-            (_lhsOarrangement@_) =
-                _childIarrangement
-            -- copy rule (up)
-            (_lhsOmaxFormatterDepth@_) =
-                _childImaxFormatterDepth
-            -- copy rule (down)
-            (_childOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_childOoldArr@_) =
-                _lhsIoldArr
-            -- copy rule (down)
-            (_childOx@_) =
-                _lhsIx
-            -- copy rule (down)
-            (_childOy@_) =
-                _lhsIy
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)
+            (_newInh) =
+                snd _newAttrs
+            ( _child_allFonts,_child_arrangement,_child_finalHRef,_child_finalHeight,_child_finalVRef,_child_finalWidth,_child_hRf,_child_hStretch,_child_maxFormatterDepth,_child_minHeight,_child_minWidth,_child_unfoldedTree,_child_vRf,_child_vStretch) =
+                (_child (let inhs = _newSyn
+                         in  font inhs : _lhs_allFonts)
+                        (assignedHRef _newSyn)
+                        (assignedHeight _newSyn)
+                        (assignedVRef _newSyn)
+                        (assignedWidth _newSyn)
+                        (backgroundColor _newSyn)
+                        (fillColor _newSyn)
+                        (font _newSyn)
+                        (_lhs_fontMetrics)
+                        (lineColor _newSyn)
+                        (mouseDown _newSyn)
+                        (_lhs_oldArr)
+                        (popupMenuItems _newSyn)
+                        (textColor _newSyn)
+                        (_lhs_x)
+                        (_lhs_y))
+        in  ( _child_allFonts,_child_arrangement,finalHRef _newInh,finalHeight _newInh,finalVRef _newInh,finalWidth _newInh,hRef _newInh,hStretch _newInh,_child_maxFormatterDepth,minHeight _newInh,minWidth _newInh,WithP _attrRule _child_unfoldedTree,vRef _newInh,vStretch _newInh)
 -- PresentationList --------------------------------------------
 {-
    inherited attributes:
@@ -2495,315 +1172,62 @@ sem_PresentationList (list) =
 sem_PresentationList_Cons :: (T_Presentation) ->
                              (T_PresentationList) ->
                              (T_PresentationList)
-sem_PresentationList_Cons (hd_) (tl_) =
-    \ _lhsIallFonts
-      _lhsIassignedHRefList
-      _lhsIassignedHeightList
-      _lhsIassignedVRefList
-      _lhsIassignedWidthList
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArrList
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIxList
-      _lhsIyList ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangementList :: ([Arrangement])
-            _lhsOfinalHRefList :: ([Int])
-            _lhsOfinalHeightList :: ([Int])
-            _lhsOfinalVRefList :: ([Int])
-            _lhsOfinalWidthList :: ([Int])
-            _lhsOhRfList :: ([Int])
-            _lhsOhStretchList :: ([Bool])
-            _lhsOmaxFormatterDepthList :: ([Int])
-            _lhsOminHeightList :: ([Int])
-            _lhsOminWidthList :: ([Int])
-            _lhsOunfoldedTreeList :: ([Presentation])
-            _lhsOvRfList :: ([Int])
-            _lhsOvStretchList :: ([Bool])
-            _hdIallFonts :: ([Font])
-            _hdIarrangement :: (Arrangement)
-            _hdIfinalHRef :: (Int)
-            _hdIfinalHeight :: (Int)
-            _hdIfinalVRef :: (Int)
-            _hdIfinalWidth :: (Int)
-            _hdIhRf :: (Int)
-            _hdIhStretch :: (Bool)
-            _hdImaxFormatterDepth :: (Int)
-            _hdIminHeight :: (Int)
-            _hdIminWidth :: (Int)
-            _hdIunfoldedTree :: (Presentation)
-            _hdIvRf :: (Int)
-            _hdIvStretch :: (Bool)
-            _hdOallFonts :: ([Font])
-            _hdOassignedHRef :: (Int)
-            _hdOassignedHeight :: (Int)
-            _hdOassignedVRef :: (Int)
-            _hdOassignedWidth :: (Int)
-            _hdObackgroundColor :: (Color)
-            _hdOfillColor :: (Color)
-            _hdOfont :: (Font)
-            _hdOfontMetrics :: (FontMetrics)
-            _hdOlineColor :: (Color)
-            _hdOmouseDown :: (Maybe UpdateDoc)
-            _hdOoldArr :: (Arrangement)
-            _hdOpopupMenuItems :: ([ PopupMenuItem ])
-            _hdOtextColor :: (Color)
-            _hdOx :: (Int)
-            _hdOy :: (Int)
-            _tlIallFonts :: ([Font])
-            _tlIarrangementList :: ([Arrangement])
-            _tlIfinalHRefList :: ([Int])
-            _tlIfinalHeightList :: ([Int])
-            _tlIfinalVRefList :: ([Int])
-            _tlIfinalWidthList :: ([Int])
-            _tlIhRfList :: ([Int])
-            _tlIhStretchList :: ([Bool])
-            _tlImaxFormatterDepthList :: ([Int])
-            _tlIminHeightList :: ([Int])
-            _tlIminWidthList :: ([Int])
-            _tlIunfoldedTreeList :: ([Presentation])
-            _tlIvRfList :: ([Int])
-            _tlIvStretchList :: ([Bool])
-            _tlOallFonts :: ([Font])
-            _tlOassignedHRefList :: ([Int])
-            _tlOassignedHeightList :: ([Int])
-            _tlOassignedVRefList :: ([Int])
-            _tlOassignedWidthList :: ([Int])
-            _tlObackgroundColor :: (Color)
-            _tlOfillColor :: (Color)
-            _tlOfont :: (Font)
-            _tlOfontMetrics :: (FontMetrics)
-            _tlOlineColor :: (Color)
-            _tlOmouseDown :: (Maybe UpdateDoc)
-            _tlOoldArrList :: ([Arrangement])
-            _tlOpopupMenuItems :: ([ PopupMenuItem ])
-            _tlOtextColor :: (Color)
-            _tlOxList :: ([Int])
-            _tlOyList :: ([Int])
-            ( _hdIallFonts,_hdIarrangement,_hdIfinalHRef,_hdIfinalHeight,_hdIfinalVRef,_hdIfinalWidth,_hdIhRf,_hdIhStretch,_hdImaxFormatterDepth,_hdIminHeight,_hdIminWidth,_hdIunfoldedTree,_hdIvRf,_hdIvStretch) =
-                (hd_ (_hdOallFonts) (_hdOassignedHRef) (_hdOassignedHeight) (_hdOassignedVRef) (_hdOassignedWidth) (_hdObackgroundColor) (_hdOfillColor) (_hdOfont) (_hdOfontMetrics) (_hdOlineColor) (_hdOmouseDown) (_hdOoldArr) (_hdOpopupMenuItems) (_hdOtextColor) (_hdOx) (_hdOy))
-            ( _tlIallFonts,_tlIarrangementList,_tlIfinalHRefList,_tlIfinalHeightList,_tlIfinalVRefList,_tlIfinalWidthList,_tlIhRfList,_tlIhStretchList,_tlImaxFormatterDepthList,_tlIminHeightList,_tlIminWidthList,_tlIunfoldedTreeList,_tlIvRfList,_tlIvStretchList) =
-                (tl_ (_tlOallFonts) (_tlOassignedHRefList) (_tlOassignedHeightList) (_tlOassignedVRefList) (_tlOassignedWidthList) (_tlObackgroundColor) (_tlOfillColor) (_tlOfont) (_tlOfontMetrics) (_tlOlineColor) (_tlOmouseDown) (_tlOoldArrList) (_tlOpopupMenuItems) (_tlOtextColor) (_tlOxList) (_tlOyList))
-            -- "ArrangerAG.ag"(line 272, column 7)
-            (_lhsOmaxFormatterDepthList@_) =
-                _hdImaxFormatterDepth : _tlImaxFormatterDepthList
-            -- "ArrangerAG.ag"(line 322, column 7)
-            (_lhsOunfoldedTreeList@_) =
-                _hdIunfoldedTree : _tlIunfoldedTreeList
-            -- "ArrangerAG.ag"(line 489, column 7)
-            (_lhsOvRfList@_) =
-                _hdIvRf : _tlIvRfList
-            -- "ArrangerAG.ag"(line 488, column 7)
-            (_lhsOhRfList@_) =
-                _hdIhRf : _tlIhRfList
-            -- "ArrangerAG.ag"(line 487, column 7)
-            (_lhsOvStretchList@_) =
-                _hdIvStretch : _tlIvStretchList
-            -- "ArrangerAG.ag"(line 486, column 7)
-            (_lhsOhStretchList@_) =
-                _hdIhStretch : _tlIhStretchList
-            -- "ArrangerAG.ag"(line 485, column 7)
-            (_lhsOminHeightList@_) =
-                _hdIminHeight : _tlIminHeightList
-            -- "ArrangerAG.ag"(line 484, column 7)
-            (_lhsOminWidthList@_) =
-                _hdIminWidth : _tlIminWidthList
-            -- "ArrangerAG.ag"(line 643, column 7)
-            (_tlOassignedVRefList@_) =
-                tail _lhsIassignedVRefList
-            -- "ArrangerAG.ag"(line 642, column 7)
-            (_hdOassignedVRef@_) =
-                head _lhsIassignedVRefList
-            -- "ArrangerAG.ag"(line 641, column 7)
-            (_tlOassignedHRefList@_) =
-                tail _lhsIassignedHRefList
-            -- "ArrangerAG.ag"(line 640, column 7)
-            (_hdOassignedHRef@_) =
-                head _lhsIassignedHRefList
-            -- "ArrangerAG.ag"(line 639, column 7)
-            (_tlOassignedHeightList@_) =
-                tail _lhsIassignedHeightList
-            -- "ArrangerAG.ag"(line 638, column 7)
-            (_hdOassignedHeight@_) =
-                head _lhsIassignedHeightList
-            -- "ArrangerAG.ag"(line 637, column 7)
-            (_tlOassignedWidthList@_) =
-                tail _lhsIassignedWidthList
-            -- "ArrangerAG.ag"(line 636, column 7)
-            (_hdOassignedWidth@_) =
-                head _lhsIassignedWidthList
-            -- "ArrangerAG.ag"(line 744, column 7)
-            (_lhsOfinalVRefList@_) =
-                _hdIfinalVRef : _tlIfinalVRefList
-            -- "ArrangerAG.ag"(line 743, column 7)
-            (_lhsOfinalHRefList@_) =
-                _hdIfinalHRef : _tlIfinalHRefList
-            -- "ArrangerAG.ag"(line 742, column 7)
-            (_lhsOfinalHeightList@_) =
-                _hdIfinalHeight : _tlIfinalHeightList
-            -- "ArrangerAG.ag"(line 741, column 7)
-            (_lhsOfinalWidthList@_) =
-                _hdIfinalWidth : _tlIfinalWidthList
-            -- "ArrangerAG.ag"(line 793, column 7)
-            (_tlOyList@_) =
-                tail _lhsIyList
-            -- "ArrangerAG.ag"(line 792, column 7)
-            (_tlOxList@_) =
-                tail _lhsIxList
-            -- "ArrangerAG.ag"(line 791, column 7)
-            (_hdOy@_) =
-                head _lhsIyList
-            -- "ArrangerAG.ag"(line 790, column 7)
-            (_hdOx@_) =
-                head _lhsIxList
-            -- "ArrangerAG.ag"(line 933, column 7)
-            (_tlOoldArrList@_) =
-                tail _lhsIoldArrList
-            -- "ArrangerAG.ag"(line 932, column 7)
-            (_hdOoldArr@_) =
-                head _lhsIoldArrList
-            -- "ArrangerAG.ag"(line 943, column 7)
-            (_lhsOarrangementList@_) =
-                _hdIarrangement : _tlIarrangementList
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _tlIallFonts
-            -- copy rule (down)
-            (_hdOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_hdObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_hdOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_hdOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_hdOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_hdOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_hdOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_hdOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_hdOtextColor@_) =
-                _lhsItextColor
-            -- copy rule (chain)
-            (_tlOallFonts@_) =
-                _hdIallFonts
-            -- copy rule (down)
-            (_tlObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_tlOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_tlOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_tlOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_tlOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_tlOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_tlOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_tlOtextColor@_) =
-                _lhsItextColor
-        in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList)
+sem_PresentationList_Cons (_hd) (_tl) =
+    \ _lhs_allFonts
+      _lhs_assignedHRefList
+      _lhs_assignedHeightList
+      _lhs_assignedVRefList
+      _lhs_assignedWidthList
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArrList
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_xList
+      _lhs_yList ->
+        let ( _hd_allFonts,_hd_arrangement,_hd_finalHRef,_hd_finalHeight,_hd_finalVRef,_hd_finalWidth,_hd_hRf,_hd_hStretch,_hd_maxFormatterDepth,_hd_minHeight,_hd_minWidth,_hd_unfoldedTree,_hd_vRf,_hd_vStretch) =
+                (_hd (_lhs_allFonts) (head _lhs_assignedHRefList) (head _lhs_assignedHeightList) (head _lhs_assignedVRefList) (head _lhs_assignedWidthList) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (head _lhs_oldArrList) (_lhs_popupMenuItems) (_lhs_textColor) (head _lhs_xList) (head _lhs_yList))
+            ( _tl_allFonts,_tl_arrangementList,_tl_finalHRefList,_tl_finalHeightList,_tl_finalVRefList,_tl_finalWidthList,_tl_hRfList,_tl_hStretchList,_tl_maxFormatterDepthList,_tl_minHeightList,_tl_minWidthList,_tl_unfoldedTreeList,_tl_vRfList,_tl_vStretchList) =
+                (_tl (_hd_allFonts) (tail _lhs_assignedHRefList) (tail _lhs_assignedHeightList) (tail _lhs_assignedVRefList) (tail _lhs_assignedWidthList) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (tail _lhs_oldArrList) (_lhs_popupMenuItems) (_lhs_textColor) (tail _lhs_xList) (tail _lhs_yList))
+        in  ( _tl_allFonts
+             ,_hd_arrangement : _tl_arrangementList
+             ,_hd_finalHRef : _tl_finalHRefList
+             ,_hd_finalHeight : _tl_finalHeightList
+             ,_hd_finalVRef : _tl_finalVRefList
+             ,_hd_finalWidth : _tl_finalWidthList
+             ,_hd_hRf : _tl_hRfList
+             ,_hd_hStretch : _tl_hStretchList
+             ,_hd_maxFormatterDepth : _tl_maxFormatterDepthList
+             ,_hd_minHeight : _tl_minHeightList
+             ,_hd_minWidth : _tl_minWidthList
+             ,_hd_unfoldedTree : _tl_unfoldedTreeList
+             ,_hd_vRf : _tl_vRfList
+             ,_hd_vStretch : _tl_vStretchList
+             )
 sem_PresentationList_Nil :: (T_PresentationList)
 sem_PresentationList_Nil  =
-    \ _lhsIallFonts
-      _lhsIassignedHRefList
-      _lhsIassignedHeightList
-      _lhsIassignedVRefList
-      _lhsIassignedWidthList
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArrList
-      _lhsIpopupMenuItems
-      _lhsItextColor
-      _lhsIxList
-      _lhsIyList ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangementList :: ([Arrangement])
-            _lhsOfinalHRefList :: ([Int])
-            _lhsOfinalHeightList :: ([Int])
-            _lhsOfinalVRefList :: ([Int])
-            _lhsOfinalWidthList :: ([Int])
-            _lhsOhRfList :: ([Int])
-            _lhsOhStretchList :: ([Bool])
-            _lhsOmaxFormatterDepthList :: ([Int])
-            _lhsOminHeightList :: ([Int])
-            _lhsOminWidthList :: ([Int])
-            _lhsOunfoldedTreeList :: ([Presentation])
-            _lhsOvRfList :: ([Int])
-            _lhsOvStretchList :: ([Bool])
-            -- "ArrangerAG.ag"(line 270, column 7)
-            (_lhsOmaxFormatterDepthList@_) =
-                [0]
-            -- "ArrangerAG.ag"(line 320, column 7)
-            (_lhsOunfoldedTreeList@_) =
-                []
-            -- "ArrangerAG.ag"(line 482, column 7)
-            (_lhsOvRfList@_) =
-                []
-            -- "ArrangerAG.ag"(line 481, column 7)
-            (_lhsOhRfList@_) =
-                []
-            -- "ArrangerAG.ag"(line 480, column 7)
-            (_lhsOvStretchList@_) =
-                []
-            -- "ArrangerAG.ag"(line 479, column 7)
-            (_lhsOhStretchList@_) =
-                []
-            -- "ArrangerAG.ag"(line 478, column 7)
-            (_lhsOminHeightList@_) =
-                []
-            -- "ArrangerAG.ag"(line 477, column 7)
-            (_lhsOminWidthList@_) =
-                []
-            -- "ArrangerAG.ag"(line 739, column 7)
-            (_lhsOfinalVRefList@_) =
-                []
-            -- "ArrangerAG.ag"(line 738, column 7)
-            (_lhsOfinalHRefList@_) =
-                []
-            -- "ArrangerAG.ag"(line 737, column 7)
-            (_lhsOfinalHeightList@_) =
-                []
-            -- "ArrangerAG.ag"(line 736, column 7)
-            (_lhsOfinalWidthList@_) =
-                []
-            -- "ArrangerAG.ag"(line 941, column 7)
-            (_lhsOarrangementList@_) =
-                []
-            -- copy rule (chain)
-            (_lhsOallFonts@_) =
-                _lhsIallFonts
-        in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList)
+    \ _lhs_allFonts
+      _lhs_assignedHRefList
+      _lhs_assignedHeightList
+      _lhs_assignedVRefList
+      _lhs_assignedWidthList
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArrList
+      _lhs_popupMenuItems
+      _lhs_textColor
+      _lhs_xList
+      _lhs_yList ->
+        let 
+        in  ( _lhs_allFonts,[],[],[],[],[],[],[],[0],[],[],[],[],[])
 -- Root --------------------------------------------------------
 {-
    inherited attributes:
@@ -2853,115 +1277,20 @@ sem_Root ((Root (_presentation))) =
     (sem_Root_Root ((sem_Presentation (_presentation))))
 sem_Root_Root :: (T_Presentation) ->
                  (T_Root)
-sem_Root_Root (presentation_) =
-    \ _lhsIallFonts
-      _lhsIbackgroundColor
-      _lhsIfillColor
-      _lhsIfocus
-      _lhsIfont
-      _lhsIfontMetrics
-      _lhsIlineColor
-      _lhsImouseDown
-      _lhsIoldArr
-      _lhsIpopupMenuItems
-      _lhsIscreenWidth
-      _lhsItextColor ->
-        let _lhsOallFonts :: ([Font])
-            _lhsOarrangement :: (Arrangement)
-            _lhsOmaxFormatterDepth :: (Int)
-            _lhsOunfoldedTree :: (Presentation)
-            _presentationIallFonts :: ([Font])
-            _presentationIarrangement :: (Arrangement)
-            _presentationIfinalHRef :: (Int)
-            _presentationIfinalHeight :: (Int)
-            _presentationIfinalVRef :: (Int)
-            _presentationIfinalWidth :: (Int)
-            _presentationIhRf :: (Int)
-            _presentationIhStretch :: (Bool)
-            _presentationImaxFormatterDepth :: (Int)
-            _presentationIminHeight :: (Int)
-            _presentationIminWidth :: (Int)
-            _presentationIunfoldedTree :: (Presentation)
-            _presentationIvRf :: (Int)
-            _presentationIvStretch :: (Bool)
-            _presentationOallFonts :: ([Font])
-            _presentationOassignedHRef :: (Int)
-            _presentationOassignedHeight :: (Int)
-            _presentationOassignedVRef :: (Int)
-            _presentationOassignedWidth :: (Int)
-            _presentationObackgroundColor :: (Color)
-            _presentationOfillColor :: (Color)
-            _presentationOfont :: (Font)
-            _presentationOfontMetrics :: (FontMetrics)
-            _presentationOlineColor :: (Color)
-            _presentationOmouseDown :: (Maybe UpdateDoc)
-            _presentationOoldArr :: (Arrangement)
-            _presentationOpopupMenuItems :: ([ PopupMenuItem ])
-            _presentationOtextColor :: (Color)
-            _presentationOx :: (Int)
-            _presentationOy :: (Int)
-            ( _presentationIallFonts,_presentationIarrangement,_presentationIfinalHRef,_presentationIfinalHeight,_presentationIfinalVRef,_presentationIfinalWidth,_presentationIhRf,_presentationIhStretch,_presentationImaxFormatterDepth,_presentationIminHeight,_presentationIminWidth,_presentationIunfoldedTree,_presentationIvRf,_presentationIvStretch) =
-                (presentation_ (_presentationOallFonts) (_presentationOassignedHRef) (_presentationOassignedHeight) (_presentationOassignedVRef) (_presentationOassignedWidth) (_presentationObackgroundColor) (_presentationOfillColor) (_presentationOfont) (_presentationOfontMetrics) (_presentationOlineColor) (_presentationOmouseDown) (_presentationOoldArr) (_presentationOpopupMenuItems) (_presentationOtextColor) (_presentationOx) (_presentationOy))
-            -- "ArrangerAG.ag"(line 141, column 7)
-            (_lhsOarrangement@_) =
-                _presentationIarrangement
-            -- "ArrangerAG.ag"(line 140, column 7)
-            (_lhsOunfoldedTree@_) =
-                _presentationIunfoldedTree
-            -- "ArrangerAG.ag"(line 139, column 7)
-            (_lhsOmaxFormatterDepth@_) =
-                _presentationImaxFormatterDepth
-            -- "ArrangerAG.ag"(line 499, column 7)
-            (_presentationOassignedVRef@_) =
-                _presentationIvRf
-            -- "ArrangerAG.ag"(line 498, column 7)
-            (_presentationOassignedHRef@_) =
-                _presentationIhRf
-            -- "ArrangerAG.ag"(line 497, column 7)
-            (_presentationOassignedHeight@_) =
-                if _presentationIvStretch then 300 else _presentationIminHeight
-            -- "ArrangerAG.ag"(line 496, column 7)
-            (_presentationOassignedWidth@_) =
-                if _presentationIhStretch then _lhsIscreenWidth else _presentationIminWidth
-            -- "ArrangerAG.ag"(line 755, column 7)
-            (_presentationOy@_) =
-                0
-            -- "ArrangerAG.ag"(line 754, column 7)
-            (_presentationOx@_) =
-                0
-            -- copy rule (up)
-            (_lhsOallFonts@_) =
-                _presentationIallFonts
-            -- copy rule (down)
-            (_presentationOallFonts@_) =
-                _lhsIallFonts
-            -- copy rule (down)
-            (_presentationObackgroundColor@_) =
-                _lhsIbackgroundColor
-            -- copy rule (down)
-            (_presentationOfillColor@_) =
-                _lhsIfillColor
-            -- copy rule (down)
-            (_presentationOfont@_) =
-                _lhsIfont
-            -- copy rule (down)
-            (_presentationOfontMetrics@_) =
-                _lhsIfontMetrics
-            -- copy rule (down)
-            (_presentationOlineColor@_) =
-                _lhsIlineColor
-            -- copy rule (down)
-            (_presentationOmouseDown@_) =
-                _lhsImouseDown
-            -- copy rule (down)
-            (_presentationOoldArr@_) =
-                _lhsIoldArr
-            -- copy rule (down)
-            (_presentationOpopupMenuItems@_) =
-                _lhsIpopupMenuItems
-            -- copy rule (down)
-            (_presentationOtextColor@_) =
-                _lhsItextColor
-        in  ( _lhsOallFonts,_lhsOarrangement,_lhsOmaxFormatterDepth,_lhsOunfoldedTree)
-
+sem_Root_Root (_presentation) =
+    \ _lhs_allFonts
+      _lhs_backgroundColor
+      _lhs_fillColor
+      _lhs_focus
+      _lhs_font
+      _lhs_fontMetrics
+      _lhs_lineColor
+      _lhs_mouseDown
+      _lhs_oldArr
+      _lhs_popupMenuItems
+      _lhs_screenWidth
+      _lhs_textColor ->
+        let ( _presentation_allFonts,_presentation_arrangement,_presentation_finalHRef,_presentation_finalHeight,_presentation_finalVRef,_presentation_finalWidth,_presentation_hRf,_presentation_hStretch,_presentation_maxFormatterDepth,_presentation_minHeight,_presentation_minWidth,_presentation_unfoldedTree,_presentation_vRf,_presentation_vStretch) =
+                (_presentation (_lhs_allFonts) (_presentation_hRf) (if _presentation_vStretch then 300 else _presentation_minHeight) (_presentation_vRf) (if _presentation_hStretch then _lhs_screenWidth else _presentation_minWidth) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (_lhs_oldArr) (_lhs_popupMenuItems) (_lhs_textColor) (0) (0))
+        in  ( _presentation_allFonts,_presentation_arrangement,_presentation_maxFormatterDepth,_presentation_unfoldedTree)
 
