@@ -120,8 +120,8 @@ SaveAllFiles9=0
 Save Active File9=0
 Replace Type9=0
 [Open Files]
-Open File0=d:\Data\Documents\ThesisCVS\TexSources\Thesis.tex
-Active File Display Mode=3
+Open File0=
+Active File Display Mode=-1
 Open File Pos0=640
 Open File Line0=143
 Open File Window Pos0=0,1,320,541,-4,-28,92,108,1203,510
