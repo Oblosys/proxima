@@ -1,4 +1,5 @@
-\documentclass{entcs} \usepackage{entcsmacro}
+\documentclass{speauth} 
+
 \usepackage{graphicx}
 \usepackage{utils}
 \usepackage{architecture}
@@ -20,26 +21,18 @@
 % Grave accent  `           Left brace   {          Vertical bar  |
 % Right brace   }           Tilde        ~
 
-\def\lastname{Schrage}
+\runningheads{M.M. Schrage et al}{Editing structured documents: Architecture} 
+
 \begin{document}
-\begin{frontmatter}
-  \title{Editing structured document\\Part II: Architecture and tool} \author{Martijn M. Schrage\thanksref{ALL}\thanksref{myemail}}
+\SPE{0}{0}{0}{0}{2005} 
+
+  \title{Editing structured documents\\Part II: Architecture and tool} 
+  \longauthor{Martijn M. Schrage, Johan Jeuring, Lambert Meertens, Doaitse Swierstra}
   \address{Institute of Information and Computing Sciences\\ Utrecht University\\
-    Utrecht, The Netherlands} \author{Johan Jeuring\thanksref{coemail}}
-  \address{Institute of Information and Computing Sciences\\ Utrecht University\\
-    Utrecht, The Netherlands} \thanks[ALL]{Thanks
-    to everyone who should be thanked} \thanks[myemail]{Email:
-    \href{mailto:martijn@cs.uu.nl} {\texttt{\normalshape
-        martijn@cs.uu.nl}}} \thanks[coemail]{Email:
-    \href{mailto:johanj@cs.uu.nl} {\texttt{\normalshape
-        johanj@cs.uu.nl}}}
+    Utrecht, The Netherlands}     
 \begin{abstract} 
   abstract\dots
 \end{abstract}
-\begin{keyword}
-  keyword$_1$ \dots keyword$_n$
-\end{keyword}
-\end{frontmatter}
 
 \section{Architecture of the Proxima editor} \label{chap:proxArch}
 
