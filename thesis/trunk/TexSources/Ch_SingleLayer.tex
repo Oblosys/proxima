@@ -486,7 +486,7 @@ An important point to note is that extra state with regard to a certain mapping,
 
 
 %																
-\subsection{One level has two kinds of extra state}
+\subsection{One level has two kinds of extra state} \label{sect:oneLevelDoubleES}
 
 % One level: two kinds of extra
 Figure~\ref{layerExtraState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering has two kinds of extra state. Figure~\ref{levelExtraState} shows a data level between two layers. In the figure, both the shaded elements and the bold elements are extra state. The shaded elements are presentation extra state with regard to the higher level, and the bold elements are translation extra state with regard to the lower level. Extra state in one direction is independent of extra state in the other direction, hence an element in the figure can be shaded, bold, shaded as well as bold, or neither. 
@@ -520,11 +520,10 @@ More formally, a data level ($Level_{i}$) can be considered either as the produc
 
 % Note that pres es for level i is important for pres of level i-1
 % and trans es for level i is important for trans of levl i+1
-\begin{small}\begin{align*}% \label{sse}
-\end{align*} 
+\begin{small}
 \begin{math}
-Level_{0} = Core_{Trans,0} \times Extra_{Trans,0}
-Level_{n} = Core_{Pres,n} \times Extra_{Pres,n}
+Level_{0} = Core_{Trans,0} \times Extra_{Trans,0}\\
+Level_{n} = Core_{Pres,n} \times Extra_{Pres,n}\\
 \forall 1 \le i \le n-1:  \\
 Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{Pres,i} 
 %\\
@@ -532,31 +531,53 @@ Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{
 %Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
 \end{math}\end{small}
 
+From a layer perspective: More precisely, because one lev. two (see Section~\ref{sect:oneLevelDoubleES}), Hence upper level $Core_{Trans,H} \times Extra_{Trans,H}$, and lower level  $Core_{Trans,H} \times Extra_{Trans,H}$. But since on this level $Core_{Pres,H} \times Extra_{Pres,H}$ and $Core_{Trans,L} \times Extra_{Transs,L}$ are not regarded, leave out the direction.
+**CoreTransH , and CorePresL is just core. always the same. CorePresH is not regarded here
+**Maybe explain that from now on, we use H and L, and since looking at layers, no problem with top and bottom, because there is no layer above or beneath
+\begin{small}
+\begin{math}
+Level_{H} = Core_{Trans,0} \times Extra_{Trans,0}\\
+Level_{L} = Core_{Pres,n} \times Extra_{Pres,n}\\
+%\forall 1 \le i \le n-1:  \\
+%Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{Pres,i} 
+%\\
+%Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1} \\
+%Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
+\end{math}\end{small}
+
+Note, only conceptual. For example if a token has type Token Whitespace String, there is no actual type Token String
 
 %																
 \subsection{Mapping information}
 
 for reuse, need mapping info. both dirs. it is the arrows from bla.
 
-% what extra info to keep
-The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, ${\tt translate}$ and ${\tt present}$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For ${\tt translate}$, the extra argument is of type $Info_{Trans}$, and it is computed by ${\tt present}$. Analogously, ${\tt present}$ gets an extra argument of type $Info_{Pres}$, which is computed by ${\tt translate}$. \note{already mention computation order here?}
+\newcommand{\iup}[0]{\text{\textuparrow}}
+\newcommand{\idwn}[0]{\text{\textdownarrow}}
 
+
+not an extra argument, but extra info. Make explicit in type, but again only conceptual!
+% what extra info to keep
+The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, ${\tt translate}$ and ${\tt present}$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For ${\tt translate}$, the extra argument is of type $Info\iup$, and it is computed by ${\tt present}$. Analogously, ${\tt present}$ gets an extra argument of type $Info\idwn$, which is computed by ${\tt translate}$. \note{already mention computation order here?}
 
 Except for the top and bottom levels, all levels contain presentation and translation information. The top level is never the result of a presentation mapping, and hence has no presentation information, whereas the bottom level has no translation information. The definition of $Level_i$ and the types of $present_i$ and $translate_i$ become:
+
 
 \begin{small}\begin{align*}% \label{sse}
 \end{align*} 
 \begin{math}
-Level_{0} = (Core_{Trans,0} \times Extra_{Trans,0}) \times Info_{Trans,0}\\
-Level_{n} = (Core_{Pres,n} \times Extra_{Pres,n}) \times  Info_{Press,n}
+Level_{0} = (Core_{Trans,0} \times Extra_{Trans,0}) \times Info\idwn_{0}\\
+Level_{n} = (Core_{Pres,n} \times Extra_{Pres,n}) \times  Info\iup_{n}\\
 \forall 1 \le i \le n-1:  \\
-Level_{i} = (Core_{Trans,i} \times Extra_{Trans,i}) \times Info_{Pres,i} \times  Info_{Trans,i}\\  
-               = (Core_{Pres,i} \times Extra_{Pres,i})  \times Info_{Pres,i} \times  Info_{Trans,i}\\  
-\\
-translate_{i} :: sheet_{Trans} \rightarrow Level_{L} \rightarrow Level_{H}\\
-present_{i} :: sheet_{Pres}  \rightarrow  Level_{H} \rightarrow Level_{L}\\
+Level_{i} = (Core_{Pres,i} \times Extra_{Pres,i})  \times Info\iup_{i} \hfill \text{\{Viewed from upper layer\}}\\  
+               = (Core_{Trans,i} \times Extra_{Trans,i}) \times Info\idwn_{i} \hfill \text{\{Viewed from lower layer\}}             
+%\\
+%translate_{i} :: sheet_{Trans} \rightarrow Level_{L} \rightarrow Level_{H}\\
+%present_{i} :: sheet_{Pres}  \rightarrow  Level_{H} \rightarrow Level_{L}\\
 \end{math}\end{small}
 
+And again from a layer perspective
+one level either up or down, because $ Info\iup_{i}$ cannot be computed from higher layer, so it is part of extra state.  $Extra_{Trans,i} = Extra'_{Trans,i} \times Info\iup$ 
 
 
 \bc
@@ -631,8 +652,6 @@ It may seem more appropriate that presentation mapping information is a result o
 
 
 
-
-
 %																
 %																
 %																
@@ -651,6 +670,8 @@ The abstract functions $Present$ and $Translate$ from the previous section speci
 
 First, we start with two functions $present$ and $translate$ that are assumed directly implement $Present$ and $Translate$. The lefthand side of Figure~\ref{maintainingInvs} shows how the abstract and concrete functions are related. The precondition is that the lower level is a correct presentation of the higher level. When the lower level is updated due to a user edit, a new higher level is computed by $translate$, establishing the translation invariant. Subsequently, when the higher layers have computed a final value for the higher level, $present$ computes a final lower level value, establishing the presentation invariant. The functions $Edit$ and $Transform$ are left abstract until the layers are connected in Chapter~\ref{chap:layeredArchs}.
 
+***input and output. levelH and levelL are not really related yet.
+
 We can express the computation using equations:
 
 \begin{small} \begin{math} \label{inv:immediate}
@@ -664,7 +685,7 @@ level''_{H} = Transform~level'_{H}	\hfill \text{\{Higher layer update\}}\\
 level''_{L} = {\tt present}~level''_{H} 	\hfill \text{\{Compute new lower level\}}\\
 level''_{L} = Present~level''_{H}		\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}\\
-{\centering (Invariant 1: Direct implementation of $Translate$ and $Present$)\\}\vspace{1em}
+{\centering (Specification 1: Direct implementation of $Translate$ and $Present$)\\}\vspace{1em}
 
 This first set of equations is not very informative, because the mapping functions $present$ and $translate$ are assumed to directly implement their abstract counterparts. In order to give a more detailed specification, and also because the presence of extra state makes it difficult to directly implement the abstract functions, we refine the specification in the next sections. Section~\ref{sect:maintainingSheet} adds style sheets to $present$ and $translate$, Section~\ref{sect:maintainingSheet} adds support for extra state handling, and finally in Section~\ref{sect:maintainingSheet} contains an incremental version of the mapping functions.
 
@@ -689,7 +710,7 @@ level''_{L} = {\tt present}~sheet_{Pres}~level''_{H} 		\hfill \text{\{Compute ne
 level''_{L} = Present~level''_{H}						\hfill \text{\{Postcondition\}}\\
 {\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{H}\hfill \text{\{***??***\}}\\
 \end{math}\end{small}\\
-{\centering (Invariant 2: Support for presentation and translation sheets)\\}\vspace{1em}
+{\centering (Specification 2: Support for presentation and translation sheets)\\}\vspace{1em}
 \note{also put id condition in previous invariant? And add the PRES TRANS one too?}
 
 The sheet parameter contains information about how to present or translate the elements of the respective data levels. The presentation sheet for the presentation layer specifies the presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The translation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $Present$ and $Translate$ functions, as these functions represent the intended presentation and translation mappings that we implement with the functions 
@@ -697,7 +718,7 @@ ${\tt present}$, ${\tt translate}$ and the respecitive sheet parameters.
 
 \note{?????????}
 Although a layer has two sheets, the two are closely related as they have to satisfy the
-$Translate \cdot Present = id_{H}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
+$Translate \cdot Present = id_{H}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using a combinator parser\cite{combinatorparser}.
 
 
 %																
@@ -705,14 +726,24 @@ $Translate \cdot Present = id_{H}$ condition. For simple editors, the sheets at 
 %																
 \subsection{Maintaining extra state} \label{sect:maintainingExtraState}
 
-** meer intro
-present and translate gaan niet naar level, maar naar core (see Section~\ref{sect:})
+In the presence of extra state,  \label{sect:extraState}
+
+As explained in \label{sect:oneLevelDoubleES}, a level is split in two parts, a $Core$ part that can be computed by the mapping function, and an $Extra$ part.
+
+%Level_{i} = (Core_{Pres,i} \times Extra_{Pres,i})  \times Info\iup_{i} \hfill \text{\{Viewed from upper layer\}}\\  
+%               = (Core_{Trans,i} \times Extra_{Trans,i}) \times Info\idwn_{i} \hfill \text{\{Viewed from lower layer\}}\\
+
+\begin{small}\begin{math} \label{inv:extraState}
+Level_{H} = Core_{H} \times Extra_{H} \times Info\idwn\\
+Level_{L} = Core_{L} \times Extra_{L} \times Info\iup\\
+\end{math}\end{small}
+
+ ** meer intro
 %***** WHAT ABOUT PRES . TRANS = ID?
 
 % mapping we have is not good enough
-The available mapping functions $Present$ and $Translate$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions ${\tt present}$ and ${\tt translate}$ that have a result type of $Core \times Extra$:
+The available mapping functions ${\tt present}$ and ${\tt translate}$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions ${\tt present}$ and ${\tt translate}$ that have a result type of $Core \times Extra$:
 % not for top and bottom
-
 
 % what extra info to keep
 The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, ${\tt translate}$ and ${\tt present}$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For ${\tt translate}$, the extra argument is of type $Info_{Trans}$, and it is computed by ${\tt present}$. Analogously, ${\tt present}$ gets an extra argument of type $Info_{Pres}$, which is computed by ${\tt translate}$. \note{already mention computation order here?}
@@ -723,27 +754,28 @@ The $Extra$ information in the result types cannot be computed from the argument
 \begin{center}
 \epsfig{file=pics/eps/maintainES.eps}
 \end{center}
-\caption{Maintaing the invariants in the presence of extra state.}\label{layerExtraState} 
+\caption{Maintaining the invariants in the presence of extra state.}\label{layerExtraState} 
 \end{center}
 \end{figure}
 
 
 \begin{small}\begin{math} \label{inv:extraState}
-Level_{H} = Core'_{Trans,H} \times Extra'_{Trans,H}\\
-Level_{L} = Core'_{Pres,L} \times Extra'_{Pres,L}\\
-{\tt translate} :: Sheet_{Trans} \rightarrow Level_{L} \rightarrow Core_{Trans,H}\\
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Core_{Pres,L}\\
+\text{\bf type}~Level_{H} = Core_{H} \times Extra_{H} \times Info\idwn\\
+\text{\bf type}~Level_{L} = Core_{L} \times Extra_{L} \times Info\iup\\
+{\tt translate} :: Sheet_{Trans} \rightarrow Level_{L} \rightarrow Core_{H}\\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Core_{L}\\
+\\
 level_{L} = Present~level_{H}						\hfill \text{\{Precondition\}}\\
 level'_{L} = Edit~level_{L}							\hfill \text{\{User edit\}}\\
-core'_{Trans,H}  = {\tt translate}~sheet_{Trans}~level'_{L}	\hfill \text{\{Compute new higher core\}}\\
-level'_{H} = {\tt reuse}~level_{H}~?level_{L}~core'_{H}\hfill \text{\{Reuse extra state\}}\\
+core'_{H} \times info'\idwn_{H} = {\tt translate}~sheet_{Trans}~level'_{L}	\hfill \text{\{Compute new higher core\}}\\
+level'_{H} = {\tt reuse}~level_{H}~?level_{L}~core'_{H}\times info'\idwn_{H} \hfill \text{\{Reuse extra state\}}\\
 level'_{H} = Translate~level'_{L}						\hfill \text{\{Intermediate condition\}}\\
 level''_{H} = Transform~level'_{H} 					\hfill \text{\{Higher layer update\}}\\
-core''_{Pres,L}  = {\tt present}~sheet_{Pres}~level''_{H}		\hfill \text{\{Compute new lower core\}}\\
-level''_{L} = {\tt reuse}~level_{L}~?level_{H}~core''_{L}\hfill \text{\{Reuse extra state\}}\\
+core''_{L} \times info''\iup_{L} = {\tt present}~sheet_{Pres}~level''_{H}		\hfill \text{\{Compute new lower core\}}\\
+level''_{L} = {\tt reuse}~level_{L}~?level_{H}~core''_{L} \times info''\iup_{L} \hfill \text{\{Reuse extra state\}}\\
 level''_{L} = Present~level''_{H}						\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}\note{does reuse need the other level as well?}\\
-{\centering (Invariant 3: Support for extra state)}\vspace{1em}
+{\centering (Specification 3: Support for extra state)}\vspace{1em}
 %{\tt present} :: Sheet_{Pres} \rightarrow Level_{H} \rightarrow Core_{Pres,L} \times
 %Extra_{Pres,L} \\
 
@@ -896,30 +928,46 @@ Figure~\ref{incrementalTranslate}, shows the righthand side of Figure~\ref{fromL
 
 **
 Now we only need to add reuse, sheets and some arrows to get bla. Also for present.
+Input and output. Now also level high and level low are inputs
+in next Chapter connected.
 **
 
 
 In addition to the extra parameters, and the change from level to edit operation, the equations for the incremental versions of ${\tt present}$ and ${\tt translate}$ also contain a number of explicit ${\tt update}$ functions. Furthermore, note that compared to ${\tt translate}$, the order of the level parameters for         ${\tt present}$ is swapped (ie. first the higher and then the lower level) since the direction of the mapping is also swapped.
  
-% PRES and TRANS are not incremental
-\begin{small}\begin{math}
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Level_{L}  \rightarrow Edit_{Level_{H}} \rightarrow Edit_{Level_{L}} \\
+ *Mention apparent mismatch with ','' on args of present and translate now we use edit ops
+
+\bc
+ {\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Level_{L}  \rightarrow Edit_{Level_{H}} \rightarrow Edit_{Level_{L}} \\
 {\tt translate} :: Sheet_{Trans} \rightarrow  Level_{L} \rightarrow Level_{H} \rightarrow  Edit_{Level_{L}} \rightarrow Edit_{Level_{H}} \\
-\text{\{\}}\\
-\\
-level_{L} = Present~level_{H}\hfill \text{\{Precondition\}}\\
-level'_{L} = {\tt update}~e_{Level_{L}}~level_{L}\\
 e_{Level_{H}} = {\tt translate}~sheet_{Trans}~level_{L}~level_{H}~e_{Level_{L}} \hfill 
-\text{\{\}}\\
-level'_{H} = {\tt update}~e_{Level_{H}}~level_{H}\\
-level'_{H} = Translate~level'_{L}\hfill \text{\{Intermediate condition\}}\\
+e'_{Level_{L}} = {\tt present}~sheet_{Pres}~level'_{H}~level'_{L}~e'_{Level_{H}} \hfill  
+\ec
+
+Incremental and extra state: user edit is weird. maybe this is not a function but some kind of constant. elow = EDIT
+
+\begin{small}\begin{math} \label{inv:incrementality}
+{\tt translate} :: Sheet_{Trans} \rightarrow Level_{L} \rightarrow Level_{H} \rightarrow  Edit_{Level_{L}} \rightarrow Edit_{Core_{H}} \\
+{\tt present} :: Sheet_{Pres} \rightarrow Level_{H} \rightarrow Level_{L}  \rightarrow Edit_{Level_{H}} \rightarrow Edit_{Core_{L}} \\
+	level_{L} = Present~level_{H}						\hfill \text{\{Precondition\}}\\
+	e_{Level_{L}} = Edit~???level_{L}							\hfill \text{\{User edit???\}}\\
 \\
-level''_{H} = {\tt update}~e'_{Level_{H}}~level'_{H}\\
-e'_{Level_{L}} = {\tt present}~sheet_{Pres}~level'_{H}~level'_{L}~e'_{Level_{H}} \hfill 
-\text{\{\}}\\
-level''_{L} = {\tt update}~e'_{Level_{L}}~level_{L}\\
-level''_{L} = Present~level''_{H}\hfill \text{\{Postcondition\}}\\
+level'_{L} = {\tt update}~e_{Level_{L}}~level_{L}                 \hfill \text{\{Compute intermediate lower level\}}\\
+e_{Core_{H}}  = {\tt translate}~sheet_{Trans}~level_{L}~level_{H}~e_{Level_{L}} \hfill \text{\{Compute higher core update\}}\\
+e_{Level_{H}} = {\tt reuse}~level_{H}~?level_{L}?~e_{Core_{H}}     \hfill \text{\{Reuse extra state\}}\\
+level'_{H} = {\tt update}~e_{Level_{H}}~level_{H}                 \hfill \text{\{Compute intermediate higher level\}}\\
+\\
+	level'_{H} = Translate~level'_{L}						\hfill \text{\{Intermediate condition\}}\\
+	e'_{Level_{H}} = Transform~e_{Level_{H}} 			\hfill \text{\{Higher layer update?\}}\\
+\\
+level''_{H} = {\tt update}~e'_{Level_{H}}~level'_{H}                 \hfill \text{\{Compute final higher level\}}\\
+e'_{Core_{L}}  = {\tt present}~sheet_{Pres}~level'_{H}~level'_{L}~e'{Level_{H}} \hfill \text{\{Compute new lower core\}}\\
+e'_{Level_{L}} = {\tt reuse}~level_{L}~?level_{H}~e'_{Core_{L}} \hfill \text{\{Reuse extra state\}}\\
+level''_{L} = {\tt update}~e_{Level_{L}}~level_{L}                 \hfill \text{\{Compute final lower level\}}\\
+\\
+	level''_{L} = Present~level''_{H}						\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}
+{\centering (Specification 4: Incrementality)}\vspace{1em}
 
 Two updates take place on the higher level, and two on the lower level. However, if we look at Figure~\ref{computeOps}, we can see that a higher level update is performed in the computation of
  ${\tt present}$. Thus, besides $e'_{Level_{L}}$ an implementation of ${\tt present}$ may also return $level''_{H}$. \note{say the the remaining updates disappear because of composition} Similarly, ${\tt translate}$ may return $e'_{L}$. \note{Mention that on composition two of the four updates can be dropped?}
