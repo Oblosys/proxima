@@ -509,7 +509,6 @@ legend   ^ is pres info       v is trans info     {node} is extra state
 %Mapping is to the node for reusing. Mapping to path is for associating doc edits with presentation parts.
 %If things are moved, the paths are no longer meaningful (nodes are). Before doc op, always fix paths by parsing.
 
-% where to store it (maybe say this further down)
 
 %What about keeping list [ID->Info?] that switches and is not part of level.
 We choose to make the mapping information part of the $Level$ type. The reason for this is that both adjacent layers may update a level, and therefore also affect the mapping information on the level. \note{need an example?} With the mapping information in the level types, $present$ and $translate$ do not need additional arguments anymore.
@@ -529,36 +528,38 @@ translate_{i} :: sheet_{Trans} \rightarrow Level_{Low} \rightarrow Level_{High}\
 present_{i} :: sheet_{Pres}  \rightarrow  Level_{High} \rightarrow Level_{Low}\\
 \end{math}\end{small}
 
-% WHEN IS IT DESTROYED?
+% computation order
+on present, compute lower 
+on translate, compute higher
+Half of the mappings are not correct, all the time. 
+NECESSARY
+However before i is presented, it was translated, and the same.
+
+equations
+
+%										
+%										
 \subsection{Vulnerability of extra state}
 
-Two kinds of problems: not valid, or destroyed.     (what about h level update in ancestor?)
+First, only works when es is child.
 
-If type changes, es is lost. But also if pres depends not only on elt but also something else, if presentation changes structurally, the mapping from previous translation cannot be used anymore.
+Mapping info is result and therefore es
 
-SOMEWHERE: Explain that result is also the other mapping info. This is extra state
+Two kinds of problems: not valid, or destroyed.
 
-* sometimes mapping is not valid. pres trans id stuff.
+if pres.translate not is id, then translate map is different from pres map. ES is not valid. translate.pres is always id
 
-% always one behind, but this is necessary!
-also pos. to compute both on each map. But then two levs are updated. 
-Info by pres is used in trans and vice versa
-Half of the mappings are not correct, all the time (probably only known when layer cycle is known). This can be tricky
-EG on a layout update, we need to reparse in order to update newly made pres ids in the document
-%doing mappings in other direction probably gives some more restrictions on relation between pres/trans
+Does not work when info not present, or node changed type. Or parent if context sensitive presentation. In that case use default value for es.
 
-%problems/restrictions
-Change on higher level that influences this level, eg. While changes to Repeat, is problematic.
+When does this happen? Examples?
+ While changes to Repeat, is problematic.
 
-Interference of other layer updates? If higher layer updates level i, does this affect the mappings? Should we keep them in the Level? (so the other layers see them as well) eg on doc change, While -> repeat until. Enr. has mappings to tokens, which are no longer valid. ES is lost. 
 
 %Maybe this is when ES breaks: if other layer messes up the tree. Non child ES is then easily broken. Does this make sense?)
 
 REQ.an update of a level, we want extra at target to remain unchanged. How to spec.? It is not always the case (delete entry may delete a chapter and delete of function may delete its layout.) 
 
 
-% ONLY FOR PARENTS
-Furthermore, the proposed solution only works well when extra state is attached to a specific parent node. Works when extra is child
 
 
 \subsection{conclusions}
@@ -573,10 +574,8 @@ Level_{n} = Core_{Pres,i} \times Extra_{Pres,i} \times Mapping_{Trans,i}\\
 Level_{i} = Level_{i} \times Mapping_{Trans,i} \times Mapping_{Pres,i}\\
 Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{Pres,i} \\
 \\
-present ::  sheet_{Pres} \rightarrow  Level_{High} \rightarrow Info_{Pres,High} \rightarrow Level_{Low}  \times Info_{Pres,Low} \\
-present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1} \times Extra_{Pres,i+1} \times Mapping_{Trans,i+1} \\
-translate :: sheet_{Trans} \rightarrow  Level_{Low} \times Info_{Pres,Low} \times  Info_{Trans,Low} \rightarrow Level_{High}  \times Info_{Pres,High} \times  Info_{Trans,High}\\
-translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}  \times Extra_{Trans,i}  \times Mapping_{Press,i} \\ \\
+translate_{i} :: sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i}\\
+present_{i} :: sheet_{Pres,i}  \rightarrow  Level_{i} \rightarrow Level_{i+1}\\
 \\
 level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
 level'_{High} = translate~sheet_{Trans}~level'_{Low}\\
@@ -601,12 +600,7 @@ Not enforced by the invariants! Need more detailed stuff on element level. Futur
 More on Difference between presentation and translation? One is vital, other isn't
 
 Have to figure out more about Focus ES, and other non node ES.
-
-
-
-
-
-
+order changes are not yet clear!
 
 
 
