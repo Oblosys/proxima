@@ -534,11 +534,11 @@ marks = '\n':take 60 qmarks
 
 instance Symbol s => Show (Message s) where
  show (Msg (action, position, expecting))  
-   =  marks ++ 
-      "\n?? Error      : " ++ position ++
-      "\n?? Expecting  : " ++ show expecting ++
-      "\n?? Repaired by: " ++ action ++
-      marks ++"\n"
+   = -- marks ++ 
+      "\nParse Error : " ++ position ++
+      "\nExpecting   : " ++ show expecting ++
+      "\nRepaired by : " ++ action 
+     -- marks ++"\n"
 
 addexpecting more  (StRepair    cost   msg   rest) = StRepair cost (addToMessage msg more) rest
 addexpecting more  (Best     l    sel  starting r) = Best l (addexpecting more sel) starting r
