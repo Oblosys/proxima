@@ -643,7 +643,7 @@ If we take the two step data types for \texttt{Simple'} from Section~\ref{sectdp
 {\tt newtype Step$_{1,2}$ a b c d = Step$_{1,2}$ (a -> (b, Step$_{2,2}$ c d a b))}\\
 {\tt newtype Step$_{2,2}$ a b c d = Step$_{2,2}$ (a -> (b, Step$_{1,2}$ c d a b))}
 
-The pattern on the righthand side can be captured by a type synonym \texttt{Step$_2$}, which makes the individual step types somewhat simpler:
+The pattern on the right-hand side can be captured by a type synonym \texttt{Step$_2$}, which makes the individual step types somewhat simpler:
 
 {\tt type Step$_2$ next a b c d = (a ->(b, next c d a b))}
 
@@ -724,7 +724,7 @@ lift simple state = (step1 (step2 (lift simple))) state
 \end{verbatim}
 \end{small}
 
-We can turn this into a more elegant definition by taking the following steps. If we drop the \texttt{state} parameter \note{already done} on the lefthand and righthand sides of the first line, and rewrite the function application as a composition, we get:
+We can turn this into a more elegant definition by taking the following steps. If we drop the \texttt{state} parameter \note{already done} on the left-hand and right hand sides of the first line, and rewrite the function application as a composition, we get:
 
 \begin{small}
 \begin{verbatim}
@@ -864,7 +864,7 @@ combine = fix $ step1 . step2
 \end{verbatim}
 \end{small}
 
-Because the constructors in the two local functions not only appear in the righthand side, but also in the patterns of the lefthand side, it is not as straightforward to factorize the constructors out of the definition. For the righthand side occurrences, we can pass the constructor as an argument \texttt{pack} to the local function, similar to what was done for \texttt{lift}. The constructors also appear on the lefthand side of the local functions. Because we cannot use a parameter for the pattern matching, we pass a selector function \texttt{unpack}. Instead of pattern matching, the \texttt{unpack} function is used to unpack the arguments of the local functions.
+Because the constructors in the two local functions not only appear in the right-hand side, but also in the patterns of the left-hand side, it is not as straightforward to factorize the constructors out of the definition. For the right-hand side occurrences, we can pass the constructor as an argument \texttt{pack} to the local function, similar to what was done for \texttt{lift}. The constructors also appear on the left-hand side of the local functions. Because we cannot use a parameter for the pattern matching, we pass a selector function \texttt{unpack}. Instead of pattern matching, the \texttt{unpack} function is used to unpack the arguments of the local functions.
 
 Unfortunately, the selector function is used on two arguments with different types, whereas Haskell only allows monomorphic applications of function arguments. Using a universally quantified type does not work, because we have to quantify over all parameters in the types, and the number of parameters is not determined. For now, the selector function is passed twice, as \texttt{unpackL} and \texttt{unpackH}. The two unpack functions are used to unpack the \texttt{hghr} and \texttt{lwr} parameters. Together with the constructor (the pack function), the unpack functions are put in a 3-tuple. In the next section, we show how a more elegant approach that uses a type class for the pack and unpack functions.
 
@@ -1010,7 +1010,7 @@ combineStepDown nextStep hghr lwr = pack $
 
 From the type constraint, we can see how the type class approach solves the double unpack parameter problem. Three \texttt{Pack} constraints are present in the type. The last two state that parameter types \texttt{stepH} and \texttt{stepL} are instances of \texttt{Pack}, and the first constraint states that result type \texttt{stepC} is instance of \texttt{Pack}. From this we can see that the first two constraints arise from the use of \texttt{unpack} on the \texttt{hghr} and \texttt{lwr} arguments (of types \texttt{stepH} and \texttt{stepL}), whereas the last constraint comes from the use of \texttt{pack}. In the implementation, this means that three dictionaries are passed, and that the two occurrences of \texttt{unpack} come from different dictionaries. In other words, the type system takes care of passing the double unpack functions.
 
-The type class does have a small drawback. Due to the monomorphism restriction, Haskell only allows a function to have an overloaded type if it is defined with parameters on the lefthand side of the definition (ie. \texttt{f x$_1$~}\dots \texttt{~x$_n$ =} \dots, instead of \texttt{f = \symbol{92}x$_1$~}\dots \texttt{~x$_n$}\verb|-> |\dots), or if it has an explicit type signature. Due to the type class, the inferred types of \texttt{lift} and \texttt{combine} are overloaded. However, \texttt{combine} has no parameters on the lefthand side of the definition, so it needs to be rewritten, or it needs a type signature.
+The type class does have a small drawback. Due to the monomorphism restriction, Haskell only allows a function to have an overloaded type if it is defined with parameters on the left-hand side of the definition (ie. \texttt{f x$_1$~}\dots \texttt{~x$_n$ =} \dots, instead of \texttt{f = \symbol{92}x$_1$~}\dots \texttt{~x$_n$}\verb|-> |\dots), or if it has an explicit type signature. Due to the type class, the inferred types of \texttt{lift} and \texttt{combine} are overloaded. However, \texttt{combine} has no parameters on the left-hand side of the definition, so it needs to be rewritten, or it needs a type signature.
 
 Because the type of \texttt{combine} can be complex, as the order of the parameters depends on the direction of the layer functions, it is inconvenient to have to give the type signature. If a type signature in the architecture source is desired, the compiler can be asked for the type, which can then be pasted in the source.
 
