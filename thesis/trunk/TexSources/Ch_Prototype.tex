@@ -1,101 +1,128 @@
 \chapter{The Proxima prototype} \label{chap:prototype}
 
-\bc TODO
+{\em *** Version: \today~ ***}
 
-Bastiaan vragen over v10 types
-\ec
+%\setlength{\unitlength}{1mm}   \newcommand{\epsfigPrx}[3]{\fbox{\begin{picture}(#2,#3)(0,0)\end{picture}}}
+\newcommand{\epsfigPrx}[3]{\epsfig{file=pics/Screenshots/#1, height=#3mm}}
 
-% Reuse from Ch_EditModel
 
-A prototype of the Proxima editor has been implemented in the fuctional language Haskell. The architecture of the prototype corresponds to the architecture described in Chapter~\ref{chap:proxArch}, and is realized with the architecture combinators from Chapter~\ref{chap:archCombs}. The implementation is platform-independent and has been succesfully tested on Windows, Linux, and MacOS X platforms. 
+A prototype of the Proxima editor has been implemented in the fuctional language Haskell. The architecture of the prototype corresponds to the architecture described in Chapter~\ref{chap:proxArch}, and is realized with the architecture combinators from Chapter~\ref{chap:archCombs}. The presentation target language is the {\Xprez} language from Chapter~\ref{chap:presenting}. The implementation is platform-independent and has been succesfully tested on Windows, Linux, and MacOS X platforms. 
 
-The prototype is implemented entirely in Haskell and uses the wxHaskell~\cite{leijen04wxHaskell} library for the implementation of the user interface. The presentation sheet \bc (which is an atttibute grammar)\ec  is compiled by an  attribute-grammar system~\cite{swierstra04ag}, which is also used to implement the arrangement mapping. The parsing sheet is specified using a parser-combinator library~\cite{swierstra01parsers}.
+The prototype is implemented entirely in Haskell and uses the wxHaskell~\cite{leijen04wxHaskell} library for the implementation of the user interface. The presentation sheet \bc (which is an atttibute grammar)\ec  is compiled by an  attribute-grammar system~\cite{swierstra04ag}, which is also used for the implementation of the arrangement layer. The parsing sheet is specified using a parser-combinator library~\cite{swierstra01parsers}.
 
 % size of editor?
 
-Proxima is an editor generator, which means that given a document type definition and number of sheets, the system generates an editor application. In the near future, it will be possible to dynamically update the sheets, and hence modify the presentation during editing. In theory, it is also possible to support dynamic updates to the document type, and thus eliminate the need for a generation step altogether. However, it is not clear yet whether the advantages of a dynamic document type justify the effort required to support it.
+Proxima is an editor generator, which means that given a document type definition and number of sheets, the system generates (or {\em instantiates}) an editor application. The sheets that need to be specified for the prototype are the presentation sheet and the parsing sheet, which are discussed in more detail in Section~\ref{sect:instantiating}.
+
+In the near future, Proxima will support dynamic updates to the sheets, and hence make it possible to change the presentation of the document during editing. In theory, it is also possible to support dynamic updates to the document type, and thus eliminate the need for a generation step altogether. However, it is not clear yet whether the advantages of a dynamic document type justify the effort required to support it. 
 
 \todo{mention absence of evaluation layer here?}
 
-The prototype does not yet have any support for incrementality. However, because about 90\% 
-of the execution time is taken up by the arrangement and rendering layers, and because editing is typically a local process, simple modifications to these two layers yield substantial results. Experiments with such simple modifications have yielded an  increase of about 900\%,
-and lead to an acceptable response time for documents of a few pages. For larger documents we need the underlying attribute-grammar compiler to support incremental evaluation.
-\todo{check para}
+The prototype does not yet support incrementality. However, because about 90\% 
+of the execution time is taken up by the arrangement and rendering layers, and because editing is typically a local process, simple modifications to these two layers yield substantial results. Experiments with such simple modifications have yielded an increase in execution speed of about 900\%,
+which leads to an acceptable response time for documents of a few pages. For larger documents we need the underlying attribute-grammar compiler to support incremental evaluation.
 
-In Section~\ref{sect:sampleEditors}, we show several example editors that have been instantiated in Proxima. Section~\ref{sect:instantiating} discusses the components that are required for instantiating an editor. In Section~\ref{sect:proxImpl}, we go over the implementation aspects for each of the layers. Finally, Section~\ref{sect:protoConcl} presents an overview of future work and concludes.
+In Section~\ref{sect:sampleEditors}, we show several example editors that have been instantiated with Proxima. Section~\ref{sect:instantiating} discusses the components that are required for instantiating an editor. In Section~\ref{sect:proxImpl}, we go over the implementation aspects for each of the layers. Finally, Section~\ref{sect:protoConcl} presents an overview of future work and concludes.
 
 % switch with implementation of system?
 \section{Instantiated editors} \label{sect:sampleEditors}
-\todo{mention size of sheets}
+
 Three editors have been implemented with Proxima: a source editor for the functional language Helium~\cite{heeren03helium}; an editor for presentation slides in the style of Microsoft PowerPoint; and a chess-board editor. Because the editors were implemented mainly for demonstration purposes, all three editors are integrated in a single editor instance.
 
 %Because the editors were implemented mainly for testing concepts, . 
 %The editor is connected to the Helium compiler to provide type inference during editing.
 %Research vehicle, so many combined features in an incomplete editor. The result is a source editor for the functional %language Helium, integrated with powerpoint slide editor and a chess board. 
 
+
+\bc
+~1600
+60   DTD
+1200 presentation
+200  parser
+150  lambda reducer
+200  type checker communicatie
+
+wordt dus 1600
+
+
+Chess board 140 regels code!   (+ zetten generator)
+10 voor DTD
+100 voor presentatie en edit gedrag, 
+30 om met zettengenerator te communiceren
+
+
+Powerpoint stuk: nu ~ 325     15 regels DTD 160 regels presentatie + 50 regels parser 
+wordt ~ 225  
+\ec
+
+
 \subsection{A Helium source editor}
 
 
 
-A source editor has been implemented for a subset of the functional language Helium~\cite{heeren03helium}, which is a  Haskell dialect designed for education. The editor already provides most of the functionality that was described in the source-editor use case (see Section~\ref{sect:sourceeditor}). In order to provide type information during editing, the editor is integrated with the Helium type checker. Figure~\ref{heliumMain} contains a screenshot of the Helium editor in action. \todo{meer over Helium?}
+A source editor has been implemented for a subset of the functional language Helium~\cite{heeren03helium}, which is a  Haskell dialect designed for education. The editor already provides most of the functionality described in the source-editor use case (see Section~\ref{sect:sourceeditor}). In order to provide type information during editing, the editor is integrated with the Helium type checker. Figure~\ref{heliumMain} contains a screenshot of the Helium editor in action. 
 
-% The Helium type checker is an interesting choice, because it vllsfd . Furthermore, much information 
-\bc Helium type checker provides Quality of error messages  Integrated with a compiler for type inference. Helium interesting, because complier has good error messages and info, which is hard to convey in a command line . \ec
+
+\newcommand{\protoscrshot}[4]{%\fbox{%
+\parbox{#4mm}{\begin{center} \fbox{\epsfigPrx{#1}{#4}{#2}}\\
+{\small #3}\end{center}
+}}% }
+\newcommand{\then}{\hspace{\stretch{1}}$\Rightarrow$\hspace{\stretch{1}}}
+
 
 
 \begin{figure}
 \begin{center}
-\epsfig{file=pics/Screenshots/heliumWindow.eps, width=10cm}
+\epsfigPrx{heliumWindow.png.eps}{100}{60}
 \caption{An editor for Helium.}\label{heliumMain} 
 \end{center}
-\end{figure}\todo{focus has wrong color}
+\end{figure}
 
-In the figure, we see an editable view of a program source, with the focus on \todo{focus}. The right-hand side of function \p{ff} has been hidden and may be expanded by clicking on the dots. The definition of \p{f} shows that program constructs may also have a more graphical presentation.
+In the figure, we see an editable view of a program source, with the focus on function \p{g} in the definition of \p{s}. The right-hand side of \p{large} has been hidden and may be expanded by clicking on the dots. The definition of \p{f} shows that program constructs may have a graphical presentation.
+% make sure that focused part has type
+% collapse function
+% fix focus color
 
+% para even checken
+%\note{mention these are not editable?}
 % semantic coloring, nice arrows?
-The type signatures for the top-level declarations are automatically derived. \note{mention these are not editable?} Moreover, the editor provides type information for local expressions as well. At the top of the presentation, we see the type for the document part that is in focus (if it has a type). At the bottom, the variables that are in scope from the focus are listed together with their types.
+The type signatures for the top-level declarations are automatically derived, and furthermore,  the editor provides type information for local expressions as well. At the top of the window we see the type for the focused expression (if it has a type). At the bottom, the variables that are in scope at the focus are listed together with their types.
 
-To the right of each type signature is a comment that shows the value of the declared identifier, which changes dynamically when the source is edited. Although not very useful in a source editor, since most declarations are functions, these computations provide an example of spreadsheet-like behavior; parts of the document that represent computations are interpreted dynamically, and the results are displayed in the presentation.
+To the right of each type signature is a comment that shows the value of the declared identifier. The value changes dynamically when the source is being edited. Although not very useful in a source editor, since most declarations are functions, these computations provide an example of spreadsheet-like behavior; parts of the document that represent computations are interpreted dynamically, and the results are displayed in the presentation.
 
-\head{Presentation-oriented editing mixed with structure editing}
+\head{Mixed document- and presentation-oriented editing}
 
-Expressions may be edited structurally (i.e\ document-oriented) based on the Helium abstract syntax. Below is an example that shows how structure editing may facilitate editing a list. When the \p{3*5} element is deleted, the comma next to it automatically disappears. When the element is pasted at the end, a comma appears in front of it. 
+Expressions can be edited structurally (or document-oriented) based on the Helium abstract syntax. Below is an example that shows how structure editing facilitates editing a list. When the \p{3*5} element is cut, the comma to the right of it automatically disappears. When the element is pasted at the end, a comma appears at the left. 
 
-%height 30px
-\fbox{\epsfig{file=pics/Screenshots/strEditList1.eps, height=0.3cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/strEditList2.eps, height=0.3cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/strEditList3.eps, height=0.3cm}}
-\todo{fix focus and add type sig to screenshot}
 
-Furthermore, the editor supports structure building with placeholders. By selecting constructs from a menu, an expression may be constructed:
+\protoscrshot{strEditList1.png.eps}{4.7}{~}{36} \then 
+\protoscrshot{strEditList2.png.eps}{4.7}{after {\em cut} \p{3*5}}{36} \then 
+\protoscrshot{strEditList3.png.eps}{4.7}{after {\em paste} \p{3*5}}{36} 
 
-%height 60px
-\fbox{\epsfig{file=pics/Screenshots/strEditList3.eps, height=0.3cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/strEditBuild2.eps, height=0.5cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/strEditBuild3.eps, height=0.5cm}}
+The editor also supports structure building with placeholders. By selecting constructs from a menu, an expression may be constructed:
 
-Similar structure editing is supported by conventional syntax-directed editors, but Proxima has the advantage that the presentation may still be edited textually as well. Program fragments may be entered or modified textually without having to switch to a different view or mode.  Below is a screenshot that shows a presentation-oriented cut operation. Although the selection that is cut does not make sense at document level, the cut is a valid edit operation at the presentation level.
+\protoscrshot{strEditBuild1.png.eps}{4.7}{~}{32} \then
+\protoscrshot{strEditBuild2.png.eps}{4.7}{after {\em add} \p{FracExp}}{38} \then
+\protoscrshot{strEditBuild3.png.eps}{4.7}{after {\em insert} \p{PowerExp}}{42} 
 
-\begin{center}
-\fbox{\epsfig{file=pics/Screenshots/presEdit1.eps, height=0.5cm}} \qquad
-\fbox{\epsfig{file=pics/Screenshots/presEdit2.eps, height=0.5cm}}
-\end{center}
 
-\bc
-\begin{center}
-\end{center}
-\ec
+Similar structure editing is supported by conventional syntax-directed editors, but Proxima has the advantage that the presentation can still be edited textually as well. Program fragments can be entered or modified textually without having to switch to a different view or mode.  Below is a screenshot that shows a presentation-oriented cut operation. Although the selection that is cut does not make sense at document level, the cut is a valid edit operation at the presentation level.
+
+\hspace{\stretch{1}} 
+\protoscrshot{presEdit1.png.eps}{4.7}{~}{42} \then
+\protoscrshot{presEdit2.png.eps}{4.7}{after {\em cut} ``\p{+2, 27, 3*}''}{36}
+ \hspace{\stretch{1}}
+
 
 \head{Type errors}
 
-The editor shows type errors by marking the error location with a squiggly line and displaying the error message at the bottom of the source. This mechanism also works in the graphically presented parts of the program, as is shown by the screenshot fragment below.
+The editor shows type errors by displaying an error message at the bottom and marking the location with a squiggly line in the source. This mechanism also works in the graphically presented parts of the program, as is shown by the screenshot fragment below.
 
-%\todo{fix (-1,-1)}
-\begin{center}
-\fbox{\epsfig{file=pics/Screenshots/typeErr.eps, height=2cm}}
-\end{center}
+\hspace{\stretch{1}} 
+\protoscrshot{typeErr.png.eps}{20}{type error: \p{3+True}}{54}
+\hspace{\stretch{1}} 
 
-The Helium type checker is an interesting candidate for integration with a structure editor, because of its sophisticated type checker. Besides the location of the error, the type checker can provide additional information about the other parts of the program that contributed to the error. Such information would be hard to show on a command-line, but can be displayed in a clear way by highlighting the relevant parts of the source code. Furthermore, for common errors, the Helium type checker is able to provide hints on how to repair them. Such hints can be presented along with a button that performs the suggested reparation when clicked.
+The Helium type compiler is an interesting candidate for integration with Proxima because of its sophisticated type checker. Besides the location of the error, the type checker can provide additional information about the other parts of the program that contributed to the error. Such information would be hard to show on a command-line, but can be displayed in a clear way by highlighting the relevant parts of the source code. Furthermore, for common errors, the Helium type checker is able to provide hints on how to repair them. A hint can be presented along with a button that performs the suggested reparation when clicked.
 
 
 %And no line numbers yet. (but will be easy to add)
@@ -109,15 +136,17 @@ The Helium type checker is an interesting candidate for integration with a struc
 
 \head{Beta reduction}
 
-A simple reduction engine may be applied to a term in the source. The screen-shots below show a few steps in the reduction of the application \p{f~3}. First, the function \p{f} is replaced by its definition from Figure~\ref{heliumMain}. Then, a beta-reduction step is performed, and the argument \p{3} is substituted for all (free) occurrences of \p{x} in the fraction. The process may be continued by reducing the mathematical operators, until we get the final value \p{16}.
+A simple reduction engine can be applied to a term in the source. The screen-shots below show two steps in the reduction of the application \p{f~3}. First, the function \p{f} is replaced by its definition from Figure~\ref{heliumMain}. Then, a beta-reduction step is performed, and the argument \p{3} is substituted for all (free) occurrences of \p{x} in the fraction. The process can be continued by reducing the mathematical operators until we get the final value \p{16}.
 
-\fbox{\epsfig{file=pics/Screenshots/beta1_170x90.eps, height=0.8cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/beta2_500x90.eps, height=0.8cm}} \hspace{\stretch{1}}
-\fbox{\epsfig{file=pics/Screenshots/beta3_410x90.eps, height=0.8cm}}
+\protoscrshot{betaReduce1.png.eps}{7.2}{~}{15} \then
+\protoscrshot{betaReduce2.png.eps}{7.2}{after~``replace~\p{f}~by~definition''}{42} \then
+\protoscrshot{betaReduce3.png.eps}{7.2}{after ``reduce lambda''}{36}
 
-The reduction engine is implemented by an attribute grammar of about 150 lines, which may be reduced further to about 100 lines, once the underlying attribute-grammar system supports default attribute declarations.
 
-Besides illustrating reduction algorithms, source-to-source transformations can be used to implement refactoring operations~\cite{reinke03refactoring}. Furthermore, by inserting the transformed term below the original, instead of replacing it, we can use the editor for creating derivations semi-automatically (e.g.\ in a proof editor).
+The reduction engine is implemented by an attribute grammar of about 150 lines, which can be reduced further to about 100 lines once the underlying attribute-grammar system supports default attribute declarations.
+
+%Besides illustrating reduction algorithms
+Similar to beta-reduction, we could implement other source-to-source transformation, such as refactoring operations~\cite{reinke03refactoring}. Furthermore, by inserting the transformed term below the original, instead of replacing it, the editor can be used to semi-automatically create derivations (e.g.\ in a proof editor).
 
 %\head{Automatic layout}
 %?
@@ -126,74 +155,84 @@ Besides illustrating reduction algorithms, source-to-source transformations can 
 
 \head{Editable list of top-level identifiers}
 
-The evaluation layer has not been completely realized yet, but nevertheles a few experimental evaluation layer features have been implemented. The list of top-level identifiers at the top of Figure~\ref{heliumMain} may be compared to an editable table of contents. Editing the names in the list causes updates to the identifiers in the corresponding declarations, and moving the identifiers results in moving the declarations.
+The evaluation layer has not been completely realized yet, but nevertheless a few experimental evaluation-layer features have been implemented. The list of top-level identifiers at the top of Figure~\ref{heliumMain} is similar to an editable table of contents. Editing a name in the list causes an update to the identifier in the corresponding declaration, and moving an indentifier moves the declaration. The screenshot shows how editing ``\p{list}'' in the identifier list results in an update to the declaration of \p{list} as well.
 
-\toHere
+
+\hspace{\stretch{1}} 
+\protoscrshot{identList1.png.eps}{10.1}{~}{47} \then
+\protoscrshot{identList2.png.eps}{10.1}{after {\em enter} `\p{1}'}{47}
+\hspace{\stretch{1}} 
+
 %SCREENSHOT
 % ""     "after entering ``..'' "      "
-\fromHere
 
 
 \head{Tree view}
 
 A second experimental feature is a built-in tree presentation of the document. The tree is not fully editable yet.
 
-\begin{center}
-\fbox{\epsfig{file=pics/Screenshots/treeview.eps, height=3cm}}
-\end{center}
+\hspace{\stretch{1}} 
+\protoscrshot{treeView'.png.eps}{25}{A tree view of \p{1*2+3}}{40}
+\hspace{\stretch{1}} 
+% treeView'.png is slightly edited version treeView.png  (no time now to fix renderer)
 
-Because of the complexity and size of the tree presentation, more support for incrementality is necessary to make it useful. Furthermore, the tree should be displayed in a separate (scrollable) window or window-pane, which is currently not possible in {\Xprez}.
+Because of the complexity and size of the tree presentation, more support for incrementality is necessary to make it useful. Furthermore, the tree should be displayed in a separate (scrollable) window or window pane, which is currently not possible with {\Xprez}.
 
 %SCREENSHOT
-\todo{XML}
 %No tree funct. yet, need some es support. Also xml is not editable because requires different scanner.
 
 
 \subsection{A poor man's PowerPoint}
 
-Integrated with the Helium editor is a very basic slide editor in the style of Microsoft's PowerPoint. A slide presentation is a list of slides, each of which consists of a title and a list of items. An item is a string, a Helium expression, or a nested item list. Figure~\ref{slideEditorWYSIWYG} shows the slide editor for a slide presentation of two slides. An item list may choose from several display styles (bulleted, numbered, or enumerated with letters) and nested lists get a smaller font size.
+Integrated with the Helium editor is a very basic slide editor in the style of Microsoft's PowerPoint. A slide presentation is a list of slides, each of which consists of a title and a list of items. An item can be either a string, a Helium expression, or a nested item list. Figure~\ref{slideEditorWYSIWYG} shows the slide editor for a slide presentation of two slides. An item list may choose from several display styles (bulleted, numbered, or enumerated with letters) and nested lists get a smaller font size. The entire slide editor is specified in about 200 lines of sheet code.
 
-Because a WYSIWYG view is not always convenient, the editor also provides an XML view, which is shown in Figure~\ref{slideEditorSource}. The source view is only partially editable, but it is straightforward to turn it into a fully-editable\todo{-?} view. \todo{built-in XML pres?}
+Because a WYSIWYG view is not always convenient, the editor also provides an XML view, which is shown in Figure~\ref{slideEditorSource}. The source view is only partially editable, but it is straightforward to turn it into a fully editable view. Similar to the predefined tree presentation, a predefined XML presentation is available for each document node. However, this causes the entire subtree to be presented as XML, whereas the Helium expression in Figure~\ref{slideEditorSource} does not have an XML presentation. Therefore, the XML view for the slide editor is  specified explicitly in the presentation sheet.
 
 \begin{figure}
-  \begin{minipage}[t]{.47\textwidth}
+  \begin{minipage}[t]{.40\textwidth}
     \begin{center}   
-\fbox{\epsfig{file=pics/Screenshots/powerpointPresWindow.eps, height=5cm}}
-      \caption{Slide editor WYSIWYG view.} \label{slideEditorWYSIWYG}
+\fbox{\epsfigPrx{slideWindow.png.eps}{40}{42}}
+      \caption{A slide editor.} \label{slideEditorWYSIWYG}
     \end{center}
   \end{minipage}
 \hfill
-  \begin{minipage}[t]{.47\textwidth}
+  \begin{minipage}[t]{.57\textwidth}
     \begin{center}  
-\fbox{\epsfig{file=pics/Screenshots/powerpointEditWindow.eps, height=5cm}}
-      \caption{Slide editor XML view.\hspace{1cm}} \label{slideEditorSource}
+\fbox{\epsfigPrx{slideXMLWindow.png.eps}{55}{42}}
+      \caption{Slides as viewed as XML.} \label{slideEditorSource}
     \end{center}
   \end{minipage}
 \end{figure}
-\todo{change Helium expression}
 
 \head{Integration with Helium editor}
 
-The slide editor is fully integrated with the Helium editor: a list of slides forms part of the program source, and, more interestingly, a slide may contain Helium code (which may again contain a list of slides, and so on). Moreover, the Helium code in a slide has exactly the same edit functionality as in the source editor. As an example, the screenshot below shows a slide that contains a Helium expression with a type error.
+The slide editor is fully integrated with the Helium editor: the list of slides is part of the program source, and, more interestingly, a slide may contain Helium code (which may again contain a list of slides, and so on). The Helium code may refer to declarations elsewhere in the source. Moreover, Helium code in a slide has exactly the same edit functionality as in the source editor. As an example, the screenshot in Figure~\ref{slideError} shows a slide with  a Helium expression that refers to a non-existent identifier \p{increaze}.
 
-\begin{center}
-\fbox{\epsfig{file=pics/Screenshots/powerpointTypeErr.eps, height=3cm}}
-\end{center}
+\begin{figure}
+\begin{minipage}[t]{.47\textwidth}
+    \begin{center}   
+\fbox{\epsfigPrx{slideErr.png.eps}{60}{46}}
+      \caption{Helium slides.} \label{slideError}
+    \end{center}
+  \end{minipage}
+\hfill
+\begin{minipage}[t]{.47\textwidth}
+    \begin{center}  
+\epsfigPrx{chessWindow.png.eps}{60}{46}
+      \caption{A game of chess: Ne3-g4?}\label{chessBoard} 
+    \end{center}
+  \end{minipage}
+\end{figure}
+%  Kasparov,G - Lautier,J Moscow, 1995  http://www.hullchessclub.com/combos/kasrarov.htm#one
+
 
 
 \subsection{Chess board}
 
-Altough it might seem a somewhat unfamiliar application of structure editing, a chess board editor lends itself very well to be implemented with Proxima.  Figure~\ref{chessBoard} shows the chess board editor, which is integrated with the Helium editor similar to the slide editor (except that we cannot use Helium expressions as chess pieces).
+Altough it may seem a unfamiliar application of structure editing, a chess board lends itself very well to be implemented with Proxima.  Figure~\ref{chessBoard} shows the chess-board editor, which is integrated with the Helium editor similar to the slide editor (except that we cannot use Helium expressions as chess pieces). The editor is connected to a chess-move generator for computing possible moves. In total, not counting the generator, the sheets for the chess board add up to about 140 lines of code.
 
-\begin{figure}
-\begin{center}
-\epsfig{file=pics/Screenshots/chessWindow.eps, height=5cm}
-\caption{A chess board editor.}\label{chessBoard} 
-\end{center}
-\end{figure}
 
-The chess-board editor highlights all squares that are reachable by the focused chess piece. A piece may be moved by clicking one of these highlighted squares, or by using cut-and-paste. The editor does not yet support playing against the computer, but this can be implemented straightforwardly by connecting the editor to a chess program. \todo{forward ref to sheet example?}
-
+The chess-board editor highlights all squares that are reachable by the focused chess piece. A piece may be moved by clicking one of these highlighted squares, or by using cut-and-paste operations. The editor does not yet support playing against the computer, but this can be implemented straightforwardly by connecting the editor to a chess program. 
 
 
 %																
@@ -203,62 +242,75 @@ The chess-board editor highlights all squares that are reachable by the focused 
 
 In order to intantiate an editor in Proxima, three components need to be provided: a {\em document type definition}, a {\em presentation sheet}, and a {\em parsing sheet}. We will give brief overview and a few example fragments of each of these three components. The {\em evaluation sheet}, {\em reduction sheet}, and {\em scanning sheet} that were mentioned in Section~\ref{sect:archProximaLayers} are not yet fully supported and therefore not discussed here.
 
-Because the sheet formalisms are still in an experimental stage, . \toHere
-Still in experimental stage. leave out details that will be hidden in future impl.
-\fromHere
+Because the sheet formalisms are still in an experimental stage, the example sheets do not yet contain much abstraction. Hence, for clarity, we wil leave out certain details. A future version of Proxima will provide appropriate abstractions for these details. 
 
 \subsection{Document type}
 
-As mentioned in Section~\ref{sect:docLevel}, a Proxima document type consists of monomorphic data types and the list type. The type definition is similar to a Haskell type definition, with a few differences. A constructor may have named children, which do not have to be globally unique. Thus, a binary tree type can be defined as:\todo{name is optional}
+As mentioned in Section~\ref{sect:docLevel}, a Proxima document type consists of monomorphic data types and the list type. The type definition is similar to a Haskell type definition, but there are a few differences. 
 
-\p{data Tree = Bin left::Tree right::Tree | Leaf val::Int}
+A constructor may have named children, which do not have to be globally unique. The name is optional and defaults to the name of the child type (with a number appended in case of more than one anonymous child). Thus, a binary tree type may be defined as:
 
-Furthermore, each constructor needs to specify how many tokens it uses in its presentation. This information can be deduced from the presentation sheet, but, for the moment, it has to be specified by hand. The tokens are specified by a list of children of type \p{IDP} that is enclosed by braces. The special syntax is necessary because Proxima provides default behavior for these types. \todo{id may be new} \todo{also possible list}
-%monomorphic (i.e.\ parameter free) data types together with the list type
-%\note{comments on generation here or in impl?}
+\p{data Tree = Bin left::Tree right::Tree | Leaf Int}
 
-Figure~\ref{docTypeExample} shows several fragments of the document type for the editors from Section~\ref{sect:sampleEditors}.\todo{find out which types to show} \todo{extra state?} \todo{boxed primvals}
-\p{Decl} has intr es as and \p{layout} \p{exp} is what? should be hidden
+Furthermore, each constructor needs to specify how many tokens it uses in its presentation. This information could be deduced from a presentation sheet, but for the moment it has to be specified by hand.  The tokens are specified by a list of identifiers, which is enclosed by braces: 
+\verb|{|\p{ident$_1$ \dots~ident$_n$}\verb|}|. This special syntax is necessary because the editor provides default behavior for these types.  Each name gives rise to a child of type \p{IDP}, which represents the identity of the token. The identitities are used on presentation and parsing for reusing tokens. 
+%A value of type \p{IDP} is either a unique identity, or a special identity \p{FreshIDP}.
+
+%\{also possible list} ??
 
 
-\todo{check that idD is not in figure, types with ::}
-\begin{figure}
+%we use special types denoted by \verb|Int_|, \verb|Bool_|, and \verb|String_|. The reason why this is visible in the %document type definition is that Although this could be hidden from the , the explicit , because  are treated specially %Finally, because the editor we use a special Primitive values are boxed. because need location. default stuff. %\verb|Int_|, \verb|Bool_|, and \verb|String_|.
+
+Finally, appearances of primitive types such as integers, booleans, and strings, are replaced by special boxed versions. \note{more info on this?}
+
+
+
+Figure~\ref{docTypeExample} shows several fragments of the document type for the editors from Section~\ref{sect:sampleEditors}. The document is a list of declarations, each of which can be either a Helium declaration, a chess board, or a slide presentation. 
+
+The \p{layout} child of \p{Decl} is a boolean value that specifies whether or not automatic layout it turned on. The value is interpretation extra state, since it is not presented.  \p{Decl} also has a boolean child \p{folded} specifying whether the right-hand side is visible or folded. Ideally, \p{folded} would be presentation extra state, but since the prototype does not yet support user-defined presentation extra state, the \p{folded} state is explicitly specified as part of the document type.
+
+Besides part of the Helium types, the figure also contains the type definitions for the chess board. The board consists of eight rows, each consisting of eight squares. A square contains a chess piece, which is either one of the six kinds of chess pieces, or \p{Nothing}. (The editor does not yet have a \p{Maybe} type for optional values.)
+
+For brevity, we do not show the rest of the (implemented) Helium language types, nor the types for the slide presentations. However, all of these types are straightforward, and the entire type definition for the three examples together is about 60 lines of code.
+
+
+%{check that idD is not in figure, types with ::}
+\begin{figure}[t]
 \begin{small}
 \begin{center}
 \begin{footnotesize}
 \begin{verbatim}
 data Root = Root decls::[Decl]
 
-data Decl = Decl exp::Bool_ layout::Bool_ Ident Exp { idP0, idP1, idP2, idP3 }
-          | BoardDecl Board                         { idP0, idP1 }
-          | PPPresentationDecl PPPresentation       { idP0, idP1 }
+data Decl = Decl layout::Bool folded::Bool Ident Exp { idP0, idP1, idP2, idP3 }
+          | BoardDecl Board                          { idP0, idP1 }
+          | SlidesDecl Slides                        { idP0, idP1 }
 
-data Exp = PlusExp exp1::Exp exp2::Exp              { idP0 }
-         | DivExp exp1::Exp exp2::Exp               { idP0 }
-         | LamExp Ident Exp                         { idP0, idP1 }
+data Exp = PlusExp exp1::Exp exp2::Exp               { idP0 }
+         | DivExp exp1::Exp exp2::Exp                { }
+         | LamExp param::Ident body::Exp             { idP0, idP1 }
          ...
-         | LetExp [Decl] Exp                        { idP0, idP1 }
-         | BoolExp Bool_                            { idP0 }
-         | IntExp Int_                              { idP0 }
+         | LetExp [Decl] Exp                         { idP0, idP1 }
+         | BoolExp Bool                              { idP0 }
+         | IntExp Int                                { idP0 }
 
 ...
 
 data Board    = Board    r1::BoardRow r2::BoardRow r3::BoardRow r4::BoardRow
                          r5::BoardRow r6::BoardRow r7::BoardRow r8::BoardRow { }
 
-data BoardRow = BoardRow ca:Square cb:Square cc:Square cd:Square
-                         ce:Square cf:Square cg:Square ch:Square { }
+data BoardRow = BoardRow ca::Square cb::Square cc::Square cd::Square
+                         ce::Square cf::Square cg::Square ch::Square { }
 
-data Square = Square Piece
+data Square = Square piece::Piece
 
-data Piece = King color : Bool_ { } | Queen color : Bool_ { } | ... | Nothing { }
+data Piece = King color::Bool { } | ... | Pawn color::Bool { } | Nothing { }
 \end{verbatim}
 \end{footnotesize}
-\caption{A Proxima document type definition.}\label{docTypeExample} 
+\caption{Fragments of Proxima document type definitions.}\label{docTypeExample} 
 \end{center}
 \end{small}
 \end{figure}
-\note{caption}
 
 \bc
          | TimesExp  exp1::Exp exp2::Exp                     { idP0::IDP }
@@ -273,42 +325,39 @@ data Piece = King color : Bool_ { } | Queen color : Bool_ { } | ... | Nothing { 
 
 -- one pres elt for in program source, other for in list
 -- however, only the one for source is used, the other has no layout
-data Ident = Ident String_                                 { idP0::IDP idP1::IDP }
+data Ident = Ident String                                 { idP0::IDP idP1::IDP }
 
 \ec
 
 \subsection{Presentation sheet}
-\todo{Check swapped hRef vRef  in code}
-\todo{If presenter/parser is explained in more detail here, add a forward ref in chapter proxArch}
+%Check swapped hRef vRef  in code
 
-The presentation sheet is an attribute grammar that specifies the presentation as a synthesized attribute \p{pres~::~Xprez}. Besides the presentation, arbitrary inherited and synthesized attribute may be specified. Furthermore, a number of default attributes is available for each document element.
+The presentation sheet is an attribute grammar that specifies the presentation as a synthesized attribute \p{pres~::~Xprez}. Besides the presentation, arbitrary inherited and synthesized attribute may be specified. Furthermore, for each document node, there are a number of predefined attributes, such as its path from the root and a default tree presentation.
 
 %Because the sheet is which is directly compiled by an attribute-grammar system.
 %The sheet is combined with a generated attribute-grammar module that defines default presentations and ..
 %..location.
 
-As explained in Section~\ref{chap:proxArch}, a presentation may be either {\em parsing} or {\em structural}, depending whether or not it allows presentation-oriented editing. If a presentation supports presentation-oriented editing, this is specified in the presentation sheet with the function \p{parsing}. On the other hand, if the presentation is a structural presentation without presentation-oriented editing, we use the function \p{structural}.  The choice between parsing or structural presentations also affects the parsing sheet, as will be explained in the next section. 
+As explained in Section~\ref{chap:proxArch}, a presentation may be either {\em parsing} or {\em structural}, depending whether or not it allows presentation-oriented editing. If a presentation supports presentation-oriented editing, this is specified in the presentation sheet with the combinator \p{parsing}. On the other hand, if the presentation does not support presentation-oriented editing, we use the combinator \p{structural}.  The choice between parsing or structural presentations also affects the parsing sheet, as will be explained in the next section. 
 
-To support editing, the presentation should be constructed according to several guidelines, which are not enforced yet. Besides specifying whether it is structural or parsing, a presentation must contain the document location, and change its background color when it is in focus. 
+To support editing, the presentation should be constructed according to several guidelines, which are not enforced yet. Besides containing a \p{parsing} or \p{structural} combinator, a presentation must encode the document location, and modify its background color when it is in focus. 
 
-Although the functions for marking the location and presenting the focus are simple, they contain explicit attribute references which require too much detail for this discussion. Because the attribute grammar compiler does not support first-class AG's, we cannot abstract over these functions. Hence, we will denote the two functions by \p{{\em location}} and \p{{\em focus}}. 
+Although the functions for marking the location and presenting the focus are simple, they contain explicit attribute references which are not interest to this discussion. Because the attribute grammar compiler does not support first-class AG's, we cannot abstract over these functions yet. Hence, we will denote the two functions by \p{{\em location}} and \p{{\em focus}}.  \todo{check diffs with chapter \ref{chap:proxArch}}
 
-\toHere
-Difference with \ref{chap:proxArch} is that parsed presentations are not token lists, but just trees.
-\fromHere
+%Difference with  is that parsed presentations are not token lists, but just trees.
 
 %$<$$squiggle$$>$ $<$$add~reduction~menu$$>$
 
-We discuss a few presentation examples that originate from the example editors in Section~\ref{sect:sampleEditors}.
+We discuss a few examples from the presentation sheets of the editors in Section~\ref{sect:sampleEditors}.
 
-\head{Fraction}
+\head{The presentation of a fraction}
 
-The first example is the presentation of a fraction expression in the Helium editor, which makes use of the \p{frac} combinator from Section~\ref{sect:xprezFrac}. A helium expression needs to show a squiggly line when it is the location of a type error and furthermore, it defines a popup menu for beta-reduction edit operations. The two functions that implement this behavior are denoted by \p{{\em squiggle}} and \p{{\em add\_reduction\_menu}}, similar to \p{{\em location}} and \p{{\em focus}}. 
+The first example is the presentation of a Helium fraction expression, which makes use of the \p{frac} combinator from Section~\ref{sect:xprezFrac}. Each helium expression needs to show a squiggly line when it is the location of a type error and, furthermore, it defines a popup menu for beta-reduction edit operations. We denote the two functions that implement this behavior by \p{{\em squiggle}} and \p{{\em add\_reduction\_menu}}, similar to \p{{\em location}} and \p{{\em focus}}. 
 
-Thus, the presentation for the \p{DivExp} constructor of \p{Exp} is:
+The presentation for the \p{DivExp} constructor of \p{Exp} is straightforward:
 
 \ttfamily\begin{small}\begin{tabbing}
-SEM Exp | DivExp\\
+SEM Exp | DivExp exp1::Exp exp2::Exp \\
 ~~lhs.pres = ({\em location}~.~structural~.~{\em focus}~.~{\em squiggle}~.~{\em add\_reduction\_menu})\\
 ~~~~~~~~~~~~~~~frac @exp1.pres @exp2.pres
 \end{tabbing}\end{small}\rmfamily
@@ -317,29 +366,30 @@ SEM Exp | DivExp\\
 %               squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
 %               frac @exp1.pres @exp2.pres
 
-\head{Lambda}
+\head{The presentation of a lambda expression}
 
-The second example is the presentation of a Helium lambda expression, such as \verb|\x|$\rarr\!$\verb|x+1|. The presentation uses a function \p{key} to display a string in keyword color (i.e.\ the constant \p{keyColor}): \todo{text has an id}
+The second example is the presentation of a Helium lambda expression, such as \verb|\x|$\rarr\!$\verb|x+1|. In the presentation we make  use a function \p{key} to display a string in keyword color (i.e.\ the constant \p{keyColor}). The definition \p{key} contains the application \p{strToken id str}, which  presents \p{str} as a token with identity \p{id}.
 
 \begin{small}
 \p{key :: IDP -> String -> Xprez}\\
-\p{key id str = text id str `withColor` keyColor}
+\p{key id str = strToken id str `withColor` keyColor}
 \end{small}
 
-Unlike the fraction, a lambda expression is a \p{parsing} presentation. This means that for the presentation of a lambda node, the tokens of its previous presentation must be reused. The presentation consists of two tokens (``\verb|\|'' and ``$\rarr\!$'') which have identifiers \p{@idP0} and \p{@idp1} (see Figure~\ref{docTypeExample}). To reuse the tokens, these identifiers are passed to \p{key}. If the node has not been presented before, the presentation identities have the \p{FreshIDP} value, and will be replaced by fresh unique id's. \note{mention that parser sets the right idps?}
+Unlike the fraction, a lambda expression is a \p{parsing} presentation. This means that for the presentation of a lambda node, the tokens of its previous presentation must be reused. The presentation consists of two tokens (``$\lambda$'' and ``$\rarr\!$''). For these tokens, \p{@idP0} and \p{@idP1} contain the identities of the tokens that were used by the parser to construct the node. In order to reuse the tokens, the identities are passed to \p{key}. If the node has not been parsed before, the presentation identities have a special value that is causes the generation of a unique identity. 
 
 %However, because (for example, when it was just inserted)  The function \p{{\em reuse}~@idP$n$} returns either %\p{@idP$n$} or if \p{@idP$n$} was not defined, a fresh unique presentation id.
 
+
 \ttfamily\begin{small}\begin{tabbing}
-SEM Exp | LamExp\\
+SEM Exp | LamExp param::Ident body::Exp { idP0, idP1} \\
 ~~lhs.pres = ({\em location}~.~parsing~.~{\em focus}~.~{\em squiggle}~.~{\em add\_reduction\_menu})\\
-~~~~~~~~~~~~~~~row [ key @idP0 "\verb|\\|"\\
-~~~~~~~~~~~~~~~~~~~, @ident.pres\\
-~~~~~~~~~~~~~~~~~~~, key @idP1 "\verb|\|174" `withFont` "symb"\\
-~~~~~~~~~~~~~~~~~~~, @exp.pres ] \\
+~~~~~~~~~~~~~~~tokens [ key @idP0 [lambdaSym] `withFont` "symb"\\ %"\verb|\\|"\\
+~~~~~~~~~~~~~~~~~~~~~~, @param.pres\\
+~~~~~~~~~~~~~~~~~~~~~~, key @idP1 [arrowSym] `withFont` "symb"\\ %"\verb|\|174"
+~~~~~~~~~~~~~~~~~~~~~~, @body.pres ] \\
 \end{tabbing}\end{small}\rmfamily
 
-Note that the arrow is an arrow symbol in a different font (\p{"symb"}).
+Note that the lambda and arrow symbols are presented as characters of the ``\p{symb}'' font.
 
 %($<$$mark~location$$>$.~parsing~.$<$$present~focus$$>$.$<$$squiggle$$>$.$<$$add~reduction~menu$$>$)\\
 
@@ -363,22 +413,22 @@ Note that the arrow is an arrow symbol in a different font (\p{"symb"}).
 %\o Figure~\ref{presSheetExample} shows a fragment of the presentation sheet for the Helium editor.
 %\o Formatter not yet editable or optimal yet.
 %\el
-\head{Chess-board square}
+\head{The presentation of a chess-board square}
 
-A presentation sheet may also specify edit behavior, an example of which is found in the presentation of a square in the chess-board editor. When a square is reachable by the focused piece, it displays a marker (see Figure~\ref{chessBoard}) in front of itself, and specifies an edit operation that moves the focused piece when this marker is clicked. 
+A presentation sheet may also specify edit behavior. An example of this is found in the presentation of a square in the chess-board editor. When a square is reachable by the focused piece, it displays a marker (see Figure~\ref{chessBoard}) in front of itself. The marker specifies its own mouse-click behavior: on a mouse click, the focused piece is moved. 
 
-We show only the part of the presentation that displays the marker and specifies its edit behaviour. This is done by a function \p{pMove}, which is applied to the rest of the presentation of the square (which is denoted by \p{...}).
+We show only the interesting part of the presentation, which displays the marker and specifies its edit behaviour. This is done by a function \p{pMove}, which is applied to the rest of the presentation of the square (denoted by \p{{\em square\_presentation}}).
 
-The squares of a chess board have an inherited attribute \p{@lhs.possibleMoves} that is a list of the locations to which the focused piece can move. The locally defined \p{pMove} first checks whether the location of the presented square \p{(@lhs.colNr, @lhs.rowNr)} is in this list. The square is not reachable, and \p{pMove} returns  \p{pres} unchanged. On the other hand if the square is reachable, \p{pMove} returns an overlay with a marker (\p{mrk}) in front of \p{pres}. Furthermore, the marker has the edit behavior that on a mouse click, an edit operation \p{(move @pth @focus)} is performed, which cuts the piece at the focused square and pastes it at the location of reachable square.
+The squares of a chess board have an inherited attribute \p{@lhs.possibleMoves} which is a list of possible destinations of the focused chess piece. The local function \p{pMove} first checks whether the location of the presented square \p{(@lhs.colNr, @lhs.rowNr)} is in this list. If the square is not reachable then \p{pMove} returns  \p{pres} unchanged. On the other hand, if the square is reachable, \p{pMove} returns an overlay with a marker (\p{mrk}) in front of \p{pres}. Furthermore, the marker associates the edit operation \p{(move @pth @focus)} with a mouse click. The edit operation moves the piece from the focused square to the presented square.
  
 \ttfamily\begin{small}\begin{tabbing}
-SEM Square | Square\\
+SEM Square | Square piece::Piece\\
 ~~lhs.pres = ({\em location}~.~structural)\\
-~~~~~~~~~~~~~~pMove (...)\\
+~~~~~~~~~~~~~~pMove {\em square\_presentation}\\
 ~~~~~~~~~~~~~~where pMove pres =\\
 ~~~~~~~~~~~~~~~~~~~~~~if (@lhs.colNr, @lhs.rowNr) `elem` @lhs.possibleMoves\\
-~~~~~~~~~~~~~~~~~~~~~~then overlay [ pres,\\
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~, mrk `withMouseDown` (move @pth @focus)]\\
+~~~~~~~~~~~~~~~~~~~~~~then overlay [ mrk `withMouseDown` move @pth @focus,\\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~, pres ]\\
 ~~~~~~~~~~~~~~~~~~~~~~else pres\\
 \end{tabbing}\end{small}\rmfamily
 
@@ -417,22 +467,24 @@ SEM Exp
 
 \subsection{Parsing sheet}
 
-The parsing sheet is specified in Haskell, using a parser-combinator library~\cite{swierstra01parsers}. The parsers take a presentation tree as input. 
+The parsing sheet is specified in Haskell, using a parser-combinator library~\cite{swierstra01parsers}. The parsers take a presentation tree as input.
 
 Because a presentation may consist of parsing and structural parts, which need to be treated differently, the parsing sheet consists of two different kinds of parsers. For a {\em structural} presentation, we need to specify a {\em recognizer}, which is a very basic parser that follows the structure of the presentation. On the other hand, for a {\em parsing} presentation, we specify a regular combinator parser. 
 
-If a document node has interpretation extra state, not all of its children are in the presentation. Hence, the parser will not have enough information to construct the node. In that case, we use the information from the parsed tokens to determine which document node . In case a node of the right type and constructor is found, we use this node to determine the values of missing children. Because the syntax of reusing may be somewhat confusing without additional explanation, we use a special notation for reusing: if we  construct a value with a constructor \p{Constr} that takes $n$ children, and we wish to reuse the $i$-th child, this is denoted as:
+If a document node has interpretation extra state, not all of its children are in the presentation. Hence, the parser will not get enough information to construct the node. In that case, we need to reuse the values of the missing children from the previous document. We use the location information from the parsed tokens to determine the document node of which they are the presentation. In case a node of the right type and constructor is found, we take the values of missing children from this node. If the tokens originate from different document nodes, the first node is used.
 
-\begin{small}\p{{\em reuse} (Constr child$_1$ \dots {\em child$_i$} \dots child$_n$)}\end{small}
-\note{reuse also takes tokens as args}
+Because the syntax of reusing may be somewhat confusing without additional explanation, we use a special notation: if we wish to reuse the $i$-th child for a constructor \p{Constr}, this is denoted by:
 
+\begin{small}\p{{\em reuse} (Constr child$_1$ \dots~{\em child$_i$} \dots~child$_n$)}\end{small}
 
-We briefly discuss the basic notation for parsers.  The \p{<*>} combinator composes two parsers sequentially, yielding a parser that succeeds only if both its component parsers succeed. Further, to combine the results of a number of sequentially composed parsers, we use the \p{<\$>}, 
-which is best explained with an example. Consider a constructor \p{Cnstr c$_1$ \dots c$_n$ :: T} and assume that for each of the $n$ children, we have parser \p{parser$_i$}. Now we can construct a parser for \p{T} by using \p{<\$>} to apply a function that constructs ........
-\fromHere
+We briefly discuss the basic notation for the parsers in the examples.  The \p{<*>} combinator composes two parsers sequentially, yielding a parser that succeeds only if both its component parsers succeed. To combine the results of a number of sequentially composed parsers, we use the \p{<\$>}
+combinator, which takes a function and a parser and applies the function to the result of the parser. If \p{f <\$>} is applied to a sequential composition of $n$ parsers, the function \p{f} gets the results of these parsers as arguments. Thus, adopting the \p{{\em reuse}} syntax mentioned above, we can specify a parser for a constructor \p{Cnstr c$_1$ \dots c$_n$ :: T} as:
+%and assume that for each of the $n$ children, we have parser \p{parser$_i$}. Now we can specify a parser for \p{T} %by using \p{<\$>} to apply a function that 
+%constructs ........
+
 
 \ttfamily\begin{small}\begin{tabbing}
-~~~~~~~~~~~ (\verb|\|c$_1$ ... c$_{n}$ -> Cnstr$_1$ c$_1$ ... c$_{n}$)\\
+~~~~~~~~~~~ (\verb|\|c$_1$ ... c$_{n}$ -> {\em reuse} Constr c$_1$ ... c$_{n}$)\\
 ~~~~~~~~<\$> parser$_{1}$ <*> parser$_{1}$ <*> ... <*> parser$_{n}$ \\
 %~~~~<|>\\
 %~~~~...\\
@@ -440,16 +492,19 @@ which is best explained with an example. Consider a constructor \p{Cnstr c$_1$ \
 %~~~~~~~~<\$> parser$_{n,1}$ <*> parser$_{1,1}$ <*> ... <*> parser$_{n,m_n}$ \\
 \end{tabbing}\end{small}\rmfamily
 
-Thus, we can construct parsers for each alternative of \p{T}, which can be combined with the choice combinator \p{<|>}, yielding a parser for \p{T}. For more information, the reader is reffered to \cite{swierstra01parsers}.
+In general, a Proxima parser for type \p{T} consists of a number of alternative parsers (each for type \p{T}), which are combined using the choice combinator \p{<|>}. Often, there is one alternative parser for each constructor of \p{T}. 
+
+In reality, many other parser combinators exist, and the actual structure of the parsers does not have to be exactly as we explained, but the situation above resembles the example parsers. For more information about the parsing library, the reader is reffered to the paper by Swierstra~\cite{swierstra01parsers}.
+
 
 %\o \p{reuse... [tokenNode tk] Nothing (Just \$ tokenIDP tk) (Just t) (Just e))}
-We present an example of a parser, followed by two recognizer examples.
+%We present one example of a parser, followed by two recognizer examples.
 
-\head{Declaration parser}
+\head{The declaration parser}
 
-A declaration (\p{Decl}) may be a Haskell declaration, a slide presentation, or a chess board. If it is a Haskell declaration, we distinguish a normal declaration from a collapsed one, which has ``\p{...}'' for its right-hand side. Thus, we get four alternatives. Furthermore, a Haskell declaration may be preceded by a generated type signature, which is recognized by a function \p{recognizeTypeDecl}.
+A declaration may be a Haskell declaration, a slide presentation, or a chess board. If it is a Haskell declaration, we distinguish a normal declaration from a collapsed one, which has ``\p{...}'' for its right-hand side. Thus, we get four alternatives. Furthermore, a Haskell declaration may be preceded by a generated type signature, which is recognized by a function \p{recognizeTypeDecl}.
 
-The declaration parser combines the four alternatives with the choice combinator \p{<|>}. For a collapsed function, the presentation does not contain a right-hand side \p{Exp}, which must therefore be reused. 
+The declaration parser combines the four alternative parsers with the choice combinator \p{<|>}. For a collapsed function, the presentation does not contain a right-hand side \p{Exp}, which must therefore be reused. 
 
 \ttfamily \begin{small} \begin{tabbing}
 parseDecl = (\verb|\|tkSig idnt tk1 exp tk2 -> {\em reuse} (Decl tkSig tk1 tk2 idnt exp))\\
@@ -460,8 +515,8 @@ parseDecl = (\verb|\|tkSig idnt tk1 exp tk2 -> {\em reuse} (Decl tkSig tk1 tk2 i
 ~~~~~~~~<*> parseIdent <*> pKey "=" <*> pKey "..."\\
 ~~~~<|>~~~~~(\verb|\|tk board -> {\em reuse} BoardDecl (tk board))\\
 ~~~~~~~~<\$> pKey "Chess" <* pKey ":" <*> recognizeBoard\\
-~~~~<|>~~~~~(\verb|\|tk slides -> {\em reuse} PPPresentationDecl (tk slides)\\
-~~~~~~~~<\$> pKey "PPT" <* pKey ":" <*> recognizePPPresentation
+~~~~<|>~~~~~(\verb|\|tk slides -> {\em reuse} SlidesDecl (tk slides)\\
+~~~~~~~~<\$> pKey "Slides" <* pKey ":" <*> recognizeSlides
 \end{tabbing} \end{small} \rmfamily
 \note{mention typing ``\p{...}''?}
 
@@ -473,43 +528,41 @@ parseDecl = (\verb|\|tkSig idnt tk1 exp tk2 -> {\em reuse} (Decl tkSig tk1 tk2 i
 % Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
 
 
-%recognizeExp' = pStr $ 
+%recognizeExp' = recognize $ 
 %         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
 %     <$> pStructural DivExpNode
 %     <*> recognizeExp
 
 
-\head{Slide recognizer}
+\head{The slide recognizer}
 
-A recognizer is specified by a parser that is transformed by the combinator \p{pStr}. The parser part consists of parsers for each constructor of the type, which are combined by \p{<|>} combinators. Each alternative consists of recognizers (or parsers) for each of the children of the constructor, preceded by a special parser that \todo{hoe leggen we dit uit?} For a constructor $Constr$, this special parser is denoted by  \p{pStructural $Constr$Node}.
+A recognizer is specified as a parser that is transformed by a combinator \p{recognize}. The parser part consists of parsers for each constructor of the type, which are combined using \p{<|>} combinators. Each alternative consists of recognizers (or parsers) for the children of the constructor, and is preceded by a special combinator that recognizes the presentation of a specific constructor. For a constructor $Constr$, this special combinator is denoted by \p{pStructural $Constr$Node}, (with \p{$Constr$Node} being a generated constructor name).
 
-A slide contains a title string and a list of items.  The title is parsed with the primitive \verb|parseString|. The item lists is recognized by \p{recognizeItemList}.
+A slide contains a title string and a list of items.  The title is parsed with the primitive \verb|parseString|, whereas the item list is recognized by \p{recognizeItemList}.
 
 \ttfamily\begin{small}\begin{tabbing}
-recognizeSlide = pStr \$\\
+recognizeSlide = recognize \$\\
 ~~~~~~~~(\verb|\|str title itemList -> {\em reuse} (Slide title itemList))\\
-~~~~<\$> pStructural SlideNode <*> parseString\verb|_| <*> recognizeItemList
+~~~~<\$> pStructural SlideNode <*> parseString <*> recognizeItemList
 \end{tabbing}\end{small}\rmfamily
 %reuseSlide [tokenNode str] Nothing (Just title) (Just itemList))
 
-Because recognizers follow the presentation structure exactly, a future version of Proxima will most likely generate them automatically from the presentation sheet. 
+Because recognizers follow the presentation structure exactly, a future version of Proxima will most likely have support for automatically generating them from the presentation sheet. 
 \bc \\
       ((\verb|\_| -> initBoard) <\$> pKey "board")\\
   <|>    \ec
-\head{Slide recognizer}
+  
+\head{The chess-board recognizer}
 
-If all descendents of a node have structural presentations, and thus may not be edited at the presentation-level, a recognizer for that node is simple. In this case, the presentation of a node will not have been modified, and instead of descending into the presentation structure, we may simply reuse the node and all of its children.
+If all descendents of a node have structural presentations, and thus may not be edited at the presentation-level, a recognizer for that node is simple. The presentation of a node will not have been modified, and instead of descending into the presentation structure, we may simply reuse all children.
 
 Hence, the recognizer for the chess board is:
 
 \ttfamily\begin{small}\begin{tabbing}
-recognizeBoard = pStr \$\\
+recognizeBoard = recognize \$\\
 ~~~~~~~~(\verb|\|str -> {\em reuse} (Board {\em BoardRow} {\em BoardRow} ... {\em BoardRow})\\
 ~~~<\$> pStructural BoardNode\\
 \end{tabbing}\end{small}\rmfamily
-
-
-
 
 
 %																
@@ -518,32 +571,30 @@ recognizeBoard = pStr \$\\
 \section{Prototype implementation} \label{sect:proxImpl}
 
 %Mappings. no eval.  arr + ren not nec. layout automatic, so only at pres layer.
-
 %Size of system.
 
 The main components of the architecture are the five layers and together with a user-interface module. 
-Each layer has a presentation and an interpretation components, which define defining \p{present} and \p{interpret}. A single architecture module imports all component modules, lifts each pair of \p{present} and \p{interpret} functions to a layer, and connects the layers with the combinators from Chapter~\ref{chap:archCombs}.  In total, the generic part of Proxima consists of about 15,000 lines of Haskell code. 
+Each layer has a presentation and an interpretation component, which define two functions \p{present} and \p{interpret}. A single architecture module imports all component modules, lifts each pair of \p{present} and \p{interpret} functions to a layer, and connects the layers with the combinators from Chapter~\ref{chap:archCombs}.  In total, the generic part of Proxima consists of about 15,000 lines of Haskell code. 
 
 The layers of Proxima generally correspond to the description given in Chapter~\p{chap:proxArch}. The differences between this description and the implementation are listed in the overview of future work in  Section~\ref{sect:protoConcl}.
 
 \subsection{Genericity}
 
-Internally, a document is represented by a Haskell type. Because Haskell is not a generic language, this entails that after changing the document type, those parts of the editor that depend on the document type need to be recompiled. Altough it would be possible to represent a document with an untyped tree structure, we choose a typed implementation because it provides type-safety for the presentation and computation sheets, and also allows a more efficient implementation.
+Internally, the document type is represented by a Haskell type. Because Haskell is not a generic language, this means that after changing the document type, the editor needs to be recompiled. It would also be possible to represent a document by an untyped tree structure, but we choose a typed implementation because it provides type-safety for the presentation and computation sheets, and also allows a more efficient implementation. Although it is an interesting feature to be able to dynamically change the document type, we do not consider this a main requirement for the editor.
 
-Type specific code is currently generated by a generator written in Haskell. Although lacking safety and transparency, this method does provide the flexibility that we need in this developmental stage of the Proxima project. 
+All type-specific code is currently generated by a generator written in Haskell. Although the specification of generated code lacks transparency, this method does provide the flexibility that we need in this developmental stage of the Proxima project. 
 
-An alternative to the Haskell Generator is the language Generic Haskelll~\cite{clarke02genericHaskell}. However, not all required functions and data types can be described elegantly in Generic Haskell yet. Furthermore, because we also need to generate AG code, switching to Generic Haskell will not eliminate the generator.
+An alternative to the Haskell Generator is the language Generic Haskelll~\cite{clarke02genericHaskell}. However, not all required functions and data types can be described elegantly in Generic Haskell yet. Furthermore, because we also need to generate AG code, switching to Generic Haskell will not eliminate the generator, until we also have a generic AG compiler.
 
-\note{future? generic AG?}
 
 \subsection{User interface}
 
-The user interface of Proxima is implemented with the wxHaskell library~\cite{leijen04wxHaskell}, which is  an elegant and fast GUI library with enough low-level support to implement the Proxima renderer. The library is based on the wxWidgets library, and parts of it are generated from a wxWidgets binding to the language Eiffel. As a result, it is relatively easy to keep the wxHaskell library up to date with the latest developments of wxWidgets. 
+The user interface of Proxima has been implemented with the wxHaskell library~\cite{leijen04wxHaskell}, which is  an elegant and fast GUI library proividing enough low-level support to implement the Proxima renderer. The library is based on the wxWidgets library, and parts of it are generated from a wxWidgets binding to the language Eiffel. As a result, keeping the wxHaskell library up to date with the latest developments of wxWidgets, requires relatively little effort. 
 %low maintenance, more chance of continuity (unlike Fudgets, etc)
 
-Several other actively maintained Haskell GUI libraries are powerful enough to implement the renderer. However, these libraries are based either on the GTK library, which is still poorly supported on windows platforms, or on Tcl/Tk, which is portable but slow.
+Most Haskell GUI libraries are not suitable for Proxima because they either lack the required functionality or are no longer being maintained. There are several suitable libraries besides wxHaskell, but these are based either on the GTK library, which is still poorly supported on windows platforms, or on Tcl/Tk, which is portable but slow.
 
-In Proxima, the dependency on the GUI library is limited to only four modules: the renderer module; a module for the type definitions of the renderer; a module for doing font queries; and a module that opens the main editor window and maps GUI events to Proxima edit gestures. Thus, porting the system to a different GUI library requires only little effort. 
+In Proxima, the dependency on the GUI library is limited to only four modules: the renderer module; a module for the type definitions of the renderer; a module for doing font queries; and a module that opens the main editor window and maps GUI events to Proxima edit gestures. Thus, the system can easily be ported to  a different GUI library. In fact, the wxHaskell port was made only recently, after most of the prototype had already been implemented.
 
 
 %\o   The HTk, TclHaskell, FranTk and Yahu are based on Tcl/Tk. The Tcl/Tk backend are portable but slow. 
@@ -552,7 +603,7 @@ In Proxima, the dependency on the GUI library is limited to only four modules: t
 %\o Object I/O is not powerful enough
 %\o External renderer was too slow and harder to communicate with. (already mentioned)
 %\o integrated in Haskell, much easier than external
-\todo{mention Xander van Wiggen for his Renderer?}
+%\todo{mention Xander van Wiggen for his Renderer?}
 
 \bc
 \subsection{The layers}
@@ -576,68 +627,92 @@ In this section, we only discuss a few interesting aspects of the layers, as wel
 
 \section{Future work and conclusions} \label{sect:protoConcl}
 
-\todo{Stukje over Haskell?}
+Although still in a preliminary stage, the prototype already makes it possible to instantiate a relatively advanced editor with only little effort. Both the slide and the chess-board editors were implemented in only a few days. Nevertheless, the prototype was mainly implemented as a proof-of-concept, and hence requires some implementation effort in order to become a full-fledged application.
+
+In the remainder of this section we first discuss our experiences with Haskell as the implementation language, followed by an overview of the future development of Proxima. We make a distinction between straightforward versus more research-oriented  issues.
+
+\subsection{Haskell}
+
+Haskell may not immediately seem the most logical candidate for implementing Proxima, because of statefulness of the architecture. Every layer has its own state, and moreover, different levels may point to each other. However, with the use of  the architecture combinators, the complex data flow in the editor is hidden from the implementation of each layer. The Proxima implementation consist of numerous algorithms over tree structures, which benefit greatly from Haskell's syntax for abstract data types and pattern-matching. 
+
+On the other hand, the typical Haskell feature of lazy evaluation has not been of significant importance (other than allowing for elegant programming), because of the overhead associated with lazy data structures. The code that is generated by the attribute grammar compiler depends on laziness, but this is also something that will most likely need to change in the future. Instead, the attribute grammar could be analysed and partitioned into strict computations.
+
 \bc
-\fromHere
-Haskell may not immediately seem the most logical candidate for implementing Proxima, because of statefulness of the architecture; every layer has its own state, and moreover, levels may point to each other. However the architecture combinators hide this state well. 
-\toHere
-
-Typical haskell thing Laziness maybe not most important. strictness for speed. unevaluated parts of tree must be made explicit anyway. On the other hand Abstr data types good. Proxima is much tree walking. Type safety?
-
-Most important connection to AG and parser tools. AG with Xprez is good for pres spec. The combination of Haskell with an attribute grammar and a parser library is especially useful for the experimental stage of the prototype. Standard patterns can be expressed elegantly using combinators, but at the same time more primitive combinators can be used to specify and experiment with different behavior.
+It might seem logical to use the laziness mechanism for only evaluating that part of the document that is visible in the presentation. However, due to the overhead of lazy data structures, this does not lead to an efficient implementation. bc For handling incrementality, we will need an explicit mechanism for only presenting and interpreting the necessary parts of a level.ec 
 \ec
 
-In the discussion of future development of Proxima, we distinguish straightforward versus more research-oriented  extensions. \todo{word: extensions?} 
-
-\head{Straightforward extensions}
-
-The prototype is in an experimental stage, which means that there is of future work. 
-Besides standard functionality such as file handling, a search facility, etc., and basic fixes, we discuss the major .. for each of the layers. The rendering layer is left out of this discussion, because no straightforward extensions are planned for this layer.Even though straightforward, these extensions may still require a substantive amount engineering.
+For the development of Proxima, probably the most important feature of Haskell is the way in which combinator languages can be defined and mixed with Haskell code. The combination of Haskell with {\Xprez}  and parser combinators is especially useful for the experimental stage of the prototype. Standard patterns can be expressed elegantly using combinators, whereas experimental features can be coded explicitly. If these features turn out useful, they can be captured by an appropriate combinator. Thus, the behavior specified in the style sheets is highly customizable, while the code in the sheets remains concise and transparent.
 
 
-\head{Evaluation}
+\subsection{Basic extensions to the prototype}
 
-An evaluation layer has not been fully implemented yet. The main reason for this is that . 
+The prototype is in an experimental stage, which means that there is an abundance of straightforward extensions to the system. Nevertheles, even though  straightforward, the implementation of these extenstions may still require a substantial amount of work. 
 
-Because the enriched document type is often very similar to the document type, it is a hassle to have to specify it entirely. However, if we put . We thus need a formalism for specifying extensions and perhaps modifications to the document type, from which the enriched document type is generated. Experimenting with the evaluation layer will be awkward until such support is available.
+Besides the standard editor functionality (e.g.\  file handling, search facility, etc.) and basic updates to the system, we can identify several important issues that are local to a layer. We briefly discuss each layer separately. The evaluation layer is omited from the discussion because most of the future work on this layer is research-oriented.
+
+%\head{Evaluation}
+%
+%An evaluation layer has not been fully implemented yet. The main reason for this is that . 
+%
+%Because the enriched document type is often very similar to the document type, it is a hassle to have to specify it %entirely. However, if we put . We thus need a formalism for specifying extensions and perhaps modifications to the %document type, from which the enriched document type is generated. Experimenting with the evaluation layer
+% will be awkward until such support is available.
 
 \head{Presentation} 
 
-Many extensions to the \p{Xprez} formalism are desirable. windows, widgets, formatters, and a page model. Although specified on the presentation level, the implementation of these features will take place mainly at the arrangement and rendering layers.
+When the Proxima parser encounters an error, the entire parsed presentation is marked with a parse error. This behavior does not meet the modeless editing requirement from Chapter~\ref{chap:requirements} since structure editing inside the region with the parse error is not possible until the error is corrected. Hence, the parser needs to be able to keep the error local and continue parsing on the rest of the parsed presentation. For parsed presentations that appear in a structural presentation, the parse error is already kept local. For example, a parse error in a Helium item of a slide only affects that item. Because the parser library that is used supports error correction, local errors will most likely be relatively easy to support. 
 
-Currently, . Yet, the parsing library that is used has support for correcting errors and thus keeping parse .
-\bl
-\o Error correcting parser
-\o could repair and put error local.
-\o However implemented for now as global parse error, because more experience with whitespace etc. is needed.
-\el
+%\bl
+%\o Error correcting parser
+%\o could repair and put error local.
+%\o However implemented for now as global parse error, because more experience with whitespace etc. is needed.
+%\el
 
-An extension of lower priority, but nonetheless straightforward is adapting the layer to support dynamically loaded presentation and parsing sheets. Because the presentation and parsing modules are already clearly separated from the other layers, dynamic loading will not require any fundamental changes to the architecture.
+An extension of lower priority, but nonetheless straightforward is adapting the presentation layer to support dynamically loaded presentation and parsing sheets. Because the presentation and parsing modules are already clearly separated from the other layers, dynamic loading will not require any fundamental changes to the architecture.
 
+Finally, many extensions to the \p{Xprez} formalism are desirable. Examples include support for windows, widgets, vertical formatters, and a page model. We mention these aspects here at the presentation layer because of their impact on the presentation level. Nevertheless, the implementation for these features will take place mainly at the arrangement and rendering layers, because at these layers take care of computing the locations and sizes of {\Xprez} elements (arranging), as well as mapping them onto appropriate gui commands (rendering).
 
 \head{Layout} 
 
-The scanner component of the layout layer is a function that traverses the layout tree and tokenizes the parts that are marked for parsing. Because the specification of the tokens is hard-coded in the scanner definition, it is not straightforward to specify a scanner for a language that has different tokens. Instead, we need a parameterizable scanner, that gets its token specifications from a scanning sheet.
+The scanner component of the layout layer is a function that traverses the layout tree and tokenizes those parts of the tree that are marked for parsing. Because the specification of the tokens is hard-coded in the scanner definition, it is not straightforward to specify a scanner for a language that has different tokens. Instead, we need a parameterizable scanner, which takes its token specifications from a scanning sheet.
 
 \head{Arrangement}
 
-The arrangement layer needs to be updated to support editable formatters. Furthermore, since this layer performs all the size and position computations for the ******
-% Formatters require little more work for keeping mappings
+The arrangement layer needs a few updates to support editable formatters. Furthermore, because this layer performs the size and position computations for the presentation, extensions to {\Xprez} are implemented for a large part at the arrangement layer.
+
+\head{Rendering}
+
+The renderer will have to provide rendering support for the extensions to {\Xprez}.
+
+\subsection{Future work requiring research}
+
+Besides the straightforward extensions to the system, there is a multitude of possible areas for future research on Proxima. We mention a few of the important areas.
+
+\head{Incrementality.} Probably the most important next step in the development of Proxima is support for incrementality, which has consequences for all layers. For the layout, arrangement and rendering layers, the presentation and interpretation mappings are mainly pre-defined, and hence these layers could provide built-in support for incrementality. Nevertheless, for handling larger documents, we also need incrementality on the evaluation and presentation layers. This will require extensions to the attribute-grammar compiler. 
+
+%Techniques for incremental attribute grammar evaluation must be applied.
+%Even simple techniques of diffing big difference.
+%%Proxima keeps track of everything, expensive. However, also good 
+%for finding differences. 
+
+Other issues related to incrementality are the required support for change management on each of the data levels, as well as a mechanism for presenting and interpreting only the necessary parts of each level (e.g.\ only arrange the visible part of a presentation).
+
+%Furthermore, incrementality may also affect the model. Special edit 
+%operations that request the evaluation for part of the document may be required. 
 
 
-\head{Research}
+\head{Evaluator layer.} An evaluation layer must be implemented, together with language support for specifying the enriched document type. Because the enriched document is often similar to the document, it is a hassle to specify it from scratch. On the other hand, using the same type for both levels compromises safety. Instead, we need a formalism for specifying only those parts for which the enriched document type differs from the document type. The enriched document type definition can be generated from that specification.
 
-Besides the straightforward extension to the system, there is a multitude of possibilities for future research on Proxima. We mention a few of the most important areas.
+Once this functionality is available, we can establish the formalisms for the evaluation and reduction sheets. An desirable aspect of these sheet formalisms would be the automatic specification of a reduction sheet, given an evaluation sheet.
 
-\toHere
-\begin{description}
-\item[Incrementality.] -Probably the most important future research area for Proxima is support for incrementality. Incrementality. easy tricks diffing. other ag stuff. maybe more complex explicit model: only requesting evaluation of what is needed.
-\item[Extra state.] -Extra state is supported, but needs + language support  % \o Storing presentation extra state.
-\item[Full evaluator layer.] -Language support is needed in order to facilitate the specification of 
-\item[Focus model.] Proxima has a concept of focus on the layout level as well as on the document level, and possibly even on the enriched document level. A focus model must be developed to integrate these different kinds of focus and translate one kind to another.
-\item[Graph support.] -Basic support for graphs, or at least presentations such as windows file folder with free layout.
-\item[Edit formalism.] -Edit commands are specified with the basic cut and paste operations. We need a /combinator library for edit commands
-\end{description}
+\head{AG presentation patterns.} The presentation sheet contains many common patterns, over some of which the attribute-grammar formalism cannot abstract elegantly yet. Identifying these patterns and developing extensions to the formalism will help  to make the presentation sheets more concise and transparent. A possible candidate for such an extension is support for first-class attribute grammars.
 
-\fromHere
-The first thing to do will be the instantiation of more example editors. Especially a word-processing editor will be interesting, because this application has not been researched extensively in Proxima. The instantiations will allow us to prioritize the list of future research, as well as suggest more areas of research. Furthermore, by examining common patterns in the sheets of the intantiated editors, we can determine what the useful abstractions and libraries will be for these sheets.
+\head{Extra state.} More research is needed to identify the different forms of extra state, as well as language support for easily specifying extra state.
+
+\head{Focus model.} Proxima has a concept of focus on the layout level as well as on the document level. Furthermore, once the evaluation layer is implemented, there will most likely also be a focus on the enriched document level. An integrated focus model must be developed for smoothly handling the translation of one kind of focus into another during editing.
+
+\head{Transformation formalism.} Edit commands are still specified with basic cut-and-paste operations. We need a transformation formalism to easily specify type-safe transformations.
+
+\head{Graph support.} Although a Proxima document is a tree, we could use cross-references between tree nodes to encode graph data. It would be interesting if this data could also be presented as a graph. Simple extensions to {\Xprez} will make it possible to create a graph presentation. For editing a graph, the arrangement layer needs provide edit operations such as moving nodes and inserting and deleting edges. The result of these edit operations needs to be interpreted as a document update.
+
+\bigskip
+A first priority is the instantiation of more example editors. Especially a word-processing editor will be interesting, because this kind of application has not yet been researched extensively with Proxima. The instantiated editors will suggest more areas of future research, as well as allow us assign priorities to each area. Furthermore, by examining common patterns in the sheets of the intantiated editors, we can determine the useful abstractions and libraries for these sheets.
