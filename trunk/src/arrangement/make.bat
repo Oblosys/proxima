@@ -1,1 +1,1 @@
-..\..\..\uust\tools\ag\uuagc -cfspm        ArrangerAG
+copy ..\..\..\uust\tools\ag\uuagc -cfspm        ArrangerAG
