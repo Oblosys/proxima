@@ -4,106 +4,45 @@
 \chapter{Haskell as an ADL for Layered Architectures}
 \label{chap:archCombs}
 
-\par In this paper we use the functional programming
-      language Haskell to give a domain specific embedded language (DSEL) for
-      describing layered editor architectures~\cite{architecture}. We use the term
-      editor in a broad sense. Text editors and HTML editors are well-known examples,
-      but also spread-sheets, e-mail agents, or even the preferences screens that are
-      present in most applications with graphical user interfaces can be regarded as
-      editors.
-\par  Haskell is a functional language with strong support for abstraction.
-      Describing the architecture in an actual programming language not only makes it
-      possible to verify the types of the components of the architecture, but also
-      provides a framework for implementing the system that is described by the
-      architecture. Because the Haskell architecture is a program in itself, the
-      system can be instantiated by providing implementations for each of the
-      components.
-\par  In their survey of architecture description languages
-      (ADLs)~\cite{medvidovicTaylor}, Medvidovic and Taylor identify
-      three essential components of an architecture description: a description of the
-      (interface of the) components, a description of the connectors, and a
-      description of the architectural configuration. They claim that the focus on
-      {\em conceptual} architecture and explicit treatment of connectors as
-      first-class entities differentiate ADL's from, amongst others, programming
-      languages. However, Higher-order typed (HOT) functional programming languages,
-      such as Haskell~\cite{haskel}, Clean, and ML offer possibilies
-      for describing the main components of an architecture, and treating all of
-      these components as first-class entities. Furthermore, by using abstraction,
-      the description of the architecture can be focused on the conceptual
-      architecture, while the details are left to the actual components.
-\par Higher-order typed functional languages offer excellent possibilities
-      for embedding domain specific languages~\cite{hudak}. Embedding a domain
-      specific language facilitates reuse of syntax, semantics, implementation code,
-      software tools, as well as look-and-feel. We give a DSEL in Haskell for
-      describing layered editor architectures. We use records that contain functions
-      to describe the components of the architecture. The connectors are combinators,
-      and the configurations are programs (functions) that consist of combinators and
-      components. 
-\par The requirements for a DSEL for describing architectures are slightly
-      different from the requirements for more familiar applications of DSELs, such
-      as parsers, pretty printers, etc. The latter are used to write programs that
-      contain many applications of the combinators and that are usually subject to
-      frequent change. An architecture description, on the other hand, will typically
-      be a small and rather static entity, because changes to the architecture
-      involve changes to many components of the system. As a consequence, a concise
-      syntax for combinator expressions is not of the highest importance.
-\par Another difference concerns the efficiency of the combinators. Because
-      in an 'ordinary' DSEL the programs that are constructed typically contain many
-      applications of the combinators, the evaluation of the combinators forms a
-      substantial part of the running time. In contrast, the combinators in an
-      architecture description are the glue that connects the main components of the
-      system. Most of the running time of the system can be expected to be taken up
-      by the components and not by the combinators. Therefore, efficiency of the
-      combinators is not a major concern. Wrapping and unwrapping a few values in the
-      combinators is not a problem if it improves the transparency of the
-      architecture.
-\par  In this paper we give four implementation models for layered
-      architectures. First, we introduce a simple example layered editor architecture
-      and explore how its main components can be modeled in Haskell. Then we proceed
-      to connect the components. In section~\ref{sectsimple}, the connection is
-      straightforward, with little abstraction. This is used in section~\ref{sectncp}
-      as a basis to develop a more abstract combinator implementation that uses
-      nested cartesian products. In section~\ref{sectdpp}, we present another set of
-      combinators, which employ a form of state hiding to improve on the previous
-      set. Section~\ref{sectlib} develops a small generic library for building the
-      architecture-specific combinators of section~\ref{sectdpp}.
-      Section~\ref{sectproxima} contains a short description of the architecture of
-      the Proxima editor~\cite{proxima}, for which the combinators were
-      designed, and section~\ref{secthaskellconclusions} presents the
-      conclusions.
+In this paper we use the functional programming language Haskell to give a domain specific embedded language (DSEL) for describing layered editor architectures~\cite{architecture}. We use the term editor in a broad sense. Text editors and HTML editors are well-known examples, but also spread-sheets, e-mail agents, or even the preferences screens that are present in most applications with graphical user interfaces can be regarded as editors.
+
+ Haskell is a functional language with strong support for abstraction. Describing the architecture in an actual programming language not only makes it possible to verify the types of the components of the architecture, but also provides a framework for implementing the system that is described by the architecture. Because the Haskell architecture is a program in itself, the system can be instantiated by providing implementations for each of the components.
+
+In their survey of architecture description languages (ADLs)~\cite{medvidovicTaylor}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Higher-order typed (HOT) functional programming languages, such as Haskell~\cite{haskel}, Clean, and ML offer possibilies for describing the main components of an architecture, and treating all of these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
+
+Higher-order typed functional languages offer excellent possibilities for embedding domain specific languages~\cite{hudak}. Embedding a domain specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. We give a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
+
+The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change. An architecture description, on the other hand, will typically be a small and rather static entity, because changes to the architecture involve changes to many components of the system. As a consequence, a concise syntax for combinator expressions is not of the highest importance.
+
+Another difference concerns the efficiency of the combinators. Because in an 'ordinary' DSEL the programs that are constructed typically contain many applications of the combinators, the evaluation of the combinators forms a substantial part of the running time. In contrast, the combinators in an architecture description are the glue that connects the main components of the system. Most of the running time of the system can be expected to be taken up by the components and not by the combinators. Therefore, efficiency of the combinators is not a major concern. Wrapping and unwrapping a few values in the combinators is not a problem if it improves the transparency of the architecture.
+
+ In this paper we give four implementation models for layered architectures. First, we introduce a simple example layered editor architecture and explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In section~\ref{sectsimple}, the connection is straightforward, with little abstraction. This is used in section~\ref{sectncp} as a basis to develop a more abstract combinator implementation that uses nested cartesian products. In section~\ref{sectdpp}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sectlib} develops a small generic library for building the architecture-specific combinators of section~\ref{sectdpp}. Section~\ref{sectproxima} contains a short description of the architecture of the Proxima editor~\cite{proxima}, for which the combinators were designed, and section~\ref{secthaskellconclusions} presents the conclusions.
+
+
+%									
+%									
+%									
 \section{A Simple editor}
 
-\par In this section, we introduce a simple layered architecture for an
-      editor that is used in the next sections to illustrate the architecture
-      description methods. The system that is described by the architecture is an
-      editor in which the user can edit a presentation of a document. Although the
-      architecture of the editor is simple, it still contains the typical features of
-      the layered architectures discussed in~\cite{architecture}. 
-\par \bigskip {\bf The edit process: }The main loop of the simple
-      editor consists of the following 5 phases: 
+In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures discussed in~\cite{architecture}. 
+
+
+\bigskip {\bf The edit process: }The main loop of the simple editor consists of the following 5 phases: 
  \begin{enumerate}
- 
- \item Compute a rendering, or {\it presentation}, of the document
-        (presentation phase)
+ \item Compute a rendering, or {\it presentation}, of the document   (presentation phase)
  \item Show the presentation to the user
  \item Receive an edit gesture from the user
- \item Translate the edit gesture to a document update (translation
-        phase)
+ \item Translate the edit gesture to a document update (translation   phase)
  \item Compute the updated document
  \end{enumerate}
 
-\par  Figure~\ref{simpleeditprocess} contains a schematic
-      representation of the edit process. Each of the boxes represents one complete
-      edit cycle. The emphasis in the figure is put on the presentation and
-      translation phases (phases 1 and 4). Phases 2 and 3 are represented by the
-      dotted arrows at the bottom of the figure, and phase 5 is represented by the
-      dotted arrows at the top.
+Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and translation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
+
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 %\xymatrix{
 % & \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \\
 %& present & translate\ar[u]& present & translate \ar[u]& present & translate \ar[u] & \\ 
@@ -122,54 +61,19 @@
 \end{small}
 \end{figure}
 
-\par 
-\par \bigskip {\bf The layers: }Figure~\ref{simplelayers} shows a more detailed view of a single edit cycle. For
-      now, we focus on the presentation and translation phases (phase 1 and phase 4).
-      Both the presentation and the translation functions (we will call them
-      {\em present} and {\em translate}) are compositions of a number of
-      subfunctions, similar to the layered editor in~\cite{architecture}.
-      The presentation of the document is computed via a number of intermediate data
-      structures that are increasingly concrete, and the edit operation on the
-      document is computed via edit operations on the same intermediate data
-      structures. Therefore, the subfunctions of {\em present} and
-      {\em translate} are grouped pairwise in horizontal layers. Another reason
-      for grouping the subfunctions is that each subfunction in a layer has some
-      parameters that are the result of the subfunction immediately to the left of
-      it. We will refer to the subfunctions as {\em layer functions}.
-\par If we look at the figure, we see that there are values that go from left
-      to right, and values that go either up or down. The values that go in
-      horizontal direction are computed by the functions in the corresponding layer,
-      although not necessarily in the same edit cycle. The vertical direction
-      parameter for a layer function, on the other hand, is the result of that
-      function in a neighboring layer (i.e. a {\em present} layer function gets
-      its vertical parameter from another {\em present} function, and a
-      {\em translate} layer function gets it from another {\em translate}
-      function). When composing layers, the vertical results from one layer are
-      passed as parameters to the next layer. The outermost vertical parameter is the
-      parameter to the combined layer, and the outermost vertical result is the
-      result of the combined layer. 
-\par \bigskip {\bf A single layer: }Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is
-      somewhat more complex than Figure~\ref{simplelayers}, because
-      not all horizontal parameters to $translate$ are results of $present$ (ie. $state$ is not a result of $present$). The data flow is a
-      simplification of the data flow of the layered editor with local state
-      from~\cite{architecture}. $present$ maps a high level data structure
-      $doc$ to a low level data structure $pres$. The $state$ parameter contains
-      state that is local to the layer, as described in~\cite{architecture}. The $translate$ function works in the
-      opposite direction of $present$ and maps an edit operation ($gest$) on the
-      $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure.
-      Besides $pres$, $present$ also returns a value $mapping$. It is used to encode
-      information that is required by $translate$ in order to map $gest$ to $upd$. An
-      example of such information is a table of pointing information, that relates
-      objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit
-      operation on the local state, $translate$ also has $state$ as a parameter. In
-      that case, $state'$ is the result of performing the update on the local state.
-      In any other case, $state'$ is equal to $state$. 
+
+\bigskip {\bf The layers: }Figure~\ref{simplelayers} shows a more detailed view of a single edit cycle. For now, we focus on the presentation and translation phases (phase 1 and phase 4). Both the presentation and the translation functions (we will call them {\em present} and {\em translate}) are compositions of a number of subfunctions, similar to the layered editor in~\cite{architecture}. The presentation of the document is computed via a number of intermediate data structures that are increasingly concrete, and the edit operation on the document is computed via edit operations on the same intermediate data structures. Therefore, the subfunctions of {\em present} and {\em translate} are grouped pairwise in horizontal layers. Another reason for grouping the subfunctions is that each subfunction in a layer has some parameters that are the result of the subfunction immediately to the left of it. We will refer to the subfunctions as {\em layer functions}.
+
+If we look at the figure, we see that there are values that go from left to right, and values that go either up or down. The values that go in horizontal direction are computed by the functions in the corresponding layer, although not necessarily in the same edit cycle. The vertical direction parameter for a layer function, on the other hand, is the result of that function in a neighboring layer (i.e. a {\em present} layer function gets its vertical parameter from another {\em present} function, and a {\em translate} layer function gets it from another {\em translate} function). When composing layers, the vertical results from one layer are passed as parameters to the next layer. The outermost vertical parameter is the parameter to the combined layer, and the outermost vertical result is the result of the combined layer. 
+
+
+\bigskip {\bf A single layer: }Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is somewhat more complex than Figure~\ref{simplelayers}, because not all horizontal parameters to $translate$ are results of $present$ (ie. $state$ is not a result of $present$). The data flow is a simplification of the data flow of the layered editor with local state from~\cite{architecture}. $present$ maps a high level data structure $doc$ to a low level data structure $pres$. The $state$ parameter contains state that is local to the layer, as described in~\cite{architecture}. The $translate$ function works in the opposite direction of $present$ and maps an edit operation ($gest$) on the $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure. Besides $pres$, $present$ also returns a value $mapping$. It is used to encode information that is required by $translate$ in order to map $gest$ to $upd$. An example of such information is a table of pointing information, that relates objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit operation on the local state, $translate$ also has $state$ as a parameter. In that case, $state'$ is the result of performing the update on the local state. In any other case, $state'$ is equal to $state$. 
+
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 \xymatrix{
  & \data{$doc$}\ar[d] & \data{$upd$} & \\
  \ar[r] & \dimcomponent{5em}{2ex}{present$_0$} \ar[d] \ar[r] &  \dimcomponent{6em}{2ex}{translate$_0$} \ar[u] \ar[r] &  \\
@@ -192,7 +96,6 @@
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 \xymatrix{
  & \data{$doc$}\ar[d] & & & \data{$upd$} & \\
  \data{$state$}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar[r] &
@@ -207,92 +110,60 @@
 \end{small}
 \end{figure}
 
+
+%									
+%									
+%									
 \section{A layer in Haskell}
 
-\par In the following sections, we will explore the possibilities of
-      implementing the layered architecture described in the previous section, using
-      the functional language Haskell. The use of a typed programming language for
-      describing an architecture ensures that the types of all components are
-      correct. Furthermore, because the architecture description language is equal to
-      the implementation language, the architecture description is an executable
-      framework for the system being described. We have the certainty that if the
-      types in the architecture description are correct, then the types in the
-      implementation are correct as well. If, on the other hand, a separate
-      architecture description language is used, then the architecture has to be
-      implemented in a programming language, after it has been type checked or proven
-      correct. This is an extra translation step that could possibly lead to
-      errors.
-\par There are two aspects to modeling a layered architecture in Haskell: the
-      building blocks, which are the layer functions, and the connections between the
-      building blocks. The layer functions can simply be modeled with Haskell
-      functions that are put in a record to model a layer. Connecting the layer
-      functions is more complicated. We will present three alternatives in the next
-      sections, but first we give the precise types of the layer functions. 
-\par In order to clearly distinguish between horizontal and vertical
-      parameters, we write the type of a layer function in the following form:
-      \texttt{horArgs -> vertArg -> (vertRes, horRess)}. Thus, we see that a
-      layer function takes one ore more horizontal arguments, a single vertical
-      argument, and returns a single vertical result, tupled with one ore more
-      horizontal results. We introduce a type synonym for layer functions of this
-      type.\begin{small}\begin{verbatim}type LayerFunction horArgs vertArg horRess vertRes =
-       horArgs -> vertArg -> (vertRes, horRess)\end{verbatim}\end{small}
+In the following sections, we will explore the possibilities of implementing the layered architecture described in the previous section, using the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra translation step that could possibly lead to errors.
 
-\par A layer is a record that contains the two layer functions: $present$ and
-      $translate$. The types of the layer functions follow directly from
-      Figure~\ref{simplesinglelayer}. Following is a first attempt at
-      a definition of \texttt{Simple'}. The names of the type and selector functions
-      contain an apostrophe (\texttt{'}) because we also introduce a slightly
-      different type \texttt{Simple}, which will be used in most of the rest of this
-      paper.\begin{small}\begin{verbatim}data Simple' state mapping doc pres gest upd =
+There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. The layer functions can simply be modeled with Haskell functions that are put in a record to model a layer. Connecting the layer functions is more complicated. We will present three alternatives in the next sections, but first we give the precise types of the layer functions. 
+
+In order to clearly distinguish between horizontal and vertical parameters, we write the type of a layer function in the following form: \texttt{horArgs -> vertArg -> (vertRes, horRess)}. Thus, we see that a layer function takes one ore more horizontal arguments, a single vertical argument, and returns a single vertical result, tupled with one ore more horizontal results. We introduce a type synonym for layer functions of this type.
+
+\begin{small}
+\begin{verbatim}
+type LayerFunction horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> (vertRes, horRess)
+\end{verbatim}
+\end{small}
+
+A layer is a record that contains the two layer functions: $present$ and $translate$. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}. Following is a first attempt at a definition of \texttt{Simple'}. The names of the type and selector functions contain an apostrophe (\texttt{'}) because we also introduce a slightly different type \texttt{Simple}, which will be used in most of the rest of this paper.
+
+\begin{small}
+\begin{verbatim}
+data Simple' state mapping doc pres gest upd =
        Simple' { present'   :: LayerFunction state doc mapping pres
                , translate' :: LayerFunction (mapping, state) gest state upd
-               }\end{verbatim}\end{small}
+               }
+\end{verbatim}
+\end{small}
 
-\par  Strictly speaking, \texttt{Simple} is not a type but rather a type
-      constructor, but since it is inconvenient to have to supply the type parameters
-      every time the type is mentioned, we will denote the type with its constructor
-      in the remainder of this text. More formally, when refering to a type
-      \texttt{t}, where \texttt{t} is a type constructor with $n$ parameters, we mean
-      the type \texttt{t a$_1$ \dots ~a$_n$} for fresh type variables
-      \texttt{a$_i$}.
-\par The field names in the record (\texttt{present'}, \texttt{translate'})
-      are also the names of the field selection functions. Thus, if \texttt{layer0}
-      is an \texttt{Simple'} value, then \texttt{present' layer0} denotes the present
-      function of the layer. The \texttt{Simple'} type is parameterized with all the
-      types that appear in the signatures of the layer functions.
-\par To simplify the horizontal connection between layer functions, we prefer
-      a data type in which the horizontal result type (3rd type parameter of
-      \texttt{LayerFunction}) of a layer function matches the horizontal argument
-      type (1st type parameter of \texttt{LayerFunction}) of the next layer function.
-      This implies that the horizontal result of $present$ has the same type as the
-      horizontal argument of $translate$, and that the horizontal result of
-      $translate$ has the same type as the horizontal argument of $present$.
-      Figure~\ref{wrapped} shows the data flow of the layer functions
-      in the new type \texttt{Simple}:\begin{small}\begin{verbatim}data Simple state mapping doc pres gest upd =
+ Strictly speaking, \texttt{Simple} is not a type but rather a type constructor, but since it is inconvenient to have to supply the type parameters every time the type is mentioned, we will denote the type with its constructor in the remainder of this text. More formally, when refering to a type \texttt{t}, where \texttt{t} is a type constructor with $n$ parameters, we mean the type \texttt{t a$_1$ \dots ~a$_n$} for fresh type variables \texttt{a$_i$}.
+
+The field names in the record (\texttt{present'}, \texttt{translate'}) are also the names of the field selection functions. Thus, if \texttt{layer0} is an \texttt{Simple'} value, then \texttt{present' layer0} denotes the present function of the layer. The \texttt{Simple'} type is parameterized with all the types that appear in the signatures of the layer functions.
+
+To simplify the horizontal connection between layer functions, we prefer a data type in which the horizontal result type (3rd type parameter of \texttt{LayerFunction}) of a layer function matches the horizontal argument type (1st type parameter of \texttt{LayerFunction}) of the next layer function. This implies that the horizontal result of $present$ has the same type as the horizontal argument of $translate$, and that the horizontal result of $translate$ has the same type as the horizontal argument of $present$. Figure~\ref{wrapped} shows the data flow of the layer functions in the new type \texttt{Simple}:
+
+\begin{small}
+\begin{verbatim}
+data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction state doc (mapping, state) pres
               , translate :: LayerFunction (mapping, state) gest state upd
-              }\end{verbatim}\end{small}
+              }
+\end{verbatim}
+\end{small}
 
-\par Only in the next section, we use the type \texttt{Simple'}. Afterwards,
-      \texttt{Simple} is used. Because conversions between the two types are trivial,
-      we will not give them. The reason why we give \texttt{Simple'} at all is that
-      it is the more appropriate type from the component programmer's view. It
-      contains exactly the function types we expect the components to have, whereas
-      in \texttt{Simple}, present returns the \texttt{state} parameter, which is done
-      only to make connecting easier.
-\par Now that the building blocks have been established, we need a way to
-      connect them. We will show three connection methods. First, we explicitly
-      connect all parameters and results by hand, which is a working, but not very
-      transparent, solution. Subsequently, we introduce two more elegant and abstract
-      methods. These methods are specific to the \texttt{Simple'} and \texttt{Simple}
-      data types, but from the last method we derive a small library that can be used
-      for layers with an arbitrary number of layer functions. 
+Only in the next section, we use the type \texttt{Simple'}. Afterwards, \texttt{Simple} is used. Because conversions between the two types are trivial, we will not give them. The reason why we give \texttt{Simple'} at all is that it is the more appropriate type from the component programmer's view. It contains exactly the function types we expect the components to have, whereas in \texttt{Simple}, present returns the \texttt{state} parameter, which is done only to make connecting easier.
+
+Now that the building blocks have been established, we need a way to connect them. We will show three connection methods. First, we explicitly connect all parameters and results by hand, which is a working, but not very transparent, solution. Subsequently, we introduce two more elegant and abstract methods. These methods are specific to the \texttt{Simple'} and \texttt{Simple} data types, but from the last method we derive a small library that can be used for layers with an arbitrary number of layer functions. 
+
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 \xymatrix{
  & \data{$doc$}\ar[d] & & & \data{$upd$} & \\
  \data{$state$}\ar[r] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
@@ -307,26 +178,18 @@
 \end{small}
 \end{figure}
 
-\section{Method 1: Explicitly connecting the components}
-\label{sectsimple}
-\par The components of the editor are modeled with layers, but to get a
-      working implementation, we also need to realize the data flow by connecting the
-      components. The document must be fed into the layers, starting at the top layer
-      and yielding the presentation at the bottom, and similarly, the edit gesture
-      must be fed into the bottom layer, yielding the document update at the top. The
-      layers are records that contain functions, so the most straightforward way of
-      tying everything together is to explicitly write the selection and application
-      of each of the functions in each of the layers. We show this by giving an
-      example edit loop for an editor that consists of three layers: \texttt{layer0},
-      \texttt{layer1}, and \texttt{layer2} of type \texttt{Simple'}. The data flow
-      between the layer functions is shown in Figure~\ref{explicit}.
-      The corresponding Haskell code for the edit loop is:
+%									
+%									
+%									
+\section{Method 1: Explicitly connecting the components} \label{sectsimple}
+
+The components of the editor are modeled with layers, but to get a working implementation, we also need to realize the data flow by connecting the components. The document must be fed into the layers, starting at the top layer and yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update at the top. The layers are records that contain functions, so the most straightforward way of tying everything together is to explicitly write the selection and application of each of the functions in each of the layers. We show this by giving an example edit loop for an editor that consists of three layers: \texttt{layer0}, \texttt{layer1}, and \texttt{layer2} of type \texttt{Simple'}. The data flow between the layer functions is shown in Figure~\ref{explicit}. The corresponding Haskell code for the edit loop is:
+
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 \xymatrix{
  & \data{{\tt doc}} \ar[d] & & & \data{{\tt update}} & \\
  \data{{\tt state0}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
@@ -351,7 +214,10 @@
 \end{center}
 \end{small}
 \end{figure}
-\begin{small}\begin{verbatim}editLoop (layer0, layer1, layer2) states doc = loop states doc
+
+\begin{small}
+\begin{verbatim}
+editLoop (layer0, layer1, layer2) states doc = loop states doc
  where loop (state0, state1, state2) doc = 
         do { -- phase 1, Compute presentation:
              let (mapping0, pres1) = present layer0 state0 doc
@@ -368,51 +234,40 @@
        
            ; let doc' = updateDocument update doc -- phase 5
            ; loop (state0', state1', state2') doc'
-           }\end{verbatim}\end{small}
+           }
+\end{verbatim}
+\end{small}
 
-\par 
-\par The five phases of the simple edit cycle as presented in the previous
-      section are directly visible in the code. Note that \texttt{present} and
-      \texttt{translate} are selector functions, and that \texttt{present layer0}
-      denotes the present function of layer-0. The functions
-      \texttt{showPresentation}, \texttt{getGesture}, and \texttt{updateDocument} are
-      left unspecified, because we want to focus on the connection of the layer
-      functions. 
-\par The following function \texttt{main} calls \texttt{editLoop} with the
-      correct parameters.\begin{small}\begin{verbatim}main layer0 layer1 layer2 = 
+The five phases of the simple edit cycle as presented in the previous section are directly visible in the code. Note that \texttt{present} and \texttt{translate} are selector functions, and that \texttt{present layer0} denotes the present function of layer-0. The functions \texttt{showPresentation}, \texttt{getGesture}, and \texttt{updateDocument} are left unspecified, because we want to focus on the connection of the layer functions. 
+
+The following function \texttt{main} calls \texttt{editLoop} with the correct parameters.
+
+\begin{small}
+\begin{verbatim}
+main layer0 layer1 layer2 = 
  do { states <- initStates
     ; doc <- initDoc 
     ; editLoop (layer0, layer1, layer2) states doc
-    }\end{verbatim}\end{small}
+    }
+\end{verbatim}
+\end{small}
 
-\par The functions \texttt{initStates} and \texttt{initDoc} provide the
-      initial values for \texttt{states} and \texttt{doc}, and are left unspecified.
-      The layers of the editor are arguments of the \texttt{main} function. An editor
-      can now be instantiated by applying the function \texttt{main} to three
-      \texttt{Simple'} values that implement the different layers. The type system
-      verifies that the implemented layer functions have the correct type
-      signatures.
-\par A disadvantage of the implementation of the edit loop sketched in this
-      section is that the patterns of the data flow are not very transparent. The
-      fact that the mapping parameters are horizontal parameters and that the
-      presentation is a vertical parameter is not immediately clear from the program
-      code. Moreover, the patterns for upward and downward vertical parameters are
-      standard, but have to be given explicitly for each application, increasing the
-      chance of errors and decreasing transparency. Finally, the number of layers is
-      hard coded in the implementation. If the system is extended with an extra
-      layer, variables have to be renamed. If each type appearing in the layers is
-      distinct, the type checker catches mistakes but if some parameters or results
-      have the same type, the type checker will not detect a problem when, for
-      example, two such equally typed variables are swapped. We will therefore try to
-      find a more abstract way of connecting the layers.
+The functions \texttt{initStates} and \texttt{initDoc} provide the initial values for \texttt{states} and \texttt{doc}, and are left unspecified. The layers of the editor are arguments of the \texttt{main} function. An editor can now be instantiated by applying the function \texttt{main} to three \texttt{Simple'} values that implement the different layers. The type system verifies that the implemented layer functions have the correct type signatures.
+
+A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the mapping parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, the patterns for upward and downward vertical parameters are standard, but have to be given explicitly for each application, increasing the chance of errors and decreasing transparency. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes but if some parameters or results have the same type, the type checker will not detect a problem when, for example, two such equally typed variables are swapped. We will therefore try to find a more abstract way of connecting the layers.
+
+
+%									
+%									
+%									
 \section{Method 2: Nested cartesian products}
+
 \label{sectncp}
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{scriptsize}
-\bigskip \noindent
 \xymatrix{
 \data{(horArg$_0$, (horArg$_1$, ($\dots$)))} \ar `d[dr] [dr] \ar@{.} `d[dddr] [dddr] & \data{vertArg} \ar[d]\\
  & \component{f$_0$} \ar@{.>}[d] \ar @{.} `r[dddr] [dddr] \ar@{-} `r[dddr] & \\
@@ -427,83 +282,40 @@
 \end{small}
 \end{figure}
 
-\par In this section we create an
-      abstraction for the horizontal and vertical data flow patterns in the edit loop
-      of the previous section. We present a number of combinators that allow us to
-      compose layers, so that instead of having to give the applications of the layer
-      functions for each of the layers, we can call the layer function of the
-      composed layer. For the main loop in the previous section, this implies that
-      both the present and the translate phase can be written with one function
-      application instead of three. The combinators also make the data flow more
-      explicit. The direction of the vertical parameter is apparent by the choice of
-      combinator, and not by the way the argument is threaded through the function
-      applications, as is the case in the previous section. 
-\par Similar to the way in which the function composition operator $\cdot$
-      can be used to compose functions {\em f} and {\em g} into $f \cdot g$, we
-      develop a \texttt{combine} combinator that takes two layers and returns a
-      combined layer. The layer functions of the combined layer are the compositions
-      of the layer functions in the layers that are combined.
-\par In the method described in this section, each of the functions in the
-      combined layer not only takes a vertical argument and returns a vertical
-      result, but it also takes a collection of horizontal arguments (one for each
-      layer) and returns a collection of horizontal results (one from each layer).
-      The composition combinator takes care of distributing the horizontal arguments
-      to the corresponding layers, and also collects the horizontal results. The
-      combined layer provides layer functions of type \texttt{LayerFunction horArgsC
-      vertArg horRessC vertRes}. The parameters \texttt{horArgsC} and
-      \texttt{horResC} stand for the types of the collections of horizontal
-      parameters and results. Figure~\ref{ncp} sketches the data flow
-      in the combined layer. Only one layer function with a downward vertical
-      parameter is shown.
-\par Because the types of the horizontal parameters are typically not the
-      same, the collections cannot be represented by lists. The same restriction
-      holds for the horizontal results. Moreover, we want to be able to determine at
-      compile time whether the collection contains the right number of elements. A
-      tuple or cartesian product is more suitable for the task, but has the
-      disadvantage that its components cannot be accessed in a compositional way.
-      Therefore, we will use a nested cartesian product consisting of only 2-tuples
-      to represent the horizontal parameters and results.
-\par An example of such a nested cartesian product containing 4 elements
-      is:\texttt{(e$_0$,(e$_1$,(e$_2$, e$_3$)))}, but also
-      \texttt{(((e$_0$,e$_1$),e$_2$), e$_3$)} and
-      \texttt{((e$_0$,e$_1$),(e$_2$,e$_3$))} are valid examples. Two nested cartesian
-      products are of equal type if and only if they have the same structure, and
-      elements at equal positions have equal types. We can access the elements in the
-      product in a compositional way by pattern matching on the top level product.
-      For example: \texttt{f (firstElt, rest) = \dots}
-\par  Because nested cartesian products with different structure are of
-      different type, we use the combinators in this section only in a right
-      associative way, so all products are of the form \texttt{(e$_0$,(e$_1$,(e$_2$,
-      (\dots, e$_n$)\dots)))}. 
-\par We first define two combinators for composing layer functions. We need
-      two combinators because there are two ways in which layer functions can be
-      composed, depending on the direction of the vertical parameter. An upward
-      vertical parameter passes through the bottom layer first, and then through the
-      top layer, whereas a downward vertical parameter passes through the top layer
-      first. The two combinators are \texttt{composeDown} and \texttt{composeUp}.
-      Figure~\ref{composeDownUp} shows the data flow for the two
-      combinators. 
-\par The combinator \texttt{composeDown} composes two layers \texttt{u} and
-      \texttt{l} by feeding the intermediate vertical result of \texttt{u} into
-      \texttt{l}, establishing a downward data flow. At the same time, the horizontal
-      parameters for \texttt{u} and \texttt{l} are taken from the horizontal
-      parameter to the combined layer (which is a tuple), and the horizontal result
-      for the combined layer is formed by tupling the horizontal results of
-      \texttt{u} and \texttt{l}.\begin{small}\begin{verbatim}composeDown :: LayerFunction horArgsU arg horRessU interm ->
+In this section we create an abstraction for the horizontal and vertical data flow patterns in the edit loop of the previous section. We present a number of combinators that allow us to compose layers, so that instead of having to give the applications of the layer functions for each of the layers, we can call the layer function of the composed layer. For the main loop in the previous section, this implies that both the present and the translate phase can be written with one function application instead of three. The combinators also make the data flow more explicit. The direction of the vertical parameter is apparent by the choice of combinator, and not by the way the argument is threaded through the function applications, as is the case in the previous section. 
+
+Similar to the way in which the function composition operator $\cdot$ can be used to compose functions {\em f} and {\em g} into $f \cdot g$, we develop a \texttt{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are the compositions of the layer functions in the layers that are combined.
+
+In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The composition combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \texttt{LayerFunction horArgsC vertArg horRessC vertRes}. The parameters \texttt{horArgsC} and \texttt{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
+
+Because the types of the horizontal parameters are typically not the same, the collections cannot be represented by lists. The same restriction holds for the horizontal results. Moreover, we want to be able to determine at compile time whether the collection contains the right number of elements. A tuple or cartesian product is more suitable for the task, but has the disadvantage that its components cannot be accessed in a compositional way. Therefore, we will use a nested cartesian product consisting of only 2-tuples to represent the horizontal parameters and results.
+
+An example of such a nested cartesian product containing 4 elements is:\texttt{(e$_0$,(e$_1$,(e$_2$, e$_3$)))}, but also \texttt{(((e$_0$,e$_1$),e$_2$), e$_3$)} and \texttt{((e$_0$,e$_1$),(e$_2$,e$_3$))} are valid examples. Two nested cartesian products are of equal type if and only if they have the same structure, and elements at equal positions have equal types. We can access the elements in the product in a compositional way by pattern matching on the top level product. For example: \texttt{f (firstElt, rest) = \dots}
+
+Because nested cartesian products with different structure are of different type, we use the combinators in this section only in a right associative way, so all products are of the form \texttt{(e$_0$,(e$_1$,(e$_2$, (\dots, e$_n$)\dots)))}. 
+
+We first define two combinators for composing layer functions. We need two combinators because there are two ways in which layer functions can be composed, depending on the direction of the vertical parameter. An upward vertical parameter passes through the bottom layer first, and then through the top layer, whereas a downward vertical parameter passes through the top layer first. The two combinators are \texttt{composeDown} and \texttt{composeUp}. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
+
+The combinator \texttt{composeDown} composes two layers \texttt{u} and \texttt{l} by feeding the intermediate vertical result of \texttt{u} into \texttt{l}, establishing a downward data flow. At the same time, the horizontal parameters for \texttt{u} and \texttt{l} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \texttt{u} and \texttt{l}.
+
+\begin{small}
+\begin{verbatim}
+composeDown :: LayerFunction horArgsU arg horRessU interm ->
                LayerFunction horArgsL interm horRessL res ->
                LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
 composeDown upper lower = 
   \(horArgsU, horArgsL) arg ->                                           
     let (horRessU, interm) = upper horArgsU arg
         (horRessL, res)    = lower horArgsL interm            
-    in  ((horRessU,horRessL), res)\end{verbatim}\end{small}
+    in  ((horRessU,horRessL), res)
+\end{verbatim}
+\end{small}
 
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \begin{tiny}
-\bigskip \noindent
 \xymatrix{
  &\data{{\tt arg}}\ar[d] &   
   \\
@@ -543,55 +355,64 @@ composeDown upper lower =
 \end{small}
 \end{figure}
 
-\par In a similar way, we define a combinator \texttt{composeUp} for
-      combining layer functions (e.g. \texttt{translate}) in which the vertical
-      parameter goes upward. We only show its type here.\begin{small}\begin{verbatim}composeUp :: LayerFunction horArgsU interm horRessU res ->
+In a similar way, we define a combinator \texttt{composeUp} for combining layer functions (e.g. \texttt{translate}) in which the vertical parameter goes upward. We only show its type here.
+
+\begin{small}
+\begin{verbatim}
+composeUp :: LayerFunction horArgsU interm horRessU res ->
              LayerFunction horArgsL arg horRessL interm ->
              LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
-\end{verbatim}\end{small}
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf Combining layers: }Using \texttt{composeUp} and
-      \texttt{composeDown}, we can define a combinator to combine \texttt{Simple}
-      layers. From now on, we use the type \texttt{Simple} instead of
-      \texttt{Simple'} because the matching horizontal parameter types in
-      \texttt{Simple} make the connection easier. 
-\par First, we need to define a new data type for combined layers. Although
-      the composition of two layer functions is a layer function itself, we cannot
-      put the compositions of the layer functions in a \texttt{Simple} record.
-      According to the definition of \texttt{Simple}, the horizontal parameter of the
-      first layer function (\texttt{present}) has type \texttt{state}, and the result
-      has type (\texttt{mapping}, \texttt{state}). In contrast, for \texttt{present}
-      in the composed layer, the horizontal parameter is a collection of states and
-      the result a collection of mapping and state tuples. We cannot specify the
-      collection types in the type signature, so we will simply use single type
-      variables for the types.
-\par The type \texttt{LayerC} is a more general version of \texttt{Simple};
-      it does not specify the exact structure of the horizontal parameters. The
-      parameter \texttt{states} represents the nested cartesian product of
-      \texttt{state} values, and the parameter \texttt{mappingsStates} represents the
-      nested cartesian product of \texttt{mapping} and \texttt{state} tuples.\begin{small}\begin{verbatim}data LayerC states mappingsStates doc pres gest upd =
+
+\bigskip {\bf Combining layers: } Using \texttt{composeUp} and \texttt{composeDown}, we can define a combinator to combine \texttt{Simple} layers. From now on, we use the type \texttt{Simple} instead of \texttt{Simple'} because the matching horizontal parameter types in \texttt{Simple} make the connection easier. 
+
+First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot put the compositions of the layer functions in a \texttt{Simple} record. According to the definition of \texttt{Simple}, the horizontal parameter of the first layer function (\texttt{present}) has type \texttt{state}, and the result has type (\texttt{mapping}, \texttt{state}). In contrast, for \texttt{present} in the composed layer, the horizontal parameter is a collection of states and the result a collection of mapping and state tuples. We cannot specify the collection types in the type signature, so we will simply use single type variables for the types.
+
+The type \texttt{LayerC} is a more general version of \texttt{Simple}; it does not specify the exact structure of the horizontal parameters. The parameter \texttt{states} represents the nested cartesian product of \texttt{state} values, and the parameter \texttt{mappingsStates} represents the nested cartesian product of \texttt{mapping} and \texttt{state} tuples.
+
+\begin{small}
+\begin{verbatim}
+data LayerC states mappingsStates doc pres gest upd =
        LayerC { presentC ::   LayerFunction states doc mappingsStates pres
               , translateC :: LayerFunction mappingsStates gest states upd
               }
-\end{verbatim}\end{small}
 
-\par The trivial function \texttt{lift} takes a layer of type \texttt{Simple}
-      and returns a \texttt{LayerC} layer.\begin{small}\begin{verbatim}lift :: Simple a b c d e f -> LayerC a (b,a) c d e f
+\end{verbatim}
+\end{small}
+
+The trivial function \texttt{lift} takes a layer of type \texttt{Simple} and returns a \texttt{LayerC} layer.
+
+\begin{small}
+\begin{verbatim}
+lift :: Simple a b c d e f -> LayerC a (b,a) c d e f
 lift simple = 
   LayerC { presentC = present simple
          , translateC = translate simple
-         }\end{verbatim}\end{small}
+         }
+\end{verbatim}
+\end{small}
 
-\par The \texttt{combine} combinator is defined by using the appropriate
-      compose combinator on each of the layer functions. \begin{small}\begin{verbatim}combine :: LayerC a b c d e f -> LayerC g h d i j e -> 
+The \texttt{combine} combinator is defined by using the appropriate compose combinator on each of the layer functions. 
+
+\begin{small}
+\begin{verbatim}
+combine :: LayerC a b c d e f -> LayerC g h d i j e -> 
            LayerC (a,g) (b,h) c i j f
 combine upper lower =
   LayerC { presentC = composeDown (presentC upper) (presentC lower)
          , translateC = composeUp (translateC upper) (translateC lower)
-         }\end{verbatim}\end{small}
+         }
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf Simple editor: } The main editor loop from the
-      previous section now reads:\begin{small}\begin{verbatim}editLoop layers states doc = loop states doc
+
+\bigskip {\bf Simple editor: } The main editor loop from the previous section now reads:
+ 
+ \begin{small}
+ \begin{verbatim}
+ editLoop layers states doc = loop states doc
  where loop states doc = 
         do { -- Compute presentation:
              let (pres, mappingsStates) = presentC layers states doc
@@ -604,106 +425,91 @@ combine upper lower =
        
            ; let doc' = updateDocument update doc
            ; loop states' doc'
-           }\end{verbatim}\end{small}
+           }
+\end{verbatim}
+\end{small}
 
-\par The \texttt{main} function is almost the same as in the previous
-      section, except that instead of a 3-tuple of layers, the combined layers are
-      passed to \texttt{editLoop}. \begin{small}\begin{verbatim}main layer0 layer1 layer2 = 
+The \texttt{main} function is almost the same as in the previous section, except that instead of a 3-tuple of layers, the combined layers are passed to \texttt{editLoop}. 
+
+\begin{small}
+\begin{verbatim}
+main layer0 layer1 layer2 = 
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
     ; let layers = lift layer0 `combine` lift layer1 `combine` lift  layer2
     ; editLoop layers ((state0, state1), state2) doc
-    }\end{verbatim}\end{small}
+    }
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf Conclusions: }The nested cartesian products
-      solution is more compositional than the approach of the previous section, and a
-      lot of data flow is hidden from the main loop by automatically passing the
-      results of one layer into another. However, all horizontal parameters are
-      passed all the way through the composite layer, and are visible in the main
-      loop, which is not where they conceptually belong. Consequently, the type of
-      the composite layer is parameterized with all types appearing in the layers,
-      leading to huge type signatures. We will therefore show yet another approach in
-      which the horizontal parameters stay within each layer and are not visible in
-      the main editor loop.
-\section{Method 3: Direct parameter passing}
-\label{sectdpp}
-\par In the previous section, the horizontal results that are computed during
-      the evaluation of one layer function are returned explicitly and passed as
-      arguments to the next layer function. In the layer functions developed in this
-      section, the horizontal results are not returned explicitly. Instead, the next layer function is returned with the
-      horizontal results already applied to it. As a consequence, the main editor
-      loop becomes more transparent, and the type of the composed layers is simpler,
-      since the type variables for the horizontal parameters are no longer explicitly
-      visible.
-\par We will illustrate the direct parameter passing method with an example.
-      Recall that the main loop of the simple editor, encoded with nested cartesian
-      products method, contains the following code:\par
+
+\bigskip {\bf Conclusions: }The nested cartesian products solution is more compositional than the approach of the previous section, and a lot of data flow is hidden from the main loop by automatically passing the results of one layer into another. However, all horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Consequently, the type of the composite layer is parameterized with all types appearing in the layers, leading to huge type signatures. We will therefore show yet another approach in which the horizontal parameters stay within each layer and are not visible in the main editor loop.
+
+
+%									
+%									
+%									
+\section{Method 3: Direct parameter passing} \label{sectdpp}
+
+In the previous section, the horizontal results that are computed during the evaluation of one layer function are returned explicitly and passed as arguments to the next layer function. In the layer functions developed in this section, the horizontal results are not returned explicitly. Instead, the next layer function is returned with the horizontal results already applied to it. As a consequence, the main editor loop becomes more transparent, and the type of the composed layers is simpler, since the type variables for the horizontal parameters are no longer explicitly visible.
+
+We will illustrate the direct parameter passing method with an example. Recall that the main loop of the simple editor, encoded with nested cartesian products method, contains the following code:
+
 \dots\\
 {\tt let (mapstates, pres) = present' layers states doc}\\
 \dots\\
 {\tt let (states', update) = translate' layers mapstates gest}\\
 \dots
-\par But with the direct parameter passing method, it will contain:\par
+
+But with the direct parameter passing method, it will contain:
+
 \dots\\
 {\tt let (pres, translateStep) = presentStep doc}\\
 \dots\\
 {\tt let (update, presentStep) = translateStep gest}\\
 \dots
-\par In other words, each combined layer function application returns the
-      result together with the next combined layer function. Horizontal parameters
-      are now completely hidden from the main loop. The code that is shown is not
-      entirely accurate, as it turns out that some pattern matching is required, but
-      it gives the general idea. Note that the order in which the layer functions are
-      evaluated is now enforced by the layer model. It is not possible to evaluate
-      \texttt{translateStep} before \texttt{presentStep}.
-\par \bigskip {\bf Type definitions: }The type of the layer needs to
-      have the following structure: \texttt{(Doc -> (Pres, Gest -> (Upd, Doc ->
-      (Pres, Gest -> (Upd, \dots)))))}. Unfortunately, we cannot use a type
-      declaration: \texttt{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))},
-      because Haskell does not allow recursive type synonyms. A \texttt{newtype}
-      declaration must be used with the disadvantage that values of the type have to
-      be wrapped with constructor functions.
-\par We encode the type by dividing the computation in {\em steps}; one
-      step for each layer function. Because the number of steps is always equal to
-      the number of layer functions, the statement that a layer has $n$ layer
-      functions, amounts to the same as that it is an $n$ step layer. From now on, we
-      will use the term number of layer functions of a layer interchangebly with
-      number of steps of a layer.
-\par For each step, we define a separate type. The types are mutually
-      recursive. Because the types of the vertical parameters may be different for
-      each layer, the step types are parameterized with the types of the vertical
-      parameters. For the \texttt{Simple} layer type, we get:\begin{small}\begin{verbatim}newtype PresStep doc pres gest upd = 
+
+In other words, each combined layer function application returns the result together with the next combined layer function. Horizontal parameters are now completely hidden from the main loop. The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Note that the order in which the layer functions are evaluated is now enforced by the layer model. It is not possible to evaluate \texttt{translateStep} before \texttt{presentStep}.
+
+
+\bigskip {\bf Type definitions: }The type of the layer needs to have the following structure: \texttt{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}. Unfortunately, we cannot use a type declaration: \texttt{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))}, because Haskell does not allow recursive type synonyms. A \texttt{newtype} declaration must be used with the disadvantage that values of the type have to be wrapped with constructor functions.
+
+We encode the type by dividing the computation in {\em steps}; one step for each layer function. Because the number of steps is always equal to the number of layer functions, the statement that a layer has $n$ layer functions, amounts to the same as that it is an $n$ step layer. From now on, we will use the term number of layer functions of a layer interchangebly with number of steps of a layer.
+
+For each step, we define a separate type. The types are mutually recursive. Because the types of the vertical parameters may be different for each layer, the step types are parameterized with the types of the vertical parameters. For the \texttt{Simple} layer type, we get:
+
+\begin{small}
+\begin{verbatim}
+newtype PresStep doc pres gest upd = 
           PresStep  (doc ->  (pres, TransStep gest upd doc pres))
 newtype TransStep gest upd doc pres = 
           TransStep (gest -> (upd,  PresStep doc pres gest upd)) 
 
-type Layer doc pres gest upd = PresStep doc pres gest upd\end{verbatim}\end{small}
+type Layer doc pres gest upd = PresStep doc pres gest upd
+\end{verbatim}
+\end{small}
 
-\par In the next section, we will give a more abstract definition of the step
-      types. For now, we will use the above definitions because they clearly show the
-      mutually recursive structure of the types. 
-\par 
-\par Instead of using a separate type for each of the layer functions, it is
-      also possible to use one \texttt{newtype} declaration that encapsulates both
-      layer functions:\begin{small}\begin{verbatim}newtype Layer doc pres gest upd = 
-  Layer (doc -> (pres, gest -> (upd, Layer doc pres gest upd)))\end{verbatim}\end{small}
+In the next section, we will give a more abstract definition of the step types. For now, we will use the above definitions because they clearly show the mutually recursive structure of the types. 
 
-\par We prefer the mutually recursive types because they are more symmetric
-      than the single \texttt{Layer} type. Because of the use of newtypes, values
-      have to be wrapped with constructors, as well as unwrapped. Wrapping and
-      unwrapping occurs either for every step, in case of the mutually recursive
-      types, or only once every edit cycle, in case of the single type encapsulating
-      all layer functions. Doing it for every step leads to more elegant
-      combinators.
-\par We define two combinators for constructing and combining \texttt{Layer}
-      values. The first combinator, \texttt{lift}, takes a \texttt{Simple} layer,
-      which is a record with layer functions, and converts it to a direct parameter
-      passing layer of type \texttt{Layer}. To combine layers of type \texttt{Layer},
-      we define a combinator \texttt{combine}. Both combinators in this section are
-      specific to the \texttt{Simple} type. In the next section, we define a library
-      to construct \texttt{lift} and \texttt{combine} for arbitrary layers.
-\par \bigskip {\bf Lift: }The combinator \texttt{lift} takes a layer
-      of type \texttt{Simple} and returns a \texttt{Layer} value:\begin{small}\begin{verbatim}lift :: Simple state mapping doc pres gest upd -> state -> 
+Instead of using a separate type for each of the layer functions, it is also possible to use one \texttt{newtype} declaration that encapsulates both layer functions:
+
+\begin{small}
+\begin{verbatim}
+newtype Layer doc pres gest upd = 
+  Layer (doc -> (pres, gest -> (upd, Layer doc pres gest upd)))
+\end{verbatim}
+\end{small}
+
+We prefer the mutually recursive types because they are more symmetric than the single \texttt{Layer} type. Because of the use of newtypes, values have to be wrapped with constructors, as well as unwrapped. Wrapping and unwrapping occurs either for every step, in case of the mutually recursive types, or only once every edit cycle, in case of the single type encapsulating all layer functions. Doing it for every step leads to more elegant combinators.
+
+We define two combinators for constructing and combining \texttt{Layer} values. The first combinator, \texttt{lift}, takes a \texttt{Simple} layer, which is a record with layer functions, and converts it to a direct parameter passing layer of type \texttt{Layer}. To combine layers of type \texttt{Layer}, we define a combinator \texttt{combine}. Both combinators in this section are specific to the \texttt{Simple} type. In the next section, we define a library to construct \texttt{lift} and \texttt{combine} for arbitrary layers.
+
+
+\bigskip {\bf Lift: }The combinator \texttt{lift} takes a layer of type \texttt{Simple} and returns a \texttt{Layer} value:
+
+\begin{small}
+\begin{verbatim}
+lift :: Simple state mapping doc pres gest upd -> state -> 
         Layer doc pres gest upd
 lift layer state = presStep state 
  where presStep state = PresStep $
@@ -711,41 +517,29 @@ lift layer state = presStep state
                     in  (pres, transStep (mapping,state))
        transStep (mapping,state) = TransStep $
            \gest -> let (state', upd) = translate layer (mapping, state) gest                     
-                    in  (upd, presStep state')\end{verbatim}\end{small}
+                    in  (upd, presStep state')
+\end{verbatim}
+\end{small}
 
-\par Besides the \texttt{layer} parameter, \texttt{lift} gets a second
-      parameter, \texttt{state}, which is the initial value of the horizontal
-      \texttt{state} parameter in the layer. The data flow pattern of the horizontal
-      parameters is encoded entirely in the definition of \texttt{lift}. Moreover,
-      the \texttt{state} type is not visible in the result of \texttt{lift}, so once
-      the horizontal state is passed to the lifted layer, it is no longer visible
-      outside this layer; the \texttt{lift} combinator takes care of passing around
-      the horizontal parameters to and from the layer functions, and also to the next
-      edit cycle. This state hiding helps to keep the architecture description
-      transparent, because now the horizontal parameters do not play a r\^o le
-      anymore when the layers are connected.
-\par \bigskip {\bf Combine: }With \texttt{lift} we can instantiate
-      layer values of type \texttt{Layer doc pres gest upd}. To combine layers, we
-      define a combinator \texttt{combine} with the following type:\begin{small}\begin{verbatim}combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
-           Layer high low elow ehigh\end{verbatim}\end{small}
+Besides the \texttt{layer} parameter, \texttt{lift} gets a second parameter, \texttt{state}, which is the initial value of the horizontal \texttt{state} parameter in the layer. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \texttt{lift}. Moreover, the \texttt{state} type is not visible in the result of \texttt{lift}, so once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \texttt{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. This state hiding helps to keep the architecture description transparent, because now the horizontal parameters do not play a r\^o le anymore when the layers are connected.
 
-\par The order of the parameters in the type of \texttt{combine} might seem a
-      bit odd. The reason for this order is that the first type in each pair of
-      parameters specifies an argument type, and the second type specifies a result
-      type. The composed \texttt{pres} function is created by applying the
-      \texttt{pres} function of the first layer (\texttt{high -> med}) to the
-      \texttt{high} argument and then applying the \texttt{pres} function of the
-      second layer (\texttt{med -> low}) to the result. The \texttt{trans}
-      function, however, has a different direction: the \texttt{trans} function of
-      the second layer (\texttt{elow -> emed}) is applied to the argument, and the
-      \texttt{trans} function of the first layer (\texttt{emed -> ehigh}) is
-      applied to the result.
-\par The implementation of combine is just plumbing to get the parameters at
-      the right places. The direction of the vertical parameters is encoded in the
-      definition of \texttt{combine}. For \texttt{pres}, this direction is downward
-      (the function from the upper layer is applied first), whereas for
-      \texttt{trans}, it is upward (the function from the lower layer is applied
-      first).\begin{small}\begin{verbatim}combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+
+\bigskip {\bf Combine: }With \texttt{lift} we can instantiate layer values of type \texttt{Layer doc pres gest upd}. To combine layers, we define a combinator \texttt{combine} with the following type:
+
+\begin{small}
+\begin{verbatim}
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+           Layer high low elow ehigh
+\end{verbatim}
+\end{small}
+
+The order of the parameters in the type of \texttt{combine} might seem a bit odd. The reason for this order is that the first type in each pair of parameters specifies an argument type, and the second type specifies a result type. The composed \texttt{pres} function is created by applying the \texttt{pres} function of the first layer (\texttt{high -> med}) to the \texttt{high} argument and then applying the \texttt{pres} function of the second layer (\texttt{med -> low}) to the result. The \texttt{trans} function, however, has a different direction: the \texttt{trans} function of the second layer (\texttt{elow -> emed}) is applied to the argument, and the \texttt{trans} function of the first layer (\texttt{emed -> ehigh}) is applied to the result.
+
+The implementation of combine is just plumbing to get the parameters at the right places. The direction of the vertical parameters is encoded in the definition of \texttt{combine}. For \texttt{pres}, this direction is downward (the function from the upper layer is applied first), whereas for \texttt{trans}, it is upward (the function from the lower layer is applied first).
+
+\begin{small}
+\begin{verbatim}
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 combine = presStep
  where presStep (PresStep upr) (PresStep lwr) = PresStep $ 
@@ -755,12 +549,16 @@ combine = presStep
        transStep (TransStep upr) (TransStep lwr) = TransStep $
            \elow -> let (emed, lwrPres') = lwr elow
                         (ehigh, uprPres') = upr emed
-                    in  (ehigh, presStep uprPres' lwrPres') \end{verbatim}\end{small}
+                    in  (ehigh, presStep uprPres' lwrPres') 
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf Simple editor: }The edit loop of the simple
-      editor no longer has a reference to the horizontal parameters. Furthermore, the
-      combined layer is called \texttt{presentStep} instead of \texttt{layers}, to
-      reflect that it is the present step of the computation.\begin{small}\begin{verbatim}editLoop presentStep doc = 
+
+\bigskip {\bf Simple editor: }The edit loop of the simple editor no longer has a reference to the horizontal parameters. Furthermore, the combined layer is called \texttt{presentStep} instead of \texttt{layers}, to reflect that it is the present step of the computation.
+
+\begin{small}
+\begin{verbatim}
+editLoop presentStep doc = 
  do { let (pres, TransStep translateStep) = presentStep doc
 
     ; showPresentation pres
@@ -771,143 +569,102 @@ combine = presStep
     ; let doc' = updateDocument update doc
     
     ; editLoop presentStep' doc'
-    }\end{verbatim}\end{small}
+    }
+\end{verbatim}
+\end{small}
 
-\par In the \texttt{main} function, the combined layer is created by lifting
-      the layers together with their initial states and using \texttt{combine} to put
-      them together.\begin{small}\begin{verbatim}main layer0 layer1 layer2 =
+In the \texttt{main} function, the combined layer is created by lifting the layers together with their initial states and using \texttt{combine} to put them together.
+
+\begin{small}
+\begin{verbatim}
+main layer0 layer1 layer2 =
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
     ; let PresStep presentStep =           lift layer0 state0 
                                  `combine` lift layer1 state1
                                  `combine` lift layer2 state2
     ; editLoop presentStep doc
-    }\end{verbatim}\end{small}
+    }
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf Conclusions: }The direct parameter passing model
-      hides the data flow of the horizontal parameters from the main loop of the
-      system. Furthermore, the types of the horizontal parameters, as well as the
-      intermediate vertical parameters are hidden from the type of the composed
-      layer, similar to the way in which the type of the intermediate result for a
-      composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from
-      the type of the composition $f \cdot g :: a \arr c$. As a result, both
-      horizontal and vertical data flow are made more transparent.
-\par 
-\par 
-\par 
-\section{Developing a library for architecture descriptions}
-\label{sectlib}
-\par In this section, we develop a small {\em meta combinator} library for
-      implementing the direct parameter passing \texttt{lift} and \texttt{combine}
-      combinators for layered architectures with an arbitrary number of layer
-      functions. The combinators in the library are meta combinators because they are
-      used to build \texttt{lift} and \texttt{combine}, which are combinators
-      themselves.
-\par The combinators from the previous section are just one case of a layered
-      architecture: a layer with two layer functions and hence two steps. Even though
-      \texttt{lift} and \texttt{combine} are straightforward to write, some code is
-      duplicated, and small errors are easily made. Therefore, instead of a general
-      description for writing \texttt{lift} and \texttt{combine} by hand, it is
-      better to have a small library of meta combinators for building them. Another
-      advantage of a meta combinator library is that the direction of the vertical
-      data flow can be expressed by using a meta combinator whose name reflects the
-      direction, instead of explicitly encoding the direction for each of the steps
-      in the \texttt{combine} function itself.
-\par In the next sections, we first analyze the data type definitions that
-      are required for a layer with an arbitrary number of layer functions. Then, we
-      derive meta combinators for \texttt{lift} and \texttt{combine}. 
-\par Looking at the definitions of \texttt{lift} and \texttt{combine} in the
-      previous section, we see that they both consist of two parts: one for each step
-      in the layer. Both functions define a local function for each of the layer
-      functions in the layer. In both \texttt{lift} and \texttt{combine} for the
-      \texttt{Simple} layer type, these local functions are called \texttt{presStep}
-      and \texttt{transStep}. 
-\par The method we use for the derivation of the meta combinators is to start
-      with such a local function and gradually factorize out all step specific
-      aspects. After this process, we are left with a function that, when applied to
-      the step specific aspects, has the same behaviour as the local function we
-      started with. Moreover, because the function is not step specific anymore, it
-      can be used to get the behaviour of the other step functions as well. This
-      function is the meta combinator that we can use to build instances of the
-      combinator for architectures with arbitrary numbers of steps.
-\par  For \texttt{lift}, the local function is similar for each of the steps,
-      but for \texttt{combine}, two variations exist, depending on the direction of
-      the vertical parameter. Consequently, one meta combinator is derived for
-      \texttt{lift}, whereas for \texttt{combine} we get two meta combinators: one
-      for steps with upward parameters and one for steps with downward
-      parameters.
-\subsection{Type definitions}
-\label{subsecttypedef}
-\par In order to extend the direct parameter passing method to layers with
-        an arbitrary number of steps, we first investigate what the data types for each
-        step will be. It turns out that it is not possible to give a general type
-        definition in Haskell that can be used for the step definitions for layers with
-        arbitrary numbers of steps. The reason for this is that the number of type
-        variables depends on the number of steps. However, we can give a simple method
-        for defining the data types, given the number of steps in the layer.
-\par If we take the two step data types for \texttt{Simple'} from
-        Section~\ref{sectdpp}, and rename the variables, we get:\par
+
+\bigskip {\bf Conclusions: }The direct parameter passing model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters are hidden from the type of the composed layer, similar to the way in which the type of the intermediate result for a composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from the type of the composition $f \cdot g :: a \arr c$. As a result, both horizontal and vertical data flow are made more transparent.
+
+
+%									
+%									
+%									
+\section{Developing a library for architecture descriptions} \label{sectlib}
+
+In this section, we develop a small {\em meta combinator} library for implementing the direct parameter passing \texttt{lift} and \texttt{combine} combinators for layered architectures with an arbitrary number of layer functions. The combinators in the library are meta combinators because they are used to build \texttt{lift} and \texttt{combine}, which are combinators themselves.
+
+The combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two steps. Even though \texttt{lift} and \texttt{combine} are straightforward to write, some code is duplicated, and small errors are easily made. Therefore, instead of a general description for writing \texttt{lift} and \texttt{combine} by hand, it is better to have a small library of meta combinators for building them. Another advantage of a meta combinator library is that the direction of the vertical data flow can be expressed by using a meta combinator whose name reflects the direction, instead of explicitly encoding the direction for each of the steps in the \texttt{combine} function itself.
+
+In the next sections, we first analyze the data type definitions that are required for a layer with an arbitrary number of layer functions. Then, we derive meta combinators for \texttt{lift} and \texttt{combine}. 
+
+Looking at the definitions of \texttt{lift} and \texttt{combine} in the previous section, we see that they both consist of two parts: one for each step in the layer. Both functions define a local function for each of the layer functions in the layer. In both \texttt{lift} and \texttt{combine} for the \texttt{Simple} layer type, these local functions are called \texttt{presStep} and \texttt{transStep}. 
+
+The method we use for the derivation of the meta combinators is to start with such a local function and gradually factorize out all step specific aspects. After this process, we are left with a function that, when applied to the step specific aspects, has the same behaviour as the local function we started with. Moreover, because the function is not step specific anymore, it can be used to get the behaviour of the other step functions as well. This function is the meta combinator that we can use to build instances of the combinator for architectures with arbitrary numbers of steps.
+
+ For \texttt{lift}, the local function is similar for each of the steps, but for \texttt{combine}, two variations exist, depending on the direction of the vertical parameter. Consequently, one meta combinator is derived for \texttt{lift}, whereas for \texttt{combine} we get two meta combinators: one for steps with upward parameters and one for steps with downward parameters.
+ 
+ 
+\subsection{Type definitions} \label{subsecttypedef}
+
+In order to extend the direct parameter passing method to layers with an arbitrary number of steps, we first investigate what the data types for each step will be. It turns out that it is not possible to give a general type definition in Haskell that can be used for the step definitions for layers with arbitrary numbers of steps. The reason for this is that the number of type variables depends on the number of steps. However, we can give a simple method for defining the data types, given the number of steps in the layer.
+
+If we take the two step data types for \texttt{Simple'} from Section~\ref{sectdpp}, and rename the variables, we get:
+
 {\tt newtype Step$_{1,2}$ a b c d = Step$_{1,2}$ (a -> (b, Step$_{2,2}$ c d a b))}\\
 {\tt newtype Step$_{2,2}$ a b c d = Step$_{2,2}$ (a -> (b, Step$_{1,2}$ c d a b))}
-\par The pattern on the righthand side can be captured by a type synonym
-        \texttt{Step$_2$}, which makes the individual step types somewhat simpler:\par
+
+The pattern on the righthand side can be captured by a type synonym \texttt{Step$_2$}, which makes the individual step types somewhat simpler:
+
 {\tt type Step$_2$ next a b c d = (a ->(b, next c d a b))}
-\par Furthermore, we write the data type definitions as records, in order
-        to get a selector function for each type. The selector functions will be used
-        in the definition of \texttt{combine}.\par
+
+Furthermore, we write the data type definitions as records, in order to get a selector function for each type. The selector functions will be used in the definition of \texttt{combine}.
+
 {\tt newtype Step$_{1,2}$ a b c d = Step$_{1,2}$ \{step$_{1,2}$}\verb| :: |{\tt Step$_2$ Step$_{2,2}$  a b c d\}}\\
 {\tt newtype Step$_{2,2}$ a b c d = Step$_{2,2}$ \{step$_{2,2}$}\verb| :: |{\tt Step$_2$ Step$_{1,2}$  a b c d\}}
-\par 
-\par For a layer with three layer functions, and hence three steps, we need
-        three mutually recursive step data types. Each step has six parameters. \par
+
+For a layer with three layer functions, and hence three steps, we need three mutually recursive step data types. Each step has six parameters.
+
 {\tt newtype Step$_{1,3}$ a b c d e f = Step$_{1,3}$ \{step$_{1,3}$}\verb| :: |{\tt a -> (b, Step$_{2,3}$ c d e f a b)\}}\\
 {\tt newtype Step$_{2,3}$ a b c d e f = Step$_{2,3}$ \{step$_{2,3}$}\verb| :: |{\tt a -> (b, Step$_{3,3}$ c d e f a b)\}}\\
 {\tt newtype Step$_{3,3}$ a b c d e f = Step$_{3,3}$ \{step$_{3,3}$}\verb| :: |{\tt a -> (b, Step$_{1,3}$ c d e f a b)\}}
-\par Which can be written simpler as: \par
+
+Which can be written simpler as:
+
 {\tt type Step$_3$ next a b c d e f = (a -> (b, next c d e f a b))}\\
 \\
 {\tt newtype Step$_{1,3}$ a b c d e f = Step$_{1,3}$ \{step$_{1,3}$}\verb| :: |{\tt Step$_3$ Step$_{2,3}$ a b c d e f\} }\\
 {\tt newtype Step$_{2,3}$ a b c d e f = Step$_{2,3}$ \{step$_{2,3}$}\verb| :: |{\tt Step$_3$ Step$_{3,3}$ a b c d e f\} }\\
 {\tt newtype Step$_{2,3}$ a b c d e f = Step$_{3,3}$ \{step$_{3,3}$}\verb| :: |{\tt Step$_3$ Step$_{1,3}$ a b c d e f\} }
-\par Clearly, the type definitions for three step layers are very similar
-        to the type definitions for two step layers. However, because the number of
-        parameters for the type depends on the number of steps, it is not possible to
-        give one Haskell type synonym \texttt{Step}. We will have to settle for a
-        general description of how to construct the type synonym. For a layer with $n$
-        layer functions, the type of \texttt{Step$_n$} has $2n$ parameters. The
-        parameters are named \texttt{a$_1$ r$_1$ \dots ~a$_n$ r$_n$} to reflect that
-        for each pair of parameters, the first one (\texttt{a$_i$}) is a vertical
-        argument, and the second one (\texttt{r$_i$}) is a vertical result \begin{tabbing}
+
+Clearly, the type definitions for three step layers are very similar to the type definitions for two step layers. However, because the number of parameters for the type depends on the number of steps, it is not possible to give one Haskell type synonym \texttt{Step}. We will have to settle for a general description of how to construct the type synonym. For a layer with $n$ layer functions, the type of \texttt{Step$_n$} has $2n$ parameters. The parameters are named \texttt{a$_1$ r$_1$ \dots ~a$_n$ r$_n$} to reflect that for each pair of parameters, the first one (\texttt{a$_i$}) is a vertical argument, and the second one (\texttt{r$_i$}) is a vertical result 
+
+\begin{tabbing}
 {\tt type St}\={\tt ep next a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = (a$_1$ -$>$  (r$_1$, next a$_2$ r$_2$ \dots ~a$_n$ r$_n$ a$_1$ r$_1$)) }
 \end{tabbing}
-\par The individual step data types are defined as:\par
+
+The individual step data types are defined as:
+
 {\tt newtype Step$_1$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_1$ \{step$_1$}\verb| :: |{\tt Step Step$_2$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}\\
 {\tt newtype Step$_2$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_2$ \{step$_2$}\verb| :: |{\tt Step Step$_3$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}\\
 \dots\\
 {\tt newtype Step$_n$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_n$ \{step$_n$}\verb| :: |{\tt Step Step$_1$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}
 
-\par Because no general \texttt{Step} type synonym is possible, an
-        implementor has to construct the appropriate \texttt{Step} type definition, as
-        well as the step data types. In a language with dependent types, such as
-        Cayenne~\cite{cayenne}, a general type \texttt{Step} could have
-        been defined.
+Because no general \texttt{Step} type synonym is possible, an implementor has to construct the appropriate \texttt{Step} type definition, as well as the step data types. In a language with dependent types, such as Cayenne~\cite{cayenne}, a general type \texttt{Step} could have been defined.
+
+
 \subsection{Derivation for \texttt{lift}}
 
-\par First we develop a meta combinator for the \texttt{lift} function.
-        Below is the code for \texttt{lift} for layers with two steps. This is the code
-        from section~\ref{sectdpp} in which a few variables have been
-        renamed to emphasize the data flow patterns instead of the meaning of the
-        individual steps. The local functions \texttt{presStep} and \texttt{transStep}
-        are renamed \texttt{step1} and \texttt{step2}. Furthermore, in
-        \texttt{presStep}, \texttt{state} is renamed to \texttt{horArgs}, and
-        \texttt{(mapping, state)} is renamed to \texttt{horRess}. And similarly, in
-        \texttt{transStep}, \texttt{(mapping, state)} is renamed to \texttt{horArgs}
-        and \texttt{state'} is renamed to \texttt{horRess}. Finally, also the vertical
-        parameters and results in both local functions are renamed to \texttt{vertArg}
-        and \texttt{vertRes}. Because the derivation will not affect the type, we do
-        not rename any type variables. The resulting function does not show its purpose
-        as clear as the original does, but it makes clear that the data flow in both
-        local functions is similar.\begin{small}\begin{verbatim}lift :: Simple state mapping doc pres gest upd ->
+First we develop a meta combinator for the \texttt{lift} function. Below is the code for \texttt{lift} for layers with two steps. This is the code from section~\ref{sectdpp} in which a few variables have been renamed to emphasize the data flow patterns instead of the meaning of the individual steps. The local functions \texttt{presStep} and \texttt{transStep} are renamed \texttt{step1} and \texttt{step2}. Furthermore, in \texttt{presStep}, \texttt{state} is renamed to \texttt{horArgs}, and \texttt{(mapping, state)} is renamed to \texttt{horRess}. And similarly, in \texttt{transStep}, \texttt{(mapping, state)} is renamed to \texttt{horArgs} and \texttt{state'} is renamed to \texttt{horRess}. Finally, also the vertical parameters and results in both local functions are renamed to \texttt{vertArg} and \texttt{vertRes}. Because the derivation will not affect the type, we do not rename any type variables. The resulting function does not show its purpose as clear as the original does, but it makes clear that the data flow in both local functions is similar.
+
+\begin{small}
+\begin{verbatim}
+lift :: Simple state mapping doc pres gest upd ->
         state -> Layer doc pres gest upd
 lift simple state = step1 state 
  where step1 horArgs = PresStep $ 
@@ -915,51 +672,62 @@ lift simple state = step1 state
                        in  (vertRes, step2 horRess)
        step2 horArgs = TransStep $
            \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, step1 horRess)\end{verbatim}\end{small}
+                       in  (vertRes, step1 horRess)
+\end{verbatim}
+\end{small}
 
-\par The definitions of the local functions \texttt{step1} and
-        \texttt{step2} contain mutually recursive references. We can take the mutual
-        recursion out of the definitions by supplying the next step as a parameter to
-        each function. 
-\par \begin{small}\begin{verbatim}lift simple state = (step1 (step2 (lift simple))) state 
+The definitions of the local functions \texttt{step1} and \texttt{step2} contain mutually recursive references. We can take the mutual recursion out of the definitions by supplying the next step as a parameter to each function. 
+
+\begin{small}
+\begin{verbatim}
+lift simple state = (step1 (step2 (lift simple))) state 
  where step1 next horArgs = PresStep $ 
            \vertArg -> let (vertRes, horRess) = present simple horArgs vertArg                                         
                        in  (vertRes, next horRess)
        step2 next horArgs = TransStep $
            \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, next horRess)\end{verbatim}\end{small}
+                       in  (vertRes, next horRess)
+\end{verbatim}
+\end{small}
 
-\par We can turn this into a more elegant definition by taking the
-        following steps. If we drop the \texttt{state} parameter on the lefthand and righthand sides of the first line, and rewrite
-        the function application as a composition, we get:\begin{small}\begin{verbatim}lift simple = (step1.step2) (lift simple)\end{verbatim}\end{small}
+We can turn this into a more elegant definition by taking the following steps. If we drop the \texttt{state} parameter on the lefthand and righthand sides of the first line, and rewrite the function application as a composition, we get:
 
-\par Because the result of \texttt{lift layer} is the function
-        \texttt{(step1.step2)} applied to this result, we can use the combinator
-        \texttt{fix}:\begin{small}\begin{verbatim}fix a = let fixa = a fixa
-        in  fixa\end{verbatim}\end{small}
+\begin{small}
+\begin{verbatim}
+lift simple = (step1.step2) (lift simple)
+\end{verbatim}
+\end{small}
 
-\par to capture the recursion pattern, yielding:\begin{small}\begin{verbatim}lift simple = fix $ step1 . step2 
+Because the result of \texttt{lift layer} is the function \texttt{(step1.step2)} applied to this result, we can use the combinator \texttt{fix}:
+
+\begin{small}
+\begin{verbatim}
+fix a = let fixa = a fixa
+        in  fixa
+\end{verbatim}
+\end{small}
+
+to capture the recursion pattern, yielding:
+
+\begin{small}
+\begin{verbatim}
+lift simple = fix $ step1 . step2 
  where step1 next horArgs = PresStep $ 
            \vertArg -> let (vertRes, horRess) = present simple horArgs vertArg                                         
                        in  (vertRes, next horRess)
        step2 next horArgs = TransStep $
            \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, next horRess)\end{verbatim}\end{small}
+                       in  (vertRes, next horRess)
+\end{verbatim}
+\end{small}
 
-\par Except for the applications of the two constructors \texttt{PresStep}
-        and \texttt{TransStep} and the layer functions \texttt{present'} and
-        \texttt{translate'}, the local functions are now equal. We eliminate the
-        constructors and the layer functions, by passing them as parameters
-        \texttt{pack} and \texttt{layerF} to the local functions.
-\par Because \texttt{step1} and \texttt{step2} are now the same function,
-        we give this function a new name: \texttt{liftStep}, which is the meta
-        combinator for building \texttt{lift} functions. Below is the new definition of
-        \texttt{lift} together with the definition of \texttt{liftStep}, which is not a
-        local function anymore. The \texttt{liftStep} below is not the final version of
-        the meta combinator. In Section~\ref{subsecttypeclass} we define
-        a type class that contains the pack function, so the final \texttt{liftStep}
-        does not get \texttt{pack} as a parameter and has a slightly different type
-        with a type constraint in it.\begin{small}\begin{verbatim}lift :: Simple state mapping doc pres gest upd ->
+Except for the applications of the two constructors \texttt{PresStep} and \texttt{TransStep} and the layer functions \texttt{present'} and \texttt{translate'}, the local functions are now equal. We eliminate the constructors and the layer functions, by passing them as parameters \texttt{pack} and \texttt{layerF} to the local functions.
+
+Because \texttt{step1} and \texttt{step2} are now the same function, we give this function a new name: \texttt{liftStep}, which is the meta combinator for building \texttt{lift} functions. Below is the new definition of \texttt{lift} together with the definition of \texttt{liftStep}, which is not a local function anymore. The \texttt{liftStep} below is not the final version of the meta combinator. In Section~\ref{subsecttypeclass} we define a type class that contains the pack function, so the final \texttt{liftStep} does not get \texttt{pack} as a parameter and has a slightly different type with a type constraint in it.
+
+\begin{small}
+\begin{verbatim}
+lift :: Simple state mapping doc pres gest upd ->
         state -> Layer doc pres gest upd
 lift simple = 
   fix $ liftStep PresStep (present simple) 
@@ -971,57 +739,51 @@ liftStep :: ((vArg -> (vRes, nStep)) -> step) ->
             hArgs -> step
 liftStep pack layerF next horArgs = pack $
     \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg
-                in  (vertRes, next horRess)\end{verbatim}\end{small}
+                in  (vertRes, next horRess)
+\end{verbatim}
+\end{small}
 
-\par \bigskip {\bf \texttt{liftStep} works for layers with arbitrary
-        numbers of steps: }The definition of \texttt{liftStep} does not depend on
-        the number of steps of a layer, even though the derivation starts with the
-        definition of \texttt{lift} for layers with two layer functions. In the case of
-        $n$ steps, there will be $n$ local step functions, each one containing a
-        reference to the next, except for the last one, which contains a reference to
-        the first function. 
-\par We can now perform the same steps to the $n$-step \texttt{lift} as we
-        did for the 2-step \texttt{lift}. We only sketch the process here. After
-        renaming the variables, the explicit recursion is removed from the local
-        function definitions, by passing the next step as a parameter, and
-        \texttt{lift} will look like:\begin{tabbing}
+
+\bigskip {\bf \texttt{liftStep} works for layers with arbitrary numbers of steps: }The definition of \texttt{liftStep} does not depend on the number of steps of a layer, even though the derivation starts with the definition of \texttt{lift} for layers with two layer functions. In the case of $n$ steps, there will be $n$ local step functions, each one containing a reference to the next, except for the last one, which contains a reference to the first function. 
+
+We can now perform the same steps to the $n$-step \texttt{lift} as we did for the 2-step \texttt{lift}. We only sketch the process here. After renaming the variables, the explicit recursion is removed from the local function definitions, by passing the next step as a parameter, and \texttt{lift} will look like:
+
+\begin{tabbing}
 {\tt l}\={\tt ift layer state = (step$_1$ (step$_2$ \dots ~(step$_n$ (lift layer))\dots)) state}\\
 \>{\tt where \dots}
 \end{tabbing}
-\par which can be written as a composition:\begin{tabbing}
+
+which can be written as a composition:
+
+\begin{tabbing}
 {\tt l}\={\tt ift layer = (step$_1$ \dots ~step$_n$) lift layer}\\
 \>{\tt where \dots}
 \end{tabbing}
-\par And, after using \texttt{fix} to capture the recursion, becomes:\begin{tabbing}
+
+And, after using \texttt{fix} to capture the recursion, becomes:
+
+\begin{tabbing}
 {\tt l}\={\tt ift layer = fix \$ step$_1$ \dots ~step$_n$}\\
 \>{\tt where \dots}
 \end{tabbing}
-\par Finally, the constructor and layer functions have to be passed as
-        parameters to the local step functions and the calls to the local functions
-        become calls to \texttt{liftStep}. If we assume that the $n$ constructors are
-        \texttt{Step$_i$} and the $n$ layer functions are \texttt{layerFunction$_i$},
-        then the final definition of \texttt{lift} is:\begin{tabbing}
+
+Finally, the constructor and layer functions have to be passed as parameters to the local step functions and the calls to the local functions become calls to \texttt{liftStep}. If we assume that the $n$ constructors are \texttt{Step$_i$} and the $n$ layer functions are \texttt{layerFunction$_i$}, then the final definition of \texttt{lift} is:\begin{tabbing}
 {\tt li}\={\tt ft l}\={\tt ayer= }\\
 \>{\tt fix \$ liftStep Step$_1$ (layerFunction$_1$ layer)}\\
 \>\>{\tt . \dots}\\ 
 \>\>\verb|. lift|{\tt Step Step$_n$ (layerFunction$_n$ layer)}
 \end{tabbing}
-\par The \texttt{liftStep} metacombinator can therefore be used to create
-        the \texttt{lift} combinator for a layer with an arbitrary number of layer
-        functions.
-\subsection{Derivation for \texttt{combine}}
-\label{subsubsectcombine}
-\par The derivation of the meta combinators for \texttt{combine} is largely
-        similar to the derivation for \texttt{lift}. We start with the original
-        definition of \texttt{combine} for layers with two steps (see
-        Section~\ref{sectdpp}), in which we have renamed some variables.
-        The two local functions are renamed to \texttt{step1} and \texttt{step2}. Both
-        \texttt{uprTrans} and \texttt{uprPres'} are renamed to \texttt{nextUpr}, and
-        both \texttt{lwrTrans} and \texttt{lwrPres'} to \texttt{nextLwr}. The names of
-        the vertical parameters and results in \texttt{presStep} (\texttt{low},
-        \texttt{med} and \texttt{high}) are already appropriate, so \texttt{elow},
-        \texttt{emed} and \texttt{ehigh} in \texttt{transStep} are also renamed to
-        \texttt{low}, \texttt{med} and \texttt{high}.\begin{small}\begin{verbatim}combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+
+The \texttt{liftStep} metacombinator can therefore be used to create the \texttt{lift} combinator for a layer with an arbitrary number of layer functions.
+
+
+\subsection{Derivation for \texttt{combine}} \label{subsubsectcombine}
+
+The derivation of the meta combinators for \texttt{combine} is largely similar to the derivation for \texttt{lift}. We start with the original definition of \texttt{combine} for layers with two steps (see Section~\ref{sectdpp}), in which we have renamed some variables. The two local functions are renamed to \texttt{step1} and \texttt{step2}. Both \texttt{uprTrans} and \texttt{uprPres'} are renamed to \texttt{nextUpr}, and both \texttt{lwrTrans} and \texttt{lwrPres'} to \texttt{nextLwr}. The names of the vertical parameters and results in \texttt{presStep} (\texttt{low}, \texttt{med} and \texttt{high}) are already appropriate, so \texttt{elow}, \texttt{emed} and \texttt{ehigh} in \texttt{transStep} are also renamed to \texttt{low}, \texttt{med} and \texttt{high}.
+
+\begin{small}
+\begin{verbatim}
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 combine = step1
  where step1 (PresStep upr) (PresStep lwr) = PresStep $
@@ -1031,10 +793,15 @@ combine = step1
        step2 (TransStep upr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
                         (high, nextUpr) = upr med
-                    in  (high, step1 nextUpr nextLwr)\end{verbatim}\end{small}
+                    in  (high, step1 nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par The explicit mutual recursion in the local functions is removed by
-        passing the next step as a parameter.\begin{small}\begin{verbatim}combine = step1 (step2 combine)
+The explicit mutual recursion in the local functions is removed by passing the next step as a parameter.
+
+\begin{small}
+\begin{verbatim}
+combine = step1 (step2 combine)
  where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
            \high -> let (med, nextUpr) = upr high
                         (low, nextLwr) = lwr med
@@ -1042,10 +809,15 @@ combine = step1
        step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
                         (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)\end{verbatim}\end{small}
+                    in  (high, nextStep nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par Analogously to \texttt{lift}, the \texttt{fix} combinator can be used
-        to abstract from the explicit recursion.\begin{small}\begin{verbatim}combine = fix $ step1 . step2
+Analogously to \texttt{lift}, the \texttt{fix} combinator can be used to abstract from the explicit recursion.
+
+\begin{small}
+\begin{verbatim}
+combine = fix $ step1 . step2
  where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
            \high -> let (med, nextUpr) = upr high
                         (low, nextLwr) = lwr med
@@ -1053,32 +825,19 @@ combine = step1
        step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
                         (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)\end{verbatim}\end{small}
+                    in  (high, nextStep nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par Because the constructors in the two local functions not only appear in
-        the righthand side, but also in the patterns of the lefthand side, it is not as
-        straightforward to factorize the constructors out of the definition. For the
-        righthand side occurrences, we can pass the constructor as an argument
-        \texttt{pack} to the local function, similar to what was done for
-        \texttt{lift}. The constructors also appear on the lefthand side of the local
-        functions. Because we cannot use a parameter for the pattern matching, we pass
-        a selector function \texttt{unpack}. Instead of pattern matching, the
-        \texttt{unpack} function is used to unpack the arguments of the local
-        functions.
-\par Unfortunately, the selector function is used on two arguments with
-        different types, whereas Haskell only allows monomorphic applications of
-        function arguments. Using a universally quantified type does not work, because
-        we have to quantify over all parameters in the types, and the number of
-        parameters is not determined. For now, the selector function is passed twice,
-        as \texttt{unpackL} and \texttt{unpackH}. The two unpack functions are used to
-        unpack the \texttt{upr} and \texttt{lwr} parameters. Together with the
-        constructor (the pack function), the unpack functions are put in a 3-tuple. In
-        the next section, we show how a more elegant approach that uses a type class
-        for the pack and unpack functions.
-\par We assume that the selector functions \texttt{presStep} and
-        \texttt{transStep} are defined by declaring the \texttt{PresStep} and
-        \texttt{TransStep} types as records, according to the method shown in
-        Section~\ref{subsecttypedef}.\begin{small}\begin{verbatim}combine = fix $ step1 (PresStep,presStep,presStep) 
+Because the constructors in the two local functions not only appear in the righthand side, but also in the patterns of the lefthand side, it is not as straightforward to factorize the constructors out of the definition. For the righthand side occurrences, we can pass the constructor as an argument \texttt{pack} to the local function, similar to what was done for \texttt{lift}. The constructors also appear on the lefthand side of the local functions. Because we cannot use a parameter for the pattern matching, we pass a selector function \texttt{unpack}. Instead of pattern matching, the \texttt{unpack} function is used to unpack the arguments of the local functions.
+
+Unfortunately, the selector function is used on two arguments with different types, whereas Haskell only allows monomorphic applications of function arguments. Using a universally quantified type does not work, because we have to quantify over all parameters in the types, and the number of parameters is not determined. For now, the selector function is passed twice, as \texttt{unpackL} and \texttt{unpackH}. The two unpack functions are used to unpack the \texttt{upr} and \texttt{lwr} parameters. Together with the constructor (the pack function), the unpack functions are put in a 3-tuple. In the next section, we show how a more elegant approach that uses a type class for the pack and unpack functions.
+
+We assume that the selector functions \texttt{presStep} and \texttt{transStep} are defined by declaring the \texttt{PresStep} and \texttt{TransStep} types as records, according to the method shown in Section~\ref{subsecttypedef}.
+
+\begin{small}
+\begin{verbatim}
+combine = fix $ step1 (PresStep,presStep,presStep) 
               . step2 (TransStep,transStep,transStep) 
  where step1 (pack, unpackU, unpackL) nextStep upr lwr = pack $
            \high -> let (med, nextUpr) = (unpackU upr) high
@@ -1087,14 +846,15 @@ combine = step1
        step2 (pack, unpackU, unpackL) nextStep upr lwr = pack $
            \low ->  let (med, nextLwr) = (unpackL lwr) low
                         (high, nextUpr) = (unpackU upr) med
-                    in  (high, nextStep nextUpr nextLwr)\end{verbatim}\end{small}
+                    in  (high, nextStep nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par Unlike in the case for \texttt{lift}, the two step functions are not
-        the same now, because the directions of the vertical parameters for
-        \texttt{step1} and \texttt{step2} are different. Therefore, instead of one meta
-        combinator, we get two: \texttt{combineStepUp} and \texttt{combineStepDown}.
-        Because all step specific information has been factorized out, the functions
-        can be used for arbitrary steps.\begin{small}\begin{verbatim}combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+Unlike in the case for \texttt{lift}, the two step functions are not the same now, because the directions of the vertical parameters for \texttt{step1} and \texttt{step2} are different. Therefore, instead of one meta combinator, we get two: \texttt{combineStepUp} and \texttt{combineStepDown}. Because all step specific information has been factorized out, the functions can be used for arbitrary steps.
+
+\begin{small}
+\begin{verbatim}
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 combine = fix $ combineStepDown (PresStep,presStep,presStep) 
                . combineStepUp (TransStep,transStep,transStep) 
@@ -1115,152 +875,120 @@ combineStepUp :: ( (l -> (h,nStepC)) -> stepC
 combineStepUp (pack, unpackU, unpackL) nextStep upr lwr = pack $
     \low -> let (med, nextLwr) = (unpackL lwr) low
                 (high, nextUpr) = (unpackU upr) med
-            in  (high, nextStep nextUpr nextLwr)\end{verbatim}\end{small}
+            in  (high, nextStep nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par Like \texttt{liftStep}, the meta combinators do not depend on the
-        number of steps, so they can be used to build \texttt{combine} for layers with
-        an arbitrary number of layer functions.
-\subsection{A type class for \texttt{pack} and \texttt{unpack}}
-\label{subsecttypeclass}
-\par The previous subsections define meta combinators for the functions
-        \texttt{lift} and \texttt{combine}. Because explicit constructor appearances
-        have been removed from the meta combinators, both functions have a function
-        argument that is used for packing the result, and \texttt{combine} has two
-        function arguments to unpack its two layer arguments. Although the unpack
-        function for both layer arguments is the same, it has to be passed twice
-        because the function is used on arguments of different type. In this section,
-        we construct a type class \texttt{Pack} that contains the pack and unpack
-        functions for the step data types. The type class eliminates the need for
-        explicitly passing the pack and unpack functions to the meta combinators.
-        Consequently, the unpack function does not need to be passed twice anymore.
-        
-\par First, we take a look at the types of the pack and unpack parameters
-        of the meta combinators. Because the types of the pack and unpack functions
-        have the same structure in each of the three combinators, it does not matter
-        which meta combinator we look at, exception that \texttt{liftStep} does not
-        have an unpack parameter. Therefore, we take a look at
-        \texttt{combineStepDown}:\begin{small}\begin{verbatim}combineStepDown :: ( (h -> (l,nStepC)) -> stepC 
+Like \texttt{liftStep}, the meta combinators do not depend on the number of steps, so they can be used to build \texttt{combine} for layers with an arbitrary number of layer functions.
+
+
+\subsection{A type class for \texttt{pack} and \texttt{unpack}} \label{subsecttypeclass}
+
+The previous subsections define meta combinators for the functions \texttt{lift} and \texttt{combine}. Because explicit constructor appearances have been removed from the meta combinators, both functions have a function argument that is used for packing the result, and \texttt{combine} has two function arguments to unpack its two layer arguments. Although the unpack function for both layer arguments is the same, it has to be passed twice because the function is used on arguments of different type. In this section, we construct a type class \texttt{Pack} that contains the pack and unpack functions for the step data types. The type class eliminates the need for explicitly passing the pack and unpack functions to the meta combinators. Consequently, the unpack function does not need to be passed twice anymore. 
+
+First, we take a look at the types of the pack and unpack parameters of the meta combinators. Because the types of the pack and unpack functions have the same structure in each of the three combinators, it does not matter which meta combinator we look at, exception that \texttt{liftStep} does not have an unpack parameter. Therefore, we take a look at \texttt{combineStepDown}:
+
+\begin{small}
+\begin{verbatim}
+combineStepDown :: ( (h -> (l,nStepC)) -> stepC 
                    , stepU -> h -> (m, nStepU)
                    , stepL -> m -> (l, nStepL)) -> 
                    (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
 combineStepDown (pack, unpackU, unpackL) nextStep upr lwr = pack $ ...
-\end{verbatim}\end{small}
 
-\par The type of \texttt{pack} is \texttt{(h -> (l, nStepC)) ->
-        stepC}. The result of the function (\texttt{stepC}) is a step type
-        (\texttt{PresStep} or \texttt{TransStep} in the \texttt{Simple'} case) and its
-        argument is a function from \texttt{h} to a tuple of \texttt{l} and the next
-        step value (\texttt{nStepC}). We rename the parameters in the type of
-        \texttt{pack} to the more general: \texttt{(arg -> (res, nStep)) ->
-        step}.
-\par For the unpack function, we only look at \texttt{unpackU}, since the
-        structure of both unpack functions is the same. The type of \texttt{unpackU} is
-        \texttt{stepU -> h -> (m,nStepU)}. The function takes a step value
-        (\texttt{stepU}) and returns a function from type \texttt{h} to a tuple of
-        \texttt{m} and the next step type (\texttt{nStepU}). Analogously to
-        \texttt{pack}, we rename the type variables: \texttt{unpack :: step -> arg ->
-        (res,nStep)}. 
-\par Thus, our first shot at a type class with \texttt{pack} and
-        \texttt{unpack} is:\begin{small}\begin{verbatim}class Pack step arg res nStep where
+\end{verbatim}
+\end{small}
+
+The type of \texttt{pack} is \texttt{(h -> (l, nStepC)) -> stepC}. The result of the function (\texttt{stepC}) is a step type (\texttt{PresStep} or \texttt{TransStep} in the \texttt{Simple'} case) and its argument is a function from \texttt{h} to a tuple of \texttt{l} and the next step value (\texttt{nStepC}). We rename the parameters in the type of \texttt{pack} to the more general: \texttt{(arg -> (res, nStep)) -> step}.
+
+For the unpack function, we only look at \texttt{unpackU}, since the structure of both unpack functions is the same. The type of \texttt{unpackU} is \texttt{stepU -> h -> (m,nStepU)}. The function takes a step value (\texttt{stepU}) and returns a function from type \texttt{h} to a tuple of \texttt{m} and the next step type (\texttt{nStepU}). Analogously to \texttt{pack}, we rename the type variables: \texttt{unpack :: step -> arg -> (res,nStep)}. 
+
+Thus, our first shot at a type class with \texttt{pack} and \texttt{unpack} is:
+
+\begin{small}
+\begin{verbatim}
+class Pack step arg res nStep where
   pack :: (arg -> (res, nStep)) -> step
-  unpack :: step -> arg -> (res, nStep)\end{verbatim}\end{small}
+  unpack :: step -> arg -> (res, nStep)
+\end{verbatim}
+\end{small}
 
-\par However, this definition is not complete yet. In order to see why, we
-        have to look at the new type of \texttt{combineStepDown}:\begin{small}\begin{verbatim}combineStepDown :: ( Pack stepC h l nStepC 
+However, this definition is not complete yet. In order to see why, we have to look at the new type of \texttt{combineStepDown}:
+
+\begin{small}
+\begin{verbatim}
+combineStepDown :: ( Pack stepC h l nStepC 
                    , Pack stepU h m nStepU
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC\end{verbatim}\end{small}
+                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
+\end{verbatim}
+\end{small}
 
-\par The type is ambiguous, because type variables \texttt{h}, \texttt{m}
-        and \texttt{l} appear in the constraint, but not in the actual type of the
-        function. The type inference algorithm cannot determine the values (which are
-        types) of \texttt{h}, \texttt{m} and \texttt{l} in an application of
-        \texttt{combineStepDown}. The problem only arises in the combine step meta
-        combinators, because in the type of \texttt{liftStep}, all variables in the
-        constraint appear in the type as well.
-\par We resolve the ambiguity by adding a functional dependency~\cite{fundep}~
-        \texttt{step -> arg res} between \texttt{step} and \texttt{arg} and
-        \texttt{res} to the class declaration.
-\par The meta combinators are used to build the \texttt{lift} and
-        \texttt{combine} combinators, and therefore the constraints in the types of the
-        meta combinators also have consequences for the types of the combinators. More
-        precisely, because in the combinator definition, a meta combinator is applied
-        to each step in the layer, for each step, constraints will appear in the type
-        of the combinators. However, the types of the combinators do not refer to these
-        intermediate steps, so the types are ambiguous. As an example, we can look at
-        the type of \texttt{lift} for \texttt{Simple}:\begin{small}\begin{verbatim}lift :: (Pack step doc pres nstep, Pack nstep gest upd step) =>
-        Simple state mapping doc pres gest upd -> state -> step\end{verbatim}\end{small}
+The type is ambiguous, because type variables \texttt{h}, \texttt{m} and \texttt{l} appear in the constraint, but not in the actual type of the function. The type inference algorithm cannot determine the values (which are types) of \texttt{h}, \texttt{m} and \texttt{l} in an application of \texttt{combineStepDown}. The problem only arises in the combine step meta combinators, because in the type of \texttt{liftStep}, all variables in the constraint appear in the type as well.
 
-\par The \texttt{Pack} constraints refer to \texttt{nstep}, which does not
-        occur in the type of the function. The ambiguity in the types can be resolved
-        by adding yet another functional dependency to the type class definition,
-        stating that the next step is uniquely determined by the current step: \texttt{step
-        -> nStep}. The final functional dependency is: \texttt{step -> arg res
-        nStep}. 
-\par It is straightforward to see that the functional dependencies hold.
-        Instances of \texttt{Pack} are always of the following form: (for a given type
-        constructor \texttt{TheStep} and its next step type \texttt{NextStep}).\par
+We resolve the ambiguity by adding a functional dependency~\cite{fundep}~ \texttt{step -> arg res} between \texttt{step} and \texttt{arg} and \texttt{res} to the class declaration.
+
+The meta combinators are used to build the \texttt{lift} and \texttt{combine} combinators, and therefore the constraints in the types of the meta combinators also have consequences for the types of the combinators. More precisely, because in the combinator definition, a meta combinator is applied to each step in the layer, for each step, constraints will appear in the type of the combinators. However, the types of the combinators do not refer to these intermediate steps, so the types are ambiguous. As an example, we can look at the type of \texttt{lift} for \texttt{Simple}:
+
+\begin{small}
+\begin{verbatim}
+lift :: (Pack step doc pres nstep, Pack nstep gest upd step) =>
+        Simple state mapping doc pres gest upd -> state -> step
+\end{verbatim}
+\end{small}
+
+The \texttt{Pack} constraints refer to \texttt{nstep}, which does not occur in the type of the function. The ambiguity in the types can be resolved by adding yet another functional dependency to the type class definition, stating that the next step is uniquely determined by the current step: \texttt{step -> nStep}. The final functional dependency is: \texttt{step -> arg res nStep}. 
+
+It is straightforward to see that the functional dependencies hold. Instances of \texttt{Pack} are always of the following form: (for a given type constructor \texttt{TheStep} and its next step type \texttt{NextStep}).
+
 {\tt instance Pack (TheStep a r \dots) a r (NextStep \dots~a r) where \dots}
 
-\par  The dependency states that given \texttt{(TheStep a b \dots)}, the
-        types \texttt{a}, \texttt{r} and \texttt{(NextStep \dots~ a r)} are uniquely
-        determined. For \texttt{a} and \texttt{r}, this is true because \texttt{a} and
-        \texttt{r} appear in \texttt{(TheStep a r \dots)}. Furthermore, because each
-        step has a unique next step, and this next step has the same type variables as
-        the step, the type \texttt{(NextStep \dots~a r)} is also determined by
-        \texttt{(TheStep a r \dots)}. Therefore, instances of \texttt{Pack} will never
-        conflict with the functional dependency.
-\par  The class definition becomes:\begin{small}\begin{verbatim}class Pack step arg res nStep | step -> arg res nStep where
-  pack :: (arg -> (res, nStep)) -> step
-  unpack :: step -> arg -> (res, nStep)\end{verbatim}\end{small}
+ The dependency states that given \texttt{(TheStep a b \dots)}, the types \texttt{a}, \texttt{r} and \texttt{(NextStep \dots~ a r)} are uniquely determined. For \texttt{a} and \texttt{r}, this is true because \texttt{a} and \texttt{r} appear in \texttt{(TheStep a r \dots)}. Furthermore, because each step has a unique next step, and this next step has the same type variables as the step, the type \texttt{(NextStep \dots~a r)} is also determined by \texttt{(TheStep a r \dots)}. Therefore, instances of \texttt{Pack} will never conflict with the functional dependency.
 
-\par With the use of the type class, the meta combinators change slightly.
-        We show the changes to the definition of \texttt{combineStepDown}. The other
-        meta combinators undergo similar changes and are shown in the next section.
-\par The \texttt{combineStepDown} function loses the 3-tuple parameter with
-        the pack and unpack functions, and \texttt{unpackL} and \texttt{unpackU} are
-        replaced by \texttt{unpack}. In addition, a type constraint is added to the
-        type.\begin{small}\begin{verbatim}combineStepDown :: ( Pack stepC h l nStepC 
+ The class definition becomes:
+
+\begin{small}
+\begin{verbatim}
+class Pack step arg res nStep | step -> arg res nStep where
+  pack :: (arg -> (res, nStep)) -> step
+  unpack :: step -> arg -> (res, nStep)
+\end{verbatim}
+\end{small}
+
+With the use of the type class, the meta combinators change slightly. We show the changes to the definition of \texttt{combineStepDown}. The other meta combinators undergo similar changes and are shown in the next section.
+
+The \texttt{combineStepDown} function loses the 3-tuple parameter with the pack and unpack functions, and \texttt{unpackL} and \texttt{unpackU} are replaced by \texttt{unpack}. In addition, a type constraint is added to the type.
+
+\begin{small}
+\begin{verbatim}
+combineStepDown :: ( Pack stepC h l nStepC 
                    , Pack stepU h m nStepU
                    , Pack stepL m l nStepL ) => 
                    (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
 combineStepDown nextStep upr lwr = pack $
     \high -> let (med, nextUpr) = (unpack upr) high
                  (low, nextLwr) = (unpack lwr) med
-             in  (low, nextStep nextUpr nextLwr)\end{verbatim}\end{small}
+             in  (low, nextStep nextUpr nextLwr)
+\end{verbatim}
+\end{small}
 
-\par From the type constraint, we can see how the type class approach
-        solves the double unpack parameter problem. Three \texttt{Pack} constraints are
-        present in the type. The last two state that parameter types \texttt{stepU} and
-        \texttt{stepL} are instances of \texttt{Pack}, and the first constraint states
-        that result type \texttt{stepC} is instance of \texttt{Pack}. From this we can
-        see that the first two constraints arise from the use of \texttt{unpack} on the
-        \texttt{upr} and \texttt{lwr} arguments (of types \texttt{stepU} and
-        \texttt{stepL}), whereas the last constraint comes from the use of
-        \texttt{pack}. In the implementation, this means that three dictionaries are
-        passed, and that the two occurrences of \texttt{unpack} come from different
-        dictionaries. In other words, the type system takes care of passing the double
-        unpack functions.
-\par The type class does have a small drawback. Due to the monomorphism
-        restriction, Haskell only allows a function to have an overloaded type if it is
-        defined with parameters on the lefthand side of the definition (ie. \texttt{f
-        x$_1$~}\dots \texttt{~x$_n$ =} \dots, instead of \texttt{f =
-        \symbol{92}x$_1$~}\dots \texttt{~x$_n$}\verb|-> |\dots), or if it has an
-        explicit type signature. Due to the type class, the inferred types of
-        \texttt{lift} and \texttt{combine} are overloaded. However, \texttt{combine}
-        has no parameters on the lefthand side of the definition, so it needs to be
-        rewritten, or it needs a type signature.
-\par Because the type of \texttt{combine} can be complex, as the order of
-        the parameters depends on the direction of the layer functions, it is
-        inconvenient to have to give the type signature. If a type signature in the
-        architecture source is desired, the compiler can be asked for the type, which
-        can then be pasted in the source.
-\par To eliminate the need for an explicit type signature for
-        \texttt{combine}, we explicitly add the upper and lower layer parameters to the
-        definition. For \texttt{Simple}, \texttt{combine} becomes: \begin{small}\begin{verbatim}combine upper lower = fix (combineStepDown . combineStepUp) upper lower\end{verbatim}\end{small}
+From the type constraint, we can see how the type class approach solves the double unpack parameter problem. Three \texttt{Pack} constraints are present in the type. The last two state that parameter types \texttt{stepU} and \texttt{stepL} are instances of \texttt{Pack}, and the first constraint states that result type \texttt{stepC} is instance of \texttt{Pack}. From this we can see that the first two constraints arise from the use of \texttt{unpack} on the \texttt{upr} and \texttt{lwr} arguments (of types \texttt{stepU} and \texttt{stepL}), whereas the last constraint comes from the use of \texttt{pack}. In the implementation, this means that three dictionaries are passed, and that the two occurrences of \texttt{unpack} come from different dictionaries. In other words, the type system takes care of passing the double unpack functions.
 
-\par A more general description of the construction of \texttt{combine} is
-        given in the next section.
+The type class does have a small drawback. Due to the monomorphism restriction, Haskell only allows a function to have an overloaded type if it is defined with parameters on the lefthand side of the definition (ie. \texttt{f x$_1$~}\dots \texttt{~x$_n$ =} \dots, instead of \texttt{f = \symbol{92}x$_1$~}\dots \texttt{~x$_n$}\verb|-> |\dots), or if it has an explicit type signature. Due to the type class, the inferred types of \texttt{lift} and \texttt{combine} are overloaded. However, \texttt{combine} has no parameters on the lefthand side of the definition, so it needs to be rewritten, or it needs a type signature.
+
+Because the type of \texttt{combine} can be complex, as the order of the parameters depends on the direction of the layer functions, it is inconvenient to have to give the type signature. If a type signature in the architecture source is desired, the compiler can be asked for the type, which can then be pasted in the source.
+
+To eliminate the need for an explicit type signature for \texttt{combine}, we explicitly add the upper and lower layer parameters to the definition. For \texttt{Simple}, \texttt{combine} becomes: 
+
+\begin{small}
+\begin{verbatim}
+combine upper lower = fix (combineStepDown . combineStepUp) upper lower
+\end{verbatim}
+\end{small}
+
+A more general description of the construction of \texttt{combine} is given in the next section.
+
+
 \subsection{Final Library and Conclusions}
 
 \begin{figure}
@@ -1311,74 +1039,56 @@ combineStepUp nextStep upr lwr = pack $
 \end{small}
 \end{figure}
 
-\par Figure~\ref{metacombinators} contains the final
-        definitions of the meta combinators together with the \texttt{Pack} type class,
-        the \texttt{fix} combinator, and the \texttt{LayerFunction} type synonym. In
-        order to describe and implement an architecture, a number of definitions are
-        necessary that depend on the number of layer functions and hence cannot be
-        included in the library. We give a general description of these
-        definitions.
-\par \bigskip {\bf General use: }The general case that we consider
-        is of a layered architecture in which the layers have $n$ layer functions. The
-        record type \texttt{TheLayer} contains the layer functions. The type has a
-        number of type variables. The \texttt{h$_i$} variables are the types that
-        appear in the horizontal parameters of the layer, and the \texttt{a$_i$} and
-        \texttt{r$_i$} are the types of the vertical arguments and result. The
-        horizontal type variables need not be equal to the types of the horizontal
-        parameters in the layer. See for example the type \texttt{Simple}. It has two
-        horizontal type variables (\texttt{mapping} and \texttt{state}), but the
-        horizontal parameters in the layer are \texttt{state} and \texttt{(mapping,
-        state)}. As a result, the number of horizontal type variables ($m$) is not
-        necessarily equal to the number of layer functions ($n$), and the types of the
-        horizontal arguments and results in the \texttt{layerFunction} types below have
-        to be denoted with \texttt{(\dots)}.\begin{tabbing}
+Figure~\ref{metacombinators} contains the final definitions of the meta combinators together with the \texttt{Pack} type class, the \texttt{fix} combinator, and the \texttt{LayerFunction} type synonym. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
+
+
+\bigskip {\bf General use: }The general case that we consider is of a layered architecture in which the layers have $n$ layer functions. The record type \texttt{TheLayer} contains the layer functions. The type has a number of type variables. The \texttt{h$_i$} variables are the types that appear in the horizontal parameters of the layer, and the \texttt{a$_i$} and \texttt{r$_i$} are the types of the vertical arguments and result. The horizontal type variables need not be equal to the types of the horizontal parameters in the layer. See for example the type \texttt{Simple}. It has two horizontal type variables (\texttt{mapping} and \texttt{state}), but the horizontal parameters in the layer are \texttt{state} and \texttt{(mapping, state)}. As a result, the number of horizontal type variables ($m$) is not necessarily equal to the number of layer functions ($n$), and the types of the horizontal arguments and results in the \texttt{layerFunction} types below have to be denoted with \texttt{(\dots)}.
+
+\begin{tabbing}
 {\tt data Th}\={\tt eLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = }\\
 \> {\tt TheLayer~ \{~}\={\tt layerFunction$_1$}\verb| :: |{\tt LayerFunction (\dots) a$_1$ (\dots) r$_1$}\\
 \>\> {\tt \dots }\\
 \>\> {\tt layerFunction$_n$}\verb| :: |{\tt LayerFunction (\dots) a$_n$ (\dots) r$_n$ \}}\\
 \end{tabbing}
-\par First, we define the \texttt{Step} type synonym that captures the
-        explicit function type and rotation of parameters in the subsequent data
-        definitions:\begin{tabbing}
+
+First, we define the \texttt{Step} type synonym that captures the explicit function type and rotation of parameters in the subsequent data definitions:
+
+\begin{tabbing}
 {\tt type St}\={\tt ep next a$_1$ r$_1$ \dots~a$_n$ r$_n$ = (a$_1$ -> (r$_1$, next a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$))}
 \end{tabbing}
-\par Using \texttt{Step} the mutually recursive data definitions for each
-        of the steps are straightforward. Each definition \texttt{Step$_i$} contains a
-        reference to the next definition \texttt{Step$_{i+1}$}, except for
-        \texttt{Step$_n$}, which contains a reference to the first step:
-        \texttt{Step$_1$}. Note that write the type definition with the Haskell record
-        syntax to define the \texttt{step$_i$} selector functions.\par
+
+Using \texttt{Step} the mutually recursive data definitions for each of the steps are straightforward. Each definition \texttt{Step$_i$} contains a reference to the next definition \texttt{Step$_{i+1}$}, except for \texttt{Step$_n$}, which contains a reference to the first step: \texttt{Step$_1$}. Note that write the type definition with the Haskell record syntax to define the \texttt{step$_i$} selector functions.
+
 {\tt newtype Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_1$ \{step$_1$}\verb| :: |{\tt Step Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
 {\tt newtype Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_2$ \{step$_1$}\verb| :: |{\tt Step Step$_3$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
 \dots \\
 {\tt newtype Step$_n$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_n$ \{step$_1$}\verb| :: |{\tt Step Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}
-\par The type synonym \texttt{Layer} is introduced for the type
-        \texttt{Step$_1$}:\par
+
+The type synonym \texttt{Layer} is introduced for the type \texttt{Step$_1$}:
+
 {\tt type Layer a$_1$ \dots~a$_{2n}$ = Step$_1$ a$_1$ \dots~a$_{2n}$}
-\par All \texttt{Step$_i$} types are made instances of \texttt{Pack} with
-        $n$ instance declarations of the following form:\begin{tabbing}
+
+All \texttt{Step$_i$} types are made instances of \texttt{Pack} with $n$ instance declarations of the following form:
+
+\begin{tabbing}
 {\tt i}\={\tt nstance Step$_i$ (Step$_i$ a$_1$ r$_1$ \dots~a$_n$  r$_n$) a$_1$ r$_1$ (Step$_{i+1}$ a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$)}\\
 \> {\tt where }\={\tt pack = Step$_i$}\\
 \>\> {\tt unpack = step$_i$}
 \end{tabbing}
-\par The only thing left to do now, is to define the \texttt{lift} and
-        \texttt{combine} combinators. For the lift combinator, we need to apply
-        \texttt{liftStep} to each of the layer functions, compose the steps and apply
-        \texttt{fix} to the composition. \begin{tabbing}
+
+The only thing left to do now, is to define the \texttt{lift} and \texttt{combine} combinators. For the lift combinator, we need to apply \texttt{liftStep} to each of the layer functions, compose the steps and apply \texttt{fix} to the composition. 
+
+\begin{tabbing}
 {\tt lift}\verb| :: |{\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ -> Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
 {\tt li}\={\tt ft t}\={\tt heLayer = }\\
 \>{\tt fix \$ liftStep (layerFunction$_1$ theLayer)}\\
 \>\>{\tt \dots}\\ 
 \>\>\verb|. lift|{\tt Step (layerFunction$_n$ theLayer)}
 \end{tabbing}
-\par The \texttt{combine} combinator is a composition of either
-        \texttt{combineStepUp} or \texttt{combineStepDown} meta combinators to which
-        \texttt{fix} is applied. The choice of \texttt{combineStepUp} or
-        \texttt{combineStepDown} for a layer function is determined by the direction of
-        the vertical data flow in that layer. Note that the \texttt{upper} and
-        \texttt{lower} arguments are added because of the monomorphism restriction. The
-        type of combine cannot be given in a general definition and is explained
-        below.\begin{tabbing}
+
+The \texttt{combine} combinator is a composition of either \texttt{combineStepUp} or \texttt{combineStepDown} meta combinators to which \texttt{fix} is applied. The choice of \texttt{combineStepUp} or \texttt{combineStepDown} for a layer function is determined by the direction of the vertical data flow in that layer. Note that the \texttt{upper} and \texttt{lower} arguments are added because of the monomorphism restriction. The type of combine cannot be given in a general definition and is explained below.
+
+\begin{tabbing}
 {\tt combine}\verb| :: |{\tt Layer \dots}\verb| -> |{\tt Layer \dots}\verb| -> |{\tt Layer \dots }\\
 {\tt co}\={\tt mbin}\={\tt e upper lower = }\\
 \>{\tt fix ( combineStep$<$Up$/$Down$>$}\\
@@ -1386,97 +1096,92 @@ combineStepUp nextStep upr lwr = pack $
 \>\>\verb|. combine|{\tt Step$<$Up$/$Down$>$}\\
 \>\>{\tt ) upper lower}
 \end{tabbing}
-\par A general type definition of combine cannot be given, because the
-        order of the type variables depends on the direction of the layer functions.
-        For each pair of type variables, a$_i$ and r$_i$ in the \texttt{Layer \dots~a$_i$
-        r$_i$ \dots} types of the two arguments and the result, we have the
-        following dependency. If the $i$-th layer function is downward:\par
-{\tt Layer \dots~h m \dots}\verb| -> |{\tt Layer \dots~m l \dots}
-                \verb| -> |{\tt Layer \dots~h l \dots}
-\par And if the layer function is upward:\par
-{\tt Layer \dots~m h \dots}\verb| -> |{\tt Layer \dots~l m \dots}
-                \verb| -> |{\tt Layer \dots~l h \dots}
-\par However, instead of computing the type by hand, the compiler can be
-        asked for the type which can then be pasted in the source.
-\par This concludes the definitions that are necessary to be able to
-        describe an architecture. 
-\par \bigskip {\bf Simple editor:} As an example application of the
-        library, we give the definitions that are required for implementing the simple
-        editor architecture. Recall that the data type containing the layer functions
-        is:\begin{small}\begin{verbatim}data Simple state mapping doc pres gest upd =
+
+A general type definition of combine cannot be given, because the order of the type variables depends on the direction of the layer functions. For each pair of type variables, a$_i$ and r$_i$ in the \texttt{Layer \dots~a$_i$ r$_i$ \dots} types of the two arguments and the result, we have the following dependency. If the $i$-th layer function is downward:
+
+{\tt Layer \dots~h m \dots}\verb| -> |{\tt Layer \dots~m l \dots} \verb| -> |{\tt Layer \dots~h l \dots}
+
+And if the layer function is upward:
+
+{\tt Layer \dots~m h \dots}\verb| -> |{\tt Layer \dots~l m \dots} \verb| -> |{\tt Layer \dots~l h \dots}
+
+However, instead of computing the type by hand, the compiler can be asked for the type which can then be pasted in the source.
+
+This concludes the definitions that are necessary to be able to describe an architecture. 
+
+
+\bigskip {\bf Simple editor:} As an example application of the library, we give the definitions that are required for implementing the simple editor architecture. Recall that the data type containing the layer functions is:
+
+\begin{small}
+\begin{verbatim}
+data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction state doc (mapping, state) pres
               , translate :: LayerFunction (mapping, state) gest state upd
-              }\end{verbatim}\end{small}
+              }
+\end{verbatim}
+\end{small}
 
-\par The simple editor layer contains two layer functions, so we need to
-        define two step data types with corresponding \texttt{pack} and \texttt{unpack}
-        functions. First we define the \texttt{Step} type synonym and the step data
-        types. The layer has two layer functions, so the number of type variables is
-        four.\begin{small}\begin{verbatim}type Step next a b c d = (a ->(b, next c d a b))
+The simple editor layer contains two layer functions, so we need to define two step data types with corresponding \texttt{pack} and \texttt{unpack} functions. First we define the \texttt{Step} type synonym and the step data types. The layer has two layer functions, so the number of type variables is four.
+
+\begin{small}
+\begin{verbatim}
+type Step next a b c d = (a ->(b, next c d a b))
 
 newtype PresStep doc pres gest upd = 
             PresStep {presStep :: Step TransStep doc pres gest upd}
 newtype TransStep gest upd doc pres = 
-            TransStep {transStep :: Step PresStep gest upd doc pres}\end{verbatim}\end{small}
+            TransStep {transStep :: Step PresStep gest upd doc pres}
+\end{verbatim}
+\end{small}
 
-\par Each pair of steps must be an instance of \texttt{Pack}: \begin{small}\begin{verbatim}instance Pack (PresStep a b c d) a b (TransStep c d a b) where
+Each pair of steps must be an instance of \texttt{Pack}: 
+
+\begin{small}
+\begin{verbatim}
+instance Pack (PresStep a b c d) a b (TransStep c d a b) where
   pack = PresStep
   unpack = presStep
 
 instance Pack (TransStep a b c d) a b (PresStep c d a b) where
   pack = TransStep
-  unpack = transStep\end{verbatim}\end{small}
+  unpack = transStep
+\end{verbatim}
+\end{small}
 
-\par The definitions of \texttt{lift} and \texttt{combine} are now rather
-        trivial:\begin{small}\begin{verbatim}lift simple =
+The definitions of \texttt{lift} and \texttt{combine} are now rather trivial:
+
+\begin{small}
+\begin{verbatim}
+lift simple =
   fix $ liftStep (present simple) . liftStep (translate simple)
 
 combine = 
-  fix $ combineStepDown . combineStepUp\end{verbatim}\end{small}
+  fix $ combineStepDown . combineStepUp
+\end{verbatim}
+\end{small}
 
-\par The definitions of the \texttt{main} and \texttt{editLoop} functions
-        are the same as in Section~\ref{sectdpp} so they are not reproduced
-        here.
-\par  \bigskip {\bf Conclusions: }
-\par The simplicity of the definitions of the \texttt{lift} and
-        \texttt{combine} combinators leads to the question whether it is possible to
-        define generic \texttt{lift} and \texttt{combine} combinators with the use of a
-        type class that contains the step specific aspects. This would eliminate the
-        need to explicitly define the combinators. It would be sufficient to define the
-        step data types and make them instances of the type class. 
-\par Although it is possible to define the type class, it turns out not te
-        be very useful. The generic combinator takes an argument of a certain step type
-        and contains a recursive call to itself on the next step type. Because of this
-        recursive call, a type constraint on the step, for example that it is an
-        instance of \texttt{Wrap}, must also hold for the next step. But since the
-        recursive call generates a constraint for its next step too, the constraint
-        must also hold for the step after the next step, and so on. As a result, in the
-        type of the combinator we have to explicitly give the type constraints on each
-        of the step types. However, this means that the type of the combinator depends
-        on the number of steps, and we do not want to encode the number of steps in the
-        library. Therefore, we will use the simpler approach of constructing
-        \texttt{lift} and \texttt{combine} explicitly.
-\par The meta combinator library has the same advantages as the direct
-        parameter passing solution of Section~\ref{sectdpp}, but at the same
-        time, it is much easier to describe a specific architecture. The use of meta
-        combinators makes the data flow clearer and reduces the chance of errors in the
-        specification.
-\section{The Proxima editor}
-\label{sectproxima}
-\par The motivation for using Haskell to describe editor architectures has
-      come from the Proxima project~\cite{proxima}. Proxima is a
-      generic incremental XML editor, which is being developed at Utrecht University.
-      The editor is parameterized with a presentation sheet that specifies how a
-      document is presented. Furthermore, it is parameterized with a computation
-      sheet that specifies derived values, such as chapter numbers, or a table of
-      contents. A user can only see and edit the final presentation of the document.
-      Because the mapping of the document on the presentation is a stepwise process,
-      and hence the translation from edit commands on the presentation to updates on
-      the document as well, Proxima has a layered architecture.
+The definitions of the \texttt{main} and \texttt{editLoop} functions are the same as in Section~\ref{sectdpp} so they are not reproduced here.
+
+
+\bigskip {\bf Conclusions: }
+
+The simplicity of the definitions of the \texttt{lift} and \texttt{combine} combinators leads to the question whether it is possible to define generic \texttt{lift} and \texttt{combine} combinators with the use of a type class that contains the step specific aspects. This would eliminate the need to explicitly define the combinators. It would be sufficient to define the step data types and make them instances of the type class. 
+
+Although it is possible to define the type class, it turns out not te be very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \texttt{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \texttt{lift} and \texttt{combine} explicitly.
+
+The meta combinator library has the same advantages as the direct parameter passing solution of Section~\ref{sectdpp}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification.
+
+
+%									
+%									
+%									
+\section{The Proxima editor} \label{sectproxima}
+
+The motivation for using Haskell to describe editor architectures has come from the Proxima project~\cite{proxima}. Proxima is a generic incremental XML editor, which is being developed at Utrecht University. The editor is parameterized with a presentation sheet that specifies how a document is presented. Furthermore, it is parameterized with a computation sheet that specifies derived values, such as chapter numbers, or a table of contents. A user can only see and edit the final presentation of the document. Because the mapping of the document on the presentation is a stepwise process, and hence the translation from edit commands on the presentation to updates on the document as well, Proxima has a layered architecture.
+
 \begin{figure}
 \begin{small}
 \begin{center}
-\par
 \begin{small}
 \begin{tabular}{c}
 {\footnotesize Document}\vspace{1ex}\\
@@ -1494,45 +1199,21 @@ combine =
 \end{small}
 \end{figure}
 
-\par Figure~\ref{proxlayers} schematically shows the layers of
-      Proxima. The figure shows the layers (surrounded by rectangles) as well as the
-      data values that arise in the process of mapping of the document on the
-      presentation. Edit actions and incremental updates are not shown in the
-      figure.
-\par The {\em document} at the top of the architecture is mapped on the
-      {\em rendering} at the bottom, which is shown to the user. The
-      {\em evaluator} takes the document and a computation sheet and produces the
-      {\em enriched document}, which is the document together with all derived
-      values. Similarly, the {\em presenter} takes the enriched document together
-      with a presentation sheet, and computes the {\em abstract presentation}.
-      Until this point, the presentation does not contain any absolute layout; all
-      elements in the presentation are positioned relative to each other and do not
-      yet have an absolute size.
-\par The absolute coordinates are computed by the {\em arranger}. It maps
-      the abstract presentation on an {\em arrangement}, which is a absolute
-      positioning of all elements of the presentation. The arranger also takes care
-      of hyphenation, line and page breaking. Finally, the arrangement is rendered as
-      a bitmap by the {\em renderer}.
-\par A prototype of the Proxima editor has been implemented with the
-      architecture combinators of the previous section. The module that contains the
-      architecture description is an actual part of the implementation of the
-      prototype.
-\section{Conclusions}
-\label{secthaskellconclusions}
-\par The combinators presented in this paper make it possible to specify
-      layered editor architectures in a concise and transparent way. With a small
-      number of definitions, a layered architecture can be described. The combinators
-      have been tested with an actual architecture and have been heap profiled to
-      ensure that no memory leaks are present.
-\par Furthermore, because the architecture description language is embedded
-      in the implementation language, the architecture of a system forms part of the
-      implementation of the system. No translations from the ADL to the
-      implementation language is required, and the implementation is guaranteed to
-      comply with the architecture.
-\par The combinator language in this paper is tailored to a specific kind of
-      architectures: those of layered editors. Although we use the term editor in a
-      broad sense, also including spread-sheets, e-mail agents, etc., further
-      research should explore the possibilities of using Haskell to describe other
-      kinds of architectures. Another area of research concerns the dynamic aspects
-      of the architecture: how can constraints and invariants on the data be
-      described and, if possible, verified?
+Figure~\ref{proxlayers} schematically shows the layers of Proxima. The figure shows the layers (surrounded by rectangles) as well as the data values that arise in the process of mapping of the document on the presentation. Edit actions and incremental updates are not shown in the figure.
+
+The {\em document} at the top of the architecture is mapped on the {\em rendering} at the bottom, which is shown to the user. The {\em evaluator} takes the document and a computation sheet and produces the {\em enriched document}, which is the document together with all derived values. Similarly, the {\em presenter} takes the enriched document together with a presentation sheet, and computes the {\em abstract presentation}. Until this point, the presentation does not contain any absolute layout; all elements in the presentation are positioned relative to each other and do not yet have an absolute size.
+
+The absolute coordinates are computed by the {\em arranger}. It maps the abstract presentation on an {\em arrangement}, which is a absolute positioning of all elements of the presentation. The arranger also takes care of hyphenation, line and page breaking. Finally, the arrangement is rendered as a bitmap by the {\em renderer}.
+
+A prototype of the Proxima editor has been implemented with the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
+
+%									
+%									
+%									
+\section{Conclusions} \label{secthaskellconclusions}
+
+The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way. With a small number of definitions, a layered architecture can be described. The combinators have been tested with an actual architecture and have been heap profiled to ensure that no memory leaks are present.
+
+Furthermore, because the architecture description language is embedded in the implementation language, the architecture of a system forms part of the implementation of the system. No translations from the ADL to the implementation language is required, and the implementation is guaranteed to comply with the architecture.
+
+The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spread-sheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns the dynamic aspects of the architecture: how can constraints and invariants on the data be described and, if possible, verified?
