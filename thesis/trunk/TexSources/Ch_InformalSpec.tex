@@ -1,0 +1,682 @@
+\chapter{One Layer}
+\label{chap:informalSpec}
+
+{\em *** Version: \today~ ***}
+
+%reorganizing Chapter 5
+
+Introduction
+
+Proxima is levels with layers in between.
+Here we specify the types of the levels, and what functions between them.
+
+The defs hold for all layers and levels, although some special cases.
+
+Renderer is implemented as tree, but
+
+\section{5.1 Defs?}
+Level, Layer
+
+\section{5.2 The Presentation and Interpretation invariants}
+
+\section{5.3 Upward and downward mappings at one layer}
+ Info on nature of the mappings between two levels
+   \subsection{3.1 The presentation mapping}
+   \subsection{3.2 The interpretation mapping}
+   \subsection{3.3 Duplicates in presentation}
+    does this belong here?
+    
+\section{5.4 Extra state}
+ say some things about level. It consists of several parts. 
+ 
+   \subsection{4.1 Extra state in presentation and interpretation direction}
+      
+   \subsection{4.2 One level has two kinds of extra state}
+      SPEC 1: LEVELs
+   \subsection{4.3 Mapping information}
+      SPEC Final: LEVELs
+
+\section{5.5 Maintaining the presentation invariant during editing}
+                   Specification of a single layer
+   \subsection{5.1 Presentation and interpretation sheets}
+      SPEC 1: Layer
+   \subsection{5.2 Maintaining extra state}
+                           Specification with extra state?
+      SPEC 2: Layer
+   \subsection{5.3 Safety of extra state}
+   \subsection{5.4 Conclusions}
+
+\section{5.6 Incrementality}
+   \subsection{6.1 From a mapping between levels to a mapping between edit
+operations}
+   \subsection{6.2 Shorthand notation for level updates}
+   \subsection{6.3 Maintaining the presentation invariant}
+                  Final specification
+        SPEC Final: Layer
+\section{5.7 Conclusions}
+
+
+
+
+
+
+
+
+
+
+\bc
+Edit is overloaded, is this okay?
+
+
+?? mention that in the process of refinement, only the last step makes sense? Direct/indirect edit ops etc. from previous chapters is not made here, and breaks invariants. Will (hopefully) be fixed in next chapter.
+
+
+Duplications somewhere else? Only in evaluator.
+mapping toc, two arrows, one to each group
+be clear on when mapping is required. Only if lower has ls. back only if partial pres?
+
+
+
+TODO
+check super & subscripts in figures and text: h/high h,intr or h_intr, etc.
+
+SOMEWHERE: mappings important for extra state, but also for editing on several levels. (is this really true?)
+
+MAPPING INFO INCONSISTENCY: figure out how to express that two cycles are needed to restore it.
+                                                  %is probably related to edit ops starting at higher level
+ALSO ALL IS ON TREES, for other things, eg, sum of leafs, it does not work, do it yourself
+EXTRA STATE, also tree ordering? precedence op tree -> non ordered op tree?
+SOMEWHERE, explain why this is all necessary, refer to Editing Chapter
+
+
+***EXTRA STATE is based on invariant mapping, however, implemented mapping is from level to level
+***EXTRA STATE is only possible when inc. because lev, cannot be derived, or maybe only store extra?
+
+** SOMEWHERE. pres is typically just for viewing: no big problem when destroyed
+** intr is more essential. bigger problem when destroyed.
+** guarantee no loss, so only limited edit func. on toc.
+
+interpretation is bit strange as edit ops can be on higher level
+* could this also be the case with presentation?
+
+
+!!!!!!!!!
+MAYBE we want to make Present and Interpret the intended and specified mappings, 
+without extra stuff and mappings, then the editor has to implement the incremental ones
+ and mapping preserving things, so the result is that Present and Interpret hold.
+- this is what we do now
+
+!however, in that case Present.Interpret will not be id if Present is ambiguous, or 
+has extra state. But maybe we don't care and only require the implementation to be id.
+
+!what about sheets? 
+
+SOMEWHERE: FOCUS more formally (if included then add forward refs to edit model chapter)
+
+
+IMPL: mapping downward, how to store in doc? Now datatype changes when pres is modified
+
+\ec
+
+
+%* explain edit steps? Before fitting it all together, we first build one layer
+
+In the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), each layer maintains invariants between two adjacent levels. When either the higher or the lower level is changed, the other adjacent level is updated apropriately. The process of updating the levels is largely symmetrical for both directions.
+
+This chapter discusses the invariants that are maintained between two adjacent levels from the perspective of a single layer. Furthermore, it specifies the additional information necessary for computing the updates that restore the invariants. The invariants given in this chapter hold for any layer in the Proxima system, although several layers will be simpler than the generic layer presented here.
+
+Besides the abstract invariants, we also present a specification of the concrete functions that need to implemented in order to maintain the layer invariants. The single layer specification serves as a basis for the specification of an entire editor in the next chapter, when the layers are connected.
+
+
+% based on a mapping between levels
+% add sheets, add extra and add incrementality
+
+\note{somewhere: Stress that mappings are not needed when for subtrees for which the lower level is not editable}
+\note{somewhere: Stress that it's only an architecture. Safety, impl. etc is left to layer. Future research (Pierce?)}
+%rather than safe toy, complete arch for many ed's Safety and patterns need to be researched
+
+\bc
+Where say that mapping back is only when we need automatic editing: is it only important for duplicates? It seems to be important for 2:1 presentations as well.  In some complicated cases, the mapping back cannot be spec'd if mapping back is does not work, it means that lower edit cannot be handled, and is forbidden. However, we always have the higher level edit left.
+\ec
+
+
+%																
+%																
+%																
+\section{Defs?}
+
+some defs + what we are going to do.
+
+Relation to rest of proxima
+
+Level
+
+Layer
+
+
+%																
+%																
+%																
+\section{The Presentation and Interpretation invariants}
+
+% will become more a computation order
+
+Because in this chapter we only look at a single layer, there are only two data levels to take into account: a higher level ($\level_{H} :: \Level_{H}$) and a lower level ($\level_{L} :: \Level_{L}$). The two levels are related by two invariants: the {\em presentation invariant} and the {\em interpretation invariant}. 
+
+The presentation invariant is satisfied if and only if the lower level is a correct presentation of the higher level. The invariant is expressed using an abstract function 
+$\Present ::  \Level_{H} \rightarrow \Level_{L}$.
+
+\begin{small}\begin{math}
+\text{\bf Presentation invariant:~~~} \level_{L} = \Present~\level_{H}\\
+\end{math}\end{small}
+
+Similarly, the interpretation invariant is satisfied if and only if the higher level is a correct interpretation of the lower level. The interpretation invariant is expressed with a function 
+$\Interpret ::  \Level_{L} \rightarrow \Level_{H}$.
+
+\begin{small}\begin{math}
+\text{\bf Interpretation invariant:~~~} \level_{H} = \Interpret~\level_{L}\\
+\end{math}\end{small}
+
+$\Present$ and $\Interpret$ are not actual functions that can be evaluated, but abstract concepts used to express a property of two levels. The functions are used to specify the behavior of a layer.
+Strictly speaking, $\Present$ and $\Interpret$ are not even functions but relations, since a higher level may have several correct presentations, and a lower level may have several correct interpretations. However, this occurs only if a level has extra state, as will be explained in Section~\ref{sect:extraState}.
+
+Because we only look at one layer in this chapter (ie. the layer between $\Level_{H}$ and $\Level_{L}$), we need two more functions to refer to the behavior of the layers below this layer, as well as the layers above. For lower layers, the function $\Edit :: \Level_{L} \rightarrow \Level_{L}$ denotes an update on $\Level_{L}$ by the lower layers. For representing updates on the higher level, we use 
+$\Transform :: \Level_{H} \rightarrow \Level_{H}$. In the next chapter, when layers are connected, $\Edit$ and $\Transform$ become superfluous.
+
+Figure~\ref{layerEditProcess} shows how the invariants are used to specify the data level updates that occur in a single edit step. On the left-hand side are the levels and layers of Proxima, during one edit step. One of the layers is shown separately on the right. 
+
+The precondition before the edit operation takes place is that the lower level is a correct presentation of the higher level, that is $\level_{L} = \Present~\level_{H}$. In the levels below, an edit operation takes place, which results in an updated lower level: $\level'_{L}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the interpretation invariant:
+$\level'_{H} = \Interpret~\level'_{L}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $\level''_{H}$. Finally, the postcondition is established by updating the lower level to $\level''_{L}$ for which 
+$\level''_{L} = \Present~\level''_{H}$ holds. 
+
+The successive updates on the levels can be expressed with equations:
+
+\begin{small}\begin{math}
+\level_{L} = \Present~\level_{H}	\hfill \text{\{Precondition\}}\\
+\level'_{L} = \Edit~\level_{L}		\hfill \text{\{User edit\}}\\
+\level'_{H} = \Interpret~\level'_{L}	\hfill \text{\{Intermediate condition\}}\\
+\level''_{H} = \Transform~\level'_{H}\hfill \text{\{Higher layer update\}}\\
+\level''_{L} = \Present~\level''_{H}	\hfill \text{\{Postcondition\}}\\
+\end{math}\end{small}
+
+% can we express when this happens with a condition? pres .. /= pres .. oid?
+The reason why $\level'_{H}$ is not immediately presented, is that it first has to be processed by the higher layers, just as $\level'_{L}$ is processed by this layer. The final value $\level''_{H}$ may be equal to $\level'_{H}$, but certainly does not have to be. Take an enriched document that contains a list of numbers together with the sum of the numbers. When one of the numbers is edited at the presentation level, the new enriched document that results from parsing ($\level'_{H}$) is a list of numbers together with a sum value that is most likely to be incorrect. In order to compute the a sum value, the enriched document needs to be passed on to the reducer and evaluator, resulting in a final enriched document ($\level''_{H}$) that reflects a correct sum.
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/layer.eps, height=1.7in}
+\end{center}\caption{An edit step on one level.}\label{layerEditProcess} 
+\end{center}
+\end{small}
+\end{figure}
+
+% why two:
+We use two invariants instead of one, to make it possible to describe the intermediate state in which changes have not been fully propagated upwards and been taken into full account. Consider an editor in which an enriched document node for a product expression (\verb|Product (Int 1) (Int 2)|) is presented as a list of presentation level tokens, colored according to the syntax. The integer values are presented in black, and the operator in green. If we denote the colors between braces, the presentation is \verb|["1" {black}, "*" {green}, "2" {black}]|. Because the presentation level is a correct presentation of the document level, the presentation invariant is satisfied. But now consider a list of tokens typed by the user, which do not have the correct coloring: \verb|["1" {black}, "*" {black}, "2" {black}]|. If we use a single invariant, then expressing that \verb|Product (Int 1) (Int 2)| is an appropriate interpretation of the uncolored tokens list, also implies that the uncolored tokens are a correct presentation of the product expression. It is no longer possible to express that the colored presentation is a correct presentation of the product, whereas the uncolored presentation is not. \note{are we saying that with one invariant, pres is inverse of intr?}
+
+\bc
+\note{mention that these things need to be each other's inverse}
+******** NOT TRUE, this will appear somewhere more downward, probably in ES section
+The functions $\Present$ and $\Interpret$ are closely related, but in contrast to what the types might suggest, the functions are in general not each others inverse. Because interpreting a presented document should not change the document, we do have: 
+
+\begin{small}\begin{math}
+\Interpret \oo \Present = id_{H}
+\end{math}\end{small}
+
+\note{what about ambiguity?}
+
+However, the reverse ($\Present \oo \Interpret = id_{L}$) does not necessarily hold. The condition implies that an edited lower level does not change when it is interpreted and presented \note{also say that higher layers should not change it?}, which is not always true. The syntax coloring example provides a case in which it does not hold; if an uncolored presentation is interpreted and then presented, the result is a colored presentation. 
+\note{pres is injective, and intr isn't?}
+\ec
+
+%summary
+Summarizing, the {\em Presentation} invariant specifies that two levels are in a final state, in which the lower level is a correct presentation of the higher. When the lower level is updated, the {\em Interpretation} invariant specifies a correct new higher level, which is passed on to the higher layers. From the higher layers, we get a final value for the higher level (for this edit step), for which a correct final lower level is specified by the {\em Presentation} invariant. The layer in between each pair of levels takes care of maintaining the invariants by invoking functions that compute level updates that reestablish the presentation and interpretation invariants.
+
+\note{say something about Interpret.Present here as well?}
+
+\bc
+?present~sheet~.~interpret~sheet = id_{H}\\
+
+OTHER EXAMPLE?: Apart from the syntax coloring example, the problem also arises when for example a textual arrow 
+\verb|"->"| is presented as a $\rightarrow$. 
+
+Vice versa? Fix by remembering extra?
+ layer shortcutting can now be expressed by only letting the lower pres invariants hold
+
+ -explain that in incremental, present and interpret cannot be used instead of Present and Interpret
+ -how does this relate to inc with diff etc. maybe that can be expressed nicely with Present
+ (or even present, then Present will be superfluous.)
+
+* does   intr.pres = id hold for a layer? pres.intr never needs to hold due to syntax coloring, normalization etc., but also because Chess board is not a presentation of ChessBoard   
+* intr.pres = id? then each pres has unique doc. Is this true? Can't doc variants be presented as same thing?
+   present( interpret uncolored ) = colored, so present.interpret /= id
+   interpret ( present ) = id? if so, what if two docs are presented on the same pres?
+ it seems true, interpret.present cycles should not alter the doc. In case of ambiguity, the system should
+ take care of conservative behavior. On an edit, the doc may change, but that's not a (interpret.present) cycle
+
+****** When this is figured out, update sheet paragraph
+\ec
+
+
+%																
+\section{Upward and downward mappings at one layer}\label{mappingsInLayer}
+
+% mapping is relation levelH levelL but each two levels express a mapping between nodes.
+
+On presentation and interpretation, elements in one data level are mapped onto elements in another level. Hence, when either the presentation or the interpretation invariant holds between two levels, we also have a mapping between the tree nodes of these levels. 
+
+Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. The dotted arrows denote on which lower level nodes a higher level node is mapped and vice versa. To reduce the number of arrows in the figure, the lower level nodes are grouped.
+
+\bc The presentation and interpretation invariants are expressed using two functions\note{incorrect:relations}: $\Present$ and $\Interpret$. The functions are of type $\Level_i \rightarrow \Level_j$ (where $j = i+1$ or
+$j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} 
+\ec
+
+By mapping between tree nodes, we mean a mapping that relates only the nodes and not the subtrees rooted at theses nodes. We can see this in Figure~\ref{nodeMapping}, by the fact that a child of a lower level node is not necessarily inside the same dotted ellipse as its parent. \note{also say that higher level child {\em cannot} be in same ellipse?}
+
+
+A difference between the presentation and interpretation mappings, is that the presentation of a higher level node may consist of several lower level nodes, whereas the interpretation of a lower level node may consist of at most one higher level node. This is why the nodes on the right side (the lower level) are grouped together with dotted ellipses, whereas the nodes on the left side are not. The reason for the distinction is that 
+\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+DISCUSS: is this restriction necessary? Or could we have n:m mappings?
+% restriction is on presentation. pres is like a fold
+% iets algemener verhaaltje hier. over dat het wel kan, maar dat de
+% automatische dingen (focus etc.) dan weg zijn
+
+AG automatically does it, but do we need to enforce? What about focus, is that the reason?
+Parser makes it hard to do n:m reuse. So implementation suggests the 1:n. Maybe lift when we know how. For eval layer might be possible already. Right now only one is responsible.  Only that one can be reused and therefore may have ES (color example, only string is reused). IntExp Int example, IntExp no pres elts, so no ES. (bit different again, since Int is entire presentation, unlike String Color example) 
+**
+\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+
+\bc
+Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, this is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
+\ec
+
+\bc
+When regarded as relating tree nodes, a mapping can express an $n:m$ relation between the nodes of the higher and the lower levels. However, when regarded as relating levels, a mapping is always a function (ie. an $n:1$ relation). Thus, $\Present$ and $\Interpret$ are functions rather than relations.
+\note{WITH ES, they are relations!}
+\ec
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/mapping.eps, width=2in}
+\end{center}
+\caption{A mapping between the nodes of two levels.}\label{nodeMapping} 
+\end{center}
+\end{figure}
+
+
+
+%																
+\subsection{The presentation mapping}
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/presentationEh.eps, width=80mm}
+%\begin{verbatim}
+%                  ..
+%                    \
+%..                   EL0
+%  \                 ELEL.
+%   EH       ->     EL..EL.
+%  / \             EL....EL. 
+% C...C           EL......EL.
+%                EL/\EL.EL/\EL.
+%                 /__\   /__\
+%                    
+%\end{verbatim}
+\end{center}
+\caption{The presentation of element $E_H$.}\label{elementPresentation} 
+\end{center}
+\end{figure}
+
+First we take a closer look at the downward, or presentation, direction. $\Present$ relates each element of the higher level onto zero or more lower level elements, forming zero or more subtrees with holes. \note{is there a name for 'tree with holes'? eg. 'tree segment'?} Figure~\ref{elementPresentation} schematically shows the presentation of a node ($E_H$) in the higher level. $E_H$ has $n$ children ($C_{H,0\dots n-1}$). The presentation of $E_H$ is a number of trees (although usually just one) that may consist of several nodes. In the figure, the first tree is shown in more detail. It consists of $m$ nodes ($E_{L,0\dots m-1}$), is rooted at $E_{L,0}$. 
+
+The $C_{L,0}$, \dots, $C_{L,l-1}$ subtrees in the lower level tree are not part of the presentation of $E_H$. Typically, these are the presentations of the children of $E_H$, but in general they can be (part of) the presentation of any element in the higher level. Alternatively, if a subtree is not a presentation of any higher level element, it is part of the extra state of the lower level, something that will be explained in the next section.
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/presentParenSum.eps}
+%
+%  ( )       Tk   ( 1+2 )
+%   +      Tk ...
+%  1 2       .....  
+%
+\end{center}
+\caption{The presentation of a parenthesized sum.}\label{presentExample} 
+\end{center}
+\end{figure}
+
+Figure~\ref{presentExample} provides a more concrete example of a presentation, taken from a source editor (see Section~\ref{sect:sourceeditor}). A parenthesized sum in the enriched document is presented as a set of tokens on the presentation level. The figure shows only a fragment of the enriched document and its presentation. \bc , leaving out the tokens to the left and the right of the expression, as well as the origin of the Tokens element. \ec The tuples in the presentation represent the whitespace of the tokens (line breaks, spaces) as defined in Section~\ref{sect:presLevel}. To the editing user, the expression will appear as "{\tt (\textvisiblespace 1+2\textvisiblespace )}". No arrows point toward the tuples, because white space is extra state of the presentation level (see Section~\ref{sect:extraState}). 
+
+\bc
+In the example, the resulting presentation is a single tree, but this is not always the case. For example, the evaluation layer in a word processor (see Section~\ref{sect:wordprocessor}), maps each chapter onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
+\ec
+
+
+
+%																
+\subsection{The interpretation mapping}
+
+The upward direction, or interpretation, is slightly more restricted than the downward direction, because a lower level element is allowed to be mapped onto at most one higher level element. \note{do we want this restriction?} Figure~\ref{elementInterpretation} schematically shows an interpretation of a number of subtrees rooted at $E_L$. The children in the lower level tree are not mapped onto $E_H$. Typically, a child of $E_L$ is mapped onto a child of $E_H$, but it is also possible that it is mapped onto another higher level node, or ignored altogether in the interpretation mapping (extra state).  Again, the lower level structure is not necessarily a single subtree (with holes); it may consist of several subtrees as the next example shows.
+
+Figure~\ref{interpretExample} contains an interpretation example. The presentation is a list of tokens of which only three tokens (\verb|"if"|, \verb|"then"| and \verb|"else"|) are shown. When parsed, the three tokens are mapped onto a single enriched document \verb|If| node. 
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/interpretationEl.eps, width=80mm}
+%\begin{verbatim}
+%
+%        EL                 ->    EH
+%    EL.......EL               CH ..  CH
+% EL  CL  EL  CL  EL
+%
+%\end{verbatim}
+\end{center}
+\caption{The interpretation of the tree rooted at {\tt EL} (beetje dubbel?)}\label{elementInterpretation} 
+\end{center}
+\end{figure}
+
+
+\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/interpretIf.eps}
+\end{center}
+\caption{The interpretation of an if expression.}\label{interpretExample} 
+\end{center}
+\end{figure}
+
+A consequence of the difference between the presentation and the interpretation mappings is that even when a lower level element depends on several higher level elements, only one is responsible for its presentation. For example, when an element \verb|Word Color String|, representing a colored string, is presented as a string in the specified color. Now the string in the presentation is presentation of \verb|Color| as well as of \verb|String|. However, only one of the two can be the interpretation of the . In order to edit the color
+
+
+  \note{where does this become important?} \note{example: leaf Color Int $\rightarrow$ colored int. When selecting, either lead or int,  Color affects but is not responsible. can be accessed by special edit ops though.}
+\note {maybe say something about 1:n presentation restriction, but also about having $>$1 doc nodes influence same pres.? Or before?}
+
+******** PROBLEM With IntExp  Int. 
+Is IntExp interpretation ES (Then ES is not always a subtree, but can be a segment as well: Paren -- IntExp(es) -- Int )? Then reusing is not as easy anymore.\\
+Or can interpretation map onto 2 nodes after all?\\
+Or do we just ignore elts with no pres and rebuild them when interpreting?\\
+Need more experience
+
+
+
+**** say more on Present . Interpret and Interpret . Present? Is a bit hard since they are not functions.
+
+\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+%\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%
+%
+%*what about parsing to something double?
+%*what about IdExp (Id "a")    ->   "a"
+%*Isn't this too restrictive?
+%* doesn't this make the presentation more simple? interpretation is hard because several elements need to be 
+%regarded.
+%if we propagate a value downward as an attribute, it already happens.
+%\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+
+%* if then else? tokens as list? then focus does not work (no?). tokens as tree?
+
+
+
+%																
+\subsection{Duplicates in presentation}
+
+\note{mention duplicates in interpretation?}
+\note{mention that this can also be used for multiple views?}
+%* not just because multiple trees: elements may depend on several trees. without duplication.
+
+The presentation of a higher level element may consist of several lower level elements, as shown in in Figure~\ref{interpretExample}. In this case, the \verb|If| node is the interpretation of all three tokens together. However, it is also possible that a higher level element is duplicated in the presentation, in which case interpretation of the lower level may yield conflicting values for the higher level element. An example of such a duplication is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is interpreted, several alternatives for one element may arise, and a choice has to be made.
+
+Note that having several lower level elements does not automatically mean that an element is duplicated. Furthermore, the interpretation of duplicates only needs to be dealt with if the duplicate structure is edited on the lower level. If a duplicate only needs to support document editing and no presentation editing, no extra work needs to be done.
+
+The only two layers suitable for specifying duplicates are the evaluation and the presentation layer. The presentation mappings for the other layers are largely predefined and do not duplicate any structures. To avoid having to deal with duplicates when parsing, duplicating is currently only allowed at the evaluation layer. This restriction may be lifted in a future version, but for now, if a presentation contains duplicates, the evaluation sheet specifies how the involved structures are duplicated, and the reduction sheet specifies how updates on duplicate structures are handled.
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/interpretToc.eps}
+%
+%  Chap              Toc
+%  "first.."     TokChap      Chap
+%                   "first.."     "first.." 
+%
+\end{center}
+\caption{The interpretation of a word processor document with a table of contents.}\label{duplicatesExample} 
+\end{center}
+\end{figure}
+
+Figure~\ref{duplicatesExample} shows an example of a duplicated structure in the form of a table of contents for a word processor. On the left-hand side of the figure is a document that contains two chapters, of which only the titles are shown. The enriched document contains both a table of contents subtree (\verb|Toc|), as well as a copy of the chapters. The table of contents subtree follows the structure of the original document, but only contains the title of each chapter rather than the chapter itself. To keep the figure simple, the table of contents only contains chapters and not sections and subsections, but in a real editor the table of contents may reflect the entire document structure. 
+
+The evaluator maps a chapter in the document on a chapter in the enriched document, as well as on a chapter entry in the table of contents tree, in the latter case leaving out everything but the title. The presenter simply presents both the table of contents tree as well as the chapter tree, and does not duplicate any structures. The table of contents example is somewhat complex, because it does not only involve a duplicated presentation, but also a partial presentation (a chapter in the table of contents is shown without its content). Section~\ref{sect:extraState} discusses how partial presentations are handled.
+
+When the enriched document is edited it is interpreted (reduced), yielding an updated document. For duplicate structures, the enriched document contains several alternatives, which may have different interpretations. In the table of contents example, the alternatives for a chapter title are the title in the table of contents and the title in the chapter. Three situations are possible. Firstly, if none of the alternatives have been edited, all interpretations are equal, and any one can be chosen. Secondly, if one alternative has been edited, the choice is in favor of the edited element. Hence, if a chapter title is edited in the table of contents, the resulting reduced document contains the updated title. Finally, if more than one value has been edited, an error is signaled to the user. In the example, this happens when the title is edited in the chapter as well as in the table of contents. In this case the edit operation may be forbidden, or either one of the values may be chosen.  \note{say that we cannot skip the evaluation layer with this scheme?}
+
+Specifying duplications in the evaluation and reduction sheets is not ideal, since the enriched document type now depends on whether or not the presentation contains duplicates. Hence, if a presentation contains several views on a structure, the necessary duplications for these views need to be specified in the evaluation layer. A special facility in for specifying common duplicate presentations, such as tree views on a structure, in the presentation layer is desirable. A possible approach for such functionality is a special parser that can resolve conflicts duplicates during parsing. With such a parser, the entire process of handling duplicates takes place in the presentation layer, and the evaluation layer is not affected. \note{parse (dirty arrangement) $\rightarrow$ dirty presentation? May be tricky as well}
+
+%																
+%																
+%																
+\section{Extra state} \label{sect:extraState}
+
+%SOMEWHERE: when es is hard. If no parent with a presentation is parent then 
+% tricky. Hence invisible elements with extra state may lose it during editing.
+
+\note{specify conditions for safety? like in Pierce's lenses stuff?}
+\note{mention Pierce paper?}
+
+In some cases, a lower level contains information that cannot be computed by presenting its adjacent higher level. Similarly, a higher level may contain information that cannot be computed by interpreting the lower level. The information in a level that cannot be computed by presenting, or interpreting an adjacent level, is referred to as {\em extra state} (also see sections~\ref{sect:editingExtraState}~and~\ref{sect:archExtraState}). Because extra state cannot be computed by the mapping function, its previous value is reused, if possible. In this section, we refine the definitions of the data levels in order to give a more precise definition of this extra state. Furthermore, we specify what information needs to be kept track of in order to handle extra state.
+
+
+%This section gives a more precise definition of extra state and specifies how  Furthermore, 
+%This section explains : welke info. wanneer gaat het mis. 
+
+
+%																
+\subsection{Extra state in presentation and interpretation direction}
+
+\bc
+during is not okay+ levels benoemen, want er wordt vaak heen en weer gesprongen.
+
+% One layer: two kinds of extra
+Since a presentation of an element may consist of zero or more elements, and an interpretation consists of at most one, it is possible that an element is not mapped onto any elements in the target level. In that case, the target level simply does not contain the information needed to compute the element**iets specifieker**, and hence it ** what ** is part of the former level's extra state. Because whether or not a node is extra state depends on which mapping we consider, we distinguish two kinds of extra state: presentation extra state and interpretation extra state. The {\em presentation extra state} consists of elements that during presentation cannot be computed from the higher level (the shaded elements at the top level of Figure~\ref{layerExtraState}), and the {\em interpretation extra state} consists of elements that during interpretation cannot be computed from the lower level (the shaded elements at the bottom layer of the figure).
+\ec
+
+
+% example pres extra
+Figure~\ref{layerExtraState} shows two examples of extra state, one occurring on presentation, and the other on interpretation. On the left-hand side, an enriched document node is presented as a token. The shaded whitespace node (0,1) is not specified by the presentation mapping, and hence is part of the lower level {\em presentation extra state}. On presentation, tokens are reused, causing the whitespace information to stay the same. In order to do this, we need to know exactly on which presentation elements an enriched document node was mapped when it was previously presented. In case a token has no previous whitespace, for example because it is the presentation of an enriched document part that has not been presented before, a default value is used.
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/presIntrESExamples.eps, width=125mm}
+\end{center}
+\caption{Two examples of extra state.} \label{layerExtraState} 
+\end{center}
+\end{figure}
+
+% example intr extra
+
+The right-hand side of Figure~\ref{layerExtraState}\note{don't use Extra and \Core already in this figure} shows an example of {\em interpretation extra state}: a word processor with an editable table of contents view. A document level chapter is presented only partially on the enriched document level, since the content of the chapter is left out. For sake of simplicity, we assume that the enriched document only contains the table of contents and not the chapters themselves. This way, we only have to consider the extra state here and not the duplication (titles appearing in the table of contents as well as in the chapters). Section~\ref{mappingsInLayer} discussed how to handle duplications in general, and the same method can be used for the table of contents.
+
+On reduction, the table of contents is mapped back onto a complete document, including the shaded content parts that are not in the enriched document. The title of a chapter comes from the entry in the enriched document, whereas the content is reused from the chapter of which the entry is the presentation. 
+
+\note{mention that intr ES is more important then pres ES here?}
+
+
+% even with pres, there can still be extra state
+Even if an element $E_H$ is mapped onto one or more elements $E_{L,0\dots n-1}$  in the other level, it can still be part of the extra state if the elements $E_{L,0\dots n-1}$ do not constitute enough information to compute $E_H$. Consider for example a presentation of a Haskell source, in which al integers are presented with the string \verb|{Int}|. The integer nodes do have a presentation, but since it does not contain enough information for the backward mapping, the integer nodes are in interpretation extra state. \note {Is this also the case for focus?} \note{Don't know much about this kind of ES yet}
+%%%
+
+An important point to note is that extra state with regard to a certain mapping, is extra state for the {\em result} type of the mapping. Hence, presentation extra state for a presentation mapping between $\Level_{H}$ and $\Level_{L}$ is in $\Level_{L}$. Vice versa, interpretation extra state is in $\Level_{H}$.
+
+\bc Although the term presentation extra state of $\Level_i$ may suggest that this concerns state that is used during the presentation of $\Level_i$, this is not the case. The extra state of $\Level_i$ refers to the extra state with regard to the presentation of the level above ($\Level_{i-1}$) on level $\Level_i$. The only extra state that is involved in the presentation of $\Level_i$ is that of its lower neighbor: $\Level_{i+1}$
+\ec
+
+
+%																
+\subsection{One level has two kinds of extra state} \label{sect:oneLevelDoubleES}
+
+% One level: two kinds of extra
+Figure~\ref{layerExtraState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering has two kinds of extra state. Figure~\ref{levelExtraState} shows a data level between two layers. In the medium level, a shaded left or right half denotes that an element is extra state. Elements with a shaded left half are presentation extra state for the higher layer, and elements with a shaded right half are interpretation extra state for the lower layer. Extra state in one direction is independent of extra state in the other direction, hence an element in the figure can have zero, one, or two shaded halves.
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/3levelES.eps, width=125mm}
+\end{center}
+\caption{Presentation and interpretation extra state in one level.}\label{levelExtraState} 
+\end{center}
+\end{figure}
+
+% example one level independence of es
+The whitespace extra state in tokens provides an example of the fact that extra state in one direction is independent of extra state in the other direction. As explained, whitespace is presentation extra state of the presentation level, since it cannot be computed when presenting the enriched document. On the other hand, when scanning, whitespace in tokens is computed from strings and line breaks in the layout level. Hence, whitespace is not interpretation extra state of the presentation level.
+
+\bc
+When the scanner layer interprets the layout level, spaces and row transitions between a token's string and the preceding token's string are encoded as whitespace information in the token. Since it can be computed during interpretation, the whitespace is not part of the interpretation extra state. On the other hand, when the enriched document is presented on tokens in the presentation level, the whitespace information cannot be computed, and hence it is part of the presentation extra state of the presentation level.
+\ec
+
+\note{also example of one level with both kinds of extra state? Will be somewhat contrived}
+%Example Decl, Decl Type Exp., Tree view
+%So always Info Pres and Intr. bla core extra:
+
+% equations:
+More specifically a data level ($\Level_{i}$) can be viewed in two ways, depending on the direction of the mapping function of which it is the result. When coming from the higher layer, the level can be considered as the product of a core part ($\Core_{\Pres,i}$) and the presentation extra state ($\Extra_{\Pres,i}$), whereas when coming from the lower layer, it is the product of a core part together with interpretation extra state (ie. $\Core_{\Intr,i} \times \Extra_{\Intr,i}$). The document and rendering level form special cases. The document ($\Level_0$) is never the result of a presentation, and therefore has no presentation extra state, whereas the rendering ($\Level_n$), which is never the result of an interpretation, has no interpretation extra state.
+
+The specification of the data level types reads:
+
+% Note that pres es for level i is important for pres of level i-1
+% and intr es for level i is important for intr of levl i+1
+\begin{small}
+\refstepcounter{specification} \label{spec:levelMultiFirst}
+\(\begin{array}{lcll}
+\Level_{0} & = & \Core_{\Intr,0} \times \Extra_{\Intr,0}      & \text{\{Document\}}\\
+\Level_{n} & = & \Core_{\Pres,n} \times \Extra_{\Pres,n}      & \text{\{Rendering\}}\\
+\lefteqn{\forall i:1 \le i \le n-1:}  \\
+\Level_{i}  & = & \Core_{\Pres,i} \times \Extra_{\Pres,i}     & \text{\{Viewed from higher layer\}}\\
+                & = & \Core_{\Intr,i} \times \Extra_{\Intr,i} &  \text{\{Viewed from lower layer\}}\\
+\end{array}\)\end{small}
+\begin{center}(Specification \thespecification: Level types with extra state (Multiple layers, First attempt))\end{center}\vspace{1em}
+
+Note that the representation of a level type as a product is only used to show that the type consists of two kinds of information. In an implementation, a level type does not need to be a product of the core and the extra state. It is likely that a level type is a tree that contains the core elements as well as the extra state elements.
+
+We can use a simplified version of this specification in this chapter, because here we focus on a single layer only. Thus, we can drop several subscripts and for each adjacent level ($\Level_{H}$ and $\Level_{L}$) only consider one of the views from Specification~\ref{spec:levelMultiFirst}, thereby improving readability of the layer specification that will be presented further on. 
+
+From the perspective of a single layer with its adjacent data levels, we only need to consider the upper level interpretation extra state, and lower level presentation extra state. The upper level presentation extra state as well as the lower level interpretation extra state level are handled by adjacent layers. Hence, $\Level_{H}$ and $\Level_{L}$ no longer need two views. Furthermore, the document and rendering levels are no longer special cases, since by definition the document cannot be a lower level and the rendering cannot be a higher level. The simplified equations are:
+
+\begin{small}\( \begin{array}{lcll}
+\Level_{H} & = & \Core_{\Intr, H} \times \Extra_{\Intr, H}\\
+\Level_{L} & = & \Core_{\Pres, L} \times \Extra_{\Pres, L}\\
+\end{array}\)\end{small}
+
+Finally, because each level now only has one kind of extra state, we can drop the $\Pres$ and $\Intr$ subscripts, yielding:
+
+\begin{small}
+\refstepcounter{specification} \label{spec:levelSingleFirst}
+\( \begin{array}{lcll}
+\Level_{H} & = & \Core_{H} \times \Extra_{H}\\
+\Level_{L} & = & \Core_{L} \times \Extra_{L}\\
+\end{array}\)\end{small}
+\begin{center}(Specification \thespecification: Level types with extra state (Single layer, First attempt))\end{center}
+
+
+%																
+\subsection{Mapping information} \label{sect:mappingInformation}
+
+When a level is updated and subsequently presented or interpreted, yielding a target level that contains extra state, the extra state from the previous value for the target level must be reused. However, the new value of the target level together with its previous value do not provide sufficient information for reusing the extra state. For example, when a list of integers that is presented as a list of tokens with whitespace, has been reordered, the tokens in the whitespace must be reordered correspondingly.  In order to do so, the layer needs to keep track of additional information about the mapping.
+
+For each target level node that is not extra state, we keep track of its origin in the source level. Thus, when presenting a higher level ($\Level_{H}$), each node in the presentation ($\Level_{L}$) contains a reference to the higher level node from which presentation it is a part. Similarly, when interpreting a lower level, each resulting $\Level_{H}$ node has references to the lower level nodes of which it is the interpretation. 
+
+We introduce two types for this mapping information: $\Info\idwn_{H}$ denotes the {\em interpretation mapping information} in the higher level (pointing to the lower level), and $\Info\iup_{L}$ denotes the {\em presentation mapping information} in the lower level (pointing to the higher level). Similar to the $\Core$ and $\Extra$ types, the $\Info$ types are only conceptual and do not necessarily correspond to types in an implementation. Figure~\ref{coreExtraInfoExamples} shows the two examples from Figure~\ref{layerExtraState} with explicit mapping information arrows. \note{Figure is not entirely right yet, non shaded can be high or low.}
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/coreExtraInfoExamples.eps, width=125mm}
+\end{center}
+\caption{Two extra state examples with explicit mapping information.}\label{coreExtraInfoExamples} 
+\end{center}
+\end{figure}
+
+Because the mapping information is part of a level, we define the level type to be a product of $\Info$ and 
+$\Extra \times \Core$. Except for the top and bottom levels, all levels contain presentation and interpretation information. The top level is never the result of a presentation mapping, and hence has no presentation information ($\Info\iup$), whereas the bottom level has no interpretation information ($\Info\idwn$). The new definition of $\Level_i$ is:
+
+\begin{small}
+\refstepcounter{specification} \label{spec:levelMultiFinal}
+\begin{align*}% \label{sse}
+\end{align*} 
+\(\begin{array}{lcll}
+\Level_{0} & = & \Core_{\Intr,0} \times \Extra_{\Intr,0} \times \Info\idwn_{0} \\
+\Level_{n} & = & \Core_{\Pres,n} \times \Extra_{\Pres,n} \times  \Info\iup_{n}\\
+\lefteqn{\forall i:1 \le i \le n-1:}  \\
+\Level_{i} & = & \Core_{\Pres,i} \times \Extra_{\Pres,i}  \times \Info\iup_{i} & \text{\{Viewed from upper layer\}}\\  
+               & = & \Core_{\Intr,i} \times \Extra_{\Intr,i} \times \Info\idwn_{i} & \text{\{Viewed from lower layer\}}
+\end{array}\)\end{small}
+\begin{center}(Specification \thespecification: Level types (Multiple layers, Final))\end{center}\vspace{1em}
+
+Note that for the middle levels, for which two kinds of mapping information exist, each alternative of the definition only contains one kind. This is because the downward mapping information $\Info\idwn_{i}$ cannot be computed by the higher layers presentation mapping, and hence is part of its extra state: $\Extra_{\Pres,i}$. Analogously, viewed from the lower layer, $\Info\iup_{i}$ is part of $\Extra_{\Intr,i}$. Rather than further complicating the definition by splitting the extra state type in a mapping information part and a regular extra state part (eg. $\Extra_{\Pres,i} = \Extra_{\mathit{Regular},\Pres,i} \times \Info\idwn_{i}$), we choose to make explicit only the mapping information relevant for the direction from which the level is viewed.
+
+Again, the definition can be simplified by taking a single layer perspective. Note that we leave the arrows in the  mapping information types, even though they are redundant now.
+
+\begin{small}
+\refstepcounter{specification} \label{spec:levelSingleFinal}
+\(\begin{array}{lcll} \label{spec:extraStateSL}
+\Level_{H} & = & \Core_{H} \times \Extra_{H} \times \Info\idwn_{H}\\
+\Level_{L} & = & \Core_{L} \times \Extra_{L} \times \Info\iup_{L}\\
+\end{array}\)\end{small}
+\begin{center}(Specification \thespecification: Level types (Single layer, Final))\end{center}\vspace{1em}
+
+\bc
+% example in picture 
+Figure~\ref{mappingInfo} shows two examples of the $\Info$ argument. The left-hand side shows the situation at the presentation layer of a Haskell source editor during presentation.  The enriched document element \verb|If|  was presented on the three tokens in the presentation level. The downward arrows represent $\Info_{\Pres,H}$, whereas the upward arrows are the interpretation information $\Info_{\Intr, L}$. The dotted arrows represent $\Info_{\Intr,H}$ (upward) and $\Info_{\Pres,L}$ (downward), which are not used in this layer. The whitespace nodes in the presentation level are presentation extra state, that has to be reused on presentation. \note{more detail on reuse?}
+
+The right-hand side of the figure shows the evaluation layer of a word processor during interpretation. The document is a \verb|Chapter| element containing two \verb|Section| children, which is mapped onto a table of contents structure in the evaluation level. Again, downward arrows are $\Info_{\Pres,H}$ and upward arrows are $\Info_{\Intr,L}$. \note{mention there is no $\Info_{\Intr,H}$?} In this case, the document contains interpretation extra state, since the contents of the chapter and sections cannot be computed from the enriched document.  \note{more detail on reuse?}
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+Enriched Document:                       Document:                                                                                            
+                                                                                            
+                  If                         Chapter "chapter 1" {"this is bla bla bla..."} 
+            / /   | |   \\                      v       v                                     
+           v v    v v    vv              Sect "1" {"..."}     Sect "2" {"..."}                
+       ^           ^           ^           |   /                    \   |                            
+      /    ^       |   ^        \  ^       v  v          ^  ^        v  v                          
+    Token /      Token |      Token \                    |  |                             
+ {WS} "if"    {WS} "then"  {WS} "else"      ChapterTocEntry "chapter 1"                     
+                                          ^              ^                 ^   ^              
+Presentation:                            SectionTocEntry "1"  SectionTocEntry "2"           
+                                                                                            
+                                         Enriched Document:                                 
+
+----------                                                                        
+legend   ^ is pres info       v is intr info     {node} is extra state            
+                                                                                  
+\end{verbatim}  
+\end{footnotesize}                                                                  
+\end{center}                                                                      
+\caption{Mapping information.}\label{info}                          
+\end{center}                                                                      
+\end{figure}
+
+%??? 
+%Mapping is to the node for reusing. Mapping to path is for associating doc edits with presentation parts.
+%If things are moved, the paths are no longer meaningful (nodes are). Before doc op, always fix paths by parsing.
+
+
+%What about keeping list [ID->Info?] that switches and is not part of level.
+We choose to make the mapping information part of the $\Level$ type. The reason for this is that both adjacent layers may update a level, and therefore also affect the mapping information on the level. \note{need an example? ** Johan: ja **} With the mapping information in the level types, $\present$ and $\interpret$ do not need additional arguments anymore.
+\ec
+
+
