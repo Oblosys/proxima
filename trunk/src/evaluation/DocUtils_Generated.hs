@@ -115,16 +115,20 @@ rankNode (ListItemNode _ _)  = 53
 rankNode (HoleItemNode _ _)  = 54
 rankNode (String_Node _ _)  = 55
 rankNode (HoleString_Node _ _)  = 56
-rankNode (List_DeclNode _ _)  = 57
-rankNode (HoleList_DeclNode _ _)  = 58
-rankNode (List_AltNode _ _)  = 59
-rankNode (HoleList_AltNode _ _)  = 60
-rankNode (List_ExpNode _ _)  = 61
-rankNode (HoleList_ExpNode _ _)  = 62
-rankNode (List_SlideNode _ _)  = 63
-rankNode (HoleList_SlideNode _ _)  = 64
-rankNode (List_ItemNode _ _)  = 65
-rankNode (HoleList_ItemNode _ _)  = 66
+rankNode (Bool_Node _ _)  = 57
+rankNode (HoleBool_Node _ _)  = 58
+rankNode (Int_Node _ _)  = 59
+rankNode (HoleInt_Node _ _)  = 60
+rankNode (List_DeclNode _ _)  = 61
+rankNode (HoleList_DeclNode _ _)  = 62
+rankNode (List_AltNode _ _)  = 63
+rankNode (HoleList_AltNode _ _)  = 64
+rankNode (List_ExpNode _ _)  = 65
+rankNode (HoleList_ExpNode _ _)  = 66
+rankNode (List_SlideNode _ _)  = 67
+rankNode (HoleList_SlideNode _ _)  = 68
+rankNode (List_ItemNode _ _)  = 69
+rankNode (HoleList_ItemNode _ _)  = 70
 
 
 
@@ -186,6 +190,10 @@ pathNode (ListItemNode _ pth)  = PathD pth
 pathNode (HoleItemNode _ pth)  = PathD pth
 pathNode (String_Node _ pth)  = PathD pth
 pathNode (HoleString_Node _ pth)  = PathD pth
+pathNode (Bool_Node _ pth)  = PathD pth
+pathNode (HoleBool_Node _ pth)  = PathD pth
+pathNode (Int_Node _ pth)  = PathD pth
+pathNode (HoleInt_Node _ pth)  = PathD pth
 pathNode (List_DeclNode _ pth)  = PathD pth
 pathNode (HoleList_DeclNode _ pth)  = PathD pth
 pathNode (List_AltNode _ pth)  = PathD pth
@@ -357,6 +365,14 @@ string_IDD :: Node -> Maybe IDD
 string_IDD (String_Node (String_ iDP _) _) = Just iDP
 string_IDD _                                   = Nothing
 
+bool_IDD :: Node -> Maybe IDD
+bool_IDD (Bool_Node (Bool_ iDP _) _) = Just iDP
+bool_IDD _                                   = Nothing
+
+int_IDD :: Node -> Maybe IDD
+int_IDD (Int_Node (Int_ iDP _) _) = Just iDP
+int_IDD _                                   = Nothing
+
 
 
 
@@ -400,6 +416,8 @@ shallowShowItem1 (StringItem  _ _) = "StringItem"
 shallowShowItem1 (HeliumItem  _ _) = "HeliumItem"
 shallowShowItem1 (ListItem  _ _) = "ListItem"
 shallowShowString_1 (String_  _ _) = "String_"
+shallowShowBool_1 (Bool_  _ _) = "Bool_"
+shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowList_Decl1 (List_Decl  _ _) = "List_Decl"
 shallowShowConsList_Decl1 (Cons_Decl  _ _) = "Cons_Decl"
 shallowShowConsList_Decl1 (Nil_Decl ) = "Nil_Decl"
@@ -419,16 +437,16 @@ shallowShowConsList_Item1 (Nil_Item ) = "Nil_Item"
 
 
 toXMLEnrichedDoc (RootEnr _ _ idListDecls decls heliumTypeInfo document) = Elt "RootEnr" [] $ toXMLDecls idListDecls
-toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool expanded] ++ [toXMLBool autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
+toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool_ expanded] ++ [toXMLBool_ autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLDecl (BoardDecl _ _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board] ++ []
 toXMLDecl (PPPresentationDecl _ _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation] ++ []
-toXMLIdent (Ident _ _ _ string) = Elt "Ident" [] $ [toXMLString string] ++ []
+toXMLIdent (Ident _ _ _ string_) = Elt "Ident" [] $ [toXMLString_ string_] ++ []
 toXMLExp (PlusExp _ _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (TimesExp _ _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (DivExp _ _ exp1 exp2) = Elt "DivExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (PowerExp _ _ exp1 exp2) = Elt "PowerExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (BoolExp _ _ bool) = Elt "BoolExp" [] $ [toXMLBool bool] ++ []
-toXMLExp (IntExp _ _ int) = Elt "IntExp" [] $ [toXMLInt int] ++ []
+toXMLExp (BoolExp _ _ bool_) = Elt "BoolExp" [] $ [toXMLBool_ bool_] ++ []
+toXMLExp (IntExp _ _ int_) = Elt "IntExp" [] $ [toXMLInt_ int_] ++ []
 toXMLExp (LamExp _ _ _ ident exp) = Elt "LamExp" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLExp (AppExp _ exp1 exp2) = Elt "AppExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (CaseExp _ _ _ exp alts) = Elt "CaseExp" [] $ toXMLAlts alts
@@ -441,12 +459,12 @@ toXMLExp (ProductExp _ _ _ _ exps) = Elt "ProductExp" [] $ toXMLExps exps
 toXMLAlt (Alt _ _ _ ident exp) = Elt "Alt" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLBoard (Board _ r1 r2 r3 r4 r5 r6 r7 r8) = Elt "Board" [] $ [toXMLBoardRow r1] ++ [toXMLBoardRow r2] ++ [toXMLBoardRow r3] ++ [toXMLBoardRow r4] ++ [toXMLBoardRow r5] ++ [toXMLBoardRow r6] ++ [toXMLBoardRow r7] ++ [toXMLBoardRow r8] ++ []
 toXMLBoardRow (BoardRow _ ca cb cc cd ce cf cg ch) = Elt "BoardRow" [] $ [toXMLBoardSquare ca] ++ [toXMLBoardSquare cb] ++ [toXMLBoardSquare cc] ++ [toXMLBoardSquare cd] ++ [toXMLBoardSquare ce] ++ [toXMLBoardSquare cf] ++ [toXMLBoardSquare cg] ++ [toXMLBoardSquare ch] ++ []
-toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool color] ++ []
-toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool color] ++ []
-toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool color] ++ []
-toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool color] ++ []
-toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool color] ++ []
-toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool_ color] ++ []
 toXMLBoardSquare (Empty) = Elt "Empty" [] $ []
 toXMLPPPresentation (PPPresentation _ viewType slides) = Elt "PPPresentation" [] $ toXMLSlides slides
 toXMLSlide (Slide _ title itemList) = Elt "Slide" [] $ [toXMLString_ title] ++ [toXMLItemList itemList] ++ []
@@ -458,6 +476,8 @@ toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString_ string] ++
 toXMLItem (HeliumItem _ exp) = Elt "HeliumItem" [] $ [toXMLExp exp] ++ []
 toXMLItem (ListItem _ itemList) = Elt "ListItem" [] $ [toXMLItemList itemList] ++ []
 toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
+toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
+toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
 toXMLList_Decl (List_Decl _ decls) = toXMLConsList_Decl decls
 toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
 toXMLConsList_Decl Nil_Decl             = []

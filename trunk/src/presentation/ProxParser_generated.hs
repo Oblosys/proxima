@@ -29,7 +29,7 @@ reuseRootEnr nodes  ma0 ma1 ma2 ma3 ma4 ma5
            (RootEnr a0 a1 a2 a3 a4 a5) -> reuse6 RootEnr a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
+reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool_ -> Maybe Bool_ -> Maybe Ident -> Maybe Exp -> Decl
 reuseDecl nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
   = case extractFromNodes extractDecl defaultDecl nodes of
            (Decl a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 Decl a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
@@ -47,7 +47,7 @@ reusePPPresentationDecl nodes  ma0 ma1 ma2 ma3
            (PPPresentationDecl a0 a1 a2 a3) -> reuse4 PPPresentationDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePPPresentationDecl"
 
-reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String -> Ident
+reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String_ -> Ident
 reuseIdent nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractIdent defaultIdent nodes of
            (Ident a0 a1 a2 a3) -> reuse4 Ident a0 a1 a2 a3 ma0 ma1 ma2 ma3
@@ -77,13 +77,13 @@ reusePowerExp nodes  ma0 ma1 ma2 ma3
            (PowerExp a0 a1 a2 a3) -> reuse4 PowerExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePowerExp"
 
-reuseBoolExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Bool -> Exp
+reuseBoolExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Bool_ -> Exp
 reuseBoolExp nodes  ma0 ma1 ma2
   = case extractFromNodes extractBoolExp defaultBoolExp nodes of
            (BoolExp a0 a1 a2) -> reuse3 BoolExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseBoolExp"
 
-reuseIntExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Int -> Exp
+reuseIntExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Int_ -> Exp
 reuseIntExp nodes  ma0 ma1 ma2
   = case extractFromNodes extractIntExp defaultIntExp nodes of
            (IntExp a0 a1 a2) -> reuse3 IntExp a0 a1 a2 ma0 ma1 ma2
@@ -161,37 +161,37 @@ reuseBoardRow nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            (BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "System error:<module>.reuseBoardRow"
 
-reuseQueen :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseQueen :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reuseQueen nodes  ma0 ma1
   = case extractFromNodes extractQueen defaultQueen nodes of
            (Queen a0 a1) -> reuse2 Queen a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseQueen"
 
-reuseKing :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseKing :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reuseKing nodes  ma0 ma1
   = case extractFromNodes extractKing defaultKing nodes of
            (King a0 a1) -> reuse2 King a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKing"
 
-reuseBishop :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseBishop :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reuseBishop nodes  ma0 ma1
   = case extractFromNodes extractBishop defaultBishop nodes of
            (Bishop a0 a1) -> reuse2 Bishop a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseBishop"
 
-reuseKnight :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseKnight :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reuseKnight nodes  ma0 ma1
   = case extractFromNodes extractKnight defaultKnight nodes of
            (Knight a0 a1) -> reuse2 Knight a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKnight"
 
-reuseRook :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseRook :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reuseRook nodes  ma0 ma1
   = case extractFromNodes extractRook defaultRook nodes of
            (Rook a0 a1) -> reuse2 Rook a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseRook"
 
-reusePawn :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reusePawn :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
 reusePawn nodes  ma0 ma1
   = case extractFromNodes extractPawn defaultPawn nodes of
            (Pawn a0 a1) -> reuse2 Pawn a0 a1 ma0 ma1
@@ -203,7 +203,7 @@ reuseEmpty nodes
            (Empty) -> reuse0 Empty
            _ -> error "System error:<module>.reuseEmpty"
 
-reusePPPresentation :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Maybe List_Slide -> PPPresentation
+reusePPPresentation :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> Maybe List_Slide -> PPPresentation
 reusePPPresentation nodes  ma0 ma1 ma2
   = case extractFromNodes extractPPPresentation defaultPPPresentation nodes of
            (PPPresentation a0 a1 a2) -> reuse3 PPPresentation a0 a1 a2 ma0 ma1 ma2
@@ -262,6 +262,18 @@ reuseString_ nodes  ma0 ma1
   = case extractFromNodes extractString_ defaultString_ nodes of
            (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseString_"
+
+reuseBool_ :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Bool_
+reuseBool_ nodes  ma0 ma1
+  = case extractFromNodes extractBool_ defaultBool_ nodes of
+           (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseBool_"
+
+reuseInt_ :: [Maybe Node] -> Maybe IDD -> Maybe Int -> Int_
+reuseInt_ nodes  ma0 ma1
+  = case extractFromNodes extractInt_ defaultInt_ nodes of
+           (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseInt_"
 
 reuseList_Decl :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Decl -> List_Decl
 reuseList_Decl nodes  ma0 ma1
@@ -453,6 +465,14 @@ extractString_ :: Maybe Node -> Maybe String_
 extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
 extractString_ _ = Nothing
 
+extractBool_ :: Maybe Node -> Maybe Bool_
+extractBool_ (Just (Bool_Node x@(Bool_ _ _) _)) = Just x
+extractBool_ _ = Nothing
+
+extractInt_ :: Maybe Node -> Maybe Int_
+extractInt_ (Just (Int_Node x@(Int_ _ _) _)) = Just x
+extractInt_ _ = Nothing
+
 extractList_Decl :: Maybe Node -> Maybe List_Decl
 extractList_Decl (Just (List_DeclNode x@(List_Decl _ _) _)) = Just x
 extractList_Decl _ = Nothing
@@ -592,6 +612,12 @@ defaultListItem = ListItem NoIDD hole
 
 defaultString_ :: String_
 defaultString_ = String_ NoIDD hole
+
+defaultBool_ :: Bool_
+defaultBool_ = Bool_ NoIDD hole
+
+defaultInt_ :: Int_
+defaultInt_ = Int_ NoIDD hole
 
 defaultList_Decl :: List_Decl
 defaultList_Decl = List_Decl NoIDD Nil_Decl

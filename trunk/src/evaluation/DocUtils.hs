@@ -26,10 +26,17 @@ redirect EvaluateDoc     = EvaluateDoc'
 redirect _               = (SkipDoc' 0)
 
 
+
+
+boolVal :: Bool_ -> Bool -- unbox, for non-AG functions (AG functions use @<child>.boolVal)
+boolVal (Bool_ _ bool) = bool
+boolVal _              = False
+
+
 -- separate module for the Editable class?
 
 
-initBoard = Board NoIDD (backRow True) (pawnRow True) emptyRow emptyRow emptyRow emptyRow (pawnRow False) (backRow False)
+initBoard = Board NoIDD (backRow (Bool_ NoIDD True)) (pawnRow (Bool_ NoIDD True)) emptyRow emptyRow emptyRow emptyRow (pawnRow (Bool_ NoIDD False)) (backRow (Bool_ NoIDD False))
 
 emptyBoard = Board NoIDD emptyRow emptyRow emptyRow emptyRow emptyRow emptyRow emptyRow emptyRow
 
@@ -44,24 +51,27 @@ backRow c = BoardRow NoIDD (Rook NoIDD c) (Knight NoIDD c) (Bishop NoIDD c) (Que
 
 
 initPPPresentation = 
-  PPPresentation NoIDD True $ List_Slide NoIDD $
+  PPPresentation NoIDD (Bool_ NoIDD True) $ List_Slide NoIDD $
     mkSlides
-      [ Slide NoIDD (String_ NoIDD "slide_1") $
+      [ Slide NoIDD (mkString_ "slide_1") $
           ItemList NoIDD (Bullet NoIDD) $ List_Item NoIDD $
-                         mkItems [ StringItem NoIDD (String_ NoIDD "item_1")
-                                 , HeliumItem NoIDD (DivExp NoIDD NoIDP (IntExp NoIDD NoIDP 1)(IntExp NoIDD NoIDP 2))
+                         mkItems [ StringItem NoIDD (mkString_ "item_1")
+                                 , HeliumItem NoIDD (DivExp NoIDD NoIDP (IntExp NoIDD NoIDP (Int_ NoIDD 1))
+                                                                        (IntExp NoIDD NoIDP (Int_ NoIDD 2)))
                                  , ListItem NoIDD listItem
                                  ]
-       , Slide NoIDD (String_ NoIDD "slide_2") $
+       , Slide NoIDD (mkString_ "slide_2") $
           ItemList NoIDD (Alpha NoIDD) $  List_Item NoIDD $
-                         mkItems [ StringItem NoIDD (String_ NoIDD "item_1")
+                         mkItems [ StringItem NoIDD (mkString_ "item_1")
                                  ]
       ]
  where listItem = ItemList NoIDD (Number NoIDD) $  List_Item NoIDD $
-                    mkItems [ StringItem NoIDD (String_ NoIDD "nested_item_1")
-                            , StringItem NoIDD (String_ NoIDD "nested_item_2")
+                    mkItems [ StringItem NoIDD (mkString_ "nested_item_1")
+                            , StringItem NoIDD (mkString_ "nested_item_2")
                             ]
-                                  
+
+       mkString_ str = String_ NoIDD str
+
 mkSlides []     = Nil_Slide
 mkSlides (s:ss) = Cons_Slide s (mkSlides ss)
 

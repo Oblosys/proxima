@@ -3,6 +3,7 @@ module Chess where
 
 import CommonTypes
 import qualified DocTypes as Prox
+import DocUtils
 import XprezLib
 import PresTypes
 
@@ -22,12 +23,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        pieceXp Prox.Empty          sqc f  = if isReachable 
                                        then markReachable `withMouseDown` moveHere path focus 
                                        else empty
-       pieceXp (Prox.King _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'k'
-       pieceXp (Prox.Queen _ c)    sqc _  = txtPiece  $ (if c then toUpper else id) 'q'
-       pieceXp (Prox.Bishop _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'b'
-       pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'n'
-       pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'r'
-       pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'p'
+       pieceXp (Prox.King _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'k'
+       pieceXp (Prox.Queen _ c)    sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'q'
+       pieceXp (Prox.Bishop _ c)   sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'b'
+       pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'n'
+       pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'r'
+       pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'p'
       -- pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
       -- pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
       -- pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
@@ -78,19 +79,19 @@ listFromBoard _                                         = replicate 8 (replicate
 listFromRow   (Prox.BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = map pieceFromSquare [x1,x2,x3,x4,x5,x6,x7,x8]
 listFromRow   _                                        = replicate 8 Empty
 
-pieceFromSquare (Prox.Queen _ True)   = Piece White Queen
-pieceFromSquare (Prox.Queen _ False)  = Piece Black Queen
-pieceFromSquare (Prox.King _ True)    = Piece White King
-pieceFromSquare (Prox.King _ False)   = Piece Black King
-pieceFromSquare (Prox.Rook _ True)    = Piece White Rook
-pieceFromSquare (Prox.Rook _ False)   = Piece Black Rook
-pieceFromSquare (Prox.Knight _ True)  = Piece White Knight
-pieceFromSquare (Prox.Knight _ False) = Piece Black Knight
-pieceFromSquare (Prox.Bishop _ True)  = Piece White Bishop
-pieceFromSquare (Prox.Bishop _ False) = Piece Black Bishop
-pieceFromSquare (Prox.Pawn _ True)    = Piece White Pawn
-pieceFromSquare (Prox.Pawn _ False)   = Piece Black Pawn
-pieceFromSquare Prox.Empty            = Empty
+pieceFromSquare (Prox.Queen _ (Prox.Bool_ _ True))  = Piece White Queen
+pieceFromSquare (Prox.Queen _ _)               = Piece Black Queen
+pieceFromSquare (Prox.King _ (Prox.Bool_ _ True))   = Piece White King
+pieceFromSquare (Prox.King _ _)                = Piece Black King
+pieceFromSquare (Prox.Rook _ (Prox.Bool_ _ True))   = Piece White Rook
+pieceFromSquare (Prox.Rook _ _)                = Piece Black Rook
+pieceFromSquare (Prox.Knight _ (Prox.Bool_ _ True)) = Piece White Knight
+pieceFromSquare (Prox.Knight _ _)              = Piece Black Knight
+pieceFromSquare (Prox.Bishop _ (Prox.Bool_ _ True)) = Piece White Bishop
+pieceFromSquare (Prox.Bishop _ _)              = Piece Black Bishop
+pieceFromSquare (Prox.Pawn _ (Prox.Bool_ _ True))   = Piece White Pawn
+pieceFromSquare (Prox.Pawn _ _)                = Piece Black Pawn
+pieceFromSquare Prox.Empty                     = Empty
 
 
 

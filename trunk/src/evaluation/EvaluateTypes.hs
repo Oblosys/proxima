@@ -80,9 +80,8 @@ uhaFromDecl pth (PPPresentationDecl _ _ _ pppres) = uhaFromPPPresentation (pth++
 uhaFromDecl _ _ = []                                      
 
 
-
 uhaFromIdent :: [Int] -> Ident -> Name
-uhaFromIdent pth (Ident _ _ _ nm) = (Name_Identifier (range pth) [] nm)
+uhaFromIdent pth (Ident _ _ _ nm) = (Name_Identifier (range pth) [] (uhaFromString_ nm))
 uhaFromIdent pth _              = (Name_Identifier (range pth) [] "x")
 
 uhaFromExp :: [Int] -> Exp -> Expression
@@ -90,10 +89,10 @@ uhaFromExp pth (PlusExp _ _ exp1 exp2)     = mkInfixApp pth "+" exp1 exp2
 uhaFromExp pth (TimesExp _ _ exp1 exp2)    = mkInfixApp pth "*" exp1 exp2
 uhaFromExp pth (DivExp _ _ exp1 exp2)      = mkInfixApp pth "div" exp1 exp2
 uhaFromExp pth (PowerExp _ _ exp1 exp2)    = mkInfixApp pth "^" exp1 exp2
-uhaFromExp pth (BoolExp _ _ bool)          = Expression_Constructor (range pth) 
-                                             $ Name_Special (range pth) [] (show bool)
-uhaFromExp pth (IntExp _ _ int)            = Expression_Literal (range pth) 
-                                             $ Literal_Int (range pth) (show int)
+uhaFromExp pth (BoolExp _ _ bool_)          = Expression_Constructor (range pth) 
+                                             $ Name_Special (range pth) [] (show $ uhaFromBool_ bool_)
+uhaFromExp pth (IntExp _ _ int_)            = Expression_Literal (range pth) 
+                                             $ Literal_Int (range pth) (show $ uhaFromInt_ int_)
 uhaFromExp pth (LamExp _ _ _ ident exp)    = Expression_Lambda (range pth) 
                                                [Pattern_Variable (range (pth++[0])) 
                                                                  (uhaFromIdent (pth++[0]) ident) ]
@@ -180,6 +179,16 @@ uhaFromItem pth (HeliumItem _ exp) =
     ]
   ]
 uhaFromItem _ _ = []
+
+
+
+-- 
+uhaFromString_ (String_ _ str) = str
+uhaFromBool_   (Bool_ _ bool)  = bool
+uhaFromInt_    (Int_ _ int)    = int
+
+
+
 
 uniqueName pth = [ if isDigit c then c else '_' | c <- show pth  ] 
 

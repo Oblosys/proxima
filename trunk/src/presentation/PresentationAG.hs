@@ -25,10 +25,10 @@ toMessage str = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
 presMessage :: HeliumMessage -> Presentation
-presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text' NoIDP) lns) `withColor` errColor
-                                                             rng:_   -> col' (map (text' NoIDP) lns) `withColor` errColor
+presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text) lns) `withColor` errColor
+                                                             rng:_   -> col' (map (text) lns) `withColor` errColor
                                                                         `link` rng
-presMessage (HMessage lns)           = col' (map (text' NoIDP) lns) `withColor` msgColor 
+presMessage (HMessage lns)           = col' (map (text) lns) `withColor` msgColor 
 
 msgColor = blue
 errColor = red
@@ -62,7 +62,7 @@ expand :: [Int] -> Decl -> UpdateDoc
 expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 True autoLayout ident exp))
+                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD True) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -70,7 +70,7 @@ toggleExpanded :: [Int] -> Decl -> UpdateDoc
 toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (not expanded) autoLayout ident exp))
+                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD (not $ boolVal expanded)) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -79,14 +79,13 @@ toggleAutoLayout :: [Int] -> Decl -> UpdateDoc
 toggleAutoLayout pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (not autoLayout) ident exp))
+                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (Bool_ NoIDD (not $ boolVal autoLayout)) ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
 
-
-
-strFromIdent (Ident _ _ _ str) = str
+-- use attributes!
+strFromIdent (Ident _ _ _ (String_ _ str)) = str
 strFromIdent _               = ""
 
 idP0FromIdent (Ident _ idp0 _ str) = idp0
@@ -205,15 +204,15 @@ toggleViewType :: [Int] -> PPPresentation -> UpdateDoc
 toggleViewType pth (PPPresentation idD viewtp slides) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
-                                              (Clip_PPPresentation (PPPresentation idD (not viewtp) slides))
+                                              (Clip_PPPresentation (PPPresentation idD (Bool_ NoIDD (not $ boolVal viewtp)) slides))
                                             )
     in  (DocumentLevel d' path cl)
 
 
-itemStart i (Bullet _) = text' NoIDP "- "
-itemStart i (Number _) = text' NoIDP (show (i+1) ++ ") ")
-itemStart i (Alpha  _) = text' NoIDP (chr (ord 'a' + i):") ")
-itemStart i (_)        = text' NoIDP "  "
+itemStart i (Bullet _) = text "- "
+itemStart i (Number _) = text (show (i+1) ++ ") ")
+itemStart i (Alpha  _) = text (chr (ord 'a' + i):") ")
+itemStart i (_)        = text "  "
 
 
 presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
@@ -786,25 +785,25 @@ type T_BoardSquare = (Int) ->
 sem_BoardSquare :: (BoardSquare) ->
                    (T_BoardSquare)
 sem_BoardSquare ((Bishop (_idD) (_color))) =
-    (sem_BoardSquare_Bishop (_idD) (_color))
+    (sem_BoardSquare_Bishop (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare ((Empty )) =
     (sem_BoardSquare_Empty )
 sem_BoardSquare ((HoleBoardSquare )) =
     (sem_BoardSquare_HoleBoardSquare )
 sem_BoardSquare ((King (_idD) (_color))) =
-    (sem_BoardSquare_King (_idD) (_color))
+    (sem_BoardSquare_King (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare ((Knight (_idD) (_color))) =
-    (sem_BoardSquare_Knight (_idD) (_color))
+    (sem_BoardSquare_Knight (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare ((ParseErrBoardSquare (_node) (_presentation))) =
     (sem_BoardSquare_ParseErrBoardSquare (_node) (_presentation))
 sem_BoardSquare ((Pawn (_idD) (_color))) =
-    (sem_BoardSquare_Pawn (_idD) (_color))
+    (sem_BoardSquare_Pawn (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare ((Queen (_idD) (_color))) =
-    (sem_BoardSquare_Queen (_idD) (_color))
+    (sem_BoardSquare_Queen (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare ((Rook (_idD) (_color))) =
-    (sem_BoardSquare_Rook (_idD) (_color))
+    (sem_BoardSquare_Rook (_idD) ((sem_Bool_ (_color))))
 sem_BoardSquare_Bishop :: (IDD) ->
-                          (Bool) ->
+                          (T_Bool_) ->
                           (T_BoardSquare)
 sem_BoardSquare_Bishop (_idD) (_color) =
     \ _lhs_colNr
@@ -817,14 +816,16 @@ sem_BoardSquare_Bishop (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                Bishop _idD _color
+                Bishop _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (BishopNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (BishopNode _self _lhs_path) _lhs_path "Bishop" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (BishopNode _self _lhs_path) _lhs_path "Bishop" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (BishopNode _self _lhs_path) _lhs_path "Bishop" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (BishopNode _self _lhs_path) _lhs_path "Bishop" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
@@ -866,7 +867,7 @@ sem_BoardSquare_HoleBoardSquare  =
                 HoleBoardSquare
         in  ( _lhs_colNr,_lhs_focusedPiece,_lhs_pIdC,presHole _lhs_focusD "BoardSquare" (HoleBoardSquareNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "BoardSquare" (HoleBoardSquareNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "BoardSquare" (HoleBoardSquareNode _self _lhs_path) _lhs_path,_self,_lhs_sqCol)
 sem_BoardSquare_King :: (IDD) ->
-                        (Bool) ->
+                        (T_Bool_) ->
                         (T_BoardSquare)
 sem_BoardSquare_King (_idD) (_color) =
     \ _lhs_colNr
@@ -879,19 +880,21 @@ sem_BoardSquare_King (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                King _idD _color
+                King _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (KingNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (KingNode _self _lhs_path) _lhs_path "King" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (KingNode _self _lhs_path) _lhs_path "King" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (KingNode _self _lhs_path) _lhs_path "King" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (KingNode _self _lhs_path) _lhs_path "King" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
 sem_BoardSquare_Knight :: (IDD) ->
-                          (Bool) ->
+                          (T_Bool_) ->
                           (T_BoardSquare)
 sem_BoardSquare_Knight (_idD) (_color) =
     \ _lhs_colNr
@@ -904,14 +907,16 @@ sem_BoardSquare_Knight (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                Knight _idD _color
+                Knight _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (KnightNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (KnightNode _self _lhs_path) _lhs_path "Knight" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (KnightNode _self _lhs_path) _lhs_path "Knight" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (KnightNode _self _lhs_path) _lhs_path "Knight" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (KnightNode _self _lhs_path) _lhs_path "Knight" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
@@ -932,7 +937,7 @@ sem_BoardSquare_ParseErrBoardSquare (_node) (_presentation) =
                 ParseErrBoardSquare _node _presentation
         in  ( _lhs_colNr,_lhs_focusedPiece,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_sqCol)
 sem_BoardSquare_Pawn :: (IDD) ->
-                        (Bool) ->
+                        (T_Bool_) ->
                         (T_BoardSquare)
 sem_BoardSquare_Pawn (_idD) (_color) =
     \ _lhs_colNr
@@ -945,19 +950,21 @@ sem_BoardSquare_Pawn (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                Pawn _idD _color
+                Pawn _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (PawnNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (PawnNode _self _lhs_path) _lhs_path "Pawn" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (PawnNode _self _lhs_path) _lhs_path "Pawn" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (PawnNode _self _lhs_path) _lhs_path "Pawn" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (PawnNode _self _lhs_path) _lhs_path "Pawn" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
 sem_BoardSquare_Queen :: (IDD) ->
-                         (Bool) ->
+                         (T_Bool_) ->
                          (T_BoardSquare)
 sem_BoardSquare_Queen (_idD) (_color) =
     \ _lhs_colNr
@@ -970,19 +977,21 @@ sem_BoardSquare_Queen (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                Queen _idD _color
+                Queen _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (QueenNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (QueenNode _self _lhs_path) _lhs_path "Queen" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (QueenNode _self _lhs_path) _lhs_path "Queen" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (QueenNode _self _lhs_path) _lhs_path "Queen" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (QueenNode _self _lhs_path) _lhs_path "Queen" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
 sem_BoardSquare_Rook :: (IDD) ->
-                        (Bool) ->
+                        (T_Bool_) ->
                         (T_BoardSquare)
 sem_BoardSquare_Rook (_idD) (_color) =
     \ _lhs_colNr
@@ -995,17 +1004,105 @@ sem_BoardSquare_Rook (_idD) (_color) =
       _lhs_rowNr
       _lhs_sqCol ->
         let (_self) =
-                Rook _idD _color
+                Rook _idD _color_self
+            ( _color_bool,_color_pIdC,_color_pres,_color_presTree,_color_presXML,_color_self) =
+                (_color (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( 1 + _lhs_colNr
              ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-             ,_lhs_pIdC
+             ,_color_pIdC
              ,loc (RookNode _self _lhs_path) $
                 structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-             ,presentElementTree _lhs_focusD (RookNode _self _lhs_path) _lhs_path "Rook" [ presentPrimTreeBool _color ]
-             ,presentElementXML _lhs_focusD (RookNode _self _lhs_path) _lhs_path "Rook" [ presentPrimXMLBool _color ]
+             ,presentElementTree _lhs_focusD (RookNode _self _lhs_path) _lhs_path "Rook" [ _color_presTree ]
+             ,presentElementXML _lhs_focusD (RookNode _self _lhs_path) _lhs_path "Rook" [ _color_presXML ]
              ,_self
              ,not _lhs_sqCol
              )
+-- Bool_ -------------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      bool                 : Bool
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for Bool_.Bool_:
+      self
+
+-}
+{-
+   local variables for Bool_.HoleBool_:
+      self
+
+-}
+{-
+   local variables for Bool_.ParseErrBool_:
+      self
+
+-}
+-- semantic domain
+type T_Bool_ = (FocusDoc) ->
+               (Int) ->
+               (Int) ->
+               ([Int]) ->
+               ( (Bool),(Int),(Presentation),(Presentation),(Presentation),(Bool_))
+-- cata
+sem_Bool_ :: (Bool_) ->
+             (T_Bool_)
+sem_Bool_ ((Bool_ (_idd) (_bool))) =
+    (sem_Bool__Bool_ (_idd) (_bool))
+sem_Bool_ ((HoleBool_ )) =
+    (sem_Bool__HoleBool_ )
+sem_Bool_ ((ParseErrBool_ (_node) (_presentation))) =
+    (sem_Bool__ParseErrBool_ (_node) (_presentation))
+sem_Bool__Bool_ :: (IDD) ->
+                   (Bool) ->
+                   (T_Bool_)
+sem_Bool__Bool_ (_idd) (_bool) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Bool_ _idd _bool
+        in  ( _bool
+             ,_lhs_pIdC
+             ,loc (Bool_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [text $ show _bool, text ""]
+             ,presentElementTree _lhs_focusD (Bool_Node _self _lhs_path) _lhs_path "Bool_" [ presentPrimTreeBool _bool ]
+             ,presentElementXML _lhs_focusD (Bool_Node _self _lhs_path) _lhs_path "Bool_" [ presentPrimXMLBool _bool ]
+             ,_self
+             )
+sem_Bool__HoleBool_ :: (T_Bool_)
+sem_Bool__HoleBool_  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleBool_
+        in  ( False,_lhs_pIdC,presHole _lhs_focusD "Bool_" (HoleBool_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "Bool_" (HoleBool_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "Bool_" (HoleBool_Node _self _lhs_path) _lhs_path,_self)
+sem_Bool__ParseErrBool_ :: (Node) ->
+                           (Presentation) ->
+                           (T_Bool_)
+sem_Bool__ParseErrBool_ (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrBool_ _node _presentation
+        in  ( False,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
 -- ConsList_Alt ------------------------------------------------
 {-
    inherited attributes:
@@ -1598,7 +1695,7 @@ sem_Decl :: (Decl) ->
 sem_Decl ((BoardDecl (_idD) (_idP0) (_idP1) (_board))) =
     (sem_Decl_BoardDecl (_idD) (_idP0) (_idP1) ((sem_Board (_board))))
 sem_Decl ((Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (_ident) (_exp))) =
-    (sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) ((sem_Ident (_ident))) ((sem_Exp (_exp))))
+    (sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) ((sem_Bool_ (_expanded))) ((sem_Bool_ (_autoLayout))) ((sem_Ident (_ident))) ((sem_Exp (_exp))))
 sem_Decl ((HoleDecl )) =
     (sem_Decl_HoleDecl )
 sem_Decl ((PPPresentationDecl (_idD) (_idP0) (_idP1) (_pPPresentation))) =
@@ -1655,8 +1752,8 @@ sem_Decl_Decl :: (IDD) ->
                  (IDP) ->
                  (IDP) ->
                  (IDP) ->
-                 (Bool) ->
-                 (Bool) ->
+                 (T_Bool_) ->
+                 (T_Bool_) ->
                  (T_Ident) ->
                  (T_Exp) ->
                  (T_Decl)
@@ -1678,21 +1775,25 @@ sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
-                Decl _idD _idP0 _idP1 _idP2 _idP3 _expanded _autoLayout _ident_self _exp_self
+                Decl _idD _idP0 _idP1 _idP2 _idP3 _expanded_self _autoLayout_self _ident_self _exp_self
             (_typeStr) =
                 case lookup (strFromIdent _ident_self) _lhs_topLevelEnv of
                   Nothing -> Nothing
                   Just tp -> Just $ strFromIdent _ident_self ++ " :: "++ tp
+            ( _expanded_bool,_expanded_pIdC,_expanded_pres,_expanded_presTree,_expanded_presXML,_expanded_self) =
+                (_expanded (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 4) (_lhs_path++[0]))
+            ( _autoLayout_bool,_autoLayout_pIdC,_autoLayout_pres,_autoLayout_presTree,_autoLayout_presXML,_autoLayout_self) =
+                (_autoLayout (_lhs_focusD) (_lhs_ix) (_expanded_pIdC) (_lhs_path++[1]))
             ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_presTree,_ident_presXML,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
-                (_ident (_lhs_col) (_lhs_focusD) (_lhs_ix) (addListToFM _lhs_layoutMap [(_idP0, (0,1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 4) (_lhs_path++[2]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+                (_ident (_lhs_col) (_lhs_focusD) (_lhs_ix) (addListToFM _lhs_layoutMap [(_idP0, (0,1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_autoLayout_pIdC) (_lhs_path++[2]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
             ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_presTree,_exp_presXML,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
                 (_exp (_ident_col+2+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_ident_layoutMap) (_lhs_level) (0) (_ident_pIdC) (_lhs_path++[3]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_ident_varsInScopeAtFocus))
         in  ( _lhs_col
              ,(_ident_str, _exp_val)
-             ,[(strFromIdent _ident_self, (PathD (_lhs_path++[0]), _exp_type))]
+             ,[(strFromIdent _ident_self, (PathD (_lhs_path++[2]), _exp_type))]
              ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [ text "'", _ident_idsPres, text' NoIDP "';" ]
-             ,let lm = if _autoLayout || _lhs_level /= 0 then _exp_layoutMap else _lhs_layoutMap
+                row' [ text "'", _ident_idsPres, text "';" ]
+             ,let lm = if _autoLayout_bool || _lhs_level /= 0 then _exp_layoutMap else _lhs_layoutMap
               in if _idP2 /= NoIDP || _lhs_level /= 0 then lm
                  else case lookupFM lm (_ident_firstToken) of
                         Just (nwln,sp) -> addListToFM lm [ (mkIDP _idP2 _lhs_pIdC 2,(nwln,sp))
@@ -1705,16 +1806,16 @@ sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (
                   (row' $
                      (if _lhs_level == 0
                       then let sigIDP    = mkIDP _idP2 _lhs_pIdC 2
-                               autoLStr = if _autoLayout then "             {auto layout}" else ""
+                               autoLStr = if _autoLayout_bool then "             {auto layout}" else ""
                            in  case _typeStr of
                                  Nothing ->
                                     case _exp_val of
                                             ErrVal -> [ StructuralP sigIDP $ row'
-                                                         [text' NoIDP ("-- No value"++autoLStr)]
+                                                         [text ("-- No value"++autoLStr)]
                                                            `withbgColor` lightGrey
                                                       ]
                                             v      -> [ StructuralP sigIDP $ row'
-                                                         [text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr )]
+                                                         [text ("-- Value: " ++ show _exp_val++autoLStr )]
                                                            `withbgColor` lightGrey
                                                       ]
                                  Just tpstr ->
@@ -1722,26 +1823,28 @@ sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (
                                         [ typeD NoIDP (tpstr)
                                         , text " "
                                         , case _exp_val of
-                                            ErrVal -> row' [text' NoIDP ("-- No value"++autoLStr)]
+                                            ErrVal -> row' [text ("-- No value"++autoLStr)]
                                                                `withbgColor` lightGrey
-                                            v      -> row' [ text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr)]
+                                            v      -> row' [ text ("-- Value: " ++ show _exp_val++autoLStr)]
                                                                `withbgColor` lightGrey
                                         ]
                                    ]
                       else [empty])
                         ++
                            [ _ident_pres, key (mkIDP _idP0 _lhs_pIdC 0) "="]
-                        ++ (if _expanded then
+                        ++ (if _expanded_bool then
                               [ _exp_pres,  sep (mkIDP _idP1 _lhs_pIdC 1) ";"
                               ] else [text " ", box (text "...") `withColor` black `withbgColor` yellow
                                                                  `withMouseDown` expand _lhs_path _self])
-                       ) `addPopupItems`  [ if _expanded then ( "Collapse: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)
-                                                         else ( "Expand: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)]
-                         `addPopupItems`  if _lhs_level == 0 then [ if _autoLayout then ( "Disable Auto Layout", toggleAutoLayout _lhs_path _self)
-                                                                                   else ( "Enable Auto Layout", toggleAutoLayout _lhs_path _self) ]
+                       ) `addPopupItems`  [ if _expanded_bool
+                                            then ( "Collapse: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)
+                                            else ( "Expand: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)]
+                         `addPopupItems`  if _lhs_level == 0 then [ if _autoLayout_bool
+                                                                    then ( "Disable Auto Layout", toggleAutoLayout _lhs_path _self)
+                                                                    else ( "Enable Auto Layout", toggleAutoLayout _lhs_path _self) ]
                                                              else []
-             ,presentElementTree _lhs_focusD (DeclNode _self _lhs_path) _lhs_path "Decl" [ presentPrimTreeBool _expanded, presentPrimTreeBool _autoLayout, _ident_presTree, _exp_presTree ]
-             ,presentElementXML _lhs_focusD (DeclNode _self _lhs_path) _lhs_path "Decl" [ presentPrimXMLBool _expanded, presentPrimXMLBool _autoLayout, _ident_presXML, _exp_presXML ]
+             ,presentElementTree _lhs_focusD (DeclNode _self _lhs_path) _lhs_path "Decl" [ _expanded_presTree, _autoLayout_presTree, _ident_presTree, _exp_presTree ]
+             ,presentElementXML _lhs_focusD (DeclNode _self _lhs_path) _lhs_path "Decl" [ _expanded_presXML, _autoLayout_presXML, _ident_presXML, _exp_presXML ]
              ,_self
              ,_lhs_col
              ,_typeStr
@@ -1963,8 +2066,6 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
                            , row[ text " ", _idListDecls_idsPres] `withFontSize` 10
                            ]
                     , vSpace 4
-                    , structural $ row [ hSpace 3, box $ row [  hSpace 3, _decls_presTree, text "   ", vLine, text "   ", _decls_presXML `withFont'` ("Courier New",8), hSpace 3]]
-                    , vSpace 14
                     , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                     , row' [ hSpace 3, _decls_pres ]
                     , vSpace 10
@@ -2173,8 +2274,8 @@ sem_Exp :: (Exp) ->
            (T_Exp)
 sem_Exp ((AppExp (_idD) (_exp1) (_exp2))) =
     (sem_Exp_AppExp (_idD) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
-sem_Exp ((BoolExp (_idD) (_idP0) (_bool))) =
-    (sem_Exp_BoolExp (_idD) (_idP0) (_bool))
+sem_Exp ((BoolExp (_idD) (_idP0) (_bool_))) =
+    (sem_Exp_BoolExp (_idD) (_idP0) ((sem_Bool_ (_bool_))))
 sem_Exp ((CaseExp (_idD) (_idP0) (_idP1) (_exp) (_alts))) =
     (sem_Exp_CaseExp (_idD) (_idP0) (_idP1) ((sem_Exp (_exp))) ((sem_List_Alt (_alts))))
 sem_Exp ((DivExp (_idD) (_idP0) (_exp1) (_exp2))) =
@@ -2185,8 +2286,8 @@ sem_Exp ((IdentExp (_idd) (_ident))) =
     (sem_Exp_IdentExp (_idd) ((sem_Ident (_ident))))
 sem_Exp ((IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3))) =
     (sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))) ((sem_Exp (_exp3))))
-sem_Exp ((IntExp (_idD) (_idP0) (_int))) =
-    (sem_Exp_IntExp (_idD) (_idP0) (_int))
+sem_Exp ((IntExp (_idD) (_idP0) (_int_))) =
+    (sem_Exp_IntExp (_idD) (_idP0) ((sem_Int_ (_int_))))
 sem_Exp ((LamExp (_idD) (_idP0) (_idP1) (_ident) (_exp))) =
     (sem_Exp_LamExp (_idD) (_idP0) (_idP1) ((sem_Ident (_ident))) ((sem_Exp (_exp))))
 sem_Exp ((LetExp (_idD) (_idP0) (_idP1) (_decls) (_exp))) =
@@ -2264,9 +2365,9 @@ sem_Exp_AppExp (_idD) (_exp1) (_exp2) =
              )
 sem_Exp_BoolExp :: (IDD) ->
                    (IDP) ->
-                   (Bool) ->
+                   (T_Bool_) ->
                    (T_Exp)
-sem_Exp_BoolExp (_idD) (_idP0) (_bool) =
+sem_Exp_BoolExp (_idD) (_idP0) (_bool_) =
     \ _lhs_col
       _lhs_env
       _lhs_errs
@@ -2284,28 +2385,30 @@ sem_Exp_BoolExp (_idD) (_idP0) (_bool) =
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
-                BoolExp _idD _idP0 _bool
+                BoolExp _idD _idP0 _bool__self
             (_type) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 []
             (_substitute) =
                 \substs -> _self
+            ( _bool__bool,_bool__pIdC,_bool__pres,_bool__presTree,_bool__presXML,_bool__self) =
+                (_bool_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 1) (_lhs_path++[0]))
         in  ( _lhs_col
              ,_substitute
              ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
              ,_lhs_newlines
-             ,_lhs_pIdC
+             ,_bool__pIdC
              ,loc (BoolExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
                 squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-                row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _bool), text' NoIDP ""]
-             ,presentElementTree _lhs_focusD (BoolExpNode _self _lhs_path) _lhs_path "BoolExp" [ presentPrimTreeBool _bool ]
-             ,presentElementXML _lhs_focusD (BoolExpNode _self _lhs_path) _lhs_path "BoolExp" [ presentPrimXMLBool _bool ]
+                row' [cons (mkIDP _idP0 _lhs_pIdC 0) "", _bool__pres]
+             ,presentElementTree _lhs_focusD (BoolExpNode _self _lhs_path) _lhs_path "BoolExp" [ _bool__presTree ]
+             ,presentElementXML _lhs_focusD (BoolExpNode _self _lhs_path) _lhs_path "BoolExp" [ _bool__presXML ]
              ,_self
              ,_lhs_spaces
              ,_substitute
              ,_type
-             ,BoolVal _bool
+             ,BoolVal _bool__bool
              ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
              )
 sem_Exp_CaseExp :: (IDD) ->
@@ -2409,7 +2512,7 @@ sem_Exp_DivExp (_idD) (_idP0) (_exp1) (_exp2) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 case (removeParens _exp1_self, removeParens _exp2_self) of
-                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive div" ,  pasteExp _lhs_path (IntExp idd1 idp1 (int1 `div` int2)))]
+                       (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive div" ,  pasteExp _lhs_path (IntExp idd1 idp1 (Int_ NoIDD (int1 `div` int2))))]
                        _                                         -> []
             (_substitute) =
                 \substs -> DivExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
@@ -2555,9 +2658,10 @@ sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 case removeParens _exp1_self of
-                       BoolExp _ _ bool -> [ ("Reduce primitive if" , pasteExp _lhs_path (if bool then setIDPExp _idP0 _exp2_self
-                                                                                 else setIDPExp _idP0 _exp3_self))]
-                       _                                         -> []
+                       BoolExp _ _ (Bool_ _ bool) -> [ ("Reduce primitive if" , pasteExp _lhs_path
+                                                                                (if bool then setIDPExp _idP0 _exp2_self
+                                                                                         else setIDPExp _idP0 _exp3_self))]
+                       _                          -> []
             (_substitute) =
                 \substs -> IfExp _idD _idP0 _idP1 _idP2 (_exp1_substitute substs) (_exp2_substitute substs) (_exp3_substitute substs)
             ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_presTree,_exp1_presXML,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
@@ -2606,9 +2710,9 @@ sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3) =
              )
 sem_Exp_IntExp :: (IDD) ->
                   (IDP) ->
-                  (Int) ->
+                  (T_Int_) ->
                   (T_Exp)
-sem_Exp_IntExp (_idD) (_idP0) (_int) =
+sem_Exp_IntExp (_idD) (_idP0) (_int_) =
     \ _lhs_col
       _lhs_env
       _lhs_errs
@@ -2626,28 +2730,30 @@ sem_Exp_IntExp (_idD) (_idP0) (_int) =
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
-                IntExp _idD _idP0 _int
+                IntExp _idD _idP0 _int__self
             (_type) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 []
             (_substitute) =
                 \substs -> _self
-        in  ( _lhs_col+length (show _int)
+            ( _int__int,_int__pIdC,_int__pres,_int__presTree,_int__presXML,_int__self) =
+                (_int_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 1) (_lhs_path++[0]))
+        in  ( _lhs_col+length (show _int__int)
              ,_substitute
              ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
              ,_lhs_newlines
-             ,_lhs_pIdC
+             ,_int__pIdC
              ,loc (IntExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
                 squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-                row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _int), text' NoIDP ""]
-             ,presentElementTree _lhs_focusD (IntExpNode _self _lhs_path) _lhs_path "IntExp" [ presentPrimTreeInt _int ]
-             ,presentElementXML _lhs_focusD (IntExpNode _self _lhs_path) _lhs_path "IntExp" [ presentPrimXMLInt _int ]
+                row' [cons (mkIDP _idP0 _lhs_pIdC 0) "", _int__pres]
+             ,presentElementTree _lhs_focusD (IntExpNode _self _lhs_path) _lhs_path "IntExp" [ _int__presTree ]
+             ,presentElementXML _lhs_focusD (IntExpNode _self _lhs_path) _lhs_path "IntExp" [ _int__presXML ]
              ,_self
              ,_lhs_spaces
              ,_substitute
              ,_type
-             ,IntVal _int
+             ,IntVal _int__int
              ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
              )
 sem_Exp_LamExp :: (IDD) ->
@@ -3008,7 +3114,7 @@ sem_Exp_PlusExp (_idD) (_idP0) (_exp1) (_exp2) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 case (removeParens _exp1_self, removeParens _exp2_self) of
-                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (+)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1+int2)))]
+                       (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (+)" , pasteExp _lhs_path (IntExp idd1 idp1 (Int_ NoIDD (int1+int2))))]
                        _                                         -> []
             (_substitute) =
                 \substs -> PlusExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
@@ -3061,7 +3167,7 @@ sem_Exp_PowerExp (_idD) (_idP0) (_exp1) (_exp2) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 case (removeParens _exp1_self, removeParens _exp2_self) of
-                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (^)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1^int2)))]
+                       (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (^)" , pasteExp _lhs_path (IntExp idd1 idp1 (Int_ NoIDD (int1^int2))))]
                        _                                         -> []
             (_substitute) =
                 \substs -> PowerExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
@@ -3186,7 +3292,7 @@ sem_Exp_TimesExp (_idD) (_idP0) (_exp1) (_exp2) =
                 lookupType _lhs_typeEnv _lhs_path
             (_reductionEdit) =
                 case (removeParens _exp1_self, removeParens _exp2_self) of
-                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (*)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1*int2)))]
+                       (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (*)" , pasteExp _lhs_path (IntExp idd1 idp1 (Int_ NoIDD (int1*int2))))]
                        _                                         -> []
             (_substitute) =
                 \substs -> TimesExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
@@ -3273,8 +3379,8 @@ sem_Ident :: (Ident) ->
              (T_Ident)
 sem_Ident ((HoleIdent )) =
     (sem_Ident_HoleIdent )
-sem_Ident ((Ident (_idD) (_idP0) (_idP1) (_string))) =
-    (sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string))
+sem_Ident ((Ident (_idD) (_idP0) (_idP1) (_string_))) =
+    (sem_Ident_Ident (_idD) (_idP0) (_idP1) ((sem_String_ (_string_))))
 sem_Ident ((ParseErrIdent (_node) (_presentation))) =
     (sem_Ident_ParseErrIdent (_node) (_presentation))
 sem_Ident_HoleIdent :: (T_Ident)
@@ -3297,9 +3403,9 @@ sem_Ident_HoleIdent  =
 sem_Ident_Ident :: (IDD) ->
                    (IDP) ->
                    (IDP) ->
-                   (String) ->
+                   (T_String_) ->
                    (T_Ident)
-sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string) =
+sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string_) =
     \ _lhs_col
       _lhs_focusD
       _lhs_ix
@@ -3313,22 +3419,24 @@ sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string) =
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
-                Ident _idD _idP0 _idP1 _string
-        in  ( _lhs_col+length _string
+                Ident _idD _idP0 _idP1 _string__self
+            ( _string__length,_string__pIdC,_string__pres,_string__presTree,_string__presXML,_string__self,_string__str) =
+                (_string_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 2) (_lhs_path++[0]))
+        in  ( _lhs_col+ length _string__str
              ,_idP0
              ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                row' [ text _string ]
+                row' [ _string__pres ]
              ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
              ,_lhs_newlines
-             ,_lhs_pIdC
+             ,_string__pIdC
              ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
                 squiggleRanges _lhs_ranges _lhs_path $
-                row' [text' (mkIDP _idP0 _lhs_pIdC 0) _string, text' NoIDP ""]
-             ,presentElementTree _lhs_focusD (IdentNode _self _lhs_path) _lhs_path "Ident" [ presentPrimTreeString _string ]
-             ,presentElementXML _lhs_focusD (IdentNode _self _lhs_path) _lhs_path "Ident" [ presentPrimXMLString _string ]
+                row' [ text' (mkIDP _idP0 _lhs_pIdC 0)  "", _string__pres, text ""]
+             ,presentElementTree _lhs_focusD (IdentNode _self _lhs_path) _lhs_path "Ident" [ _string__presTree ]
+             ,presentElementXML _lhs_focusD (IdentNode _self _lhs_path) _lhs_path "Ident" [ _string__presXML ]
              ,_self
              ,_lhs_spaces
-             ,_string
+             ,_string__str
              ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
              )
 sem_Ident_ParseErrIdent :: (Node) ->
@@ -3350,6 +3458,92 @@ sem_Ident_ParseErrIdent (_node) (_presentation) =
         let (_self) =
                 ParseErrIdent _node _presentation
         in  ( _lhs_col,NoIDP,presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_spaces,"",_lhs_varsInScopeAtFocus)
+-- Int_ --------------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      int                  : Int
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for Int_.HoleInt_:
+      self
+
+-}
+{-
+   local variables for Int_.Int_:
+      self
+
+-}
+{-
+   local variables for Int_.ParseErrInt_:
+      self
+
+-}
+-- semantic domain
+type T_Int_ = (FocusDoc) ->
+              (Int) ->
+              (Int) ->
+              ([Int]) ->
+              ( (Int),(Int),(Presentation),(Presentation),(Presentation),(Int_))
+-- cata
+sem_Int_ :: (Int_) ->
+            (T_Int_)
+sem_Int_ ((HoleInt_ )) =
+    (sem_Int__HoleInt_ )
+sem_Int_ ((Int_ (_idd) (_int))) =
+    (sem_Int__Int_ (_idd) (_int))
+sem_Int_ ((ParseErrInt_ (_node) (_presentation))) =
+    (sem_Int__ParseErrInt_ (_node) (_presentation))
+sem_Int__HoleInt_ :: (T_Int_)
+sem_Int__HoleInt_  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleInt_
+        in  ( 0,_lhs_pIdC,presHole _lhs_focusD "Int_" (HoleInt_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "Int_" (HoleInt_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "Int_" (HoleInt_Node _self _lhs_path) _lhs_path,_self)
+sem_Int__Int_ :: (IDD) ->
+                 (Int) ->
+                 (T_Int_)
+sem_Int__Int_ (_idd) (_int) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Int_ _idd _int
+        in  ( _int
+             ,_lhs_pIdC
+             ,loc (Int_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [text $ show _int, text ""]
+             ,presentElementTree _lhs_focusD (Int_Node _self _lhs_path) _lhs_path "Int_" [ presentPrimTreeInt _int ]
+             ,presentElementXML _lhs_focusD (Int_Node _self _lhs_path) _lhs_path "Int_" [ presentPrimXMLInt _int ]
+             ,_self
+             )
+sem_Int__ParseErrInt_ :: (Node) ->
+                         (Presentation) ->
+                         (T_Int_)
+sem_Int__ParseErrInt_ (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrInt_ _node _presentation
+        in  ( 0,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
 -- Item --------------------------------------------------------
 {-
    inherited attributes:
@@ -3438,8 +3632,8 @@ sem_Item_HeliumItem (_idd) (_exp) =
                 (_exp (0) ([]) ([]) (_lhs_focusD) (_lhs_ix) (emptyFM) (0) (0) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (0) ([]) ([]) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _exp_pIdC
              ,loc (HeliumItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ text' NoIDP "HeliumItem $"
-                     , row [text' NoIDP "  ", _exp_pres]
+                col' [ text "HeliumItem $"
+                     , row [text "  ", _exp_pres]
                      ]
              ,loc (HeliumItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 row' [itemStart _lhs_ix _lhs_listType, _exp_pres
@@ -3482,8 +3676,8 @@ sem_Item_ListItem (_idd) (_itemList) =
                 (_itemList (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _itemList_pIdC
              ,loc (ListItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ text' NoIDP "ListItem $"
-                     , row [text' NoIDP "  ", _itemList_pres]
+                col' [ text "ListItem $"
+                     , row [text "  ", _itemList_pres]
                      ]
              ,loc (ListItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 row' [ text "   ",
@@ -3524,13 +3718,17 @@ sem_Item_StringItem (_idd) (_string) =
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 StringItem _idd _string_self
-            ( _string_pIdC,_string_pres,_string_pres2,_string_presTree,_string_presXML,_string_self) =
+            ( _string_length,_string_pIdC,_string_pres,_string_presTree,_string_presXML,_string_self,_string_str) =
                 (_string (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( _string_pIdC
              ,loc (StringItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                 row' [ text' NoIDP "StringItem ", _string_pres ]
+                 row' [ text "StringItem "
+                      , row' [ text "\""
+                             , _string_pres
+                             , text "\""
+                             ] `withColor` darkViolet ]
              ,loc (StringItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [itemStart _lhs_ix _lhs_listType, _string_pres2]
+                row' [itemStart _lhs_ix _lhs_listType, _string_pres]
              ,presentElementTree _lhs_focusD (StringItemNode _self _lhs_path) _lhs_path "StringItem" [ _string_presTree ]
              ,presentElementXML _lhs_focusD (StringItemNode _self _lhs_path) _lhs_path "StringItem" [ _string_presXML ]
              ,_self
@@ -3622,12 +3820,11 @@ sem_ItemList_ItemList (_idd) (_listType) (_items) =
                 (_items (_lhs_focusD) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
         in  ( _items_pIdC
              ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ row' [ text' NoIDP "ItemList ", _listType_pres, text' NoIDP " $"]
+                col' [ row' [ text "ItemList ", _listType_pres, text " $"]
                      , _items_pres
                   ]
              ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [
-                       _listType_pres2
+                row' [ _listType_pres2
                      , _items_pres2
                      ]
              ,presentElementTree _lhs_focusD (ItemListNode _self _lhs_path) _lhs_path "ItemList" [ _listType_presTree, _items_presTree ]
@@ -3731,7 +3928,7 @@ sem_ListType_Alpha (_idd) =
                 Alpha _idd
         in  ( _lhs_pIdC
              ,loc (AlphaNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                text' NoIDP "Alpha"
+                text "Alpha"
              ,loc (AlphaNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                empty
              ,presentElementTree _lhs_focusD (AlphaNode _self _lhs_path) _lhs_path "Alpha" [  ]
@@ -3753,7 +3950,7 @@ sem_ListType_Bullet (_idd) =
                 Bullet _idd
         in  ( _lhs_pIdC
              ,loc (BulletNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                text' NoIDP "Bullet"
+                text "Bullet"
              ,loc (BulletNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                empty
              ,presentElementTree _lhs_focusD (BulletNode _self _lhs_path) _lhs_path "Bullet" [  ]
@@ -3787,7 +3984,7 @@ sem_ListType_Number (_idd) =
                 Number _idd
         in  ( _lhs_pIdC
              ,loc (NumberNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                text' NoIDP "Number"
+                text "Number"
              ,loc (NumberNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                empty
              ,presentElementTree _lhs_focusD (NumberNode _self _lhs_path) _lhs_path "Number" [  ]
@@ -4692,7 +4889,7 @@ sem_PPPresentation :: (PPPresentation) ->
 sem_PPPresentation ((HolePPPresentation )) =
     (sem_PPPresentation_HolePPPresentation )
 sem_PPPresentation ((PPPresentation (_idd) (_viewType) (_slides))) =
-    (sem_PPPresentation_PPPresentation (_idd) (_viewType) ((sem_List_Slide (_slides))))
+    (sem_PPPresentation_PPPresentation (_idd) ((sem_Bool_ (_viewType))) ((sem_List_Slide (_slides))))
 sem_PPPresentation ((ParseErrPPPresentation (_node) (_presentation))) =
     (sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation))
 sem_PPPresentation_HolePPPresentation :: (T_PPPresentation)
@@ -4708,7 +4905,7 @@ sem_PPPresentation_HolePPPresentation  =
                 HolePPPresentation
         in  ( _lhs_pIdC,presHole _lhs_focusD "PPPresentation" (HolePPPresentationNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "PPPresentation" (HolePPPresentationNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "PPPresentation" (HolePPPresentationNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_PPPresentation_PPPresentation :: (IDD) ->
-                                     (Bool) ->
+                                     (T_Bool_) ->
                                      (T_List_Slide) ->
                                      (T_PPPresentation)
 sem_PPPresentation_PPPresentation (_idd) (_viewType) (_slides) =
@@ -4720,28 +4917,30 @@ sem_PPPresentation_PPPresentation (_idd) (_viewType) (_slides) =
       _lhs_varsInScope
       _lhs_varsInScopeAtFocus ->
         let (_self) =
-                PPPresentation _idd _viewType _slides_self
+                PPPresentation _idd _viewType_self _slides_self
+            ( _viewType_bool,_viewType_pIdC,_viewType_pres,_viewType_presTree,_viewType_presXML,_viewType_self) =
+                (_viewType (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
             ( _slides_pIdC,_slides_pres,_slides_pres2,_slides_presTree,_slides_presXML,_slides_press,_slides_press2,_slides_self,_slides_varsInScopeAtFocus) =
-                (_slides (_lhs_focusD) (_lhs_pIdC + 0) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+                (_slides (_lhs_focusD) (_viewType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _slides_pIdC
              ,loc (PPPresentationNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                 col' $ [ row' [ text' NoIDP "View type: "
-                             ,  if _viewType
-                                then (box $ text' NoIDP $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
-                                else (box $ text' NoIDP $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType _lhs_path _self)]
+                 col' $ [ row' [ text "View type: "
+                             ,  if _viewType_bool
+                                then (box $ text $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
+                                else (box $ text $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType _lhs_path _self)]
                               ]
                       , vSpace 10
                       ] ++
-                        if _viewType
+                        if _viewType_bool
                         then
-                          [ row' [ text' NoIDP "pres ",key NoIDP "=",text' NoIDP " Presentation ", text' NoIDP " $"]
-                          , row' [ text' NoIDP "         ", _slides_pres]
+                          [ row' [ text "pres ",key NoIDP "=",text " Presentation ", text " $"]
+                          , row' [ text "         ", _slides_pres]
                           ]
                         else
                           [ _slides_pres2
                           ]
-             ,presentElementTree _lhs_focusD (PPPresentationNode _self _lhs_path) _lhs_path "PPPresentation" [ presentPrimTreeBool _viewType, _slides_presTree ]
-             ,presentElementXML _lhs_focusD (PPPresentationNode _self _lhs_path) _lhs_path "PPPresentation" [ presentPrimXMLBool _viewType, _slides_presXML ]
+             ,presentElementTree _lhs_focusD (PPPresentationNode _self _lhs_path) _lhs_path "PPPresentation" [ _viewType_presTree, _slides_presTree ]
+             ,presentElementXML _lhs_focusD (PPPresentationNode _self _lhs_path) _lhs_path "PPPresentation" [ _viewType_presXML, _slides_presXML ]
              ,_self
              ,_slides_varsInScopeAtFocus
              )
@@ -4853,17 +5052,17 @@ sem_Slide_Slide (_idd) (_title) (_itemList) =
       _lhs_varsInScopeAtFocus ->
         let (_self) =
                 Slide _idd _title_self _itemList_self
-            ( _title_pIdC,_title_pres,_title_pres2,_title_presTree,_title_presXML,_title_self) =
+            ( _title_length,_title_pIdC,_title_pres,_title_presTree,_title_presXML,_title_self,_title_str) =
                 (_title (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
             ( _itemList_pIdC,_itemList_pres,_itemList_pres2,_itemList_presTree,_itemList_presXML,_itemList_self,_itemList_varsInScopeAtFocus) =
                 (_itemList (_lhs_focusD) (_lhs_ix) (_title_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _itemList_pIdC
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ row' [ text' NoIDP "Slide ", _title_pres, text' NoIDP " $"]
-                     , row' [ text' NoIDP "  ", _itemList_pres ]
+                col' [ row' [ text "Slide ", _title_pres, text " $"]
+                     , row' [ text "  ", _itemList_pres ]
                      ]
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                 slide _title_pres2
+                 slide _title_pres
                        _itemList_pres2
              ,presentElementTree _lhs_focusD (SlideNode _self _lhs_path) _lhs_path "Slide" [ _title_presTree, _itemList_presTree ]
              ,presentElementXML _lhs_focusD (SlideNode _self _lhs_path) _lhs_path "Slide" [ _title_presXML, _itemList_presXML ]
@@ -4881,11 +5080,12 @@ sem_Slide_Slide (_idd) (_title) (_itemList) =
       pIdC                 : Int
 
    synthesised attributes:
+      length               : Int
       pres                 : Presentation
-      pres2                : Presentation
       presTree             : Presentation
       presXML              : Presentation
       self                 : SELF
+      str                  : String
 
 -}
 {-
@@ -4908,7 +5108,7 @@ type T_String_ = (FocusDoc) ->
                  (Int) ->
                  (Int) ->
                  ([Int]) ->
-                 ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(String_))
+                 ( (Int),(Int),(Presentation),(Presentation),(Presentation),(String_),(String))
 -- cata
 sem_String_ :: (String_) ->
                (T_String_)
@@ -4926,7 +5126,7 @@ sem_String__HoleString_  =
       _lhs_path ->
         let (_self) =
                 HoleString_
-        in  ( _lhs_pIdC,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,_self)
+        in  ( 0,_lhs_pIdC,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (HoleString_Node _self _lhs_path) _lhs_path,_self,"")
 sem_String__ParseErrString_ :: (Node) ->
                                (Presentation) ->
                                (T_String_)
@@ -4937,7 +5137,7 @@ sem_String__ParseErrString_ (_node) (_presentation) =
       _lhs_path ->
         let (_self) =
                 ParseErrString_ _node _presentation
-        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
+        in  ( 0,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,"")
 sem_String__String_ :: (IDD) ->
                        (String) ->
                        (T_String_)
@@ -4948,16 +5148,13 @@ sem_String__String_ (_idd) (_string) =
       _lhs_path ->
         let (_self) =
                 String_ _idd _string
-        in  ( _lhs_pIdC
-             ,row' [ text' NoIDP "\""
-                   , loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                       row' [text' NoIDP _string, text' NoIDP ""]
-                   , text' NoIDP "\""
-                   ] `withColor` darkViolet
+        in  ( length _string
+             ,_lhs_pIdC
              ,loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                 row' [text' NoIDP _string, text' NoIDP ""]
+                row' [text _string, text ""]
              ,presentElementTree _lhs_focusD (String_Node _self _lhs_path) _lhs_path "String_" [ presentPrimTreeString _string ]
              ,presentElementXML _lhs_focusD (String_Node _self _lhs_path) _lhs_path "String_" [ presentPrimXMLString _string ]
              ,_self
+             ,_string
              )
 

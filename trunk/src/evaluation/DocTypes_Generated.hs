@@ -86,7 +86,7 @@ data EnrichedDoc = RootEnr IDD IDP List_Decl List_Decl HeliumTypeInfo Document
                     deriving Show
 
 
-data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp 
+data Decl = Decl IDD IDP IDP IDP IDP Bool_ Bool_ Ident Exp 
           | BoardDecl IDD IDP IDP Board 
           | PPPresentationDecl IDD IDP IDP PPPresentation 
           | HoleDecl
@@ -94,7 +94,7 @@ data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp
              deriving Show
 
 
-data Ident = Ident IDD IDP IDP String 
+data Ident = Ident IDD IDP IDP String_ 
            | HoleIdent
            | ParseErrIdent Node Presentation
               deriving Show
@@ -104,8 +104,8 @@ data Exp = PlusExp IDD IDP Exp Exp
          | TimesExp IDD IDP Exp Exp 
          | DivExp IDD IDP Exp Exp 
          | PowerExp IDD IDP Exp Exp 
-         | BoolExp IDD IDP Bool 
-         | IntExp IDD IDP Int 
+         | BoolExp IDD IDP Bool_ 
+         | IntExp IDD IDP Int_ 
          | LamExp IDD IDP IDP Ident Exp 
          | AppExp IDD Exp Exp 
          | CaseExp IDD IDP IDP Exp List_Alt 
@@ -138,19 +138,19 @@ data BoardRow = BoardRow IDD BoardSquare BoardSquare BoardSquare BoardSquare Boa
                  deriving Show
 
 
-data BoardSquare = Queen IDD Bool 
-                 | King IDD Bool 
-                 | Bishop IDD Bool 
-                 | Knight IDD Bool 
-                 | Rook IDD Bool 
-                 | Pawn IDD Bool 
+data BoardSquare = Queen IDD Bool_ 
+                 | King IDD Bool_ 
+                 | Bishop IDD Bool_ 
+                 | Knight IDD Bool_ 
+                 | Rook IDD Bool_ 
+                 | Pawn IDD Bool_ 
                  | Empty 
                  | HoleBoardSquare
                  | ParseErrBoardSquare Node Presentation
                     deriving Show
 
 
-data PPPresentation = PPPresentation IDD Bool List_Slide 
+data PPPresentation = PPPresentation IDD Bool_ List_Slide 
                     | HolePPPresentation
                     | ParseErrPPPresentation Node Presentation
                        deriving Show
@@ -188,6 +188,18 @@ data String_ = String_ IDD String
              | HoleString_
              | ParseErrString_ Node Presentation
                 deriving Show
+
+
+data Bool_ = Bool_ IDD Bool 
+           | HoleBool_
+           | ParseErrBool_ Node Presentation
+              deriving Show
+
+
+data Int_ = Int_ IDD Int 
+          | HoleInt_
+          | ParseErrInt_ Node Presentation
+             deriving Show
 
 
 data List_Decl = List_Decl IDD ConsList_Decl 
@@ -250,22 +262,24 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 data ClipDoc = Clip_List_Decl List_Decl
              | Clip_HeliumTypeInfo HeliumTypeInfo
              | Clip_Document Document
-             | Clip_Bool Bool
+             | Clip_Bool_ Bool_
              | Clip_Ident Ident
              | Clip_Exp Exp
              | Clip_Board Board
              | Clip_PPPresentation PPPresentation
-             | Clip_String String
-             | Clip_Int Int
+             | Clip_String_ String_
+             | Clip_Int_ Int_
              | Clip_List_Alt List_Alt
              | Clip_List_Exp List_Exp
              | Clip_BoardRow BoardRow
              | Clip_BoardSquare BoardSquare
              | Clip_List_Slide List_Slide
-             | Clip_String_ String_
              | Clip_ItemList ItemList
              | Clip_ListType ListType
              | Clip_List_Item List_Item
+             | Clip_String String
+             | Clip_Bool Bool
+             | Clip_Int Int
              | Clip_Decl Decl
              
              | Clip_Alt Alt
@@ -337,6 +351,10 @@ data Node = NoNode
           | HoleItemNode Item Path 
           | String_Node String_ Path 
           | HoleString_Node String_ Path 
+          | Bool_Node Bool_ Path 
+          | HoleBool_Node Bool_ Path 
+          | Int_Node Int_ Path 
+          | HoleInt_Node Int_ Path 
           | List_DeclNode List_Decl Path 
           | HoleList_DeclNode List_Decl Path 
           | List_AltNode List_Alt Path 
@@ -408,6 +426,10 @@ instance Show Node where
   show (HoleItemNode _ _)  = "HoleItemNode"
   show (String_Node _ _)  = "String_Node"
   show (HoleString_Node _ _)  = "HoleString_Node"
+  show (Bool_Node _ _)  = "Bool_Node"
+  show (HoleBool_Node _ _)  = "HoleBool_Node"
+  show (Int_Node _ _)  = "Int_Node"
+  show (HoleInt_Node _ _)  = "HoleInt_Node"
   show (List_DeclNode _ _)  = "List_DeclNode"
   show (HoleList_DeclNode _ _)  = "HoleList_DeclNode"
   show (List_AltNode _ _)  = "List_AltNode"

@@ -56,22 +56,24 @@ arityClip :: ClipDoc -> Int
 arityClip (Clip_List_Decl x) = arity x
 arityClip (Clip_HeliumTypeInfo x) = arity x
 arityClip (Clip_Document x) = arity x
-arityClip (Clip_Bool x) = arity x
+arityClip (Clip_Bool_ x) = arity x
 arityClip (Clip_Ident x) = arity x
 arityClip (Clip_Exp x) = arity x
 arityClip (Clip_Board x) = arity x
 arityClip (Clip_PPPresentation x) = arity x
-arityClip (Clip_String x) = arity x
-arityClip (Clip_Int x) = arity x
+arityClip (Clip_String_ x) = arity x
+arityClip (Clip_Int_ x) = arity x
 arityClip (Clip_List_Alt x) = arity x
 arityClip (Clip_List_Exp x) = arity x
 arityClip (Clip_BoardRow x) = arity x
 arityClip (Clip_BoardSquare x) = arity x
 arityClip (Clip_List_Slide x) = arity x
-arityClip (Clip_String_ x) = arity x
 arityClip (Clip_ItemList x) = arity x
 arityClip (Clip_ListType x) = arity x
 arityClip (Clip_List_Item x) = arity x
+arityClip (Clip_String x) = arity x
+arityClip (Clip_Bool x) = arity x
+arityClip (Clip_Int x) = arity x
 arityClip (Clip_Decl x) = arity x
 arityClip (Clip_Alt x) = arity x
 arityClip (Clip_Slide x) = arity x
@@ -82,22 +84,24 @@ alternativesClip :: ClipDoc -> [ (String, ClipDoc) ]
 alternativesClip (Clip_List_Decl x) = alternatives x
 alternativesClip (Clip_HeliumTypeInfo x) = alternatives x
 alternativesClip (Clip_Document x) = alternatives x
-alternativesClip (Clip_Bool x) = alternatives x
+alternativesClip (Clip_Bool_ x) = alternatives x
 alternativesClip (Clip_Ident x) = alternatives x
 alternativesClip (Clip_Exp x) = alternatives x
 alternativesClip (Clip_Board x) = alternatives x
 alternativesClip (Clip_PPPresentation x) = alternatives x
-alternativesClip (Clip_String x) = alternatives x
-alternativesClip (Clip_Int x) = alternatives x
+alternativesClip (Clip_String_ x) = alternatives x
+alternativesClip (Clip_Int_ x) = alternatives x
 alternativesClip (Clip_List_Alt x) = alternatives x
 alternativesClip (Clip_List_Exp x) = alternatives x
 alternativesClip (Clip_BoardRow x) = alternatives x
 alternativesClip (Clip_BoardSquare x) = alternatives x
 alternativesClip (Clip_List_Slide x) = alternatives x
-alternativesClip (Clip_String_ x) = alternatives x
 alternativesClip (Clip_ItemList x) = alternatives x
 alternativesClip (Clip_ListType x) = alternatives x
 alternativesClip (Clip_List_Item x) = alternatives x
+alternativesClip (Clip_String x) = alternatives x
+alternativesClip (Clip_Bool x) = alternatives x
+alternativesClip (Clip_Int x) = alternatives x
 alternativesClip (Clip_Decl x) = alternatives x
 alternativesClip (Clip_Alt x) = alternatives x
 alternativesClip (Clip_Slide x) = alternatives x
@@ -108,22 +112,24 @@ holeClip :: ClipDoc -> ClipDoc
 holeClip (Clip_List_Decl x) = Clip_List_Decl hole
 holeClip (Clip_HeliumTypeInfo x) = Clip_HeliumTypeInfo hole
 holeClip (Clip_Document x) = Clip_Document hole
-holeClip (Clip_Bool x) = Clip_Bool hole
+holeClip (Clip_Bool_ x) = Clip_Bool_ hole
 holeClip (Clip_Ident x) = Clip_Ident hole
 holeClip (Clip_Exp x) = Clip_Exp hole
 holeClip (Clip_Board x) = Clip_Board hole
 holeClip (Clip_PPPresentation x) = Clip_PPPresentation hole
-holeClip (Clip_String x) = Clip_String hole
-holeClip (Clip_Int x) = Clip_Int hole
+holeClip (Clip_String_ x) = Clip_String_ hole
+holeClip (Clip_Int_ x) = Clip_Int_ hole
 holeClip (Clip_List_Alt x) = Clip_List_Alt hole
 holeClip (Clip_List_Exp x) = Clip_List_Exp hole
 holeClip (Clip_BoardRow x) = Clip_BoardRow hole
 holeClip (Clip_BoardSquare x) = Clip_BoardSquare hole
 holeClip (Clip_List_Slide x) = Clip_List_Slide hole
-holeClip (Clip_String_ x) = Clip_String_ hole
 holeClip (Clip_ItemList x) = Clip_ItemList hole
 holeClip (Clip_ListType x) = Clip_ListType hole
 holeClip (Clip_List_Item x) = Clip_List_Item hole
+holeClip (Clip_String x) = Clip_String hole
+holeClip (Clip_Bool x) = Clip_Bool hole
+holeClip (Clip_Int x) = Clip_Int hole
 holeClip (Clip_Decl x) = Clip_Decl hole
 holeClip (Clip_Alt x) = Clip_Alt hole
 holeClip (Clip_Slide x) = Clip_Slide hole
@@ -134,22 +140,24 @@ isListClip :: ClipDoc -> Bool
 isListClip (Clip_List_Decl x) = isList x
 isListClip (Clip_HeliumTypeInfo x) = isList x
 isListClip (Clip_Document x) = isList x
-isListClip (Clip_Bool x) = isList x
+isListClip (Clip_Bool_ x) = isList x
 isListClip (Clip_Ident x) = isList x
 isListClip (Clip_Exp x) = isList x
 isListClip (Clip_Board x) = isList x
 isListClip (Clip_PPPresentation x) = isList x
-isListClip (Clip_String x) = isList x
-isListClip (Clip_Int x) = isList x
+isListClip (Clip_String_ x) = isList x
+isListClip (Clip_Int_ x) = isList x
 isListClip (Clip_List_Alt x) = isList x
 isListClip (Clip_List_Exp x) = isList x
 isListClip (Clip_BoardRow x) = isList x
 isListClip (Clip_BoardSquare x) = isList x
 isListClip (Clip_List_Slide x) = isList x
-isListClip (Clip_String_ x) = isList x
 isListClip (Clip_ItemList x) = isList x
 isListClip (Clip_ListType x) = isList x
 isListClip (Clip_List_Item x) = isList x
+isListClip (Clip_String x) = isList x
+isListClip (Clip_Bool x) = isList x
+isListClip (Clip_Int x) = isList x
 isListClip (Clip_Decl x) = isList x
 isListClip (Clip_Alt x) = isList x
 isListClip (Clip_Slide x) = isList x
@@ -160,22 +168,24 @@ insertListClip :: Int -> ClipDoc -> ClipDoc -> ClipDoc
 insertListClip i c (Clip_List_Decl x) = insertList i c x
 insertListClip i c (Clip_HeliumTypeInfo x) = insertList i c x
 insertListClip i c (Clip_Document x) = insertList i c x
-insertListClip i c (Clip_Bool x) = insertList i c x
+insertListClip i c (Clip_Bool_ x) = insertList i c x
 insertListClip i c (Clip_Ident x) = insertList i c x
 insertListClip i c (Clip_Exp x) = insertList i c x
 insertListClip i c (Clip_Board x) = insertList i c x
 insertListClip i c (Clip_PPPresentation x) = insertList i c x
-insertListClip i c (Clip_String x) = insertList i c x
-insertListClip i c (Clip_Int x) = insertList i c x
+insertListClip i c (Clip_String_ x) = insertList i c x
+insertListClip i c (Clip_Int_ x) = insertList i c x
 insertListClip i c (Clip_List_Alt x) = insertList i c x
 insertListClip i c (Clip_List_Exp x) = insertList i c x
 insertListClip i c (Clip_BoardRow x) = insertList i c x
 insertListClip i c (Clip_BoardSquare x) = insertList i c x
 insertListClip i c (Clip_List_Slide x) = insertList i c x
-insertListClip i c (Clip_String_ x) = insertList i c x
 insertListClip i c (Clip_ItemList x) = insertList i c x
 insertListClip i c (Clip_ListType x) = insertList i c x
 insertListClip i c (Clip_List_Item x) = insertList i c x
+insertListClip i c (Clip_String x) = insertList i c x
+insertListClip i c (Clip_Bool x) = insertList i c x
+insertListClip i c (Clip_Int x) = insertList i c x
 insertListClip i c (Clip_Decl x) = insertList i c x
 insertListClip i c (Clip_Alt x) = insertList i c x
 insertListClip i c (Clip_Slide x) = insertList i c x
@@ -186,22 +196,24 @@ removeListClip :: Int -> ClipDoc -> ClipDoc
 removeListClip i (Clip_List_Decl x) = removeList i x
 removeListClip i (Clip_HeliumTypeInfo x) = removeList i x
 removeListClip i (Clip_Document x) = removeList i x
-removeListClip i (Clip_Bool x) = removeList i x
+removeListClip i (Clip_Bool_ x) = removeList i x
 removeListClip i (Clip_Ident x) = removeList i x
 removeListClip i (Clip_Exp x) = removeList i x
 removeListClip i (Clip_Board x) = removeList i x
 removeListClip i (Clip_PPPresentation x) = removeList i x
-removeListClip i (Clip_String x) = removeList i x
-removeListClip i (Clip_Int x) = removeList i x
+removeListClip i (Clip_String_ x) = removeList i x
+removeListClip i (Clip_Int_ x) = removeList i x
 removeListClip i (Clip_List_Alt x) = removeList i x
 removeListClip i (Clip_List_Exp x) = removeList i x
 removeListClip i (Clip_BoardRow x) = removeList i x
 removeListClip i (Clip_BoardSquare x) = removeList i x
 removeListClip i (Clip_List_Slide x) = removeList i x
-removeListClip i (Clip_String_ x) = removeList i x
 removeListClip i (Clip_ItemList x) = removeList i x
 removeListClip i (Clip_ListType x) = removeList i x
 removeListClip i (Clip_List_Item x) = removeList i x
+removeListClip i (Clip_String x) = removeList i x
+removeListClip i (Clip_Bool x) = removeList i x
+removeListClip i (Clip_Int x) = removeList i x
 removeListClip i (Clip_Decl x) = removeList i x
 removeListClip i (Clip_Alt x) = removeList i x
 removeListClip i (Clip_Slide x) = removeList i x
@@ -233,7 +245,7 @@ instance Editable Decl where
   paste (0:p) c (PPPresentationDecl i1 i2 i3 x1) = PPPresentationDecl i1 i2 i3 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Decl {Ident} {Exp} "  , Clip_Decl $ Decl NoIDD NoIDP NoIDP NoIDP NoIDP hole hole hole hole)
+  alternatives _ = [("Decl {Bool_} {Bool_} {Ident} {Exp} "  , Clip_Decl $ Decl NoIDD NoIDP NoIDP NoIDP NoIDP hole hole hole hole)
                    ,("BoardDecl {Board} "  , Clip_Decl $ BoardDecl NoIDD NoIDP NoIDP hole)
                    ,("PPPresentationDecl {PPPresentation} "  , Clip_Decl $ PPPresentationDecl NoIDD NoIDP NoIDP hole)
                    ,("{Decl}", Clip_Decl hole)
@@ -260,7 +272,7 @@ instance Editable Ident where
   paste (0:p) c (Ident i1 i2 i3 x1) = Ident i1 i2 i3 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Ident "  , Clip_Ident $ Ident NoIDD NoIDP NoIDP hole)
+  alternatives _ = [("Ident {String_} "  , Clip_Ident $ Ident NoIDD NoIDP NoIDP hole)
                    ,("{Ident}", Clip_Ident hole)
                    ]
 
@@ -335,8 +347,8 @@ instance Editable Exp where
                    ,("TimesExp {Exp} {Exp} "  , Clip_Exp $ TimesExp NoIDD NoIDP hole hole)
                    ,("DivExp {Exp} {Exp} "  , Clip_Exp $ DivExp NoIDD NoIDP hole hole)
                    ,("PowerExp {Exp} {Exp} "  , Clip_Exp $ PowerExp NoIDD NoIDP hole hole)
-                   ,("BoolExp "  , Clip_Exp $ BoolExp NoIDD NoIDP hole)
-                   ,("IntExp "  , Clip_Exp $ IntExp NoIDD NoIDP hole)
+                   ,("BoolExp {Bool_} "  , Clip_Exp $ BoolExp NoIDD NoIDP hole)
+                   ,("IntExp {Int_} "  , Clip_Exp $ IntExp NoIDD NoIDP hole)
                    ,("LamExp {Ident} {Exp} "  , Clip_Exp $ LamExp NoIDD NoIDP NoIDP hole hole)
                    ,("AppExp {Exp} {Exp} "  , Clip_Exp $ AppExp NoIDD hole hole)
                    ,("CaseExp {Exp} {Alts} "  , Clip_Exp $ CaseExp NoIDD NoIDP NoIDP hole hole)
@@ -491,12 +503,12 @@ instance Editable BoardSquare where
   paste (0:p) c (Pawn i1 x1) = Pawn i1 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Queen "  , Clip_BoardSquare $ Queen NoIDD hole)
-                   ,("King "  , Clip_BoardSquare $ King NoIDD hole)
-                   ,("Bishop "  , Clip_BoardSquare $ Bishop NoIDD hole)
-                   ,("Knight "  , Clip_BoardSquare $ Knight NoIDD hole)
-                   ,("Rook "  , Clip_BoardSquare $ Rook NoIDD hole)
-                   ,("Pawn "  , Clip_BoardSquare $ Pawn NoIDD hole)
+  alternatives _ = [("Queen {Bool_} "  , Clip_BoardSquare $ Queen NoIDD hole)
+                   ,("King {Bool_} "  , Clip_BoardSquare $ King NoIDD hole)
+                   ,("Bishop {Bool_} "  , Clip_BoardSquare $ Bishop NoIDD hole)
+                   ,("Knight {Bool_} "  , Clip_BoardSquare $ Knight NoIDD hole)
+                   ,("Rook {Bool_} "  , Clip_BoardSquare $ Rook NoIDD hole)
+                   ,("Pawn {Bool_} "  , Clip_BoardSquare $ Pawn NoIDD hole)
                    ,("Empty "  , Clip_BoardSquare $ Empty)
                    ,("{BoardSquare}", Clip_BoardSquare hole)
                    ]
@@ -528,7 +540,7 @@ instance Editable PPPresentation where
   paste (1:p) c (PPPresentation i1 x1 x2) = PPPresentation i1 x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("PPPresentation {Slides} "  , Clip_PPPresentation $ PPPresentation NoIDD hole hole)
+  alternatives _ = [("PPPresentation {Bool_} {Slides} "  , Clip_PPPresentation $ PPPresentation NoIDD hole hole)
                    ,("{PPPresentation}", Clip_PPPresentation hole)
                    ]
 
@@ -667,6 +679,52 @@ instance Editable String_ where
   parseErr = ParseErrString_
 
   hole = HoleString_
+
+
+
+instance Editable Bool_ where
+  select []    x                  = Clip_Bool_ x
+  select (0:p) (Bool_ _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Bool_ c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Bool_")   x
+  paste (0:p) c (Bool_ i1 x1) = Bool_ i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Bool_ "  , Clip_Bool_ $ Bool_ NoIDD hole)
+                   ,("{Bool_}", Clip_Bool_ hole)
+                   ]
+
+  arity (Bool_ _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrBool_
+
+  hole = HoleBool_
+
+
+
+instance Editable Int_ where
+  select []    x                  = Clip_Int_ x
+  select (0:p) (Int_ _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Int_ c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Int_")   x
+  paste (0:p) c (Int_ i1 x1) = Int_ i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Int_ "  , Clip_Int_ $ Int_ NoIDD hole)
+                   ,("{Int_}", Clip_Int_ hole)
+                   ]
+
+  arity (Int_ _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrInt_
+
+  hole = HoleInt_
 
 toConsList_Decl [] = Nil_Decl
 toConsList_Decl (x:xs) = Cons_Decl x (toConsList_Decl xs)

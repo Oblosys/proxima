@@ -50,7 +50,7 @@ recognizeRootEnr = pStr' $
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (Structural (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
 
-      <*> parseIDListList_Decl <* (pStr' $ pStructural List_DeclNode) <*> recognizeList_Decl
+      <*> parseIDListList_Decl {- <* (pStr' $ pStructural List_DeclNode) -} <*> recognizeList_Decl
                                    {- tree or xml view-}
 -- ?remove pStr from this parser?
 parseIDListList_Decl :: ListParser List_Decl
@@ -76,9 +76,9 @@ recognizeIDListDecl = pStr $
 -- ?remove pStr from this parser?
 parseIdListIdent :: ListParser Ident
 parseIdListIdent =  pStr $
-           (\string -> reuseIdent [tokenNode string] Nothing Nothing Nothing (Just $ lIdentVal string))
-      <$   pSym parsingTk
-      <*>  pLIdent
+          (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
+      <$  pSym parsingTk
+      <*> pLIdent 
 
 -------------------- Chess board parser:
 
@@ -109,12 +109,14 @@ recognizeSlide =  pStr $
          (\str title itemList -> reuseSlide [tokenNode str] Nothing (Just title) (Just itemList))
      <$> pStructural SlideNode
      <*> parseString_ <*> recognizeItemList
-    
--- ?remove pStr from this parser?
+
+-- parseString needs to parse the ParseToken, rewrite, so it doesn't use reuseString
 parseString_ = pStr $
-           (\string -> reuseString_ [tokenNode string] Nothing (Just $ lIdentVal string)) 
+--           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+          mkString_
      <$   pSym parsingTk
      <*>  pLIdent
+
 
 recognizeItemList = pStr $                          -- ListType
          (\str listType list_item -> reuseItemList [tokenNode str] Nothing (Just listType) (Just list_item))
@@ -171,7 +173,7 @@ parseList_Decl =
       <$> pList parseDecl
 
 parseDecl  =                                                              -- IDD  "="                   ";"                       type sig              not used  expanded    auto-layout
-          (\sig ident tk1 exp tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just True) Nothing (Just ident) (Just exp))
+          (\sig ident tk1 exp tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just $ mkBool_ True) Nothing (Just ident) (Just exp))
       <$> pMaybe (pStructural DeclNode) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
   <|>     (\sig ident tk1 tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
@@ -303,8 +305,37 @@ recognizeExp' = pStr $
      <*> recognizeExp
 
 parseIdent = 
-         (\string -> reuseIdent [tokenNode string] Nothing (Just $ tokenIDP string) Nothing (Just $ lIdentVal string))
+         (\strTk -> reuseIdent [tokenNode strTk] Nothing (Just $ tokenIDP strTk) Nothing (Just $ mkString_ strTk))
      <$> pLIdent
+
+
+-- primitive, what to do with idp?
+
+-- maybe make a primIDP ? that takes the idp out of the string_? Then string has an idp field,
+-- but it is not used on presentation. (maybe it can be hidden from the user)
+
+
+
+-- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
+mkString_ :: Token (Maybe Node) -> String_
+mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+
+mkInt_ :: Token (Maybe Node) -> Int_
+mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
+
+-- Extracting the value from the token is not necessary, since true and false have different
+-- parsers, which can give the value as an argument
+mkBool_ :: Bool -> Bool_
+mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool)) 
+
+--pString_ = 
+--         (\string -> reuseString_ [tokenNode string] Nothing (Just $ tokenIDP string) (Just $ lIdentVal string))
+--     <$> pLIdent
+-- parser that ignores idp, we want to specify this at the parent level!
+--pString__ = 
+--         (\string -> reuseString_ [tokenNode string] Nothing Nothing (Just $ lIdentVal string))
+--     <$> pLIdent
+
 
 -------------------- Keyword parsers, remember to keep these consistent with keywords in Scanner.hs
 
@@ -333,13 +364,13 @@ pFalse  = pKey "False"
 -------------------- more or less primitive parsers: (because int & bool are unboxed)
 
 parseIntExp =
-         (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ intVal tk))
+         (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkInt_ tk))
      <$> pInt
 
 parseBoolExp = 
-         (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just True))
+         (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkBool_ True))
      <$> pTrue
-  <|>    (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just False))
+  <|>    (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkBool_ False))
      <$> pFalse
 
 --------------------------------------------------------------

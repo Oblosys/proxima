@@ -63,6 +63,9 @@ pMaybe parser = Just <$> parser `opt` Nothing
 
 pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
 
+
+
+
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
 pStr' :: ListParser a -> ListParser a
@@ -80,6 +83,11 @@ pStr p = unfoldStructure
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
          in  if null errs then res else debug Err (show errs) $ parseErr NoNode pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
+
+-- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
+-- 'top-level' parsing. Hence, the parser succeeds on any structural token, and something like
+-- pStr (pSym <DivExp> ...) <|> pStr (pSym <PowerExp> ...)  always takes the first alternative
+
 
 -- ? parse error is tricky, since the structural parent of the parsing subtree should know
 -- when an error occurred. Instead of Maybe, we need something like Reuse|(Set x)|(ParseErr [Err])
@@ -220,10 +228,18 @@ pStruct = pCSym 4 (Structural Nothing empty [] NoIDP)
 pCSym c p = pCostSym c p p
 
 lIdentVal :: Token (Maybe Node) -> String
-lIdentVal (LIdentTk "" _ _)  = "x"   -- may happen on parse error (although not likely since insert is expensive)
 lIdentVal (LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
+strValTk :: Token (Maybe Node) -> String
+strValTk (StrTk str _ _)    = str
+strValTk (IntTk str _ _)    = str
+strValTk (LIdentTk str _ _) = str
+strValTk (UIdentTk str _ _) = str
+strValTk (OpTk str _ _)     = str
+strValTk (SymTk str _ _)    = str
+strValTk tk                 = debug Err ("PresentationParser.strValTk: StructuralToken " ++ show tk) $ show tk
+  
 intVal :: Token (Maybe Node) -> Int
 intVal (IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (IntTk str _ _) = read str
