@@ -55,7 +55,7 @@ ziet er vaak mooier uit en verloopt logischer. mixen met <= bewijzen geen proble
 % Even in pure structure editor there are pres. oriented bits. eg navigation (pointing problem)
 
 
-In this chapter we give a formal specification of the layered architecture of the Proxima editor. We represent the presentation mapping $\Present$ by a function $\present$. Given $\present$, we state a number of requirements for a corresponding function $\interpret$, which is an inverse of $\present$, and maps an updated presentation back onto the document. Furthermore, we specify how the data levels are updated after the presentation has been edited.
+In this chapter we develop a formal specification of a layered presentation-oriented editor, such as  Proxima. We represent the presentation mapping $\Present$ by a function $\present$. Given $\present$, we state a number of requirements for a corresponding function $\interpret$, which is an inverse of $\present$, and maps an updated presentation back onto the document. Furthermore, we specify how the data levels are updated after the presentation has been edited.
 
 \bc 
 \toHere
@@ -85,7 +85,7 @@ First we consider a simple abstract editor consisting of a single layer between 
 \present & \tp &  \Level\H \rightarrow \Level\L\\
 }
 
-Because not every value of type $\Level\L$ is the presentation of a document is, $\present$ need not be surjective.  \nonote{what if not total?}
+Because not every value of type $\Level\L$ is the presentation of a document is, $\present$ need not be surjective.\nonote{what if not total?}
 
 Given $\present$, we will specify a total function $\interpret$, which maps a lower level back onto a higher level: 
 
@@ -174,7 +174,7 @@ Most likely, after editing, the presentation invariant does not hold between $\l
 
 Besides the presentation invariant, we impose several other requirements on the final levels.
 
-Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change because of the edit operation, and thus $\level''\H = \level\H$. Because, in this section, the presentation mapping is a function, $\level'\L$ can only be a valid presentation of $\level\H$ if it is equal to $\level\L$, meaning that the user did not change the lower level. However, in the next section, when extra state is added to the model, the reason for this property becomes clear. Because the property states that the document stays inert under an edit operation, we refer to it as \law{Doc-Inert}.
+Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change because of the edit operation, and thus $\level''\H = \level\H$. Because, in this section, the presentation mapping is a function, $\level'\L$ can only be a valid presentation of $\level\H$ if it is equal to $\level\L$, meaning that the user did not change the lower level. However, in the next section, when extra state is added to the model, the reason for this property becomes clear. Because the property states that the document stays the same under an edit operation, we refer to it as \law{Doc-Inert}.
 
 Secondly, if a user edits the lower level in such a way that $\level'\L$ is a valid presentation of some higher-level value, then the editor should not perform any further updates on the lower level, and the final value $level''\L$ should be equal $\level'\L$. Analogous to the previous property, this property is referred to as \law{Pres-Inert}.
 
@@ -182,7 +182,7 @@ Secondly, if a user edits the lower level in such a way that $\level'\L$ is a va
 Besides \law{Pres-Inert}, we could also add a requirement that if there exists an $h$, such that $level'\L = \present~h$, then $level''\H = h$, since because of \law{Pres-Inert} and injectivity of $\present$, $h$ is the only possible value for $\level''\H$. However, since this requirement will no longer hold in the presence of extra state, we will omit it here as well.
 \ec
 
-Our final requirement specifies what happens when $\level'\L$ is not a valid presentation of any higher level. In this case, the editor could simply forbid the edit operation, but a more user-friendly solution is to regard the operation as an inexact edit operation and perform the intended edit operation. This means that the editor chooses a $level''\H$ and $level''\L$ such that $level''\L$ is as close as possible to the $level'\L$ that came from the user (and, of course, $\level''\L = \present~\level''\H$ ).
+Our final requirement specifies what happens when $\level'\L$ is not a valid presentation of any higher level. In this case, the editor could simply forbid the edit operation, but a more user-friendly solution is to regard the operation as an inexact edit operation and perform the intended edit operation. This means that the editor chooses a $level''\H$ and $level''\L$ such that $level''\L$ is as close as possible to the $level'\L$ that came from the user (and, of course, $\level''\L = \present~\level''\H$).
 
 Summarizing, if we let $Comp$ be a program fragment that assigns new values to the data levels, then the requirements on $Comp$, specified as Hoare triples, are:
 
@@ -223,13 +223,13 @@ Because the program only consists of assignments and a composition, we do not ne
 \wp{~x \gets e~}{P} ~\eqv~ P[x/e]\\
 }{\fn{wp}-$\gts$}
 
-And a for composition we have:
+And for composition we have:
 
 \xprlab{
 \wp{~S \semi T~}{P} ~\eqv~ \wp{S}{ \wp{T}{P} }\\
 }{\fn{wp}-$\smi$}
 
-In Section~\ref{sect:compositeExtraEditing} we need two more laws, which we introduce here as well for completeness. We need a law for weakening the postcondition.
+In Section~\ref{sect:compositeExtraEditing} we need two more laws, which we introduce here as well, for completeness. We need a law for weakening the postcondition.
 
 \xprlab{
 (Q \imp Q') ~\imp~ (\wp{S}{Q} \imp \wp{S}{Q'})\\
@@ -374,10 +374,10 @@ Because two levels that only differ in extra state are in a sense equivalent, we
 We provide two examples to illustrate the equivalence class representation for extra state. Both examples are set in an editor for a simple programming language, for which layout is not part of the syntax.
 
 
-As an example of interpretation extra state, we take a partially presented declaration. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H$$~\tp~$$Level\H$$~\rel~$$Level\H$, we have 
+As an example of interpretation extra state, we take a partially presented declaration. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, the right-hand sides \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H$$~\tp~$$Level\H$$~\rel~$$Level\H$, we have 
 $(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$, which means that the two declarations are equal up to extra state. More generally, according to  $H$ a declaration is equivalent to every declaration that has the same left-hand side identifier.
 
-Whitespace is an example of presentation extra state. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Let $L$$~\tp~$$Level\L$$~\rel~$$Level\L$ be the equivalence relation for presentation extra state, then, for example,
+Whitespace is an example of presentation extra state. Consider an expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Let $L$$~\tp~$$Level\L$$~\rel~$$Level\L$ be the equivalence relation for presentation extra state, then, for example,
 $``\texttt{1\spc+\spc 2}\text{''}~L~``\texttt{1+2}\text{''}$.
 
 
@@ -427,7 +427,7 @@ x \in \eqcl{y}{R} ~\eqv~ \eqcl{x}{R} = \eqcl{y}{R}
 
 \subsection{An equivalence class for extra state} \label{sect:eqclassForES}
 
-If several lower-level values are related to the same higher-level value by the presentation relation, this means that when disregarding extra state, the lower-level values are equal. Similarly, if two higher-level values are related to the same lower value, the higher-level values are equal up to extra state. We use an equivalence relation to express that two values are equal up to extra state. 
+If several lower-level values are related to the same higher-level value by the presentation relation, this means that, when disregarding extra state, the lower-level values are equal. Similarly, if two higher-level values are related to the same lower value, the higher-level values are equal up to extra state. We use an equivalence relation to express that two values are equal up to extra state. 
 
 The two data levels give rise to two equivalence relations: $H$ and $L$.
 
@@ -1125,7 +1125,7 @@ we can construct a data type $T\st$ by:
 \data~T\st =  \p{C}_0~T\st_{0,0} \dots T\st_{0,m_0} ~|~\dots~|~\p{C}_n~T\st_{n,0} \dots T\st_{n,m_n}~|~\texttt{*}_T\\
 }
 
-For the binary tree from~\ref{sect:treesWildcards}, we get:
+For the binary tree from Section~\ref{sect:treesWildcards}, we get:
 
 \xpr{
 \data~Tree\st  = {\tt Bin}~Bool\st~Tree\st~Tree\st~|~{\tt Leaf}~Bool\st~Int\st~|~\texttt{*}_{Tree}\\
@@ -1174,7 +1174,7 @@ We prove $x\st \reuzestar y \in \para{x\st}$ by structural induction on $x\st$
 \end{Prf}
 
 {\bf Case} $x\st = \p{C}~x\st_0 \dots x\st_n$ and $y = \p{C}~y_0 \dots y_n$:\\
-The induction hypothesis is $x\st_i \reuzestar y_i \in \para{x\st_i}$ % \note{"property of \dots" step okay?}
+The induction hypothesis is $x\st_i \reuzestar y_i \in \para{x\st_i}$
 \begin{Prf}&
 	\p{C}~x\st_0 \dots x\st_n \reuzestar \p{C}~y_0 \dots y_n \in \para{\p{C}~x\st_0 \dots x\st_n}\\
 \Eqv{\law{$\reuzestar$-Def}}&
@@ -1329,14 +1329,19 @@ The $\reuzestar$ from this section is able to reuse extra state after a structur
 %																
 %																
 \section{A composite layer}  \label{sect:compositeExtra}
+\newcommand{\presentH}{\present_{\mathrm H}}
+\newcommand{\presentL}{\present_{\mathrm L}}
+\newcommand{\presentC}{\present_{\mathrm C}}
+\newcommand{\interpretH}{\interpret_{\mathrm H}}
+\newcommand{\interpretL}{\interpret_{\mathrm L}}
+\newcommand{\interpretC}{\interpret_{\mathrm C}}
 
 In order to describe the architecture of Proxima, we refine the single-layer model from the previous sections to accommodate multiple layers. 
 \bc Given a function $\present$ that can be split into component functions $\present\H$ and $\present\L$, we show how the specification for $\interpret$ can be split into specifications for the components $\interpret\H$ and $\interpret\L$.  
 \ec
 To make it explicit that $\present$ and $\interpret$ are composite functions in this section, we denote the functions by $\present\C$ and $\interpret\C$.
 
-We assume that  $\present\C$ is given and that it can be split into components $\present\H$ and $\present\L$. For these components, we recursively obtain specifications for  $\interpret\H$ and $\interpret\L$. The specification for $\interpret\C$ is a composition of $\interpret\H$ and $\interpret\L$.
-\nonote{what about es?? partially specified?}
+We assume that  $\present\C$ is given and that it can be split into components $\presentH$ and $\present\L$. For these components, we recursively obtain specifications for  $\interpret\H$ and $\interpret\L$. The specification for $\interpret\C$ is a composition of $\interpret\H$ and $\interpret\L$.\nonote{what about es?? partially specified?}
 
 \bc Rather than splitting aconsidering all layers at once, we look at a composite layer that consists of an upper and a lower layer with a middle data level in between. \ec
 
@@ -1365,7 +1370,7 @@ It turns out that splitting the presentation mapping and constructing $\interpre
 %\o Are the eq. classes of composite * layers still * eq. classes?
 %\el
 
-\subsection{Composite $present\C$ and $interpret\C$} \label{sect:compositeExtraCompose}
+\subsection{Composite $\present\C$ and $\interpret\C$} \label{sect:compositeExtraCompose}
 
 
 
@@ -1415,7 +1420,7 @@ and
 h~\Interpret\C ~l ~\eqv~ \exists m : h~\Interpret\H~m \land m~\Interpret\L~l\\
 }
 
-\head{Composite $present\C$ and $interpret\C$}
+\head{Composite $\present\C$ and $\interpret\C$}
 
 
 We can split $\present\C$ and compose $\interpret\C$, similar to $Present\C$ and $Interpret\C$  with the difference that all relations are now represented by functions between equivalence classes. 
@@ -1501,16 +1506,33 @@ In line with the previous sections, we would like to represent the two relations
 \begin{center} 
 \begin{minipage}[t]{.45\textwidth}
  
-\begin{array}[b]{l@{}l@{}l@{}l}
-\Eqcl{Level\H}{CH}~~~ 	& \Eqcl{Level\H}{HH}~~~	&                    \\
-~~~~\,\text{\textbar}& \present\H 			&	\\
-\present\C 				& \Eqcl{Level\M}{HL}		& \Eqcl{Level\M}{LH} 	\\
-~~~~\text{\textdownarrow} &						& \present\L	\\
+%\begin{array}[b]{l@{}l@{}l@{}l}
+%\Eqcl{Level\H}{CH}~~~ 	& \Eqcl{Level\H}{HH}~~~	&                    \\
+%~~~~\,\text{\textbar}& \present\H 			&	\\
+%\present\C 				& \Eqcl{Level\M}{HL}		& \Eqcl{Level\M}{LH} 	\\
+%~~~~\text{\textdownarrow} &						& \present\L	\\
+%\Eqcl{Level\L}{CL} 		&				 		& \Eqcl{Level\L}{LL} \\
+%\end{array} 
+
+%\SelectTips{cm}{10}
+\begin{small}
+\xymatrix@=0.25cm{
+\Eqcl{Level\H}{CH} \ar@{-}[dd] 	& \Eqcl{Level\H}{HH} \ar@{-}[d]	&                    \\
+					& \present_{\mathrm H} \ar[d]			&	\\
+\present_{\mathrm C} \ar[dd]				& \Eqcl{Level\M}{HL}		& \Eqcl{Level\M}{LH} \ar@{-}[d]	\\
+					&						& \present_{\mathrm L} \ar[d]	\\
 \Eqcl{Level\L}{CL} 		&				 		& \Eqcl{Level\L}{LL} \\
-\end{array} 
+%\ar@{-}[dd]		& \ar@{-}[d]&  \\
+%     				& \ar[d] 	&  \\
+%\ar[dd]			& 		    &  \ar@{-}[d]\\
+%					&			&  \ar[d]	\\
+%					&           &  \\
+}
+\end{small}
+
 \end{minipage}
 \end{center}
-\caption{Equivalence relations in a composite layer. (draft)} \label{relationsInLayer} 
+\caption{Equivalence relations in a composite layer.} \label{relationsInLayer} 
 \end{figure}
 
 
@@ -1710,49 +1732,65 @@ $(\present_{n} \oo \present_{n-1} \oo \cdots \oo \present_1 \oo \interpret_1 \oo
 The most logical way to decompose this computation is by splitting it into $\present_{n}$, $\interpret_{n}$, and
 $(\present_{n-1} \oo \cdots \oo \interpret_{n-1})$. This corresponds to splitting off an atomic layer at the bottom of a composite layer.
 
+\bc
+ & \dataa{$doc$}\ar[d]                    & & & \dataa{$upd$} & \\
+ \dataa{$state$}\ar[r]                    & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
+     \dataa{$mapping$}\ar@{.>}[r] & \dataa{$mapping$} \ar[r] & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
+ & & \dataa{$state$}\ar@{.>}[r] & \dataa{$state$} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
+ & \dataa{$pres$}                          & & & \dataa{$gest$}\ar[uu] & 
+ \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
+\ec
 
 
 \begin{figure}
   \hfill
   \begin{minipage}[t]{.45\textwidth}
     \begin{center}  
-\begin{footnotesize}
-\begin{array}[b]{l@{}l@{}l@{}l}
-\Eqcl{Level\H}{CH}~~~ 	& \Eqcl{Level\H}{HH}~~~	&                    \\
-~~~~\,\!\text{\textbar}		& \present\H 				&	\\
-\present\C 				& \Eqcl{Level\M}{HL}		& \Eqcl{Level\M}{LH} 	\\
-~~~~\text{\textdownarrow}&						& \present\L	\\
-\Eqcl{Level\L}{CL} 		&				 		& \Eqcl{Level\L}{LL} \\
-\end{array} 
-\end{footnotesize}
-%      \epsfig{file=pics/eps/singleToMulti2.eps, width = 60mm}\\ \vspace{0.765cm}
-%      \caption{A composite layer} \label{relativeLayer}
+\begin{small}
+\xymatrix@=0.25cm{
+\Eqcl{Level\H}{CH}\ar@{-}[dd] 	& \Eqcl{Level\H}{HH}\ar@{-}[d]	&                    \\
+								& \present_{\mathrm H} \ar[d]		&	\\
+\present_{\mathrm C} \ar[dd] 				& \Eqcl{Level\M}{HL}			& \Eqcl{Level\M}{LH}\ar@{-}[d] 	\\
+								&								& \present_{\mathrm L} \ar[d]	\\
+\Eqcl{Level\L}{CL} 				&				 				& \Eqcl{Level\L}{LL} \\
+}
+\end{small}
+%\begin{footnotesize}
+%\begin{array}[b]{l@{}l@{}l@{}l}
+%\Eqcl{Level\H}{CH}~~~ 	& \Eqcl{Level\H}{HH}~~~	&                    \\
+%~~~~\,\!\text{\textbar}		& \present\H 				&	\\
+%\present\C 				& \Eqcl{Level\M}{HL}		& \Eqcl{Level\M}{LH} 	\\
+%~~~~\text{\textdownarrow}&						& \present\L	\\
+%\Eqcl{Level\L}{CL} 		&				 		& \Eqcl{Level\L}{LL} \\
+%\end{array} 
+%\end{footnotesize}
     \end{center}
   \end{minipage}
   \hfill
   \begin{minipage}[t]{.45\textwidth}
     \begin{center}  
-\begin{footnotesize}
-\begin{array}[b]{l@{}l@{}l@{}l}
-\Eqcl{Level_0}{CH_i} 			& \Eqcl{Level_0}{CH_{i-1}}			&    \\
-~~~~\,\!\text{\textbar}		& \present_{\mathrm{C},{i-1}}~~~~&	\\
-\present_{\mathrm{C},{i}} ~~~~& \Eqcl{Level_{i-1}}{CL_{i-1}} 	& \Eqcl{Level_{i-1}}{H_i} \\
-~~~~\text{\textdownarrow}	&								& \present_i	\\
-\Eqcl{Level_{i}}{CL	_i}		&	 							& \Eqcl{Level_{i}}{L_i} \\
-
-%Level_0: 		&  CH_i 		& CH_{i-1} 	&                    \\
-% 			&   			& \present_{\mathrm{C},{i-1}} ~~&	\\
-%Level_{i-1}:~~& \present_{\mathrm{C},{i}} ~~	& CL_{i-1} 	 & H_i 	\\
-%		 	&   			&		& \present_i	\\
-%Level_{i}: 	& CL	_i		& 		& L_i \\
-\end{array} 
-\end{footnotesize}
-%      \epsfig{file=pics/eps/singleToMulti1.eps, width = 60mm}
-%      \caption{An indexed composite layer.} \label{indexedLayer}
+\begin{small}
+\xymatrix@=0.25cm{
+\Eqcl{Level_0}{CH_i} \ar@{-}[dd]&  \Eqcl{Level_0}{CH_{i-1}} \ar@{-}[d]&    \\
+								& \present_{\mathrm{C},{i-1}} \ar[d]		&	\\
+\present_{\mathrm{C},{i}} \ar[dd] & \Eqcl{Level_{i-1}}{CL_{i-1}} 		& \Eqcl{Level_{i-1}}{H_i} \ar@{-}[d] \\
+								&									& \present_i \ar[d]\\
+\Eqcl{Level_{i}}{CL	_i}		&	 									& \Eqcl{Level_{i}}{L_i} \\
+}
+\end{small}
+%\begin{footnotesize}
+%\begin{array}[b]{l@{}l@{}l@{}l}
+%\Eqcl{Level_0}{CH_i} 			& \Eqcl{Level_0}{CH_{i-1}}			&    \\
+%~~~~\,\!\text{\textbar}		& \present_{\mathrm{C},{i-1}}~~~~&	\\
+%\present_{\mathrm{C},{i}} ~~~~& \Eqcl{Level_{i-1}}{CL_{i-1}} 	& \Eqcl{Level_{i-1}}{H_i} \\
+%~~~~\text{\textdownarrow}	&								& \present_i	\\
+%\Eqcl{Level_{i}}{CL	_i}		&	 							& \Eqcl{Level_{i}}{L_i} \\
+%\end{array} 
+%\end{footnotesize}
     \end{center}
   \end{minipage}
   \hfill
-\caption{Indices in a composite layer. (draft)} \label{indicesInLayer} 
+\caption{Indices in a composite layer.} \label{indicesInLayer} 
 \end{figure}
 
 
@@ -1793,9 +1831,9 @@ In a composition of $n$ presentation functions ($\present_n \oo \present_{n-1} \
 
 \bc
 For the equivalence relations we denote $CH_i$, $CL_i$, $CH_{i-1}$, $CH_{i-1}$, $H_i$, and $L_i$ by $CH$, $CL$, $HH$, $HL$, $LH$, and $LL$. Figure~\ref{relativeLayer} shows what Figure~\ref{indexedLayer} looks like when using the short-hand notation. 
-\note{mention that for levels $h$ stands for $0$, whereas for rels and mapping fns it stands for $i-1$?}
+%\note{mention that for levels $h$ stands for $0$, whereas for rels and mapping fns it stands for $i-1$?}
 %Note that this means that for functions the H subscript stands for $n-1$ and not for $0$. Same thing holds for $\interpret$.
-\note{mention that shorthand is not used for basis}
+%\note{mention that shorthand is not used for basis}
 \ec
 
 
@@ -2096,7 +2134,7 @@ Because we assumed the antecedent of \law{Doc-Inert} (in weakest precondition no
 
 \xprlab{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} ~~\imp~~ \wp{Comp_n} { \level'\L = \level''\L}}		{Pres-Inert}
 
-Similar to \law{Doc-Inert}, we cannot guarantee \law{Pres-Inert} without assuming extra conditions. It turns out that we can prove \law{Pres-Inert} if we assume \law{$\present$-Match} \nonote{not \law{$\interpret$-Match}??} together with a reversed \law{Orthogonal}, in which the $HL$ and $LH$ relations are swapped. However, because \law{Orthogonal} refers to $\reuze{LH}$, its reverse would have to refer to $\reuze{HL}$, which does not exist. The reason for this is the association order in $Comp$: reuse in the presentation direction of the higher layer is the result of the combined effect of the $\reuze{LL}$ functions of the components of the higher layer. Thus, the only way to specify a reversed \law{Orthogonal} is as a condition on the composite layer:
+Similar to \law{Doc-Inert}, we cannot guarantee \law{Pres-Inert} without assuming extra conditions. It turns out that we can prove \law{Pres-Inert} if we assume \law{$\present$-Match}\nonote{not \law{$\interpret$-Match}??} together with a reversed \law{Orthogonal}, in which the $HL$ and $LH$ relations are swapped. However, because \law{Orthogonal} refers to $\reuze{LH}$, its reverse would have to refer to $\reuze{HL}$, which does not exist. The reason for this is the association order in $Comp$: reuse in the presentation direction of the higher layer is the result of the combined effect of the $\reuze{LL}$ functions of the components of the higher layer. Thus, the only way to specify a reversed \law{Orthogonal} is as a condition on the composite layer:
 
 \xprlab{
 \eqcl{\level'\L}{LH}  = \eqcl{m}{LH} ~\imp~ \wp{Comp_{n-1}} {\eqcl{\level''\L}{LH}  = \eqcl{m}{LH}}}{Orthogonal-R}
@@ -2480,9 +2518,12 @@ Consider the interpretation extra state of the composition, which is represented
 On the other hand, if \law{Absorption} holds, then each $CH$ class corresponds to exactly one $HH$ class, and closeness is guaranteed by \law{Doc-Preserve} on the higher layer.
 
 The part of \law{Intended} for reusing presentation extra state is guaranteed by the component layers in a similar way as for interpretation extra state (without assuming \law{Absorption}). The other part of \law{Intended} must be guaranteed by 
-$\interpret\L$ and $\interpret\H$, and thus serves as the specification of these functions. %\note{this seems to be quite complicated}
+$\interpret\L$ and $\interpret\H$, and thus serves as the specification of these functions. 
 
-\nonote{more on nature of composite closeness?}
+%\note{this seems to be quite complicated}
+
+%\nonote{more on nature of composite closeness?}
+
 %\bl
 %\o preses is composition of pres es on middle and on lower, composite reuse must guarantee closeness.
 %\o intended is 2-step, each step does closer. hence, only editors that close is this way. if a h exists that is closer to l', but for %which m isn't, then not computed.
@@ -2523,9 +2564,7 @@ The stronger condition \law{Absorption} implies all four additional conditions:
 \xprlab{
 \eqcl{m}{LH} = \eqcl{m'}{LH} ~\imp~ \eqcl{m}{HL} = \eqcl{m'}{HL}}{Absorption}
 
-For the top-most composition, we cannot assume \law{Absorption} because this would rule out interpretation extra state altogether. However, {$\present$-Match}, {$\interpret$-Match}, \law{Orthogonal} trivially hold for the top-most composition, and \law{Pres-Inert} is proven without assuming \law{Absorption} for the top-most composition.
-
-\nonote{make explicit that we only need \law{InterPresent} and \law{Intended}?}
+For the top-most composition, we cannot assume \law{Absorption} because this would rule out interpretation extra state altogether. However, {$\present$-Match}, {$\interpret$-Match}, \law{Orthogonal} trivially hold for the top-most composition, and \law{Pres-Inert} is proven without assuming \law{Absorption} for the top-most composition.\nonote{make explicit that we only need \law{InterPresent} and \law{Intended}?}
 
 Because an editor consisting of $n$ layers is specified by repeatedly splitting of layers from underneath, we need to prove \law{Absorption} for each of the $n-1$ composite layers, except the top-most one. 
 
@@ -2705,8 +2744,7 @@ To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the docum
 \xprlab{~}{Pres-Inert}
 \vspace{-1.5ex}
 
-The precondition has been weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondition, on the other hand, is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change. 
-\nonote{say something about delta in precondition, plus the fact that it is on equivalence class?}
+The precondition has been weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondition, on the other hand, is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change. \nonote{say something about delta in precondition, plus the fact that it is on equivalence class?}
 
 Because the precondition of \law{Pres-Inert} has been weakened, it is satisfied by the two examples $\present~x = (x,x)$ and 
 $\present~x =(x,x,x)$. Hence, the editing behavior for these examples is no longer specified by the  \law{Intended} requirement. The \law{Intended} requirement now, more appropriately, only applies to presentation updates that are not valid even when duplicates are ignored. An example of such an update occurs in an expression editor with syntax coloring and  two views. If an expression is entered in one of the views, it is not a valid presentation even if the second view is ignored, because the new expression does not have the correct syntax coloring. Hence, the \law{Intended} requirement applies.
@@ -2811,7 +2849,7 @@ With duplicates it is easy to specify presentation mappings for which it is diff
 %\o Incrementality
 %\el
 
-\section{Related work and conclusions}
+\section{Conclusions and related work}
 
 %\bl
 %\o chapter specifies $\interpret$, given $\present$
@@ -2825,6 +2863,10 @@ In this chapter, we have provided a specification of the $\interpret$ mapping, g
 
 The combination of extra state and duplications makes it easy to construct a presentation mapping for which we cannot specify an $\interpret$. However, the aim of the specification is not to specify an editor for every imaginable presentation mapping, but rather to be able to formally specify the editors for real-world examples in which basic cases of duplication and extra state occur.
 
+The specification establishes requirements on the pair of $\present$ and $\interpret$ functions that constitute an editor, and  helps to clarify the notion of a layered presentation-oriented editor. Furthermore, the specification gives a more precise definition of the concept of extra state, and what it entails to reuse extra state.
+%%%%% CHECK
+
+
 Related to the specification in this chapter is the work by Meertens~\cite{meertens98maintainers} on maintainers for constraints between a document and its presentation. Given a constraint between two values, Meertens formulates a number of requirements for a pair of functions to be a maintainer for that constraint. In our case, the constraint would be the presentation relation. Meertens also provides a more formal approach to the concept of closeness and gives a number of maintainers for specific constraints.
 
 Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierce03lenses}, and Mu, Hu, and Takeichi~\cite{muhu04inv}, describe injective languages that allow the computation of a document from its (possibly edited) presentation. The language by Mu, Hu, and Takeichi also takes into account duplication of information.
@@ -2833,7 +2875,8 @@ The three formalisms have in common that their focus is not immediately on real-
 
 %\note{also say that \law{Intended} is not handled?}
 
-%** more on incrementality, also more lazy pres. evaluation only send request when info is needed. (maybe More impl than spec.)
+%** more on incrementality, also more lazy pres. evaluation
+% only send request when info is needed. (maybe More impl than spec.)
 
 
 %\bl
@@ -2848,6 +2891,10 @@ The three formalisms have in common that their focus is not immediately on real-
 %New things may break old. But parts remain valid
 
 %Conditions: maybe weaker ones are possible. these are for the most general case.
+
+
+% why this specification
+
 
 An important area of future research lies in the development of a presentation language that is powerful enough to specify all use cases, and which automatically constructs $\interpret$. Because an efficient inverse cannot always be computed automatically, complex parts of the presentation can be annotated, whereas for simpler presentations $\interpret$ is constructed automatically. Until such a language has been developed, it is up to the implementor to guarantee correctness of the editor.
 
