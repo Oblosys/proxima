@@ -38,9 +38,7 @@ A generic editor is a large system consisting of many components. In this chapte
 The core architecture of the Proxima system consists of a number of layers, which only communicate with their direct neighbors. This layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto an intermediate data structure. This intermediate data structure is mapped onto another intermediate data structure, until the last intermediate data structure is mapped onto the rendering. We will use the term {\em level} for the document, the rendering and the intermediate data structures, and the term {\em layer} for the components that take care of the mapping. Figure~\ref{proxlayers} schematically shows the levels and layers of Proxima. Only two levels are visible to each layer: an upper and a lower level.
 
 \begin{figure}
-\begin{small}
 \begin{center}
-\par                 %??? why a \par?
 \begin{small}
 \begin{tabular}{c}
 {Document}\vspace{1ex}\\
@@ -55,7 +53,6 @@ The core architecture of the Proxima system consists of a number of layers, whic
 \end{tabular}
 \end{small}\caption{ The levels and layers of Proxima (draft)}\label{proxlayers} 
 \end{center}
-\end{small}
 \end{figure}
 
 %sheets?
@@ -82,6 +79,10 @@ Some steps in the presentation process, especially in the higher layers, may be 
 
 The remainder of this chapter contains an informal description of the levels and layers in the Proxima architecture. A more formal description is presented in chapters~\ref{chap:singleLayer}~and~\ref{chap:layeredArchs}.
 
+
+%									
+%									
+%									
 \section{The levels of Proxima}
 
 A data level in Proxima is not just an intermediate value in the presentation computation, but an entity in its own right. Together, the data levels constitute the state of the editor. The six data levels of Proxima are:
@@ -100,6 +101,8 @@ A data level in Proxima is not just an intermediate value in the presentation co
 \item[Rendering:] A collection of user interface commmands for drawing the absolutely positioned and sized arrangement.
 \end{description}
 
+
+%									
 \subsection{Document} \label {sect:docLevel}
 
 A document is the internal tree data structure that is edited by the user. The type of the document is described by a context free grammar, with special constructs for lists and optional values (similar to EBNF). Haskell data types, EBNF, DTDs and XML Schemas are all restricted forms of context free grammars suitable for describing the document type. In this thesis, we make use of simple Haskell data types without higher-order types, except for the list type.
@@ -122,6 +125,8 @@ data Exp$_{Doc}$ \= =  IfExp $_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$\\
 
 An example document of this type, as well as examples of the lower levels, is provided with the explanation of the presentation process in Section~\ref{sect:presprocess}.
 
+
+%									
 \subsection{Enriched Document} \label{sect:enrLevel}
 
 An enriched document is a copy of the document, to which derived information has been added. In the word processor example, the enriched document contains a table of contents, and each section or subsection element has a field that contains its number. Such derived information is not present at the document level.
@@ -145,6 +150,8 @@ data Type$_{Enr}$ = IntType$_{Enr}$ | BoolType$_{Enr}$ | ErrorType$_{Enr}$
 \end{tabbing}
 \rmfamily
 
+
+%									
 \subsection{Presentation} \label{sect:presLevel}
 
 %what is presentation
@@ -190,6 +197,8 @@ data AttributionRule = \dots\\
 \end{tabbing}
 \rmfamily
 
+
+%									
 \subsection{Layout}
 
 The layout level is the same as the presentation level, except for the tokens. On the layout level, a token is represented by its string, whereas its whitespace is represented by strings of spaces and by starting a new row for each line break. Formatters are still present, because the exact size and position information required to remove them is not known at the layout level.
@@ -212,6 +221,8 @@ data AttributionRule = \dots\\
 \end{tabbing}
 \rmfamily
 
+
+%									
 \subsection{Arrangement}
 
 %what is arrangement  : fixed position + size. also formatters are replaced by columns of rows
@@ -239,7 +250,7 @@ data Arrangement \= = Empty$_{Arr}$ Geometry\\
 type Geometry = (Position, Size)\\ %\note{geometry for Empty?} 
 data AttributionRule = \dots\\
 \\
-*** of ***\\
+*** or ***\\
 \\
 data Arrangement \= = Empty$_{Arr}$\\
                  \> | String$_{Arr}$ Size String\\
@@ -257,6 +268,8 @@ data AttributionRule = \dots\\
 
 \note {have to make a choice: 2nd one makes moving arrs in a compound arr easier, good for incrementality, but has not been implemented/tested}
 
+
+%									
 \subsection{Rendering}
 
 A rendering is a set of user interface drawing commands that are actually drawn on the screen. Positions are expressed in pixel coordinates. In contrast to the other levels, a rendering has no explicit tree structure. \note{maybe it should be a tree though}
@@ -271,6 +284,10 @@ data RenderingCommand = \dots
 \end{tabbing}
 \rmfamily
 
+
+%									
+%									
+%									
 \section{The layers of Proxima}
 
 Between each pair of data levels is a {\em layer} that takes care of mapping the upper level onto the lower level (downward mapping, or presentation) and that translates edit operations on the lower level to edit operations on the upper level (upward mapping, or translation). 
@@ -295,7 +312,9 @@ $\delta_{Low}$ & {lower level} & $\delta_{Low}$
 \end{small}
 \end{figure}
 
-%Three kinds of arrows are visible in the picture: downward, upward, and horizontal arrows pointing to the %right. The downward arrows represent the presentation process and the upward arrows represent the %translation of edit operations. The horizontal arrows  and the horizontal arrows 
+%Three kinds of arrows are visible in the picture: downward, upward, and horizontal arrows pointing to the
+%right. The downward arrows represent the presentation process and the upward arrows represent the
+%translation of edit operations. The horizontal arrows  and the horizontal arrows 
 
 %A mapping between edit operations is at least as expressive as a mapping between values, because any %mapping on values can be represented by a mapping 
 %$f :: Data_{High} \rightarrow Data_{Low}$ can be expressed as a mapping on edit operations
@@ -307,7 +326,6 @@ A layer has two separate components, one for the downward mapping (presentation)
 \begin{itemize}
 \item Evaluation layer: Evaluator/Reducer
 %The evaluator computes all derived values and structures, and may reorder parts of the document. Its %counterpart, the reducer, maps edit operations on derived structures onto edit operations on the %document.
-
 \item Presentation layer: Presenter/Parser
 %The presenter computes the presentation of the enriched document. The parser A logical description of the %presentation of the document, consisting of rows and columns of attributed presentation elements. %\note{mention formatters here?}
 \item Layout layer: Layouter/Scanner
@@ -318,8 +336,12 @@ A layer has two separate components, one for the downward mapping (presentation)
 
 The downward mappings from all the layers together form a logical whole (the presentation process), just as the upward mappings (the translation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the translation process.
 
-\section{Presentation Process}
-\label{sect:presprocess}
+
+%									
+%									
+%									
+\section{Presentation Process} \label{sect:presprocess}
+
 The presentation process is the stepwise mapping of a document onto its final rendering. Although the mapping is actually a mapping between edit operations on each of the levels, we will present it here as a mapping between edit levels. The reason for this is that the fact that the mapping is on edit operations rather than on levels is important mainly for reasons of incrementality, and regarding it as a mapping on levels makes the presentation process easier to explain.
 
 In order to illustrate the different stages in the presentation process, we follow the presentation of an simple document. After the description of each layer component, the intermediate result of the presentation of the document is given.
@@ -337,10 +359,12 @@ Root$_{Doc}$ \= [ Comment$_{Doc}$ ["This", "is", "a", "simple", "expression"] \\
 \end{tabbing}
 \rmfamily \normalsize
 
+
+%									
 \subsection{Evaluation layer: Evaluator} \label{sect:evaluator}
 
 %what is evaluator
-The first step in the presentation process is the computation of the derived information in the document. The component that takes care of this is the evaluator. The evaluator is parameterized with a {\em computation sheet}, which is a declarative specification of the derived values. The computation sheet is specified using an attribute grammar formalism.
+The first step in the presentation process is the computation of the derived information in the document. The component that takes care of this is the evaluator. The evaluator is parameterized with a {\em evaluation sheet}, which is a declarative specification of the derived values. The evaluation sheet is specified using an attribute grammar formalism.
 
 Besides basic values, such as section numbers or the outcome of a computation in a spread sheet, the evaluator may also derive tree structures, such as a table of contents. The derived structures may be partial, duplicated, or reordered versions of the document.
 
@@ -359,6 +383,8 @@ Root$_{Enr}$ \= [ Comment$_{Enr}$ [ "This", "is", "a", "simple", "expression" ]\
 \end{tabbing}
 \rmfamily \normalsize
 
+
+%									
 \subsection{Presentation layer: Presenter} \label{sect:presenter}
 
 %what is presenter
@@ -399,12 +425,15 @@ Col$_{Pres}$ \= [ With$_{Pres}$ \{ fontFamily = "Times New Roman", fontSize = 12
 \rmfamily \normalsize
 
 
+
+%									
 \subsection{Layout layer: Layouter} \label{sect:layouter}
 
 %what is layouter
-The layouter removes the tokens in the presentation level, yielding the layout level. Each list of tokens is mapped on a column that contains rows of strings. A token is represented by its string, whereas spaces in its whitespace are represented as strings of spaces, and a line break in the whitespace causes a new row in the layout. \note{mention a layout sheet?} Structural tokens are treated specially, since they are not strings. A structural token is represented in the layout level by its presentation field, whereas its whitespace is represented by strings of spaces and starting new rows, similar to the other tokens.
+The layouter processes the tokens in the presentation level, yielding the layout level. Each list of tokens is mapped on a column that contains rows of strings. A token is represented by its string, whereas spaces in its whitespace are represented as strings of spaces, and a line break in the whitespace causes a new row in the layout. \note{mention a layout sheet?} Structural tokens are treated specially, since they are not strings. A structural token is represented in the layout level by its presentation field, whereas its whitespace is represented by strings of spaces and starting new rows, similar to the other tokens.
 
 %The layout layer may be parameterized with a layout sheet, in whi
+
 
 \bigskip {\bf Example:} The tokens that are present in the presentation level are replaced by strings in the layout level (the \textvisiblespace~character denotes a space). The formatter is not affected. The line break before the type declaration is represented by an empty string. 
 
@@ -416,21 +445,23 @@ Col$_{Lay}$ \= [  With$_{Lay}$ \{ fontFamily = "Times New Roman", fontSize = 12 
                     \> , With$_{Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
                     \>  ~~~ \= (Col$_{Lay}$ \= [ "" \\
                     \>          \>        \> , Row$_{Lay}$ [ "simple1", "\textvisiblespace", "::",
-                                                                              "\textvisiblespace", "Int" ]\\
+                                                                           "\textvisiblespace", "Int" ]\\
                     \>          \>        \> ])\\
                     \> , With$_{Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
                     \>  ~~~ \= (Col$_{Lay}$ \= [ Row$_{Lay}$ [ "simple1", "\textvisiblespace", "=" ]\\
                     \>          \>        \> , Row$_{Lay}$  [ "\textvisiblespace\textvisiblespace", 
-                                                                              "if", "\textvisiblespace", "True", "\textvisiblespace", 
-                                                                              "then", "\textvisiblespace", "1" ]\\
+                                                                             "if", "\textvisiblespace", "True", "\textvisiblespace", 
+                                                                             "then", "\textvisiblespace", "1" ]\\
                     \>          \>        \> , Row$_{Lay}$ [ "\textvisiblespace\textvisiblespace\textvisiblespace
-                                                                              \textvisiblespace\textvisiblespace\textvisiblespace
-                                                                              \textvisiblespace\textvisiblespace\textvisiblespace                                                                                    \textvisiblespace ", "else", "\textvisiblespace", "0" ]\\
+                                                                             \textvisiblespace\textvisiblespace\textvisiblespace
+                                                                             \textvisiblespace\textvisiblespace\textvisiblespace                                                                                         \textvisiblespace ", "else", "\textvisiblespace", "0" ]\\
                     \>          \>        \> ])\\
                     \> ]
 \end{tabbing}
 \rmfamily \normalsize
 
+
+%									
 \subsection{Arrangement layer: Arranger} \label{sect:arranger}
 
 The arranger computes the exact sizes and positions for all elements in the layout level, yielding the arrangement. Fonts are queried to determine the size of strings, and child elements of compound elements such as rows and columns are aligned and positioned.
@@ -438,29 +469,12 @@ The arranger computes the exact sizes and positions for all elements in the layo
 The arrangement layer also processes formatters by mapping them onto columns of rows in the arrangement. First, the amount of available space for a formatter is computed, and then the child elements are distributed along rows using a (possibly optimal) line breaking algorithm.
 % no sheet
 
+
 \bigskip {\bf Example:} The formatter, which is the first element in the top-level column of the example layout, is replaced by a column of rows in the arrangement. Furthermore, each element in the arrangement tree contains has an exact size and a position relative to its parent, which are denoted with superscripts: {\em element}$^{(x,y)(width\times height)}$. 
 
 Note that the with elements are not removed, because the font information is required to render the arrangement.
-%(149,156)
-%
-%[149-166,174-180,189-193,201-228,149-191]
-%[17,6,4,27,42]
-%
-%
-%6   (0,6) This (25,6)  is (40,6) a (52,6) simple
-%18  (0,18) expression
-%30
-%42  (0,) simple1 (35,) :: (55,) Int
-%54  (0,) simple1 (35,) = 
-%66         (10,) if   (25,) True   (50,)  then (75,) 1
-%78                                       (50,)  else  (75,) 0
-%\note{show the sizes and positions, but maybe not for strings}
 
 Arrangement:
-%With$_{Lay}$ \{ FontFamily = "Times New Roman" \}\\
-                    %\>  ~~~ Formatter$_{Lay}$ [ "This", "is", "a", "simple", "expression" ]\\
-%                    \> , With$_{Lay}$ \{ FontFamily = "Courier New" \}\\
-                    %\>  ~~~ \=
 \small \ttfamily
 \begin{tabbing}
 Col$_{Arr}^{(0,0)(80\times84)}$ \\
@@ -485,29 +499,13 @@ Col$_{Arr}^{(0,0)(80\times84)}$ \\
       \>      \> , Row$_{Arr}^{(0,36)(80\times12)}$ [ \dots~]\\
       \>      \> , Row$_{Arr}^{(0,48)(80\times12)}$ [ \dots~]\\
       \>      \> ])\\
-       \> ]
+      \> ]
 
-%                    \>                       \> , Row$_{Arr}^{(0,24)(80\times12)}$ \=  [ 
-                    %"\textvisiblespace\textvisiblespace"$^{(0,0)(10\times12)}$, 
-                                                                              %"if"$^{(10,0)(10\times12)}$, 
-%                                                                              "\textvisiblespace"$^{(20,0)(5\times12)}$\\
-                    %\>                       \>              \>, "True"$^{(25,0)(20\times12)}$, 
-%                    "\textvisiblespace"$^{(45,0)(5\times12)}$, 
-                                                                              %"then"$^{(50,0)(20\times12)}$\\
-                    %\>                       \>              \>, "\textvisiblespace"$^{(70,0)(5\times12)}$, 
-%                    "1"$^{(75,0)(5\times12)}$ ]\\
-%
-                    %\>                       \> , Row$_{Arr}^{(0,36)(80\times12)}$ \= [ 
-%                    "\textvisiblespace\textvisiblespace\textvisiblespace
-                                                                             %\textvisiblespace\textvisiblespace\textvisiblespace
-                                                                             %\textvisiblespace\textvisiblespace\textvisiblespace
-                                                                             %\textvisiblespace "$^{(0,0)(50\times12)}$, 
-%                                                                             "else"$^{(50,0)(20\times12)}$\\
-                     %\>                     \>              \>, "\textvisiblespace"$^{(70,0)(5\times12)}$, 
-%                     "0"$^{(75,0)(5\times12)}$ ]\\
 \end{tabbing}
 \rmfamily \normalsize
 
+
+%									
 \subsection{Renderering layer: Renderer} \label{sect:renderer}
 
 The renderer maps each element of the arrangement onto a set of drawing commands for the user interface. All positions and size have already been computed by the arranger, and the renderer only scales these positions and sizes according to the current scaling factor of the view.
@@ -532,6 +530,10 @@ simple1 = \\
 \rmfamily
 }}
 
+
+%									
+%									
+%									
 \section{Translation Process}
 
 The translation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
@@ -548,6 +550,8 @@ On the lowest two layers (rendering and arrangement), only direct translation ta
 
 Because the translation of edit operations does not go through all stages like the presentation does, and because of the variation in edit operations, it is not possible to give a running example of the translation process. A number of separate examples are therefore provided together with the descriptions of the translation components.
 
+
+%									
 \subsection{Renderering layer: Gesture Interpreter} \label{sect:gestureInterpreter}
 
 The gesture interpreter has two tasks. It maps edit gestures onto edit operations for the designated levels, and it translates edit operations on the rendering onto edit operations on the arrangement, which means that absolute positions in pixel coordinates are translated descaled to arrangement level coordinates. 
@@ -568,6 +572,8 @@ The second example is a key press of the letter 'a', which is mapped onto an ins
 KeyPress$_{Ren}$ 'a' $\mapsto$ Wrap$_{Arr}$ (Insert$_{Lay}$ 'a')
 \rmfamily
 
+
+%									
 \subsection{Arrangement layer: Unarranger}
 
 The main task of the unarranger is mapping locations in arrangement level edit operations on locations in layout level edit operations. A location that is specified in absolute coordinates is first converted to a location in the arrangement tree, which is specified as a tree path. Subsequently, the arrangement tree path is mapped onto a layout tree path. The arrangement tree is largely isomorphic to the layout tree, except for the formatter subtrees, as these are represented by rows and columns in the arrangement. Therefore, the mapping is mainly the identity function, except for paths in rows that originate from a formatter, which are mapped to paths in the originating formatter.
@@ -579,6 +585,8 @@ An mouse left click event at position (56,38) in the example arrangement from Se
 unarrange (MouseClick$_{Arr}$ (56,38) Left 1) = MouseClick$_{Lay}$ [1,0,1,4,0] Left 1
 \rmfamily
 
+
+%									
 \subsection{Layout layer: Scanner} \label{sect:scanner}
 
 The scanner is the first layer in which the level to level mapping becomes important, since the layout level may be edited by the user. Edit operations targeted at the layout level are performed on the layout level, after which the level is scanned, yielding the new presentation. A presentation edit operation is computed from the new presentation.
@@ -631,6 +639,8 @@ $\mapsto$\\
 
 We use an informal notation for both the {\em insert} and the {\em replace} edit operations to improve readability. The actual insert operation also contains a reference to the target location of the inserted character, and the replace operation contains the locations of the token lists, rather than the lists themselves. 
 
+
+%									
 \subsection{Presentation layer: Parser} \label{sect:parser}
         
 It is difficult to directly map edit operations on the presentation to edit operations on the enriched document, therefore we take the indirect approach: the edit operations are applied to the presentation, which is parsed to yield a new enriched document. The enriched document edit operations are computed from this new enriched document.
@@ -695,6 +705,8 @@ It should ne noted that the second \ttfamily (IntExp$_{Enr}$ 0)\rmfamily in the 
 
 After it is edited, an enriched document may be inconsistent with regard to the document and the evaluator. For example, if the declaration is edited in such a way that its type no longer matches the one in its type declaration. The consistency is guaranteed again when the reducer and evaluator have been invoked.
 
+
+%									
 \subsection{Evaluation layer: Reducer} \label{sect:reducer}
 
 The reducer takes care of mapping edit operations in derived structures on edit operation on the document. The specification of the mapping is in the {\em reduction sheet}, which in many cases can be automatically derived from the evaluation sheet. Automatic reduction behaviour is typically possible for parts of the enriched document that are duplicated, reordered, or partial versions of parts of the document. 
@@ -744,6 +756,10 @@ And the document level edit operation thus becomes:
 \end{tabbing}
 \rmfamily \normalsize
 
+
+%									
+%									
+%									
 \section{Extra state at each level}
 
 Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a more fundamental reason is that the presentation and translation mappings are not complete. More specifically, a level does not always contain enough information to compute the level below it and vice versa. By storing both layers, together with information on how elements in each layer depend on each other, it is possible to compute the lower level from an updated upper level and vice versa.
@@ -759,6 +775,10 @@ $translate :: low+extra_{low} \rightarrow high+extra_{high}$.
 
 The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and translation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
 
+
+%									
+%									
+%									
 \section{Motivation for the layer structure}
 
 The choice of layers for the Proxima editor is not an exact one. On the one extreme, the entire edit process can be put in one large layer, whereas on the other extreme a separate layer can be defined for every small step in the process. The choice of layers in Proxima is a balance between these extremes. This section contains the motivation for the layer structure as it is.
