@@ -33,14 +33,15 @@ genDocumentTypes include parsedFile =
 
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line
-genNode extendedTypes = [    "data Node = NoNode "]
+genNode (File _ ds) = [    "data Node = NoNode "]
                         ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
-                        ++ indent 10 (map makeNodeAlt fields)  where
-                        fields = removeRepeat(getFields' extendedTypes)
-                        makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
-                        makeNodeAlt e = "| "++fieldType e ++"Node "++fieldType e++" Path "
+                        ++ indent 10 (map makeNodeAlt (allConstructors ds))
+ where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) | Decl tp prods decltp <- ds, decltp /= DeclConsList, Prod cnstr cs <-prods]
+       --                fields = removeRepeat(getFields' extendedTypes)
+       --makeNodeAlt (Decl  _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
+       makeNodeAlt (tp, cnstr, _, _) = "| "++ cnstr ++"Node "++ tp ++" Path "
 ---
-
+       
 --- no clip for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- a special ConsList label in fields is not a good idea. Instead of from getFields, these
 --- types should come from the lefthand sides of the declarations
