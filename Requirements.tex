@@ -1,5 +1,5 @@
-\documentclass{entcs} 
-\usepackage{entcsmacro}
+\documentclass{speauth} 
+
 \usepackage{graphicx}
 \usepackage{utils}
 \usepackage{requirements}
@@ -21,23 +21,21 @@
 % Grave accent  `           Left brace   {          Vertical bar  |
 % Right brace   }           Tilde        ~
 
-\def\lastname{Schrage}
+\newcommand{\p}[1]{\texttt{#1}}
+\newcommand{\spc}{\textvisiblespace}
+
+\runningheads{M.M. Schrage}{Requirements} 
+
 \begin{document}
-\begin{frontmatter}
-  \title{Requirements} 
+
+  \title{Requirements for a presentatio-oriented editor for structured documents} 
   \author{Martijn M. Schrage, Johan Jeuring, Lambert Meertens, Doaitse Swierstra}
   \address{Institute of Information and Computing Sciences\\ Utrecht University\\
-    Utrecht, The Netherlands} 
-    \thanks[myemail]{Email:
-    \href{mailto:martijn@cs.uu.nl} {\texttt{\normalshape
-        martijn@cs.uu.nl}}} 
+    Utrecht, The Netherlands}     
 \begin{abstract} 
   abstract\dots
 \end{abstract}
-\begin{keyword}
-  keyword$_1$ \dots keyword$_n$
-\end{keyword}
-\end{frontmatter}
+
 
 \section{Requirements for a structure editor} \label{chap:requirements}
 
