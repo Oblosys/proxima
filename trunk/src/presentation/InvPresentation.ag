@@ -1,0 +1,213 @@
+SEM Decl
+  | InvDecl     lhs.idsPres = loc (InvDeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                                       row' [ text "inv;" ]
+
+SEM Decl 
+  | InvDecl      loc.typeStr = Nothing
+
+
+SEM Decl
+  | InvDecl       lhs.dcl   = ("XXXXXX", ErrVal)  -- should be done nicely with Maybe
+
+
+
+
+
+SEM Decl
+  | InvDecl         
+      lhs.pres = loc (InvDeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text' (mkIDP @idP0 @lhs.pIdC 0) "Inv: ", @inv.pres ]
+
+
+SEM Inv
+  | Inv
+      lhs.pres = loc (InvNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   col [ row [ text "get: \"", @eval.pres, text "\"" ]
+                       , @doc.pres
+                       , row [ text "src = ", @enr.pres ]
+                       ] 
+                                          
+SEM EvalButton
+  | ReEvaluate1 
+      lhs.pres = loc (ReEvaluate1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ box $ text "Evaluate" ] 
+  | ReEvaluate2 -- this constructore will never be presented
+      lhs.pres = loc (ReEvaluate2Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ box $ text "Evaluate" `withbgColor` blue ] 
+  | Skip
+      lhs.pres = loc (SkipNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ box $ text "Evaluate" ] `withMouseDown` pressEvalButton @lhs.path 
+-- `addPopupItems` [("eval", pressEvalButton @lhs.path)]
+                   
+SEM EitherDocView
+  | LeftDocView
+      lhs.pres = loc (LeftDocViewNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "Reduction error: ", col (map presMsg (lines (string_ @error.self))) ]
+  | RightDocView
+      lhs.pres = loc (RightDocViewNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "Doc: ", @doc.pres ]
+
+SEM View
+  | ANil
+      lhs.pres = loc (ANilNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   addInsOp @lhs.path @self $
+                   row' [ text "[]" ]
+  | AN
+      lhs.pres = loc (ANNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   addMarkOp @lhs.path @self $
+                   row' [ text " #", @int_.pres ]
+  | AS
+      lhs.pres = loc (ASNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   addMarkOp @lhs.path @self $
+                   row' [ text " \"", @string_.pres, text "\"" ]
+  | Pr
+      lhs.pres = loc (PrNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "<", @view1.pres, text ", ", @view2.pres, text ">" ]
+  | Ls
+      lhs.pres = loc (LsNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   addInsOp @lhs.path @self $
+                   addDelOp @lhs.path @self $
+                   row' [ text "(", @view1.pres, text " : ", @view2.pres, text ")" ]
+  | Tr
+      lhs.pres = loc (TrNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                    row' [ text "{", @view1.pres, text ", ", @view2.pres, text "}" ]
+  | L
+      lhs.pres = loc (LNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(L ", @view.pres, text ")" ]
+  | R
+      lhs.pres = loc (RNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(R ", @view.pres, text ")" ]
+  | Mark
+      lhs.pres = loc (MarkNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row [ @view.pres, text " ", move 0 (-4) $ shrink (text "*")] 
+  | DelL
+      lhs.pres = loc (DelLNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(", overlay [ row [ @view1.pres, text " :- " ]
+                                            , hLine `withHRef` 6
+                                            , empty ] `withColor` red
+                        , @view2.pres, text ")" ]
+  | InsL
+      lhs.pres = loc (InsLNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row [ text "(", overlay [ row [@view1.pres, text " :+ "]
+                                           , hLine `withHRef` (-3)
+                                           , empty ] `withColor` green
+                       , @view2.pres, text ")" ]
+  | SndP
+      lhs.pres = loc (SndPNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text $ "<" ++ (if bool_ @bool_.self then "+" else "-" ) 
+                        , @view1.pres, text ", ", @view2.pres, text ">" ]
+  | FstP
+      lhs.pres = loc (SndPNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text $ "<", @view1.pres, text ", ", @view2.pres
+                        , text $ (if bool_ @bool_.self then "+" else "-" ) ++ ">" ]
+  | IfNil
+      lhs.pres = loc (IfNilNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text $ "([]"++(if bool_ @bool_.self then "+" else "-" )++">"
+                        , text " ", @view.pres, text ")" ]
+  | Undef
+      lhs.pres = loc (UndefNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   text "\94" `withFontFam` "Symbol" `withFontSize_` (\fs -> fs - 3) -- bottom symbol
+  | Unit
+      lhs.pres = loc (UnitNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "()" ]
+
+
+SEM View
+{-  | ANil
+      lhs.pres = loc (ANilNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   addInsOp @lhs.path @self $
+                   row' [ text "[]" ]
+  | AN
+      lhs.pres = loc (ANNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   addMarkOp @lhs.path @self $
+                   row' [ text "#", @int_.pres ]
+  | AS
+      lhs.pres = loc (ASNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   addMarkOp @lhs.path @self $
+                   row' [ text "'", @string_.pres, text "'" ]
+  | Pr
+      lhs.pres = loc (PrNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "<", @view1.pres, text ", ", @view2.pres, text ">" ]
+  | Ls
+      lhs.pres = loc (LsNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   addInsOp @lhs.path @self $
+                   addDelOp @lhs.path @self $
+                   row' [ text "(\n", @view1.pres, text " : ", @view2.pres, text ")" ]
+  | Tr
+      lhs.pres = loc (TrNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "{", @view1.pres, text ", ", @view2.pres, text "}" ]
+  | L
+      lhs.pres = loc (LNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(L ", @view.pres, text ")" ]
+  | R
+      lhs.pres = loc (RNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(R ", @view.pres, text ")" ]
+  | Mark
+      lhs.pres = loc (MarkNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ @view.pres, move 0 (-4) $ shrink (text "*")] 
+  | DelL
+      lhs.pres = loc (DelLNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(", overlay [ row [ @view1.pres, text " : " ]
+                                            , hLine `withHRef` 6
+                                            , empty ] `withColor` red
+                        , @view2.pres, text ")" ]
+  | InsL
+      lhs.pres = loc (InsLNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ text "(", overlay [ row [@view1.pres, text " : "]
+                                           , hLine `withHRef` (-3)
+                                           , empty ] `withColor` green
+                       , @view2.pres, text ")" ]
+  | SndP
+      lhs.pres = loc (SndPNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(SndP ", @bool_.pres,text " ", @view1.pres, text " ", @view2.pres, text ")" ]
+  | FstP
+      lhs.pres = loc (FstPNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(FstP ", @bool_.pres,text " ", @view1.pres, text " ", @view2.pres, text ")" ]
+  | IfNil
+      lhs.pres = loc (IfNilNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "(IfNil ", @bool_.pres,text " ", @view.pres, text ")" ]
+  | Undef
+      lhs.pres = loc (UndefNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   text "\94" `withFontFam` "Symbol" `withFontSize_` (\fs -> fs - 3) -- bottom symbol
+  | Unit
+      lhs.pres = loc (UnitNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row' [ text "()" ]
+-}
+
+{
+pressEvalButton pth = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_EvalButton (ReEvaluate1 NoIDD))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+addMarkOp pth view pres = pres `addPopupItems` [("Mark", markOp pth view)]
+
+markOp pth view = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (Mark NoIDD view))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+
+addDelOp pth view pres = pres `addPopupItems` [("Delete", deleteOp pth view)]
+
+deleteOp pth (Ls idD v1 v2) = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (DelL NoIDD v1 v2))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+addInsOp pth view pres = pres `addPopupItems` [("Insert", insertOp pth view)]
+
+insertOp pth view = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (InsL NoIDD HoleView view))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+}
