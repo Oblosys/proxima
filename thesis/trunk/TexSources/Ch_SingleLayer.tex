@@ -43,7 +43,7 @@ ALSO ALL IS ON TREES, for other things, eg, sum of leafs, it does not work, do i
 EXTRA STATE, also tree ordering? precedence op tree -> non ordered op tree?
 SOMEWHERE, explain why this is all necessary, refer to Editing Chapter
 
-No i's in this chapter!!! all is High and Low Is this possible?
+No i's in this chapter!!! all is High and L Is this possible?
 
 ***EXTRA STATE is based on invariant mapping, however, implemented mapping is from level to level
 ***EXTRA STATE is only possible when inc. because lev, cannot be derived, or maybe only store extra?
@@ -107,46 +107,46 @@ Where say that mapping back is only when we need automatic editing: is it only i
 % will become more a computation order
 
 In order to relate the data levels surrounding one layer, we use two invariants: the {\em presentation invariant} and the {\em translation invariant}. The presentation invariant is satisfied if and only if the lower level is a correct presentation of the higher level. The invariant is expressed using an abstract function 
-$Present ::  Level_{High} \rightarrow Level_{Low}$.
+$Present ::  Level_{H} \rightarrow Level_{L}$.
 
 \begin{small}\begin{math}
-level_{Low} = Present~level_{High}\\
-%Present :: Level_{High} \rightarrow Level_{Low} \\
+level_{L} = Present~level_{H}\\
+%Present :: Level_{H} \rightarrow Level_{L} \\
 \end{math}\end{small}
 
 Similarly, the translation invariant is satisfied if and only if the higher level is a correct translation of the lower level. The translation invariant is expressed with the function 
-$Translate ::  Level_{Low} \rightarrow Level_{High}$.
+$Translate ::  Level_{L} \rightarrow Level_{H}$.
 
 \begin{small}\begin{math}
-%Translate ::  Level_{Low} \rightarrow Level_{High} \\
-level_{High} = Translate~level_{Low}\\
+%Translate ::  Level_{L} \rightarrow Level_{H} \\
+level_{H} = Translate~level_{L}\\
 \end{math}\end{small}
 
 The functions $Present$ and $Translate$ are abstract concepts used to express a property of two levels, not actual functions that can be evaluated. The functions are used specify the behavior of a layer.
 Strictly speaking, $Present$ and $Translate$ are not even functions but relations, since a higher level may have several correct presentations, and a lower level may have several correct translations. However, this occurs only if a level has extra state, as will be explained in Section~\ref{sect:extraState}.
 
-Because we only look at one layer in this chapter (ie. the layer between $Level_{High}$ and $Level_{Low}$), we need two more functions to refer to the behavior of the layers below this layer, as well as the layers above. For lower layers, the function $Edit :: Level_{Low} \rightarrow Level_{Low}$ denotes an update on $Level_{Low}$ by the lower layers. For representing updates on the higher level, we use 
-$Transform :: Level_{High} \rightarrow Level_{High}$. In the next chapter, layers are connected, which removes the need for $Edit$ and $Transform$.
+Because we only look at one layer in this chapter (ie. the layer between $Level_{H}$ and $Level_{L}$), we need two more functions to refer to the behavior of the layers below this layer, as well as the layers above. For lower layers, the function $Edit :: Level_{L} \rightarrow Level_{L}$ denotes an update on $Level_{L}$ by the lower layers. For representing updates on the higher level, we use 
+$Transform :: Level_{H} \rightarrow Level_{H}$. In the next chapter, layers are connected, which removes the need for $Edit$ and $Transform$.
 
-Figure~\ref{layerEditProcess} shows how the invariants can be used to specify the data level updates. The precondition before the edit operation takes place is that the lower level is a correct presentation of the higher level, that is $level_{Low} = Present~level_{High}$. In the levels below, an edit operation takes place, which results in an updated lower level: $level'_{Low}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the translation invariant:
-$level'_{High} = Translate~level'_{Low}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $level''_{High}$. Finally, the postcondition is established by updating the lower level to $level''_{Low}$ for which 
-$level''_{Low} = Present~level''_{High}$ holds. 
+Figure~\ref{layerEditProcess} shows how the invariants can be used to specify the data level updates. The precondition before the edit operation takes place is that the lower level is a correct presentation of the higher level, that is $level_{L} = Present~level_{H}$. In the levels below, an edit operation takes place, which results in an updated lower level: $level'_{L}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the translation invariant:
+$level'_{H} = Translate~level'_{L}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $level''_{H}$. Finally, the postcondition is established by updating the lower level to $level''_{L}$ for which 
+$level''_{L} = Present~level''_{H}$ holds. 
 
 The successive updates on the levels can be expressed with equations:
 
 \begin{small}\begin{math}
-level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}\\
-level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{High} = Transform~level'_{High}\\
-level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
+level_{L} = Present~level_{H}\hfill \text{\{Precondition\}}\\
+level'_{L} = Edit~level_{L}\\
+level'_{H} = Translate~level'_{L}\hfill \text{\{Intermediate condition\}}\\
+level''_{H} = Transform~level'_{H}\\
+level''_{L} = Present~level''_{H}\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}
 
 % also do an EDIT condition that says the new thing is what we intend with the 
 % edit gesture? Does not seem to make sense for a single layer. Maybe do it in the % next chapter
 
 % can we express when this happens with a condition? pres .. /= pres .. oid?
-The reason why $level'_{High}$ is not immediately presented, is that it has to be processed by the higher layers, just as $level'_{Low}$ is processed by this layer. The final value $level''_{High}$ may be equal to $level'_{High}$, but this is not always the case. Take, for example, an enriched document that contains a list of numbers together with the sum of the numbers. When one of the numbers is edited on presentation level, the new enriched document that results from parsing ($level'_{High}$) is a list of numbers together with a sum value that might not be correct anymore. In order to get the correct value, the enriched document is passed on to the reducer and evaluator, resulting in a final enriched document ($level''_{High}$) that contains a correct sum.
+The reason why $level'_{H}$ is not immediately presented, is that it has to be processed by the higher layers, just as $level'_{L}$ is processed by this layer. The final value $level''_{H}$ may be equal to $level'_{H}$, but this is not always the case. Take, for example, an enriched document that contains a list of numbers together with the sum of the numbers. When one of the numbers is edited on presentation level, the new enriched document that results from parsing ($level'_{H}$) is a list of numbers together with a sum value that might not be correct anymore. In order to get the correct value, the enriched document is passed on to the reducer and evaluator, resulting in a final enriched document ($level''_{H}$) that contains a correct sum.
 
 \begin{figure}
 \begin{small}
@@ -156,9 +156,9 @@ The reason why $level'_{High}$ is not immediately presented, is that it has to b
 %\begin{small}
 %\xymatrix{
 %                      \ar@{.>}[d] &  &                       \ar@{.}[rr] & &                   \ar@{.>}[d]  \\
-% \data{$level_{High}$} \ar[d]     &  & \data{$level'_{High}$} \ar@{.}[u] & & \data{$level''_{High}$} %\ar[d] \\ 
+% \data{$level_{H}$} \ar[d]     &  & \data{$level'_{H}$} \ar@{.}[u] & & \data{$level''_{H}$} %\ar[d] \\ 
 % \component{$Present$} \ar[d]     &  & \component{$Translate$} \ar[u]    & & \component{$Present$}  %\ar[d]  \\
-% \data{$level_{Low}$}  \ar@{.}[d] &  & \data{$level'_{Low}$}  \ar[u]     & & \data{$level''_{Low}$} %\ar@{.>}[d]\\
+% \data{$level_{L}$}  \ar@{.}[d] &  & \data{$level'_{L}$}  \ar[u]     & & \data{$level''_{L}$} %\ar@{.>}[d]\\
 %                      \ar@{.}[r] & \abscomponent{User Edit} \ar@{.}[r]  &                      \ar@{.>}[u]  & &         %                       \\
 % {\rm Precondition}               &  & {\rm Intermediate~condition}      & & {\rm Postcondition}            \\
 %}
@@ -180,12 +180,12 @@ As an example, consider an editor in which an enriched document node \verb|Plus 
 %The functions $Present$ and $Translate$ are closely related, but in contrast to what the types might %suggest, the functions are in general not each others inverse. Because translating a presented document %should not change the document, we do have: 
 %
 %\begin{small}\begin{math}
-%Translate \cdot Present = id_{High}
+%Translate \cdot Present = id_{H}
 %\end{math}\end{small}
 %
 %\note{what about ambiguity?}
 %
-%However, the reverse ($Present \cdot Translate = id_{Low}$) does not necessarily hold. The condition %implies that an edited lower level does not change when it is translated and presented \note{also say that %higher layers should not change it?}, which is not always true. The syntax coloring example provides a case %in which it does not hold; if an uncolored presentation is translated and then presented, the result is a %colored presentation. 
+%However, the reverse ($Present \cdot Translate = id_{L}$) does not necessarily hold. The condition %implies that an edited lower level does not change when it is translated and presented \note{also say that %higher layers should not change it?}, which is not always true. The syntax coloring example provides a case %in which it does not hold; if an uncolored presentation is translated and then presented, the result is a %colored presentation. 
 %\note{pres is injective, and trans isn't?}
 
 %summary
@@ -194,7 +194,7 @@ Summarizing, the $Presentation$ invariant specifies that two levels are in a fin
 \note{say something about Translate.Present here as well?}
 
 \bc
-?present~sheet~.~translate~sheet = id_{High}\\
+?present~sheet~.~translate~sheet = id_{H}\\
 
 OTHER EXAMPLE?: Apart from the syntax coloring example, the problem also arises when for example a textual arrow 
 \verb|"->"| is presented as a $\rightarrow$. In that case, a lower level containing textual arrows is 
@@ -481,7 +481,7 @@ The evaluator maps chapters, sections, and subsections in the document onto entr
 Even if an element \verb|X| is mapped onto one or more elements \verb|Y|$_n$  in the other level, it can still be part of the extra state, if the elements \verb|Y|$_n$ do not constitute enough information to be mapped back onto \verb|X|. Consider for example a presentation of a Haskell source, in which al integers are presented with the string \verb|<Int>|. The integer nodes do have a presentation, but since it does not contain enough information for the backward mapping, the integer nodes are in translation extra state. \note {Is this also the case for focus} \note{Don't know much about this kind of ES yet}
 %%%
 
-An important point to note is that extra state with regard to a certain mapping, is extra state for the {\em result} type of the mapping. Hence, presentation extra state for a presentation mapping between $Level_{High}$ and $Level_{Low}$ is part of $Level_{Low}$. Although the term presentation extra state of $Level_i$ may suggest that this concerns state that is used during the presentation of $Level_i$, this is not the case. The extra state of $Level_i$ refers to the extra state with regard to the presentation of the level above ($Level_{i-1}$) on level $Level_i$. The only extra state that involved in the presentation of $Level_i$ is that of its lower neighbor: $Level_{i+1}$
+An important point to note is that extra state with regard to a certain mapping, is extra state for the {\em result} type of the mapping. Hence, presentation extra state for a presentation mapping between $Level_{H}$ and $Level_{L}$ is part of $Level_{L}$. Although the term presentation extra state of $Level_i$ may suggest that this concerns state that is used during the presentation of $Level_i$, this is not the case. The extra state of $Level_i$ refers to the extra state with regard to the presentation of the level above ($Level_{i-1}$) on level $Level_i$. The only extra state that involved in the presentation of $Level_i$ is that of its lower neighbor: $Level_{i+1}$
 
 
 
@@ -553,19 +553,19 @@ Level_{n} = (Core_{Pres,n} \times Extra_{Pres,n}) \times  Info_{Press,n}
 Level_{i} = (Core_{Trans,i} \times Extra_{Trans,i}) \times Info_{Pres,i} \times  Info_{Trans,i}\\  
                = (Core_{Pres,i} \times Extra_{Pres,i})  \times Info_{Pres,i} \times  Info_{Trans,i}\\  
 \\
-translate_{i} :: sheet_{Trans} \rightarrow Level_{Low} \rightarrow Level_{High}\\
-present_{i} :: sheet_{Pres}  \rightarrow  Level_{High} \rightarrow Level_{Low}\\
+translate_{i} :: sheet_{Trans} \rightarrow Level_{L} \rightarrow Level_{H}\\
+present_{i} :: sheet_{Pres}  \rightarrow  Level_{H} \rightarrow Level_{L}\\
 \end{math}\end{small}
 
 
 
 \bc
 \begin{small}\begin{align*}
-translate_{i} :: sheet_{Trans} \times Info_{Trans,Low} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}  \times Extra_{Trans,High}  \times Info_{Press,High}\\
-present_{i} :: sheet_{Pres}  \rightarrow Info_{Pres,High} \rightarrow  Level_{High} \rightarrow Core_{Pres,Low} \times Extra_{Pres,Low}   \times Info_{Pres,Low} \\
+translate_{i} :: sheet_{Trans} \times Info_{Trans,L} \rightarrow Level_{L} \rightarrow Core_{Trans,H}  \times Extra_{Trans,H}  \times Info_{Press,H}\\
+present_{i} :: sheet_{Pres}  \rightarrow Info_{Pres,H} \rightarrow  Level_{H} \rightarrow Core_{Pres,L} \times Extra_{Pres,L}   \times Info_{Pres,L} \\
 %\\
-%level'_{High} = {\tt translate}~sheet_{Trans}~info'~level'_{Low}\\
-%level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
+%level'_{H} = {\tt translate}~sheet_{Trans}~info'~level'_{L}\\
+%level''_{L} = {\tt present}~sheet_{Pres}~level''_{H}\\
 %\\
 %Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
 %Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
@@ -575,9 +575,9 @@ present_{i} :: sheet_{Pres}  \rightarrow Info_{Pres,High} \rightarrow  Level_{Hi
 
 
 % example in picture 
-Figure~\ref{mappingInfo} shows two examples of the $Info$ argument. The lefthand side shows the situation at the presentation layer of a Haskell source editor during presentation.  The enriched document element \verb|If|  was presented on the three tokens in the presentation level. The downward arrows represent $Info_{Pres,High}$, whereas the upward arrows are the translation information $Info_{Trans, Low}$. The dotted arrows represent $Info_{Trans,High}$ (upward) and $Info_{Pres,Low}$ (downward), which are not used in this layer. The whitespace nodes in the presentation level are presentation extra state, that has to be reused on presentation. \note{more detail on reuse?}
+Figure~\ref{mappingInfo} shows two examples of the $Info$ argument. The lefthand side shows the situation at the presentation layer of a Haskell source editor during presentation.  The enriched document element \verb|If|  was presented on the three tokens in the presentation level. The downward arrows represent $Info_{Pres,H}$, whereas the upward arrows are the translation information $Info_{Trans, L}$. The dotted arrows represent $Info_{Trans,H}$ (upward) and $Info_{Pres,L}$ (downward), which are not used in this layer. The whitespace nodes in the presentation level are presentation extra state, that has to be reused on presentation. \note{more detail on reuse?}
 
-The righthand side of the figure shows the evaluation layer of a word processor during translation. The document is a \verb|Chapter| element containing two \verb|Section| children, which is mapped onto a table of contents structure in the evaluation level. Again, downward arrows are $Info_{Pres,High}$ and upward arrows are $Info_{Trans,Low}$. \note{mention there is no $Info_{Trans,High}$?} In this case, the document contains translation extra state, since the contents of the chapter and sections cannot be computed from the enriched document.  \note{more detail on reuse?}
+The righthand side of the figure shows the evaluation layer of a word processor during translation. The document is a \verb|Chapter| element containing two \verb|Section| children, which is mapped onto a table of contents structure in the evaluation level. Again, downward arrows are $Info_{Pres,H}$ and upward arrows are $Info_{Trans,L}$. \note{mention there is no $Info_{Trans,H}$?} In this case, the document contains translation extra state, since the contents of the chapter and sections cannot be computed from the enriched document.  \note{more detail on reuse?}
 
 \begin{figure}
 \begin{center}
@@ -654,15 +654,15 @@ First, we start with two functions $present$ and $translate$ that are assumed di
 We can express the computation using equations:
 
 \begin{small} \begin{math} \label{inv:immediate}
-{\tt translate}	::  Level_{Low} \rightarrow Level_{High} \hfill ~\\
-{\tt present}	:: Level_{High} \rightarrow Level_{Low}  \hfill ~\\
-level_{Low} = Present~level_{High}		\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}			\hfill\text{\{User edit\}}\\
-level'_{High} = {\tt translate}~level'_{Low} \hfill \text{\{Compute new higher level\}}\\
-level'_{High} = Translate~level'_{Low}		\hfill \text{\{Intermediate condition\}}\\
-level''_{High} = Transform~level'_{High}	\hfill \text{\{Higher layer update\}}\\
-level''_{Low} = {\tt present}~level''_{High} 	\hfill \text{\{Compute new lower level\}}\\
-level''_{Low} = Present~level''_{High}		\hfill \text{\{Postcondition\}}\\
+{\tt translate}	::  Level_{L} \rightarrow Level_{H} \hfill ~\\
+{\tt present}	:: Level_{H} \rightarrow Level_{L}  \hfill ~\\
+level_{L} = Present~level_{H}		\hfill \text{\{Precondition\}}\\
+level'_{L} = Edit~level_{L}			\hfill\text{\{User edit\}}\\
+level'_{H} = {\tt translate}~level'_{L} \hfill \text{\{Compute new higher level\}}\\
+level'_{H} = Translate~level'_{L}		\hfill \text{\{Intermediate condition\}}\\
+level''_{H} = Transform~level'_{H}	\hfill \text{\{Higher layer update\}}\\
+level''_{L} = {\tt present}~level''_{H} 	\hfill \text{\{Compute new lower level\}}\\
+level''_{L} = Present~level''_{H}		\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}\\
 {\centering (Invariant 1: Direct implementation of $Translate$ and $Present$)\\}\vspace{1em}
 
@@ -678,16 +678,16 @@ The first refinement we make is the addition of $sheet$ parameters to ${\tt pres
 The presentation sheet has the abstract type $Sheet_{Pres}$, and the translation sheet is of type $Sheet_{Trans}$. The equations thus become:
 
 \begin{small} \begin{math} \label{inv:sheets}
-{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \\
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low} \\
-level_{Low} = Present~level_{High}						\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}							\hfill \text{\{User edit\}}\\
-level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}	\hfill \text{\{Compute new higher level\}}\\
-level'_{High} = Translate~level'_{Low}						\hfill \text{\{Intermediate condition\}}\\
-level''_{High} = Transform~level'_{High} 					\hfill \text{\{Higher layer update\}}\\
-level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High} 		\hfill \text{\{Compute new lower level\}}\\
-level''_{Low} = Present~level''_{High}						\hfill \text{\{Postcondition\}}\\
-{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\hfill \text{\{***??***\}}\\
+{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{L} \rightarrow Level_{H} \\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Level_{L} \\
+level_{L} = Present~level_{H}						\hfill \text{\{Precondition\}}\\
+level'_{L} = Edit~level_{L}							\hfill \text{\{User edit\}}\\
+level'_{H} = {\tt translate}~sheet_{Trans}~level'_{L}	\hfill \text{\{Compute new higher level\}}\\
+level'_{H} = Translate~level'_{L}						\hfill \text{\{Intermediate condition\}}\\
+level''_{H} = Transform~level'_{H} 					\hfill \text{\{Higher layer update\}}\\
+level''_{L} = {\tt present}~sheet_{Pres}~level''_{H} 		\hfill \text{\{Compute new lower level\}}\\
+level''_{L} = Present~level''_{H}						\hfill \text{\{Postcondition\}}\\
+{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{H}\hfill \text{\{***??***\}}\\
 \end{math}\end{small}\\
 {\centering (Invariant 2: Support for presentation and translation sheets)\\}\vspace{1em}
 \note{also put id condition in previous invariant? And add the PRES TRANS one too?}
@@ -697,7 +697,7 @@ ${\tt present}$, ${\tt translate}$ and the respecitive sheet parameters.
 
 \note{?????????}
 Although a layer has two sheets, the two are closely related as they have to satisfy the
-$Translate \cdot Present = id_{High}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
+$Translate \cdot Present = id_{H}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
 
 
 %																
@@ -729,23 +729,23 @@ The $Extra$ information in the result types cannot be computed from the argument
 
 
 \begin{small}\begin{math} \label{inv:extraState}
-Level_{High} = core'_{Trans,High} \times extra'_{Trans,High}\\
-Level_{Low} = core'_{Pres,Low} \times extra'_{Pres,High}\\
-{\tt translate} :: Sheet_{Trans} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}\\
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Core_{Pres,Low}\\
-level_{Low} = Present~level_{High}						\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}							\hfill \text{\{User edit\}}\\
-core'_{Trans,High}  = {\tt translate}~sheet_{Trans}~level'_{Low}	\hfill \text{\{Compute new higher core\}}\\
-level'_{High} = {\tt reuse}~level_{High}~?level_{Low}~core'_{High}\hfill \text{\{Reuse extra state\}}\\
-level'_{High} = Translate~level'_{Low}						\hfill \text{\{Intermediate condition\}}\\
-level''_{High} = Transform~level'_{High} 					\hfill \text{\{Higher layer update\}}\\
-core''_{Pres,Low}  = {\tt present}~sheet_{Pres}~level''_{High}		\hfill \text{\{Compute new lower core\}}\\
-level''_{Low} = {\tt reuse}~level_{Low}~?level_{High}~core''_{Low}\hfill \text{\{Reuse extra state\}}\\
-level''_{Low} = Present~level''_{High}						\hfill \text{\{Postcondition\}}\\
+Level_{H} = Core'_{Trans,H} \times Extra'_{Trans,H}\\
+Level_{L} = Core'_{Pres,L} \times Extra'_{Pres,L}\\
+{\tt translate} :: Sheet_{Trans} \rightarrow Level_{L} \rightarrow Core_{Trans,H}\\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Core_{Pres,L}\\
+level_{L} = Present~level_{H}						\hfill \text{\{Precondition\}}\\
+level'_{L} = Edit~level_{L}							\hfill \text{\{User edit\}}\\
+core'_{Trans,H}  = {\tt translate}~sheet_{Trans}~level'_{L}	\hfill \text{\{Compute new higher core\}}\\
+level'_{H} = {\tt reuse}~level_{H}~?level_{L}~core'_{H}\hfill \text{\{Reuse extra state\}}\\
+level'_{H} = Translate~level'_{L}						\hfill \text{\{Intermediate condition\}}\\
+level''_{H} = Transform~level'_{H} 					\hfill \text{\{Higher layer update\}}\\
+core''_{Pres,L}  = {\tt present}~sheet_{Pres}~level''_{H}		\hfill \text{\{Compute new lower core\}}\\
+level''_{L} = {\tt reuse}~level_{L}~?level_{H}~core''_{L}\hfill \text{\{Reuse extra state\}}\\
+level''_{L} = Present~level''_{H}						\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}\note{does reuse need the other level as well?}\\
 {\centering (Invariant 3: Support for extra state)}\vspace{1em}
-%{\tt present} :: Sheet_{Pres} \rightarrow Level_{High} \rightarrow Core_{Pres,Low} \times
-%Extra_{Pres,Low} \\
+%{\tt present} :: Sheet_{Pres} \rightarrow Level_{H} \rightarrow Core_{Pres,L} \times
+%Extra_{Pres,L} \\
 
 
 
@@ -793,12 +793,12 @@ Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{
 translate_{i} :: sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i}\\
 present_{i} :: sheet_{Pres,i}  \rightarrow  Level_{i} \rightarrow Level_{i+1}\\
 \\
-%level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
-%level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
-%level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
-{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\\
+%level_{L} = Present~level_{H}\hfill \text{\{Precondition\}}\\
+level'_{H} = {\tt translate}~sheet_{Trans}~level'_{L}\\
+%level'_{H} = Translate~level'_{L}\hfill \text{\{Intermediate condition\}}\\
+level''_{L} = {\tt present}~sheet_{Pres}~level''_{H}\\
+%level''_{L} = Present~level''_{H}\hfill \text{\{Postcondition\}}\\
+{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{H}\\
 \\
 Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
 Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
@@ -848,14 +848,14 @@ Figure~\ref{fromLevelToOp} shows the difference between a translation mapping be
 
 % there is PRES, which is a level thing, pres, which is incremental, and also presLevel
 % pres will work on mappings, presLevel won't. Is this PRES? or do we keep PRES abstract
-The arrows going from the higher and the lower level to ${\tt translate}$ in the righthand side of Figure~\ref{fromLevelToOp}, are necessary because in some cases, it is hard to map a lower level edit operation onto a higher level edit operation without reference to the respective data levels. If such a mapping is not available, but there is a non-incremental mapping between levels, then the computation sketched in Figure~\ref{computeOps} can be used to obtain a mapping between edit operations. The figure shows how a function ${\tt translate} :: Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}}$ can be constructed when only a function with type ${\tt translate'} :: Level_{High} \rightarrow Level_{Low}$  is available. In the figure, the edit operation is applied as an update to the old higher level, using the function ${\tt update}$. A new lower level is then computed by applying ${\tt translate'}$ to the updated updated higher level. Finally, the incremental lower level update is computed by taking the difference of the updated lower level and the original. Of course, this is only a sketch, and the difference function does not exist in general, but for some editors, it will be a feasible solution. In order to allow this kind of computation, ${\tt translate}$ needs the values of the higher and lower level as arguments.
+The arrows going from the higher and the lower level to ${\tt translate}$ in the righthand side of Figure~\ref{fromLevelToOp}, are necessary because in some cases, it is hard to map a lower level edit operation onto a higher level edit operation without reference to the respective data levels. If such a mapping is not available, but there is a non-incremental mapping between levels, then the computation sketched in Figure~\ref{computeOps} can be used to obtain a mapping between edit operations. The figure shows how a function ${\tt translate} :: Edit_{Level_{H}} \rightarrow Edit_{Level_{L}}$ can be constructed when only a function with type ${\tt translate'} :: Level_{H} \rightarrow Level_{L}$  is available. In the figure, the edit operation is applied as an update to the old higher level, using the function ${\tt update}$. A new lower level is then computed by applying ${\tt translate'}$ to the updated updated higher level. Finally, the incremental lower level update is computed by taking the difference of the updated lower level and the original. Of course, this is only a sketch, and the difference function does not exist in general, but for some editors, it will be a feasible solution. In order to allow this kind of computation, ${\tt translate}$ needs the values of the higher and lower level as arguments.
 
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
 \epsfig{file=pics/eps/levelMap2deltaMap.eps}
-\end{center}\caption{Computation of $e_{High}$ from $e_{Low}$}\label{computeOps} 
+\end{center}\caption{Computation of $e_{H}$ from $e_{L}$}\label{computeOps} 
 \end{center}
 \end{small}
 \end{figure}
@@ -903,26 +903,26 @@ In addition to the extra parameters, and the change from level to edit operation
  
 % PRES and TRANS are not incremental
 \begin{small}\begin{math}
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low}  \rightarrow Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}} \\
-{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \rightarrow  Edit_{Level_{Low}} \rightarrow Edit_{Level_{High}} \\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Level_{L}  \rightarrow Edit_{Level_{H}} \rightarrow Edit_{Level_{L}} \\
+{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{L} \rightarrow Level_{H} \rightarrow  Edit_{Level_{L}} \rightarrow Edit_{Level_{H}} \\
 \text{\{\}}\\
 \\
-level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{Low} = {\tt update}~e_{Level_{Low}}~level_{Low}\\
-e_{Level_{High}} = {\tt translate}~sheet_{Trans}~level_{Low}~level_{High}~e_{Level_{Low}} \hfill 
+level_{L} = Present~level_{H}\hfill \text{\{Precondition\}}\\
+level'_{L} = {\tt update}~e_{Level_{L}}~level_{L}\\
+e_{Level_{H}} = {\tt translate}~sheet_{Trans}~level_{L}~level_{H}~e_{Level_{L}} \hfill 
 \text{\{\}}\\
-level'_{High} = {\tt update}~e_{Level_{High}}~level_{High}\\
-level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level'_{H} = {\tt update}~e_{Level_{H}}~level_{H}\\
+level'_{H} = Translate~level'_{L}\hfill \text{\{Intermediate condition\}}\\
 \\
-level''_{High} = {\tt update}~e'_{Level_{High}}~level'_{High}\\
-e'_{Level_{Low}} = {\tt present}~sheet_{Pres}~level'_{High}~level'_{Low}~e'_{Level_{High}} \hfill 
+level''_{H} = {\tt update}~e'_{Level_{H}}~level'_{H}\\
+e'_{Level_{L}} = {\tt present}~sheet_{Pres}~level'_{H}~level'_{L}~e'_{Level_{H}} \hfill 
 \text{\{\}}\\
-level''_{Low} = {\tt update}~e'_{Level_{Low}}~level_{Low}\\
-level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
+level''_{L} = {\tt update}~e'_{Level_{L}}~level_{L}\\
+level''_{L} = Present~level''_{H}\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}
 
 Two updates take place on the higher level, and two on the lower level. However, if we look at Figure~\ref{computeOps}, we can see that a higher level update is performed in the computation of
- ${\tt present}$. Thus, besides $e'_{Level_{Low}}$ an implementation of ${\tt present}$ may also return $level''_{High}$. \note{say the the remaining updates disappear because of composition} Similarly, ${\tt translate}$ may return $e'_{Low}$. \note{Mention that on composition two of the four updates can be dropped?}
+ ${\tt present}$. Thus, besides $e'_{Level_{L}}$ an implementation of ${\tt present}$ may also return $level''_{H}$. \note{say the the remaining updates disappear because of composition} Similarly, ${\tt translate}$ may return $e'_{L}$. \note{Mention that on composition two of the four updates can be dropped?}
 
 %However, because a layer does not exist on its own, but is composed with other layers (as will be explained 
 %in the next Chapter), an adjacent layer will also do an update on the level. Hence
