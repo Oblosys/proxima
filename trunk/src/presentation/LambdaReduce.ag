@@ -128,7 +128,7 @@ SEM Exp [|| substitute :{( [(String, Exp)] -> Exp )}]
                                                                         (filter (\(str,_) -> str /= strFromIdent @ident.self)
                                                                                 substs))
   | AppExp 
-      loc.substitute = \substs -> AppExp @iDD (@exp1.substitute substs) (@exp2.substitute substs)
+      loc.substitute = \substs -> AppExp @idD (@exp1.substitute substs) (@exp2.substitute substs)
   | CaseExp
       loc.substitute = \substs -> @self
   | LetExp
