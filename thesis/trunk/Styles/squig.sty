@@ -1,0 +1,64 @@
+\usepackage{math,calc} % \usepackage{math,ccalc}
+
+%--------------fonts---------------------
+\newcommand{\cn}[1]{\mbox{\sf #1}}
+\newcommand{\rw}[1]{\mbox{\bf #1}}
+\font\openfont=bbm10 at 12pt
+\newcommand{\open}[1]{\mbox{{\openfont{}#1}}}
+%--------------symbols-------------------
+%\newcommand{\oo}{{\;\protect\raisebox{.3ex}{\tiny ${\bullet}$}\;}}
+\newcommand{\oo}{{\;\protect\raisebox{.3ex}{\tiny ${\circ}$}\;}}
+\renewcommand{\split}{\,\protect\raisebox{-.0012ex}{\tiny ${\bigtriangleup}$}\,} % Martijn new.. => renew..
+\newcommand{\junc}{\,\protect\raisebox{.12em}{\tiny ${\bigtriangledown}$}\,}
+\newcommand{\cat}{{{+}\!\!\!{+}}}
+\renewcommand{\gets}{{:=}}
+\newcommand{\eq}{\;=\;}
+\renewcommand{\and}{\land}
+\def\overlay#1#2{\mathpalette\ooverlay{{#1}{#2}}}
+\def\ooverlay#1#2{\oooverlay#1#2}
+\def\oooverlay#1#2#3{{\setbox0=\hbox{$#1#2$}\setbox1=\hbox{$#1#3$}%
+                      \ifdim \wd0<\wd1%
+                         \setbox2=\box1 \setbox1=\box0 \setbox0=\box2%
+                      \fi % \box0 is the wider
+                      \rlap{\hbox to\wd0{\hss\box1\hss}}\box0%
+                    }}
+\newcommand{\map}{\protect\raisebox{.2ex}{\scriptsize ${\ast}$}}
+\newcommand{\klei}{\,\diamond\,}
+\renewcommand{\hole}{\_\hspace{0.07em}} % Martijn new.. => renew..   What was orginal \hole?
+\newcommand{\gat}{\protect\raisebox{-.2ex}{$\Box$}}
+\newcommand{\ston}{[\hole]}
+\renewcommand{\c}{{\cdot}}
+\newfont{\pagkxi}{pagk at 11pt}
+\newcommand{\Prod}{\mbox{\pagkxi T\hspace{-.02em}T}}
+%--------------brackets------------------
+\newcommand{\cata}[1]{(\![{#1}]\!)}
+\newcommand{\ana}[1]{[\!({#1})\!]}
+\newcommand{\para}[1]{[\![{#1}]\!]}
+\newcommand{\red}[1]{\langle\!\langle{#1}\rangle\!\rangle}
+\newcommand{\tup}[1]{\langle {#1} \rangle}
+\newcommand{\Set}[1]{\{#1\}}
+%--------------constants-----------------
+\newcommand{\id}{\cn{id}}
+\newcommand{\true}{\cn{true}}
+\newcommand{\false}{\cn{false}}
+\newcommand{\Nat}{\open{N}}
+\newcommand{\Int}{\open{Z}}
+\newcommand{\Bool}{\open{B}}
+\newcommand{\Real}{\open{R}}
+\newcommand{\Id}{\cn{Id}}
+\newcommand{\inl}{\cn{inl}}
+\newcommand{\inr}{\cn{inr}}
+\newcommand{\exl}{\cn{exl}}
+\newcommand{\exr}{\cn{exr}}
+\newcommand{\Exl}{\cn{Exl}}
+\newcommand{\Exr}{\cn{Exr}}
+%--------------fions---------------------
+\newcommand{\fionarrow}{{\leftarrow}}
+\newcommand{\fiontype}[2]{{#1}\,\fionarrow\,{#2}}
+\newfont{\cmsyx}{cmsy10}
+\newcommand{\hastype}{\,:\,}
+\newcommand{\fion}[3]{{#1}\hastype\fiontype{{#2}}{{#3}}}
+%--------------prog----------------------
+%    \newcommand{\data}{\rw{data}}
+\newcommand{\type}{\rw{type}}
+\newcommand{\where}{\rw{where}}

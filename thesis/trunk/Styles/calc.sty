@@ -1,0 +1,74 @@
+\usepackage{fleqn,leqno}
+%------------------- calc ---------------
+%\newlength{\xprindent}
+%\setlength{\xprindent}{1.5em}
+\newcommand{\bqa}{\vspace{.3\baselineskip}\[\hspace*{\xprindent}\begin{array}{
+@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}
+\newcommand{\eqa}{\end{array}\]\vspace{.3\baselineskip}}
+\newenvironment{xprenv}{\nopagebreak[4]\bqa}{\eqa}
+%\newcommand{\xpr}[1]{\begin{xprenv}#1\end{xprenv}}
+\newenvironment{zenv}[1]{\nopagebreak\vspace*{-.8\baselineskip}\hspace*{\mathindent}\makebox[3em][l]{$#1$}\begin{tabular}[t]{@{}l@{}l@{}l@{}l}\{$~$&}{$~$\}\end{tabular}\vspace*{-.8\baselineskip}}
+\newcommand{\z}[2]{\begin{zenv}{#1}#2\end{zenv}}
+\newcommand{\zz}[1]{\nopagebreak\vspace*{-.8\baselineskip}\hspace*{\mathindent}\makebox[3em][l]{$#1$}\vspace*{-.8\baselineskip}}
+%---------------- symbols ------------------
+\newcommand{\equsym}{\hspace*{.06em}{=}\hspace*{.185em}}
+\newcommand{\eqvsym}{\hspace*{.06em}{\equiv}\hspace*{.166em}}
+\newcommand{\impsym}{\hspace*{.00em}{\Rightarrow}\hspace*{.00em}}
+\newcommand{\ffrsym}{\hspace*{-.06em}{\Leftarrow}\hspace*{.06em}}
+\newcommand{\equ}{\:\equsym\:}
+\newcommand{\eqv}{\:\eqvsym\:}
+\newcommand{\imp}{\:\impsym\:}
+\newcommand{\ffr}{\:\ffrsym\:}
+\newcommand{\Equ}[1]{\z{\equsym}{#1}}
+\newcommand{\Eqv}[1]{\z{\eqvsym}{#1}}
+\newcommand{\Imp}[1]{\z{\impsym}{#1}}
+\newcommand{\Ffr}[1]{\z{\ffrsym}{#1}}
+\newcommand{\FFr}{\Ffr}
+%----------------- style ----------------
+\newcommand{\defof}[1]{definition of $#1$}
+\newcommand{\defsof}[1]{definitions of $#1$}
+
+% \z and \zz are for putting comments in proofs
+% \z{sym}{comment}:             sym  { comment }
+% \zz{sym}:                              sym
+
+
+\newlength{\xprindent}
+\setlength{\xprindent}{-1em}
+
+\newcommand{\bqaM}{ \hspace*{\xprindent}\begin{array}{
+@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}    % or @{}r@{}c.. 
+\newcommand{\eqaM}{\end{array}}
+\newenvironment{xprenvM}{\nopagebreak[4]\bqaM}{\eqaM}
+
+\newcommand{\xpr}[1]{\vspace{-.3\baselineskip}\begin{displaymath}
+\begin{xprenvM}#1\end{xprenvM}
+\end{displaymath}\vspace{-.7\baselineskip}}
+
+\newcommand{\xprlab}[2]{\vspace{-.3\baselineskip}\begin{displaymath}
+\begin{array}{
+@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}    % or @{}r@{}c.. 
+#1 
+\end{array}
+\end{displaymath} \hfill \text{\sc #2}\vspace{-.7\baselineskip}}
+% use \begin{math} instead of \[, otherwise \hfill does not work.
+
+
+\newenvironment{xprenvPrf}
+{\nopagebreak[4]\hspace*{\xprindent} \begin{array}{@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}
+{\end{array}}
+
+% same as \xpr{} but with \Box Probably not very useful, since \Box is not always immediately after math
+% maybe merge, if xpr has {llll..} array instead of {rcll..}
+\newcommand{\prf}[1]{\vspace{-.3\baselineskip}\begin{displaymath}
+\begin{xprenvPrf}#1 \end{xprenvPrf}
+\end{displaymath}   \vspace{-.7\baselineskip}}
+
+
+\newenvironment{proof}{\par{\bf Proof:}}{$\Box$}
+%\newcommand{\prooff}{{\bf Proof:\ }}
+%\newcommand{\proofEnd}{$\Box$}
+
+\newcommand{\jstf}[1]{\text{\{~#1~\}}} % justification (right term?) of a proof step 
+\newcommand{\tp}{\: ::\:} % Haskell type decl
+
