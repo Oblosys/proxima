@@ -1,0 +1,130 @@
+
+
+$h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}$\\
+$\imp$\\
+$h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}$
+
+
+\prf{
+h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}\\
+	\Eqv{property of set comprehension, let $l_0$ be blabla}\\
+l_0~\Present\C~h \land l_0~\Present\C~h'\\
+%	\Eqv{Def. $\Present\C$}\\
+%(\exists m : l_0~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_0~\Present\L~m' \land %m'~\Present\H~h')\\
+%	\Imp{{\sc InterPresent} on higher and lower relations}\\
+%(\exists m : m~\Interpret\L~l_0 \land h~\Interpret\H~m) \land (\exists m' : m'~\Interpret\L~l_0 \land %h'~\Interpret\H~m')\\
+%	\Eqv{Def. $\Interpret\C$ (and commutativity of $\land$)}\\
+	\Imp{Interpresent on relation}\\
+h~\Interpret\C~l_0 \land h'~\Interpret\C~l_0\\
+	\Eqv{property of set comprehension}\\
+h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}
+}
+
+And:
+
+$h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}$\\
+$\ffr$ direction\\
+$h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}$
+
+\prf{
+(\exists m : h~\Interpret\H~m \land m~\Interpret\L~l_0) \land (\exists m' : h'~\Interpret\H~m' \land m'~\Interpret\L~l_0)\\
+		\Imp{{\sc \interpret-Char} on $\interpret\H$ and $\interpret\L$ + dropped $\exists$ for now}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \bc \land \eqcl{m_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \land 
+\eqcl{h'}{HH} = \interpret\H~\eqcl{m'_0}{HL} \bc \land \eqcl{m'_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec\\
+		\Imp{the property we need}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}  \bc \land  \eqcl{m_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \land
+\eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH} \bc \land \eqcl{m'_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \\
+		\Imp{define $l_1$ s.t. $\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH}$ and $\eqcl{m_1}{LH} = \eqcl{m'_1}{LH}$}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH} \land
+\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH} \land \eqcl{l_1}{LL} = \present\L~\eqcl{m'_1}{LH} \\
+%		\Imp{}\\
+%\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH} \land \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH} \land
+%\eqcl{l_1}{LL} = \Present\L~\eqcl{m'_1}{LH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH}\\
+		\Imp{{\sc \present-Char} on $\present\H$ and $\present\L$}\\
+(\exists m : l_1~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_1~\Present\L~m' \land m'~\Present\H~h')\\
+}\note{add existential quantifiers}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+}
+
+equiv. to
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h,h',h'' : h~\Interpret\C~l \land h~\Interpret\C~l' \land l'~\Present\C~h' \land l~\Present\C~h''}
+}
+\note{do we have both $l'~\Present\C~h'$ and $l~\Present\C~h''$?}
+
+$\imp$ is clear from {\sc InterPresent}
+
+\prf{
+l' \in \setof{l'}{\exists h,h',h'' : h~\Interpret\C~l \land h~\Interpret\C~l' \land l'~\Present\C~h' \land l~\Present\C~h''}\\
+	\Eqv{property of set comprehension + comm. $\land$}\\
+h_0~\Interpret\C~l \land l~\Present\C~h''_0 \land h_0~\Interpret\C~l' \land l'~\Present\C~h'_0\\
+	\Imp{$h~\Interpret\C~l \land l~\Present\C~h' ~\imp~ l~\Present\C~h$}\\
+l~\Present\C~h_0 \land l'~\Present\C~h_0\\
+	\Imp{}\\
+\eqcl{l}{L} = \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+%
+%l_0~\Present\C~h \land l_0~\Present\C~h'\\
+%	\Eqv{Def. $\Present\C$}\\
+%(\exists m : l_0~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_0~\Present\L~m' \land %m'~\Present\H~h')\\
+%	\Imp{{\sc Interpresent} on higher and lower}\\
+%(\exists m : m~\Interpret\L~l_0 \land h~\Interpret\H~m) \land (\exists m' : m'~\Interpret\L~l_0 \land %h'~\Interpret\H~m')\\
+}
+Problems: we need interpresent on $l$ and $l'$, they follow from def. of class. Figure out details on this. 
+\xprlab{
+\forall m : \forall m_0, m_0' \in \eqcl{m}{LH} & ~: & \exists m_1,m'_1 : \eqcl{m_1}{LH} = \eqcl{m'_1}{LH}\\   &\land   &\eqcl{h}{HH} = \interpret\H \eqcl{m_0}{HL} \imp \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}\\
+  &\land ~&\eqcl{h'}{HH} = \interpret\H \eqcl{m'_0}{HL} \imp \eqcl{m'_1}{HL} = \present\H ~\eqcl{h'}{HH}\\
+  &\land & something~like~~  {\bf valid}~m \imp \dots
+}{Property}
+
+{\sc Compatible} implies this condition.
+
+Lemma: (figure out quantifications)\\ 
+$h~\Interpret\C~l \land (\exists h' : l~\Present\C~h') ~\imp~ l~\Present\C~h$
+
+\prf{
+%	\Imp{{\sc InterPresent} on higher and lower for $l'$}\\
+%h_0~\Interpret\C~l \land l'~\Present\C~h_0\\
+%	\Imp{{\sc InterPresent} on higher and lower for $l'$}\\
+%l~\Present\C~h_0 \land l'~\Present\C~h_0\\
+%	\Eqv{property of set comprehension}\\
+%l' \in \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+h~\Interpret\C~l \land (\exists h' : l~\Present\C~h')\\
+	\Imp{let $h'_0$ to be that $h'$}\\
+h~\Interpret\C~l \land l~\Present\C~h'_0\\
+	\Imp{Def of $\Interpret\C$ \&  $\Present\C$ + remove $\exists$}\\
+h~\Interpret\H~m_0 \land m_0~\Interpret\L~l \land l~\Present\L~m'_0 \land  m'_0~\Present\H~h'_0\\
+		\Imp{{\sc \interpret-Char} and {\sc \interpret-Char} on high and low + leaving out some bits}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \land \eqcl{m'_0}{HL} = \present\H~\eqcl{h'_0}{HH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{{\sc InterPresent}}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \land \eqcl{h'_0}{HH} = \interpret\H~\eqcl{m'_0}{HL} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{{\sc Property}}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'_0}{HH} \land \eqcl{m_1}{LH} = \eqcl{m'_1}{LH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{we need $\eqcl{m_1}{LH} = \eqcl{m'_0}{LH}$ or $\eqcl{m'_1}{LH} = \eqcl{m'_0}{LH}$}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'_0}{HH} \land \eqcl{m_1}{LH} = \eqcl{m'_1}{LH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m_1}{LH}\\
+	\Imp{}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} ~~~~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m_1}{LH}\\
+	\Imp{}\\
+l~\Present\L~m_1 \land m_1~\Present\H~h\\
+	\Imp{}\\
+l~\Present\C~h
+}
