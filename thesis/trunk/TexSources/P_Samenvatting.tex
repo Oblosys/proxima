@@ -27,7 +27,7 @@ Om in te zien wat een generieke editor precies is, kunnen we editen vergelijken 
 % van vruchten sap te maken.
 Van sinaasappels, bananen en druiven kan sap gemaakt worden met een citruspers, een blender en een druivenpers. Er zijn dus drie verschillende apparaten nodig, die elk een eigen gebruiksaanwijzing hebben.
 %Hiervoor zijn echter drie verschillende apparaten met drie verschillende gebruiksaanwijzingen nodig. 
-Bovendien moet voor een ander soort vrucht misschien weer een nieuw apparaat aangeschaft worden. Handiger is het daarom gebruik te maken van een algemene (of generieke) sapcentrifuge, zoals de Juice Tiger$^{\text{\tiny\sf TM}}$ in Figuur~\ref{genericJuicer}. Door middel van verschillende hulpstukken kan dit apparaat sap maken van diverse soorten vruchten en zo een aantal losse apparaten vervangen.
+Bovendien moet voor een ander soort vrucht misschien weer een nieuw apparaat aangeschaft worden. Handiger is het daarom gebruik te maken van een algemene (of generieke) sapcentrifuge, zoals de Juice Tiger$^{\text{\tiny\sf TM}}$ in Figuur~\ref{genericJuicer} op de volgende bladzijde. Door middel van verschillende hulpstukken kan dit apparaat sap maken van diverse soorten vruchten en zo een aantal losse apparaten vervangen.
 
 % voordelen generiek
 Zoals de sapcentrifuge een aantal losse fruitpersen vervangt, zo kan een generieke editor een aantal losse editors vervangen (zie Figuur~\ref{genericEditor}). De rol van hulpstukken wordt nu vervuld door {\em style sheets}, waarin het specifieke gedrag van de editor voor een bepaald documenttype beschreven wordt. De voordelen van een generieke editor zijn vergelijkbaar met die van de sapcentrifuge. In plaats van verschillende applicaties is er bijvoorbeeld nog maar \'e\'en applicatie, met een uniforme user interface. Het belangrijkste voordeel is echter 
@@ -123,7 +123,11 @@ Hoofdstukken~\ref{chap:informalSpec} en~\ref{chap:formalSpec} geven een specific
 
 Om een document af te beelden op het scherm maakt Proxima gebruik van de presentatietaal {\Xprez}. {\Xprez} is een declaratieve presentatietaal die geschikt is voor een verscheidenheid aan toepassingen. Hoofdstuk~\ref{chap:presenting} inventariseert een aantal requirements voor een presentatietaal en bevat een vergelijking van een aantal van zulke talen. Vervolgens wordt aan de hand van voorbeelden een informele beschrijving van de taal {\Xprez} gegeven.
 
+Hoofdstuk~\ref{chap:prototype} beschrijft het prototype van Proxima, dat ge\"\i mplementeerd is in de functionele programmeertaal Haskell. Het prototype is platform-onafhankelijk en voldoet al aan vier van de zes genoemde requirements, terwijl aan de overige twee (presentatieformalisme en modelessness) grotendeels is voldaan. De berekende waarden en de presentatie van het document worden gespecificeerd met behulp van een attributengrammatica. Voor de interpretatie wordt gebruik gemaakt van  een combinator parser. Het hoofdstuk toont screenshots van het prototype en bevat ook een aantal voorbeelden van de style sheets waarmee specifieke editors beschreven worden.
+
+\bc
 Hoofdstuk~\ref{chap:prototype} beschrijft het prototype van Proxima, dat is ge\"\i mplementeerd in de functionele programmeertaal Haskell en voldoet aan de zes genoemde requirements. De berekende waarden en de presentatie van het document worden gespecificeerd met behulp van een attributengrammatica, terwijl de interpretatie richting met een combinator parser beschreven wordt. Het hoofdstuk toont screenshots van het prototype en bevat ook een aantal voorbeelden van de style sheets waarmee specifieke editors beschreven worden.
+\ec
 
 Ondanks de nog prille staat van het prototype is het al mogelijk om met relatief weinig moeite complexe editors te bouwen die toch prettig in het gebruik zijn. Op basis van de ervaringen met  het prototype kunnen we concluderen dat de combinatie van een krachtig presentatiemechanisme en een presentatiegericht edit model zeker mogelijk is.
 % editor

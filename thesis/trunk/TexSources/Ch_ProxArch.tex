@@ -335,9 +335,9 @@ For example, moving a section entry in a table of contents is a direct edit oper
 Summarizing, the following three levels may be directly edited in Proxima:
 
 \begin{description}
-\item[Layout] Mainly text-oriented editing. For example: entering keywords (eg.\ "\verb|if|", "\verb|then|", or "\verb|else|"); moving the focus downward one line; etc.
-\item[Enriched Document] Tree edit operations on derived structures, such as moving an entry in a generated table of contents.
-\item[Document] Tree edit operations, such as moving a section in word-processor document; deleting a declaration in Haskell source; or moving the focus to a certain subtree of the document.
+\item[Layout.] Mainly text-oriented editing, such as entering keywords (e.g.\ "\verb|if|", "\verb|then|", or "\verb|else|") or moving the focus downward one line.
+\item[Enriched Document.] Tree edit operations on derived structures, such as moving an entry in a generated table of contents.
+\item[Document.] Tree edit operations, such as moving a section in word-processor document; deleting a declaration in Haskell source; or moving the focus to a certain subtree of the document.
 \end{description}
 
 
@@ -990,7 +990,9 @@ The architecture of the Proxima editor consists of five layers connecting six da
 Proxima has an open architecture, to which an extra layer can be added with relatively little effort. Moreover, each layer may easily be extended or modified. Instead of specifying the computations in an evaluation sheet, the evaluation layer may, for example, invoke an external type checker. 
 
 % edit ops only on layout?
-The value of each level in the Proxima editor contributes to the total editor state, rather than just being an intermediate value in a computation. One reason for this is to support incrementality, but a second reason is that a level may contain extra state. More specifically, from the perspective of a single layer, a higher level does not always contain enough information to compute the lower level and vice versa. By storing both layers, together with information on how elements in each level depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
+The value of each level in the Proxima editor contributes to the total editor state, rather than just being an intermediate value in a computation. One reason for this is to support incrementality, but a second reason is that a level may contain extra state. More specifically, from the perspective of a single layer, a higher level does not always contain enough information to compute the lower level and vice versa. By storing both levels, together with information on how elements in one level depend on elements in the other,
+%each level depend on each other,
+ it is possible to compute the lower level from an updated higher level and vice versa.
 
 Each layer in the Proxima system maintains information on the bidirectional mapping between the neighboring higher and lower levels. In the lower layers, the mappings can be maintained by the editor, because the lower layers operate between levels that have fixed types, and furthermore, have presentation and interpretation mappings that are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings are to be maintained. 
 

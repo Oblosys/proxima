@@ -1245,7 +1245,7 @@ $y^i \in \para{x\st_i} ~\imp~  x\st_i \reuzestar y_i = y_i$\\
 	\p{C}~y_0 \dots y_n \in \setof{ \p{C}~x_0 \dots x_n}{x_0 \in \para{x\st_0} \land \dots  \land x_n \in \para{x\st_n}}\\
 \Eqv{\law{$\para{\hole}$-Def}}&
 	\p{C}~y_0 \dots y_n \in \para{\p{C}~x\st_0 \dots x\st_n}\\
-\Eqv{definitions of $x$ and $y$}&
+\Eqv{definitions of $x\st$ and $y$}&
 	y \in \para{x\st}\\
 \end{Prf}
 
@@ -1282,7 +1282,7 @@ If tree nodes have identities that are preserved by edit operations, an extra st
 
 
 \xpr{
-\reuzestar ::  T^* \to Level \to T\\
+\hspace*{-2.3pt}\reuzestar ::  T^* \to Level \to T\\
 \p{C}_{id}~x^*_0 \dots x^*_n ~\reuzestar~ level ~~=~~ \p{C}_{id}~x'_0 \dots x'_n\\
 ~\textbf{where}~x'_i = \left\{
 \begin{array}{lll}
@@ -1831,7 +1831,7 @@ The inductive definition of $\present_{\s \mathrm{C},i}$ is right-associative, w
 \interpret_{\s \mathrm{C},i} \oo \eqcl{\hole}{CL_i} =  (\interpret_{\s \mathrm{C},i-1}  \oo \eqcl{\hole}{CL_{i-1}}) \klei  (\interpret_{\s i} \oo \eqcl{\hole}{L_i})
 }
 
-The equivalence relations for the basis ($CH_0$ and $CL_0$) both are the equality relation ($=$). The reason for this is that the presentation function at the basis ($\present_{\s 0}$) is the identity, which leaves no room for extra state since each element in $Level_0$ is mapped onto itself. Hence, all equivalence classes are singleton sets, which corresponds to the equivalence classes of the equality relation. \finalshortpage
+The equivalence relations for the basis ($CH_0$ and $CL_0$) both are the equality relation ($=$). The reason for this is that the presentation function at the basis ($\present_{\s 0}$) is the identity, which leaves no room for extra state since each element in $Level_0$ is mapped onto itself. Hence, all equivalence classes are singleton sets, which correspond to the equivalence classes of the equality relation. \finalshortpage
 
 Because indices make proofs harder to read, and because at any time we only regard two layers and three levels, we use the notation from the left-hand side of Figure~\ref{indicesInLayer} in the rest of this section.
 
@@ -1854,7 +1854,7 @@ For the equivalence relations we denote $CH_i$, $CL_i$, $CH_{i-1}$, $CH_{i-1}$, 
 
 \subsection{Editing} \label{sect:compositeExtraEditing}
 
-Besides $level\H$ and $level\L$, a composite layer also keeps track of the middle level $level\M$. Before the edit operation we know $\eqcl{Level\L}{CL} \eq present\C \eqcl{Level\H}{CH}$. By \law{$\present$-Compose}, this implies there exists a middle level $m$ for which we have $\eqcl{\level\L}{LL} = \presentL~\eqcl{m}{LH}$ and $\eqcl{m}{HL} = \presentH~\eqcl{\level\H}{HH}$ . Although not explicitly denoted, we assume that $level\M$ is this $m$. \finalshortpage
+Besides $level\H$ and $level\L$, a composite layer also keeps track of the middle level, $level\M$. Before the edit operation we know that $\eqcl{Level\L}{CL}$$\eq$$\present\C \eqcl{Level\H}{CH}$. By \law{$\present$-Compose}, this implies there exists a middle level $m$ for which we have $\eqcl{\level\L}{LL} = \presentL~\eqcl{m}{LH}$ and $\eqcl{m}{HL} = \presentH~\eqcl{\level\H}{HH}$. Although not explicitly denoted, we assume that $level\M$ is this $m$. \finalshortpage
 
 \begin{figure}
 \begin{small}

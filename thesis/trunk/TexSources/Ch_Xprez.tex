@@ -70,11 +70,11 @@ In most presentation languages, a presentation is a tree structure, in which the
 
 \finallongpage
 \begin{description}
-\item[Box layout]
+\item[Box layout.]
 In a box layout, child presentations are positioned relative to each other, for example horizontally in a row, or vertically in a column. The exact positioning may be specified for the entire list of children (e.g.\ by using a row or column combinator), or for each child itself, by specifying how it should be positioned relative to its sibling. A box model may provide facilities for aligning and stretching child presentations.
 
 \bc The positions can be set either directly or relative to positions of other presentations, or by declaring constraints. If constraints are used, the style sheet does not so much specify the exact computation of a presentation attribute, but rather gives constraints that should hold for the attribute. The actual computation of the attribute value is left to a constraint solver. \ec
-\item[Matrix layout]
+\item[Matrix layout.]
 A matrix model is similar to a box model, but aligns its children both horizontally and vertically. Because it is more general than a row or a column, a matrix may be used to create a box layout. 
 
 \bc  be used to align a grid of elements, usually a list of rows that each contain a list of elements. The elements are aligned along the rows as well as the columns. This is difficult to specify just using rules for each row and cell, as the width of the n-th cell %has to be related to the n-th cells in the other rows instead of to properties of its parent or sibling cells.**  % properties?
@@ -83,7 +83,7 @@ Matrices can be used to create box presentations, but the extent to which this i
 \ec
 
 \finallongpage
-\item[Flow layout]
+\item[Flow layout.]
  % does not depend on doc structure, but on available space. final presentation is not tree of target, but split 
  %along lines and pages
 
@@ -102,28 +102,28 @@ Besides constructs for specifying the structure of the presentation, presentatio
 
 Of the five presentation languages we examined, only XSL regards its target language as a language in its own right, with a separate syntax. The other languages only describe how presentation attributes of the elements of the target presentation tree can be set, but do not treat a presentation as an actual value in the language.
 
-\head{CSS~2.0:} Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer.  \bc The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. \todo{flow} \ec A presentation is a tree structure, in which the nodes specify presentation attributes such as font size or color, and the leaves are document content. A presentation attribute may be specified either absolutely or as a percentage. The meaning of a percentage depends on the attribute. For instance, a percentage value for the {\em font-size} attribute refers to the font size of the parent element, but a percentage for the {\em line-height} attribute refers to the font size of the element itself. It is not possible to let the value of a presentation attribute depend on arbitrary presentation attributes of the parent or siblings in the presentation tree.
+\bigskip{\bf CSS~2.0.}~\,Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer.  \bc The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. \todo{flow} \ec A presentation is a tree structure, in which the nodes specify presentation attributes such as font size or color, and the leaves are document content. A presentation attribute may be specified either absolutely or as a percentage. The meaning of a percentage depends on the attribute. For instance, a percentage value for the {\em font-size} attribute refers to the font size of the parent element, but a percentage for the {\em line-height} attribute refers to the font size of the element itself. It is not possible to let the value of a presentation attribute depend on arbitrary presentation attributes of the parent or siblings in the presentation tree.
 
 CSS~2.0 supports a flow layout and a table format for a matrix layout. However, the control over alignment in the matrix model is rather weak.
 
 \bc but it is of limited use because the transformation language is rather weak. Consequently, if the data in the document does not have exactly the same structure as a CSS~2.0 table, it cannot be presented as one.
 \ec
-\head{CCSS:} Constraint Cascading Style Sheets~\cite{badros99ccss} is an extension of the CSS~2.0 standard that is based on constraints. The target language of CCSS closely resembles the CSS~2.0 target language, but presentation attributes for a child are specified using constraints instead of percentages of the parent's attribute values. Another difference is that the constraints may refer to global constraint variables and to left-siblings in the presentation tree as well as to the parent node. Similar to CSS~2.0, CCSS supports a flow and matrix layout, but no box layout.
+\bigskip{\bf CCSS.}~\,Constraint Cascading Style Sheets~\cite{badros99ccss} is an extension of the CSS~2.0 standard that is based on constraints. The target language of CCSS closely resembles the CSS~2.0 target language, but presentation attributes for a child are specified using constraints instead of percentages of the parent's attribute values. Another difference is that the constraints may refer to global constraint variables and to left-siblings in the presentation tree as well as to the parent node. Similar to CSS~2.0, CCSS supports a flow and matrix layout, but no box layout.
 
-\head{XSL FO:} On the other side of the spectrum is the XSL stylesheet language for XML. The design of the target language, XSL Formatting Objects, was based on the flow objects of the DSSSL~\cite{dsssl96} presentation language for SGML. The formatting objects standard consists of a large collection of elements that can be used to specify page models, presentation attributes, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
+\bigskip{\bf XSL FO.}~\,On the other side of the spectrum is the XSL stylesheet language for XML. The design of the target language, XSL Formatting Objects, was based on the flow objects of the DSSSL~\cite{dsssl96} presentation language for SGML. The formatting objects standard consists of a large collection of elements that can be used to specify page models, presentation attributes, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
 
 XSL FO offers strong control over the flow model, but a box model is not supported. The matrix (table) model for XSL FO has more control over alignment than CSS~2.0, but horizontal alignment is still poorly supported. Hence, a mathematical formula cannot be displayed elegantly in XSL FO.
 
 %but using it to create a box layout is difficult, because that requires the style sheet to take care of computing the alignment, 
 %and XSLT does not support a strong computational formalism.
 
-\head{PSL:} The Proteus Stylesheet Language~\cite{marden98psl} is an attempt to combine the simplicity of CSS~2.0 with the power of XSL. PSL extends the CSS target language with a box model and graphical symbols. The value of a presentation attribute (which is called a property in PSL) can be expressed as a mathematical expression that refers to presentation attributes of nodes in the presentation tree. This mechanism is called {\em property propagation}. 
+\bigskip{\bf PSL.}~\,The Proteus Stylesheet Language~\cite{marden98psl} is an attempt to combine the simplicity of CSS~2.0 with the power of XSL. PSL extends the CSS target language with a box model and graphical symbols. The value of a presentation attribute (which is called a property in PSL) can be expressed as a mathematical expression that refers to presentation attributes of nodes in the presentation tree. This mechanism is called {\em property propagation}. 
 
 PSL supports a flow model and a constraint-based box model, but lacks a matrix model. A presentation can specify its attributes for position and size relative to position and size attributes of other presentations in the tree. These other presentations can be addressed using a number of primitive functions for accessing siblings, parents, ancestors of a specific type, etc.
 
-\head{P:} The  language P is the presentation language of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes, which may be composed according to a box, a flow, or a matrix model. P supports horizontal and vertical-reference lines for automatic alignment of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of presentation attributes. In contrast to PSL, the box layout in P is not constraint-based. \bc Hence, the style sheet designer needs to take the order of computation of the layout properties** into account. \ec 
+\bigskip{\bf P.}~\,The  language P is the presentation language of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes, which may be composed according to a box, a flow, or a matrix model. P supports horizontal and vertical-reference lines for automatic alignment of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of presentation attributes. In contrast to PSL, the box layout in P is not constraint-based. \bc Hence, the style sheet designer needs to take the order of computation of the layout properties** into account. \ec 
 
-\head{Discussion:} 
+\head{Discussion} 
 
 The languages discussed above are all declarative and domain-specific languages that vary in expressive power. The languages CSS~2.0, CCSS, and PSL allow simple presentations to be specified in a simple way, but cannot be used to specify more complex presentations, such as mathematical formulas. In contrast, XSL and P allow complex presentations to be specified, but due to the lack of abstraction, simple presentations also have rather elaborate specifications, especially in P. 
 
@@ -138,19 +138,19 @@ If, on the other hand, child presentations are first-class, and abstraction mech
 Based on the requirements from Chapter~\ref{chap:requirements} and the previous discussion, we conclude that the presentation target language for Proxima, should meet the following requirements: 
 
 \begin{description}
-\item[Proportional effort]
-It must be possible to specify complex presentations, but the specification of simple presentations should still be easy.
-\item[Declarative]
+\item[Proportional effort.]
+It must be possible to specify complex presentations, but the specification of simple presentations should still be esy.
+\item[Declarative.]
 In a declarative language, understanding a composite presentation is easier, because the computation of a presentation does not generate side effects. Another advantage is that the designer need not worry about the order of computation of presentations and attributes.
-\item[First-class presentations]
+\item[First-class presentations.]
 A first-class presentation can be named and manipulated at the level of its parent, which in many cases is the natural place for such manipulations. At the same time, it is also possible to specify aspects of the presentation at the level of the child when this is more appropriate.
-\item[Box, matrix, and flow layout]
+\item[Box, matrix, and flow layout.]
 All four layout models mentioned at the start of this section should be supported. The alignment of the box and matrix models must be powerful enough to specify complex presentations such as mathematical formulas. 
-\item[Text, graphical, and widgets]
+\item[Text, graphical, and widgets.]
 It must be possible to specify text and graphical elements such as lines, boxes, and images. Moreover, the language must support user-interface widgets, such as buttons, selection lists, and menus. 
-\item[Powerful abstraction mechanism]
+\item[Powerful abstraction mechanism.]
 User-defined functions and variables help to reduce code duplication, facilitate code reuse, and increase transparency, because complex pieces of code may be replaced by functions with well-chosen names.
-\item[Domain-specific]
+\item[Domain-specific.]
 The language should have syntax for presentation-specific constructs such as an {\bf ex} (the height of the letter `x' in the current font and size) and different measuring units such as pixels and inches.
 \end{description}
 \bc
@@ -287,7 +287,7 @@ Because the column contains presentations that stretch vertically, the column it
 %																
 \subsection{Modifying presentation attributes}
 
-The presentation attributes of a presentation can be modified using the \p{with\symbol{95}} combinator (the name has an underscore because the keyword \p{with} is a reserved word in Haskell).
+The presentation attributes of a presentation can be modified using the \p{with\symbol{95}} combinator. (The name has an underscore because ``\p{with}'' is a reserved word in Haskell.)
 
 \begin{small}
 \begin{verbatim}

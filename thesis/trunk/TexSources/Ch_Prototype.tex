@@ -103,45 +103,57 @@ Expressions can be edited structurally (or document-oriented) based on the Heliu
 \newcommand{\then}{\hspace{0.4mm}$\Rightarrow$\hspace{2.1mm}}
 
 
-% geometry: 0,106 - 390x52
+% geometry: 0,106 - 390x52    was 4.7, 3.7, 4.7
+
+% | 8 [] [] [] 13 | =  21
+% | 10.5 [] [] [] 10.5 |
+% -> 2.5    = \hspace{5pt}
 \begin{center}
-\protoscrshotStep{strEditList1.png.eps}{4.7}{~}{36} \then 
-\protoscrshotStep{strEditList2.png.eps}{3.7}{\hspace*{-4.4cm}{\em cut} \p{3*5}}{36} \then 
-\protoscrshotStep{strEditList3.png.eps}{4.7}{\hspace*{-4.3cm}{\em paste} \p{3*5}}{36}
+\hspace*{5pt}\protoscrshotStep{strEditList1.png.eps}{4.4}{~}{36} \then 
+\protoscrshotStep{strEditList2.png.eps}{4.4}{\hspace*{-4.4cm}{\em cut} \p{3*5}}{36} \then 
+\protoscrshotStep{strEditList3.png.eps}{4.4}{\hspace*{-4.3cm}{\em paste} \p{3*5}}{36}
 \nopagebreak[4] \\ [2mm]
 \begin{small}
-\parbox{125mm}{\hspace*{3.85cm}{{\em cut} \p{3*5}}
-\hspace{2.38cm} {\em paste} \p{3*5}}
+\parbox{125mm}{\hspace*{3.68cm}{{\em cut} \p{3*5}}
+\hspace{2.94cm} {\em paste} \p{3*5}}
 \end{small} \end{center}
 
+% ALIGN CAPTIONS!!!!!!!!!!
 
 
 The editor also supports structure building with placeholders. By selecting constructs from a menu, an expression may be constructed:
 
+% | 6 [] [] [] 11 | =  17
+% | 8.5 [] [] [] 8.5 |
+% -> 2.5    = \hspace{5pt}
 \begin{center}
-% geometry: 0,130 - 340x52
-\protoscrshotStep{strEditBuild1.png.eps}{4.7}{~}{32} \then
-% geometry: 0,130 - ..x52
-\protoscrshotStep{strEditBuild2.png.eps}{3.7}{\hspace*{-4.5cm} {\em add} \p{FracExp}}{38} \then
+% geometry: 0,130 - 340x52     was 4.7 3.7 4.7
+\hspace*{5pt}\protoscrshotStep{strEditBuild1.png.eps}{4.4}{~}{32} \then
+% geometry: 0,130 - 408x52
+\protoscrshotStep{strEditBuild2Y.png.eps}{4.4}{\hspace*{-4.5cm} {\em add} \p{FracExp}}{38} \then
 % geometry: 0,130 - 440x52
-\protoscrshotStep{strEditBuild3.png.eps}{4.7}{\hspace*{-4.7cm} {\em insert} \p{PowerExp}}{42} 
+\protoscrshotStep{strEditBuild3Y.png.eps}{4.4}{\hspace*{-4.7cm} {\em insert} \p{PowerExp}}{42} 
 \nopagebreak[4] \\ [2mm]
 \begin{small}
-\parbox{125mm}{\hspace*{2.92cm} {\em add} \p{FracExp}
-\hspace{1.7cm}   {\em insert} \p{PowerExp}}
+\parbox{125mm}{\hspace*{2.62cm} {\em insert} \p{FracExp}
+\hspace{2.12cm}   {\em insert} \p{PowerExp}}
 \end{small}\end{center}
+% add insert caption
+%\parbox{125mm}{\hspace*{2.73cm} {\em add} \p{FracExp}
+%\hspace{2.25cm}   {\em insert} \p{PowerExp}}
+
 
 
 Similar structure editing is supported by conventional syntax-directed editors, but Proxima has the advantage that the presentation can still be edited textually as well. Program fragments can be entered or modified textually without having to switch to a different view or mode.  Below is a screenshot that shows a presentation-oriented cut operation. Although the selection that is cut does not make sense at document level, the cut is a valid edit operation at the presentation level.
 
 \begin{center}
 % geometry: 0,130 - 300x52
-\protoscrshotStep{presEdit1.png.eps}{4.7}{~}{42} \then
+\protoscrshotStep{presEdit1Y.png.eps}{4.7}{~}{42} \then
 % geometry: 0,130 - ..x52
-\protoscrshotStep{presEdit2.png.eps}{4.7}{\hspace*{-5.8cm} {\em cut} ``\p{+2, 27, 3*}''}{36}
+\protoscrshotStep{presEdit2Y.png.eps}{4.7}{\hspace*{-5.8cm} {\em cut} ``\p{+2, 27, 3*}''}{36}
 \nopagebreak[4] \\ [2mm]
 \begin{small}
-\hspace*{1.00cm}{\em cut} ``\p{+2, 27, 3*}''
+\hspace*{1.15cm}{\em cut} ``\p{+2, 27, 3*}''
 \end{small}
 \end{center}
 
@@ -764,7 +776,7 @@ The renderer will have to provide rendering support for the extensions to {\Xpre
 
 Besides the straightforward extensions to the system, there is a multitude of possible areas for future research on Proxima. We mention a few of the important areas.
 
-\head{Incrementality.} Probably the most important next step in the development of Proxima is support for incrementality, which has consequences for all layers. For the layout, arrangement and rendering layers, the presentation and interpretation mappings are mainly pre-defined, and hence these layers could provide built-in support for incrementality. Nevertheless, for handling larger documents, we also need incrementality on the evaluation and presentation layers. This will require extensions to the attribute-grammar compiler. 
+\bigskip{\bf Incrementality.}~\,Probably the most important next step in the development of Proxima is support for incrementality, which has consequences for all layers. For the layout, arrangement and rendering layers, the presentation and interpretation mappings are mainly pre-defined, and hence these layers could provide built-in support for incrementality. Nevertheless, for handling larger documents, we also need incrementality on the evaluation and presentation layers. This will require extensions to the attribute-grammar compiler. 
 
 %Techniques for incremental attribute grammar evaluation must be applied.
 %Even simple techniques of diffing big difference.
@@ -777,19 +789,19 @@ Other issues related to incrementality are the required support for change manag
 %operations that request the evaluation for part of the document may be required. 
 
 
-\head{Evaluator layer.} An evaluation layer must be implemented, together with language support for specifying the enriched document type. Because the enriched document is often similar to the document, it is a hassle to specify it from scratch. On the other hand, using the same type for both levels compromises safety. Instead, we need a formalism for specifying only those parts for which the enriched document type differs from the document type. The enriched document type definition can be generated from that specification.
+\bigskip{\bf Evaluator layer.}~\,An evaluation layer must be implemented, together with language support for specifying the enriched document type. Because the enriched document is often similar to the document, it is a hassle to specify it from scratch. On the other hand, using the same type for both levels compromises safety. Instead, we need a formalism for specifying only those parts for which the enriched document type differs from the document type. The enriched document type definition can be generated from that specification.
 
 Once this functionality is available, we can establish the formalisms for the evaluation and reduction sheets. A desirable aspect of these sheet formalisms would be the automatic specification of a reduction sheet, given an evaluation sheet.
 
-\head{AG presentation patterns.} The presentation sheet contains many common patterns, over some of which the attribute-grammar formalism cannot abstract elegantly yet. Identifying these patterns and developing extensions to the formalism will help  to make the presentation sheets more concise and transparent. A possible candidate for such an extension is support for first-class attribute grammars.
+\bigskip{\bf AG presentation patterns.}~\,The presentation sheet contains many common patterns, over some of which the attribute-grammar formalism cannot abstract elegantly yet. Identifying these patterns and developing extensions to the formalism will help  to make the presentation sheets more concise and transparent. A possible candidate for such an extension is support for first-class attribute grammars.
 
-\head{Extra state.} More research is needed to identify the different forms of extra state, as well as language support for easily specifying extra state.
+\bigskip{\bf Extra state.}~\,More research is needed to identify the different forms of extra state, as well as language support for easily specifying extra state.
 
-\head{Focus model.} Proxima has a concept of focus on the layout level as well as on the document level. Furthermore, once the evaluation layer is implemented, there will most likely also be a focus on the enriched document level. An integrated focus model must be developed for smoothly handling the translation of one kind of focus into another during editing.
+\bigskip{\bf Focus model.}~\,Proxima has a concept of focus on the layout level as well as on the document level. Furthermore, once the evaluation layer is implemented, there will most likely also be a focus on the enriched document level. An integrated focus model must be developed for smoothly handling the translation of one kind of focus into another during editing.
 
-\head{Transformation formalism.} Edit commands are still specified with basic cut-and-paste operations. We need a transformation formalism to easily specify type-safe transformations.
+\bigskip{\bf Transformation formalism.}~\,Edit commands are still specified with basic cut-and-paste operations. We need a transformation formalism to easily specify type-safe transformations.
 
-\head{Graph support.} Although a Proxima document is a tree, we could use cross-references between tree nodes to encode graph data. It would be interesting if this data could also be presented as a graph. Simple extensions to {\Xprez} will make it possible to create a graph presentation. For editing a graph, the arrangement layer needs to provide edit operations such as moving nodes and inserting and deleting edges. The result of these edit operations needs to be interpreted as a document update.
+\bigskip{\bf Graph support.}~\,Although a Proxima document is a tree, we could use cross-references between tree nodes to encode graph data. It would be interesting if this data could also be presented as a graph. Simple extensions to {\Xprez} will make it possible to create a graph presentation. For editing a graph, the arrangement layer needs to provide edit operations such as moving nodes and inserting and deleting edges. The result of these edit operations needs to be interpreted as a document update.
 
 \bigskip
 A first priority is the instantiation of more example editors. Especially a word-processing editor will be interesting, because this kind of application has not yet been investigated extensively with Proxima. The example editors will suggest more areas of future research, and allow us assign priorities to each area as well. Furthermore, by examining common patterns in the sheets of the example editors, we can determine the useful abstractions and libraries for these sheets.
