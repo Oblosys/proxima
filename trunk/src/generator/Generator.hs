@@ -33,7 +33,7 @@ import GenProxParser
 main =
   getArgs >>= \args->
   if length args /= 1 then
-    putStrLn "Usage: generator file" >>
+    putStrLn "Usage: generate file" >>
     exitWith (ExitFailure 1)
   else
     generateFiles (head args)
