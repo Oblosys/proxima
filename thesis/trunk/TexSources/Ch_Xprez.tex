@@ -46,9 +46,9 @@ Two kinds of languages are involved in the presentation process: a presentation 
 Section~\ref{targetlangs} discusses existing presentation target languages, followed by the introduction of the target language of {\sc Xprez} in Sect.~\ref{xpreztarget}. Section~\ref{transformlangs} deals with the transformation languages and Sect.~\ref{conclusions} concludes.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Presentation Target Languages}
 \label{targetlangs}
 
@@ -66,7 +66,7 @@ A very low level way of formatting is specifying the absolute coordinates in the
 \end{description}
 
 
-%									
+%																
 \subsection{Existing Presentation Target Languages} \label{existingtarget}
 
 In this section, we will examine the target sublanguages of five presentation languages: CSS~2.0, CCSS, XSL, PSL and P. Of these five languages, only XSL regards its target language as a separate language with its own syntax. The other languages only describe how properties of the elements of the target presentation tree can be set, but they do not treat presentations as actual values in the language.
@@ -105,16 +105,16 @@ User-defined functions and var\-i\-ables help to reduce code duplication, facili
 \end{description}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{The {\sc Xprez} Target Language}
 \label{xpreztarget}
 
 With the requirements from the previous subsection in mind, we have developed the declarative presentation language {\sc Xprez}. 
 
 
-%									
+%																
 \subsection{{\sc Xprez} Presentation Model}
 
 {\sc Xprez} is a box language, like P, and the document formatting languages \TeX ~and Lout~\cite{lout}. A presentation is a value of the abstract data type \texttt{Xprez}, the definition of which is omitted. A presentation is either a simple box containing a piece of text or a graphical object, or a composite box that contains a list of child presentation boxes. It can therefore be viewed as a tree in which the leaves are simple presentations and the nodes are composite presentations. We construct \texttt{Xprez} values in the functional language Haskell extended with a number of primitive functions that will be described in Sect.~\ref{primitives}.
@@ -145,7 +145,7 @@ A presentation box (from now on called presentation) has a number of properties 
 \noindent Figure~\ref{xprezproperties} contains the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when they are combined in composite presentations. The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self explanitory. In the future, this set will be extended with other properties such as more line style and font attributes, and user defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
 
 
-%									
+%																
 \subsection{{\sc Xprez} Primitives} \label{primitives}
 
 Simple presentations can be created with the first five combinators in Fig.~\ref{xprezprim}. The \texttt{empty} combinator is a neutral element that is not visible and takes up no space. A piece of text can be presented with \texttt{text}, and a rectangle with \texttt{rect}, which takes the width and height as arguments. The \texttt{poly} combinator takes a list of relative coordinates between (0,0) and (1,1) and produces a line figure that connects these points. A \texttt{poly} presentation stretches in horizontal and vertical direction. Finally, \texttt{img} can be used to display bitmap images. The argument is a string that contains the path to the bitmap file. By default, the reference lines of simple presentations are 0, except for the horizontal reference line of a text presentation, which is equal to the baseline of the current font.
@@ -205,7 +205,7 @@ in  row [ text "Big" `withFontSize` 200
 The second element in the row is a column that takes the horizontal reference line from its third child (the numbering starts at 0), so the word {\bf ``Big''}, displayed with a font size of 200 pixels, is aligned with the word {\bf ``small''}, which has the default font size. The \texttt{cross} object is a line figure in the form of an X, and the \texttt{greycross} is that same figure with a grey background color. Because these presentations stretch in vertical direction, so does the column that contains them. The two stretching objects above the reference object (\texttt{text "small"}) are each assigned equal amounts of the remaining space above the horizontal reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is added and distributed equally over all stretching objects. In this case, there will no longer be any alignment of the reference object. 
 
 
-%									
+%																
 \subsection{Property Modification}
 
 The properties of a presentation can be modified using the generic \texttt{with\symbol{95}}\footnote{The name contains an underscore because Haskell already has a keyword {\em with}} combinator:
@@ -242,7 +242,7 @@ With \texttt{p `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we can now spe
 The font size combinators show how abstraction is used to meet the {\em proportional effort} requirement. For simple changes of the font size, the simple \texttt{withFontSize} combinator can be used, and only if more control is desired, it is necessary to use the more complicated \texttt{withFontSize\symbol{95}} or \texttt{with\symbol{95}} combinators.
 
 
-%									
+%																
 \subsection{Advanced Examples}
 
 A presentation in {\sc Xprez} is a first class value, so it is possible to perform manipulations on child presentations, such as positioning or font size updates, at parent level. This is illustrated in the following presentation for mathematical fractions: 
@@ -280,22 +280,22 @@ The second example is a pair of combinators that can be used to create tree brow
 The tree example is given here to show that a rather complex and graphical presentation can be specified with relatively little effort. However, in order to make this presentation a fully operational tree browser that can react to mouse clicks, we need to model the presentation state and edit operations on this state. This is not possible in the current version of {\sc Xprez} but will be possible in the Proxima editor system.
 
 
-%									
+%																
 \subsection{Future Work}
 
 {\sc Xprez} meets the requirements listed at the bottom of Sect.~\ref{existingtarget}, with the exception of the domain-specific syntax, for which a special parser will have to be added to the system. Furthermore, there are a number of things that are still lacking in the current model and that are being investigated. Firstly, there is no page model yet, and hence no page related concepts such as footnotes and page references are possible. Probably, an abstraction similar to the {\em Galley} from Lout~\cite{lout} can be used for this. Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \texttt{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. Finally, the \texttt{with\symbol{95}} combinator only gives access to the properties of a parent and its child. It is not possible to access properties of siblings, or presentations elsewhere in the tree, but it is also not yet clear whether such access is really necessary in a presentation language. Nevertheless, the set of combinators presented so far is powerful enough to cover much of the \TeX ~math typesetting as described in \cite{functionaltex}, including superscripts and subscripts. We also expect that defining a presentation sheet for the MathML~\cite{mathml} language will be rather straightforward in {\sc Xprez}.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Presentation Transformation Languages}
 \label{transformlangs}
 
 A presentation transformation language is used to specify a mapping between a document language (a subset of XML defined by a DTD) and a presentation target language. It may be a complete programming language, which is powerful, but leaves the burden of traversing the document structure on the programmer. Therefore, often a rule based language is used. For each element in the document type, one or more rules can be specified, which map the element onto its presentation. 
 
 
-%									
+%																
 \subsection{Existing Languages}
 
 The five languages discussed in Section~\ref{targetlangs} all have rule-based transformation languages. However, the power of the rule selection mechanisms varies, as well as the transformation capabilities.{\bf }
@@ -317,7 +317,7 @@ It is possible to leave out the presentation of certain elements, and to add tex
 Another problem with these languages is that it is difficult to specify computations other than the basic counters that are provided as primitives. PSL allows computations on properties, but not on the content of the presentation. Specifying a field in the presentation that contains as its content the sum of a number of other fields is not possible. XSLT has very basic support for manipulations on numbers, text and booleans, but relies on separate scripting languages for more interesting calculations. However, the standard does not specify how a style sheet should be extended with scripting functions, and hence this is implemented differently by each XSLT processor. This makes it impossible to specify computations in a uniform and portable way.
 
 
-%									
+%																
 \subsection{{\sc Xprez} Transformation Language}
 
 The transformation language for {\sc Xprez} is an attribute grammar over the document type. For each element, a synthesized attribute {\em pres} of type \texttt{Xprez} is defined, which specifies the presentation of the element. Apart from the presentation attribute, the style sheet designer can declare other synthesized and inherited attributes, in order to create derived document structures or perform computations over document values. Below is a presentation rule for the top-level \texttt{Module} element of a document type for a small functional language:
@@ -338,9 +338,9 @@ As in P, only one presentation can be specified for each element. Context specif
 The transformation component of {\sc Xprez} has been realized in Haskell, using the MAG attribute grammar system\cite{ag}. Currently, the system can handle only a subset of all document types, as there is no support for XML attributes and entities yet.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Conclusions}
 \label{conclusions}
 

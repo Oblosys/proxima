@@ -1,29 +1,26 @@
 \chapter{Architecture of the Proxima Editor}
 \label{chap:proxArch}
 
-%\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-%\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+\bc
+Multiple presentations? Will this be hard to implement?
 
-% Multiple presentations? Will this be hard to implement?
+ref to reqs and how the architecture helps?
 
-% ref to reqs and how the architecture helps?
+Partial? is that really when high -> low + extra???
+Partial: compare with window that shows only part of the source?
 
-% Partial? is that really when high -> low + extra???
-% Partial: compare with window that shows only part of the source?
+SOMEWHERE: presentation may support duplicates in future, otherwise tree views need enriched 
+ document structures.
 
-% SOMEWHERE: presentation may support duplicates in future, otherwise tree views need enriched 
-% document structures.
+TODO: mention that font query in arranger is also ui dependent.
 
-%TODO: mention that font query in arranger is also ui dependent.
+TODO: find out where edit gesture/operation should be mentioned
 
-%TODO: find out where edit gesture/operation should be mentioned
+plaatje Proxima + style (parsing) sheet + computation (reduction) sheet -> editor mention Bootstrapping problem, descr. of levels layers and edit model. second is easier to give with in a
 
-%plaatje Proxima + style (parsing) sheet + computation (reduction) sheet -> editor
-
-% mention Bootstrapping problem, descr. of levels layers and edit model. second is easier to give with in a
-% formal story. however, design reasons for first are hard to comprehend without idea. So first informal arch 
-% and edit model and later the formal stuff
-
+formal story. however, design reasons for first are hard to comprehend without idea. So first informal arch 
+ and edit model and later the formal stuff
+\ec
 
 
 {\em *** Version: \today~***}
@@ -79,9 +76,9 @@ Some steps in the presentation process, especially in the higher layers, may be 
 The remainder of this chapter contains an informal description of the levels and layers in the Proxima architecture. A more formal description is presented in chapters~\ref{chap:singleLayer}~and~\ref{chap:layeredArchs}.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{The levels of Proxima}
 
 A data level in Proxima is not just an intermediate value in the presentation computation, but an entity in its own right. Together, the data levels constitute the state of the editor. The six data levels of Proxima are:
@@ -101,7 +98,7 @@ A data level in Proxima is not just an intermediate value in the presentation co
 \end{description}
 
 
-%									
+%																
 \subsection{Document} \label {sect:docLevel}
 
 A document is the internal tree data structure that is edited by the user. The type of the document is described by a context free grammar, with special constructs for lists and optional values (similar to EBNF). Haskell data types, EBNF, DTDs and XML Schemas are all restricted forms of context free grammars suitable for describing the document type. In this thesis, we make use of simple Haskell data types without higher-order types, except for the list type.
@@ -125,7 +122,7 @@ data Exp$_{Doc}$ \= =  IfExp $_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$\\
 An example document of this type, as well as examples of the lower levels, is provided with the explanation of the presentation process in Section~\ref{sect:presprocess}.
 
 
-%									
+%																
 \subsection{Enriched Document} \label{sect:enrLevel}
 
 An enriched document is a copy of the document, to which derived information has been added. In the word processor example, the enriched document contains a table of contents, and each section or subsection element has a field that contains its number. Such derived information is not present at the document level.
@@ -150,7 +147,7 @@ data Type$_{Enr}$ = IntType$_{Enr}$ | BoolType$_{Enr}$ | ErrorType$_{Enr}$
 \rmfamily
 
 
-%									
+%																
 \subsection{Presentation} \label{sect:presLevel}
 
 %what is presentation
@@ -197,7 +194,7 @@ data AttributionRule = \dots\\
 \rmfamily
 
 
-%									
+%																
 \subsection{Layout}
 
 The layout level is the same as the presentation level, except for the tokens. On the layout level, a token is represented by its string, whereas its whitespace is represented by strings of spaces and by starting a new row for each line break. Formatters are still present, because the exact size and position information required to remove them is not known at the layout level.
@@ -221,7 +218,7 @@ data AttributionRule = \dots\\
 \rmfamily
 
 
-%									
+%																
 \subsection{Arrangement}
 
 %what is arrangement  : fixed position + size. also formatters are replaced by columns of rows
@@ -251,7 +248,7 @@ data AttributionRule = \dots\\
 \end{tabbing}
 \rmfamily
 
-%									
+%																
 \subsection{Rendering}
 
 A rendering is a set of user interface drawing commands that are actually drawn on the screen. Positions are expressed in pixel coordinates. In contrast to the other levels, a rendering has no explicit tree structure.
@@ -267,9 +264,9 @@ data RenderingCommand = \dots
 \rmfamily
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{The layers of Proxima}
 
 Between each pair of data levels is a {\em layer} that takes care of mapping the higher level onto the lower level (downward mapping, or presentation) and that translates edit operations on the lower level to edit operations on the higher level (upward mapping, or translation). 
@@ -293,14 +290,16 @@ $\delta_{Low}$ & {lower level} & $\delta_{Low}$
 \end{small}
 \end{figure}
 
-%Three kinds of arrows are visible in the picture: downward, upward, and horizontal arrows pointing to the
-%right. The downward arrows represent the presentation process and the upward arrows represent the
-%translation of edit operations. The horizontal arrows  and the horizontal arrows 
+\bc
+Three kinds of arrows are visible in the picture: downward, upward, and horizontal arrows pointing to the
+right. The downward arrows represent the presentation process and the upward arrows represent the
+translation of edit operations. The horizontal arrows  and the horizontal arrows 
 
-%A mapping between edit operations is at least as expressive as a mapping between values, because any 
-%mapping on values can be represented by a mapping 
-%$f :: Data_{High} \rightarrow Data_{Low}$ can be expressed as a mapping on edit operations
-%$f' ::  \delta_{Data_{High}} \rightarrow \delta_{Data_{Low}}$ with $f' edit_{High} = set (f %(edit_{High}high))$
+A mapping between edit operations is at least as expressive as a mapping between values, because any 
+mapping on values can be represented by a mapping 
+$f :: Data_{High} \rightarrow Data_{Low}$ can be expressed as a mapping on edit operations
+$f' ::  \delta_{Data_{High}} \rightarrow \delta_{Data_{Low}}$ with $f' edit_{High} = set (f (edit_{High}high))$
+\ec
 
 %thing is parameterized!!!
 A layer has two separate components, one for the downward mapping (presentation) and one for the upward mapping (translation). Because each layer is between two levels and the Proxima system consists of six data levels, we have five layers:
@@ -326,9 +325,9 @@ Some of the components in the architecture are parameterized with so called {\em
 The downward mappings from all the layers together form a logical whole (the presentation process), just as the upward mappings (the translation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the translation process.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Presentation Process} \label{sect:presprocess}
 
 The presentation process is the stepwise mapping of a document onto its final rendering. Although the mapping is actually a mapping between edit operations on each of the levels, we will present it here as a mapping between edit levels. The reason for this is that the fact that the mapping is on edit operations rather than on levels is important mainly for reasons of incrementality, and regarding it as a mapping on levels makes the presentation process easier to explain.
@@ -349,7 +348,7 @@ Root$_{Doc}$ \= [ Comment$_{Doc}$ ["This", "is", "a", "simple", "expression"] \\
 \rmfamily \normalsize
 
 
-%									
+%																
 \subsection{Evaluation layer: Evaluator} \label{sect:evaluator}
 
 %what is evaluator
@@ -373,7 +372,7 @@ Root$_{Enr}$ \= [ Comment$_{Enr}$ [ "This", "is", "a", "simple", "expression" ]\
 \rmfamily \normalsize
 
 
-%									
+%																
 \subsection{Presentation layer: Presenter} \label{sect:presenter}
 
 %what is presenter
@@ -415,7 +414,7 @@ Col$_{Pres}$ \= [ With$_{Pres}$ \{ fontFamily = "Times New Roman", fontSize = 12
 
 
 
-%									
+%																
 \subsection{Layout layer: Layouter} \label{sect:layouter}
 
 %what is layouter
@@ -452,7 +451,7 @@ Col$_{Lay}$ \= [  With$_{Lay}$ \{ fontFamily = "Times New Roman", fontSize = 12 
 \rmfamily \normalsize
 
 
-%									
+%																
 \subsection{Arrangement layer: Arranger} \label{sect:arranger}
 
 The arranger computes the exact sizes and positions for all elements in the layout level, yielding the arrangement. Fonts are queried to determine the size of strings, and child elements of compound elements such as rows and columns are aligned and positioned.
@@ -496,7 +495,7 @@ Col$_{Arr}^{(0,0)(80\times84)}$ \\
 \rmfamily \normalsize
 
 
-%									
+%																
 \subsection{Renderering layer: Renderer} \label{sect:renderer}
 
 The renderer maps each element of the arrangement onto a set of drawing commands for the user interface. All positions and size have already been computed by the arranger, and the renderer only scales these positions and sizes according to the current scaling factor of the view.
@@ -522,9 +521,9 @@ simple1 = \\
 }}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Translation Process}
 
 The translation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
@@ -542,7 +541,7 @@ On the lowest two layers (rendering and arrangement), only direct translation ta
 Because the translation of edit operations does not go through all stages like the presentation does, and because of the variation in edit operations, it is not possible to give a running example of the translation process. A number of separate examples are therefore provided together with the descriptions of the translation components.
 
 
-%									
+%																
 \subsection{Renderering layer: Gesture Interpreter} \label{sect:gestureInterpreter}
 
 The gesture interpreter has two tasks. It maps edit gestures onto edit operations for the designated levels, and it translates edit operations on the rendering onto edit operations on the arrangement, which means that absolute positions in pixel coordinates are translated descaled to arrangement level coordinates. 
@@ -564,7 +563,7 @@ KeyPress$_{Ren}$ 'a' $\mapsto$ Wrap$_{Arr}$ (Insert$_{Lay}$ 'a')
 \rmfamily
 
 
-%									
+%																
 \subsection{Arrangement layer: Unarranger}
 
 The main task of the unarranger is mapping locations in arrangement level edit operations on locations in layout level edit operations. A location that is specified in absolute coordinates is first converted to a location in the arrangement tree, which is specified as a tree path. Subsequently, the arrangement tree path is mapped onto a layout tree path. The arrangement tree is largely isomorphic to the layout tree, except for the formatter subtrees, as these are represented by rows and columns in the arrangement. Therefore, the mapping is mainly the identity function, except for paths in rows that originate from a formatter, which are mapped to paths in the originating formatter.
@@ -577,7 +576,7 @@ unarrange (MouseClick$_{Arr}$ (56,38) Left 1) = MouseClick$_{Lay}$ [1,0,1,4,0] L
 \rmfamily
 
 
-%									
+%																
 \subsection{Layout layer: Scanner} \label{sect:scanner}
 
 The scanner is the first layer in which the level to level mapping becomes important, since the layout level may be edited by the user. Edit operations targeted at the layout level are performed on the layout level, after which the level is scanned, yielding the new presentation. A presentation edit operation is computed from the new presentation.
@@ -633,7 +632,7 @@ $\mapsto$\\
 We use an informal notation for both the {\em insert} and the {\em replace} edit operations to improve readability. The actual insert operation also contains a reference to the target location of the inserted character, and the replace operation contains the locations of the token lists, rather than the lists themselves. 
 
 
-%									
+%																
 \subsection{Presentation layer: Parser} \label{sect:parser}
         
 It is difficult to directly map edit operations on the presentation to edit operations on the enriched document, therefore we take the indirect approach: the edit operations are applied to the presentation, which is parsed to yield a new enriched document. The enriched document edit operations are computed from this new enriched document.
@@ -699,7 +698,7 @@ It should ne noted that the second \ttfamily (IntExp$_{Enr}$ 0)\rmfamily in the 
 After it is edited, an enriched document may be inconsistent with regard to the document and the evaluator. For example, if the declaration is edited in such a way that its type no longer matches the one in its type declaration. The consistency is guaranteed again when the reducer and evaluator have been invoked.
 
 
-%									
+%																
 \subsection{Evaluation layer: Reducer} \label{sect:reducer}
 
 The reducer takes care of mapping edit operations in derived structures on edit operation on the document. The specification of the mapping is in the {\em reduction sheet}, which in many cases can be automatically derived from the evaluation sheet. Automatic reduction behaviour is typically possible for parts of the enriched document that are duplicated, reordered, or partial versions of parts of the document. 
@@ -750,9 +749,9 @@ And the document level edit operation thus becomes:
 \rmfamily \normalsize
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Extra state at each level}
 
 Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a more fundamental reason is that the presentation and translation mappings are not complete. More specifically, a level does not always contain enough information to compute the level below it and vice versa. By storing both layers, together with information on how elements in each layer depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
@@ -769,9 +768,9 @@ $translate :: low+extra_{low} \rightarrow high+extra_{high}$.
 The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and translation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Motivation for the layer structure}
 
 The choice of layers for the Proxima editor is not an exact one. On the one extreme, the entire edit process can be put in one large layer, whereas on the other extreme a separate layer can be defined for every small step in the process. The choice of layers in Proxima is a balance between these extremes. This section contains the motivation for the layer structure as it is.

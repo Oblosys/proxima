@@ -32,9 +32,9 @@ HOE HEEFT PRE HIERMEE TE MAKEN? pre geeft geen berekening, maar alleen verband, 
 In this chapter, compose the layers from the previous chapter. First make a presentation system (not an editor), add layers. Then editor with layers. Finally, editor with the layers from previous chapter. And some more stuff for typical layer functionality. (skipping, and higher level edit ops)
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Presentation system}
 
 Presentation systems are applications that provide a user with some kind of view  on a data structure. Examples of presentation systems are pdf-viewers, image viewers, and web browsers, although the latter also have functionality for accessing non-local documents. Because an editor can be seen as  a presentation system with extra functionality  for editing the presented data, we will first develop a number of invariants that model the architecture of a presentation system, and in the next section rework the invariants to model an editor.
@@ -45,7 +45,7 @@ In this section, as well as in the following two, we will follow the same line o
 ??
 
 
-%									
+%																
 \subsection{Single stage presentation}
 
 Suppose that there is a function $present :: Document \rightarrow Rendering$ that maps a $document$ of type $Document$ to a $rendering$ of type $Rendering$. We formally define the relation between the document and the rendering with the invariant:
@@ -70,7 +70,7 @@ rendering = present~document
 {\centering (Invariant 2: One stage presentation, Final)\\}\vspace{1em}
 
 
-%									
+%																
 \subsection{Layered presentation}
 
 
@@ -103,7 +103,7 @@ rendering = level_n \hfill \text{\{Compute Rendering\}}
 {\centering (Invariant 4: Layered presentation, Final)\\}\vspace{1em} 
 
 
-%									
+%																
 \subsection{Layered presentation with local state}
 
 
@@ -130,15 +130,15 @@ level_{i+1} = present_i~sheet_i~level_i
 \end{figure}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Editor}
 
 plaatje van edit proces, show get gesture, update ...
 
 
-%									
+%																
 \subsection{Single stage editor}
 
 
@@ -181,7 +181,7 @@ rendering'' = present~document''	\hfill \text{\{Postcondition + Compute renderin
 * Add correctness? met EDIT \& PRESENT? Maakt ook trans/pres volgorde in inc duidelijker
 
 
-%									
+%																
 \subsection{Layered editor}
 
 
@@ -220,7 +220,7 @@ level''_{i+1} = present_i~level''_i		\hfill \text{\{Postcondition + Compute Rend
 - nu is doc'' = doc' reden duidelijk te zien, weer twee keer update, behalve op doc
 
 
-%										
+%																
 \subsection{Layered editor with local state}
 
 - sheets are added, similar to presenter. 2 sheets pres and trans sheet. Can be together, but may be separated. Parser is different from stylesheet. maybe both come from some common originating sheet. (tell this in single layer chapter?)
@@ -242,15 +242,15 @@ level''_{i+1} = present_i~sheet_{Pres,i}~level_i''		\hfill \text{\{Postcondition
 {\centering (Invariant 9: Layered editor with sheets)\\}\vspace{1em}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Incrementality}
 
 - ipv a->b edit a -> edit b plaatje. Komt omhoog en omlaag voor, altijd eerst edit. verandert de invariant een beetje, kopieren gebeurt nu tussen level en level'
 
 
-%									
+%																
 \subsection{Single stage editor}
 
 
@@ -310,7 +310,7 @@ rendering'' = update~e'_{Rendering}~rendering'		\hfill \text{\{Update rendering\
 {\centering (Invariant 6: One stage editor, 1st attempt)\\}
 
 
-%									
+%																
 \subsection{Layered}
 
 - symmetrie van edit, telkens onderaan. Behalve bij laatste update rendering, duidelijk zichtbaar in extra inv.
@@ -384,9 +384,9 @@ level''_{n} = update~e'_{Level_{n}}~level'_{n}		\hfill \text{\{Update rendering\
 {\centering (Invariant 6: layered incremental with sheets)\\}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Mapping info \& Local state}
 
 * Where: say that editing on all levels is possible

@@ -1,44 +1,46 @@
 \chapter{Editing Structured Documents}
 \label{chap:editing}
 
-% !!!TODO: rename local state to extra state
+\bc
+!!!TODO: rename local state to extra state
 
-% LANGUAGE:
-% *** Lefthand shreenshot instead of left screenshot??
-% cross-links?
+LANGUAGE:
+*** Lefthand shreenshot instead of left screenshot??
+cross-links?
 
-% TODO: change wordprocessor screenshot to actual thesis chapter text
+TODO: change wordprocessor screenshot to actual thesis chapter text
 
 
-% Mention OpenDoc, Views? Not really structure editors.
+Mention OpenDoc, Views? Not really structure editors.
 
-%Focus of proxima, trees. Not entire systems, just the editor.
+Focus of proxima, trees. Not entire systems, just the editor.
 
-% presentation transformation language? mapping language, pres spec lang?
+presentation transformation language? mapping language, pres spec lang?
 
-% mention that instead of preventing syntax errors, continuous parsing with in-place error info
-% is a good model as well?
+mention that instead of preventing syntax errors, continuous parsing with in-place error 
+info is a good model as well?
 
-% incrementality  has been removed from this chapter
-%Also, we have not paid much attention to incrementality. The layered architecture of %Proxima allows incrementality issues to be dealt with by individual layers. 
+incrementality  has been removed from this chapter
+Also, we have not paid much attention to incrementality. The layered architecture of Proxima allows incrementality issues to be dealt with by individual layers. 
 
-%With current computer speeds, parsers are so fast that incremental parsing has become %less of an issue. We expect that a rather coarse model for incrementality in the %presentation will be sufficient for creating fast editors.
-
+With current computer speeds, parsers are so fast that incremental parsing has become %less of an issue. We expect that a rather coarse model for incrementality in the %presentation will be sufficient for creating fast editors.
+\ec
 
 {\em *** Version: \today~ ***}
 
 *** Introduction is added when other chapters are finished.\\
 *** Pictures are still drafts because they may be replaced by screen-shots of the prototype.\\
 
-%Editing is concerned with the creation and maintenance of documents.  
-%Most documents have some form of structure. 
-%
-%In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use %cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors %are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and %evaluate related work according to them. End with a discussion why no editor meets all requirements, and how proxima will.
+\bc
+Editing is concerned with the creation and maintenance of documents.  
+Most documents have some form of structure. 
 
+In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and evaluate related work according to them. End with a discussion why no editor meets all requirements, and how proxima will.
+\ec
 
-%									
-%									
-%									
+%								
+%								
+%								
 \section{Editing}
 \label{sect:editing}
 
@@ -73,7 +75,9 @@ User
 %boundaries of editor concept
 Naturally, word processors, image editors, and XML editors are regarded as editors in this view, but there are also some less obvious examples. Take for example the preferences pane that is part of most window based applications. The set of check boxes, selection lists, and text fields can be seen as a presentation of the preferences of the application. 
 
-%When regarded as an editor, more sophisticated input fields that incorporate parsers, may be used. Furthermore, normal %undo/redo functionality is possible, instead of the course grained OK/Cancel model, which only allows accepting or ignoring all %changes at once.
+\bc
+When regarded as an editor, more sophisticated input fields that incorporate parsers, may be used. Furthermore, normal undo/redo functionality is possible, instead of the course grained OK/Cancel model, which only allows accepting or ignoring all changes at once.
+\ec
 
 With such a broad view of editors, it is possible to regard every application, and even an entire operating system as an editor. In essence, all a computer user does is give edit gestures with the mouse and the keyboard in response to the presentation on the computer monitor. In reaction to the edit gestures, the internal state of the computer changes, giving rise to a new presentation. 
 
@@ -98,7 +102,8 @@ In the context of generic editing, the term {\em user} can refer to either an ed
 Because it is difficult to give a precise definition of a generic structure editor, as well as the possibly restrictive consequences of such a definition, we will rather use a number of typical use cases to clarify the concept. Section~\ref{sect:usecases} presents the use cases.
 
 
-%									\subsection{Classes of Structure Editors}
+%								
+\subsection{Classes of Structure Editors}
 
 Three classes of structure editors are distinguished in literature: syntax-directed, syntax-recognizing, and hybrid editors. Syntax-directed editors mainly support edit operations targeted at the document structure, whereas syntax-recognizing editors support edit operations on the presentation of the document. A hybrid editor combines  syntax-directed with syntax-recognizing features, but the term is not used consistently in literature. 
 
@@ -174,7 +179,7 @@ Others (e.g.~\cite{bahlkesneltingswillusp20, ballance92pan, koorn92gse}), howeve
 Because of the confusion, and because of the strictness of the syntax-directed versus syntax-recognizing classification, we rather regard the levels on which edit operations are supported together with the integration between edit operations on different levels. Syntax-directed editors mainly support document level edit operations, whereas syntax-recognizing editors mainly support presentation level edit operations.
 
 
-%									
+%								
 \subsection{Advantages of Structure Editors}
 
 An editor that knows about the structure of the edited document can offer a lot of interesting functionality. Advantages include:
@@ -189,20 +194,20 @@ An editor that knows about the structure of the edited document can offer a lot 
 \item[Structural Edit Operations.] Some operations, such as changing a section with subsections to a subsection with subsubsections in a scientific article, are straightforward to specify at structural level, but awkward on presentation level.
 
 \item[Structural Navigation.] Navigating over the document structure instead of its presentation can be very useful. In program editors, when the focus is on an identifier, a jump to its definition in the source may be performed. Furthermore, an outline view of the document can be shown in which a user can click to jump to the corresponding position in the document.
+\bc
+\item[Integration with Other Tools] Integrating with other tools, such as compilers, spell checkers, and theorem provers, program transformation systems, and relayingis easier when the editor has knowledge of the document structure. 
 
-%\item[Integration with Other Tools] Integrating with other tools, such as compilers, spell checkers, and theorem %provers, program transformation systems, and relayingis easier when the editor has knowledge of the document structure. 
-%integration
-
-%\item[Connection to Other Tools]
-%Customization of the editor becomes more interesting <customization becomes more 
-%interesting when structure is known and results can be put in presentation>
+\item[Connection to Other Tools]
+Customization of the editor becomes more interesting <customization becomes more interesting when structure is known and results can be put in presentation>
+\ec
 \end{description}
 
 For document types with a textual presentation, such as program sources or XML documents, some of the advantages can be simulated with a text editor. Lexical analysis can be used on the edited text, and basic support for syntax coloring, auto-completion, and navigation can be provided. However, although simple and efficient, these solutions are  very basic and prone to errors, because much of the structure of a document cannot be recognized at a purely lexical level.
 
-%sometimes basic structural navigation.  Even though some of the document structure can be recognized at lexical level, in the %general case, a full parse is needed. For example, when trying to specify a Haskell function definition as a line in which a '=' %character is present, also lines containing strings or comments with '=' characters are identified as funcion definitions. In some %cases the problems can be overcome, but in general this amounts to building a parser in a formalism that is too weak for that %purpose. Therefore, we will not consider text editors in this overview of editors.
+\bc
+sometimes basic structural navigation.  Even though some of the document structure can be recognized at lexical level, in the general case, a full parse is needed. For example, when trying to specify a Haskell function definition as a line in which a '=' character is present, also lines containing strings or comments with '=' characters are identified as funcion definitions. In some cases the problems can be overcome, but in general this amounts to building a parser in a formalism that is too weak for that purpose. Therefore, we will not consider text editors in this overview of editors.
 %*********************************
-
+\ec
 
 Despite the advantages, generic structure editors are not widespread at all. Several structure editors are used in small communities, but most development projects have been terminated, and in the last decade, very few publications on the subject have appeared. The rise of the XML standard has spawned a large number of generic editors, but when regarded as structure editors, XML editors do not show much variation and do not offer many of the possibilies that a structure editor could offer. Hence their applicability is limited, and using an XML editor for example to edit a java program source for example is not possible with the current generation of editors.
 
@@ -261,7 +266,7 @@ Unlike any current structure editor, the Proxima editor will be able to handle a
 }
 
 
-%									
+%								
 \subsection{An Editor for Haskell} As an example of a program editor, we take an editor for the functional language Haskell. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language based edit operations. Unlike most text editors, the editor supports highlighting at a semantic rather than syntactic level, making it possible to use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
 
 %mention module handling etc.?
@@ -367,7 +372,7 @@ The two functions \verb|widthA| and \verb|heightA| have a large number of uninte
 The program editor generates a number of requirements, an important one being possibility of freely editing the textual program source, including the layout. At the same time, it must be possible to let the layout be set automatically as well. Furthermore, a formalism for specifying computations over the document is required for performing static analysis and type checking.
 
 
-%									
+%																
 \subsection{A Word Processor} \label{sect:wordprocessor} This section describes a WYSIWYG document editor with a user interface similar to word processing applications such as Microsoft Word, but with a document model similar to the XML DocBook standard~\cite{docbook} and with an output quality similar to \LaTeX~\cite{latex}.
 
 \screenshot{Piece of document, with toc, section, subsection, citations, refs}{Word processor}
@@ -499,7 +504,7 @@ Compared to the program editor, the word processor requires a more powerful pres
 Finally, in order to handle edit operations on the table of contents, the editor must support editing not only on presentation and document level, but also on the level of derived structures. In order to do so, a mapping must be maintained between a derived structure and its origin in the document.
 
 
-%									
+%																
 \subsection{Equation Editor/MathML}  
 
 Because mathematical formulae have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. In an actual instance of the generic editor, the equation editor can be integrated with the word processor to support equation editing in the document that contains the equations. However, we separate the two examples because of the different requirements they provide.
@@ -556,7 +561,7 @@ Presenting mathematics puts a heavy demand on the presentation formalism. Fine c
 Editing mathematics requires basic document edit support (copy and paste), as well as drag and drop editing. For supporting domain-specific transformations, a formalism for specifying document edit operations is needed. Presentation editing on mathematical formulae is desirable as well, but as of yet not a strict requirement, due to its still unclear nature.
 
 
-%									
+%																
 \subsection{Non-primitive Outline View/Tree Browser}
 
 An outline view, or tree browser, is a hierarchical view on tree structures. It is found in the Java Swing GUI library and also forms the main navigation tool in Microsoft's Windows Explorer application. 
@@ -615,7 +620,7 @@ Edit operations on the tree structure are similar to edit operations on the tabl
 An aspect specific to the tree browser is that it has a notion of state. Each node in the tree view is either collapsed or expanded and this information must be stored somewhere. Such presentation state, or {\em local state}, as we call it, does not belong in the document, because if it stored there, the document type will need to be changed whenever a tree view is added to the presentation. The fact that this state is not part of the document, but rather of the presentation of the document, makes it hard to model in a structure editor. A mapping between the document and the presentation state needs to be maintained to associate a document node with its expansion state, even when the document is edited. 
 
 
-%									
+%																
 \subsection{Tax Form}
 
 The last example is a tax form application, which is basically a spread-sheet with a rather specialized presentation. It contains questions and explanatory text, mixed with input fields and fields that contain derived information. 
@@ -721,15 +726,15 @@ In contrast to the other use cases, the tax form presentation is rather similar 
 The tax form also features computations with results that appear explicitly in the document presentation itself. Unlike the type computations in the Haskell editor, the computations in the tax form can be specified by the editor user (the tax man), rather than the editor designer. Therefore, the editor needs to be able to support spread-sheet behaviour.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Functional Requirements}
 \label{sect:reqs}
 With the use cases of the previous section in mind, we now discuss a number of functional requirements for a generic structure editor. 
 
 
-%									
+%																
 \subsection{Genericity}
 
 In order to support the five use cases, the editor must be generic in the sense that it is not built for a specific document type, or class of document types. However, we do restrict ourselves to trees rather than graphs. Most documents can be represented by trees, including the five use cases. A formalism for specifying cross-links between tree nodes is desirable, but full graph editing is not a requirement.
@@ -737,7 +742,7 @@ In order to support the five use cases, the editor must be generic in the sense 
 Although a distinction can be made between editor generators and generic editors, we regard both kinds of system as generic.
 
 
-%									
+%																
 \subsection{Computations over the Document}
 
 An interesting aspect of an editor that has knowledge of the structure of the document, is that it can show computed or derived values over that structure to the user. Examples of computations are automatic chapter numbering and a derived table of contents, but also derived type information for identifiers and function definitions in a program source. Two aspects have an influence on the usefulness of the computations: the strength of the formalism in which the computations are specified, and the integration of computed values and structures with the document presentation.
@@ -747,7 +752,7 @@ For program editing as well as the tax form, the strength of the computation for
 For the word processing example, as well as the tax form, the integration of computed values with the document presentation is important. Whereas type errors may be shown in separate windows or by underlining the location and showing the message in a tooltip, chapter numbers and a table of contents form an actual part of the presentation. 
 
 
-%									
+%																
 \subsection{Presentation Formalism}
 
 The presentation formalism has two different aspects that we consider together here. One is the formalism in which the building blocks of the presentation are expressed (the presentation target language), whereas the other is the formalism in which the mapping from the document onto the presentation target language is expressed (the presentation transformation language). For XML, a well known presentation language is the Extensible Stylesheet Language (XSL)~\cite{xsl}, it is split into the mapping language XSLT and the target language XSL Formatting Objects. Chapter~\ref{XPrez} discusses the two aspects of the presentation formalism in more detail.
@@ -763,7 +768,7 @@ The presentation transformation language has to support the specification of com
 Although the transformation language is related to the computation formalism, since a presentation can be seen as a computed value, we do separate the two. One reason is that separation of computation and presentation makes it possible to specify multiple presentations of a document together with its computed values. Another reason is that the separation makes it easier to support edit operations on derived structures.
 
 
-%									
+%																
 \subsection{Editing Strength}
 
 The editing strength of an editor is determined by the levels at which edit operations can be targeted, together with the complexity of the edit operations and the extent in which they are user specifyable. Levels at which editing is possible are the presentation level and document level. Syntax-directed editors mainly offer edit operations targeted at the document level, whereas
@@ -782,7 +787,7 @@ As the word processing use case shows, it can be desirable to support edit opera
 % say more? that is should be easy to do standard stuff?
 
 
-%									
+%																
 \subsection{Modeless Editing}
 
 Besides support for editing on different levels, an important requirement is the integration of the edit operations on the different levels. A seamless integration of document and presentation editing provides a more pleasant edit interface to the user, as the intended operation can be performed on the presentation that the user is working on, without first explicitly having to switch modes.
@@ -792,7 +797,7 @@ The most extreme form of mode-switching is when different-level edit operations 
 If the editable textual presentation is displayed in-place in the document presentation, the mode-switching becomes less intrusive. However, the most user-friendly approach is to avoid mode switching altogether, so that a user can freely edit in the presentation, even when it contains computations and graphical presentations. Moreover, if a presentation edit makes the presentation invalid, the invalid area should be kept as small as possible, and document editing must still be available on the valid parts.
 
 
-%									
+%																
 \subsection{Local State}
 
 A feature that is not explicitly present in any of the current structure editors, is the notion of local state. With local state, we mean information that needs to be kept track of when editing a document, but which does not conceptually belong to the document itself. 
@@ -801,19 +806,21 @@ A clear example of local state is present in the outline view example. The expan
 
 Support for local state complicates the presentation process as well as the translation of edit events onto document updates. A document element needs to keep track of its presentation elements, and when it is re-presented, it must be mapped onto those same presentation elements because local state may be associated with the presentation. The editor needs to have facilities for easily maintaining the required mappings between a document and its presentation to keep track of the local state, and when no local state is used, no extra effort should be required from the editor designer.
 
-%more?
-%The discussed concepts are mainly related to the edit model of the system. 
-%Document model and edit model. Not things like multiple window, XSL output feature etc.
-%Mention that these requirements are different from things like multiple window, XSL output %window, help feature, etc. Those are added easily, no specific model needed. Requirements %here are more fundamental.
-%
-%plug-in architecture, open.
-%%somewhere:
-%Focus on documents, not sound or video. Also focus on single documents (although not hard) 
-%instead of document management, versioning, or compound documents. Mainly orthogonal.
-% page refs are a bit tricky.
+\bc
+more?
+The discussed concepts are mainly related to the edit model of the system. 
+Document model and edit model. Not things like multiple window, XSL output feature etc.
+Mention that these requirements are different from things like multiple window, XSL output window, help feature, etc. Those are added easily, no specific model needed. Requirements here are more fundamental.
+
+plug-in architecture, open.
+%somewhere:
+Focus on documents, not sound or video. Also focus on single documents (although not hard) 
+instead of document management, versioning, or compound documents. Mainly orthogonal.
+page refs are a bit tricky.
+\ec
 
 
-%									
+%																
 \subsection{Summary}
 
 Summarizing, to support all five use cases, a generic structure editor must meet the following requirements.
@@ -828,15 +835,15 @@ Summarizing, to support all five use cases, a generic structure editor must meet
 \end{itemize}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Overview of Existing Editors}
 
 Because of the large number of existing systems, we cannot mention all editors in this overview. The editors mentioned are some of the early systems, together with a number of other editors that contain novel features.
 
 
-%									
+%																
 \subsection{Syntax-Directed Editors} \label{sect:synDirEditors}
 
 Most of the editors in this section are specially designed for program editing and hence have a rather text-oriented presentation formalism. Moreover, the computation formalism in such editors is aimed mainly at analysing source code, instead of performing general purpose computations. 
@@ -883,19 +890,21 @@ Other textual syntax-directed editors for program editing are the Aloe editor in
 Some more exotic editors, that do not support editing on the presentation are Multiview~\cite{} and VL-Eli~\cite{}.
 
 
-%									
+%																
 \subsection{Syntax-Recognizing Editors}
 
 Similar to the syntax-directed editors, most syntax-recognizing editors are designed for program editing. Regarding the computations, however, due to problems with free editing of presentations with derived values, none of the syntax-recognizing editors support arbitrary computations that may appear in the presentation.
 
-%\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-%
-%% More Presentation oriented
-%\bigskip{\bf SRE}\\
-%
-%No information on this one yet. Order paper at library.
-%
-%\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+\bc
+\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+% More Presentation oriented
+\bigskip{\bf SRE}\\
+
+No information on this one yet. Order paper at library.
+
+\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+\ec
 
 \bigskip {\bf Pan}
 
@@ -931,17 +940,19 @@ Built using the experience of the FIELD~\cite{field} project, Desert~\cite{reiss
 
 Other syntax-recognizing editors similar to the ones that were discussed include  Babel~\cite{Babel}, Saga~\cite{saga}, and Pregmatic~\cite{pregmatic}.
 
-% CodeProcessor~\cite{codeprocessor}
-% Lapis, text only
+\bc
+CodeProcessor~\cite{codeprocessor}
+Lapis, text only
 
-%\bigskip {\bf Intentional Programming Editor}
-%Interesting structure editor with powerful presentations, discontinued, little publications on
-%internals. Monolithic system, program oriented. Transformations. No evidence of full 
-%integrated computations. Editing model mimics text editing, but apparently no integrated
-%both level editing
+\bigskip {\bf Intentional Programming Editor}
+Interesting structure editor with powerful presentations, discontinued, little publications on
+internals. Monolithic system, program oriented. Transformations. No evidence of full 
+integrated computations. Editing model mimics text editing, but apparently no integrated
+both level editing
+\ec
 
 
-%									
+%																
 \subsection {Editor Toolkits}
 
 Besides generic editors and edit generators, an editor can also be built using an editor toolkit. The toolkit is a collection of libaries and tools that can be used when building an editor. The editor application itself, however, has to be written by hand. The separation between a toolkit from a generator is not always completely clear, since the specifications that an editor generator uses for specifying language, presentation, and semantics can be considered programs as well. The toolkits we consider here, require a substantial amount of programming in order to build an editor.
@@ -962,23 +973,24 @@ The Microsoft Visual Studio environment includes an integrated program editor. A
 
 The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
 
-%\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-%
-%\bigskip{\bf Other editor toolkits}
-%
-%*First find out more about them.*\\
-%Xemacs\\
-%Andrew system\\
-%Opendoc.\\
-%
-%\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-%
-%% FIELD? and its relation to Desert?
-%
-%% what about non program editors? mention, ref, ignore?
+\bc
+\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+\bigskip{\bf Other editor toolkits}
 
-%									
+*First find out more about them.*\\
+Xemacs\\
+Andrew system\\
+Opendoc.\\
+
+\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+% FIELD? and its relation to Desert?
+
+% what about non program editors? mention, ref, ignore?
+\ec
+
+%																
 \subsection{XML Editors}
 
 % check the list of XML editors and mention which ones are in the overview.
@@ -1076,24 +1088,20 @@ Proxima			&   ++	&   ++	&   ++ 	&   ++	&   ++	&     ++	\\
 
 
 %             EXPLANATION OF SCORES??
-
-
  
+\bc
+More flexibility, more freedom. More power, so less disadv. and more adv. An overview of existing structure editors is given, together with an evaluation according to the requirements. 
 
-%More flexibility, more freedom. More power, so less disadv. and more adv.
-% An overview of existing structure editors is given, together with an evaluation according to %the requirements. 
-
-
-%\section{Problems with current editors}
-%An xml editor for Haskell would never be possible
-%\begin{itemize}
-%\item No computation formalism
-%\item Presentation formalism too weak. 
-%\item No local state support. layout, treebrowser expansion
-%\item Mode switching editors hard to use
-%\item Either text only, or no free editing
-%\end{itemize}
-
+\section{Problems with current editors}
+An xml editor for Haskell would never be possible
+\begin{itemize}
+\item No computation formalism
+\item Presentation formalism too weak. 
+\item No local state support. layout, treebrowser expansion
+\item Mode switching editors hard to use
+\item Either text only, or no free editing
+\end{itemize}
+\ec
 In the table of the previous section, none of the existing systems has a line that contains only positives. No editor supports local state, and besides that, each of the editors has at least one more column with a low score (+/- or less). One of the reasons for this is that the requirements for computations and a powerful presentation formalism interfere with the requirements for editing strength and modelessness.
 
 The first two requirements determine the presentation complexity of the editor, whereas the last two determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
@@ -1144,74 +1152,99 @@ Of course, many more requirements exist, but our focus is on the editing model. 
 Many of the features in Proxima are optional rather than enforced. Edit operations on derived structures may be specified or automatically derived in cases for which they make sense, but if this is not the case, the editor designer need not specify them. A similar thing holds for the local state. Supporting local state in a Proxima application puts some effort on the editor designer, but if no local state is present, the editor designer does not need to take it into account.
 
 
-% open architecture, plug-in, access to doc model & edit ops, scripting, secondary requirements.
-
-%Sometimes general solution is impossible, but many instances have logical acceptable %semantics. If our solution works well in these cases and just makes a choice in ambiguous %case we think this is ok. Also Model in general not possible, but for use cases it is. Pan says %structural edit ops can be confusing when pres matches, but structure doesn't
-%
-%Proxima is not a monolithic environment that will take over your entire computer. People are %used to compilers, tools, etc. So just the editor. 
 
 
-%Problems with attr grammars, Pan citations: 32 \& 66
+\bc
+
+ open architecture, plug-in, access to doc model & edit ops, scripting, secondary requirements.
+
+Sometimes general solution is impossible, but many instances have logical acceptable semantics. If our solution works well in these cases and just makes a choice in ambiguous case we think this is ok. Also Model in general not possible, but for use cases it is. Pan says structural edit ops can be confusing when pres matches, but structure doesn't
+
+Proxima is not a monolithic environment that will take over your entire computer. People are used to compilers, tools, etc. So just the editor. 
 
 
-%DeVanter Boshernitsan 2000: identity is not guaranteed during textual edit (ref to de vanter)
-%they also have a horizontal line, but on the left are plain text eds.
+Problems with attr grammars, Pan citations: 32 \& 66
 
 
-
-%%%%%%%%%%%% OLD STUFF
-
-%find out where lang is reffed and copy the info from there (lang is not easily available)
-
-% bernard lang, on the usefulness of syntax directed editing. 86 (volgens devanter en %boshernitsan, disp and editing source code in soft eng. envs., section 8)
-% no reason is given though.
+DeVanter Boshernitsan 2000: identity is not guaranteed during textual edit (ref to de vanter)
+they also have a horizontal line, but on the left are plain text eds.
 
 
 
+%%%%%%%%%%% OLD STUFF
 
-%\bigskip {\bf Speed}
-%The first disadvantage, that structure editors put a higher demand on processor and memory %resources has become less of a problem with the high processor speeds and low memory costs %of today. When the first-generation structure editors were built, parsing a program source %was too slow to do a full parse of the source on each key press. At the same time, computing %a WYSIWYG presentation faced similar speed problems. Incremental parsers were very %important for editors, and WYSIWYG editing did not 
-%
-%With the current generation of computers, however, parsers easily parse over a 1000 lines per %second, and document presentation . Incrementality is still important, but not as vital as in %the beginning. A more coarse solution that splits the document in a number 
-%Processing speed has increased, whereas document complexity Nowadays, on the other hand, %many editors. parsers 1000 lines a second. Incr. still important, but simpler higher level %approaches taken. 
-%. say docs stay the same? presentations more complex, but more dedicated hardware? etc.?
-%
-%also incremental analysing less important, even recognized by Ensemble ui thesis guy.
-%
-%\bigskip {\bf Hard to learn}
-%
-%The second disadvantage of structure editors is that the edit model offered to the user is %often rather restrictive and takes considerable time to get used to. Especially the older %structure editors expected that users would not need textual edit operations and exclusively %offered structural edit operations. An edit operation that is simple when viewed as a textual %edit operation, such as changing a while statement to an if statement in the language Java, %has to be performed as a structural edit operation in syntax directed editors. 
-%
- %, with the rationale that a user would not need any other edit operations when structural edit %operations were available. However, because for example changing an 'if' statement to a %'while' statement in the language Java, is a very simple textual edit operation, 
+find out where lang is reffed and copy the info from there (lang is not easily available)
+
+ bernard lang, on the usefulness of syntax directed editing. 86 (volgens devanter en boshernitsan, disp and editing source code in soft eng. envs., section 8)
+ no reason is given though.
+
+
+
+
+\bigskip {\bf Speed}
+The first disadvantage, that structure editors put a higher demand on processor and memory resources has become less of a problem with the high processor speeds and low memory costs of today. When the first-generation structure editors were built, parsing a program source was too slow to do a full parse of the source on each key press. At the same time, computing a WYSIWYG presentation faced similar speed problems. Incremental parsers were very important for editors, and WYSIWYG editing did not 
+
+With the current generation of computers, however, parsers easily parse over a 1000 lines per second, and document presentation . Incrementality is still important, but not as vital as in %the beginning. A more coarse solution that splits the document in a number 
+Processing speed has increased, whereas document complexity Nowadays, on the other hand, many editors. parsers 1000 lines a second. Incr. still important, but simpler higher level approaches taken. 
+. say docs stay the same? presentations more complex, but more dedicated hardware? etc.?
+
+also incremental analysing less important, even recognized by Ensemble ui thesis guy.
+
+\bigskip {\bf Hard to learn}
+
+The second disadvantage of structure editors is that the edit model offered to the user is often rather restrictive and takes considerable time to get used to. Especially the older structure editors expected that users would not need textual edit operations and exclusively offered structural edit operations. An edit operation that is simple when viewed as a textual edit operation, such as changing a while statement to an if statement in the language Java, has to be performed as a structural edit operation in syntax directed editors. 
+
+ with the rationale that a user would not need any other edit operations when structural edit operations were available. However, because for example changing an 'if' statement to a 'while' statement in the language Java, is a very simple textual edit operation, 
 %% editor builders think that model in user changes and is more efficient, but users turned out
 %% to want to stick to the lines and columns model as well.
-%edit ops that don't make structural sense are forbidden. However, maybe intermed. states in %an operation. 
-%already recognized that this is bad, but fix is not integrated well.
-%
-%Later structure editors do offer edit operations on presentation level as well, but the %integration betweesipen the different levels of editing is not BLA. Either the editor is a %syntax-directed editor that supports a form of parsing freely edited document parts, or the %editor is a syntax-recognizing editor with .  
-%
-%
-%(Refs!) Users feel restricted. Layout is determined by pretty printer. Funtional languages: not %statements but functions. Difficult to give a good pretty printing (?) without user changing it %a bit.
-%
-%\bigskip {\bf Flexibility}
-%
-%The last disadvantage mentioned is the lack of flexibility of structure editors.  
-%
-%?different edit model. changing if to while is not by using backspace. In cases in which it is %supported, simple presentation, or looks bad.
-%
-%Editors XML or progamming languages, not latex etc.
-%
-%SE good for novices.
-%
-%And better UI's (graphics, etc) offer even more advantages than in 80's. 
-%
-%
-%mode switch Goes wrong if presentation is ambiguous, i.e. not all data is present in %presentation (example), or unparseable presentation (different?) (example)
-%\
-%
-%
-%More flexibility, more freedom. More power, so less disadv. and more adv.
-% An overview of existing structure editors is given, together with an evaluation according to %the requirements. 
+edit ops that don't make structural sense are forbidden. However, maybe intermed. states in an operation. 
+already recognized that this is bad, but fix is not integrated well.
+
+Later structure editors do offer edit operations on presentation level as well, but the integration betweesipen the different levels of editing is not BLA. Either the editor is a syntax-directed editor that supports a form of parsing freely edited document parts, or the editor is a syntax-recognizing editor with .  
+
+
+(Refs!) Users feel restricted. Layout is determined by pretty printer. Funtional languages: not statements but functions. Difficult to give a good pretty printing (?) without user changing it a bit.
+
+\bigskip {\bf Flexibility}
+
+The last disadvantage mentioned is the lack of flexibility of structure editors.  
+
+?different edit model. changing if to while is not by using backspace. In cases in which it is supported, simple presentation, or looks bad.
+
+Editors XML or progamming languages, not latex etc.
+
+SE good for novices.
+
+And better UI's (graphics, etc) offer even more advantages than in 80's. 
+
+
+mode switch Goes wrong if presentation is ambiguous, i.e. not all data is present in presentation (example), or unparseable presentation (different?) (example)
+\
+
+
+More flexibility, more freedom. More power, so less disadv. and more adv.
+ An overview of existing structure editors is given, together with an evaluation according to the requirements. 
+
+
+The scores are vastgesteld as follows:
+
+\begin{description}
+\item[genericity]
+(++): means that the system is either truely generic or an editor generator. 
+(+): system is a toolkit
+(+/-): system is aExplanation of scores.
+generic low if hard to implement. Toolkits score less though.
+
+\item[Computations] some tandard computations (-), arbitrary computations (+), arbitrary computations including derived structures (++) 
+comp: -- no computations, - some standard comps, +/- derived structures, +  arb. comps, ++ arb. comps integrated in doc
+
+pres: -- text only - text \& atrs +/- graphics + graphics, aligning, formatting
+ 
+The strength of the presentation transformation formalism is added to (or distracted from) the score.
+\item[Editing Strength] points are earned for: Structure edit operations, User-specifyable transformations, Free text editing, Free layout editing, and Derived structure editing
+\item[Modeless Editing] Mode switching (--), , Seemless integration (++). If only one level can be edited, the modeless property is not meaningful (n/a).\note{niet goed}
+\section{Discussion}
+\end{description}
 
 
 
@@ -1219,109 +1252,80 @@ Many of the features in Proxima are optional rather than enforced. Edit operatio
 
 
 
+\bigskip {\bf Code Processor}\\
+Not a structure editor. Not very different from Desert
+%De vanter Boshernitsan Displ and Ed source code in soft eng envs.
+paper in bezit
+\bigskip {\bf Pregmatic}\\
+Nothing new. text only Hybrid structure editor. based on Extended affix grammars
 
-%
-%The scores are vastgesteld as follows:
-%
-%\begin{description}
-%\item[genericity]
-%(++): means that the system is either truely generic or an editor generator. 
-%(+): system is a toolkit
-%(+/-): system is aExplanation of scores.
-%generic low if hard to implement. Toolkits score less though.
-%
-%\item[Computations] some tandard computations (-), arbitrary computations (+), arbitrary %computations including derived structures (++) 
-%comp: -- no computations, - some standard comps, +/- derived structures, +  arb. comps, ++ %arb. comps integrated in doc
-%
-%pres: -- text only - text \& atrs +/- graphics + graphics, aligning, formatting
-% 
-%The strength of the presentation transformation formalism is added to (or distracted from) the %score.
-%\item[Editing Strength] points are earned for: Structure edit operations, User-specifyable %transformations, Free text editing, Free layout editing, and Derived structure editing
-%\item[Modeless Editing] Mode switching (--), , Seemless integration (++). If only one level %can be edited, the modeless property is not meaningful (n/a).\note{niet goed}
-%%\section{Discussion}
-%\end{description}
+paper in bezit
+\bigskip {\bf Dose}\\
+text only pure with integrated parser
+citation Kaiser et al 88 Koen de Hond thesis
+[FJS86] P. H Feiler, F. Jalili, and J. H Schlichter. An uage. Interactive Prototyping Environment for Language ch Design. In Proceedings of the Nineteenth Annual e Hawaii International Conference on System d Sciences, volume II, pages 106--116. IEEE, 1986. 
+\bigskip {\bf MultiView}\\
+does not mix textual edit + parsing and structure editing
+
+paper in bezit
+
+\bigskip {\bf Mentor 80}\\
+een van de eersten pure met parser. 
+[DGHKL84] V. Donzeau­Gouge, G. Huet, G. Kahn, and B.  Lang. Programming Environments Based On  Structured Editors: The MENTOR Experience, he chapter 7, pages 128--140. In Barstow et al., editors. ere Interactive Programming Environments. McGraw­ for Hill Book Company, 1983. 
+
+\bigskip {\bf Gandalf, Aloe}
+syn dir text only
+A. N. Habermann and D. Notkin. Gandalf: Software Development Environments. IEEE Transactions on Software Engineering, 12(12):1117--1127, 1986. 
+
+\bigskip {\bf Centaur}\\
+Pure with bit of parsing
+successor of Mentor (zie Koorn)
+
+[BCD + 88] P. Borras, D. Clement, Th. Despeyroux, ogram J. Incerpi, G. Kahn, B. Lang, and V. Pascual.  Centaur: The System. In Proc. of the ACM SIGPLAN s, Conference on Practical Software Development re­ori­ Environments, pages 14--24, 1988. 
 
 
+most have parsers
 
+\\ {\bf Poe 84}\\
+syn dir text only\cite{fischer84poe}
 
+\\ {\bf Gnome}\\ 
+syn dir text only\cite{garlan84gnome}
 
+\\ {\bf Pecan}\\
+syn dir text only\cite{reiss84pecan}
 
+\\ {\bf Muir 87}\\
+syn dir text only
+\cite{normark88muir}
 
-%\bigskip {\bf Code Processor}\\
-%Not a structure editor. Not very different from Desert
-%%De vanter Boshernitsan Displ and Ed source code in soft eng envs.
-%paper in bezit
-%\bigskip {\bf Pregmatic}\\
-%Nothing new. text only Hybrid structure editor. based on Extended affix grammars
-%
-%paper in bezit
-%\bigskip {\bf Dose}\\
-%text only pure with integrated parser
-%citation Kaiser et al 88 Koen de Hond thesis
-%[FJS86] P. H Feiler, F. Jalili, and J. H Schlichter. An uage. Interactive Prototyping %Environment for Language ch Design. In Proceedings of the Nineteenth Annual e Hawaii %International Conference on System d Sciences, volume II, pages 106--116. IEEE, 1986. 
-%\bigskip {\bf MultiView}\\
-%does not mix textual edit + parsing and structure editing
-%
-%paper in bezit
-%
-%\bigskip {\bf Mentor 80}\\
-%een van de eersten pure met parser. 
-%[DGHKL84] V. Donzeau­Gouge, G. Huet, G. Kahn, and B.  Lang. Programming Environments %Based On  Structured Editors: The MENTOR Experience, he chapter 7, pages 128--140. In %Barstow et al., editors. ere Interactive Programming Environments. McGraw­ for Hill Book %Company, 1983. 
-%
-%\bigskip {\bf Gandalf, Aloe}
-%syn dir text only
-%A. N. Habermann and D. Notkin. Gandalf: Software Development Environments. IEEE %Transactions on Software Engineering, 12(12):1117--1127, 1986. 
-%
-%\bigskip {\bf Centaur}\\
-%Pure with bit of parsing
-%successor of Mentor (zie Koorn)
-%
-%[BCD + 88] P. Borras, D. Clement, Th. Despeyroux, ogram J. Incerpi, G. Kahn, B. Lang, and %V. Pascual.  Centaur: The System. In Proc. of the ACM SIGPLAN s, Conference on Practical %Software Development re­ori­ Environments, pages 14--24, 1988. 
-%
-%
-%most have parsers
-%
-%\\ {\bf Poe 84}\\
-%syn dir text only\cite{fischer84poe}
-%
-%\\ {\bf Gnome}\\ 
-%syn dir text only\cite{garlan84gnome}
-%
-%\\ {\bf Pecan}\\
-%syn dir text only\cite{reiss84pecan}
-%
-%\\ {\bf Muir 87}\\
-%syn dir text only
-%\cite{normark88muir}
-%
-%\\ {\bf Dice}\\
- %Linkoping Univ. Distributed Incremental Compiling Environment
-%text only, syn dir with parser
-%P. Fritzson: "Symbolic Debugging through Incremental Compilation in an Integrated
-%Environment", J. Systems and Software Vol. 3, 1983, pp. 285-294.
-%
-%\\ {\bf vl ELI}\\
-%Pure
-%http://www.cwi.nl/ftp/markvdb/entcs65.3/65.3.012.pdf
-%
-%\\ {\bf Andrew toolkit/Ez}\\
- %Andrew system
-%Toolkit is C++ library, so lot of coding, not just a few stylesheets.
-%
-%Palay, er al. The Andrew Toolkit: An Overview. Proceedings of the USENIX Technical %Conference, Feb. 1998.
-%
-%\bigskip {\bf Rita}\\
-%text only non source oriented
-%
-%http://citeseer.nj.nec.com/cowan91rita.html
+\\ {\bf Dice}\\
+Linkoping Univ. Distributed Incremental Compiling Environment
+text only, syn dir with parser
+P. Fritzson: "Symbolic Debugging through Incremental Compilation in an Integrated
+Environment", J. Systems and Software Vol. 3, 1983, pp. 285-294.
+
+\\ {\bf vl ELI}\\
+Pure
+http://www.cwi.nl/ftp/markvdb/entcs65.3/65.3.012.pdf
+
+\\ {\bf Andrew toolkit/Ez}\\
+Andrew system
+Toolkit is C++ library, so lot of coding, not just a few stylesheets.
+
+Palay, er al. The Andrew Toolkit: An Overview. Proceedings of the USENIX Technical Conference, Feb. 1998.
+
+\bigskip {\bf Rita}\\
+text only non source oriented
+
+http://citeseer.nj.nec.com/cowan91rita.html
 
 
 
-%
-%old non source editors are mentioned:
-%These incluand its derivative the Interleaf Publishing System (IPS) [17],
-%PEN[18], W[19] Quill [12], Author/Editor[21],WRITE-IT SGML Editor [22],
-%and systems by Kimura [23], van Huu[24], Coray et al. [25], and Furuta[26].
+
+old non source editors are mentioned:
+These incluand its derivative the Interleaf Publishing System (IPS) [17],
+PEN[18], W[19] Quill [12], Author/Editor[21],WRITE-IT SGML Editor [22], and systems by Kimura [23], van Huu[24], Coray et al. [25], and Furuta[26].
 
 
-
+\ec

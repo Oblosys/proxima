@@ -20,9 +20,9 @@ Another difference concerns the efficiency of the combinators. Because in an 'or
 In this paper we give four implementation models for layered architectures. First, we introduce a simple example layered editor architecture and explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In section~\ref{sectsimple}, the connection is straightforward, with little abstraction. This is used in section~\ref{sectncp} as a basis to develop a more abstract combinator implementation that uses nested cartesian products. In section~\ref{sectdpp}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sectlib} develops a small generic library for building the architecture-specific combinators of section~\ref{sectdpp}. Section~\ref{sectproxima} contains a short description of the architecture of the Proxima editor~\cite{proxima}, for which the combinators were designed, and section~\ref{secthaskellconclusions} presents the conclusions.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{A Simple editor}
 
 In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures discussed in~\cite{architecture}. 
@@ -111,9 +111,9 @@ If we look at the figure, we see that there are values that go from left to righ
 \end{figure}
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{A layer in Haskell}
 
 In the following sections, we will explore the possibilities of implementing the layered architecture described in the previous section, using the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra translation step that could possibly lead to errors.
@@ -184,9 +184,9 @@ Now that the building blocks have been established, we need a way to connect the
 \end{small}
 \end{figure}
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Method 1: Explicitly connecting the components} \label{sectsimple}
 
 The components of the editor are modeled with layers, but to get a working implementation, we also need to realize the data flow by connecting the components. The document must be fed into the layers, starting at the top layer and yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update at the top. The layers are records that contain functions, so the most straightforward way of tying everything together is to explicitly write the selection and application of each of the functions in each of the layers. We show this by giving an example edit loop for an editor that consists of three layers: \texttt{layer0}, \texttt{layer1}, and \texttt{layer2} of type \texttt{Simple'}. The data flow between the layer functions is shown in Figure~\ref{explicit}. The corresponding Haskell code for the edit loop is:
@@ -265,9 +265,9 @@ The functions \texttt{initStates} and \texttt{initDoc} provide the initial value
 A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the mapping parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, the patterns for upward and downward vertical parameters are standard, but have to be given explicitly for each application, increasing the chance of errors and decreasing transparency. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes but if some parameters or results have the same type, the type checker will not detect a problem when, for example, two such equally typed variables are swapped. We will therefore try to find a more abstract way of connecting the layers.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Method 2: Nested cartesian products}
 
 \label{sectncp}
@@ -456,9 +456,9 @@ main layer0 layer1 layer2 =
 \bigskip {\bf Conclusions: }The nested cartesian products solution is more compositional than the approach of the previous section, and a lot of data flow is hidden from the main loop by automatically passing the results of one layer into another. However, all horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Consequently, the type of the composite layer is parameterized with all types appearing in the layers, leading to huge type signatures. We will therefore show yet another approach in which the horizontal parameters stay within each layer and are not visible in the main editor loop.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Method 3: Direct parameter passing} \label{sectdpp}
 %Not fully abstracted factorized version of combinators primarily
 %for explaining the model. Next section has more abstraction
@@ -609,9 +609,9 @@ main layer0 layer1 layer2 =
 %actions. However, it is straightforward to extend the combinators to an IO type, 
 %in order to support IO actions by layer functions.
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Developing a library for architecture descriptions} \label{sectlib}
 
 In this section, we develop a small {\em meta combinator} library for implementing the direct parameter passing \texttt{lift} and \texttt{combine} combinators for layered architectures with an arbitrary number of layer functions. The combinators in the library are meta combinators because they are used to build \texttt{lift} and \texttt{combine}, which are combinators themselves.
@@ -627,7 +627,7 @@ The method we use for the derivation of the meta combinators is to start with su
  For \texttt{lift}, the local function is similar for each of the steps, but for \texttt{combine}, two variations exist, depending on the direction of the vertical parameter. Consequently, one meta combinator is derived for \texttt{lift}, whereas for \texttt{combine} we get two meta combinators: one for steps with upward parameters and one for steps with downward parameters.
  
  
-%									
+%																
 \subsection{Type definitions} \label{subsecttypedef}
 
 \note{put a b params at end. Then order is reverse to layer function order}
@@ -679,7 +679,7 @@ The individual step data types are defined as:
 Because no general \texttt{Step} type synonym is possible, an implementor has to construct the appropriate \texttt{Step} type definition, as well as the step data types. In a language with dependent types, such as Cayenne~\cite{cayenne}, a general type \texttt{Step} could have been defined.
 
 
-%									
+%																
 \subsection{Derivation for \texttt{lift}}
 
 First we develop a meta combinator for the \texttt{lift} function. Below is the code for \texttt{lift} for layers with two steps. This is the code from section~\ref{sectdpp} in which a few variables have been renamed to emphasize the data flow patterns instead of the meaning of the individual steps. The local functions \texttt{presStep} and \texttt{transStep} are renamed \texttt{step1} and \texttt{step2}. Furthermore, in \texttt{presStep}, \texttt{state} is renamed to \texttt{horArgs}, and \texttt{(mapping, state)} is renamed to \texttt{horRess}. And similarly, in \texttt{transStep}, \texttt{(mapping, state)} is renamed to \texttt{horArgs} and \texttt{state'} is renamed to \texttt{horRess}. Finally, also the vertical parameters and results in both local functions are renamed to \texttt{vertArg} and \texttt{vertRes}. Because the derivation will not affect the type, we do not rename any type variables. The resulting function does not show its purpose as clear as the original does, but it makes clear that the data flow in both local functions is similar.
@@ -806,7 +806,7 @@ Finally, the constructor and layer functions have to be passed as parameters to 
 The \texttt{liftStep} metacombinator can therefore be used to create the \texttt{lift} combinator for a layer with an arbitrary number of layer functions.
 
 
-%									
+%																
 \subsection{Derivation for \texttt{combine}} \label{subsubsectcombine}
 
 The derivation of the meta combinators for \texttt{combine} is largely similar to the derivation for \texttt{lift}. We start with the original definition of \texttt{combine} for layers with two steps (see Section~\ref{sectdpp}), in which we have renamed some variables. The two local functions are renamed to \texttt{step1} and \texttt{step2}. Both \texttt{uprTrans} and \texttt{uprPres'} are renamed to \texttt{nextUpr}, and both \texttt{lwrTrans} and \texttt{lwrPres'} to \texttt{nextLwr}. The names of the vertical parameters and results in \texttt{presStep} (\texttt{low}, \texttt{med} and \texttt{high}) are already appropriate, so \texttt{elow}, \texttt{emed} and \texttt{ehigh} in \texttt{transStep} are also renamed to \texttt{low}, \texttt{med} and \texttt{high}.
@@ -912,7 +912,7 @@ combineStepUp (pack, unpackU, unpackL) nextStep upr lwr = pack $
 Like \texttt{liftStep}, the meta combinators do not depend on the number of steps, so they can be used to build \texttt{combine} for layers with an arbitrary number of layer functions.
 
 
-%									
+%																
 \subsection{A type class for \texttt{pack} and \texttt{unpack}} \label{subsecttypeclass}
 
 The previous subsections define meta combinators for the functions \texttt{lift} and \texttt{combine}. Because explicit constructor appearances have been removed from the meta combinators, both functions have a function argument that is used for packing the result, and \texttt{combine} has two function arguments to unpack its two layer arguments. Although the unpack function for both layer arguments is the same, it has to be passed twice because the function is used on arguments of different type. In this section, we construct a type class \texttt{Pack} that contains the pack and unpack functions for the step data types. The type class eliminates the need for explicitly passing the pack and unpack functions to the meta combinators. Consequently, the unpack function does not need to be passed twice anymore. 
@@ -1020,7 +1020,7 @@ combine upper lower = fix (combineStepDown . combineStepUp) upper lower
 A more general description of the construction of \texttt{combine} is given in the next section.
 
 
-%									
+%																
 \subsection{Final Library and Conclusions}
 
 %from thesis/DPPClass_Lib.hs:
@@ -1205,9 +1205,9 @@ Although it is possible to define the type class, it turns out not te be very us
 The meta combinator library has the same advantages as the direct parameter passing solution of Section~\ref{sectdpp}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification.
 
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{The Proxima editor} \label{sectproxima}
 
 The motivation for using Haskell to describe editor architectures has come from the Proxima project~\cite{proxima}. Proxima is a generic incremental XML editor, which is being developed at Utrecht University. The editor is parameterized with a presentation sheet that specifies how a document is presented. Furthermore, it is parameterized with a computation sheet that specifies derived values, such as chapter numbers, or a table of contents. A user can only see and edit the final presentation of the document. Because the mapping of the document on the presentation is a stepwise process, and hence the translation from edit commands on the presentation to updates on the document as well, Proxima has a layered architecture.
@@ -1240,9 +1240,9 @@ The absolute coordinates are computed by the {\em arranger}. It maps the abstrac
 
 A prototype of the Proxima editor has been implemented with the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
 
-%									
-%									
-%									
+%																
+%																
+%																
 \section{Conclusions} \label{secthaskellconclusions}
 
 The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way. With a small number of definitions, a layered architecture can be described. The combinators have been tested with an actual architecture and have been heap profiled to ensure that no memory leaks are present.

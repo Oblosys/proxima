@@ -2,61 +2,56 @@
 \label{chap:singleLayer}
 
 {\em *** Version: \today~ ***}
+\bc
+IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are correct 
+  ..           ...       
+ .  .    ..   .   .   .. 
+.    ....  ...     ...  .
+ no it's not asymmetric. find out more about this.
+ maybe it's just that a level is never presented twice without trans, and vice versa
 
-%IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are correct 
-%  ..           ...       
-% .  .    ..   .   .   .. 
-%.    ....  ...     ...  .
-% no it's not asymmetric. find out more about this.
-% maybe it's just that a level is never presented twice without trans, and vice versa
+SOMEWHERE: mappings important for extra state, but also for editing on several levels. (is this really true?)
 
-%SOMEWHERE: mappings important for extra state, but also for editing on several levels. (is this really true?)
-%
-%UPPER LEVEL OR HIGHER LEVEL  and H/L or U/L
-%
-%RENDERER IS SPECIAL, LOWER THING IS NOT A TREE, EXPLAIN THAT THIS CHAPTER ONLY HOLDS FOR HIGHER LAYERS
-%
-%MAPPING INFO INCONSISTENCY: figure out how to express that two cycles are needed to restore it.
+UPPER LEVEL OR HIGHER LEVEL  and H/L or U/L
+
+RENDERER IS SPECIAL, LOWER THING IS NOT A TREE, EXPLAIN THAT THIS CHAPTER ONLY HOLDS FOR HIGHER LAYERS
+
+MAPPING INFO INCONSISTENCY: figure out how to express that two cycles are needed to restore it.
                                                   %is probably related to edit ops starting at higher level
-%ALSO ALL IS ON TREES, for other things, eg, sum of leafs, it does not work, do it yourself
-%EXTRA STATE, also tree ordering? precedence op tree -> non ordered op tree?
-%SOMEWHERE, explain why this is all necessary, refer to Editing Chapter
-%
-%No i's in this chapter!!! all is High and Low Is this possible?
-%
-%***EXTRA STATE is based on invariant mapping, however, implemented mapping is from level to level
-%***EXTRA STATE is only possible when inc. because lev, cannot be derived, or maybe only store extra?
-%
-%** SOMEWHERE. pres is typically just for viewing: no big problem when destroyed
-%** trans is more essential. bigger problem when destroyed.
-%** guarantee no loss, so only limited edit func. on toc.
-%
-%translation is bit strange as edit ops can be on higher level
-%* could this also be the case with presentation?
-%
-%
-%
-%!!!!!!!!!
-%MAYBE we want to make PRESENT and TRANSLATE the intended and specified mappings, 
-%without extra stuff and mappings, then the editor has to implement the incremental ones
-% and mapping preserving things, so the result is that PRESENT and TRANSLATE hold.
-%
-%!however, in that case PRESENT.TRANSLATE will not be id if PRESENT is ambiguous, or 
-%has extra state. But maybe we don't care and only require the implementation to be id.
-%
-%!what about sheets? 
-%
-%SOMEWHERE: FOCUS more formally (if included then add forward refs to edit model chapter)
+ALSO ALL IS ON TREES, for other things, eg, sum of leafs, it does not work, do it yourself
+EXTRA STATE, also tree ordering? precedence op tree -> non ordered op tree?
+SOMEWHERE, explain why this is all necessary, refer to Editing Chapter
+
+No i's in this chapter!!! all is High and Low Is this possible?
+
+***EXTRA STATE is based on invariant mapping, however, implemented mapping is from level to level
+***EXTRA STATE is only possible when inc. because lev, cannot be derived, or maybe only store extra?
+
+** SOMEWHERE. pres is typically just for viewing: no big problem when destroyed
+** trans is more essential. bigger problem when destroyed.
+** guarantee no loss, so only limited edit func. on toc.
+
+translation is bit strange as edit ops can be on higher level
+* could this also be the case with presentation?
 
 
-%IMPL: mapping downward, how to store in doc? Now datatype changes when pres is modified
+
+!!!!!!!!!
+MAYBE we want to make PRESENT and TRANSLATE the intended and specified mappings, 
+without extra stuff and mappings, then the editor has to implement the incremental ones
+ and mapping preserving things, so the result is that PRESENT and TRANSLATE hold.
+
+!however, in that case PRESENT.TRANSLATE will not be id if PRESENT is ambiguous, or 
+has extra state. But maybe we don't care and only require the implementation to be id.
+
+!what about sheets? 
+
+SOMEWHERE: FOCUS more formally (if included then add forward refs to edit model chapter)
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+IMPL: mapping downward, how to store in doc? Now datatype changes when pres is modified
+
+\ec
 
 %provisional
 
@@ -79,9 +74,9 @@ This chapter discusses the invariant that is maintained between two adjacent lev
 %edit cannot be handled, and is forbidden. However, we always have the higher level edit left.
 
 
-%									
-%									
-%									
+%								
+%								
+%								
 \section{The Presentation and Translation invariants}
 
 % will become more a computation order
@@ -181,9 +176,7 @@ Summarizing, the presentation invariant specifies that two levels are in a final
 % ****** When this is figured out, update sheet paragraph
 
 
-
-%										
-%										
+%								
 \subsection{Upward and downward mappings in one layer} \label{mappingsInLayer}
 
 The presentation and translation invariants are expressed with two functions: $PRESENT$ and $TRANSLATE$. The functions are of type $Level_i \rightarrow Level_j$, which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view the mappings as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
@@ -299,8 +292,8 @@ When translating the enriched document, the reducer makes a choice between the a
 
 A disadvantage of the described method for handling duplicates is that the enriched document type now depends on the presentation; if a presentation contains a tree view on the document, then the enriched document has to take care of duplicating it. A special facility for creating the necessary enriched document data definitions as well as the evaluation and reduction of the duplicates is desirable. However, it may be possible to capture the standard behavior for duplicates in a parser combinator that will allow the duplicate editing conflicts to be resolved during parsing. In that case, the whole process takes place in the presentation layer, and the evaluation layer is not affected. \note{parse (dirty arrangement) -> dirty presentation? May be tricky as well}
 
-%										
-%									
+
+%								
 \subsection{Maintaining the presentation invariant during editing}
 
 During editing, data levels are updated as a result of user interaction. When a level changes, the adjacent level needs to be updated to establish the appropriate invariant. We specify two mapping functions {\em present} and {\em translate} that compute new levels. On a higher level update, {\em present} computes a lower level that establishes the presentation invariant. Similarly, on a lower level update, a new higher level is computed by the {\em translate} mapping, establishing the translation invariant. 
@@ -341,9 +334,7 @@ Although a layer has two sheets, the two are closely related as they have to sat
 $TRANSLATE \cdot PRESENT = id_{High}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
 
 
-
-%										
-%										
+%																
 \section{Extra state} \label{sect:extraState}
 
 %SOMEWHERE: when es is hard. If no parent with a presentation is parent then tricky. Hence invisible elements with %extra state may lose it during editing.
@@ -384,8 +375,8 @@ The equations from the previous section assume that a level can be computed from
 %This section gives a more precise definition of extra state and specifies how  Furthermore, 
 %This section explains : welke info. wanneer gaat het mis. 
 
-%										
-%										
+
+%																
 \subsection{Extra state in presentation and translation direction}
 
 % One layer: two kinds of extra
@@ -408,8 +399,7 @@ The evaluator maps chapters, sections, and subsections in the document onto entr
 An important point to note is that extra state with regard to a certain mapping, is extra state for the {\em result} type of the mapping. Hence, presentation extra state for a presentation mapping between $Level_{High}$ and $Level_{Low}$ is part of $Level_{Low}$. Although the term presentation extra state of $Level_i$ may suggest that this concerns state that is used during the presentation of $Level_i$, this is not the case. The extra state of $Level_i$ refers to the extra state with regard to the presentation of the level above ($Level_{i-1}$) on level $Level_i$. The only extra state that involved in the presentation of $Level_i$ is that of its lower neighbor: $Level_{i+1}$
 
 
-%										
-%										
+%																
 \subsection{Extra state at a single level}
 
 % One level: two kinds of extra
@@ -454,8 +444,8 @@ PRESENT_{i} :: Level_{i} \rightarrow Core_{Pres,i+1} \\
 TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
 \end{math}\end{small}
 
-%										
-%										
+
+%																
 \subsection{Maintaining extra state during editing} \label{sect:maintainingExtraState}
 
 %***** WHAT ABOUT PRES . TRANS = ID?
@@ -553,8 +543,7 @@ It may seem more appropriate that presentation mapping information is a result o
 % if pres.translate not is id, then translate map is different from pres map. ES is not valid. translate.pres is always id
 
 
-%										
-%										
+%																
 \subsection{Safety of extra state}
 \note {where to say:  new nodes have no es, use initial value}
 
@@ -625,9 +614,7 @@ Still, besides these restrictions, the model works for specifying the whitespace
 %order changes are not yet clear!
 
 
-%										
-%										
-%										
+%																
 \subsection{Incrementality}
 % meer uitleg?: no choice on inc, even memo may be used, but do need old level for that.
 
@@ -747,8 +734,8 @@ Two updates take place on the higher level, and two on the lower level. However,
 %However, because a layer does not exist on its own, but is composed with other layers (as will be explained 
 %in the next Chapter), an adjacent layer will also do an update on the level. Hence
 
-%										
-%									
+
+%																
 \subsection{Conclusions}
 
 In one level,  mapping info to higher and lower (except for doc \& rendering), furthermore, the tree can can be regarded bla.
