@@ -99,8 +99,9 @@ presHole focus typeStr nd pth = loc nd $
 --  structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
   
 presParseErr node pres =
-  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} `withbgColor` whiteSmoke
+  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} 
                                                                                      -- empty trick
+                          --`withbgColor` whiteSmoke
 
 
 row'  = RowP (NoIDP) 0 
@@ -1249,7 +1250,8 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
          ,_decls_pIdC
          ,loc (DocNode _document []) $
           loc (EnrNode _self []) $ structural $
-            col [ row' [ text $ "Document focus: "++show _lhs_focusD
+            col [ row' [ hSpace 3
+                       , text $ "Document focus: "++show _lhs_focusD
                        , typeD NoIDP $ ( case lookup _lhs_focusD _typeEnv of
                                           Nothing -> ""
                                           Just tp -> " :: "++tp)
@@ -1257,12 +1259,13 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
                        ]
                 , vSpace 4
                 , hLine
-                , row' [ text "Top level identifiers:"
+                , row' [ hSpace 3
+                       , text "Top level identifiers:"
                        , loc (DeclsNode _idListDecls_self _idListDecls_path) $ parsing $ presentFocus _lhs_focusD _idListDecls_path $ row[ text " ", _idListDecls_idsPres] `withFontSize` 10
                        ]
                 , vSpace 4
-                , row' [key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
-                , loc (DeclsNode _decls_self _decls_path) $ parsing $ presentFocus _lhs_focusD _decls_path $ row _decls_press
+                , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
+                , row' [ hSpace 3, loc (DeclsNode _decls_self _decls_path) $ parsing $ presentFocus _lhs_focusD _decls_path $ row _decls_press ]
                 , vSpace 10
                 , hLine
                 , vSpace 4

@@ -82,7 +82,8 @@ SEM EnrichedDoc
                                                         -- A better implementation of popups will create the menu in 
                                                         -- the higher layers. Although it is still a bit unclear where
                  loc (EnrNode @self []) $ structural $ 
-                   col [ row' [ text $ "Document focus: "++show @lhs.focusD
+                   col [ row' [ hSpace 3
+                              , text $ "Document focus: "++show @lhs.focusD
                               , typeD NoIDP $ ( case lookup @lhs.focusD @typeEnv of 
                                                  Nothing -> ""
                                                  Just tp -> " :: "++tp)
@@ -91,12 +92,13 @@ SEM EnrichedDoc
                               ]
                        , vSpace 4
                        , hLine
-                       , row' [ text "Top level identifiers:"
+                       , row' [ hSpace 3
+                              , text "Top level identifiers:"
                               , loc (DeclsNode @idListDecls.self @idListDecls.path) $ parsing $ presentFocus @lhs.focusD @idListDecls.path $ row[ text " ", @idListDecls.idsPres] `withFontSize` 10
                               ] 
                        , vSpace 4
-                       , row' [key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
-                       , loc (DeclsNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press 
+                       , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
+                       , row' [ hSpace 3, loc (DeclsNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press ]
                        , vSpace 10                                     
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez     
@@ -165,6 +167,7 @@ SEM Decl
                                            ] 
                                       ]
                          else [empty])
+
                            ++ 
                               [ @ident.pres, key (mkIDP @idP0 @lhs.pIdC 0) "="]
                            ++ (if @expanded then
@@ -387,8 +390,9 @@ presHole focus typeStr nd pth = loc nd $
 --  structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
   
 presParseErr node pres =
-  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} `withbgColor` whiteSmoke
+  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} 
                                                                                      -- empty trick
+                          --`withbgColor` whiteSmoke
 
 
 row'  = RowP (NoIDP) 0 

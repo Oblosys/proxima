@@ -184,7 +184,7 @@ vLineW lw = polyW lw [(0,0),(0,1)] `withWidth` 1
 hvStretch = empty `withHStretch` True `withVStretch` True
 
 
-hSpace w = row [ empty ] `withWidth` w `withVStretch` True
+hSpace w = col [ empty ] `withWidth` w `withVStretch` True
 
 vSpace h = row [ empty ] `withHeight` h `withHStretch` True
 
