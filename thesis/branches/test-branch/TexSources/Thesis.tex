@@ -1,0 +1,40 @@
+% draft?
+% 11pt?
+% conclusions?
+\documentclass[twoside]{report}
+\usepackage{thesis}
+\begin{document}
+\selectlanguage{english}
+
+\pagenumbering{roman}
+
+%\newcommand{\subtitle}{titel}     \include{P_AltTitlePages}
+%\include{P_Titlepages}
+
+%\include{P_Preface}
+%\tableofcontents
+
+\clearpage
+\pagenumbering{arabic}
+
+%\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
+%\setcounter{chapter}{1} \include{Ch_XML}   		% 2
+%\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
+\setcounter{chapter}{3} \include{Ch_EditModel}   	% 4
+%\setcounter{chapter}{4} \include{Ch_SingleLayer}	% 5
+%\setcounter{chapter}{5} \include{Ch_LayeredArchs}	% 6 	 yet to be written
+%\setcounter{chapter}{6} \include{Ch_ArchCombs}	% 7
+%\setcounter{chapter}{7} \input{Ch_Xprez}   		% 8
+%\setcounter{chapter}{8}\include{Ch_Prototype}    	% 9	 yet to be written
+%\setcounter{chapter}{9}\include{Ch_Conclusions}	% 10 yet to be written
+
+\bibliographystyle{abbrv}
+%\bibliography{thesis}
+
+ %\include{P_Dankwoord}
+ %\include{P_Samenvatting}
+ %\include{P_CV}
+
+\thispagestyle{empty}
+\cleardoublepage
+\end{document}

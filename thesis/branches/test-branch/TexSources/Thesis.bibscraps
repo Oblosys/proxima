@@ -1,0 +1,315 @@
+    <reference id="oppen">D.C. Oppen, <em>Prettyprinting.</em> ACM Transactions
+      on Programming Languages and Systems 2(4), pp 465-483, 1980.</reference> 
+
+@Article{oppen,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+    <reference id="swierstra">S.D. Swierstra, P.R. Azero Alcocer, J. Saraiava.
+      <em>Designing and Implementing Combinator Languages</em>. In Advanced
+      Functional Programming, Third International School, AFP'98, Springer-Verlag,
+      LNCS 1608, pp 150-206,1999. </reference> 
+
+@Article{swierstra,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+    <reference id="hughes">J. Hughes. <em>The design of a pretty-printing
+      library.</em> In J. Jeuring and E. Meijer, editors, First International Spring
+      School on Advanced Functional Programming Techniques, LNCS 925, pp 53-96.
+      Springer-Verlag, 1995. </reference> 
+
+%@Article{hughes,
+%    author = "Pino",
+%    title = "Bla",
+%    year = "1999",
+%    journal = "Sesamboek"
+%}
+    <reference id="kahl">W. Kahl. <em>Beyond Pretty-Printing: Galley Concepts
+      in Document Formatting Combinators</em>. In G. Gupta, editor, Proceedings of
+      the First International Workshop on Practical Aspects of Declarative Languages,
+      San Antonio, Texas, USA, LNCS 1551, pp 76-90, Springer-Verlag,
+      1999.</reference> 
+
+@Article{kahl,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+    <reference id="brand">M.G.J. van den Brand and E. Visser. <em>Generation of
+      formatters for context-free languages.</em> ACM Transactions on Software
+      Engineering and Methodology 5(1), pp 1-41, 1996</reference> 
+
+@Article{brand,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+    <reference id="tex">D.E. Knuth. <em>The \TeX book.</em> Addison Wesley,
+      Reading, MA, 1984. </reference> 
+
+@Article{tex,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+   <reference id="lout">J. Kingston. <em>The design and implementation of the
+      Lout document formatting language</em>. Software--Practice and Experience, vol.
+      23, pp 1001-1041, 1993.</reference> 
+ @Article{lout,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+    
+    <reference id="functionaltex">R. Heckmann and R. Wilhelm. <em>A functional
+      description of TEX's formula layout.</em> Journal of Functional Programming
+      7(5), pp 451-485, September 1997 </reference> 
+
+@Article{functionaltex,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+  
+    <reference id="ag">S.D. Swierstra, <em>Simple, Functional Attribute
+      Grammars</em>. Utrecht University, 1999.
+      \url|http://www.cs.uu.nl/groups/ST/Software/UU_AG/index.html|</reference> 
+
+@Article{ag,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+
+@Article{architecture,
+    author = "Martijn",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+    <reference id="medvidovicTaylor">N. Medvidovic and R.N. Taylor. A
+      classification and comparison framework for software architecture description
+      languages. <em>IEEE Transactions on Software Engineering,</em> 26(1).
+      2000.</reference> 
+
+@Article{medvidovicTaylor,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+
+    <reference id="peytonJones98Haskell">S. Peyton Jones and J. Hughes. <em>Haskell 98: A
+      Non-strict, Purely Functional Language</em>. February 1999.
+      \url|http://www.haskell.org/onlinereport/|</reference> 
+
+      Refer to Haskell report?
+@Article{peytonJones98haskell,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+    <reference id="hudak">P. Hudak. Modular Domain Specific Languages and
+      Tools. In I<em>nternational Conference on Software Reuse, ICSR 98</em>,
+      1998</reference> 
+
+@Article{hudak,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+
+@Article{proxima,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+
+    <reference id="cayenne">L. Augustsson. Cayenne - a language with dependent
+      types. <em>Proceedings of the ICFP '98, ACM SIGPLAN Notices,</em> 34(1). 1999,
+      pp. 239-50.</reference> 
+@Article{cayenne,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+    <reference id="fundep">Mark P. Jones. Type Classes with Functional
+      Dependencies. In <em>Proceedings of the 9th European Symposium on
+      Programming,</em> E-SOP 2000, number 1782 in LNCS, Berlin, Germany, March 2000.
+      Springer-Verlag. </reference> 
+@Article{fundep,
+    author = "Pino",
+    title = "Bla",
+    year = "1999",
+    journal = "Sesamboek"
+}
+
+
+Transform the next references to bib items
+
+
+from \data\documents\proxima\xprez.xml          * is unreferenced in Xprez paper
+
+  <references> 
+  * <reference id="cassowary">G. Badros and A. Borning. <em>The Cassowary
+      linear arithmetic constraint solving algorithm: Interface and
+      implementation.</em> Technical Report UW-CSE-9806 -04, University of
+      Washington, Seattle, Washington, June 1998.</reference> 
+    <reference id="ccss">G. J. Badros, A. Borning, K. Marriott, and P. Stuckey.
+      <em>Constraint cascading style sheets for the web.</em> In Proceedings of the
+      1999 ACM Conference on User Interface Software and Technology, November 1999.
+      </reference> 
+  * <reference id="clean">E. Barendsen and S. Smetsers. <em>Uniqueness typing
+      for functional languages with graph rewriting semantics.</em> Mathematical
+      Structures in Computer Science 6, pp 579-612, 1996. </reference> 
+    <reference id="brand">M.G.J. van den Brand and E. Visser. <em>Generation of
+      formatters for context-free languages.</em> ACM Transactions on Software
+      Engineering and Methodology 5(1), pp 1-41, 1996</reference> 
+    <reference id="functionaltex">R. Heckmann and R. Wilhelm. <em>A functional
+      description of TEX's formula layout.</em> Journal of Functional Programming
+      7(5), pp 451-485, September 1997 </reference> 
+    <reference id="hughes">J. Hughes. <em>The design of a pretty-printing
+      library.</em> In J. Jeuring and E. Meijer, editors, First International Spring
+      School on Advanced Functional Programming Techniques, LNCS 925, pp 53-96.
+      Springer-Verlag, 1995. </reference> 
+    <reference id="kahl">W. Kahl. <em>Beyond Pretty-Printing: Galley Concepts
+      in Document Formatting Combinators</em>. In G. Gupta, editor, Proceedings of
+      the First International Workshop on Practical Aspects of Declarative Languages,
+      San Antonio, Texas, USA, LNCS 1551, pp 76-90, Springer-Verlag,
+      1999.</reference> 
+    <reference id="lout">J. Kingston. <em>The design and implementation of the
+      Lout document formatting language</em>. Software--Practice and Experience, vol.
+      23, pp 1001-1041, 1993.</reference> 
+    <reference id="tex">D.E. Knuth. <em>The \TeX book.</em> Addison Wesley,
+      Reading, MA, 1984. </reference> 
+  * <reference id="HAG">M.F. Kuiper, S.D. Swierstra, and H.H. Vogt. <em>Higher
+      order attribute grammars.</em> In Proceedings of the 1989 ACM SIGPLAN
+      Conference on Programming Language Design and Implementation, pp 131-145,
+      1989.</reference> 
+    <reference id="psl">P. M. Marden, Jr. and E. V. Munson. <em>PSL: An
+      alternate approach to style sheet languages for the world wide web.</em>
+      Journal of Universal Computer Science, 4(10), 1998. </reference> 
+    <reference id="oppen">D.C. Oppen, <em>Prettyprinting.</em> ACM Transactions
+      on Programming Languages and Systems 2(4), pp 465-483, 1980.</reference> 
+    <reference id="haskell">S. Peyton Jones and J. Hughes. <em>Haskell 98: A
+      Non-strict, Purely Functional Language</em>. February 1999.
+      \url|http://www.haskell.org/onlinereport/|</reference> 
+    <reference id="thot">V. Quint, translated by E. V. Munson. <em>The
+      languages of Thot.</em> INRIA, 1997.
+      \url|http://www.inrialpes.fr/opera/Thot/Doc/languages.html| </reference> 
+    <reference id="swierstra">S.D. Swierstra, P.R. Azero Alcocer, J. Saraiava.
+      <em>Designing and Implementing Combinator Languages</em>. In Advanced
+      Functional Programming, Third International School, AFP'98, Springer-Verlag,
+      LNCS 1608, pp 150-206,1999. </reference> 
+    <reference id="ag">S.D. Swierstra, <em>Simple, Functional Attribute
+      Grammars</em>. Utrecht University, 1999.
+      \url|http://www.cs.uu.nl/groups/ST/Software/UU_AG/index.html|</reference> 
+    <reference id="css">World Wide Web Consortium. <em>Cascading Style Sheets,
+      level 2 (CSS2).</em> W3C Recommendation,12 May 1998.
+      \url|http://www.w3.org/TR/REC-CSS2|</reference> 
+    <reference id="xsl">World Wide Web Consortium. <em>Extensible Stylesheet
+      Language (XSL).</em> W3C Working Draft, 21 November 2000.
+      \url|http://www.w3.org/TR/WD-xsl|</reference> 
+    <reference id="mathml">World Wide Web Consortium. <em>Mathematical Markup
+      Language (MathML).</em> W3C Recommendation, 21 February 2001.
+      \url|http://www.w3.org/TR/MathML2|<comment>empty line or comment required after last ref</comment> </reference> 
+  </references> 
+
+from: \Data\Documents\Proxima\Thesis\architecture-combinators.xml
+
+  <references> 
+    <reference id="cayenne">L. Augustsson. Cayenne - a language with dependent
+      types. <em>Proceedings of the ICFP '98, ACM SIGPLAN Notices,</em> 34(1). 1999,
+      pp. 239-50.</reference> 
+    <reference id="hudak">P. Hudak. Modular Domain Specific Languages and
+      Tools. In I<em>nternational Conference on Software Reuse, ICSR 98</em>,
+      1998</reference> 
+    <reference id="fundep">Mark P. Jones. Type Classes with Functional
+      Dependencies. In <em>Proceedings of the 9th European Symposium on
+      Programming,</em> E-SOP 2000, number 1782 in LNCS, Berlin, Germany, March 2000.
+      Springer-Verlag. </reference> 
+    <reference id="medvidovicTaylor">N. Medvidovic and R.N. Taylor. A
+      classification and comparison framework for software architecture description
+      languages. <em>IEEE Transactions on Software Engineering,</em> 26(1).
+      2000.</reference> 
+    <reference id="haskell">S. Peyton Jones and J. Hughes. <em>Haskell 98: A
+      Non-strict, Purely Functional Language</em>. February 1999.
+      \url|http://www.haskell.org/onlinereport/|</reference> 
+    <reference id="architecture">M.M. Schrage, J. Jeuring, D. Swierstra, and L.
+      Meertens. Layered Software Architectures for Editors, 2002, In
+      preparation</reference> 
+    <reference id="proxima">M.M. Schrage, J. Jeuring, D. Swierstra, and L.
+      Meertens. <em>Proxima, a generic incremental XML editor,</em> 1999.
+      \url|http://www.cs.uu.nl/research/projects/proxima/|</reference> 
+  </references>
+
+last big source \Data\Documents\Proxima\Thesis\architecture.xml contains no new references
+
+
+
+
+------------ Nog uit te zoeken:
+
+
+Parser Generation for Interactive Environments - Rekers (1992)   (Correct)   (55 citations) 
+op gezag van Rector Magnificus Prof. dr. P.W.M. de Meijer, in het openbaar te verdedigen in de Aula der 
+www.cwi.nl/ftp/gipe/reports/Rek92.ps.Z 
+--
+
+%article
+Wolfram Kahl: Beyond Pretty-Printing: Galley Concepts in Document Formatting Combinators. PADL 1999: 76-90
+
+A small Haskell implementation of Vertical Galleys. 
+--
+
+%article
+Oege de Moor, Kevin Backhouse, S. Doaitse Swierstra:
+First-class Attribute Grammars
+
+Haskell/functional representation of attribute grammars on rose trees. Untyped with regard to the grammar of the data and presence of attributes (references to child synthesised require definition of attribute for the child) Attributes (not just attribute values, but attributes, compare to java class instead of object) are first class, allowing for general definitions of copy and chain rules, etc. 
+--
+
+%article
+J.W.C. Koorn:
+GSE: a generic text and structure editor
+
+only text editing in focus
+--
+
+%book?
+mathspad
+
+not really generic. Can grammar be changed?
+very basic presentation specification language. presentations can be stacked vertically in stacks with 3 fields. Alignment is baseline or centerline. Some basic fillers (dots, line, space) are available. Not WYSIWYG: roots are quite different.
+--
+
+
+
+
+
+
+
