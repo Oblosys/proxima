@@ -21,12 +21,11 @@ import ArrTypes -- temporarily
 import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
---import ProxParser -- for debugging on command line and for initMap
+import ProxParser -- for debugging on command line and for initMap
 
-import NewParser
 import ProxParser (initLayout)-- for debugging on command line and for initMap
 
---import PresentationParsing hiding (walk)
+import PresentationParsing
 import Layout hiding (combine)
 import Scanner
 import ArrUtils

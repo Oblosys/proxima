@@ -116,7 +116,7 @@ SEM EnrichedDoc
                               , row[ text " ", @idListDecls.idsPres] `withFontSize` 10
                               ] 
                        , vSpace 4
-                       , structural $ @decls.presXML `withFont'` ("Courier New",8)
+                       , structural $ row [  hSpace 3, @decls.presTree, text "   ", vLine, text "   ", @decls.presXML `withFont'` ("Courier New",8) ] 
                        , vSpace 4
                        , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                        , row' [ hSpace 3, @decls.pres ]
@@ -934,7 +934,7 @@ SEM Exp [ env : Bindings | | val : Value ]
   | IntExp      lhs.val   = IntVal @int
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg -> 
-                                     let (_,_,_,_,_,_,_,_,_,_,_,v,_) = 
+                                     let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = 
                                            @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                                      in  v)  -- dirty hack because AG does not allow this easily
   | AppExp      lhs.val   = case @exp1.val of LamVal f -> f @exp2.val
@@ -942,7 +942,7 @@ SEM Exp [ env : Bindings | | val : Value ]
 
   | CaseExp     lhs.val   = case lookup "a" @alts.alts of {Just v -> v; Nothing -> ErrVal}
   | LetExp      lhs.val   = --@exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
-                            let (_,_,_,_,_,_,_,_,_,_,_,v,_) = 
+                            let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = 
                                   @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                             in  v  -- dirty hack because AG does not allow this easily
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }

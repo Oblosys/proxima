@@ -49,6 +49,13 @@ presentPrimXMLString :: String -> Presentation
 presentPrimXMLString x = text $ "<String>"++x++"<String>"
 
 
+presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
+presentElementTree focusD node path tag children =
+  loc node $ parsing $ presentFocus focusD path $                  
+    if null children
+    then mkTreeLeaf False $ text $ tag
+    else mkTreeNode False True (text tag) children
+    
 presentPrimTreeBool :: Bool -> Presentation
 presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
 
@@ -932,13 +939,13 @@ SEM String_ [ || presTree : Presentation ]
 SEM List_Decl [ || presTree : Presentation ]
   | List_Decl
       lhs.presTree = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressTree
+                       col @elts.pressTree
   | ParseErrList_Decl
       lhs.presTree = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                       presParseErr @node @presentation
   | HoleList_Decl
       lhs.presTree = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_Decl" (HoleList_DeclNode @self @lhs.path) @lhs.path
+                       presHole @lhs.focusD "List_Decl" (HoleList_DeclNode @self @lhs.path) @lhs.path
 
 SEM ConsList_Decl [ | | pressTree : {[Presentation]} ]
   | Cons_Decl     lhs.pressTree  = @head.presTree : @tail.pressTree
@@ -947,13 +954,13 @@ SEM ConsList_Decl [ | | pressTree : {[Presentation]} ]
 SEM List_Alt [ || presTree : Presentation ]
   | List_Alt
       lhs.presTree = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressTree
+                       col @elts.pressTree
   | ParseErrList_Alt
       lhs.presTree = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                       presParseErr @node @presentation
   | HoleList_Alt
       lhs.presTree = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_Alt" (HoleList_AltNode @self @lhs.path) @lhs.path
+                       presHole @lhs.focusD "List_Alt" (HoleList_AltNode @self @lhs.path) @lhs.path
 
 SEM ConsList_Alt [ | | pressTree : {[Presentation]} ]
   | Cons_Alt     lhs.pressTree  = @head.presTree : @tail.pressTree
@@ -962,13 +969,13 @@ SEM ConsList_Alt [ | | pressTree : {[Presentation]} ]
 SEM List_Exp [ || presTree : Presentation ]
   | List_Exp
       lhs.presTree = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressTree
+                       col @elts.pressTree
   | ParseErrList_Exp
       lhs.presTree = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                       presParseErr @node @presentation
   | HoleList_Exp
       lhs.presTree = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_Exp" (HoleList_ExpNode @self @lhs.path) @lhs.path
+                       presHole @lhs.focusD "List_Exp" (HoleList_ExpNode @self @lhs.path) @lhs.path
 
 SEM ConsList_Exp [ | | pressTree : {[Presentation]} ]
   | Cons_Exp     lhs.pressTree  = @head.presTree : @tail.pressTree
@@ -977,13 +984,13 @@ SEM ConsList_Exp [ | | pressTree : {[Presentation]} ]
 SEM List_Slide [ || presTree : Presentation ]
   | List_Slide
       lhs.presTree = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressTree
+                       col @elts.pressTree
   | ParseErrList_Slide
       lhs.presTree = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                       presParseErr @node @presentation
   | HoleList_Slide
       lhs.presTree = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_Slide" (HoleList_SlideNode @self @lhs.path) @lhs.path
+                       presHole @lhs.focusD "List_Slide" (HoleList_SlideNode @self @lhs.path) @lhs.path
 
 SEM ConsList_Slide [ | | pressTree : {[Presentation]} ]
   | Cons_Slide     lhs.pressTree  = @head.presTree : @tail.pressTree
@@ -992,13 +999,13 @@ SEM ConsList_Slide [ | | pressTree : {[Presentation]} ]
 SEM List_Item [ || presTree : Presentation ]
   | List_Item
       lhs.presTree = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressTree
+                       col @elts.pressTree
   | ParseErrList_Item
       lhs.presTree = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                       presParseErr @node @presentation
   | HoleList_Item
       lhs.presTree = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_Item" (HoleList_ItemNode @self @lhs.path) @lhs.path
+                       presHole @lhs.focusD "List_Item" (HoleList_ItemNode @self @lhs.path) @lhs.path
 
 SEM ConsList_Item [ | | pressTree : {[Presentation]} ]
   | Cons_Item     lhs.pressTree  = @head.presTree : @tail.pressTree

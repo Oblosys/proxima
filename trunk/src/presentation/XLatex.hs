@@ -159,23 +159,23 @@ tree = mkTreeNode True True (text "node") [l4, tr1, l6]
 -------------------------------------------------------------------------
 mkTreeLeaf :: Bool -> Xprez -> Xprez
 mkTreeLeaf isLast label = 
-  row [ leafHandle isLast, hLine `withWidth` 5, leafImg
-      , hLine `withWidth` 5, refHalf label ] 
+  row [ leafHandle isLast, empty {-hLine-} `withWidth` 12, leafImg
+      , empty {-hLine-} `withWidth` 5, refHalf label ] 
 
 mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
-mkTreeNode isExp isLast label children =
-  rowR 1 [ hSpace 4, nodeHandle isExp isLast, hLine `withWidth` 5
-         , col $ [ row [ col [ nodeImg , if isExp then vLine else empty ]
-                       , hLine `withWidth` 5,refHalf label 
+mkTreeNode isLast isExp label children =
+  rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
+         , col $ [ row [ col [ nodeImg , if isExp then empty {-vLine-} else empty ]
+                       , empty {-hLine-} `withWidth` 5,refHalf label 
                        ] 
                  ] ++ (if isExp then children else [] )
          ]
 
 nodeHandle isExp isLast 
- = colR 1 ([ vLine, handleImg isExp ]++ if isLast then [] else [ vLine])
+ = colR 1 ([ empty{-vLine-}, rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [empty{- vLine-}])
 
 leafHandle isLast 
- = colR 1 ([vLine, empty]++ if isLast then [] else [vLine])
+ = colR 1 ([empty{-vLine-}, empty `withSize` (9,9) `withRef` (4,4)]++ if isLast then [] else [empty{-vLine-}])
 
 handleImg isExp = if isExp then minusImg else plusImg
 
