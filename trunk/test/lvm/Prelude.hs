@@ -28,6 +28,18 @@ otherwise = True
 undefined :: a
 undefined = case True of { False -> undefined }
 
+
+-- duplicated:
+
+length :: [a] -> Int
+length xs = foldl' (\l _ -> l + 1) 0 xs
+
+foldl' :: (a -> b -> a) -> a -> [b] -> a
+foldl' _ a [] = a
+foldl' f a (x:xs) = (foldl' f $! f a x) xs
+
+--
+
 {- 
 For Proxima, we don't need much from the prelude yet. Until compiling is done in a more incremental
 way, we use a stripped prelude.

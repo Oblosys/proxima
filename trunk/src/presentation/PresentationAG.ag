@@ -938,7 +938,7 @@ SEM Exp [ env : Bindings | | val : Value ]
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg -> 
                                      let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = 
-                                           @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                                           @exp undefined ((@ident.str, arg): @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                                      in  v)  -- dirty hack because AG does not allow this easily
   | AppExp      lhs.val   = case @exp1.val of LamVal f -> f @exp2.val
                                               _        -> ErrVal

@@ -46,11 +46,17 @@ data ProximaLayer m state doc pres editDoc editPres editDoc' editPres' =
 
 -- The data type used by the combinators
 
+{-
 data Layer m state doc pres editDoc editPres editDoc' editPres' =
        Layer { translate :: LayerFunction m (state, doc) (pres, editPres) (state, pres) (doc, editDoc)
               , present ::   LayerFunction m (state, pres) (doc, editDoc') (state, doc) (pres, editPres')
               }
-
+-}
+-- thesis version with better names
+data Layer m state high low editH editL editH' editL' =
+       Layer { translate :: LayerFunction m (state, high) (low, editL) (state, low) (high, editH)
+              , present ::   LayerFunction m (state, low) (high, editH') (state, high) (low, editL')
+              }
 
 {-
 (Monad m,
