@@ -344,12 +344,12 @@ $TRANSLATE \cdot PRESENT = id_{High}$ condition. For simple editors, the sheets 
 %										
 \section{Extra state} \label{sect:extraState}
 
-SOMEWHERE: when es is hard. If no parent with a presentation is parent then tricky. Hence invisible elements with extra state may lose it during editing.
+%SOMEWHERE: when es is hard. If no parent with a presentation is parent then tricky. Hence invisible elements with %extra state may lose it during editing.
 
-???? specify conditions for safety? like in Pierce's lenses stuff
-???? mention Pierce
+\note{specify conditions for safety? like in Pierce's lenses stuff?}
+\note{mention Pierce paper}
 
-The equations from the previous section assume that a level can be computed from the old values for the two levels together with a sheet and an edit operation on one of the levels. However, this turns out not to be entirely true in the presence of {\em extra state}. If we consider two adjacent data levels, some elements in one level cannot be derived from the other level. Figure~\ref{nodeMapping2} shows two levels with the presentation mapping expressed with arrows. The shaded nodes on the top level have no presentation elements and hence cannot be computed from the lower level during translation. Such elements that cannot be computed from the other level, are referred to as extra state elements.  \note{explain dependency on direction already here?}
+The equations from the previous section assume that a level can be computed from the old values for the two levels together with a sheet and an edit operation on one of the levels. However, this turns out not to be entirely true in the presence of {\em extra state}. If we consider two adjacent data levels, some elements in one level cannot be derived from the other level. Figure~\ref{layerExtraState} shows two levels with the presentation mapping expressed with arrows. The shaded nodes on the top level have no presentation elements and hence cannot be computed from the lower level during translation. Such elements that cannot be computed from the other level, are referred to as extra state elements.  \note{explain dependency on direction already here?}
 
 % also show a vice versa? with two invariants, it's maybe not logical to show both in one figure
 
@@ -372,7 +372,7 @@ The equations from the previous section assume that a level can be computed from
           cL
 \end{verbatim}
 \end{center}
-\caption{Elements without presentation. $<$add arrows \& more elements, also more without pres.$>$}\label{nodeMapping2} 
+\caption{Elements without presentation. $<$add arrows \& more elements, also more without pres.$>$}\label{layerExtraState} 
 \end{center}
 \end{figure}
 %CAPTION: shaded is extra
@@ -387,7 +387,7 @@ The equations from the previous section assume that a level can be computed from
 \subsection{Extra state in presentation and translation direction}
 
 % One layer: two kinds of extra
-Since a presentation of an element may consist of zero or more elements, and a translation consists of at most one, it is possible that an element is not mapped onto any elements in the other level. In that case, the other level simply does not contain the information needed to compute the element, and hence it is part of the former level's extra state. Because the property of extra state depends on the direction of the mapping, we distinguish two kinds of extra state: presentation extra state and translation extra state. The {\em presentation extra state} consists of elements that during presentation cannot be computed from the higher level (the shaded elements at the top level of figure\ref{}), and the {\em translation extra state} consists of elements that during translation cannot be computed from the lower level (the shaded elements at the bottom layer of the figure).
+Since a presentation of an element may consist of zero or more elements, and a translation consists of at most one, it is possible that an element is not mapped onto any elements in the other level. In that case, the other level simply does not contain the information needed to compute the element, and hence it is part of the former level's extra state. Because the property of extra state depends on the direction of the mapping, we distinguish two kinds of extra state: presentation extra state and translation extra state. The {\em presentation extra state} consists of elements that during presentation cannot be computed from the higher level (the shaded elements at the top level of Figure~\ref{layerExtraState}), and the {\em translation extra state} consists of elements that during translation cannot be computed from the lower level (the shaded elements at the bottom layer of the figure).
 
 % even with pres, there can still be extra state
 Even if an element \verb|X| is mapped onto one or more elements \verb|Y|$_n$  in the other level, it can still be part of the extra state, if the elements \verb|Y|$_n$ do not constitute enough information to be mapped back onto \verb|X|. Consider for example a presentation of a Haskell source, in which al integers are presented with the string \verb|<Int>|. The integer nodes do have a presentation, but since it does not contain enough information for the backward mapping, the integer nodes are in extra state. \note {Is this also the case for focus} \note{Don't know much about this kind of ES yet}
@@ -411,7 +411,22 @@ An important point to note is that extra state with regard to a certain mapping,
 \subsection{Extra state at a single level}
 
 % One level: two kinds of extra
-Figure~\ref{layerLocalState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering has two kinds of extra state. Figure~\ref{levelLocalState} shows a data level between two layers. In the figure, both the shaded elements and the bold elements are extra state. The shaded elements are presentation extra state with regard to the higher level, and the bold elements are translation extra state with regard to the lower level. Extra state in one direction is independent of extra state in the other direction, hence an element in the figure can be shaded, bold, shaded as well as bold, or neither. 
+Figure~\ref{layerExtraState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering has two kinds of extra state. Figure~\ref{levelExtraState} shows a data level between two layers. In the figure, both the shaded elements and the bold elements are extra state. The shaded elements are presentation extra state with regard to the higher level, and the bold elements are translation extra state with regard to the lower level. Extra state in one direction is independent of extra state in the other direction, hence an element in the figure can be shaded, bold, shaded as well as bold, or neither. 
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\begin{verbatim}
+Level                elt   elt
+                         v    v 
+Level    shaded  elt  bold
+               ^        ^
+Level       elt      elt
+\end{verbatim}
+\end{center}
+\caption{Presentation and translation extra state in one level. $<$add arrows \& more elements, also more without pres.$>$}\label{levelExtraState} 
+\end{center}
+\end{figure}
 
 % example one level independence of es
 The whitespace extra state in tokens provides an example of the fact that the property of extra state in one direction is independent of extra state in the other direction. When the scanner layer translates the layout level, spaces and row transitions between a token's string and the preceding token's string are encoded as whitespace information in the token. Since it can be computed during translation, the whitespace is not part of the translation extra state. On the other hand, when the enriched document is presented on tokens in the presentation level, the whitespace information cannot be computed, and hence it is part of the presentation extra state of the presentation level.
@@ -441,7 +456,7 @@ TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
 %										
 \subsection{Maintaining extra state during editing} \label{sect:maintainingExtraState}
 
-***** WHAT ABOUT PRES . TRANS = ID?
+%***** WHAT ABOUT PRES . TRANS = ID?
 
 % mapping we have is not good enough
 The available mapping functions $PRESENT$ and $TRANSLATE$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions $present$ and $translate$ that have a result type of $Core \times Extra$:
@@ -470,11 +485,9 @@ present_{i} :: sheet_{Pres}  \rightarrow Info_{Pres,High} \rightarrow  Level_{Hi
 
 
 % example in picture 
-Figure~\ref{mappingInfo} shows two examples of the $Info$ argument. The lefthand side shows the situation at the presentation layer of a Haskell source editor during presentation.  The enriched document element \verb|If|  was presented on the three tokens in the presentation level. The downward arrows represent $Info_{Pres,High}$, whereas the upward arrows are the translation information $Info_{Trans, Low}$. The dotted arrows represent $Info_{Trans,High}$ (upward) and $Info_{Pres,Low}$ (downward), which are not used in this layer. The whitespace nodes in the presentation level are presentation extra state, that has to be reused on presentation. 
-*********
+Figure~\ref{mappingInfo} shows two examples of the $Info$ argument. The lefthand side shows the situation at the presentation layer of a Haskell source editor during presentation.  The enriched document element \verb|If|  was presented on the three tokens in the presentation level. The downward arrows represent $Info_{Pres,High}$, whereas the upward arrows are the translation information $Info_{Trans, Low}$. The dotted arrows represent $Info_{Trans,High}$ (upward) and $Info_{Pres,Low}$ (downward), which are not used in this layer. The whitespace nodes in the presentation level are presentation extra state, that has to be reused on presentation. \note{more detail on reuse?}
 
-The righthand side of the figure shows the evaluation layer of a word processor during translation. The document is a \verb|Chapter| element containing two \verb|Section| children, which is mapped onto a table of contents structure in the evaluation level. Again, downward arrows are $Info_{Pres,High}$ and upward arrows are $Info_{Trans,Low}$. \note{mention there is no $Info_{Trans,High}$?} In this case, the document contains translation extra state, since the contents of the chapter and sections cannot be computed from the enriched document. 
-*********
+The righthand side of the figure shows the evaluation layer of a word processor during translation. The document is a \verb|Chapter| element containing two \verb|Section| children, which is mapped onto a table of contents structure in the evaluation level. Again, downward arrows are $Info_{Pres,High}$ and upward arrows are $Info_{Trans,Low}$. \note{mention there is no $Info_{Trans,High}$?} In this case, the document contains translation extra state, since the contents of the chapter and sections cannot be computed from the enriched document.  \note{more detail on reuse?}
 
 \begin{figure}
 \begin{center}
@@ -531,34 +544,39 @@ present_{i} :: sheet_{Pres}  \rightarrow  Level_{High} \rightarrow Level_{Low}\\
 % computation order
 The mapping information that is used by $present$ is computed by $translate$ and vice versa. As a consequence, only one kind of mapping information is guaranteed to be valid. After presentation, the translation mapping is correct, but the presentation mapping may be incorrect, whereas after translation, the presentation information is correct, but the translation information may be incorrect. However, this does not cause any problems since a level is presented before its lower neighbor is translated, and vice versa. \note{when we have higher level edit ops, this will become a problem}
 
-It may seem more appropriate that presentation mapping information is a result of the presentation, rather than the translation, since it concerns information about the presentation of the level and not its translation, but this is not the case. Besides causing $present$ to return two levels, rather than one, there is another reason why the information cannot be computed by $present$. After a level is presented, the lower level may be updated by the lower adjacent layer. If $present$ computes the mapping information in the higher level, which refers to the lower level, then this information may not be correct anymore after a lower level update. By computing the mapping information during translation, the problem is avoided, since after its translation, the lower level is not edited before the higher level is presented again. The same thing holds for $translate$
+It may seem more appropriate that presentation mapping information is a result of the presentation, rather than the translation, since it concerns information about the presentation of the level and not its translation, but this is not the case. Besides causing $present$ to return two levels, rather than one, there is another reason why the information cannot be computed by $present$. After a level is presented, the lower level may be updated by the lower adjacent layer. If $present$ computes the mapping information in the higher level, which refers to the lower level, then this information may not be correct anymore after a lower level update. By computing the mapping information during translation, the problem is avoided, since after its translation, the lower level is not edited before the higher level is presented again. The same thing holds for $translate$.
 
 \note{does give a problem when mappings are not inverse}
 \note{eg. "chess:" "board" -> ChessBoard. Now ChessBoard has wrong pres info when presented on an image instead of tokens}
 % if pres.translate not is id, then translate map is different from pres map. ES is not valid. translate.pres is always id
 
-****
 
 %										
 %										
-\subsection{Vulnerability of extra state}
+\subsection{Safety of extra state}
+\note {where to say:  new nodes have no es, use initial value}
 
-Edit operations on a level may invalidate the presentation and translation information, and therefore may cause the loss of extra state. 
+Because the reuse of extra state depends on the mapping information, extra state may be lost if the mapping information is not valid. There are in two situations in which the mapping information can be invalid.  
+
+First of all, a level may be updated in such a way that the mapping information that was computed at the previous presentation or translation, is no longer correct. An example is when a document edit operation in a Haskell source editor changes a sum to a product. The old presentation mapping in invalid, since it points to the presentation of the sum. In this case, because of the similarity between the presentations of a sum and a product, the tokens can be reused, but if the updated node has a completely different presentation, then the layout information of the tokens is lost.
+
+The second situation in which the mapping information may be invalid, is if $present \cdot translate$ is not identity function for a node. \note{say this some other way?} An example is found in a source editor that provides graphical presentations for some of its tokens (eg. $\rightarrow$ for the token \verb|"->"|). If a \verb|"->"| token is parsed, the mapping information in the resulting enriched document node points toward the textual arrow. However, if the enriched document is presented, the presentation contains a graphical arrow, and hence the mapping information with respect to the arrow token is incorrect. In such a case, the presentation function itself must take care of reusing extra state from the textual arrow token for the graphical arrow token.
+
+The reverse situation does not occur, since we require that $translate \cdot present$ is identity for a node. \note{add this to the invariants}
+
+In case the extra state cannot be restored, it is set to an initial value. Thus, if an entry is added to a table of contents in the enriched document of a word processor, a chapter (or section) without any content is added to the document. Similarly, if a document edit operation in a source editor adds a new structure to the document, its presentation gets a default layout.
+
+The responsibility of restoring extra state and handling problem situations, currently lies within each layer itself. Restrictions on the presentation and translation mappings could possibly guarantee the safety of extra state, but currently, no such restrictions have been established. However, the fact that safety of extra state cannot be guaranteed in general, does not actually have to cause a problem. Since presentation extra state generally consists of non-essential information, it is not a big problem that in some rare cases, it is reset to a default value. \note{mention this difference somewhere before} Translation extra state, on the other hand, does represent essential information, but by restricting the edit behavior on presentations that have translation extra state, it can be protected. For example, the edit behavior on a table of contents can be restricted to updates on titles, and insertion and deletion of entire entries. This way, the corresponding section nodes in the document are never lost. Of course, it is still possible to delete a chapter by removing its table of contents entry, but this is a choice made by the editor designer. 
 
 
-\note{mention here the invalid mapping info?}
+\note{can we always tell that extra state was lost?}
 
-Does not work when info not present, or node changed type. Or parent if context sensitive presentation. In that case use default value for es. When type changes, can try to reuse. Eg when plus changes to times, can reuse the tokens whitespace. left to presentation.
+%Now left to editor. During pres, do we have old node? And what about trans? Do we have old pres?
+%Would be nice if we could guarantee safety. When? context free presentation?
+%list delete is in general no problem  Or parent if context sensitive presentation.
 
-If no es, 
-
-When does this happen? Examples?
- While changes to Repeat, is problematic.
-
-
-For a translation, loss of ES is more important. But... Just don't allow too much editing. In a table of contents, only allow moving around . bla Still remove of a toc entry can remove a chapter. but we want this.
-
-Would be nice if we could guarantee safety. When? context free presentation?More on Difference between 
+%higher level update without lower level translation gives problem. but not mentioned here, only in layered archs
+%lower level update without higher level pres?   is this not just editing and skipping higher layers?
 
 \subsection{conclusions}
 % the final equations
@@ -575,11 +593,11 @@ Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{
 translate_{i} :: sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i}\\
 present_{i} :: sheet_{Pres,i}  \rightarrow  Level_{i} \rightarrow Level_{i+1}\\
 \\
-level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
+%level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
 level'_{High} = translate~sheet_{Trans}~level'_{Low}\\
-level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+%level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
 level''_{Low} = present~sheet_{Pres}~level''_{High}\\
-level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
+%level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
 translate~sheet_{Trans}  \cdot present~sheet_{Pres} = id_{High}\\
 \\
 PRESENT_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
@@ -588,19 +606,21 @@ TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
 \end{small}
 {\centering ()\\}
 
-First, only works when es is child.
-Remember ES on parsing stuff is fragile, and only works for parent node. However very good for what we need.
- unless strong restrictions. important for translation direction
-ES needs to be attached to a parent node. layout is an example. things like order are harder. extra layer?
-Many possibilities not researched yet.
-ONLY A MODEL!
+The model for extra state presented in this section only shows what information must be kept track of by a layer in order to support extra state. It does not specify how to keep track of the extra information, nor how to handle conflict situations, or loss of extra state. This is left to the individual layers. Furthermore, the reuse of extra state only works for extra state that is attached to a non-extra state parent node. 
 
-Specific layers should take care of keeping the necessary stuff, this only specifies what info should be kept and where.
-Not enforced by the invariants! Need more detailed stuff on element level. Future research.
+Still, besides these restrictions, the model works for specifying the whitespace extra state for token presentations as well as translation extra state for editing partial presentations. Further research is required to established restrictions on the presentation and translation mappings, that can guarantee safety of extra state. Furthermore, a method for handling extra state that is not attached to specific parent nodes is desirable. Finally, experience with building editors with Proxima, as well as using these editors will provide more instances of extra state, and information on how to solve conflict situations.
+
+% Not enforced by the invariants! Need more detailed stuff on element level. Future research.
+
+%Remember ES on parsing stuff is fragile
+%unless strong restrictions. important for translation direction
+%layout is an example. things like order are harder. extra layer?
+%Many possibilities not researched yet.
 
 
-Have to figure out more about Focus ES, and other non node ES.
-order changes are not yet clear!
+
+%Have to figure out more about Focus ES, and other non node ES.
+%order changes are not yet clear!
 
 
 %										
