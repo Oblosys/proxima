@@ -14,7 +14,7 @@ import Data.FiniteMap
 import IOExts
 
 
---import qualified NewParser
+import qualified NewParser
 
 {-
 initDoc =  mkRoot $ mkDecls $ concat $ replicate 1 
@@ -55,12 +55,17 @@ mkExps = foldr (ConsExps NoIDD) (NilExps NoIDD)
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
 
+-- new parser:
+parsePres pres = let (enr,errs) = showDebug Err (NewParser.parse pres)
+                 in  if null errs then Just (enr, [], []) else Nothing
+{-
+-- old parser
 parsePres pres = --showDebug' Err ("parsing: "++show pres ++" has result ") $
-                 --debug Err (show (NewParser.parse pres) )$
+                 debug Err (show (NewParser.parse pres) )$
                  Just (startRecognize pres) 
                  --let (doc, success) = parsePresentation pres
                  --in  if success then Just doc else Nothing
-
+-}
 
 
 {-
@@ -81,9 +86,9 @@ For each parse, reuse everything that is not in the parse
 
  
 -- this one has no presentation id's to reuse
-makeDecls :: [Decl] -> Decls
-makeDecls [] = NilDecls NoIDD
-makeDecls (decl:decls) = ConsDecls NoIDD decl (makeDecls decls)
+makeDecls :: [Decl] -> ConsList_Decl
+makeDecls [] = Nil_Decl
+makeDecls (decl:decls) = Cons_Decl decl (makeDecls decls)
 
 
 --makeDecl retrieves local state from tokens
@@ -111,9 +116,9 @@ makeDecl' mtoken0 token1 token2 =
 
 -- makeDecl and makeDecl' ************** new pres ids
 
-makeAlts :: [Alt] -> Alts
-makeAlts [] = NilAlts NoIDD
-makeAlts (alt:alts) = ConsAlts NoIDD alt (makeAlts alts)
+makeAlts :: [Alt] -> ConsList_Alt
+makeAlts [] = Nil_Alt
+makeAlts (alt:alts) = Cons_Alt alt (makeAlts alts)
 
 makeAlt :: Token (Maybe Node) -> Token (Maybe Node) -> (Ident -> Exp -> Alt)
 makeAlt token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 altIDD token1 token2
@@ -192,11 +197,11 @@ makeLam token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 lamIDD token1 toke
 makeApp :: (Exp -> Exp -> Exp)
 makeApp = AppExp NoIDD
 
-makeCase :: Token (Maybe Node) -> Token (Maybe Node) -> (Exp -> Alts -> Exp)
+makeCase :: Token (Maybe Node) -> Token (Maybe Node) -> (Exp -> List_Alt -> Exp)
 makeCase token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 caseIDD token1 token2
                          in  CaseExp idD idP1 idP2 
 
-makeLet :: Token (Maybe Node) -> Token (Maybe Node) -> (Decls -> Exp -> Exp)
+makeLet :: Token (Maybe Node) -> Token (Maybe Node) -> (List_Decl -> Exp -> Exp)
 makeLet token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 letIDD token1 token2
                         in  LetExp idD idP1 idP2 
 
@@ -211,19 +216,19 @@ makeList token1 token2 tokens = let -- TODO: recover node id properly
                                        idPopen = tokenIDP token1 
                                        idPclose = tokenIDP token2
                                        idPseps = map tokenIDP tokens
-                                   in  ListExp NoIDD idPopen idPclose idPseps . makeExps
+                                   in  ListExp NoIDD idPopen idPclose idPseps . List_Exp NoIDD . makeExps
 
 makeProduct :: Token (Maybe Node) -> Token (Maybe Node) -> [Token (Maybe Node)]-> ([Exp] -> Exp)
 makeProduct token1 token2 tokens = let -- TODO: recover node id properly
                                        idPopen = tokenIDP token1 
                                        idPclose = tokenIDP token2
                                        idPseps = map tokenIDP tokens
-                                   in  ProductExp NoIDD idPopen idPclose idPseps . makeExps
+                                   in  ProductExp NoIDD idPopen idPclose idPseps . List_Exp NoIDD . makeExps
 
-
-makeExps :: [Exp] -> Exps
-makeExps [] = NilExps NoIDD
-makeExps (exp:exps) = ConsExps NoIDD exp (makeExps exps)
+-- use fromList...!
+makeExps :: [Exp] -> ConsList_Exp
+makeExps [] = Nil_Exp
+makeExps (exp:exps) = Cons_Exp exp (makeExps exps)
 
 
 recoverIDs1 :: (Node -> Maybe IDD) -> (Token (Maybe Node)) -> (IDD, IDP)
@@ -312,36 +317,37 @@ startRecognize pres =
     [d] ->
       let (d', inss, dels) = recognizeEnr d
       in  (d', inss, dels)
-    _ -> debug Err ("PresentationParser.startRecognize: incorrect Root presentation " ++ show pres) (HoleEnr, [], emptyFM)
+    _ -> debug Err ("PresentationParser.startRecognize: incorrect Root presentation " ++ show pres) (HoleEnrichedDoc, [], emptyFM)
 
 
 
-recognizeEnr (Left _)                  = debug Err "recognizeEnr: No parser for Enr" (HoleEnr, [], emptyFM)
-recognizeEnr (Right (Nothing, pres))   = debug Err "Problem" (HoleEnr, [], emptyFM)
+recognizeEnr (Left _)                  = debug Err "recognizeEnr: No parser for Enr" (HoleEnrichedDoc, [], emptyFM)
+recognizeEnr (Right (Nothing, pres))   = debug Err "Problem" (HoleEnrichedDoc, [], emptyFM)
 recognizeEnr (Right (Just node, pres)) = -- structural
   makeStructuralEnr (Just node) pres      
 
 makeStructuralEnr nd@(Just node@(EnrichedDocNode (RootEnr idD idP _ _ tpinfo doc) _)) pres = 
   case gatherChildren pres Nothing of
     [c0,c1] ->
+--      debug Err ("bla"++show pres) $
       let (c0') = recognizeDeclsIdsPres c0 -- need a different recognizer for the id list
           (c1', inss, dels) = recognizeDecls c1
       in if null inss && isEmptyFM dels 
          then (RootEnr idD idP c0' c1' tpinfo doc, inss, dels) -- makeEnr
-         else (ParseErrEnr node pres {-(map show inss ++ map show (fmToList dels))-}, [], emptyFM)
-    cs -> debug Err ("PresentationParser.makeStructuralEnr: structure was changed " ++ show pres++show (length cs)) (HoleEnr, [], emptyFM) 
-makeStructuralEnr mn _ = debug Err ("PresentationParser.makeStructuralEnr: no exp node located " ++ show mn) (HoleEnr, [], emptyFM)
+         else (ParseErrEnrichedDoc node pres {-(map show inss ++ map show (fmToList dels))-}, [], emptyFM)
+    cs -> debug Err ("PresentationParser.makeStructuralEnr: structure was changed " ++ show pres++show (length cs)) (HoleEnrichedDoc, [], emptyFM) 
+makeStructuralEnr mn _ = debug Err ("PresentationParser.makeStructuralEnr: no exp node located " ++ show mn) (HoleEnrichedDoc, [], emptyFM)
 
 
-recognizeDecls :: (Either (Maybe Node, Presentation) (Maybe Node, Presentation)) -> (Decls, InsertedTokenList, DeletedTokenMap)
-recognizeDecls (Left (Nothing, pres))   = debug Err "Problem" (HoleDecls, [], emptyFM)
+recognizeDecls :: (Either (Maybe Node, Presentation) (Maybe Node, Presentation)) -> (List_Decl, InsertedTokenList, DeletedTokenMap)
+recognizeDecls (Left (Nothing, pres))   = debug Err "Problem" (HoleList_Decl, [], emptyFM)
 recognizeDecls (Left (Just node, pres)) = -- parsing
   let (decls, errs) = runParser parseDecls (ParsePres (LocatorP node pres))
-  in  if null errs then (decls, [], emptyFM) else (ParseErrDecls node pres (map show errs), [], emptyFM)
+  in  if null errs then (decls, [], emptyFM) else (ParseErrList_Decl node pres {-(map show errs)-}, [], emptyFM)
 --      dels = concatMap (extractDeletedTks pres) errs
 --    in {- debug Err ({-"dels:"++show dels-}
 --                  "parsed:"++show decls) -} (decls, [], listToFM dels)
-recognizeDecls (Right _)                = debug Err "recognizeDoc: No structure recognizer for DeclS" (HoleDecls, [], emptyFM)
+recognizeDecls (Right _)                = debug Err "recognizeDoc: No structure recognizer for DeclS" (HoleList_Decl, [], emptyFM)
 
 
 
@@ -378,8 +384,8 @@ recognizeExp (Right (Just node, pres)) = -- structural
 
 
 
---parseDecls :: TreeParser Decls
-parseDecls  =    makeDecls 
+parseDecls :: TreeParser List_Decl
+parseDecls  =    (List_Decl NoIDD .makeDecls )
              <$> pList parseDecl
 
 makeStructuralDecl :: (Maybe Node) -> Presentation -> Decl
@@ -435,8 +441,8 @@ pPPPresentation =  ((\_ -> initPPPresentation) <$> pKey "pres")
 
 -- end chess board
       
---parseAlts :: TreeParser Alts
-parseAlts  =    makeAlts 
+--parseAlts :: TreeParser List_Alt
+parseAlts  =    (List_Alt NoIDD . makeAlts )
              <$> pList parseAlt
 
 -- parsing structurals is still a bit tricky, because any structural will do, including holes
@@ -602,18 +608,18 @@ pHoleDecl =  (\(Structural mn pr _) -> HoleDecl) <$> pStruct
 -- recognizer parser for the identifier list
 
 -- parse the list of decls
-recognizeDeclsIdsPres :: (Either (Maybe Node, Presentation) (Maybe Node, Presentation)) -> (Decls)
-recognizeDeclsIdsPRes (Left (Nothing, pres))   = debug Err "Problem" (HoleDecls)
+recognizeDeclsIdsPres :: (Either (Maybe Node, Presentation) (Maybe Node, Presentation)) -> (List_Decl)
+recognizeDeclsIdsPRes (Left (Nothing, pres))   = debug Err "Problem" (HoleList_Decl)
 recognizeDeclsIdsPres (Left (Just node, pres)) = -- parsing
   let (decls, errs) = runParser parseDeclsIdsPres (ParsePres (LocatorP node pres))
-  in  if null errs then decls else (ParseErrDecls node pres (map show errs))
-recognizeDeclsIdsPres (Right _)                = debug Err "recognizeDeclsIdPres: No structure recognizer for DeclS" (HoleDecls)
+  in  if null errs then decls else (ParseErrList_Decl node pres {- (map show errs) -} )
+recognizeDeclsIdsPres (Right _)                = debug Err "recognizeDeclsIdPres: No structure recognizer for DeclS" (HoleList_Decl)
 
-parseDeclsIdsPres :: TreeParser Decls
-parseDeclsIdsPres  = makeDecls
+parseDeclsIdsPres :: TreeParser List_Decl
+parseDeclsIdsPres  = (List_Decl NoIDD . makeDecls)
              <$>  pList parseDeclIdsPres
 
---parseDeclIdsPres :: TreeParser Decl
+parseDeclIdsPres :: TreeParser Decl
 parseDeclIdsPres  =  (\(Structural mn pr _) -> makeStructuralDeclIdsPres mn pr)
              <$>   pSym (Structural Nothing (EmptyP NoIDP) NoIDP)       
 
@@ -679,7 +685,7 @@ makeStructuralItem nd@(Just (ItemNode (StringItem idD string) _)) pres =
 
 
 --- structure recognition for PPPresentation
-
+-- what about parse errors and holes, are they recognized correctly now?
 
 makeStructuralPPPresentation :: (Maybe Node) -> Presentation -> PPPresentation
 makeStructuralPPPresentation nd@(Just (PPPresentationNode (PPPresentation idD viewtp _) _)) pres = 
@@ -693,8 +699,8 @@ makeStructuralPPPresentation nd@(Just (PPPresentationNode _ _)) pres =
 makeStructuralPPPresentation mn _ = debug Err ("PresentationParser.makeStructuralPPPresentation: no PPPresentation node located " ++ show mn) HolePPPresentation
 
 
-recognizeSlides (Left _)                  = debug Err "recognizeSlides: No parser for Slides" HoleSlides
-recognizeSlides (Right (Nothing, pres))   = debug Err "Problem" HoleSlides
+recognizeSlides (Left _)                  = debug Err "recognizeSlides: No parser for Slides" HoleList_Slide
+recognizeSlides (Right (Nothing, pres))   = debug Err "Problem" HoleList_Slide
 recognizeSlides (Right (Just node, pres)) = -- structural
   makeStructuralSlides (Just node) pres      
 
@@ -702,44 +708,40 @@ recognizeSlides (Right (Just node, pres)) = -- structural
 -- for a list, makeStructural is different. because cons nodes sometimes have no presentation
 -- there will not be structural nodes to recover them. Hence gatherChildren returns the children
 -- of the list. The consNodes are recreated.
-makeStructuralSlides :: (Maybe Node) -> Presentation -> Slides
-makeStructuralSlides nd@(Just (SlidesNode (ConsSlides idD slide slides) _)) pres = 
+makeStructuralSlides :: (Maybe Node) -> Presentation -> List_Slide
+makeStructuralSlides nd@(Just (List_SlideNode (List_Slide idD slides) _)) pres = 
   case gatherChildren pres Nothing of
     cs ->
       let cs' = map recognizeSlide cs
-      in mkListSlides cs'
-    _ -> debug Err ("PresentationParser.makeStructuralSlides: structure was changed " ++ show pres) HoleSlides
-makeStructuralSlides nd@(Just (SlidesNode (NilSlides idD) _)) pres = 
-          NilSlides idD
-makeStructuralSlides nd@(Just (SlidesNode _ _)) pres = 
-  debug Err ("PresentationParser.makeStructuralSlides: structural parse error " ++ show nd) HoleSlides
-makeStructuralSlides mn _ = debug Err ("PresentationParser.makeStructuralSlides: no Slides node located " ++ show mn) HoleSlides
+      in List_Slide idD $ mkListSlides cs'
+    _ -> debug Err ("PresentationParser.makeStructuralSlides: structure was changed " ++ show pres) HoleList_Slide
+makeStructuralSlides nd@(Just (List_SlideNode _ _)) pres = 
+  debug Err ("PresentationParser.makeStructuralSlides: structural parse error " ++ show nd) HoleList_Slide
+makeStructuralSlides mn _ = debug Err ("PresentationParser.makeStructuralSlides: no Slides node located " ++ show mn) HoleList_Slide
 
-mkListSlides [] = NilSlides NoIDD  
-mkListSlides (sl:sls) = ConsSlides NoIDD sl $ mkListSlides sls
+mkListSlides [] = Nil_Slide
+mkListSlides (sl:sls) = Cons_Slide sl $ mkListSlides sls
 
 
 
-recognizeItems (Left _)                  = debug Err "recognizeItems: No parser for Items" HoleItems
-recognizeItems (Right (Nothing, pres))   = debug Err "Problem" HoleItems
+recognizeItems (Left _)                  = debug Err "recognizeItems: No parser for List_Item" HoleList_Item
+recognizeItems (Right (Nothing, pres))   = debug Err "Problem" HoleList_Item
 recognizeItems (Right (Just node, pres)) = -- structural
   makeStructuralItems (Just node) pres      
 
-makeStructuralItems :: (Maybe Node) -> Presentation -> Items
-makeStructuralItems nd@(Just (ItemsNode (ConsItems idD item items) _)) pres = 
+makeStructuralItems :: (Maybe Node) -> Presentation -> List_Item
+makeStructuralItems nd@(Just (List_ItemNode (List_Item idD items) _)) pres = 
   case gatherChildren pres Nothing of
     cs ->
       let cs' = map recognizeItem cs
-      in mkListItems cs'
-    _ -> debug Err ("PresentationParser.makeStructuralItems: structure was changed " ++ show pres) HoleItems
-makeStructuralItems nd@(Just (ItemsNode (NilItems idD) _)) pres = 
-          NilItems idD
-makeStructuralItems nd@(Just (ItemsNode _ _)) pres = 
-  debug Err ("PresentationParser.makeStructuralItems: structural parse error " ++ show nd) HoleItems
-makeStructuralItems mn _ = debug Err ("PresentationParser.makeStructuralItems: no Items node located " ++ show mn) HoleItems
+      in List_Item idD $ mkListItems cs'
+    _ -> debug Err ("PresentationParser.makeStructuralItems: structure was changed " ++ show pres) HoleList_Item
+makeStructuralItems nd@(Just (List_ItemNode _ _)) pres = 
+  debug Err ("PresentationParser.makeStructuralItems: structural parse error " ++ show nd) HoleList_Item
+makeStructuralItems mn _ = debug Err ("PresentationParser.makeStructuralItems: no Items node located " ++ show mn) HoleList_Item
 
-mkListItems [] = NilItems NoIDD  
-mkListItems (sl:sls) = ConsItems NoIDD sl $ mkListItems sls
+mkListItems [] = Nil_Item 
+mkListItems (sl:sls) = Cons_Item sl $ mkListItems sls
 
 
 -- 

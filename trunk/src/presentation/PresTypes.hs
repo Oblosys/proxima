@@ -92,7 +92,7 @@ data Presentation = EmptyP !IDP
                            -- this node. For these subtrees, old arrangement is used
 
 -- slightly less verbose show for presentation, without doc refs
-{-
+
 instance Show Presentation where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
@@ -108,10 +108,10 @@ instance Show Presentation where
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
--}
+
 
 -- shallow presentation, showing only toplevel presentation node
-
+{-
 instance Show Presentation where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":StringP "++show str++"}"
@@ -128,7 +128,7 @@ instance Show Presentation where
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
 
-
+-}
 -- overlays: do they need a ref that says which element is the first, or in what order its elts should be parsed?
 -- or is this always the order in which they appear on the screen? (== order of child list)
 -- for now, the overlay can only have focus or be parsed in its head element.

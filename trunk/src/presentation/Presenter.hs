@@ -50,10 +50,10 @@ presentEnr' state (EnrichedDocLevel d focusD ) layM idC =
                                        else  [text "=", text (show f1) `withColor` red
                                              ,text ("  {"++show f2++"}") `withColor` grey]
 -}                                             
-presentEnr' state (EnrichedDocLevel d@(HoleEnr) _) lay idc =
+presentEnr' state (EnrichedDocLevel d@(HoleEnrichedDoc) _) lay idc =
       (structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text "<HoleEnr>: something is very wrong"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
       , lay, idc)
-presentEnr' state (EnrichedDocLevel d@(ParseErrEnr node pres) _) lay idc = 
+presentEnr' state (EnrichedDocLevel d@(ParseErrEnrichedDoc node pres) _) lay idc = 
      (loc node $ parsing $ overlay [pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red ] `withbgColor` lightGrey
      , lay, idc)
 

@@ -213,6 +213,7 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
 itemStart i (Bullet _) = text' NoIDP "- "
 itemStart i (Number _) = text' NoIDP (show (i+1) ++ ") ")
 itemStart i (Alpha  _) = text' NoIDP (chr (ord 'a' + i):") ")
+itemStart i (_)        = text' NoIDP "  "
 
 --addReductionPopupItems :: [ PopupItem ] -> Presentation -> Presentation
 addReductionPopupItems its pres = addPopupItems pres its
@@ -276,7 +277,7 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
       alt                  : Binding
       lhsLength            : Int
       pres                 : Presentation
-      self                 : Alt
+      self                 : SELF
 
 -}
 {-
@@ -329,159 +330,101 @@ sem_Alt_Alt :: (IDD) ->
                (T_Ident) ->
                (T_Exp) ->
                (T_Alt)
-sem_Alt_Alt (_idD) (_idP0) (_idP1) (_ident) (_exp) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Alt _idD _idP0 _idP1 _ident_self _exp_self
-        (_lhsLength) =
-            length $ strFromIdent _ident_self
-        ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
-            (_ident (_lhs_col) (_lhs_focusD) (addListToFM _lhs_layoutMap [(_idP0, (0,_lhs_totalMaxLHSLength - _lhsLength+1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 2) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_ident_col+ _lhs_totalMaxLHSLength - _lhsLength + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_ident_layoutMap) (_lhs_level) (0) (_lhs_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_ident_varsInScopeAtFocus))
-    in  ( (_ident_str, _exp_val)
-         ,_lhs_col
-         ,_exp_layoutMap
-         ,_lhsLength
-         ,1
-         ,_exp_pIdC
-         ,loc (AltNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $
-            row'  $ [ _ident_pres
-                    , text' (mkIDP _idP0 _lhs_pIdC 0) "",
-                             key NoIDP "®"    `withFontFam` "symbol"
-                    , _exp_pres
-                    , sep (mkIDP _idP1 _lhs_pIdC 1) ";"
-                    ]
-         ,_self
-         ,_lhs_col
-         ,_exp_varsInScopeAtFocus
-         )
+sem_Alt_Alt (_idD) (_idP0) (_idP1) (_ident) (_exp) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Alt _idD _idP0 _idP1 _ident_self _exp_self
+            (_lhsLength) =
+                length $ strFromIdent _ident_self
+            ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
+                (_ident (_lhs_col) (_lhs_focusD) (_lhs_ix) (addListToFM _lhs_layoutMap [(_idP0, (0,_lhs_totalMaxLHSLength - _lhsLength+1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 2) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_ident_col+ _lhs_totalMaxLHSLength - _lhsLength + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_ident_layoutMap) (_lhs_level) (0) (_ident_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_ident_varsInScopeAtFocus))
+        in  ( (_ident_str, _exp_val)
+             ,_lhs_col
+             ,_exp_layoutMap
+             ,_lhsLength
+             ,1
+             ,_exp_pIdC
+             ,loc (AltNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $
+                row'  $ [ _ident_pres
+                        , text' (mkIDP _idP0 _lhs_pIdC 0) "",
+                                 key NoIDP "®"    `withFontFam` "symbol"
+                        , _exp_pres
+                        , sep (mkIDP _idP1 _lhs_pIdC 1) ";"
+                        ]
+             ,_self
+             ,_lhs_col
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Alt_HoleAlt :: (T_Alt)
-sem_Alt_HoleAlt (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleAlt
-    in  ( ("XXXXXX", ErrVal),_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Alt" (AltNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+sem_Alt_HoleAlt  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleAlt
+        in  ( ("XXXXXX", ErrVal),_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Alt" (AltNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
 sem_Alt_ParseErrAlt :: (Node) ->
                        (Presentation) ->
                        (T_Alt)
-sem_Alt_ParseErrAlt (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrAlt _node _presentation
-    in  ( ("XXXXXX", ErrVal),_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
--- Alts --------------------------------------------------------
-{-
-   inherited attributes:
-      env                  : Bindings
-      errs                 : [HeliumMessage]
-      focusD               : FocusDoc
-      ix                   : Int
-      level                : Int
-      ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      topLevelEnv          : [(String, String)]
-      totalMaxLHSLength    : Int
-      typeEnv              : [(PathDoc,String)]
-      varsInScope          : FiniteMap String (PathDoc, String)
-
-   chained attributes:
-      col                  : Int
-      layoutMap            : LayoutMap
-      newlines             : Int
-      pIdC                 : Int
-      path                 : [Int]
-      spaces               : Int
-      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
-
-   synthesised attributes:
-      alts                 : Bindings
-      maxLHSLength         : Int
-      press                : [Presentation]
-      self                 : Alts
-
--}
-{-
-   local variables for Alts.ConsAlts:
-      self
-
--}
-{-
-   local variables for Alts.HoleAlts:
-      self
-
--}
-{-
-   local variables for Alts.NilAlts:
-      self
-
--}
-{-
-   local variables for Alts.ParseErrAlts:
-      self
-
--}
--- semantic domain
-type T_Alts = (Int) ->
-              (Bindings) ->
-              ([HeliumMessage]) ->
-              (FocusDoc) ->
-              (Int) ->
-              (LayoutMap) ->
-              (Int) ->
-              (Int) ->
-              (Int) ->
-              ([Int]) ->
-              (([PathDoc],[PathDoc],[PathDoc])) ->
-              (Int) ->
-              ([(String, String)]) ->
-              (Int) ->
-              ([(PathDoc,String)]) ->
-              (FiniteMap String (PathDoc, String)) ->
-              (FiniteMap String (PathDoc, String)) ->
-              ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),([Int]),([Presentation]),(Alts),(Int),(FiniteMap String (PathDoc, String)))
--- cata
-sem_Alts :: (Alts) ->
-            (T_Alts)
-sem_Alts ((ConsAlts (_iDD) (_alt) (_alts))) =
-    (sem_Alts_ConsAlts (_iDD) ((sem_Alt (_alt))) ((sem_Alts (_alts))))
-sem_Alts ((HoleAlts )) =
-    (sem_Alts_HoleAlts )
-sem_Alts ((NilAlts (_iDD))) =
-    (sem_Alts_NilAlts (_iDD))
-sem_Alts ((ParseErrAlts (_node) (_presentation))) =
-    (sem_Alts_ParseErrAlts (_node) (_presentation))
-sem_Alts_ConsAlts :: (IDD) ->
-                     (T_Alt) ->
-                     (T_Alts) ->
-                     (T_Alts)
-sem_Alts_ConsAlts (_iDD) (_alt) (_alts) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ConsAlts _iDD _alt_self _alts_self
-        ( _alt_alt,_alt_col,_alt_layoutMap,_alt_lhsLength,_alt_newlines,_alt_pIdC,_alt_pres,_alt_self,_alt_spaces,_alt_varsInScopeAtFocus) =
-            (_alt (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 0) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _alts_alts,_alts_col,_alts_layoutMap,_alts_maxLHSLength,_alts_newlines,_alts_pIdC,_alts_path,_alts_press,_alts_self,_alts_spaces,_alts_varsInScopeAtFocus) =
-            (_alts (_alt_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_alt_layoutMap) (_lhs_level) (_alt_newlines) (_alt_pIdC) (_lhs_path) (_lhs_ranges) (_alt_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_alt_varsInScopeAtFocus))
-    in  ( _alt_alt : _alts_alts,_alts_col,_alts_layoutMap,_alt_lhsLength `max` _alts_maxLHSLength,_alts_newlines,_alts_pIdC,_lhs_path,_alt_pres : _alts_press,_self,_alts_spaces,_alts_varsInScopeAtFocus)
-sem_Alts_HoleAlts :: (T_Alts)
-sem_Alts_HoleAlts (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleAlts
-    in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,_lhs_path,[presHole _lhs_focusD "Alts" (AltsNode _self _lhs_path) _lhs_path],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
-sem_Alts_NilAlts :: (IDD) ->
-                    (T_Alts)
-sem_Alts_NilAlts (_iDD) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            NilAlts _iDD
-    in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,_lhs_path,[],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
-sem_Alts_ParseErrAlts :: (Node) ->
-                         (Presentation) ->
-                         (T_Alts)
-sem_Alts_ParseErrAlts (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrAlts _node _presentation
-    in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,_lhs_path,[presParseErr _node _presentation],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+sem_Alt_ParseErrAlt (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrAlt _node _presentation
+        in  ( ("XXXXXX", ErrVal),_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
 -- Board -------------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
 
    chained attributes:
@@ -489,7 +432,7 @@ sem_Alts_ParseErrAlts (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) 
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : Board
+      self                 : SELF
 
 -}
 {-
@@ -498,8 +441,19 @@ sem_Alts_ParseErrAlts (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) 
       self
 
 -}
+{-
+   local variables for Board.HoleBoard:
+      self
+
+-}
+{-
+   local variables for Board.ParseErrBoard:
+      self
+
+-}
 -- semantic domain
 type T_Board = (FocusDoc) ->
+               (Int) ->
                (Int) ->
                ([Int]) ->
                ( (Int),(Presentation),(Board))
@@ -508,6 +462,10 @@ sem_Board :: (Board) ->
              (T_Board)
 sem_Board ((Board (_idD) (_r1) (_r2) (_r3) (_r4) (_r5) (_r6) (_r7) (_r8))) =
     (sem_Board_Board (_idD) ((sem_BoardRow (_r1))) ((sem_BoardRow (_r2))) ((sem_BoardRow (_r3))) ((sem_BoardRow (_r4))) ((sem_BoardRow (_r5))) ((sem_BoardRow (_r6))) ((sem_BoardRow (_r7))) ((sem_BoardRow (_r8))))
+sem_Board ((HoleBoard )) =
+    (sem_Board_HoleBoard )
+sem_Board ((ParseErrBoard (_node) (_presentation))) =
+    (sem_Board_ParseErrBoard (_node) (_presentation))
 sem_Board_Board :: (IDD) ->
                    (T_BoardRow) ->
                    (T_BoardRow) ->
@@ -518,38 +476,63 @@ sem_Board_Board :: (IDD) ->
                    (T_BoardRow) ->
                    (T_BoardRow) ->
                    (T_Board)
-sem_Board_Board (_idD) (_r1) (_r2) (_r3) (_r4) (_r5) (_r6) (_r7) (_r8) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) =
-    let (_self) =
-            Board _idD _r1_self _r2_self _r3_self _r4_self _r5_self _r6_self _r7_self _r8_self
-        (_possibleMoves) =
-            case _r8_focusedPiece of
-              Just (square, (r,c)) -> Chess.computeMoves _self (r,c)
-              Nothing              -> []
-        ( _r1_focusedPiece,_r1_pIdC,_r1_pres,_r1_rowNr,_r1_self,_r1_sqCol) =
-            (_r1 (_lhs_focusD) (Nothing) (_lhs_pIdC) (_lhs_path++[0]) (_possibleMoves) (0) (False))
-        ( _r2_focusedPiece,_r2_pIdC,_r2_pres,_r2_rowNr,_r2_self,_r2_sqCol) =
-            (_r2 (_lhs_focusD) (_r1_focusedPiece) (_r1_pIdC) (_lhs_path++[1]) (_possibleMoves) (_r1_rowNr) (_r1_sqCol))
-        ( _r3_focusedPiece,_r3_pIdC,_r3_pres,_r3_rowNr,_r3_self,_r3_sqCol) =
-            (_r3 (_lhs_focusD) (_r2_focusedPiece) (_r2_pIdC) (_lhs_path++[2]) (_possibleMoves) (_r2_rowNr) (_r2_sqCol))
-        ( _r4_focusedPiece,_r4_pIdC,_r4_pres,_r4_rowNr,_r4_self,_r4_sqCol) =
-            (_r4 (_lhs_focusD) (_r3_focusedPiece) (_r3_pIdC) (_lhs_path++[3]) (_possibleMoves) (_r3_rowNr) (_r3_sqCol))
-        ( _r5_focusedPiece,_r5_pIdC,_r5_pres,_r5_rowNr,_r5_self,_r5_sqCol) =
-            (_r5 (_lhs_focusD) (_r4_focusedPiece) (_r4_pIdC) (_lhs_path++[4]) (_possibleMoves) (_r4_rowNr) (_r4_sqCol))
-        ( _r6_focusedPiece,_r6_pIdC,_r6_pres,_r6_rowNr,_r6_self,_r6_sqCol) =
-            (_r6 (_lhs_focusD) (_r5_focusedPiece) (_r5_pIdC) (_lhs_path++[5]) (_possibleMoves) (_r5_rowNr) (_r5_sqCol))
-        ( _r7_focusedPiece,_r7_pIdC,_r7_pres,_r7_rowNr,_r7_self,_r7_sqCol) =
-            (_r7 (_lhs_focusD) (_r6_focusedPiece) (_r6_pIdC) (_lhs_path++[6]) (_possibleMoves) (_r6_rowNr) (_r6_sqCol))
-        ( _r8_focusedPiece,_r8_pIdC,_r8_pres,_r8_rowNr,_r8_self,_r8_sqCol) =
-            (_r8 (_lhs_focusD) (_r7_focusedPiece) (_r7_pIdC) (_lhs_path++[7]) (_possibleMoves) (_r7_rowNr) (_r7_sqCol))
-    in  ( _r8_pIdC
-         ,loc (BoardNode _self _lhs_path) $ presentFocus _lhs_focusD _lhs_path $
-            structural $ colR 4 (reverse [_r1_pres,_r2_pres,_r3_pres,_r4_pres,_r5_pres,_r6_pres,_r7_pres,_r8_pres])
-         ,_self
-         )
+sem_Board_Board (_idD) (_r1) (_r2) (_r3) (_r4) (_r5) (_r6) (_r7) (_r8) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Board _idD _r1_self _r2_self _r3_self _r4_self _r5_self _r6_self _r7_self _r8_self
+            (_possibleMoves) =
+                case _r8_focusedPiece of
+                  Just (square, (r,c)) -> Chess.computeMoves _self (r,c)
+                  Nothing              -> []
+            ( _r1_focusedPiece,_r1_pIdC,_r1_pres,_r1_rowNr,_r1_self,_r1_sqCol) =
+                (_r1 (_lhs_focusD) (Nothing) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_possibleMoves) (0) (False))
+            ( _r2_focusedPiece,_r2_pIdC,_r2_pres,_r2_rowNr,_r2_self,_r2_sqCol) =
+                (_r2 (_lhs_focusD) (_r1_focusedPiece) (_lhs_ix) (_r1_pIdC) (_lhs_path++[1]) (_possibleMoves) (_r1_rowNr) (_r1_sqCol))
+            ( _r3_focusedPiece,_r3_pIdC,_r3_pres,_r3_rowNr,_r3_self,_r3_sqCol) =
+                (_r3 (_lhs_focusD) (_r2_focusedPiece) (_lhs_ix) (_r2_pIdC) (_lhs_path++[2]) (_possibleMoves) (_r2_rowNr) (_r2_sqCol))
+            ( _r4_focusedPiece,_r4_pIdC,_r4_pres,_r4_rowNr,_r4_self,_r4_sqCol) =
+                (_r4 (_lhs_focusD) (_r3_focusedPiece) (_lhs_ix) (_r3_pIdC) (_lhs_path++[3]) (_possibleMoves) (_r3_rowNr) (_r3_sqCol))
+            ( _r5_focusedPiece,_r5_pIdC,_r5_pres,_r5_rowNr,_r5_self,_r5_sqCol) =
+                (_r5 (_lhs_focusD) (_r4_focusedPiece) (_lhs_ix) (_r4_pIdC) (_lhs_path++[4]) (_possibleMoves) (_r4_rowNr) (_r4_sqCol))
+            ( _r6_focusedPiece,_r6_pIdC,_r6_pres,_r6_rowNr,_r6_self,_r6_sqCol) =
+                (_r6 (_lhs_focusD) (_r5_focusedPiece) (_lhs_ix) (_r5_pIdC) (_lhs_path++[5]) (_possibleMoves) (_r5_rowNr) (_r5_sqCol))
+            ( _r7_focusedPiece,_r7_pIdC,_r7_pres,_r7_rowNr,_r7_self,_r7_sqCol) =
+                (_r7 (_lhs_focusD) (_r6_focusedPiece) (_lhs_ix) (_r6_pIdC) (_lhs_path++[6]) (_possibleMoves) (_r6_rowNr) (_r6_sqCol))
+            ( _r8_focusedPiece,_r8_pIdC,_r8_pres,_r8_rowNr,_r8_self,_r8_sqCol) =
+                (_r8 (_lhs_focusD) (_r7_focusedPiece) (_lhs_ix) (_r7_pIdC) (_lhs_path++[7]) (_possibleMoves) (_r7_rowNr) (_r7_sqCol))
+        in  ( _r8_pIdC
+             ,loc (BoardNode _self _lhs_path) $ presentFocus _lhs_focusD _lhs_path $
+                structural $ colR 4 (reverse [_r1_pres,_r2_pres,_r3_pres,_r4_pres,_r5_pres,_r6_pres,_r7_pres,_r8_pres])
+             ,_self
+             )
+sem_Board_HoleBoard :: (T_Board)
+sem_Board_HoleBoard  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleBoard
+        in  ( _lhs_pIdC,presHole _lhs_focusD "Board" (BoardNode _self _lhs_path) _lhs_path,_self)
+sem_Board_ParseErrBoard :: (Node) ->
+                           (Presentation) ->
+                           (T_Board)
+sem_Board_ParseErrBoard (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrBoard _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,_self)
 -- BoardRow ----------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
       possibleMoves        : [(Int, Int)]
 
@@ -561,7 +544,7 @@ sem_Board_Board (_idD) (_r1) (_r2) (_r3) (_r4) (_r5) (_r6) (_r7) (_r8) (_lhs_foc
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : BoardRow
+      self                 : SELF
 
 -}
 {-
@@ -569,9 +552,20 @@ sem_Board_Board (_idD) (_r1) (_r2) (_r3) (_r4) (_r5) (_r6) (_r7) (_r8) (_lhs_foc
       self
 
 -}
+{-
+   local variables for BoardRow.HoleBoardRow:
+      self
+
+-}
+{-
+   local variables for BoardRow.ParseErrBoardRow:
+      self
+
+-}
 -- semantic domain
 type T_BoardRow = (FocusDoc) ->
                   ( Maybe (BoardSquare,(Int,Int)) ) ->
+                  (Int) ->
                   (Int) ->
                   ([Int]) ->
                   ([(Int, Int)]) ->
@@ -583,6 +577,10 @@ sem_BoardRow :: (BoardRow) ->
                 (T_BoardRow)
 sem_BoardRow ((BoardRow (_idD) (_ca) (_cb) (_cc) (_cd) (_ce) (_cf) (_cg) (_ch))) =
     (sem_BoardRow_BoardRow (_idD) ((sem_BoardSquare (_ca))) ((sem_BoardSquare (_cb))) ((sem_BoardSquare (_cc))) ((sem_BoardSquare (_cd))) ((sem_BoardSquare (_ce))) ((sem_BoardSquare (_cf))) ((sem_BoardSquare (_cg))) ((sem_BoardSquare (_ch))))
+sem_BoardRow ((HoleBoardRow )) =
+    (sem_BoardRow_HoleBoardRow )
+sem_BoardRow ((ParseErrBoardRow (_node) (_presentation))) =
+    (sem_BoardRow_ParseErrBoardRow (_node) (_presentation))
 sem_BoardRow_BoardRow :: (IDD) ->
                          (T_BoardSquare) ->
                          (T_BoardSquare) ->
@@ -593,37 +591,74 @@ sem_BoardRow_BoardRow :: (IDD) ->
                          (T_BoardSquare) ->
                          (T_BoardSquare) ->
                          (T_BoardRow)
-sem_BoardRow_BoardRow (_idD) (_ca) (_cb) (_cc) (_cd) (_ce) (_cf) (_cg) (_ch) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            BoardRow _idD _ca_self _cb_self _cc_self _cd_self _ce_self _cf_self _cg_self _ch_self
-        ( _ca_colNr,_ca_focusedPiece,_ca_pIdC,_ca_pres,_ca_self,_ca_sqCol) =
-            (_ca (0) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path++[0]) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol))
-        ( _cb_colNr,_cb_focusedPiece,_cb_pIdC,_cb_pres,_cb_self,_cb_sqCol) =
-            (_cb (_ca_colNr) (_lhs_focusD) (_ca_focusedPiece) (_ca_pIdC) (_lhs_path++[1]) (_lhs_possibleMoves) (_lhs_rowNr) (_ca_sqCol))
-        ( _cc_colNr,_cc_focusedPiece,_cc_pIdC,_cc_pres,_cc_self,_cc_sqCol) =
-            (_cc (_cb_colNr) (_lhs_focusD) (_cb_focusedPiece) (_cb_pIdC) (_lhs_path++[2]) (_lhs_possibleMoves) (_lhs_rowNr) (_cb_sqCol))
-        ( _cd_colNr,_cd_focusedPiece,_cd_pIdC,_cd_pres,_cd_self,_cd_sqCol) =
-            (_cd (_cc_colNr) (_lhs_focusD) (_cc_focusedPiece) (_cc_pIdC) (_lhs_path++[3]) (_lhs_possibleMoves) (_lhs_rowNr) (_cc_sqCol))
-        ( _ce_colNr,_ce_focusedPiece,_ce_pIdC,_ce_pres,_ce_self,_ce_sqCol) =
-            (_ce (_cd_colNr) (_lhs_focusD) (_cd_focusedPiece) (_cd_pIdC) (_lhs_path++[4]) (_lhs_possibleMoves) (_lhs_rowNr) (_cd_sqCol))
-        ( _cf_colNr,_cf_focusedPiece,_cf_pIdC,_cf_pres,_cf_self,_cf_sqCol) =
-            (_cf (_ce_colNr) (_lhs_focusD) (_ce_focusedPiece) (_ce_pIdC) (_lhs_path++[5]) (_lhs_possibleMoves) (_lhs_rowNr) (_ce_sqCol))
-        ( _cg_colNr,_cg_focusedPiece,_cg_pIdC,_cg_pres,_cg_self,_cg_sqCol) =
-            (_cg (_cf_colNr) (_lhs_focusD) (_cf_focusedPiece) (_cf_pIdC) (_lhs_path++[6]) (_lhs_possibleMoves) (_lhs_rowNr) (_cf_sqCol))
-        ( _ch_colNr,_ch_focusedPiece,_ch_pIdC,_ch_pres,_ch_self,_ch_sqCol) =
-            (_ch (_cg_colNr) (_lhs_focusD) (_cg_focusedPiece) (_cg_pIdC) (_lhs_path++[7]) (_lhs_possibleMoves) (_lhs_rowNr) (_cg_sqCol))
-    in  ( _ch_focusedPiece
-         ,_ch_pIdC
-         ,loc (BoardRowNode _self _lhs_path) $ presentFocus _lhs_focusD _lhs_path $
-          structural $  row' [_ca_pres,_cb_pres,_cc_pres,_cd_pres,_ce_pres,_cf_pres,_cg_pres,_ch_pres]
-         ,1 + _lhs_rowNr
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardRow_BoardRow (_idD) (_ca) (_cb) (_cc) (_cd) (_ce) (_cf) (_cg) (_ch) =
+    \ _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                BoardRow _idD _ca_self _cb_self _cc_self _cd_self _ce_self _cf_self _cg_self _ch_self
+            ( _ca_colNr,_ca_focusedPiece,_ca_pIdC,_ca_pres,_ca_self,_ca_sqCol) =
+                (_ca (0) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol))
+            ( _cb_colNr,_cb_focusedPiece,_cb_pIdC,_cb_pres,_cb_self,_cb_sqCol) =
+                (_cb (_ca_colNr) (_lhs_focusD) (_ca_focusedPiece) (_lhs_ix) (_ca_pIdC) (_lhs_path++[1]) (_lhs_possibleMoves) (_lhs_rowNr) (_ca_sqCol))
+            ( _cc_colNr,_cc_focusedPiece,_cc_pIdC,_cc_pres,_cc_self,_cc_sqCol) =
+                (_cc (_cb_colNr) (_lhs_focusD) (_cb_focusedPiece) (_lhs_ix) (_cb_pIdC) (_lhs_path++[2]) (_lhs_possibleMoves) (_lhs_rowNr) (_cb_sqCol))
+            ( _cd_colNr,_cd_focusedPiece,_cd_pIdC,_cd_pres,_cd_self,_cd_sqCol) =
+                (_cd (_cc_colNr) (_lhs_focusD) (_cc_focusedPiece) (_lhs_ix) (_cc_pIdC) (_lhs_path++[3]) (_lhs_possibleMoves) (_lhs_rowNr) (_cc_sqCol))
+            ( _ce_colNr,_ce_focusedPiece,_ce_pIdC,_ce_pres,_ce_self,_ce_sqCol) =
+                (_ce (_cd_colNr) (_lhs_focusD) (_cd_focusedPiece) (_lhs_ix) (_cd_pIdC) (_lhs_path++[4]) (_lhs_possibleMoves) (_lhs_rowNr) (_cd_sqCol))
+            ( _cf_colNr,_cf_focusedPiece,_cf_pIdC,_cf_pres,_cf_self,_cf_sqCol) =
+                (_cf (_ce_colNr) (_lhs_focusD) (_ce_focusedPiece) (_lhs_ix) (_ce_pIdC) (_lhs_path++[5]) (_lhs_possibleMoves) (_lhs_rowNr) (_ce_sqCol))
+            ( _cg_colNr,_cg_focusedPiece,_cg_pIdC,_cg_pres,_cg_self,_cg_sqCol) =
+                (_cg (_cf_colNr) (_lhs_focusD) (_cf_focusedPiece) (_lhs_ix) (_cf_pIdC) (_lhs_path++[6]) (_lhs_possibleMoves) (_lhs_rowNr) (_cf_sqCol))
+            ( _ch_colNr,_ch_focusedPiece,_ch_pIdC,_ch_pres,_ch_self,_ch_sqCol) =
+                (_ch (_cg_colNr) (_lhs_focusD) (_cg_focusedPiece) (_lhs_ix) (_cg_pIdC) (_lhs_path++[7]) (_lhs_possibleMoves) (_lhs_rowNr) (_cg_sqCol))
+        in  ( _ch_focusedPiece
+             ,_ch_pIdC
+             ,loc (BoardRowNode _self _lhs_path) $ presentFocus _lhs_focusD _lhs_path $
+              structural $  row' [_ca_pres,_cb_pres,_cc_pres,_cd_pres,_ce_pres,_cf_pres,_cg_pres,_ch_pres]
+             ,1 + _lhs_rowNr
+             ,_self
+             ,not _lhs_sqCol
+             )
+sem_BoardRow_HoleBoardRow :: (T_BoardRow)
+sem_BoardRow_HoleBoardRow  =
+    \ _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                HoleBoardRow
+        in  ( _lhs_focusedPiece,_lhs_pIdC,presHole _lhs_focusD "BoardRow" (BoardRowNode _self _lhs_path) _lhs_path,_lhs_rowNr,_self,_lhs_sqCol)
+sem_BoardRow_ParseErrBoardRow :: (Node) ->
+                                 (Presentation) ->
+                                 (T_BoardRow)
+sem_BoardRow_ParseErrBoardRow (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                ParseErrBoardRow _node _presentation
+        in  ( _lhs_focusedPiece,_lhs_pIdC,presParseErr _node _presentation,_lhs_rowNr,_self,_lhs_sqCol)
 -- BoardSquare -------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
       possibleMoves        : [(Int, Int)]
       rowNr                : Int
@@ -636,7 +671,7 @@ sem_BoardRow_BoardRow (_idD) (_ca) (_cb) (_cc) (_cd) (_ce) (_cf) (_cg) (_ch) (_l
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : BoardSquare
+      self                 : SELF
 
 -}
 {-
@@ -650,12 +685,22 @@ sem_BoardRow_BoardRow (_idD) (_ca) (_cb) (_cc) (_cd) (_ce) (_cf) (_cg) (_ch) (_l
 
 -}
 {-
+   local variables for BoardSquare.HoleBoardSquare:
+      self
+
+-}
+{-
    local variables for BoardSquare.King:
       self
 
 -}
 {-
    local variables for BoardSquare.Knight:
+      self
+
+-}
+{-
+   local variables for BoardSquare.ParseErrBoardSquare:
       self
 
 -}
@@ -679,6 +724,7 @@ type T_BoardSquare = (Int) ->
                      (FocusDoc) ->
                      ( Maybe (BoardSquare,(Int,Int)) ) ->
                      (Int) ->
+                     (Int) ->
                      ([Int]) ->
                      ([(Int, Int)]) ->
                      (Int) ->
@@ -691,10 +737,14 @@ sem_BoardSquare ((Bishop (_idD) (_color))) =
     (sem_BoardSquare_Bishop (_idD) (_color))
 sem_BoardSquare ((Empty )) =
     (sem_BoardSquare_Empty )
+sem_BoardSquare ((HoleBoardSquare )) =
+    (sem_BoardSquare_HoleBoardSquare )
 sem_BoardSquare ((King (_idD) (_color))) =
     (sem_BoardSquare_King (_idD) (_color))
 sem_BoardSquare ((Knight (_idD) (_color))) =
     (sem_BoardSquare_Knight (_idD) (_color))
+sem_BoardSquare ((ParseErrBoardSquare (_node) (_presentation))) =
+    (sem_BoardSquare_ParseErrBoardSquare (_node) (_presentation))
 sem_BoardSquare ((Pawn (_idD) (_color))) =
     (sem_BoardSquare_Pawn (_idD) (_color))
 sem_BoardSquare ((Queen (_idD) (_color))) =
@@ -704,99 +754,687 @@ sem_BoardSquare ((Rook (_idD) (_color))) =
 sem_BoardSquare_Bishop :: (IDD) ->
                           (Bool) ->
                           (T_BoardSquare)
-sem_BoardSquare_Bishop (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Bishop _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Bishop (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Bishop _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
 sem_BoardSquare_Empty :: (T_BoardSquare)
-sem_BoardSquare_Empty (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Empty
-    in  ( 1 + _lhs_colNr
-         ,_lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self False _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Empty  =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Empty
+        in  ( 1 + _lhs_colNr
+             ,_lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self False _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
+sem_BoardSquare_HoleBoardSquare :: (T_BoardSquare)
+sem_BoardSquare_HoleBoardSquare  =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                HoleBoardSquare
+        in  ( _lhs_colNr,_lhs_focusedPiece,_lhs_pIdC,presHole _lhs_focusD "BoardSquare" (BoardSquareNode _self _lhs_path) _lhs_path,_self,_lhs_sqCol)
 sem_BoardSquare_King :: (IDD) ->
                         (Bool) ->
                         (T_BoardSquare)
-sem_BoardSquare_King (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            King _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_King (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                King _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
 sem_BoardSquare_Knight :: (IDD) ->
                           (Bool) ->
                           (T_BoardSquare)
-sem_BoardSquare_Knight (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Knight _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Knight (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Knight _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
+sem_BoardSquare_ParseErrBoardSquare :: (Node) ->
+                                       (Presentation) ->
+                                       (T_BoardSquare)
+sem_BoardSquare_ParseErrBoardSquare (_node) (_presentation) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                ParseErrBoardSquare _node _presentation
+        in  ( _lhs_colNr,_lhs_focusedPiece,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_sqCol)
 sem_BoardSquare_Pawn :: (IDD) ->
                         (Bool) ->
                         (T_BoardSquare)
-sem_BoardSquare_Pawn (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Pawn _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Pawn (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Pawn _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
 sem_BoardSquare_Queen :: (IDD) ->
                          (Bool) ->
                          (T_BoardSquare)
-sem_BoardSquare_Queen (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Queen _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Queen (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Queen _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
 sem_BoardSquare_Rook :: (IDD) ->
                         (Bool) ->
                         (T_BoardSquare)
-sem_BoardSquare_Rook (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPiece) (_lhs_pIdC) (_lhs_path) (_lhs_possibleMoves) (_lhs_rowNr) (_lhs_sqCol) =
-    let (_self) =
-            Rook _idD _color
-    in  ( 1 + _lhs_colNr
-         ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
-         ,_lhs_pIdC
-         ,loc (BoardSquareNode _self _lhs_path) $
-            structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
-         ,_self
-         ,not _lhs_sqCol
-         )
+sem_BoardSquare_Rook (_idD) (_color) =
+    \ _lhs_colNr
+      _lhs_focusD
+      _lhs_focusedPiece
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_possibleMoves
+      _lhs_rowNr
+      _lhs_sqCol ->
+        let (_self) =
+                Rook _idD _color
+        in  ( 1 + _lhs_colNr
+             ,if (PathD _lhs_path) == _lhs_focusD then Just (_self, (_lhs_colNr,_lhs_rowNr)) else _lhs_focusedPiece
+             ,_lhs_pIdC
+             ,loc (BoardSquareNode _self _lhs_path) $
+                structural $ Chess.piece _self _color _lhs_sqCol _lhs_rowNr _lhs_colNr _lhs_possibleMoves _lhs_focusD _lhs_path
+             ,_self
+             ,not _lhs_sqCol
+             )
+-- ConsList_Alt ------------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      ix                   : Int
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      totalMaxLHSLength    : Int
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      alts                 : Bindings
+      maxLHSLength         : Int
+      press                : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for ConsList_Alt.Cons_Alt:
+      self
+
+-}
+{-
+   local variables for ConsList_Alt.Nil_Alt:
+      self
+
+-}
+-- semantic domain
+type T_ConsList_Alt = (Int) ->
+                      (Bindings) ->
+                      ([HeliumMessage]) ->
+                      (FocusDoc) ->
+                      (Int) ->
+                      (LayoutMap) ->
+                      (Int) ->
+                      (Int) ->
+                      (Int) ->
+                      ([Int]) ->
+                      (([PathDoc],[PathDoc],[PathDoc])) ->
+                      (Int) ->
+                      ([(String, String)]) ->
+                      (Int) ->
+                      ([(PathDoc,String)]) ->
+                      (FiniteMap String (PathDoc, String)) ->
+                      (FiniteMap String (PathDoc, String)) ->
+                      ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),([Presentation]),(ConsList_Alt),(Int),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_ConsList_Alt :: (ConsList_Alt) ->
+                    (T_ConsList_Alt)
+sem_ConsList_Alt ((Cons_Alt (_head) (_tail))) =
+    (sem_ConsList_Alt_Cons_Alt ((sem_Alt (_head))) ((sem_ConsList_Alt (_tail))))
+sem_ConsList_Alt ((Nil_Alt )) =
+    (sem_ConsList_Alt_Nil_Alt )
+sem_ConsList_Alt_Cons_Alt :: (T_Alt) ->
+                             (T_ConsList_Alt) ->
+                             (T_ConsList_Alt)
+sem_ConsList_Alt_Cons_Alt (_head) (_tail) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Cons_Alt _head_self _tail_self
+            ( _head_alt,_head_col,_head_layoutMap,_head_lhsLength,_head_newlines,_head_pIdC,_head_pres,_head_self,_head_spaces,_head_varsInScopeAtFocus) =
+                (_head (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _tail_alts,_tail_col,_tail_layoutMap,_tail_maxLHSLength,_tail_newlines,_tail_pIdC,_tail_press,_tail_self,_tail_spaces,_tail_varsInScopeAtFocus) =
+                (_tail (_head_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_head_layoutMap) (_lhs_level) (_head_newlines) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_head_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+        in  ( _head_alt : _tail_alts,_tail_col,_tail_layoutMap,_head_lhsLength `max` _tail_maxLHSLength,_tail_newlines,_tail_pIdC,_head_pres : _tail_press,_self,_tail_spaces,_tail_varsInScopeAtFocus)
+sem_ConsList_Alt_Nil_Alt :: (T_ConsList_Alt)
+sem_ConsList_Alt_Nil_Alt  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Nil_Alt
+        in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,[],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+-- ConsList_Decl -----------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      ix                   : Int
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      dcls                 : Bindings
+      declaredVars         : [(String,(PathDoc,String))]
+      idsPres              : Presentation
+      parseErrs            : [String]
+      press                : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for ConsList_Decl.Cons_Decl:
+      self
+
+-}
+{-
+   local variables for ConsList_Decl.Nil_Decl:
+      self
+
+-}
+-- semantic domain
+type T_ConsList_Decl = (Int) ->
+                       (Bindings) ->
+                       ([HeliumMessage]) ->
+                       (FocusDoc) ->
+                       (Int) ->
+                       (LayoutMap) ->
+                       (Int) ->
+                       (Int) ->
+                       (Int) ->
+                       ([Int]) ->
+                       (([PathDoc],[PathDoc],[PathDoc])) ->
+                       (Int) ->
+                       ([(String, String)]) ->
+                       ([(PathDoc,String)]) ->
+                       (FiniteMap String (PathDoc, String)) ->
+                       (FiniteMap String (PathDoc, String)) ->
+                       ( (Int),(Bindings),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),([String]),([Presentation]),(ConsList_Decl),(Int),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_ConsList_Decl :: (ConsList_Decl) ->
+                     (T_ConsList_Decl)
+sem_ConsList_Decl ((Cons_Decl (_head) (_tail))) =
+    (sem_ConsList_Decl_Cons_Decl ((sem_Decl (_head))) ((sem_ConsList_Decl (_tail))))
+sem_ConsList_Decl ((Nil_Decl )) =
+    (sem_ConsList_Decl_Nil_Decl )
+sem_ConsList_Decl_Cons_Decl :: (T_Decl) ->
+                               (T_ConsList_Decl) ->
+                               (T_ConsList_Decl)
+sem_ConsList_Decl_Cons_Decl (_head) (_tail) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Cons_Decl _head_self _tail_self
+            ( _head_col,_head_dcl,_head_declaredVars,_head_idsPres,_head_layoutMap,_head_newlines,_head_pIdC,_head_pres,_head_self,_head_spaces,_head_typeStr,_head_varsInScopeAtFocus) =
+                (_head (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _tail_col,_tail_dcls,_tail_declaredVars,_tail_idsPres,_tail_layoutMap,_tail_newlines,_tail_pIdC,_tail_parseErrs,_tail_press,_tail_self,_tail_spaces,_tail_varsInScopeAtFocus) =
+                (_tail (_head_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_head_layoutMap) (_lhs_level) (_head_newlines) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_head_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+        in  ( _tail_col,_head_dcl : _tail_dcls,_head_declaredVars ++ _tail_declaredVars,row' [ _head_idsPres, text " ", _tail_idsPres ],_tail_layoutMap,_tail_newlines,_tail_pIdC,[],_head_pres : _tail_press,_self,_tail_spaces,_tail_varsInScopeAtFocus)
+sem_ConsList_Decl_Nil_Decl :: (T_ConsList_Decl)
+sem_ConsList_Decl_Nil_Decl  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Nil_Decl
+        in  ( _lhs_col,[],[],empty,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[],[],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+-- ConsList_Exp ------------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      ix                   : Int
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      press                : [Presentation]
+      self                 : SELF
+      vals                 : [Value]
+
+-}
+{-
+   local variables for ConsList_Exp.Cons_Exp:
+      self
+
+-}
+{-
+   local variables for ConsList_Exp.Nil_Exp:
+      self
+
+-}
+-- semantic domain
+type T_ConsList_Exp = (Int) ->
+                      (Bindings) ->
+                      ([HeliumMessage]) ->
+                      (FocusDoc) ->
+                      (Int) ->
+                      (LayoutMap) ->
+                      (Int) ->
+                      (Int) ->
+                      (Int) ->
+                      ([Int]) ->
+                      (([PathDoc],[PathDoc],[PathDoc])) ->
+                      (Int) ->
+                      ([(String, String)]) ->
+                      ([(PathDoc,String)]) ->
+                      (FiniteMap String (PathDoc, String)) ->
+                      (FiniteMap String (PathDoc, String)) ->
+                      ( (Int),(LayoutMap),(Int),(Int),([Presentation]),(ConsList_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_ConsList_Exp :: (ConsList_Exp) ->
+                    (T_ConsList_Exp)
+sem_ConsList_Exp ((Cons_Exp (_head) (_tail))) =
+    (sem_ConsList_Exp_Cons_Exp ((sem_Exp (_head))) ((sem_ConsList_Exp (_tail))))
+sem_ConsList_Exp ((Nil_Exp )) =
+    (sem_ConsList_Exp_Nil_Exp )
+sem_ConsList_Exp_Cons_Exp :: (T_Exp) ->
+                             (T_ConsList_Exp) ->
+                             (T_ConsList_Exp)
+sem_ConsList_Exp_Cons_Exp (_head) (_tail) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Cons_Exp _head_self _tail_self
+            ( _head_col,_head_lamBody,_head_layoutMap,_head_newlines,_head_pIdC,_head_pres,_head_self,_head_spaces,_head_substitute,_head_type,_head_val,_head_varsInScopeAtFocus) =
+                (_head (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _tail_col,_tail_layoutMap,_tail_newlines,_tail_pIdC,_tail_press,_tail_self,_tail_spaces,_tail_vals,_tail_varsInScopeAtFocus) =
+                (_tail (_head_col + 2) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_head_layoutMap) (_lhs_level) (_head_newlines) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_head_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+        in  ( _tail_col,_tail_layoutMap,_tail_newlines,_tail_pIdC,_head_pres : _tail_press,_self,_tail_spaces,_head_val : _tail_vals,_tail_varsInScopeAtFocus)
+sem_ConsList_Exp_Nil_Exp :: (T_ConsList_Exp)
+sem_ConsList_Exp_Nil_Exp  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Nil_Exp
+        in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
+-- ConsList_Item -----------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      listType             : ListType
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      pIdC                 : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      press                : [Presentation]
+      press2               : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for ConsList_Item.Cons_Item:
+      self
+
+-}
+{-
+   local variables for ConsList_Item.Nil_Item:
+      self
+
+-}
+-- semantic domain
+type T_ConsList_Item = (FocusDoc) ->
+                       (Int) ->
+                       (ListType) ->
+                       (Int) ->
+                       ([Int]) ->
+                       (([PathDoc],[PathDoc],[PathDoc])) ->
+                       (FiniteMap String (PathDoc, String)) ->
+                       (FiniteMap String (PathDoc, String)) ->
+                       ( (Int),([Presentation]),([Presentation]),(ConsList_Item),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_ConsList_Item :: (ConsList_Item) ->
+                     (T_ConsList_Item)
+sem_ConsList_Item ((Cons_Item (_head) (_tail))) =
+    (sem_ConsList_Item_Cons_Item ((sem_Item (_head))) ((sem_ConsList_Item (_tail))))
+sem_ConsList_Item ((Nil_Item )) =
+    (sem_ConsList_Item_Nil_Item )
+sem_ConsList_Item_Cons_Item :: (T_Item) ->
+                               (T_ConsList_Item) ->
+                               (T_ConsList_Item)
+sem_ConsList_Item_Cons_Item (_head) (_tail) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Cons_Item _head_self _tail_self
+            ( _head_pIdC,_head_pres,_head_pres2,_head_self,_head_varsInScopeAtFocus) =
+                (_head (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _tail_pIdC,_tail_press,_tail_press2,_tail_self,_tail_varsInScopeAtFocus) =
+                (_tail (_lhs_focusD) (_lhs_ix + 1) (_lhs_listType) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+        in  ( _tail_pIdC,_head_pres : _tail_press,_head_pres2 : _tail_press2,_self,_tail_varsInScopeAtFocus)
+sem_ConsList_Item_Nil_Item :: (T_ConsList_Item)
+sem_ConsList_Item_Nil_Item  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Nil_Item
+        in  ( _lhs_pIdC,[],[],_self,_lhs_varsInScopeAtFocus)
+-- ConsList_Slide ----------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      pIdC                 : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      press                : [Presentation]
+      press2               : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for ConsList_Slide.Cons_Slide:
+      self
+
+-}
+{-
+   local variables for ConsList_Slide.Nil_Slide:
+      self
+
+-}
+-- semantic domain
+type T_ConsList_Slide = (FocusDoc) ->
+                        (Int) ->
+                        (Int) ->
+                        ([Int]) ->
+                        (([PathDoc],[PathDoc],[PathDoc])) ->
+                        (FiniteMap String (PathDoc, String)) ->
+                        (FiniteMap String (PathDoc, String)) ->
+                        ( (Int),([Presentation]),([Presentation]),(ConsList_Slide),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_ConsList_Slide :: (ConsList_Slide) ->
+                      (T_ConsList_Slide)
+sem_ConsList_Slide ((Cons_Slide (_head) (_tail))) =
+    (sem_ConsList_Slide_Cons_Slide ((sem_Slide (_head))) ((sem_ConsList_Slide (_tail))))
+sem_ConsList_Slide ((Nil_Slide )) =
+    (sem_ConsList_Slide_Nil_Slide )
+sem_ConsList_Slide_Cons_Slide :: (T_Slide) ->
+                                 (T_ConsList_Slide) ->
+                                 (T_ConsList_Slide)
+sem_ConsList_Slide_Cons_Slide (_head) (_tail) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Cons_Slide _head_self _tail_self
+            ( _head_pIdC,_head_pres,_head_pres2,_head_self,_head_varsInScopeAtFocus) =
+                (_head (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 30) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _tail_pIdC,_tail_press,_tail_press2,_tail_self,_tail_varsInScopeAtFocus) =
+                (_tail (_lhs_focusD) (_lhs_ix + 1) (_head_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_head_varsInScopeAtFocus))
+        in  ( _tail_pIdC,_head_pres : _tail_press,_head_pres2 : _tail_press2,_self,_tail_varsInScopeAtFocus)
+sem_ConsList_Slide_Nil_Slide :: (T_ConsList_Slide)
+sem_ConsList_Slide_Nil_Slide  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Nil_Slide
+        in  ( _lhs_pIdC,[],[],_self,_lhs_varsInScopeAtFocus)
 -- Decl --------------------------------------------------------
 {-
    inherited attributes:
@@ -824,7 +1462,7 @@ sem_BoardSquare_Rook (_idD) (_color) (_lhs_colNr) (_lhs_focusD) (_lhs_focusedPie
       declaredVars         : [(String,(PathDoc,String))]
       idsPres              : Presentation
       pres                 : Presentation
-      self                 : Decl
+      self                 : SELF
       typeStr              : Maybe String
 
 -}
@@ -894,28 +1532,44 @@ sem_Decl_BoardDecl :: (IDD) ->
                       (IDP) ->
                       (T_Board) ->
                       (T_Decl)
-sem_Decl_BoardDecl (_idD) (_idP0) (_idP1) (_board) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            BoardDecl _idD _idP0 _idP1 _board_self
-        (_typeStr) =
-            Nothing
-        ( _board_pIdC,_board_pres,_board_self) =
-            (_board (_lhs_focusD) (_lhs_pIdC) (_lhs_path++[0]))
-    in  ( _lhs_col
-         ,("XXXXXX", ErrVal)
-         ,[]
-         ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text "board;" ]
-         ,_lhs_layoutMap
-         ,_lhs_newlines
-         ,_lhs_pIdC + 1
-         ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            row' [text' (mkIDP _idP0 _lhs_pIdC 0) "Chess: ", _board_pres]
-         ,_self
-         ,_lhs_spaces
-         ,_typeStr
-         ,_lhs_varsInScopeAtFocus
-         )
+sem_Decl_BoardDecl (_idD) (_idP0) (_idP1) (_board) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                BoardDecl _idD _idP0 _idP1 _board_self
+            (_typeStr) =
+                Nothing
+            ( _board_pIdC,_board_pres,_board_self) =
+                (_board (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 2) (_lhs_path++[0]))
+        in  ( _lhs_col
+             ,("XXXXXX", ErrVal)
+             ,[]
+             ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "board;" ]
+             ,_lhs_layoutMap
+             ,_lhs_newlines
+             ,_board_pIdC
+             ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [text' (mkIDP _idP0 _lhs_pIdC 0) "Chess: ", _board_pres]
+             ,_self
+             ,_lhs_spaces
+             ,_typeStr
+             ,_lhs_varsInScopeAtFocus
+             )
 sem_Decl_Decl :: (IDD) ->
                  (IDP) ->
                  (IDP) ->
@@ -926,229 +1580,182 @@ sem_Decl_Decl :: (IDD) ->
                  (T_Ident) ->
                  (T_Exp) ->
                  (T_Decl)
-sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (_ident) (_exp) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Decl _idD _idP0 _idP1 _idP2 _idP3 _expanded _autoLayout _ident_self _exp_self
-        (_typeStr) =
-            case lookup (strFromIdent _ident_self) _lhs_topLevelEnv of
-              Nothing -> Nothing
-              Just tp -> Just $ strFromIdent _ident_self ++ " :: "++ tp
-        ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
-            (_ident (_lhs_col) (_lhs_focusD) (addListToFM _lhs_layoutMap [(_idP0, (0,1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 3) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_ident_col+2+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_ident_layoutMap) (_lhs_level) (0) (_ident_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_ident_varsInScopeAtFocus))
-    in  ( _lhs_col
-         ,(_ident_str, _exp_val)
-         ,[(strFromIdent _ident_self, (PathD (_lhs_path++[0]), _exp_type))]
-         ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text "'", _ident_idsPres, text' NoIDP "';" ]
-         ,let lm = if _autoLayout || _lhs_level /= 0 then _exp_layoutMap else _lhs_layoutMap
-          in if _idP2 /= NoIDP || _lhs_level /= 0 then lm
-             else case lookupFM lm (_ident_firstToken) of
-                    Just (nwln,sp) -> addListToFM lm [ (mkIDP _idP2 _lhs_pIdC 2,(nwln,sp))
-                                                                 , (_ident_firstToken, (1,sp)) ]
-                    _        -> addToFM lm (mkIDP _idP2 _lhs_pIdC 2) (1,0)
-         ,1
-         ,_exp_pIdC
-         ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $
-              (row' $
-                 (if _lhs_level == 0
-                  then let sigIDP    = mkIDP _idP2 _lhs_pIdC 2
-                           autoLStr = if _autoLayout then "             {auto layout}" else ""
-                       in  case _typeStr of
-                             Nothing ->
-                                case _exp_val of
-                                        ErrVal -> [ StructuralP sigIDP $ row'
-                                                     [text' NoIDP ("-- No value"++autoLStr)]
-                                                       `withbgColor` lightGrey
-                                                  ]
-                                        v      -> [ StructuralP sigIDP $ row'
-                                                     [text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr )]
-                                                       `withbgColor` lightGrey
-                                                  ]
-                             Just tpstr ->
-                               [  StructuralP sigIDP . row' $
-                                    [ typeD NoIDP (tpstr)
-                                    , text " "
-                                    , case _exp_val of
-                                        ErrVal -> row' [text' NoIDP ("-- No value"++autoLStr)]
+sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (_ident) (_exp) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Decl _idD _idP0 _idP1 _idP2 _idP3 _expanded _autoLayout _ident_self _exp_self
+            (_typeStr) =
+                case lookup (strFromIdent _ident_self) _lhs_topLevelEnv of
+                  Nothing -> Nothing
+                  Just tp -> Just $ strFromIdent _ident_self ++ " :: "++ tp
+            ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
+                (_ident (_lhs_col) (_lhs_focusD) (_lhs_ix) (addListToFM _lhs_layoutMap [(_idP0, (0,1)), (_idP1, (0,0))]) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 4) (_lhs_path++[2]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_ident_col+2+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_ident_layoutMap) (_lhs_level) (0) (_ident_pIdC) (_lhs_path++[3]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_ident_varsInScopeAtFocus))
+        in  ( _lhs_col
+             ,(_ident_str, _exp_val)
+             ,[(strFromIdent _ident_self, (PathD (_lhs_path++[0]), _exp_type))]
+             ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "'", _ident_idsPres, text' NoIDP "';" ]
+             ,let lm = if _autoLayout || _lhs_level /= 0 then _exp_layoutMap else _lhs_layoutMap
+              in if _idP2 /= NoIDP || _lhs_level /= 0 then lm
+                 else case lookupFM lm (_ident_firstToken) of
+                        Just (nwln,sp) -> addListToFM lm [ (mkIDP _idP2 _lhs_pIdC 2,(nwln,sp))
+                                                                     , (_ident_firstToken, (1,sp)) ]
+                        _        -> addToFM lm (mkIDP _idP2 _lhs_pIdC 2) (1,0)
+             ,1
+             ,_exp_pIdC
+             ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $
+                  (row' $
+                     (if _lhs_level == 0
+                      then let sigIDP    = mkIDP _idP2 _lhs_pIdC 2
+                               autoLStr = if _autoLayout then "             {auto layout}" else ""
+                           in  case _typeStr of
+                                 Nothing ->
+                                    case _exp_val of
+                                            ErrVal -> [ StructuralP sigIDP $ row'
+                                                         [text' NoIDP ("-- No value"++autoLStr)]
                                                            `withbgColor` lightGrey
-                                        v      -> row' [ text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr)]
+                                                      ]
+                                            v      -> [ StructuralP sigIDP $ row'
+                                                         [text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr )]
                                                            `withbgColor` lightGrey
-                                    ]
-                               ]
-                  else [empty])
-                    ++
-                       [ _ident_pres, key (mkIDP _idP0 _lhs_pIdC 0) "="]
-                    ++ (if _expanded then
-                          [ _exp_pres,  sep (mkIDP _idP1 _lhs_pIdC 1) ";"
-                          ] else [text " ", box (text "...") `withColor` black `withbgColor` yellow
-                                                             `withMouseDown` expand _lhs_path _self])
-                   ) `addPopupItems`  [ if _expanded then ( "Collapse: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)
-                                                     else ( "Expand: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)]
-                     `addPopupItems`  if _lhs_level == 0 then [ if _autoLayout then ( "Disable Auto Layout", toggleAutoLayout _lhs_path _self)
-                                                                               else ( "Enable Auto Layout", toggleAutoLayout _lhs_path _self) ]
-                                                         else []
-         ,_self
-         ,_lhs_col
-         ,_typeStr
-         ,_exp_varsInScopeAtFocus
-         )
+                                                      ]
+                                 Just tpstr ->
+                                   [  StructuralP sigIDP . row' $
+                                        [ typeD NoIDP (tpstr)
+                                        , text " "
+                                        , case _exp_val of
+                                            ErrVal -> row' [text' NoIDP ("-- No value"++autoLStr)]
+                                                               `withbgColor` lightGrey
+                                            v      -> row' [ text' NoIDP ("-- Value: " ++ show _exp_val++autoLStr)]
+                                                               `withbgColor` lightGrey
+                                        ]
+                                   ]
+                      else [empty])
+                        ++
+                           [ _ident_pres, key (mkIDP _idP0 _lhs_pIdC 0) "="]
+                        ++ (if _expanded then
+                              [ _exp_pres,  sep (mkIDP _idP1 _lhs_pIdC 1) ";"
+                              ] else [text " ", box (text "...") `withColor` black `withbgColor` yellow
+                                                                 `withMouseDown` expand _lhs_path _self])
+                       ) `addPopupItems`  [ if _expanded then ( "Collapse: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)
+                                                         else ( "Expand: "++strFromIdent _ident_self, toggleExpanded _lhs_path _self)]
+                         `addPopupItems`  if _lhs_level == 0 then [ if _autoLayout then ( "Disable Auto Layout", toggleAutoLayout _lhs_path _self)
+                                                                                   else ( "Enable Auto Layout", toggleAutoLayout _lhs_path _self) ]
+                                                             else []
+             ,_self
+             ,_lhs_col
+             ,_typeStr
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Decl_HoleDecl :: (T_Decl)
-sem_Decl_HoleDecl (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleDecl
-        (_typeStr) =
-            Nothing
-    in  ( _lhs_col,("XXXXXX", ErrVal),[],presHole _lhs_focusD "Decl" (DeclNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Decl" (DeclNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
+sem_Decl_HoleDecl  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleDecl
+            (_typeStr) =
+                Nothing
+        in  ( _lhs_col,("XXXXXX", ErrVal),[],presHole _lhs_focusD "Decl" (DeclNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Decl" (DeclNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
 sem_Decl_PPPresentationDecl :: (IDD) ->
                                (IDP) ->
                                (IDP) ->
                                (T_PPPresentation) ->
                                (T_Decl)
-sem_Decl_PPPresentationDecl (_idD) (_idP0) (_idP1) (_pPPresentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            PPPresentationDecl _idD _idP0 _idP1 _pPPresentation_self
-        (_typeStr) =
-            Nothing
-        ( _pPPresentation_pIdC,_pPPresentation_pres,_pPPresentation_self,_pPPresentation_varsInScopeAtFocus) =
-            (_pPPresentation (_lhs_focusD) (_lhs_pIdC) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-    in  ( _lhs_col
-         ,("XXXXXX", ErrVal)
-         ,[]
-         ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text "slides;" ]
-         ,_lhs_layoutMap
-         ,_lhs_newlines
-         ,_pPPresentation_pIdC
-         ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text' (mkIDP _idP0 _lhs_pIdC 0) "PPT: ", _pPPresentation_pres ]
-         ,_self
-         ,_lhs_spaces
-         ,_typeStr
-         ,_pPPresentation_varsInScopeAtFocus
-         )
+sem_Decl_PPPresentationDecl (_idD) (_idP0) (_idP1) (_pPPresentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                PPPresentationDecl _idD _idP0 _idP1 _pPPresentation_self
+            (_typeStr) =
+                Nothing
+            ( _pPPresentation_pIdC,_pPPresentation_pres,_pPPresentation_self,_pPPresentation_varsInScopeAtFocus) =
+                (_pPPresentation (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 2) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _lhs_col
+             ,("XXXXXX", ErrVal)
+             ,[]
+             ,loc (DeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "slides;" ]
+             ,_lhs_layoutMap
+             ,_lhs_newlines
+             ,_pPPresentation_pIdC
+             ,loc (DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text' (mkIDP _idP0 _lhs_pIdC 0) "PPT: ", _pPPresentation_pres ]
+             ,_self
+             ,_lhs_spaces
+             ,_typeStr
+             ,_pPPresentation_varsInScopeAtFocus
+             )
 sem_Decl_ParseErrDecl :: (Node) ->
                          (Presentation) ->
                          (T_Decl)
-sem_Decl_ParseErrDecl (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrDecl _node _presentation
-        (_typeStr) =
-            Nothing
-    in  ( _lhs_col,("XXXXXX", ErrVal),[],presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
--- Decls -------------------------------------------------------
-{-
-   inherited attributes:
-      env                  : Bindings
-      errs                 : [HeliumMessage]
-      focusD               : FocusDoc
-      ix                   : Int
-      level                : Int
-      ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      topLevelEnv          : [(String, String)]
-      typeEnv              : [(PathDoc,String)]
-      varsInScope          : FiniteMap String (PathDoc, String)
-
-   chained attributes:
-      col                  : Int
-      layoutMap            : LayoutMap
-      newlines             : Int
-      pIdC                 : Int
-      path                 : [Int]
-      spaces               : Int
-      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
-
-   synthesised attributes:
-      dcls                 : Bindings
-      declaredVars         : [(String,(PathDoc,String))]
-      idsPres              : Presentation
-      parseErrs            : [String]
-      press                : [Presentation]
-      self                 : Decls
-
--}
-{-
-   local variables for Decls.ConsDecls:
-      self
-
--}
-{-
-   local variables for Decls.HoleDecls:
-      self
-
--}
-{-
-   local variables for Decls.NilDecls:
-      self
-
--}
-{-
-   local variables for Decls.ParseErrDecls:
-      self
-
--}
--- semantic domain
-type T_Decls = (Int) ->
-               (Bindings) ->
-               ([HeliumMessage]) ->
-               (FocusDoc) ->
-               (Int) ->
-               (LayoutMap) ->
-               (Int) ->
-               (Int) ->
-               (Int) ->
-               ([Int]) ->
-               (([PathDoc],[PathDoc],[PathDoc])) ->
-               (Int) ->
-               ([(String, String)]) ->
-               ([(PathDoc,String)]) ->
-               (FiniteMap String (PathDoc, String)) ->
-               (FiniteMap String (PathDoc, String)) ->
-               ( (Int),(Bindings),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),([String]),([Int]),([Presentation]),(Decls),(Int),(FiniteMap String (PathDoc, String)))
--- cata
-sem_Decls :: (Decls) ->
-             (T_Decls)
-sem_Decls ((ConsDecls (_iDD) (_decl) (_decls))) =
-    (sem_Decls_ConsDecls (_iDD) ((sem_Decl (_decl))) ((sem_Decls (_decls))))
-sem_Decls ((HoleDecls )) =
-    (sem_Decls_HoleDecls )
-sem_Decls ((NilDecls (_iDD))) =
-    (sem_Decls_NilDecls (_iDD))
-sem_Decls ((ParseErrDecls (_node) (_presentation) (_parseErrs))) =
-    (sem_Decls_ParseErrDecls (_node) (_presentation) (_parseErrs))
-sem_Decls_ConsDecls :: (IDD) ->
-                       (T_Decl) ->
-                       (T_Decls) ->
-                       (T_Decls)
-sem_Decls_ConsDecls (_iDD) (_decl) (_decls) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ConsDecls _iDD _decl_self _decls_self
-        ( _decl_col,_decl_dcl,_decl_declaredVars,_decl_idsPres,_decl_layoutMap,_decl_newlines,_decl_pIdC,_decl_pres,_decl_self,_decl_spaces,_decl_typeStr,_decl_varsInScopeAtFocus) =
-            (_decl (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 0) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _decls_col,_decls_dcls,_decls_declaredVars,_decls_idsPres,_decls_layoutMap,_decls_newlines,_decls_pIdC,_decls_parseErrs,_decls_path,_decls_press,_decls_self,_decls_spaces,_decls_varsInScopeAtFocus) =
-            (_decls (_decl_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_decl_layoutMap) (_lhs_level) (_decl_newlines) (_decl_pIdC) (_lhs_path) (_lhs_ranges) (_decl_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_decl_varsInScopeAtFocus))
-    in  ( _decls_col,_decl_dcl : _decls_dcls,_decl_declaredVars ++ _decls_declaredVars,row' [ _decl_idsPres, text " ", _decls_idsPres ],_decls_layoutMap,_decls_newlines,_decls_pIdC,[],_lhs_path,_decl_pres : _decls_press,_self,_decls_spaces,_decls_varsInScopeAtFocus)
-sem_Decls_HoleDecls :: (T_Decls)
-sem_Decls_HoleDecls (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleDecls
-    in  ( _lhs_col,[],[],presHole _lhs_focusD "Decls" (DeclsNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[],_lhs_path,[presHole _lhs_focusD "Decls" (DeclsNode _self _lhs_path) _lhs_path],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
-sem_Decls_NilDecls :: (IDD) ->
-                      (T_Decls)
-sem_Decls_NilDecls (_iDD) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            NilDecls _iDD
-    in  ( _lhs_col,[],[],empty,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[],_lhs_path,[],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
-sem_Decls_ParseErrDecls :: (Node) ->
-                           (Presentation) ->
-                           ([String]) ->
-                           (T_Decls)
-sem_Decls_ParseErrDecls (_node) (_presentation) (_parseErrs) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrDecls _node _presentation _parseErrs
-    in  ( _lhs_col,[],[],empty,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,_parseErrs,_lhs_path,[presParseErr _node _presentation],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+sem_Decl_ParseErrDecl (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrDecl _node _presentation
+            (_typeStr) =
+                Nothing
+        in  ( _lhs_col,("XXXXXX", ErrVal),[],presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
 -- EnrichedDoc -------------------------------------------------
 {-
    inherited attributes:
@@ -1160,16 +1767,16 @@ sem_Decls_ParseErrDecls (_node) (_presentation) (_parseErrs) (_lhs_col) (_lhs_en
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : EnrichedDoc
+      self                 : SELF
 
 -}
 {-
-   local variables for EnrichedDoc.HoleEnr:
+   local variables for EnrichedDoc.HoleEnrichedDoc:
       self
 
 -}
 {-
-   local variables for EnrichedDoc.ParseErrEnr:
+   local variables for EnrichedDoc.ParseErrEnrichedDoc:
       self
 
 -}
@@ -1190,103 +1797,112 @@ type T_EnrichedDoc = (FocusDoc) ->
 -- cata
 sem_EnrichedDoc :: (EnrichedDoc) ->
                    (T_EnrichedDoc)
-sem_EnrichedDoc ((HoleEnr )) =
-    (sem_EnrichedDoc_HoleEnr )
-sem_EnrichedDoc ((ParseErrEnr (_node) (_presentation))) =
-    (sem_EnrichedDoc_ParseErrEnr (_node) (_presentation))
+sem_EnrichedDoc ((HoleEnrichedDoc )) =
+    (sem_EnrichedDoc_HoleEnrichedDoc )
+sem_EnrichedDoc ((ParseErrEnrichedDoc (_node) (_presentation))) =
+    (sem_EnrichedDoc_ParseErrEnrichedDoc (_node) (_presentation))
 sem_EnrichedDoc ((RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (_document))) =
-    (sem_EnrichedDoc_RootEnr (_id) (_idP) ((sem_Decls (_idListDecls))) ((sem_Decls (_decls))) (_heliumTypeInfo) (_document))
-sem_EnrichedDoc_HoleEnr :: (T_EnrichedDoc)
-sem_EnrichedDoc_HoleEnr (_lhs_focusD) (_lhs_layoutMap) (_lhs_pIdC) =
-    let (_self) =
-            HoleEnr
-    in  ( _lhs_layoutMap,_lhs_pIdC,presHole _lhs_focusD "EnrichedDoc" (EnrichedDocNode _self []) [],_self)
-sem_EnrichedDoc_ParseErrEnr :: (Node) ->
-                               (Presentation) ->
-                               (T_EnrichedDoc)
-sem_EnrichedDoc_ParseErrEnr (_node) (_presentation) (_lhs_focusD) (_lhs_layoutMap) (_lhs_pIdC) =
-    let (_self) =
-            ParseErrEnr _node _presentation
-    in  ( _lhs_layoutMap,_lhs_pIdC,presParseErr _node _presentation,_self)
+    (sem_EnrichedDoc_RootEnr (_id) (_idP) ((sem_List_Decl (_idListDecls))) ((sem_List_Decl (_decls))) (_heliumTypeInfo) (_document))
+sem_EnrichedDoc_HoleEnrichedDoc :: (T_EnrichedDoc)
+sem_EnrichedDoc_HoleEnrichedDoc  =
+    \ _lhs_focusD
+      _lhs_layoutMap
+      _lhs_pIdC ->
+        let (_self) =
+                HoleEnrichedDoc
+        in  ( _lhs_layoutMap,_lhs_pIdC,presHole _lhs_focusD "EnrichedDoc" (EnrichedDocNode _self []) [],_self)
+sem_EnrichedDoc_ParseErrEnrichedDoc :: (Node) ->
+                                       (Presentation) ->
+                                       (T_EnrichedDoc)
+sem_EnrichedDoc_ParseErrEnrichedDoc (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_layoutMap
+      _lhs_pIdC ->
+        let (_self) =
+                ParseErrEnrichedDoc _node _presentation
+        in  ( _lhs_layoutMap,_lhs_pIdC,presParseErr _node _presentation,_self)
 sem_EnrichedDoc_RootEnr :: (IDD) ->
                            (IDP) ->
-                           (T_Decls) ->
-                           (T_Decls) ->
+                           (T_List_Decl) ->
+                           (T_List_Decl) ->
                            (HeliumTypeInfo) ->
                            (Document) ->
                            (T_EnrichedDoc)
-sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (_document) (_lhs_focusD) (_lhs_layoutMap) (_lhs_pIdC) =
-    let (_self) =
-            RootEnr _id _idP _idListDecls_self _decls_self _heliumTypeInfo _document
-        (_errs) =
-            let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in errs
-        (_typeEnv) =
-            let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in topLevelEnv
-        (_topLevelEnv) =
-            let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in typeEnv
-        (_varsInScope) =
-            listToFM _decls_declaredVars
-        ( _idListDecls_col,_idListDecls_dcls,_idListDecls_declaredVars,_idListDecls_idsPres,_idListDecls_layoutMap,_idListDecls_newlines,_idListDecls_pIdC,_idListDecls_parseErrs,_idListDecls_path,_idListDecls_press,_idListDecls_self,_idListDecls_spaces,_idListDecls_varsInScopeAtFocus) =
-            (_idListDecls (0) ([]) ([]) (_lhs_focusD) (0) (_lhs_layoutMap) (0) (0) (_lhs_pIdC) ([]) (([],[],[])) (0) (_topLevelEnv) (_typeEnv) (_varsInScope) (emptyFM))
-        ( _decls_col,_decls_dcls,_decls_declaredVars,_decls_idsPres,_decls_layoutMap,_decls_newlines,_decls_pIdC,_decls_parseErrs,_decls_path,_decls_press,_decls_self,_decls_spaces,_decls_varsInScopeAtFocus) =
-            (_decls (0)
-                    (_decls_dcls)
-                    (_errs)
-                    (_lhs_focusD)
-                    (0)
-                    (_lhs_layoutMap)
-                    (0)
-                    (1)
-                    (_idListDecls_pIdC)
-                    ([])
-                    ((\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
-                     $ map pthFrmMsg _errs)
-                    (0)
-                    (_topLevelEnv)
-                    (_typeEnv)
-                    (_varsInScope)
-                    (emptyFM))
-    in  ( _decls_layoutMap
-         ,_decls_pIdC
-         ,loc (DocumentNode _document []) $
-          loc (EnrichedDocNode _self []) $ structural $
-            col [ row' [ hSpace 3
-                       , text $ "Document focus: "++show _lhs_focusD
-                       , typeD NoIDP $ ( case lookup _lhs_focusD _typeEnv of
-                                          Nothing -> ""
-                                          Just tp -> " :: "++tp)
-                                        ++ replicate 80 ' '
-                       ]
-                , vSpace 4
-                , hLine
-                , row' [ hSpace 3
-                       , text "Top level identifiers:"
-                       , loc (DeclsNode _idListDecls_self _idListDecls_path) $ parsing $ presentFocus _lhs_focusD _idListDecls_path $ row[ text " ", _idListDecls_idsPres] `withFontSize` 10
-                       ]
-                , vSpace 4
-                , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
-                , row' [ hSpace 3, loc (DeclsNode _decls_self _decls_path) $ parsing $ presentFocus _lhs_focusD _decls_path $ row _decls_press ]
-                , vSpace 10
-                , hLine
-                , vSpace 4
-                , let errs = if null _decls_parseErrs then _errs else map toMessage _decls_parseErrs
-                  in  col' (map presMessage errs ++ [empty]) `withFontSize` 12
-                , vSpace 10
-                , hLine
-                , vSpace 4
-                , text "Variables in scope:"
-                , col [ typeD NoIDP (var++" :: "++tpStr) `link` pth
-                      | (var,(pth,tpStr)) <- fmToList _decls_varsInScopeAtFocus ]
-                ]
-              `withFont'` ("Courier New",14)
-         ,_self
-         )
+sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (_document) =
+    \ _lhs_focusD
+      _lhs_layoutMap
+      _lhs_pIdC ->
+        let (_self) =
+                RootEnr _id _idP _idListDecls_self _decls_self _heliumTypeInfo _document
+            (_errs) =
+                let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in errs
+            (_typeEnv) =
+                let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in topLevelEnv
+            (_topLevelEnv) =
+                let (errs, typeEnv, topLevelEnv) = _heliumTypeInfo in typeEnv
+            (_varsInScope) =
+                listToFM _decls_declaredVars
+            ( _idListDecls_col,_idListDecls_dcls,_idListDecls_declaredVars,_idListDecls_idsPres,_idListDecls_layoutMap,_idListDecls_newlines,_idListDecls_pIdC,_idListDecls_parseErrs,_idListDecls_pres,_idListDecls_press,_idListDecls_self,_idListDecls_spaces,_idListDecls_varsInScopeAtFocus) =
+                (_idListDecls (0) ([]) ([]) (_lhs_focusD) (_lhs_layoutMap) (0) (0) (_lhs_pIdC + 4) ([]) (([],[],[])) (0) (_topLevelEnv) (_typeEnv) (_varsInScope) (emptyFM))
+            ( _decls_col,_decls_dcls,_decls_declaredVars,_decls_idsPres,_decls_layoutMap,_decls_newlines,_decls_pIdC,_decls_parseErrs,_decls_pres,_decls_press,_decls_self,_decls_spaces,_decls_varsInScopeAtFocus) =
+                (_decls (0)
+                        (_decls_dcls)
+                        (_errs)
+                        (_lhs_focusD)
+                        (_lhs_layoutMap)
+                        (0)
+                        (1)
+                        (_idListDecls_pIdC)
+                        ([])
+                        ((\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
+                         $ map pthFrmMsg _errs)
+                        (0)
+                        (_topLevelEnv)
+                        (_typeEnv)
+                        (_varsInScope)
+                        (emptyFM))
+        in  ( _decls_layoutMap
+             ,_decls_pIdC
+             ,loc (DocumentNode _document []) $
+              loc (EnrichedDocNode _self []) $ structural $
+                col [ row' [ hSpace 3
+                           , text $ "Document focus: "++show _lhs_focusD
+                           , typeD NoIDP $ ( case lookup _lhs_focusD _typeEnv of
+                                              Nothing -> ""
+                                              Just tp -> " :: "++tp)
+                                            ++ replicate 80 ' '
+                           ]
+                    , vSpace 4
+                    , hLine
+                    , row' [ hSpace 3
+                           , text "Top level identifiers:"
+                           , row[ text " ", _idListDecls_idsPres] `withFontSize` 10
+                           ]
+                    , debug Err ("children are"++ show _decls_self) $ vSpace 4
+                    , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
+                    , row' [ hSpace 3, _decls_pres ]
+                    , vSpace 10
+                    , hLine
+                    , vSpace 4
+                    , let errs = if null _decls_parseErrs then _errs else map toMessage _decls_parseErrs
+                      in  col' (map presMessage errs ++ [empty]) `withFontSize` 12
+                    , vSpace 10
+                    , hLine
+                    , vSpace 4
+                    , text "Variables in scope:"
+                    , col [ typeD NoIDP (var++" :: "++tpStr) `link` pth
+                          | (var,(pth,tpStr)) <- fmToList _decls_varsInScopeAtFocus ]
+                    ]
+                  `withFont'` ("Courier New",14)
+             ,_self
+             )
 -- Exp ---------------------------------------------------------
 {-
    inherited attributes:
       env                  : Bindings
       errs                 : [HeliumMessage]
       focusD               : FocusDoc
+      ix                   : Int
       level                : Int
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
@@ -1305,7 +1921,7 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
    synthesised attributes:
       lamBody              : ([(String, Exp)] -> Exp)
       pres                 : Presentation
-      self                 : Exp
+      self                 : SELF
       substitute           : ( [(String, Exp)] -> Exp )
       type                 : String
       val                  : Value
@@ -1451,6 +2067,7 @@ type T_Exp = (Int) ->
              (Bindings) ->
              ([HeliumMessage]) ->
              (FocusDoc) ->
+             (Int) ->
              (LayoutMap) ->
              (Int) ->
              (Int) ->
@@ -1466,18 +2083,18 @@ type T_Exp = (Int) ->
 -- cata
 sem_Exp :: (Exp) ->
            (T_Exp)
-sem_Exp ((AppExp (_iDD) (_exp1) (_exp2))) =
-    (sem_Exp_AppExp (_iDD) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
+sem_Exp ((AppExp (_idD) (_exp1) (_exp2))) =
+    (sem_Exp_AppExp (_idD) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
 sem_Exp ((BoolExp (_idD) (_idP0) (_bool))) =
     (sem_Exp_BoolExp (_idD) (_idP0) (_bool))
 sem_Exp ((CaseExp (_idD) (_idP0) (_idP1) (_exp) (_alts))) =
-    (sem_Exp_CaseExp (_idD) (_idP0) (_idP1) ((sem_Exp (_exp))) ((sem_Alts (_alts))))
+    (sem_Exp_CaseExp (_idD) (_idP0) (_idP1) ((sem_Exp (_exp))) ((sem_List_Alt (_alts))))
 sem_Exp ((DivExp (_idD) (_idP0) (_exp1) (_exp2))) =
     (sem_Exp_DivExp (_idD) (_idP0) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
 sem_Exp ((HoleExp )) =
     (sem_Exp_HoleExp )
-sem_Exp ((IdentExp (_iDD) (_ident))) =
-    (sem_Exp_IdentExp (_iDD) ((sem_Ident (_ident))))
+sem_Exp ((IdentExp (_idd) (_ident))) =
+    (sem_Exp_IdentExp (_idd) ((sem_Ident (_ident))))
 sem_Exp ((IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3))) =
     (sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))) ((sem_Exp (_exp3))))
 sem_Exp ((IntExp (_idD) (_idP0) (_int))) =
@@ -1485,9 +2102,9 @@ sem_Exp ((IntExp (_idD) (_idP0) (_int))) =
 sem_Exp ((LamExp (_idD) (_idP0) (_idP1) (_ident) (_exp))) =
     (sem_Exp_LamExp (_idD) (_idP0) (_idP1) ((sem_Ident (_ident))) ((sem_Exp (_exp))))
 sem_Exp ((LetExp (_idD) (_idP0) (_idP1) (_decls) (_exp))) =
-    (sem_Exp_LetExp (_idD) (_idP0) (_idP1) ((sem_Decls (_decls))) ((sem_Exp (_exp))))
+    (sem_Exp_LetExp (_idD) (_idP0) (_idP1) ((sem_List_Decl (_decls))) ((sem_Exp (_exp))))
 sem_Exp ((ListExp (_idD) (_idP0) (_idP1) (_ids) (_exps))) =
-    (sem_Exp_ListExp (_idD) (_idP0) (_idP1) (_ids) ((sem_Exps (_exps))))
+    (sem_Exp_ListExp (_idD) (_idP0) (_idP1) (_ids) ((sem_List_Exp (_exps))))
 sem_Exp ((ParenExp (_idD) (_idP0) (_idP1) (_exp))) =
     (sem_Exp_ParenExp (_idD) (_idP0) (_idP1) ((sem_Exp (_exp))))
 sem_Exp ((ParseErrExp (_node) (_presentation))) =
@@ -1497,221 +2114,318 @@ sem_Exp ((PlusExp (_idD) (_idP0) (_exp1) (_exp2))) =
 sem_Exp ((PowerExp (_idD) (_idP0) (_exp1) (_exp2))) =
     (sem_Exp_PowerExp (_idD) (_idP0) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
 sem_Exp ((ProductExp (_idD) (_idP0) (_idP1) (_ids) (_exps))) =
-    (sem_Exp_ProductExp (_idD) (_idP0) (_idP1) (_ids) ((sem_Exps (_exps))))
+    (sem_Exp_ProductExp (_idD) (_idP0) (_idP1) (_ids) ((sem_List_Exp (_exps))))
 sem_Exp ((TimesExp (_idD) (_idP0) (_exp1) (_exp2))) =
     (sem_Exp_TimesExp (_idD) (_idP0) ((sem_Exp (_exp1))) ((sem_Exp (_exp2))))
 sem_Exp_AppExp :: (IDD) ->
                   (T_Exp) ->
                   (T_Exp) ->
                   (T_Exp)
-sem_Exp_AppExp (_iDD) (_exp1) (_exp2) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            AppExp _iDD _exp1_self _exp2_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case removeParens _exp1_self of
-                    LamExp _ _ _ ident exp -> [ ("Beta reduce",
-                                                 pasteExp _lhs_path
-                                                          (ensureParens (_exp1_lamBody [(strFromIdent ident, _exp2_self)] ))
-                                                )
-                                              ]
-                    _                      -> []
-        (_substitute) =
-            \substs -> AppExp _iDD (_exp1_substitute substs) (_exp2_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (_exp1_col+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-    in  ( _lhs_col
-         ,_substitute
-         ,_exp2_layoutMap
-         ,_exp2_newlines
-         ,_exp2_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [_exp1_pres, _exp2_pres]
-         ,_self
-         ,_exp2_spaces
-         ,_substitute
-         ,_type
-         ,case _exp1_val of LamVal f -> f _exp2_val
-                            _        -> ErrVal
-         ,_exp2_varsInScopeAtFocus
-         )
+sem_Exp_AppExp (_idD) (_exp1) (_exp2) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                AppExp _idD _exp1_self _exp2_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case removeParens _exp1_self of
+                        LamExp _ _ _ ident exp -> [ ("Beta reduce",
+                                                     pasteExp _lhs_path
+                                                              (ensureParens (_exp1_lamBody [(strFromIdent ident, _exp2_self)] ))
+                                                    )
+                                                  ]
+                        _                      -> []
+            (_substitute) =
+                \substs -> AppExp _idD (_exp1_substitute substs) (_exp2_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (_exp1_col+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+        in  ( _lhs_col
+             ,_substitute
+             ,_exp2_layoutMap
+             ,_exp2_newlines
+             ,_exp2_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [_exp1_pres, _exp2_pres]
+             ,_self
+             ,_exp2_spaces
+             ,_substitute
+             ,_type
+             ,case _exp1_val of LamVal f -> f _exp2_val
+                                _        -> ErrVal
+             ,_exp2_varsInScopeAtFocus
+             )
 sem_Exp_BoolExp :: (IDD) ->
                    (IDP) ->
                    (Bool) ->
                    (T_Exp)
-sem_Exp_BoolExp (_idD) (_idP0) (_bool) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            BoolExp _idD _idP0 _bool
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-    in  ( _lhs_col
-         ,_substitute
-         ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
-         ,_lhs_newlines
-         ,_lhs_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _bool), text' NoIDP ""]
-         ,_self
-         ,_lhs_spaces
-         ,_substitute
-         ,_type
-         ,BoolVal _bool
-         ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
-         )
+sem_Exp_BoolExp (_idD) (_idP0) (_bool) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                BoolExp _idD _idP0 _bool
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+        in  ( _lhs_col
+             ,_substitute
+             ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
+             ,_lhs_newlines
+             ,_lhs_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _bool), text' NoIDP ""]
+             ,_self
+             ,_lhs_spaces
+             ,_substitute
+             ,_type
+             ,BoolVal _bool
+             ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
+             )
 sem_Exp_CaseExp :: (IDD) ->
                    (IDP) ->
                    (IDP) ->
                    (T_Exp) ->
-                   (T_Alts) ->
+                   (T_List_Alt) ->
                    (T_Exp)
-sem_Exp_CaseExp (_idD) (_idP0) (_idP1) (_exp) (_alts) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            CaseExp _idD _idP0 _idP1 _exp_self _alts_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_lhs_col + 5)
-                  (_lhs_env)
-                  (_lhs_errs)
-                  (_lhs_focusD)
-                  (addListToFM _lhs_layoutMap
-                       [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                       , (_idP1, (0,1)) ])
-                  (_lhs_level)
-                  (0)
-                  (_lhs_pIdC + 2)
-                  (_lhs_path++[0])
-                  (_lhs_ranges)
-                  (1)
-                  (_lhs_topLevelEnv)
-                  (_lhs_typeEnv)
-                  (_lhs_varsInScope)
-                  (_lhs_varsInScopeAtFocus))
-        ( _alts_alts,_alts_col,_alts_layoutMap,_alts_maxLHSLength,_alts_newlines,_alts_pIdC,_alts_path,_alts_press,_alts_self,_alts_spaces,_alts_varsInScopeAtFocus) =
-            (_alts (_lhs_col + 2) (_lhs_env) (_lhs_errs) (_lhs_focusD) (0) (_exp_layoutMap) (_lhs_level) (1) (_exp_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_col + 2) (_lhs_topLevelEnv) (_alts_maxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-    in  ( _alts_col
-         ,_substitute
-         ,_alts_layoutMap
-         ,_alts_newlines
-         ,_alts_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [ key (mkIDP _idP0 _lhs_pIdC 0) "case"
-                 , _exp_pres
-                 , key (mkIDP _idP1 _lhs_pIdC 1) "of"
-                 , loc (AltsNode _alts_self _alts_path) $ parsing $ presentFocus _lhs_focusD _alts_path $ row _alts_press
-                 ]
-         ,_self
-         ,_alts_spaces
-         ,_substitute
-         ,_type
-         ,case lookup "a" _alts_alts of {Just v -> v; Nothing -> ErrVal}
-         ,_alts_varsInScopeAtFocus
-         )
+sem_Exp_CaseExp (_idD) (_idP0) (_idP1) (_exp) (_alts) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                CaseExp _idD _idP0 _idP1 _exp_self _alts_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_lhs_col + 5)
+                      (_lhs_env)
+                      (_lhs_errs)
+                      (_lhs_focusD)
+                      (_lhs_ix)
+                      (addListToFM _lhs_layoutMap
+                           [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                           , (_idP1, (0,1)) ])
+                      (_lhs_level)
+                      (0)
+                      (_lhs_pIdC + 2)
+                      (_lhs_path++[0])
+                      (_lhs_ranges)
+                      (1)
+                      (_lhs_topLevelEnv)
+                      (_lhs_typeEnv)
+                      (_lhs_varsInScope)
+                      (_lhs_varsInScopeAtFocus))
+            ( _alts_alts,_alts_col,_alts_layoutMap,_alts_maxLHSLength,_alts_newlines,_alts_pIdC,_alts_press,_alts_self,_alts_spaces,_alts_varsInScopeAtFocus) =
+                (_alts (_lhs_col + 2) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp_layoutMap) (_lhs_level) (1) (_exp_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_col + 2) (_lhs_topLevelEnv) (_alts_maxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+        in  ( _alts_col
+             ,_substitute
+             ,_alts_layoutMap
+             ,_alts_newlines
+             ,_alts_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [ key (mkIDP _idP0 _lhs_pIdC 0) "case"
+                     , _exp_pres
+                     , key (mkIDP _idP1 _lhs_pIdC 1) "of"
+                     , loc (List_AltNode _alts_self []                ) $ parsing $ presentFocus _lhs_focusD []                $ row _alts_press
+                     ]
+             ,_self
+             ,_alts_spaces
+             ,_substitute
+             ,_type
+             ,case lookup "a" _alts_alts of {Just v -> v; Nothing -> ErrVal}
+             ,_alts_varsInScopeAtFocus
+             )
 sem_Exp_DivExp :: (IDD) ->
                   (IDP) ->
                   (T_Exp) ->
                   (T_Exp) ->
                   (T_Exp)
-sem_Exp_DivExp (_idD) (_idP0) (_exp1) (_exp2) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            DivExp _idD _idP0 _exp1_self _exp2_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case (removeParens _exp1_self, removeParens _exp2_self) of
-                   (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive div" ,  pasteExp _lhs_path (IntExp idd1 idp1 (int1 `div` int2)))]
-                   _                                         -> []
-        (_substitute) =
-            \substs -> DivExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (addToFM _lhs_layoutMap _idP0 (0,0)) (_lhs_level) (0) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-    in  ( _exp1_col
-         ,_substitute
-         ,_exp2_layoutMap
-         ,_exp2_newlines
-         ,_exp2_pIdC
-         ,loc (ExpNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            frac _exp1_pres _exp2_pres
-         ,_self
-         ,_exp2_spaces
-         ,_substitute
-         ,_type
-         ,evaluateIntOp div _exp1_val _exp2_val
-         ,_exp2_varsInScopeAtFocus
-         )
+sem_Exp_DivExp (_idD) (_idP0) (_exp1) (_exp2) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                DivExp _idD _idP0 _exp1_self _exp2_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case (removeParens _exp1_self, removeParens _exp2_self) of
+                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive div" ,  pasteExp _lhs_path (IntExp idd1 idp1 (int1 `div` int2)))]
+                       _                                         -> []
+            (_substitute) =
+                \substs -> DivExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (addToFM _lhs_layoutMap _idP0 (0,0)) (_lhs_level) (0) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+        in  ( _exp1_col
+             ,_substitute
+             ,_exp2_layoutMap
+             ,_exp2_newlines
+             ,_exp2_pIdC
+             ,loc (ExpNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                frac _exp1_pres _exp2_pres
+             ,_self
+             ,_exp2_spaces
+             ,_substitute
+             ,_type
+             ,evaluateIntOp div _exp1_val _exp2_val
+             ,_exp2_varsInScopeAtFocus
+             )
 sem_Exp_HoleExp :: (T_Exp)
-sem_Exp_HoleExp (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleExp
-        (_type) =
-            "<Hole>"
-        (_substitute) =
-            \substs -> _self
-    in  ( _lhs_col,_substitute,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Exp" (ExpNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_substitute,_type,ErrVal,_lhs_varsInScopeAtFocus)
+sem_Exp_HoleExp  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleExp
+            (_type) =
+                "<Hole>"
+            (_substitute) =
+                \substs -> _self
+        in  ( _lhs_col,_substitute,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Exp" (ExpNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_substitute,_type,ErrVal,_lhs_varsInScopeAtFocus)
 sem_Exp_IdentExp :: (IDD) ->
                     (T_Ident) ->
                     (T_Exp)
-sem_Exp_IdentExp (_iDD) (_ident) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            IdentExp _iDD _ident_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case lookupFM  _lhs_varsInScope (strFromIdent _ident_self) of
-              Nothing      -> []
-              Just (PathD pth@(_:_),_) ->
-                [( "Replace by definition"
-                 , \(DocumentLevel d path cl) ->
-                   case selectD (init pth) d of
-                     (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 _ _ _ exp)) ->
-                           let (DocumentLevel d' _ _) =
-                                 editPasteD (DocumentLevel d (PathD _lhs_path) (Clip_Exp ( setIDPExp (idP0FromIdent _ident_self) $ ensureParens exp)))
-                           in  (DocumentLevel d' path cl)
-                     _ -> (DocumentLevel d path cl)
-                 )]
-        (_substitute) =
-            \substs -> case lookup (strFromIdent _ident_self) substs of
-                               Just exp -> exp
-                               Nothing  -> _self
-        ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
-            (_ident (_lhs_col) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 2) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-    in  ( _ident_col
-         ,_substitute
-         ,_ident_layoutMap
-         ,_ident_newlines
-         ,_ident_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-              _ident_pres
-                `addPopupItems`
-                [( "Jump to declaration of "++show (strFromIdent _ident_self),
-                      navigateTo $ case lookupFM  _lhs_varsInScope (strFromIdent _ident_self) of
-                                     Nothing      -> NoPathD
-                                     Just (pth,_) -> pth)]
-         ,_self
-         ,_ident_spaces
-         ,_substitute
-         ,_type
-         ,case lookup _ident_str _lhs_env of { Just v -> v; Nothing -> ErrVal }
-         ,_ident_varsInScopeAtFocus
-         )
+sem_Exp_IdentExp (_idd) (_ident) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                IdentExp _idd _ident_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case lookupFM  _lhs_varsInScope (strFromIdent _ident_self) of
+                  Nothing      -> []
+                  Just (PathD pth@(_:_),_) ->
+                    [( "Replace by definition"
+                     , \(DocumentLevel d path cl) ->
+                       case selectD (init pth) d of
+                         (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 _ _ _ exp)) ->
+                               let (DocumentLevel d' _ _) =
+                                     editPasteD (DocumentLevel d (PathD _lhs_path) (Clip_Exp ( setIDPExp (idP0FromIdent _ident_self) $ ensureParens exp)))
+                               in  (DocumentLevel d' path cl)
+                         _ -> (DocumentLevel d path cl)
+                     )]
+            (_substitute) =
+                \substs -> case lookup (strFromIdent _ident_self) substs of
+                                   Just exp -> exp
+                                   Nothing  -> _self
+            ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
+                (_ident (_lhs_col) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+        in  ( _ident_col
+             ,_substitute
+             ,_ident_layoutMap
+             ,_ident_newlines
+             ,_ident_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                  _ident_pres
+                    `addPopupItems`
+                    [( "Jump to declaration of "++show (strFromIdent _ident_self),
+                          navigateTo $ case lookupFM  _lhs_varsInScope (strFromIdent _ident_self) of
+                                         Nothing      -> NoPathD
+                                         Just (pth,_) -> pth)]
+             ,_self
+             ,_ident_spaces
+             ,_substitute
+             ,_type
+             ,case lookup _ident_str _lhs_env of { Just v -> v; Nothing -> ErrVal }
+             ,_ident_varsInScopeAtFocus
+             )
 sem_Exp_IfExp :: (IDD) ->
                  (IDP) ->
                  (IDP) ->
@@ -1720,599 +2434,670 @@ sem_Exp_IfExp :: (IDD) ->
                  (T_Exp) ->
                  (T_Exp) ->
                  (T_Exp)
-sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            IfExp _idD _idP0 _idP1 _idP2 _exp1_self _exp2_self _exp3_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case removeParens _exp1_self of
-                   BoolExp _ _ bool -> [ ("Reduce primitive if" , pasteExp _lhs_path (if bool then setIDPExp _idP0 _exp2_self
-                                                                             else setIDPExp _idP0 _exp3_self))]
-                   _                                         -> []
-        (_substitute) =
-            \substs -> IfExp _idD _idP0 _idP1 _idP2 (_exp1_substitute substs) (_exp2_substitute substs) (_exp3_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (_lhs_col + 2+1)
-                   (_lhs_env)
-                   (_lhs_errs)
-                   (_lhs_focusD)
-                   (addListToFM _lhs_layoutMap
-                      [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                      , (_idP1, (1,_lhs_col))
-                      , (_idP2, (1,_lhs_col)) ])
-                   (_lhs_level)
-                   (0)
-                   (_lhs_pIdC + 3)
-                   (_lhs_path++[0])
-                   (_lhs_ranges)
-                   (1)
-                   (_lhs_topLevelEnv)
-                   (_lhs_typeEnv)
-                   (_lhs_varsInScope)
-                   (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (_lhs_col + 4+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-        ( _exp3_col,_exp3_lamBody,_exp3_layoutMap,_exp3_newlines,_exp3_pIdC,_exp3_pres,_exp3_self,_exp3_spaces,_exp3_substitute,_exp3_type,_exp3_val,_exp3_varsInScopeAtFocus) =
-            (_exp3 (_lhs_col + 4+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp2_layoutMap) (_lhs_level) (0) (_exp2_pIdC) (_lhs_path++[2]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp2_varsInScopeAtFocus))
-    in  ( _exp3_col
-         ,_substitute
-         ,_exp3_layoutMap
-         ,_exp3_newlines
-         ,_exp3_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row'  $ [ key (mkIDP _idP0 _lhs_pIdC 0) "if",   _exp1_pres
-                        , key (mkIDP _idP1 _lhs_pIdC 1) "then", _exp2_pres
-                        , key (mkIDP _idP2 _lhs_pIdC 2) "else", _exp3_pres ]
-         ,_self
-         ,_exp3_spaces
-         ,_substitute
-         ,_type
-         ,case _exp1_val of BoolVal b -> if b then _exp2_val else _exp3_val
-                            _         -> ErrVal
-         ,_exp3_varsInScopeAtFocus
-         )
+sem_Exp_IfExp (_idD) (_idP0) (_idP1) (_idP2) (_exp1) (_exp2) (_exp3) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                IfExp _idD _idP0 _idP1 _idP2 _exp1_self _exp2_self _exp3_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case removeParens _exp1_self of
+                       BoolExp _ _ bool -> [ ("Reduce primitive if" , pasteExp _lhs_path (if bool then setIDPExp _idP0 _exp2_self
+                                                                                 else setIDPExp _idP0 _exp3_self))]
+                       _                                         -> []
+            (_substitute) =
+                \substs -> IfExp _idD _idP0 _idP1 _idP2 (_exp1_substitute substs) (_exp2_substitute substs) (_exp3_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (_lhs_col + 2+1)
+                       (_lhs_env)
+                       (_lhs_errs)
+                       (_lhs_focusD)
+                       (_lhs_ix)
+                       (addListToFM _lhs_layoutMap
+                          [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                          , (_idP1, (1,_lhs_col))
+                          , (_idP2, (1,_lhs_col)) ])
+                       (_lhs_level)
+                       (0)
+                       (_lhs_pIdC + 3)
+                       (_lhs_path++[0])
+                       (_lhs_ranges)
+                       (1)
+                       (_lhs_topLevelEnv)
+                       (_lhs_typeEnv)
+                       (_lhs_varsInScope)
+                       (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (_lhs_col + 4+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+            ( _exp3_col,_exp3_lamBody,_exp3_layoutMap,_exp3_newlines,_exp3_pIdC,_exp3_pres,_exp3_self,_exp3_spaces,_exp3_substitute,_exp3_type,_exp3_val,_exp3_varsInScopeAtFocus) =
+                (_exp3 (_lhs_col + 4+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp2_layoutMap) (_lhs_level) (0) (_exp2_pIdC) (_lhs_path++[2]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp2_varsInScopeAtFocus))
+        in  ( _exp3_col
+             ,_substitute
+             ,_exp3_layoutMap
+             ,_exp3_newlines
+             ,_exp3_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                    squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row'  $ [ key (mkIDP _idP0 _lhs_pIdC 0) "if",   _exp1_pres
+                            , key (mkIDP _idP1 _lhs_pIdC 1) "then", _exp2_pres
+                            , key (mkIDP _idP2 _lhs_pIdC 2) "else", _exp3_pres ]
+             ,_self
+             ,_exp3_spaces
+             ,_substitute
+             ,_type
+             ,case _exp1_val of BoolVal b -> if b then _exp2_val else _exp3_val
+                                _         -> ErrVal
+             ,_exp3_varsInScopeAtFocus
+             )
 sem_Exp_IntExp :: (IDD) ->
                   (IDP) ->
                   (Int) ->
                   (T_Exp)
-sem_Exp_IntExp (_idD) (_idP0) (_int) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            IntExp _idD _idP0 _int
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-    in  ( _lhs_col+length (show _int)
-         ,_substitute
-         ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
-         ,_lhs_newlines
-         ,_lhs_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _int), text' NoIDP ""]
-         ,_self
-         ,_lhs_spaces
-         ,_substitute
-         ,_type
-         ,IntVal _int
-         ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
-         )
+sem_Exp_IntExp (_idD) (_idP0) (_int) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                IntExp _idD _idP0 _int
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+        in  ( _lhs_col+length (show _int)
+             ,_substitute
+             ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
+             ,_lhs_newlines
+             ,_lhs_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [cons (mkIDP _idP0 _lhs_pIdC 0) (show _int), text' NoIDP ""]
+             ,_self
+             ,_lhs_spaces
+             ,_substitute
+             ,_type
+             ,IntVal _int
+             ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
+             )
 sem_Exp_LamExp :: (IDD) ->
                   (IDP) ->
                   (IDP) ->
                   (T_Ident) ->
                   (T_Exp) ->
                   (T_Exp)
-sem_Exp_LamExp (_idD) (_idP0) (_idP1) (_ident) (_exp) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            LamExp _idD _idP0 _idP1 _ident_self _exp_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> LamExp _idD _idP0 _idP1 _ident_self (_exp_substitute
-                                                             (filter (\(str,_) -> str /= strFromIdent _ident_self)
-                                                                     substs))
-        ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
-            (_ident (_lhs_col + 1)
-                    (_lhs_focusD)
-                    (addListToFM _lhs_layoutMap
-                       [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                       , (_idP1, (0,1)) ])
-                    (_lhs_level)
-                    (0)
-                    (_lhs_pIdC + 2)
-                    (_lhs_path++[0])
-                    (_lhs_ranges)
-                    (0)
-                    (_lhs_varsInScope)
-                    (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_ident_col + 3)
-                  (_lhs_env)
-                  (_lhs_errs)
-                  (_lhs_focusD)
-                  (_ident_layoutMap)
-                  (_lhs_level)
-                  (0)
-                  (_ident_pIdC)
-                  (_lhs_path++[1])
-                  (_lhs_ranges)
-                  (1)
-                  (_lhs_topLevelEnv)
-                  (_lhs_typeEnv)
-                  (addToFM _lhs_varsInScope (strFromIdent _ident_self)
-                                            (PathD $ (_lhs_path++[0]), _exp_type))
-                  (_ident_varsInScopeAtFocus))
-    in  ( _exp_col
-         ,_exp_substitute
-         ,_exp_layoutMap
-         ,_exp_newlines
-         ,_exp_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [
-                   key (mkIDP _idP0 _lhs_pIdC 0) "\\"
-                 , _ident_pres
-                 , text' (mkIDP _idP1 _lhs_pIdC 1) ""
-                   , key NoIDP "®"    `withFontFam` "symbol"
-                 , _exp_pres ]
-         ,_self
-         ,_exp_spaces
-         ,_substitute
-         ,_type
-         ,LamVal (\arg ->
-                   let (_,_,_,_,_,_,_,_,_,_,v,_) =
-                         _exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
-                   in  v)
-         ,_exp_varsInScopeAtFocus
-         )
+sem_Exp_LamExp (_idD) (_idP0) (_idP1) (_ident) (_exp) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                LamExp _idD _idP0 _idP1 _ident_self _exp_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> LamExp _idD _idP0 _idP1 _ident_self (_exp_substitute
+                                                                 (filter (\(str,_) -> str /= strFromIdent _ident_self)
+                                                                         substs))
+            ( _ident_col,_ident_firstToken,_ident_idsPres,_ident_layoutMap,_ident_newlines,_ident_pIdC,_ident_pres,_ident_self,_ident_spaces,_ident_str,_ident_varsInScopeAtFocus) =
+                (_ident (_lhs_col + 1)
+                        (_lhs_focusD)
+                        (_lhs_ix)
+                        (addListToFM _lhs_layoutMap
+                           [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                           , (_idP1, (0,1)) ])
+                        (_lhs_level)
+                        (0)
+                        (_lhs_pIdC + 2)
+                        (_lhs_path++[0])
+                        (_lhs_ranges)
+                        (0)
+                        (_lhs_varsInScope)
+                        (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_ident_col + 3)
+                      (_lhs_env)
+                      (_lhs_errs)
+                      (_lhs_focusD)
+                      (_lhs_ix)
+                      (_ident_layoutMap)
+                      (_lhs_level)
+                      (0)
+                      (_ident_pIdC)
+                      (_lhs_path++[1])
+                      (_lhs_ranges)
+                      (1)
+                      (_lhs_topLevelEnv)
+                      (_lhs_typeEnv)
+                      (addToFM _lhs_varsInScope (strFromIdent _ident_self)
+                                                (PathD $ (_lhs_path++[0]), _exp_type))
+                      (_ident_varsInScopeAtFocus))
+        in  ( _exp_col
+             ,_exp_substitute
+             ,_exp_layoutMap
+             ,_exp_newlines
+             ,_exp_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [
+                       key (mkIDP _idP0 _lhs_pIdC 0) "\\"
+                     , _ident_pres
+                     , text' (mkIDP _idP1 _lhs_pIdC 1) ""
+                       , key NoIDP "®"    `withFontFam` "symbol"
+                     , _exp_pres ]
+             ,_self
+             ,_exp_spaces
+             ,_substitute
+             ,_type
+             ,LamVal (\arg ->
+                       let (_,_,_,_,_,_,_,_,_,_,v,_) =
+                             _exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                       in  v)
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Exp_LetExp :: (IDD) ->
                   (IDP) ->
                   (IDP) ->
-                  (T_Decls) ->
+                  (T_List_Decl) ->
                   (T_Exp) ->
                   (T_Exp)
-sem_Exp_LetExp (_idD) (_idP0) (_idP1) (_decls) (_exp) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            LetExp _idD _idP0 _idP1 _decls_self _exp_self
-        (_varsInScope) =
-            addListToFM _lhs_varsInScope _decls_declaredVars
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-        ( _decls_col,_decls_dcls,_decls_declaredVars,_decls_idsPres,_decls_layoutMap,_decls_newlines,_decls_pIdC,_decls_parseErrs,_decls_path,_decls_press,_decls_self,_decls_spaces,_decls_varsInScopeAtFocus) =
-            (_decls (_lhs_col + 3+1)
-                    (_lhs_env)
-                    (_lhs_errs)
-                    (_lhs_focusD)
-                    (0)
-                    (addListToFM _lhs_layoutMap
-                       [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                       , (_idP1, (1,_lhs_col))])
-                    (_lhs_level + 1)
-                    (0)
-                    (_lhs_pIdC + 2)
-                    (_lhs_path++[0])
-                    (_lhs_ranges)
-                    (1)
-                    (_lhs_topLevelEnv)
-                    (_lhs_typeEnv)
-                    (_varsInScope)
-                    (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_lhs_col + 3+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_decls_layoutMap) (_lhs_level) (0) (_decls_pIdC) (_lhs_path++[1]) (_lhs_ranges) (2) (_lhs_topLevelEnv) (_lhs_typeEnv) (_varsInScope) (_decls_varsInScopeAtFocus))
-    in  ( _exp_col
-         ,_substitute
-         ,_exp_layoutMap
-         ,_exp_newlines
-         ,_exp_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [ key (mkIDP _idP0 _lhs_pIdC 0) "let"
-                 , loc (DeclsNode _decls_self _decls_path) $ parsing $ presentFocus _lhs_focusD _decls_path $ row _decls_press
-                 , key (mkIDP _idP1 _lhs_pIdC 1) "in", _exp_pres ]
-         ,_self
-         ,_exp_spaces
-         ,_substitute
-         ,_type
-         ,let (_,_,_,_,_,_,_,_,_,_,v,_) =
-                _exp undefined (_decls_dcls ++ _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
-          in  v
-         ,_exp_varsInScopeAtFocus
-         )
+sem_Exp_LetExp (_idD) (_idP0) (_idP1) (_decls) (_exp) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                LetExp _idD _idP0 _idP1 _decls_self _exp_self
+            (_varsInScope) =
+                addListToFM _lhs_varsInScope _decls_declaredVars
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+            ( _decls_col,_decls_dcls,_decls_declaredVars,_decls_idsPres,_decls_layoutMap,_decls_newlines,_decls_pIdC,_decls_parseErrs,_decls_pres,_decls_press,_decls_self,_decls_spaces,_decls_varsInScopeAtFocus) =
+                (_decls (_lhs_col + 3+1)
+                        (_lhs_env)
+                        (_lhs_errs)
+                        (_lhs_focusD)
+                        (addListToFM _lhs_layoutMap
+                           [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                           , (_idP1, (1,_lhs_col))])
+                        (_lhs_level + 1)
+                        (0)
+                        (_lhs_pIdC + 2)
+                        (_lhs_path++[0])
+                        (_lhs_ranges)
+                        (1)
+                        (_lhs_topLevelEnv)
+                        (_lhs_typeEnv)
+                        (_varsInScope)
+                        (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_lhs_col + 3+1) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_decls_layoutMap) (_lhs_level) (0) (_decls_pIdC) (_lhs_path++[1]) (_lhs_ranges) (2) (_lhs_topLevelEnv) (_lhs_typeEnv) (_varsInScope) (_decls_varsInScopeAtFocus))
+        in  ( _exp_col
+             ,_substitute
+             ,_exp_layoutMap
+             ,_exp_newlines
+             ,_exp_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [ key (mkIDP _idP0 _lhs_pIdC 0) "let"
+                     , loc (List_DeclNode _decls_self []               ) $ parsing $ presentFocus _lhs_focusD []                 $ row _decls_press
+                     , key (mkIDP _idP1 _lhs_pIdC 1) "in", _exp_pres ]
+             ,_self
+             ,_exp_spaces
+             ,_substitute
+             ,_type
+             ,let (_,_,_,_,_,_,_,_,_,_,v,_) =
+                    _exp undefined (_decls_dcls ++ _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+              in  v
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Exp_ListExp :: (IDD) ->
                    (IDP) ->
                    (IDP) ->
                    ([IDP]) ->
-                   (T_Exps) ->
+                   (T_List_Exp) ->
                    (T_Exp)
-sem_Exp_ListExp (_idD) (_idP0) (_idP1) (_ids) (_exps) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ListExp _idD _idP0 _idP1 _ids _exps_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-        ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_exps_path,_exps_press,_exps_self,_exps_spaces,_exps_vals,_exps_varsInScopeAtFocus) =
-            (_exps (_lhs_col + 1+1)
-                   (_lhs_env)
-                   (_lhs_errs)
-                   (_lhs_focusD)
-                   (0)
-                   (addListToFM _lhs_layoutMap
-                      [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                      , (_idP1, (0,1)) ])
-                   (_lhs_level)
-                   (0)
-                   (_lhs_pIdC + 2)
-                   (_lhs_path++[0])
-                   (_lhs_ranges)
-                   (1)
-                   (_lhs_topLevelEnv)
-                   (_lhs_typeEnv)
-                   (_lhs_varsInScope)
-                   (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-    in  ( _exps_col + 1+1
-         ,_substitute
-         ,_exps_layoutMap
-         ,0
-         ,_exps_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' $    [sep (mkIDP _idP0 _lhs_pIdC 0) "["]
-                   ++ let xps = map (loc (ExpsNode _exps_self _exps_path) . parsing . presentFocus _lhs_focusD _exps_path) _exps_press
-                          sps = map (\id -> sep id ",") (_ids++ map IDP [_lhs_pIdC .. ] )
-                      in (if null xps
-                          then []
-                          else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
-                   ++ [sep (mkIDP _idP1 _lhs_pIdC 1) "]"]
-         ,_self
-         ,0
-         ,_substitute
-         ,_type
-         ,ListVal _exps_vals
-         ,_exps_varsInScopeAtFocus
-         )
+sem_Exp_ListExp (_idD) (_idP0) (_idP1) (_ids) (_exps) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ListExp _idD _idP0 _idP1 _ids _exps_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+            ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_exps_press,_exps_self,_exps_spaces,_exps_vals,_exps_varsInScopeAtFocus) =
+                (_exps (_lhs_col + 1+1)
+                       (_lhs_env)
+                       (_lhs_errs)
+                       (_lhs_focusD)
+                       (addListToFM _lhs_layoutMap
+                          [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                          , (_idP1, (0,1)) ])
+                       (_lhs_level)
+                       (0)
+                       (_lhs_pIdC + 3)
+                       (_lhs_path++[0])
+                       (_lhs_ranges)
+                       (1)
+                       (_lhs_topLevelEnv)
+                       (_lhs_typeEnv)
+                       (_lhs_varsInScope)
+                       (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+        in  ( _exps_col + 1+1
+             ,_substitute
+             ,_exps_layoutMap
+             ,0
+             ,_exps_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' $    [sep (mkIDP _idP0 _lhs_pIdC 0) "["]
+                       ++ let xps = _exps_press
+                              sps = map (\id -> sep id ",") (_ids++ map IDP [_lhs_pIdC .. ] )
+                          in (if null xps
+                              then []
+                              else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
+                       ++ [sep (mkIDP _idP1 _lhs_pIdC 1) "]"]
+             ,_self
+             ,0
+             ,_substitute
+             ,_type
+             ,ListVal _exps_vals
+             ,_exps_varsInScopeAtFocus
+             )
 sem_Exp_ParenExp :: (IDD) ->
                     (IDP) ->
                     (IDP) ->
                     (T_Exp) ->
                     (T_Exp)
-sem_Exp_ParenExp (_idD) (_idP0) (_idP1) (_exp) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParenExp _idD _idP0 _idP1 _exp_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> ParenExp _idD _idP0 _idP1 (_exp_substitute substs)
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_lhs_col + 1+1)
-                  (_lhs_env)
-                  (_lhs_errs)
-                  (_lhs_focusD)
-                  (addListToFM _lhs_layoutMap
-                     [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                     , (_idP1, (0,1)) ])
-                  (_lhs_level)
-                  (0)
-                  (_lhs_pIdC + 2)
-                  (_lhs_path++[0])
-                  (_lhs_ranges)
-                  (1)
-                  (_lhs_topLevelEnv)
-                  (_lhs_typeEnv)
-                  (_lhs_varsInScope)
-                  (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-    in  ( _exp_col + 1+1
-         ,_exp_lamBody
-         ,_exp_layoutMap
-         ,0
-         ,_exp_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row'  [sep (mkIDP _idP0 _lhs_pIdC 0) "(", _exp_pres , sep (mkIDP _idP1 _lhs_pIdC 1) ")"]
-         ,_self
-         ,0
-         ,_substitute
-         ,_type
-         ,_exp_val
-         ,_exp_varsInScopeAtFocus
-         )
+sem_Exp_ParenExp (_idD) (_idP0) (_idP1) (_exp) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParenExp _idD _idP0 _idP1 _exp_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> ParenExp _idD _idP0 _idP1 (_exp_substitute substs)
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (_lhs_col + 1+1)
+                      (_lhs_env)
+                      (_lhs_errs)
+                      (_lhs_focusD)
+                      (_lhs_ix)
+                      (addListToFM _lhs_layoutMap
+                         [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                         , (_idP1, (0,1)) ])
+                      (_lhs_level)
+                      (0)
+                      (_lhs_pIdC + 2)
+                      (_lhs_path++[0])
+                      (_lhs_ranges)
+                      (1)
+                      (_lhs_topLevelEnv)
+                      (_lhs_typeEnv)
+                      (_lhs_varsInScope)
+                      (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+        in  ( _exp_col + 1+1
+             ,_exp_lamBody
+             ,_exp_layoutMap
+             ,0
+             ,_exp_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row'  [sep (mkIDP _idP0 _lhs_pIdC 0) "(", _exp_pres , sep (mkIDP _idP1 _lhs_pIdC 1) ")"]
+             ,_self
+             ,0
+             ,_substitute
+             ,_type
+             ,_exp_val
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Exp_ParseErrExp :: (Node) ->
                        (Presentation) ->
                        (T_Exp)
-sem_Exp_ParseErrExp (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrExp _node _presentation
-        (_type) =
-            "<ParseErr>"
-        (_substitute) =
-            \substs -> _self
-    in  ( _lhs_col,_substitute,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_substitute,_type,ErrVal,_lhs_varsInScopeAtFocus)
+sem_Exp_ParseErrExp (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrExp _node _presentation
+            (_type) =
+                "<ParseErr>"
+            (_substitute) =
+                \substs -> _self
+        in  ( _lhs_col,_substitute,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,_substitute,_type,ErrVal,_lhs_varsInScopeAtFocus)
 sem_Exp_PlusExp :: (IDD) ->
                    (IDP) ->
                    (T_Exp) ->
                    (T_Exp) ->
                    (T_Exp)
-sem_Exp_PlusExp (_idD) (_idP0) (_exp1) (_exp2) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            PlusExp _idD _idP0 _exp1_self _exp2_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case (removeParens _exp1_self, removeParens _exp2_self) of
-                   (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (+)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1+int2)))]
-                   _                                         -> []
-        (_substitute) =
-            \substs -> PlusExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (addToFM _lhs_layoutMap _idP0 (0,1)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (_exp1_col + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-    in  ( _exp2_col
-         ,_substitute
-         ,_exp2_layoutMap
-         ,_exp2_newlines
-         ,_exp2_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [_exp1_pres , op (mkIDP _idP0 _lhs_pIdC 0) "+", _exp2_pres]
-         ,_self
-         ,_exp2_spaces
-         ,_substitute
-         ,_type
-         ,evaluateIntOp (+) _exp1_val _exp2_val
-         ,_exp2_varsInScopeAtFocus
-         )
+sem_Exp_PlusExp (_idD) (_idP0) (_exp1) (_exp2) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                PlusExp _idD _idP0 _exp1_self _exp2_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case (removeParens _exp1_self, removeParens _exp2_self) of
+                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (+)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1+int2)))]
+                       _                                         -> []
+            (_substitute) =
+                \substs -> PlusExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (addToFM _lhs_layoutMap _idP0 (0,1)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (_exp1_col + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+        in  ( _exp2_col
+             ,_substitute
+             ,_exp2_layoutMap
+             ,_exp2_newlines
+             ,_exp2_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [_exp1_pres , op (mkIDP _idP0 _lhs_pIdC 0) "+", _exp2_pres]
+             ,_self
+             ,_exp2_spaces
+             ,_substitute
+             ,_type
+             ,evaluateIntOp (+) _exp1_val _exp2_val
+             ,_exp2_varsInScopeAtFocus
+             )
 sem_Exp_PowerExp :: (IDD) ->
                     (IDP) ->
                     (T_Exp) ->
                     (T_Exp) ->
                     (T_Exp)
-sem_Exp_PowerExp (_idD) (_idP0) (_exp1) (_exp2) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            PowerExp _idD _idP0 _exp1_self _exp2_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case (removeParens _exp1_self, removeParens _exp2_self) of
-                   (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (^)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1^int2)))]
-                   _                                         -> []
-        (_substitute) =
-            \substs -> PowerExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (addToFM _lhs_layoutMap _idP0 (0,0)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-    in  ( _exp2_col
-         ,_substitute
-         ,_exp2_layoutMap
-         ,_exp2_newlines
-         ,_exp2_pIdC
-         ,loc (ExpNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            power _exp1_pres _exp2_pres
-         ,_self
-         ,_exp2_spaces
-         ,_substitute
-         ,_type
-         ,evaluateIntOp (^) _exp1_val _exp2_val
-         ,_exp2_varsInScopeAtFocus
-         )
+sem_Exp_PowerExp (_idD) (_idP0) (_exp1) (_exp2) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                PowerExp _idD _idP0 _exp1_self _exp2_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case (removeParens _exp1_self, removeParens _exp2_self) of
+                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (^)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1^int2)))]
+                       _                                         -> []
+            (_substitute) =
+                \substs -> PowerExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (addToFM _lhs_layoutMap _idP0 (0,0)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (0) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (0) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+        in  ( _exp2_col
+             ,_substitute
+             ,_exp2_layoutMap
+             ,_exp2_newlines
+             ,_exp2_pIdC
+             ,loc (ExpNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                power _exp1_pres _exp2_pres
+             ,_self
+             ,_exp2_spaces
+             ,_substitute
+             ,_type
+             ,evaluateIntOp (^) _exp1_val _exp2_val
+             ,_exp2_varsInScopeAtFocus
+             )
 sem_Exp_ProductExp :: (IDD) ->
                       (IDP) ->
                       (IDP) ->
                       ([IDP]) ->
-                      (T_Exps) ->
+                      (T_List_Exp) ->
                       (T_Exp)
-sem_Exp_ProductExp (_idD) (_idP0) (_idP1) (_ids) (_exps) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ProductExp _idD _idP0 _idP1 _ids _exps_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            []
-        (_substitute) =
-            \substs -> _self
-        ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_exps_path,_exps_press,_exps_self,_exps_spaces,_exps_vals,_exps_varsInScopeAtFocus) =
-            (_exps (_lhs_col + 1+1)
-                   (_lhs_env)
-                   (_lhs_errs)
-                   (_lhs_focusD)
-                   (0)
-                   (addListToFM _lhs_layoutMap
-                      [ (_idP0, (_lhs_newlines,_lhs_spaces))
-                      , (_idP1, (0,1)) ])
-                   (_lhs_level)
-                   (0)
-                   (_lhs_pIdC + 2)
-                   (_lhs_path++[0])
-                   (_lhs_ranges)
-                   (1)
-                   (_lhs_topLevelEnv)
-                   (_lhs_typeEnv)
-                   (_lhs_varsInScope)
-                   (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-    in  ( _exps_col + 1+1
-         ,_substitute
-         ,_exps_layoutMap
-         ,0
-         ,_exps_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' $    [sep (mkIDP _idP0 _lhs_pIdC 0) "("]
-                   ++ let xps = map (loc (ExpsNode _exps_self _exps_path) . parsing . presentFocus _lhs_focusD _exps_path) _exps_press
-                          sps = map (\id -> sep id ",") (_ids++ map IDP [_lhs_pIdC .. ] )
-                      in  if null xps
-                          then []
-                          else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
-                   ++ [sep (mkIDP _idP1 _lhs_pIdC 1) ")"]
-         ,_self
-         ,0
-         ,_substitute
-         ,_type
-         ,ProdVal _exps_vals
-         ,_exps_varsInScopeAtFocus
-         )
+sem_Exp_ProductExp (_idD) (_idP0) (_idP1) (_ids) (_exps) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ProductExp _idD _idP0 _idP1 _ids _exps_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                []
+            (_substitute) =
+                \substs -> _self
+            ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_exps_press,_exps_self,_exps_spaces,_exps_vals,_exps_varsInScopeAtFocus) =
+                (_exps (_lhs_col + 1+1)
+                       (_lhs_env)
+                       (_lhs_errs)
+                       (_lhs_focusD)
+                       (addListToFM _lhs_layoutMap
+                          [ (_idP0, (_lhs_newlines,_lhs_spaces))
+                          , (_idP1, (0,1)) ])
+                       (_lhs_level)
+                       (0)
+                       (_lhs_pIdC + 3)
+                       (_lhs_path++[0])
+                       (_lhs_ranges)
+                       (1)
+                       (_lhs_topLevelEnv)
+                       (_lhs_typeEnv)
+                       (_lhs_varsInScope)
+                       (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+        in  ( _exps_col + 1+1
+             ,_substitute
+             ,_exps_layoutMap
+             ,0
+             ,_exps_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' $    [sep (mkIDP _idP0 _lhs_pIdC 0) "("]
+                       ++ let xps = _exps_press
+                              sps = map (\id -> sep id ",") (_ids++ map IDP [_lhs_pIdC .. ] )
+                          in  if null xps
+                              then []
+                              else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
+                       ++ [sep (mkIDP _idP1 _lhs_pIdC 1) ")"]
+             ,_self
+             ,0
+             ,_substitute
+             ,_type
+             ,ProdVal _exps_vals
+             ,_exps_varsInScopeAtFocus
+             )
 sem_Exp_TimesExp :: (IDD) ->
                     (IDP) ->
                     (T_Exp) ->
                     (T_Exp) ->
                     (T_Exp)
-sem_Exp_TimesExp (_idD) (_idP0) (_exp1) (_exp2) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            TimesExp _idD _idP0 _exp1_self _exp2_self
-        (_type) =
-            lookupType _lhs_typeEnv _lhs_path
-        (_reductionEdit) =
-            case (removeParens _exp1_self, removeParens _exp2_self) of
-                   (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (*)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1*int2)))]
-                   _                                         -> []
-        (_substitute) =
-            \substs -> TimesExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
-        ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
-            (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (addToFM _lhs_layoutMap _idP0 (0,1)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
-        ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
-            (_exp2 (_exp1_col + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
-    in  ( _exp2_col
-         ,_substitute
-         ,_exp2_layoutMap
-         ,_exp2_newlines
-         ,_exp2_pIdC
-         ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
-            row' [_exp1_pres , op (mkIDP _idP0 _lhs_pIdC 0) "*", _exp2_pres]
-         ,_self
-         ,_exp2_spaces
-         ,_substitute
-         ,_type
-         ,evaluateIntOp (*) _exp1_val _exp2_val
-         ,_exp2_varsInScopeAtFocus
-         )
--- Exps --------------------------------------------------------
-{-
-   inherited attributes:
-      env                  : Bindings
-      errs                 : [HeliumMessage]
-      focusD               : FocusDoc
-      ix                   : Int
-      level                : Int
-      ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      topLevelEnv          : [(String, String)]
-      typeEnv              : [(PathDoc,String)]
-      varsInScope          : FiniteMap String (PathDoc, String)
-
-   chained attributes:
-      col                  : Int
-      layoutMap            : LayoutMap
-      newlines             : Int
-      pIdC                 : Int
-      path                 : [Int]
-      spaces               : Int
-      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
-
-   synthesised attributes:
-      press                : [Presentation]
-      self                 : Exps
-      vals                 : [Value]
-
--}
-{-
-   local variables for Exps.ConsExps:
-      self
-
--}
-{-
-   local variables for Exps.HoleExps:
-      self
-
--}
-{-
-   local variables for Exps.NilExps:
-      self
-
--}
-{-
-   local variables for Exps.ParseErrExps:
-      self
-
--}
--- semantic domain
-type T_Exps = (Int) ->
-              (Bindings) ->
-              ([HeliumMessage]) ->
-              (FocusDoc) ->
-              (Int) ->
-              (LayoutMap) ->
-              (Int) ->
-              (Int) ->
-              (Int) ->
-              ([Int]) ->
-              (([PathDoc],[PathDoc],[PathDoc])) ->
-              (Int) ->
-              ([(String, String)]) ->
-              ([(PathDoc,String)]) ->
-              (FiniteMap String (PathDoc, String)) ->
-              (FiniteMap String (PathDoc, String)) ->
-              ( (Int),(LayoutMap),(Int),(Int),([Int]),([Presentation]),(Exps),(Int),([Value]),(FiniteMap String (PathDoc, String)))
--- cata
-sem_Exps :: (Exps) ->
-            (T_Exps)
-sem_Exps ((ConsExps (_iDD) (_exp) (_exps))) =
-    (sem_Exps_ConsExps (_iDD) ((sem_Exp (_exp))) ((sem_Exps (_exps))))
-sem_Exps ((HoleExps )) =
-    (sem_Exps_HoleExps )
-sem_Exps ((NilExps (_iDD))) =
-    (sem_Exps_NilExps (_iDD))
-sem_Exps ((ParseErrExps (_node) (_presentation))) =
-    (sem_Exps_ParseErrExps (_node) (_presentation))
-sem_Exps_ConsExps :: (IDD) ->
-                     (T_Exp) ->
-                     (T_Exps) ->
-                     (T_Exps)
-sem_Exps_ConsExps (_iDD) (_exp) (_exps) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ConsExps _iDD _exp_self _exps_self
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 100) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_exps_path,_exps_press,_exps_self,_exps_spaces,_exps_vals,_exps_varsInScopeAtFocus) =
-            (_exps (_exp_col + 2) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix + 1) (_exp_layoutMap) (_lhs_level) (_exp_newlines) (_exp_pIdC) (_lhs_path) (_lhs_ranges) (_exp_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp_varsInScopeAtFocus))
-    in  ( _exps_col,_exps_layoutMap,_exps_newlines,_exps_pIdC,_lhs_path,_exp_pres : _exps_press,_self,_exps_spaces,_exp_val : _exps_vals,_exps_varsInScopeAtFocus)
-sem_Exps_HoleExps :: (T_Exps)
-sem_Exps_HoleExps (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleExps
-    in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,_lhs_path,[presHole _lhs_focusD "Exps" (ExpsNode _self _lhs_path) _lhs_path],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
-sem_Exps_NilExps :: (IDD) ->
-                    (T_Exps)
-sem_Exps_NilExps (_iDD) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            NilExps _iDD
-    in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,_lhs_path,[],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
-sem_Exps_ParseErrExps :: (Node) ->
-                         (Presentation) ->
-                         (T_Exps)
-sem_Exps_ParseErrExps (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrExps _node _presentation
-    in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,_lhs_path,[presParseErr _node _presentation],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
+sem_Exp_TimesExp (_idD) (_idP0) (_exp1) (_exp2) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                TimesExp _idD _idP0 _exp1_self _exp2_self
+            (_type) =
+                lookupType _lhs_typeEnv _lhs_path
+            (_reductionEdit) =
+                case (removeParens _exp1_self, removeParens _exp2_self) of
+                       (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (*)" , pasteExp _lhs_path (IntExp idd1 idp1 (int1*int2)))]
+                       _                                         -> []
+            (_substitute) =
+                \substs -> TimesExp _idD _idP0 (_exp1_substitute substs) (_exp2_substitute substs)
+            ( _exp1_col,_exp1_lamBody,_exp1_layoutMap,_exp1_newlines,_exp1_pIdC,_exp1_pres,_exp1_self,_exp1_spaces,_exp1_substitute,_exp1_type,_exp1_val,_exp1_varsInScopeAtFocus) =
+                (_exp1 (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (addToFM _lhs_layoutMap _idP0 (0,1)) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 1) (_lhs_path++[0]) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus))
+            ( _exp2_col,_exp2_lamBody,_exp2_layoutMap,_exp2_newlines,_exp2_pIdC,_exp2_pres,_exp2_self,_exp2_spaces,_exp2_substitute,_exp2_type,_exp2_val,_exp2_varsInScopeAtFocus) =
+                (_exp2 (_exp1_col + 3) (_lhs_env) (_lhs_errs) (_lhs_focusD) (_lhs_ix) (_exp1_layoutMap) (_lhs_level) (0) (_exp1_pIdC) (_lhs_path++[1]) (_lhs_ranges) (1) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_exp1_varsInScopeAtFocus))
+        in  ( _exp2_col
+             ,_substitute
+             ,_exp2_layoutMap
+             ,_exp2_newlines
+             ,_exp2_pIdC
+             ,loc (ExpNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $ addReductionPopupItems _reductionEdit $
+                row' [_exp1_pres , op (mkIDP _idP0 _lhs_pIdC 0) "*", _exp2_pres]
+             ,_self
+             ,_exp2_spaces
+             ,_substitute
+             ,_type
+             ,evaluateIntOp (*) _exp1_val _exp2_val
+             ,_exp2_varsInScopeAtFocus
+             )
 -- Ident -------------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       level                : Int
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
@@ -2330,7 +3115,7 @@ sem_Exps_ParseErrExps (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) 
       firstToken           : IDP
       idsPres              : Presentation
       pres                 : Presentation
-      self                 : Ident
+      self                 : SELF
       str                  : String
 
 -}
@@ -2352,6 +3137,7 @@ sem_Exps_ParseErrExps (_node) (_presentation) (_lhs_col) (_lhs_env) (_lhs_errs) 
 -- semantic domain
 type T_Ident = (Int) ->
                (FocusDoc) ->
+               (Int) ->
                (LayoutMap) ->
                (Int) ->
                (Int) ->
@@ -2372,40 +3158,76 @@ sem_Ident ((Ident (_idD) (_idP0) (_idP1) (_string))) =
 sem_Ident ((ParseErrIdent (_node) (_presentation))) =
     (sem_Ident_ParseErrIdent (_node) (_presentation))
 sem_Ident_HoleIdent :: (T_Ident)
-sem_Ident_HoleIdent (_lhs_col) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleIdent
-    in  ( _lhs_col,NoIDP,presHole _lhs_focusD "Ident" (IdentNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Ident" (IdentNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,"",_lhs_varsInScopeAtFocus)
+sem_Ident_HoleIdent  =
+    \ _lhs_col
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleIdent
+        in  ( _lhs_col,NoIDP,presHole _lhs_focusD "Ident" (IdentNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Ident" (IdentNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,"",_lhs_varsInScopeAtFocus)
 sem_Ident_Ident :: (IDD) ->
                    (IDP) ->
                    (IDP) ->
                    (String) ->
                    (T_Ident)
-sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string) (_lhs_col) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Ident _idD _idP0 _idP1 _string
-    in  ( _lhs_col+length _string
-         ,_idP0
-         ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text _string ]
-         ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
-         ,_lhs_newlines
-         ,_lhs_pIdC + 1
-         ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-            squiggleRanges _lhs_ranges _lhs_path $
-            row' [text' (mkIDP _idP0 _lhs_pIdC 0) _string, text' NoIDP ""]
-         ,_self
-         ,_lhs_spaces
-         ,_string
-         ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
-         )
+sem_Ident_Ident (_idD) (_idP0) (_idP1) (_string) =
+    \ _lhs_col
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Ident _idD _idP0 _idP1 _string
+        in  ( _lhs_col+length _string
+             ,_idP0
+             ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text _string ]
+             ,addToFM _lhs_layoutMap _idP0 (_lhs_newlines,_lhs_spaces)
+             ,_lhs_newlines
+             ,_lhs_pIdC
+             ,loc (IdentNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                squiggleRanges _lhs_ranges _lhs_path $
+                row' [text' (mkIDP _idP0 _lhs_pIdC 0) _string, text' NoIDP ""]
+             ,_self
+             ,_lhs_spaces
+             ,_string
+             ,if (PathD _lhs_path) == _lhs_focusD then _lhs_varsInScope else _lhs_varsInScopeAtFocus
+             )
 sem_Ident_ParseErrIdent :: (Node) ->
                            (Presentation) ->
                            (T_Ident)
-sem_Ident_ParseErrIdent (_node) (_presentation) (_lhs_col) (_lhs_focusD) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrIdent _node _presentation
-    in  ( _lhs_col,NoIDP,presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,"",_lhs_varsInScopeAtFocus)
+sem_Ident_ParseErrIdent (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrIdent _node _presentation
+        in  ( _lhs_col,NoIDP,presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,_self,_lhs_spaces,"",_lhs_varsInScopeAtFocus)
 -- Item --------------------------------------------------------
 {-
    inherited attributes:
@@ -2423,7 +3245,7 @@ sem_Ident_ParseErrIdent (_node) (_presentation) (_lhs_col) (_lhs_focusD) (_lhs_l
    synthesised attributes:
       pres                 : Presentation
       pres2                : Presentation
-      self                 : Item
+      self                 : SELF
 
 -}
 {-
@@ -2477,77 +3299,118 @@ sem_Item ((StringItem (_idd) (_string))) =
 sem_Item_HeliumItem :: (IDD) ->
                        (T_Exp) ->
                        (T_Item)
-sem_Item_HeliumItem (_idd) (_exp) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HeliumItem _idd _exp_self
-        ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
-            (_exp (0) ([]) ([]) (_lhs_focusD) (emptyFM) (0) (0) (0) (_lhs_path++[0]) (_lhs_ranges) (0) ([]) ([]) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-    in  ( _lhs_pIdC + 10
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            col' [ text' NoIDP "HeliumItem $"
-                 , row [text' NoIDP "  ", _exp_pres]
-                 ]
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [itemStart _lhs_ix _lhs_listType, _exp_pres
-                                                      `withColor` black
-                                                      `withbgColor` white
-                                                      `withFontFam` "Courier New" ]
-         ,_self
-         ,_exp_varsInScopeAtFocus
-         )
+sem_Item_HeliumItem (_idd) (_exp) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HeliumItem _idd _exp_self
+            ( _exp_col,_exp_lamBody,_exp_layoutMap,_exp_newlines,_exp_pIdC,_exp_pres,_exp_self,_exp_spaces,_exp_substitute,_exp_type,_exp_val,_exp_varsInScopeAtFocus) =
+                (_exp (0) ([]) ([]) (_lhs_focusD) (_lhs_ix) (emptyFM) (0) (0) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (0) ([]) ([]) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _exp_pIdC
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                col' [ text' NoIDP "HeliumItem $"
+                     , row [text' NoIDP "  ", _exp_pres]
+                     ]
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [itemStart _lhs_ix _lhs_listType, _exp_pres
+                                                          `withColor` black
+                                                          `withbgColor` white
+                                                          `withFontFam` "Courier New" ]
+             ,_self
+             ,_exp_varsInScopeAtFocus
+             )
 sem_Item_HoleItem :: (T_Item)
-sem_Item_HoleItem (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleItem
-    in  ( _lhs_pIdC,presHole _lhs_focusD "Item" (ItemNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Item" (ItemNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+sem_Item_HoleItem  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleItem
+        in  ( _lhs_pIdC,presHole _lhs_focusD "Item" (ItemNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Item" (ItemNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_Item_ListItem :: (IDD) ->
                      (T_ItemList) ->
                      (T_Item)
-sem_Item_ListItem (_idd) (_itemList) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ListItem _idd _itemList_self
-        ( _itemList_pIdC,_itemList_pres,_itemList_pres2,_itemList_self,_itemList_varsInScopeAtFocus) =
-            (_itemList (_lhs_focusD) (_lhs_pIdC) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-    in  ( _lhs_pIdC + 10
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            col' [ text' NoIDP "ListItem $"
-                 , row [text' NoIDP "  ", _itemList_pres]
-                 ]
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [ text "   ",
-                   _itemList_pres2
-                               `withFontSize_` (\fs -> if fs > 5 then fs * 80 `div` 100 else fs)
-                 ]
-         ,_self
-         ,_itemList_varsInScopeAtFocus
-         )
+sem_Item_ListItem (_idd) (_itemList) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ListItem _idd _itemList_self
+            ( _itemList_pIdC,_itemList_pres,_itemList_pres2,_itemList_self,_itemList_varsInScopeAtFocus) =
+                (_itemList (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _itemList_pIdC
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                col' [ text' NoIDP "ListItem $"
+                     , row [text' NoIDP "  ", _itemList_pres]
+                     ]
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "   ",
+                       _itemList_pres2
+                                   `withFontSize_` (\fs -> if fs > 5 then fs * 80 `div` 100 else fs)
+                     ]
+             ,_self
+             ,_itemList_varsInScopeAtFocus
+             )
 sem_Item_ParseErrItem :: (Node) ->
                          (Presentation) ->
                          (T_Item)
-sem_Item_ParseErrItem (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrItem _node _presentation
-    in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
+sem_Item_ParseErrItem (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrItem _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
 sem_Item_StringItem :: (IDD) ->
                        (T_String_) ->
                        (T_Item)
-sem_Item_StringItem (_idd) (_string) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            StringItem _idd _string_self
-        ( _string_pres,_string_pres2,_string_self) =
-            (_string (_lhs_focusD) (_lhs_path++[0]))
-    in  ( _lhs_pIdC + 10
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-             row' [ text' NoIDP "StringItem ", _string_pres ]
-         ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [itemStart _lhs_ix _lhs_listType, _string_pres2]
-         ,_self
-         ,_lhs_varsInScopeAtFocus
-         )
+sem_Item_StringItem (_idd) (_string) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                StringItem _idd _string_self
+            ( _string_pIdC,_string_pres,_string_pres2,_string_self) =
+                (_string (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _string_pIdC
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                 row' [ text' NoIDP "StringItem ", _string_pres ]
+             ,loc (ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [itemStart _lhs_ix _lhs_listType, _string_pres2]
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
 -- ItemList ----------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
       varsInScope          : FiniteMap String (PathDoc, String)
@@ -2559,7 +3422,7 @@ sem_Item_StringItem (_idd) (_string) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_l
    synthesised attributes:
       pres                 : Presentation
       pres2                : Presentation
-      self                 : ItemList
+      self                 : SELF
 
 -}
 {-
@@ -2580,6 +3443,7 @@ sem_Item_StringItem (_idd) (_string) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_l
 -- semantic domain
 type T_ItemList = (FocusDoc) ->
                   (Int) ->
+                  (Int) ->
                   ([Int]) ->
                   (([PathDoc],[PathDoc],[PathDoc])) ->
                   (FiniteMap String (PathDoc, String)) ->
@@ -2591,142 +3455,71 @@ sem_ItemList :: (ItemList) ->
 sem_ItemList ((HoleItemList )) =
     (sem_ItemList_HoleItemList )
 sem_ItemList ((ItemList (_idd) (_listType) (_items))) =
-    (sem_ItemList_ItemList (_idd) ((sem_ListType (_listType))) ((sem_Items (_items))))
+    (sem_ItemList_ItemList (_idd) ((sem_ListType (_listType))) ((sem_List_Item (_items))))
 sem_ItemList ((ParseErrItemList (_node) (_presentation))) =
     (sem_ItemList_ParseErrItemList (_node) (_presentation))
 sem_ItemList_HoleItemList :: (T_ItemList)
-sem_ItemList_HoleItemList (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleItemList
-    in  ( _lhs_pIdC,presHole _lhs_focusD "ItemList" (ItemListNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ItemList" (ItemListNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+sem_ItemList_HoleItemList  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleItemList
+        in  ( _lhs_pIdC,presHole _lhs_focusD "ItemList" (ItemListNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "ItemList" (ItemListNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_ItemList_ItemList :: (IDD) ->
                          (T_ListType) ->
-                         (T_Items) ->
+                         (T_List_Item) ->
                          (T_ItemList)
-sem_ItemList_ItemList (_idd) (_listType) (_items) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ItemList _idd _listType_self _items_self
-        ( _listType_pIdC,_listType_pres,_listType_self,_listType_varsInScopeAtFocus) =
-            (_listType (_lhs_focusD) (_lhs_pIdC + 10) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _items_pIdC,_items_path,_items_press,_items_press2,_items_self,_items_varsInScopeAtFocus) =
-            (_items (_lhs_focusD) (0) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
-    in  ( _items_pIdC
-         ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            col' [ row' [ text' NoIDP "ItemList ", _listType_pres, text' NoIDP " $"]
-              , loc (ItemsNode _items_self _items_path) $ structural $ presentFocus _lhs_focusD _items_path $
-                   presentList _items_press
-              ]
-         ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            row' [ loc (ListTypeNode _listType_self (error "no path")) $ structural $
-                     empty
-                 , loc (ItemsNode _items_self _items_path) $ structural $ presentFocus _lhs_focusD _items_path $
-                     col' _items_press2
-                 ]
-         ,_self
-         ,_items_varsInScopeAtFocus
-         )
+sem_ItemList_ItemList (_idd) (_listType) (_items) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ItemList _idd _listType_self _items_self
+            ( _listType_pIdC,_listType_pres,_listType_self,_listType_varsInScopeAtFocus) =
+                (_listType (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+            ( _items_pIdC,_items_pres,_items_pres2,_items_press,_items_press2,_items_self,_items_varsInScopeAtFocus) =
+                (_items (_lhs_focusD) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
+        in  ( _items_pIdC
+             ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                col' [ row' [ text' NoIDP "ItemList ", _listType_pres, text' NoIDP " $"]
+                     , _items_pres
+                  ]
+             ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ loc (ListTypeNode _listType_self (debug Err "no path in invisible ListType" [])) $ structural $
+                         empty
+                     , _items_pres2
+                     ]
+             ,_self
+             ,_items_varsInScopeAtFocus
+             )
 sem_ItemList_ParseErrItemList :: (Node) ->
                                  (Presentation) ->
                                  (T_ItemList)
-sem_ItemList_ParseErrItemList (_node) (_presentation) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrItemList _node _presentation
-    in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
--- Items -------------------------------------------------------
-{-
-   inherited attributes:
-      focusD               : FocusDoc
-      ix                   : Int
-      listType             : ListType
-      ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      varsInScope          : FiniteMap String (PathDoc, String)
-
-   chained attributes:
-      pIdC                 : Int
-      path                 : [Int]
-      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
-
-   synthesised attributes:
-      press                : [Presentation]
-      press2               : [Presentation]
-      self                 : Items
-
--}
-{-
-   local variables for Items.ConsItems:
-      self
-
--}
-{-
-   local variables for Items.HoleItems:
-      self
-
--}
-{-
-   local variables for Items.NilItems:
-      self
-
--}
-{-
-   local variables for Items.ParseErrItems:
-      self
-
--}
--- semantic domain
-type T_Items = (FocusDoc) ->
-               (Int) ->
-               (ListType) ->
-               (Int) ->
-               ([Int]) ->
-               (([PathDoc],[PathDoc],[PathDoc])) ->
-               (FiniteMap String (PathDoc, String)) ->
-               (FiniteMap String (PathDoc, String)) ->
-               ( (Int),([Int]),([Presentation]),([Presentation]),(Items),(FiniteMap String (PathDoc, String)))
--- cata
-sem_Items :: (Items) ->
-             (T_Items)
-sem_Items ((ConsItems (_idd) (_item) (_items))) =
-    (sem_Items_ConsItems (_idd) ((sem_Item (_item))) ((sem_Items (_items))))
-sem_Items ((HoleItems )) =
-    (sem_Items_HoleItems )
-sem_Items ((NilItems (_idd))) =
-    (sem_Items_NilItems (_idd))
-sem_Items ((ParseErrItems (_node) (_presentation))) =
-    (sem_Items_ParseErrItems (_node) (_presentation))
-sem_Items_ConsItems :: (IDD) ->
-                       (T_Item) ->
-                       (T_Items) ->
-                       (T_Items)
-sem_Items_ConsItems (_idd) (_item) (_items) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ConsItems _idd _item_self _items_self
-        ( _item_pIdC,_item_pres,_item_pres2,_item_self,_item_varsInScopeAtFocus) =
-            (_item (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC + 100) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _items_pIdC,_items_path,_items_press,_items_press2,_items_self,_items_varsInScopeAtFocus) =
-            (_items (_lhs_focusD) (_lhs_ix + 1) (_lhs_listType) (_item_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_item_varsInScopeAtFocus))
-    in  ( _items_pIdC,_lhs_path,_item_pres : _items_press,_item_pres2 : _items_press2,_self,_items_varsInScopeAtFocus)
-sem_Items_HoleItems :: (T_Items)
-sem_Items_HoleItems (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleItems
-    in  ( _lhs_pIdC,_lhs_path,[presHole _lhs_focusD "Items" (ItemsNode _self _lhs_path) _lhs_path],[presHole _lhs_focusD "Items" (ItemsNode _self _lhs_path) _lhs_path],_self,_lhs_varsInScopeAtFocus)
-sem_Items_NilItems :: (IDD) ->
-                      (T_Items)
-sem_Items_NilItems (_idd) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            NilItems _idd
-    in  ( _lhs_pIdC,_lhs_path,[],[],_self,_lhs_varsInScopeAtFocus)
-sem_Items_ParseErrItems :: (Node) ->
-                           (Presentation) ->
-                           (T_Items)
-sem_Items_ParseErrItems (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_listType) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrItems _node _presentation
-    in  ( _lhs_pIdC,_lhs_path,[presParseErr _node _presentation],[presParseErr _node _presentation],_self,_lhs_varsInScopeAtFocus)
+sem_ItemList_ParseErrItemList (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrItemList _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
 -- ListType ----------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
       varsInScope          : FiniteMap String (PathDoc, String)
@@ -2737,7 +3530,7 @@ sem_Items_ParseErrItems (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_li
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : ListType
+      self                 : SELF
 
 -}
 {-
@@ -2768,6 +3561,7 @@ sem_Items_ParseErrItems (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_li
 -- semantic domain
 type T_ListType = (FocusDoc) ->
                   (Int) ->
+                  (Int) ->
                   ([Int]) ->
                   (([PathDoc],[PathDoc],[PathDoc])) ->
                   (FiniteMap String (PathDoc, String)) ->
@@ -2788,50 +3582,690 @@ sem_ListType ((ParseErrListType (_node) (_presentation))) =
     (sem_ListType_ParseErrListType (_node) (_presentation))
 sem_ListType_Alpha :: (IDD) ->
                       (T_ListType)
-sem_ListType_Alpha (_idd) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Alpha _idd
-    in  ( _lhs_pIdC + 10
-         ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            text' NoIDP "Alpha"
-         ,_self
-         ,_lhs_varsInScopeAtFocus
-         )
+sem_ListType_Alpha (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Alpha _idd
+        in  ( _lhs_pIdC
+             ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                text' NoIDP "Alpha"
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
 sem_ListType_Bullet :: (IDD) ->
                        (T_ListType)
-sem_ListType_Bullet (_idd) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Bullet _idd
-    in  ( _lhs_pIdC + 10
-         ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            text' NoIDP "Bullet"
-         ,_self
-         ,_lhs_varsInScopeAtFocus
-         )
+sem_ListType_Bullet (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Bullet _idd
+        in  ( _lhs_pIdC
+             ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                text' NoIDP "Bullet"
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
 sem_ListType_HoleListType :: (T_ListType)
-sem_ListType_HoleListType (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleListType
-    in  ( _lhs_pIdC,presHole _lhs_focusD "ListType" (ListTypeNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+sem_ListType_HoleListType  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleListType
+        in  ( _lhs_pIdC,presHole _lhs_focusD "ListType" (ListTypeNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_ListType_Number :: (IDD) ->
                        (T_ListType)
-sem_ListType_Number (_idd) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Number _idd
-    in  ( _lhs_pIdC + 10
-         ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            text' NoIDP "Number"
-         ,_self
-         ,_lhs_varsInScopeAtFocus
-         )
+sem_ListType_Number (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Number _idd
+        in  ( _lhs_pIdC
+             ,loc (ListTypeNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                text' NoIDP "Number"
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
 sem_ListType_ParseErrListType :: (Node) ->
                                  (Presentation) ->
                                  (T_ListType)
-sem_ListType_ParseErrListType (_node) (_presentation) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrListType _node _presentation
-    in  ( _lhs_pIdC,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
--- PPPresentation ----------------------------------------------
+sem_ListType_ParseErrListType (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrListType _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
+-- List_Alt ----------------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      totalMaxLHSLength    : Int
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      alts                 : Bindings
+      maxLHSLength         : Int
+      press                : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for List_Alt.HoleList_Alt:
+      self
+
+-}
+{-
+   local variables for List_Alt.List_Alt:
+      self
+
+-}
+{-
+   local variables for List_Alt.ParseErrList_Alt:
+      self
+
+-}
+-- semantic domain
+type T_List_Alt = (Int) ->
+                  (Bindings) ->
+                  ([HeliumMessage]) ->
+                  (FocusDoc) ->
+                  (LayoutMap) ->
+                  (Int) ->
+                  (Int) ->
+                  (Int) ->
+                  ([Int]) ->
+                  (([PathDoc],[PathDoc],[PathDoc])) ->
+                  (Int) ->
+                  ([(String, String)]) ->
+                  (Int) ->
+                  ([(PathDoc,String)]) ->
+                  (FiniteMap String (PathDoc, String)) ->
+                  (FiniteMap String (PathDoc, String)) ->
+                  ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),([Presentation]),(List_Alt),(Int),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_List_Alt :: (List_Alt) ->
+                (T_List_Alt)
+sem_List_Alt ((HoleList_Alt )) =
+    (sem_List_Alt_HoleList_Alt )
+sem_List_Alt ((List_Alt (_idd) (_elts))) =
+    (sem_List_Alt_List_Alt (_idd) ((sem_ConsList_Alt (_elts))))
+sem_List_Alt ((ParseErrList_Alt (_node) (_presentation))) =
+    (sem_List_Alt_ParseErrList_Alt (_node) (_presentation))
+sem_List_Alt_HoleList_Alt :: (T_List_Alt)
+sem_List_Alt_HoleList_Alt  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleList_Alt
+        in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,[],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+sem_List_Alt_List_Alt :: (IDD) ->
+                         (T_ConsList_Alt) ->
+                         (T_List_Alt)
+sem_List_Alt_List_Alt (_idd) (_elts) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                List_Alt _idd _elts_self
+            ( _elts_alts,_elts_col,_elts_layoutMap,_elts_maxLHSLength,_elts_newlines,_elts_pIdC,_elts_press,_elts_self,_elts_spaces,_elts_varsInScopeAtFocus) =
+                (_elts (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (0) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_totalMaxLHSLength) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _elts_alts
+             ,_elts_col
+             ,_elts_layoutMap
+             ,_elts_maxLHSLength
+             ,_elts_newlines
+             ,_elts_pIdC
+             ,map ( loc (List_AltNode _self _lhs_path)
+                  . presentFocus _lhs_focusD _lhs_path )
+                  _elts_press
+             ,_self
+             ,_elts_spaces
+             ,_elts_varsInScopeAtFocus
+             )
+sem_List_Alt_ParseErrList_Alt :: (Node) ->
+                                 (Presentation) ->
+                                 (T_List_Alt)
+sem_List_Alt_ParseErrList_Alt (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_totalMaxLHSLength
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrList_Alt _node _presentation
+        in  ( [],_lhs_col,_lhs_layoutMap,0,_lhs_newlines,_lhs_pIdC,[ presParseErr _node _presentation ],_self,_lhs_spaces,_lhs_varsInScopeAtFocus)
+-- List_Decl ---------------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      dcls                 : Bindings
+      declaredVars         : [(String,(PathDoc,String))]
+      idsPres              : Presentation
+      parseErrs            : [String]
+      pres                 : Presentation
+      press                : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for List_Decl.HoleList_Decl:
+      self
+
+-}
+{-
+   local variables for List_Decl.List_Decl:
+      self
+
+-}
+{-
+   local variables for List_Decl.ParseErrList_Decl:
+      self
+
+-}
+-- semantic domain
+type T_List_Decl = (Int) ->
+                   (Bindings) ->
+                   ([HeliumMessage]) ->
+                   (FocusDoc) ->
+                   (LayoutMap) ->
+                   (Int) ->
+                   (Int) ->
+                   (Int) ->
+                   ([Int]) ->
+                   (([PathDoc],[PathDoc],[PathDoc])) ->
+                   (Int) ->
+                   ([(String, String)]) ->
+                   ([(PathDoc,String)]) ->
+                   (FiniteMap String (PathDoc, String)) ->
+                   (FiniteMap String (PathDoc, String)) ->
+                   ( (Int),(Bindings),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),([String]),(Presentation),([Presentation]),(List_Decl),(Int),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_List_Decl :: (List_Decl) ->
+                 (T_List_Decl)
+sem_List_Decl ((HoleList_Decl )) =
+    (sem_List_Decl_HoleList_Decl )
+sem_List_Decl ((List_Decl (_idd) (_elts))) =
+    (sem_List_Decl_List_Decl (_idd) ((sem_ConsList_Decl (_elts))))
+sem_List_Decl ((ParseErrList_Decl (_node) (_presentation))) =
+    (sem_List_Decl_ParseErrList_Decl (_node) (_presentation))
+sem_List_Decl_HoleList_Decl :: (T_List_Decl)
+sem_List_Decl_HoleList_Decl  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleList_Decl
+        in  ( _lhs_col
+             ,[]
+             ,[]
+             ,presHole _lhs_focusD "Decls" (List_DeclNode _self _lhs_path) _lhs_path
+             ,_lhs_layoutMap
+             ,_lhs_newlines
+             ,_lhs_pIdC
+             ,[]
+             ,loc (List_DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                presHole _lhs_focusD "Decls" (List_DeclNode _self _lhs_path) _lhs_path
+             ,[]
+             ,_self
+             ,_lhs_spaces
+             ,_lhs_varsInScopeAtFocus
+             )
+sem_List_Decl_List_Decl :: (IDD) ->
+                           (T_ConsList_Decl) ->
+                           (T_List_Decl)
+sem_List_Decl_List_Decl (_idd) (_elts) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                List_Decl _idd _elts_self
+            ( _elts_col,_elts_dcls,_elts_declaredVars,_elts_idsPres,_elts_layoutMap,_elts_newlines,_elts_pIdC,_elts_parseErrs,_elts_press,_elts_self,_elts_spaces,_elts_varsInScopeAtFocus) =
+                (_elts (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (0) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _elts_col
+             ,_elts_dcls
+             ,_elts_declaredVars
+             ,loc (List_DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+              _elts_idsPres
+             ,_elts_layoutMap
+             ,_elts_newlines
+             ,_elts_pIdC
+             ,_elts_parseErrs
+             ,loc (List_DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row _elts_press
+             ,map ( loc (List_DeclNode _self _lhs_path)
+                  . presentFocus _lhs_focusD _lhs_path )
+                  _elts_press
+             ,_self
+             ,_elts_spaces
+             ,_elts_varsInScopeAtFocus
+             )
+sem_List_Decl_ParseErrList_Decl :: (Node) ->
+                                   (Presentation) ->
+                                   (T_List_Decl)
+sem_List_Decl_ParseErrList_Decl (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrList_Decl _node _presentation
+        in  ( _lhs_col
+             ,[]
+             ,[]
+             ,empty
+             ,_lhs_layoutMap
+             ,_lhs_newlines
+             ,_lhs_pIdC
+             ,[]
+             ,loc (List_DeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                presParseErr _node _presentation
+             ,[ presParseErr _node _presentation ]
+             ,_self
+             ,_lhs_spaces
+             ,_lhs_varsInScopeAtFocus
+             )
+-- List_Exp ----------------------------------------------------
+{-
+   inherited attributes:
+      env                  : Bindings
+      errs                 : [HeliumMessage]
+      focusD               : FocusDoc
+      level                : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      topLevelEnv          : [(String, String)]
+      typeEnv              : [(PathDoc,String)]
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      col                  : Int
+      layoutMap            : LayoutMap
+      newlines             : Int
+      pIdC                 : Int
+      spaces               : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      press                : [Presentation]
+      self                 : SELF
+      vals                 : [Value]
+
+-}
+{-
+   local variables for List_Exp.HoleList_Exp:
+      self
+
+-}
+{-
+   local variables for List_Exp.List_Exp:
+      self
+
+-}
+{-
+   local variables for List_Exp.ParseErrList_Exp:
+      self
+
+-}
+-- semantic domain
+type T_List_Exp = (Int) ->
+                  (Bindings) ->
+                  ([HeliumMessage]) ->
+                  (FocusDoc) ->
+                  (LayoutMap) ->
+                  (Int) ->
+                  (Int) ->
+                  (Int) ->
+                  ([Int]) ->
+                  (([PathDoc],[PathDoc],[PathDoc])) ->
+                  (Int) ->
+                  ([(String, String)]) ->
+                  ([(PathDoc,String)]) ->
+                  (FiniteMap String (PathDoc, String)) ->
+                  (FiniteMap String (PathDoc, String)) ->
+                  ( (Int),(LayoutMap),(Int),(Int),([Presentation]),(List_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_List_Exp :: (List_Exp) ->
+                (T_List_Exp)
+sem_List_Exp ((HoleList_Exp )) =
+    (sem_List_Exp_HoleList_Exp )
+sem_List_Exp ((List_Exp (_idd) (_elts))) =
+    (sem_List_Exp_List_Exp (_idd) ((sem_ConsList_Exp (_elts))))
+sem_List_Exp ((ParseErrList_Exp (_node) (_presentation))) =
+    (sem_List_Exp_ParseErrList_Exp (_node) (_presentation))
+sem_List_Exp_HoleList_Exp :: (T_List_Exp)
+sem_List_Exp_HoleList_Exp  =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleList_Exp
+        in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
+sem_List_Exp_List_Exp :: (IDD) ->
+                         (T_ConsList_Exp) ->
+                         (T_List_Exp)
+sem_List_Exp_List_Exp (_idd) (_elts) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                List_Exp _idd _elts_self
+            ( _elts_col,_elts_layoutMap,_elts_newlines,_elts_pIdC,_elts_press,_elts_self,_elts_spaces,_elts_vals,_elts_varsInScopeAtFocus) =
+                (_elts (_lhs_col) (_lhs_env) (_lhs_errs) (_lhs_focusD) (0) (_lhs_layoutMap) (_lhs_level) (_lhs_newlines) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_spaces) (_lhs_topLevelEnv) (_lhs_typeEnv) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _elts_col
+             ,_elts_layoutMap
+             ,_elts_newlines
+             ,_elts_pIdC
+             ,map ( loc (List_ExpNode _self _lhs_path)
+                  . presentFocus _lhs_focusD _lhs_path )
+                  _elts_press
+             ,_self
+             ,_elts_spaces
+             ,_elts_vals
+             ,_elts_varsInScopeAtFocus
+             )
+sem_List_Exp_ParseErrList_Exp :: (Node) ->
+                                 (Presentation) ->
+                                 (T_List_Exp)
+sem_List_Exp_ParseErrList_Exp (_node) (_presentation) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrList_Exp _node _presentation
+        in  ( _lhs_col,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,[ presParseErr _node _presentation ],_self,_lhs_spaces,[],_lhs_varsInScopeAtFocus)
+-- List_Item ---------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      listType             : ListType
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      pIdC                 : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      pres                 : Presentation
+      pres2                : Presentation
+      press                : [Presentation]
+      press2               : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for List_Item.HoleList_Item:
+      self
+
+-}
+{-
+   local variables for List_Item.List_Item:
+      self
+
+-}
+{-
+   local variables for List_Item.ParseErrList_Item:
+      self
+
+-}
+-- semantic domain
+type T_List_Item = (FocusDoc) ->
+                   (ListType) ->
+                   (Int) ->
+                   ([Int]) ->
+                   (([PathDoc],[PathDoc],[PathDoc])) ->
+                   (FiniteMap String (PathDoc, String)) ->
+                   (FiniteMap String (PathDoc, String)) ->
+                   ( (Int),(Presentation),(Presentation),([Presentation]),([Presentation]),(List_Item),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_List_Item :: (List_Item) ->
+                 (T_List_Item)
+sem_List_Item ((HoleList_Item )) =
+    (sem_List_Item_HoleList_Item )
+sem_List_Item ((List_Item (_idd) (_elts))) =
+    (sem_List_Item_List_Item (_idd) ((sem_ConsList_Item (_elts))))
+sem_List_Item ((ParseErrList_Item (_node) (_presentation))) =
+    (sem_List_Item_ParseErrList_Item (_node) (_presentation))
+sem_List_Item_HoleList_Item :: (T_List_Item)
+sem_List_Item_HoleList_Item  =
+    \ _lhs_focusD
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleList_Item
+        in  ( _lhs_pIdC
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presHole _lhs_focusD "Items" (List_ItemNode _self _lhs_path) _lhs_path
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               presHole _lhs_focusD "Items" (List_ItemNode _self _lhs_path) _lhs_path
+             ,[]
+             ,[presHole _lhs_focusD "Items" (List_ItemNode _self _lhs_path) _lhs_path]
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
+sem_List_Item_List_Item :: (IDD) ->
+                           (T_ConsList_Item) ->
+                           (T_List_Item)
+sem_List_Item_List_Item (_idd) (_elts) =
+    \ _lhs_focusD
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                List_Item _idd _elts_self
+            ( _elts_pIdC,_elts_press,_elts_press2,_elts_self,_elts_varsInScopeAtFocus) =
+                (_elts (_lhs_focusD) (0) (_lhs_listType) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _elts_pIdC
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presentList _elts_press
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               col' _elts_press2
+             ,map ( loc (List_ItemNode _self _lhs_path)
+                  . presentFocus _lhs_focusD _lhs_path )
+                  _elts_press
+             ,_elts_press2
+             ,_self
+             ,_elts_varsInScopeAtFocus
+             )
+sem_List_Item_ParseErrList_Item :: (Node) ->
+                                   (Presentation) ->
+                                   (T_List_Item)
+sem_List_Item_ParseErrList_Item (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_listType
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrList_Item _node _presentation
+        in  ( _lhs_pIdC
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presParseErr _node _presentation
+             ,loc (List_ItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               presParseErr _node _presentation
+             ,[ presParseErr _node _presentation ]
+             ,[presParseErr _node _presentation]
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
+-- List_Slide --------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
@@ -2845,7 +4279,128 @@ sem_ListType_ParseErrListType (_node) (_presentation) (_lhs_focusD) (_lhs_pIdC) 
 
    synthesised attributes:
       pres                 : Presentation
-      self                 : PPPresentation
+      pres2                : Presentation
+      press                : [Presentation]
+      press2               : [Presentation]
+      self                 : SELF
+
+-}
+{-
+   local variables for List_Slide.HoleList_Slide:
+      self
+
+-}
+{-
+   local variables for List_Slide.List_Slide:
+      self
+
+-}
+{-
+   local variables for List_Slide.ParseErrList_Slide:
+      self
+
+-}
+-- semantic domain
+type T_List_Slide = (FocusDoc) ->
+                    (Int) ->
+                    ([Int]) ->
+                    (([PathDoc],[PathDoc],[PathDoc])) ->
+                    (FiniteMap String (PathDoc, String)) ->
+                    (FiniteMap String (PathDoc, String)) ->
+                    ( (Int),(Presentation),(Presentation),([Presentation]),([Presentation]),(List_Slide),(FiniteMap String (PathDoc, String)))
+-- cata
+sem_List_Slide :: (List_Slide) ->
+                  (T_List_Slide)
+sem_List_Slide ((HoleList_Slide )) =
+    (sem_List_Slide_HoleList_Slide )
+sem_List_Slide ((List_Slide (_idd) (_elts))) =
+    (sem_List_Slide_List_Slide (_idd) ((sem_ConsList_Slide (_elts))))
+sem_List_Slide ((ParseErrList_Slide (_node) (_presentation))) =
+    (sem_List_Slide_ParseErrList_Slide (_node) (_presentation))
+sem_List_Slide_HoleList_Slide :: (T_List_Slide)
+sem_List_Slide_HoleList_Slide  =
+    \ _lhs_focusD
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleList_Slide
+        in  ( _lhs_pIdC
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presHole _lhs_focusD "Slides" (List_SlideNode _self _lhs_path) _lhs_path
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               presHole _lhs_focusD "Slides" (List_SlideNode _self _lhs_path) _lhs_path
+             ,[]
+             ,[presHole _lhs_focusD "Slides" (List_SlideNode _self _lhs_path) _lhs_path]
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
+sem_List_Slide_List_Slide :: (IDD) ->
+                             (T_ConsList_Slide) ->
+                             (T_List_Slide)
+sem_List_Slide_List_Slide (_idd) (_elts) =
+    \ _lhs_focusD
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                List_Slide _idd _elts_self
+            ( _elts_pIdC,_elts_press,_elts_press2,_elts_self,_elts_varsInScopeAtFocus) =
+                (_elts (_lhs_focusD) (0) (_lhs_pIdC + 100) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _elts_pIdC
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presentList _elts_press
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) _elts_press2
+             ,map ( loc (List_SlideNode _self _lhs_path)
+                  . presentFocus _lhs_focusD _lhs_path )
+                  _elts_press
+             ,_elts_press2
+             ,_self
+             ,_elts_varsInScopeAtFocus
+             )
+sem_List_Slide_ParseErrList_Slide :: (Node) ->
+                                     (Presentation) ->
+                                     (T_List_Slide)
+sem_List_Slide_ParseErrList_Slide (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrList_Slide _node _presentation
+        in  ( _lhs_pIdC
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                presParseErr _node _presentation
+             ,loc (List_SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+               presParseErr _node _presentation
+             ,[ presParseErr _node _presentation ]
+             ,[presParseErr _node _presentation]
+             ,_self
+             ,_lhs_varsInScopeAtFocus
+             )
+-- PPPresentation ----------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+      ranges               : ([PathDoc],[PathDoc],[PathDoc])
+      varsInScope          : FiniteMap String (PathDoc, String)
+
+   chained attributes:
+      pIdC                 : Int
+      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
+
+   synthesised attributes:
+      pres                 : Presentation
+      self                 : SELF
 
 -}
 {-
@@ -2866,6 +4421,7 @@ sem_ListType_ParseErrListType (_node) (_presentation) (_lhs_focusD) (_lhs_pIdC) 
 -- semantic domain
 type T_PPPresentation = (FocusDoc) ->
                         (Int) ->
+                        (Int) ->
                         ([Int]) ->
                         (([PathDoc],[PathDoc],[PathDoc])) ->
                         (FiniteMap String (PathDoc, String)) ->
@@ -2877,53 +4433,71 @@ sem_PPPresentation :: (PPPresentation) ->
 sem_PPPresentation ((HolePPPresentation )) =
     (sem_PPPresentation_HolePPPresentation )
 sem_PPPresentation ((PPPresentation (_idd) (_viewType) (_slides))) =
-    (sem_PPPresentation_PPPresentation (_idd) (_viewType) ((sem_Slides (_slides))))
+    (sem_PPPresentation_PPPresentation (_idd) (_viewType) ((sem_List_Slide (_slides))))
 sem_PPPresentation ((ParseErrPPPresentation (_node) (_presentation))) =
     (sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation))
 sem_PPPresentation_HolePPPresentation :: (T_PPPresentation)
-sem_PPPresentation_HolePPPresentation (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HolePPPresentation
-    in  ( _lhs_pIdC,presHole _lhs_focusD "PPPresentation" (PPPresentationNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+sem_PPPresentation_HolePPPresentation  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HolePPPresentation
+        in  ( _lhs_pIdC,presHole _lhs_focusD "PPPresentation" (PPPresentationNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_PPPresentation_PPPresentation :: (IDD) ->
                                      (Bool) ->
-                                     (T_Slides) ->
+                                     (T_List_Slide) ->
                                      (T_PPPresentation)
-sem_PPPresentation_PPPresentation (_idd) (_viewType) (_slides) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            PPPresentation _idd _viewType _slides_self
-        ( _slides_pIdC,_slides_path,_slides_press,_slides_press2,_slides_self,_slides_varsInScopeAtFocus) =
-            (_slides (_lhs_focusD) (0) (_lhs_pIdC + 1) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-    in  ( _slides_pIdC
-         ,loc (PPPresentationNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-             col' $ [ row' [ text' NoIDP "View type: "
-                         ,  if _viewType
-                            then (box $ text' NoIDP $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
-                            else (box $ text' NoIDP $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType _lhs_path _self)]
+sem_PPPresentation_PPPresentation (_idd) (_viewType) (_slides) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                PPPresentation _idd _viewType _slides_self
+            ( _slides_pIdC,_slides_pres,_slides_pres2,_slides_press,_slides_press2,_slides_self,_slides_varsInScopeAtFocus) =
+                (_slides (_lhs_focusD) (_lhs_pIdC + 0) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _slides_pIdC
+             ,loc (PPPresentationNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                 col' $ [ row' [ text' NoIDP "View type: "
+                             ,  if _viewType
+                                then (box $ text' NoIDP $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
+                                else (box $ text' NoIDP $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType _lhs_path _self)]
+                              ]
+                      , vSpace 10
+                      ] ++
+                        if _viewType
+                        then
+                          [ row' [ text' NoIDP "pres ",key NoIDP "=",text' NoIDP " Presentation ", text' NoIDP " $"]
+                          , row' [ text' NoIDP "         ", _slides_pres]
                           ]
-                  , vSpace 10
-                  ] ++
-                    if _viewType
-                    then
-                      [ row' [ text' NoIDP "pres ",key NoIDP "=",text' NoIDP " Presentation ", text' NoIDP " $"]
-                      , row' [ text' NoIDP "         "
-                             , loc (SlidesNode _slides_self _slides_path) $ structural $ presentFocus _lhs_focusD _slides_path $
-                                 presentList _slides_press ]
-                      ]
-                    else
-                      [ loc (SlidesNode _slides_self _slides_path) $ structural $ presentFocus _lhs_focusD _slides_path $
-                                col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) _slides_press2
-                      ]
-         ,_self
-         ,_slides_varsInScopeAtFocus
-         )
+                        else
+                          [ _slides_pres2
+                          ]
+             ,_self
+             ,_slides_varsInScopeAtFocus
+             )
 sem_PPPresentation_ParseErrPPPresentation :: (Node) ->
                                              (Presentation) ->
                                              (T_PPPresentation)
-sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation) (_lhs_focusD) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrPPPresentation _node _presentation
-    in  ( _lhs_pIdC,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
+sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrPPPresentation _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
 -- Slide -------------------------------------------------------
 {-
    inherited attributes:
@@ -2940,7 +4514,7 @@ sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation) (_lhs_focusD) 
    synthesised attributes:
       pres                 : Presentation
       pres2                : Presentation
-      self                 : Slide
+      self                 : SELF
 
 -}
 {-
@@ -2977,140 +4551,74 @@ sem_Slide ((ParseErrSlide (_node) (_presentation))) =
 sem_Slide ((Slide (_idd) (_title) (_itemList))) =
     (sem_Slide_Slide (_idd) ((sem_String_ (_title))) ((sem_ItemList (_itemList))))
 sem_Slide_HoleSlide :: (T_Slide)
-sem_Slide_HoleSlide (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleSlide
-    in  ( _lhs_pIdC,presHole _lhs_focusD "Slide" (SlideNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Slide" (SlideNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
+sem_Slide_HoleSlide  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                HoleSlide
+        in  ( _lhs_pIdC,presHole _lhs_focusD "Slide" (SlideNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Slide" (SlideNode _self _lhs_path) _lhs_path,_self,_lhs_varsInScopeAtFocus)
 sem_Slide_ParseErrSlide :: (Node) ->
                            (Presentation) ->
                            (T_Slide)
-sem_Slide_ParseErrSlide (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrSlide _node _presentation
-    in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
+sem_Slide_ParseErrSlide (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                ParseErrSlide _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_varsInScopeAtFocus)
 sem_Slide_Slide :: (IDD) ->
                    (T_String_) ->
                    (T_ItemList) ->
                    (T_Slide)
-sem_Slide_Slide (_idd) (_title) (_itemList) (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            Slide _idd _title_self _itemList_self
-        ( _title_pres,_title_pres2,_title_self) =
-            (_title (_lhs_focusD) (_lhs_path++[0]))
-        ( _itemList_pIdC,_itemList_pres,_itemList_pres2,_itemList_self,_itemList_varsInScopeAtFocus) =
-            (_itemList (_lhs_focusD) (_lhs_pIdC + 1) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-    in  ( _itemList_pIdC
-         ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-            col' [ row' [ text' NoIDP "Slide ", _title_pres, text' NoIDP " $"]
-                 , row' [ text' NoIDP "  ", _itemList_pres ]
-                 ]
-         ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-             slide _title_pres2
-                   _itemList_pres2
-         ,_self
-         ,_itemList_varsInScopeAtFocus
-         )
--- Slides ------------------------------------------------------
-{-
-   inherited attributes:
-      focusD               : FocusDoc
-      ix                   : Int
-      ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      varsInScope          : FiniteMap String (PathDoc, String)
-
-   chained attributes:
-      pIdC                 : Int
-      path                 : [Int]
-      varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
-
-   synthesised attributes:
-      press                : [Presentation]
-      press2               : [Presentation]
-      self                 : Slides
-
--}
-{-
-   local variables for Slides.ConsSlides:
-      self
-
--}
-{-
-   local variables for Slides.HoleSlides:
-      self
-
--}
-{-
-   local variables for Slides.NilSlides:
-      self
-
--}
-{-
-   local variables for Slides.ParseErrSlides:
-      self
-
--}
--- semantic domain
-type T_Slides = (FocusDoc) ->
-                (Int) ->
-                (Int) ->
-                ([Int]) ->
-                (([PathDoc],[PathDoc],[PathDoc])) ->
-                (FiniteMap String (PathDoc, String)) ->
-                (FiniteMap String (PathDoc, String)) ->
-                ( (Int),([Int]),([Presentation]),([Presentation]),(Slides),(FiniteMap String (PathDoc, String)))
--- cata
-sem_Slides :: (Slides) ->
-              (T_Slides)
-sem_Slides ((ConsSlides (_idd) (_slide) (_slides))) =
-    (sem_Slides_ConsSlides (_idd) ((sem_Slide (_slide))) ((sem_Slides (_slides))))
-sem_Slides ((HoleSlides )) =
-    (sem_Slides_HoleSlides )
-sem_Slides ((NilSlides (_idd))) =
-    (sem_Slides_NilSlides (_idd))
-sem_Slides ((ParseErrSlides (_node) (_presentation))) =
-    (sem_Slides_ParseErrSlides (_node) (_presentation))
-sem_Slides_ConsSlides :: (IDD) ->
-                         (T_Slide) ->
-                         (T_Slides) ->
-                         (T_Slides)
-sem_Slides_ConsSlides (_idd) (_slide) (_slides) (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ConsSlides _idd _slide_self _slides_self
-        ( _slide_pIdC,_slide_pres,_slide_pres2,_slide_self,_slide_varsInScopeAtFocus) =
-            (_slide (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 1) (_lhs_path++[_lhs_ix]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
-        ( _slides_pIdC,_slides_path,_slides_press,_slides_press2,_slides_self,_slides_varsInScopeAtFocus) =
-            (_slides (_lhs_focusD) (_lhs_ix + 1) (_slide_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_slide_varsInScopeAtFocus))
-    in  ( _slides_pIdC,_lhs_path,_slide_pres : _slides_press,_slide_pres2 : _slides_press2,_self,_slides_varsInScopeAtFocus)
-sem_Slides_HoleSlides :: (T_Slides)
-sem_Slides_HoleSlides (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            HoleSlides
-    in  ( _lhs_pIdC,_lhs_path,[presHole _lhs_focusD "Slides" (SlidesNode _self _lhs_path) _lhs_path],[presHole _lhs_focusD "Slides" (SlidesNode _self _lhs_path) _lhs_path],_self,_lhs_varsInScopeAtFocus)
-sem_Slides_NilSlides :: (IDD) ->
-                        (T_Slides)
-sem_Slides_NilSlides (_idd) (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            NilSlides _idd
-    in  ( _lhs_pIdC,_lhs_path,[],[],_self,_lhs_varsInScopeAtFocus)
-sem_Slides_ParseErrSlides :: (Node) ->
-                             (Presentation) ->
-                             (T_Slides)
-sem_Slides_ParseErrSlides (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_pIdC) (_lhs_path) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus) =
-    let (_self) =
-            ParseErrSlides _node _presentation
-    in  ( _lhs_pIdC,_lhs_path,[presParseErr _node _presentation],[presParseErr _node _presentation],_self,_lhs_varsInScopeAtFocus)
+sem_Slide_Slide (_idd) (_title) (_itemList) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                Slide _idd _title_self _itemList_self
+            ( _title_pIdC,_title_pres,_title_pres2,_title_self) =
+                (_title (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _itemList_pIdC,_itemList_pres,_itemList_pres2,_itemList_self,_itemList_varsInScopeAtFocus) =
+                (_itemList (_lhs_focusD) (_lhs_ix) (_title_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
+        in  ( _itemList_pIdC
+             ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                col' [ row' [ text' NoIDP "Slide ", _title_pres, text' NoIDP " $"]
+                     , row' [ text' NoIDP "  ", _itemList_pres ]
+                     ]
+             ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                 slide _title_pres2
+                       _itemList_pres2
+             ,_self
+             ,_itemList_varsInScopeAtFocus
+             )
 -- String_ -----------------------------------------------------
 {-
    inherited attributes:
       focusD               : FocusDoc
+      ix                   : Int
       path                 : [Int]
 
    chained attributes:
+      pIdC                 : Int
 
    synthesised attributes:
       pres                 : Presentation
       pres2                : Presentation
-      self                 : String_
+      self                 : SELF
 
 -}
 {-
@@ -3130,8 +4638,10 @@ sem_Slides_ParseErrSlides (_node) (_presentation) (_lhs_focusD) (_lhs_ix) (_lhs_
 -}
 -- semantic domain
 type T_String_ = (FocusDoc) ->
+                 (Int) ->
+                 (Int) ->
                  ([Int]) ->
-                 ( (Presentation),(Presentation),(String_))
+                 ( (Int),(Presentation),(Presentation),(String_))
 -- cata
 sem_String_ :: (String_) ->
                (T_String_)
@@ -3142,30 +4652,43 @@ sem_String_ ((ParseErrString_ (_node) (_presentation))) =
 sem_String_ ((String_ (_idd) (_string))) =
     (sem_String__String_ (_idd) (_string))
 sem_String__HoleString_ :: (T_String_)
-sem_String__HoleString_ (_lhs_focusD) (_lhs_path) =
-    let (_self) =
-            HoleString_
-    in  ( presHole _lhs_focusD "String_" (String_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (String_Node _self _lhs_path) _lhs_path,_self)
+sem_String__HoleString_  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleString_
+        in  ( _lhs_pIdC,presHole _lhs_focusD "String_" (String_Node _self _lhs_path) _lhs_path,presHole _lhs_focusD "String_" (String_Node _self _lhs_path) _lhs_path,_self)
 sem_String__ParseErrString_ :: (Node) ->
                                (Presentation) ->
                                (T_String_)
-sem_String__ParseErrString_ (_node) (_presentation) (_lhs_focusD) (_lhs_path) =
-    let (_self) =
-            ParseErrString_ _node _presentation
-    in  ( presParseErr _node _presentation,presParseErr _node _presentation,_self)
+sem_String__ParseErrString_ (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrString_ _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,_self)
 sem_String__String_ :: (IDD) ->
                        (String) ->
                        (T_String_)
-sem_String__String_ (_idd) (_string) (_lhs_focusD) (_lhs_path) =
-    let (_self) =
-            String_ _idd _string
-    in  ( row' [ text' NoIDP "\""
-               , loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                   row' [text' NoIDP _string, text' NoIDP ""]
-               , text' NoIDP "\""
-               ] `withColor` darkViolet
-         ,loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-             row' [text' NoIDP _string, text' NoIDP ""]
-         ,_self
-         )
+sem_String__String_ (_idd) (_string) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                String_ _idd _string
+        in  ( _lhs_pIdC
+             ,row' [ text' NoIDP "\""
+                   , loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                       row' [text' NoIDP _string, text' NoIDP ""]
+                   , text' NoIDP "\""
+                   ] `withColor` darkViolet
+             ,loc (String_Node _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                 row' [text' NoIDP _string, text' NoIDP ""]
+             ,_self
+             )
 

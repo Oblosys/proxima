@@ -21,13 +21,24 @@ INCLUDE "PresentationAG_Generated.ag"
 INCLUDE "LambdaReduce.ag"
 {-
 
-Xprez problem, background color on row with one StringP element does not work.
-Temporary workaround, add StringP _ "" to row
 
+
+TODO: fix loc and path for case and let exps
+
+-- parsing/structural nodes should be inserted above holes and parse errors as well!
+-- otherwise recognition/gatherchildren misses children
+
+
+-- need control over structural navigation! focus on invisible elements, or Ident instead of IdentExp
+-- is not good. 
 Important:
 
 When defining new attributes on Exp, take care that the (,,,,) patterns at LamExp.val and LetExp.val in the evaluator AG
 are updated as well. Both mimic higher order ag behavior by calling the semExp function.
+
+Xprez problem, background color on row with one StringP element does not work.
+Temporary workaround, add StringP _ "" to row
+
 -}
 
                  
@@ -40,12 +51,16 @@ are updated as well. Both mimic higher order ag behavior by calling the semExp f
 --
 --------------------------------------------------------------
 
-SEM Decls [ | | parseErrs : {[String]} ]
-  | ConsDecls     lhs.parseErrs = []
-  | NilDecls      lhs.parseErrs = []
-  | HoleDecls     lhs.parseErrs = []
-  | ParseErrDecls lhs.parseErrs = @parseErrs
+SEM List_Decl [ | | parseErrs : {[String]} ]
+  | ParseErrList_Decl
+      lhs.parseErrs = []  --- NOT RIGHT!
+  | HoleList_Decl
+      lhs.parseErrs = []
 
+SEM ConsList_Decl [ | | parseErrs : {[String]} ]
+  | Cons_Decl     lhs.parseErrs = []
+  | Nil_Decl      lhs.parseErrs = []
+  
 --------------------------------------------------------------
 --
 -- Document Presentation
@@ -53,16 +68,16 @@ SEM Decls [ | | parseErrs : {[String]} ]
 --------------------------------------------------------------
 
 
-ATTR Decls Decl Exp Exps Alts Alt -- don't want to put these in Exp and Exps, but otherwise we have
+ATTR List_Decl ConsList_Decl Decl Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt -- don't want to put these in Exp and Exps, but otherwise we have
                                   -- to define them at LetExp's
                          [ errs : {[HeliumMessage]}
                            topLevelEnv : {[(String, String)]}
                            typeEnv     : {[(PathDoc,String)]} | | ]
 
 
-ATTR Decls Decl Ident Exp Exps Alts Alt [ ranges : {([PathDoc],[PathDoc],[PathDoc])} | | ]
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ ranges : {([PathDoc],[PathDoc],[PathDoc])} | | ]
 
-ATTR Decls Decl Ident Exp Exps Alts Alt [ level : Int | | ] -- level of declarations 0 = top
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ level : Int | | ] -- level of declarations 0 = top
 SEM EnrichedDoc
   | RootEnr
       decls.level = 0
@@ -94,11 +109,11 @@ SEM EnrichedDoc
                        , hLine
                        , row' [ hSpace 3
                               , text "Top level identifiers:"
-                              , loc (DeclsNode @idListDecls.self @idListDecls.path) $ parsing $ presentFocus @lhs.focusD @idListDecls.path $ row[ text " ", @idListDecls.idsPres] `withFontSize` 10
+                              , row[ text " ", @idListDecls.idsPres] `withFontSize` 10
                               ] 
-                       , vSpace 4
+                       , debug Err ("children are"++ show @decls.self) $ vSpace 4
                        , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
-                       , row' [ hSpace 3, loc (DeclsNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press ]
+                       , row' [ hSpace 3, @decls.pres ]
                        , vSpace 10                                     
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez     
@@ -134,6 +149,26 @@ errColor = red
 
 }                   
 
+SEM List_Decl [ || pres : Presentation ]
+  | List_Decl
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row @elts.press
+  | ParseErrList_Decl
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   presParseErr @node @presentation
+  | HoleList_Decl
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Decls" (List_DeclNode @self @lhs.path) @lhs.path
+                 
+{-                 
+SEM List_Decl
+  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                                    @elts.idsPres
+  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (List_DeclNode @self @lhs.path) @lhs.path
+  | ParseErrList_Decl lhs.idsPres = empty  -- must be empty, otherwise initDoc hack fails
+  -}               
+                 
+                   
 SEM Decl
   | Decl         
       lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -251,13 +286,13 @@ SEM Exp
                    row' [ key (mkIDP @idP0 @lhs.pIdC 0) "case"
                         , @exp.pres
                         , key (mkIDP @idP1 @lhs.pIdC 1) "of"
-                        , loc (AltsNode @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press 
+                        , loc (List_AltNode @alts.self [] {- @alts.path-}) $ parsing $ presentFocus @lhs.focusD [] {-@alts.path-} $ row @alts.press 
                         ] 
   | LetExp      
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row' [ key (mkIDP @idP0 @lhs.pIdC 0) "let"
-                        , loc (DeclsNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press 
+                        , loc (List_DeclNode @decls.self []{-@decls.path-}) $ parsing $ presentFocus @lhs.focusD [] {-@decls.path-} $ row @decls.press 
                         , key (mkIDP @idP1 @lhs.pIdC 1) "in", @exp.pres ] 
                                      
 
@@ -290,7 +325,7 @@ SEM Exp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row' $    [sep (mkIDP @idP0 @lhs.pIdC 0) "["]
-                          ++ let xps = map (loc (ExpsNode @exps.self @exps.path) . parsing . presentFocus @lhs.focusD @exps.path) @exps.press
+                          ++ let xps = @exps.press
                                  sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )  
                              in (if null xps
                                  then []
@@ -300,13 +335,12 @@ SEM Exp
       lhs.pres = loc (ExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row' $    [sep (mkIDP @idP0 @lhs.pIdC 0) "("]
-                          ++ let xps = map (loc (ExpsNode @exps.self @exps.path) . parsing . presentFocus @lhs.focusD @exps.path) @exps.press
+                          ++ let xps = @exps.press
                                  sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )  
                              in  if null xps
                                  then []
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
                           ++ [sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
-
 
 
 SEM Alt
@@ -471,9 +505,9 @@ and on parsing, the doc->pres mapping will be set correctly
 
 -- merge the counters
 
-ATTR EnrichedDoc Decls Decl Ident Exp Exps Alts Alt [ | layoutMap : LayoutMap | ]
+ATTR EnrichedDoc List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | layoutMap : LayoutMap | ]
 
-ATTR Decls Decl Ident Exp Exps Alts Alt [ | newlines, spaces, col : Int | ]
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | newlines, spaces, col : Int | ]
 
 SEM EnrichedDoc
   | RootEnr 
@@ -630,9 +664,10 @@ SEM Exp
             lhs.col = @exps.col + 1+1 --" )"
             lhs.newlines = 0
             lhs.spaces = 0
-SEM Exps -- all exps get same (newlines, spaces)
-  | ConsExps
-      exps.col = @exp.col + 2 --", "
+
+SEM ConsList_Exp -- all exps get same (newlines, spaces)
+  | Cons_Exp
+      tail.col = @head.col + 2 --", "
 
 -- alts compute a maximum lefthand side length, that is sent back down at the case node.
 SEM Alt [ totalMaxLHSLength : Int | | lhsLength : Int ]
@@ -652,16 +687,18 @@ SEM Alt [ totalMaxLHSLength : Int | | lhsLength : Int ]
     | ParseErrAlt
         lhs.lhsLength = 0
 
+SEM List_Alt  [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
+    | HoleList_Alt
+        lhs.maxLHSLength = 0
+    | ParseErrList_Alt
+        lhs.maxLHSLength = 0
+        
+SEM ConsList_Alt [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
+    | Cons_Alt
+        lhs.maxLHSLength = @head.lhsLength `max` @tail.maxLHSLength
+    | Nil_Alt
+        lhs.maxLHSLength = 0
 
-SEM Alts [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
-    | ConsAlts
-        lhs.maxLHSLength = @alt.lhsLength `max` @alts.maxLHSLength
-    | NilAlts
-        lhs.maxLHSLength = 0
-    | HoleAlts
-        lhs.maxLHSLength = 0
-    | ParseErrAlts
-        lhs.maxLHSLength = 0
 --------------------------------------------------------------
 --
 -- Simple Type computations
@@ -688,7 +725,7 @@ SEM Decl
 
 -- variables in scope
 
-ATTR Decls Decl Ident Exp Exps Alts Alt [ varsInScope : {FiniteMap String (PathDoc, String)} 
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ varsInScope : {FiniteMap String (PathDoc, String)} 
                                         | varsInScopeAtFocus : {FiniteMap String (PathDoc, String)} 
                                         | 
                                         ]
@@ -707,7 +744,7 @@ SEM Exp
       exp.varsInScope = addToFM @lhs.varsInScope (strFromIdent @ident.self) 
                                                  (PathD $ (@lhs.path++[0]), @exp.type) 
 
-ATTR Decls Decl [ | | declaredVars USE {++} {[]} : {[(String,(PathDoc,String))]} ] 
+ATTR List_Decl ConsList_Decl Decl [ | | declaredVars USE {++} {[]} : {[(String,(PathDoc,String))]} ] 
 
 SEM Decl
   | Decl
@@ -855,12 +892,16 @@ evaluateIntOp _  _           _           = ErrVal
 SEM EnrichedDoc
   | RootEnr
       decls.env = @decls.dcls
-            
-SEM Decls [ env : Bindings | | dcls : Bindings ]
-  | ConsDecls     lhs.dcls  = @decl.dcl : @decls.dcls
-  | NilDecls      lhs.dcls  = []
-  | HoleDecls     lhs.dcls  = []
-  | ParseErrDecls lhs.dcls  = []
+     
+SEM List_Decl [ env : Bindings | | dcls : Bindings ]
+  | ParseErrList_Decl
+      lhs.dcls = []
+  | HoleList_Decl
+      lhs.dcls = []
+
+SEM ConsList_Decl [ env : Bindings | | dcls : Bindings ]
+  | Cons_Decl     lhs.dcls  = @head.dcl : @tail.dcls
+  | Nil_Decl      lhs.dcls  = []
                 
 SEM Decl [ env : Bindings | | dcl : Binding ]
   | Decl         lhs.dcl   = (@ident.str, @exp.val)
@@ -888,7 +929,7 @@ SEM Exp [ env : Bindings | | val : Value ]
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg -> 
                                      let (_,_,_,_,_,_,_,_,_,_,v,_) = 
-                                           @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                                           @exp undefined ((_ident_str, arg): _lhs_env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                                      in  v)  -- dirty hack because AG does not allow this easily
   | AppExp      lhs.val   = case @exp1.val of LamVal f -> f @exp2.val
                                               _        -> ErrVal
@@ -896,7 +937,7 @@ SEM Exp [ env : Bindings | | val : Value ]
   | CaseExp     lhs.val   = case lookup "a" @alts.alts of {Just v -> v; Nothing -> ErrVal}
   | LetExp      lhs.val   = --@exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             let (_,_,_,_,_,_,_,_,_,_,v,_) = 
-                                  @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                                  @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                             in  v  -- dirty hack because AG does not allow this easily
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }
   | IfExp       lhs.val   = case @exp1.val of BoolVal b -> if b then @exp2.val else @exp3.val
@@ -908,18 +949,26 @@ SEM Exp [ env : Bindings | | val : Value ]
   | ParseErrExp lhs.val   = ErrVal
 
 
-SEM Exps [ env : Bindings | | vals : {[Value]} ]
-  | ConsExps     lhs.vals = @exp.val : @exps.vals
-  | NilExps      lhs.vals = []
-  | HoleExps     lhs.vals = []
-  | ParseErrExps lhs.vals = []
-      
 
-SEM Alts [ env : Bindings | | alts : Bindings ]
-  | ConsAlts     lhs.alts  = @alt.alt : @alts.alts
-  | NilAlts      lhs.alts  = []
-  | HoleAlts     lhs.alts  = []
-  | ParseErrAlts lhs.alts  = []
+SEM List_Exp [ env : Bindings || vals : {[Value]} ]
+  | ParseErrList_Exp
+      lhs.vals = []
+  | HoleList_Exp
+      lhs.vals = []
+
+SEM ConsList_Exp [ env : Bindings | | vals : {[Value]} ]
+  | Cons_Exp     lhs.vals = @head.val : @tail.vals
+  | Nil_Exp      lhs.vals = []
+   
+SEM List_Alt [ env : Bindings | | alts : Bindings ]
+  | ParseErrList_Alt
+      lhs.alts = []
+  | HoleList_Alt
+      lhs.alts = []
+
+SEM ConsList_Alt [ env : Bindings | | alts : Bindings ]
+  | Cons_Alt     lhs.alts  = @head.alt : @tail.alts
+  | Nil_Alt      lhs.alts  = []
                 
 SEM Alt [ env : Bindings | | alt : Binding ]
   | Alt         lhs.alt   = (@ident.str, @exp.val)
@@ -941,7 +990,7 @@ SEM Decl
                    row' [text' (mkIDP @idP0 @lhs.pIdC 0) "Chess: ", @board.pres]
                            
 
-SEM Board [ | | pres : Presentation ] 
+SEM Board [ | | ] 
   | Board 
       lhs.pres = loc (BoardNode @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
                    structural $ colR 4 (reverse [@r1.pres,@r2.pres,@r3.pres,@r4.pres,@r5.pres,@r6.pres,@r7.pres,@r8.pres])
@@ -952,7 +1001,7 @@ SEM Board [ | | pres : Presentation ]
                             Nothing              -> []
       r1.focusedPiece = Nothing
       
-SEM BoardRow [ possibleMoves : {[(Int, Int)]}| sqCol : Bool rowNr : Int focusedPiece : { Maybe (BoardSquare,(Int,Int)) } | pres : Presentation ] 
+SEM BoardRow [ possibleMoves : {[(Int, Int)]}| sqCol : Bool rowNr : Int focusedPiece : { Maybe (BoardSquare,(Int,Int)) } | ] 
   | BoardRow 
       lhs.pres = loc (BoardRowNode @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
                  structural $  row' [@ca.pres,@cb.pres,@cc.pres,@cd.pres,@ce.pres,@cf.pres,@cg.pres,@ch.pres]
@@ -960,7 +1009,7 @@ SEM BoardRow [ possibleMoves : {[(Int, Int)]}| sqCol : Bool rowNr : Int focusedP
       lhs.rowNr = 1 + @lhs.rowNr
       ca.colNr = 0
       
-SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { Maybe (BoardSquare,(Int,Int)) } sqCol : Bool colNr : Int | pres : Presentation ]
+SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { Maybe (BoardSquare,(Int,Int)) } sqCol : Bool colNr : Int | ]
   | King 
       lhs.pres = loc (BoardSquareNode @self @lhs.path) $
                    structural $ Chess.piece @self @color @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
@@ -1011,13 +1060,17 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 --      separate Hole/ParseErr stuff from presentation
 --      can we mix pres with idsPres?
 
-ATTR Decls Decl Ident [ || idsPres : Presentation ]
+ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation ]
 
-SEM Decls
-  | ConsDecls     lhs.idsPres = row' [ @decl.idsPres, text " ", @decls.idsPres ]
-  | NilDecls      lhs.idsPres = empty
-  | HoleDecls     lhs.idsPres = presHole @lhs.focusD "Decls" (DeclsNode @self @lhs.path) @lhs.path
-  | ParseErrDecls lhs.idsPres = empty  -- must be empty, otherwise initDoc hack fails
+SEM List_Decl
+  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                                    @elts.idsPres
+  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (List_DeclNode @self @lhs.path) @lhs.path
+  | ParseErrList_Decl lhs.idsPres = empty  -- must be empty, otherwise initDoc hack fails
+
+SEM ConsList_Decl
+  | Cons_Decl     lhs.idsPres = row' [ @head.idsPres, text " ", @tail.idsPres ]
+  | Nil_Decl      lhs.idsPres = empty
                  
 SEM Decl
   | Decl               lhs.idsPres = loc (DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1050,17 +1103,9 @@ SEM EnrichedDoc -- don't understand why this is necessary, it should not be used
             idListDecls.varsInScopeAtFocus = emptyFM
             
             idListDecls.ranges = ([],[],[])
-            idListDecls.ix = 0
-            idListDecls.path = []
+--            idListDecls.ix = 0
+--            idListDecls.path = []
             
-
-
-
-
-
-
-
-
 ------------------------- PowerPoint stuff:
 
 
@@ -1070,7 +1115,6 @@ SEM Item
   | HeliumItem exp.col = 0         -- auto layout
                exp.newlines = 0    --
                exp.spaces = 0      --
-               exp.pIdC = 0        --
                 
                exp.level = 0 -- not right
                exp.layoutMap = emptyFM
@@ -1080,17 +1124,13 @@ SEM Item
                exp.topLevelEnv = []
                exp.env = []
 
-ATTR PPPresentation Slides Slide ItemList ListType Items Item
+ATTR PPPresentation List_Slide ConsList_Slide Slide ItemList ListType List_Item ConsList_Item Item
                                         [ varsInScope : {FiniteMap String (PathDoc, String)} 
                                         | varsInScopeAtFocus : {FiniteMap String (PathDoc, String)} 
                                         | 
                                         ]
 
-ATTR PPPresentation Slides Slide ItemList ListType Items Item [ ranges : {([PathDoc],[PathDoc],[PathDoc])} | | ]
-
-
-
-
+ATTR PPPresentation List_Slide ConsList_Slide Slide ItemList ListType List_Item ConsList_Item Item [ ranges : {([PathDoc],[PathDoc],[PathDoc])} | | ]
 
 SEM Decl
   | PPPresentationDecl         
@@ -1110,21 +1150,32 @@ SEM PPPresentation
                                         if @viewType 
                                         then
                                           [ row' [ text' NoIDP "pres ",key NoIDP "=",text' NoIDP " Presentation ", text' NoIDP " $"]
-                                          , row' [ text' NoIDP "         "
-                                                 , loc (SlidesNode @slides.self @slides.path) $ structural $ presentFocus @lhs.focusD @slides.path $ 
-                                                     presentList @slides.press ]
-                                                   -- tricky bit
+                                          , row' [ text' NoIDP "         ", @slides.pres]
                                           ]
                                         else
-                                          [ loc (SlidesNode @slides.self @slides.path) $ structural $ presentFocus @lhs.focusD @slides.path $ 
-                                                    col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) @slides.press2
+                                          [ @slides.pres2
                                           ]
--- tricky bit: loc and structural for list has to be set by parent, which is not elegant
--- instead of only cons and nil (eg ConsSlides (consSlides .. NilSlides)),
--- we need ListSlides (ConsSlides (ConsSlides ... NilSlides)),
--- so attribution for List can do these things
-                                      
-  
+
+SEM List_Slide [ || pres : Presentation ]
+  | List_Slide
+      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presentList @elts.press
+  | ParseErrList_Slide
+      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presParseErr @node @presentation
+  | HoleList_Slide
+      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Slides" (List_SlideNode @self @lhs.path) @lhs.path
+
+
+{
+presentList []     = row' [sep NoIDP "  []"]
+presentList (p:ps) = col' $  [ row' [sep NoIDP "  [ ", p ] ]
+                          ++ [ row' [sep NoIDP "  , ", p]| p <- ps ]
+                          ++ [ sep NoIDP "  ] "]
+}
+
+                                        
 SEM Slide
   | Slide lhs.pres = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col' [ row' [ text' NoIDP "Slide ", @title.pres, text' NoIDP " $"]
@@ -1134,15 +1185,20 @@ SEM Slide
 SEM ItemList
   | ItemList lhs.pres = loc (ItemListNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                           col' [ row' [ text' NoIDP "ItemList ", @listType.pres, text' NoIDP " $"]
-                            , loc (ItemsNode @items.self @items.path) $ structural $ presentFocus @lhs.focusD @items.path $ 
-                                 presentList @items.press
+                               , @items.pres
                             ]
-{
-presentList []     = row' [sep NoIDP "  []"]
-presentList (p:ps) = col' $  [ row' [sep NoIDP "  [ ", p ] ]
-                          ++ [ row' [sep NoIDP "  , ", p]| p <- ps ]
-                          ++ [ sep NoIDP "  ] "]
-}
+
+SEM List_Item [ || pres : Presentation ]
+  | List_Item
+      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presentList @elts.press
+  | ParseErrList_Item
+      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presParseErr @node @presentation
+  | HoleList_Item
+      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Items" (List_ItemNode @self @lhs.path) @lhs.path
+
                                 
 SEM ListType
   | Bullet         lhs.pres = loc (ListTypeNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1151,7 +1207,6 @@ SEM ListType
                                 text' NoIDP "Number"
   | Alpha          lhs.pres = loc (ListTypeNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 text' NoIDP "Alpha"
-
 
 SEM Item
   | StringItem     lhs.pres = loc (ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1186,7 +1241,19 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
 }
 
 ATTR Slide ItemList {- ListType -} Item String_ [ || pres2 : Presentation ]
-ATTR Slides Items [ || press2 : {[Presentation]} ]
+ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation]} ]
+
+SEM List_Slide [ || pres2 : Presentation ]
+  | List_Slide
+      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) @elts.press2
+  | ParseErrList_Slide
+      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presParseErr @node @presentation
+  | HoleList_Slide
+      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Slides" (List_SlideNode @self @lhs.path) @lhs.path
+
 
 SEM Slide
   | Slide lhs.pres2 = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1196,15 +1263,27 @@ SEM Slide
 -- Tricky: need to put an invisible structural presentation of listTypeNode, because
 -- makeStructuralListType expects it
 -- since non list nodes have no synthesized path, pass error. It will not be used anyway
+
 SEM ItemList
   | ItemList lhs.pres2 = loc (ItemListNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                           row' [ loc (ListTypeNode @listType.self (error "no path")) $ structural $
+                           row' [ loc (ListTypeNode @listType.self (debug Err "no path in invisible ListType" [])) $ structural $
                                     empty
-                                , loc (ItemsNode @items.self @items.path) $ structural $ presentFocus @lhs.focusD @items.path $ 
-                                    col' @items.press2
+                                , @items.pres2
                                 ]
                             -- list gets loc and structural
             items.listType = @listType.self
+
+SEM List_Item [ || pres2 : Presentation ]
+  | List_Item
+      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   col' @elts.press2
+  | ParseErrList_Item
+      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presParseErr @node @presentation
+  | HoleList_Item
+      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Items" (List_ItemNode @self @lhs.path) @lhs.path
+
 
 SEM Item [ listType : ListType || ]
   | StringItem     lhs.pres2 = loc (ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1229,24 +1308,24 @@ SEM String_
 itemStart i (Bullet _) = text' NoIDP "- "
 itemStart i (Number _) = text' NoIDP (show (i+1) ++ ") ")
 itemStart i (Alpha  _) = text' NoIDP (chr (ord 'a' + i):") ")
+itemStart i (_)        = text' NoIDP "  "
 }
 
 
 
-SEM Slides
-  | ConsSlides lhs.press2 = @slide.pres2 : @slides.press2
-  | NilSlides  lhs.press2 = []
+SEM ConsList_Slide
+  | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
+  | Nil_Slide  lhs.press2 = []
 
-SEM Items [ listType : ListType || ]
-  | ConsItems lhs.press2 = @item.pres2 : @items.press2
-              item.listType = @lhs.listType
-  | NilItems  lhs.press2 = []
+ATTR List_Item [ listType : ListType || ]
+SEM ConsList_Item [ listType : ListType || ]
+  | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
+              head.listType = @lhs.listType
+  | Nil_Item  lhs.press2 = []
 
-
-
-SEM Slides
-  | HoleSlides     lhs.press2 = [presHole @lhs.focusD "Slides" (SlidesNode @self @lhs.path) @lhs.path]
-  | ParseErrSlides lhs.press2 = [presParseErr @node @presentation]
+SEM List_Slide
+  | HoleList_Slide     lhs.press2 = [presHole @lhs.focusD "Slides" (List_SlideNode @self @lhs.path) @lhs.path]
+  | ParseErrList_Slide lhs.press2 = [presParseErr @node @presentation]
 
 SEM Slide
   | HoleSlide     lhs.pres2 = presHole @lhs.focusD "Slide" (SlideNode @self @lhs.path) @lhs.path
@@ -1257,9 +1336,9 @@ SEM ItemList
   | ParseErrItemList lhs.pres2 = presParseErr @node @presentation
 
 
-SEM Items
-  | HoleItems     lhs.press2 = [presHole @lhs.focusD "Items" (ItemsNode @self @lhs.path) @lhs.path]
-  | ParseErrItems lhs.press2 = [presParseErr @node @presentation]
+SEM List_Item
+  | HoleList_Item     lhs.press2 = [presHole @lhs.focusD "Items" (List_ItemNode @self @lhs.path) @lhs.path]
+  | ParseErrList_Item lhs.press2 = [presParseErr @node @presentation]
 
 SEM Item
   | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (ItemNode @self @lhs.path) @lhs.path
@@ -1268,5 +1347,86 @@ SEM Item
 SEM String_
   | HoleString_     lhs.pres2 = presHole @lhs.focusD "String_" (String_Node @self @lhs.path) @lhs.path
   | ParseErrString_ lhs.pres2 = presParseErr @node @presentation
+
+
+
+
+
+
+
+
+--- Required changes for boxed lists
+-- change EvaluateTypes.hs
+-- change ...Node in presentationAG
+-- change ProxParser to add extra List element
+-- change presentationAG
+
+
+-- remove pres attr decl and default for hole and parseErr
+-- idpc is bit different
+-- path attribution is just copy
+{-
+SEM List_Exp
+  | List_Exp elts.path  = @lhs.path -- ++ [0]
+
+SEM List_Exp
+  | List_Exp
+      lhs.press = map (  loc (List_ExpNode @self @lhs.path) 
+                      -- . parsing -- if press is used, the parent is reponsible for setting parsing/structural
+                       . presentFocus @lhs.focusD @lhs.path ) 
+                      @elts.press
+  | ParseErrList_Exp 
+      lhs.press = []
+  | HoleList_Exp
+      lhs.press = []
+
+
+SEM ConsList_Exp
+  | Cons_Exp head.path  = @lhs.path++[@lhs.ix]
+             tail.path = @lhs.path
+  | Cons_Exp     lhs.press = @head.pres : @tail.press
+  | Nil_Exp      lhs.press = []
+
+SEM ConsList_Exp [ ix : Int | | ]
+  | Cons_Exp     tail.ix  = @lhs.ix + 1
+
+SEM List_Exp
+  | List_Exp elts.ix = 0
+
+
+SEM List_Exp
+  | List_Exp elts.pIdC = @lhs.pIdC + 1
+             lhs.pIdC = @elts.pIdC
+
+SEM ConsList_Exp
+  | Cons_Exp head.pIdC = @lhs.pIdC + 2
+             tail.pIdC = @head.pIdC
+             lhs.pIdC = @tail.pIdC
+
+
+  
+
+List & ConsList
+ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
+       [ path : {[Int]} | | ]
+
+List & ConsList
+
+ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
+       [ |  pIdC : Int  | ]
+
+List & ConsList
+ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
+       [ focusD : FocusDoc | | ]
+
+List & ConsList
+ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation]} ]
+
+ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation ]
+
+
+ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ ix : Int || ]
+
+-}  
 
                          
