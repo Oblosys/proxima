@@ -1963,7 +1963,7 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
                            , row[ text " ", _idListDecls_idsPres] `withFontSize` 10
                            ]
                     , vSpace 4
-                    , structural $ row [ hSpace 3, box $ row [  hSpace 3, _decls_presTree, text "   ", vLine, text "   ", _decls_presXML `withFont'` ("Courier New",8) ] ]
+                    , structural $ row [ hSpace 3, box $ row [  hSpace 3, _decls_presTree, text "   ", vLine, text "   ", _decls_presXML `withFont'` ("Courier New",8), hSpace 3]]
                     , vSpace 14
                     , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                     , row' [ hSpace 3, _decls_pres ]

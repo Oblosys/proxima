@@ -116,7 +116,7 @@ SEM EnrichedDoc
                               , row[ text " ", @idListDecls.idsPres] `withFontSize` 10
                               ] 
                        , vSpace 4
-                       , structural $ row [ hSpace 3, box $ row [  hSpace 3, @decls.presTree, text "   ", vLine, text "   ", @decls.presXML `withFont'` ("Courier New",8) ] ]
+                       , structural $ row [ hSpace 3, box $ row [  hSpace 3, @decls.presTree, text "   ", vLine, text "   ", @decls.presXML `withFont'` ("Courier New",8), hSpace 3]]
                        , vSpace 14
                        , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                        , row' [ hSpace 3, @decls.pres ]
