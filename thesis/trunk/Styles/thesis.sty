@@ -25,14 +25,31 @@
 \usepackage{ifthen}
 \usepackage[dutch,english]{babel}
 
-% Begin Martijn
+%%%%%%%%%
+% Begin Martijn  %
+%%%%%%%%%
+
+%% block comment stuff %%
 %\usepackage{version}
 %\usepackage{comment}
 \let\bc=\iffalse % start block comment
 \let\ec=\fi        % end block comment
 
 % if comments give problems, one of the packages can be used.
-% End Martijn
+
+%% Easy lists %%
+
+\newcommand{\bl}[0]{\begin{itemize}}
+\renewcommand{\o}[0]{\item}  % \o used to be ø, but we never use that one anyway.
+\newcommand{\el}[0]{\end{itemize}}
+
+%% new counters %%
+
+\newcounter{specification}
+
+%%%%%%%%
+% End Martijn %
+%%%%%%%%
 
 \setlength{\paperheight}{240mm}
 \setlength{\textheight}{190mm}

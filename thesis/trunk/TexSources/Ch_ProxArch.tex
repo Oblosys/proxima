@@ -380,7 +380,7 @@ Tokens form a special case in the presentation process, because a token contains
 
 If an enriched document element that is presented with tokens, is newly created or has not been presented before, a default value for the whitespace of its tokens is chosen. This default may come from a pretty print algorithm. A default value may be used also in case a structure has been edited in such a way that reusing the old tokens does not make sense.
 
-The mechanism of reusing presentation tokens is also used to handle ambiguities in token representations. For example when a user has entered the text "001" which is stored in the document as the integer 1, the mapping between the enriched document and the presentation ensures that on re-presentation, the integer is presented as "001" instead of "1"
+The mechanism of reusing presentation tokens is also used to handle ambiguities in token representations. For example, when a user has entered the text "001" which is stored in the document as the integer 1, the mapping between the enriched document and the presentation ensures that on re-presentation, the integer is presented as "001" instead of "1"
 
 % strongly related to evaluator
 The evaluator and the presenter both make use of the attribute grammar formalism and are closely related. The separation between evaluating and presenting is not strict. On the one hand, the entire presentation can be regarded as a derived structure, and on the other hand the presentation sheet can reorder elements in the presentation and introduce structures, which is more appropriately done in the evaluation sheet. 
