@@ -266,7 +266,7 @@ According to \law{\fn{wp}-Char}, $\hoare{\true} {Comp} { \level''\L = \present~\
 
 $\true ~\imp~ \wp{Comp}{ \level''\L = \present~\level''\H }$
 
-\bc Unlike the other proofs in this section, we start the weakest precondition proofs with the antecedent of the implication and work toward the conclusion. This way, the order of the subsitutions in the proof steps corresponds to the evaluation order of the assignment statements in $Comp$. \ec
+\bc Unlike the other proofs in this section, we start the weakest precondition proofs with the antecedent of the implication and work toward the conclusion. This way, the order of the substitutions in the proof steps corresponds to the evaluation order of the assignment statements in $Comp$. \ec
 
 \begin{proof} 
 \begin{Prf}&
@@ -776,7 +776,7 @@ The \law{Intended} requirement is somewhat more subtle, since it has a double fu
 
 On the other hand, \law{Intended} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
 %$\present \eqcl{level''\H}$
- we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guararanteed by \law{$\reuz$-Close} in the same way as on the higher level for \law{Doc-Preserve}.
+ we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guaranteed by \law{$\reuz$-Close} in the same way as on the higher level for \law{Doc-Preserve}.
 
 
 
@@ -913,13 +913,13 @@ We can define two values of type $T$ to be equivalent when they are equal, or on
 x \eqstar y \is  \core~x = \core~y
 }{$\eqstar$-Def}
 
-To see that $\eqstar$ is an equivalence relation, we need the theorem below, the simple proof of which has been omited:
+To see that $\eqstar$ is an equivalence relation, we need the theorem below, the simple proof of which has been omitted:
 
 \xpr{
 \text{``$R$~is an equivalence relation''}~~\eqv~~\exists f : \forall x,y : x\;R\;y ~\eqv~ (f~x = f~y)
 }
 
-By substituting $\core$ for $f$ and $\eqstar$ for $R$ in this theorem, we can immediately conlude that $\eqstar$ is an equivalence relation on $T$. 
+By substituting $\core$ for $f$ and $\eqstar$ for $R$ in this theorem, we can immediately conclude that $\eqstar$ is an equivalence relation on $T$. 
 
 Without giving a proof, we mention that the equivalence classes of $\eqstar$ can be expressed using $\para{\hole}$ and $\core$. 
 
@@ -972,7 +972,7 @@ In this section, we define a function $\reuzestar$ that fills in the wildcards i
 
 We give two examples to show how $\reuzestar$ is used.
 
-Consider a $Token$ data type with a presentation extra state tuple to denote the whitespace. If a token for \verb|"False"| with a whitespace of one linebreak and three spaces is updated to a token \verb|"True"|, then the whitespace of the old token is reused by $\reuzestar$:
+Consider a $Token$ data type with a presentation extra state tuple to denote the whitespace. If a token for \verb|"False"| with a whitespace of one line break and three spaces is updated to a token \verb|"True"|, then the whitespace of the old token is reused by $\reuzestar$:
 
 $(\verb|Token |\texttt{*}_{(Int, Int)} \verb| "True"|) \reuzestar  (\verb|Token (1,3) "False"|) \eq \verb|Token (1,3) "True"|$
 
@@ -2501,7 +2501,7 @@ The \law{Intended} requirement is somewhat more subtle, since it has a double fu
 
 On the other hand, \law{Intended} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
 %$\present \eqcl{level''\H}$
- we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guararanteed by \law{$\reuz$-Close} analogous to the higher level.
+ we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guaranteed by \law{$\reuz$-Close} analogous to the higher level.
 
 
 \ec
@@ -2826,7 +2826,7 @@ The combination of extra state and duplications makes it easy to construct a pre
 
 Related to the specification in this chapter is the work by Meertens~\cite{meertens98maintainers} on maintainers for constraints between a document and its presentation. Given a constraint between two values, Meertens formulates a number of requirements for a pair of functions to be a maintainer for that constraint. In our case, the constraint would be the presentation relation. Meertens also provides a more formal approach to the concept of closeness and gives a number of maintainers for specific constraints.
 
-Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierce03lenses}, and Mu, Hu, and Takeichi~\cite{muhu04inv}, describe injective languages that allow the computation of a document from its (possibly edited) presentation. The language by Mu, Hu, and Takeichi takes into account duplication of information.
+Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierce03lenses}, and Mu, Hu, and Takeichi~\cite{muhu04inv}, describe injective languages that allow the computation of a document from its (possibly edited) presentation. The language by Mu, Hu, and Takeichi also takes into account duplication of information.
 
 The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentations of the use cases from Chapter~\ref{chap:requirements}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. And finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. 
 

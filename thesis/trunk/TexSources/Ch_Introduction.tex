@@ -38,7 +38,7 @@ In response to this situation, we have developed  the presentation-oriented stru
 \ec
 
 \bc para uit advantages of str editors
-Despite the advantages mentioned, generic structure editors are not widespread at all. Several structure editors are used in small communities, but most development projects have been terminated, and in the last decade, very few publications on the subject have appeared. The rise of the XML standard has spawned a large number of generic editors, but when regarded as structure editors, XML editors do not show much variation and do not offer many of the possibilies that a structure editor could offer. Hence, their applicability is limited, and using an XML editor to edit a Java program source, for example, is not possible with the current generation of editors.
+Despite the advantages mentioned, generic structure editors are not widespread at all. Several structure editors are used in small communities, but most development projects have been terminated, and in the last decade, very few publications on the subject have appeared. The rise of the XML standard has spawned a large number of generic editors, but when regarded as structure editors, XML editors do not show much variation and do not offer many of the possibilities that a structure editor could offer. Hence, their applicability is limited, and using an XML editor to edit a Java program source, for example, is not possible with the current generation of editors.
 \ec
 
 
@@ -122,7 +122,7 @@ The popularity of the document standard XML has led to an increasing demand for 
 
 A {\em structured document} is a collection of logical entities between which a structural relation exists. Examples of structured documents are HTML pages, program sources, word processor documents, etc. 
 
-In this thesis, we restrict ourselves to structured documents that have a tree stucture that can be described by an EBNF grammar. Although graphs can be viewed as structured documents as well, algorithms for performing computations over graphs are far more complex than tree algorithms. Furthermore, parsers for graphs are less well understood than parsers for trees, as well as computationally more expensive. 
+In this thesis, we restrict ourselves to structured documents that have a tree structure that can be described by an EBNF grammar. Although graphs can be viewed as structured documents as well, algorithms for performing computations over graphs are far more complex than tree algorithms. Furthermore, parsers for graphs are less well understood than parsers for trees, as well as computationally more expensive. 
 
 In cases where we explicitly want to describe the structure of a document fragment, we use monomorphic (i.e.\ parameter free) Haskell~\cite{peytonJones03haskell} data types together with the list type. Example document fragments are represented by Haskell terms. For example, a document representing the let expression  $\mathbf{let}~x = 1;~y = 2~\mathbf{in}~x+y$
 \bc $(1+2) \times (3 + 4)$\ec can be denoted in Haskell by: 
@@ -154,7 +154,7 @@ The type of an XML document can be specified in several formalisms. The {\em Doc
 %XML is not a meta language.
 %Although XML is often referred to as a meta-language, this is not a very accurate term. Indeed, the DTD part of an XML document may %define a language, However, In general, an XML document does not define a language, but is an element of a language. It is only the DTD %description that defines a language. Hence, it would be more appropriate to refer to XML as a super-language.
 
-Ther number of standards for sublanguages of XML, also referred to as dialects, is rapidly growing. Besides the already mentioned XML Schema, we provide a few more examples.
+The number of standards for sublanguages of XML, also referred to as dialects, is rapidly growing. Besides the already mentioned XML Schema, we provide a few more examples.
 
 The Mathematical Markup Language MathML~\cite{mathml20} is a standard for describing mathematical equations and expressions.  \bc Expressions in MathML can be encoded based on  meaning, as well as on presentation. Hence, $1+2$ can be represented either as a sum  element that has two integer child elements, or as a sequence of three elements: two integers with a plus operator in the middle.  \ec Technical documentation can be represented with the DocBook~\cite{walsh02docbook} standard, which exists for XML as well as for SGML. The standard can also be used for papers and books. Finally, we mention the XHTML~\cite{xhtml11} standard, which is an XML encoding of HTML. Although similar, an HTML document is not necessarily an XML document, since HTML is a dialect of SGML rather than XML.
 
@@ -210,7 +210,7 @@ also in defs
 \ec
 
 % what is sheet
-The presentation relation for an editor may be (partially) specified in a style sheet, or {\em presentation sheet}. A presentation sheet describes how elements of the document type are to be presented, and is a parameter of the presentation process. By modifying the sheet, a user may influence the appearence of the document without having to modify the editor itself. A presentation sheet can be regarded as a parameter to the interpretation process as well, since the interpretation depends on the presentation specified in the sheet. Examples of style-sheet formalisms are the Cascading Style Sheets (CSS)~\cite{css2} for HTML as well as XML, and the Extensible Stylesheet Language (XSL)~\cite{xsl10} for XML.
+The presentation relation for an editor may be (partially) specified in a style sheet, or {\em presentation sheet}. A presentation sheet describes how elements of the document type are to be presented, and is a parameter of the presentation process. By modifying the sheet, a user may influence the appearance of the document without having to modify the editor itself. A presentation sheet can be regarded as a parameter to the interpretation process as well, since the interpretation depends on the presentation specified in the sheet. Examples of style-sheet formalisms are the Cascading Style Sheets (CSS)~\cite{css2} for HTML as well as XML, and the Extensible Stylesheet Language (XSL)~\cite{xsl10} for XML.
 
 %what is the editing process
 Generally speaking, editing consists of repeated interactive cycles of presenting and interpreting. The editor shows a presentation of the document together with the current focus to the user. The user then provides the editor with an {\em edit gesture}, such as a key press or a mouse movement, which is interpreted as an update on the document. The document is then re-presented and shown to the user. The process is repeated until the user quits the editor. Chapters~\ref{chap:informalSpec} and~\ref{chap:formalSpec} provide a more formal description of the editing process.
@@ -295,7 +295,7 @@ An editor that knows about the structure of the edited document can offer intere
 For document types with a textual presentation, such as program sources or XML documents, some of the advantages can be simulated with a text editor. Lexical analysis can be used on the edited text, and basic support for syntax coloring, auto-completion, and navigation can be provided. However, although simple and efficient, these solutions are  very basic and prone to errors, because, in general, much of the structure of a document cannot be recognized at a purely lexical level.
 
 \bc
-sometimes basic structural navigation.  Even though some of the document structure can be recognized at lexical level, in the general case, a full parse is needed. For example, when trying to specify a Haskell function definition as a line in which a '=' character is present, also lines containing strings or comments with '=' characters are identified as funcion definitions. In some cases the problems can be overcome, but in general this amounts to building a parser in a formalism that is too weak for that purpose. Therefore, we will not consider text editors in this overview of editors.
+sometimes basic structural navigation.  Even though some of the document structure can be recognized at lexical level, in the general case, a full parse is needed. For example, when trying to specify a Haskell function definition as a line in which a '=' character is present, also lines containing strings or comments with '=' characters are identified as function definitions. In some cases the problems can be overcome, but in general this amounts to building a parser in a formalism that is too weak for that purpose. Therefore, we will not consider text editors in this overview of editors.
 %*********************************
 \ec
 

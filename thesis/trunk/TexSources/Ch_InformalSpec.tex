@@ -79,7 +79,7 @@ IMPL: mapping downward, how to store in doc? Now datatype changes when pres is m
 
 
 \bc
-In the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), each layer maintains an invariant between adjacent levels. When either the higher or the lower level is changed, the other adjacent level is updated apropriately. The process of updating the levels is largely symmetrical for both directions.
+In the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), each layer maintains an invariant between adjacent levels. When either the higher or the lower level is changed, the other adjacent level is updated appropriately. The process of updating the levels is largely symmetrical for both directions.
 
 This chapter discusses the invariant that is maintained between adjacent levels from the perspective of a single layer. Furthermore, it specifies the additional information necessary for computing the updates that restore the invariants. The invariants given in this chapter hold for any layer in the Proxima system, although some layers are simpler than the generic layer presented here.
 
@@ -281,7 +281,7 @@ Because the presentation or interpretation does not specify the value of the ext
 
 % mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, we asssume that $Present$ not only relates a higher level to a lower level, but that it also establishes a relation between the nodes on these levels. If, for example, a document containing an if expression is mapped onto a presentation that contains the three tokens ``\p{if}'', ``\p{then}'', and ``\p{else}'', then this establishes a relation between the \p{If} node in the document, and the three token nodes in the presentation.
+In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, we assume that $Present$ not only relates a higher level to a lower level, but that it also establishes a relation between the nodes on these levels. If, for example, a document containing an if expression is mapped onto a presentation that contains the three tokens ``\p{if}'', ``\p{then}'', and ``\p{else}'', then this establishes a relation between the \p{If} node in the document, and the three token nodes in the presentation.
 Thus, for any two levels $Level\H$ and $Level\L$ between which the presentation invariant holds, we also have a relation between the nodes of these two levels.
 \bc Hence, we have two relations; a relation between the upper and lower trees, and a relation between the nodes of these trees. An example shows what we mean by this. \ec
 
@@ -521,7 +521,7 @@ It is hard to give a precise definition of duplication of information without ma
 
 
 \bc
-If a higher-level node The presentation of a higher-level node may consist of several lower-level nodes, as shown in in Figure~\ref{presentExample}. In this case, both the "\verb|(|" and "\verb|)|" tokens are in the presentation of the \verb|Paren| node. However, it is also possible that a higher-level node is duplicated in the presentation, in which case interpretation of the lower level may yield conflicting values for the higher-level node. An example of such a duplication is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is interpreted, several alternatives for one node may arise, and a choice has to be made.
+If a higher-level node The presentation of a higher-level node may consist of several lower-level nodes, as shown in Figure~\ref{presentExample}. In this case, both the "\verb|(|" and "\verb|)|" tokens are in the presentation of the \verb|Paren| node. However, it is also possible that a higher-level node is duplicated in the presentation, in which case interpretation of the lower level may yield conflicting values for the higher-level node. An example of such a duplication is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is interpreted, several alternatives for one node may arise, and a choice has to be made.
 
 Note that having several lower-level nodes does not automatically mean that a node is duplicated. Furthermore, the interpretation of duplicates only needs to be dealt with if the duplicate structure is edited on the lower level. If a duplicate only needs to support document-oriented editing and no presentation-oriented editing, no extra work needs to be done.
 \ec

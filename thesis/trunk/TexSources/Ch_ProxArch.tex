@@ -323,7 +323,7 @@ Summarizing, the following three levels may be directly edited in Proxima:
 \begin{description}
 \item[Layout] Mainly text-oriented editing. For example: entering keywords (eg.\ "\verb|if|", "\verb|then|", or "\verb|else|"); moving the focus downward one line; etc.
 \item[Enriched Document] Tree edit operations on derived structures, such as moving an entry in a generated table of contents.
-\item[Document] Tree edit operations, such as moving a section in wordprocessor document; deleting a declaration in Haskell source; or moving the focus to a certain subtree of the document.
+\item[Document] Tree edit operations, such as moving a section in word-processor document; deleting a declaration in Haskell source; or moving the focus to a certain subtree of the document.
 \end{description}
 
 
@@ -365,7 +365,7 @@ $\downarrow$ & $\swarrow \hspace{3.5em} \searrow$ & $\uparrow$ \\
 $\downarrow$ & $\nwarrow \hspace{4.0em}  \nearrow$ & $\uparrow$\\
 $\delta_{Low}$ &  \hspace{5em}{lower level} \hspace{3.5em}$<\sim$ & $\delta_{Low}$
 \end{tabular}
-\caption{A single proxima layer (draft)}\label{singleLayer} 
+\caption{A single Proxima layer (draft)}\label{singleLayer} 
 \end{center}
 \end{small}
 \end{figure}
@@ -411,7 +411,7 @@ The examples accompanying the component descriptions show a few instances of bot
 
 \bc
 \begin{description}
-\item [Evaluation, Evaluator:] Computes all derived values and structures and may reorder parts of the document. Parameterized with an {\em evaluation sheet}, which specifies the compuations.
+\item [Evaluation, Evaluator:] Computes all derived values and structures and may reorder parts of the document. Parameterized with an {\em evaluation sheet}, which specifies the computations.
 \item [Evaluation, Reducer:] Maps edit operations on derived structures onto edit operations on the document. Parameterized with a {\em reduction sheet}, which specifies how to handle editing of derived values/structures.
 \item [Presentation, Presenter:] Computes the presentation of the enriched document. Parameterized with a {\em presentation sheet}, which is an attribute grammar that , 
 \item [Presentation, Parser:] Parsing sheet.
@@ -502,7 +502,7 @@ The enriched document is mapped onto the presentation by the presenter. Similar 
 
 In order to support extra state, the presentation layer keeps track of the mappings between the elements of the enriched document and the elements of the presentation. The presenter stores the enriched document origin in each presentation element, whereas the parser stores the presentation elements that were used for parsing, in the enriched document.
 
-Tokens are an example of presentation extra state in the presenter, because a token contains its own whitespace, which is not represented in the document or enriched document levels. If an enriched document structure is re-presented, the originial tokens (and corresponding white\-space) are reused. 
+Tokens are an example of presentation extra state in the presenter, because a token contains its own whitespace, which is not represented in the document or enriched document levels. If an enriched document structure is re-presented, the original tokens (and corresponding white\-space) are reused. 
 
 If an enriched document element that is presented with tokens, is newly created or has not been presented before, a default value for the whitespace of its tokens is chosen. This default may come from a pretty printing algorithm. A default value may also be used in case a structure has been edited in such a way that reusing the old tokens does not make sense.
 
@@ -620,7 +620,7 @@ Col$_{\Arr}^{(0,0)(80\times84)}$ \\
 
 
 %																
-\subsection{Renderering layer: Renderer} \label{sect:renderer}
+\subsection{Rendering layer: Renderer} \label{sect:renderer}
 
 The renderer maps each element of the arrangement onto a set of drawing commands for the user interface. While traversing the arrangement, information from the \verb|With| nodes is used to generate commands that set the font, style, and color of the rendering. All positions and sizes have already been computed by the arranger, and the renderer only scales these positions and sizes according to the current scaling factor of the view. 
 
@@ -696,7 +696,7 @@ Because of the scaling factor, the coordinates are divided by 1.5 to get the arr
 MouseClick$_{\Ren}$ Left (84,57) $\mapsto$ MouseClick$_{\Arr}$ Left (56, 38)\\
 \rmfamily
 
-The second example is a key press of the letter '\verb|a|', which is mapped onto an insert event. However, a textual insert event is targeted at the layout level instead of the arrangement level, since the arrangement level cannot be edited textually. Because the insert operation is not of the arrangement edit type, it is wrapped with a \p{Wrap$_{\Arr}$} constructor. The arrangement layer will remove the \p{Wrap$_{\Arr}$} constuctor and pass the insert operation on to the layout layer.
+The second example is a key press of the letter '\verb|a|', which is mapped onto an insert event. However, a textual insert event is targeted at the layout level instead of the arrangement level, since the arrangement level cannot be edited textually. Because the insert operation is not of the arrangement edit type, it is wrapped with a \p{Wrap$_{\Arr}$} constructor. The arrangement layer will remove the \p{Wrap$_{\Arr}$} constructor and pass the insert operation on to the layout layer.
 
 \ttfamily
 KeyPress$_{\Ren}$ 'a' $\mapsto$ Wrap$_{\Arr}$ (Insert$_{\Lay}$ 'a')
@@ -733,7 +733,7 @@ The scanner layer does not yet support the handling of comments that may appear 
 
 
 \bigskip {\bf Example:}
-Consider the example layout level from Section~\ref{sect:layouter} and assume that the edit operation on the layout is the insertion of a space between the characters 'e' and '1' in the identifer \verb|"simple1"| of the declaration. Because "\verb|simple 1 = if |\dots" is not a valid declaration, the edit operation will cause a parse error in the presentation layer, but this has no consequences for the example at the layout layer.
+Consider the example layout level from Section~\ref{sect:layouter} and assume that the edit operation on the layout is the insertion of a space between the characters 'e' and '1' in the identifier \verb|"simple1"| of the declaration. Because "\verb|simple 1 = if |\dots" is not a valid declaration, the edit operation will cause a parse error in the presentation layer, but this has no consequences for the example at the layout layer.
 
 In order to compute the edit operation on the presentation, we first apply the layout edit operation to the layout level, yielding:
 
@@ -946,7 +946,7 @@ The problem with partial mappings, is that when mapping one level onto another, 
 %																
 \section{The choice of layers in Proxima}
 
-The choice of layers for the Proxima editor is based on pragmatic considerations. On the one extreme, the entire editing process could be put in one large layer, resulting in an unwieldy presentation relation. On the other extreme a separate layer could be defined for every small step in the process, giving an awkward and inefficient editing proces. The choice of layers in Proxima is a balance between these two extremes. This section explains why Proxima consists of the five layers that were presented in this chapter.
+The choice of layers for the Proxima editor is based on pragmatic considerations. On the one extreme, the entire editing process could be put in one large layer, resulting in an unwieldy presentation relation. On the other extreme a separate layer could be defined for every small step in the process, giving an awkward and inefficient editing process. The choice of layers in Proxima is a balance between these two extremes. This section explains why Proxima consists of the five layers that were presented in this chapter.
 
 The separation of document evaluation and presentation serves two purposes. Firstly, the separation makes it possible to have different presentations for a document together with its derived structures. Secondly, it facilitates the specification of edit behavior on derived structures. When parsing and reduction are mixed, such behavior is harder to specify.
 
@@ -956,11 +956,11 @@ Below the layout level are the arrangement level and the rendering level. The se
 
 The arrangement process itself also consists of steps, since formatters are mapped on arrangement rows and columns which are then arranged similarly to other rows and columns. However, these steps are very closely intertwined, and separating the arrangement into different layers does not seem to offer advantages. 
 
-Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes or the formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{vogt89Hags} for the evaluation layer. \bc In fact, the whole presentation process can be specified with a higher-order attribute grammar.\note{is this true? Probably only useful for parts}\ec However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to interpret edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammers in Proxima, more research is necessary.
+Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes or the formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{vogt89Hags} for the evaluation layer. \bc In fact, the whole presentation process can be specified with a higher-order attribute grammar.\note{is this true? Probably only useful for parts}\ec However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to interpret edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammars in Proxima, more research is necessary.
 
 \section{Conclusions}
 
-The architecture of the Proxima editor consists of five layers connecting six data levels. Several layers are parameterized with sheets that specify the behavior of the layer. The most imporant sheets are the presentation and parsing sheets, which are specified, respectively, with an attribute grammar and a combinator parser. The other sheets are the evaluation and reduction sheets of the evaluation layer, and the scanning sheet of the scanning layer, but no final choice has been made about the formalisms for these sheets.
+The architecture of the Proxima editor consists of five layers connecting six data levels. Several layers are parameterized with sheets that specify the behavior of the layer. The most important sheets are the presentation and parsing sheets, which are specified, respectively, with an attribute grammar and a combinator parser. The other sheets are the evaluation and reduction sheets of the evaluation layer, and the scanning sheet of the scanning layer, but no final choice has been made about the formalisms for these sheets.
 
 Proxima has an open architecture, to which an extra layer can be added with relatively little effort. Moreover, each layer may easily be extended or modified. Instead of specifying the computations in an evaluation sheet, the evaluation layer may, for example, invoke an external type checker. 
 

@@ -29,7 +29,7 @@ In this section, we introduce the presentation language of Proxima: {\Xprez}. Th
  is already powerful enough to cover much of the \TeX~math typesetting as described in \cite{heckmann97functionalTex}. 
 
 
-Although there are many presentation languages for structured documents (e.g.~\cite{css2, badros99ccss, marden98psl, xsl10, quint97thot}), not a single one seems to have sufficient expressiveness and abstraction mechanisms to specify the presentations of the use cases from Chapter~\ref{chap:requirements}. Pretty-printing libraries (e.g~\cite{oppen80prettyPrinting, swierstra98combinators, hughes1995prettyPrinting, kahl99galleyCombs, brand96generationOfFormatters}) do offer expressiveness, abstraction mechanisms, but these libraries are mainly text-oriented. 
+Although there are many presentation languages for structured documents (e.g.\ \cite{css2, badros99ccss, marden98psl, xsl10, quint97thot}), not a single one seems to have sufficient expressiveness and abstraction mechanisms to specify the presentations of the use cases from Chapter~\ref{chap:requirements}. Pretty-printing libraries (e.g.\ \cite{oppen80prettyPrinting, swierstra98combinators, hughes1995prettyPrinting, kahl99galleyCombs, brand96generationOfFormatters}) do offer expressiveness, abstraction mechanisms, but these libraries are mainly text-oriented. 
 
  
 Below are two screenshots of example {\Xprez} presentations containing ligatures (e.g.\ the ``fi'' in ``Scientific'') and several mathematical constructs. An editor for these presentations can already be instantiated with the Proxima prototype, but in order to support pleasant editing, the prototype requires a few more extensions.
@@ -85,7 +85,7 @@ Matrices can be used to create box presentations, but the extent to which this i
  % does not depend on doc structure, but on available space. final presentation is not tree of target, but split 
  %along lines and pages
 
-A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matix layout, the final structure of the presentation is only partially determined by the structure of the presentation.\nonote{niet duidelijk}
+A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matrix layout, the final structure of the presentation is only partially determined by the structure of the presentation.\nonote{niet duidelijk}
 
 % How the presentations are divided over the lines and pages depends on the size of the presentation
 %
@@ -127,13 +127,13 @@ The languages discussed above are all declarative and domain-specific languages 
 
 Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position attributes relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned\nonote{lambert: tops and bottoms, even verduidelijken}, or that two presentations should have the same widths. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
 
-Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the the order of the children depends on an attribute of the parent, then the presentation definition of each child needs to access this parent attribute and use its value to determine the alignment of the child.
+Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the order of the children depends on an attribute of the parent, then the presentation definition of each child needs to access this parent attribute and use its value to determine the alignment of the child.
 
 If, on the other hand, child presentations are first-class, and abstraction mechanisms can be used to define combinators on them, a list of children may be reversed with a reverse function in the presentation definition of the parent.  Another advantage of this approach is that the concepts of layout direction (horizontal or vertical) and order of the children are orthogonal now. The layout direction is determined by which combinator is applied to the list of children, whereas the order is determined by whether or not a reverse function is applied to the list. In the model of P and PSL, these concepts are intertwined, and reversing a horizontal list is conceptually different from reversing a vertical list.
 
 \head{ Requirements}
 
-Based on the requirements from Chaper~\ref{chap:requirements} and the previous discussion, we conclude that the presentation target language for Proxima, should meet the following requirements: 
+Based on the requirements from Chapter~\ref{chap:requirements} and the previous discussion, we conclude that the presentation target language for Proxima, should meet the following requirements: 
 
 \begin{description}
 \item[Proportional effort]

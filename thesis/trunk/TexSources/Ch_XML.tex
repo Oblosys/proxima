@@ -31,7 +31,7 @@ With current computer speeds, parsers are so fast that incremental parsing has b
 Editing is concerned with the creation and maintenance of documents.  
 Most documents have some form of structure. 
 
-In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and evaluate related work according to them. End with a discussion why no editor meets all requirements, and how proxima will.
+In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and evaluate related work according to them. End with a discussion why no editor meets all requirements, and how Proxima will.
 \ec
 
 In this chapter, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the definition of the term editor from the previous chapter, as well as provide standard examples to explain and define edit behavior in the coming chapters. A design requirement of Proxima is that the editor is able to handle all five use cases. 
@@ -258,7 +258,7 @@ The document model consists of chapters, sections and subsections. The editor su
 
 \head{Structural view on the document}
 
-Although Microsoft Word is one of the most popular word-processing tools in the world, an often-heard complaint concerns its confusing document model. Sometimes edit operations are not allowed because of underlying document structure, but it is not obvious why this is the case. Furthermore, the reason why a document fragment looks the way it does is not always clear. The user may have set specific style attributes for a particular fragment, or the style may originate from the document's presentation rules. A more structural view on the document, such as Wordperfect's ``underwater'' screen, can help to clarify the situation, but is not supported by Microsoft Word. Such a structural view is easily defined in a structure editor:
+Although Microsoft Word is one of the most popular word-processing tools in the world, an often-heard complaint concerns its confusing document model. Sometimes edit operations are not allowed because of underlying document structure, but it is not obvious why this is the case. Furthermore, the reason why a document fragment looks the way it does is not always clear. The user may have set specific style attributes for a particular fragment, or the style may originate from the document's presentation rules. A more structural view on the document, such as WordPerfect's ``underwater'' screen, can help to clarify the situation, but is not supported by Microsoft Word. Such a structural view is easily defined in a structure editor:
 
 \editScreenshotTrns{
 \begin{tabular}{l}
@@ -477,7 +477,7 @@ For quick and easy structure entry, the editor supports textual entry of mathema
 
 The entered text is parsed and causes the insertion of $- 4(\pi - \theta_{ab})$, as shown on the right.  It should be noted, however, that textual entry does not always lead to the desired result in a two-dimensional presentation. For example, when "\verb|2/4|" is entered, an intuitive result is the insertion of a fraction with the focus ending up below the fraction line to the right of the 4: \framebox{$\frac{2}{4\mid}$}. But now the expected result of entering "\verb|+6|" would be \framebox{$\frac{2}{4+6\mid}$}, whereas the correct meaning of "\verb|2/4+6|" is \framebox{$\frac{2}{4}+6$}.
 
-If a complex subformula needs to be entered, or if the appearance of a formula needs to be fine-tuned, the user may temporarily switch to a more structural presentation. This may be considered a mode switch, but since the structural presentation is in the same window as the graphical presentation and may be switched back at any time, it does not restrict the user.
+If a complex subformula needs to be entered, or if the appearance of a formula needs to be fine tuned, the user may temporarily switch to a more structural presentation. This may be considered a mode switch, but since the structural presentation is in the same window as the graphical presentation and may be switched back at any time, it does not restrict the user.
 
 \head{Domain-specific transformations}
 
@@ -541,7 +541,7 @@ Root	&+	&-Node	&+&-Leaf	& 	&\\
 \end{tabular}
 }{}
 
-The tree view in the screenshot is a more spatious presentation, in which the child nodes are presented to the right of the parent rather than below.
+The tree view in the screenshot is a more spacious presentation, in which the child nodes are presented to the right of the parent rather than below.
 
 
 \head{Requirements} % tree browser
@@ -834,7 +834,7 @@ The Synthesizer Generator~\cite{reps84synGen} is the successor of the Cornell Pr
 
 An interesting aspect of the Synthesizer Generator is its support for computations over the document structure. The presentation of the document can contain computed values, which are specified using an attribute grammar. 
 
-The edit model supports user-specified transformations on the structure, but plain text editing is poorly supported. The editor uses mode-switching, and after switching to the textual mode, the presentation must be left in a parseable state before structure editing is available again.
+The edit model supports user-specified transformations on the structure, but plain text editing is poorly supported. The editor uses mode-switching, and after switching to the textual mode, the presentation must be left in a parsable state before structure editing is available again.
 
 Over the years, the behavior and design have not undergone many drastic changes, but the system is still being used and commercially maintained.
 
@@ -939,7 +939,7 @@ both level editing
 %																
 \subsection {Editor toolkits} \label{sect:toolkits}
 
-Besides generic editors and edit generators, an editor can also be built using an editor toolkit. The toolkit is a collection of libaries and tools that can be used when building an editor. The editor application itself, however, has to be written by hand. The distinction between a toolkit and a generator is not always completely clear, since the specifications that an editor generator uses for specifying language, presentation, and semantics can be considered programs as well. The toolkits we consider here all require a substantial amount of programming in order to build an editor.
+Besides generic editors and edit generators, an editor can also be built using an editor toolkit. The toolkit is a collection of libraries and tools that can be used when building an editor. The editor application itself, however, has to be written by hand. The distinction between a toolkit and a generator is not always completely clear, since the specifications that an editor generator uses for specifying language, presentation, and semantics can be considered programs as well. The toolkits we consider here all require a substantial amount of programming in order to build an editor.
 
 The advantage of a toolkit is that the final editor can be customized to a high degree, but this comes at the cost of the increased effort required for building an editor. 
 
@@ -1096,7 +1096,7 @@ Figure~\ref{scoretable} contains an evaluation of the strengths and weaknesses o
 
 The reason why no editor scores positive on the extra state requirement is that, although it is rather straightforward to support either presentation or interpretation extra state, it is hard to support both forms. A syntax-directed editor without support for presentation-oriented editing may support interpretation extra state simply by ignoring it during presentation. Similarly, a syntax-recognizing editor without document-oriented editing may support presentation extra state by ignoring it during interpretation. The syntax-recognizing editors score lower on extra state than the syntax-directed editors because only built-in forms of presentation extra state are supported, whereas the interpretation extra state for the syntax-directed editors may be specified by the editor designer.
 
-The main reason why no editor has a line containing only positives is that the requirements for the computation and presentation formalisms interfere with the requirements for editing power and modelessness. The former two requirements determine the presentation complexity of the editor, whereas the latter determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
+The main reason why no editor has a line containing only positives is that the requirements for the computation and presentation formalisms interfere with the requirements for editing power and modelessness. The former two requirements determine the presentation complexity of the editor, whereas the latter determine the usability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
 
 {\bf Syntax-directed editors.} The syntax-directed editors tend to do well on the computation requirement, but at the same time, presentation-oriented editing is weakly supported, leading to a lower score on editing power. Furthermore, modelessness is not supported at all. However, if the presentation formalism is simple, and no computed values appear in the presentation, then modelessness can be supported (see PSG). Most syntax-directed editors support interpretation extra state, but none support presentation extra state adequately.
 

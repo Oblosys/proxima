@@ -6,9 +6,9 @@
 \newcommand{\epsfigPrx}[3]{\epsfig{file=pics/Screenshots/#1, height=#3mm}}
 
 
-A prototype of the Proxima editor has been implemented in the fuctional language Haskell. The architecture of the prototype corresponds to the architecture described in Chapter~\ref{chap:proxArch}. The presentation target language is the {\Xprez} language from Chapter~\ref{chap:presenting}. The implementation is platform-independent and has been successfully tested on Windows, Linux, and MacOS X platforms. 
+A prototype of the Proxima editor has been implemented in the functional language Haskell. The architecture of the prototype corresponds to the architecture described in Chapter~\ref{chap:proxArch}. The presentation target language is the {\Xprez} language from Chapter~\ref{chap:presenting}. The implementation is platform-independent and has been successfully tested on Windows, Linux, and MacOS X platforms. 
 
-The prototype is implemented entirely in Haskell and uses the wxHaskell~\cite{leijen04wxHaskell} library for the implementation of the user interface. The presentation sheet \bc (which is an atttibute grammar)\ec  is compiled by an  attribute-grammar system~\cite{swierstra04ag}, which is also used for the implementation of the arrangement layer. The parsing sheet is specified using a parser-combinator library~\cite{swierstra01parsers}.
+The prototype is implemented entirely in Haskell and uses the wxHaskell~\cite{leijen04wxHaskell} library for the implementation of the user interface. The presentation sheet \bc (which is an attribute grammar)\ec  is compiled by an  attribute-grammar system~\cite{swierstra04ag}, which is also used for the implementation of the arrangement layer. The parsing sheet is specified using a parser-combinator library~\cite{swierstra01parsers}.
 
 % size of editor?
 
@@ -164,7 +164,7 @@ Similar to beta-reduction, we could implement other source-to-source transformat
 %SCREENSHOT
 \head{Editable list of top-level identifiers}
 
-The evaluation layer has not been completely realized yet, but nevertheless a few experimental evaluation-layer features have been implemented. The list of top-level identifiers at the top of Figure~\ref{heliumMain} is similar to an editable table of contents. Editing a name in the list causes an update to the identifier in the corresponding declaration, and moving an indentifier moves the declaration. The screenshot shows how editing ``\p{list}'' in the identifier list results in an update to the declaration of \p{list} as well.
+The evaluation layer has not been completely realized yet, but nevertheless a few experimental evaluation-layer features have been implemented. The list of top-level identifiers at the top of Figure~\ref{heliumMain} is similar to an editable table of contents. Editing a name in the list causes an update to the identifier in the corresponding declaration, and moving an identifier moves the declaration. The screenshot shows how editing ``\p{list}'' in the identifier list results in an update to the declaration of \p{list} as well.
 
 
 \hspace{\stretch{1}} 
@@ -254,9 +254,9 @@ The chess-board editor highlights all squares that are reachable by the chess pi
 %																
 \section{Instantiating an editor} \label{sect:instantiating}
 
-In order to intantiate an editor in Proxima, three components need to be provided: a {\em document type definition}, a {\em presentation sheet}, and a {\em parsing sheet}. We will give a brief overview and a few example fragments of each of these three components. The {\em evaluation sheet}, {\em reduction sheet}, and {\em scanning sheet} that are mentioned in Section~\ref{sect:archProximaLayers} are not yet fully supported and therefore not discussed here.
+In order to instantiate an editor in Proxima, three components need to be provided: a {\em document type definition}, a {\em presentation sheet}, and a {\em parsing sheet}. We will give a brief overview and a few example fragments of each of these three components. The {\em evaluation sheet}, {\em reduction sheet}, and {\em scanning sheet} that are mentioned in Section~\ref{sect:archProximaLayers} are not yet fully supported and therefore not discussed here.
 
-Because the sheet formalisms are still in an experimental stage, the example sheets do not yet contain much abstraction. Hence, for clarity, we wil leave out certain details. A future version of Proxima will provide appropriate abstractions for these details. 
+Because the sheet formalisms are still in an experimental stage, the example sheets do not yet contain much abstraction. Hence, for clarity, we will leave out certain details. A future version of Proxima will provide appropriate abstractions for these details. 
 
 \subsection{Document type}
 
@@ -267,7 +267,7 @@ A constructor may have named children, which do not have to be globally unique. 
 \p{data Tree = Bin left::Tree right::Tree | Leaf Int}
 
 Furthermore, each constructor needs to specify how many tokens it uses in its presentation. This information could be deduced from a presentation sheet, but for the moment it has to be specified by hand.  The tokens are specified by a list of identifiers, which is enclosed by braces: 
-\verb|{|\p{ident$_1$ \dots~ident$_n$}\verb|}|. This special syntax is necessary because the editor provides default behavior for these types.  Each name gives rise to a child of type \p{IDP}, which represents the identity of the token. The identitities are used on presentation and parsing for reusing tokens. 
+\verb|{|\p{ident$_1$ \dots~ident$_n$}\verb|}|. This special syntax is necessary because the editor provides default behavior for these types.  Each name gives rise to a child of type \p{IDP}, which represents the identity of the token. The identities are used on presentation and parsing for reusing tokens. 
 %A value of type \p{IDP} is either a unique identity, or a special identity \p{FreshIDP}.
 
 %\{also possible list} ??
@@ -507,7 +507,7 @@ combinator, which takes a function and a parser and applies the function to the 
 
 In general, a Proxima parser for type \p{T} consists of a number of alternative parsers (each for type \p{T}), which are combined using the choice combinator \p{<|>}. Often, there is one alternative parser for each constructor of \p{T}. 
 
-In reality, many other parser combinators exist, and the actual structure of the parsers does not have to be exactly as we explained, but the situation above resembles the example parsers. For more information about the parsing library, the reader is refered to Swierstra~\cite{swierstra01parsers}, Hutton~\cite{hutton92parsers}, or Fokker~\cite{ fokker95parsers}.
+In reality, many other parser combinators exist, and the actual structure of the parsers does not have to be exactly as we explained, but the situation above resembles the example parsers. For more information about the parsing library, the reader is referred to Swierstra~\cite{swierstra01parsers}, Hutton~\cite{hutton92parsers}, or Fokker~\cite{ fokker95parsers}.
 
 
 
@@ -671,7 +671,7 @@ For the development of Proxima, probably the most important feature of Haskell i
 
 \subsection{Basic extensions to the prototype}
 
-The prototype is in an experimental stage, which means that there is an abundance of straightforward extensions to the system. Nevertheless, even though  straightforward, the implementation of these extentions may still require a substantial amount of work. 
+The prototype is in an experimental stage, which means that there is an abundance of straightforward extensions to the system. Nevertheless, even though  straightforward, the implementation of these extensions may still require a substantial amount of work. 
 
 Besides standard editor functionality (e.g.\  file handling, search facility, etc.) and basic updates to the system, we can identify several important issues that are local to a layer. We briefly discuss each layer separately. The evaluation layer is omitted from the discussion, because most of the future work on this layer is research-oriented.
 
