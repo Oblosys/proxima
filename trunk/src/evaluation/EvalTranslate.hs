@@ -83,9 +83,9 @@ lines'     :: String -> [String]
 lines' ""   = []
 lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
              in l : case s' of []      -> []
-                               ('\n' :'\r':s'') -> lines' s''   -- a Dos "\n\r" encountered on Unix or Mac platform
+                               ('\r' :'\n':s'') -> lines' s''   -- a Dos "\n\r" encountered on Unix or Mac platform
                                ('\n' :s'') -> lines' s''         -- the current platform's linebreak (?)
                                                                  -- or a Unix "\n" encountered on a Dos or Mac platform
                                ('\r':s'') -> lines' s''          -- a  Mac "\r" encountered on Dos or Unix platform 
 
--- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"
+-- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"?
