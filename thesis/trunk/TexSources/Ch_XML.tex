@@ -44,7 +44,7 @@ In this chapter, we give a rather informal definition of editing (editor?**), an
 \label{sect:editing}
 
 %what is an editor
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or vi~\cite{vi}, we will use it in a much broader sense. We regard as an editor any application that keeps track of an internal data structure that is shown to the user in the form of a bitmap, and that can be changed by that user. The internal data structure is referred to as the {\em document}, and the bitmap is the {\em presentation}. 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it in a much broader sense. We regard as an editor any application that keeps track of an internal data structure that is shown to the user in the form of a bitmap, and that can be changed by that user. The internal data structure is referred to as the {\em document}, and the bitmap is the {\em presentation}. 
 % get rid of "bitmap", add that notion of document is req'd? (is it?)
 
 %what is the edit process
@@ -437,7 +437,7 @@ The word processor has support for the specification of a generated table of con
 ~~~2~\vline Use Cases\\
 \\
 {\normalsize 1~~Editing}\\
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or vi~\cite{vi}, we will use it in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it in a much broader sense. We regard \dots\\ 
 \dots \\
 {\normalsize 2~~Use Cases}\\
 In this section we present five example applications of a generic structure editor. Some of these cases are well-known \dots\\
@@ -450,7 +450,7 @@ In this section we present five example applications of a generic structure edit
 ~~~2~~The \vline Use Cases\\
 \\
 {\normalsize 1~~Editing}\\
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or vi~\cite{vi}, we will use it in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it in a much broader sense. We regard \dots\\ 
 \dots \\
 {\normalsize 2~~The Use Cases}\\
 In this section we present five example applications of a generic structure editor. Some of these cases are well-known \dots\\
@@ -472,7 +472,7 @@ Besides textual edit operations, it is also possible to perform structural edit 
 ~~~2~~Use Cases \\
 \\
 {\normalsize 1~~Editing}\\
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or vi~\cite{vi}, we will use it in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it in a much broader sense. We regard \dots\\ 
 \dots \\
 {\normalsize 2~~Use Cases}\\
 In this section we present five example applications of a generic structure editor. Some of these cases are well-known \dots\\
@@ -488,7 +488,7 @@ In this section we present five example applications of a generic structure edit
 In this section we present five example applications of a generic structure editor. Some of these cases are well-known \dots\\
 \dots\\
 {\normalsize 2~~Editing}\\
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or vi~\cite{vi}, we will use it in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it in a much broader sense. We regard \dots\\ 
 \dots 
 \end{tabular}
 }{during drag}{after drop}
@@ -747,7 +747,7 @@ Although a distinction can be made between editor generators and generic editors
 
 An interesting aspect of an editor that has knowledge of the structure of the document, is that it can show computed or derived values over that structure to the user. Examples of computations are automatic chapter numbering and a derived table of contents, but also derived type information for identifiers and function definitions in a program source. Two aspects have an influence on the usefulness of the computations: the strength of the formalism in which the computations are specified, and the integration of computed values and structures with the document presentation.
 
-For program editing as well as the tax form, the strength of the computation formalism is important. Computations can provide static analysis, e.g. detecting name clashes and scoping problems, as well as a type derivation. In order to be able to specify these computations for arbitrary languages, a turing complete formalism, such as an attribute grammar~\cite{AG}, is desirable. Another option is to allow the specification of constraints on the document tree~\cite{ballance92pan} and have the editor check automatically whether the constraints hold, but this is not as powerful. Moreover, in such a constraint based system it is hard to specify numberings and derived structures in an elegant way.
+For program editing as well as the tax form, the strength of the computation formalism is important. Computations can provide static analysis, e.g. detecting name clashes and scoping problems, as well as a type derivation. In order to be able to specify these computations for arbitrary languages, a turing complete formalism, such as an attribute grammar~\cite{ag}, is desirable. Another option is to allow the specification of constraints on the document tree~\cite{ballance92pan} and have the editor check automatically whether the constraints hold, but this is not as powerful. Moreover, in such a constraint based system it is hard to specify numberings and derived structures in an elegant way.
 
 For the word processing example, as well as the tax form, the integration of computed values with the document presentation is important. Whereas type errors may be shown in separate windows or by underlining the location and showing the message in a tooltip, chapter numbers and a table of contents form an actual part of the presentation. 
 
@@ -866,13 +866,14 @@ The LRC attribute grammar system~\cite{lrc} was a research project at Utrecht Un
 
 For the presentation of the document, the Tcl/Tk language is used. This allows for complex presentations with multiple windows, GUI widgets, colors, and basic graphical elements. However, the integration between the generated presentation and the editor is very weak. No general focus model is present, and although edit events can be attached to the Tcl presentation, free editing is only possible a separate window that contains a purely textual presentation of the document. The textual presentation cannot be used to edit the layout of the main presentation, and it does not contain derived values. 
 
-\bigskip {\bf SbyS, Mj\"olner Orm} %90
+\bigskip {\bf SbyS, Mj\o lner/Orm} %90
 
-SbyS~\cite{sbys} is the structure editor from the Mj\"olner Orm environment. Mj\"olner Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most other systems are editor generators, that generate an editor for a specific language.
+SbyS~\cite{sbys} is the structure editor from the Mj\o lner/Orm environment~\cite{magnusson90orm}. Mj\o lner/Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most other systems are editor generators, that generate an editor for a specific language.
 
 The structure editor is syntax-directed text and text-oriented with a parser only for entering expressions. In order to overcome the usability problems associated with pure syntax-directed editing, the editor employs the concept of direct manipulation. Program constructs are shown in a pallette, from which they can be dragged to the program source or a clipboard.
 
 No formalism for specifying transformations is present, and the only computations that can be specified are aimed at semantic analysis and code generation. Derived values cannot be part of the presentation.
+
 
 \bigskip {\bf PSG} % 86
 
@@ -961,7 +962,7 @@ The advantage of a toolkit is that the final editor can be customized to a high 
 
 \bigskip {\bf Amaya, Thot}
 
-Amaya~\cite{amaya} is the W3C web browser that is built on top of the editor toolkit Thot\cite{quint1997thot}, which is a successor of GRIF~\cite{grif}. The Thot toolkit supports a number of specification languages for document structure, presentation, and transformation, but in order to build an actual editor C code is required to connect the various components.
+Amaya~\cite{amaya} is the W3C web browser that is built on top of the editor toolkit Thot\cite{quint97thot}, which is a successor of GRIF~\cite{grif}. The Thot toolkit supports a number of specification languages for document structure, presentation, and transformation, but in order to build an actual editor C code is required to connect the various components.
 
 The presentation formalism in Thot, called P, is a powerful graphical presentation formalism, somewhat similar to Proteus (Ensemble), but with more advanced alignment features. As a result, complex presentations are possible, such as the presentation for equation editor use case.
 
@@ -1045,12 +1046,12 @@ XMLSPY is a large system that has similar functionality as X-Metal. An important
 
 \section{Discussion}
 
-Figure~\ref{scoretable} contains a score table for all discussed editors. 
+Figure~\ref{scoretable} contains a score table for all discussed editors. \note{get rid of ? in table}
 % Also a number that were not introduced due to space limitations (or some similar reason)?
 
 % TODO:  use $$ and \pm
 
-\begin{figure} % use XY pic?
+\begin{figure}
 \begin{center}
 \begin{footnotesize}
 \begin{tabular}[t]{l|c|c|c|c|c|c}
@@ -1061,7 +1062,7 @@ Editor		& Genericity & Computations & Presentation & Editing    & Modeless & Loc
 Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    - -	\\
 LRC			&   ++	&   ++	&   + 	&   +	&   - - 	&    - -	\\
 PSG			&   ++	&    +	&   - -	&   ?+/-	&    +	&    - -	\\
-SbyS/Mj\"olnerOrm	&   ++	&    -	&   - - 	&   -	&   n/a	&    - -	\\
+SbyS, Mj\o lner/Orm	&   ++	&    -	&   - - 	&   -	&   n/a	&    - -	\\
 \hline
 %SRE			&   ?	&   ?	&   ? 	&   ?	&   ?	&    - -	\\
 Pan			&   ++	&  +/-	&   - 	&   +/-	&   ++	&    - -	\\
@@ -1070,8 +1071,8 @@ Desert			&   ++	&   - -	&   +/- 	&   +/-	&   - -	&    - -	\\
 %Intent. Progr. Editor	&   ?	&   ?	&   + 	&   ?	&   ++	&    - -	\\
 Ensemble			&   ++	&   +/-	&   + 	&   +	&   ++	&    - -	\\
 \hline
-Thot/Amaya		&   +	&   +/-	&  + 	&   +	&   - -	&    - -	\\
-VisualStudio		&   +/-	&   +/-	&   - 	&   -	&   n/a	&    - -	\\
+Amaya, Thot		&   +	&   +/-	&  + 	&   +	&   - -	&    - -	\\
+Visual Studio		&   +/-	&   +/-	&   - 	&   -	&   n/a	&    - -	\\
 \hline
 XMetal			&   ++	&   -	&  +/- 	&  +/-	&   - -	&   - -	\\
 XMLSPY			&   ++	&   +/-	&   + 	&  +/-	&   - -	&   - -	\\
