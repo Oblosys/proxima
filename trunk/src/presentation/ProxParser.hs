@@ -95,7 +95,7 @@ makeDecls (decl:decls) = Cons_Decl decl (makeDecls decls)
 makeDecl :: Maybe (Token (Maybe Node)) -> Token (Maybe Node) -> Token (Maybe Node) -> (Ident -> Exp -> Decl)
 makeDecl mtoken0 token1 token2 =
   let tpdeclIDP           = case mtoken0 of Just tok -> tokenIDP tok; Nothing -> NoIDP
-      (idD, (idP1, idP2)) = recoverIDs2 lamIDD token1 token2
+      (idD, (idP1, idP2)) = recoverIDs2 lamExpIDD token1 token2
       mOldDecl            = recoverDecl token1 token2
       (expanded, autoLayout) = case mOldDecl of
                                  Just (Decl _ _ _ _ _ exp aut _ _) -> (exp, aut)
@@ -106,7 +106,7 @@ makeDecl mtoken0 token1 token2 =
 makeDecl' ::  Maybe (Token (Maybe Node)) -> Token (Maybe Node) -> Token (Maybe Node) -> (Ident -> Decl)
 makeDecl' mtoken0 token1 token2 =
   let tpdeclIDP           = case mtoken0 of Just tok -> tokenIDP tok; Nothing -> NoIDP
-      (idD, (idP1, idP2)) = recoverIDs2 lamIDD token1 token2
+      (idD, (idP1, idP2)) = recoverIDs2 lamExpIDD token1 token2
       mOldDecl            = recoverDecl token1 token2
       (expanded, autoLayout, expr) = case mOldDecl of
                                        Just (Decl _ _ _ _ _ exp aut _ expr) -> (exp, aut, expr)
@@ -152,12 +152,12 @@ makeBoolExp token = let (idD, idP) = recoverIDs1 boolExpIDD token
 -- ******** rename plus to sum
 
 makeSum :: Token (Maybe Node) -> (Exp -> Exp -> Exp)
-makeSum token = let (idD, idP) = recoverIDs1 sumIDD token
+makeSum token = let (idD, idP) = recoverIDs1 plusExpIDD token
                 in  PlusExp idD idP 
 
 
 makeProd :: Token (Maybe Node) -> (Exp -> Exp -> Exp)
-makeProd token= let (idD, idP) = recoverIDs1 prodIDD token
+makeProd token= let (idD, idP) = recoverIDs1 timesExpIDD token
                 in  TimesExp idD idP 
 
 
@@ -166,7 +166,7 @@ makeProd token= let (idD, idP) = recoverIDs1 prodIDD token
 --makeDiv (Just (ExpNode (DivExp id _ _ _) _)) idA = DivExp id idA
 --makeDiv _                                      idA = DivExp NoIDP idA
 makeDiv :: Token (Maybe Node) -> (Exp -> Exp -> Exp)
-makeDiv token= let (idD, idP) = recoverIDs1 divIDD token
+makeDiv token= let (idD, idP) = recoverIDs1 divExpIDD token
                in  DivExp idD idP 
 
 
@@ -175,7 +175,7 @@ makeDiv token= let (idD, idP) = recoverIDs1 divIDD token
 
 
 makePower :: Token (Maybe Node) -> (Exp -> Exp -> Exp)
-makePower token= let (idD, idP) = recoverIDs1 powerIDD token
+makePower token= let (idD, idP) = recoverIDs1 powerExpIDD token
                  in  PowerExp idD idP 
 
 
@@ -185,12 +185,12 @@ makePower token= let (idD, idP) = recoverIDs1 powerIDD token
 
 
 makeParen :: Token (Maybe Node) -> Token (Maybe Node) -> (Exp -> Exp)
-makeParen token1 token2 = let (idD, (idPopen, idPclose)) = recoverIDs2 parenIDD token1 token2
+makeParen token1 token2 = let (idD, (idPopen, idPclose)) = recoverIDs2 parenExpIDD token1 token2
                           in  ParenExp idD idPopen idPclose
 
 
 makeLam :: Token (Maybe Node) -> Token (Maybe Node) -> (Ident -> Exp -> Exp)
-makeLam token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 lamIDD token1 token2
+makeLam token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 lamExpIDD token1 token2
                         in  LamExp idD idP1 idP2 
 
 
@@ -198,16 +198,16 @@ makeApp :: (Exp -> Exp -> Exp)
 makeApp = AppExp NoIDD
 
 makeCase :: Token (Maybe Node) -> Token (Maybe Node) -> (Exp -> List_Alt -> Exp)
-makeCase token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 caseIDD token1 token2
+makeCase token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 caseExpIDD token1 token2
                          in  CaseExp idD idP1 idP2 
 
 makeLet :: Token (Maybe Node) -> Token (Maybe Node) -> (List_Decl -> Exp -> Exp)
-makeLet token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 letIDD token1 token2
+makeLet token1 token2 = let (idD, (idP1, idP2)) = recoverIDs2 letExpIDD token1 token2
                         in  LetExp idD idP1 idP2 
 
 
 makeIf :: Token (Maybe Node) -> Token (Maybe Node) -> Token (Maybe Node) -> (Exp -> Exp -> Exp -> Exp)
-makeIf token1 token2 token3 = let (idD, (idP1, idP2, idP3)) = recoverIDs3 ifIDD token1 token2 token3
+makeIf token1 token2 token3 = let (idD, (idP1, idP2, idP3)) = recoverIDs3 ifExpIDD token1 token2 token3
                               in  IfExp idD idP1 idP2 idP3
 
 
