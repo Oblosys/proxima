@@ -12,7 +12,6 @@ import List hiding (delete)
 import Data.FiniteMap
 import IOExts
 
----
 
 import ProxParser_Generated
 import DocumentEdit
@@ -22,88 +21,10 @@ import qualified UU_Parsing
 import Char
 
 import Scanner (tokenize)
-----
 
-{-
-initDoc =  mkRoot $ mkDecls $ concat $ replicate 1 
-                            [ mkDecl' (ID 300) (mkIdent "r") $
-                                mkLam' (ID 200) (mkIdent "x") $
-                                      (mkDiv (mkInt' (ID 209) 1)  (mkId "x"))
-                            , mkDecl' (ID 201) (mkIdent' (ID 100) "f") $
-                               mkLam' (ID 202) (mkIdent "b") $
-                                 mkIf' (ID 203) (ID 204) (ID 205)
-                                       (mkInt' (ID 206) 1) 
-                                       (mkInt' (ID 207) 2) 
-                                       (mkInt' (ID 208) 3)
-                            ]
-
-mkRoot = RootDoc NoIDD NoIDP
-mkRoot' id = RootDoc NoIDD id
-mkDecls = foldr (ConsDecls NoIDD) (NilDecls NoIDD) 
-mkDecl = Decl NoIDD NoIDP NoIDP NoIDP NoIDP True
-mkDecl' id = Decl NoIDD id NoIDP NoIDP NoIDP True
-mkIdent = Ident NoIDD NoIDP
-mkIdent' id = Ident NoIDD id
-mkLam = LamExp NoIDD NoIDP NoIDP
-mkLam' id = LamExp NoIDD id NoIDP
-mkSum = PlusExp NoIDD NoIDP
-mkDiv = DivExp NoIDD NoIDP
-mkId str = IdentExp NoIDD (mkIdent str)
-mkId' id str = IdentExp NoIDD (mkIdent' id str)
-mkIf = IfExp NoIDD NoIDP NoIDP NoIDP
-mkIf' id0 id1 id2 = IfExp NoIDD id0 id1 id2
-mkInt = IntExp NoIDD NoIDP
-mkInt' id = IntExp NoIDD id
-mkProduct = ProductExp NoIDD NoIDP NoIDP []
-mkProduct' i1 i2 is = ProductExp NoIDD (ID i1) (ID i2) (map ID is)
-mkExps = foldr (ConsExps NoIDD) (NilExps NoIDD) 
--}
-
+-- why is this here?
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
-
--- new parser:
-
-
-{-
-comments from old parser
-
-The id of the origin is used to set the id of the doc element. 
-(only succeeds if origin was of same type)
-In case of several symbols (eg. if .. then .. else ..fi): if 1st fails, try 2nd, etc.
-
-
-For each parse, reuse everything that is not in the parse
-
--}
-
- 
--- ******** rename plus to sum
--- remember to that "Chess", "PPT", "board", and "pres" must be keywords in PresentationParsing
-
-
-{-
-Parser notes
-
-inserted layout? 
-
-a = + 2; -> a = HOLE + 2;        single space
-a = 2 -> a = 2;                          no whitespace
-
-
-f = 1;
-
-= 2;
-
-->
-
-f = 1;
-
-HOLE = 2;                                 copied from following token
-
-
--}
-
 
 
 parsePres pres = let tokens = postScanStr pres Nothing
@@ -117,103 +38,7 @@ parsePres pres = let tokens = postScanStr pres Nothing
        deepShow i tok = indent i ++ show tok ++ "\n" 
        indent i = take i (repeat ' ')
        
---- testing bits
 
-clparse str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
-                   tokens = enrichedDocTk : postScanStr prs Nothing
-                   result = runParser recognizeRootEnr tokens
-               in  debug Err ("Parsing: "++show (tokens)++"\nhas result:") $
-                   result 
-clparsep p str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
-                      tokens = postScanStr prs Nothing
-                      result = runParser p tokens
-                  in  debug Err ("Parsing: "++show (tokens)++"\nhas result:") $
-                      result 
-
-
---------------------------------------------------------------
-
-
-
-enrichedDocTk = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty [] NoIDP)
---boardDeclTk =  (Structural (Just $ BoardDeclNode hole []) [] NoIDP)
-parsingTk = (Structural (Just $ NoNode) empty [] NoIDP)
---enrichedDocTk = StrTk "+" Nothing NoIDP -- (Structural (Just $ EnrichedDocNode HoleEnrichedDoc []) [] NoIDP)
---declTk = StrTk "*" Nothing NoIDP -- (Structural (Just $ DeclNode hole []) [] NoIDP)
---parsingTk = StrTk "%" Nothing NoIDP -- (Structural (Just $ NoNode) [] NoIDP)
-
-toks = [ mkEnrichedDocTk
-           [ mkParsingTk 
-               [ mkDeclTk 
-                    [ mkParsingTk 
-                      [ LIdentTk "x" Nothing NoIDP
-                      ]
-                   ]
-               ]
-           , mkParsingTk
-               [ mkDeclTk  [] 
-               , LIdentTk "x" Nothing NoIDP
-               , StrTk "=" Nothing NoIDP
-               , IntTk "1" Nothing NoIDP
-               , StrTk ";" Nothing NoIDP
-               , LIdentTk "y" Nothing NoIDP
-               , StrTk "=" Nothing NoIDP
-               , IntTk "1" Nothing NoIDP
-               , StrTk ";" Nothing NoIDP
-               ]
-               
-           ]
-       ]
- where mkEnrichedDocTk cs = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty cs NoIDP)
-       mkDeclTk cs =  (Structural (Just $ DeclNode hole []) empty cs NoIDP)
-       mkParsingTk cs = (Structural (Just $ NoNode) empty cs NoIDP)
-        
-
-
-
--- UNCLEAR:
--- default: what to do with things like HeliumTypeInfo? answer: declare as Editable and specify hole
-
---Design issues with parsing and structure recognizing (choose different name? recognizer is usually parser with Bool result)
-
--- TODO: 
-
-
-
--- parsing token is now a Structural NoNode, this is a hack.
-
--- put "tokenNode" application in generated code, now it appears everywhere
--- put general extractFromNodes (rename to reuseFrom Tokens) in begin part of Parser_Generated (after new generater is used)
-
--- do things for parseErr and Hole in structure recognition. This should be done with a class,
--- so pStr can take care of it. See pStr definition
--- first, ignore, then do it explicitly in each recognizer, finally do it hidden in pStr
-
-
--- what do we do with "lIdentVal" in parseString_?
-
-
--- where to put pStr, for structurals inside and for parsers outside? parsers calling each other should
--- not have a pStr. (parsing in parsing does not (and should not) give rise to a Parsing node from postScan pres)
--- maybe have recognizeBla do the pStr, and have parseBla without
-
-
-
-
--- recognize should take into account the presentation, which must be present in the structural token somewhere
-
-
---PROBLEM: When several structural presentations for one type exist, we need a way to determine which recognizer to use.
---For example tree node with children or without. A parser would use the keyword "+" or "-", but in the recognizer
---we somehow have to look at the boolean expansion value of the recognized node since parsing an image of + or - is not
---an option.
-
------------------------
-
-
-
-
--- RootEnr id:IDD idP:IDP idListDecls:Decls  Decls HeliumTypeInfo Document -- Document is only for popup menu hack (see RootEnr.pres in presentationAg.hs)
 
 
 
@@ -518,3 +343,137 @@ parseBoolExp =
      <$> pFalse
 
 --------------------------------------------------------------
+--- testing bits
+
+clparse str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
+                   tokens = enrichedDocTk : postScanStr prs Nothing
+                   result = runParser recognizeRootEnr tokens
+               in  debug Err ("Parsing: "++show (tokens)++"\nhas result:") $
+                   result 
+clparsep p str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
+                      tokens = postScanStr prs Nothing
+                      result = runParser p tokens
+                  in  debug Err ("Parsing: "++show (tokens)++"\nhas result:") $
+                      result 
+
+
+--------------------------------------------------------------
+
+
+
+enrichedDocTk = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty [] NoIDP)
+--boardDeclTk =  (Structural (Just $ BoardDeclNode hole []) [] NoIDP)
+parsingTk = (Structural (Just $ NoNode) empty [] NoIDP)
+--enrichedDocTk = StrTk "+" Nothing NoIDP -- (Structural (Just $ EnrichedDocNode HoleEnrichedDoc []) [] NoIDP)
+--declTk = StrTk "*" Nothing NoIDP -- (Structural (Just $ DeclNode hole []) [] NoIDP)
+--parsingTk = StrTk "%" Nothing NoIDP -- (Structural (Just $ NoNode) [] NoIDP)
+
+toks = [ mkEnrichedDocTk
+           [ mkParsingTk 
+               [ mkDeclTk 
+                    [ mkParsingTk 
+                      [ LIdentTk "x" Nothing NoIDP
+                      ]
+                   ]
+               ]
+           , mkParsingTk
+               [ mkDeclTk  [] 
+               , LIdentTk "x" Nothing NoIDP
+               , StrTk "=" Nothing NoIDP
+               , IntTk "1" Nothing NoIDP
+               , StrTk ";" Nothing NoIDP
+               , LIdentTk "y" Nothing NoIDP
+               , StrTk "=" Nothing NoIDP
+               , IntTk "1" Nothing NoIDP
+               , StrTk ";" Nothing NoIDP
+               ]
+               
+           ]
+       ]
+ where mkEnrichedDocTk cs = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty cs NoIDP)
+       mkDeclTk cs =  (Structural (Just $ DeclNode hole []) empty cs NoIDP)
+       mkParsingTk cs = (Structural (Just $ NoNode) empty cs NoIDP)
+        
+
+
+
+-- UNCLEAR:
+-- default: what to do with things like HeliumTypeInfo? answer: declare as Editable and specify hole
+
+--Design issues with parsing and structure recognizing (choose different name? recognizer is usually parser with Bool result)
+
+-- TODO: 
+
+
+
+-- parsing token is now a Structural NoNode, this is a hack.
+
+-- put "tokenNode" application in generated code, now it appears everywhere
+-- put general extractFromNodes (rename to reuseFrom Tokens) in begin part of Parser_Generated (after new generater is used)
+
+-- do things for parseErr and Hole in structure recognition. This should be done with a class,
+-- so pStr can take care of it. See pStr definition
+-- first, ignore, then do it explicitly in each recognizer, finally do it hidden in pStr
+
+
+-- what do we do with "lIdentVal" in parseString_?
+
+
+-- where to put pStr, for structurals inside and for parsers outside? parsers calling each other should
+-- not have a pStr. (parsing in parsing does not (and should not) give rise to a Parsing node from postScan pres)
+-- maybe have recognizeBla do the pStr, and have parseBla without
+
+
+-- recognize should take into account the presentation, which must be present in the structural token somewhere
+
+
+--PROBLEM: When several structural presentations for one type exist, we need a way to determine which recognizer to use.
+--For example tree node with children or without. A parser would use the keyword "+" or "-", but in the recognizer
+--we somehow have to look at the boolean expansion value of the recognized node since parsing an image of + or - is not
+--an option.
+
+-----------------------
+
+
+
+
+
+{-
+comments from old parser
+
+The id of the origin is used to set the id of the doc element. 
+(only succeeds if origin was of same type)
+In case of several symbols (eg. if .. then .. else ..fi): if 1st fails, try 2nd, etc.
+
+
+For each parse, reuse everything that is not in the parse
+
+-}
+
+ 
+-- ******** rename plus to sum
+-- remember to that "Chess", "PPT", "board", and "pres" must be keywords in PresentationParsing
+
+
+{-
+Parser notes
+
+inserted layout? 
+
+a = + 2; -> a = HOLE + 2;        single space
+a = 2 -> a = 2;                          no whitespace
+
+
+f = 1;
+
+= 2;
+
+->
+
+f = 1;
+
+HOLE = 2;                                 copied from following token
+
+
+-}
+
