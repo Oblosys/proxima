@@ -27,6 +27,8 @@
 \runningheads{M.M. Schrage}{Requirements} 
 
 \begin{document}
+\SPE{0}{0}{0}{0}{2005} 
+
 
   \title{Requirements for a presentatio-oriented editor for structured documents} 
   \author{Martijn M. Schrage, Johan Jeuring, Lambert Meertens, Doaitse Swierstra}
@@ -120,7 +122,7 @@ An obvious research question is to abstract from the specific aspects of each ed
 Especially in the nineteen-eighties, many research projects on structure editing were started. However, the editors developed were generally perceived as being overly restrictive, and attempts at developing less restrictive systems resulted mainly in text-only editors. Further, regardless of the restrictiveness of the edit model, the applicability of the generic editors was generally limited to source editors for programming languages and simple word-processing applications. In the years following, research interest in structure editing steadily declined, and many of the generic editors that were developed are now used only for educational purposes at the institute of origin. 
 
 In our opinion, the problem with most of these structure editors is that they either focus on editing the document structure, or the presentation (often just text). The document-oriented editors may have a powerful presentation mechanism, but poor editing support in the presentation, which results in a restrictive edit model. On the other hand, purely presentation-oriented editors lack edit operations on the document, and have relatively weak presentation mechanisms. 
-
+ 
 With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many XML document types are being developed, but support for editing documents of these types is still poor. There is a choice between using an expensive custom-made editor, or a generic XML editor, but the functionality of the latter does not come close to what a presentation-oriented (WYSIWYG) editor could potentially offer. It is, for instance, not possible to use any of the current XML editors as a convenient editor for a programming language or for mathematical equations. 
 
 In this paper we investigate requirements for structure editors. We present five use cases in detail. The use cases serve to illustrate the term generic editor, and to formulate requirements for structure editors. 
@@ -696,7 +698,8 @@ Although such a rather restricted edit model is common even in the current gener
 
 Direct manipulation of parts of the formula is supported on a structural level. A proper subtree of the formula can be dragged to a different location.
 
-\definecolor{gray}{gray}{.6}
+%%\definecolor{gray}{gray}{.6}
+\newcommand{\textcolor}[1]{#1}
 \editStepScrshot
 {$ \frac{(x-1)\times{ \framebox{\scriptsize $(x+1)$}}}{y + \textcolor{gray}{\{\tt Exp\}}}    $}
 {\begin{normalsize}$ \frac{(x-1)\times{\textcolor{gray}{\{\tt Exp\}}} }{y + \framebox{\scriptsize $x+1$}}{\vrule height1.8ex width-2.5pt depth1.99ex} $ \end{normalsize}}
