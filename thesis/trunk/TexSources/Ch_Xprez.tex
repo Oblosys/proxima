@@ -4,10 +4,11 @@
 TODO:
 
 
+property/attribute?
+
 CHECK hansen function based formatting (Bib from Rui)
 Check out  Yahu & wxHaskell for alternative ways of handling attributes/properties. Can these handle synthesized attrs as well?
 
-change case for titles and headings
 
 Check first chapter if transformation/target language separation is removed here
 \ec
@@ -20,7 +21,6 @@ Check first chapter if transformation/target language separation is removed here
 
 \chapter{Presenting structured documents with {\sc Xprez}} \label{chap:presenting}
 
-{\sc Xprez} is not latex!! Latex is too complex. {\sc Xprez} is target. Latex needs attributes and lot of computations. Proxima can build an editor for latex, but not just using {\sc Xprez}. E.g.\ fontsize etc will be visible in document level.
 
 
 \bc
@@ -28,31 +28,9 @@ The popularity of the document standard XML has led to an increasing demand for 
 \ec
 
 
-\bl
-\o Presentation level in Proxima is Xprez
-\o Simple version is Section~\ref{sect:presLevel}
-\o Compare it to other pres langs and explain language
-\o just enriched/pres level now?
-\el
+Although there are many presentation languages for structured documents (e.g.~\cite{css2, badros99ccss, marden98psl, xsl10, quint97thot}), not a single one seems to have sufficient expressiveness and abstraction mechanisms to specify the presentations of the use cases from Chapter~\ref{chap:requirements}. Pretty-printing combinators (e.g~\cite{oppen80prettyPrinting, swierstra98combinators, hughes1995prettyPrinting, kahl99galleyCombs, brand96generationOfFormatters}) do offer expressiveness, abstraction mechanisms, but these libraries are mainly text-oriented.
 
-There exist a number of style sheet or presentation languages for XML, for example CSS~\cite{css2}, CCSS~\cite{badros99ccss}, PSL~\cite{marden98psl}, XSL~\cite{xsl10}, and P~\cite{quint97thot}, but they lack either the expressiveness or the abstraction mechanisms to specify the presentations for the use cases from Chapter~\ref{chap:requirements}. Pretty-printing combinators \cite{oppen80prettyPrinting,swierstra98combinators,hughes1995prettyPrinting,kahl99galleyCombs,brand96generationOfFormatters} do offer expressiveness, abstraction mechanisms and first-class presentations, but these libraries are mainly text-oriented.
-
-%, and all require a program for traversing the document tree and generating the presentation. 
-
-\bc
-In a comparative study of a number of existing languages, we determined the following list of requirements for a presentation language:
-
-\begin{itemize}
-\item Complicated presentations should be possible, but at the same time simple presentations should be easy to specify.
-\item The language should be declarative. Thus, the order in which presentation rules are specified is not important.
-\item Domain-specific syntax should be available for presentation-specific constructs. 
-\item It should support a flow (\`a la XSL) and a box (\`a la \TeX) model with alignment.
-\item Presentations should be first-class values. Thus presentations can be manipulated, passed as arguments to functions, etc.
-\item It should have a powerful abstraction mechanism. Thus, similar presentations can be specified with one, appropriately parameterized, function.
-\end{itemize}
-\ec
-
-{\sc Xprez} has been implemented in the functional language Haskell. It does not yet have a domain-specific syntax, but other than that it meets the requirements. Although the language is not yet fully developed, it is already powerful enough to describe a \TeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of an example document presented using this style sheet. The style sheet handles section numbering, ligatures (e.g.\ the ``fi'' in Scientific), and several mathematical constructs.
+In this section, we introduce the presentation language of Proxima: {\sc Xprez}. The language is an extended version of the presentation level that was discussed in Section~\ref{sect:presLevel}. {\sc Xprez}  has been implemented in Haskell. \bc It does not yet have a domain-specific syntax, but other than that it meets the requirements.\ec Although the language is not yet fully developed, it is already powerful enough to describe a \TeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of example {\sc Xprez} presentations, containing ligatures (e.g.\ the ``fi'' in ``Scientific''), and several mathematical constructs. It is already possible to instantiate an editor for these presentations with Proxima prototype, but in order to support pleasant editing, a few more extensions to the prototype are needed.
 
 \begin{center}
 \epsfig{file=pics/eps/xlatex1.png.eps, width=2in} \qquad
@@ -70,9 +48,7 @@ The contributions of this paper are:
 \end{itemize}
 \ec
 
-
-\todo{}
-Section~\ref{sect:targetlangs} discusses existing presentation languages and states a number of requirements for a presentation language. followed by the introduction of the target language of {\sc Xprez} in Section~\ref{sect:xpreztarget}.  Section~\ref{sect:conclusions} concludes.
+Section~\ref{sect:targetlangs} discusses several existing presentation languages and states a number of requirements for a presentation language. This is followed by an informal description of the {\sc Xprez} presentation language in Section~\ref{sect:xpreztarget}. Section~\ref{sect:conclusions} concludes with an overview of future research.
 
 
 %																
@@ -80,89 +56,91 @@ Section~\ref{sect:targetlangs} discusses existing presentation languages and sta
 %																
 \section{Presentation languages} \label{sect:targetlangs}
 
-\todo{change title}
+In this section, we discuss five presentation languages for structured documents. XSL~\cite{xsl10} is a presentation language for XML documents, whereas CCSS~\cite{badros99ccss} and PSL~\cite{marden98psl} are presentation languages for HTML. CSS~2.0~\cite{css2} can be used to present both XML and HTML documents. Finally, the language P~\cite{quint97thot} is the presentation language of the Thot editor toolkit (see Section~\ref{sect:toolkits}). 
 
-In this section, we discuss five presentation languages: CSS~2.0, CCSS, XSL, PSL and P. 
-\cite{sgml86} and \cite{dsssl96}
+In Section~\ref{sect:presentationFormalism}, we mentioned that a presentation language consists of two parts. One part is the {\em presentation target language}, which describes the components (strings, boxes, rows, etc.) of a presentation. The other part is the presentation specification language, in which we specify how a document is mapped onto an element of the target language. Not every presentation language explicitly indentifies its presentation target language. Moreover, if the target language supports abstraction, a presentation may contain functions, which makes it difficult to clearly separate the two languages.
 
-%Paper organisation move this to introduction
-Two kinds of languages are involved in the presentation process: a presentation target language, and a presentation specification or transformation language. The presentation target language describes the building blocks of the presentation that is displayed on the screen or sent to a printer, whereas the transformation language specifies how an XML document is mapped onto the target language to create this presentation. The Extensible Stylesheet Language (XSL) gives a clear example of the distinction, as it has been split into a transformation language (XSL Transformations or XSLT) and a target language (XSL Formatting Objects). XSLT documents specify transformations that map a source document tree to a tree of Formatting Objects, which can then be rendered. 
+In the remainder of this chapter, we focus on presentation target language, because {\sc Xprez} is the presentation target language of Proxima. The presentation specification language of Proxima is an attribute grammar formalism, but the details of this formalism still require further research. % maybe example
 
-
-Presentation lang is trans + target. Most formalisms have both. Here focus on target. Trans is AG but has not been that well developed for Prox. (Example in next chapter?)
-
-Maybe not say Xprez has a target language, but that Xprez is a target language?
-
-
-
-The elementary building blocks of most presentation target languages are basic presentations of strings and simple graphical objects such as lines, boxes and circles. The building blocks can be composed according to a severaln models:
+\toHere
+The elementary building blocks of most presentation target languages are basic presentations of strings and simple graphical objects such as lines, boxes and images. Presentations have presentation attributes such as font size, color, etc. Composite presentations may be formed according to several models:
 
 \begin{description}
-\item[Flow model]
-When a flow model is used, presentations are placed next to each other or above each other, depending on the current flow direction. If the remaining space in the current direction is too small to fit the presentation, a new flow presentation is started. In this way, lists of words can be divided into lines and lists of lines can be divided into pages. The generated list of flows may then be manipulated further, for example, by extending each page in a list of pages with a header and a footer.
-\item[Box model]
-The box model allows each presentation to define its position relative to sibling or parent presentations. The positions can be set either directly by specifying them relative to positions of other presentations, or by declaring constraints. If constraints are used, the style sheet does not so much specify the exact calculation of a property, but rather gives constraints that should hold for the property. The actual computation of the property value is left to a constraint solver. 
+\item[Box model] rows and columns
+A box model allows each part of the presentation to define its position relative to sibling or parent presentations. The positions can be set either directly or relative to positions of other presentations, or by declaring constraints. If constraints are used, the style sheet does not so much specify the exact computation of a property, but rather gives constraints that should hold for the property. The actual computation of the property value is left to a constraint solver. 
+\item[Flow model] % does not depend on doc structure, but on available space
+In a flow model presentations are placed next to each other or above each other, depending on the current flow direction. If the remaining space in the current direction is too small to fit the presentation, a new flow presentation is started. In this way, lists of words can be divided into lines and lists of lines can be divided into pages. The generated list of flows may then be manipulated further, for example, by extending each page in a list of pages with a header and a footer.
 \item[Matrix model]
-The matrix model can be used to align a tree of cells, usually a list of rows that each contain a list of cells, along the rows as well as the columns. This is difficult to specify just using rules for each row and cell, as the width of the n-th cell has to be related to the n-th cells in the other rows instead of to properties of its parent or sibling cells. Matrices can be used to create box presentations, but the extent to which this is possible depends on the expressivity of the matrix model; for example, whether or not cells may overlap.
+A matrix model can be used to align a grid of elements, usually a list of rows that each contain a list of elements. The elements are aligned along the rows as well as the columns. This is difficult to specify just using rules for each row and cell, as the width of the n-th cell has to be related to the n-th cells in the other rows instead of to properties of its parent or sibling cells.** Matrices can be used to create box presentations, but the extent to which this is possible depends on the expressivity of the matrix model; for example, whether or not cells may overlap.
 \item[Absolute positioning]
-A very low level way of formatting is specifying the absolute coordinates in the resulting presentation.
+A very low-level of formatting is specifying the absolute coordinates in the resulting presentation.
 \end{description}
+\fromHere
 
 
 %																
 \subsection{Existing presentation languages} \label{sect:existingtarget}
 
-\todo{DSSSL? Lambert mentioned it at the transformation lang section} % Does DSSSL have a target component?
+Of the five presentation languages we examined, only XSL regards its target language as a language in its own right, with a separate syntax. The other languages only describe how properties of the elements of the target presentation tree can be set, but do not treat a presentations as an actual value in the language.
 
-Of the five \todo{?}presentation languages we examined, only XSL regards its target language as a language in its own right, with a separate syntax. The other languages only describe how properties of the elements of the target presentation tree can be set, but do not treat a presentations as an actual value in the language.
-
-\head{CSS~2.0:} Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer. The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. 
-\toHere
-
-The nodes of the tree specify presentation properties such as font size or color, either absolutely or as a percentage. However, aribitrary expressions *** . The kind of a property determines to what property a percentage refers. For instance, a percentage value for the {\em font-size} property refers to the font size of the parent element, but a percentage for the {\em line-height} property refers to the font size of the element itself. It is not possible to let a property value depend on arbitrary properties of the parent or siblings in the presentation tree.
-
-\fromHere
+\head{CSS~2.0:} Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer.  \bc The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. \todo{flow} \ec A presentation is a tree structure, in which the nodes specify presentation properties such as font size or color, and the leaves are document content. A presentation property may be specified either absolutely or as a percentage. In the latter case, the kind of the property determines what property the percentage refers to. For instance, a percentage value for the {\em font-size} property refers to the font size of the parent element, but a percentage for the {\em line-height} property refers to the font size of the element itself. It is not possible to let a property value depend on arbitrary properties of the parent or siblings in the presentation tree.
 
 CSS~2.0 supports a flow layout and absolute positioning. There is also a table format, but it is of limited use because the transformation language is rather weak. Consequently, if the data in the document does not have exactly the same structure as a CSS~2.0 table, it cannot be presented as one.
 
 \head{CCSS:} Constraint Cascading Style Sheets~\cite{badros99ccss} is an extension of the CSS~2.0 standard that is based on constraints. The target language of CCSS closely resembles the CSS~2.0 target language, but child properties are specified using constraints instead of percentages of the parent's property values. Another difference is that the constraints may refer to global constraint variables and to left-siblings in the presentation tree as well as to the parent node. 
 
-\head{XSL FO:} On the other side of the spectrum is the XSL stylesheet language for XML. The design of the target language, XSL Formatting Objects, was based on the*** flow objects of the DSSSL presentation language for SGML. consists of a large collection of elements that can be used to specify page models, presentation properties, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
+\head{XSL FO:} On the other side of the spectrum is the XSL stylesheet language for XML. The design of the target language, XSL Formatting Objects, was based on the flow objects of the DSSSL~\cite{dsssl96} presentation language for SGML. The formatting objects standard consists of a large collection of elements that can be used to specify page models, presentation properties, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
 
-XSL formatting objects offer  strong control over the flow model, but no box model is supported. There is a table model, but using it to do a box layout is difficult, because that requires the style sheet to take care of computing the alignment, and XSLT does not support a strong computational formalism.
+XSL Formatting Objects offer strong control over the flow model, but a box model is not supported. There is a table model, but using it to create a box layout is difficult, because that requires the style sheet to take care of computing the alignment, and XSLT does not support a strong computational formalism.
 
-\head{PSL:} The Proteus Stylesheet Language~\cite{marden98psl} is an attempt to combine the simplicity of CSS~2.0 with the power of XSL. Its target language is again close to the CSS target language. PSL extends the CSS target language with a box model and graphical symbols. The value of a property can be expressed as a mathematical expression that refers to properties of nodes in the presentation tree. This mechanism is called {\em property propagation}. 
+\head{PSL:} The Proteus Stylesheet Language~\cite{marden98psl} is an attempt to combine the simplicity of CSS~2.0 with the power of XSL. PSL extends the CSS target language with a box model and graphical symbols. The value of a property can be expressed as a mathematical expression that refers to properties of nodes in the presentation tree. This mechanism is called {\em property propagation}. 
 
-PSL supports a constraint-based box model. A presentation can specify its properties for position and size relative to properties of other presentations in the tree. The other presentations can be addressed using a number of primitive functions for accessing siblings, parents, ancestors of a specific type, etc.
+PSL supports a flow model and a constraint-based box model. A presentation can specify its properties for position and size relative to properties of other presentations in the tree. The other presentations can be addressed using a number of primitive functions for accessing siblings, parents, ancestors of a specific type, etc.
 
-\head{P:} The last language we consider is the presentation language P of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of properties. In contrast to PSL, the box layout in P is not constraint based. Hence, the style sheet designer needs to take the order of computation of the layout properties into account. P does support horizontal and vertical reference lines for automatic alignment of boxes. Matrices are not primitive objects in P.
+\head{P:} The  language P is the presentation language of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes, which may be composed according to a box, a flow, or a matrix model. P supports horizontal and vertical reference lines for automatic alignment of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of properties. In contrast to PSL, the box layout in P is not constraint-based. \bc Hence, the style sheet designer needs to take the order of computation of the layout properties into account. \ec 
 
-\head{Discussion:} The languages discussed above are all declarative and domain-specific languages that vary in expressive power. The simple languages CSS~2.0, CCSS, and PSL allow simple presentations to be specified in a simple way, but cannot be used to specify more complex presentations, such as mathematical formulas. In contrast, XSL and P do allow complex presentations to be specified, but due to the lack of abstraction, simple presentations also have rather elaborate specifications, especially in P. 
+\head{Discussion:} 
 
-Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. A box can specify its own position properties relative to its parent or siblings, but it is not possible to state at parent level that two child presentations should have their top and bottom aligned, or that two presentations should have the same width. As a consequence, the conceptually simple change of presenting the children of a node next to each other instead of above each other requires changing the presentations for all child elements. Moreover, if the choice for vertical or horizontal layout depends on an attribute of the parent, then all children require code in their presentation rules for accessing this parent attribute, if possible, and letting their presentation depend on its value. If, however, presentations are first-class objects in the target language, then the parent presentation rule can specify the layout of the children.
+The languages discussed above are all declarative and domain-specific languages that vary in expressive power. The languages CSS~2.0, CCSS, and PSL allow simple presentations to be specified in a simple way, but cannot be used to specify more complex presentations, such as mathematical formulas. In contrast, XSL and P allow complex presentations to be specified, but due to the lack of abstraction, simple presentations also have rather elaborate specifications, especially in P. 
 
-Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, a reverse order presentation of a list of children is obtained by aligning each right side with the previous child's left side. If, on the other hand, child presentations are first-class, and abstraction mechanisms can be used to define combinators on them, reversing can be specified by a simple reverse combinator. Another advantage of this approach is that the concepts of reversing and direction of layout are orthogonal now. Changing the layout from a horizontal list to a vertical list can be achieved by applying a different combinator to the reversed children, while the order of the children is controlled by applying the reverse combinator or not. In the P and PSL model, these concepts are intertwined.
+Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position properties relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned, or that two presentations should have the same width. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
 
-\fromHere
+Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the the order of the children depends on an attribute of the parent, then the presentation definition of each child need to access this parent attribute and use its value to determine the alignment of the child.
+
+If, on the other hand, child presentations are first-class, and abstraction mechanisms can be used to define combinators on them, a list of children may be reversed with a reverse function in the presentation definition of the parent.  Another advantage of this approach is that the concepts of layout direction (horizontal or vertical) and order of the children are orthogonal now. The layout direction is determined by which combinator is applied to the list of children, whereas the order is determined by whether or not a reverse function is applied to the list. In the model of P and PSL, these concepts are intertwined, and reversing a horizontal list is conceptually different from reversing a vertical list.
 
 \head{ Requirements}
 
-Based on the previous discussion, we can conclude that a presentation target language, and in particular the target language for Proxima, should meet the following requirements: 
+Based on the use cases from Chaper~\ref{chap:requirements} and the previous discussion, we conclude that the presentation target language for Proxima, should meet the following requirements: 
 
 \begin{description}
 \item[Proportional effort]
 It must be possible to specify complex presentations, but the specification of simple presentations should still be easy.
 \item[Declarative]
 In a declarative language, understanding a composite presentation is easier, because the computation of a presentation does not generate side effects. Another advantage is that the designer need not worry about the order of computation of presentations and properties.
-\item[Domain-specific]
-The language should have syntax for presentation-specific constructs such as an {\bf em} (the height of the letter m in the current font and size) and different measuring units such as pixels and inches.
-\item[Flow and Box model with alignment]
-The language supports a flow model for textual parts of a presentation, and a box model for displaying mathematical formulas and other more graphical presentations such as trees. Automatic alignment can be used to specify composite presentations without having to position each child presentation explicitly.
 \item[First-class presentations]
-A first-class presentation can be named and manipulated at the level of its parent, which in many cases is the natural place for such manipultation. At the same time, it is also possible to specify properties at child presentation level when this is more appropriate. \todo{clear enough?}
+A first-class presentation can be named and manipulated at the level of its parent, which in many cases is the natural place for such manipulation. At the same time, it is also possible to specify properties at child presentation level when this is more appropriate.
+\item[Flow, box, matrix, and absolute positioning]
+All four layout models mentioned at the start of this section should be supported. The alignment of the box and matrix models must be powerful enough to specify complex presentations such as mathematical formulas.
+\item[Text, graphical, and widgets]
+It must be possible to specify text and graphical elements such as lines, boxes, and images. Moreover, the language must support user-interface widgets, such as buttons, selection lists, and menus. 
 \item[Powerful abstraction mechanism]
-User-defined functions and var\-i\-ables help to reduce code duplication, facilitate code reuse, and increase transparency, because complex pieces of code may be replaced by functions with well-chosen names.
+User-defined functions and variables help to reduce code duplication, facilitate code reuse, and increase transparency, because complex pieces of code may be replaced by functions with well-chosen names.
+\item[Domain-specific]
+The language should have syntax for presentation-specific constructs such as an {\bf ex} (the height of the letter `x' in the current font and size) and different measuring units such as pixels and inches.
 \end{description}
+\bc
+\begin{itemize}
+\item Complicated presentations should be possible, but at the same time simple presentations should be easy to specify.
+\item The language should be declarative. Thus, the order in which presentation rules are specified is not important.
+\item Domain-specific syntax should be available for presentation-specific constructs. 
+\item It should support a flow (\`a la XSL) and a box (\`a la \TeX) model with alignment.
+\item Presentations should be first-class values. Thus presentations can be manipulated, passed as arguments to functions, etc.
+\item It should have a powerful abstraction mechanism. Thus, similar presentations can be specified with one, appropriately parameterized, function.
+\end{itemize}
+\ec
+
+
 
 %																
 %																
@@ -174,17 +152,17 @@ With the requirements from the previous subsection in mind, we have developed th
 %																
 \subsection{{\sc Xprez} presentation model}
 
-{\sc Xprez} is a box language, similar to P and the document formatting languages \TeX ~and Lout~\cite{kingston93lout}. A presentation is a value of the abstract type \texttt{Xprez}, and is either a simple box containing a text or a graphical object, or a composite box that contains a list of child presentation boxes. Thus, a presentation is a tree, in which the leaves are simple presentations and the nodes are composite presentations. We construct \texttt{Xprez} values in the functional language Haskell, using a number of primitive functions that are described in Section~\ref{sect:primitives}.
+{\sc Xprez} is a box language, similar to P and the document formatting languages \TeX ~and Lout~\cite{kingston93lout}. A presentation is a value of the abstract type \p{Xprez}, and is either a simple box containing a text or a graphical object, or a composite box that contains a list of child presentation boxes. Thus, a presentation is a tree, in which the leaves are simple presentations and the nodes are composite presentations. We construct \p{Xprez} values in the functional language Haskell, using a number of primitive functions that are described in Section~\ref{sect:primitives}.
 
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{small}
 \begin{verbatim}
-data Inh = Inh {fontFamily :: String, fontSize :: Int,
-                textColor, lineColor, fillColor, backgroundColor :: Color} 
-data Syn = Syn {hRef, vRef, minWidth, minHeight :: Int,
-                hStretch, vStretch :: Bool}
+data Inh = Inh { fontFamily :: String, fontSize :: Int,
+                 textColor, lineColor, fillColor, bgColor :: Color } 
+data Syn = Syn { hRef, vRef, minWidth, minHeight :: Int,
+                 hStretch, vStretch :: Bool}
 \end{verbatim}
 \end{small}
 \caption{The {\sc Xprez} properties}\label{xprezproperties} 
@@ -199,15 +177,23 @@ A presentation box (from now on called presentation) has a number of properties 
 \epsfig{file=pics/eps/PresentationBox.eps, width=2in}
 \end{center}
 
-\toHere
+A presentation tree in {Xprez} can be regarded as an attribute grammar, in which the properties are inherited and synthesized attributes. The inherited attributes (or downward properties) are properties that are typically specified for an entire subpresentation, such as color and font size. The synthesized attributes (upward properties), on the other hand are set by a child and used by its parent. Examples of upward properties are reference lines and size information. Figure~\ref{xprezproperties} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the two classes of properties. The figure also shows the type of each property. 
 
-Figure~\ref{xprezproperties} shows the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when combined in composite presentations. \todo{note h is vertical line} The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self-explanatory. In the future, this set will be extended with other properties such as more line-style and font attributes, and user-defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
+The \p{hRef} and \p{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when combined in composite presentations. Note that the vertical reference line is in fact a horizontal line and vice versa. The term vertical reference line stems from the fact that it is used for vertical alignment; modifying the vertical reference line affects the vertical position of the presentation. 
 
+The boolean \p{hStretch} and \p{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The remaining properties are the self-explanatory: \p{fontFamily}, \p{fontSize}, \p{textColor}, \p{lineColor}, \p{fillColor}, and \p{bgColor}. In the future, this set will be extended with other properties such as line and font style properties, and properties for modeling edit behavior (e.g.\ \p{onMouseClick~::~EditCommand}). \bc and user-defined properties will be supported. \ec
+
+\bc
+The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \p{Inh} for inherited properties, and \p{Syn} for synthesized properties.
+\ec
 
 %																
 \subsection{{\sc Xprez} primitives} \label{sect:primitives}
 
-Simple presentations can be created with the first five combinators in Figure~\ref{xprezprim}. The \texttt{empty} combinator is a neutral element that is not visible and takes up no space. A piece of text can be presented with \texttt{text}, and a rectangle with \texttt{rect}, which takes the width and height as arguments. The \texttt{poly} combinator takes a list of relative coordinates between (0,0) and (1,1) and produces a line figure that connects these points. A \texttt{poly} presentation stretches in horizontal and vertical direction. Finally, \texttt{img} can be used to display bitmap images. The argument is a string that contains the path to the bitmap file. By default, the reference lines of simple presentations are 0\todo{expl more}, except for the vertical reference line of a text presentation, which is the baseline of the current font.
+The first five combinators in Figure~\ref{xprezprim} specify simple presentations (without children). The \p{empty} combinator is not visible and takes up no space, it is the neutral element for composite presentations. A string can be presented with \p{text}, and a rectangle with \p{rect}. The \p{poly} combinator takes a list of relative coordinates and produces a line figure that connects these points. Finally, \p{img} can be used to display external images. The argument is a string that contains the path to the image file. In a future version, an \p{img} may also contain a reference to an image that is encoded as part of the document.
+\todo{poly maybe between 1 and 0, so we have a max}
+
+Except for \p{text}, both horizontal and vertical reference lines of a simple presentation 0 (i.e.\ the north-west corner). For \p{text},  the vertical reference line is the baseline of the text and the horizontal reference line is 0. By default, a  simple presentation does not stretch.
 
 \begin{figure}
 \begin{small}
@@ -215,12 +201,12 @@ Simple presentations can be created with the first five combinators in Figure~\r
 \begin{small}
 \begin{verbatim}
 empty             :: Xprez
-text              :: String -> Xprez             -- simple text
-rect              :: Int -> Int -> Xprez         -- rectangle
-img               :: String -> Xprez             -- image (jpg, png, ...)
-poly              :: [ (Float, Float) ] -> Xprez -- poly line
-row, col, overlay :: [ Xprez ] -> Xprez          -- row, column, overlay
-rowR, colR        :: Int -> [ Xprez ] -> Xprez   -- row, col w/ reference
+text              :: String -> Xprez             
+rect              :: Xprez                       
+img               :: String -> Xprez             
+poly              :: [ (Float, Float) ] -> Xprez 
+row, col, overlay :: [ Xprez ] -> Xprez          
+rowR, colR        :: Int -> [ Xprez ] -> Xprez   
 matrix            :: [[ Xprez ]] -> Xprez
 format            :: [ Xprez ] -> Xprez
 \end{verbatim}
@@ -230,50 +216,54 @@ format            :: [ Xprez ] -> Xprez
 \end{small}
 \end{figure}
 
-There are several kinds of composite presentations, the simplest being rows and columns (combinators \texttt{row} and \texttt{col}), which are duals. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical reference lines aligned. Horizontal reference lines have no effect on the positioning in a row.
+%-- simple text           
+%-- rectangle             
+%-- image (jpg, png, ...) 
+%-- poly line             
+%-- row, column, overlay  
+%-- row, col w/ reference 
+
+The remaining primitives in Figure~\ref{xprezprim} specify composite presentations. The behavior of columns (\p{col}) is equal to that of rows (\p{row}) with the horizontal and vertical directions swapped. Hence, we only discuss the \p{row} primitive. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical reference lines aligned. Horizontal reference lines have no effect on the positioning in a row.
 
 \begin{center}
 \epsfig{file=pics/eps/row.eps, width=3.2in}
 \end{center}
 
-The bounding box of a row is the smallest rectangle that encloses all its children. The vertical reference line is equal to the aligned reference lines of the children, whereas the horizontal reference line is taken from one of the children (by default the first one). The \texttt{rowR} combinator takes an extra argument of type \texttt{Int} that specifies which child carries the horizontal reference line for the row. \texttt{}By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. However, by setting the stretch properties, these defaults can be overridden. 
+The bounding box of a row is the smallest rectangle that encloses all elements of the row. The vertical reference line of the row is equal to the aligned reference lines of the children, whereas the horizontal reference line is taken from the first child. In order to use the horizontal reference line from one of the other children, we can use the \p{rowR} combinator. The integer argument of \p{rowR} specifies which child determines the horizontal reference line for the row, with 0 denoting the first child. 
 
-The \texttt{matrix} combinator can be used to describe a table layout, in which elements are aligned with elements to their left and right as well as with elements above and below them. 
+By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. The defaults may be overridden by setting the stretch properties with the method that is  shown in the next section. 
 
-Because \texttt{row}, \texttt{column} and \texttt{matrix} do not allow their children to overlap, a special combinator is required to create overlapping presentations. The \texttt{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \texttt{overlayR} combinator is needed. 
+The \p{matrix} combinator can be used to describe a table layout, in which elements are aligned with elements to their left and right as well as with elements above and below them. 
 
-The last composite combinator in Figure~\ref{xprezprim} is \texttt{format}. It takes list of presentations as argument and splits this list into rows based on the available horizontal space. The resulting rows are placed in a column. The \texttt{format} combinator can be used to display a paragraph of words, or any other kind of presentations for that matter, on a number of lines. 
+Because \p{row}, \p{column} and \p{matrix} do not allow their children to overlap, we need a special combinator for overlapping presentations. The \p{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \p{overlayR} combinator is needed. 
 
-\fromHere
+A flow layout can be achieved with the \p{format} combinator for paragraph formatting. The combinator takes a list of presentations as argument and splits this list into rows based on the available horizontal space. The resulting rows are placed in a column.  Because \p{Xprez} does not yet have a page model, only horizontal formatting is supported.
 
 Here is an example {\sc Xprez} presentation that illustrates alignment and stretching in a row:
 
 \begin{small}
 \begin{verbatim}
 let cross     = poly [(0,0),(1,0),(1,1),(0,1),(0,0),(1,1),(0,1),(1,0)]
-    greycross = cross `withbgColor` grey
+    greycross = cross `withbgColor` grey `withStretch` True
 in  row [ text "Big" `withFontSize` 200
         , colR 2 [ cross, cross, text "small", greycross, greycross ] ] 
 \end{verbatim}
 \end{small}
 
-\toHere
 The code produces the following image (the dashed line has been added to show vertical reference line of the presentation):
 
 \begin{center}
 \epsfig{file=pics/eps/align.png.eps, width=1in}
 \end{center}
 
-The second element in the row is a column that takes the vertical reference line from its third child (the numbering starts at 0). Therefore, the word ``Big'' is aligned with the word ``small''. The \texttt{cross} object is a line figure in the form of a rectangle with a cross, and the \texttt{greycross} is a \texttt{cross} with a grey background. 
- \todo{these?}
+The second element in the row is a column that takes the vertical reference line from its third child. Therefore, the word ``Big'' is aligned with the word ``small''. The \p{cross} object is a line figure in the form of a rectangle with a cross, which is made stretchable in both directions by \p{withStretch}. The \p{greycross} is a \p{cross} with a grey background. 
  
-Because these presentations stretch in vertical direction, so does the containing column. The two stretching objects above the reference object (\texttt{text "small"}) are each assigned equal amounts of the remaining space above the vertical reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is added and distributed equally over all stretching objects. In this case, there will no longer be any alignment of the reference object. 
-
+Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The two stretching objects above the reference object (\p{text "small"}) are each assigned equal amounts of the remaining space above the vertical reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
 
 %																
 \subsection{Property modification}
 
-The properties of a presentation can be modified using the \texttt{with\symbol{95}}\footnote{The name has an underscore because the keyword {\tt with} is already defined in Haskell} combinator:
+The properties of a presentation can be modified using the \p{with\symbol{95}} combinator (The name gets an underscore because the keyword {\tt with} is already defined in Haskell).
 
 \begin{small}
 \begin{verbatim}
@@ -281,9 +271,13 @@ with_ :: Xprez -> ((Inh, Syn) -> (Inh, Syn)) -> Xprez
 \end{verbatim}
 \end{small}
 
-In the specification of a property value, the original values of properties can be used, e.g.\ the font size can be set to the old font size increased with 2 points. Therefore, the second argument of \texttt{with\symbol{95}} is a function that takes the original values of the inherited attributes that come from the parent and the synthesized attributes that come from child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
+The combinator takes a single child presentation as argument, together with a function from attributes to attributes. The function is applied to the inherited attributes coming from the parent, and the synthesized attributes coming from the child. From the result of this application, the inherited attributes are passed to the child, whereas the synthesized attributes are passed to the parent. Thus, the \p{with\symbol{95}} combinator can be used to modify the inherited and synthesized attributes of a presentation.
 
-The inherited and synthesized property values are Haskell records, which have special syntax for accessing and updating fields. If \texttt{inh} is a value of type \texttt{Inh}, then the expression \texttt{fontSize inh} denotes the value of the \texttt{fontSize} field in \texttt{inh}, and \texttt{inh $\{$ fontSize = 10 $\}$} denotes a value of type \texttt{Inh} in which all fields have the same values as in \texttt{inh}, except for the \texttt{fontSize} field, which is now 10. Below is the definition for the \texttt{withFontSize} combinator: 
+\bc \toHere
+In the specification of a property value, the original values of properties can be used (e.g.\ the font size can be set to the old font size increased with 2 points). Therefore, the second argument of \p{with\symbol{95}} is a function that %takes as arguments the inherited attributes coming from the parent and the synthesized attributes coming from the %child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
+\fromHere \ec
+
+Because the inherited and synthesized properties are modeled as Haskell records, we use the Haskell record syntax for  accessing and updating property values. Hence, for a record of inherited properties \p{inh :: Inh}, the expression \p{fontSize inh} denotes the value of the \p{fontSize} property in \p{inh}. Furthermore, \p{inh $\{$ fontSize = 10 $\}$} denotes a copy of \p{inh} in which the \p{fontSize} field is updated to 10. Thus, we can define a  \p{withFontSize} combinator: 
 
 \begin{small}
 \begin{verbatim}
@@ -292,7 +286,9 @@ withFontSize xp fs = xp `with_` \(inh, syn) -> (inh {fontSize = fs}, syn)
 \end{verbatim}
 \end{small}
 
-Constructing functions comes with some syntactic overhead, but by using a libary of combinators for the most frequent uses, most of the explicit calls to the \texttt{with\symbol{95}} combinator can be avoided. However, a problem with this derived combinator is that is that the \texttt{fs} value is of type \texttt{Int}, and therefore cannot depend on the original font size value. A different combinator that takes a function of type \texttt{Int -> Int} as argument, which is used in the fraction example below, solves this problem:
+The function argument to \p{with\symbol{95}} introduces a considerable syntactic overhead to the presentation code. To reduce this overhead, we can define a library of combinators, such as \p{withFontSize}, for frequent applications of  \p{with\symbol{95}}. Thus, most of the explicit applications of \p{with\symbol{95}} may be avoided.
+
+Besides combinators that set a property value absolutely, we can also define combinators that take into account the original value of a property when setting its value. Consider the combinator \p{withFontSize\symbol{95}} defined below. Instead of an integer, it takes a function (\p{ffs~::~Int~->~Int}) as argument. Given the inherited font size, the function \p{ffs} specifies its new value.
 
 \begin{small}
 \begin{verbatim}
@@ -302,14 +298,18 @@ withFontSize_ xp ffs =
 \end{verbatim}
 \end{small}
 
+With \p{pres `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we specify that \p{pres} gets a doubled font size. An application of \p{withFontSize\symbol{95}} has a function argument, but the function is considerably simpler than for \p{with\symbol{95}}. 
 
-With \texttt{p `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we can now specify the doubling of the font size for a presentation \texttt{p}, but again, this requires a function in the presentation code, although it is easier to write than the functions required by \texttt{with\symbol{95}}. A more natural solution is the declaration of a special data type \texttt{Length}, with operations such as addition and multiplication, but which also has primitive values that represent current font properties. In Haskell, type classes can be used to accomplish this. Using type classes, it will be possible to write: \texttt{vSpace (2*ex)}, which denotes a horizontal space of twice the height of the letter x in the current font. A future version of {\sc Xprez} will support special syntax for \texttt{with\symbol{95}}, allowing \texttt{text "a" with $\{$ child.fontSize = parent.fontSize * 2 $\}$} to be written without explicit functions.\todo{mention this stuff?}
-
-The font-size combinators show how abstraction is used to meet the {\em proportional effort} requirement. For simple changes of the font size, the simple \texttt{withFontSize} combinator can be used, and only if more control is desired, it is necessary to use the more complicated \texttt{withFontSize\symbol{95}} or \texttt{with\symbol{95}} combinators.
-
+\bc A more natural solution is the declaration of a special data type \p{Length}, with operations such as addition and multiplication, but which also has primitive values that represent current font properties. In Haskell, type classes can be used to accomplish this. Using type classes, it will be possible to write: \p{vSpace (2*ex)}, which denotes a horizontal space of twice the height of the letter x in the current font.\ec 
 
 
-\fromHere
+The font-size combinators show how abstraction is used to meet the {\em proportional effort} requirement. For simple changes of the font size, the simple \p{withFontSize} combinator can be used, and only if more control is desired, it is necessary to use the more complicated \p{withFontSize\symbol{95}} or \p{with\symbol{95}} combinators.
+
+A future version of {\sc Xprez} will support a domain specific special syntax for \p{with\symbol{95}}. Thus, in order to specify that  a presentation \p{pres} gets twice the font size of its parent, a red background color, and a height that is twice the height of the letter `x' in the current font, we will be able to write something in the line of: 
+
+\begin{small}
+\p{pres\{ child.fontSize = 2*parent.fontSize, child.color = red, height = 1ex \}}
+\end{small}
 
 %																
 \subsection{Advanced examples}
@@ -330,13 +330,13 @@ shrink e = e `withFontSize_` (\fs -> (70 `percent` fs) `max` 10)
 \end{verbatim}
 \end{small}
 
-The non-primitive library function \texttt{hAlignCenter} centers its argument horizontally, and the \texttt{shrink} function reduces the font size to 70\%, with a minimum of 10. The result of \texttt{(text "x" `frac` text "2") `frac` text "1 + y"} is:
+The non-primitive library function \p{hAlignCenter} centers its argument horizontally, and the \p{shrink} function reduces the font size to 70\%, with a minimum of 10. The result of \p{(text "x" `frac` text "2") `frac` text "1 + y"} is:
 
 \begin{center}
 \epsfig{file=pics/eps/frac.png.eps, width=0.5in}
 \end{center}
 
-The \texttt{pad} and \texttt{shrink} functions illustrate the {\em first-class} and {\em abstraction} requirements. Because a presentation is a first-class value, the presentations of the numerator and the denominator can be resized and positioned in the presentation of the fraction itself. Furthermore, we can abstract over positioning and resizing by using the functions \texttt{pad} and \texttt{shrink}. 
+The \p{pad} and \p{shrink} functions illustrate the {\em first-class} and {\em abstraction} requirements. Because a presentation is a first-class value, the presentations of the numerator and the denominator can be resized and positioned in the presentation of the fraction itself. Furthermore, we can abstract over positioning and resizing by using the functions \p{pad} and \p{shrink}. 
 
 In contrast, child presentations in both P or PSL cannot be addressed at parent level. Hence, the numerator, the denominator, and even the fraction bar, each have to specify their own size and relative position. As a result, it is difficult to reuse parts of a presentation in another presentation, since all parts refer to each other. Furthermore,  the manipulations on the appearance are harder to read, because no abstraction can be used. 
 
@@ -347,12 +347,13 @@ The second example is a pair of combinators that can be used to create tree brow
 \epsfig{file=pics/eps/tree.png.eps, width=1in}
 \end{center}
 
-\toHere
 
-The image has been created with the \texttt{mkTreeLeaf} and \texttt{mkTreeNode} combinators, shown in Figure~\ref{treeCombinators}. Both combinators take an \texttt{Xprez} argument that is the presentation of the label, and the tree node also takes a list of child presentations (which should be either nodes or leaves for a correct tree, but can actually be any value of type \texttt{Xprez}). Labels are not restricted to text, but can also be images, or composite {\sc Xprez} presentations, like the label that contains the case expression in the last leaf of the example tree. 
+The image has been created with the \p{mkTreeLeaf} and \p{mkTreeNode} combinators, shown in Figure~\ref{treeCombinators}. Both combinators take an \p{Xprez} argument that is the presentation of the label, and the tree node also takes a list of child presentations (which should be either nodes or leaves for a correct tree). A label is not restricted to text, but can be an arbitrary {\sc Xprez} presentation, as shown by the case statement at the bottom of the tree. The tree example shows that a complex and graphical presentation can be specified with relatively little effort.
 
-The tree example is given here to show that a rather complex and graphical presentation can be specified with relatively little effort. However, in order to make this presentation a fully operational tree browser that can react to mouse clicks, we need to model the presentation state and edit operations on this state. This is not possible in the current version of {\sc Xprez} but will be possible in the Proxima editor system.
-\begin{figure}
+\bc However, in order to make this presentation a fully operational tree browser that can react to mouse clicks, we need to model the presentation state and edit operations on this state. This is not possible in the current version of {\sc Xprez} but will be possible in the Proxima editor system.
+\ec
+
+\begin{figure}[t] % float placement, see http://www.maths.uwa.edu.au/computing/software/tex/doc/FAQ.html
 \begin{small}
 \begin{center}
 \begin{footnotesize}
@@ -389,30 +390,50 @@ minusImg = img "minus.bmp" `withRef` (4,4)
 \end{figure}
 
 
-
 %																
-\subsection{Future work}
+\section{Conclusions and further research}  \label{sect:conclusions}
 
-{\sc Xprez} meets the requirements listed at the bottom of Section~\ref{sect:existingtarget}, except for domain-specific syntax, for which a special parser will have to be added to the system. Furthermore, there are a number of things that are still lacking in the current model and that are being investigated. Firstly, there is no page model yet, and hence no page related concepts such as footnotes and page references are possible. Probably, an abstraction similar to the {\em galley} from Lout~\cite{kingston93lout} can be used for this. Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \texttt{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. Finally, the \texttt{with\symbol{95}} combinator only gives access to the properties of a parent and its child. It is not possible to access properties of siblings, or presentations elsewhere in the tree, but it is also not yet clear whether such access is really necessary in a presentation language. Nevertheless, the set of combinators we have presented is powerful enough to cover much of the \TeX~math typesetting as described in \cite{heckmann97functionalTex}, including superscripts and subscripts. We also expect that defining a presentation sheet for the MathML~\cite{mathml20} language will be rather straightforward in {\sc Xprez}.
+% meer over Xprez als editor pres lang?
 
+Current style sheet languages lack either the expressiveness or the abstraction mechanisms to specify complex presentations in a readable way. The declarative presentation language {\sc Xprez}, introduced in this chapter, combines a flow and box model with a powerful abstraction mechanism and first-class presentations. The language is well-suited for specifying a wide range of presentations, from tree browsers to WYSIWYG presentations of mathematical formulas, using concise and readable style sheets\todo{niet echt style sheets}. An implementation of {\sc Xprez} is part of the Proxima prototype. 
 
-%																
-%																
-%																
-\section{Conclusions} \label{sect:conclusions}
+\toHere
 
-\note{paper-style conclusions must be changed to chapter conclusions}
-Current style sheet languages lack either the expressiveness or the abstraction mechanisms to specify complex presentations in a readable way. The declarative presentation language {\sc Xprez}, introduced in this paper, combines a flow and box model with a powerful abstraction mechanism and first-class presentations. The language is well suited for specifying a wide range of presentations, from tree browsers to WYSIWYG presentations of mathematical formulas, using concise and readable style sheets.
+\bc The set of combinators we have presented is powerful enough to cover much of the \TeX~math typesetting as described in \cite{heckmann97functionalTex}, including superscripts and subscripts. We also expect that defining a presentation sheet for the MathML language will be rather straightforward in {\sc Xprez}.
+\ec
+
+{\sc Xprez} meets the requirements listed at the bottom of Section~\ref{sect:existingtarget}, except for domain-specific syntax, for which a special parser will have to be added to the system. Furthermore, there are a number of things that are still lacking in the current model and that are being investigated. 
+
+%Firstly, there is no page model yet, and hence no page related concepts such as footnotes and page references are possible. %Probably, an abstraction similar to the {\em galley} from Lout~\cite{kingston93lout} can be used for this. 
+%
+%Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both %of these concepts are related to the need for a more powerful \p{format} primitive that can handle both horizontal and vertical %formatting while offering more control over the generated rows and columns. 
+
+% obsolete
+\bc Finally, the \p{with\symbol{95}} combinator only gives access to the properties of a parent and its child. It is not possible to access properties of siblings, or presentations elsewhere in the tree, but it is also not yet clear whether such access is really necessary in a presentation language. 
+\ec
+
+\bl
+\o domain-spec. syntax
+\o page model
+\o padding and margins
+\o way to extend model with constraints.
+\o extensive library of combinators
+\o safe `with` applications
+\el
+
+Besides extentions to the {\sc Xprez} language, it is desirable to have an algebraic model for {\sc Xprez} presentations. With such a model, we can give laws to specify the exact behavior of the combinators, rather than give a textual description.
 
 
 % research: develop a more algebraic description, so we can show stretching and alignment without giving the entire AG.
-
+% yahu model? maybe just syntax for lists of props { hStretch = True, vStretch = True, ..}
 % page model
+
+
+
 
 \bc
 A Haskell implementation has been developed for both the target and transformation parts of {\sc Xprez}. It has been used to generate all screen shots in this paper. The user interface of this implementation is still in a premature stage, and the dependency on a number of different tools make it difficult to install. However, these are minor problems which require a fair amount of programming, but pose no major theoretical difficulties. For more information about the system, contact the authors, or visit: \url|http://www.cs.uu.nl/research/projects/proxima/|
 \ec
-\todo{mention Xander van Wiggen for his Renderer?}
 
 \bc
 \head{Acknowledgements}
