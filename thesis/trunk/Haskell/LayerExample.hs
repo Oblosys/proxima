@@ -33,7 +33,7 @@ wrap (Layer f1 f2) = Layer' (\() str -> ((), f1 str) )
 -- Almost automaticallly we can define the step type and Pack instances
 -- step type for two layer steps:
 
-type Step nextstep a b c d = (a ->(b, nextstep c d a b))
+type Step nextstep a b c d = (a ->(nextstep c d a b, b))
 
 newtype Step1 l h h' l' = 
             Step1 {step1 :: Step Step2 l h h' l'}
@@ -101,19 +101,19 @@ run layers =
    
     ; putStrLn $ "Inserting "++str++" at bottom of layers"
 
-    ; let (hOut, Step2 fDown) = fUp str
+    ; let (Step2 fDown, hOut) = fUp str
     
     ; putStrLn $ "Result coming from the top, hOut: "++ hOut
 
-    ; let (lOut, Step1 fUp') = fDown hOut
+    ; let (Step1 fUp', lOut) = fDown hOut
 
     ; putStrLn $ "Result coming from the bottom, lOut: "++ lOut
 
-    ; let (hOut', Step2 fDown') = fUp' lOut      -- remember not to use fUp, but fUp'
+    ; let (Step2 fDown', hOut') = fUp' lOut      -- remember not to use fUp
     
     ; putStrLn $ "Result coming from the top, hOut': "++ hOut'
 
-    ; let (lOut', Step1 fUp') = fDown' hOut'    -- same here
+    ; let (Step1 fUp', lOut') = fDown' hOut'    -- same here
 
     ; putStrLn $ "Result coming from the bottom, lOut': "++ lOut'
     
@@ -125,9 +125,9 @@ run layers =
 
 -- with the top combinator, a monadic topLayer can be combined with the layers
 
-top :: Monad m => (b -> m c) -> Step1 a b c d -> a -> m (d,Step1 a b c d)
+top :: Monad m => (b -> m c) -> Step1 a b c d -> a -> m (Step1 a b c d, d)
 top topLayer (Step1 step) a =
- do { let (b, Step2 step') = step a
+ do { let (Step2 step', b) = step a
     ; c <- topLayer b
     ; return $ step' c
     }
@@ -145,11 +145,11 @@ run' layers =
    
     ; putStrLn $ "Inserting "++str++" at bottom of layers"
     
-    ; (lOut, layers') <- top topLayer layers str
+    ; (layers', lOut) <- top topLayer layers str
 
     ; putStrLn $ "Result coming from the bottom, lOut: "++ lOut
 
-    ; (lOut', layers'') <- top topLayer layers' lOut
+    ; (layers'', lOut') <- top topLayer layers' lOut
    
     ; putStrLn $ "Result coming from the bottom, lOut': "++ lOut'
     
@@ -163,16 +163,16 @@ run' layers =
 
 -- If we call the newtype Ztep
 
-newtype Ztep m a b = Ztep (a -> m (b, (Ztep m a b)))
+newtype Ztep m a b = Ztep (a -> m (Ztep m a b, b))
 
 -- then the following top' combinator combines the layers with a top layer:
 
 top' :: Monad m => (b -> m c) -> Step1 a b c d -> (Ztep m a d)
 top' topLayer (Step1 step) = Ztep $ \a ->
- do { let (b, Step2 step') = step a
+ do { let (Step2 step', b) = step a
     ; c <- topLayer b
-    ; let (d, Step1 step'') = step' c
-    ; return $ (d, top' topLayer (Step1 step''))
+    ; let (Step1 step'', d) = step' c
+    ; return $ (top' topLayer (Step1 step''), d)
     }
 
 run'' :: Step1 String String String String -> IO ()
@@ -183,11 +183,11 @@ run'' openLayers =
    
     ; putStrLn $ "Inserting "++str++" at bottom of layers"
     
-    ; (lOut, Ztep layers') <- layers str
+    ; (Ztep layers', lOut) <- layers str
 
     ; putStrLn $ "Result coming from the bottom, lOut: "++ lOut
 
-    ; (lOut', Ztep layers'') <- layers' lOut
+    ; (Ztep layers'', lOut') <- layers' lOut
    
     ; putStrLn $ "Result coming from the bottom, lOut': "++ lOut'
     
@@ -196,20 +196,20 @@ run'' openLayers =
     }
 
 
-{-
+{- 
 -- a different Ztep type that leads to simpler combinator and maybe even nicer code. 
 -- Is this applicable to the meta combinator step types as well?
 
-newtype Ztep m a b = Ztep (a, b -> m (Ztep m a b))
+newtype Ztep m a b = Ztep (b -> m (Ztep m a b), a)
 
 -- then the following top' combinator combines the layers with a top layer:
 
 top' :: Monad m => (b -> m c) -> Step1 a b c d -> a -> m (Ztep m d a)
 top' topLayer (Step1 step) a =
- do { let (b, Step2 step') = step a
+ do { let (Step2 step', b) = step a
     ; c <- topLayer b
-    ; let (d, Step1 step'') = step' c
-    ; return $ Ztep (d, top' topLayer (Step1 step''))
+    ; let (Step1 step'', d) = step' c
+    ; return $ Ztep (top' topLayer (Step1 step''), d)
     }
 
 run'' :: Step1 String String String String -> IO ()
@@ -220,19 +220,19 @@ run'' openLayers =
    
     ; putStrLn $ "Inserting "++str++" at bottom of layers"
     
-    ; Ztep (lOut, layers') <- layers str
+    ; Ztep (layers', lOut) <- layers str
 
     ; putStrLn $ "Result coming from the bottom, lOut: "++ lOut
 
-    ; Ztep (lOut', layers'') <- layers' lOut
+    ; Ztep (layers'', lOut') <- layers' lOut
    
     ; putStrLn $ "Result coming from the bottom, lOut': "++ lOut'
     
     ; return () 
     --; run (layers'')  -- instead of return ()      causes a continuing computation    
     }
-
 -}
+
 
 -- More interesting layers with horizontal dataFlow. We directly put LayerFunctions in the layer, so no wrap is needed
 -- The LayersAB datatype is parameterized with the type of the horizontal parameter

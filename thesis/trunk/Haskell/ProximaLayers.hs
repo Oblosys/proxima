@@ -1,6 +1,7 @@
 module ProximaLayers where
 
--- not yet adapted to different param order
+-- obsolete, class version (DPPClass_Lib) is used in thesis.
+-- step & res parameters have not been swapped
 
 import DPP_Lib
 

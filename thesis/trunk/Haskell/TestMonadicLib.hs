@@ -7,7 +7,7 @@ import ArchitectureLibM
 
 --------------------
 
-type Step nextstep a b c d = (a -> IO (b, nextstep c d a b))
+type Step nextstep a b c d = (a -> IO (nextstep c d a b, b))
 
 newtype PresStep doc pres gest upd = 
             PresStep {presStep :: Step TransStep doc pres gest upd}
@@ -36,8 +36,8 @@ combine upr lwr =
 
 data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction IO state doc (mapping, state) pres
-               , translate :: LayerFunction IO (mapping, state) gest state upd
-               }
+              , translate :: LayerFunction IO (mapping, state) gest state upd
+              }
 
 
 --------------------
@@ -67,9 +67,9 @@ testIO =
     }
  where loop layer n =
         do { let PresStep f = layer
-           ; (rend, TransStep f') <- f "doc"
+           ; (TransStep f', rend) <- f "doc"
            ; putStr rend
-           ; (upd, layer') <- f' "gest"
+           ; (layer', upd) <- f' "gest"
            ; putStr upd
            ; if n > 0 then loop layer' (n-1) else return ()
            }

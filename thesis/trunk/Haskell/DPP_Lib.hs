@@ -1,5 +1,6 @@
 module DPP_Lib where
 -- obsolete, class version (DPPClass_Lib) is used in thesis.
+-- step & res parameters have not been swapped
 {- 
 type Step nextstap a0 .. a2n = ( a0 -> (a1, nextstep a2 .. a2n a0 a1))
 

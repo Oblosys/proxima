@@ -4,10 +4,10 @@ import DPPClass_Lib
 import Layers
 
 
-type Step nextstep a b c d = (a ->(b, nextstep c d a b))
+type Step nextstep a b c d = (a ->(nextstep c d a b, b))
 
 newtype PresStep doc pres gest upd = 
-            PresStep {presStep :: Step TransStep doc pres gest upd}
+            PresStep  {presStep  :: Step TransStep doc pres gest upd}
 newtype TransStep gest upd doc pres = 
             TransStep {transStep :: Step PresStep gest upd doc pres}
 
@@ -31,12 +31,12 @@ combine upr lwr =
 
 
 editLoop present doc = 
- do { let (pres, TransStep translate) = present doc
+ do { let (TransStep translate, pres) = present doc
 
     ; showRendering pres
     ; gesture <- getGesture
     
-    ; let (update, PresStep present') = translate gesture
+    ; let (PresStep present', update) = translate gesture
     
     ; let doc' = updateDocument update doc
     

@@ -33,7 +33,7 @@ wrap (Layer f1 f2) = Layer' (\() str -> ((), f1 str) )
 -- Almost automaticallly we can define the step type and Pack instances
 -- step type for two layer steps:
 
-type Step nextstep a b c d = (a ->(b, nextstep c d a b))
+type Step nextstep a b c d = (a ->(nextstep c d a b, b))
 
 newtype Step1 l h h' l' = 
             Step1 {step1 :: Step Step2 l h h' l'}
@@ -101,19 +101,19 @@ run layers =
    
     ; putStrLn $ "Inserting "++str++" at bottom of layers"
 
-    ; let (hOut, Step2 fDown) = fUp str
+    ; let (Step2 fDown, hOut) = fUp str
     
     ; putStrLn $ "Result coming from the top, hOut: "++ hOut
 
-    ; let (lOut, Step1 fUp') = fDown hOut
+    ; let (Step1 fUp', lOut) = fDown hOut
 
     ; putStrLn $ "Result coming from the bottom, lOut: "++ lOut
 
-    ; let (hOut', Step2 fDown') = fUp' lOut      -- remember not to use fUp
+    ; let (Step2 fDown', hOut') = fUp' lOut      -- remember not to use fUp
     
     ; putStrLn $ "Result coming from the top, hOut': "++ hOut'
 
-    ; let (lOut', Step1 fUp') = fDown' hOut'    -- same here
+    ; let (Step1 fUp', lOut') = fDown' hOut'    -- same here
 
     ; putStrLn $ "Result coming from the bottom, lOut': "++ lOut'
     

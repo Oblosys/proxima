@@ -2,7 +2,70 @@ module Main where
 
 import Layers
 
+newtype PresStep doc pres gest upd = 
+          PresStep  (doc ->  (TransStep gest upd doc pres, pres))
+newtype TransStep gest upd doc pres = 
+          TransStep (gest -> (PresStep doc pres gest upd, upd)) 
 
+type Layer doc pres gest upd = PresStep doc pres gest upd  
+
+
+lift :: Simple state mapping doc pres gest upd ->
+         state -> Layer doc pres gest upd
+lift simple state = presStep state 
+ where presStep state = PresStep $
+           \doc ->  let ((mapping,state), pres) = present simple state doc                                         
+                    in  (transStep (mapping,state), pres)
+       transStep (mapping,state) = TransStep $
+           \gest -> let (state', upd) = translate simple (mapping, state) gest                     
+                    in  (presStep state', upd)
+
+
+
+
+
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+             Layer high low elow ehigh
+combine = presStep
+ where presStep (PresStep upr) (PresStep lwr) = PresStep $ 
+           \high -> let (uprTrans, med) = upr high
+                        (lwrTrans, low) = lwr med
+                    in  (transStep uprTrans lwrTrans, low)
+       transStep (TransStep upr) (TransStep lwr) = TransStep $
+           \elow -> let (lwrPres, emed) = lwr elow
+                        (uprPres, ehigh) = upr emed
+                    in  (presStep uprPres lwrPres, ehigh)
+
+ 
+
+editLoop presentStep doc = 
+ do { let (TransStep translateStep, pres) = presentStep doc
+
+    ; showRendering pres
+    ; gesture <- getGesture
+    
+    ; let (PresStep presentStep', update) = translateStep gesture
+    
+    ; let doc' = updateDocument update doc
+    
+    ; editLoop presentStep' doc'
+    }
+
+--main :: IO ()
+main' layer0 layer1 layer2 =
+ do { (state0, state1, state2) <- initStates
+    ; doc <- initDoc 
+    ; let PresStep presentStep =           lift layer0 state0 
+                                 `combine` lift layer1 state1
+                                 `combine` lift layer2 state2
+    ; editLoop presentStep doc
+    }
+
+    
+    
+    
+    
+{- original  (nstep, vres) instead of (vres, nstep)
 newtype PresStep doc pres gest upd = 
           PresStep  (doc ->  (pres, TransStep gest upd doc pres))
 newtype TransStep gest upd doc pres = 
@@ -87,3 +150,4 @@ main' layer0 layer1 layer2 =
                                  `combine` lift layer2 state2
     ; editLoop presentStep doc
     }
+-}

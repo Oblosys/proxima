@@ -6,9 +6,9 @@ import Layers
 -- factorize types:
 
 newtype PresStep' doc pres gest upd = 
-            PresStep' (doc ->  (pres, TransStep' doc pres gest upd))
+            PresStep' (doc -> (TransStep' doc pres gest upd, pres))
 newtype TransStep' doc pres gest upd = 
-            TransStep' (gest -> (upd,  PresStep' doc pres gest upd))
+            TransStep' (gest -> (PresStep' doc pres gest upd, upd))
 
 type Layer doc pres gest upd = PresStep doc pres gest upd  
 
@@ -17,20 +17,20 @@ newtype PresStep doc pres gest upd =
 newtype TransStep gest upd doc pres = 
             TransStep {transStep :: Step PresStep gest upd doc pres}
 
-newtype Step1 a b c d = Step1 (a -> (b, Step2 c d a b))
-newtype Step2 a b c d = Step2 (a -> (b, Step1 c d a b))
+newtype Step1 a b c d = Step1 (a -> (Step2 c d a b, b))
+newtype Step2 a b c d = Step2 (a -> (Step1 c d a b, b))
 
-type Step nextstep a b c d = (a ->(b, nextstep c d a b))
+type Step nextstep a b c d = (a ->(nextstep c d a b, b))
 
 newtype Step1F a b c d = Step1F (Step Step2 a b c d)
 newtype Step2F a b c d = Step2F (Step Step1 a b c d)
 
-newtype Step1' a b c d e f = Step1' (a -> (b, Step2' a b c d e f))
-newtype Step2' a b c d e f = Step2' (a -> (b, Step3' a b c d e f))
-newtype Step3' a b c d e f = Step3' (a -> (b, Step1' a b c d e f))
+newtype Step1' a b c d e f = Step1' (a -> (Step2' a b c d e f, b))
+newtype Step2' a b c d e f = Step2' (a -> (Step3' a b c d e f, b))
+newtype Step3' a b c d e f = Step3' (a -> (Step1' a b c d e f, b))
 
 
-type F' nextstep a b c d e f = (a ->(b, nextstep c d e f a b))
+type F' nextstep a b c d e f = (a ->(nextstep c d e f a b, b))
 
 newtype Step1F' a b c d e f = Step1F' (F' Step2' a b c d e f)
 newtype Step2F' a b c d e f = Step2F' (F' Step3' a b c d e f)
@@ -43,7 +43,7 @@ newtype Step3F' a b c d e f = Step3F' (F' Step1' a b c d e f)
 
 
 -------- factorize lift
-
+{-
 -- dpp lift:
 lift'''' :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
@@ -59,17 +59,17 @@ lift'''' simple state = presStep state
 -- all steps on one level: no longer access horizontals using scope, all explicitly passed.
 -- TODO: get rid of previous lift, because this one is clearer. Scoping was used when horizontal parameters
 -- between subsequent layer function weren't of equal type yet.
-
+-}
 
 lift1 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift1 simple state = presStep state 
  where presStep state = PresStep $ 
            \doc -> let ((mapping,state), pres) = present simple state doc                                         
-                   in (pres, transStep (mapping,state))
+                   in  (transStep (mapping,state), pres)
        transStep (mapping,state) = TransStep $
            \gest -> let (state', upd) = translate simple (mapping, state) gest                     
-                    in  (upd, presStep state')
+                    in  (presStep state', upd)
 
 -- don't mention types after 1 because they don't change
 -- horizontal and vertical args and res are uniform now (vertical already were)
@@ -79,10 +79,10 @@ lift2 :: Simple state mapping doc pres gest upd ->
 lift2 simple state = step1 state 
  where step1 horArg = PresStep $ 
            \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
-                       in  (vertRes, step2 horRes)
+                       in  (step2 horRes, vertRes)
        step2 horArg = TransStep $
            \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
-                       in  (vertRes, step1 horRes)
+                       in  (step1 horRes, vertRes)
 
 
 -- still references to each other in let. So now pass next step as parameter
@@ -98,10 +98,10 @@ lift3 :: Simple state mapping doc pres gest upd ->
 lift3 simple = (step1.step2) (lift3 simple)
  where step1 next horArg = PresStep $ 
            \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
-                       in  (vertRes, next horRes)
+                       in  (next horRes, vertRes)
        step2 next horArg = TransStep $
            \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
-                       in  (vertRes, next horRes)
+                       in  (next horRes, vertRes)
 -- use fix and .
 
 f' a b c = g c
@@ -120,10 +120,10 @@ lift4 :: Simple state mapping doc pres gest upd ->
 lift4 simple = fix $ step1 . step2 
  where step1 next horArg = PresStep $ 
            \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
-                       in  (vertRes, next horRes)
+                       in  (next horRes, vertRes)
        step2 next horArg = TransStep $
            \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
-                       in  (vertRes, next horRes)
+                       in  (next horRes, vertRes)
 
 -- Get rid of constructor and destructor applications, and explicit layer function calls, all are params
 
@@ -133,10 +133,10 @@ lift5 simple = fix $ step1 PresStep (present simple)
                   . step2 TransStep (translate simple) 
  where step1 pack layerF next horArg = pack $ 
            \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                                         
-                   in (vertRes, next horRes)
+                       in (next horRes, vertRes)
        step2 pack layerF next horArg = pack $
            \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
-                    in  (vertRes, next horRes)
+                    in  (next horRes, vertRes)
 
 -- now step1 and step2 are the same and we use a generic liftStep
 
@@ -144,12 +144,13 @@ lift5 simple = fix $ step1 PresStep (present simple)
 fix a = let fixa = a fixa
         in  fixa
 
+
 -- not final because pack will be a 3 tuple in the final bit.
-liftStep :: ((vArg -> (vRes, nStep)) -> step ) ->
+liftStep :: ((vArg -> (nStep, vRes)) -> step ) ->
             (hArg -> vArg -> (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
 liftStep pack layerF next horArg = pack $
     \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
-                in  (vertRes, next horRes)
+                in  (next horRes, vertRes)
 
 lift6 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
@@ -165,13 +166,13 @@ combine0 :: Layer high med emed ehigh -> Layer med low elow emed ->
              Layer high low elow ehigh
 combine0 = step1
  where step1 (PresStep upr) (PresStep lwr) = PresStep $ \high ->                                                                    
-                    let (med, uprTrans) = upr high
-                        (low, lwrTrans) = lwr med
-                    in (low, step2 uprTrans lwrTrans)
+                    let (uprTrans, med) = upr high
+                        (lwrTrans, low) = lwr med
+                    in  (step2 uprTrans lwrTrans, low)
        step2 (TransStep upr) (TransStep lwr) = TransStep $ \elow ->
-                    let (emed, lwrPres') = lwr elow
-                        (ehigh, uprPres') = upr emed
-                    in  (ehigh, step1 uprPres' lwrPres')
+                    let (lwrPres', emed) = lwr elow
+                        (uprPres', ehigh) = upr emed
+                    in  (step1 uprPres' lwrPres', ehigh)
  
 -- rename variables.
 
@@ -179,39 +180,39 @@ combine1 :: Layer high med emed ehigh -> Layer med low elow emed ->
              Layer high low elow ehigh
 combine1 = step1
  where step1 (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
-                        (low, nextLwr) = lwr med
-                    in  (low, step2 nextUpr nextLwr)
+           \high -> let (nextUpr, med) = upr high
+                        (nextLwr, low) = lwr med
+                    in  (step2 nextUpr nextLwr, low)
        step2 (TransStep upr) (TransStep lwr) = TransStep $
-           \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, step1 nextUpr nextLwr)
+           \low ->  let (nextLwr, med) = lwr low
+                        (nextUpr, high) = upr med
+                    in  (step1 nextUpr nextLwr, high)
 -- reference each other so next step as parameter
 
 combine2 :: Layer high med emed ehigh -> Layer med low elow emed -> 
              Layer high low elow ehigh
 combine2 = step1 (step2 combine2)
  where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
-                        (low, nextLwr) = lwr med
-                    in  (low, nextStep nextUpr nextLwr)
+           \high -> let (nextUpr, med) = upr high
+                        (nextLwr, low) = lwr med
+                    in  (nextStep nextUpr nextLwr, low)
        step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
-           \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)
+           \low ->  let (nextLwr, med) = lwr low
+                        (nextUpr, high) = upr med
+                    in  (nextStep nextUpr nextLwr, high)
 -- use fix
 
 combine3 :: Layer high med emed ehigh -> Layer med low elow emed -> 
              Layer high low elow ehigh
 combine3 = fix $ step1 . step2
  where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
-                        (low, nextLwr) = lwr med
-                    in  (low, nextStep nextUpr nextLwr)
+           \high -> let (nextUpr, med) = upr high
+                        (nextLwr, low) = lwr med
+                    in  (nextStep nextUpr nextLwr, low)
        step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
-           \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)
+           \low ->  let (nextLwr, med) = lwr low
+                        (nextUpr, high) = upr med
+                    in  (nextStep nextUpr nextLwr, high)
 
 -- get rid of constructors and in this case also destructors. Destr. are pattern matching instead of
 -- combine ... (Constr layer) we will use combine unpack x = ... unpack x
@@ -222,13 +223,13 @@ combine4 :: Layer high med emed ehigh -> Layer med low elow emed ->
 combine4 = fix $ step1 (PresStep,presStep,presStep) 
                . step2 (TransStep,transStep,transStep) 
  where step1 (pack, unpackU, unpackL) nextStep upr lwr = pack $
-           \high -> let (med, nextUpr) = (unpackU upr) high
-                        (low, nextLwr) = (unpackL lwr) med
-                    in  (low, nextStep nextUpr nextLwr)
+           \high -> let (nextUpr, med) = (unpackU upr) high
+                        (nextLwr, low) = (unpackL lwr) med
+                    in  (nextStep nextUpr nextLwr, low)
        step2 (pack, unpackU, unpackL) nextStep upr lwr = pack $
-           \low ->  let (med, nextLwr) = (unpackL lwr) low
-                        (high, nextUpr) = (unpackU upr) med
-                    in  (high, nextStep nextUpr nextLwr)
+           \low ->  let (nextLwr, med) = (unpackL lwr) low
+                        (nextUpr, high) = (unpackU upr) med
+                    in  (nextStep nextUpr nextLwr, high)
 -- factorize up and down. now up and down don't contain spec. for the step, so can be used by any step
 
 combine5 :: Layer high med emed ehigh -> Layer med low elow emed -> 
@@ -236,29 +237,58 @@ combine5 :: Layer high med emed ehigh -> Layer med low elow emed ->
 combine5 = fix $ combineStepDown (PresStep,presStep,presStep) 
                . combineStepUp (TransStep,transStep,transStep) 
 
-combineStepDown :: ( (h -> (l, nStepC)) -> stepC 
-                   , stepU -> h -> (m, nStepU)
-                   , stepL -> m -> (l, nStepL)) -> 
+combineStepDown :: ( (h -> (nStepC, l)) -> stepC 
+                   , stepU -> h -> (nStepU, m)
+                   , stepL -> m -> (nStepL, l)) -> 
                    (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
 combineStepDown (pack, unpackU, unpackL) nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpackU upr) high
-                 (low, nextLwr) = (unpackL lwr) med
-             in  (low, nextStep nextUpr nextLwr)
+    \high -> let (nextUpr, med) = (unpackU upr) high
+                 (nextLwr, low) = (unpackL lwr) med
+             in  (nextStep nextUpr nextLwr, low)
 
-combineStepUp :: ( (l -> (h, nStepC)) -> stepC 
-                 , stepU -> m -> (h, nStepU)
-                 , stepL -> l -> (m, nStepL)) -> 
+combineStepUp :: ( (l -> (nStepC, h)) -> stepC 
+                 , stepU -> m -> (nStepU,h )
+                 , stepL -> l -> (nStepL, m)) -> 
                  (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
 combineStepUp (pack, unpackU, unpackL) nextStep upr lwr = pack $
-    \low -> let (med, nextLwr) = (unpackL lwr) low
-                (high, nextUpr) = (unpackU upr) med
-            in  (high, nextStep nextUpr nextLwr)
+    \low -> let (nextLwr, med) = (unpackL lwr) low
+                (nextUpr, high) = (unpackU upr) med
+            in  (nextStep nextUpr nextLwr, high)
 
+
+
+-- Done factorizing. 
+-- figure contains the entire library together with fix, and slightly modified liftStep that 
+-- gets a 3-tuple instead of just a constructor.
+
+
+liftStep' :: ((a -> (b,c)) -> d,e,f) ->
+             (g -> a -> (h,c)) -> (h -> b) -> g -> d
+liftStep' (pack, _, _) layerF next horArg = pack $
+    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
+                in  (next horRes, vertRes)
+
+
+-- by defining unpack = (cons, unpack, unpack) for each step type, definitions of lift and combine become:
+
+{-
+dictPresStep = (PresStep, presStep, presStep)
+dictTransStep = (TransStep, transStep, transStep)
+
+lift simple=
+  fix $ liftStep' dictPresStep (present simple) 
+      . liftStep' dictTransStep (translate simple)
+
+combine = 
+  fix $ combineStepDown dictPresStep
+      . combineStepUp dictTransStep
+-}
+
+-- END:
 
 
 ---- Old stuff:
-
-
+--Still has different order for nstep&res args
 
 -- quantified combineStep
 -- won't work, result type h i j k parameters are different for up and down step.
@@ -274,33 +304,7 @@ combineStepUpq packunpack nextStep upr lwr = pack $
             in  (high, nextStep nextUpr nextLwr)
  where (pack,unpack) = packunpack
 -}
--- Done factorizing. 
--- figure contains the entire library together with fix, and slightly modified liftStep that 
--- gets a 3-tuple instead of just a constructor.
 
-
-liftStep' :: ((a -> (b,c)) -> d,e,f) ->
-             (g -> a -> (h,b)) -> (h -> c) -> g -> d
-liftStep' (pack, _, _) layerF next horArg = pack $
-    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
-                in  (vertRes, next horRes)
-
-
--- by defining unpack = (cons, unpack, unpack) for each step type, definitions of lift and combine become:
-
-
-dictPresStep = (PresStep, presStep, presStep)
-dictTransStep = (TransStep, transStep, transStep)
-
-lift simple=
-  fix $ liftStep' dictPresStep (present simple) 
-      . liftStep' dictTransStep (translate simple)
-
-combine = 
-  fix $ combineStepDown dictPresStep
-      . combineStepUp dictTransStep
-
--- END:
 {-
 f (c,d,u) f k horArg = c $ \vertArg -> 
            let (vertRes, horRes) = f horArg vertArg
@@ -335,5 +339,4 @@ g' (c, d, d') dir  dir' comb upperst lowerst =
 dirDown (upper, lower) = (upper, lower)
 
 dirUp   (upper, lower) = (lower, upper)
-
 

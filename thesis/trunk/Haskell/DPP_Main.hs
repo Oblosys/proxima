@@ -1,5 +1,6 @@
 module DPP_Main where
 -- obsolete, class version (DPPClass_Main) is used in thesis.
+-- step & res parameters have not been swapped
 
 import DPP_Lib
 import Char
