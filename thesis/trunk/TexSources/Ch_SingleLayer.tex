@@ -14,6 +14,9 @@ Trans -> Intr  (or Int?)
 also renamed picture files, and updated pictures themselves
 
 
+?? mention that in the process of refinement, only the last step makes sense? Direct/indirect edit ops etc. from previous chapters is not made here, and breaks invariants. Will (hopefully) be fixed in next chapte.r
+
+
 TODO
 check super & subscripts in figures and text: h/high h,intr or h_intr, etc.
 
@@ -422,7 +425,7 @@ Figure~\ref{layerExtraState} shows two examples of extra state, one occurring on
 \begin{figure}
 \begin{center}
 \begin{center}
-\epsfig{file=pics/eps/presintrESExamples.eps, width=125mm}
+\epsfig{file=pics/eps/presIntrESExamples.eps, width=125mm}
 \end{center}
 \caption{Two examples of extra state.} \label{layerExtraState} 
 \end{center}
@@ -514,7 +517,7 @@ When a level is updated and subsequently presented or interpreted, yielding a ta
 
 For each node in the target level, we keep track of its origin in the source level. Thus, when presenting a higher level ($Level_{H}$), each node in the presentation ($Level_{L}$) contains a reference to the higher level node from which presentation it is a part.  Similarly, when interpreting a lower level, each resulting $Level_{H}$ node has references to the lower level nodes of which it is the interpretation. 
 
-We introduce two types for this mapping information: $Info\idwn_{H}$ denotes the {\em interpretation mapping information} in the higher level (pointing to the lower level), and $Info\iup_{L}$ denotes the {\em presentation mapping information} in the lower level (pointing to the higher level). Similar to the $Core$ and $Extra$ types, the $Info$ types are only conceptual and do not necessarily correspond to actual types in an implementation. Figure~\ref{coreExtraInfoExamples} shows the two examples from Figure~\ref{layerExtraState} with explicit mapping information arrows. 
+We introduce two types for this mapping information: $Info\idwn_{H}$ denotes the {\em interpretation mapping information} in the higher level (pointing to the lower level), and $Info\iup_{L}$ denotes the {\em presentation mapping information} in the lower level (pointing to the higher level). Similar to the $Core$ and $Extra$ types, the $Info$ types are only conceptual and do not necessarily correspond to actual types in an implementation. Figure~\ref{coreExtraInfoExamples} shows the two examples from Figure~\ref{layerExtraState} with explicit mapping information arrows. \note{Figure is not entirely right yet, non shaded can be high or low.}
 
 \begin{figure}
 \begin{center}
