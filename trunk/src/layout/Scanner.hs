@@ -46,6 +46,12 @@ tokenizeLst i loc (pres:press) = let (pres', lm0, i') = tokenize i loc pres
 
 
 -- TODO: use AG
+-- when integrating, take care that:
+-- if string has no idd, but empty "" before it has, then idd is reused from ""
+-- when setting loc, don't do anything for String_, Int_, etc.
+
+
+
 
 -- at token start, we set the id from the context, but if there is none, then we use the id that
 -- was set during the layout part of the token. Do we need to do this for loc as well?
@@ -134,7 +140,6 @@ tokenizeCol' i loc lc layout id str (pres:press) =
         in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm0 `plusFM` lm `plusFM` lm1, i''')
 
  
-
 -- loc is threaded, lc is just inherited. 
 tokenize' :: Int -> (Maybe Node,AttrRule) -> (TokenType,Maybe Node,AttrRule) -> Layout -> IDP -> String -> Presentation 
           -> ((TokenType,Maybe Node,AttrRule), Layout, IDP, String, [Presentation], LayoutMap, Int)
