@@ -13,63 +13,6 @@ P x   \eq   x \in { x |  P x }
 
 
 \ec
-\newcommand{\spc}{\textvisiblespace}
-
-\newcommand{\fn}[1]{{\ensuremath{\mathsf {#1}}}}
-
-%\renewcommand{\present}{\ensuremath{\mathit{present}}}
-\renewcommand{\present}{\fn{present}}
-%\newcommand{\interpret}{\ensuremath{\mathit{interpret}}}
-\renewcommand{\interpret}{\fn{interpret}}
-\renewcommand{\core}{\fn{core}}
-\newcommand{\default}{\fn{default}}
-\newcommand{\valid}{\fn{valid}}
-\newcommand{\close}{~\text{``close to''}~}
-
-
-% not used, so we redefine these commands
-\renewcommand{\H}{_{\, \mathrm H}}  % old \H seems to put '' above the next character
-\renewcommand{\L}{_{\, \mathrm L}} % was an L with a dash in the middle
-\newcommand{\M}{_{\, \mathrm M}}
-\newcommand{\HH}{_{\, \mathrm {HH}}} 
-\newcommand{\HL}{_{\, \mathrm {HL}}} 
-\newcommand{\LH}{_{\, \mathrm {LH}}} 
-\newcommand{\LL}{_{\, \mathrm {LL}}} 
-\newcommand{\CH}{_{\, \mathrm {CH}}} 
-\newcommand{\CL}{_{\, \mathrm {CL}}} 
-\newcommand{\C}{_{\, \mathrm C}} 
-\newcommand{\Eqclass}[2]{{#1}\!/_{{#2}}}
-\newcommand{\eqclass}[2]{[{#1}]_{{#2}}}  % maybe pad [] with \' spaces?
-\newcommand{\Eqcl}[2]{\Eqclass{#1}{_{\!\!{#2}}}}
-\newcommand{\eqcl}[2]{\eqclass{#1}{\!_{#2}}}
-\newcommand{\eqstar}{\ensuremath{\simeq}}
-%\newcommand{\eqstar}{\ensuremath{\stackrel{*}{\simeq}}}
-\newcommand{\Eqstarcl}[2]{{#1}/_{\!\eqstar {\mathrm {#2}}}}
-\newcommand{\eqstarcl}[2]{[{#1}]_{\!\eqstar {\mathrm {#2}}}}
-\newcommand{\eqhole}{[\hole]} % \eqcl{\hole}{} gets wrong spacing
-
-\newcommand{\eqr}{\ensuremath{\simeq}}
-\newcommand{\reuz}{\ensuremath{\triangleright}}
-\newcommand{\reuze}[1]{\ensuremath{\,\reuz_{_{\!\!#1}}\,}} % rm prevents {\sc $\reuzestar$} from changing the *
-\newcommand{\reuzestar}{\ensuremath{\,\overlay{\protect\raisebox{0.3em}{\rm \:\:\scriptsize *}}{\reuz}\,}}
-%\newcommand{\reuzestar}{\ensuremath{\stackrel{ * }{\reuz}}}
-\newcommand{\rel}{\ensuremath{\sim}}
-\newcommand{\law}[1]{{\sc {#1}}}
-
-
-\newcommand{\is}{\widehat{=}} % instead of {\stackrel{\wedge}{=}}
-\newcommand{\gts}{\text{\tt :=}}
-\renewcommand{\gets}{~\gts~}
-\newcommand{\smi}{\text{\tt ;}}
-\newcommand{\semi}{\smi~}
-\newcommand{\assert}[1]{\{ \ensuremath{#1} \}}
-\newcommand{\hoare}[3]{{\assert{#1}\:{#2}\;\assert{#3}}} % #2 is italic, so space looks bigger
-
-\newsavebox{\wpbox}
-\sbox{\wpbox}{$\wp$}
-\newcommand{\powerset}{\usebox{\wpbox}}
-\renewcommand{\wp}[2]{\fn{wp}(#1,~#2)}
-
 
 {\em *** Version: \today~ ***}
 
@@ -128,7 +71,10 @@ P x   \eq   x \in { x |  P x }
 \section{Intro}
 
 \toHere
-
+TODO:
+\bl
+\o lower and higher extra state \rarr presentation and interpretation extra state
+\el
 %Somewhere: combinators guaranteeing safety are not what we want. 
 %Only spec. responsibility is left to layer. Pierce: only one way E.S. No 
 %structural updates. Incomplete. No duplicates.
@@ -221,6 +167,7 @@ As mentioned, \law{InterPresent} is only a minimal condition requirement on $\pr
 
 \subsection{Editing}\label{sect:single_Editing}
 
+*** copied to previous chapter
 A user may perform an edit operation on either the higher level (document) or the lower level (presentation). However, because after a document update, the presentation invariant can be restored by simply presenting the updated document, we only consider presentation-oriented editing here. When the lower level is edited, we need to interpret the updated lower level in order to find a new higher level, which subsequently may need to be presented again.
 
 
@@ -236,9 +183,9 @@ The user then updates the lower level:
 & & \level\L \leadsto \level'\L 
 }
 
-after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$.
+after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$, in order to restore the presentation invariant.
 
-The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the edit process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
+\bc The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the edit process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
 
 \begin{figure}
 \xpr{
@@ -251,7 +198,7 @@ level\L 		&~\leadsto~ & level'\L 	& 			& level''\L\\
 
 
 Most likely, after editing, the presentation invariant does not hold between $\level'\L$ and $\level\H$. Hence, we need to find a new higher level value $\level''\H$. However, because it is possible that $\level'\L$ is not a valid presentation of a higher level value, we also need to find a new lower level $\level''\L$ in order to restore the presentation invariant. Figure~\ref{} shows the values of the higher and lower levels for the example from the previous section.
-
+\ec 
 Besides the presentation invariant, we can give several other requirements on the new levels.
 
 Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change because of the edit operation, and thus $\level''\H = \level\H$. Because in this section presentation is injective, $\level'\L$ can only be a valid presentation of $\level\H$, if it is equal to $\level\L$, meaning that the user did not change the lower level. However, in the next section, when extra state is added to the model, the reason for this property becomes clear. Because the property states that the document stays inert under an edit operation, we refer to it as \law{Doc-Inert}.
@@ -1295,7 +1242,7 @@ The new $\reuzestar$ is able to reuse extra state after structural updates, such
 %																
 %																
 %																
-\section{Combining two layers}  \label{sect:combinedExtra}
+\section{A combined layer}  \label{sect:combinedExtra}
 
 \toHere
 
@@ -2195,12 +2142,13 @@ The easiest way to deal with duplicate information is to simply ignore one of th
 
 In some cases non-editable duplicates are perfectly acceptable. In case of the list of integers with its average, few people will expect to be able to edit the average value. And perhaps even fewer people will expect to be able to edit colors in a syntax-coloring editor and thereby modify the edited program source. However, in some cases we do want to be able to edit duplicate values.
 
-\subsection{Adapting the specification}
+\subsection{Adapting the \law{Imprecise} requirement}
 % This is not consistent with ``close to'' on presentation.  
 % If $(1,1) \leadsto (1,8)$ then $(8,8)$ is probably closer as far as the user is concerned.
 Instead of ignoring one of the duplicates, a more user-friendly approach is to use the value of the changed duplicate to determine the document update. This is in line with the requirement that if an update is imprecise, the editor will perform the operation that the user intended. 
 
-Edit operations on duplicates most probably result in an invalid presentation, unless a user has managed to consistently edit all appearences of the duplicate. Hence, the result of an edit operation on a duplicate value is mainly specified by the \law{Imprecise} requirement: \note{if we change \law{Pres-Inert} this is not entirely true anymore}
+\note{not entirely true if we block out duplicates}
+Edit operations on duplicates most probably result in an invalid presentation, unless a user has managed to consistently edit all appearences of the duplicate. Hence, the result of an edit operation on a duplicate value is mainly specified by the \law{Imprecise} requirement: 
 
 %The problem with duplicates is that information from the document is present several times in the presentation.
 %We tackle the problem by taking the 
@@ -2217,35 +2165,25 @@ A second example shows more precisely what the problem is. Consider the function
 $\present~x = (x,x,x)$. If a user edits the first element of the presentation
 ($(0,0,0) \leadsto (1,0,0)$) the intuitive result would be to change the document to $1$. However, since $(1,0,0)$ is arguably closer to $(0,0,0)$ than $(1,1,1)$, $level''\H$ is specified to be $0$ instead of $1$. Therefore, an editor conforming to the specification does not allow any editing in the presentation, unless two or more values are edited simultaneously and consistently. 
 
-The problem with the \law{Imprecise} requirement is that the duplicates that were not edited influence the result at the cost of the edited duplicate. We tackle the problem by weakening the \law{Imprecise} requirement. Rather than requiring the entire final presentation to be ``close to'' the result of the user update, we only require closeness for those parts of the presentation that were changed.
-\note{mention already that a weaker form is still needed?}
 
-In order to make explicit which parts of $\level\L$ have changed, we introduce a new operator:
- 
+% just looking at change is not really enough. 
+The problem with the \law{Imprecise} requirement is that the duplicates of the edited part of the presentation influence the final result of the edit operation. We tackle the problem by introducing an operator to ignore these duplicates:
+
 \xpr{
 \Delta \tp  T \to T \to T\st\\
 }
 
-The result of  $x~\Delta~x'$ is a value that is structurally the same as $x'$, but only contains those parts that are different from $x$. The other parts are represented by wildcards ($*$). Thus, for example $(1,2,3)~\Delta~(1,3,2) = (*,3,*)$.
-
-\note{say a bit more about structural diffs?}
+The result of  $x~\Delta~x'$ is a value that is structurally the same as $x'$, but in which the duplicates of the parts that are different from $x$ have been replaced wildcards ($*$). Thus, if $\present~(x,y) = (x,x,y)$, then 
+$(1,1,5)~\Delta~(1,2,5) = (*,2,5)$ and $(3,1,5)~\Delta~(1,2,5) = (3,*,5)$, but $(1,1,5)~\Delta~(1,1,4) = (1,1,4)$. Another example is $\present~(x,y) = (x,y,x+y)$, with $(1,2,3)~\Delta~(10,2,3) = (10,2,*)$ and 
+$(1,2,3)~\Delta~(1,2,13) = (1*,*,12)$. If the presentation does not contain duplicates, we have $x \Delta x' = x'$
 
 \toHere
+Unfortunately, it is difficult to give an exact specification of $\Delta$. 
 
-\bl
-\o informally introduce an operator that blocks out all duplicates 
-\el
-\xpr{
-\Delta \tp  T \to T \to T\st\\
-}
-
-Maybe instead of $\Delta$, it is better to introduce an operator that blocks out all values that are duplicates of/dependent on the changed parts? It is even harder to define, but seems more appropriate, because no unnecessary *'s are introduced.
-Furthermore, if there are no duplicates, the requirements become the same as in the previous section.
-
-The rest of the story remains largely similar if we use this alternative operator.
+problems, structural diffs, only informal
+\note{say a bit more about structural diffs?}
 
 operator introduces problems, what if structure depends on other value, what in case of conflict. say something about this.
-
 conflict: unspecified behavior 
 \fromHere
 
@@ -2274,18 +2212,17 @@ Similar to Section~\ref{sect:wildcardEq}, a wildcard stands for any value, and t
 %
 %``close to'' on $T\st$ and $T$ is similar to $=\st$. everything is close to a $*$.
 
-The new \law{Imprecise} requirement only requires closeness on the edited part of the presentation:
+The new \law{Imprecise} requirement does not require closeness on duplicates of the edited part of the presentation:
 
 \xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Imprecise}
 
-For the $present~x = (x,x)$ example, after $(0,0) \leadsto (1,0)$ the requirement states $(1,*) \close level''\L$, with $(1,1)$ as a solution, whereas for $(1,1)\leadsto (1,0)$ it states $(*,0)$, with $(0,0)$, as a solution. For the triple presentation, the requirement after updating the first element states $(1,*,*) \close level''\L$, which has $(1,1,1)$ as a solution.
-
-Although the duplicate updates can be specified now, the requirements no longer say anything about the unchanged parts of the presentation. Therefore, we add a weaker requirement for preserving extra state of the unchanged parts of the presentation. The extra requirement that we need corresponds exactly to the old \law{Imprecise} requirement:
-\note{could unchanged parts also need an imprecise req? or is it only for the preserve part}
+However, this is requirement alone is not sufficient. Recall that the old \law{Imprecise} also served to preserve the presentation extra state. Because duplicates are ignored by the new \law{Imprecise}, it says nothing about their extra state. Therefore, we need to add a weaker requirement for preserving extra state of the duplicates. The new requirement corresponds to the old \law{Imprecise} requirement:
 
 \xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
 
-\subsection{Requirements} % maybe call this Pres-Inert and make separate subsection Requirements
+With the new requirements, the two examples do not cause any problems anymore. For the $present~x = (x,x)$ example, after $(0,0) \leadsto (1,0)$ the requirement states $(1,*) \close level''\L$, with $(1,1)$ as a solution, whereas for $(1,1)\leadsto (1,0)$ it states $(*,0)$, with $(0,0)$, as a solution. For the triple presentation, the requirement after updating the first element states $(1,*,*) \close level''\L$, which has $(1,1,1)$ as a solution. \note{mention here already that these examples no longer fall under \law{imprecise} when \law{Pres-Inert} is updated? }
+
+\subsection{Adapting the \law{Pres-Inert} requirement}
 
 Besides the \law{Imprecise} requirement, also the \law{Pres-Inert} requirement needs to be adapted to support duplicates. An example shows the problem that can occur with the old \law{Pres-Inert} requirement.
 
@@ -2309,7 +2246,7 @@ $[f = 2, a = True]$ or something similar, which is clearly not the desired behav
 %a = 1; f = ...            a = True; f = ...     a = True; f = ... [type err]          a = True; f = ...
 %                                *    True   *  
 
-To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the document, we weaken the requirement in a similar way as \law{Imprecise}; both the pre- and the postcondition are changed to refer only to the updated parts of the lower level:
+To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the document, we adapt the requirement in a similar way as \law{Imprecise}; both the pre- and the postcondition are changed to ignore duplicates of the updated parts of the lower level:
 
 %\note{Alternatively, could we make \law{Pres-Inert} weaker than \law{Doc-Preserve}?}
 % no, pres inert usually conflicts with doc-preserve, making it weaker would disable it.
@@ -2319,7 +2256,12 @@ To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the docum
 The precondition needs to be weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondtion on the other hand is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change.
 
 \note{say something about delta in precondition, plus the fact that it is on equivalence class.}
-\note{\law{Pres-Inert} now seems cover some of \law{Imprecise}'s cases}.
+
+Now that we have updated \law{Pres-Inert}, the two examples from the previous section ($\present x = (x,x)$ and 
+$\present~x =(x,x,x)$) no longer fall under the \law{Imprecise} requirement. 
+
+
+\subsection{The remaining requirements}
 
 The other requirements (\law{Postcondition}, \law{Doc-Inert}, and \law{Doc-Preserve}) do not need to be updated . The postcondition should still hold between the entire higher and lower level, and \law{Doc-Preserve} only refers to higher level values and therefore is not affected by duplicates in the presentation.
 
@@ -2337,6 +2279,10 @@ Summarizing, we have the following set of requirements:
 \xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
 
 \toHere
+
+\bl
+\o no dups, then req's are the same.
+\el
 
 \bl
 \o Duplicates are tricky
