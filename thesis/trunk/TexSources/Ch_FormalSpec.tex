@@ -374,11 +374,10 @@ Because two levels that only differ in extra state are in a sense equivalent, we
 We provide two examples to illustrate the equivalence class representation for extra state. Both examples are set in an editor for a simple programming language, for which layout is not part of the syntax.
 
 
-\todo{$H$ en $L$ uitleggen}
-A partially presented declaration is an example of interpretation extra state. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H \tp Level\H \rel Level\H$, we can express this as 
-$(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$. More generally, a declaration is equivalent to every declaration that has the same left-hand side identifier.
+As an example of interpretation extra state, we take a partially presented declaration. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H$$~\tp~$$Level\H$$~\rel~$$Level\H$, we have 
+$(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$, which means that the two declarations are equal up to extra state. More generally, according to  $H$ a declaration is equivalent to every declaration that has the same left-hand side identifier.
 
-Whitespace is an example of presentation extra state on the lower level. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Thus, for example, 
+Whitespace is an example of presentation extra state. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Thus, for example, 
 $``\texttt{1\spc+\spc 2}\text{''}~L~``\texttt{1+2}\text{''}$.
 
 
@@ -2514,11 +2513,9 @@ On the other hand, \law{Intended} also states that from the equivalence class $\
 
 \subsection{Conclusions}
 
-\todo{make explicit that we only need \law{InterPresent} and \law{Intended}?}
 
 A layered editor consisting of two component layers can be specified in the same manner as a single-layered editor, but imposes additional requirements on the components. In order to guarantee that the composition is valid, \bc mapping between equivalence classes, \ec we need the 
 \law{$\present$-Match} and \law{$\interpret$-Match} conditions on the components. Furthermore, for \law{Doc-Inert} and \law{Pres-Inert} requirements, we need to assume the conditions \law{Orthogonal} and the rather complex \law{Orthogonal-R}.
-
 
 The stronger condition \law{Absorption} implies all four additional conditions: 
 
@@ -2527,8 +2524,9 @@ The stronger condition \law{Absorption} implies all four additional conditions:
 
 For the top-most composition, we cannot assume \law{Absorption} because this would rule out interpretation extra state altogether. However, {$\present$-Match}, {$\interpret$-Match}, \law{Orthogonal} trivially hold for the top-most composition, and \law{Pres-Inert} is proven without assuming \law{Absorption} for the top-most composition.
 
-\todo{split instead of constructed}
-Because an editor consisting of $n$ layers is constructed by taking the top layer and repeatedly putting layers underneath, we need to prove \law{Absorption} for each of the $n-1$ compositions, except the top-most composition. 
+\nonote{make explicit that we only need \law{InterPresent} and \law{Intended}?}
+
+Because an editor consisting of $n$ layers is specified by repeatedly splitting of layers from underneath, we need to prove \law{Absorption} for each of the $n-1$ composite layers, except the top-most one. 
 
 \law{Absorption} is a rather strong condition. It only allows interpretation extra state at the document level, since all other interpretation extra state is absorbed by presentation extra state.  Further research is necessary to determine whether this restriction disallows the specification of useful editors, in which case a workable but less strict condition needs to be established. 
 

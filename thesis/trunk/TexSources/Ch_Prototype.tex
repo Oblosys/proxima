@@ -2,8 +2,8 @@
 
 %{\em *** Version: \today~ ***}
 
-\setlength{\unitlength}{1mm}   \newcommand{\epsfigPrx}[3]{\fbox{\begin{picture}(#2,#3)(0,0)\end{picture}}}
-%\newcommand{\epsfigPrx}[3]{\epsfig{file=pics/Screenshots/#1, height=#3mm}}
+%\setlength{\unitlength}{1mm}   \newcommand{\epsfigPrx}[3]{\fbox{\begin{picture}(#2,#3)(0,0)\end{picture}}}
+\newcommand{\epsfigPrx}[3]{\epsfig{file=pics/Screenshots/#1, height=#3mm}}
 
 
 A prototype of the Proxima editor has been implemented in the fuctional language Haskell. The architecture of the prototype corresponds to the architecture described in Chapter~\ref{chap:proxArch}. The presentation target language is the {\Xprez} language from Chapter~\ref{chap:presenting}. The implementation is platform-independent and has been succesfully tested on Windows, Linux, and MacOS X platforms. 
@@ -126,7 +126,7 @@ The editor shows type errors by displaying an error message at the bottom and ma
 
 \hspace{\stretch{1}} 
 % geometry: 0,130 - 412x158
-\protoscrshot{typeErr.png.eps}{20}{type error: \p{3+True}}{54}
+\protoscrshot{typeErr.png.eps}{20}{A type error: \p{3+True}}{54}
 \hspace{\stretch{1}} 
 
 The Helium type compiler is an interesting candidate for integration with Proxima because of its sophisticated type checker. Besides the location of the error, the type checker can provide additional information about the other parts of the program that contributed to the error. Such information would be hard to show on a command-line, but can be displayed in a clear way by highlighting the relevant parts of the source code. Furthermore, for common errors, the Helium type checker is able to provide hints on how to repair them. A hint can be presented along with a button that performs the suggested reparation when clicked.
@@ -156,14 +156,12 @@ A simple reduction engine can be applied to a term in the source. The screen-sho
 The reduction engine is implemented by an attribute grammar of about 150 lines, which can be reduced further to about 100 lines once the underlying attribute-grammar system supports default attribute declarations.
 
 %Besides illustrating reduction algorithms
-Similar to beta-reduction, we could implement other source-to-source transformation, such as refactoring operations~\cite{reinke03refactoring}. Furthermore, by inserting the transformed term below the original, instead of replacing it, the editor can be used to semi-automatically create derivations, as, for example, in a proof editor such as  MathSpad~\cite{verhoeven00mathspad}.
+Similar to beta-reduction, we could implement other source-to-source transformation, such as refactoring operations~\cite{reinke03refactoring}. Furthermore, by inserting the transformed term below the original, instead of replacing it, the editor can be used to semi-automatically create derivations, as in a proof editor (e.g.\   MathSpad~\cite{verhoeven00mathspad}).
 % such as ).
 
 %\head{Automatic layout}
 %?
 %SCREENSHOT
-
-
 \head{Editable list of top-level identifiers}
 
 The evaluation layer has not been completely realized yet, but nevertheless a few experimental evaluation-layer features have been implemented. The list of top-level identifiers at the top of Figure~\ref{heliumMain} is similar to an editable table of contents. Editing a name in the list causes an update to the identifier in the corresponding declaration, and moving an indentifier moves the declaration. The screenshot shows how editing ``\p{list}'' in the identifier list results in an update to the declaration of \p{list} as well.
@@ -590,13 +588,20 @@ recognizeBoard = recognize \verb|$|\\
 %Size of system.
 
 The main components of the architecture are the five layers, together with a user-interface module. 
-Each layer has a presentation and an interpretation component, which define two functions \p{present} and \p{interpret}. 
-\toHere     \todo{detach arch combinators}
-A single architecture module imports all component modules, lifts each pair of \p{present} and \p{interpret} functions to a layer, and connects the layers with the combinators from Chapter~\ref{chap:archCombs}.  
-\fromHere
-In total, the generic part of Proxima consists of about 15,000 lines of Haskell code. 
+Each layer has a presentation and an interpretation component, which define two functions \p{present} and \p{interpret}. A single architecture module imports all component modules, and connects the  \p{present} and \p{interpret} functions. Thus hiding the data-flow patterns from the layer component modules. In total, the generic part of Proxima consists of about 15,000 lines of Haskell code. 
 
+
+%\toHere
+%
+% to a layer, and connects the layers with the combinators from Chapter~\ref{chap:archCombs}.  
+%
+%Detach ook verderop 
+%+ todo below:
+%\fromHere
+
+\bc
 The layers of Proxima generally correspond to the description given in Chapter~\p{chap:proxArch}. The differences between this description and the current prototype implementation are listed in the overview of future work in  Section~\ref{sect:protoConcl}. \todo{is dat wel zo?}
+\ec
 
 \subsection{Genericity}
 
@@ -653,7 +658,7 @@ In the remainder of this section we first discuss our experiences with Haskell a
 
 \subsection{Haskell}
 
-Haskell may not immediately seem the most logical candidate for implementing Proxima, because of statefulness of the architecture. Every layer has its own state, and moreover, different levels may point to each other. However, with the use of  the architecture combinators\todo{chapter has been removed}, the complex data flow in the editor is hidden from the implementation of each layer. The Proxima implementation consist of numerous algorithms over tree structures, which benefit greatly from Haskell's syntax for abstract data types and pattern-matching. 
+Haskell may not immediately seem the most logical candidate for implementing Proxima, because of statefulness of the architecture. Every layer has its own state, and moreover, different levels may point to each other. However, because  the complex data flow patterns are confined to a single architecture module, each layer component only has to deal with its surrounding levels. The Proxima implementation consist of numerous algorithms over tree structures, which benefit greatly from Haskell's syntax for abstract data types and pattern-matching. 
 
 On the other hand, the typical Haskell feature of lazy evaluation has not been of significant importance (other than allowing for elegant programming), because of the overhead associated with lazy data structures. The code that is generated by the attribute grammar compiler depends on laziness, but this is also something that will most likely need to change in the future. Instead, the attribute grammar could be analysed and partitioned into strict computations.
 

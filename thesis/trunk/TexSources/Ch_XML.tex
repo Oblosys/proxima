@@ -50,7 +50,7 @@ It is important to note that although the use cases are discussed as separate ap
 
 As an example of a program-source editor, we take an editor for the functional programming language Haskell~\cite{peytonJones03haskell}. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language-specific edit operations. 
 
-There exists evidence showing that syntax highlighting makes programs more readable~\cite{baecker88readability, omanCook90typography}. Our editor also supports highlighting at a semantic rather than syntactic level. Hence, unlike most text editors, the editor can use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot~\note{The screenshots in this chapter are still drafts because they may be replaced by actual Proxima screenshots.} are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
+There exists evidence showing that syntax highlighting makes programs more readable~\cite{baecker88readability, omanCook90typography}. Our editor also supports highlighting at a semantic rather than syntactic level. Hence, unlike most text editors, the editor can use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot\note{The screenshots in this chapter are still drafts because they may be replaced by actual Proxima screenshots.} are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
 
 %mention module handling etc.?
  
@@ -67,24 +67,39 @@ The screenshot shows the type of the expression in focus, together with a list o
 
 Some structure editors use an automatic layout scheme while editing program sources. The user then does not need to worry about layout issues, such as the alignment of parameters in functions with multiple clauses. However, for a Haskell editor this situation is not optimal because Haskell programs mainly consist of expressions, which are hard to layout automatically. Therefore, rather than having automatic layout be continuously performed on the entire source, a user may request the editor to automatically lay out a selected part of the program. The specification of the layout of the program is part of a presentation sheet and may be adapted by the user. Of course, if desired, it is also possible to turn on continuous automatic layout.
 
+
 \newcommand{\editScreenshot}[4]{%
 %
 \noindent
 \begin{center}
 \begin{picture}(350,135)(0,0)
 \begin{scriptsize}
-\put(0,30){ \framebox(170,105){#1}}
-\put(180,30){ \framebox(170,105){#2}}
+\put(0,30){ \framebox(160,105){#1}}
+\put(180,30){ \framebox(160,105){#2}}
 \end{scriptsize}
-\put(170,13){ $\Rightarrow$}
-\put(0,0) { \makebox(170,30){#3}}
-\put(180,0) { \makebox(170,30){#4}}
+\put(165,80){ $\Rightarrow$}
+\put(0,0) { \makebox(160,30){#3}}
+\put(180,0) { \makebox(160,30){#4}}
 \end{picture}
 \end{center}
 }
 
+\newcommand{\editScreenshotTrns}[3]{%
+%
+\noindent
+\begin{center}
+\begin{picture}(350,130)(0,0)
+\begin{scriptsize}
+\put(0,30){ \framebox(160,105){#1}}
+\put(180,30){ \framebox(160,105){#2}}
+\end{scriptsize}
+\put(165,80){ $\Rightarrow$}
+\put(96,0) { \makebox(150,30){#3}}
+\end{picture}
+\end{center}
+}
 
-\editScreenshot{
+\editScreenshotTrns{
 \ttfamily 
 \begin{tabular}[t]{@{}l@{}}
 \begin{tabular}[t]{@{}l@{}}
@@ -139,7 +154,7 @@ suffix~x~y~=~reverse~x~`prefix`~~reverse~y\\
 \end{tabular}
 \end{scriptsize}
 \rmfamily
-}{}{after Apply Layout}
+}{apply Layout}
 
 The screenshot shows the automatic-layout operation applied to the selected function {\tt prefix}. The layed-out function on the right-hand side is still freely editable, including its whitespace.
 % comment handling?
@@ -148,7 +163,7 @@ The screenshot shows the automatic-layout operation applied to the selected func
 
 Because a program construct is represented by a contiguous area in the presentation, moving a program construct can usually be done in a straightforward way by moving its presentation. However, this is not always the case. Consider for example the following let expression:
 
-\smallScreenshot{\framebox{let x=1}; y=2 in x+y}{after select}
+\smallScreenshot{let \framebox{x=1}; y=2 in x+y}{after select}
 
 The let expression consists of a list of declarations that are separated by semicolons and whitespace. Contrary to, for example, the language Java, the semicolon in Haskell acts as a separator, and not as a terminator. Unlike a terminator, which can be regarded as part of the presentation of a declaration, a separator belongs to the presentation of the list of declarations. As a result, semicolons may cause problems when declarations are moved.
 
@@ -164,7 +179,7 @@ When the declaration is pasted, a semicolon is automatically placed in front of 
 
 A second example of an edit operation that takes the document structure into account is a rename operation on an identifier. In a regular text editor, occurrences of the identifier name need to be changed using search and replace. However, automatic search and replace does not always lead to the desired result because the identifier may be redeclared in inner scopes, or the identifier name may appear in a string.
 
-\editScreenshot{f \framebox{a} b = a + let a = 10 in a }{f \framebox{x} b = x + let a = 10 in a }{rename variable}{}
+\editScreenshotTrns{f \framebox{a} b = a + let a = 10 in a }{f \framebox{x} b = x + let a = 10 in a }{rename variable}
 
 % a function is a better example
 The rename operation takes account of the scoping rules of Haskell, and only changes the appearances that lie in scope of the updated identifier. If the new name is captured by an inner declaration, or if it shadows an identifier that is already declared, a warning is issued.
@@ -175,7 +190,7 @@ The rename operation is an example of a {\em refactoring} operation: a source-to
 
 Function definitions in the source presentation may be collapsed, leaving only one left-hand side and the (possibly inferred) type declaration. This operation is often referred to as folding.
 
-\editScreenshot{
+\editScreenshotTrns{
 \begin{tabular}[t]{l}
 %{\tt yA (LineA \_ x y x' y' \_ \_)~~~= y}\\
 %{\tt yA (PolyA \_ x y w h \_ \_ \_ \_)~= y}\\
@@ -219,7 +234,7 @@ Function definitions in the source presentation may be collapsed, leaving only o
 {\tt heightA (OverlayA \_ x y w h \_ \_)}&\p{ = h}
 \end{tabular}
 \end{tabular}
-}{Hide Function Definition}{}
+}{hide function definition}
 
 The two functions \verb|widthA| and \verb|heightA| have a large number of clauses. Hiding these clauses may improve the readability of the source. After applying the {\em hide function body} edit operation to the function \verb|widthA|,  only one clause remains with a collapsed right-hand side ({\tt \framebox{\rule{0cm}{1.5ex}\dots}}). The function is expanded again by clicking on the dots. A collapsed function may be renamed, deleted, or structurally moved around in the source. Editing the whitespace around the `\verb|=|' sign would be ambiguous because of the hidden parameters names and the fact that a single collapsed function typically represents several clauses. Hence, editing this whitespace is not allowed.
 
@@ -233,11 +248,11 @@ Freely editing the program source is not always regarded a requirement for a str
 %																
 \subsection{A word processor} \label{sect:wordprocessor} 
 
-\todo{Text in screenshots is no longer correct}
+\nonote{Text in screenshots is no longer correct}
 
 This section describes a WYSIWYG document editor with a user interface similar to word-processing applications such as Microsoft Word, but with a document model similar to the XML/SGML DocBook standard~\cite{walsh02docbook} and an output quality similar to \TeX~\cite{knuth84tex}. Examples of editors with similar functionality are TeXmacs\cite{texmacs} and Lyx~\cite{lyx}, but neither system is generic.
 
-\screenshot{$\langle$Word-processor document with table of contents, citations, etc.$\rangle$}{Word processor}
+\screenshot{$\langle$Word-processor document with table of contents, citations, etc.$\rangle$}{The word processor}
 
 The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG presentation with optimal line breaking, a derived table of contents, and an automatic bibliography. Cross-references, such as citations or references to figures, can be clicked to bring the referred part of the document into focus.
 
@@ -245,7 +260,7 @@ The document model consists of chapters, sections and subsections. The editor su
 
 Although Microsoft Word is one of the most popular word-processing tools in the world, an often-heard complaint concerns its confusing document model. Sometimes edit operations are not allowed because of underlying document structure, but it is not obvious why this is the case. Furthermore, the reason why a document fragment looks the way it does is not always clear. The user may have set specific style attributes for a particular fragment, or the style may originate from the document's presentation rules. A more structural view on the document, such as Wordperfect's ``underwater'' screen, can help to clarify the situation, but is not supported by Microsoft Word. Such a structural view is easily defined in a structure editor:
 
-\editScreenshot{
+\editScreenshotTrns{
 \begin{tabular}{l}
 \rmfamily
 normal text {\em {\bf \em italic and bold} just italic} normal\\
@@ -253,11 +268,11 @@ text again {\bf \em plus a warning}.\\
 \end{tabular}
 }{
 \begin{tabular}{l}
-normal text $<$E$>$$<$B$>${\em {\bf \em italic and bold}}$<$/B$>${\em\ just}\\
-{\em italic}$<$/E$>$ normal text again $<$Warning$>${\bf \em plus}\\
-{\bf \em a warning}$<$/Warning$>$.\\
+normal text $\langle$e$\rangle$$\langle$b$\rangle${\em {\bf \em italic and bold}}$\langle$/b$\rangle$ {\em just}\\
+{\em italic}$\langle$/e$\rangle$ normal text again $\langle$Warning$\rangle${\bf \em plus a} \\
+{\bf \em warning}$\langle$/Warning$\rangle$.\\
 \end{tabular}
-}{Regular WYSIWYG presentation}{Structural presentation}
+}{switch to structural presentation}
 
 The two screenshots show two presentations of the same document fragment. The left-hand presentation is the regular WYSIWYG presentation, whereas the right-hand one is a more structural presentation that shows the markup tags. The example document also contains a fictitious \verb|<Warning>| element that is presented in a bold and italic style. Only in the structural presentation can the warning be distinguished from text that has been explicitly formatted as bold and italic.
 
@@ -265,33 +280,33 @@ The structural view is also helpful for positioning the focus. For example, in t
 
 %Handles to invisible stuff, attributes?
 
-\head{Structural edit operations}\\
+\head{Structural edit operations}
 
 Edit operations that rearrange the document structure, such as promoting a subsection to section, are awkward to perform on a textually represented document, such as a \TeX\ source. All tags or \TeX\ commands that specify the subsection and its descendants need to be changed. This is a rather specific search/replace operation on only part of the document source, which is a hassle to automate.
 
 A structure editor may be of some help here, because the structural similarities between sections and subsections are known to the editor and can be used to define edit operations for restructuring the document.
 
-\editScreenshot{
+\editScreenshotTrns{
 \begin{tabular}[t]{l}
 1~~Editing~structured~documents\\
 ~~1.1~~Classes of structure editors\\
 ~~1.2~~Advantages of structure editors\\
-~~1.3~~Use cases~~~~~~$\leftarrow$~Change to: Section\\
+~\,\fbox{1.3~~Use cases}\\
 ~~~~1.3.1~~A source editor for Haskell\\
 2~~Functional requirements
 \end{tabular}
 }{ 
 \begin{tabular}[t]{l}
-1~~Editing~structured~documents\\
-~~1.1~~Classes of structure editors\\
-~~1.2~~Advantages of structure editors\\
-2~~Use cases\\
-~~2.1~~A source editor for Haskell\\
-3~~Functional requirements
+~1~~Editing~structured~documents\\
+~~~1.1~~Classes of structure editors\\
+~~~1.2~~Advantages of structure editors\\
+\,\fbox{2~~Use cases}\\
+~~~2.1~~A source editor for Haskell\\
+~3~~Functional requirements
 \end{tabular}
-}{}{}
+}{change to section}
  
-The screenshot shows the effect of the structural edit operation {\em Change to Section}. If the containing section ``Editing structured documents'' had had any subsections following the promoted subsection, these could have become subsections of the new ``Use cases'' section. However, different behavior for such sections may be specified by the user in a preferences window for the command.
+The screenshot shows the effect of the structural edit operation {\em change to section}. If the containing section ``Editing structured documents'' had had any subsections following the promoted subsection, these could have become subsections of the new ``Use cases'' section. However, different behavior for such sections may be specified by the user in a preferences window for the command.
 
 An operation that changes the level of a section or subsection is rather complex because it involves splitting and changing elements. Moreover, there are special cases to consider. For example, if a subsubsection is the deepest possible structural level, a warning needs to be issued when a section containing a subsubsection is demoted to subsection. Therefore, such an operation needs to be specified explicitly by the editor designer or user. Other document operations, however, such as splitting and joining elements of a list, may be derived automatically.
 % show transf. spec. language?
@@ -302,7 +317,7 @@ An operation that changes the level of a section or subsection is rather complex
 
 The word processor has support for the specification of a generated table of contents. From an entry in the table, a user can jump to the corresponding position in the document presentation. The presentation of the table of contents itself can be customized to match the style of the rest of the presentation. When the document is edited, the table of contents is updated accordingly. Moreover, editing an entry in the table of contents causes an update to the title of the corresponding chapter or section.
 
-\editScreenshot{
+\editScreenshotTrns{
 \begin{tiny}
 \begin{tabular}[t]{p{5.2cm}}
 {\small Contents}\\
@@ -346,7 +361,7 @@ In this section we present five example applications of a generic structure edit
 \dots
 \end{tabular}
 \end{tiny}
-}{}{after typing: 'T', 'h', 'e', ' ', 'u'}
+}{enter: ``\p{The\spc u}''}
 % In final picture maybe use Lambert's idea instead of dots? (3 different blocks, each with zigzag ends)
 
 The screenshot shows a document with a table of contents. The dots (\dots) are not part of the actual screenshot, but have been added to show the table of contents together with the section headings. The second entry in the table of contents is edited by entering the text ``The u'' over the selected letter 'U' at the beginning of the title. The result is that both the entry in the table of contents as well as the title in the presentation of the section itself change to ``The use cases''.
@@ -415,7 +430,7 @@ Finally, in order to handle edit operations on the table of contents, the editor
 %																
 \subsection{Equation editor/MathML}  
 
-Because mathematical formulas have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. Equation editing functionality is typically integrated with a word processor to support in-place editing of equations in a document. An example of an editor for mathematical documents is the MathSpad editor~\cite{verhoeven00mathspad}, which offers word-processing functionality as well. MathSpad also supports a form of genericity, but does not allow the document type to be specified. Furthermore, both the edit model and the document presentation are somewhat inclined towards documents of a mathematical nature.
+Because mathematical formulas have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. Equation editing functionality is typically integrated with a word processor to support in-place editing of equations in a document. An example of an editor for mathematical documents is the MathSpad editor~\cite{verhoeven00mathspad}, which offers word-processing functionality as well. MathSpad also supports a form of genericity, but does not allow the document type to be specified. Furthermore, both the edit model and the document presentation have a tendency towards documents of a mathematical nature.
 
 %The TexMacs and Lyx editors mentioned in the previous section support math editing. 
 
@@ -455,10 +470,10 @@ In practice, we do not expect this restriction to be a major problem. A fragment
 
 For quick and easy structure entry, the editor supports textual entry of mathematical structures without having to switch to a different mode.
 
-\editScreenshot
+\editScreenshotTrns
 {\begin{normalsize}$a_nb_n = \frac{4\theta_{ab}\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$ \end{normalsize}}
 {\begin{normalsize}$a_nb_n = \frac{4\theta_{ab} - 4(\pi - \theta_{ab})\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$ \end{normalsize}}
-{enter:  {\tt -4($\backslash$pi-$\backslash$theta\_\{ab\})}}{}
+{enter:  ``{\tt -4($\backslash$pi-$\backslash$theta\_\{ab\})}'' }
 
 The entered text is parsed and causes the insertion of $- 4(\pi - \theta_{ab})$, as shown on the right.  It should be noted, however, that textual entry does not always lead to the desired result in a two-dimensional presentation. For example, when "\verb|2/4|" is entered, an intuitive result is the insertion of a fraction with the focus ending up below the fraction line to the right of the 4: \framebox{$\frac{2}{4\mid}$}. But now the expected result of entering "\verb|+6|" would be \framebox{$\frac{2}{4+6\mid}$}, whereas the correct meaning of "\verb|2/4+6|" is \framebox{$\frac{2}{4}+6$}.
 
@@ -468,9 +483,9 @@ If a complex subformula needs to be entered, or if the appearance of a formula n
 
 Because the editor has knowledge about the exact structure of a document, rather than just about the structure of the presentation, it is possible to specify domain-specific mathematical transformations.
 
-\editScreenshot
+\editScreenshotTrns
 {\begin{normalsize}$x = \framebox{$a \times (b + c)$}$\end{normalsize}}
-{\begin{normalsize}$x = \framebox{$a \times b + a \times c$}$\end{normalsize}}{}{after distribution transformation}
+{\begin{normalsize}$x = \framebox{$a \times b + a \times c$}$\end{normalsize}}{distribute}
 
 The example shows the application of a distribution transformation to the selected subformula. Similar transformations, such as factorize or reverse, may be specified by the editor designer or the editor user. Furthermore, instead of updating the expression in-place, the editor may also insert the transformed expression below the original. This way, the editor can be used to construct derivations or proofs semi-automatically (or indeed fully automatically, if the editor is connected to a theorem prover).
 
@@ -487,7 +502,7 @@ Because parts of an expression may be missing during its construction,  the edit
 
 An outline view, or tree browser, is a hierarchical view on tree structures. It is found in the Java Swing GUI library and also forms the main navigation tool in Microsoft's Windows Explorer application. 
 
-\screenshot{$\langle$tree browser in an integrated development environment$\rangle$}{Tree-browser View}
+\screenshot{$\langle$tree browser in an integrated development environment$\rangle$}{Tree-browser view}
 
 Some editors, especially XML editors, provide tree-browser views on the document, but in all editors, the view is hard-coded. However, if the editor is sufficiently powerful to express a tree-browser view without resorting to a primitive tree-browser widget, this offers many possibilities for integrating the tree view with other views on the document. 
 
@@ -495,7 +510,7 @@ Some editors, especially XML editors, provide tree-browser views on the document
 
 Tree views are useful for giving an overview of large structures, such as a program source that consists of a number of different modules. By combining a tree presentation with a Haskell source editor, we can support the kind of project management that is found in integrated development environments, such as JBuilder or Eclipse~\cite{eclipse2001}. 
 
-\editScreenshot{$\langle$module structure + Haskell Editor$\rangle$}{$\langle$selected name has focus in Haskell editor$\rangle$}{click on function name}{}
+\editScreenshotTrns{$\langle$module structure + Haskell Editor$\rangle$}{$\langle$selected name has focus in Haskell editor$\rangle$}{click on function name}
 
 The window in the screenshot consists of two panes, the right-hand pane contains a Haskell source editor and the left-hand pane contains a tree view of the module structure of the edited program. Below the module in the tree are the functions and types it defines. When the user clicks on a name in the left-hand pane, the corresponding module is shown in the right-hand pane and the function definition or type declaration is brought into focus. 
 
@@ -503,7 +518,7 @@ The window in the screenshot consists of two panes, the right-hand pane contains
 
 The tree browser supports drag and drop edit behavior that allows nodes in the tree to be dragged to new locations. 
 
-\editScreenshot{$\langle$tree$\rangle$}{$\langle$rearranged tree$\rangle$}{dragging tree node}{}
+\editScreenshotTrns{$\langle$tree$\rangle$}{$\langle$rearranged tree$\rangle$}{drag tree node}
 
 The screenshot shows the effect of dragging the leaf with label ``leaf 1'' to its new position below ``leaf 3''. The operation results in a structural document change in which the element with presentation ``leaf 1'' becomes a child of the element that has presentation ``node 1'', immediately below the element with presentation ``leaf~3''.
 
@@ -544,19 +559,19 @@ An aspect that is specific to the tree browser is that it has a notion of state.
 The last example is a simple tax-form application, which is basically a spreadsheet with a rather specialized presentation. It contains questions and explanatory text, mixed with input fields and fields that contain derived information. 
 
 \screenshot{
-\begin{tabular}[t]{l@{\:}lll}
+\begin{tabular}[t]{l@{\:\:}l@{\:\:}l@{\:\:}l}
 Income\\
-Nr. of jobs & \framebox{2}\\
+Nr. of jobs & \framebox(23,8){\hfill 2}\\
 \\
 Job nr. & Description & Salary & Tax withheld\\
-1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
-2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
+1 & \framebox(50,8){PhD student}		& \framebox(23,8){\hfill 10} &\framebox(23,8){\hfill 2}\\
+2 & \framebox(50,8){Programmer}	& \framebox(23,8){\hfill 20} &\framebox(23,8){\hfill 5}\\
 Total income:& 30\\
-Tax paid: & 7.50\\ 
+Tax paid: & 7\\ 
 \\
-Interest:&\framebox{2}\\
+Interest:&\framebox(23,8){\hfill 2}\\
 \\
-Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
+Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
 \end{tabular}
 }{A much simplified tax form}
 
@@ -575,42 +590,42 @@ A difference between the tax form and the previous use cases is that, similar to
 
 In most presentations, the structure of the presentation depends on the document structure. However, the presentation structure may also depend on a document value, rather than the structure. An example is the following section of the tax form:
 
-\editScreenshot{
+\editScreenshotTrns{
 \begin{tiny}
-\begin{tabular}[t]{l@{\:}lll}
+\begin{tabular}[t]{l@{\:\:}l@{\:\:}l@{\:\:}l}
 Income\\
-Nr. of jobs & \framebox{2}\\
+Nr. of jobs & \framebox(19,6){\hfill 2}\\
 \\
 Job nr. & Description & Salary & Tax withheld\\
-1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
-2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
+1 & \framebox(40,6){PhD student}		& \framebox(19,6){\hfill 10} &\framebox(19,6){\hfill 2}\\
+2 & \framebox(40,6){Programmer}		& \framebox(19,6){\hfill 20} &\framebox(19,6){\hfill 5}\\
 Total income: & 30\\
-Tax paid: & 7.50\\ 
+Tax paid: & 7\\ 
 \\
-Interest:&\framebox{2}\\
+Interest:&\framebox(19,6){\hfill 2}\\
 \\
-Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
+Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
 \end{tabular}
 \end{tiny}
 }{
 \begin{tiny}
-\begin{tabular}[t]{l@{\:}lll}
+\begin{tabular}[t]{l@{\:\:}l@{\:\:}l@{\:\:}l}
 Income\\
-Nr. of jobs & \framebox{3}\\
+Nr. of jobs & \framebox(19,6){\hfill 3}\\
 \\
 Job nr. & Description & Salary & Tax withheld\\
-1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
-2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
-3 & \framebox{}	& \framebox{0} &\framebox{0}\\
+1 & \framebox(40,6){PhD student}		& \framebox(19,6){\hfill 10} &\framebox(19,6){\hfill 2}\\
+2 & \framebox(40,6){Programmer}		& \framebox(19,6){\hfill 20} &\framebox(19,6){\hfill 5}\\
+3 & \framebox(40,6){}				& \framebox(19,6){\hfill 0} &\framebox(19,6){\hfill 0}\\
 Total income: & 30\\
-Tax paid: & 7.50\\ 
+Tax paid: & 7\\ 
 \\
-Interest:&\framebox{2}\\
+Interest:&\framebox(19,6){\hfill 2}\\
 \\
-Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
+Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
 \end{tabular}
 \end{tiny}
-}{}{Nr. of jobs was changed to 3}
+}{increase number of jobs}
 
 The number of input fields for job information depends on the number of jobs. When the number is increased, the structure of the input form changes accordingly, showing an extra line of input fields. Decreasing the number hides the corresponding input fields, but after a subsequent increase, the fields reappear containing their previous values.
 
@@ -624,19 +639,19 @@ A different presentation of the tax form allows a user to design the form by edi
 \framebox{Income}\\
 \framebox{Nr. of jobs} & c1: special \framebox{jobs.length}\\
 \\
-\framebox{Job nr.} & \framebox{Description} & \framebox{Salary} & \framebox{Tax withheld}\\
+\framebox{Job nr.} & \framebox {Description} & \framebox{Salary} & \framebox{Tax withheld}\\
 LIST: jobs\\
 derived \framebox {index} & cs1: input & cs2: input & cs3: input \\
-derived:  1 & cs1[0]: input \framebox{PhD student}		& cs2[0]: input \framebox{10}& cs3[0]: input \framebox{2.5}\\
+derived:  1 & cs1[0]: input \framebox{PhD student}		& cs2[0]: input \framebox{10}& cs3[0]: input \framebox{2}\\
 derived: 2 & cs1[1]: input \framebox{Programmer}	& cs2[1]: input \framebox{20}& cs3[1]: input \framebox{5}\\
 \framebox{Total income:} & c2: derived \framebox{sum cs1} {\em 30}\\
-\framebox{Tax paid:} & c3: derived \framebox{sum cs2} {\em 7.50}\\ 
+\framebox{Tax paid:} & c3: derived \framebox{sum cs2} {\em 7}\\ 
 \\
 \framebox{Interest:}& c4: input \framebox{2}\\
 \\
 \framebox{Tax due:}& \multicolumn{3}{l}{
 \framebox{35\% of income - paid = }
- \vline\ c5: derived \framebox{0.35*(c2+c4)-c3} {\bf \em 3.7}
+ \vline\ c5: derived \framebox{0.35*(c2+c4)-c3} {\bf \em 3.5}
 }\\
 \end{tabular}
 \end{tiny}
@@ -725,8 +740,7 @@ For document-oriented edit operations, a transformation specification formalism 
 %																
 \subsection{Modeless editing}
 
-\todo{\cite{sufrin99modeless, kaiser85parsingWithoutParser}}
-Besides support for both document- and presentation-oriented editing, an important requirement is the integration of these two kinds of editing. A seamless integration provides a pleasant edit interface to the user, as the intended operation can be performed on the presentation the user is working on, without first having to explicitly switch modes.
+Besides support for both document- and presentation-oriented editing, an important requirement is the integration of these two kinds of editing. A seamless integration provides a pleasant edit interface to the user, as the intended operation can be performed on the presentation the user is working on, without first having to explicitly switch modes. Sufrin and De Moor describe a basic modeless structure editor~\cite{sufrin99modeless}, but the idea of modeless editing is also found in earlier publications (e.g.\ Kaiser and Kant~\cite{kaiser85parsingWithoutParser}).
 
 The most extreme form of mode-switching is when edit operations on different levels have to take place in separate windows and also have a separate undo-history. This is the approach taken by many pure structure editors that offer some support for free text editing, as well as by all existing XML editors. Even worse, the separate free-editing text mode often has a special text-only format, in which derived values are not shown and interesting graphical presentations are not possible. In order to get back to document-oriented editing, the user needs to leave the text in a valid state, or abandon the text update.
 
@@ -943,7 +957,7 @@ Thot editors are of a syntax-directed nature. Multiple views on the document may
 % IDE, also editor Program editor.
 %veel programmeerwerk.
 %
-%\todo{also in comparison}
+%***{also add to comparison}
 
 \head{Visual Studio editor}
 

@@ -516,6 +516,7 @@
 \typeout{******}}
 
 \newcommand{\paranote}[1]{%
+\error
 \notewarning%
 \marginpar{\raggedright
 \hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
@@ -530,6 +531,7 @@
 \newcommand{\nonote}[1]{}%
 
 \newcommand{\inote}[1]{%
+\error
 \notewarning%
 \mbox{$^{\ast\ast\ast}$}\marginpar{\tiny$\ast\ast\ast$}%
 {\sffamily #1}}
@@ -537,6 +539,7 @@
 %\newcommand{\todo}[1]{%
 %}
 \newcommand{\todo}[1]{%
+\error
 \notewarning%
 \mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
 \hspace{0pt}\sffamily\tiny{\sc todo:}\\ #1}}
