@@ -1,1 +1,1 @@
-C:\apps\cygwin\usr\local\bin\uuagc -cfspm --self PresentationAG.ag
+uuagc -cfspm --self PresentationAG.ag
