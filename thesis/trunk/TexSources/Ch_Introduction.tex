@@ -10,7 +10,7 @@ Many software applications involve some form of editing: a user views a data str
 
 An obvious research question is to abstract from the specific aspects of each editor and construct a generic system that can be instantiated to a specific editor application. Building an editor with such a system would require only a fraction of the amount of engineering required to build an editor from scratch. 
 % And easy to customize. 
-A generic editor enhances consistency between editors, because all instantiated editors share the same edit model, and, furthermore, it facilitates the integration of editors for different document types 
+A generic editor enhances consistency between editors, because all instantiated editors share the same edit model, and, furthermore, it facilitates the integration of editors for different document types.
 
 
 %easy to maintain and develop (features added to generic editor
@@ -21,7 +21,7 @@ A generic editor enhances consistency between editors, because all instantiated 
 
 Especially in the nineteen-eighties, many research projects on structure editing were started. However, the editors developed were generally perceived as being overly restrictive, and attempts at developing less restrictive systems resulted mainly in text-only editors. \nonote{mention syntax-directed/recognizing here already?} Further, regardless of the restrictiveness of the edit model, the applicability of the generic editors was generally limited to source editors for programming languages and simple word-processing applications.
 %No generic editor However, no editor gained much popularity . either  applicable or perceived as restrictive.  but not %one has gained widespread acceptance.
-In the years following, research interest in structure editing steadily declined, and most of the generic editors that were developed are now used only for educational purposes at the institute of origin.
+In the years following, research interest in structure editing steadily declined, and many of the generic editors that were developed are now used only for educational purposes at the institute of origin.
 %Nowadays, the term structure editor even has a rather negative connotation.
 
 In our opinion, the problem with most of these structure editors is that they either focus on editing the document structure, or the presentation (often just text).
@@ -32,7 +32,7 @@ With the increasing popularity of the XML format for representing structured doc
 % ample support? geeft wel dubbele "there is"
 There is a choice between using an expensive custom-made editor, or a generic XML editor, the functionality of which does  not come close to what a presentation-oriented (WYSIWYG) editor could potentially offer. It is not possible to use one of the current XML editors as a convenient editor for a programming language or for mathematical equations.
 
-In response to this situation, we have developed  the presentation-oriented structure editor Proxima. Before we introduce Proxima, we discuss the basic concepts that play a role in editing structured documents. In Section~\ref{sect:introProxima} we introduce the Proxima editor, followed by a summary of the terminology in Section~\ref{sect:terminology} and an overview of the thesis in Section~\ref{sect:overview}.
+In response to this situation, we have developed  the presentation-oriented structure editor Proxima. Before we introduce Proxima, we discuss the basic concepts that play a role in editing structured documents. In Section~\ref{sect:introProxima} we introduce the Proxima editor, followed by a summary of the introduced terminology in Section~\ref{sect:terminology} and an overview of the thesis in Section~\ref{sect:overview}.
 \bc
 In response to this situation, we have developed  the presentation-oriented structure editor Proxima. The editor can be used for a wide range of applications, such as word-processors or source editors, but also equation editing and spreadsheet behavior is possible. The editor has a layered architecture and combines a powerful document presentation mechanism with a non-restrictive edit model. Besides edit operations on the document structure, the editor also allows editing in the presentation.  A platform-independent Haskell prototype has been implemented, and experiments with instantiated editors have yielded promising results.
 \ec
@@ -389,7 +389,7 @@ In some publications (e.g.~\cite{teitelbaum81progSynth, minor90editing}), the te
 In contrast, other publications (e.g.~\cite{ballance92pan, koorn92gse}) advocate that the term hybrid should be reserved for editors that support full textual editing of the document, as well as limited syntax-directed functionality, even if structural modifications on the document are not supported. In this view, almost all syntax-recognizing editors would classify as hybrid editors, since most of these editors support a form of structural navigation.
 
 %and because of the strictness of the syntax-directed versus syntax-recognizing classification,
-Because of the confusion, and because most editors tend to be either primarily syntax-directed or syntax-recognizing, we often use those terms instead.
+Because of the confusion, and because most editors tend to be either primarily syntax-directed or syntax-recognizing, we will often use those terms, instead of the term hybrid.
 
 %Because of this confusion we refrain from using the term hybrid. Instead, we refer to editors that primarily support %document-oriented edit operations as syntax-directed editors, and to editors that primarily support presentation-%oriented editing as syntax-recognizing editors.
 
@@ -400,13 +400,13 @@ In this thesis we present the design of the presentation-oriented structure edit
 
 As we mentioned in Section~\ref{sect:classes},  syntax-directed and syntax-recognizing editors generally only have to implement either the presentation or the interpretation mapping. Proxima, on the other hand, supports both  presentation- and document-oriented editing and therefore implements the presentation as well as  the interpretation mapping. 
 
-The implementation of the bi-directional mappings is facilitated by a layered architecture. The computation of the presentation is broken up in several stages, and each intermediate value in this computation corresponds to a {\em data levels} (or just {\em level}). The interpretation process has the same intermediate values. Between two levels, there is a {\em layer}, which takes care of the translations from one level to another, and thus implements a single stage of the presentation and interpretation processes.
+The implementation of the bi-directional mappings is facilitated by a layered architecture. The computation of the presentation is broken up in several stages, and each intermediate value in this computation corresponds to a {\em data level} (or just {\em level}). The interpretation process has the same intermediate values. Between two levels, there is a {\em layer}, which takes care of the translations from one level to another, and thus implements a single stage of the presentation and interpretation processes.
 
 \nonote{target intermediate levels}
 \nonote{sheets}
 %Intermediate levels may also be targeted.
 
-The layered architecture makes it possible\nonote{hoe dan?} to combine presentation-oriented editing with a powerful document-presentation mechanism, which includes the derived values and structures. A platform-independent Haskell prototype of Proxima has been implemented, and experiments with instantiated editors have yielded promising results.
+The layered architecture makes it possible\nonote{hoe dan?} to combine presentation-oriented editing with a powerful document-presentation mechanism that includes support for the derived values and structures. A platform-independent Haskell prototype of Proxima has been implemented, and experiments with instantiated editors have yielded promising results.
 
 
 \nonote{toekomst, hier al verschillende levels en layers laten zien, probleem dat presentation dan rendering wordt}
@@ -444,21 +444,21 @@ The layered architecture makes it possible\nonote{hoe dan?} to combine presentat
 We give a summary of the terms that were introduced in the previous sections.
 
 \begin{description}
-\item[Editor:] Application for creating and modifying documents. In this thesis also used to refer to {\em structure editors} and {\em generic editors} (or generic structure editors).
+\item[Editor:] Application for creating and modifying documents. In this thesis, the term also used to refer to structure editors and generic editors (or generic structure editors).
 \item[Document:] Internal data structure that represents the information that is edited.
 \item[Presentation mapping/relation:] The relation between the document and its presentation.
 \item[Presentation-oriented editing:] Edit operation targeted at the presentation: e.g.\ deleting ``\;$+$\;'' from ``$1+2$'', yielding ``$12$''.
 \item[Document-oriented editing/structure editing:] Edit operation targeted at the document: e.g.\ swapping two sections in an article.
-\item[Presentation sheet:] Parameter to the presentation (and interpretation) process. 
+\item[Presentation sheet:] Parameter to the presentation/interpretation process. 
 \item[Presentation process:] Process of computing the presentation of a document.
 \item[Interpretation process:] Process of computing a document from a presentation.
-\item[Level:] Intermediate value of the presentation/interpretation process, also includes document and presentation.
+\item[Level:] Intermediate value of the presentation/interpretation process, including the document and the presentation.
 \item[Layer:] Component that realizes the presentation and interpretation between two levels.
 \item[Structure editor:] An editor that has knowledge of the structure of the edited document. Usually assumed to be a {\em generic editor} as well.
 \item[Generic editor:] A structure editor that is suitable to edit documents of different types.
 \item[Syntax-directed editor:] An editor that primarily supports document-oriented editing.
 \item[Syntax-recognizing editor:] An editor that primarily supports presentation-oriented editing.
-\item[Valid document:] A well-typed document. Mainly used for XML documents.
+\item[Valid document:] A well-typed document, mainly used in the context of XML.
 \item[Valid presentation:] A presentation that is the result of presenting some document.
 \item[Focus:] Shared name for cursor and selection.
 \end{description} 
@@ -496,9 +496,9 @@ The layered architecture of Proxima is introduced in Chapter~\ref{chap:proxArch}
 
 In chapters~\ref{chap:informalSpec} and~\ref{chap:formalSpec}, we develop a specification of the Proxima editor. Chapter~\ref{chap:informalSpec} serves as an introduction to the specification and introduces our model of the edit process, as well as the concepts of extra state and duplicates in the presentation. In  Chapter~\ref{chap:formalSpec}, we start by specifying a simple editor, to which extra state and multiple layers are added in subsequent sections. The chapter ends with an informal discussion on how to handle presentations that contain duplicates.
 
-In Chapter~\ref{chap:presenting}, we discuss the {\Xprez} presentation formalism of the Proxima. {\Xprez} is a declarative presentation language, suited for specifying a wide range of presentations. We state a number of requirements for a presentation language for structured documents, and provide an informal overview of {\Xprez} using a series of examples.
+In Chapter~\ref{chap:presenting}, we discuss the {\Xprez} presentation formalism of the Proxima. {\Xprez} is a declarative presentation language, suited for specifying a wide range of presentations. We state a number of requirements for a presentation language for structured documents, and provide an informal overview of {\Xprez}, using a series of examples.
 
-A prototype that already offers much of the functionality mentioned in this thesis has been implemented in Haskell. Chapter~\ref{chap:prototype} discussed the implemented prototype and contains screenshots of editors that have been instantiated with it. The chapter also explains which components need to be provided to instantiate an editor.
+A prototype that offers much of the functionality discussed in this thesis has been implemented in the functional language Haskell. Chapter~\ref{chap:prototype} discusses the prototype as well as a number of editors that have been instantiated. The chapter also explains which components need to be provided to instantiate an editor.
 
 Finally, Chapter~\ref{chap:conclusions} presents the conclusions and gives an overview of future work.  
 
