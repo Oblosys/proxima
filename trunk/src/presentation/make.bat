@@ -1,1 +1,1 @@
-d:\bin\uuagc -cfspm --self PresentationAG.ag
+..\..\..\uust\tools\ag\uuagc -cfspm --self PresentationAG.ag
