@@ -295,7 +295,7 @@ A disadvantage of the implementation of the edit loop sketched in this section i
 
 \note{Ref to Doaitse Pablo?} In this section we create an abstraction for the horizontal and vertical data flow patterns in the edit loop of the previous section. We present a number of combinators that allow us to compose layers, so that instead of having to give the applications of the layer functions for each of the layers, we can call the layer function of the composed layer. For the main loop in the previous section, this implies that both the present and the interpret phase can be written with one function application instead of three. The combinators also make the data flow more explicit. The direction of the vertical parameter is apparent by the choice of combinator, and not by the way the argument is threaded through the function applications, as is the case in the previous section. 
 
-Similar to the way in which the function composition operator $\cdot$ can be used to compose functions {\em f} and {\em g} into $f \cdot g$, we develop a \texttt{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are the compositions of the layer functions in the layers that are combined.
+Similar to the way in which the function composition operator $\oo$ can be used to compose functions {\em f} and {\em g} into $f \oo g$, we develop a \texttt{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are the compositions of the layer functions in the layers that are combined.
 
 In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The composition combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \texttt{LayerFunction horArgsC vertArg horRessC vertRes}. The parameters \texttt{horArgsC} and \texttt{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
 
@@ -608,7 +608,7 @@ main layer0 layer1 layer2 =
 \end{small}
 
 
-\bigskip {\bf Conclusions: }The direct parameter passing model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters are hidden from the type of the composed layer, similar to the way in which the type of the intermediate result for a composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from the type of the composition $f \cdot g :: a \arr c$. As a result, both horizontal and vertical data flow are made more transparent. \note{say something about layers with different horizontal dataflow?}\note{monads arrows?} \note{relation to existential types. arrows?} \note{io?}
+\bigskip {\bf Conclusions: }The direct parameter passing model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters are hidden from the type of the composed layer, similar to the way in which the type of the intermediate result for a composition of two functions $f :: b \arr c$ and $g :: a \arr b$ is hidden from the type of the composition $f \oo g :: a \arr c$. As a result, both horizontal and vertical data flow are made more transparent. \note{say something about layers with different horizontal dataflow?}\note{monads arrows?} \note{relation to existential types. arrows?} \note{io?}
 
 %In the implemented layers, the layer functions themselves do not perform any IO 
 %actions. However, it is straightforward to extend the combinators to an IO type, 
@@ -681,7 +681,7 @@ The individual step data types are defined as:
 \dots\\
 {\tt newtype Step$_n$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_n$ \{step$_n$}\verb| :: |{\tt Step Step$_1$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}
 
-Because no general \texttt{Step} type synonym is possible, an implementor has to construct the appropriate \texttt{Step} type definition, as well as the step data types. In a language with dependent types, such as Cayenne~\cite{cayenne}, a general type \texttt{Step} could have been defined.
+Because no general \texttt{Step} type synonym is possible, an implementor has to construct the appropriate \texttt{Step} type definition, as well as the step data types. In a language with dependent types, such as Cayenne~\cite{augustsson98cayenne}, a general type \texttt{Step} could have been defined.
 
 
 %																
