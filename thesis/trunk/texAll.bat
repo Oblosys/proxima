@@ -1,8 +1,11 @@
 @echo off
 rem for some reason, 'runLatex EntireThesis' does not return, so we call latex explicitly here
 
-latex EntireThesis.tex --quiet --src-specials=cr  -include-directory TexSources -include-directory Styles -include-directory TexOutput -output-directory TexOutput
+rem cannot call bibAll, because bibTex stops batch file on warnings
+rem bibAll
 
-copy TexOutput\EntireThesis.aux TexOutput\Thesis.aux
-rem .aux is copied, so Thesis can be TeXed with the right chapter references.
-rem .toc is not copied, so Thesis.tex must have been TeXed before running texAll, to get the toc right
+
+
+latex EntireThesis.tex --src-specials=cr  -include-directory TexSources -include-directory Styles -include-directory TexOutput -output-directory TexOutput | grep -E "defined|rerun"
+
+rem show undefined and multiply defined labels + rerun warnings

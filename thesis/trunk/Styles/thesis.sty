@@ -3,7 +3,7 @@
 % page number for first page of chapter? also for star chapters (dankwoord/toc/etc.)?
 %  at least override preface and toc. because roman numbers look silly at the bottom
 % 
-{
+
 
 % \usepackage{alltt} % probably needed for Haskell as an adl
 
@@ -12,7 +12,7 @@
 % patched C:\apps\texmf\tex\generic\babel\dutch.ldf   commented line 113-142: %\initiate@active@char{"}
 % this solves the compatibility problem with xypic
 
-
+\usepackage{float}
 
 %\usepackage{mypslatex}    % why use this?
 %\usepackage{ipe}
@@ -103,6 +103,54 @@
 
 
 % Martijn:
+
+
+
+
+\newcommand{\screenshot}[2]{%
+%
+\noindent 
+\begin{center}
+\begin{picture}(250,180)(0,0)
+\begin{tiny}
+\put(0,30){ \framebox(250,150){#1}}
+\end{tiny}
+\put(0,0) { \makebox(250,30){#2}}
+\end{picture}
+\end{center}
+}
+
+\newcommand{\smallScreenshot}[2]{%
+%
+\noindent
+\begin{center}
+\begin{picture}(170,130)(0,0)
+\begin{tiny}
+\put(0,30){ \framebox(170,100){#1}}
+\end{tiny}
+\put(0,0) { \makebox(170,30){#2}}
+\end{picture}
+\end{center}
+}
+
+\newcommand{\editScreenshot}[4]{%
+%
+\noindent
+\begin{center}
+\begin{picture}(350,130)(0,0)
+\begin{tiny}
+\put(0,30){ \framebox(170,100){#1}}
+\put(180,30){ \framebox(170,100){#2}}
+\end{tiny}
+\put(170,13){ $\Rightarrow$}
+\put(0,0) { \makebox(170,30){#3}}
+\put(180,0) { \makebox(170,30){#4}}
+\end{picture}
+\end{center}
+}
+
+
+
 
 \newcommand{\p}[1]{\texttt{#1}}
 
@@ -233,7 +281,7 @@
 \renewcommand{\wp}[2]{\fn{wp}(#1,~#2)}
 
 
-
+\newcommand{\Xprez}{{\sc Xprez}}
 
 
 

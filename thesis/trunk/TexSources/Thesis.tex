@@ -31,11 +31,16 @@
 %\newlabel{chap:formalSpec}{{5}{91}}
 
 % dummy labels for Ch_Xprez
-\newlabel{sect:presLevel}{{3.1.3}{53}}
+%\newlabel{chap:requirements}{{2}{13}}
+%\newlabel{sect:presentationFormalism}{{2.2.3}{32}}
+%\newlabel{sect:presLevel}{{3.1.3}{53}}
+%\newlabel{sect:toolkits}{{2.3.3}{40}}
+%\newlabel{sect:ImplPres}{{8.2.4}{194}}
 
 % dummy labels for Ch_Prototype
 \newlabel{sect:sourceeditor}{{2.1.1}{14}}
 \newlabel{chap:proxArch}{{3}{49}}
+\newlabel{chap:archCombs}{{6}{139}}
 
 
 
@@ -45,25 +50,25 @@
 
 \pagenumbering{roman}
 
-%\newcommand{\subtitle}{Chapter 6: Architecture combinators}     \include{P_AltTitlePages}
+%\newcommand{\subtitle}{Chapter 6: Presenting structured documents with {\Xprez}}     \include{P_AltTitlePages}
 %\include{P_Titlepages}
 
  %\include{P_Preface}
-%\tableofcontents
+\tableofcontents
 
 \clearpage \thispagestyle{empty} \cleardoublepage
 
 \pagenumbering{arabic}
 
-%\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
+\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
 %\setcounter{chapter}{1} \include{Ch_XML}   		% 2
 %\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
 %\setcounter{chapter}{3} \include{Ch_InformalSpec}	% 4
 %\setcounter{chapter}{4} \include{Ch_FormalSpec}	% 5
 %\setcounter{chapter}{5} \include{Ch_ArchCombs}	% 6
-%\setcounter{page}{175}
-\setcounter{chapter}{6} \include{Ch_Xprez}   		% 7
-%\setcounter{chapter}{7} \include{Ch_Prototype}    	% 8 yet to be written
+%\setcounter{chapter}{6} \include{Ch_Xprez}   		% 7
+\setcounter{page}{189}
+\setcounter{chapter}{7} \include{Ch_Prototype}    	% 8 yet to be written
 %\setcounter{chapter}{8} \include{Ch_Conclusions}	% 9 yet to be written
 
 \bibliographystyle{abbrv}
@@ -78,7 +83,8 @@
 % \include{P_Samenvatting}
 % \include{P_CV}
 %\include{P_IpaDissertations}
-\thispagestyle{empty}
+
+%\thispagestyle{empty}
 %\cleardoublepage
 
 \end{document}
@@ -91,19 +97,18 @@ Urgent problems:
 presentation/rendering image?  mention that lower layers are fixed and hence presentation often used for rendering
 
 General TODOs
+* Check for important bits:
+* - from CVS: Ch_EditModel.tex, Ch_LayeredArchs.tex, Ch_SingleLayerOld.tex,  and Paper_LayeredArchs.tex  
+* - Somewhere.tex, and other old documents
+
+* Extra presentation state and extra interpr. state   versus presentation extra state and interpretation extra state?
+* british american  i.e. has , in American english.    is ize possible in british english? If so switch to Br.
+
 * Fix math fonts.
-* Sentence case for titles?
-* check labeling of sections, mayba add chapter to labels (eg. now {sect:conclusions} might be used several times)
 
-*map to/onto?
-
-* change bitmap to image/oid
 * explain Parsing/Structure recognizing model somewhere
-* define term presentation-oriented somewhere
 * mention that doc-oriented is always easy. Even for a syn dir editor, the hard bits are in pointing, which is a pres-oriented op.
 * stress that document is internal data structure and not what people usually think (eg. something coming out of a printer) . Perhaps even repeat this a few times.
-
-* Duplicate parser does not seem that complicated!
 
 
 NOTES
@@ -127,10 +132,10 @@ upper level is Level_{High} is bit strange, and Level_{Up} does not make sense.
 
 * Order of chapters: layered, single  or single, layered?
 * layers, single. PROBLEM edit and diff model must be explained, and is typical single layer stuff
-                         GOOD: edit process is already explained before single
+                         GOOD: editing process is already explained before single
                          
 * single, layers. PROBLEM assumes edit ops in and out
-                                        edit process not explained
+                                        editing process not explained
                          GOOD: Final bits of layered can give the complete thing, including one layer
                                     edit/diff stuff explained.
 

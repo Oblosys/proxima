@@ -3,9 +3,40 @@
 
 
 %What we did.
-Layered editor architecture that allows mix between pres and doc oriented
-Declarative presentation formalism with abstraction, etc.
+Showed why structure eds ar not as generally applicable and popular.
+
+Layered editor architecture that allows mix between pres and doc oriented.
+
+A formal spec. Declarative presentation formalism with abstraction, etc.
+
 Architecture described as part of own program
+
+Language. 
+
+
+\subsection{Further research}
+
+*incrementality
+apply know techniques.?
+Proxima keeps track of everything, expensive. However, also good for finding differences. Even simple techniques of diffing big difference.
+
+*automatic interpretation for evaluation and other thing.
+important for eval and pres layers. Maybe not fully automatic. but auto for simple and user-specified only for harder bits
+
+* specification
+specification
+spec for extra state. more examples
+spec. for duplicates
+
+Prototype:
+evaluation layer. also more language support
+enhance presentation language.
+Lots of libraries
+
+\subsection{Final remarks}
+
+% 
+Rather than simple spec for fast parsing and safe and simple editor. Proxima allows both parser and pres. Result may crash, but in practice easy to make good editor. 
 
 %Why proxima is useful (check with introduction)
 Advantages of this way of building editors.
@@ -14,26 +45,12 @@ Advantages of this way of building editors.
 *Good support for editing own datatypes.
 *Mixing different editors easy
 
-What we still need to do: gliding scale
 
-specification
-spec for extra state. more examples
-spec. for duplicates
-incrementality
-
-related: automatic interpretation for evaluation and other thing.
-
-Architecture:
-evaluation layer. also more language support
-
-Implementation
-apply know techniques.?
-Proxima keeps track of everything, expensive. However, also good for finding differences. Even simple techniques of diffing big difference.
-
-enhance presentation language.
 
 Prototype seems to work already. pres lang powerful enough. extra state useful. 
 
 
 
-Interesting problems?? table formatting, generalized paste, etc.
+Shown that it is possible to provide a good modeless integration of pres oriented and doc oriented editing while still having a strong pres and comp facility. ES. Structure editors may lose their negative image. 
+
+%Interesting problems?? table formatting, generalized paste, etc.
