@@ -10,3 +10,4 @@ rem IF %texerr%==1
 
 
 rem dvi is copied to source directory, so yap can find eps pictures and tex sources
+
