@@ -13,8 +13,6 @@ ziet er vaak mooier uit en verloopt logischer. mixen met <= bewijzen geen proble
 {\em *** Version: \today~ ***}
 
 
-
-
 %\bl
 %\o how to layout the equations and put label at the right?
 %\o Operators between identifiers look asymmetrical: 
@@ -66,15 +64,7 @@ Because we make only few assumptions on the presentation mapping, the specificat
 
 An automatically derived $\interpret$ is desirable, but this is not yet feasible for the complex presentation functions of the use cases from Chapter~\ref{chap:requirements}. Examples of presentation formalisms supporting an automatic inverse for basic functions can be found in \cite{meertens98maintainers}, \cite{muhu04inv}, and \cite{pierce03lenses}. 
 
-%*** no longer edit ops, but levels. (pres-oriented) easier to spec. Change to edit ops is future work
-
-In contrast to the architecture description of Chapter~\ref{sect:proxArch}, the specification . Hence $\present$ and 
-$\interpret$ are functions between levels and not between edit operations.***
-
 We develop the specification by starting with a simplified editor, and then step by step adding extra functionality. Section~\ref{sect:singleSimple} specifies a simple editor that consists of a single layer and does not support extra state. In Section~\ref{sect:singleExtra}, the specification is extended with a general model of extra state. Section~\ref{sect:wildcardEq} provides a more concrete specification of extra state for tree data structures. The last step is the addition of layers to the specification in Section~\ref{sect:combinedExtra}. Finally, Section~\ref{sect:duplicates} discusses informally how the specification can be adapted to handle duplications in the presentation.
-
-
-%\note{Somewhere: Duplicates are allowed, but cannot be handled in a way that a user would expect?}
 
 
 
@@ -99,11 +89,13 @@ Given $\present$, we will specify a total function $\interpret$, which maps a lo
 \interpret  & \tp & \Level\L \rightarrow \Level\H\\
 }
 
-\note{Say some things on totality of \interpret (easy to make total?)}
+Note that in constrast to the architecture description in Chapter~\ref{sect:proxArch}, $\present$ and $\interpret$ in the specification are functions between values rather than edit operations.
 
-\head{The \law{InterPresent} property}
+\todo{Unclear: Say some things on totality of \interpret (is it easy to make it total?)??}
 
-A minimal condition for a $\present$ and $\interpret$ pair to model an editor is that presentation of a higher level followed by interpretation should yield the original higher level. In other words, $\interpret$ is a left inverse of $\present$. We express this with the \law{InterPresent} property: 
+\head{The \law{InterPresent} requirement}
+
+A minimal condition for a $\present$ and $\interpret$ pair to model an editor is that presentation of a higher level followed by interpretation should yield the original higher level. In other words, $\interpret$ is a left inverse of $\present$. We express this with the \law{InterPresent} requirement: 
 
 \xprlab{
 l \equ \present~h ~\imp~ h \equ \interpret~l  
@@ -114,9 +106,9 @@ Or, equivalently, using function composition:
 \xpr{
 \interpret \oo \present \eq id_{\Level\H} 
 }
-\note{consequence, no normalization on document}
+%\note{consequence, no normalization on document}
 
-The \law{InterPresent} property implies injectivity of $\present$ and (together with totality of $\present$) surjectivity of $\interpret$. 
+\law{InterPresent} implies injectivity of $\present$ and (together with totality of $\present$) surjectivity of $\interpret$. 
 
 
 We do not require that $\interpret$ is a right inverse (i.e.\ $\present \oo \interpret = id_{\Level\L}$) in order to support ``imprecise'' editing. Imprecise editing means that although the user-updated lower level is not a completely valid presentation of a document, it does make clear what the user intended with the edit operation.
@@ -128,7 +120,7 @@ Hence, $\present \oo \interpret$ is not the identity, since $\present \oo \inter
 % Not nec. always normalized.
 
 
-\law{InterPresent} is only a minimal condition requirement on $\present$ and $\interpret$. In order to model an editor, we also want to say something about the result of $\interpret$ on lower level values outside the range of $\present$. The next section provides such a requirement.
+Since we assume $\present$ is given, \law{InterPresent} is a requirement for $\interpret$. Yet, it is only a minimal requirement. In order to model an editor, we also want to say something about the result of $\interpret$ on lower level values outside the range of $\present$. The next section provides such a requirement.
 
 
 %\bl
@@ -188,8 +180,11 @@ Summarizing, if we let $Comp$ be a program fragment that assigns new values to t
 \xprlab{\hoare{ \level'\L = \present~h } {Comp} {\level'\L = \level''\L}}{Pres-Inert}
 \xprlab{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}{Imprecise}
 
-Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close~to'' is equality. \note{Maybe mention precondition more explicitly?} 
-\todo{say that \law{Imprecise} is weaker}
+Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close~to'' is equality. In order to prevent a conflict with \law{Postcondition}, \law{Imprecise} is slightly weaker than \law{Postcondition}.
+%\note{Maybe mention precondition more explicitly?} 
+%\todo{say that \law{Imprecise} is weaker} is not true. 
+
+
 \head{Definition of $Comp$}
 
 
@@ -200,12 +195,12 @@ Comp \is 	& \level''\H \gets \interpret~\level'\L \semi\\
 				&\level''\L \gets  \present~\level''\H
 }{$Comp$-Def}
 
-\todo{other reqs with pc specify interpret together with bla, fix this in sections below}
+Together with $Comp$, the requirements above provide a specification of $\interpret$. We can prove that \law{Postcondition} holds, and furthermore, if \law{InterPresent} holds, then \law{Doc-Inert} and \law{Pres-Inert} can be proved as well. \law{Imprecise} cannot be proved from \law{InterPresent}, and hence is a requirement on $\interpret$ (together with $Comp$).
 
-\head{A little Hoare logic}
 
-We can prove that $Comp$ meets the first three requirements using Hoare logic. We use the following law to relate Hoare triples to weakest precondition propositions:
+\head{Basic Hoare logic}
 
+Before we prove the requirements, we introduce a few laws from the Hoare calculus. We use the following law to relate Hoare triples to weakest precondition propositions:
 
 \xprlab{
 \hoare{P}{S} {Q} ~\eqv~ P \imp wp(S,Q)
@@ -254,7 +249,7 @@ P \imp \wp{S}{Q} \land P \imp \wp{S}{Q'} ~\imp~ P \imp \wp{S}{Q \land Q'}\\
 
 \head{\law{Postcondition} requirement}
 
-\note{Give this proof here? It's rather trivial.}
+%\note{Give this proof here? It's rather trivial.}
 
 According to \law{\fn{wp}-Char}, $\hoare{\true} {Comp} { \level''\L = \present~\level''\H }$ is equivalent to:
 
@@ -340,10 +335,14 @@ If $\level'\L$ is not a valid presentation, only \law{Postcondition} and \law{Im
 
 \xpr{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}
 
-This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Since $\present$ is given, this requirement provides a specification of $\interpret$. \todo{even fixen} Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close~to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
+This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close~to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
 
 %\note{Is ``close to'' what we want? For simple editors, maybe it is, but is "-$>$" close to \rarr?}
 %\note{What about Chapter titles and fonts? Will these be handled correctly with ``close to'' req.?}
+
+%conclusions
+% give present, we have two requirements interpresent, imprecise. and together with $comp$ these specify an editor.
+
 
 
 
@@ -378,17 +377,17 @@ Because no assumptions are made about the types of the two levels, the model for
 
 \subsection{Equivalence classes}
 
-We start by introducing some notation for equivalence classes. A typed binary relation $R \tp T \rel T$ is an equivalence relation if it is reflexive, symmetric, and transitive.  The equivalence class for a value $x \tp T$ is denoted by $\eqclass{x}{R}$. Its definition is:
+We start by introducing some notation for equivalence classes. A typed binary relation $R \tp T \rel T$ is an equivalence relation if it is reflexive, symmetric, and transitive.  The equivalence class for a value $x \tp T$ is denoted by $\eqcl{x}{R}$. Its definition is:
 
 \xpr{
-%( \eqclass{\hole}{R}) \tp S \to  \Eqclass{S}{R}\\
-\eqclass{x}{R} = \setof{y}{x R y}
+%( \eqcl{\hole}{R}) \tp S \to  \Eqcl{S}{R}\\
+\eqcl{x}{R} = \setof{y}{x\;R\;y}
 }
 
 The factor set $\Eqcl{T}{R}$ is the set of all equivalence classes of $R$. It is a set of mutually exclusive and jointly exhaustive subsets of $T$ (if we regard $T$ as a set).
 
 \xpr{
-\Eqclass{T}{R} = \setof{\eqclass{x}{R}}{ x \tp T}
+\Eqcl{T}{R} = \setof{\eqcl{x}{R}}{ x \tp T}
 }
 
 We have the following property for an equivalence relation $R$:
@@ -400,7 +399,7 @@ x \in \eqcl{y}{R} ~\eqv~ \eqcl{x}{R} = \eqcl{y}{R}
 
 %Proposition:
 %\xpr{
-%\eqclass{x}{R} = \eqclass{y}{R} ~\lor~ (\eqclass{x}{R} \cap \eqclass{y}{R}) = \emptyset
+%\eqcl{x}{R} = \eqcl{y}{R} ~\lor~ (\eqcl{x}{R} \cap \eqcl{y}{R}) = \emptyset
 %}
 
 
@@ -541,9 +540,9 @@ In the remainder of this section, we exclusively make use the functional represe
 %}{Present}
 
 
-\head{\law{InterPresent} property}
+\head{\law{InterPresent} requirement}
 
-The \law{InterPresent} property changes slightly, since we use equivalence class notation to make explicit that the arguments and results are equivalence classes:
+The \law{InterPresent} requirement changes slightly, since we use equivalence class notation to make explicit that the arguments and results are equivalence classes:
 
 \xprlab{
 %l~\Present~h \imp h~\Interpret~l\\
@@ -590,7 +589,7 @@ In addition to the four requirements of the previous section, we need to require
 
 \law{Doc-Preserve} is weaker than the other requirements. It specifies which element of the equivalence class determined by \law{Postcondition} is the final value of the lower level.
 
-On the lower level, we need a similar requirement for presentation extra state, but here it coincides with \law{Imprecise}. Thus, \law{Imprecise} has a double function: it states that the resulting equivalence class of $\present$ must be close to the equivalence class of $level'\L$, as well as that the presentation extra state in $level''\L$ must resemble the extra state in $\level'\L$ as much as possible. \note{mention strength of \law{Imprecise}?}
+On the lower level, we need a similar requirement for presentation extra state, but here it coincides with \law{Imprecise}. Thus, \law{Imprecise} has a double function: it states that the resulting equivalence class of $\present$ must be close to the equivalence class of $level'\L$, as well as that the presentation extra state in $level''\L$ must resemble the extra state in $\level'\L$ as much as possible.
 
 
 % es part weaker than others, not nec. either not valid, only imprecise and postcondition. 
@@ -607,31 +606,31 @@ From this class, we need to select an element for which the extra state resemble
 In this section, we only give the type of~$\reuz$, together with a number of requirements. Section~\ref{sect:wildcardEq} provides a more concrete instance. The type of~$\reuz$ is:
 
 \xprlab{
-\reuz \tp  \Eqclass{X}{R} \to X \to X\\
+\reuz \tp  \Eqcl{X}{R} \to X \to X\\
 }
 
-In order to disambiguate different $\reuz$ functions, we add the relation as a subscript to the operator (e.g.\ $\reuze{H}$ and $\reuze{L}\!$). For the higher level we have $\reuze{H} \tp  \Eqclass{Level\H}{H} \to Level\H \to Level\H$, and for the lower level $\reuze{L} \tp  \Eqclass{Level\L}{L} \to Level\L \to Level\L$
+In order to disambiguate different $\reuz$ functions, we add the relation as a subscript to the operator (e.g.\ $\reuze{H}$ and $\reuze{L}\!$). For the higher level we have $\reuze{H} \tp  \Eqcl{Level\H}{H} \to Level\H \to Level\H$, and for the lower level $\reuze{L} \tp  \Eqcl{Level\L}{L} \to Level\L \to Level\L$
 
 We require several properties of~$\reuz$. First of all, the equivalence class of the result of~$\reuz$ must be equal to the  equivalence class argument: \note{reformulate: its eq. class must be equal to args eq.class?} 
 
-%\xprlab{\eqclass{x}{R} \reuz y \in \eqclass{x}{R}}				{$\reuz$-Valid}
-\xprlab{\eqclass{\eqclass{x}{R} \reuz y}{R} = \eqclass{x}{R}}	{$\reuz$-Valid}
+%\xprlab{\eqcl{x}{R} \reuz y \in \eqcl{x}{R}}				{$\reuz$-Valid}
+\xprlab{\eqcl{\eqcl{x}{R} \reuz y}{R} = \eqcl{x}{R}}	{$\reuz$-Valid}
 
 Furthermore, if the value argument is in the equivalence class argument, then~$\reuz$ returns the value argument.
 
  
-%\xprlab{y \in \eqclass{x}{R} \imp \eqclass{x}{R} \reuz y = y}			{$\reuz$-Idem} 
-\xprlab{\eqclass{y}{R} = \eqclass{x}{R} ~\imp~ \eqclass{x}{R} \reuz y = y}	{$\reuz$-Idem} 
+%\xprlab{y \in \eqcl{x}{R} \imp \eqcl{x}{R} \reuz y = y}			{$\reuz$-Idem} 
+\xprlab{\eqcl{y}{R} = \eqcl{x}{R} ~\imp~ \eqcl{x}{R} \reuz y = y}	{$\reuz$-Idem} 
 
 Finally, if the value argument is not in the equivalence class argument, then~$\reuz$ returns an element of that class that is as close as possible to the value argument.
 
-\xprlab{\eqclass{x}{R} \reuz y \close y}		{$\reuz$-Close} 
+\xprlab{\eqcl{x}{R} \reuz y \close y}		{$\reuz$-Close} 
 
 Similar to the \law{Doc-Inert} and \law{Imprecise} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close~to'' is equality.
 
 \head{Definition of $Comp$}
 
-Using $\eqcl{\hole}{X}$ and ~$\reuz$ we can define $Comp$. The definition is split in $Up$ and $Dwn$ to make the proofs of the requirements more readable. %(will be split for composite layers anyway).
+Using $\eqcl{\hole}{}$ and $\reuz$ we can define $Comp$. The definition is split in $Up$ and $Dwn$ to make the proofs of the requirements more readable. %(will be split for composite layers anyway).
 
 %\xprlab{
 %\level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H  \\ %(\level'\L,\level\H)\\ 
@@ -650,6 +649,7 @@ Up \is		& \level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level
 Dwn \is		& \level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{$Dwn$-Def}
 
 We prove that $Comp$ meets the requirements.
+\todo{same as before, but now also specify }
 
 \head{\law{Postcondition} requirement}
 
@@ -756,7 +756,7 @@ We assume $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$.
 
 \head{\law{Doc-Preserve} and \law{Imprecise} requirements}
 
-Because of the nature of the \law{Doc-Preserve} and \law{Imprecise} requirements, we give an informal argumentation instead of a proof. 
+For the \law{Doc-Preserve} and \law{Imprecise} requirements, we give an informal argumentation because of the informal nature of the \close requirement. 
 
 From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H \close level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
 
@@ -799,7 +799,7 @@ The specification for reusing extra state is a first step, and needs to be exten
 
 In a tree structured-data type, we can model extra state by leaving certain parts of the tree undetermined. We do this by representing each extra state part by a wildcard, which stands for any possible value of the correct type. The functions $\present$ and $\interpret$ return a value that contains wildcards, thus leaving the extra state in the result undetermined.
 
-For a type $T$, the corresponding wildcard has type $*_T$ and is denoted by  $\texttt{*}_{T}$:
+For a type $T$, the corresponding wildcard has type $*_T$ and is denoted by  $\texttt{*}_{T}$ (in a different font):
 
 \xpr{
 \data~*_T  = \texttt{*}_{T}\\
@@ -899,44 +899,44 @@ x \eqstar y \is  \core~x = \core~y
 To see that $\eqstar$ is an equivalence relation, we need the theorem below, the simple proof of which has been omited:
 
 \xpr{
-(\exists f : \forall x,y : x R y ~\eqv~ (f~x = f~y)) ~\eqv~ \text{``$R$~is an equivalence relation''}
+(\exists f : \forall x,y : x\;R\;y ~\eqv~ (f~x = f~y)) ~\eqv~ \text{``$R$~is an equivalence relation''}
 }
 
 By substituting $\core$ for $f$ and $\eqstar$ for $R$, it immediately follows that~$\eqstar$ is an equivalence relation on $T$. 
 
 Without giving a proof, we mention that the equivalence classes of $\eqstar$ can be expressed using $\para{\hole}$ and $\core$. 
 
-\xpr{
-\eqclass{x}{\eqstar} \eq \para{\core~x}
-}
+\xprlab{
+\eqcl{x}{\eqstar} \eq \para{\core~x}
+}{$\eqstar$-Classes}
 \bc
 This one was already proven:
 
 \xpr{
-(\exists f : x R y ~\eqv~ (f~x = f~y) ~\imp~ R~\text{is an equivalence relation}
+(\exists f : x\;R\;y ~\eqv~ (f~x = f~y) ~\imp~ R~\text{is an equivalence relation}
 }
 
 
 \begin{proof} \note{maybe leave this out, or prove equiv. See how much space/time we have}
 \begin{Prf}&
-x R x 	& \Eqv{definition of $R$}\\
+x\;R\;x 	& \Eqv{definition of $R$}\\
 f x = f x 	& \Eqv{reflexivity of =}\\
 \true\\
 \end{Prf}
 
 
 \begin{Prf}&
-x R y  	& \Eqv{definition of $R$}\\
+x\;R\;y  	& \Eqv{definition of $R$}\\
 f x = f y 	& \Eqv{symmetry of =}\\
 f y = f x 	& \Eqv{definition of $R$}\\
-y R x\\
+y\;R\;x\\
 \end{Prf}\note{get $\eqv$ instead of $\imp$}
 
 \begin{Prf}&
-x R y  \land y R z 		& \Eqv{definition of $R$}\\
+x\;R\;y  \land y\;R\;z 		& \Eqv{definition of $R$}\\
 f x = f y \land f y = f z	& \Imp{transitivity of =}\\
 f x = f z 				& \Eqv{definition of $R$}\\
-x R z\\
+x\;R\;z\\
 \end{Prf}
 \end{proof}
 \ec
@@ -1024,15 +1024,16 @@ Recall the types of $\present$ and $\interpret$:
 %We assume that the equivalence relations $H$ and $L$ are implied by wildcard types $\Level^*\H$ and $\Level^*\L$. This %gives rise to  Hence:
 %explain bit more, two or more implies all. also for constructor.\note{comment probably obsolete}
 
-A wildcard type $\Level^*\H$ induces an equivalence relation $\eqstar$ and the corresponding $\core$ and $\reuzestar_{\rm H}$ functions. We restrict ourselves by requiring that the extra state on $\Level\H$ has a wildcard representation. Thus, we require the existence of a $\Level^*\H$, such that $H \eqv {\eqstar}$. A similar restriction applies to the lower level.
+A wildcard type $\Level^*\H$ induces an equivalence relation $\eqstar$ and the corresponding $\core$ and $\reuzestar$ functions. We restrict ourselves by requiring that the extra state on $\Level\H$ has a wildcard representation. Thus, we require the existence of a $\Level^*\H$, such that $H \eqv {\eqstar}$. A similar restriction applies to the lower level.
 
-If we add subscripts for the relations to disambiguate $\para{\hole}$ and $\core$ for the different levels, the equivalence classes on the higher and lower levels can be expressed as:
+To disambiguate instances of $\core$ for the different levels, we use subscripts H and L (rather than the verbose $\Level^*\H$ and $\Level^*\H$).  The equivalence classes on the higher and lower levels can be expressed as: 
 
 \xprlab{
-\eqcl{h}{H} \eq \para{ \core_{\!H}~h}_{\!_{H}}\\
-\eqcl{l}{L} \eq \para{ \core_{\!L}~l}_{\!_{L}}\\
+h\;H\;h' \is  \core\!\H~h = \core\!\H~h'\\
+l\;L\;l' \is  \core\!\L~l = \core\!\L~l'\\
+%\eqcl{h}{H} \eq \para{ \core_{\!H}~h}_{\!_{H}}\\
+%\eqcl{l}{L} \eq \para{ \core_{\!L}~l}_{\!_{L}}\\
 }{Restrict}
-
 
 %A wildcard type $\Level^*\H$ induces an equivalence relation $\eqstar_{\rm H}$ and corresponding $\core_{\rm H}$, and %$\reuzestar_{\rm H}$ functions. Similarly, a type $\Level^*\L$ gives rise to a relation $\eqstar_{\rm H}$ and corresponding %functions. 
 %
@@ -1040,12 +1041,16 @@ If we add subscripts for the relations to disambiguate $\para{\hole}$ and $\core
 %$L \eqv {\eqstar_{\rm L}}$. The equivalence classes on the higher and lower level can therefore be expressed in terms of %$\para{\hole}$ and $\core$:
 %
 %\xprlab{
-%\eqclass{h}{H} \eq \para{ \core_{\rm H}~h}\\
-%\eqclass{l}{L} \eq \para{ \core_{\rm L}~l}\\
+%\eqcl{h}{H} \eq \para{ \core_{\rm H}~h}\\
+%\eqcl{l}{L} \eq \para{ \core_{\rm L}~l}\\
 %}{Restrict}
 
 
-Because the results in the remainder of this section apply to either level, we drop the subscripts to $\para{\hole}$ and $\core$. We use $R$ to denote either $H$ or $L$.
+Because the results in the remainder of this section apply to either level, we drop the subscripts to $\core$ and other level-specific functions. We use $R$ to denote either relation $H$ or $L$. Thus, from \law{$\eqstar$-Classes}, we have:
+
+\xprlab{
+\eqcl{x}{R} \eq \para{\core~x}
+}{Restrict-Classes}
 
 %For $x$ of type $T$, we assume that there is a $T^*$ wildcard type, let $\eqsim$ be the equivalence class 
 
@@ -1053,11 +1058,12 @@ Because the results in the remainder of this section apply to either level, we d
 %\eqclass{x}{\eqstar} \eq \para{ \core~x}
 %}{Restrict}% deze weg doen?
 
+
 We define $\reuz$ in terms of $\reuzestar$:
 
 \xprlab{
-\reuz ::  \Eqcl{T}{\eqstar} \to T \to T\\
-\eqclass{x}{\eqstar} \reuz y \is \core~x \reuzestar y 
+\reuz ::  \Eqcl{T}{R} \to T \to T\\
+\eqcl{x}{R} \reuz y \is \core~x \reuzestar y 
 }{$\reuz$-Def}
 
 %\note{maybe mention that we cannot use this one on combination eq. classes}
@@ -1068,18 +1074,18 @@ We have to prove that $\reuz$ is a well defined function and that it meets the \
 The function $\reuz$ is a well-defined function on equivalence classes if for all elements in an equivalence class, $\reuz$ gives the same result.
 
 \xpr{
-x \eqstar x' ~~\imp~~ \eqclass{x}{\eqstar} \reuz y \equ \eqclass{x'}{\eqstar} \reuz y
+\eqcl{x}{R} = \eqcl{x'}{R}  ~~\imp~~ \eqcl{x}{R} \reuz y \equ \eqcl{x'}{R} \reuz y
 }
-
 \begin{proof}
 \begin{Prf}&
-	\eqclass{x}{\eqstar} \reuz y \equ \eqclass{x'}{\eqstar} \reuz y\\
+	\eqcl{x}{R} \reuz y \equ \eqcl{x'}{R} \reuz y\\
 \Eqv{$\reuz$-Def}&
 	\core~x \reuzestar y \equ \core~x' \reuzestar y\\ 
-\Imp{Leibniz}&
-	\core~x \equ \core~x' \\ 
-\Eqv{\law{$\eqstar$-Def}}&
-	x \eqstar x'\\
+\Ffr{Leibniz}&
+	\core~x \equ \core~x'\\
+%	\para{ \core~x}_{\!_{R}} \equ \para{\core~x'}_{\!_{R}}\\
+\Eqv{\law{Restrict}}&
+	x\;R\;x'\\
 \end{Prf}
 \end{proof}
 
@@ -1090,7 +1096,7 @@ Before we prove validity and idempotency, we introduce a more uniform wildcard t
 
 The structure of a wildcard type definition $T^*$ leads to awkward proofs, because each child of a constructor can be either a wildcard or a regular child. When pattern matching, this means that children cannot be handled uniformly. Therefore, we introduce a uniform construction assigining a data type $T\st$, which has an extra wildcard constructor, to every type $T$, including the primitive types. 
 (Note the different star symbols: `$\star$' for the uniform type versus `$*$' for the regular wildcard type.) 
-\todo{mention cons is the same}
+
 For a type $T$:
 
 \xpr{
@@ -1113,7 +1119,9 @@ Note that the construction also applies to the primitive types $Bool$ and $Int$,
 
 
 %A $T^*$ type can be viewed as an inlined version of a $T\st$ type.  
-Unlike $T^*$ types, a data type $T$ has only one $T\st$ type. Because $T^*$ and $T\st$ share the $\texttt{*}_T$ constructor, any $T^*$ value is also a $T\st$ value. Furthermore, the functions $\reuzestar$, $\para{\hole}$, which are defined by pattern matching on $T^*$ values, are also functions on $T\st$.
+Unlike $T^*$ types, a data type $T$ has only one $T\st$ type. Because $T^*$ and $T\st$ share the $\texttt{*}_T$ constructor, any $T^*$ value is also a $T\st$ value. For example, for the type $Tree^*$ from Section~\ref{sect:treesWildcards}, we have 
+${\tt Leaf~True}~\texttt{*}_{Int}\tp Tree^*$ as well as ${\tt Leaf~True}~\texttt{*}_{Int}\tp Tree\st$. 
+Because the constructors are shared, the functions $\reuzestar$ and $\para{\hole}$, which are defined by pattern matching on $T^*$ values, are also functions on $T\st$.
 % \note{say how we use $T\st$ in proofs?}
 
 %\bl
@@ -1125,21 +1133,17 @@ Unlike $T^*$ types, a data type $T$ has only one $T\st$ type. Because $T^*$ and 
 The validity requirement  follows from a more general statement on $T\st$:
 
 \begin{Prf}&
-	\eqclass{\eqclass{x}{\eqstar} \reuz y}{\eqstar} = \eqclass{x}{\eqstar}\\
+	\eqcl{\eqcl{x}{R} \reuz y}{R} = \eqcl{x}{R}\\
 \Eqv{\law{$\eqhole$-Member}}&
-	\eqclass{x}{\eqstar} \reuz y \in \eqclass{x}{\eqstar}\\
-\Eqv{\law{Restrict} and \law{$\reuz$-Def}}&
+	\eqcl{x}{R} \reuz y \in \eqcl{x}{R}\\
+\Eqv{\law{$\reuz$-Def} and \law{Restrict-Classes}}&
 	\core~x \reuzestar y \in \para{ \core~x}\\
 \FFr{taking  $\core~x$ for $x\st$}&
 	x\st \reuzestar y \in \para{x\st}\\
 %& \text{define $C x\st_0 \dots x\st_n = \core~x$, prim types are constrs with 0 arity}\\
 \end{Prf}
 
-We prove 
-
-\xpr{x\st \reuzestar y \in \para{x\st}}
-
-by structural induction on $x\st$
+We prove $x\st \reuzestar y \in \para{x\st}$ by structural induction on $x\st$
 
 \begin{proof}
 {\bf case} $x\st = \texttt{*}_T$:\\
@@ -1184,20 +1188,16 @@ Similar to validity, we prove idempotency by proving a more general statement on
 %\xprlab{\eqclass{y}{\eqstar} = \eqclass{x}{\eqstar} ~\imp~ \eqclass{x}{\eqstar} \reuz y = y}	{$\reuz$-Idem} 
 
 \begin{Prf}&
-	\eqclass{y}{\eqstar} = \eqclass{x}{\eqstar} ~\imp~ \eqclass{x}{\eqstar} \reuz y = y\\
+	\eqcl{y}{R} = \eqcl{x}{R} ~\imp~ \eqcl{x}{R} \reuz y = y\\
 \Eqv{\law{$\eqhole$-Member}}&
-	y \in \eqclass{x}{\eqstar} ~\imp~ \eqclass{x}{\eqstar} \reuz y = y\\
-\Eqv{\law{Restrict} and def}&
+	y \in \eqcl{x}{R} ~\imp~ \eqcl{x}{R} \reuz y = y\\
+\Eqv{\law{Restrict-Classes} and \law{$\reuz$-Def}}&
 	y \in \para{ \core~x} ~\imp~ \core~x \reuzestar y = y\\
 \FFr{taking  $\core~x$ for $x\st$}&
 	y \in \para{x\st} ~\imp~ x\st \reuzestar y = y\\
 \end{Prf}
 
-The more general statement
-
-$y \in \para{x\st} ~\imp~ x\st \reuzestar y = y$
-
-is proven by structural induction on $x\st$:
+The more general statement $y \in \para{x\st} ~\imp~ x\st \reuzestar y = y$ is proven by structural induction on $x\st$:
 
 \begin{proof}
 {\bf case} $x\st = \texttt{*}_T$:\\
@@ -1565,9 +1565,9 @@ If {$\present$-Match} and {$\interpret$-Match} hold, then \law{$\present\C$-Def}
 %}
 
 
-\subsection{InterPresent}
+\subsection{The \law{InterPresent} requirement}
 
-The \law{InterPresent} property holds for a combination if it holds for the upper and lower layer.
+The \law{InterPresent} requirement holds for a combination if it holds for the upper and lower layer.
 
 \xprlab{\eqcl{l}{CL} = \present\C~\eqcl{h}{CH} ~\imp~ \eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL}}{InterPresent}
 
@@ -1601,7 +1601,7 @@ Layers are combined in a ``top-associative'' way; a combined layer is formed by 
 \bc When the lowest level is updated, it is first interpreted by the lower layer yielding an intermediate middle level, the intermediate level is then interpreted and subsequently presented by the layers above, after which the result from these layers is presented by the lower layer. \ec
 %The process can be sketched as follows:
 
-$(\present_{n} \oo \present_{n-1} \oo \cdots \present_1 \oo \interpret_1 \oo \cdots \oo \interpret_{n-1}\oo \interpret_{n})$
+$(\present_{n} \oo \present_{n-1} \oo \cdots \oo \present_1 \oo \interpret_1 \oo \cdots \oo \interpret_{n-1}\oo \interpret_{n})$
 
 The most logical way to split this computation is by taking the middle part $(\present_{n-1} \oo \cdots \oo \interpret_{n-1})$ and surrounding it with $\present_{n}$ and $\interpret_{n}$. This corresponds to taking a combined layer and putting an atomic layer underneath. 
 
@@ -1730,9 +1730,9 @@ Before the lower level is updated, we have:
 \level\L \leadsto \level'\L 
 }
 
-After the lower-level update, the lower layer computes an intermediate value $\level'\M$, from which the higher layer (which may be a combined layer itself) computes $\level'\H$. At the top, $\level'\H$ is assigned to $\level''\H$, which is subsequently presented onto $level''\M$. Finally, $level''\M$ presented onto $level''\L$. Figure~\ref{combinedEdit} sketches the updates to the various data levels.
-\todo{explain a bit about what present and interpret in the figure mean} Just a sketch, pres and int need appl. of reuse. also H functions may be combined
+After the lower-level update, the lower layer computes an intermediate value $\level'\M$, from which the higher layer (which may be a combined layer itself) computes $\level'\H$. At the top, $\level'\H$ is assigned to $\level''\H$, which is subsequently presented onto $level''\M$. Finally, $level''\M$ presented onto $level''\L$. 
 
+Figure~\ref{combinedEdit} sketches the updates to the various data levels. Note that the figure is just a sketch, since $\present$ and $\interpret$ are functions between equivalence classes instead of values (as the figure might suggest). 
 
 Apart from a few changes to the subscripts, the requirements for $level''\H$ and $level''\L$ are equal to the requirements for the single layer editor in Section~\ref{sect:singleExtra_Editing}. The only difference is that we explicitly added the precondition of the edit step ($\eqcl{\level\L}{CL} = \present\C~\eqcl{\level\H}{CH}$) to the precondition of to the precondition of \law{Doc-Inert}. We need it here, because \law{Doc-Inert} can only hold if the middle level is a valid presentation of $\level\H$. 
 
@@ -1760,7 +1760,7 @@ Up \is		& \level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \le
 \xprlab{
 Dwn \is		& \level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{$Dwn$-Def}
 
-We prove that $Comp$ meets the requirements.
+We prove that $Comp$ meets the first three requirements.
 
 
 \subsection{\law{Postcondition} requirement}
@@ -2081,8 +2081,12 @@ is evident if we substitute according to \law{$Comp$-Def}:
 \xpr{\eqcl{\level'_0}{=} = \id~\eqcl{h}{H} \land \level'_{1} = x ~\imp~\wp {\level''_0 \gets \level'_0} { \level'_0 = \level''_0 \land \level'_{n+1} = x}}
 \ec
 
+{\bf Case~} $n=0$ We omit the trivial proof of this case. \todo{mention we don't need it because we give $n=1$? (and since $n=0$ is only for \id-layer)}
+
 {\bf Case~} $n=1$
-\todo{Check proof+ mention/prove  $n=0$?}
+
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level'_{n+1} = x ~\imp\\ \wp{Comp_n}{\level'\L = \level''\L  \land \level'_{n+1} = x}}
+
 
 The proof is similar to the proof of \law{Pres-Inert} for a single layer (see Section~\ref{sect:singleExtra_Editing}).
 
@@ -2363,7 +2367,7 @@ On the other hand, if \law{Absorption} holds, then each $CH$ class corresponds t
 The part of \law{Imprecise} for reusing presentation extra state is guaranteed by the component layers in a similar way as for interpretation extra state (without assuming \law{Absorption}). The other part of \law{Imprecise} must be guaranteed by 
 $\interpret\L$ and $\interpret\H$, and thus serves as the specification of these functions. \note{this seems to be quite complicated}
 
-
+\todo{more on nature of combined closeness?}
 %\bl
 %\o preses is combination of pres es on middle and on lower, combined reuse must guarantee closeness.
 %\o imprecise is 2-step, each step does closer. hence, only editors that close is this way. if a h exists that is closer to l', but for %which m isn't, then not computed.
@@ -2394,6 +2398,7 @@ On the other hand, \law{Imprecise} also states that from the equivalence class $
 
 
 \subsection{Conclusions}
+\todo{make explicit that we only need \law{InterPresent} and \law{Imprecise}?}
 
 A layered editor consisting of two component layers can be specified in the same manner as a single layered editor, but imposes additional requirements on the components. In order to guarantee that the combination is a mapping between equivalence classes, we need the 
 {$\present$-Match} and {$\interpret$-Match} conditions on the components. Furthermore, for \law{Doc-Inert} and \law{Pres-Inert} requirements, we need to assume the conditions \law{Orthogonal} and the rather complex \law{Orthogonal-R}.
@@ -2410,7 +2415,7 @@ Because an editor consisting of $n$ layers is constructed by taking the top laye
 
 \law{Absorption} is a rather strong condition. It only allows interpretation extra state at the document level, since all other interpretation extra state is absorbed by presentation extra state.  Further research is necessary to determine whether this restriction disallows the specification of useful editors, in which case a workable but less strict condition needs to be established. 
 
-\note{mention that for actual editors, only a few layers are not fixed, making it easier to guarantee these conditions?}
+%\note{mention that for actual editors, only a few layers are not fixed, making it easier to guarantee these conditions?}
 %\note{We don't want absorption for the combination of $id$ and $layer_0$, because then there is no document extra state}
 %Maybe different approach for handling imprecise edit will help.
 
@@ -2600,6 +2605,7 @@ Summarizing, we have the following set of requirements:\nopagebreak[4]
 \xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
 \xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
 
+\todo{What about \law{InterPresent}?}
 If the presentation does not contain duplicates, then the requirements correspond exactly to the requirements of the previous section.
 
 Further research is needed to establish a formal notion of duplicates in the presentation, as well as a specification of the $\Delta$ operator. Both are needed for a verification that $Comp$ as defined in Section~\ref{sect:combinedExtraEditing} meets the requirements.
@@ -3885,7 +3891,7 @@ Using this result, we prove \law{Postcondition}.
 \bc
 \section{Equivalence classes}
 
-We want to express $R \tp X \rel Y$ as a bijective function $f \tp \Eqclass{Y}{H} \to \Eqclass{X}{L}$.
+We want to express $R \tp X \rel Y$ as a bijective function $f \tp \Eqcl{Y}{H} \to \Eqcl{X}{L}$.
 
 We can define the classes:
 
@@ -3899,7 +3905,7 @@ and
 y~H~y' \is \exists x :  x~R~y \land x~R~y'\\
 }
 
-We want:$x~R~y \eqv \eqclass{x}{L} = f~\eqclass{y}{H}$.
+We want:$x~R~y \eqv \eqcl{x}{L} = f~\eqcl{y}{H}$.
 
 
 * for interpret, split the classes in valid/invalid, so it becomes a surjective function.
