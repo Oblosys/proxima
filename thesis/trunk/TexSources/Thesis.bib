@@ -1,8 +1,8 @@
 ------------------------ Thesis: annotated bibtex file
 
 TODO 
-ASK: how to get "et al." 
-ASK: "van den Brand" at B?
+ASK: "van den Brand" at B? Bibtex doesn't handle 'von' tokens correctly
+@PREAMBLE{ {\providecommand{\noopsort}[1]{}} }
 
 
 LATER: check if AG manual is tech report
@@ -35,7 +35,7 @@ GENERAL PAPERS ON EDITING
  }
 
 @inproceedings{vanter94practical,
-    author = "Michael L. Van de Vanter",
+    author = "Michael L. {Van De Vanter}",
     title = "Practical Language-Based Editing for Software Engineers",
     booktitle = "{ICSE} Workshop on {SE}-{HCI}",
     pages = "251-267",
@@ -366,7 +366,7 @@ put Editors in Author field
 
 
 @BOOK{ peytonJones03haskell,
-  AUTHOR    = {S.L. Peyton Jones},
+  AUTHOR    = {S.L. {Peyton Jones}},
   TITLE     = {{Haskell 98 Language and Libraries}},
   SERIES    = {},
   VOLUME    = {},
@@ -449,7 +449,7 @@ inproceedings{leijen04wxHaskell,
 }
 
 @article{ demoor99breaking,
-    author = "Oege de Moor and Jeremy Gibbons",
+    author = {{\noopsort{Moor}O. de Moor} and J. Gibbons},
     title = "Bridging the algorithm gap: {A} linear-time functional program for paragraph formatting",
     journal = "Science of Computer Programming",
     volume = "35",
@@ -530,18 +530,19 @@ year = 2004
 }
 
 @misc{lyx ,
-author = "Matthias Ettrich, et al.",
+author = "Matthias Ettrich and others",
 title = "{{Lyx} -- The Document Processor}",
 howpublished = "\url|http://www.lyx.org|",
 year = 2004
 }
 
 @misc{texmacs,
-author = "{Joris van der Hoeven}",
+author = "\noopsort{Hoeven}J. van der Hoeven",
 title = "{GNU} {TexMacs}",
 howpublished = "\url|http://www.texmacs.org|",
 year = 2004
 }
+
 
 --- Chapter: Editing Structured Documents
 
@@ -630,7 +631,7 @@ EDITORS
 }
 
 @article{ ballance92pan,
-    author = "Robert A. Ballance and Susan L. Graham and Michael L. Van de Vanter",
+    author = "Robert A. Ballance and Susan L. Graham and Michael L. {Van De Vanter}",
     title = "The {Pan} language-based editing system",
     journal = "ACM Transactions on Software Engineering and Methodology (TOSEM)",
     volume = "1",
@@ -720,8 +721,9 @@ EDITORS
    year = "2000"
 }
 
+
 @phdthesis{brand92pregmatic,
-   author = "M. G. J. van den Brand",
+   author = "{\noopsort{Brand}M. G. J. van den Brand}",
    school = "Katholieke Universiteit Nijmegen, Netherlands",
    title = "Pregmatic, a generator for incremental programming environments",
    year = "1992"
@@ -938,7 +940,7 @@ EDITORS
     volume = {65},
     issue = {3},
     publisher = {Elsevier},
-    editor = {Mark van den Brand and Ralf L\"ammel},
+    editor = {van den Brand, M. G. J. and L\"ammel, Ralf },
     year = {2002}
 }
 
@@ -1236,7 +1238,7 @@ In this paper we present a first formalisation of document formatting combinator
 }
 
 @article{brand96generationOfFormatters,
- author = {Mark {van den Brand} and Eelco Visser},
+ author = "{\noopsort{Brand}M. G. J. van den  Brand} and Eelco Visser",
  title = {Generation of formatters for context-free languages},
  journal = {ACM Transactions on Software Engineering and Methodology (TOSEM)},
  volume = {5},
