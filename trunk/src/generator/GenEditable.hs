@@ -93,6 +93,7 @@ instances d@(Decl e prods DeclDef)  = ["\n\ninstance Editable " ++ e ++ " where"
                                     ++ paste         d
                                     ++ alternatives  d 
                                     ++ arity (e,prods)
+                                    ++ parseErr e
                                     ++ hole e
 
 
@@ -184,7 +185,9 @@ bodyArity (Prod e l)   = genArity e (count l)
 genArity e (v,v') = "  arity ("++e++concat(replicate v " _")++ (genVar v' " x") ++") = " ++ show v'
 
 
-{- hole  -}
+parseErr e = ["  parseErr = ParseErr" ++ e ++"\n"]
+
+{- hole  -} -- list hole is now [] Do lists really need a Hole?
 holeList e = ["  hole = Nil" ++ init e ++ "\n" ]
 hole e = ["  hole = Hole" ++ e ++"\n"]
 
@@ -247,6 +250,7 @@ primitiveEdit f
                         , "                   , (\"False\", Clip_Bool False)      "
                         , "                   , (\"{Bool}\", Clip_Bool hole) ]    "
                         , "  arity _ = 0                                          "
+                        , "  parseErr _ _ = False\n"
                         , "  hole = False\n" 
                         ]
 
@@ -262,6 +266,7 @@ primitiveEdit f
                         , "                   , (\"{Int}\", Clip_Int hole) ]"
                         , "  "
                         , "  arity _ = 0"
+                        , "  parseErr _ _ = 0\n"  
                         , "  hole = 0\n" 
                         ]
 
@@ -277,6 +282,7 @@ primitiveEdit f
                          , "                   , (\"{String}\", Clip_String hole) ] "
                          , " "
                          , "  arity _ = 0"
+                         , "  parseErr _ _= \"{ParseErr}\"\n"
                          , "  hole = \"{String}\"\n"
                          ]
 
@@ -351,6 +357,8 @@ instanceList (Decl e prods _) =
   , ""
   , "  arity (List_"++listTp++" _ x1) = length (fromConsList_"++listTp++" x1)"
   , "  arity _                        = 0"
+  , ""
+  , "  parseErr = ParseErrList_"++listTp
   , ""
   , "  hole = List_"++listTp++" NoIDD Nil_"++listTp++""
   , ""

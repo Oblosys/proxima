@@ -108,9 +108,9 @@ genReuseN arity =
 reuse6 :: (a0->a1->a2->a3->a4->a5->r) ->
           a0 -> a1 -> a2 -> a3 -> a4 -> a5->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
-reuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+reuse6 f {peC} a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5)
-
+    {reuse pec a0 ra0}
 -}
 
        
@@ -119,7 +119,17 @@ reuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
 reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Decls -> Maybe Decls -> Maybe HeliumTypeInfo -> Maybe Document  -> EnrichedDoc
 reuseRootEnr nodes ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromNodes extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0 a1 a2 a3 a4 a5) -> reuse6 RootEnr a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
+           (RootEnr a0 a1 a2 a3 a4 a5) -> reuse6 RootEnr {ParseErrEnr} a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "System error:<module>.reuseRootEnr"
+
+-}
+
+{-
+Maybe not necessary, depends on whether node in parse error is reused
+fix to data Reuse a = Reuse | Set a | ParseErr [String]
+
+reuse parseErrCnstr oldVal Reuse   = oldVal
+reuse parseErrCnstr oldVal (Set a) = a
+reuse parseErrCnstr oldVal (ParseErr errs) = parseErrCnstr a errs -- fix ParseErr<Type>, so each can have list of errors
 
 -}

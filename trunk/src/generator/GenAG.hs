@@ -1,8 +1,13 @@
 module GenAG where
 
 import GenCommon
+import List
 
 --- This file needs major restructuring, also the output
+
+-- TODO rules for inherited attribute isLast : Boolean, defined on all elts, except root
+--
+-- True for each last child of an element or list, otherwise False
 
 -------------------------------------------------------------------
 --           G E N E R A T E    A G    F I L E S                 --
@@ -19,6 +24,10 @@ genPresentationAG include parsedFile =
                  ++ genAgTypes extendedTypes
                  ++ genSem     extendedTypes
                  ++ genAtt     extendedTypes
+                 ++ [ "\n\n\n-- Default XML presentation\n"]
+                 ++ genPresentXML extendedTypes
+                 ++ [ "\n\n\n-- Default Tree presentation\n"]
+                 ++ genPresentTree extendedTypes
                  where
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
@@ -214,3 +223,95 @@ SEM ConsList_Exp
 ---          ,"  | Hole"++e++"     lhs.path = @lhs.path"
 --          ,"  | ParseErr"++e++" lhs.path = @lhs.path"
 -}
+genPresentXML (File _ decls) = concatMap genPresentXMLDecl decls 
+
+genPresentXMLDecl (Decl "EnrichedDoc" l _)          = []
+genPresentXMLDecl (Decl e _ DeclConsList) = 
+  [ "SEM ConsList_"++listTp++" [ | | pressXML : {[Presentation]} ]"
+  , "  | Cons_"++listTp++"     lhs.pressXML  = @head.presXML : @tail.pressXML"
+  , "  | Nil_"++listTp++"      lhs.pressXML  = []"
+  , ""
+  ]
+ where listTp = drop (length "ConsList_") e --- !!! need to access the type name here in an safe way
+
+genPresentXMLDecl (Decl e _ DeclList) =
+  [ "SEM List_"++listTp++" [ || presXML : Presentation ]"
+  , "  | List_"++listTp++""
+  , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    col @elts.pressXML"
+  , "  | ParseErrList_"++listTp++""
+  , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    presParseErr @node @presentation"
+  , "  | HoleList_"++listTp++""
+  , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
+  , ""
+  ]
+ where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
+
+genPresentXMLDecl (Decl tp prods _) = 
+  [ "SEM "++tp++" [ || presXML : Presentation ]" ]
+  ++ concatMap genPresentXMLProd prods ++
+  [ "  | Hole"++tp++"     lhs.presXML = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
+  , "  | ParseErr"++tp++" lhs.presXML = presParseErr @node @presentation"
+  , ""
+  ]
+   
+genPresentXMLProd (Prod cnstr children) = 
+  [ "  | "++cnstr
+  , "      lhs.presXML = presentElementXML @lhs.focusD ("++cnstr++"Node @self @lhs.path) @lhs.path \""++cnstr++"\""
+                  ++ " [ "
+                  ++ concat (intersperse ", " [ genPresentXMLField child | child <- children, not $ isID child ])
+                  ++" ] "
+  ]
+
+genPresentXMLField (Field name tp Prim) = "presentPrimXML"++tp++" @"++name
+genPresentXMLField (Field name _ _) = "@"++name++".presXML"
+
+
+
+
+genPresentTree (File _ decls) = concatMap genPresentTreeDecl decls 
+
+genPresentTreeDecl (Decl "EnrichedDoc" l _)          = []
+genPresentTreeDecl (Decl e _ DeclConsList) = 
+  [ "SEM ConsList_"++listTp++" [ | | pressTree : {[Presentation]} ]"
+  , "  | Cons_"++listTp++"     lhs.pressTree  = @head.presTree : @tail.pressTree"
+  , "  | Nil_"++listTp++"      lhs.pressTree  = []"
+  , ""
+  ]
+ where listTp = drop (length "ConsList_") e --- !!! need to access the type name here in an safe way
+
+genPresentTreeDecl (Decl e _ DeclList) =
+  [ "SEM List_"++listTp++" [ || presTree : Presentation ]"
+  , "  | List_"++listTp++""
+  , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    col @elts.pressTree"
+  , "  | ParseErrList_"++listTp++""
+  , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    presParseErr @node @presentation"
+  , "  | HoleList_"++listTp++""
+  , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
+  , ""
+  ]
+ where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
+
+genPresentTreeDecl (Decl tp prods _) = 
+  [ "SEM "++tp++" [ || presTree : Presentation ]" ]
+  ++ concatMap genPresentTreeProd prods ++
+  [ "  | Hole"++tp++"     lhs.presTree = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
+  , "  | ParseErr"++tp++" lhs.presTree = presParseErr @node @presentation"
+  , ""
+  ]
+   
+genPresentTreeProd (Prod cnstr children) = 
+  [ "  | "++cnstr
+  , "      lhs.presTree = presentElementTree @lhs.focusD ("++cnstr++"Node @self @lhs.path) @lhs.path \""++cnstr++"\""
+                  ++ " [ "
+                  ++ concat (intersperse ", " [ genPresentTreeField child | child <- children, not $ isID child ])
+                  ++" ] "
+  ]
+
+genPresentTreeField (Field name tp Prim) = "presentPrimTree"++tp++" @"++name
+genPresentTreeField (Field name _ _) = "@"++name++".presTree"

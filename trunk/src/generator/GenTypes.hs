@@ -7,7 +7,7 @@ import List
 ---------------------------------------------------------------------
 
 genDocumentTypes :: [String] -> File -> [String]
-genDocumentTypes include parsedFile =  
+genDocumentTypes include parsedFile@(File m d) =  
                  include ++    
                  [  defaultLimit
                  ,  "\n{- ------------------------------------"
@@ -18,7 +18,11 @@ genDocumentTypes include parsedFile =
                  ++ genDataTypes extendedTypes 
                  ++ ["\n\n-- Generated Types --\n"]
                  ++ genClipDoc   extendedTypes 
-                 ++ genNode      extendedTypes
+                 ++ ["\n\n"]
+                 ++ genNode      allConstructors
+                 ++ ["\n\n"]
+                 ++ genShowNode  allConstructors
+                 
 {-
                  ++ ["{- !!!!!!!!!!!!!"]
                  ++ (removeRepeat(getFields extendedTypes))
@@ -26,23 +30,30 @@ genDocumentTypes include parsedFile =
                  ++ [(show extendedTypes)]     
                  ++ ["!!!!!!!!!!!!! -}"]
 -}
-                 where
-                 extendedTypes = extendTypes parsedFile
-                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+ where extendedTypes@(File _ d') = (File m (d++(genListTypes parsedFile)))
+       allConstructors = [ (tp, cnstr, map fieldType cs, decltp) 
+                         | Decl tp prods decltp <- d'
+                         , decltp /= DeclConsList
+                         , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hack
+
+
+genShowNode constrs = [ "instance Show Node where"
+                      , "  show NoNode            = \"NoNode\""
+                      , "  show (RootDocNode _ _) = \"RootDocNode\""  
+                      , "  show (HoleDocumentNode _ _) = \"HoleDocumentNode\""]
+                      ++ (map makeNodeAlt $ zip constrs [3..]) 
+ where makeNodeAlt ((_, cnstr, _, _),i) = "  show ("++ cnstr ++"Node _ _)  = \""++cnstr ++"Node\""
+
 
 --- generation of ParseErr and Hole should be done more abstractely, now it is hard to generate for them
 
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line
-genNode (File _ ds) = [    "data Node = NoNode "]
-                        ++ [ "          | DocumentNode Document Path" ] 
-                        ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
-                        ++ indent 10 (map makeNodeAlt (allConstructors ds))
- where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) 
-                            | Decl tp prods decltp <- ds
-                            , decltp /= DeclConsList
-                            , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hack
-       makeNodeAlt (tp, cnstr, _, _) = "| "++ cnstr ++"Node "++ tp ++" Path "
+genNode cnstrs = [    "data Node = NoNode "]
+              ++ [ "          | RootDocNode Document Path" ] 
+              ++ [ "          | HoleDocumentNode Document Path" ] --- does not appear as field, but should be in Node
+              ++ indent 10 (map makeNodeAlt cnstrs)
+ where makeNodeAlt (tp, cnstr, _, _) = "| "++ cnstr ++"Node "++ tp ++" Path "
 ---
        
 --- no clip for conslist, is unsafe string compare hack now, should be done nicely!!!

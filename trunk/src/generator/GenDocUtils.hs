@@ -10,36 +10,46 @@ import GenCommon
 -------------------------------------------------------------------
 
 genDocUtils :: [String] -> File -> [String]
-genDocUtils include parsedFile =  
+genDocUtils include parsedFile@(File m d) =  
                  include ++ 
                  [  defaultLimit 
                  ,  "\n{- ------------------------------------"
                  ,  "\n generated part"
                  ,  "\n-------------------------------------- -}"
                  ]
-                 ++ genPathNode    extendedTypes 
+                 ++ genRankNode    allConstructors
+                 ++ ["\n\n"]
+                 ++ genPathNode    allConstructors
                  ++ ["\n\n"]
                  ++ genFuncIDD     parsedFile
                  ++ ["\n\n"]
                  ++ genShallowShow extendedTypes 
                  ++ ["\n\n"]
                  ++ genToXML       extendedTypes 
-                 where
-                 extendedTypes = extendTypes parsedFile
-                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+ where extendedTypes@(File m d') = (File m (d++(genListTypes parsedFile)))
+       allConstructors = [ (tp, cnstr, map fieldType cs, decltp) 
+                         | Decl tp prods decltp <- d'
+                         , decltp /= DeclConsList
+                         , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hack
 
-{- Path Node -} -- hole support is nasty, it should be in the decls already
+-- hole support is nasty, it should be in the decls already
 -- so we need a function that adds holes and a function that adds parse errs, then the 
--- generator parts can use the datatype with holes & parse errors, or without.
-genPathNode (File _ ds) = [ "pathNode :: Node -> PathDoc"
-                         , "pathNode NoNode            = NoPathD"
-                         , "pathNode (EnrichedDocNode _ pth) = PathD pth"]  -- RUI: added this line
-                         ++ (map makeNodeAlt (allConstructors ds)) 
- where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) 
-                            | Decl tp prods decltp <- ds
-                            , decltp /= DeclConsList
-                            , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hac
-       makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
+-- generator parts can use the datatype with holes & parse errors, or without.       
+
+genRankNode constrs = [ "rankNode :: Node -> Int"
+                      , "rankNode NoNode            = 0"
+                      , "rankNode (RootDocNode _ _) = 1"  
+                      , "rankNode (HoleDocumentNode _ _) = 2"]
+                      ++ (map makeNodeAlt $ zip constrs [3..]) 
+ where makeNodeAlt ((_, cnstr, _, _),i) = "rankNode ("++ cnstr ++"Node _ _)  = "++show i
+
+{- Path Node -} 
+genPathNode constrs = [ "pathNode :: Node -> PathDoc"
+                      , "pathNode NoNode            = NoPathD"
+                      , "pathNode (RootDocNode _ pth) = PathD pth"
+                      , "pathNode (HoleDocumentNode _ pth) = PathD pth"]  -- RUI: added this line
+                      ++ (map makeNodeAlt constrs) 
+ where makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
 
 
 --- this one doesn't work for holes, but it will be obsolete soon anyway
@@ -67,7 +77,7 @@ genShallowShow (File _ decls) = concatMap printDeclSS decls
 
 printDeclSS (Decl d prods _) =  map (printProdSS d) prods
 
-printProdSS d (Prod s fields) 
+printProdSS d (Prod s fields)
               = "shallowShow"++d++"1 ("++s++" "++concat(replicate ((length fields)) " _") ++") = "++show s
 
 
