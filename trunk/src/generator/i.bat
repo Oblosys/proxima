@@ -1,1 +1,1 @@
-ghci Generator.hs -package lang  -package util -fglasgow-exts 
+ghci Generator.hs -package lang  -package util -fglasgow-exts -i../../..

@@ -1,1 +1,1 @@
-ghc Generator.hs --make -package uust  -fglasgow-exts 
+ghc Generator.hs --make -package lang -fglasgow-exts -o generate -i../../..
