@@ -26,8 +26,8 @@ data Layer' = Layer' (LayerFunction () String () String)
 -- wrap is used to create the Layer' values. The horizontal dataflow is () everywhere
 
 wrap :: Layer -> Layer'
-wrap (Layer f1 f2) = Layer' (\() str -> (f1 str, ()) )
-                            (\() str -> (f2 str, ()) )                            
+wrap (Layer f1 f2) = Layer' (\() str -> ((), f1 str) )
+                            (\() str -> ((), f2 str) )                            
 
 
 -- Almost automaticallly we can define the step type and Pack instances
@@ -241,15 +241,15 @@ data LayerAB a = LayerAB (LayerFunction a String a String)
                          (LayerFunction a String a String)
 
 layerA :: LayerAB Int
-layerA = LayerAB (\h v -> (map toUpper v++show h, h+1))
-                 (\h v -> (map toLower v++show h, h+1))
+layerA = LayerAB (\h v -> (h+1, map toUpper v++show h))
+                 (\h v -> (h+1, map toLower v++show h))
 
 -- each layer step concatenates the showed horizontal int to right of the vertical result and
 -- increments the horizontal int
 
 layerB :: LayerAB Char
-layerB = LayerAB (\h v -> (h : reverse v, succ h)) 
-                 (\h v -> (h : reverse v, succ h))
+layerB = LayerAB (\h v -> (succ h, h : reverse v)) 
+                 (\h v -> (succ h, h : reverse v))
 
 -- each layer step concatenates the horizontal character to the left of the vertical result and
 -- applies succ to the horizontal character

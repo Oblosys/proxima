@@ -1,5 +1,7 @@
 module ProximaLayers where
 
+-- not yet adapted to different param order
+
 import DPP_Lib
 
 

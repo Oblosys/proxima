@@ -50,9 +50,9 @@ lift'''' :: Simple state mapping doc pres gest upd ->
 lift'''' simple state = presStep state 
  where presStep state = 
          PresStep ( 
-           \doc -> let (pres, (mapping,state)) = present simple state doc                                         
+           \doc -> let ((mapping,state), pres) = present simple state doc                                         
                    in (pres, TransStep 
-                               (\gest -> let (upd, state') = translate simple (mapping, state) gest                     
+                               (\gest -> let (state', upd) = translate simple (mapping, state) gest                     
                                          in  (upd, presStep state')
                                ))
                   )
@@ -65,10 +65,10 @@ lift1 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift1 simple state = presStep state 
  where presStep state = PresStep $ 
-           \doc -> let (pres, (mapping,state)) = present simple state doc                                         
+           \doc -> let ((mapping,state), pres) = present simple state doc                                         
                    in (pres, transStep (mapping,state))
        transStep (mapping,state) = TransStep $
-           \gest -> let (upd, state') = translate simple (mapping, state) gest                     
+           \gest -> let (state', upd) = translate simple (mapping, state) gest                     
                     in  (upd, presStep state')
 
 -- don't mention types after 1 because they don't change
@@ -77,12 +77,12 @@ lift1 simple state = presStep state
 lift2 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift2 simple state = step1 state 
- where step1 horArgs = PresStep $ 
-           \vertArg -> let (vertRes, horRess) = present simple horArgs vertArg                                         
-                       in  (vertRes, step2 horRess)
-       step2 horArgs = TransStep $
-           \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, step1 horRess)
+ where step1 horArg = PresStep $ 
+           \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
+                       in  (vertRes, step2 horRes)
+       step2 horArg = TransStep $
+           \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
+                       in  (vertRes, step1 horRes)
 
 
 -- still references to each other in let. So now pass next step as parameter
@@ -96,12 +96,12 @@ lift3 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 --lift3 simple state = (step1 (step2 (lift3 simple))) state 
 lift3 simple = (step1.step2) (lift3 simple)
- where step1 next horArgs = PresStep $ 
-           \vertArg -> let (vertRes, horRess) = present simple horArgs vertArg                                         
-                       in  (vertRes, next horRess)
-       step2 next horArgs = TransStep $
-           \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, next horRess)
+ where step1 next horArg = PresStep $ 
+           \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
+                       in  (vertRes, next horRes)
+       step2 next horArg = TransStep $
+           \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
+                       in  (vertRes, next horRes)
 -- use fix and .
 
 f' a b c = g c
@@ -118,12 +118,12 @@ f'' a b  = fix $ f0.f1
 lift4 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift4 simple = fix $ step1 . step2 
- where step1 next horArgs = PresStep $ 
-           \vertArg -> let (vertRes, horRess) = present simple horArgs vertArg                                         
-                       in  (vertRes, next horRess)
-       step2 next horArgs = TransStep $
-           \vertArg -> let (vertRes, horRess) = translate simple horArgs vertArg                     
-                       in  (vertRes, next horRess)
+ where step1 next horArg = PresStep $ 
+           \vertArg -> let (horRes, vertRes) = present simple horArg vertArg                                         
+                       in  (vertRes, next horRes)
+       step2 next horArg = TransStep $
+           \vertArg -> let (horRes, vertRes) = translate simple horArg vertArg                     
+                       in  (vertRes, next horRes)
 
 -- Get rid of constructor and destructor applications, and explicit layer function calls, all are params
 
@@ -131,12 +131,12 @@ lift5 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift5 simple = fix $ step1 PresStep (present simple) 
                   . step2 TransStep (translate simple) 
- where step1 pack layerF next horArgs = pack $ 
-           \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                                         
-                   in (vertRes, next horRess)
-       step2 pack layerF next horArgs = pack $
-           \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                     
-                    in  (vertRes, next horRess)
+ where step1 pack layerF next horArg = pack $ 
+           \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                                         
+                   in (vertRes, next horRes)
+       step2 pack layerF next horArg = pack $
+           \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
+                    in  (vertRes, next horRes)
 
 -- now step1 and step2 are the same and we use a generic liftStep
 
@@ -146,10 +146,10 @@ fix a = let fixa = a fixa
 
 -- not final because pack will be a 3 tuple in the final bit.
 liftStep :: ((vArg -> (vRes, nStep)) -> step ) ->
-            (hArgs -> vArg -> (vRes,hRess)) -> (hRess -> nStep) -> hArgs -> step
-liftStep pack layerF next horArgs = pack $
-    \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                     
-                in  (vertRes, next horRess)
+            (hArg -> vArg -> (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
+liftStep pack layerF next horArg = pack $
+    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
+                in  (vertRes, next horRes)
 
 lift6 :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
@@ -280,10 +280,10 @@ combineStepUpq packunpack nextStep upr lwr = pack $
 
 
 liftStep' :: ((a -> (b,c)) -> d,e,f) ->
-             (g -> a -> (b,h)) -> (h -> c) -> g -> d
-liftStep' (pack, _, _) layerF next horArgs = pack $
-    \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                     
-                in  (vertRes, next horRess)
+             (g -> a -> (h,b)) -> (h -> c) -> g -> d
+liftStep' (pack, _, _) layerF next horArg = pack $
+    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg                     
+                in  (vertRes, next horRes)
 
 
 -- by defining unpack = (cons, unpack, unpack) for each step type, definitions of lift and combine become:

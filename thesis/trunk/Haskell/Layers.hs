@@ -5,18 +5,18 @@ import DPPClass_Lib
 
 data Simple' state mapping doc pres gest upd =
        Simple' { present' ::   LayerFunction state doc mapping pres
-              , translate' :: LayerFunction (mapping, state) gest state upd
-              }
+               , translate' :: LayerFunction (mapping, state) gest state upd
+               }
 
 data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction state doc (mapping, state) pres
-               , translate :: LayerFunction (mapping, state) gest state upd
-               }
+              , translate :: LayerFunction (mapping, state) gest state upd
+              }
 
 wrap :: Simple' state mapping doc pres gest upd -> Simple state mapping doc pres gest upd 
 wrap (Simple' present' translate') =
-  Simple { present = \state doc -> let (pres, mapping) = present' state doc
-                                     in (pres, (mapping, state))
+  Simple { present = \state doc -> let (mapping, pres) = present' state doc
+                                   in  ((mapping, state), pres)
          , translate = translate'
          }
 

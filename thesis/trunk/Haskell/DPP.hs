@@ -2,6 +2,7 @@ module Main where
 
 import Layers
 
+
 newtype PresStep doc pres gest upd = 
           PresStep  (doc ->  (pres, TransStep gest upd doc pres))
 newtype TransStep gest upd doc pres = 
@@ -9,27 +10,30 @@ newtype TransStep gest upd doc pres =
 
 type Layer doc pres gest upd = PresStep doc pres gest upd  
 
+
 lift' :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift' layer state = presStep state 
  where presStep state = 
          PresStep ( 
-           \doc -> let (pres, (mapping,state)) = present layer state doc                                         
+           \doc -> let ((mapping,state), pres) = present layer state doc                                         
                    in (pres, TransStep 
-                               (\gest -> let (upd, state') = translate layer (mapping, state) gest                     
+                               (\gest -> let (state', upd) = translate layer (mapping, state) gest                     
                                          in  (upd, presStep state')
                                ))
                   )
+
 
 lift :: Simple state mapping doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift simple state = presStep state 
  where presStep state = PresStep $
-           \doc ->  let (pres, (mapping,state)) = present simple state doc                                         
+           \doc ->  let ((mapping,state), pres) = present simple state doc                                         
                     in  (pres, transStep (mapping,state))
        transStep (mapping,state) = TransStep $
-           \gest -> let (upd, state') = translate simple (mapping, state) gest                     
+           \gest -> let (state', upd) = translate simple (mapping, state) gest                     
                     in  (upd, presStep state')
+
 
 combine' :: Layer high med emed ehigh -> Layer med low elow emed -> 
              Layer high low elow ehigh
@@ -45,6 +49,7 @@ combine' upperPres lowerPres = PresStep $
                     (emed, lowerPres') = lower' elow
                     (ehigh, upperPres') = upper' emed
                 in  (ehigh, combine' upperPres' lowerPres'))
+
 
 combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
              Layer high low elow ehigh
@@ -74,7 +79,7 @@ editLoop presentStep doc =
     }
 
 --main :: IO ()
-main layer0 layer1 layer2 =
+main' layer0 layer1 layer2 =
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
     ; let PresStep presentStep =           lift layer0 state0 

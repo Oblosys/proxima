@@ -1,22 +1,22 @@
 module ArchitectureLibM where
 
-
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
          in fixa
 
-type LayerFunction m horArgs vertArg horRess vertRes = 
-       (horArgs -> vertArg -> m (vertRes, horRess))
+type LayerFunction m horArg vertArg horRes vertRes = 
+       (horArg -> vertArg -> m (horRes, vertRes))
+
 
 class Pack m step arg res nStep | step -> m arg res nStep where
   pack :: (arg -> m (res, nStep)) -> step
   unpack :: step -> arg -> m (res, nStep)
 
 liftStep :: (Monad m, Pack m step vArg vRes nStep) => 
-            (hArgs -> vArg -> m (vRes,hRess)) -> (hRess -> nStep) -> hArgs -> step
-liftStep layerF next horArgs = pack $ 
-    \vertArg -> do {(vertRes, horRess) <- layerF horArgs vertArg
-                   ; return (vertRes, next horRess)
+            (hArg -> vArg -> m (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
+liftStep layerF next horArg = pack $ 
+    \vertArg -> do {(horRes, vertRes) <- layerF horArg vertArg
+                   ; return (vertRes, next horRes)
                    }
                    
 

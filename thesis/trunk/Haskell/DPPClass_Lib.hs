@@ -1,23 +1,25 @@
 module DPPClass_Lib where
 
+-- param order
+
 
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
          in fixa
 
-type LayerFunction horArgs vertArg horRess vertRes =
-       horArgs -> vertArg -> (vertRes, horRess)
+type LayerFunction horArg vertArg horRes vertRes =
+       horArg -> vertArg -> (horRes, vertRes)  --
 
-{-
-class Pack step arg res nStep | step -> arg res where
+
+class Pack step arg res nStep | step -> arg res nStep where
   pack :: (arg -> (res, nStep)) -> step
   unpack :: step -> arg -> (res, nStep)
 
 liftStep :: Pack step vArg vRes nStep => 
-            (hArgs -> vArg -> (vRes,hRess)) -> (hRess -> nStep) -> hArgs -> step
-liftStep layerF next horArgs = pack $
-    \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                     
-                in  (vertRes, next horRess)
+            (hArg -> vArg -> (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
+liftStep layerF next horArg = pack $
+    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg --
+                in  (vertRes, next horRes)                     --
 
 combineStepDown :: ( Pack stepC h l nStepC 
                    , Pack stepU h m nStepU
@@ -36,17 +38,19 @@ combineStepUp nextStep upr lwr = pack $
     \low -> let (med, nextLwr) = (unpack lwr) low
                 (high, nextUpr) = (unpack upr) med
             in  (high, nextStep nextUpr nextLwr)
--}
+
+
+{- Different version (does not type check). Probably for Jurre Laven's MSc thesis
 
 class Pack step a b c d nStep where
   pack :: (arg -> (res, nStep c d a b)) -> step a b c d
   unpack :: step a b c d -> arg -> (res, nStep c d a b)
 
 liftStep :: Pack step vArg vRes c d nStep => 
-            (hArgs -> vArg -> (vRes,hRess)) -> (hRess -> nStep c d vArg vRes) -> hArgs -> step vArg vRes c d
-liftStep layerF next horArgs = pack $
-    \vertArg -> let (vertRes, horRess) = layerF horArgs vertArg                     
-                in  (vertRes, next horRess)
+            (hArg -> vArg -> (vRes,hRes)) -> (hRes -> nStep c d vArg vRes) -> hArg -> step vArg vRes c d
+liftStep layerF next horArg = pack $
+    \vertArg -> let (vertRes, horRes) = layerF horArg vertArg                     
+                in  (vertRes, next horRes)
 
 
 combineStepDown :: ( Pack stepC h l c d nStepC 
@@ -66,3 +70,4 @@ combineStepUp nextStep upr lwr = pack $
     \low -> let (med, nextLwr) = (unpack lwr) low
                 (high, nextUpr) = (unpack upr) med
             in  (high, nextStep nextUpr nextLwr)
+-}

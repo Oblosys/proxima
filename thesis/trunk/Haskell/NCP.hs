@@ -3,8 +3,8 @@ module Main where
 import Layers
 
 
-type LayerFunction horArgs vertArg horRess vertRes = 
-       (horArgs -> vertArg -> (vertRes, horRess))
+type LayerFunction horArg vertArg horRes vertRes = 
+       horArg -> vertArg -> (horRes, vertRes)  --
 
 -- code for haskell.xml
 data LayerC h0 h1 doc pres gest upd =
@@ -12,24 +12,24 @@ data LayerC h0 h1 doc pres gest upd =
               , translateC :: LayerFunction h1 gest h0 upd
               }
 
-composeDown :: LayerFunction horArgsU arg horRessU interm ->
-               LayerFunction horArgsL interm horRessL res ->
-               LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
+composeDown :: LayerFunction horArgU arg horResU interm ->
+               LayerFunction horArgL interm horResL res ->
+               LayerFunction (horArgU, horArgL) arg (horResU,horResL) res
 composeDown upper lower = 
-  \(horArgsU, horArgsL) arg ->                                           
-    let (interm, horRessU) = upper horArgsU arg
-        (res, horRessL)    = lower horArgsL interm            
-    in  (res, (horRessU,horRessL))
+  \(horArgU, horArgL) arg ->                                           
+    let (horResU, interm) = upper horArgU arg       --
+        (horResL, res)    = lower horArgL interm    --      
+    in  ((horResU,horResL), res)                    --
 
 
-composeUp :: LayerFunction horArgsU interm horRessU res ->
-             LayerFunction horArgsL arg horRessL interm ->
-             LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
+composeUp :: LayerFunction horArgU interm horResU res ->
+             LayerFunction horArgL arg horResL interm ->
+             LayerFunction (horArgU, horArgL) arg (horResU,horResL) res
 composeUp upper lower = 
-  \(horArgsU, horArgsL) arg ->
-    let (interm, horRessL) = lower horArgsL arg
-        (res, horRessU)    = upper horArgsU interm            
-    in  (res, (horRessU,horRessL))
+  \(horArgU, horArgL) arg ->
+    let (horResL, interm) = lower horArgL arg
+        (horResU, res)    = upper horArgU interm            
+    in  ((horResU,horResL), res)
 
 -- problem, when we combine, the thing is no longer a Simple'.
 
@@ -69,7 +69,7 @@ Or: wrap simples so htypes match.
 -}
 
 
-main layer0 layer1 layer2 = 
+main' layer0 layer1 layer2 = 
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
     ; let layers = lift layer0 `combine` lift layer1 `combine` lift  layer2
@@ -79,13 +79,13 @@ main layer0 layer1 layer2 =
 editLoop layers states doc = loop states doc
  where loop states doc = 
         do { -- Compute rendering:
-             let (pres, mappingsStates) = presentC layers states doc
+             let (mappingsStates, pres) = presentC layers states doc
            
            ; showRendering pres
            ; gest <- getGesture
  
              -- Compute document update:
-           ; let (update, states') = translateC layers mappingsStates gest
+           ; let (states', update) = translateC layers mappingsStates gest
        
            ; let doc' = updateDocument update doc
            ; loop states' doc'
