@@ -51,27 +51,17 @@ printDeclIDD (Decl d prods _) =  concatMap (printProdIDD d) prods
 
 printProdIDD d (Prod s fields) 
           = let name = decapitalize s
-            in
-                if null fields then [name++"IDD _                                   = Nothing\n"]
+            in  if null fields then [name++"IDD _                                   = Nothing\n"]
                 else    [ name++"IDD :: Node -> Maybe IDD"
                         , name++"IDD ("++d++"Node ("++s++ " iDP"++concat(replicate ((length fields)-1) " _")++") _) = Just iDP"
                         , name++"IDD _                                   = Nothing\n"]
 
 
-{-
-printProdIDD d (Prod s fields) 
-          = let name = decapitalize s
-                idName = if null fields then idD else (\(Field n _ _)->n) (head fields)
-            in  [ name++"IDD :: Node -> Maybe IDD"
-                , name++"IDD ("++d++"Node ("++s++ " "++idName ++concat(replicate ((length fields)-1) " _")++") _) = Just "++idName
-                , name++"IDD _                                   = Nothing\n\n"]
-
--}
 
 
-{- Function XML -} 
 
-{- Function IDD -} 
+
+{- Function Shallow -} 
 genShallowShow :: File -> [String]
 genShallowShow (File _ decls) = concatMap printDeclSS decls
 
@@ -81,47 +71,16 @@ printProdSS d (Prod s fields)
               = "shallowShow"++d++"1 ("++s++" "++concat(replicate ((length fields)) " _") ++") = "++show s
 
 
-{-
-"shallowShow"++d++"1 ("++concat(replicate ((length fields)-1) " _") ++") = "++s
 
-
-
-shallowShowExp1 (PlusExp id pid _ _)  = "PlusExp"
-shallowShowExp1 (TimesExp id pid _ _) = "TimesExp"
-shallowShowExp1 (DivExp id pid _ _)   = "DivExp"
-shallowShowExp1 (PowerExp id pid _ _) = "PowerExp"
-shallowShowExp1 (IntExp id pid i)     = "IntExp"
-shallowShowExp1 HoleExp               = "HoleExp"
-shallowShowExp1 (ParseErrExp _ _)     = "ParseErrExp"
-
-shallowShowExp1 _                     = "<EXP>"
--}
-
-{-
-
-toXMLConsList_Slide-- ??????????
-
-
-toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
-toXMLConsList_Decl Nil_Decl             = []
-toXMLDecls _                           = []
-
-toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLExps exps
-toXMLConsList_Exp Nil_Exp             = []
-toXMLExps _                           = []
-
-
-toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLAlts alts
-toXMLConsList_Alt Nil_Alt             = []
-toXMLAlts _                           = []
--}
+{- Function XML -} 
 
 genToXML :: File -> [String]
 genToXML (File _ decls) = concatMap printDeclXML decls
 
 printDeclXML (Decl d prods DeclConsList) =  
           let   decl =  drop 9 d
-          in    [ "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXML"++ decl++"s "++(decapitalize decl)++"s"
+          in    [ "toXMLList_"++decl++" (List_"++decl++" _ "++(decapitalize decl)++"s) = toXMLConsList_"++decl++" "++(decapitalize decl)++"s"
+                , "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXML"++ decl++"s "++(decapitalize decl)++"s"
                 , "toXMLConsList_"++decl++" Nil_"++decl++"             = []"
                 , "toXML"++decl++"s _                           = []"
                 ]
@@ -157,3 +116,35 @@ listArg  d fields   = "map toXML"++d++" "++concat(showAsList(getVar fields))
 singleArg :: Field -> String
 singleArg (Field varName varType _)= "[toXML"++varType++" "++varName++"]"
 
+{-
+"shallowShow"++d++"1 ("++concat(replicate ((length fields)-1) " _") ++") = "++s
+
+
+
+shallowShowExp1 (PlusExp id pid _ _)  = "PlusExp"
+shallowShowExp1 (TimesExp id pid _ _) = "TimesExp"
+shallowShowExp1 (DivExp id pid _ _)   = "DivExp"
+shallowShowExp1 (PowerExp id pid _ _) = "PowerExp"
+shallowShowExp1 (IntExp id pid i)     = "IntExp"
+shallowShowExp1 HoleExp               = "HoleExp"
+shallowShowExp1 (ParseErrExp _ _)     = "ParseErrExp"
+
+shallowShowExp1 _                     = "<EXP>"
+
+
+toXMLConsList_Slide-- ??????????
+
+
+toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
+toXMLConsList_Decl Nil_Decl             = []
+toXMLDecls _                           = []
+
+toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLExps exps
+toXMLConsList_Exp Nil_Exp             = []
+toXMLExps _                           = []
+
+
+toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLAlts alts
+toXMLConsList_Alt Nil_Alt             = []
+toXMLAlts _                           = []
+-}
