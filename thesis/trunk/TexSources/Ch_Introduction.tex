@@ -4,65 +4,8 @@
 %{\em *** Version: \today~ ***}
 
 
-\bc
-\begin{figure} % use XY pic?
-\hfill
-\begin{minipage}[b]{.45\textwidth}
-\begin{tabular}{c}
-\begin{tabular}{|c|}
-\hline 
-Document \\
-(Internal representation)\\
-\hline 
-\end{tabular}\\
-$\downarrow$ $\uparrow$\\
-\begin{tabular}{|c|}
-\hline
-Presentation \\
-(Image, visible to the user)\\
-\hline
-\end{tabular}\\
-$\downarrow$ $\uparrow$\\
-User
-\end{tabular}\caption{Editing (Draft)}\label{editprocess} 
-\end{minipage}
-\hfill
-\begin{minipage}[b]{.45\textwidth}
-\framebox{
-\begin{minipage}[b]{5cm}
-\normalsize 
-\begin{center}
-Ceci n'est pas un document\\
-[2mm]
-\tiny Martijn M. Schrage\\
-[2mm]
-24 April 2004\\
-[4mm]
-\end{center}
-\scriptsize Contents\\
-\tiny
-\begin{tabular}{p{4cm}}
-1.~Preliminaries 			\dotfill 1\\
-~1.1~Structured documents \dotfill 1\\
-~1.2~XML 				\dotfill 2\\
-~1.3~Editing  			\dotfill 3\\\\
-\dots
-\end{tabular}
-\end{minipage}
-}
-\caption{A presentation}\label{editprocess} 
-\end{minipage}
-\hfill
-\end{figure}
-\ec
 
 
-\bc
-Editing is concerned with the creation and maintenance of documents.  
-Most documents have some form of structure. 
-
-In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and evaluate related work according to them. End with a discussion why no editor meets all requirements, and how proxima will.
-\ec
 
 %								
 %								
@@ -75,6 +18,10 @@ In this chapter, we give a rather informal definition of editing (editor?**), an
 \el
 % juice tiger?
 
+\bc
+Editing is concerned with the creation and maintenance of documents.  
+Most documents have some form of structure. 
+\ec
 % Many applications are editing. view document, enter text, copy paste, move parts, navigate. 
 % By abstracting over the specifics of the editor, a generic editor could offer a lot of advantages
 % Only one editor for a range of documents provides a uniform interface, and makes embedding documents easy.
@@ -85,6 +32,11 @@ In this chapter, we give a rather informal definition of editing (editor?**), an
 % Although the research in this thesis is not specifically tailored for XML, many of the results apply to XML as well, since 
 % XML documents are tree structured documents. 
 
+
+% identify problems, and propose an architecture with several novel features that .
+
+% prototype has been implemented and although still lot of work to do. It already makes it possible to create editors
+% in very little time
 
 % maybe borrow from {Why Proxima} section
 % also see ch_conclusions
@@ -167,12 +119,18 @@ Naturally, word processors, image editors, and text editors are regarded as edit
 % document and presentation
 Figure~\ref{editor} contains a schematic representation of an editor. The main data structures in the editor (also referred to as {\em levels}) are the internal {\em document} on the left and the user visible {\em presentation} on the right. The document is an internal data structure, which is not directly visible to the user. It should not be confused with a file, which is basically a presentation stored on a file system. Furthermore, we also do not consider an XML source to be a document, but rather textual presentation of the internal document.
 
+\bc define levels \ec
+
 A {\em presentation}, or {\em view} is the only thing a user sees of the document. A presentation may be textual, graphical, or a combination of both. We focus on static presentations only. Hence, we do not explicitly consider presentations containing sounds or animations, unless presented statically (e.g.\ as a textual link to a sound or video file). In the presentation, the editor shows the focus of attention, or {\em focus}, which is a shared name for the selection as well the cursor (which is an empty selection).  Several presentations of a single document may be shown simultaneously by the editor, each having its own focus. Finally, if a presentation resembles the final physical appearance of the document when it is printed, it is referred to as a WYSIWYG presentation (What You See Is What You Get).
 
 % what is presenting
 The relation between a document and its presentation is denoted by the term {\em presentation relation}, or {\em presentation mapping}. If, according to the presentation relation, the presentation is a presentation of the document, we say that the {\em presentation invariant} holds. Computing the presentation of a document is called the {\em presentation process}, whereas computing a document from a presentation is called the {\em interpretation process}. Together, the two processes implement the presentation relation and maintain the presentation invariant.
 
 %***  define valid presentation!!
+\bc
+When the presentation level is a presentation of the document, we refer to it as valid. This should not be confused with valid for XML documents which means type correct.
+also in defs
+\ec
 
 % what is sheet
 The presentation relation for an editor may be (partially) specified in a style sheet, or {\em presentation sheet}. A presentation sheet describes how elements of the document type are presented, and is a parameter of the presentation process. By modifying the sheet, user may influence the appearence of the document without having to modify the editor itself. A presentation sheet can be regarded as a parameter to the interpretation process as well, since the interpretation depends on the presentation specified in the sheet. Examples of style sheet formalisms are the Cascading Style Sheets (CSS)~\cite{css2} for HTML as well as XML, and the Extensible Stylesheet Language (XSL)~\cite{xsl10} for XML.
@@ -389,7 +347,7 @@ interactive transformations, proof editors, rewrite systems
 structural data complex presentations: math
 programs with types and structural edit ops: IDEs
 
-Proxima not about changing the world: struct editors, views, (THE?). editors have illogical/inconsistent features. Easiest to start all over with new model, however will frustrate users. Better to have a model that allow to express the familiar edit models. and merge them seamlessly.
+Proxima not about changing the world: struct editors, views.  editors have illogical/inconsistent features. Easiest to start all over with new model, however will frustrate users. Better to have a model that allow to express the familiar edit models. and merge them seamlessly.
 \ec
 
 
@@ -397,44 +355,39 @@ Proxima not about changing the world: struct editors, views, (THE?). editors hav
 
 *** Will be added when all chapters are more or less finished ***
 
-%Chapter~\ref{chap:requirements}:
-%\bl
-%\o Use cases
-%\o Functional requirements
-%\o Evaluation of editors
-%\o Introduction of Proxima
-%\el
-%
-%Chapter~\ref{chap:proxArch}:
-%
-%\bl
-%\o Description of levels
-%\o Description of layers
-%\o Examples of presentation and interpretation
-%\el
-%
-%Chapter~\ref{chap:informalSpec}:  ~\ref{chap:formalSpec}
-%
-%~\ref{chap:archCombs}
-%~\ref{chap:presenting}
-%~\ref{chap:prototype}
-%
-%As mentioned, users regard structure editors as being either overly restrictive, and/or not powerful enough. In the remainder of %this chapter, we first give a set of possible applications of structure editing, and then explore a number of functional %requirements that in our view are important for creating a flexible non-restrictive structure editor.
-% zit al een beetje in next chapter intro.
+The outline of the remainder of this 
 
-%The outline of the remainder of this 
-%Chapter~\ref{chap:requirements} explores the possible applications of generic structure editing, by providing five use cases of %real-world editors. With these use cases in mind, we formulate a number of requirements that in our view are important for a %flexible non-restrictive structure editor. The chapter also explains why current structure editors 
-%
-%The layered architecture of Proxima is introduced in Chapter~\ref{chap:proxArch}. The main data structures and components %are discussed and examples of the presentation and interpretation processes are provided.
+%As mentioned, users regard structure editors as being either overly restrictive, and/or not powerful enough.
+Chapter~\ref{chap:requirements} explores the possible applications of generic structure editing, by providing five use cases of real-world editors. With these use cases in mind, we formulate a number of functional requirements that in our view are important for a flexible non-restrictive structure editor. The chapter also explains why current structure editors 
+\bc
+ I and then explore a number of functional requirements that in our view are important for creating a flexible non-restrictive structure editor.
+\ec
+\bl
+\o Evaluation of editors
+\o Introduction of Proxima
+\el
 
-%~\ref{chap:informalSpec} ~\ref{chap:formalSpec}
-%
-%~\ref{chap:archCombs}
-%~\ref{chap:presenting}
-%~\ref{chap:prototype}
-%
-%Chapter~\ref{chap:conclusions} presents the conclusions.
-%(Will be added when all chapters are more or less finished)
+The layered architecture of Proxima is introduced in Chapter~\ref{chap:proxArch}. The main data structures and components are discussed and examples of the presentation and interpretation processes are provided.
+Chapter~\ref{chap:proxArch}:
+\bl
+\o Description of levels
+\o Description of layers
+\o Examples of presentation and interpretation
+\el
+
+
+Chapter~\ref{chap:informalSpec} 
+Chapter~\ref{chap:formalSpec}
+
+Chapter~\ref{chap:archCombs}
+We discuss several methods of realizing connections between layers and abstract from one. Furthermore, explanation of layer in Proxima.
+
+Chapter~\ref{chap:presenting} Important for editor.
+
+Chapter~\ref{chap:prototype}
+
+Chapter~\ref{chap:conclusions} presents the conclusions.  % Mention this one?
+(Will be added when all chapters are more or less finished)
 \bc
 * mention here or in chapter proxArch?:
 Bootstrapping problem, descr. of levels layers and edit model. second is easier to give with in a formal story. however, design reasons for first are hard to comprehend without idea. So first informal arch and edit model and later the formal stuff

@@ -169,7 +169,7 @@ Finally, a presentation (or part of it) may consist of a list of tokens, which m
 
 A presentation that needs to be parsed may contain parts that we do not want to be parsed. For example, a textual equation or source editor may have a non-textual presentation for fractions ($\frac{1}{1+x}$). Such a presentation can be included in the token list presentation with a {\em structural token}. A structural token contains a presentation, and is treated specially by the parser. Although a structural presentation itself is not parsed, it may contain other token lists that will be parsed (e.g. the numerator and denominator of the fraction may be parsed again).
 
-Unlike the document and the enriched document, the presentation has a fixed type, of which we present a slightly simplified subset here. Here, we present a slightly simplified subset of the type. The details regarding the attribution (e.g.\ color, font, and reference lines) of presentation elements have been left out, by leaving the type \verb|AttributionRule| abstract. Chapter~\ref{chap:xprez} discusses the presentation type in more detail.
+Unlike the document and the enriched document, the presentation has a fixed type, of which we present a slightly simplified subset here. Here, we present a slightly simplified subset of the type. The details regarding the attribution (e.g.\ color, font, and reference lines) of presentation elements have been left out, by leaving the type \verb|AttributionRule| abstract. Chapter~\ref{chap:presenting} discusses the presentation type in more detail.
 
 \noindent
 \ttfamily

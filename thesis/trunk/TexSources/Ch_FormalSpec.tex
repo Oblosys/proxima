@@ -1615,8 +1615,8 @@ The proof is simple:
 In this section, we give inductive versions of \law{$\present\C$-Def} and \law{$\interpret\C$-Def} for an editor consisting of $n$ layers. The building blocks of the combination are $n+1$ data levels and $n$ pairs of presentation and interpretation functions and corresponding equivalence relations:
 
 \xpr{
-\present_i   &\tp& \Eqcl{\Level_i}{H_i} \rightarrow  \Eqcl{\Level_{i+1}}{L_i}\\
-\interpret_i &\tp& \Eqcl{\Level_{i+1}}{L_i} \rightarrow \Eqcl{\Level_i}{H_i}\\
+\present_i   &\tp& \Eqcl{\Level_{i-1}}{H_i} \rightarrow  \Eqcl{\Level_i}{L_i}\\
+\interpret_i &\tp& \Eqcl{\Level_i}{L_i} \rightarrow \Eqcl{\Level_{i-1}}{H_i}\\
 }
 
 Because $Level_0$ is the document and $Level_n$ the presentation, the top layer consists of  $\present_1$ and $\interpret_1$, whereas the lowest layer consists of $\present_{n}$ and $\interpret_{n}$. A combined layer consists of two combined functions: $\present_{\mathrm{C},i}$ and $\interpret_{\mathrm{C},i}$.

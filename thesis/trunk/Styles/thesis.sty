@@ -4,9 +4,14 @@
 %  at least override preface and toc. because roman numbers look silly at the bottom
 % 
 {
-\usepackage[dutch,english]{babel}
 
 % \usepackage{alltt} % probably needed for Haskell as an adl
+
+\usepackage[all]{xy}
+\usepackage[dutch,english]{babel}
+% patched C:\apps\texmf\tex\generic\babel\dutch.ldf   commented line 113-142: %\initiate@active@char{"}
+% this solves the compatibility problem with xypic
+
 
 
 %\usepackage{mypslatex}    % why use this?
@@ -27,7 +32,6 @@
 
 \usepackage{url}
 \usepackage[usenames]{color}
-\usepackage[all]{xy}
 %\usepackage{mathabx}
 \usepackage{wasysym} % for nice squiggly arrow: \leadsto
 \usepackage{textcomp} % for \textdownarrow and \textuparrow
@@ -96,6 +100,40 @@
 
 
 \fboxsep = 1pt % framebox padding
+
+
+% Martijn:
+
+\newcommand{\p}[1]{\texttt{#1}}
+
+\newcommand{\iup}[0]{\text{\textuparrow}}
+\newcommand{\idwn}[0]{\text{\textdownarrow}}
+
+
+
+% commands used for architecture pictures
+%
+\newcommand{\component}[1]{*+[F-:<3pt>]\txt{#1}}
+\newcommand{\dimcomponent}[3]{*=<#1,#2>+[F-:<3pt>]\txt{#3}}
+\newcommand{\abscomponent}[1]{*+[F.:<3pt>]\txt{#1}}
+\newcommand{\dataa}[1]{*+[F]\txt{#1}}
+\newcommand{\dataH}{\ensuremath{{\rm Data}_H}}
+\newcommand{\dataL}{\ensuremath{{\rm Data}_L}}
+\newcommand{\dH}{\ensuremath{\delta_H}}
+\newcommand{\dHl}{\ensuremath{\delta_{H,l}}}
+\newcommand{\dHr}{\ensuremath{\delta_{H,r}}}
+\newcommand{\dL}{\ensuremath{\delta_L}}
+\newcommand{\dLl}{\ensuremath{\delta_{L,l}}}
+\newcommand{\dLr}{\ensuremath{\delta_{L,r}}}
+\newcommand{\arr}{\ensuremath{\rightarrow}}
+
+
+
+\newcommand{\fromHere}{~\\ \ensuremath{\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow}\\}
+
+\newcommand{\toHere}{~\\ \ensuremath{\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow}\\}
+
+
 
 \newcommand{\Doc}[0]{\ensuremath{\mathit{Doc}}}		%
 \newcommand{\Enr}[0]{\ensuremath{\mathit{Enr}}}		%
@@ -498,36 +536,6 @@
 %\newtheorem{defi}{Definition}% not used
 
 
-% Martijn:
-
-\newcommand{\iup}[0]{\text{\textuparrow}}
-\newcommand{\idwn}[0]{\text{\textdownarrow}}
-
-
-
-% commands used for architecture pictures
-%
-\newcommand{\component}[1]{*+[F-:<3pt>]\txt{#1}}
-\newcommand{\dimcomponent}[3]{*=<#1,#2>+[F-:<3pt>]\txt{#3}}
-\newcommand{\abscomponent}[1]{*+[F.:<3pt>]\txt{#1}}
-\newcommand{\dataa}[1]{*+[F]\txt{#1}}
-\newcommand{\dataH}{\ensuremath{{\rm Data}_H}}
-\newcommand{\dataL}{\ensuremath{{\rm Data}_L}}
-\newcommand{\dH}{\ensuremath{\delta_H}}
-\newcommand{\dHl}{\ensuremath{\delta_{H,l}}}
-\newcommand{\dHr}{\ensuremath{\delta_{H,r}}}
-\newcommand{\dL}{\ensuremath{\delta_L}}
-\newcommand{\dLl}{\ensuremath{\delta_{L,l}}}
-\newcommand{\dLr}{\ensuremath{\delta_{L,r}}}
-\newcommand{\arr}{\ensuremath{\rightarrow}}
-
-
-
-\newcommand{\fromHere}{~\\ \ensuremath{\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow}\\}
-
-\newcommand{\toHere}{~\\ \ensuremath{\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow}\\}
-
-%%
 
 
 

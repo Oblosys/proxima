@@ -12,7 +12,7 @@
 
 
 
-{\em *** Version: \today~ ***}
+%{\em *** Version: \today~ ***}
 
 %reorganizing Chapter 5
 
@@ -346,7 +346,7 @@ The $C_{L,0}$, \dots, $C_{L,l-1}$ subtrees in the lower-level tree are not part 
 \end{figure}
 
 %removed story about whitespace extra state
-Figure~\ref{presentExample} provides a more concrete example of a presentation, taken from a source editor (see Section~\ref{sect:sourceeditor}). A parenthesized sum in the document is presented as a list of tokens, which are represented by strings.  The figure shows only part of the document and its presentation. To the editing user, the expression will appear as "{\tt (1+2)}". The example is somewhat simplified, because it does not contain whitespace, which is part of the presentation extra state and will be discussed in Section~\ref{subsect:extraState}.
+Figure~\ref{presentExample} provides a more concrete example of a presentation, taken from a source editor (see Section~\ref{sect:sourceeditor}). A parenthesized sum in the document is presented as a list of tokens, which are represented by strings.  The figure shows only part of the document and its presentation. To the editing user, the expression will appear as "{\tt (1+2)}". The example is somewhat simplified, because it does not contain whitespace. Whitespace is part of the presentation extra state, which is discussed in following subsection.
 
 \bc  why is this one commented?
 In the example, the resulting presentation is a single tree, but this is not always the case. For example, the evaluation layer in a word processor (see Section~\ref{sect:wordprocessor}), maps each chapter onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
@@ -410,7 +410,7 @@ An important point to note is that extra state with regard to a certain mapping 
 % One level: two kinds of extra
 Figure~\ref{layerExtraState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering may have both presentation and interpretation extra state. 
 
-Figure~\ref{levelExtraState} shows a data level between two layers. At the medium level, a shaded left or right half denotes that a node is extra state. Nodes with a shaded left half are presentation extra state for the higher layer, and nodes with a shaded right half are interpretation extra state for the lower layer. Extra state in one direction is independent of extra state in the other direction, hence a node in the figure can have zero, one, or two shaded halves.
+Figure~\ref{levelExtraState} shows a data level between two layers. At the middle level, a shaded left or right half denotes that a node is extra state. Nodes with a shaded left half are presentation extra state for the higher layer, and nodes with a shaded right half are interpretation extra state for the lower layer. Extra state in one direction is independent of extra state in the other direction, hence a node in the figure can have zero, one, or two shaded halves.
 
 \begin{figure}
 \begin{center}
@@ -506,7 +506,7 @@ A consequence of the difference between the presentation and the interpretation 
 %																
 %																
 %																
-\section{Duplicates in presentation} \label{sect:informalDuplicates}
+\section{Duplicates in the presentation} \label{sect:informalDuplicates}
 
 %\note{mention duplicates in interpretation?}
 %* not just because multiple trees: nodes may depend on several trees. without duplication.

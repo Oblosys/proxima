@@ -4,15 +4,25 @@
 \bl
 \o Architecture from Section~\ref{sect:proxArch} has been implemented (not completely) in Functional language Haskell
 \o editor generator. compile for datatype and sheets, although sheets in future dynamic
-\o Evaluation layer still only tentatively
 \o Platform-independent, Windows, Linux,  Unix, Mac. 
+\el
+
+\bl
+\o Evaluation layer still only tentatively
 \o No effort in incremental, but simple fixes have been shown to make system run at acceptable speed.
 \el
 
+% switch with implementation of system?
 \section{Implemented editors}
 
+The prototype has been used to instantiate several example editors. 
+
+Research vehicle, so many combined features in an incomplete editor.
+
+Before we discuss the editors, we give a brief overview of the . that need to be to instantiate an editor with Proxima.
 
 \subsection{Building an editor with Proxima}
+
 
 \bl
 \o doc type
@@ -20,40 +30,65 @@
 \o parser
 \el
 
+Evaluator is still basic.
+
 \subsection{A Helium source editor}
 subset of Helium~\cite{heeren03helium} similar to \ref{sect:sourceeditor}
 
 Source with fraction, and types, and values (not useful, but similar to spread sheet)
+folded function.
+
 \head{structural editing}
-SCREENSHOT
+
+1+2*3     ->     1+{Exp}
+[ 1, >2<, 3 ]      [ 1, 3 >< ]    
+    cut                            paste
+
+\head{built-in XML/tree view}
+incomplete    
 \head{Jump to definition}
 SCREENSHOT
-\head{Beta reduction}
-SCREENSHOT
-\subsection{Slide editor}
 
+\head{Beta reduction}
+a few steps
+
+\head{prettyprinter}
+
+\todo{check manual}
+
+\subsection{Slide editor}
 Slide with Haskell and a type error
 SCREENSHOT
-\subsection{Chess board}
 
-Chess board with computed possible moves
+two views
 SCREENSHOT
 
 
 
-\section{Implementation}
+\subsection{Chess board}
 
+Integrated with Helium editor.
+
+Chess board with computed possible moves
+
+SCREENSHOT
+
+attribute for square is possible move. `withMouseClick` cut piece paste here.
+
+\section{Implementation}
 
 \subsection{General}
 
 Haskell is not generic: code generator for type decls. Flexible solution. GH other possibility.
 
-Mappings. not everywhere
+Mappings. not everywhere actually only between arr and pres. and pres and enr. (doc is same as enr.)
 
 \subsection{Architecture}
 
 Implemented with combinators from Section
 
+Each layer has a presentation and an interpretation module, defining present resp. interpret. 
+Architecture module imports all and lifts the function pairs to layers Chapter~\ref{chap:archCombs}. 
 %No hierarchical modules because of editor problem (all look the same). %? mention this at all?
 
 
@@ -66,7 +101,7 @@ Implemented with combinators from Section
 \el
 
 \bl
-\o Doc editing is by code generation.
+\o Doc editing is done with code generation. (Only explicit tree editing, presentation-oriented doc editing is done by parsing edited presentation)
 \el
 
 \subsection{Presentation}
@@ -120,6 +155,7 @@ recognizeExp' = pStr $
 \o pres attribute
 \o generated attributes
 \o Target is {\sc Xprez}
+\o breaking not optimal, or is this more for Xprez chapter?
 \el
 
 \bl
@@ -129,6 +165,7 @@ recognizeExp' = pStr $
 \bl
 \o still a lot of code is added by hand. Need nice abstractions
 \el
+
 \subsection{Layout}
 
 \bl
@@ -136,21 +173,37 @@ recognizeExp' = pStr $
 \el
 \bl
 \o Scanner processes presentation tree.
+\o not parameterized
 \el
 
 \subsection{Arrangement}
 
 \bl
-\o AG implements Xprez
-\o Unarranger is simple
+\o AG implements Xprez. 
+\o Unarranger is simple keep mappings for pointing. path translation. Formatters require little more work
 \el
 
 \subsection{Rendering}
 
 \bl
-\o Why wxHaskell~\cite{wxHaskell}.
+\o Why wxHaskell~\cite{wxHaskell}. 
+\o Elegant and fast. Enough low level hooks.
+\o Piggy backs on vast wxWidgets library. low maintenance, more chance of continuity (unlike Fudgets, etc. when researcher proves his point and goes on with new project)
+\o platform independent.  GTK+HS/GTK2HS No documentation yet
+\o integrated in Haskell, much easier than external
+\o very easy to change, very little dependence on GUI.
+\o we want a Haskell GUI standard soon! 
 \el
 
+\bl
+\o   The HTk, TclHaskell, FranTk and Yahu are based on Tcl/Tk. The Tcl/Tk backend are portable but slow. 
+\o The Gtk+HS, iHaskell, Gtk2HS are based on GTK. Poor windows. Proxima is user-friendly and more appropriate for 90\%
+of people using windows, than for vi users on Unix etc.
+\el
+\bl
+\o Object I/O is Win32 specific.
+\o External renderer was too slow and harder to communicate with. (already mentioned)
+\el
 \bc
 Why wxHaskell.
 Why ObjectIO. 
@@ -194,7 +247,9 @@ interested in the development of "standard" GUI
 library. \ec
 
 \section{Future work and conclusions}
-Straightforward:
+
+
+Straightforward or little research (but maybe a lot of work)
 
 \bl
 \o Parameterizable scanner.
@@ -202,17 +257,26 @@ Straightforward:
 \o Editing in formatter.
 \o Standard stuff, file menu, search, keyboard macros, etc.
 \o use dynamic module loading to change presentation dynamically. changing datatype dyn. is probably not an option
-\o Extensions to presentation formalism. windows/frames/widgets/formatters
+\o Extensions to Xprez presentation formalism. windows/frames/widgets/formatters/page model
 \o error correcting parser
 \el
 
-Requiring research:
+Requiring further research:
 \bl
-\o Incrementality.
-\o formalism for declaring pres Extra state
+\o Incrementality. easy tricks diffing. other ag stuff. maybe more complex explicit model: only requesting evaluation of what is needed.
+\o formalism for declaring pres Extra state + language support
 \o Libraries for easy editor building.
 \o Focus handling
 \o Full evaluator layer.
 \o Graph support.
 \o Storing presentation extra state.
+\o formalism/combinator library for edit commands
+\el
+
+\bl
+\o find more things and establish priorities by instantiating more editors
+\el
+
+\bl
+\o conclusions?
 \el
