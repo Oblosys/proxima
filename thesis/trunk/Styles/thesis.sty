@@ -39,6 +39,12 @@
 
 % if comments give problems, one of the packages can be used.
 
+\usepackage{squig} % Lambert (imports calc and math)
+%\usepackage{calc} % Lambert
+%\usepackage{math} % Lambert
+
+
+
 %% Minder royale itemize
 
 \newenvironment{itize}{%
@@ -62,7 +68,7 @@
 %% Easy lists %%
 
 \newcommand{\bl}[0]{\begin{itize}}
-\renewcommand{\o}[0]{\item}  % \o used to be ø, but we never use that one anyway.
+\renewcommand{\*}[0]{\item}  % don't know what \* used to be. Should check this.
 \newcommand{\el}[0]{\end{itize}}
 
 %% new counters %%
@@ -90,16 +96,23 @@
 
 \newcommand{\Present}[0]{\ensuremath{\mathit{Present}}} 	%56
 \newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}		%56
-\newcommand{\present}[0]{\tt present}					%56
+\newcommand{\present}[0]{{\tt present}}					%56
 \newcommand{\Interpret}[0]{\ensuremath{\mathit{Interpret}}}%56
 \newcommand{\Intr}[0]{\ensuremath{\mathit{Intr}}}		%56
-\newcommand{\interpret}[0]{\tt interpret}					%56
-\newcommand{\reuse}[0]{\tt reuse}						%56
+\newcommand{\interpret}[0]{{\tt interpret}}				%56
+\newcommand{\reuse}[0]{{\tt reuse}}						%56
 \newcommand{\update}[0]{{\tt update}}					%56
 \newcommand{\Edit}[0]{\ensuremath{\mathit{Edit}}} 		%56 Edit is overloaded
 \newcommand{\Transform}[0]{\ensuremath{\mathit{Transform}}}%56
-
+\newcommand{\data}[0]{\mathbf {data}}					%56
+ 
 %\newcommand{\}[0]{\ensuremath{\mathit{}}}
+
+
+\newcommand{\rarr}{\ensuremath{\rightarrow}~}
+\newcommand{\larr}{\ensuremath{\leftarrow}~}
+\newcommand{\dbarr}{\ensuremath{\leftrightarrow}~}
+
 
 %%%%%%%%
 % End Martijn %
@@ -367,16 +380,16 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 %
-\newbox\ProofSym
-\setbox\ProofSym=\hbox{%
-\unitlength=0.18ex%
-\begin{picture}(10,10)
-\put(0,0){\framebox(9,9){}}
-\put(0,3){\framebox(6,6){}}
-\end{picture}}
-%
-\newenvironment{proof}{\par\noindent{\bf Proof:}}{\hfill%
-\copy\ProofSym\medskip\endtrivlist}
+%\newbox\ProofSym
+%\setbox\ProofSym=\hbox{%
+%\unitlength=0.18ex%
+%\begin{picture}(10,10)
+%\put(0,0){\framebox(9,9){}}
+%\put(0,3){\framebox(6,6){}}
+%\end{picture}}
+%%
+%\newenvironment{proof}{\par\noindent{\bf Proof:}}{\hfill%
+%\copy\ProofSym\medskip\endtrivlist}
 
 
 
@@ -427,7 +440,7 @@
 \newcommand{\component}[1]{*+[F-:<3pt>]\txt{#1}}
 \newcommand{\dimcomponent}[3]{*=<#1,#2>+[F-:<3pt>]\txt{#3}}
 \newcommand{\abscomponent}[1]{*+[F.:<3pt>]\txt{#1}}
-\newcommand{\data}[1]{*+[F]\txt{#1}}
+%\newcommand{\data}[1]{*+[F]\txt{#1}}
 \newcommand{\dataH}{\ensuremath{{\rm Data}_H}}
 \newcommand{\dataL}{\ensuremath{{\rm Data}_L}}
 \newcommand{\dH}{\ensuremath{\delta_H}}
