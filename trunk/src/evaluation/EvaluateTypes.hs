@@ -7,6 +7,7 @@ import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
 import Data.FiniteMap
 
+import DocumentEdit
 
 import UHA_Syntax
 
@@ -55,24 +56,23 @@ evaluate doc = henk2 . uhaFromDoc $ doc
 -- so ranges from UHA can be mapped back onto Proxima Document locations
 
 uhaFromDoc :: Document -> Module
-uhaFromDoc (RootDoc _ _ decls) = Module_Module 
+uhaFromDoc (RootDoc _ _ list_decl) = Module_Module 
                                    (range []) MaybeName_Nothing MaybeExports_Nothing
-                                   (Body_Body (range []) [] (uhaFromDecls 0 [] decls))  
+                                   (Body_Body (range []) [] (uhaFromList_Decl [] list_decl))  
 
 
-uhaFromDecls :: Int -> [Int] -> Decls -> [Declaration]
-uhaFromDecls i pth (ConsDecls _ decl decls) = uhaFromDecl (pth++[i]) decl ++ uhaFromDecls (i+1) pth decls
-uhaFromDecls i pth (NilDecls _) = [] 
-uhaFromDecls _ _ _ = []
+uhaFromList_Decl :: [Int] -> List_Decl -> [Declaration] 
+uhaFromList_Decl pth (List_Decl _ consList) = concat [ uhaFromDecl (pth++[i]) dcl | (dcl,i) <- zip (fromConsList_Decl consList) [0..] ]
+uhaFromList_Decl _ _ = []
 
 
 uhaFromDecl :: [Int] -> Decl -> [Declaration] -- return type is List so wrong Decl's can return a []
 uhaFromDecl pth (Decl _ _ _ _ _ _ _ ident exp) =
   [ Declaration_FunctionBindings (range pth) 
     [ FunctionBinding_FunctionBinding (range pth)
-      (LeftHandSide_Function (range (pth++[0])) (uhaFromIdent (pth++[0]) ident) [])
-      (RightHandSide_Expression (range (pth++[1]))
-                               (uhaFromExp (pth++[1]) exp)
+      (LeftHandSide_Function (range (pth++[2])) (uhaFromIdent (pth++[2]) ident) [])
+      (RightHandSide_Expression (range (pth++[3]))
+                               (uhaFromExp (pth++[3]) exp)
                                MaybeDeclarations_Nothing)
     ]
   ]
@@ -98,11 +98,11 @@ uhaFromExp pth (LamExp _ _ _ ident exp)    = Expression_Lambda (range pth)
                                                [Pattern_Variable (range (pth++[0])) 
                                                                  (uhaFromIdent (pth++[0]) ident) ]
                                                (uhaFromExp (pth++[1]) exp)
-uhaFromExp pth (CaseExp _ _ _ exp alts)    = Expression_Case (range pth) 
+uhaFromExp pth (CaseExp _ _ _ exp list_alt)    = Expression_Case (range pth) 
                                                (uhaFromExp (pth++[0]) exp)
-                                               (uhaFromAlts 0 (pth++[1]) alts)                                                                 
-uhaFromExp pth (LetExp _ _ _ decls exp)    = Expression_Let (range pth) 
-                                               (uhaFromDecls 0 (pth++[0]) decls)                                                                 
+                                               (uhaFromList_Alt (pth++[1]) list_alt)                                                                 
+uhaFromExp pth (LetExp _ _ _ list_decl exp)    = Expression_Let (range pth) 
+                                               (uhaFromList_Decl (pth++[0]) list_decl)                                                                 
                                                (uhaFromExp (pth++[1]) exp)
 uhaFromExp pth (AppExp _ exp1 exp2)        = Expression_NormalApplication (range pth)
                                                (uhaFromExp (pth++[0]) exp1) 
@@ -115,10 +115,10 @@ uhaFromExp pth (IfExp _ _ _ _ exp1 exp2 exp3) = Expression_If (range pth)
                                                               (uhaFromExp (pth++[2]) exp3)
 uhaFromExp pth (ParenExp _ _ _ exp)        = Expression_Parenthesized (range pth)
                                              $ uhaFromExp (pth++[0]) exp
-uhaFromExp pth (ListExp _ _ _ _ exps)      = Expression_List (range pth)
-                                             $ uhaFromExps 0 (pth++[0]) exps
-uhaFromExp pth (ProductExp _ _ _ _ exps)   = Expression_Tuple (range pth)
-                                             $ uhaFromExps 0 (pth++[0]) exps
+uhaFromExp pth (ListExp _ _ _ _ list_exp)      = Expression_List (range pth)
+                                             $ uhaFromList_Exp (pth++[0]) list_exp
+uhaFromExp pth (ProductExp _ _ _ _ list_exp)   = Expression_Tuple (range pth)
+                                             $ uhaFromList_Exp (pth++[0]) list_exp
 uhaFromExp pth HoleExp                     = Expression_Variable (range pth)
                                              $ Name_Identifier (range pth) [] "undefined"
 uhaFromExp pth (ParseErrExp _ _)           = Expression_Variable (range pth)
@@ -126,19 +126,14 @@ uhaFromExp pth (ParseErrExp _ _)           = Expression_Variable (range pth)
 uhaFromExp pth  _                          = Expression_Variable (range pth)
                                              $ Name_Identifier (range pth) [] "undefined"
 
-
-uhaFromExps :: Int -> [Int] -> Exps -> [Expression]
-uhaFromExps i pth (ConsExps _ exp exps) = uhaFromExp (pth++[i]) exp : uhaFromExps (i+1) pth exps
-uhaFromExps i pth (NilExps _)           = [] 
-uhaFromExps i pth _                     = [] 
+uhaFromList_Exp :: [Int] -> List_Exp -> [Expression]
+uhaFromList_Exp pth (List_Exp _ consList) = [ uhaFromExp (pth++[i]) dcl | (dcl,i) <- zip (fromConsList_Exp consList) [0..] ]
+uhaFromList_Exp _ _ = []
 
 
-
-uhaFromAlts :: Int -> [Int] -> Alts -> [Alternative]
-uhaFromAlts i pth (ConsAlts _ decl decls) = uhaFromAlt (pth++[i]) decl ++ uhaFromAlts (i+1) pth decls
-uhaFromAlts i pth (NilAlts _) = [] 
-uhaFromAlts _ _ _ = []
-
+uhaFromList_Alt :: [Int] -> List_Alt -> [Alternative]
+uhaFromList_Alt pth (List_Alt _ consList) = concat [ uhaFromAlt (pth++[i]) dcl | (dcl,i) <- zip (fromConsList_Alt consList) [0..] ]
+uhaFromList_Alt _ _ = []
 
 uhaFromAlt :: [Int] -> Alt -> [Alternative] -- return type is List so wrong Alt's can return a []
 uhaFromAlt pth (Alt _ _ _ ident exp) = [ Alternative_Alternative (range pth) 
@@ -154,22 +149,25 @@ uhaFromAlt _ _ = []
 
 
 -- collect the expressions in helium items and bind them to unique function names
-uhaFromPPPresentation pth (PPPresentation _ vwtype slides) = uhaFromSlides 0 (pth++[1]) slides
+uhaFromPPPresentation pth (PPPresentation _ vwtype list_slide) = uhaFromList_Slide (pth++[1]) list_slide
 uhaFromPPPresentation _ _ = []
 
-uhaFromSlides i pth (ConsSlides _ slide slides) = uhaFromSlide (pth++[i]) slide 
-                                               ++ uhaFromSlides (i+1) (pth) slides
-uhaFromSlides _ _ _ = []
+
+uhaFromList_Slide :: [Int] -> List_Slide -> [Declaration]
+uhaFromList_Slide pth (List_Slide _ consList) = concat [ uhaFromSlide (pth++[i]) dcl | (dcl,i) <- zip (fromConsList_Slide consList) [0..] ]
+uhaFromList_Slide _ _ = []
+
 
 uhaFromSlide pth (Slide _ _ itemlist) = uhaFromItemList (pth++[1]) itemlist
 uhaFromSlide _ _ = []
 
-uhaFromItemList pth (ItemList _ lsttype items) = uhaFromItems 0 (pth++[1]) items
+uhaFromItemList pth (ItemList _ lsttype list_item) = uhaFromList_Item (pth++[1]) list_item
 uhaFromItemList _ _ = []
 
-uhaFromItems i pth (ConsItems _ item items) = uhaFromItem (pth++[i]) item
-                                           ++ uhaFromItems (i+1) (pth) items
-uhaFromItems _ _ _ = []
+uhaFromList_Item :: [Int] -> List_Item -> [Declaration]
+uhaFromList_Item pth (List_Item _ consList) = concat [ uhaFromItem (pth++[i]) dcl | (dcl,i) <- zip (fromConsList_Item consList) [0..] ]
+uhaFromList_Item _ _ = []
+
 
 uhaFromItem pth (HeliumItem _ exp) = 
   [ Declaration_FunctionBindings noRange 
