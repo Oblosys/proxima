@@ -14,7 +14,7 @@ import Data.FiniteMap
 import IOExts
 
 
-import qualified NewParser
+--import qualified NewParser
 
 {-
 initDoc =  mkRoot $ mkDecls $ concat $ replicate 1 
@@ -54,18 +54,19 @@ mkExps = foldr (ConsExps NoIDD) (NilExps NoIDD)
 
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
-
+{-
 -- new parser:
 parsePres pres = let (enr,errs) = showDebug Err (NewParser.parse pres)
                  in  if null errs then Just (enr, [], []) else Nothing
-{-
+-}
+
 -- old parser
 parsePres pres = --showDebug' Err ("parsing: "++show pres ++" has result ") $
-                 debug Err (show (NewParser.parse pres) )$
+        --         debug Err (show (NewParser.parse pres) )$
                  Just (startRecognize pres) 
                  --let (doc, success) = parsePresentation pres
                  --in  if success then Just doc else Nothing
--}
+
 
 
 {-
