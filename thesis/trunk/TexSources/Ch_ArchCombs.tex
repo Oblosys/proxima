@@ -29,17 +29,17 @@ In this paper we give four implementation models for layered architectures. Firs
 %																
 \section{A Simple editor}
 
-In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures discussed in~\cite{architecture}. 
+In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures discussed in~\cite{architecture} \note{is chapter now}. 
 
 
 \bigskip {\bf The edit process: }The main loop of the simple editor consists of the following 5 phases: 
  \begin{enumerate}
- \item Compute a rendering, or {\it presentation}, of the document   (presentation phase)
+ \item Compute a rendering, or {\it presentation}, of the document  (presentation phase)
  \item Show the presentation to the user
  \item Receive an edit gesture from the user
- \item Interpret the edit gesture, yielding a document update (interpretation phase)
+ \item Interpret the edit gesture as a document update (interpretation phase)
  \item Compute the updated document
- \end{enumerate}
+ \end{enumerate} \note{add backward ref to \ref{sect:editDifferentLevels}, and also sync the two descriptions}
 
 Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and interpretation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
 
