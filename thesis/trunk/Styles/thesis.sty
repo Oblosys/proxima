@@ -14,9 +14,14 @@
 
 \usepackage{float}
 
-%\usepackage{mypslatex}    % why use this?
+\usepackage{mypslatex}
+% remember to fix chapter header \textsc etc. + check toc and content of all chapters
+
+
 %\usepackage{ipe}
 %\usepackage{algo}
+
+\usepackage{multicol} % required for IPA dissertation series
 
 
 \usepackage{amssymb}
@@ -53,7 +58,7 @@
 %\usepackage{math} % Lambert
 
 % kopje met skip ervoor en geen pagebreak erna
-\newcommand{\head}[1]{\bigskip{\bf #1}\nopagebreak[4]}
+\newcommand{\head}[1]{\bigskip{\sffamily\bfseries #1}\nopagebreak[4]}
 
 %% Minder royale itemize
 
@@ -220,24 +225,24 @@
 \DeclareMathOperator{\cloze}{\ \text{``close to''}\ }
 
 % not used, so we redefine these commands
-\renewcommand{\H}{_{\, \mathrm H}}  % old \H seems to put '' above the next character
-\renewcommand{\L}{_{\, \mathrm L}} % was an L with a dash in the middle
-\newcommand{\M}{_{\, \mathrm M}}
-\newcommand{\HH}{_{\, \mathrm {HH}}} 
-\newcommand{\HL}{_{\, \mathrm {HL}}} 
-\newcommand{\LH}{_{\, \mathrm {LH}}} 
-\newcommand{\LL}{_{\, \mathrm {LL}}} 
-\newcommand{\CH}{_{\, \mathrm {CH}}} 
-\newcommand{\CL}{_{\, \mathrm {CL}}} 
-\newcommand{\C}{_{\, \mathrm C}} 
-\newcommand{\Eqclass}[2]{{#1}\!/_{{#2}}}
-\newcommand{\eqclass}[2]{[{#1}]_{{#2}}}  % maybe pad [] with \' spaces?
+\renewcommand{\H}{_{\hspace*{0.076em} \mathrm H}}  % old \H seems to put '' above the next character
+\renewcommand{\L}{_{\hspace*{0.076em} \mathrm L}} % was an L with a dash in the middle
+\newcommand{\M}{_{\hspace*{0.076em} \mathrm M}}
+\newcommand{\HH}{_{\hspace*{0.076em} \mathrm {HH}}} 
+\newcommand{\HL}{_{\hspace*{0.076em} \mathrm {HL}}} 
+\newcommand{\LH}{_{\hspace*{0.076em} \mathrm {LH}}} 
+\newcommand{\LL}{_{\hspace*{0.076em} \mathrm {LL}}} 
+\newcommand{\CH}{_{\hspace*{0.076em} \mathrm {CH}}} 
+\newcommand{\CL}{_{\hspace*{0.076em} \mathrm {CL}}} 
+\newcommand{\C}{_{\hspace*{0.076em} \mathrm C}} 
+\newcommand{\Eqclass}[2]{{#1}\hspace{-0.030em}/_{{#2}}}
+\newcommand{\eqclass}[2]{[{#1}]\hspace*{0.076em}_{{#2}}}  % maybe pad [] with \' spaces?
 \newcommand{\Eqcl}[2]{\Eqclass{#1}{_{\!\!{#2}}}}
 \newcommand{\eqcl}[2]{\eqclass{#1}{\!_{#2}}}
 \newcommand{\eqstar}{\ensuremath{\simeq}}
 %\newcommand{\eqstar}{\ensuremath{\stackrel{*}{\simeq}}}
 \newcommand{\Eqstarcl}[2]{{#1}/_{\!\eqstar {\mathrm {#2}}}}
-\newcommand{\eqstarcl}[2]{[{#1}]_{\!\eqstar {\mathrm {#2}}}}
+\newcommand{\eqstarcl}[2]{[{#1}]\hspace*{0.076em}_{\!\eqstar {\mathrm {#2}}}}
 \newcommand{\eqhole}{[\hole]} % \eqcl{\hole}{} gets wrong spacing
 
 
@@ -299,16 +304,25 @@
 \setlength{\footskip}{36pt}
 
 \setlength{\paperwidth}{170mm}
-\setlength{\textwidth}{125mm}
+\setlength{\textwidth}{125mm}%125  % on -x with same headwidth: marginparwidth +=x  and evensidemargin -= x
 \setlength{\hoffset}{0pt}
+                                   %   (((210  - (125+2+14=141) = 69) /2  =34.5)  -25.4) = 9.1
+%\setlength{\oddsidemargin}{9.1mm} % =  ((page - (textwidth+mpsep+mpwidth) ) / 2) - 25.4 
+%\setlength{\evensidemargin}{20.1mm}    % = \oddside + \marginparsep + \marginparwidth
+%\setlength{\oddsidemargin}{14.1mm}%{19.1mm}   % adjusted for 2cm outer margin (and 130 textwidth)
+%\setlength{\evensidemargin}{15.1mm}%{15.1mm} % adjusted for 2cm outer margin (and 130 textwidth)
+\setlength{\oddsidemargin}{19.6mm}% 2 cm outside, 2.5 cm margin - 1inch
+\setlength{\evensidemargin}{14.6mm}% 2cm outside, 2.0cm margin -1inch
 
-\setlength{\oddsidemargin}{9.1mm}
-\setlength{\evensidemargin}{25.1mm}
 \setlength{\marginparsep}{2mm}
-\setlength{\marginparwidth}{14mm}
+\setlength{\marginparwidth}{9mm}
 
 \setlength{\parskip}{0.5\baselineskip}
 \setlength{\parindent}{0pt}
+
+% when fixing these spacings, also check \newcommand{\myChapter} !!!!!!!!!
+% also check title pages!!!
+
 %\raggedbottom
 
 
@@ -401,12 +415,12 @@
   \chaptermark{\thechapter~~~#1}                   % chapter number in head
   \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}%
   {\flushright\sffamily\bfseries%
-  \rule{141mm}{1pt}\par
-  \vspace{-8pt}
-  \parbox{125mm}{\flushright\textsc{\huge\chaptername}}%
-  \parbox{16mm}{\flushright\textsc{\huge\thechapter}}\par%
-  \vspace{-17pt}
-  \rule{141mm}{1pt}
+  \rule{136mm}{1pt}\par %%%%%%%%%
+  \vspace{-18.5pt} % was -8
+  \parbox[t]{125mm}{\flushright \bc \textsc\ec { \huge\chaptername}}%        textwidth %%%% 125
+  \parbox[t]{11mm}{\flushright \bc \textsc\ec { \huge\thechapter}}\par%    % marginparsep+marginparwidth
+  \vspace{-1pt} % was -17
+  \rule{136mm}{1pt}                                      %%%%%%%  136
   \Huge#2\par}%
   \vspace{10\baselineskip}  
 
@@ -523,12 +537,12 @@
 
 %\newcommand{\note}[1]{%
 %}
-\newcommand{\note}[1]{%
-\notewarning%
-\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
-\hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
+%\newcommand{\note}[1]{%
+%\notewarning%
+%\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
+%\hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
 
-\newcommand{\nonote}[1]{}%
+%\newcommand{\nonote}[1]{}%
 
 \newcommand{\inote}[1]{%
 \error
@@ -538,11 +552,11 @@
 
 %\newcommand{\todo}[1]{%
 %}
-\newcommand{\todo}[1]{%
-\error
-\notewarning%
-\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
-\hspace{0pt}\sffamily\tiny{\sc todo:}\\ #1}}
+%\newcommand{\todo}[1]{%
+%%\error                gives an error to ensure there are no todo's left
+%\notewarning%
+%\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
+%\hspace{0pt}\sffamily\tiny{\sc todo:}\\ #1}}
 
 
 \def\figpath{Figures/}
@@ -601,9 +615,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \newcommand{\thsetinfo}[1]{\special{!userdict begin /thtext
 %     (#1) def end}}
-
+%
 % \thsetinfo{thesis.dvi (generated from thesis.tex on \today),}
-
+%
 % \special{!userdict begin
 % /thpt { 72 div 25.4 mul } def
 % /thtop 268.5 def /thbot 28.5 def
@@ -633,20 +647,21 @@
 % /start-hook { 135 45 { dup mul exch dup mul add 1 exch sub } 
 % setscreen } def
 % end}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-% Set the lpi and angle of the type-setter's halftone screen. Leave
-% this in for proper rastering of gray-scale images.
-
-\special{!userdict begin
-/start-hook { 135 45 { dup mul exch dup mul add 1 exch sub }
-setscreen } def
-end}
-
-
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "thesis"
-%%% End: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%
+%% Set the lpi and angle of the type-setter's halftone screen. Leave
+%% this in for proper rastering of gray-scale images.
+%
+%\special{!userdict begin
+%/start-hook { 135 45 { dup mul exch dup mul add 1 exch sub }
+%setscreen } def
+%end}
+%
+%
+%%%% Local Variables: 
+%%%% mode: latex
+%%%% TeX-master: "thesis"
+%%%% End: 
+%%%%%%%

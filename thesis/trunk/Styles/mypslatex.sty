@@ -53,7 +53,8 @@
 
 \renewcommand{\sfdefault}{phv}
 \renewcommand{\rmdefault}{ptm}
-\renewcommand{\ttdefault}{pcr}
+% uitgezet voor normale tex tt fonts
+%\renewcommand{\ttdefault}{pcr}
 
 
 %%%% MATHPTM.STY
@@ -73,11 +74,14 @@
 
 \DeclareMathSymbol{\omicron}{0}{operators}{`\o}
 
+
+% uitgezet. Nog even checken wat het gevolg is.
+
 % Reduce the space around math operators
 
-\thinmuskip=2mu
-\medmuskip=2.5mu plus 1mu minus 1mu
-\thickmuskip=4mu plus 1.5mu minus 1mu
+%\thinmuskip=2mu
+%\medmuskip=2.5mu plus 1mu minus 1mu
+%\thickmuskip=4mu plus 1.5mu minus 1mu
 
 % No bold math.
 
@@ -127,43 +131,45 @@
    {<-> ssub * pzccm/b/n}{}
 
 
-
-%%%% OT1pcr.fd
+% uitgezet voor normale tex tt fonts
+% >>
+%%%%% OT1pcr.fd
+%%
+%\DeclareFontFamily{OT1}{pcr}{\hyphenchar \font =-1}%
+%%
+%\DeclareFontShape{OT1}{pcr}{b}{n}{%
+%   <-> pcrb7t%
+%}{}%
+%%
+%\DeclareFontShape{OT1}{pcr}{b}{sc}{%
+%   <-> pcrbc7t%
+%}{}%
+%%
+%\DeclareFontShape{OT1}{pcr}{b}{sl}{%
+%   <-> pcrbo7t%
+%}{}%
+%%
+%%%%% pslatex's condenced courier
+%\DeclareFontShape{OT1}{pcr}{m}{n}{%
+%   <-> pcrr7tn%
+%}{}%
+%%
+%\DeclareFontShape{OT1}{pcr}{m}{sc}{%
+%   <-> pcrrc7t%
+%}{}%
+%%
+%\DeclareFontShape{OT1}{pcr}{m}{sl}{%
+%   <-> pcrro7t%
+%}{}%
 %
-\DeclareFontFamily{OT1}{pcr}{\hyphenchar \font =-1}%
-%
-\DeclareFontShape{OT1}{pcr}{b}{n}{%
-   <-> pcrb7t%
-}{}%
-%
-\DeclareFontShape{OT1}{pcr}{b}{sc}{%
-   <-> pcrbc7t%
-}{}%
-%
-\DeclareFontShape{OT1}{pcr}{b}{sl}{%
-   <-> pcrbo7t%
-}{}%
-%
-%%%% pslatex's condenced courier
-\DeclareFontShape{OT1}{pcr}{m}{n}{%
-   <-> pcrr7tn%
-}{}%
-%
-\DeclareFontShape{OT1}{pcr}{m}{sc}{%
-   <-> pcrrc7t%
-}{}%
-%
-\DeclareFontShape{OT1}{pcr}{m}{sl}{%
-   <-> pcrro7t%
-}{}%
-
-%
-\DeclareFontShape{OT1}{pcr}{bx}{n}{<->ssub * pcr/b/n}{}%
-\DeclareFontShape{OT1}{pcr}{bx}{sc}{<->ssub * pcr/b/sc}{}%
-\DeclareFontShape{OT1}{pcr}{bx}{sl}{<->ssub * pcr/b/sl}{}%
-\DeclareFontShape{OT1}{pcr}{b}{it}{<->ssub * pcr/b/sl}{}%
-\DeclareFontShape{OT1}{pcr}{bx}{it}{<->ssub * pcr/b/it}{}%
-\DeclareFontShape{OT1}{pcr}{m}{it}{<->ssub * pcr/m/sl}{}%
+%%
+%\DeclareFontShape{OT1}{pcr}{bx}{n}{<->ssub * pcr/b/n}{}%
+%\DeclareFontShape{OT1}{pcr}{bx}{sc}{<->ssub * pcr/b/sc}{}%
+%\DeclareFontShape{OT1}{pcr}{bx}{sl}{<->ssub * pcr/b/sl}{}%
+%\DeclareFontShape{OT1}{pcr}{b}{it}{<->ssub * pcr/b/sl}{}%
+%\DeclareFontShape{OT1}{pcr}{bx}{it}{<->ssub * pcr/b/it}{}%
+%\DeclareFontShape{OT1}{pcr}{m}{it}{<->ssub * pcr/m/sl}{}%
+% <<
 
 %
 
