@@ -29,17 +29,18 @@ genDocUtils include parsedFile =
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
 
 {- Path Node -} 
-genPathNode parsedFile = [ "pathNode :: Node -> PathDoc"
+genPathNode (File _ ds) = [ "pathNode :: Node -> PathDoc"
                          , "pathNode NoNode            = NoPathD"
                          , "pathNode (EnrichedDocNode _ pth) = PathD pth"]  -- RUI: added this line
-                         ++ (map makeNodeAlt fields) 
+                         ++ (map makeNodeAlt (allConstructors ds)) 
                          where
-                         fields = removeRepeat(getFields' parsedFile)
-                         makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
-                         makeNodeAlt e = "pathNode ("++fieldType e ++"Node _ pth)  = PathD pth"
+                         
+                         allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) | Decl tp prods decltp <- ds, decltp /= DeclConsList, Prod cnstr cs <-prods]
+--                         makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
+                         makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
 
 
-
+---
 {- Function IDD -} 
 genFuncIDD :: File -> [String]
 genFuncIDD (File _ decls) = concatMap printDeclIDD decls
@@ -50,7 +51,7 @@ printProdIDD d (Prod s fields)
           = let name = decapitalize s
             in  if null fields then [name++"IDD _                                   = Nothing\n"]
                 else    [ name++"IDD :: Node -> Maybe IDD"
-                        , name++"IDD ("++d++"Node ("++s++ " iDP"++concat(replicate ((length fields)-1) " _")++") _) = Just iDP"
+                        , name++"IDD ("++s++"Node ("++s++ " iDP"++concat(replicate ((length fields)-1) " _")++") _) = Just iDP"
                         , name++"IDD _                                   = Nothing\n"]
 
 
