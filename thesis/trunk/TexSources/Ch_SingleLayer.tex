@@ -1,6 +1,18 @@
 \chapter{Specifying a layered editor}
 \label{chap:singleLayer}
 
+
+\bc
+Lambert:
+
+*) altijd <=, waarom? en waarom ook bij X => Y. assume X, prove Y is a =>
+ziet er vaak mooier uit en verloopt logischer. mixen met <= bewijzen geen probleeem.
+
+P x   \eq   x \in { x |  P x }
+
+
+
+\ec
 \renewcommand{\present}{\ensuremath{\mathit{present}}}
 \renewcommand{\interpret}{\ensuremath{\mathit{interpret}}}
 \newcommand{\spc}{\textvisiblespace}
@@ -17,21 +29,20 @@
 \newcommand{\CH}{_{\, \mathrm {CH}}} 
 \newcommand{\CL}{_{\, \mathrm {CL}}} 
 \newcommand{\C}{_{\, \mathrm C}} 
-\newcommand{\Eqclass}[2]{{#1}/_{\!{#2}}}
-\newcommand{\eqclass}[2]{[\,{#1}\,]_{#2}}
-\newcommand{\Eqcl}[2]{\Eqclass{#1}{\simeq {\mathrm {#2}}}}
-\newcommand{\eqcl}[2]{\eqclass{#1}{\simeq {\mathrm {#2}}}}
+\newcommand{\Eqclass}[2]{{#1}\!/_{{#2}}}
+\newcommand{\eqclass}[2]{[\,{#1}\,]_{{#2}}}
+\newcommand{\Eqcl}[2]{\Eqclass{#1}{_{\!\!{#2}}}}
+\newcommand{\eqcl}[2]{\eqclass{#1}{\!_{#2}}}
 \newcommand{\Eqstarcl}[2]{{#1}/_{\!\stackrel{*}{\simeq} {\mathrm {#2}}}}
 \newcommand{\eqstarcl}[2]{[\,{#1}\,]_{\!\stackrel{*}{\simeq} {\mathrm {#2}}}}
 \newcommand{\eqr}{\ensuremath{\simeq}}
 \newcommand{\eqstar}{\ensuremath{\stackrel{*}{\simeq}}}
 \newcommand{\reuz}{\ensuremath{\triangleright}}
-\newcommand{\reuze}[1]{\ensuremath{\triangleright_{\!_\mathrm{#1}}}}
+\newcommand{\reuze}[1]{\ensuremath{\triangleright_{_{\!\!#1}}}}
 \newcommand{\reuzestar}{\ensuremath{\stackrel{*}{\triangleright}}}
 \newcommand{\rel}{\ensuremath{\sim}}
 
-
-
+\newcommand{\powerset}{\mathcal{P}}
 {\em *** Version: \today~ ***}
 
 
@@ -96,6 +107,7 @@
 %Somewhere: combinators guaranteeing safety are not what we want. 
 %Only spec. responsibility is left to layer. Pierce: only one way E.S. No 
 %structural updates. Incomplete. No duplicates.
+Mention Pierce's lenses.
 \bl
 \o Even in pure structure editor there are pres. oriented bits. eg navigation (pointing problem)
 \el
@@ -138,6 +150,7 @@ Given a $\present$, we specify an $\interpret$.
 \o present is not surjective. not all pres have a doc
 \o we also want interpret to be total. So it is more than just the inverse. 
 \el
+
 \head{Presentation invariant}
 
 \bl
@@ -153,6 +166,8 @@ Given a $\present$, we specify an $\interpret$.
 \bl
 \o Property {\sc InterPresent}\note{name: Correctness/Well behaved/\dots?} 
 \o Presenting followed by interpreting is identity on higher level: \note{normalizing doc may not occur}
+\o sequence of presenting and interpreting therefore converges
+\o Reverse does not hold.
 \o name comes from compose interpret and present
 \el
 
@@ -205,8 +220,8 @@ An edit operation takes place when {\sc Present} holds:
 \el
 
 \bl 
-\o If  $\level'$ is a presentation of some $\level''\H$, this is the one we want. (cannot guarantee that with extra state)
-\o explain {\sc Pres-Inert} and {\sc Doc-Inert}
+\o If  $\level'$ is a presentation of some $\level''\H$, this is the one we want. (cannot guarantee that with extra state)  \note{Do we req. and will we prove this?}
+\o explain  {\sc Doc-Inert} and {\sc Pres-Inert}
 \o Also possible that $\level'\L$ is not a presentation of any higher level. 
 \o Can discard the edit operation, but can also try to find one that is and was intended by the user
 \o Interpret chooses.
@@ -220,8 +235,8 @@ Summarizing, we need:
 \xpr{
 \level''\L = \present~\level''\H 				& \jstf{Postcondition}\\
 \level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit}\\
-(\exists h : \level'\L = \present~h) \imp \level''\L = \level'\L	& \jstf{\sc Pres-Inert}\\
 \level'\L = \present~\level\H \imp \level''\H = \level\H & \jstf{{\sc Doc-Inert}}
+(\exists h : \level'\L = \present~h) \imp \level''\L = \level'\L	& \jstf{\sc Pres-Inert}\\
 }
 
 Mention that {\sc Doc-Inert} also implies $\level''\L = \level'\L$ by {\sc Pres-Inert}.
@@ -238,6 +253,20 @@ The solution is this computation: \note{align label with last eq.? how?}
 \head{Postcondition}
 
 by definition, the postcondition holds.
+
+\head{{\sc Doc-Inert}}
+
+$\level'\L = \present~\level\H \imp \level''\H = \level\H$ has a simple proof:
+
+
+\begin{proof} Assume $\level'\L = \present~\level\H$ then
+\prf{
+\level''\H 						& \Equ{\sc Compute}\\
+\interpret~\level'\L				& \Equ{$\level'\L = \present~\level\H$}\\
+\interpret~(\present~\level\H)		& \Equ{\sc InterPresent}\\
+\level\H
+}
+\end{proof}
 
 \head{{\sc Pres-Inert}}
 
@@ -259,20 +288,6 @@ $\level'\L = \present~h \imp \level''\L = \level'\L$
 }
 \end{proof}
 
-\head{{\sc Doc-Inert}}
-
-$\level'\L = \present~\level\H \imp \level''\H = \level\H$ has a simple proof:
-
-
-\begin{proof} Assume $\level'\L = \present~\level\H$ then
-\prf{
-\level''\H 						& \Equ{\sc Compute}\\
-\interpret~\level'\L				& \Equ{$\level'\L = \present~\level\H$}\\
-\interpret~(\present~\level\H)		& \Equ{\sc InterPresent}\\
-\level\H
-}
-\end{proof}
-
 
 \head{Imprecise edit}
 
@@ -289,6 +304,11 @@ On the other hand, if $\level'\L$ is not a valid presentation, $interpret$ needs
 \el
 %is interpret the inverse of present? If one exist, we can use it, but it must also work for L not in 
 %range of present.
+
+
+
+
+
 
 
 
@@ -330,13 +350,12 @@ Next section we give a concrete instance of these classes.
 
 \subsection{Equivalence classes}
 
-\renewcommand{\Eqcl}[2]{\Eqclass{#1}{\!_{#2}}}
-\renewcommand{\eqcl}[2]{\eqclass{#1}{\!_{#2}}}
+Equivalence relation: symmetric reflexive
+transitive relation.
 
-Equivalence relation:
+$R$ or if there are two:  $x \eqr\H y$  and $x \eqr\L y$ 
 
-$x \eqr y$ or if there are two:  $x \eqr\H y$  and $x \eqr\L y$ 
-
+% notation
 
 $\eqclass{x}{R}$ is the equivalence class that contains $x$
 
@@ -346,50 +365,31 @@ $\eqclass{x}{R}$ is the equivalence class that contains $x$
 }
 
 
-$\Eqcl{S}{R}$ is set of all equivalence classes of $R$ (call it factor set)?
+The factor set $\Eqcl{S}{R}$ is set of all equivalence classes of $R$.
 \xpr{
 %( \eqclass{\hole}{R}) \tp S \to \Eqclass{S}{R}\\
 \Eqclass{S}{R} = \setof{\eqclass{x}{R}}{ x \in S}
 }
 
+mutually disjoint, union is T
 
-For level types, we add a letter to disambiguate: (maybe get rid of $\sim$ and use $\Eqclass{Level\H}{H}$ and $\eqclass{h}{H}$, then $H$ and $L$ are the eq. relations)
+% property of eq
 
-$\Eqcl{Level\H}{H}$ and $\eqcl{h}{H}$ vs $\Eqcl{Level\L}{L}$ and $\eqcl{h}{L}$ 
+We have the following property for an equivalence relation $R$:
 
-Finite rep:
-
-$x \eqstar y$ and $x \eqstar\H y$  vs.  $x \eqstar\L y$ 
-
-Notation on a type:
-
-\xpr{
-\Eqclass{S}{R} \subset \mathcal{P} S
-}
-
-overload this one on values, to get from a value to its eq. class. \note{Figure out details. If types are sets, values and types are not that distinct anymore}
+\xprlab{
+x \in \eqcl{y}{R} ~\eqv~ \eqcl{x}{R} = \eqcl{y}{R}
+}{Eq-Member}
 
 
+%Proposition:
+%\xpr{
+%\eqclass{x}{R} = \eqclass{y}{R} ~\lor~ (\eqclass{x}{R} \cap \eqclass{y}{R}) = \emptyset
+%}
 
-The relations we use here are $H$ and $L$, so classes are 
-
-\xpr{
-\eqcl{Level\H}{H} \subset \mathcal{P} Level\H
-}
-
-and value:
-
-\xpr{
-(\eqcl{\hole}{H}) \tp Level\H \to \eqcl{\Level\H}{H}
-}
-
-Proposition:
-\xpr{
-\eqclass{x}{R} = \eqclass{y}{R} ~\lor~ (\eqclass{x}{R} \cap \eqclass{y}{R}) = \emptyset
-}
+\note{Add some examples?}
 
 
-Add some examples?
 
 
 \subsection{Presenting and interpreting}
@@ -401,23 +401,76 @@ Add some examples?
 
 \head{$present$ and $interpret$}
 
+Relations: 
+\bl
+\o typed relation. 
+\o express preference on domain/range. ($R \oo D$ \note{use $\oo$}, so $y~F~x$ looks like $y = f~x$)
+\o relations are total
+\o say that range is not the set, but only the set for which relation holds
+\el
+
 \xpr{
 Present &\tp& \Level\H \rel \Level\L\\
 Interpret &\tp& \Level\L \rel \Level\H
 }
 
+% here L and H
+
+In a layer, two types: $Level\H$ $Level\L$ each with an equivalence class and two eq. classes:
+
+$\Eqcl{Level\H}{H}$ and $\eqcl{h}{H}$ vs $\Eqcl{Level\L}{L}$ and $\eqcl{l}{L}$ 
+
+and value:
+\xpr{
+(\eqcl{\hole}{H}) \tp Level\H \to \eqcl{\Level\H}{H}
+}
+
 Something about what the equivalence classes are: Lower is underspecified: 
 PER story
 
+\textdownarrow\textdownarrow\textdownarrow\textdownarrow
 
+\xpr{
+\eqcl{h}{H} = \setof{h'}{\exists l : l~\Present~h \land l~\Present~h'}
+}
 
+defines a class on $\Level\H$, since $\Present$ is total, so we have $\eqcl{h}{H}$ for each $h$ on $\Level\H$.
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h : l~\Present~h \land l'~\Present~h}
+}
+defines a class on ${\bf range}~\Present \subset \Level\H$, $\Present$ need not be surjective.
+
+$\Interpret$:
+
+\xpr{
+\eqcl{h}{H} = \setof{h'}{\exists l : h~\Interpret~l \land h'~\Interpret~l}
+}
+
+defines class on $\Level\H$, since $\Interpret$ is total.
+
+Last one is tricky, since also elements without presentation are included in eq. class.
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h : h~\Interpret~l \land h~\Interpret~l'}
+}
+
+Restrict it to range of $\Present$?
+That means we would get:
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h : h~\Interpret~l \land h~\Interpret~l' \land  l'~\Present~h'}
+}
+
+\textuparrow\textuparrow\textuparrow\textuparrow
+
+Total functions:
 
 \xpr{
 \present &\tp& \Eqcl{\Level\H}{H} \rightarrow  \Eqcl{\Level\L}{L}\\
 \interpret &\tp& \Eqcl{ \Level\L}{L} \rightarrow \Eqcl{\Level\H}{H}
 }
 
-result is always an eq. class (follows from type)
+result is always an eq. class (follows from type)\note{fix $H$ and $L$, since these are the eq. relations, but used here as sets}
 
 \xpr{
 L = \present~H \imp L = \eqcl{l}{L}\\
@@ -426,11 +479,17 @@ H = \interpret~L \imp H = \eqcl{h}{H}
 
 How $\present$ and $\interpret$ are related to $\Present$ and $\Interpret$
 
-\xpr{
+\xprlab{
 l~Present~h ~\eqv~ \eqcl{l}{L} = \present~ \eqcl{h}{H}\\
+}{\present-Char}
+\xprlab{
 h~Interpret~l ~\eqv~ \eqcl{h}{H} = \interpret~\eqcl{l}{L}
-}
+}{\interpret-Char}\note{we never use this one}
 
+What's this one?
+\xpr{
+\present~H = \setof{l}{h \in H \land l \in Present~h}
+}
 
 \head{Presentation invariant}
 
@@ -470,7 +529,7 @@ or:
 % for which l in pres h, but we want for all h in int l that l in pres h
 
 
-\subsection{Editing}
+\subsection{Editing} \label{sect:singleExtra_Editing}
 
 \bl
 \o Edit lower level, when presentation invariant holds:
@@ -494,9 +553,8 @@ We need:
 \xpr{
 \level''\L~\Present~ \level''\H 		& \jstf{Postcondition}\\
 \level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit (+pres. lower extr.st.?)}\\
-%(\exists h : \eqcl{\level'\L}{L} = \present~\eqcl{h}{H}) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
-(\exists h : \level'\L~\Present~h) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
 \level'\L~\Present~\level\H \imp \level''\H = \level\H & \jstf{{\sc Doc-Inert}}\\
+(\exists h : \level'\L~\Present~h) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
 \level''\H~\text{"close to"}~\level\H & \jstf{preserve higher es}\\
 }
 \bl
@@ -508,7 +566,7 @@ Solution:
 
 Have to extract one from the eq. class. Choice from e.s. values. We want one for which e.s. resembles the previous value for the level as much as possible. (h'' resembles h, and l'' resembles l')
 
-Assume a function $\reuz$, which takes old and new value and returns resembling one from eq. class of new val. More precisely, we need two: $\reuze{H}$ and $\reuze{L}$.
+Assume a function $\reuz$, which takes old and new value and returns resembling one from eq. class of new val. More precisely, we need two: $\reuze{H}$ and $\reuze{L}$. \note{these are relations again, so use $L$ and $H$ in subscripts instead of L and H}
 
 
 Here, only the type and a few requirements, but in next section, an actual instance.
@@ -517,9 +575,10 @@ Here, only the type and a few requirements, but in next section, an actual insta
 \reuz ::  \Eqclass{X}{R} \to X \to X\\
 }
 
-\xprlab{X \reuz y \in X}						{$\reuz$-Valid} 
-\xprlab{y \in X \imp X \reuz y = y}				{$\reuz$-Idem} 
-\xprlab{(X \reuz y) \text{~``close to''~} y}		{$\reuz$-Close} 
+
+\xprlab{\eqclass{x}{R} \reuz y \in \eqclass{x}{R}}			{$\reuz$-Valid} 
+\xprlab{y \in \eqclass{x}{R} \imp \eqclass{x}{R} \reuz y = y}	{$\reuz$-Idem} 
+\xprlab{(\eqclass{x}{R} \reuz y) \text{~``close to''~} y}		{$\reuz$-Close} 
 
 If $y \in X$, then {\sc $\reuz$-Idem} guarantees close to, because we have equality. In other cases, the requirement remains vague.
 
@@ -527,8 +586,8 @@ If $y \in X$, then {\sc $\reuz$-Idem} guarantees close to, because we have equal
 With $\reuz$ function we can extract, and with $\eqcl{\hole}{X}$ we can inject, so now we can give compute:
 
 \xprlab{
-\level''\H = (\interpret~ \eqcl{\level'\L}{L})  \reuze{H}   \level\H  \\ %(\level'\L,\level\H)\\ 
-\level''\L = (\present~ \eqcl{\level''\H}{H})   \reuze{L}   \level'\L % ^* (\level''\H, level'\L)
+\level''\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H  \\ %(\level'\L,\level\H)\\ 
+\level''\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L % ^* (\level''\H, level'\L)
 }{Compute}
 
 The levels defined by compute meet the requirements:
@@ -537,36 +596,66 @@ The levels defined by compute meet the requirements:
 
 Rather trivial again.
 
+
+\head{{\sc Doc-Inert}}
+
+
+%\level''\H = \interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H  \\
+%\level''\L =  \present~ \eqcl{\level''\H}{H}   \reuz   \level'\L 
+\pagebreak
+$\level'\L~\Present~\level\H \imp \level''\H = \level\H $
+
+
+\begin{proof} Assume $\level'\L~\Present~\level\H$ , which is equivalent to:
+
+$\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}$  by  {\sc \present-Char}.
+
+then:
+
+\prf{
+\level''\H 						                 	& \Equ{\sc Compute}\\
+\interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H 	& \Equ{assumption}\\
+\interpret~(\present~\eqcl{\level\H}{H})  \reuz  \level\H 	& \Equ{\sc InterPresent}\\
+\eqcl{\level\H}{H}  \reuz  \level\H 				& \Equ{{\sc $\reuz$-Idem} and $\level\H \in \eqcl{\level\H}{H}$} \\
+\level\H
+}
+\end{proof}
+
+
+%With extra state, also possible to edit while preserving the invariant. (only add spaces in language %without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not %change. This is only an issue with extra state, since in previous section, $present$ was injective, and %hence $\level\L' = present~\level\H \land \level\L'' = present~\level\H \imp \level'\L = \level''\L$ %\dots \note{explain more?} 
+%
+%$\level'\L \in \present~\level\H \imp \level''\H = \level\H$\\
+%
+%\begin{proof} 
+%\prf{
+%\level'\L \in \present~\level\H	& \Imp{\sc InterPresent}\\
+%\level\H \in \interpret~\level'\L	& \Imp{\sc Intr$^*$-Idem}\\
+%\level\H = \interpret^* (\level'\L,\level\H) & \Imp{\sc Compute}\\ 
+%\level\H = \level''\H 
+%}
+%\end{proof}
+%
+%\note{Doing this proof by starting with $\level\H$ and substituting is tricky, because {\sc InterPresent} %is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
+
 \head{{\sc Pres-Inert}}
 
 If result of edit is presentation of something, it is unchanged by {\sc Compute}: 
 
-$\level'\L \in \present~H \imp \level''\L = \level'\L$
+$\level'\L~\Present~h \imp \level''\L = \level'\L$,
 
-\begin{proof}  In the proof, we assume: $level'\L \in \present~H$, and show that if we perform the substitutions from {\sc Compute} it follows that $level''\L = level'\L$.
+\begin{proof}  In the proof, we assume: $level'\L~\Present~h$, or eqivalently (by {\sc \present-Char}\\
+):
+$\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$, and show that if we perform the substitutions from {\sc Compute} it follows that $level''\L = level'\L$.
 
-\xpr{
- \eqcl{( \eqcl{x}{X} \reuz y)}{X} =  \eqcl{x}{X}
-}
+Assumption: $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$
 
-$y \in  \eqcl{x}{X} ~\imp~  \eqcl{y}{X} =  \eqcl{x}{X}$
-
+We need this result: \note{call this one a Lemma?}
 \prf{
-\setof{x'}{ y \simeq x'}\\
- \eqcl{y}{X} =  \eqcl{x}{X} 
-}
-
-\prf{
-True 						& \Imp{\sc $\reuz$-Valid}\\
-\eqcl{x}{X} \reuz y \in \eqcl{x}{X}	& \Imp{prop}\\
-\eqcl{x}{X} \reuz \eqcl{y}{X} =  \eqcl{x}{X}
-}
-
-$l \in \present~H \imp \eqcl{l}{L} = \present~H$
-Assume $l \in \present~H$ 
-\prf{
-l' \in \eqcl{l}{L} \imp l' \in \present~H\\
-l' \in \present~H \imp l' \in \eqcl{l}{L}\\
+\eqcl{\eqcl{x}{R}  ~\reuz~  y}{R} = \eqcl{x}{R}\\
+	\Eqv{\sc Eq-Member}\\
+\eqcl{x}{R}  ~\reuz~  y \in \eqcl{x}{R}\\
+	\Eqv{$\reuz$-Valid}\\
+True
 }
 
 \prf{
@@ -575,13 +664,15 @@ l' \in \present~H \imp l' \in \eqcl{l}{L}\\
 \present~ \eqcl{\level''\H}{H}   ~\reuz~   \level'\L\\
 			\Equ{\sc Compute}\\
 \present~ \eqcl{(\interpret~ \eqcl{\level'\L}{L}  ~\reuz~  \level\H)}{H}   ~\reuz~   \level'\L\\
-			\Equ{ }\\
-\present~ \eqcl{(\interpret~(\present~H)  ~\reuz~  \level\H)}{H}   ~\reuz~   \level'\L\\
+			\Equ{assumption}\\
+\present~ \eqcl{(\interpret~(\present~\eqcl{h}{H})  ~\reuz~  \level\H)}{H}   ~\reuz~   \level'\L\\
 			\Equ{\sc InterPresent }\\
-\present~ \eqcl{(H  ~\reuz~   \level\H)}{H}   ~\reuz~   \level'\L\\
-			\Equ{ }\\
-\present~H  ~\reuz~  \level'\L\\
-			\Equ{ {\sc $\reuz$-Idem} and $\level'\L \in \present~H$ }\\
+\present~ \eqcl{(\eqcl{h}{H}  ~\reuz~   \level\H)}{H}   ~\reuz~   \level'\L\\
+			\Equ{ $\eqcl{\eqcl{x}{R}  ~\reuz~  y}{R}  = \eqcl{x}{R}$}\\
+\present~\eqcl{h}{H}  ~\reuz~  \level'\L\\
+			\Equ{ assumption}\\
+\eqcl{\level'\L}{L}~\reuz~  \level'\L\\
+			\Equ{ {\sc $\reuz$-Idem} and $\level'\L \in \eqcl{\level'\L}{L}$ }\\
 \level'\L
 } 
 
@@ -634,42 +725,6 @@ l' \in \present~H \imp l' \in \eqcl{l}{L}\\
 %}
 %\end{proof}
 
-\head{{\sc Doc-Inert}}
-
-
-%\level''\H = \interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H  \\
-%\level''\L =  \present~ \eqcl{\level''\H}{H}   \reuz   \level'\L 
-
-$\level'\L~\Present~\level\H \imp \level''\H = \level\H $
-
-Assumption is equivalent to $\eqcl{\level'\L}{L} = present~\eqcl{\level\H}{H}$, either because of its type or because we define present like that.
-
-\begin{proof} Assume $\level'\L \in \present~\eqcl{\level\H}{H}$ then
-\prf{
-\level''\H 						                 	& \Equ{\sc Compute}\\
-\interpret~ \eqcl{\level'\L}{L}  \reuz   \level\H 	& \Equ{$l \in \present~H \imp \eqcl{l}{L} ~=~ \present~H$}\\
-\interpret~(\present~\eqcl{\level\H}{H})  \reuz  \level\H 	& \Equ{\sc InterPresent}\\
-\eqcl{\level\H}{H}  \reuz  \level\H 				& \Equ{{\sc $\reuz$-Idem} and $\level\H \in \eqcl{\level\H}{H}$} \\
-\level\H
-}
-\end{proof}
-
-
-%With extra state, also possible to edit while preserving the invariant. (only add spaces in language %without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not %change. This is only an issue with extra state, since in previous section, $present$ was injective, and %hence $\level\L' = present~\level\H \land \level\L'' = present~\level\H \imp \level'\L = \level''\L$ %\dots \note{explain more?} 
-%
-%$\level'\L \in \present~\level\H \imp \level''\H = \level\H$\\
-%
-%\begin{proof} 
-%\prf{
-%\level'\L \in \present~\level\H	& \Imp{\sc InterPresent}\\
-%\level\H \in \interpret~\level'\L	& \Imp{\sc Intr$^*$-Idem}\\
-%\level\H = \interpret^* (\level'\L,\level\H) & \Imp{\sc Compute}\\ 
-%\level\H = \level''\H 
-%}
-%\end{proof}
-%
-%\note{Doing this proof by starting with $\level\H$ and substituting is tricky, because {\sc InterPresent} %is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
-
 \head{Imprecise edit}
 
 \bl
@@ -714,7 +769,7 @@ A simple tree data type with boolean values in the nodes and leafs, and ints in 
 A possible $Tree^*$ is when int in leaf, and bool in node are extra:
 
 \xpr{
-\data~Tree^*  = Bin~*~Tree^*~Tree^*~|~Leaf~Bool~*\\
+\data~Tree^*  = Bin~*_{Bool}~Tree^*~Tree^*~|~Leaf~Bool~*_{Int}\\
 }
 
 With value: $Bin *_{Tree} (Leaf~*_{Bool})$ 
@@ -730,21 +785,20 @@ More generally:
 }
 becomes:
 \xpr{\data~T^* =  C_0~U_{0,0} \dots U_{0,m_0} | \dots | C_n~U_{n,0} \dots U_{n,m_n}\\ 
-with~ T^*_{i,j} = T^*_{i,j}  \text{~or~} *    
+with~ T^*_{i,j} = T^*_{i,j}  \text{~or~} *_{T^{i,j}}    
 }
 
 Same constructor, therefore all vals of T are also values of $T^*$
 
 
-Still need this one?
 
-Stars represent sets. All $t^*$ are sets, but not reverse. example
+Wildcards represent sets. All $t^*$ are sets. \note{mention that reverse is not true + example?} Define a function $\para{\hole}$ that returns the set for a term in $T^*$:
 
 \xprlab{
-\para{\hole} \tp T^* \to \set{T} \\
+\para{\hole} \tp T^* \to \powerset T\\
 \para{*_ T} \eq \setof{x}{x \tp T}\\
 \para{C~x^*_0 \dots x^*_n} \eq \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
-}{$\para{\hole}$-Def}\note{name it {\sc $\para{\hole}$-Def} (or {\sc $\para{\hole}$-Char})?} \note{use $x^*_i$?}
+}{$\para{\hole}$-Def}
 
 
 
@@ -771,7 +825,7 @@ Do it by making a function that drops all extra state and replaces by *. It depe
 }{$\core$-Def}
 
 
-Then compare the two core bits.
+Then compare the two core bits. $\eqstar :: T \rel T$ 
 
 
 \xprlab{
@@ -781,13 +835,11 @@ x \eqstar y ~\eq~  \core~x = \core~y
 
 Since $\eqstar$ is defined as equality on the result of a function (ie. $\core$), we know it is an equivalence relation on the domain of that function by the following theorem:
 
-Actual theorem is
-
 \xpr{
 (\exists f : \forall x,y : x R y ~\eqv~ (f~x = f~y)) ~\eqv~ R~\text{is an equivalence relation}
 }
 
-
+\bc
 This one was already proven:
 
 \xpr{
@@ -795,7 +847,7 @@ This one was already proven:
 }
 
 
-\begin{proof} \note{maybe leave this out}
+\begin{proof} \note{maybe leave this out, or prove equiv. See how much space/time we have}
 \prf{
 x R x 	& \Eqv{definition of $R$}\\
 f x = f x 	& \Eqv{reflexivity of =}\\
@@ -817,18 +869,9 @@ f x = f z 				& \Eqv{definition of $R$}\\
 x R z 
 }
 \end{proof}
+\ec
 
 \subsection{Reuse/\reuzestar}
-
-Restrict ourselves to reversible. So no longer all eq. classes, but only those that have wildcard-representations. explain bit more, two or more implies all. also for constructor.\note{comment probably obsolete}
-
-\xprlab{
-\present &\tp& \Eqstarcl{\Level\H}{H} \rightarrow  \Eqstarcl{\Level\L}{L}\\
-\interpret &\tp& \Eqstarcl{\Level\L}{L} \rightarrow  \Eqstarcl{\Level\H}{H}
-}
-%interpret~l = \para{interpret'~l}\\
-%present~h = \para{present'~h}
-%}{Restrict}
 
 Now we define a reuse function.
 
@@ -844,10 +887,10 @@ default~x^* \in \para{x^*}\\
 \o Moreover, default may depend on other information. Eg. whitespace coming from a pretty printing algorithm. This would be an extra argument to default, but the req. stays.
 \el
 
-When *, just use righthand side. When not star, left has priority. \note{subscribt X is not right in $\eqstarcl{X}{X}$}
+When *, just use righthand side. When not star, left has priority. \note{subscribt X is not right in $\eqstarcl{X}{X}$}. Type is not right, arg is not a class.
 
 \xprlab{
-\reuzestar ::  \eqstarcl{X}{X} \to X \to X\\
+\reuzestar ::  T^* \to T \to T\\
 *_a \reuzestar  y = y\\
 C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n = C~(x^*_0 \reuzestar y_0) \dots (x^*_n  \reuzestar y_n) \\
 C~x^*_0 \dots x^*_n \reuzestar C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*_n)
@@ -866,25 +909,181 @@ C~x^*_0 \dots x^*_n \reuzestar C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*_n)
 \o IMPORTANT: Look at reuse for tokens, is this correct? 
 \el
 
-Now we have to prove the requirements for $\reuzestar$
 
-\xprlab{X \reuzestar y \in X}						{$\reuz$-Valid} 
-\xprlab{y \in X \imp X \reuzestar y = y}				{$\reuz$-Idem} 
-\xprlab{X \reuzestar y \imp x \text{~``close to''~} y}	{$\reuz$-Close} 
 
+\subsection{Reuse ...}
+
+
+We need a $\reuz$ on equivalence classes.
+
+
+Restrict ourselves to reversible. So no longer all eq. classes, but only those that have wildcard-representations. explain bit more, two or more implies all. also for constructor.\note{comment probably obsolete}
+
+
+The equivalence class has a * representation: (not $R$ but the eq. relation from $*$)
+
+\xprlab{
+\present &\tp& \Eqcl{\Level\H}{H} \rightarrow  \Eqcl{\Level\L}{L}\\
+\interpret &\tp& \Eqcl{\Level\L}{L} \rightarrow  \Eqcl{\Level\H}{H}
+}
+
+$R$ is either $H$ or $L$.
+
+For $x$ of type $T$, we assume that there is a $T^*$ wildcard type, let $\eqsim$ be the equivalence class 
+\xprlab{
+\eqclass{x}{R} \eq \para{ \core~x}
+}{Restrict}
+
+
+Now we can define our $\reuz$ in terms of $\reuzestar$:
+
+\xprlab{
+\reuz ::  \Eqcl{T}{R} \to T \to T\\
+\eqclass{x}{R} \reuz y \eqv \core~x \reuzestar y 
+}{def}
+
+This $\reuz$ can only be used on wildcard eq. classes, which is the case in previous chapter. (In next, we will not use these things)
+
+Have to prove that $\reuz$ is a well defined function, and that it meets the  {\sc $\reuz$-Valid} {\sc $\reuz$-Idem} 
+{\sc $\reuz$-Close} requirements from Section~\ref{sect:singleExtra_Editing}. 
+
+%\note{maybe rewrite these things, so $\in$ is removed}
+%\xprlab{\eqclass{x}{R} \reuz y \in \eqclass{x}{R}}			{$\reuz$-Valid} 
+%\xprlab{y \in \eqclass{x}{R} \imp \eqclass{x}{R} \reuz y = y}	{$\reuz$-Idem} 
+%\xprlab{(\eqclass{x}{R} \reuz y) \text{~``close to''~} y}		{$\reuz$-Close} 
+
+
+%\xprlab{X \reuzestar y \in X}						{$\reuz$-Valid} 
+%\xprlab{y \in X \imp X \reuzestar y = y}				{$\reuz$-Idem} 
+%\xprlab{X \reuzestar y \imp x \text{~``close to''~} y}	{$\reuz$-Close} 
+
+\bl
+\o We prove this for more general $x^*$ instead of just for $\core~x$. 
+\o Explain more general type. 
+\note{ How to denote this general type? $T^{**}$}???
+\el
 
 \head{Validity}
 
+
 \begin{proof}
+
 \prf{
+\eqclass{x}{R} \reuz y \in \eqclass{x}{R} & \Eqv{{\sc Restrict} and def}\\
+\core~x \reuzestar y \in \para{ \core~x}\\
+\text{define $C x^*_0 \dots x^*_n = \core~x$, prim types are constrs with 0 arity}
+}
+
+
+\note{This is the old proof, check whether it's still up to date.}
+
+For any $x^*$:
+\prf{
+x^* \reuzestar y \in \para{x^*}\\
 }
 \end{proof}
 
+
+\begin{proof} 
+{\bf case} $x = *_T$:\\
+\prf{
+*_T \reuzestar y 	\in \para{*_T}
+& \Eqv{{\sc $\reuzestar$-Def}}\\
+y 				\in \para{*_T}		
+& \Eqv{{\sc $\para{\hole}$-Def}}\\
+y 				\in \setof{t}{t \tp T}	
+& \FFr{$y \tp T$} \\
+True 
+}
+
+
+{\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C~y_0 \dots y_n$\\
+Induction Hypothesis is $x^*_i \reuzestar y_i \in \para{x*_i}$ \note{How to make this first step a bit nicer?}
+\prf{
+C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}\\
+				 \Eqv{{\sc $\reuzestar$-Def}}\\
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n \reuzestar y_n) \in \para{C~x^*_0 \dots x^*_n}\\
+				 \Eqv{{\sc $\para{\hole}$-Def}}\\
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n \reuzestar y_n) \in  \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} \\
+				 \Eqv{Induction Hypothesis}\\
+True
+}
+
+{\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C'~y_0 \dots y_m$, with $C \neq C'$\\
+\prf{
+C~x^*_0 \dots x^*_n \reuzestar C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n}\\
+		\Eqv{{\sc $\reuzestar$-Def}}\\
+default (C~x^*_0 \dots x^*_n) \in \para{C~x^*_0 \dots x^*_n}\\
+		\Eqv{{\sc $default$-Valid}}\\
+True
+}
+\end{proof}
+
+
+
+
 \head{Idempotency}
 
-\begin{proof}
+Similar story:
+\xprlab{y \in \eqclass{x}{R} \imp \eqclass{x}{R} \reuz y = y}	{$\reuz$-Idem} 
+
 \prf{
+y \in \eqclass{x}{R} \imp \eqclass{x}{R} \reuz y = y& \Eqv{{\sc Restrict} and def}\\
+y \in \para{ \core~x} \imp \core~x \reuzestar y = y\\
 }
+
+\note{also old proof, needs checking}
+
+Again, we prove a more general thing: $y \in \para{x} \imp x \reuzestar y = y$.
+
+Structural induction on $x$:
+
+\begin{proof}
+{\bf case} $x = *_T$:\\
+\prf{
+y \in \para{*_T} \imp {*_T \reuzestar y = y} & \FFr{how do we call this?}\\
+*_T \reuzestar y = y	& \Eqv {\sc $\reuzestar$-Def}\\
+y = y				& \Eqv{reflexivity of $=$} \\
+True					
+}
+
+{\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C~y_0 \dots y_n$\\
+Induction Hypothesis is 
+$y^i \in \para{x*^i} \imp  x^*_i \reuzestar y_i = y_i$\\
+\prf{
+x \reuzestar y = y
+				& \Eqv{definitions of $x$ and $y$}\\
+C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n = C~y_0 \dots y_n
+				& \Eqv{{\sc $\reuzestar$-Def}}\\
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n  \reuzestar y_n) = C~y_0 \dots y_n
+				& \FFr{$n$ times {\sc Leibniz}}\\
+x^*_0 \reuzestar y_0 = y_0  \land \dots \land  x^*_n \reuzestar y_n = y_n
+				& \Eqv{Induction Hypothesis}\\
+y_0 \in \para{x^*_0} \land \dots \land y^n \in \para{x^*_n}
+				& \FFr{property of set comprehension}\\
+C~y_0 \dots y_n \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
+				& \Eqv{{\sc $\para{\hole}$-Def}}\\
+C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}
+				& \Eqv{definitions of $x$ and $y$}\\
+y \in \para{x}
+}
+
+The third case will not occur.
+
+{\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C'~y_0 \dots y_m$, with $C \neq C'$\\
+%\prf{
+%y \in \para{x}
+%				& \Eqv{definitions of $x$ and $y$}\\
+%C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} 
+%				& \Eqv{{\sc $\para{\hole}$-Def}}\\
+%C'~y_0 \dots y_m \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in %\para{x^*_n}} 
+%				& \Eqv{property of set comprehension}\\
+%\exists x_0 \dots x_n : C'~y_0 \dots y_m = C'~x_0 \dots x_n 
+%				& \Eqv{$C \neq C'$}\\
+%False
+%				& \Imp{This step seems a bit uncommon}\\
+%x \reuzestar y = y
+%}
 \end{proof}
 
 \head{Closeness}
@@ -901,11 +1100,25 @@ A bit vague. Better reuse gets closer.
 
 
 
+
+
+
+
+
 %																
 %																
 %																
 \section{Combining two layers}  \label{sect:combinedExtra}
 
+
+Problems:
+\bl
+\o Classes of C
+\o $Level\M$
+\o proofs with existentials
+\o absorption too strong
+\o notation for compute
+\el
 
 Notes:
 \bl
@@ -924,7 +1137,213 @@ Want to model a layered architecture. bla bla. First split this one in two. An i
 
 \head{$present$ and $interpret$}
 
+Relations are compositions of upper and higher relations: ($Interpret$ and $Present$ are total in left ...)
 
+
+\xpr{
+\Present\C = \Present\L \oo \Present\H\\
+\Interpret\C = \Interpret\H \oo\Interpret\L
+}\note{symbol?}
+
+\bl
+\o We need to know that classes are okay and that $Interpret$ is total, etc (for all assumptions not enforced by {\sc InterPresent}
+\o Then we can model these relations as functions between classes.
+\el
+
+\head{Are classes okay?}
+
+Before we can say we have $\present\C$ and $\interpret\C$, we need to establish that the combined relations work on equivalence classes.
+
+\bl
+\o Classes for $\Present$: $\Eqcl{\Level\H}{CH^P}$ and $\Eqcl{\Level\L}{CL^P}$
+\o Classes for $\Interpret$: $\Eqcl{\Level\H}{CH^I}$ and $\Eqcl{\Level\L}{CL^I}$
+\o prove that all are equivalence classes?
+\o $\Eqcl{\Level\H}{CH^P}$ equal to $\Eqcl{\Level\H}{CH^I}$
+\o $\Eqcl{\Level\L}{CL^P}$ equal to (on range) $\Eqcl{\Level\L}{CL^I}$
+\o Do we also need following? 
+\o $h' \in \eqcl{h}{HH} \imp h' \in \eqcl{h}{CH^P}$
+\o $h' \in \eqcl{h}{HH} \imp h' \in \eqcl{h}{CH^P}$
+\o $l' \in \eqcl{l}{LL} \imp l' \in \eqcl{l}{CL^I}$
+\o $l' \in \eqcl{l}{LL} \imp l' \in \eqcl{l}{CL^I}$
+\o maybe we can say something about lower level stuff, even if  $l$ is not valid.
+\o These might be straightforward
+\o comment: keep things separated unless they have to be eq. because of some rule.
+\el
+
+
+\head{Higher classes:}
+
+We use interpresent for the combined relation we have interpresent: (don't have it on functions yet)
+\prf{
+l~\Present\C~h\\
+	\Eqv{Def. $\Present\C$}\\
+\exists m : l~\Present\L~m \land m~\Present\H~h\\
+	\Imp{{\sc InterPresent} on higher and lower relations}\\
+\exists m : m~\Interpret\L~l \land h~\Interpret\H~m\\
+	\Eqv{Def. $\Interpret\C$ (and commutativity of $\land$)}\\
+h~\Interpret\C~l\\
+}
+
+The higher level class arising from $Present$:
+
+\xpr{
+\eqcl{h}{H} = \setof{h'}{\exists l : l~\Present~h \land l~\Present~h'}
+}
+must be equivalent to the one arising from $Interpret$:
+\xpr{
+\eqcl{h}{H} = \setof{h'}{\exists l : h~\Interpret~l \land h'~\Interpret~l}
+}
+
+Which can be stated as:
+
+\xpr{
+\forall h : \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'} \equ
+\setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}
+}
+
+We prove the two directions:
+
+$h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}$\\
+$\imp$\\
+$h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}$
+
+
+\prf{
+h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}\\
+	\Eqv{property of set comprehension, let $l_0$ be blabla}\\
+l_0~\Present\C~h \land l_0~\Present\C~h'\\
+%	\Eqv{Def. $\Present\C$}\\
+%(\exists m : l_0~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_0~\Present\L~m' \land %m'~\Present\H~h')\\
+%	\Imp{{\sc InterPresent} on higher and lower relations}\\
+%(\exists m : m~\Interpret\L~l_0 \land h~\Interpret\H~m) \land (\exists m' : m'~\Interpret\L~l_0 \land %h'~\Interpret\H~m')\\
+%	\Eqv{Def. $\Interpret\C$ (and commutativity of $\land$)}\\
+	\Imp{Interpresent on relation}\\
+h~\Interpret\C~l_0 \land h'~\Interpret\C~l_0\\
+	\Eqv{property of set comprehension}\\
+h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}
+}
+
+And:
+
+$h' \in \setof{h'}{\exists l : l~\Present\C~h \land l~\Present\C~h'}$\\
+$\ffr$ direction\\
+$h' \in \setof{h'}{\exists l : h~\Interpret\C~l \land h'~\Interpret\C~l}$
+
+\prf{
+(\exists m : h~\Interpret\H~m \land m~\Interpret\L~l_0) \land (\exists m' : h'~\Interpret\H~m' \land m'~\Interpret\L~l_0)\\
+		\Imp{{\sc \interpret-Char} on $\interpret\H$ and $\interpret\L$ + dropped $\exists$ for now}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \bc \land \eqcl{m_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \land 
+\eqcl{h'}{HH} = \interpret\H~\eqcl{m'_0}{HL} \bc \land \eqcl{m'_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec\\
+		\Imp{the property we need}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}  \bc \land  \eqcl{m_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \land
+\eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH} \bc \land \eqcl{m'_0}{LH} = \interpret\L~\eqcl{l_0}{LL} \ec \\
+		\Imp{define $l_1$ s.t. $\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH}$ and $\eqcl{m_1}{LH} = \eqcl{m'_1}{LH}$}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH} \land
+\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH} \land \eqcl{l_1}{LL} = \present\L~\eqcl{m'_1}{LH} \\
+%		\Imp{}\\
+%\eqcl{l_1}{LL} = \present\L~\eqcl{m_1}{LH} \land \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH} \land
+%\eqcl{l_1}{LL} = \Present\L~\eqcl{m'_1}{LH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'}{HH}\\
+		\Imp{{\sc \present-Char} on $\present\H$ and $\present\L$}\\
+(\exists m : l_1~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_1~\Present\L~m' \land m'~\Present\H~h')\\
+}\note{add existential quantifiers}
+
+We need:
+\xpr{
+\forall m : \forall m_0, m_0' \in \eqcl{m}{LH} & ~: & \exists m_1,m'_1 : \eqcl{m_1}{LH} = \eqcl{m'_1}{LH}\\
+  &\land     &\eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL}\\
+  &\land ~&\eqcl{m'_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m'_0}{HL}
+}
+
+or, more easily useable in proof:
+
+
+\xprlab{
+\forall m : \forall m_0, m_0' \in \eqcl{m}{LH} & ~: & \exists m_1,m'_1 : \eqcl{m_1}{LH} = \eqcl{m'_1}{LH}\\   &\land   &\eqcl{h}{HH} = \interpret\H \eqcl{m_0}{HL} \imp \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}\\
+  &\land ~&\eqcl{h'}{HH} = \interpret\H \eqcl{m'_0}{HL} \imp \eqcl{m'_1}{HL} = \present\H ~\eqcl{h'}{HH} 
+}{Property}
+
+
+{\sc Absorption} implies this condition. The more relaxed {\sc Compatible} condition implies {\sc Property} for valid $m$, but needs a different clause for non-valid $m$.
+
+{\sc Property} together with a reverse {\sc Orthogonal} is enough to prove {\sc Pres-Inert} (although the proof may be tricky).
+
+What is the intuitive meaning of {\sc Property}? Is there a condition that is enough for easy proof of {\sc Pres-Inert} and which also implies {\sc Property}?
+
+\head{Lower classes:}
+
+Assume $\exists h: l~\Present\C~h$
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+}
+
+equiv. to
+
+\xpr{
+\eqcl{l}{L} = \setof{l'}{\exists h,h',h'' : h~\Interpret\C~l \land h~\Interpret\C~l' \land l'~\Present\C~h' \land l~\Present\C~h''}
+}
+\note{do we have both $l'~\Present\C~h'$ and $l~\Present\C~h''$?}
+
+$\imp$ is clear from {\sc InterPresent}
+
+\prf{
+l' \in \setof{l'}{\exists h,h',h'' : h~\Interpret\C~l \land h~\Interpret\C~l' \land l'~\Present\C~h' \land l~\Present\C~h''}\\
+	\Eqv{property of set comprehension + comm. $\land$}\\
+h_0~\Interpret\C~l \land l~\Present\C~h''_0 \land h_0~\Interpret\C~l' \land l'~\Present\C~h'_0\\
+	\Imp{$h~\Interpret\C~l \land l~\Present\C~h' ~\imp~ l~\Present\C~h$}\\
+l~\Present\C~h_0 \land l'~\Present\C~h_0\\
+	\Imp{}\\
+\eqcl{l}{L} = \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+%
+%l_0~\Present\C~h \land l_0~\Present\C~h'\\
+%	\Eqv{Def. $\Present\C$}\\
+%(\exists m : l_0~\Present\L~m \land m~\Present\H~h) \land (\exists m' : l_0~\Present\L~m' \land %m'~\Present\H~h')\\
+%	\Imp{{\sc Interpresent} on higher and lower}\\
+%(\exists m : m~\Interpret\L~l_0 \land h~\Interpret\H~m) \land (\exists m' : m'~\Interpret\L~l_0 \land %h'~\Interpret\H~m')\\
+}
+Problems: we need interpresent on $l$ and $l'$, they follow from def. of class. Figure out details on this. 
+\xprlab{
+\forall m : \forall m_0, m_0' \in \eqcl{m}{LH} & ~: & \exists m_1,m'_1 : \eqcl{m_1}{LH} = \eqcl{m'_1}{LH}\\   &\land   &\eqcl{h}{HH} = \interpret\H \eqcl{m_0}{HL} \imp \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}\\
+  &\land ~&\eqcl{h'}{HH} = \interpret\H \eqcl{m'_0}{HL} \imp \eqcl{m'_1}{HL} = \present\H ~\eqcl{h'}{HH}\\
+  &\land & something~like~~  {\bf valid}~m \imp \dots
+}{Property}
+
+{\sc Compatible} implies this condition.
+
+Lemma: (figure out quantifications)\\ 
+$h~\Interpret\C~l \land (\exists h' : l~\Present\C~h') ~\imp~ l~\Present\C~h$
+
+\prf{
+%	\Imp{{\sc InterPresent} on higher and lower for $l'$}\\
+%h_0~\Interpret\C~l \land l'~\Present\C~h_0\\
+%	\Imp{{\sc InterPresent} on higher and lower for $l'$}\\
+%l~\Present\C~h_0 \land l'~\Present\C~h_0\\
+%	\Eqv{property of set comprehension}\\
+%l' \in \setof{l'}{\exists h : l~\Present\C~h \land l'~\Present\C~h}
+h~\Interpret\C~l \land (\exists h' : l~\Present\C~h')\\
+	\Imp{let $h'_0$ to be that $h'$}\\
+h~\Interpret\C~l \land l~\Present\C~h'_0\\
+	\Imp{Def of $\Interpret\C$ \&  $\Present\C$ + remove $\exists$}\\
+h~\Interpret\H~m_0 \land m_0~\Interpret\L~l \land l~\Present\L~m'_0 \land  m'_0~\Present\H~h'_0\\
+		\Imp{{\sc \interpret-Char} and {\sc \interpret-Char} on high and low + leaving out some bits}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \land \eqcl{m'_0}{HL} = \present\H~\eqcl{h'_0}{HH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{{\sc InterPresent}}\\
+\eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \land \eqcl{h'_0}{HH} = \interpret\H~\eqcl{m'_0}{HL} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{{\sc Property}}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'_0}{HH} \land \eqcl{m_1}{LH} = \eqcl{m'_1}{LH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH}\\
+	\Imp{we need $\eqcl{m_1}{LH} = \eqcl{m'_0}{LH}$ or $\eqcl{m'_1}{LH} = \eqcl{m'_0}{LH}$}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} \land \eqcl{m'_1}{HL} = \present\H~\eqcl{h'_0}{HH} \land \eqcl{m_1}{LH} = \eqcl{m'_1}{LH} ~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m_1}{LH}\\
+	\Imp{}\\
+\eqcl{m_1}{HL} = \present\H~\eqcl{h_0}{HH} ~~~~~~\land \eqcl{l}{LL} = \present\L~\eqcl{m_1}{LH}\\
+	\Imp{}\\
+l~\Present\L~m_1 \land m_1~\Present\H~h\\
+	\Imp{}\\
+l~\Present\C~h
+}
+
+
+
+\head{bla}
 We have: 
 
 \xpr{
@@ -934,7 +1353,7 @@ We have:
 \interpret\L  &\tp& \Eqcl{ \Level\L}{LL} \rightarrow \Eqcl{\Level\M}{LH}\\
 }
 
-Middle level type is equal, but the equivalence relations are very likely to be different. ($\eqr\HL \neq \eqr\LH$)
+Middle level type is equal, but the equivalence relations are very likely to be different. ($HL \neq LH$)
 
 We define a combined present and interpret as functions between eq. classes: (similar to Section~\ref{sect:singleExtra})
 
@@ -943,8 +1362,7 @@ We define a combined present and interpret as functions between eq. classes: (si
 \interpret\C &\tp& \Eqcl{ \Level\L}{CL} \rightarrow \Eqcl{\Level\H}{CH}
 }
 
-Again it is likely that  $\eqr\CH \neq \eqr\HH$ and $\eqr\CL \neq \eqr\LL$.
-
+Again it is likely that  $CH \neq HH$ and $CL \neq LL$.
 
 All classes together:
 \xpr{
@@ -953,13 +1371,48 @@ All classes together:
                                 &                   & \Eqcl{\Level\M}{LH} & ~~\rightarrow~~ & \Eqcl{\Level\L}{LL}\\
 }
 
-The definition of $\present\C$ and $\interpret\C$ : 
+
+
+%old notation with $\bigcup$:
+%
+%\xpr{
+%\present\C~H & \equ & \bigcup~\setof{ present\L~\eqcl{m}{LH}~} {~ h \in H \land \eqcl{m}{HL} = %\present\H~\eqcl{h}{HH}}\\
+%\interpret\C~L & \equ & \bigcup~\setof{ interpret\H~\eqcl{m}{HL}~} {~ l \in L \land \eqcl{m}{LH} = %\interpret\L~\eqcl{l}{LL}}\\
+%%\interpret~\level\L & \equ & \{ \level\H \:|\: \level\H \in \interpret\H~\level\M \land \level\M \in %%\interpret\L~\level\L \}\\
+%}
+\note{use $\exists$ before $h$ in set comprehension?}
+The definition of $\present\C$ and $\interpret\C$: \note{spacing around $H$ is weird}
+\xpr{
+\present\C~H & \equ & \setof{l}{h \in H \land \exists m : \eqcl{l}{LL} = present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = present\H~\eqcl{h}{HH}}\\
+\interpret\C~L & \equ & \setof{h}{l \in L \land \exists m : \eqcl{h}{HH} = interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}}
+}
+
+explanation of def.
 
 \xpr{
-\present\C~H & \equ & \bigcup~\setof{ present\L \eqcl{m }{LH}~} {~ h \in H \land m \in \present\H \eqcl{h}{HH}}\\
-\interpret\C~L & \equ & \bigcup~\setof{ interpret\H \eqcl{m }{HL}~} {~ l \in L \land m \in \interpret\L \eqcl{l}{LL}}\\
-%\interpret~\level\L & \equ & \{ \level\H \:|\: \level\H \in \interpret\H~\level\M \land \level\M \in %\interpret\L~\level\L \}\\
+\present\C~H \\
+	\Eqv{need a name for this one}\\
+\setof{l}{h \in H \land l~Present\C~h}\\
+	\Eqv{$Present\C \eqv Present\L \oo Present\H$}\\
+\setof{l}{h \in H \land \exists m : l~Present\L~m \and m~Present\H~h}\\
+	\Eqv{\sc \present-Char}\\
+\setof{l}{h \in H \land \exists m : \eqcl{l}{LL} = present\L~\eqcl{m}{LH} \and \eqcl{m}{HL} = present\H~\eqcl{h}{HH}}\\
+%	\Eqv{}\\
+%\present~H = \setof{l}{h \in H \land l \in Present~h}\\
 }
+
+Implications: $\imp$ follows from def.
+
+\xpr{
+%l \in \eqcl{\level\L}{CL} \imp \exists m,h : \eqcl{l}{LL} = \present\L~\eqcl{m0}{LH} \land %\eqcl{m}{HL} = \present\H~\eqcl{h}{HH} \land h \in \eqcl{\level\H}{CH} ??
+\eqcl{l}{CL} = \present\C~\eqcl{h}{CH} ~\imp\\ 
+\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
+\text{and}\\
+\eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL} ~\imp\\
+\exists m : \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}
+}
+
+Reverse ($\ffr$) is tricky:
 
 Kleisli:
 
@@ -968,87 +1421,119 @@ Kleisli:
 \interpret & \equ &(\interpret\H  \oo \eqcl{\hole}{HL}) \klei  (\interpret\L  \oo \eqcl{\hole}{LL})
 }
 
-When are the results of these equivalence classes?
 
 \head{Equivalence classes for combination}
 
 \bl
 \o combining presents and interprets may affect classes. 
 \o example of this
+\o both defs, final class is union of eq. classes. 
+\o Are classes from def disjoint? Should be, otherwise no eq. class. 
+\o classes can be merged, so still equivalence classes (not star classes, but not req. as long as $\reuz$ is not used on these classes)
 \o sometimes interpret is no longer okay for present, since its classes are too coarse
 \o when doesn't this happen?
 \el
 
-Maybe
+Unclear:
 \bl
+\o What are requirements on classes. upper are equal? lower pres $\leq$ lower intr?
+\o Which of these reqs are implied by interpresent?
 \o if no longer works, then interpresent also fails, so if we have interpresent for combination, then classes are okay? 
-\o does not prevent classes of present from getting to big
+\o How do we know that classes did not get to big?
+\el
+
+Idea:
+\bl
+\o pres and int combinations imply classes
 \el
 
 \head{Presentation invariant}
 
-Presentation invariant for combination $\eqcl{l}{CL} = \present\C \eqcl{h}{CH}$ is equivalent to:
+Presentation invariant for combination $\level\L~\Present\C~ \level\H$ or
+ $\eqcl{l}{CL} = \present\C \eqcl{h}{CH}$ is equivalent to:
 
 \xprlab{
-\eqcl{\level\L}{CL} = \bigcup~\setof{ present\L \eqcl{m }{LH}~} {~ h \in \eqcl{\level\H}{CH} \land m \in \present\H \eqcl{h}{HH}}\\
+\eqcl{\level\L}{CL} = \setof{l}{h \in \eqcl{\level\H}{CH} \land \exists m : \eqcl{l}{LL} = present\L~\eqcl{m}{LH} \and \eqcl{m}{HL} = present\H~\eqcl{h}{HH}}\\
 }{Present}
 
 Which implies there is a $\level\M$ such that {\sc Present} holds between $\level\H$ and $\level\M$, as well as between $\level\M$ and $\level\L$:
 
 \xpr{
-%l \in \eqcl{\level\L}{CL} \imp \exists m,h : \eqcl{l}{LL} = \present\L \eqcl{m0}{LH} \land %\eqcl{m}{HL} = \present\H \eqcl{h}{HH} \land h \in \eqcl{\level\H}{CH} ??
-\exists \level\M : \eqcl{\level\L}{LL} = \present\L \eqcl{\level\M}{LH} \land \eqcl{\level\M}{LL} = \present\H \eqcl{\level\H}{HH}
+%l \in \eqcl{\level\L}{CL} \imp \exists m,h : \eqcl{l}{LL} = \present\L~\eqcl{m0}{LH} \land %\eqcl{m}{HL} = \present\H~\eqcl{h}{HH} \land h \in \eqcl{\level\H}{CH} ??
+\exists \level\M : \eqcl{\level\L}{LL} = \present\L~\eqcl{\level\M}{LH} \land \eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH}
 }
-
-
-%\xpr{
-%\exists \level\M: \level\L \in \present\L~\level\M \wedge \level\M \in \present\H~\level\H\\
-%}
-
 
 
 \head{InterPresent}
 
 Using interpresent on both parts of the combined layer:
 
-\xprlab{
-\eqcl{m}{HL} = \present\H~\eqcl{h}{HH} \imp \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL}
+We prove:
+
+\prf{
+\eqcl{l'}{CL} = \present\C~\eqcl{h'}{CH}\\
+	\Imp{corollary}\\ 
+\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h'}{HH}\\
+	\Imp{{\sc InterPresent} on higher and lower}\\
+\exists m : \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = interpret\L~\eqcl{l}{LL} \\ 
+	\Imp{corollary (with equivalences instead of implications}\\
+\eqcl{h'}{CH} = \interpret\C~\eqcl{l'}{CL}\\
 }
 
-and
-
-\xprlab{
-\eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \imp \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}
-}
-
-
-we want to get:
-
-\xprlab{
-\eqcl{l}{CL} = \present\C~\eqcl{h}{CH} \imp \eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL}\\
-}{InterPresent}
-
-Which is not true. But if the lower layer in the combination is always a single layer, and we do not use interpresent on the higher layer, then we don't need it on the combined layer.
+% or say l \in {set def of interpret}
+% => l in interpret =>{eq. classes are okay} [l] = interpret
 %
-%\begin{proof}
-%\prf{
-%\level\L \in \present~\level\H 
-%		& \Imp{definition of $present$} \\
-%\exists \level\M : \level\L = \present\L~\level\M \land \level\M = \present\L~\level\H 
-%		& \Imp{\sc InterPresent-H} \\
-%\exists \level\M : \level\L = \present\L~\level\M \land \level\H \in \interpret\H~\level\M
-%		& \Imp{\sc InterPresent-L} \\
-%\exists \level\M : \level\M = \interpret\L~\level\L \land \level\H \in \interpret\H~\level\M 
-%		& \Imp{definition of $interpret$} \\
-%\level\H \in \interpret~\level\L
-%}
-%\end{proof}
+%	\Eqv{def. of combination}\\
+%\eqcl{l'}{CL} = \setof{l}{\exists h \in \eqcl{h'}{CH} : \exists m : \eqcl{l}{LL} = present\L~\eqcl{m}{LH} %\land \eqcl{m}{HL} = present\H~\eqcl{h}{HH}}\\
+%	\Imp{}\\
+%\forall l \in \eqcl{l'}{CL} : \exists h \in \eqcl{h'}{CH} : \exists m :  l \in \eqcl{l'}{CL} \land 
+%   \eqcl{l}{LL} = present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\ 
+%	\Imp{{\sc InterPresent} on higher and lower}\\
+%\forall h \in \eqcl{h'}{CH} : \exists m,l :  l \in \eqcl{l'}{CL} \land 
+%   \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = interpret\L~\eqcl{l}{LL} \\ 
+%	\Imp{}\\
+%	\Imp{}\\
+%
 
+About the proof:
+\xpr{
+h \in \interpret\C~\eqcl{l}{LL}			& \Imp{higher class for $Interpret\C$ includes $\eqcl{}{H}$}\\
+h \in \interpret\C~\eqcl{l}{CL}			& \Imp{lower class for $Interpret\C$ is same as for $Present$}\\
+\eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL}\\
+}
 
+\head{old stuff}
+Probably $\eqcl{h}{CH} \subset \interpret\C~\eqcl{l}{CL}$ is straightforward, but we also need to prove that the class from interpret does not get too big.
+
+Interpret's lower class may be bigger than present's, but higher must be equal.
+
+Prove that classes do not get bigger?
+
+\prf{
+h \in \eqcl{h'}{CH}\\
+	\Imp{ previous proof, existentials in proof?}\\
+\exists m,l :  l \in \eqcl{l'}{CL} \land 
+   \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = interpret\L~\eqcl{l}{LL} \\ 
+	\Imp{??}\\
+h \in \setof{ interpret\H~\eqcl{m}{HL}~} {~ l \in \eqcl{l'}{CL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}}\\
+	\Imp{??}\\
+h \in \bigcup~\setof{ interpret\H~\eqcl{m}{HL}~} {~ l \in \eqcl{l'}{CL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}}\\
+}
+
+If we use interpresent on relations, this proof might be easier, since we don't need to do it for entire class? \xpr{
+\l~\Present\C~h \imp h~\Interpret\C~l\\
+vs\\
+\eqcl{l}{L} = \present\C~\eqcl{h}{H} \imp \eqcl{h}{H} = \interpret\C~\eqcl{l}{L}\\
+}
+
+Then we still need to say some things about the classes.
 
 \subsection{Editing}
 
 Pres inv holds for high and low, so we have $level\H$, $level\M$, and $level\L$:
+
+\note{How do we know/state that the $m$ that exists is our $level\M$?}
+
 
 \xpr{
 \eqcl{\level\L}{LL} = \present\L~\eqcl{\level\M}{LH} ~\land~
@@ -1056,8 +1541,7 @@ Pres inv holds for high and low, so we have $level\H$, $level\M$, and $level\L$:
 \level\L \leadsto \level'\L 
 }
 
-We need $level''\H$,  $level''\M$, and $level''\L$ that restore the invariant. \note{do we need to preserve medium? if apparent in H, or L, automatic, and if not maybe not necessary? Still, we probably do: eg. when med e.s is temporarily hidden, we don't want it to get lost}
-
+We need $level''\H$,  $level''\M$, and $level''\L$ that restore the invariant.
 
 Copied from single layer extra state section:
 
@@ -1069,33 +1553,28 @@ We need:
 \xpr{
 \level''\L~\Present~ \level''\H 		& \jstf{Postcondition}\\
 \level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit (+pres. lower extr.st.?)}\\
-%(\exists h : \eqcl{\level'\L}{L} = \present~\eqcl{h}{H}) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
-(\exists h : \level'\L~\Present~h) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
 \level'\L~\Present~\level\H \imp \level''\H = \level\H & \jstf{{\sc Doc-Inert}}\\
+(\exists h : \level'\L~\Present~h) \imp \level''\L = \level'\L	& \jstf{{\sc Pres-Inert}}\\
 \level''\H~\text{"close to"}~\level\H & \jstf{preserve higher es}\\
 }
 
 
 Solution is these computations:
 
-%\xpr{
-%\interpret\L^* \tp \Level\L \times \Level\M \rightarrow \Level\M\\
-%\interpret\H^* \tp \Level\M \times \Level\H \rightarrow \Level\H\\
-%\present\H^* \tp \Level\H \times \Level\M \rightarrow \Level\M\\
-%\present\L^* \tp \Level\M \times \Level\L \rightarrow \Level\L\\
-%}
 
-\xprlab{
-\level''\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{bLH}   \level\M  \\
-\level''\H = (\interpret\H~ \eqcl{\level'\M}{LH})  \reuze{HH}   \level\H  \\
-\level''\M = (\present\H~ \eqcl{\level''\H}{HH})   \reuze{HL}   \level'\M\\
-\level''\L = (\present\L~ \eqcl{\level''\M}{LH})   \reuze{LL}   \level'\L
-}{Compute}
+%\xprlab{
+%\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
+%\level''\H = (\interpret\H~ \eqcl{\level'\M}{LH})  \reuze{HH}   \level\H  \\
+%\level''\M = (\present\H~ \eqcl{\level''\H}{HH})   \reuze{HL}   \level'\M\\
+%\level''\L = (\present\L~ \eqcl{\level''\M}{LH})   \reuze{LL}   \level'\L
+%}{Compute}
 
 \xprlab{
 compute^{intr}:
 \level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
 \level'\H = compute^{intr}\H \level'\M  \level\H \\
+\\
+\level''\H = \level'\H\\
 \\
 compute^{pres}:
 \level''\M = compute^{pres}\H \level''\H  \level'\M\\
@@ -1113,81 +1592,314 @@ not exactly the same. Upper is the same, but lower is split. Kind of nested: low
 
 Mention that this can be made more uniform by always using $level' = \interpret$ and add $\level''\H = \level'\H$?
 
-\bc more uniform:
-\interpret\L^* \tp \Level\L \times \Level\M \rightarrow \Level\M\\
-\level'\M = \interpret\L^* (\level'\L,\level\M)\\ 
-\interpret\H^* \tp \Level\M \times \Level\H \rightarrow \Level\H\\
-\level''\H = \interpret\H^* (\level'\M,\level\H)\\ 
-\present\H^* \tp \Level\H \times \Level\M \rightarrow \Level\M\\
-\level''\M = \present\H^* (\level''\H, level'\M)
-\present\L^* \tp \Level\M \times \Level\L \rightarrow \Level\L\\
-\level''\L = \present\L^* (\level''\H, level'\L)
-\ec
-
 \bl
-\o We want h'' s.t. l'' close to l
 \o Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
 \el
 
+We need something more to combine:
 
 \xprlab{
-\eqcl{m'}{LH} \reuze{LH} m \in \eqcl{m}{HL}}{Orthogonal}
+\eqcl{m'}{HL} = \eqcl{m}{HL} ~\imp~ \eqcl{m'}{LH} \reuze{LH} m \in \eqcl{m}{HL}}{Orthogonal}
 
-
-\xprlab{
-m' \in \eqcl{m}{HL} ~\imp~ \eqcl{m'}{LH} \reuze{LH} m \in \eqcl{m}{HL}}{Weaker-Orthogonal}
 
 Different notation:
 \xprlab{
-m'~HL~m ~\imp~ \eqcl{m'}{LH} \reuze{LH} m~HL~m}{Weaker-Orthogonal}
+m'~HL~m ~\imp~ \eqcl{m'}{LH} \reuze{LH} m~HL~m}{Orthogonal}
+
+However, when reasoning about wildcard types, using the class might be more intuitive than using the relation. using $\eqcl{x}{R}$ means replacing some parts of $x$ by stars.
 
 
-\xprlab{
-\forall m \in [m_0]\LH : & (\exists h_0 : m = pres \eqcl{h_0}{HH}) \lor\\
-& (present\H \oo interpret\H) \eqcl{m}{HL} \subset \eqcl{m_0}{LH}}{Compatible}
 
-There should be an extra condition in compatible, or we can always prove $l''=l'$.
 
-\head{{\sc Pres-Inert}}
-
-If result of edit is presentation of something, it is unchanged by {\sc Compute}: \note{How to formulate this one?}
-
-\xpr{
-\exists h : level'\L \in \present~h \imp level''\L = level'\L
-}
-
-Unfortunately, this is not true:
-
-\xpr{
-\present\H x\ = (x,x)   & \hspace{1cm} & \present\L\ (x,y) = y \\
-\interpret\H\ (x,y) = x &                     & \interpret\L\ y = (*,y)\\
-}
-
-we have $1 \in present 1$, but according to compute: 
-
-\xpr{
-0			&		& (0,0)	  & \\ 
-\downarrow	&		& \uparrow & \downarrow\\
-(0,0)			&		& (0,1)	  & (0,0)\\
-\downarrow	&		& \uparrow & \downarrow\\
-0			&\leadsto	& 1		  & 0
-}
-
-\bl
-\o Counter-example
-\o L' Pres H0 (L' Pres M0 Pres H0), but result is L'' Pres H' with L' /= L''
-\o interpret gives M' for which L' Pres M' (we know there is one (M0), so it cannot fail to return one, bla)
-\o if higher interpret gives H' for which M' Pres H' then Extra says M'' = M' and L'' = L', so (not M' Pres H')
-\el
 
 \head{{\sc Doc-Inert}}
 
+TODO: fix existentials in proof
+
 $\level'\L ~\Present~\level\H \imp \level''\H = \level\H$\\
 
+\begin{proof}
+\prf{
+True						& \Imp{\sc Present}\\
+\level\M ~\Present\H~\level\H & \Eqv{\sc \present-Char} \\
+\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH} \\
+}
+
+\prf{
+\level'\L ~\Present\C~\level\H\\
+	\Eqv{{\sc \present-Char}}\\
+\eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}\\
+	\Imp{bla}\\ 
+\exists m : \eqcl{\level'\L}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H 
+\eqcl{\level\H}{HH}\\
+}
+
+Let $m_0$ be this $m$: we have
+
+$\eqcl{\level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$ and 
+$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$
+
+\prf{
+\present\L~\eqcl{m_0}{LH} & \Imp{{\sc InterPresent} on lower layer}\\ 
+\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}\\
+}
+
+\prf{
+\eqcl{m_0}{HL} & \Equ{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}\\
+\present\H~\eqcl{\level\H}{HH} & \Equ{\sc Present}\\
+\eqcl{\level\M}{HL}\\
+}
+
+So now we have:
+\xpr{
+\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}\\
+\eqcl{m_0}{HL} =\eqcl{\level\M}{HL}
+}
+First, we prove that $\level'\M~\Present\H~\level\H$
+
+\prf{
+\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH} \level\M\\
+	\Imp{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}$}\\
+\level'\M = \eqcl{m_0}{LH}  \reuze{LH}   \level\M\\
+	\Imp{{\sc Orthogonal} and $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$}\\
+\level'\M \in  \eqcl{\level\M}{HL}\\
+	\Eqv{{\sc Eq-Member}}\\
+\eqcl{\level'\M}{HL} = \eqcl{\level\M}{HL}\\
+	\Imp{{\sc Present} on lower layer, or prove this?}\\
+\eqcl{\level'\M}{HL} =  \present\H~\eqcl{\level\H}{HH}\\
+	\Eqv{{\sc \present-Char}}\\
+\level'\M~\Present\H~\level\H
+%\level'\M = interpret\L {level'\L}{LL} \reuze{LH} \level\M\\
+%\exists m : \level'\M = {m}{LH} \reuze{LH} \level\M
+}
+
+Now proof is easy:
+
+\prf{
+\level'\H\\
+\Equ{\sc Compute}\\
+compute^{intr}\H \level'\M  \level\H\\
+\Equ{$\level'\M~\Present\H~\level\H$ and {\sc Doc-Inert} on higher layer}\\
+\level\H\\
+}
+\end{proof}
 
 
 
 
+
+
+\head{{\sc Pres-Inert}}
+
+If result of edit is presentation of something, it is unchanged by {\sc Compute}:
+
+\xpr{
+(\exists h : level'\L~\Present\C~h) \imp level''\L = level'\L
+}
+
+Assume we have $h_0$ such that $level'\L~\Present\C~h_0$:
+
+\prf{
+level'\L~\Present\C~h_0\\
+	\Eqv{\sc \present-Char}\\
+\eqcl{level'\L}{CL} = \present\C~\eqcl{h_0}{CH}\\
+	\Imp{bla}\\
+\exists m : \eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h_0}{HH}\\
+}
+
+Let $m_0$ be the $m$ from the existential quantification:
+
+$\eqcl{level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$ and $\eqcl{m_0}{HL} = \present\H~\eqcl{h_0}{HH}$
+
+From assumption we know that interpret gets us in class of $m_0$
+
+\prf{
+\eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH} & \Imp{{\sc InterPresent} on lower layer}\\
+\eqcl{m_0}{LH} = \interpret\L~\eqcl{level'\L}{LL}
+}
+
+$\level'\M$ and $m_0$ are in same LH class.
+
+\prf{
+True\\
+	\Eqv{Compute}\\
+\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
+	\Imp{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{level'\L}{LL}$}\\
+\level'\M = \eqcl{m_0}{LH}  \reuze{LH}   \level\M  \\
+	\Imp{$\reuz$-Valid}\\
+\level'\M \in \eqcl{m_0}{LH}\\
+	\Imp{\sc Absorption}\\
+\level'\M \in \eqcl{m_0}{HL}\\
+	\Imp{{\sc Eq-Member}}\\
+\eqcl{\level'\M}{HL} = \eqcl{m_0}{HL}
+}
+
+And thus: $\exists h : \level'\M~Present\H~h$
+
+\prf{
+\eqcl{\level'\M}{HL} = \eqcl{m_0}{HL}\\
+	\Imp{$\eqcl{m_0}{HL} = \present\H~\eqcl{h_0}{HH}$}\\
+\eqcl{\level'\M}{HL} = \present\H~\eqcl{h_0}{HH}\\
+	\Eqv{\sc \present-Char}\\
+\level'\M~Present\H~h_0
+}
+
+Now by substituting from {\sc Compute}
+
+\prf{
+\level''\L\\
+			\Equ{\sc Compute}\\
+\present\L~ \eqcl{\level''\M}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{\sc Compute}\\
+\present\L~ \eqcl{compute^{pres}\H \level''\H~\level'\M}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{\sc Compute}\\
+\present\L~ \eqcl{compute^{pres}\H \level'\H~\level'\M}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{\sc Compute}\\
+\present\L~ \eqcl{compute^{pres}\H (compute^{intr}\H \level'\M  \level\H)~\level'\M}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{$\exists h : \level'\M~Present\H~h$ and {\sc Pres-Inert} on higher layer}\\
+\present\L~ \eqcl{\level'\M}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{$\eqcl{\level'\M}{LH} = \eqcl{m_0}{LH}$}\\
+\present\L~ \eqcl{m_0}{LH}  \reuze{LL}  \level'\L\\
+			\Equ{$\eqcl{level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$}\\
+\eqcl{level'\L}{LL}  \reuze{LL}  \level'\L\\
+			\Equ{$\reuz$-Idem}\\
+\level'\L
+}
+
+
+
+\head{Extra stuff for {\sc Pres-Inert}}
+
+\xprlab{
+\forall m : \eqcl{m}{LH} \subset \eqcl{m}{HL}}{Absorption}
+
+Absorption occurs when all lower es is inside higher es (and hence does not influence the document). Eq $(Int,(Int,*))$ is absorbed by  $(Int,(*,*))$ and $(Int,*)$, but also by $(Int,(Int,*))$.
+
+Absorption means that all higher es of lower layer gets absorbed by layer above. So only the highest layer can have doc extra state. This seems to strict.
+
+Problem: in one eq. class, can there be several situations? eg (*,*) \dbarr (), one absorbed, the other always valid (or other condition)
+
+Compatibility:
+\xprlab{
+\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \exists h: m~Present~h) \imp\\
+                   & \begin{array}[b]{@{}l@{}l@{}l}
+                      \forall m' \in \eqcl{m_0}{LH} :~&  (\exists h_0 : m = pres \eqcl{h_0}{HH})~\lor\\
+                    							& (present\H \oo interpret\H) \eqcl{m}{HL} \subset 			\end{array}
+\eqcl{m_0}{LH}}{Compatible}
+
+or if we define: ${\bf valid}~l \eqv \exists h : \eqcl{l}{L} present \eqcl{h}{H}$ (note that this is on {\em a} layer, not on higher or lower)
+
+\xprlab{
+\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : {\bf valid}~m) \imp\\
+                   & \begin{array}[b]{@{}l@{}l@{}l}
+                       \forall m' \in \eqcl{m_0}{LH} : ~ & {\bf valid}~m~\lor\\
+									&(present\H \oo interpret\H) \eqcl{m}{HL} \subset \eqcl{m_0}{LH}
+			\end{array}
+}{Compatible}
+
+Lambert:
+\xprlab{
+\forall m_0 : \forall m,m' : {\bf valid}~m \land \lnot {\bf valid}~m' ~~\imp \dots \subset \dots
+}
+
+% single layer:
+%\level''\L\\
+%			\Equ{\sc Compute}\\
+%\present~ \eqcl{\level''\H}{H}   ~\reuz~   \level'\L\\
+%			\Equ{\sc Compute}\\
+%\present~ \eqcl{(\interpret~ \eqcl{\level'\L}{L}  ~\reuz~  \level\H)}{H}   ~\reuz~   \level'\L\\
+%			\Equ{assumption}\\
+%\present~ \eqcl{(\interpret~(\present~\eqcl{h}{H})  ~\reuz~  \level\H)}{H}   ~\reuz~   \level'\L\\
+%			\Equ{\sc InterPresent }\\
+%\present~ \eqcl{(\eqcl{h}{H}  ~\reuz~   \level\H)}{H}   ~\reuz~   \level'\L\\
+%			\Equ{ $\eqcl{\eqcl{x}{R}  ~\reuz~  y}{R}  = \eqcl{x}{R}$}\\
+%\present~\eqcl{h}{H}  ~\reuz~  \level'\L\\
+%			\Equ{ assumption}\\
+%\eqcl{\level'\L}{L}~\reuz~  \level'\L\\
+%			\Equ{ {\sc $\reuz$-Idem} and $\level'\L \in \eqcl{\level'\L}{L}$ }\\
+%\level'\L
+
+
+
+
+
+
+%Unfortunately, this is not true:
+%
+%\xpr{
+%\present\H x\ = (x,x)   & \hspace{1cm} & \present\L\ (x,y) = y \\
+%\interpret\H\ (x,y) = x &                     & \interpret\L\ y = (*,y)\\
+%}
+%
+%we have $1 \in present 1$, but according to compute: 
+%
+%\xpr{
+%0			&		& (0,0)	  & \\ 
+%\downarrow	&		& \uparrow & \downarrow\\
+%(0,0)			&		& (0,1)	  & (0,0)\\
+%\downarrow	&		& \uparrow & \downarrow\\
+%0			&\leadsto	& 1		  & 0
+%}
+%
+%\bl
+%\o Counter-example
+%\o L' Pres H0 (L' Pres M0 Pres H0), but result is L'' Pres H' with L' /= L''
+%\o interpret gives M' for which L' Pres M' (we know there is one (M0), so it cannot fail to return one, bla)
+%\o if higher interpret gives H' for which M' Pres H' then Extra says M'' = M' and L'' = L', so (not M' Pres H')
+%\el
+
+
+\section{Some notes on compute:}
+
+with a $compute^{intr}$, we can specify {\sc Doc-Inert} nicely: (or more exactly, a property from which doc-inert follows)
+
+$l~\Present~h \imp compute^{intr} (l,h) = h$
+
+And maybe also:
+
+$\forall h : l'~\Present~h' \imp compute^{pres}( compute^{intr} (l',h), l' ) = l'$ 
+
+or curried and with arguments swapped:
+
+$\forall h : l~\Present~h' \imp compute^{pres} l (compute^{intr} h~l) = l'$ 
+ 
+$\forall h : l~\Present~h' \imp (compute^{pres} l) \oo (compute^{intr} h) = l'$ 
+
+With these functions, {\sc Compute} is
+
+\xprlab{
+compute^{intr}:\\
+\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
+\level'\H = compute^{intr}\H  \level\H \level'\M\\
+\\
+compute^{pres}:\\
+\level''\M = compute^{pres}\H  \level'\M \level''\H\\
+\level''\L = (\present\L~ \eqcl{\level''\M}{LH})   \reuze{LL}   \level'\L
+}{Compute}
+
+Or:
+
+\xprlab{
+compute^{intr}:\\
+\level'\M = compute^{intr}\L  \level\M \level'\L\\
+\level'\H = compute^{intr}\H  \level\H \level'\M\\
+\\
+compute^{pres}:\\
+\level''\M = compute^{pres}\H  \level'\M \level''\H\\
+\level''\L = compute^{pres}\L  \level'\L \level''\M\\
+}{Compute}
+
+By composing, medium levels disappear.
+
+\xprlab{
+compute^{intr}\C = compute^{intr}\H  \level\H \oo compute^{intr}\L  \level\M\\
+\\
+compute^{pres}\C = compute^{pres}\L  \level'\L \oo compute^{pres}\H  \level'\M\\
+}{Compute}
+
+Maybe however, we can prove inertia requirements and then say, that since pres and intr are compositions, we have extra properties on them. Then in the proofs, these properties can be used instead of the reqs. 
+
+What we do for combined compute must also be done for single layer e.s. compute.
 
 
 \bc
@@ -1276,6 +1988,38 @@ Informal
 
 Old statement: if there are several choices for interpret, which all obey {\sc InterPresent}, then there are duplicates. This does not seem to be true. (eg. $present n = 2n$)
 
+
+\bl
+\o Story so far allows spec of many editors but some are not possible
+\o simplest is duplicate: $\lambda n \to (n,n)$
+\o (1,2) ambiguous
+\o derived values: can be made non-editable
+\o syntax coloring. can be seen as a derived value.
+\o parsing with correction. 
+\el
+
+\bl
+\o with one interpret, we have to make a choice.
+\o by always taking the same alternative, the other becomes non-editable.
+\o This is not consistent with "close to" on presentation.  If $(1,1) \leadsto (1,8)$ then $(8,8)$ is probably closer as far as the user is concerned.
+\el
+
+\bl
+\o If we have more interprets, "close to" is not sufficient anyway.
+\o $pres~n = (n,n,n)$, after changing one val, the original is always closer than what the user intended.
+\o We use a different concept. result is ''close to'' for the edited bits.
+\el
+
+\bl
+\o Duplicates get nasty with extra state
+\o close on document gets into trouble with pres-inert
+\el
+
+\bl
+\o Example: editor with functions and type declarations. also folding. a = 1; f = a + 2; Pres a = 1; f = ..., edit 1 $\leadsto$ True. 
+\el
+
+
 %																
 %																
 %																
@@ -1301,14 +2045,23 @@ Informal
 \section{document editing}
 Skipping lower layers
 
+update (pres upd) pres \rarr pres'
+update (doc upd) pres \rarr pres$\times$(doc upd) , which interprets to (update (doc upd) doc)
 
 
 %																
 %																
 %																
 \section{layer skipping}
-Skipping higher layers
+Skipping higher layers. Probably won't say much about that here.
 
+\section{Conclusions}
+
+Always possible to find pathological cases.
+We try to define what's a natural editor
+New things may break old. But parts remain valid
+
+Future: specification formalism for presentation mappings that guarantees correctness of editors. Will need annotations for more complex cases)
 % restore old defs from thesis.sty
 \renewcommand{\present}[0]{{\tt present}}					%56
 \renewcommand{\interpret}[0]{{\tt interpret}}				%56
