@@ -16,14 +16,9 @@ import powerpoint map
 \end{tiny}
 \end{figure}
 
-TODO before sending sources
-
-Implementation
-Arch doc:
-fill it in a bit
 
 
-- ModuleMap is clickable module overview in html
+ModuleMap is clickable module overview in html
 
 Proxima consists of six levels: Document, Enriched Document, Presentation, Layout, Arrangement and Rendering. For each level, a \verb|<level>Types| module and a \verb|<level>Utils| module exist. \verb|<level>Types| contains the basic data type definitions for the level, including smart constructors and selector functions. \verb|<level>Utils| contains basic utility functions operating on the tree structure of the level.
 
@@ -236,8 +231,33 @@ After parsing (and re-presenting), the layout of currently invisible structures 
 
 
 \section{To Do}
+\subsection{Complete list}
+\begin{description}
+\item [Presentation focus]
+\item [Document focus]
+\item [Presentation edit]
+\item [Document edit]
+\item [Integration of Document/Presentation foci]
+\item [Update Parser] Error correcting parser that creates local parseErr nodes
+\item [Scanner that uses layout sheet] 
+\item [Dirty bits for all levels]
+\item [Incremental arranger]
+\item [Incremental renderer] managing its own bitmap and managing images
+\item [Formatter]
+\item [Matrix]
+\item [Window panes] maybe also multiple windows
+\item [Nice edit behavior]
+\end{description}
+
+\begin{description}
+\item [AG patterns and meta formalism]
+\item [ES behavior]
+\item [whitespace in hidden/double presentations]
+\item [XML support] invalidness, DTD
+\end{description}
 \subsection{Incrementality}
 Fix arrangement structure, so position is in parent row,col,ovl
+
 \subsection{Parsing}
 New parser based on new version of UUAG error correcting parsers is necessary.
 
