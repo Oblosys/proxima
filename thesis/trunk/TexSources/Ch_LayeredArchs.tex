@@ -20,7 +20,7 @@ IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are co
  .  .    ..   .   .   .. 
 .    ....  ...     ...  .
  no it's not asymmetric. find out more about this.
- maybe it's just that a level is never presented twice without trans, and vice versa
+ maybe it's just that a level is never presented twice without intr, and vice versa
 
 RENDERER IS SPECIAL, LOWER THING IS NOT A TREE, EXPLAIN THAT THIS CHAPTER ONLY HOLDS FOR HIGHER LAYERS
 
@@ -79,7 +79,7 @@ gesture depends on level, not edit. Also on other levels?
 First try: add i and leave out Edit and Transform
 
 \begin{small}\( \begin{array}{lcl}  \label{inv:incrementality}
-{\tt translate_i}  ::  Sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow  Edit_{Level_{i+1}} \rightarrow Edit_{Core_{i}\times Info\idwn_{i}} \\
+{\tt interpret_i}  ::  Sheet_{Intr,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow  Edit_{Level_{i+1}} \rightarrow Edit_{Core_{i}\times Info\idwn_{i}} \\
 {\tt present_i}  ::  Sheet_{Pres,i} \rightarrow Level_{i} \rightarrow Level_{i+1}  \rightarrow Edit_{Level_{i}} \rightarrow Edit_{Core_{i+1}\times Info\iup_{i+1}}\\
 \\
 \end{array}\) \\
@@ -87,11 +87,11 @@ First try: add i and leave out Edit and Transform
 level_{i+1} 	& = & Present_{i}~level_{i}						& \text{\{Precondition\}}\\
 \\
 level'_{i+1} 	& = & {\tt update}~e_{Level_{i+1}}~level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
-e_{Core_{i} \times Info\idwn_{i}}  & = & {\tt translate}_{i}~sheet_{Trans,i}~level_{i+1}~level_{i}~e_{Level_{i+1}} & \text{\{Compute higher core update\}}\\
-e_{Level_{i}} & = & {\tt reuse}_{Trans,i}~level_{i}~e_{Core_{i}\times Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
+e_{Core_{i} \times Info\idwn_{i}}  & = & {\tt interpret}_{i}~sheet_{Intr,i}~level_{i+1}~level_{i}~e_{Level_{i+1}} & \text{\{Compute higher core update\}}\\
+e_{Level_{i}} & = & {\tt reuse}_{Intr,i}~level_{i}~e_{Core_{i}\times Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
 level'_{i} & = & {\tt update}~e_{Level_{i}}~level_{i}                 & \text{\{Compute intermediate higher level\}}\\
 \\\
-level'_{i} & = & Translate_{i}~level'_{i+1}						& \text{\{Intermediate condition\}}\\
+level'_{i} & = & Interpret_{i}~level'_{i+1}						& \text{\{Intermediate condition\}}\\
 \\
 level''_{i} & = & {\tt update}~e'_{Level_{i}}~level'_{i}                 & \text{\{Compute final higher level\}}\\
 e'_{Core_{i+1}\times Info\iup_{i+1}}  & = & {\tt present}_{i}~sheet_{Pres,i}~level'_{i}~level'_{i+1}~e'{Level_{i}} & \text{\{Compute new lower core\}}\\
@@ -104,7 +104,7 @@ level''_{i+1} & = & Present_{i}~level''_{i}						& \text{\{Postcondition\}}\\
 \begin{center}(First try)\end{center}\vspace{1em}
 
 
-level updates are double., so leave out one. trans leave out higher \{Compute intermediate higher level\} and pres leave out lower \{Compute final lower level\}. End up with:
+level updates are double., so leave out one. intr leave out higher \{Compute intermediate higher level\} and pres leave out lower \{Compute final lower level\}. End up with:
 
 \begin{small}\( \begin{array}{lcll} 
 level'_{i+1} 	& = & {\tt update}~e_{Level_{i+1}}~level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
@@ -137,7 +137,7 @@ If we remove the double updates, and add the top and bottom stuff, we get a fina
 \begin{itemize}
 \item subscripts cannot be dropped anymore. Use data defs from prev chap (multiple layer perspective)
 \item levels and layers mismatch, j and i
-\item present, translate, Sheet, all get i.  level,core,info h is level... i and level.. L is level.. i+1
+\item present, interpret, Sheet, all get i.  level,core,info h is level... i and level.. L is level.. i+1
 \item update is generic, so no subscripts
 \item only need one update on each layer, choose the source level because of inc comp. (ref to previous chap)
 \item Edit and Transform disappear
@@ -146,18 +146,18 @@ If we remove the double updates, and add the top and bottom stuff, we get a fina
 Given level0..n for which Pres holds and an edit gesture, compute level''0..n so Pres holds again.
 
 \begin{small}\( \begin{array}{lcl}  \label{inv:incrementality}
-\text{\bf type}~Level_{0}  =  Core_{Trans,0} \times Extra_{Trans,0} \times Info\idwn_{0} \\
+\text{\bf type}~Level_{0}  =  Core_{Intr,0} \times Extra_{Intr,0} \times Info\idwn_{0} \\
 \text{\bf type}~Level_{n}  =  Core_{Pres,n} \times Extra_{Pres,n} \times  Info\iup_{n}\\
 \lefteqn{\forall j:1 \le i \le n-1:}  \\
 \text{\bf type}~Level_{j} =  Core_{Pres,j} \times Extra_{Pres,j}  \times Info\iup_{j}   
-                                       =  Core_{Trans,j} \times Extra_{Trans,j} \times Info\idwn_{j}\\
+                                       =  Core_{Intr,j} \times Extra_{Intr,j} \times Info\idwn_{j}\\
 
 e_{Level_{n}}  = EditGesture ??\\
 e'_{Level_{0}}  = e_{Level{0}}\\
 level'_{0} =  level_{0}\\
 level''_{n}  =  {\tt update}~e'_{Level_{n}}~level'_{n}\\
 \lefteqn{\forall i:0 \le i \le n-1:}  \\
-{\tt translate_i}  ::  Sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow  Edit_{Level_{i+1}} \rightarrow Edit_{Core_{i}\times Info\idwn_{i}} \\
+{\tt interpret_i}  ::  Sheet_{Intr,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow  Edit_{Level_{i+1}} \rightarrow Edit_{Core_{i}\times Info\idwn_{i}} \\
 {\tt present_i}  ::  Sheet_{Pres,i} \rightarrow Level_{i} \rightarrow Level_{i+1}  \rightarrow Edit_{Level_{i}} \rightarrow Edit_{Core_{i+1}\times Info\iup_{i+1}}\\
 \\
 \end{array}\) \\
@@ -165,10 +165,10 @@ level''_{n}  =  {\tt update}~e'_{Level_{n}}~level'_{n}\\
 level_{i+1} 	& = & Present_{i}~level_{i}						& \text{\{Precondition\}}\\
 \\
 level'_{i+1} 	& = & {\tt update}~e_{Level_{i+1}}~level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
-e_{Core_{i} \times Info\idwn_{i}}  & = & {\tt translate}_{i}~sheet_{Trans,i}~level_{i+1}~level_{i}~e_{Level_{i+1}} & \text{\{Compute higher core update\}}\\
-e_{Level_{i}} & = & {\tt reuse}_{Trans,i}~level_{i}~e_{Core_{i}\times Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
+e_{Core_{i} \times Info\idwn_{i}}  & = & {\tt interpret}_{i}~sheet_{Intr,i}~level_{i+1}~level_{i}~e_{Level_{i+1}} & \text{\{Compute higher core update\}}\\
+e_{Level_{i}} & = & {\tt reuse}_{Intr,i}~level_{i}~e_{Core_{i}\times Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
 \\\
-level'_{i} & = & Translate_{i}~level'_{i+1}						& \text{\{Intermediate condition\}}\\
+level'_{i} & = & Interpret_{i}~level'_{i+1}						& \text{\{Intermediate condition\}}\\
 \\
 level''_{i} & = & {\tt update}~e'_{Level_{i}}~level'_{i}                 & \text{\{Compute final higher level\}}\\
 e'_{Core_{i+1}\times Info\iup_{i+1}}  & = & {\tt present}_{i}~sheet_{Pres,i}~level'_{i}~level'_{i+1}~e'{Level_{i}} & \text{\{Compute new lower core\}}\\
@@ -338,7 +338,7 @@ plaatje van edit proces, show get gesture, update ...
 \bigskip \noindent
 \xymatrix{
 \data{$document$}\ar[d]	& 			& \data{$document'$}\ar[r] 		& \data{$document''$}\ar[d]  \\
-\component{$present$} \ar[d] &			& \component{$translate$} \ar[u]	& \component{$present$} \ar[d]\\
+\component{$present$} \ar[d] &			& \component{$interpret$} \ar[u]	& \component{$present$} \ar[d]\\
 \data{$rendering$} \ar[r]	& \component{update} \ar[r] 	& \data{$rendering'$}\ar[u] 		& \data{$rendering''$}  \\
 			& \data{$gesture$} \ar[u]	&				& 	 	
 }
@@ -350,27 +350,27 @@ plaatje van edit proces, show get gesture, update ...
 \begin{small}\begin{align*}% \label{sse}
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present & :: Document \rightarrow Rendering \\
-translate & :: Rendering \rightarrow Document \\
+interpret & :: Rendering \rightarrow Document \\
 \end{align*} 
 \begin{math}
 rendering = present~document	\hfill \text{\{Precondition\}} \\
 rendering' = update~gesture~rendering	\hfill \text{\{Update rendering\}} \\
-document' = translate~rendering' 	\hfill \text{\{Compute updated document\}}\\
+document' = interpret~rendering' 	\hfill \text{\{Compute updated document\}}\\
 document'' = document'		\\% \hfill \text{\{Update Document\}} \\
 rendering'' = present~document''	\hfill \text{\{Postcondition + Compute rendering'\}} \\
 \end{math}\end{small}
 {\centering (Invariant 6: One stage editor, 1st attempt)\\}
 
-- niet reeel, rendering = presentation, assume eg text only, translation is parser.
+- niet reeel, rendering = presentation, assume eg text only, interpretion is parser.
 
 - explain ' \& ''
 
 - twee keer update op rendering, eerste keer bv insert keywords als text, daarna met mooie opmaak. niet op doc
-* somewhere translate.pres does not need to be id. can be, 01 -> 01 have to store extra info, however editor can choose to do something else, normalize, nice formatting.
+* somewhere interpret.pres does not need to be id. can be, 01 -> 01 have to store extra info, however editor can choose to do something else, normalize, nice formatting.
 
 - merk op dat doc'' = doc, maakt berekening eleganter
 
-* Add correctness? met EDIT \& PRESENT? Maakt ook trans/pres volgorde in inc duidelijker
+* Add correctness? met EDIT \& PRESENT? Maakt ook intr/pres volgorde in inc duidelijker
 
 
 %																
@@ -381,11 +381,11 @@ rendering'' = present~document''	\hfill \text{\{Postcondition + Compute renderin
 \bigskip \noindent
 \xymatrix{
  \data{$level_{0}$}\ar[d] 	& 			& \data{$level'_{0}$}\ar[r] 		& \data{$level''_{0}$}\ar[d]  \\
-\component{$present_{0}$} \ar[d]&			& \component{$translate_{0}$} \ar[u]	& \component{$present_{0}$} \ar[d]\\
+\component{$present_{0}$} \ar[d]&			& \component{$interpret_{0}$} \ar[u]	& \component{$present_{0}$} \ar[d]\\
 \data{$level_{1}$} \ar@{.>}[dd]	& 		 	& \data{$level'_{1}$}\ar[u] 		& \data{$level''_{1}$} \ar@{.>}[dd]  \\
 				&			& 				& 	 		\\
 \data{$level'_{n-1}$}\ar[d]	&	 		& \data{$level'_{n-1}$}\ar@{.>}[uu] 	& \data{$level''_{n-1}$}\ar[d]  \\
-\component{$present_{n-1}$} \ar[d]&			& \component{$translate_{n-1}$} \ar[u]	& \component{$present_{n-1}$} \ar[d]\\
+\component{$present_{n-1}$} \ar[d]&			& \component{$interpret_{n-1}$} \ar[u]	& \component{$present_{n-1}$} \ar[d]\\
 \data{$level_{n}$} \ar[r]	& \component{update} \ar[r] 	& \data{$level'_{n}$}\ar[u] 		& \data{$level''_{n}$}  \\
 			& \data{$gesture$} \ar[u]	&				& 	 	
 }
@@ -395,12 +395,12 @@ rendering'' = present~document''	\hfill \text{\{Postcondition + Compute renderin
 \begin{small}\begin{align*} % \label{le}
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present_i & :: Level_i \rightarrow Level_{i+1} \\
-translate_i & :: Level_{i+1} \rightarrow Level_i \\
+interpret_i & :: Level_{i+1} \rightarrow Level_i \\
 \end{align*} 
 \begin{math}
 \forall 0 \le i \le n-1:  \\
 level_{i+1}= present_i~level_i		\hfill \text{\{Precondition\}} \\
-level'_{i} = translate_i~level'_{i+1}		\hfill \text{\{Compute updated document\}}\\
+level'_{i} = interpret_i~level'_{i+1}		\hfill \text{\{Compute updated document\}}\\
 level'_n = update~gesture~level_n		\hfill \text{\{Update presentation \}} \\
 level''_{0} = level'_{0}\\
 level''_{i+1} = present_i~level''_i		\hfill \text{\{Postcondition + Compute Rendering'\}} \\
@@ -415,17 +415,17 @@ level''_{i+1} = present_i~level''_i		\hfill \text{\{Postcondition + Compute Rend
 %																
 \subsection{Layered editor with local state}
 
-- sheets are added, similar to presenter. 2 sheets pres and trans sheet. Can be together, but may be separated. Parser is different from stylesheet. maybe both come from some common originating sheet. (tell this in single layer chapter?)
+- sheets are added, similar to presenter. 2 sheets pres and intr sheet. Can be together, but may be separated. Parser is different from stylesheet. maybe both come from some common originating sheet. (tell this in single layer chapter?)
 
 \begin{small}\begin{align*} % \label{le}
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present_i & :: Sheet_{Pres,i} \rightarrow Level_i \rightarrow Level_{i+1} \\
-translate_i & ::  Sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_i \\
+interpret_i & ::  Sheet_{Intr,i} \rightarrow Level_{i+1} \rightarrow Level_i \\
 \end{align*} 
 \begin{math}
 \forall 0 \le i \le n-1:  \\
 level_{i+1}= present_i~sheet_{Pres,i}~level_i		\hfill \text{\{Precondition\}} \\
-level'_{i} = translate_i~sheet_{Trans,i}~level'_{i+1}		\hfill \text{\{Compute updated document\}}\\
+level'_{i} = interpret_i~sheet_{Intr,i}~level'_{i+1}		\hfill \text{\{Compute updated document\}}\\
 level'_n = update~gesture~level_n		\hfill \text{\{Update presentation \}} \\
 level''_{0} = level'_{0}\\
 level''_{i+1} = present_i~sheet_{Pres,i}~level_i''		\hfill \text{\{Postcondition + Compute Rendering'\}} \\
@@ -463,7 +463,7 @@ level''_{i+1} = present_i~sheet_{Pres,i}~level_i''		\hfill \text{\{Postcondition
 \xymatrix{
 				& \data{$e_{Document}$} \ar `[rr][drr]&				& \\
 \data{$document$} \ar[rr] \ar[rd] 	& 				& \data{$document'$}\ar[r]\ar[rd] 	& \data{$e'_{Document}$} \ar[d] \ar@{~>}[r] & \data{$document''$}  \\
-				& \component{$translate$} \ar[uu]	&				& \component{$present$} \ar[d]	&\\
+				& \component{$interpret$} \ar[uu]	&				& \component{$present$} \ar[d]	&\\
 \data{$rendering$} \ar[r] \ar[ru]	&\data{$gesture$} \ar[u] \ar@{~>}[r]	&  \data{$rendering'$}\ar[r]\ar[ru] 	&\data{$e'_{Rendering}$}\ar@{~>}[r]	&  \data{$rendering''$}  
 }
 \end{scriptsize}
@@ -477,9 +477,9 @@ level''_{i+1} = present_i~sheet_{Pres,i}~level_i''		\hfill \text{\{Postcondition
 
 INV
 
-- params: eerst eigen level dan volgende, dus voor present anders dan voor translate
+- params: eerst eigen level dan volgende, dus voor present anders dan voor interpret
 
-* ERGENS: edit en pres/trans zijn nu gescheiden, maar kunnen worden ze samen genomen in impl. omdat edit soms nodig is"
+* ERGENS: edit en pres/intr zijn nu gescheiden, maar kunnen worden ze samen genomen in impl. omdat edit soms nodig is"
 
 - precondition is no longer ok.
 
@@ -487,11 +487,11 @@ INV
 *** add PRESENT? \\
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present & :: Document \rightarrow Rendering \\
-translate & :: Rendering \rightarrow Document \\
+interpret & :: Rendering \rightarrow Document \\
 \end{align*} 
 \begin{math}
 rendering = PRESENT~document	\hfill \text{\{Precondition???\}} \\
-e_{Document} = translate~rendering~document~gesture \hfill \text{\{Compute document update\}}\\
+e_{Document} = interpret~rendering~document~gesture \hfill \text{\{Compute document update\}}\\
 e'_{Document} = e_{Document}		\\% \hfill \text{\{Update Document\}} \\
 e'_{Rendering} = present~document~rendering~e'_{Document} \hfill \text{\{Compute rendering update\}}\\
 document' = document \\
@@ -518,12 +518,12 @@ OR
 \xymatrix{
  					& \data{$e_{Level_{0}}$} \ar`[rr][drr]		&						& \\
 \data{$level_{0}$} \ar[rr] \ar[rd] 		& 					& \data{$level_{0}'$}\ar[r]\ar[rd] 			&  \data{$e'_{Level_{0}}$} \ar[d] \ar@{~>}[r]	&  \data{$level_{0}''$}  \\
-Layer 0:					& \component{$translate$} \ar[uu]		&						& \component{$present$} \ar[d]		& 			& \\
+Layer 0:					& \component{$interpret$} \ar[uu]		&						& \component{$present$} \ar[d]		& 			& \\
 \data{$level_{1}$} \ar[r] \ar[ru]\ar@{.>}[rd]	&\data{$e_{Level_{1}}$} \ar[u] \ar@{~>}[r]	& \data{$level_{1}'$}\ar[r]\ar[ru]\ar@{.>}[rd]		&\data{$e'_{Level_{1}}$}\ar@{~>}[r]\ar@{.>}[d]& \data{$level_{1}''$} \\
 					&\ar@{.>}[u]				&						& 					&			&		\\
 					&\ar@{..}[u]				&						& \ar@{.>}[d] \ar@{.}[u]			&			&		\\
 \data{$level_{n-1}$} \ar[r] \ar[rd]\ar@{.>}[ru] 	& \data{$e_{Level_{n-1}}$} \ar@{.>}[u]\ar@{~>}[r]& \data{$level_{n-1}'$}\ar[r]\ar[rd]\ar@{.>}[ru]	&\data{$e_{Level_{n-1}}$} \ar[d] \ar@{~>}[r]	& \data{$level_{n-1}''$}  \\
-Layer n:					& \component{$translate$} \ar[u]		&						& \component{$present$} \ar[d]		&\\
+Layer n:					& \component{$interpret$} \ar[u]		&						& \component{$present$} \ar[d]		&\\
 \data{$level_{n}$} \ar[r] \ar[ru]		&\data{$e_{Level_{n}}$} \ar[u] \ar@{~>}[r]	& \data{$level_{n}'$}\ar[r]\ar[ru]			&\data{$e'_{Level_{n}}$}\ar@{~>}[r]		& \data{$level_{n}''$}  \\
 			& 			&		& 
 }
@@ -537,12 +537,12 @@ Layer n:					& \component{$translate$} \ar[u]		&						& \component{$present$} \a
 *** add PRESENT? \\
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present_i & :: Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \rightarrow Level_{i+1} \\
-translate_i & :: Level_{i+1} \rightarrow Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \\
+interpret_i & :: Level_{i+1} \rightarrow Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \\
 \end{align*} 
 \begin{math}
 \forall 0 \le i \le n-1:  \\
 level_{i+1}= PRESENT_i~level_i	\hfill \text{\{Precondition???  Abstract thing also layered???\}} \\
-e_{Level_{i}} = translate_i~Level_{i+1}~Level_i~e_{Level_{i+1}} \hfill \text{\{\}}\\
+e_{Level_{i}} = interpret_i~Level_{i+1}~Level_i~e_{Level_{i+1}} \hfill \text{\{\}}\\
 e'_{Level_0} = e_{Level_0}		\\% \hfill \text{\{Update Document\}} \\
 e'_{Level_{i+1}} = present_i~Level_{i}~Level_{i+1}~e_{Level_{i}} \hfill \text{\{\}}\\
 level'_{0} = level_{0}\\
@@ -560,12 +560,12 @@ level''_{n} = update~e'_{Level_{n}}~level'_{n}		\hfill \text{\{Update rendering\
 *** add PRESENT? \\
 update & :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha \\
 present_i & ::  Sheet_{Pres,i} \rightarrow Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \rightarrow Level_{i+1} \\
-translate_i & ::  Sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \\
+interpret_i & ::  Sheet_{Intr,i} \rightarrow Level_{i+1} \rightarrow Level_{i} \rightarrow Level_{i+1} \rightarrow Level_i \\
 \end{align*} 
 \begin{math}
 \forall 0 \le i \le n-1:  \\
 level_{i+1}= PRESENT_i~level_i	\hfill \text{\{Precondition???  Abstract thing also layered???\}} \\
-e_{Level_{i}} = translate_i~sheet_{Trans,i}~Level_{i+1}~Level_i~e_{Level_{i+1}} \hfill \text{\{\}}\\
+e_{Level_{i}} = interpret_i~sheet_{Intr,i}~Level_{i+1}~Level_i~e_{Level_{i+1}} \hfill \text{\{\}}\\
 e'_{Level_0} = e_{Level_0}		\\% \hfill \text{\{Update Document\}} \\
 e'_{Level_{i+1}} = present_i~sheet_{Pres,i}~Level_{i}~Level_{i+1}~e_{Level_{i}} \hfill \text{\{\}}\\
 level'_{0} = level_{0}\\
@@ -587,7 +587,7 @@ level''_{n} = update~e'_{Level_{n}}~level'_{n}		\hfill \text{\{Update rendering\
 
 
 - zeg dat telkens maar 1 mapping verandert. Is dat zo? misschien doet een update ook wel een mapping veranderen
-mapping' trans = mapping'' trans
+mapping' intr = mapping'' intr
 mapping pres = mapping' pres
 
 * say something about edit ops targeted at levels other than rendering.
@@ -608,7 +608,7 @@ mapping pres = mapping' pres
 % 				& 				& 			&%%				&  \data{$e'_{Document}$} \ar[ddd] \ar[dr]\\
 %\data{$document$} \ar[rrr] \ar[rdd] 	& 				&			& \data{$document'$}\ar[rr]\ar[rdd] 	&				& \component{update} \ar[r] & \data{$document''$}  \\
 %				& \data{$e_{Document}$} \ar `u[uu][rrruu]   & 			& 				& 				&\\ 
-%				& \component{$translate$} \ar[u]	&			&				& \component{$present$} \ar[d]	&\\
+%				& \component{$interpret$} \ar[u]	&			&				& \component{$present$} \ar[d]	&\\
 %				& 				& 			&				&\data{$e'_{Rendering}$}\ar[dr]	&\\
 %\data{$rendering$} \ar[rr] \ar[ruu]	&				& \component{update} \ar[r]& \data{$rendering'$}\ar[rr]\ar[ruu] 	&				& \component{update} \ar[r]& \data{$rendering''$}  \\
 %				& \data{$gesture$} \ar[uuu] \ar[ru]	&			& 
@@ -622,7 +622,7 @@ mapping pres = mapping' pres
 % 			& 				& 		&			&  \data{$e'_{Level_{0}}$} \ar[ddd] \ar[dr]\\
 %\data{$level_{0}$} \ar[rrr] \ar[rdd] & 				&		& \data{$level_{0}'$}\ar[rr]\ar[rdd] &			& \component{update} \ar[r] & \data{$level_{0}''$}  \\
 %			& \data{$e_{Level_{0}}$} \ar `u[uu][rrruu]   & 		& 			& 			&\\ 
-%			& \component{$translate$} \ar[u]	&		&			& \component{$present$} \ar[d]& 			& \\
+%			& \component{$interpret$} \ar[u]	&		&			& \component{$present$} \ar[d]& 			& \\
 %			& 				& 		&			&\data{$e'_{Level_{1}}$}\ar[dr]\ar@{.>}[ddd]		& \\
 %\data{$level_{1}$} \ar[rr] \ar[ruu]\ar@{.>}[rdd]&		& \component{update} \ar[r]& \data{$level_{1}'$}\ar[rr]\ar[ruu]\ar@{.>}[rdd]&& \component{update} \ar[r]& \data{$level_{1}''$}  \\
 %			& \data{$e_{Level_{1}}$} \ar[uuu] \ar[ru]&		&			& 			&			&		\\
@@ -630,7 +630,7 @@ mapping pres = mapping' pres
 %			& 				& 		&			&  \data{$e_{Level_{n-1}}$} \ar[ddd] \ar[dr]		&		\\
 %\data{$level_{n-1}$} \ar[rr] \ar[rdd]\ar@{.>}[ruu] & 		& \component{update} \ar[r]& \data{$level_{n-1}'$}\ar[rr]\ar[rdd]\ar@{.>}[ruu] && \component{update} \ar[r] & \data{$level_{n-1}''$}  \\
 %			& \data{$e_{Level_{n-1}}$} \ar@{.>}[uuu]\ar[ru]   & 	& 			& 			&\\ 
-%			& \component{$translate$} \ar[u]	&		&			& \component{$present$} \ar[d]&\\
+%			& \component{$interpret$} \ar[u]	&		&			& \component{$present$} \ar[d]&\\
 %			& 				& 		&			&\data{$e'_{Level_{n}}$}\ar[dr]&\\
 %\data{$level_{n}$} \ar[rr] \ar[ruu]&				& \component{update} \ar[r]& \data{$level_{n}'$}\ar[rr]\ar[ruu] &		& \component{update} \ar[r]& \data{$level_{n}''$}  \\
 %			& \data{$e_{Level_{n}}$} \ar[uuu] \ar[ru]&		& 
