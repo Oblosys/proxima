@@ -23,16 +23,16 @@ Using the single layer specification from the previous chapter, we can give a sp
 \ec
 
 \bl
-\o Spec for editor is combined spec for single layers.
-\o abstract $\Edit$ and $\Transform$ removed
-\o Next chapter, we give Haskell for the combination.
+\* Spec for editor is combined spec for single layers.
+\* abstract $\Edit$ and $\Transform$ removed
+\* Next chapter, we give Haskell for the combination.
 \el
 
 \bl
-\o In this chapter, combine the single layer specifications.
-\o First combine everything, assuming edit ops are indirect (ref Chapter Edit Model)
-\o Section~\ref{sect:specHigherEdit} support for direct interpretation of edit ops
-\o Section~\ref{sect:specSkipLayers} support for skipping higher layers
+\* In this chapter, combine the single layer specifications.
+\* First combine everything, assuming edit ops are indirect (ref Chapter Edit Model)
+\* Section~\ref{sect:specHigherEdit} support for direct interpretation of edit ops
+\* Section~\ref{sect:specSkipLayers} support for skipping higher layers
 \el
 
 \fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -258,24 +258,24 @@ Instead of editing the rendering, an edit operation targets one of the higher le
 So target a level j: direct translation of edit op (not affecting levels), after which indirect interpretation takes place.
 
 \bl
-\o consequences for es safety
-\o lower are not just skips, but direct edit op interpretations.
-\o tricky. maybe need to point out diff between skipping and processing
-\o kind of phase shift. Entire translation/presentation process is completed, but it starts at higher translation and also ends there.
+\* consequences for es safety
+\* lower are not just skips, but direct edit op interpretations.
+\* tricky. maybe need to point out diff between skipping and processing
+\* kind of phase shift. Entire translation/presentation process is completed, but it starts at higher translation and also ends there.
 \el
 
 \bl
-\o trans . pres = id so levels stay the same. Only reason for translating is info.
+\* trans . pres = id so levels stay the same. Only reason for translating is info.
 \el
 
 Spec:
 
 \bl
-\o edit op on level $j$ (== higher level for layer $j$)
-\o $\forall i\le j:$ original spec. holds
-\o $\forall i>j: e_j = skip$ 
-\o $\level'_j = Translate_j~\level'_{j+1}$ does not hold $\level''_{j+1} = \Present_j~\level''_j$ does
-\o After edit op, need to translate at layers $n\dots j$ for mapping info.
+\* edit op on level $j$ (== higher level for layer $j$)
+\* $\forall i\le j:$ original spec. holds
+\* $\forall i>j: e_j = skip$ 
+\* $\level'_j = Translate_j~\level'_{j+1}$ does not hold $\level''_{j+1} = \Present_j~\level''_j$ does
+\* After edit op, need to translate at layers $n\dots j$ for mapping info.
 \el 
 
 \section{Skipping higher layers} \label{sect:specSkipLayers}
@@ -283,30 +283,30 @@ Spec:
 The last adjustment we make to the specification is 
 
 \bl
-\o ref to edit model chapter. Chapter~\ref{chap:editModel}
-\o layered arch offer a way to skip certain things during editing.
-\o kind of optimization, but also desired behavior
-\o computed values changing for intermediate doc instances, optimal line breaking. Busy for a user 
+\* ref to edit model chapter. Chapter~\ref{chap:editModel}
+\* layered arch offer a way to skip certain things during editing.
+\* kind of optimization, but also desired behavior
+\* computed values changing for intermediate doc instances, optimal line breaking. Busy for a user 
 \el
 
 \bl
-\o skipping cycles + es safety
-\o with update on only lower ES, automatic skip, but then no problem with invariants
-\o must be careful
+\* skipping cycles + es safety
+\* with update on only lower ES, automatic skip, but then no problem with invariants
+\* must be careful
 \el
 
 Spec:
 \bl
-\o skipping layers $0\dots j$
-\o $\forall i>j:$ original spec. holds
-\o $\forall i\le j: e_j and e'_j = skip and e'_{j+1} = e{j+1}$  
-\o Invs. still hold, except at skipping point: $Translate_j$ and $\Present_j$ do not hold.
+\* skipping layers $0\dots j$
+\* $\forall i>j:$ original spec. holds
+\* $\forall i\le j: e_j and e'_j = skip and e'_{j+1} = e{j+1}$  
+\* Invs. still hold, except at skipping point: $Translate_j$ and $\Present_j$ do not hold.
 \el
 
 \section{Conclusions}
 
 \bl
-\o ?
+\* ?
 \el
 
 
