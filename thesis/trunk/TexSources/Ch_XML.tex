@@ -1,7 +1,9 @@
 \chapter{Requirements for a structure editor} %\chapter{Editing structured documents}
 \label{chap:requirements}
 
-{\em *** Version: \today~ ***}
+%{\em *** Version: \today~ ***}
+
+
 
 \bc
 
@@ -34,22 +36,16 @@ Most documents have some form of structure.
 In this chapter, we give a rather informal definition of editing (editor?**), and look at why no str eds. From a number of use cases, we state a number of requirements that are important in the design of a generic structure editor. Other structure editors are evaluated on these requirements, and . We end with a discussion why no structure editor has yet .  give fun. req. and evaluate related work according to them. End with a discussion why no editor meets all requirements, and how proxima will.
 \ec
 
-\bl
-\o number of use cases that a structure editor should be able to handle
-\o functional requirements
-\o comparison of editors according to the requirements
-\o proxima
-\el
+In this chapter, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the definition of the term editor from the previous chapter, as well as provide standard examples to explain and define edit behavior in the next chapters. A design requirement of Proxima is that the editor is able to handle all five use cases. 
 
+Section~\ref{sect:usecases} presents the five use cases, from which we formulate a set of functional requirements for a flexible non-restrictive structure editor, in Section~\ref{sect:requirements}. Existing editors are evaluated according to these requirements in sections~\label{sect:overview} and~\label{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how the Proxima editor meets the requirements and thus will be able to implement all of the use cases.
 
 \section{Use cases}
 \label{sect:usecases}
 
-In this section we present five example structure editors. Some of these cases are well-known applications of structure editors, but a few more exotic applications have been included as well.
+Some of the five example editors, presented in this section, are well-known applications of structure editors. However, a few more exotic applications have been included as well. None of the current generic structure editors can handle all five use cases.
 
-The use cases serve a two-fold purpose. Firstly, we will use them as standard examples to explain and define edit behaviour in the next chapters. Secondly, the use cases make the rather vague definition of the term editor in the previous section more precise, and serve as a basis for the formulation of a set of functional requirements. 
-
-Unlike any current structure editor, the Proxima editor is able to handle all five use cases. It is important to note that, although the use cases are discussed as separate applications, aspects of them can be combined in a single editor instance.
+It is important to note that, although the use cases are discussed as separate applications, aspects of them can be combined in a single editor instance.
 
 \newcommand{\screenshot}[2]{%
 %
@@ -95,16 +91,17 @@ Unlike any current structure editor, the Proxima editor is able to handle all fi
 
 
 %								
-\subsection{A source editor for Haskell}  \label{sect:sourceeditor} As an example of a program source editor, we take an editor for the functional programming language Haskell~\cite{peytonJones03haskell}. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language-based edit operations. 
+\subsection{A source editor for Haskell}  \label{sect:sourceeditor} 
 
-****** shown is misschien wat sterk
-Syntax-highlighting, which has been shown to make programs more readable~\cite{baecker88readability, omanCook90typography}, is supported at a semantic rather than syntactic level. Hence, unlike most text editors, the editor can use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
+As an example of a program source editor, we take an editor for the functional programming language Haskell~\cite{peytonJones03haskell}. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language-based edit operations. 
+
+There exists evidence showing that syntax-highlighting makes programs more readable~\cite{baecker88readability, omanCook90typography}. Our editor also supports highlighting at a semantic rather than syntactic level. Hence, unlike most text editors, the editor can use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
 
 %mention module handling etc.?
  
 \screenshot{colorful (also type decls) haskell listing with pop-up type info  (layered)}{The Haskell source editor}
 
-Haskell is a particularly interesting language for a source editor because it has a rich type system and information about types is very useful during programming. Haskell programmers often experience that, once type errors have been removed, a function is correct. Therefore, an environment that supports in-place display of type errors, as well as easy access to type information of variables in scope, will help rapid program development. 
+Haskell is a particularly interesting language for a source editor because due to Haskell's rich type system, information about types is very useful during programming. Haskell programmers often experience that, once type errors have been removed, a function is correct. Therefore, an environment that supports in-place display of type errors, as well as easy access to type information of variables in scope, will help rapid program development. 
 
 The screenshot shows the type of the expression in focus, together with a list of variables in scope. Selection in the menu causes a jump to the definition of the identifier. Because many identifiers may be in scope, the menu is layered according to scope level. 
 
@@ -112,39 +109,93 @@ The screenshot shows the type of the expression in focus, together with a list o
 
 \head{Automatic layout}
 
-Some structure editors use an automatic layout scheme while editing program sources. The user then does not need to worry about layout issues, such as the alignment of parameters in functions with multiple clauses. However, for a Haskell editor this situation is not optimal, because Haskell programs mainly consist of expressions, which are hard to layout automatically. Therefore, rather than enforcing automatic layout, the editor should offer support to layout selected parts of the program on demand. The specification of the layout of the program is part of the presentation sheet. Of course, if desired, it is also possible to turn on continuous automatic layout.
+Some structure editors use an automatic layout scheme while editing program sources. The user then does not need to worry about layout issues, such as the alignment of parameters in functions with multiple clauses. However, for a Haskell editor this situation is not optimal, because Haskell programs mainly consist of expressions, which are hard to layout automatically. Therefore, rather having automatic layout continuously performed on the entire source, a user may request the editor to automatically layout a selected part of the program. The specification of the layout of the program is part of a presentation sheet and may be adapted by the user. Of course, if desired, it is also possible to turn on continuous automatic layout.
 
-\editScreenshot{selected function with crappy layout}{function with nice layout}{}{after Apply Layout}
+\editScreenshot{
+\ttfamily 
+\begin{tabular}[t]{l}
+\begin{tabular}[t]{l}
+tails~::~[a]~->~[[a]]\\
+tails~[]~=~[[]]\\
+tails~xxs@(\_:xs)~=~xxs:tails~xs\\
+\end{tabular}
+\\
+\\
+\begin{tabular}[t]{|@{}l@{}|}
+\hline\\
+isPrefixOf~::~(Eq~a)~=>~[a]~->~[a]~->~Bool\\
+isPrefixOf~[]~\_~=~True\\
+isPrefixOf~\_~~[]~=~~False\\
+isPrefixOf~(x:xs)~(y:ys)~=~if~x~==~y~then~isPrefixOf~xs~ys~else\\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~False\\
+\hline
+\end{tabular}\\
+\\
+\begin{tabular}[t]{l}
+isSuffixOf~::~(Eq~a)~=>~[a]~->~[a]~->~Bool\\
+isSuffixOf~x~y~=~reverse~x~~~`isPrefixOf`~~~reverse~y\\
+\end{tabular}
+\end{tabular}
+\rmfamily
+}
+{
+\ttfamily 
+\begin{tabular}[t]{l}
+\begin{tabular}[t]{l}
+tails~::~[a]~->~[[a]]\\
+tails~[]~=~[[]]\\
+tails~xxs@(\_:xs)~=~xxs:tails~xs\\
+\end{tabular}
+\\
+\\
+\begin{tabular}[t]{|@{}l@{}|}
+\hline\\
+isPrefixOf~::~(Eq~a)~=>~[a]~->~[a]~->~Bool\\
+isPrefixOf~[]~~~~~\_~~~~~~=~True\\
+isPrefixOf~\_~~~~~~[]~~~~~=~False\\
+isPrefixOf~(x:xs)~(y:ys)~=~if~x~==~y\\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~then~isPrefixOf~xs~ys\\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~else~False\\
+\hline
+\end{tabular}\\
+\\
+\begin{tabular}[t]{l}
+isSuffixOf~::~(Eq~a)~=>~[a]~->~[a]~->~Bool\\
+isSuffixOf~x~y~=~reverse~x~~~`isPrefixOf`~~~reverse~y~~~~~~\\
+\end{tabular}
+\end{tabular}
+\rmfamily
+}{}{after Apply Layout}
 
-The screen-shot shows the automatic layout operation applied to the selected function. The new function on the right side is still freely editable, including its layout.
+The screen-shot shows the automatic layout operation applied to the selected function {\tt isSuffixOf}. The layed out function on the right-hand side is still freely editable, including its whitespace.
 % comment handling?
 
 \head{Structural edit operations}
 
 Because a program construct is represented by a contiguous area in the presentation, moving a program construct can usually be done in a straightforward way by moving its presentation. However, this is not always the case. Consider for example the following let expression:
 
-\smallScreenshot{\frame{let x=1}; y=2 in x+y}{after select}
+\smallScreenshot{\framebox{let x=1}; y=2 in x+y}{after select}
 
 The let expression consists of a list of declarations that are separated by semicolons and whitespace. Contrary to, for example, in the language Java, the semicolon in Haskell acts as a separator, and not as a terminator. Unlike a terminator, which can be regarded as part of a declaration's presentation, a separator belongs more to the presentation of the list of declarations, than to the presentation of a single declaration. As a result, the semicolons may cause problems when declarations are moved.
 
-As an example, consider moving the first declaration (\verb|x = 1|) to the end of the let expression. When the declaration is cut, the semicolon behind it must be deleted, and when the declaration is pasted at the end, a semicolon together with appropriate whitespace must be added. Similar issues apply to all list structures that are presented using separators, such as Haskell lists \verb|[1, 2, 3]|, tuples \verb|(1,2,3)|, or monadic \verb|do| expressions \verb|do {a <- getChar ; putStr [a]}|.
+Consider moving the first declaration (\verb|x = 1|) to the end of the let expression. When the declaration is cut, the semicolon behind it must be deleted, and when the declaration is pasted at the end, a semicolon together with appropriate whitespace must be added. Similar issues apply to all list structures that are presented using separators, such as Haskell lists \verb|[1, 2, 3]|, tuples \verb|(1,2,3)|, or monadic \verb|do| expressions \verb|do {a <- getChar ; putStr [a]}|.
 
 If the structure of the edited list is taken into account, cut-and-paste on lists with separators can be handled elegantly. When the first declaration is selected, the editor recognizes it as an element of the let expression's declaration list, and when it is cut, the semicolon next to it disappears:
 
-\editScreenshot{let y=2 in \underline{x}+y}{let y=2; \frame{x=1} in x+y}{after cut}{after paste}
+\editScreenshot{let y=2 in \underline{x}+y}{let y=2; \framebox{x=1} in x+y}{after cut}{after paste}
 
-When the declaration is pasted, a semicolon is automatically placed in front of it. The whitespace from the semicolon is copied from the whitespace of the other semicolons in the presentation. When the presentation of the list contains explicitly added whitespace, causing an irregular presentation (e.g.\ \verb|[1,  2,    3, 4]|), the layout of the result after paste may not be what is expected. However, since list structures are usually layed out in a regular way, this need not be a problem. \note{use visiblespace}
+When the declaration is pasted, a semicolon is automatically placed in front of it. The whitespace from the semicolon is copied from the whitespace of the other semicolons in the presentation (or may come from a pretty-printing algorithm). If the list has an irregular layout (e.g.\ \verb|[1,  2,    3, 4]|), the layout after the paste operation may not be what is expected. However, since list structures are usually layed out in a regular way, this need not be a problem.
 
 \head{Rename within scope}
 
-A second example of an edit operation that takes the document structure into account, is a rename operation on an identifier. In a regular text editor, occurrences of the identifier name need to be changed using search and replace. However, because the identifier name may appear in a string, or an identifier of the same name may be declared in inner scopes, automatic search and replace does not always lead to the desired result.
+A second example of an edit operation that takes the document structure into account, is a rename operation on an identifier. In a regular text editor, occurrences of the identifier name need to be changed using search and replace. However, because the identifier name may appear in a string, or an identifier with the same name may be declared in inner scopes, automatic search and replace does not always lead to the desired result.
 
-\editScreenshot{f \frame{a} b = a + let a = 10 in a }{f \frame{x} b = x + let a = 10 in a }{rename variable}{}
+\editScreenshot{f \framebox{a} b = a + let a = 10 in a }{f \framebox{x} b = x + let a = 10 in a }{rename variable}{}
 
 % a function is a better example
 The rename operation takes account of the scoping rules of Haskell, and only changes the appearances that lie in scope of the updated identifier. If the new name is captured by an inner declaration, or if it shadows an identifier that is already declared, a warning is issued.
 
-The rename operation is an example of a {\em refactoring}: a source-to-source program transformation that leaves intact the functionality of the program. The designers of the Haskell Refactorer~\cite{reinke03refactoring} identify a number of such transformations.
+The rename operation is an example of a {\em refactoring} operation: a source-to-source program transformation that leaves  the functionality of the program intact. The designers of the Haskell Refactorer~\cite{reinke03refactoring} identify a number of such transformations.
 
 \head{Hide function definitions/folding}
 
@@ -170,7 +221,6 @@ Function definitions in the source presentation may be collapsed, leaving only o
 {\tt heightA :: Arrangement $\rightarrow$ Int}\\
 {\tt heightA (StringA \_ x y w h \_ \_ \_ \_)~= h}\\
 \end{tabular}
-
 }{
 \begin{tabular}[t]{l}
 {\tt yA (LineA \_ x y x' y' \_ \_)~~~= y}\\
@@ -180,7 +230,7 @@ Function definitions in the source presentation may be collapsed, leaving only o
 {\tt yA (OverlayA \_ x y w h \_ \_)~~= y}\\
 \\
  {\tt widthA :: Arrangement $\rightarrow$ Int}\\
-{\tt widthA = \frame{\rule{0cm}{1.5ex}\dots}}\\
+{\tt widthA = \framebox{\rule{0cm}{1.5ex}\dots}}\\
 \\
 {\tt heightA :: Arrangement $\rightarrow$ Int}\\
 {\tt heightA (StringA \_ x y w h \_ \_ \_ \_)~= h}\\
@@ -193,36 +243,48 @@ Function definitions in the source presentation may be collapsed, leaving only o
 \end{tabular}
 }{Hide Function Definition}{}
 
-The two functions \verb|widthA| and \verb|heightA| have a large number of clauses. Hiding these clauses may improve the readability of the source. After applying the {\em hide function body} edit operation to the function \verb|widthA|,  only one clause remains with a collapsed right-hand side ({\tt \frame{\rule{0cm}{1.5ex}\dots}}). The function is expanded again by clicking on the dots. 
+The two functions \verb|widthA| and \verb|heightA| have a large number of clauses. Hiding these clauses may improve the readability of the source. After applying the {\em hide function body} edit operation to the function \verb|widthA|,  only one clause remains with a collapsed right-hand side ({\tt \framebox{\rule{0cm}{1.5ex}\dots}}). The function is expanded again by clicking on the dots. A collapsed function may be deleted or structurally moved around in the source, but in order to edit the function name or the whitespace around the \verb|=| sign, the function must be expanded first.
 
 \head{Requirements} % haskell editor
 
+The source editor generates a number of requirements, an important one being the possibility of freely editing the textual program source, including the layout. At the same time, it must be possible to let the layout be computed automatically as well. Furthermore, a formalism for specifying computations over the document is required for performing static analysis and type checking.
 
-The source editor generates a number of requirements, an important one being the possibility of freely editing the textual program source, including the layout. At the same time, it must be possible to let the layout be set automatically as well. Furthermore, a formalism for specifying computations over the document is required for performing static analysis and type checking.
+Freely editing the program source is not always regarded a requirement for a structure editor. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g.~\cite{teitelbaum81progSynth, magnusson90orm}). However, no clear consensus has been reached on the subject (e.g.~\cite{abandonText82waters} and reactions \cite{shani83notAbandon, responseToWaters83notkin}, and \cite{vanter94practical}) and nowadays most syntax-directed editors support some form of free text editing. Furthermore, because up to now no pure syntax-directed editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for an editor.
 
 
 %																
-\subsection{A word processor} \label{sect:wordprocessor} This section describes a WYSIWYG document editor with a user interface similar to word-processing applications such as Microsoft Word, but with a document model similar to the XML/SGML DocBook standard~\cite{walsh02docbook} and with an output quality similar to \TeX~\cite{knuth84tex}.
+\subsection{A word processor} \label{sect:wordprocessor} This section describes a WYSIWYG document editor with a user interface similar to word-processing applications such as Microsoft Word, but with a document model similar to the XML/SGML DocBook standard~\cite{walsh02docbook} and an output quality similar to \TeX~\cite{knuth84tex}. Examples of editors with similar functionality are TeXmacs\cite{texmacs} and Lyx~\cite{lyx}, but neither system is generic.
 
 \screenshot{Piece of document, with toc, section, subsection, citations, refs}{Word processor}
 
-The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG presentation with optimal line breaking, a derived table of contents, and an automatic bibliography. Cross-references, such as references to tables and figures or citations, can be clicked to bring the referred part of the document into focus.
+The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG presentation with optimal line breaking, a derived table of contents, and an automatic bibliography. Cross-references, such as citations or references to figures, can be clicked to bring the referred part of the document into focus.
 
 \head{Structural view on the document}
 
 Although Microsoft Word is one of the most popular word-processing tools in the world, an often heard complaint concerns its confusing document model. Sometimes edit operations are not allowed because of underlying document structure, but it is not obvious why this is the case. Furthermore, the reason why a document fragment looks the way it does is not always clear. The user may have set specific style attributes for a particular fragment, or the style may originate from the document's presentation rules. A more structural view on the document, such as Wordperfect's ``underwater'' screen, can help to clarify the situation, but is not supported by Microsoft Word. Such a structural view is easily defined in a structure editor:
 
-\editScreenshot{normal {\em {\bf \em italic+bold} just italic} normal {\bf \em a warning}}{normal $<$E$>$$<$B$>${\em {\bf \em italic+bold}}$<$/B$>${\em just italic}$<$/E$>$ normal $<$Warning$>${\bf \em a warning}$<$/Warning$>$}{Normal presentation}{Structural presentation}
+\editScreenshot{
+\begin{tabular}{l}
+\rmfamily
+normal text {\em {\bf \em italic+bold} just italic} and more normal text\\
+{\bf \em plus a warning}.\\
+\end{tabular}
+}{
+\begin{tabular}{l}
+normal text $<$E$>$$<$B$>${\em {\bf \em italic+bold}}$<$/B$>${\em just italic}$<$/E$>$ and\\
+more normal text $<$Warning$>${\bf \em plus a warning}$<$/Warning$>$.\\
+\end{tabular}
+}{Regular WYSIWYG presentation}{Structural presentation}
 
-The two screenshots show two presentations of the same document fragment. The left presentation is the regular WYSIWYG presentation, whereas the right one is a more structural presentation that shows the markup tags. The example document also contains a fictitious \verb|<Warning>| element that is presented in a bold and italic style. In the left presentation, it cannot be distinguished from ordinary text that is both bold and italic, but in the right presentation it can.
+The two screenshots show two presentations of the same document fragment. The left-hand presentation is the regular WYSIWYG presentation, whereas the right-hand one is a more structural presentation that shows the markup tags. The example document also contains a fictitious \verb|<Warning>| element that is presented in a bold and italic style. Only in the structural  presentation the warning can be distinguished from ordinary text that is both bold and italic.
 
-The structural view can also be helpful for positioning the focus. For example, in the left presentation, the start of the first piece of italic text just before the bold part overlaps with the start of the bold part, therefore adding text that is italic but not bold is rather tricky in the first presentation. In the right presentation, however, the positions do not overlap and text that is just italic as well as text that is italic and bold can be added without a problem. In order for the structural views to be helpful, the editor supports easy switching between views while preserving the current focus.
+The structural view is also helpful for positioning the focus. For example, in the left-hand presentation, the start of the first piece of italic text just before the bold part overlaps with the start of the bold part, therefore inserting text that is italic but not bold is rather tricky. In the right-hand presentation, however, the positions do not overlap and text that is only italic as well as text that is italic and bold can be inserted without a problem. In order for the structural views to be helpful, the editor supports easy switching between views while preserving the current focus.
 
 %Handles to invisible stuff, attributes?
 
 \head{Structural edit operations}\\
 
-Edit operations that rearrange the document structure, such as promoting a subsection to a section, are awkward to perform on a textually represented document, such as a \TeX source. The tags or \TeX commands specifiying the subsection and its descendants need to be changed. This is a rather specific search/replace operation on only part of the document source, which is a hassle to automate.
+Edit operations that rearrange the document structure, such as promoting a subsection to a section, are awkward to perform on a textually represented document, such as a \TeX\ source. All tags or \TeX\ commands that specify the subsection and its descendants need to be changed. This is a rather specific search/replace operation on only part of the document source, which is a hassle to automate.
 
 A structure editor may be of some help here, because the structural similarities between sections and subsections are known to the editor and can be used to define edit operations for restructuring the document.
 
@@ -246,7 +308,7 @@ A structure editor may be of some help here, because the structural similarities
 \end{tabular}
 }{}{}
  
-The screenshot shows the effect of the document edit operation {\em Change to Section}. If the containing section ``Editing structured documents'' had had any subsections following the promoted subsection, these could have become subsections of the new ``Use cases'' section. However, different behavior for such sections may be specified by the user in a preferences window for the command.
+The screenshot shows the effect of the structural edit operation {\em Change to Section}. If the containing section ``Editing structured documents'' had had any subsections following the promoted subsection, these could have become subsections of the new ``Use cases'' section. However, different behavior for such sections may be specified by the user in a preferences window for the command.
 
 An operation that changes the level of a section or subsection is rather complex, because it involves splitting and changing elements. Moreover, there are special cases to consider. For example, if a subsubsection is the deepest possible structural level, and a section that contains a subsubsection is changed to a subsection, a warning needs to be issued. Therefore, such an operation needs to be specified explicitly by the editor designer or user. Other document operations, however, such as splitting and joining elements of a list, may be derived automatically.
 % show transf. spec. language?
@@ -255,20 +317,20 @@ An operation that changes the level of a section or subsection is rather complex
 
 \head{Editing a title in the table of contents}
 
-The word processor has support for the specification of a generated table of contents. From the entries in the table, the user can jump to the corresponding position in the document presentation. The presentation of the table of contents itself can be customized to match the style of the rest of the presentation. When the document is edited, the table of contents is updated accordingly. Moreover, a title in the table of contents can be edited, causing an update to the title in the document.
+The word processor has support for the specification of a generated table of contents. From an entry in the table, a user can jump to the corresponding position in the document presentation. The presentation of the table of contents itself can be customized to match the style of the rest of the presentation. When the document is edited, the table of contents is updated accordingly. Moreover, editing an entry in the table of contents causes an update to the title of the corresponding chapter or section.
 
 \editScreenshot{
 \begin{tabular}[t]{p{5.2cm}}
 {\small Contents}\\
 \vspace{0.001cm}
 ~~~1~~Editing~structured~documents\\
-~~~2~\vline Use cases\\
+~~~2~~\framebox{\!U\!}se cases\\
 ~~~\dots\\
 \vspace{0.005cm}
 {\small 1~~Editing~structured~documents}\\
 \vspace{0.001cm}
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it \\
-% in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use \\
+% it in a much broader sense. We regard \dots\\ 
 \dots \\
 \vspace{0.005cm}
 {\small 2~~Use cases}\\
@@ -282,24 +344,24 @@ In this section we present five example applications of a generic structure edit
 {\small Contents}\\
 \vspace{0.001cm}
 ~~~1~~Editing\\
-~~~2~~The \vline Use cases\\
+~~~2~~The use cases\\
 ~~~\dots\\
 \vspace{0.005cm}
 {\small 1~~Editing~structured~documents}\\
 \vspace{0.001cm}
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it \\
-%in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use \\
+%it in a much broader sense. We regard \dots\\ 
 \dots \\
 \vspace{0.005cm}
-{\small 2~~The Use cases}\\
+{\small 2~~The use cases}\\
 \vspace{0.001cm}
 In this section we present five example applications of a generic structure editor. Some of these \\
 %cases are well-known \dots\\
 \dots
 \end{tabular}
-}{}{after typing: 'T', 'h', 'e', ' '}
+}{}{after typing: 'T', 'h', 'e', ' ', 'u'}
 
-The screenshot shows a document with a table of contents. The second entry in the table of contents is edited by adding the text ``The '' to the start of the title. The result is that both the entry in the table of contents as well as the title in the presentation of the section itself change to ``The Use cases''.
+The screenshot shows a document with a table of contents. The dots (\dots) are not part of the actual screenshot, but have been added to show the table of contents together with the section headings. The second entry in the table of contents is edited by entering the text ``The u'' over the selected letter 'U' at the beginning of the title. The result is that both the entry in the table of contents as well as the title in the presentation of the section itself change to ``The use cases''.
 
 \head{Moving a section in the table of contents}
 
@@ -309,14 +371,14 @@ Besides textual edit operations, it is also possible to perform structural edit 
 \begin{tabular}[t]{p{5.2cm}}
 {\small Contents}\\
 \vspace{0.001cm}
-\fbox{1~~Editing~structured~documents}\\
+~~~ \framebox{1~~Editing~structured~documents}\\
 ~~~2~~Use cases \\
 ~~~\dots\\
 \vspace{0.005cm}
 {\small 1~~Editing~structured~documents}\\
 \vspace{0.001cm}
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use it\\
-% in a much broader sense. We regard \dots\\ 
+While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs}, we will use\\
+% it in a much broader sense. We regard \dots\\ 
 \dots \\
 \vspace{0.005cm}
 {\small 2~~Use cases}\\
@@ -330,7 +392,7 @@ In this section we present five example applica- \\ %tions of a generic structur
 {\small Contents}\\
 \vspace{0.001cm}
 ~~~ 1~~Use cases\\
-\fbox{2~~Editing~structured~documents}\\
+~~~ \framebox{2~~Editing~structured~documents}\\
 ~~~\dots\\
 \vspace{0.005cm}
 {\small 1~~Use cases}\\
@@ -353,23 +415,23 @@ Although structure-changing operations on derived structures may not always make
  
 \head{Requirements} % word processor
 
-Compared to the source editor, the word processor requires a more powerful presentation formalism. Besides text in different fonts, sizes, and colors, the presentation also contains images and basic graphical elements. Furthermore, optimal line and page breaking support is needed for formatting paragraphs and pages. 
+Compared to the source editor, the word processor requires a more powerful presentation formalism. Besides text in different fonts, sizes, and colors, the presentation also contains images and basic graphical elements. Furthermore, support for optimal line and page breaking is needed for formatting paragraphs and pages. 
 
-Finally, in order to handle edit operations on the table of contents, the editor must support editing not only on presentation and document level, but also on the level of derived structures. In order to do so, a mapping must be maintained between a derived structure and its origin in the document.
+Finally, in order to handle edit operations on the table of contents, the editor must support editing not only on presentation and document level, but also on the level of derived structures.
 
 
 %																
 \subsection{Equation editor/MathML}  
 
-Because mathematical formulae have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. Equation editing functionality is typically integrated with a word processor to support in-place editing of equations in a document. However, we separate the two examples here because of the different requirements they generate.
+Because mathematical formulas have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. Equation editing functionality is typically integrated with a word processor to support in-place editing of equations in a document. However, we separate the two examples here because of the different requirements they generate. An example of a non-generic editor for mathematical documents is the MathSpad editor~\cite{verhoeven00mathspad}, which offers word-processing functionality as well. Furthermore, also the TexMacs and Lyx editors mentioned in the previous section support math editing. 
 
-The screenshot shows a WYSIWYG equation editor with support for mathematical constructs such as fractions, roots, and integrals. The document model for the equation editor can be the mathematical markup language MathML~\cite{mathml20}.
+The screenshot shows a WYSIWYG equation editor with support for mathematical constructs such as fractions, roots, and integrals. A possible document type for  the equation editor is the Mathematical Markup Language MathML~\cite{mathml20}.
 
 \screenshot{Nice complex formula with lots of ugly mathematics and a few placeholders}{The equation editor}
 
-Due to their structured nature, mathematical formulae are suitable for document edit operations, using menus and buttons for structure entry. Free presentation editing, on the other hand, is not as clearly defined on a formula as it is on a program source. For example, shrinking the 2 in the number 42 and moving it upwards a bit, could theoretically lead to recognition of the square $4^2$. However, this requires a complicated visual parsing scheme, the exact behavior of which is not clear. Therefore, the editor only allows free editing in the textual parts of a formula that can be parsed unambiguously.
+Mathematical formulas are suitable for document-oriented edit operations, using menus and buttons for structure entry. Free presentation-oriented editing, on the other hand, is not as clearly defined on a formula as it is on a program source. For example, shrinking the 2 in the number 42 and moving it upwards a bit, could theoretically lead to recognition of the square $4^2$. However, this requires a complicated visual parsing scheme, the exact behavior of which is not clear. Therefore, the editor only allows free editing in the textual parts of a formula that can be parsed unambiguously.
 
-Although the restrictions that are put on the edit model are common even in the current generation of non-generic equation editors, we bkastens02vl-elieve that a more sophisticated and flexible edit model is possible. The Proxima architecture does not prohibit such an edit model, but more research on parsing two-dimensional structures is required before it can be supported.
+Although such a rather restricted edit model is common even in the current generation of non-generic equation editors, we believe that a more sophisticated and flexible edit model is possible. The Proxima architecture does not prohibit such an edit model, but more research on parsing two-dimensional structures is required before it can be supported.
 
 \head{Drag and drop}
 
@@ -377,20 +439,20 @@ Direct manipulation of parts of the formula is supported on a structural level. 
 
 \definecolor{gray}{gray}{.6}
 \editScreenshot
-{$ \frac{(x-1)^{\frame{(x+1)}}}{y + \textcolor{gray}{\{\tt Exp\}}}    $}
-{$ \frac{(1+x)^{\textcolor{gray}{\{\tt Exp\}}} }{y + \frame{x+1}}  $}{dragging}{after drop}
+{$ \frac{(x-1)\times{\framebox{$(x+1)$}}}{y + \textcolor{gray}{\{\tt Exp\}}}    $}
+{$ \frac{(1+x)\times{\textcolor{gray}{\{\tt Exp\}}} }{y + \framebox{$x+1$}}  $}{dragging}{after drop}
 
 The subformula is dragged to its new location below the fraction bar, leaving a placeholder (\textcolor{gray}{\{\tt Exp\}}) at its origin. Note that the parentheses disappear because the $+$ operator is associative. 
 
 Only proper subtrees in the document may be selected in the equation editor. This means that in the formula $2^{3^4}$, 
-the $2^3$ part may not be selected because it is not a proper subtree (the power operator is right associative). 
+the $2^3$ part may not be selected because it is not a proper subtree (the power operator associates to the right). 
 %\note{mention associative operators?}
-% except for subformulae for which the outermost presentation is textual, such as $1$\frame{$-\frac{1}{x}-$}$x$. 
+% except for subformulas for which the outermost presentation is textual, such as $1$\framebox{$-\frac{1}{x}-$}$x$. 
 
 In practice, we do not expect this restriction to be a major problem. A fragment of the presentation that does not correspond to a proper subtree does not actually represent a meaningful expression. Hence, the chance that the fragment is reused elsewhere or needs to be moved is small. An unlikely situation in which this might occur is when a user needs to build an expression that by chance has exactly the same presentation as some already present non-subtree selection.
 % say something about parser
 
-\head{Textual structure entry}
+\head{Textual structure entry/parser}
 
 For quick and easy structure entry, the editor supports textual entry of mathematical structures without having to switch to a different mode.
 
@@ -399,24 +461,25 @@ For quick and easy structure entry, the editor supports textual entry of mathema
 {$a_nb_n = \frac{4\theta_{ab} - 4(\pi - \theta_{ab})\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$}
 {enter:  {\tt -4($\backslash$pi-$\backslash$theta\_\{ab\})}}{}
 
-The entered text causes the insertion of $- 4(\pi - \theta_{ab})$, as shown on the right.  It should be noted, however, that textual entry does not always lead to the desired result in a two-dimensional presentation. For example, when "\verb|2/4|" is entered, an intuitive result is the addition of a fraction with the focus ending up below the fraction line to the right of the 4: \frame{$\frac{2}{4\mid}$}. But now, the expected result of entering "\verb|+6|" is \frame{$\frac{2}{4+6\mid}$}, whereas the correct meaning of "\verb|2/4+6|" is \frame{$\frac{2}{4}+6\mid$}.
+The entered text is parserd and causes the insertion of $- 4(\pi - \theta_{ab})$, as shown on the right.  It should be noted, however, that textual entry does not always lead to the desired result in a two-dimensional presentation. For example, when "\verb|2/4|" is entered, an intuitive result is the insertion of a fraction with the focus ending up below the fraction line to the right of the 4: \framebox{$\frac{2}{4\mid}$}. But now the expected result of entering "\verb|+6|" would be \framebox{$\frac{2}{4+6\mid}$}, whereas the correct meaning of "\verb|2/4+6|" is \framebox{$\frac{2}{4}+6$}.
 
-Only if complex subformula need to be entered, or if the appearance of a formula needs to be fine-tuned, the user may temporarily switch to a more structural presentation. 
+If a complex subformula needs to be entered, or if the appearance of a formula needs to be fine-tuned, the user may temporarily switch to a more structural presentation. This may be considered a mode switch, but since the structural presentation is in the same window as the graphical presentation and may be switched back at any time, it does not restrict the user.
 
 \head{Domain-specific transformations}
 
 Because the editor has knowledge about the exact structure of a document, rather than just about the structure of the presentation, it is possible to specify domain specific mathematical transformations.
 
-\editScreenshot{$x = \frame{a * (b + c)}$}{$x = \frame{a * b + a * c}$}{}{after distribution transformation}
+\editScreenshot{$x = \framebox{$a \times (b + c)$}$}{$x = \framebox{$a \times b + a \times c$}$}{}{after distribution transformation}
 
-The example shows the application of a distribution transformation to the selected subformula. Similar transformations, such as factorize or reverse, may be specified by the editor designer or the editor user. Furthermore, instead of updating the expression in-place, the editor may also insert the transformed expression below the original. This way, the editor can be used to construct derivations or proofs semi-automatically.
+The example shows the application of a distribution transformation to the selected subformula. Similar transformations, such as factorize or reverse, may be specified by the editor designer or the editor user. Furthermore, instead of updating the expression in-place, the editor may also insert the transformed expression below the original. This way, the editor can be used to construct derivations or proofs semi-automatically (or indeed fully automatically, if the editor is connected to a theorem prover).
 
 \head{Requirements} % equation editor
 
-Presenting mathematics puts a heavy demand on the presentation formalism. Fine control over automatic alignment and resizing of presentation objects is needed for complex presentations such as integrals, square roots and fractions. 
+Presenting mathematics puts a heavy demand on the presentation formalism. Fine control over automatic alignment and resizing of presentation elements is needed for complex presentations such as integrals, square roots and fractions. 
 
-Editing mathematics requires basic document edit support (copy and paste), as well as drag and drop editing. For supporting domain-specific transformations, a formalism for specifying document edit operations is needed. Presentation editing on mathematical formulae is desirable, but is not a strict requirement, due to its still unclear nature.
+Editing mathematics requires basic document-oriented edit support (copy and paste), as well as drag and drop editing. Structure entry is also typically a document-oriented edit operation, because many expression structures, such as a quotient, a power expression, or a square root, have no presentation that can easily be entered with conventional editing methods.
 
+Because parts of an expression may be missing during its construction,  the editor must be able to handle incomplete documents. Furthermore, for supporting domain-specific transformations, a formalism for specifying document-oriented edit operations is needed. Presentation-oriented editing on mathematical formulas is desirable, but is not a strict requirement, because of its still unclear nature.
 
 %																
 \subsection{Non-primitive outline view/tree browser}\label{sect:treeBrowser}
@@ -425,26 +488,26 @@ An outline view, or tree browser, is a hierarchical view on tree structures. It 
 
 \screenshot{}{Tree Browser View}
 
-Some editors, especially XML editors, provide tree browser views on the document, but in all editors, the view is built-in. However, if the editor is sufficiently powerful to express a tree browser view without resorting to a primitive tree browser widget, this offers many possibilities for integrating the tree view with other views on the document, creating for example WYSIWYG views of parts of a program source, in which branches can be hidden or shown. At the same time, it opens the door for using the generic editor for module or document management, similar to the project management found in integrated development environments, such as JBuilder or Eclipse~\cite{eclipse2001}.
+Some editors, especially XML editors, provide tree browser views on the document, but in all editors, the view is built-in. However, if the editor is sufficiently powerful to express a tree browser view without resorting to a primitive tree browser widget, this offers many possibilities for integrating the tree view with other views on the document. 
 
 \head{Navigation}
 
-Tree views are useful for showing an overview of large structures, such as a program source that consists of a number of different modules. 
+Tree views are useful for giving an overview of large structures, such as a program source that consists of a number of different modules. By combining a tree presentation with a Haskell source editor, we can support the kind the project management that is found in integrated development environments, such as JBuilder or Eclipse~\cite{eclipse2001}. 
 
 \editScreenshot{module structure + Haskell Editor}{selected name has focus in Haskell editor}{click on function name}{}
 
-The editor window consists of two panes, the right pane contains a Haskell source editor and the left pane contains a tree view of the module structure of the edited program. Below the module in the tree are the functions and types it defines. When the user clicks on a name in the left pane, the corresponding module is shown in the right pane and the function definition or type declaration is brought into focus. 
+The window in the screenshot consists of two panes, the right-hand pane contains a Haskell source editor and the left-hand pane contains a tree view of the module structure of the edited program. Below the module in the tree are the functions and types it defines. When the user clicks on a name in the left-hand pane, the corresponding module is shown in the right-hand pane and the function definition or type declaration is brought into focus. 
 
 \head{Drag and drop}
 
-The tree browser supports drag and drop edit behaviour that allows nodes in the tree to be dragged to new locations. 
+The tree browser supports drag and drop edit behavior that allows nodes in the tree to be dragged to new locations. 
 
 \editScreenshot{tree}{rearranged tree}{dragging tree node}{}
 
-The screenshot shows the effect of dragging the leaf with label ``leaf 1'' to its new position below ``leaf 3''. The operation results in a structural document change in which the element with presentation ``leaf 1'' becomes a child of the element that has presentation ``node 1'', immediately below the element with presentation ``leaf 3''.
+The screenshot shows the effect of dragging the leaf with label ``leaf 1'' to its new position below ``leaf 3''. The operation results in a structural document change in which the element with presentation ``leaf 1'' becomes a child of the element that has presentation ``node 1'', immediately below the element with presentation ``leaf~3''.
 
 In this example, the elements of the tree are all of equal type, and therefore can be moved anywhere in the structure. %\note{mention XML stuff?}
-Using the tree view for outline editing in the word processor example is slightly more complex, because a move operation may first require a transformation of the element moved. For example, when a subsection is moved immediately under a chapter element, it must be changed to a section first. 
+Using the tree view for outline editing in the word processor example is slightly more complex, because a move operation may require a transformation of the element moved. For example, when a subsection is moved immediately under a chapter element, it must be changed to a section. 
 
 \head{Customized tree views}
 
@@ -469,38 +532,39 @@ The tree view in the screenshot is a more spatious presentation, in which the ch
 
 Similar to the equation editor, the tree browser has a two-dimensional graphical presentation that requires fine control over the alignment of the presentation elements. Customizability of the tree view requires that the presentation specifications are transparent and reusable. 
 
-Edit operations on the tree structure are similar to edit operations on the table of contents in the word-processing example, because the tree is typically a derived structure that follows the structure of the document (or part of it). Updates on the tree need to be mapped on updates on the document itself. Navigation operations can be considered as an update on the  focus, and hence, the document edit specification formalism must support focus updates.
+Edit operations on the tree structure are similar to edit operations on the table of contents in the word-processing example, because the tree is typically a derived structure that follows the structure of the document (or part of it). Updates on the tree need to be mapped on updates on the document itself. Navigation operations can be considered as an update on the  focus and hence the specification formalism for document-oriented edit operations must support focus updates.
 
-An aspect specific to the tree browser is that it has a notion of state. Each node in the tree view is either collapsed or expanded, and this information must be stored somewhere. Such presentation state, or {\em extra state}, as we call it, does not belong in the document, because if it stored there, the document type will need to be changed whenever a tree view is added to the presentation. The fact that this state is not part of the document, but rather of the presentation of the document, makes it hard to model in a structure editor. A mapping between the document and the presentation state needs to be maintained to associate a document node with its expansion state, even when the document is edited. 
+An aspect that is specific to the tree browser is that it has a notion of state. Each node in the tree view is either collapsed or expanded, and this information must be stored somewhere. Such presentation state, or {\em presentation extra state}, as we call it, does not belong in the document, because if it is stored there, the document type will need to be changed if a tree view is added to the presentation. The fact that this state is not part of the document, but rather of the presentation of the document, makes it hard to model in a structure editor. A mapping between the document and the presentation state needs to be maintained to associate a document node with its expansion state, even when the document is edited and its nodes are reordered. 
 
 
 %																
 \subsection{Tax form}
 
-The last example is a tax form application, which is basically a spread-sheet with a rather specialized presentation. It contains questions and explanatory text, mixed with input fields and fields that contain derived information. 
+The last example is a tax form application, which is basically a spread sheet with a rather specialized presentation. It contains questions and explanatory text, mixed with input fields and fields that contain derived information. 
 
 \screenshot{
-\begin{tabular}[t]{llll}
+\begin{tabular}[t]{l@{\:}lll}
 Income\\
-Nr. of jobs & \frame{2}\\
+Nr. of jobs & \framebox{2}\\
 \\
-Job nr. & Description & Total Salary & Tax Deducted\\
-1 & \frame{PhD student}		& \frame{10} &\frame{2.50}\\
-2 & \frame{Scientific programmer}	& \frame{20} &\frame{5}\\
-Total income & 30\\
-Total tax paid & 7.50\\ 
+Job nr. & Description & Salary & Tax deducted\\
+1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
+2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
+Total income:& 30\\
+Tax paid: & 7.50\\ 
 \\
-Interest:&\frame{2}\\
+Interest:&\framebox{2}\\
 \\
-Total tax:& 35\% of income - paid = & {\bf 3.7}
+Total tax:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
 \end{tabular}
 }{A much simplified tax form}
 
-A difference between the tax form and the previous use cases is the fact that the results of computations that are specified by the user form part of the presentation. Furthermore, the tax form requires a table-oriented layout with support for user interface widgets such as text fields, radio buttons, and selection lists.
 
-The tax form editor has two different kinds of users: the user that designs the tax form, and the user that fills out the form. Both users use the same document type, albeit with different presentations. The form designer uses a presentation that shows the building blocks and structure of the form, as well as the specification of computated values. On the other hand, the user that fills out the form only sees the input fields and accompanying fragments of text. The structure of the form and the specification of computed values are not explicitly visible and cannot be modified in this presentation.
+The tax form editor has two different kinds of users: a user that designs the tax form, and a user that fills out the form. Both users use the same document type, albeit with different presentations. The form designer uses a presentation that shows the building blocks and structure of the form, as well as the formulas for the derived values. On the other hand, the user that fills out the form sees the input fields, the derived values, and the accompanying fragments of text. The structure of the form and the formulas for the derived values are not explicitly visible and cannot be modified in this presentation.
 
-The distinction between the two kinds of users differs from the distinction in Section~\ref{sect:editing} between editor designer users and  document editing users, because both tax form users edit the document and are therefore document editing users.
+The distinction between the two kinds of users differs from the distinction in Section~\ref{sect:editing} between editor designer users and  document editing users, because for the tax form, both users edit the document and therefore are document editing users rather than editor designers.
+
+A difference between the tax form and the previous use cases that, similar to a spread sheet, it has computations that are specified in the document itself. Hence, these computations can be modified by an editing user, rather than an editor designer. Although this is probably not how an actual tax form application would be designed, we use the presence of computations in the document as an example of spread sheet behavior in a structure editor.
 
 %Navigating over form with subforms etc.
 
@@ -509,35 +573,35 @@ The distinction between the two kinds of users differs from the distinction in S
 In most presentations, the structure of the presentation depends on the document structure. However, the presentation structure may also depend on a document value, rather than the structure. An example is the following section of the tax form:
 
 \editScreenshot{
-\begin{tabular}[t]{llll}
+\begin{tabular}[t]{l@{\:}lll}
 Income\\
-Nr. of jobs & \frame{2}\\
+Nr. of jobs & \framebox{2}\\
 \\
-Job nr. & Description & Total Salary & Tax Deducted\\
-1 & \frame{PhD student}		& \frame{10} &\frame{2.50}\\
-2 & \frame{Scientific programmer}	& \frame{20} &\frame{5}\\
-Total income & 30\\
-Total tax paid & 7.50\\ 
+Job nr. & Description & Salary & Tax deducted\\
+1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
+2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
+Total income: & 30\\
+Tax paid: & 7.50\\ 
 \\
-Interest:&\frame{2}\\
+Interest:&\framebox{2}\\
 \\
-Total tax:& 35\% of income - paid = & {\bf 3.7}
+Total tax:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
 \end{tabular}
 }{
-\begin{tabular}[t]{llll}
+\begin{tabular}[t]{l@{\:}lll}
 Income\\
-Nr. of jobs & \frame{3}\\
+Nr. of jobs & \framebox{3}\\
 \\
-Job nr. & Description & Total Salary & Tax Deducted\\
-1 & \frame{PhD student}		& \frame{10} &\frame{2.50}\\
-2 & \frame{Scientific programmer}	& \frame{20} &\frame{5}\\
-3 & \frame{}	& \frame{0} &\frame{0}\\
-Total income & 30\\
-Total tax paid & 7.50\\ 
+Job nr. & Description & Salary & Tax deducted\\
+1 & \framebox{PhD student}		& \framebox{10} &\framebox{2.50}\\
+2 & \framebox{Programmer}	& \framebox{20} &\framebox{5}\\
+3 & \framebox{}	& \framebox{0} &\framebox{0}\\
+Total income: & 30\\
+Tax paid: & 7.50\\ 
 \\
-Interest:&\frame{2}\\
+Interest:&\framebox{2}\\
 \\
-Total tax:& 35\% of income - paid = & {\bf 3.7}
+Total tax:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.7}}
 \end{tabular}
 }{}{Nr. of jobs is changed is changed to 3}
 
@@ -548,26 +612,28 @@ The number of input fields for job information depends on the number of jobs. Wh
 A different presentation of the tax form allows a user to design the form by editing the structure of the form, rather than the values of its input fields.
 
 \screenshot{
-\begin{tabular}[t]{l|l|l|l}
-\frame{Income}\\
-\frame{Nr. of jobs} & c1: special \frame{jobs.length}\\
+\begin{tabular}[t]{l@{}|l@{}|l@{}|l}
+\framebox{Income}\\
+\framebox{Nr. of jobs} & c1: special \framebox{jobs.length}\\
 \\
-\frame{Job nr.} & \frame{Description} & \frame{Total Salary} & \frame{Tax Deducted}\\
+\framebox{Job nr.} & \framebox{Description} & \framebox{Salary} & \framebox{Tax deducted}\\
 LIST: jobs\\
-derived \frame {index} & cs1: input & cs2: input & cs3: input \\
-derived:  1 & cs1[0]: input \frame{PhD student}		& cs2[0]: input \frame{10}& cs3[0]: input \frame{2.5}\\
-derived: 2 & cs1[1]: input \frame{Scientific programmer}	& cs2[1]: input \frame{20}& cs3[1]: input \frame{5}\\
-\frame{Total income:} & c2: derived \frame{sum cs1} {\em 30}\\
-\frame{Total tax paid:} & c3: derived \frame{sum cs2} {\em 7.50}\\ 
+derived \framebox {index} & cs1: input & cs2: input & cs3: input \\
+derived:  1 & cs1[0]: input \framebox{PhD student}		& cs2[0]: input \framebox{10}& cs3[0]: input \framebox{2.5}\\
+derived: 2 & cs1[1]: input \framebox{Programmer}	& cs2[1]: input \framebox{20}& cs3[1]: input \framebox{5}\\
+\framebox{Total income:} & c2: derived \framebox{sum cs1} {\em 30}\\
+\framebox{Tax paid:} & c3: derived \framebox{sum cs2} {\em 7.50}\\ 
 \\
-\frame{Interest:}& c4: input \frame{2}\\
+\framebox{Interest:}& c4: input \framebox{2}\\
 \\
-\frame{Total tax:}& \frame{35\% of income - paid = }&
-c5: derived \frame{0.35*(c2+c4)-c3} {\bf \em 3.7}
+\framebox{Total tax:}& \multicolumn{3}{l}{
+\framebox{35\% of income - paid = }
+ \vline\ c5: derived \framebox{0.35*(c2+c4)-c3} {\bf \em 3.7}
+}\\
 \end{tabular}
 }{Tax form for the tax man (draft)}
 
-The screenshot shows the same tax form document as the previous screenshot, but now the tax form structure and layout are editable. Text blocks, as well as input fields and derived value fields can be inserted or deleted, and the computations for the derived values can be specified. The labels (c1 \dots c5, and cs1 \dots cs3) are supplied automatically, but can also be specified. The input values of the input fields are editable to allow for easy testing of the specified computations. 
+The screenshot shows the same tax form document as the previous screenshot, but now the tax form structure and layout are editable. Text blocks, as well as input fields and derived value fields can be inserted or deleted, and the computations for the derived values (``index'', ``sum cs1'' and ``sum cs2'', and ``0.35*(c2+c4)-c3'') can be modified. The labels (c1 \dots c5, and cs1 \dots cs3) are supplied automatically, but may also be changed. The input values of the input fields are editable to allow for easy testing of the specified computations. 
 
 % how to do child stuff?
 
@@ -575,92 +641,113 @@ The screenshot shows the same tax form document as the previous screenshot, but 
 
 In contrast to the other use cases, the tax form presentation is rather similar to a user interface. Instead of just text and graphical elements, it contains widgets, such as check boxes, selection lists, and input fields, with the corresponding edit behavior.
 
-The tax form also features computations with results that appear explicitly in the document presentation itself. Unlike the type computations in the Haskell editor, the computations in the tax form can be specified by the editor user (the tax man), rather than the editor designer. Therefore, the editor needs to be able to support spread-sheet behaviour.
-
+The tax form also features computations with results that appear explicitly in the presentation itself. Unlike the type computations in the Haskell editor, the computations in the tax form are part of the document, and may be specified by an editing user (the tax man), rather than an editor designer. Therefore, similar to a spread sheet application, the editor needs to dynamically interpret document structures that represent computations and display the results in the presentation. 
 
 %																
 %																
 %																
 \section{Functional requirements}
 \label{sect:reqs}
-With the use cases of the previous section in mind, we now discuss a number of functional requirements for a generic structure editor. 
+With the use cases of the previous section in mind, we now provide a number of functional requirements for a generic structure editor. 
 
 
 %																
 \subsection{Genericity}
 
-In order to support the five use cases, the editor must be generic in the sense that it is not built for a specific document type, or class of document types. However, we do restrict ourselves to trees rather than graphs. Most documents can be represented by trees, including the five use cases. A formalism for specifying cross-links between tree nodes is desirable, but full graph editing is not a requirement.
+In order to support the five use cases, the editor must be generic in the sense that it is not built for a specific document type, or class of document types. However, as mentioned in Section~\ref{sect:structdocs}, we do restrict ourselves to trees rather than graphs. Most documents can be represented by trees, including our five use cases. A formalism for specifying cross-links between tree nodes is desirable, but full graph editing is not a requirement.
 
-Although a distinction can be made between editor generators and generic editors, we regard both as generic editors.
+%Although a distinction can be made between editor generators and generic editors, we regard both as generic editors.
 
 
 %																
 \subsection{Computation formalism}
 
-An interesting aspect of an editor that has knowledge of the structure of the document, is that it can show computed or derived values over that structure to the user. Examples of computations are automatic chapter numbering and a derived table of contents, but also derived type information for identifiers and function definitions in a program source. Two aspects influence the usefulness of the computations: the strength of the formalism in which the computations are specified, and the integration of computed values and structures with the document presentation.
+An interesting aspect of an editor that has knowledge of the structure of the document, is that it can show derived values over that structure to the user. Examples of computations are automatic chapter numbering and a derived table of contents, but also derived type information for identifiers and function definitions in a program source. Two aspects influence the usefulness of the computations: the strength of the formalism in which the computations are specified, and the integration of computed values and structures with the document presentation.
 
-For program editing as well as the tax form, the strength of the computation formalism is important. Computations can provide static analysis, e.g.\ detecting name clashes and scoping problems, as well as a type derivation. In order to be able to specify these computations for arbitrary languages, a Turing-complete formalism, such as an attribute grammar~\cite{swierstra04ag}, is desirable. Another option is to allow the specification of constraints on the document tree~\cite{ballance92pan} and have the editor check automatically whether the constraints hold, but this is not as powerful. Moreover, in such a constraint-based system it is hard to specify numberings and derived structures in an elegant way.
+% or connection to something
+
+For program editing as well as the tax form, the strength of the computation formalism is important. Computations can provide static analysis, e.g.\ detecting name clashes and scoping problems, as well as a type derivation. In order to be able to specify these computations for arbitrary languages, a Turing-complete formalism, such as an attribute grammar~\cite{swierstra04ag}, is desirable. Other options include constraint-based systems~\cite{ganzevoort92views, christopher90constraints, ballance92pan} and tree transformation formalisms~\cite{visser01stratego, xslt10}. Furthermore, the computation formalism should offer functionality for connecting to external tools, such as a compiler or a theorem prover.
 
 For the word-processing example, as well as the tax form, the integration of computed values with the document presentation is important. Whereas type errors may be shown in separate windows or by underlining the location and showing the message in a tooltip, chapter numbers and a table of contents form an actual part of the presentation. 
+
 
 
 %																
 \subsection{Presentation formalism}
 
-The presentation formalism has two different aspects, which we consider together here. One is the formalism in which the building blocks of the presentation are expressed (the presentation target language), whereas the other is the formalism in which the mapping from the document onto the presentation target language is expressed (the presentation transformation language). For XML, a well known presentation language is the Extensible Stylesheet Language (XSL)~\cite{xsl10}. XSL is split into the mapping language XSLT~\cite{xslt10} and the target language XSL Formatting Objects. Chapter~\ref{chap:presenting} discusses the two aspects of the presentation formalism in more detail.
+The presentation formalism has two different aspects, which we consider together here. One is the formalism in which the building blocks of the presentation are expressed (the {\em presentation target language}), whereas the other  (the {\em presentation transformation language}) is the formalism in which it is specified how a document is mapped onto an element of the presentation target language. For XML, a well-known presentation language is the Extensible Stylesheet Language (XSL)~\cite{xsl10}. XSL is split into the mapping language XSLT~\cite{xslt10} and the target language XSL Formatting Objects. Chapter~\ref{chap:presenting} discusses the two aspects of the presentation formalism in more detail.
 
-In many editors the target language is just plain text, sometimes with some color and font attributes. However, in order to support the graphical renderings of the equation editor and outline view use cases, a more advanced target formalism is required. It must be possible to specify graphical elements such as lines and rectangles, as well as to show images. Furthermore, the presentation of a mathematical formula requires an advanced alignment model that offers full control over the positioning of presentation elements.
+In many editors the {\em presentation target language} is just plain text, sometimes with color and font attributes. However, in order to support the graphical presentations of the equation editor and outline view use cases, a more advanced target formalism is required. It must be possible to specify graphical elements such as lines and boxes, as well as show images. Furthermore, the presentation of a mathematical formula requires an advanced alignment model that offers full control over the positioning of presentation elements.
 
-Another requirement for the presentation target language comes from the tax form example. The tax form typically contains user interface widgets, such as radio buttons, selection lists, menus, and normal buttons. Therefore, the target language must support user interface widgets.
-% The presentation language may provide built-in support for such widgets, but if it the language is powerful enough, 
+Another requirement for the presentation target language comes from the tax form example. The tax form typically contains user interface widgets, such as buttons, selection lists, and menus. Therefore, the target language must support user interface widgets.
+% The presentation language may provide built-in support for such widgets, but if
+% it the language is powerful enough, 
 %they may also be emulated.
 
 
 Finally, the word processor use case requires that the presentation target language supports line and page breaking, preferably optimal~\cite{knuth82breaking}. 
 
-The presentation transformation language has to support the specification of complex graphical presentations with compact readable style sheets. It must be possible to specify simple presentations in an easy way, while still allowing the specification of more complex presentations.
+The {\em presentation transformation language} has to support the specification of complex graphical presentations with compact readable style sheets. It must be possible to specify simple presentations in an easy way, while still allowing the specification of more complex presentations. For the exact choice of formalism we have similar options as for the computation formalism, including AGs, constraint-based systems, and tree transformation formalisms.
 
-Although the transformation language is related to the computation formalism, since a presentation can be seen as a computed value, we do separate the two. One reason is that separation of computation and presentation makes it possible to specify multiple presentations of a document together with its computed values. Another reason is that the separation makes it easier to support edit operations on derived structures.
+Although a presentation can be seen a computed value, we make a separation between the presentation transformation language and the computation formalism. One reason for this is that the separation of computation and presentation makes it possible to specify multiple presentations of a document together with its computed values. Furthermore, the separation makes it easier to support edit operations on derived structures.
 
 
 %																
 \subsection{Editing strength}
 
-The editing strength of an editor is determined by the number of levels at which edit operations can be targeted, together with the complexity of the edit operations and to what extent these operations are user-specifiable. Levels at which editing is possible are the presentation level and document level. Syntax-directed editors mainly offer edit operations targeted at the document level, whereas
-syntax-recognizing editors edit the presentation level. Both levels, however, are important. Furthermore, as we will show in Chapter~\ref{chap:proxArch}, a number of other levels may be distinguished, among which a level that contains derived structures and values.
+The editing strength of an editor is determined by the number of levels at which edit operations can be targeted, together with the complexity of the edit operations and to what extent these operations are user-specifiable. 
 
-%refs
-The source editor use case shows the necessity of free textual editing in the presentation. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g.~\cite{teitelbaum81progSynth, magnusson90orm}). However, no clear consensus has been reached on the subject (e.g.~\cite{abandonText82waters} and reactions \cite{shani83notAbandon, responseToWaters83notkin}, and \cite{vanter94practical}) and nowadays even most syntax-directed editors support some form of free text editing. Furthermore, because up to now no pure structure editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for program editing.
+%Levels at which editing is possible are the presentation and the document. Furthermore, as we will show in %Chapter~\ref{chap:proxArch}, a number of other levels may be distinguished, among which a level that contains derived %structures and values.
 
-Besides presentation-oriented edit operations, document-oriented operations are important as well. The equation editor as well as the outline editor rely heavily on document editing. For equation editing, structure entry is typically a document edit operation, because many expression structures, such as a quotient, a power expression, or a square root, have no presentation that can easily be entered with conventional editing methods. The outline editor requires document editing because it has to support navigation over the structure, as well as moving nodes in the tree to other locations, which is a document-oriented operation. Document edit operations typically include basic copy, paste, and delete operations, as well as selection and navigation operations.
 
-Especially for document edit operations, a transformation specification formalism is desirable. It allows the editor designer to define edit operations specific to the edited type of document. An example of such a user-specified edit operation is the rename operation in the Haskell editor. Furthermore, the formalism can be used to specify standard generic document edit operations such as split and join.
+% document-oriented editing
+The equation editor as well as the outline editor rely heavily on document-oriented editing. Document-oriented edit operations typically include basic copy, paste, and delete operations, as well as selection and navigation operations.
 
-%macro language?
+Because a document is not always well typed while it is being constructed, the editor should support incomplete document structures, for example by allowing placeholders to appear in the document tree. Besides incomplete documents, it is desirable to have support for invalid documents in general. However, because it can be difficult to compute the presentation of an invalid document, we may wish to allow invalid documents only for certain presentations, such as a textual XML source presentation. 
 
-As the word processor use case shows, it can be desirable to support edit operations on derived structures. This is not to say that all derived structures and values should be editable, but in those cases in which it makes sense to a user, it should be possible to specify the edit behaviour for derived structures.
+%presentation-oriented editing
+Presentation-oriented editing is required for the source editor, because it supports free textual editing of the program source. To a lesser extent, presentation-oriented editing is needed also for the equation editor (for textual structure entry) and the tax form (for editing the computations). 
+
+Finally, as the editable table of contents of the word processor use case shows, support for edit operations on derived structures is desirable. This is not to say that all derived structures and values should be editable, but in those cases in which it makes sense to a user, it should be possible to specify the edit behavior for derived structures.
 % say more? that is should be easy to do standard stuff?
+
+For document-oriented edit operations, a transformation specification formalism is desirable. It allows an editor designer to define edit operations specific to a certain type of document. An example of such an edit operation is the rename operation in the Haskell editor. Furthermore, the formalism can be used to specify standard generic document-oriented edit operations such as split and join.
 
 
 %																
 \subsection{Modeless editing}
 
-Besides support for editing on different levels, an important requirement is the integration of the edit operations on the different levels. A seamless integration of document and presentation editing provides a more pleasant edit interface to the user, as the intended operation can be performed on the presentation that the user is working on, without first explicitly having to switch modes.
+Besides support for editing on different levels, an important requirement is the integration of the edit operations on the different levels. A seamless integration of document-oriented and presentation-oriented editing provides a more pleasant edit interface to the user, as the intended operation can be performed on the presentation that the user is working on, without first explicitly having to switch modes.
 
-The most extreme form of mode-switching is when different-level edit operations have to take place in separate windows and also have a separate undo-history. This is the approach taken by many pure structure editors that offer some support for free text editing, as well as by all existing XML editors. Even worse, the separate free-editing text mode often has a special text-only format, in which derived values are not shown and interesting graphical presentations are not possible. In order to get back to document editing, the user needs to leave the text in a valid state, or abandon the text update.
+The most extreme form of mode-switching is when different-level edit operations have to take place in separate windows and also have a separate undo-history. This is the approach taken by many pure structure editors that offer some support for free text editing, as well as by all existing XML editors. Even worse, the separate free-editing text mode often has a special text-only format, in which derived values are not shown and interesting graphical presentations are not possible. In order to get back to document-oriented editing, the user needs to leave the text in a valid state, or abandon the text update.
 
-If the editable textual presentation is displayed in-place in the document presentation, the mode-switching becomes less intrusive. However, the most user-friendly approach is to avoid mode switching altogether, so that a user can freely edit in the presentation, even when it contains computations and graphical presentations. Moreover, if a presentation edit makes the presentation invalid, the invalid area should be kept as small as possible, and document editing must still be available on the valid parts.
+If the editable textual presentation is displayed in-place in the document presentation, the mode-switching becomes less intrusive. However, the most user-friendly approach is to avoid mode switching altogether, thus allowing a user to freely edit the presentation, even if it contains computations and graphical presentations. Moreover, if a presentation-oriented edit operation makes the presentation invalid, the invalid area should be kept as small as possible, and document-oriented editing must still be available on the valid parts.
 
 
 %																
 \subsection{Extra state} \label{sect:editingExtraState}
 
-A feature that is not explicitly present in any of the current structure editors, is the notion of extra state. With extra state, we mean information that needs to be kept track of when editing a document, but which does not conceptually belong to the document itself. \note{already mention interpretation e.s. here?}
+If a document is edited, the presentation is updated accordingly by presenting the edited document. However, in some cases, a presentation may contain information that cannot be derived from the document. We refer to such information as {\em presentation extra state}. Analogously, the document may contain information that cannot be inferred from the presentation. This information is referred to as {\em interpretation extra state}. 
 
-A clear example of extra state is present in the outline view example. The expansion state of the nodes of the tree view needs to be kept track of. However, this is not information that should be stored in the document tree structure, since the design of the document type should not have to consider what views may be defined for that document type. Moreover, several views may be opened simultaneously, each with their own expansion state.  Other examples of extra state are focus information, local layout settings (e.g.\ whether or not auto-layout is turned on), and whitespace in the presentation. These examples all concern extra state at presentation level, but extra state also appears on other levels, as will be shown in Chapter~\ref{chap:proxArch}. In order to handle extra state, a formalism must be present to declare variables local to presentation elements. Furthermore, when a document is stored, its extra state must also be stored as well.
+\bc *******
+A feature that is not explicitly present in any of the current structure editors, is the notion of extra state. With extra state, we mean information that needs to be kept track of when editing a document, but which does not conceptually belong to the document itself. \note{already mention interpretation e.s. here?} We distinguish two forms: {\em presentation extra state} and {\em interpretation extra state}.
+\ec
 
-Support for extra state complicates the presentation process as well as the interpretation of edit events as document updates. A document element needs to keep track of its presentation elements, and when it is re-presented, it must be mapped onto those same presentation elements because extra state may be associated with the presentation. The editor needs to have facilities for keeping track of the information required to support extra state, and when there is no extra state is, no extra effort should be required from the editor designer.
+A clear example of {\em presentation extra state} is found in the outline view example. The expansion state of the nodes of the tree view needs to be kept track of. However, this is not information that should be stored in the document tree structure, since the design of the document type should not have to consider what views may be defined for that document type. Moreover, several views may be opened simultaneously, each with their own expansion state. Hence, the expansion state is regarded as presentation extra state. Other examples of presentation extra state are focus information, local layout settings (e.g.\ whether or not auto-layout is turned on), and whitespace in the presentation. 
 
+{\em Interpretation extra state}, on the other hand, is any information in the document that cannot be inferred from its presentation. Hence, if a document is only partially presented, those parts that are not presented are considered interpretation extra state. An example is an editable table of contents of a word processor, in which the content of the chapters and sections is interpretation extra state.
+
+In order to handle the use cases, a generic editor should support both presentation extra state, and interpretation extra state (in the form of editable partial presentations). We do not consider a generic editor to fully support presentation extra state if it only supports built-in forms. Instead, it must be possible to explicitly declare parts of the presentation to be extra state.
+
+\bc
+The examples all concern extra state at presentation level, but extra state also appears on other levels, as will be shown in Chapter~\ref{chap:proxArch}. In order to handle extra state, a formalism must be present to declare variables local to presentation elements. Furthermore, when a document is stored, its extra state must also be stored as well. **** also mention interpr. extra state + \ref{sect:extraState}
+\ec
+
+In order to support extra state, an editor needs to maintain information about the mapping between the document and its presentation. If there is no extra state, no extra effort should be required from the editor designer. Extra state is discussed in more detail in sections~\ref{sect:extraState} and~\ref{sect:singleExtra}
+
+\bc
+Support for extra state complicates the presentation process as well as the interpretation process. A document element needs to keep track of its presentation elements, and when it is re-presented, it must be mapped onto those same presentation elements because extra state may be associated with the presentation. Similarly, the presentation elements must keep track of the document . The editor needs to have facilities for keeping track of the information required to support extra state, and
+\ec
 
 
 %																
@@ -674,12 +761,14 @@ Summarizing, to support all five use cases, a generic structure editor must meet
 \item A graphical presentation language with a powerful mapping formalism.
 \item Support for edit operations on all levels, including edit operations on derived structures.
 \item Modeless editing.
-\item Support for extra state.
+\item Support for presentation extra state as well as interpretation extra state.
 \end{itemize}
 
+The requirements above all apply to the edit model, but of course many other requirements exist for a generic structure editor.  Commonly recognized requirements for editors, which we will not discuss in detail, include: undo functionality, multiple window support, search/replace functionality, and a help facility. 
+%macro language?
 
-*****
-Of course, many more requirements exist, but our focus is on the editing model. The computation model of Proxima is general, and in order to easily use it for example to do semantic analysis or code generation, libraries are required. Other requirements that we consider orthogonal to ours, concern document management and database connectivity. 
+%The computation model of Proxima is general, and in order to easily use it for example to do semantic analysis or code %generation, libraries are required. Furthermore, there are requirements that we consider.
+%Furthermore, requirements that we consider orthogonal to ours, concern document management and database connectivity. 
 \bc
 more?
 The discussed concepts are mainly related to the edit model of the system. 
@@ -688,7 +777,7 @@ Mention that these requirements are different from things like multiple window, 
 
 plug-in architecture, open.
 %somewhere:
-Focus on documents, not sound or video. Also focus on single documents (although not hard) 
+lso focus on single documents (although not hard) 
 instead of document management, versioning, or compound documents. Mainly orthogonal.
 page refs are a bit tricky.
 \ec
@@ -702,7 +791,7 @@ page refs are a bit tricky.
 %																
 %																
 %																
-\section{Overview of structure editors}
+\section{Overview of structure editors} \label{sect:overview}
 
 Because of the large number of existing systems, we cannot mention all editors in this overview. The editors mentioned are some of the early systems, together with a number of other editors that contain novel features.
 
@@ -710,7 +799,9 @@ Because of the large number of existing systems, we cannot mention all editors i
 %																
 \subsection{Syntax-directed editors} \label{sect:synDirEditors}
 
-Most of the editors in this section are specially designed for program editing and hence have a rather text-oriented presentation formalism. Moreover, the computation formalism in such editors is aimed mainly at analysing source code, instead of performing general purpose computations. 
+Most of the editors in this section are specifically designed for program editing and hence have a rather text-oriented presentation formalism. Moreover, the computation formalism in such editors is aimed mainly at analyzing source code, and not at performing general purpose computations. 
+
+Most syntax-directed editors allow partial presentations of the document, and hence offer support for interpretation extra state. On the other hand, the only form of presentation extra state is found in built-in tree views on the document structure.
 
 \head{Synthesizer Generator}
 
@@ -718,21 +809,21 @@ The Synthesizer Generator~\cite{reps84synGen} is the successor of the Cornell Pr
 
 %prog Sys is monolithic, also for program execution.
 
-An interesting aspect of the Synthesizer Generator is its support for computations over the document structure. The presentation of the document can contain computed values, that are specified using an attribute grammar. 
+An interesting aspect of the Synthesizer Generator is its support for computations over the document structure. The presentation of the document can contain computed values, which are specified using an attribute grammar. 
 
-The edit model supports user-specified transformations on the structure, but plain text editing is poorly supported. The editor uses mode-switching and after switching to textual mode, the presentation must be put in a parseable state before any structure editing is available again.
+The edit model supports user-specified transformations on the structure, but plain text editing is poorly supported. The editor uses mode-switching and after switching to the textual mode, the presentation must be left in a parseable state before structure editing is available again.
 
-Over the years, the behaviour and design have not undergone many drastic changes, but the system is still being used and commercially maintained.
+Over the years, the behavior and design have not undergone many drastic changes, but the system is still being used and commercially maintained.
 
 \head{LRC}
 
-The LRC attribute grammar system~\cite{saraiva00lrc} was a research project at Utrecht University. Higher-order attribute grammars are used to specify the derived values, as well as the presentation. The system is based on an efficient higher-order attribute grammar evaluator. Higher-order attribute grammars allow some computations to be specified more elegantly than normal attribute grammars.
+The LRC attribute grammar system~\cite{saraiva00lrc} was a research project at Utrecht University. Higher-order attribute grammars are used to specify the derived values, as well as the presentation. The system is based on an efficient higher-order attribute grammar evaluator. Higher-order attribute grammars allow some computations to be specified more elegantly than regular attribute grammars.
 
 For the presentation of the document, the Tcl/Tk language is used. This allows for complex presentations with multiple windows, GUI widgets, colors, and basic graphical elements. However, the integration between the generated presentation and the editor is very weak. No general focus model is present, and although edit events can be attached to the Tcl presentation, free editing is only possible a separate window that contains a purely textual presentation of the document. The textual presentation cannot be used to edit the layout of the main presentation, and it does not contain derived values. 
 
-\head{SbyS, Mj\slasho lner/Orm} %90
+\head{SbyS, Mj\bfslasho lner/Orm} %90
 
-SbyS is the structure editor of the Mj\slasho lner/Orm environment~\cite{magnusson90orm}. Mj\slasho lner/Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most other systems are editor generators, that generate an editor for a specific language.
+SbyS is the structure editor of the Mj\slasho lner/Orm environment~\cite{magnusson90orm}. Mj\slasho lner/Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most of the other systems are editor generators.
 
 The structure editor is syntax-directed text and text-oriented with a parser only for entering expressions. In order to overcome the usability problems associated with pure syntax-directed editing, the editor employs the concept of direct manipulation. Program constructs are shown in a pallette, from which they can be dragged to the program source or a clipboard.
 
@@ -741,17 +832,17 @@ No formalism for specifying transformations is present, and the only computation
 
 \head{PSG} % 86
 
-PSG (Programming System Generator)~\cite{Bahlke86PSG} is a generator for language-based interactive environments, developed at the Technical University of Darmstadt. As the name already suggests, the system is designed for programming languages. The presentations are text-only and only LL(1) grammars are supported. The system generates an editor based on a number of formal descriptions for a language, including a syntax definition, a presentation sheet (called a {\em format syntax} in PSG), and a specification of the semantic analysis.
+PSG (Programming System Generator)~\cite{Bahlke86PSG} is a generator for language-based interactive environments, and is developed at the Technical University of Darmstadt. As the name already suggests, the system is designed for programming languages. The presentations are text-only and only LL(1) grammars are supported. The system generates an editor based on a number of formal descriptions for a language, including a syntax definition, a presentation sheet (called a {\em format syntax} in PSG), and a specification of the semantic analysis.
 
 Special focus has been put on incremental analysis over incomplete program fragments. PSG uses a special form of the attribute grammar formalism that supports sets of possible attribute values in order to handle attribution of incomplete document fragments.
 
-However, the presentation may not contain derived values or structures. And although textual editing takes place in the same view as document editing, this does involve a mode switch. Furthermore, layout information cannot be edited freely, but is determined by the presentation sheet.
+However, the presentation may not contain derived values or structures. And although textual editing takes place in the same view as document-oriented editing, this does involve a mode switch. Furthermore, layout information cannot be edited freely, but is determined by the presentation sheet.
 
 \head{Other syntax-directed editors} % 86
 
 % mention text only syn-dir editors with parser mentor
 Other textual syntax-directed editors for program editing are the Aloe editor in Gandalf environment\cite{notkin85gandalf}, Mentor~\cite{donzeau84mentor}, its successor Centaur~\cite{borras88centaur}, Pregmatic~\cite{brand92pregmatic}, Poe~\cite{fischer84poe}, Dose~\cite{kaiser88dose}, Gnome~\cite{garlan84gnome}, Pecan~\cite{reiss84pecan}, Muir~\cite{normark88muir}, and Dice~\cite{fritzson84dice}. These systems have their own interesting aspects, but as far as the editors are concerned they do not deviate much from the systems already discussed, and hence are not discussed separately.
-
+%Cedar?   http://portal.acm.org/citation.cfm?id=801968&dl=ACM&coll=portal#
 Some more exotic editors that do not support editing on the presentation are Multiview~\cite{read96multiview} and {VL-Eli}~\cite{kastens02vl-eli}.
 
 
@@ -759,6 +850,8 @@ Some more exotic editors that do not support editing on the presentation are Mul
 \subsection{Syntax-recognizing Editors}
 
 Similar to the syntax-directed editors, most syntax-recognizing editors are designed for program editing. Regarding the computations, however, due to the difficulty of free editing in a presentation with derived values, none of the syntax-recognizing editors support arbitrary computations that may appear in the presentation.
+
+Regarding extra state, syntax-recognizing editors are the opposite of syntax-recognizing editors: several built-in forms of presentation extra state (e.g.\ whitespace) are supported, but interpretation extra state is not. 
 
 \bc
 \toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -775,13 +868,13 @@ No information on this one yet. Order paper at library.
 
 Pan~\cite{ballance92pan} is a text-only source editor environment. The presentations are text in multiple fonts, styles, and colors. The system has good support for handling partially incorrect or incomplete documents.
 
-The computation formalisms in Pan are oriented towards semantic analysis. Logical constraint grammars are used for specifying, checking, and maintenaining of contextual constraints. Computed information is shown in the presentation by changing the font and color attributes of the text, but it is not possible to specify arbitrary computations that form part of the document presentation. Furthermore, it is not possible to specify an editable presentation that shows only part of the document (e.g.\ a presentation in which function bodies may be hidden), as the editor is syntax-recognizing, and therefore the presentation must contain all information necessary to derive the document structure.
+The computation formalisms in Pan are oriented towards semantic analysis. Logical constraint grammars are used for specifying, checking, and maintaining contextual constraints. Computed information is shown in the presentation by changing the font and color attributes of the text, but it is not possible to specify arbitrary computations that form part of the presentation. Furthermore, the editor does not support interpretation extra state. Hence, it is not possible to specify an editable presentation that shows only part of the document (e.g.\ a presentation in which function bodies may be hidden), as the editor is syntax-recognizing, and therefore the presentation must contain all information necessary to derive the document structure.
 
-Pan offers some document editing, but edit operations on document structures are performed by editing the corresponding parts in the presentation and reparsing the presentation. Edit operations that modify the document structure directly are not supported, as these are believed to confuse the user. As a consequence, only basic document edit operations such as cut and paste are supported, and no document transformations can be specified. Free text editing, on the other hand, is fully supported, including layout editing. 
+Pan offers some document-oriented editing, but edit operations on document structures are performed by editing the corresponding parts in the presentation and reparsing the presentation. Edit operations that modify the document structure directly are not supported, as these are believed to confuse the user. As a consequence, only basic document-oriented edit operations such as cut and paste are supported, and no document transformations can be specified. Free text editing, on the other hand, is fully supported, including layout editing. 
 
 \head{GSE, ASF/SDF}
 
-The GSE~\cite{koorn92gse} editor has been developed as part of the Esprit project "Generation of Interactive Programming Environments" (GIPE). It is still being used in the ASF/SDF meta environment~\cite{klint93asfsdf}. The editor is primarily aimed at programming languages and the presentations are assumed to be lines of text. GSE supports free editing of the program text without an explicit mode switch, but structural edit operations on the program that keep user-specified layout in tact are not supported. Also, computations on the document cannot be specified.
+The GSE~\cite{koorn92gse} editor has been developed as part of the Esprit project ``Generation of Interactive Programming Environment'' (GIPE). It is still being used in the ASF/SDF meta environment~\cite{klint93asfsdf}. The editor is primarily aimed at programming languages and the presentations are assumed to be lines of text. GSE supports free editing of the program text without an explicit mode switch, but structural edit operations on the program that keep user-specified layout intact are not supported. Furthermore, computations on the document cannot be specified.
 
 \head{Ensemble}
 
@@ -804,6 +897,9 @@ Built using the experience of the FIELD~\cite{reiss94field} project, Desert~\cit
 \head{Other syntax-recognizing editors}
 
 Other syntax-recognizing editors similar to the ones that were discussed include  Babel~\cite{horton81babel}, Saga~\cite{campbell84saga}, and Pregmatic~\cite{brand92pregmatic}.
+
+%% Maybe check linden94incremental form some more.
+
 
 \bc
 CodeProcessor~\cite{codeprocessor}
@@ -832,13 +928,14 @@ The presentation formalism in Thot, called P, is a powerful graphical presentati
 
 Thot editors are of a syntax-directed nature. Multiple views on the document may be edited simultaneously, and user-specified transformations are supported. However, free text editing can only be done in a separate window in a different mode. Also, no computations are supported, other than some basic counters in the presentation. 
 
-\head{Visual Studio model}
+\head{Visual Studio editor}
 
-The Microsoft Visual Studio environment includes an integrated source editor. Although the editor does not contain any novel features, and  thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
+The Microsoft Visual Studio environment includes an integrated source editor. Although the editor does not contain any novel features, and thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
 
-The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
+The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document-oriented edit functionality is supported, other than the displaying results of semantic analysis. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
 
-\note{Mention eclipse?}
+\note{Mention Eclipse?}
+\note{Other editor toolkits?}
 \bc
 \toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -857,49 +954,48 @@ Opendoc.\\
 \ec
 
 %																
-\subsection{XML editors}
+\subsection{XML editors} \label{sect:xmlEditors}
 
 % check the list of XML editors and mention which ones are in the overview.
 A large number of XML editors has been developed, but the differences between them are not fundamental. Almost all XML editors classify as pure structure editors with mode switching. 
 
-Because of the small amount of variation, we discuss XML editors in general with respect to our functional requirements. Afterwards, two \note{three?} editors are discussed separately.
+Because of the small amount of variation, we discuss XML editors in general with respect to our functional requirements. Afterwards, two  editors are discussed separately.
 
 \begin{description}
 \item[Genericity.] 
-The XML editors are generic. Most reviewed editors are actual generic editors, rather than editor generators, and support editing of documents with arbitrary DTDs. Although compared to context free grammars, DTDs have a few restrictions in order to make parsing easier~\cite{klein98glushkovRestr}, the type language is very similar to the EBNF grammar description formalism and powerful enough to describe the tree based document structures we wish to edit.
-\note{What about schemas?}
+The XML editors are generic. Most reviewed editors are actual generic editors, rather than editor generators, and support editing of documents with arbitrary DTDs. Although compared to context free grammars, DTDs have a few restrictions in order to make parsing easier~\cite{klein98glushkovRestr}, the type language is very similar to the EBNF grammar description formalism and powerful enough to describe the tree-based document structures we wish to edit.
 
-\item[Computations formalism.]
+\item[Computation formalism.]
 Support for computations is very weak for all reviewed editors. A few editors support basic numbering of elements in the document, but no arbitrary computations can be specified. Some editors support the transformation formalism XSLT, but none provide an editable view on the resulting transformed document.
 
 \item[Presentation formalism.]
-Most XML editors only provide standard views on the document. Popular are the raw-text XML source view, a built-in tree view showing the document structure with PCDATA values in the leafs, and a slightly less raw view with tags, represented using a more graphical presentation.
+Most XML editors only provide standard views on the document. Popular are the raw-text XML source view, a built-in tree view showing the document structure with the textual content in the leaves, and a slightly less raw view with tags, represented using a more graphical presentation.
 
-Some editors support a user definable presentation, or at least allow the user to specify some attributes for the presentation. However, the presentation formalisms are generally weak, and the presentations that can be used for editing, have to follow the structure of the XML document. Moreover, there is hardly any support for textual presentations, making it impossible to present an XML tree representing the abstract syntax tree of a program as the actual program text.
+Some editors support a user-defined presentation, or at least allow the user to specify some attributes for the presentation. However, the presentation formalisms are generally weak, and the presentations that can be used for editing, have to follow the structure of the XML document. Moreover, there is hardly any support for textual presentations, making it impossible to present an XML tree that represents an abstract syntax tree as actual program source code.
 
-It is remarkable that support for textual presentations of XML documents is this weak, since many languages for processing and describing XML documents are specified in XML itself (for example XML Schema~\cite{xmlSchema1, xmlSchema2}  or XSLT~\cite{xslt10}) and editing these languages would be greatly simplified by providing the user with a concise concrete syntax, rather than the verbose XML syntax.
+It is remarkable that support for textual presentations of XML documents is this weak, since many languages for processing and describing XML documents are specified in XML itself (e.g.\ XML Schema~\cite{xmlSchema1, xmlSchema2}  and XSLT~\cite{xslt10}) and editing these languages would be greatly simplified by providing the user with a concise concrete syntax, rather than the verbose XML syntax.
 
 \item[Editing strength.]
 %check transformation
-Most XML editors offer simple document edit operations for structure entry and manipulation. However, none of the reviewed editors support user-specified transformations on the tree structure.
+Most XML editors offer simple document-oriented edit operations for structure entry and manipulation. However, none of the reviewed editors support user-specified transformations on the tree structure.
 
-In each of the editors, free text editing is supported only in the raw XML source. Because most XML documents have text and whitespace in the leafs, it may appear that the document edit operations are free text editing, but this is not the case. Textual presentations other than the source presentation cannot be edited freely. On the other hand, as mentioned, most XML editors do not allow a textual presentation of the document. 
+In each of the editors, free text editing is supported only in the raw XML source. Because most XML documents have text and whitespace in the leaves, it may appear that the document-oriented edit operations are free text editing, but this is not the case. Textual presentations other than the source presentation cannot be edited freely. On the other hand, as mentioned, most XML editors offer little support for textual presentations of the document. 
 
 \item[Modeless editing.]
-None of the editors support free editing on the presentation without a mode switch. Each type of view has a separate window, and though some editors have a shared undo history for some of the views, no editor has a shared undo history for the XML source presentation and its other presentations. Hence, after switching to source mode, previous edit operations on other views cannot be undone anymore, and vice versa.
+None of the editors support free editing on the presentation without a mode switch. Each type of view has a separate window, and though some editors have a shared undo history for some of the views, no editor has a shared undo history for the XML source presentation and its other presentations. Hence, after switching to source mode, previous edit operations on other views cannot be undone, and vice versa.
 
 \item[Extra State.]
-The XML editors do not support user-specified extra state.
+The XML editors support extra state similar to the syntax-recognizing editors. Interpretation extra state is supported in the form of partial presentations, but presentation extra state is only found in built-in tree views.
 
 \end{description}
 
-Two XML editors have a more sophisticated presentation engine and some basic support for computations, and are therefore discussed separately.
+Two XML editors have a more sophisticated presentation engine and basic support for computations, and are therefore discussed separately.
 
 \head{X-Metal}
 
 The commercial system X-Metal from SoftQuad is a highly customizable XML editor, with support for many XML standards and database connectivity. Besides regular source and outline views, it offers built-in table editing and an editable CSS~\cite{css2} presentation of the document. CSS provides a quick and easy way to specify a document presentation, but its expressive power is limited. Although general computations cannot be specified, CSS does allow the specification of basic counters in the presentation. 
 
-Document edit operations in X-Metal are rather weak, and transformations cannot be specified. Furthermore, the freely editable source presentation can only be edited in a separate mode.
+Document-oriented edit operations in X-Metal are rather weak, and transformations cannot be specified. Furthermore, the freely editable source presentation can only be edited in a separate mode.
 
 % mention frame maker here?
 \head{XMLSPY}
@@ -909,44 +1005,43 @@ XMLSPY is a large system that has similar functionality as X-Metal. An important
 %\head{Frame maker?}\\
 
 
-\section{Discussion}
+\section{Discussion} \label{sect:discussion}
 
 % Also a number that were not introduced due to space limitations (or some similar reason)?
 
 % TODO:  use $$ and \pm
-
 \begin{figure}
 \begin{center}
 \begin{footnotesize}
 \begin{tabular}[t]{l|c|c|c|c|c|c}
-Editor		& Genericity & Computation & Presentation & Editing    & Modeless & Local \\
+Editor		& Genericity & Computation & Presentation & Editing    & Modeless & Extra \\
 		&                 &      formalism        &   formalism   & strength     &  editing   & state \\
 \hline
 %                                           generic  comps      pres        editing    integration extra state
-Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    - -	\\
-LRC			&   ++	&   ++	&   + 	&   +	&   - - 	&    - -	\\
-PSG			&   ++	&    +	&   - -	&   +/-	&    +	&    - -	\\
-SbyS, Mj\slasho lner/Orm	&   ++	&    -	&   - - 	&   -	&   n/a	&    - -	\\
+Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    +/- 	\\
+LRC					&   ++	&   ++	&   + 	&   +	&   - - 	&    +/-	\\
+PSG					&   ++	&    +	&   - -	&   +/-	&    +	&    +/-	\\
+SbyS, Mj\slasho lner/Orm&   ++	&    -	&   - - 	&   -		&   n/a	&    +/-	\\
 \hline
 %SRE			&   ?	&   ?	&   ? 	&   ?	&   ?	&    - -	\\
-Pan			&   ++	&  +/-	&   - 	&   +/-	&   ++	&    - -	\\
-GSE			&   ++	&   - -	&   - - 	&   +/-	&   ++	&    - -	\\
-Desert			&   ++	&   - -	&   +/- 	&   +/-	&   - -	&    - -	\\
+Pan					&   ++	&  +/-	&   - 	&   +/-	&   ++	&     -	\\
+GSE					&   ++	&   - -	&   - - 	&   +/-	&   ++	&     -	\\
+Desert				&   ++	&   - -	&   +/- 	&   +/-	&   - -	&     -	\\
 %Intent. Progr. Editor	&   ?	&   ?	&   + 	&   ?	&   ++	&    - -	\\
-Ensemble			&   ++	&   +/-	&   + 	&   +	&   ++	&    - -	\\
+Ensemble				&   ++	&   +/-	&   + 	&   +	&   ++	&     -	\\
 \hline
-Amaya, Thot		&   +	&   +/-	&  + 	&   +	&   - -	&    - -	\\
-Visual Studio		&   +/-	&   +/-	&   - 	&   -	&   n/a	&    - -	\\
+Amaya, Thot			&   +	&   +/-	&  + 	&   +	&   - -	&    -	\\
+Visual Studio			&   +/-	&   +/-	&   - 	&   -		&   n/a	&    -	\\
 \hline
-XMetal			&   ++	&   -	&  +/- 	&  +/-	&   - -	&   - -	\\
-XMLSPY			&   ++	&   +/-	&   + 	&  +/-	&   - -	&   - -	\\
-Other XML editors		&   ++	&  max. - & max. +/-&  +/-	&   - -	&   - -	\\
+XMetal				&   ++	&   -		&  +/- 	&  +/-	&   - -	&   +/-	\\
+XMLSPY				&   ++	&   +/-	&   + 	&  +/-	&   - -	&   +/-	\\
+Other XML editors		&   ++	&  max. - & max. +/-&  +/-	&   - -	&   max. +/-	\\
 \hline
 %\dots			&   ?	&   ?	&   ? 	&   ?	&   ?	&     --	\\
-Proxima			&   ++	&   ++	&   ++ 	&   ++	&   ++	&     ++	\\
+Proxima				&   ++	&   ++	&   ++ 	&   ++	&   ++	&     ++	\\
 \end{tabular}                                                   
 \end{footnotesize}
-\caption{Editor evaluation}\label{editing} 
+\caption{Editor evaluation}\label{scoretable} 
 \end{center}
 \end{figure}
 
@@ -968,18 +1063,19 @@ An xml editor for Haskell would never be possible
 \end{itemize}
 \ec
 
+Figure~\ref{scoretable} contains an evaluation of the strengths and weaknesses of each of the discussed editors according to the requirements from Section~\ref{sect:reqs}. None of the editors scores a positive for extra state, and besides that, each of the editors has at least one or more columns with a low score ($+/-$ or less). 
 
-Figure~\ref{scoretable} contains an evaluation of the strengths and weaknesses of each of the discussed editors according to the requirements from Section~\ref{sect:reqs}. None of the existing systems has a line that contains only positives. No editor supports extra state, and besides that, each of the editors has at least one or more columns with a low score (+/- or less). One of the reasons for this is that the requirements for the computation and presentation formalisms interfere with the requirements for editing strength and modelessness.
+The reason why no editor scores positive on the extra state requirement is that although it is rather straightforward to support either presentation or interpretation extra state, it is hard to support both forms. A syntax-directed editor without support for presentation-oriented editing may support interpretation extra state simply by ignoring it during presentation. Similarly, a syntax-recognizing editor without document-oriented editing may support presentation extra state by ignoring it during interpretation. The syntax-recognizing editors score lower on extra state than the syntax-directed editors because only built-in forms of presentation extra state are supported, whereas the interpretation extra state for the syntax-directed editors may be specified by the editor designer.
 
-The former two requirements determine the presentation complexity of the editor, whereas the latter determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
+The main reason why no editor has a line containing only positives is that the requirements for the computation and presentation formalisms interfere with the requirements for editing strength and modelessness. The former two requirements determine the presentation complexity of the editor, whereas the latter determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
 
-{\bf Syntax-directed editors.} The syntax-directed editors tend to do well on the computation requirement, but at the same time, presentation editing is weakly supported, leading to a lower score on editing strength. Furthermore, modelessness is not supported at all. However, if the presentation formalism is simple, and no computed values appear in the presentation, then modelessness can be supported (see PSG). 
+{\bf Syntax-directed editors.} The syntax-directed editors tend to do well on the computation requirement, but at the same time, presentation-oriented editing is weakly supported, leading to a lower score on editing strength. Furthermore, modelessness is not supported at all. However, if the presentation formalism is simple, and no computed values appear in the presentation, then modelessness can be supported (see PSG). Most syntax-directed editors support interpretation extra state, but none support presentation extra state adequately.
 
-{\bf Syntax-recognizing editors.} The syntax-recognizing editors on the other hand do well on the presentation editing and modelessness requirements, but the fact that a document is derived from its presentation has a number of consequences. Firstly, the presentation must at all times contain sufficient information to derive the document, which puts restrictions on the presentation formalism. Secondly, having derived values and structures in the presentation makes parsing a lot harder and is therefore not supported, hence the low scores on the computation formalism requirement. And finally, edit operations on the document are harder to implement. As a result, syntax-recognizing editors will not score maximally in the computation, presentation, and editing strength columns.
+{\bf Syntax-recognizing editors.} The syntax-recognizing editors on the other hand do well on the presentation-oriented editing and modelessness requirements, but the fact that a document is derived from its presentation has a number of consequences. Firstly, the presentation must at all times contain sufficient information to derive the document, which puts restrictions on the presentation formalism. Secondly, having derived values and structures in the presentation makes parsing a lot harder and is therefore not supported, hence the low scores on the computation formalism requirement. And finally, edit operations on the document are harder to implement. As a result, syntax-recognizing editors do not score maximally in the computation, presentation, and editing strength columns. In contrast to syntax-directed editors, the syntax-recognizing editors support a form of presentation extra state, but lack interpretation extra state support.
 
 {\bf XML editors.} XML editors are similar to syntax-directed editors, but somehow the computation and presentation formalisms are not very well developed. Semantic analysis, is of course not an essential requirement for an XML editor, but computations and derived structures have many applications also for XML editing. Furthermore, specification of a textual presentation with a parser is not supported, which is odd because the raw XML source has an extremely verbose syntax that is far from suitable for viewing or editing directly.
 
-Although some XML editors have support for graphical presentations, the presentation transformation formalisms are generally weak, disallowing the structure of the presentation to be different from the structure of the document. Hence, there exists a strong connection between an XML document and its presentation. A tree structured document with text in the leafs lends itself well for editing with an XML editor, but other structures are harder or impossible to edit. An example is an XML representation of an abstract syntax tree, or a paragraph that is represented by a list of word elements. Current XML editors cannot handle such documents.
+Although some XML editors have support for graphical presentations, the presentation transformation formalisms are generally weak, disallowing the structure of the presentation to be different from the structure of the document. Hence, there exists a strong connection between an XML document and its presentation. A tree structured document with text in the leaves lends itself well for editing with an XML editor, but other structures are harder or impossible to edit. An example is an XML representation of an abstract syntax tree, or a paragraph that is represented by a list of word elements. Current XML editors cannot handle such documents.
 
 The close link between the XML document and its presentation sustains the view that an XML document is a piece of text with markup tags added to it. In this view, the current XML editors provide sufficient edit functionality. However, if a more powerful editor is available, which releases the tight connection between a document and its presentation, the view might change, causing new applications for XML to arise.
 
@@ -988,36 +1084,47 @@ The close link between the XML document and its presentation sustains the view t
 
 \bigskip
 
-Because the discussed structure editors are evaluated only with respect to requirements for the edit model, some of the systems look rather bad. Partly, this is due to the fact that these systems were designed with a large number of other requirements in mind, which are not taken into account here because they are concerned more with the environment than with the editor. Structure editors often have many facilities for managing and versioning documents, as well as complex semantic analysis methods, whereas XML editors often support built-in XSLT viewers, DTD viewers and editors, and database connectivity, as well as support for the many standards existing in the XML world. However, we view these requirements not as essential for the design of a generic structure editor.
+Because the discussed structure editors are evaluated only with respect to requirements for the edit model, some of the systems look rather bad. Partly, this is due to the fact that these systems were designed with a large number of other requirements in mind, which are not taken into account here because they are concerned more with the environment than with the editor. Structure editors often have many facilities for managing and versioning documents, as well as complex semantic analysis methods, whereas XML editors often offer built-in XSLT viewers, DTD viewers or editors, and database connectivity, as well as support for the many standards existing in the XML world. However, we view these requirements not as being essential for the design of a generic structure editor.
 
-Summarizing, the current and previous generations of structure editors are not powerful enough to edit the five use cases of Section~\ref{sect:usecases}. The editors either lack flexibility to express the required presentations, or have an edit model that is overly restrictive, or suffer from both of these problems. In the next Section, we introduce our solution to this situation.
+Summarizing, the current and previous generations of structure editors are not powerful enough to edit the five use cases of Section~\ref{sect:usecases}. The editors either lack flexibility to express the required presentations, or have an edit model that is overly restrictive, or even suffer from both of these problems. In the next section, we introduce our solution to this situation.
 
-\section{The Proxima editor}
+\section{The Proxima editor}\label{sect:proxEditor}
 
 Proxima is a generic structure editor that can handle all five use cases from Section~\ref{sect:usecases}. It meets the requirements from Section~\ref{sect:reqs}.
 
 The Proxima editor uses the attribute grammar formalism for performing semantic analysis, as well as the specification of derived document structures and values, which may appear in the presentation. The presentation formalism supports graphical presentations, and a box layout model with alignment, strong enough to specify presentations of mathematical equations. Furthermore, edit operations may be targeted at both presentation and document level, as well as at derived document structures, without mode switching.
 
 % edit ops on several levels really why we keep mappings?
-In order to support the edit operations at multiple levels, the editor keeps track of bidirectional mappings between the document and its presentations. A layered architecture, which breaks up the presentation process, as well as the handling of edit operations in a number of steps, facilitates the process of keeping the mappings consistent. The problem that a higher level does not contain enough information to compute the lower level (e.g.\ when the document does not contain the  whitespace of the presentation) is handled by storing the required information as extra state on the lower level. 
+In order to support the edit operations at multiple levels, as well as presentation and interpretation extra state, the editor keeps track of bidirectional mappings between the document and its presentations. A layered architecture, which breaks up the presentation process, as well as the handling of edit operations in a number of steps, facilitates the process of keeping the mappings consistent. 
 
 % what about backward mapping, no ES needed? Probably won't know this until some more
 % research is done on mappings
 
 An editor in Proxima is specified by a number of sheets that specify the computations, the presentation, the parser (inverse of the presentation), and the reducer (for handling edit operations on derived values and structures). The languages of the editor sheets are declarative and have a strong abstraction formalism, which helps to keep the specification of simple behavior short, while still allowing the specification of complex behavior as well.
 
-To accomplish the requirements, Proxima makes use of the following concepts:
+\section{Conclusions}
+
+Source editors, word processors, and equation editors can all be seen as possible applications, or instances, of a generic editor.  The same thing holds for more exotic applications such as a tax form, or an outline editor or tree browser. However, no existing editor is able to handle this range of applications. We believe the reason for this is that existing editors lack complexity in presenting documents and/or have an edit model that is overly restrictive. Or, more specifically, because no editor meets all six of the following requirements.
+
+\begin{itemize}
+\item Genericity.
+\item Support for a Turing-complete computations over the document.
+\item A graphical presentation language with a powerful mapping formalism.
+\item Support for edit operations on all levels, including edit operations on derived structures.
+\item Modeless editing.
+\item Support for presentation extra state as well as interpretation extra state.
+\end{itemize}
+
+In contrast, the Proxima editor meets all six requirements and is able to handle all five use cases. In order to meet the requirements, Proxima makes use of the following concepts:
 
 \begin{itemize}
 \item A layered architecture
 \item Bidirectional mappings between document and presentation
-\item Concept of extra state on several levels of the presentation process
+\item Concept of presentation/interpretation extra state on several levels of the presentation process
 \item Declarative specification languages with strong abstraction mechanisms for specifying mappings between levels
 \end{itemize}
 
-
-Many of the features of Proxima are optional rather than enforced. Edit operations on derived structures may be specified or automatically derived in cases for which they make sense, but if this is not the case, the editor designer need not specify them. A similar thing holds for the extra state. Supporting extra state in a Proxima application puts some effort on the editor designer, but if no extra state is present, the editor designer does not need to take it into account. 
-
+Many of the features of Proxima are optional rather than enforced. Edit operations on derived structures may be specified or automatically derived in cases for which they make sense, but if this is not the case, the editor designer need not specify them. A similar thing holds for the extra state. Supporting extra state in a Proxima instantiation puts some effort on the editor designer, but if no extra state is present, no extra effort is required.
 
 
 
