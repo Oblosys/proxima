@@ -1,0 +1,39 @@
+% Contains everything.
+% Useful for getting cross-chapter references right when texing a single chapter.
+
+\documentclass[twoside]{report}
+\usepackage{thesis}
+\begin{document}
+\selectlanguage{english}
+
+\pagenumbering{roman}
+
+\include{P_Titlepages}
+
+\include{P_Preface}
+\tableofcontents
+
+\clearpage
+\pagenumbering{arabic}
+
+\setcounter{chapter}{0} \include{Ch_Introduction}	% 1
+\setcounter{chapter}{1} \include{Ch_XML}   		% 2
+\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
+\setcounter{chapter}{3} \include{Ch_EditModel}   	% 4
+\setcounter{chapter}{4} \include{Ch_SingleLayer}	% 5
+\setcounter{chapter}{5} \include{Ch_LayeredArchs}	% 6
+\setcounter{chapter}{6} \include{Ch_ArchCombs}	% 7
+\setcounter{chapter}{7} \include{Ch_Xprez}   		% 8
+\setcounter{chapter}{8} \include{Ch_Prototype}    	% 9
+\setcounter{chapter}{9} \include{Ch_Conclusions}	% 10
+
+\bibliographystyle{abbrv}
+\bibliography{thesis}
+
+\include{P_Dankwoord}
+\include{P_Samenvatting}
+\include{P_CV}
+
+\thispagestyle{empty}
+\cleardoublepage
+\end{document}
