@@ -136,8 +136,8 @@ toXMLBoardSquare (Empty) = Elt "Empty" [] []
 
 pathNode :: Node -> PathDoc
 pathNode NoNode            = NoPathD
-pathNode (DocNode _ pth)   = PathD pth
-pathNode (EnrNode _ pth)   = PathD pth
+pathNode (DocumentNode _ pth)   = PathD pth
+pathNode (EnrichedDocNode _ pth)   = PathD pth
 pathNode (DeclsNode _ pth) = PathD pth
 pathNode (DeclNode _ pth)  = PathD pth
 pathNode (IdentNode _ pth) = PathD pth

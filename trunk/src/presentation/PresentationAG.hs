@@ -1200,7 +1200,7 @@ sem_EnrichedDoc_HoleEnr :: (T_EnrichedDoc)
 sem_EnrichedDoc_HoleEnr (_lhs_focusD) (_lhs_layoutMap) (_lhs_pIdC) =
     let (_self) =
             HoleEnr
-    in  ( _lhs_layoutMap,_lhs_pIdC,presHole _lhs_focusD "EnrichedDoc" (EnrNode _self []) [],_self)
+    in  ( _lhs_layoutMap,_lhs_pIdC,presHole _lhs_focusD "EnrichedDoc" (EnrichedDocNode _self []) [],_self)
 sem_EnrichedDoc_ParseErrEnr :: (Node) ->
                                (Presentation) ->
                                (T_EnrichedDoc)
@@ -1248,8 +1248,8 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
                     (emptyFM))
     in  ( _decls_layoutMap
          ,_decls_pIdC
-         ,loc (DocNode _document []) $
-          loc (EnrNode _self []) $ structural $
+         ,loc (DocumentNode _document []) $
+          loc (EnrichedDocNode _self []) $ structural $
             col [ row' [ hSpace 3
                        , text $ "Document focus: "++show _lhs_focusD
                        , typeD NoIDP $ ( case lookup _lhs_focusD _typeEnv of

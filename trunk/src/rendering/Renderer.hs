@@ -70,7 +70,7 @@ arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]
       
 --mkPopupMenuXY :: Presentation -> Scale -> Arrangement -> Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
 --              -> Int -> Int -> GUI RenderingLevel ()
-mkPopupMenuXY prs scale arr@(LocatorA (DocNode doc _) _) handler renderingLvlVar window x' y' =
+mkPopupMenuXY prs scale arr@(LocatorA (DocumentNode doc _) _) handler renderingLvlVar window x' y' =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case pointOvlRev' x y [[]] arr of
                         (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs

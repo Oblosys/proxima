@@ -13,6 +13,9 @@ import List hiding (delete)
 import Data.FiniteMap
 import IOExts
 
+
+--import qualified NewParser
+
 {-
 initDoc =  mkRoot $ mkDecls $ concat $ replicate 1 
                             [ mkDecl' (ID 300) (mkIdent "r") $
@@ -52,11 +55,11 @@ mkExps = foldr (ConsExps NoIDD) (NilExps NoIDD)
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
 
-parsePres pres = {- showDebug' Err ("parsing: "++show pres ++" has result ") $ -} 
+parsePres pres = --showDebug' Err ("parsing: "++show pres ++" has result ") $
+                 --debug Err (show (NewParser.parse pres) )$
                  Just (startRecognize pres) 
                  --let (doc, success) = parsePresentation pres
                  --in  if success then Just doc else Nothing
-
 
 
 
@@ -318,7 +321,7 @@ recognizeEnr (Right (Nothing, pres))   = debug Err "Problem" (HoleEnr, [], empty
 recognizeEnr (Right (Just node, pres)) = -- structural
   makeStructuralEnr (Just node) pres      
 
-makeStructuralEnr nd@(Just node@(EnrNode (RootEnr idD idP _ _ tpinfo doc) _)) pres = 
+makeStructuralEnr nd@(Just node@(EnrichedDocNode (RootEnr idD idP _ _ tpinfo doc) _)) pres = 
   case gatherChildren pres Nothing of
     [c0,c1] ->
       let (c0') = recognizeDeclsIdsPres c0 -- need a different recognizer for the id list
@@ -374,10 +377,8 @@ recognizeExp (Right (Just node, pres)) = -- structural
 
 
 
---parseDoc :: TreeParser Document
-parseEnr = (\ds -> RootEnr NoIDD NoIDP ds) <$> parseDecls
 
-parseDecls :: TreeParser Decls
+--parseDecls :: TreeParser Decls
 parseDecls  =    makeDecls 
              <$> pList parseDecl
 
@@ -391,7 +392,7 @@ pMaybe parser = Just <$> parser `opt` Nothing
 
 -- parsing structurals is still a bit tricky, because any structural will do, including holes
 -- therefore, the {} are required around it. TODO
-parseDecl :: TreeParser Decl
+--parseDecl :: TreeParser Decl
 parseDecl  =  (\mtk0 ident tk1 exp tk2 -> makeDecl mtk0 tk1 tk2 ident exp) 
              <$> pMaybe (pSym (Structural Nothing (EmptyP NoIDP) NoIDP)) -- derived type sig
                  <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
@@ -414,7 +415,7 @@ parseDecl  =  (\mtk0 ident tk1 exp tk2 -> makeDecl mtk0 tk1 tk2 ident exp)
           <|> (\t ->  BoardDecl NoIDD (tokenIDP t) NoIDP) <$> pKey "Chess" <* pKey ":" <*> pBoard
           <|> (\t ->  PPPresentationDecl NoIDD (tokenIDP t) NoIDP) <$> pKey "PPT" <* pKey ":" <*> pPPPresentation
 
-pBoard :: TreeParser Board
+--pBoard :: TreeParser Board
 pBoard =    ((\_ -> initBoard) <$> pKey "board")
          <|>(\(Structural mn pr _) -> makeStructuralBoard mn pr) <$> pSym (Structural Nothing (EmptyP NoIDP) NoIDP) 
 
@@ -423,7 +424,7 @@ makeStructuralBoard nd@(Just (BoardNode b _)) pres = b
 makeStructuralBoard mn _ = debug Err ("PresentationParser.makeStructuralExp: no exp node located " ++ show mn) initBoard
 
 
-pPPPresentation :: TreeParser PPPresentation
+--pPPPresentation :: TreeParser PPPresentation
 pPPPresentation =  ((\_ -> initPPPresentation) <$> pKey "pres")
          <|>(\(Structural mn pr _) -> makeStructuralPPPresentation mn pr) <$> pSym (Structural Nothing (EmptyP NoIDP) NoIDP) 
 
@@ -434,63 +435,63 @@ pPPPresentation =  ((\_ -> initPPPresentation) <$> pKey "pres")
 
 -- end chess board
       
-parseAlts :: TreeParser Alts
+--parseAlts :: TreeParser Alts
 parseAlts  =    makeAlts 
              <$> pList parseAlt
 
 -- parsing structurals is still a bit tricky, because any structural will do, including holes
 -- therefore, the {} are required around it. Will be fixed when structurals have a type TODO
-parseAlt :: TreeParser Alt
+--parseAlt :: TreeParser Alt
 parseAlt  =  (\ident tk1 exp tk2 -> makeAlt tk1 tk2 ident exp) 
              <$> parseIdent <*> pArrow <*> parseExp  <*> pKeyC 4 ";"
 
 
-parseIfExp :: TreeParser Exp
+--parseIfExp :: TreeParser Exp
 parseIfExp =     (\tk1 c tk2 th tk3 el -> makeIf tk1 tk2 tk3 c th el) 
              <$> pIf <*> parseExp <*> pThen <*> parseExp <*> pElse <*> parseExp
 
             
-parseLamExp :: TreeParser Exp
+--parseLamExp :: TreeParser Exp
 parseLamExp =     (\tk1 a tk2 b -> makeLam tk1 tk2 a b) 
               <$> pLambda <*> parseIdent <*> pArrow <*> parseExp
 
             
-parseCaseExp :: TreeParser Exp
+--parseCaseExp :: TreeParser Exp
 parseCaseExp =     (\tk1 a tk2 b -> makeCase tk1 tk2 a b) 
               <$> pCase <*> parseExp <*> pOf <*> parseAlts
 
-parseLetExp :: TreeParser Exp
+--parseLetExp :: TreeParser Exp
 parseLetExp =     (\tk1 a tk2 b -> makeLet tk1 tk2 a b) 
               <$> pLet <*> parseDecls <*> pIn <*> parseExp
 
-parseExp :: TreeParser Exp
+--parseExp :: TreeParser Exp
 parseExp   = {-pMarkParseErr (ParseErrExp NoNode (EmptyP NoIDP)) ( -}   
                  parseExp'   -- e and t are flipped in lambda for <??>
             <??> ( (\tk e t-> makeSum tk t e)  <$> pKey "+" <*> parseExp )
              -- )
 
-parseExp' :: TreeParser Exp
+--parseExp' :: TreeParser Exp
 parseExp'   = {-pMarkParseErr (ParseErrExp NoNode (EmptyP NoIDP)) ( -}   
                  parseTerm   -- e and t are flipped in lambda for <??>
             <??> ( (\tk e t-> makeDiv tk t e)  <$> pKey "%" <*> parseExp' )
              -- )
 
 
-parseTerm :: TreeParser Exp
+--parseTerm :: TreeParser Exp
 parseTerm   =      parseFactor
               <??> (    (\tk t f-> makeProd tk f t) <$> pKey "*" <*> parseTerm
                     <|> (\tk t f-> makeDiv tk f t)  <$> pKey "/" <*> parseTerm
                    )
 
-parseFactor :: TreeParser Exp
+--parseFactor :: TreeParser Exp
 parseFactor =      parseFactor'
               <??> ((\tk f' f -> makePower tk f f') <$> pKey "^" <*> parseFactor)
 
-parseFactor' :: TreeParser Exp
+--parseFactor' :: TreeParser Exp
 parseFactor' =   parseFactor''
              <??> ((\f' f -> makeApp f f') <$> parseFactor')
 
-parseFactor'' :: TreeParser Exp
+--parseFactor'' :: TreeParser Exp
 parseFactor'' = --  pHoleExp
             -- <|>
                  parseIntExp 
@@ -504,7 +505,7 @@ parseFactor'' = --  pHoleExp
              <|> parseLetExp
              <|> pStructureExp
 
-pStructureExp :: TreeParser Exp
+--pStructureExp :: TreeParser Exp
 pStructureExp = (\(Structural mn pr _) -> makeStructuralExp mn pr) <$> pSym (Structural Nothing (EmptyP NoIDP) NoIDP) -- EmptyP+NoIDP are ignored in compare
 -- laziness takes care that makeStructuralExp is only evaluated when it is part of the result of a successful
 -- parse
@@ -532,53 +533,53 @@ parseParenExp =
 
 
 
-pIf :: TreeParser (Token (Maybe Node))
+--pIf :: TreeParser (Token (Maybe Node))
 pIf = pKey "if"
 
-pThen :: TreeParser (Token (Maybe Node))
+--pThen :: TreeParser (Token (Maybe Node))
 pThen = pKey "then"
 
-pElse :: TreeParser (Token (Maybe Node))
+--pElse :: TreeParser (Token (Maybe Node))
 pElse = pKey "else"
 
-pLambda :: TreeParser (Token (Maybe Node))
+--pLambda :: TreeParser (Token (Maybe Node))
 pLambda =    pKey "\\" 
 
 
-pArrow :: TreeParser (Token (Maybe Node))
+--pArrow :: TreeParser (Token (Maybe Node))
 pArrow =     pKey "->"
          <|> pKey "\174"
 
-pCase :: TreeParser (Token (Maybe Node))
+--pCase :: TreeParser (Token (Maybe Node))
 pCase = pKey "case"
 
-pOf :: TreeParser (Token (Maybe Node))
+--pOf :: TreeParser (Token (Maybe Node))
 pOf = pKey "of"
 
-pLet :: TreeParser (Token (Maybe Node))
+--pLet :: TreeParser (Token (Maybe Node))
 pLet = pKey "let"
 
-pIn :: TreeParser (Token (Maybe Node))
+--pIn :: TreeParser (Token (Maybe Node))
 pIn = pKey "in"
 
-pTrue :: TreeParser (Token (Maybe Node))
+--pTrue :: TreeParser (Token (Maybe Node))
 pTrue = pKey "True"
 
-pFalse :: TreeParser (Token (Maybe Node))
+--pFalse :: TreeParser (Token (Maybe Node))
 pFalse = pKey "False"
 
 
-parseBoolExp :: TreeParser Exp
+--parseBoolExp :: TreeParser Exp
 parseBoolExp = (\tk -> makeBoolExp tk True)  <$> pTrue
            <|> (\tk -> makeBoolExp tk False) <$> pFalse
 
-parseIntExp :: TreeParser Exp
+--parseIntExp :: TreeParser Exp
 parseIntExp = (\tk -> makeIntExp tk (intVal tk)) <$> pInt
 
-parseIdentExp :: TreeParser Exp
+--parseIdentExp :: TreeParser Exp
 parseIdentExp = makeIdentExp <$> parseIdent
 
-parseIdent :: TreeParser Ident
+--parseIdent :: TreeParser Ident
 parseIdent = -- pHoleIdent
          --    <|>
           (\tk -> makeIdent tk (lIdentVal tk)) <$> pLIdent
@@ -612,7 +613,7 @@ parseDeclsIdsPres :: TreeParser Decls
 parseDeclsIdsPres  = makeDecls
              <$>  pList parseDeclIdsPres
 
-parseDeclIdsPres :: TreeParser Decl
+--parseDeclIdsPres :: TreeParser Decl
 parseDeclIdsPres  =  (\(Structural mn pr _) -> makeStructuralDeclIdsPres mn pr)
              <$>   pSym (Structural Nothing (EmptyP NoIDP) NoIDP)       
 
@@ -636,7 +637,7 @@ recognizeIdentIdsPres (Right _)                = debug Err "recognizeIdentIdsPre
 
 
 -- special ident parser that reuses the original token (because layout in other pres is local state)
-parseIdentIdsPres :: TreeParser Ident
+--parseIdentIdsPres :: TreeParser Ident
 parseIdentIdsPres = -- pHoleIdent
          --    <|>
           (\tk -> makeIdent' tk (lIdentVal tk)) <$> pLIdent
@@ -831,7 +832,7 @@ makeStructuralItem mn _ = debug Err ("PresentationParser.makeStructuralItem: no 
 
 
 
-parseString_ :: TreeParser String_
+--parseString_ :: TreeParser String_
 parseString_ = -- pHoleIdent
          --    <|>
           (\tk -> makeString_ tk (lIdentVal tk)) <$> pLIdent

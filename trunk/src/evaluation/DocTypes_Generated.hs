@@ -36,8 +36,8 @@ data HeliumMessage =
 
 
 data Node = NoNode 
-          | DocNode Document Path -- Path will always be []
-          | EnrNode EnrichedDoc Path -- Path will always be []
+          | DocumentNode Document Path -- Path will always be []
+          | EnrichedDocNode EnrichedDoc Path -- Path will always be []
           | DeclsNode Decls Path
           | DeclNode Decl Path
           | IdentNode Ident Path

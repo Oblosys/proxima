@@ -11,7 +11,6 @@ import Char
 
 import IOExts
 
-
 {-
 
 
@@ -175,6 +174,9 @@ gatherChildren (LocatorP l p)     ctxt = gatherChildren p (Just l)
 gatherChildren (ParsingP _ pres) ctxt    = [Left (ctxt, pres)]
 gatherChildren (StructuralP _ pres) ctxt = [Right (ctxt, pres)]
 gatherChildren pres _ = debug Err ("*** PresentationParser.gatherChildren: unimplemented presentation: " ++ show pres) []
+
+
+
 
 
 
@@ -465,8 +467,6 @@ prr = LocatorP (NoNode)
 
 With nodes are hard to parse, so presentation parsing will probably not be able to use font attributes etc.
 
-Root usually has no presentation of its own, so current algorithm does not recover its id. This is bad
-
 -}
 
 
@@ -505,63 +505,10 @@ errsSinceCheck (NoMoreSteps v    ) = False
 
 
 {-
-tks = [Tk '1' (Just (ExpNode (Int 0 9)))
-      ,Tk '+' (Just (ExpNode (Sum 1 (Int 0 9)(Int 2 9))))
-      ,Tk '2' (Just (ExpNode (Int 2 9)))]
-
-instance Symbol Char where
- deleteCost b = 1{-I-}
-
-
--- simple parsers for checking error stuff
-
-pInt' = (\ds -> Int (-1) (foldl (\r c-> 10*r+ord c-ord '0') 0 ds))<$> pList1 pDigit'
-
---pDigit :: Parser (Token (Maybe Node)) (Token (Maybe Node))
-
--- type sig required due to monomorphism restriction...
-pDigit' :: Parser Char Char
-pDigit' = pCostRange 5 '0' (Range '0' '9')
-
--- right associative, so we don't need to fix left recursion.
--- parser parses (1*3)*4 differently from 1*3*4 
-{-
-parse1Exp'   = parse1Term'  
-            <|> (\t _ e -> Sum (-1) t e)  <$> parse1Term' <*> pSym' '+' <*> parse1Exp'
-            
-parse1Term'   = parse1Factor'
-             <|> (\f _ t -> Prod (-1) f t) <$> parse1Factor' <*> pSym' '*' <*> parse1Term'
-            
-parse1Factor' = pInt'
-             <|> pSym' '(' *> parse1Exp' <* pSym' ')'
--}
-
-parse1Exp'   = parse1Term' 
-             <??> ((\ _ e t -> Sum (-1) t e) <$> pSym' '+' <*> parse1Exp')
-
-parse1Term'   = parse1Factor'
-             <|> (\f _ t -> Prod (-1) f t) <$> parse1Factor' <*> pSym' '*' <*> parse1Term'
-            
-parse1Factor' = pInt'
-             <|> pSym' '(' *> parse1Exp' <* pSym' ')'
-
-pSym' c = pCostSym 5 c c
-
-
-
-
-
-
-pres0 = row [row [text "1", text "+", text "2"], text "+", text "3"]
-
 -- error recovery is bit weird here: etest parse1Exp' "1*2+2x43*4"
 -- gives                                               1*2+243*4+0
 
 -- always left factor, and preferably use chain
-
-pHoleExp' :: Parser Char Exp
-pHoleExp' = HoleExp <$ pCostSym 1 '#' '#'
-
 
 -}
 

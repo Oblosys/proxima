@@ -503,7 +503,7 @@ SEM Items
 -- default presentations for Holes and ParseErrs
 
 SEM EnrichedDoc
-  | HoleEnr     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (EnrNode @self []) []  -- does not exist
+  | HoleEnr     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (EnrichedDocNode @self []) []  -- does not exist
   | ParseErrEnr lhs.pres = presParseErr @node @presentation
 
 SEM Decls

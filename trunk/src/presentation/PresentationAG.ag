@@ -77,11 +77,11 @@ SEM Exp
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (DocNode @document []) $  --HACK!! top level loc needs to be a ref to the document
+      lhs.pres = loc (DocumentNode @document []) $  --HACK!! top level loc needs to be a ref to the document
                                                         -- it is used by mkPopupMenuXY in Renderer.
                                                         -- A better implementation of popups will create the menu in 
                                                         -- the higher layers. Although it is still a bit unclear where
-                 loc (EnrNode @self []) $ structural $ 
+                 loc (EnrichedDocNode @self []) $ structural $ 
                    col [ row' [ hSpace 3
                               , text $ "Document focus: "++show @lhs.focusD
                               , typeD NoIDP $ ( case lookup @lhs.focusD @typeEnv of 
