@@ -1,0 +1,1 @@
+C:\apps\cygwin\usr\local\bin\uuagc -cfspm        ArrangerAG

@@ -1,0 +1,907 @@
+\begin{HS}[imports]
+--import Picob
+import IOExts
+
+import CommonDefs
+import DocumentDefs -- for Node
+import PresentationDefs
+import ArrangementDefs
+import Picob
+
+import FontLib
+{-
+
+data Picob = Picob_EmptyPicob !ID
+           | Picob_SimpleTextPicob !ID !Int !Int !String
+           | Picob_RectanglePicob !ID !Int !Int !Int !Int !Int !Color
+           | Picob_ImagePicob !ID !String
+           | Picob_PolyPicob !ID !PointList !Int
+           | Picob_TestPicob !ID !Int !Color
+           | Picob_RowPicob !ID !Int !PicobList
+           | Picob_ColumnPicob !ID !Int !PicobList
+           | Picob_OverlayPicob !ID !PicobList
+           | Picob_MatrixPicob !ID !Int !Int !PicobList
+           | Picob_LayedOutRowPicob !ID !PicobList !Int !Int !OffsetList
+           | Picob_FormatterPicob !ID !PicobList
+           | Picob_AlternativePicob !ID !PicobList
+           | Picob_WithNode !ID !Picob !AttrRule
+           | Picob_StructuralPicob !ID !Picob
+           | Picob_ParsingPicob !ID !Picob
+           | Picob_LocatorPicob !ID !Picob Location
+          deriving Show
+
+strict version of Picob
+-}
+
+
+
+unfoldAGFormatter w ws picobList = 
+ let breaks = firstFit w ws
+     picobs = getPicobs picobList
+     dividedPicobs = linesFromBreaks breaks picobs
+     picobLists = map mkPicobList dividedPicobs
+     rows = -- map (\lst -> Picob_LayedOutRowPicob lst 100 32 (repeat (0,0))) picobLists
+         map (Picob_RowPicob NoID 0) picobLists
+     unfoldedList = Picob_ColumnPicob NoID 0 (mkPicobList rows)
+ in  --debug Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
+           unfoldedList
+
+selectFirstFit :: Int -> [ Int ] -> Int  
+selectFirstFit availableWidth widths = 
+  if null widths 
+  then error "Alternative picob has no alternatives"
+  else select widths 0
+ where
+  select [_] n = n
+  select (w:ws) n = if w <= availableWidth then n else select ws (n+1)
+
+
+-- maybe nicer as synth attribute for picobList
+getPicobs (PicobList_Nil) = []
+getPicobs (PicobList_Cons picob picobs) = picob : getPicobs picobs
+
+mkPicobList [] = PicobList_Nil
+mkPicobList (p:ps) = PicobList_Cons p (mkPicobList ps)
+
+type IntList = [ Int ]
+type OffsetList = [ (Int,Int) ]
+type PointList = [ (Float,Float) ] 
+type IdList = [ String ]
+type ArrangementList = [ Arrangement ]
+type ConstraintList = [ String ]
+type Env = [ ( String, Int ) ]
+
+
+
+
+
+
+
+
+assign [] _ _ = []
+assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
+
+
+divide n [] = []
+divide n xs = let (line, rest) = splitAt n xs in line : divide n rest
+
+getRows n [] = []
+getRows n xs = let (line, rest) = splitAt n xs in line : divide n rest
+
+getCols n xs = foldr (zipWith (:)) (repeat []) (getRows n xs)
+
+
+
+-- just add words until line overflow
+firstFit lineWidth widths = buildFFBreaks lineWidth 0 0 widths
+
+buildFFBreaks _ pos _ [] = [] -- add a breakpoint after last word? prob. not, otherwise return [pos]
+buildFFBreaks maxLength pos currentLength (width:widths) =
+  let space = if currentLength == 0 then 0 else 0 -- hard coded minimum space, and widths must be >= 0 
+      newLength = currentLength + space + width
+  in if currentLength == 0 && width > maxLength
+     then if null widths 
+          then []
+          else (pos+1) : buildFFBreaks maxLength pos 0 (widths)
+     else if newLength <= maxLength
+          then buildFFBreaks maxLength (pos+1) newLength widths
+          else pos : buildFFBreaks maxLength (pos) 0 (width:widths)
+
+linesFromBreaks :: [Int] -> [a] -> [[a]]
+linesFromBreaks brks wrds = tolines' brks 0 wrds 
+   where
+   tolines' [] _ wrds = [wrds]
+   tolines' (brk:brks) lastbrk wrds = take (brk-lastbrk) wrds :
+                                      tolines' brks brk (drop (brk-lastbrk) wrds)
+
+
+
+
+type TplIntIntInt = (Int, Int, Int)
+
+type FontList = [Font]
+
+type BoolList = [Bool]
+
+type MaybeUpdateDoc = Maybe UpdateDoc
+type PopupMenuItems = [ PopupMenuItem ]
+\end{HS}
+\begin{AG}
+
+DATA Root 
+  | Root Picob
+
+DATA Picob
+  | EmptyPicob id : ID   -- vRef and hRef? Size?
+  | SimpleTextPicob id : ID hRef, vRef : Int text : String 
+  | RectanglePicob id : ID  hRef, vRef : Int w, h : Int lineWidth : Int color : Color
+  | ImagePicob id : ID  src : String
+  | PolyPicob id : ID  pointList : PointList lineWidth : Int
+  | TestPicob id : ID  area : Int color : Color
+  | RowPicob id : ID  vRefNr :Int PicobList
+  | ColumnPicob id : ID  hRefNr : Int PicobList
+  | OverlayPicob id : ID  PicobList -- overlay has no ref nr
+  | MatrixPicob id : ID  m, n : Int PicobList
+  | LayedOutRowPicob id : ID  PicobList w, h : Int offsets :  OffsetList -- optimization for laying out text
+  | FormatterPicob id : ID  PicobList
+  | AlternativePicob id : ID  PicobList
+  | WithNode id : ID  child : Picob attrRule : AttrRule
+  | StructuralPicob id : ID  child : Picob
+  | ParsingPicob id : ID  child : Picob
+  | LocatorPicob id : ID  child : Picob location : Node
+
+--  For each Nonterminal:
+ -- add id propagation
+ -- add formatter depth computation
+ -- add attributed tree definition
+
+
+DATA PicobList
+  | Nil 
+  | Cons Picob PicobList
+
+
+ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
+            mouseDown : MaybeUpdateDoc
+            popupMenuItems : PopupMenuItems
+            screenWidth : Int  
+          || maxFormatterDepth : Int  unfoldedTree : Picob arrangement : Arrangement ]
+SEM Root
+  | Root
+      LHS.maxFormatterDepth = picob_maxFormatterDepth
+      LHS.unfoldedTree  = picob_unfoldedTree
+      LHS.arrangement   = picob_arrangement
+
+
+-- Presentation Attribute Propagation in Picob Tree
+-- Root: copy rule
+
+-- Optimize: maybe we only want to update the attrs that are set by the with rule? Or won't that improve much?
+
+SEM Picob [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
+            mouseDown : MaybeUpdateDoc
+            popupMenuItems : PopupMenuItems
+            | | ]
+  | WithNode
+      LOC.newAttrs   = attrRule ( Inh lhs_font 
+                                      lhs_textColor lhs_lineColor lhs_fillColor lhs_backgroundColor
+                                      lhs_mouseDown lhs_popupMenuItems
+				      lhs_assignedWidth lhs_assignedHeight lhs_assignedHRef lhs_assignedVRef
+				, Syn child_hRf child_vRf child_minWidth child_minHeight
+				      child_hStretch child_vStretch
+				      child_finalWidth child_finalHeight child_finalHRef child_finalVRef) -- no names because ag parser can't handle braces
+      child.font = font (fst newAttrs)
+      child.textColor = textColor (fst newAttrs)
+      child.lineColor = lineColor (fst newAttrs)
+      child.fillColor = fillColor (fst newAttrs)
+      child.backgroundColor = backgroundColor (fst newAttrs)     
+      child.mouseDown = mouseDown (fst newAttrs)
+      child.popupMenuItems = popupMenuItems (fst newAttrs)
+      child.assignedWidth = assignedWidth (fst newAttrs)
+      child.assignedHeight = assignedHeight (fst newAttrs)
+      child.assignedHRef = assignedHRef (fst newAttrs)
+      child.assignedVRef = assignedVRef (fst newAttrs)
+      LHS.hRf = hRef (snd newAttrs)
+      LHS.vRf = vRef (snd newAttrs)
+      LHS.minWidth = minWidth (snd newAttrs)
+      LHS.minHeight = minHeight (snd newAttrs)
+      LHS.hStretch = hStretch (snd newAttrs)
+      LHS.vStretch = vStretch (snd newAttrs)
+      LHS.finalWidth = finalWidth (snd newAttrs)
+      LHS.finalHeight = finalHeight (snd newAttrs)
+      LHS.finalHRef = finalHRef (snd newAttrs)
+      LHS.finalVRef = finalVRef (snd newAttrs)
+
+-- rest is taken care of by copy rule
+
+SEM PicobList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
+                 mouseDown : MaybeUpdateDoc popupMenuItems : PopupMenuItems | | ]
+
+
+
+-- Font Metrics
+
+-- first, collect all used fonts. They can only change at a with node, so only one check.
+-- This could be optimised by only checking with nodes that update the font, instead of e.g.
+-- color
+
+ATTR Root [ | allFonts : FontList | ]
+-- copy rule
+
+SEM Picob [ | allFonts : FontList | ]
+  | WithNode
+      child.allFonts = let inhs = fst newAttrs
+                       in  font inhs : lhs_allFonts
+-- these are nubbed later. Maybe they should only be added if not present?
+
+SEM PicobList [ | allFonts : FontList | ] 
+
+SEM Root [ fontMetrics : FontMetrics | | ]
+
+SEM Picob [ fontMetrics : FontMetrics | | ]
+  
+SEM PicobList [ fontMetrics : FontMetrics | | ]  -- copy Rule
+
+
+
+
+-- formatterDepth and maxFormatterDepth definitions   
+
+ATTR Picob [ | | maxFormatterDepth : Int ]
+SEM Picob
+  | EmptyPicob
+      LHS.maxFormatterDepth = 0
+  | SimpleTextPicob
+      LHS.maxFormatterDepth = 0
+  | RectanglePicob 
+      LHS.maxFormatterDepth = 0
+  | ImagePicob 
+      LHS.maxFormatterDepth = 0
+  | PolyPicob 
+      LHS.maxFormatterDepth = 0
+  | TestPicob 
+      LHS.maxFormatterDepth = 0
+  | RowPicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+  | ColumnPicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+  | MatrixPicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+  | OverlayPicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+  | LayedOutRowPicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+  | FormatterPicob 
+      LHS.maxFormatterDepth = 1 + maximum picobList_maxFormatterDepthList
+  | AlternativePicob 
+      LHS.maxFormatterDepth = maximum picobList_maxFormatterDepthList
+-- | WithNode copy
+-- | StructuralPicob
+-- | ParsingPicob
+-- | LocatorPicob copy
+
+ATTR PicobList [ | | maxFormatterDepthList : IntList ]
+SEM PicobList
+  | Nil 
+      LHS.maxFormatterDepthList = [0]
+  | Cons 
+      LHS.maxFormatterDepthList = picob_maxFormatterDepth : picobList_maxFormatterDepthList
+
+
+-- Creating the unfoldedTree
+ATTR Picob [  | | unfoldedTree : Picob ]
+SEM Picob
+  | EmptyPicob 
+      LHS.unfoldedTree = Picob_EmptyPicob id 
+  | SimpleTextPicob 
+      LHS.unfoldedTree = Picob_SimpleTextPicob id hRef vRef text 
+  | RectanglePicob    
+      LHS.unfoldedTree = Picob_RectanglePicob id hRef vRef w h lineWidth color
+  | ImagePicob    
+      LHS.unfoldedTree = Picob_ImagePicob id src
+  | PolyPicob
+      LHS.unfoldedTree = Picob_PolyPicob id pointList lineWidth
+  | TestPicob             
+      LHS.unfoldedTree = Picob_TestPicob id area color
+  | RowPicob 
+      LHS.unfoldedTree = Picob_RowPicob id vRefNr picobList_unfoldedTreeList
+  | ColumnPicob 
+      LHS.unfoldedTree = Picob_ColumnPicob id hRefNr picobList_unfoldedTreeList
+  | MatrixPicob 
+      LHS.unfoldedTree = Picob_MatrixPicob id m n picobList_unfoldedTreeList
+  | OverlayPicob 
+      LHS.unfoldedTree = Picob_OverlayPicob id picobList_unfoldedTreeList
+  | LayedOutRowPicob 
+      LHS.unfoldedTree = Picob_LayedOutRowPicob id picobList_unfoldedTreeList w h offsets
+  | FormatterPicob 
+      LHS.unfoldedTree = unfoldAGFormatter lhs_assignedWidth picobList_minWidthList picobList_unfoldedTreeList
+  | AlternativePicob 
+      LHS.unfoldedTree = Picob_AlternativePicob id picobList_unfoldedTreeList
+  | WithNode
+      LHS.unfoldedTree = Picob_WithNode id child_unfoldedTree attrRule
+  | StructuralPicob
+      LHS.unfoldedTree = Picob_StructuralPicob id  child_unfoldedTree
+  | ParsingPicob
+      LHS.unfoldedTree = Picob_ParsingPicob id  child_unfoldedTree
+  | LocatorPicob
+      LHS.unfoldedTree = Picob_LocatorPicob id  child_unfoldedTree location
+-- bit of a hack, but the children are needed as values of type Picob, so we can use unfoldedTreeList,
+-- as there will not be any formatters inside anyway
+
+ATTR PicobList [  | |  unfoldedTreeList : PicobList ]
+SEM PicobList
+  | Nil
+      LHS.unfoldedTreeList = PicobList_Nil
+  | Cons 
+      LHS.unfoldedTreeList = PicobList_Cons picob_unfoldedTree picobList_unfoldedTreeList
+
+
+
+-- char width not ok for more complicated (overlapping) glyphs like ff ligature in tex. 
+-- char height sometimes needed for individual characters
+
+-- matrix does not work correctly yet: empty `withWidth` 50 `beside` matrix is problem
+-- no stretch in matrix
+
+-- row in row has problems with vRef
+-- hRef and vRef updates do not work properly
+
+
+-- ref and size as ag aspects:
+
+SEM Picob [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRf, vRf : Int ]
+  | EmptyPicob
+      LOC.minWidth = 0
+      LOC.minHeight = 0
+      LOC.hStretch = False
+      LOC.vStretch = False
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | SimpleTextPicob 
+      LOC.minWidth = textWidth lhs_fontMetrics lhs_font text
+      LOC.minHeight = charHeight lhs_fontMetrics lhs_font
+      LOC.hStretch = False
+      LOC.vStretch = False
+      LOC.hRf = baseLine lhs_fontMetrics lhs_font
+      LOC.vRf = 0       
+  | RectanglePicob 
+      LOC.minWidth = w
+      LOC.minHeight = h
+      LOC.hStretch = False
+      LOC.vStretch = False
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | ImagePicob 
+      LOC.minWidth = 0
+      LOC.minHeight = 0
+      LOC.hStretch = True
+      LOC.vStretch = True
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | PolyPicob 
+      LOC.minWidth = 0
+      LOC.minHeight = 0
+      LOC.hStretch = True
+      LOC.vStretch = True
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | TestPicob 
+      LOC.minWidth = error "not implemented"
+      LOC.minHeight = error "not implemented"
+      LOC.hStretch = error "not implemented" 
+      LOC.vStretch = error "not implemented" 
+      LOC.hRf = error "not implemented"
+      LOC.vRf = error "not implemented"
+  | RowPicob 
+      LOC.minTopHeight = if null picobList_hRfList then 0
+                            else maximum picobList_hRfList
+      LOC.minBottomHeight = if null picobList_hRfList then 0
+                            else maximum [ minHeight - hRf | (minHeight, hRf) <- zip picobList_minHeightList picobList_hRfList ]
+      LOC.minWidth = sum picobList_minWidthList
+      LOC.minHeight = minTopHeight + minBottomHeight
+      LOC.hStretch = or picobList_hStretchList
+      LOC.vStretch = and picobList_vStretchList -- False  -- maybe true if there are only stretch children
+      LOC.hRf = minTopHeight
+      LOC.vRf = if null picobList_vRfList then 0
+                else sum (take vRefNr picobList_minWidthList) + picobList_vRfList !! vRefNr
+  | ColumnPicob
+      LOC.minLeftWidth = if null picobList_vRfList then 0
+                         else maximum picobList_vRfList
+      LOC.minRightWidth = if null picobList_vRfList then 0
+                          else maximum [ minWidth - vRf | (minWidth, vRf) <- zip picobList_minWidthList picobList_vRfList ]
+      LOC.minWidth = minLeftWidth + minRightWidth 
+      LOC.minHeight = sum picobList_minHeightList
+   --   LOC.minWidth = maximum picobList_minWidthList
+   --   LOC.minHeight = leftWidth + rightWidth
+      LOC.hStretch = and picobList_hStretchList -- False  -- maybe true if there are only stretch children
+      LOC.vStretch = or picobList_vStretchList
+      LOC.hRf = if null picobList_hRfList then 0
+                else sum (take hRefNr picobList_minHeightList) + picobList_hRfList !! hRefNr
+      LOC.vRf = minLeftWidth
+  | OverlayPicob 
+      LOC.minLeftWidth = maximum picobList_vRfList
+      LOC.minRightWidth = maximum [ minWidth - vRf | (minWidth, vRf) <- zip picobList_minWidthList picobList_vRfList ]
+      LOC.minWidth = minLeftWidth +minRightWidth 
+      LOC.minTopHeight = maximum picobList_hRfList 
+      LOC.minBottomHeight = maximum [ minHeight - hRf | (minHeight, hRf) <- zip picobList_minHeightList picobList_hRfList ]
+      LOC.minHeight = minTopHeight + minBottomHeight
+      LOC.hStretch = and picobList_hStretchList
+      LOC.vStretch = and picobList_vStretchList
+      LOC.hRf = minTopHeight
+      LOC.vRf = minLeftWidth
+    {-  LOC.topHeight = maximum picobList_hRfList
+      LOC.bottomHeight = maximum [ minHeight - hRf | (minHeight, hRf) <- zip picobList_minHeightList picobList_hRfList ]
+      LOC.leftWidth = maximum picobList_vRfList
+      LOC.rightWidth = maximum [ minWidth - vRf | (minWidth, vRf) <- zip picobList_minWidthList picobList_vRfList ]
+      LOC.minWidth = leftWidth + rightWidth 
+      LOC.minHeight = topHeight + bottomHeight
+      LOC.hRf = topHeight
+      LOC.vRf = leftWidth-}
+  | MatrixPicob
+      LOC.rowTopHeights = map maximum (getRows n picobList_hRfList)
+      LOC.rowBottomHeights = showDebug' Arr "rws:" $ map (\minHghtsHRefs ->
+                                   maximum [ minHeight - hRf | (minHeight, hRf) <- minHghtsHRefs ]
+				 ) (getRows n (zip picobList_minHeightList picobList_hRfList))
+      LOC.colLeftWidths = map maximum (getCols n picobList_vRfList)
+      LOC.colRightWidths = showDebug' Arr  "rws:" $ map (\minWdthsVRefs ->
+                                   maximum [ minWidth - vRf | (minWidth, vRf) <- minWdthsVRefs ]
+				 ) (getCols n (zip picobList_minWidthList picobList_vRfList))
+      LOC.rowHeights = showDebug' Arr "rhgts:" $ zipWith (+) rowTopHeights rowBottomHeights
+      LOC.colWidths = showDebug' Arr "cwdths:" $ zipWith (+) colLeftWidths colRightWidths
+      LOC.minWidth = sum colLeftWidths + sum colRightWidths
+      LOC.minHeight = sum rowTopHeights + sum rowBottomHeights
+      LOC.hStretch = False
+      LOC.vStretch = False
+      LOC.hRf = if null picobList_hRfList then 0
+                else head rowTopHeights
+      LOC.vRf = 0
+  | LayedOutRowPicob 
+      LOC.minWidth = error "not implemented"
+      LOC.minHeight = error "not implemented"
+      LOC.hStretch = error "not implemented" 
+      LOC.vStretch = error "not implemented" 
+      LOC.hRf = error "not implemented"
+      LOC.vRf = error "not implemented"
+  | FormatterPicob 
+      LOC.minWidth = 0
+      LOC.minHeight = 0
+      LOC.hStretch = True
+      LOC.vStretch = True
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | AlternativePicob 
+      LOC.minWidth = 0
+      LOC.minHeight = 0
+      LOC.hStretch = True
+      LOC.vStretch = True
+      LOC.hRf = 0
+      LOC.vRf = 0
+  | WithNode
+{-
+      LOC.wdth = 
+      LOC.minHeight = 
+      LOC.hRf = 
+      LOC.vRf = 
+-}
+ATTR PicobList [  | |  minWidthList, minHeightList : IntList hRfList, vRfList : IntList
+                       hStretchList, vStretchList : BoolList ]
+SEM PicobList
+  | Nil
+      LHS.minWidthList = []
+      LHS.minHeightList = []
+      LHS.hStretchList = []
+      LHS.vStretchList = []
+      LHS.hRfList = []
+      LHS.vRfList = []
+  | Cons 
+      LHS.minWidthList = picob_minWidth : picobList_minWidthList
+      LHS.minHeightList = picob_minHeight : picobList_minHeightList
+      LHS.hStretchList = picob_hStretch : picobList_hStretchList
+      LHS.vStretchList = picob_vStretch : picobList_vStretchList
+      LHS.hRfList = picob_hRf : picobList_hRfList
+      LHS.vRfList = picob_vRf : picobList_vRfList
+
+
+
+
+SEM Root
+  | Root -- if scr < min, assign min
+      picob.assignedWidth = if picob_hStretch then lhs_screenWidth else picob_minWidth
+      picob.assignedHeight = if picob_vStretch then 300 else picob_minHeight -- should be screenHeight
+      picob.assignedHRef = picob_hRf -- is ignored anyway 
+      picob.assignedVRef = picob_vRf 
+
+SEM Picob [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : Int | | ]
+  | RowPicob
+      LOC.assignedWidths = if picobList_hStretchList!!vRefNr -- if Ref Object is stretch, all children get
+                                 then assign picobList_hStretchList -- equal space           +1, because refobj is stretch too
+                                               (repeat((leftTotalSpace+rightTotalSpace)`div`(leftHStretches+1+rightHStretches))
+						
+					       )
+					       picobList_minWidthList
+		                 else assign picobList_hStretchList
+                                               (  replicate vRefNr (leftChildSpace) 
+					       ++ [0] -- not used
+					       ++ repeat rightChildSpace
+					       )
+					       picobList_minWidthList
+      picobList.assignedWidthList    = assignedWidths
+      picobList.assignedVRefList     = picobList_vRfList -- is not right, nested rows don't work now
+
+      picobList.assignedHeightList    =assign picobList_vStretchList
+                                              (repeat lhs_assignedHeight) picobList_minHeightList 
+      picobList.assignedHRefList     = assign picobList_vStretchList
+                                              (repeat hRf)--lhs_assignedHRef)
+					     picobList_hRfList 
+
+       -- width of stretching children should not be subtracted from available width
+       -- for the moment this amount is added back to it as left and right corrections
+      LOC.stretchMinWidths = assign picobList_hStretchList picobList_minWidthList (repeat 0)
+      -- this list contains the widths for the non stretchers, the other widths are 0
+
+      LOC.leftCorrection = sum (take vRefNr stretchMinWidths) 
+                              + if picobList_hStretchList!!vRefNr then stretchMinWidths !! vRefNr else 0
+      LOC.rightCorrection = sum (drop (vRefNr+1) stretchMinWidths)
+
+      LOC.leftTotalSpace = lhs_assignedVRef - vRf    + leftCorrection
+      LOC.rightTotalSpace = lhs_assignedWidth - minWidth - leftTotalSpace  + rightCorrection
+      LOC.leftHStretches = length . filter (==True) . take vRefNr $ picobList_hStretchList 
+      LOC.rightHStretches = length . filter (==True) . drop (vRefNr+1) $ picobList_hStretchList 
+      LOC.leftChildSpace = round (fromIntegral leftTotalSpace / fromIntegral leftHStretches )
+      LOC.rightChildSpace = round (fromIntegral rightTotalSpace / fromIntegral rightHStretches )
+ 
+       
+      -- lhs_assigned vs final????
+  | ColumnPicob
+      picobList.assignedWidthList    = assign picobList_hStretchList
+                                              (repeat lhs_assignedWidth) picobList_minWidthList 
+      -- in case of stretch, return composite's ref
+      picobList.assignedVRefList     = assign picobList_hStretchList
+                                              (repeat lhs_assignedVRef)
+					      picobList_vRfList 
+      LOC.assignedHeights = if picobList_vStretchList!!hRefNr -- if Ref Object is stretch, all children get
+                            then assign picobList_vStretchList -- equal space           +1, because refobj is stretch too
+                                               (repeat((topTotalSpace+bottomTotalSpace)`div`(topVStretches+1+bottomVStretches))
+						
+					       )
+					       picobList_minHeightList
+		            else assign picobList_vStretchList
+                                               (  replicate hRefNr (topChildSpace) 
+					       ++ [0] -- not 0
+					       ++ repeat bottomChildSpace
+					       )
+					       picobList_minHeightList
+      picobList.assignedHeightList    = assignedHeights
+      picobList.assignedHRefList     = {-debug Arr (  "assHRef:"++show lhs_assignedHRef
+						++ "HRef:"++ show hRf
+						++ "minHeight:"++show minHeight
+						++ "assHeight:"++show lhs_assignedHeight
+						++ "topTotal:"++ show topTotalSpace
+						++ "botTotal:"++ show bottomTotalSpace
+						)-}  picobList_hRfList -- is not right, nested cols don't work now
+
+       -- width of stretching children should not be subtracted from available height
+       -- for the moment this amount is added back to it as top and bottom corrections
+      LOC.stretchMinHeights = assign picobList_vStretchList picobList_minHeightList (repeat 0)
+      -- this list contains the heights for the non stretchers, the other heights are 0
+
+      LOC.topCorrection = sum (take hRefNr stretchMinHeights) 
+                              + if picobList_vStretchList!!hRefNr then stretchMinHeights !! hRefNr else 0
+      LOC.bottomCorrection = sum (drop (hRefNr+1) stretchMinHeights)
+
+      
+      
+      
+      LOC.topTotalSpace = lhs_assignedHRef - hRf  + topCorrection     -- minTopHeight
+      LOC.bottomTotalSpace = lhs_assignedHeight - minHeight - topTotalSpace   + bottomCorrection
+      LOC.topVStretches = length . filter (==True) . take hRefNr $ picobList_vStretchList 
+      LOC.bottomVStretches = length . filter (==True) . drop (hRefNr+1) $ picobList_vStretchList 
+      LOC.topChildSpace = round (fromIntegral topTotalSpace / fromIntegral topVStretches )
+      LOC.bottomChildSpace = round (fromIntegral bottomTotalSpace / fromIntegral bottomVStretches )
+     {-
+      picobList.assignedTopHeightList = let topHghts = trce "thrf:" (take hRefNr picobList_hghtList)
+                                            refTopHght = val (picobList_hRfList !! hRefNr )
+					    refBotHght = val (picobList_hghtList !! hRefNr) - val (picobList_hRfList !! hRefNr)
+                                            avTChildHeight = round (fromIntegral (lhs_assignedTopHeight - val (sum' topHghts)-refTopHght )
+					                      /fromIntegral (cntUndef topHghts) )
+					    topUndefs = take (hRefNr) (repeat avTChildHeight)
+					    bottomHghts = trce "bhrf:" (drop (hRefNr+1) picobList_hghtList)
+                                            avBChildHeight = round (fromIntegral (lhs_assignedBottomHeight - val (sum' bottomHghts)-refBotHght)
+					                      /fromIntegral (cntUndef bottomHghts) )
+					    bottomUndefs = (repeat avBChildHeight)
+				        in  replaceUndefined picobList_hRfList (topUndefs ++ [0] ++ bottomUndefs)
+      picobList.assignedBottomHeightList = replaceUndefined (zipWith (-) picobList_hghtList picobList_hRfList) (repeat 0)
+     -}
+  | MatrixPicob
+-- is a lot more complicated than this
+      picobList.assignedHeightList    =assign picobList_vStretchList
+                                              (concat. map (replicate n)$ rowHeights)
+					      picobList_minHeightList 
+      picobList.assignedHRefList     = assign picobList_vStretchList
+                                              (concat. map (replicate n)$ rowTopHeights) --(repeat lhs_assignedHRef)
+					      picobList_hRfList 
+      picobList.assignedWidthList    = assign picobList_hStretchList
+                                              (concat.repeat$colWidths) 
+					      picobList_minWidthList 
+      picobList.assignedVRefList     = assign picobList_hStretchList
+                                              (concat.repeat$colLeftWidths) --(repeat lhs_assignedVRef)
+					      picobList_vRfList 
+   --   picobList.assignedWidthList    = picobList_minWidthList
+ --     picobList.assignedHeightList   = picobList_minHeightList
+ --     picobList.assignedHRefList     = picobList_hRfList
+   --   picobList.assignedVRefList     = picobList_vRfList
+  | OverlayPicob
+      picobList.assignedHeightList    =assign picobList_vStretchList
+                                              (repeat lhs_assignedHeight) picobList_minHeightList 
+      picobList.assignedHRefList     = assign picobList_vStretchList
+                                              (repeat lhs_assignedHRef) picobList_hRfList 
+      picobList.assignedWidthList    = assign picobList_hStretchList
+                                              (repeat lhs_assignedWidth) picobList_minWidthList 
+      picobList.assignedVRefList     = assign picobList_hStretchList
+                                              (repeat lhs_assignedVRef) picobList_vRfList 
+  | LayedOutRowPicob
+      picobList.assignedWidthList    = error "LayedOut row not implemented yet."
+      picobList.assignedHeightList    = error "LayedOut row not implemented yet."
+      picobList.assignedHRefList    = error "LayedOut row not implemented yet."
+      picobList.assignedVRefList    = error "LayedOut row not implemented yet."
+  | FormatterPicob
+      picobList.assignedWidthList    = error "FormatterPicob must be unfolded first"
+      picobList.assignedHeightList    = error "FormatterPicob must be unfolded first"
+      picobList.assignedHRefList     =  error "FormatterPicob must be unfolded first"
+      picobList.assignedVRefList     =  error "FormatterPicob must be unfolded first"
+  | AlternativePicob
+      picobList.assignedWidthList    = repeat lhs_assignedWidth
+      picobList.assignedHeightList    = repeat lhs_assignedHeight
+      picobList.assignedHRefList     = repeat lhs_assignedHRef
+      picobList.assignedVRefList     = repeat lhs_assignedVRef
+  | WithNode
+{-      child.assignedWidth = if defined (width (snd newAttrs)) then val (width (snd newAttrs)) else lhs_assignedWidth 
+      child.assignedHeight = if defined (height (snd newAttrs))  -- bit tricky
+                                 then val (hRef (snd newAttrs))
+				 else lhs_assignedTopHeight 
+      child.assignedBottomHeight = if defined (height (snd newAttrs))
+                                    then val (height (snd newAttrs)) - val (hRef (snd newAttrs))
+				    else lhs_assignedBottomHeight 
+-}
+SEM PicobList [ assignedWidthList, assignedHeightList, assignedHRefList, assignedVRefList : IntList | | ]
+  | Cons 
+      picob.assignedWidth = head lhs_assignedWidthList
+      picobList.assignedWidthList = tail lhs_assignedWidthList
+      picob.assignedHeight = head lhs_assignedHeightList
+      picobList.assignedHeightList = tail lhs_assignedHeightList
+      picob.assignedHRef = head lhs_assignedHRefList
+      picobList.assignedHRefList = tail lhs_assignedHRefList
+      picob.assignedVRef = head lhs_assignedVRefList
+      picobList.assignedVRefList = tail lhs_assignedVRefList
+
+
+-- why do picobs need this value themselves? Poly & rect need it for scaling.
+-- instead of sending back, maybe row and col can keep a local copy? or will this interfere
+-- with top/bottom/etc-aligning? 
+SEM Picob [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
+  | EmptyPicob
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | SimpleTextPicob 
+      LOC.finalWidth = minWidth
+      LOC.finalHeight = minHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | RectanglePicob  
+      LOC.finalWidth = minWidth
+      LOC.finalHeight = minHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | ImagePicob  
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | PolyPicob 
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | TestPicob 
+      LOC.finalWidth = error "not implemented"
+      LOC.finalHeight = error "not implemented"
+      LOC.finalHRef = error "not implemented"
+      LOC.finalVRef = error "not implemented"
+  | RowPicob -- asymmetric??
+      LOC.finalWidth = sum picobList_finalWidthList
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = if null picobList_vRfList then 0
+                      else if picobList_hStretchList!!vRefNr then lhs_assignedVRef
+		           else sum (take vRefNr assignedWidths) + (picobList_vRfList !! vRefNr)
+  | ColumnPicob
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight =  sum picobList_finalHeightList--lhs_assignedHeight
+      LOC.finalHRef = if null picobList_hRfList then 0
+                      else if picobList_vStretchList!!hRefNr then lhs_assignedHRef
+		           else sum (take hRefNr assignedHeights) + (picobList_hRfList !! hRefNr)
+      LOC.finalVRef = lhs_assignedVRef
+
+{-      LOC.finalHeight = val hght
+      LOC.finalWidth = val wdth
+      LOC.finalHRef =  sum (take hRefNr picobList_finalHeightList) + picobList_finalHRefList !! hRefNr
+      LOC.finalVRef = val vRf
+-}
+  | OverlayPicob 
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = lhs_assignedHRef
+      LOC.finalVRef = lhs_assignedVRef
+  | MatrixPicob
+      LOC.finalWidth = lhs_assignedWidth
+      LOC.finalHeight = lhs_assignedHeight
+      LOC.finalHRef = if null picobList_hRfList then 0 -- we need H/VRefNrs here, but there not in MatrixPicob yet
+                      else head rowTopHeights
+      LOC.finalVRef = if null picobList_hRfList then 0
+                      else head colLeftWidths
+  | LayedOutRowPicob 
+      LOC.finalWidth = error "not implemented"
+      LOC.finalHeight = error "not implemented"
+      LOC.finalHRef = error "not implemented"
+      LOC.finalVRef = error "not implemented"
+  | FormatterPicob 
+      LOC.finalWidth =  error "FormatterPicob must be unfolded first"
+      LOC.finalHeight =  error "FormatterPicob must be unfolded first"
+      LOC.finalHRef =  error "FormatterPicob must be unfolded first"
+      LOC.finalVRef =  error "FormatterPicob must be unfolded first"
+  | AlternativePicob 
+      LOC.finalWidth = picobList_finalWidthList !! firstFit
+      LOC.finalHeight = picobList_finalHeightList !! firstFit
+      LOC.finalHRef = picobList_finalHRefList !! firstFit
+      LOC.finalVRef = picobList_finalVRefList !! firstFit
+      LOC.firstFit = selectFirstFit lhs_assignedWidth picobList_finalWidthList -- no VRefs (yet)
+  | WithNode
+{-
+      LOC.wdth = 
+      LOC.hght = 
+      LOC.hRf = 
+      LOC.vRf = 
+-}
+ATTR PicobList [  | |  finalWidthList, finalHeightList, finalHRefList, finalVRefList : IntList ]
+SEM PicobList
+  | Nil
+      LHS.finalWidthList = []
+      LHS.finalHeightList = []
+      LHS.finalHRefList = []
+      LHS.finalVRefList = []
+  | Cons 
+      LHS.finalWidthList = picob_finalWidth : picobList_finalWidthList
+      LHS.finalHeightList = picob_finalHeight : picobList_finalHeightList
+      LHS.finalHRefList = picob_finalHRef : picobList_finalHRefList
+      LHS.finalVRefList = picob_finalVRef : picobList_finalVRefList
+
+
+
+
+
+-- Position calculation
+
+SEM Root
+  | Root 
+      picob.xAG = 0
+      picob.yAG = 0
+
+ATTR Picob [ xAG, yAG : Int | | ]
+SEM Picob
+  | RowPicob
+      picobList.xAGList    = init.scanl (+) 0 $ picobList_finalWidthList
+      picobList.yAGList    = [ finalHRef - chRf | chRf <- picobList_finalHRefList ]
+  | ColumnPicob
+      picobList.xAGList    = [ finalVRef - cvRf | cvRf <- picobList_finalVRefList ]
+      picobList.yAGList    = init.scanl (+) 0 $ picobList_finalHeightList
+  | MatrixPicob -- x and y are added to cumulative heights and widths
+      LOC.cumulativeColWidths = init. scanl (+) 0 $ colWidths
+      LOC.cumulativeRowHeights = init. scanl (+) 0 $ rowHeights
+      LOC.absoluteRowRefYs = zipWith (+) cumulativeRowHeights rowTopHeights
+      LOC.absoluteColRefXs = zipWith (+) cumulativeColWidths colLeftWidths 
+      picobList.xAGList    = zipWith (-) (concat . repeat $ absoluteColRefXs) picobList_finalVRefList
+      picobList.yAGList    = zipWith (-) (concat . map (replicate n) $ absoluteRowRefYs) picobList_finalHRefList
+  | OverlayPicob
+      picobList.xAGList    = [ finalVRef - cvRf | cvRf <- picobList_finalVRefList ]
+      picobList.yAGList    = [ finalHRef - chRf | chRf <- picobList_finalHRefList ]
+  | LayedOutRowPicob
+      picobList.xAGList    = error "LayedOut row not implemented yet."
+      picobList.yAGList    = error "LayedOut row not implemented yet."
+  | FormatterPicob
+      picobList.xAGList    = error "FormatterPicob must be unfolded first"
+      picobList.yAGList    = error "FormatterPicob must be unfolded first"
+  | AlternativePicob
+      picobList.xAGList    = repeat 0
+      picobList.yAGList    = repeat 0
+
+ATTR PicobList [ xAGList, yAGList : IntList | | ]
+SEM PicobList
+  | Cons 
+      picob.xAG = head lhs_xAGList
+      picob.yAG = head lhs_yAGList
+      picobList.xAGList = tail lhs_xAGList
+      picobList.yAGList = tail lhs_yAGList
+
+
+
+
+
+
+
+-- Creating the Attributed Picob Tree
+
+-- are the widths and heights really needed in the attributed tree?
+-- yes, they define the area of the picob, used for background coloring etc.
+
+
+
+ATTR Picob [  | | arrangement : Arrangement ]
+SEM Picob
+  | EmptyPicob
+      LHS.arrangement = EmptyA id 0 0 0 0
+  | SimpleTextPicob 
+      LHS.arrangement = StringA id lhs_xAG lhs_yAG finalWidth finalHeight text lhs_textColor lhs_font (cumulativeCharWidths lhs_fontMetrics lhs_font text) -- expensive, but will be evaluated lazily
+  | RectanglePicob
+      LHS.arrangement = RectangleA id lhs_xAG lhs_yAG finalWidth finalHeight lineWidth Solid lhs_lineColor lhs_fillColor
+  | ImagePicob
+      LHS.arrangement = ImageA id lhs_xAG lhs_yAG finalWidth finalHeight src Tile lhs_lineColor lhs_backgroundColor
+  | PolyPicob      
+      LHS.arrangement = let mkPoint (rx, ry) = ( round (rx * fromIntegral finalWidth)
+			                                   , round (ry * fromIntegral finalHeight) )
+		        in  PolyA id lhs_xAG lhs_yAG finalWidth finalHeight (map mkPoint pointList) lineWidth lhs_lineColor lhs_backgroundColor
+		      
+  | TestPicob
+      LHS.arrangement =  RectangleA id lhs_xAG lhs_yAG finalWidth finalHeight 0 Solid lhs_lineColor lhs_fillColor
+  | RowPicob 
+      LHS.arrangement = {- debug Arr ( "rowattrs:"++show 
+                                                  ( (picobList_minWidthList
+						  , picobList_vRfList
+						  , picobList_finalWidthList 
+                                                  , picobList_finalVRefList )
+                                                  , lhs_assignedWidth
+						  , leftCorrection
+						  , rightCorrection
+						  , assignedWidths 
+						  ))$ -}
+						  RowA id lhs_xAG lhs_yAG finalWidth finalHeight lhs_backgroundColor picobList_arrangementList
+  | ColumnPicob 
+      LHS.arrangement = {- debug Arr ( "colattrs:"++show 
+                                                  ( (picobList_minWidthList
+						  , picobList_vRfList
+						  , picobList_finalWidthList 
+                                                  , picobList_finalVRefList )
+                                                  , lhs_assignedWidth
+						  , assign picobList_hStretchList (repeat lhs_assignedWidth) picobList_minWidthList 
+					          ))$ -}
+						  ColA id lhs_xAG lhs_yAG finalWidth finalHeight lhs_backgroundColor picobList_arrangementList 
+  | OverlayPicob 
+      LHS.arrangement = OverlayA id lhs_xAG lhs_yAG finalWidth finalHeight lhs_backgroundColor picobList_arrangementList
+  | LayedOutRowPicob 
+      LHS.arrangement = RowA id lhs_xAG lhs_yAG finalWidth finalHeight lhs_backgroundColor picobList_arrangementList
+  | MatrixPicob 
+      LHS.arrangement = StringA NoID 0 40 0 0 ("unimplemented AttrPicob MatrixPicob") (0,0,0) defaultFont []
+       -- MatrixPicob id picobList_arrangementList lhs_xAG lhs_yAG finalWidth finalHeight lhs_backgroundColor
+  | FormatterPicob 
+      LHS.arrangement = error "FormatterPicob must be unfolded first"
+  | AlternativePicob -- remove the alternative picob
+      LHS.arrangement = picobList_arrangementList !! firstFit 
+   -- with node is removed by copy rule
+
+  | StructuralPicob 
+      LHS.arrangement = StructuralA id child_arrangement
+  | ParsingPicob 
+      LHS.arrangement = ParsingA id child_arrangement
+  | LocatorPicob 
+      LHS.arrangement = LocatorA location child_arrangement
+
+
+ATTR PicobList [  | |  arrangementList : ArrangementList ]
+SEM PicobList
+  | Nil
+      LHS.arrangementList = []
+  | Cons 
+      LHS.arrangementList = picob_arrangement : picobList_arrangementList
+
+\end{AG}
