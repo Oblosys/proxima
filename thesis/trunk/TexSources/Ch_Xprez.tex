@@ -3,6 +3,9 @@
 \bc
 TODO:
 Check out  Yahu & wxHaskell for alternative ways of handling attributes/properties. Can these handle synthesized attrs as well?
+change case for titles and headings
+
+Check first chapter if transformation/target language separation is removed here
 \ec
 
 
@@ -10,14 +13,14 @@ Check out  Yahu & wxHaskell for alternative ways of handling attributes/properti
 \chapter{Presenting Structured Documents}
 \label{\ch}
 
-{\sc Xprez} is not latex!! Latex is too complex. {\sc Xprez} is target. Latex needs attributes and lot of computations. Proxima can build an editor for latex, but not just using {\sc Xprez}. Eg. fontsize etc will be visible in document level.
+{\sc Xprez} is not latex!! Latex is too complex. {\sc Xprez} is target. Latex needs attributes and lot of computations. Proxima can build an editor for latex, but not just using {\sc Xprez}. E.g.\ fontsize etc will be visible in document level.
 
 Cassowary is not cited in article
 
 
 The popularity of the document standard XML has led to an increasing demand for XML editors. The Proxima project is concerned with the design of a generic presentation-oriented XML editor with support for derived values in documents. A presentation is a view on a document, according to a style sheet. In a presentation oriented editor the user only sees a presentation of a document. WYSIWYG editing is possible using a WYSIWYG presentation, whereas the underlying document structure can be viewed and edited with a presentation that shows the actual tags and tree structure of the document. Because Proxima will support derived values, constructs such as chapter numbers and references are not hard-coded in the editor, but can be specified entirely by the user. Also, computations in a document, where one field contains the result of a calculation over several input fields can be modeled with derived values. In order to specify document presentations, a powerful presentation language is required. For this reason, we have developed the declarative XML presentation language {\sc Xprez}.
 
-There exist a number of style sheet or presentation languages for XML, for example CSS~\cite{css}, CCSS~\cite{badros99ccss}, PSL~\cite{marden98psl}, XSL~\cite{xsl}, and P~\cite{quint97thot}, but they lack either the expressiveness or the abstraction mechanisms to specify the complex presentations required for an XML editor. Pretty-printing combinators \cite{oppen80prettyPrinting,swierstra,hughes1995prettyPrinting,kahl99galleyCombs,brand96generationOfFormatters} do offer expressiveness, abstraction mechanisms and first-class presentations, but most of these libraries only have combinators for text, and all require a program for traversing the document tree and generating the presentation. 
+There exist a number of style sheet or presentation languages for XML, for example CSS~\cite{css}, CCSS~\cite{badros99ccss}, PSL~\cite{marden98psl}, XSL~\cite{xsl}, and P~\cite{quint97thot}, but they lack either the expressiveness or the abstraction mechanisms to specify the complex presentations required for an XML editor. Pretty-printing combinators \cite{oppen80prettyPrinting,swierstra98combinators,hughes1995prettyPrinting,kahl99galleyCombs,brand96generationOfFormatters} do offer expressiveness, abstraction mechanisms and first-class presentations, but most of these libraries only have combinators for text, and all require a program for traversing the document tree and generating the presentation. 
 
 In a comparative study of a number of existing languages, we determined the following list of requirements for a presentation language:
 
@@ -30,7 +33,7 @@ In a comparative study of a number of existing languages, we determined the foll
 \item It should have a powerful abstraction mechanism. Thus, similar presentations can be specified with one, appropriately parameterized, function.
 \end{itemize}
 
-{\sc Xprez} has been implemented in the functional language Haskell. It does not yet have a domain-specific syntax, but other than that it meets the requirements. Although the language is not yet fully developed, it is already powerful enough to describe a \LaTeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of an example document presented using this style sheet. The style sheet handles section numbering, ligatures (e.g. the ``fi'' in Scientific), and several mathematical constructs.
+{\sc Xprez} has been implemented in the functional language Haskell. It does not yet have a domain-specific syntax, but other than that it meets the requirements. Although the language is not yet fully developed, it is already powerful enough to describe a \LaTeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of an example document presented using this style sheet. The style sheet handles section numbering, ligatures (e.g.\ the ``fi'' in Scientific), and several mathematical constructs.
 
 \begin{center}
 \epsfig{file=pics/eps/xlatex1.png.eps, width=2in} \qquad
@@ -221,7 +224,7 @@ with_ :: Xprez -> ((Inh, Syn) -> (Inh, Syn)) -> Xprez
 \end{verbatim}
 \end{small}
 
-In the specification of a property value, the original values of properties can be used, e.g. the font size can be set to the old font size increased with 2 points. Therefore, the second argument of \texttt{with\symbol{95}} is a function that takes the original values of the inherited attributes that come from the parent and the synthesized attributes that come from child presentation as arguments, and returns the new values (i.e. the inherited attributes that go to the child and the synthesized attributes that go to the parent).
+In the specification of a property value, the original values of properties can be used, e.g.\ the font size can be set to the old font size increased with 2 points. Therefore, the second argument of \texttt{with\symbol{95}} is a function that takes the original values of the inherited attributes that come from the parent and the synthesized attributes that come from child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
 
 The inherited and synthesized property values are Haskell records, which have special syntax for accessing and updating fields. If \texttt{inh} is a value of type \texttt{Inh}, then the expression \texttt{fontSize inh} denotes the value of the fontSize field in \texttt{inh}, and \texttt{inh $\{$ fontSize = 10 $\}$} denotes a value of type \texttt{Inh} in which all fields have the same values as in \texttt{inh}, except for the \texttt{fontSize} field, which is now 10. Below is the definition for the \texttt{withFontSize} combinator: 
 
@@ -305,7 +308,7 @@ A presentation transformation language is used to specify a mapping between a do
 
 The five languages discussed in Section~\ref{targetlangs} all have rule-based transformation languages. However, the power of the rule selection mechanisms varies, as well as the transformation capabilities.{\bf }
 
-{\bf CSS~2.0:} In CSS~2.0, rules are used to specify the appearance of elements or classes of elements. These rules are either applied to certain types of elements (e.g. all \texttt{Title} elements in the document), or depend on contextual information of an element (e.g. all elements that are a child of a \texttt{Section} element). The body of a rule consists just of property declarations.
+{\bf CSS~2.0:} In CSS~2.0, rules are used to specify the appearance of elements or classes of elements. These rules are either applied to certain types of elements (e.g.\ all \texttt{Title} elements in the document), or depend on contextual information of an element (e.g.\ all elements that are a child of a \texttt{Section} element). The body of a rule consists just of property declarations.
 
 It is possible to leave out the presentation of certain elements, and to add textual content before or after a presentation element in CSS~2.0, but general tree transformations cannot be specified. It is also not possible to specify computations. Therefore, a more complicated presentation structure, such as a table of contents or a section reference is impossible to specify using CSS~2.0. Frequently used derived values, such as element counters, have been added as primitives to the language, but they are not very flexible. Furthermore, the addition of special cases instead of a general solution, increases the complexity of the semantics of the language.
 
@@ -336,9 +339,9 @@ Module name decls {
 \end{verbatim}
 \end{small}
 
-The attribute definitions are written in Haskell and can contain references to inherited attributes coming from the parent, as well as to synthesized attributes of the children, e.g. the presentations of the children. {\sc Xprez} has built-in support for XML lists and optional data types that takes care of propagating attributes through the document. If, for example, an element \texttt{E} has a synthesized attribute of type \texttt{a}, then a list of elements \texttt{E}, denoted in the DTD by \texttt{E*}, automatically has a synthesized attribute of type \texttt{[a]}. Because the attribute definitions are Haskell, abstraction can be used and regularly used patterns can be captured with functions. Moreover, computations over the document can make use of the full Haskell language.
+The attribute definitions are written in Haskell and can contain references to inherited attributes coming from the parent, as well as to synthesized attributes of the children, e.g.\ the presentations of the children. {\sc Xprez} has built-in support for XML lists and optional data types that takes care of propagating attributes through the document. If, for example, an element \texttt{E} has a synthesized attribute of type \texttt{a}, then a list of elements \texttt{E}, denoted in the DTD by \texttt{E*}, automatically has a synthesized attribute of type \texttt{[a]}. Because the attribute definitions are Haskell, abstraction can be used and regularly used patterns can be captured with functions. Moreover, computations over the document can make use of the full Haskell language.
 
-As in P, only one presentation can be specified for each element. Context-specific presentations have to be encoded using attributes. For example, by using an inherited attribute that contains the elements on the path to the root, an element can let its presentation depend on the type of its parent, or the presence of certain elements among its ancestors. Specifying such an attribute for each element in the document type is a hassle, so a collection of pre-defined attributes (e.g. positions, sibling lists, etc.) is present. 
+As in P, only one presentation can be specified for each element. Context-specific presentations have to be encoded using attributes. For example, by using an inherited attribute that contains the elements on the path to the root, an element can let its presentation depend on the type of its parent, or the presence of certain elements among its ancestors. Specifying such an attribute for each element in the document type is a hassle, so a collection of pre-defined attributes (e.g.\ positions, sibling lists, etc.) is present. 
 
 The transformation component of {\sc Xprez} has been realized in Haskell, using the MAG attribute grammar system\cite{ag}. Currently, the system can handle only a subset of all document types, as there is no support for XML attributes and entities yet.
 \ec

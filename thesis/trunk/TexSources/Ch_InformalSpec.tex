@@ -159,7 +159,7 @@ The final values $level''\H$ and $level''\L$ satisfy the presentation invariant 
 
 %\begin{figure}
 %\xpr{
-%Plus~1~x 		&   			&		 & 			& Lam~x~(Plus~1~x)\\
+%Sum~1~x 		&   			&		 & 			& Lam~x~(Sum~1~x)\\
 %~~~\downarrow &   		&		&~\nearrow~&~~~\downarrow \\
 %1+x 		&~\leadsto~ & {\tt \backslash x~->~} 1 + x 	& 			& \lambda~x~\to~1+x\\
 %}
@@ -456,7 +456,7 @@ Firstly, if the presentation of a node depends not only on the node itself, but 
 
 For interpretation extra state, updates elsewhere in the tree can be  even more dangerous. When a presentation is computed by a parser, updates on the presentation before a certain token may greatly influence how the token is parsed. Hence, extra state in a presentation that allows full text editing is vulnerable. 
 
-\note{Mention imprecise edit? When interpreted presentation is much different from final presentation, es reuse may be tricky (eg. after entering "{\tt ->}", final presentation is "$\rarr$"?)}
+\note{Mention imprecise edit? When interpreted presentation is much different from final presentation, es reuse may be tricky (e.g.\ after entering "{\tt ->}", final presentation is "$\rarr$"?)}
 
 Secondly, if a node is transformed, it may make sense to reuse its extra state in the result of the transformation. For example, when in an expression editor, a sum node at document level is transformed to a product node, it makes sense to reuse its whitespace extra state. However, if the transformation is performed by simply removing the old sum and inserting a fresh product node, then the extra state is lost. In such a case, an editor designer may specify for a transformations that source nodes are reused in the result, thereby also reusing their extra state. 
 
@@ -551,7 +551,7 @@ The evaluator maps a chapter in the document on a chapter in the enriched docume
 
 When a user performs an update on the presentation, this results in an updated enriched document. Updates can be either in the table of contents, or in the chapters themselves. If the update is not in the table of contents, the document is computed from the chapters in the enriched document, while ignoring the table of contents altogether. On the other hand, if the table of contents tree is modified, the chapters in the enriched document tree are ignored on interpretation, and the document is obtained from the table of contents tree only. In this case, the chapter content is treated as interpretation extra state. 
 
-By treating the table of contents as a partial duplicate of the chapters, it is easy to support structural updates on the table of contents, such as swapping two titles. The reuse process for extra state takes care of swapping the chapter content correspondingly. The editor designer only needs to specify what happens when a new title is inserted, or when an entry is moved to a different level (eg. a section to a subsection). Furthermore, it may be desirable to issue a warning when deleting a table of contents entry.
+By treating the table of contents as a partial duplicate of the chapters, it is easy to support structural updates on the table of contents, such as swapping two titles. The reuse process for extra state takes care of swapping the chapter content correspondingly. The editor designer only needs to specify what happens when a new title is inserted, or when an entry is moved to a different level (e.g.\ a section to a subsection). Furthermore, it may be desirable to issue a warning when deleting a table of contents entry.
 
 \note{mention that we need change management as well as incremental updates for this to work?}
 \bc
@@ -671,7 +671,7 @@ $\Extra \times \Core$. Except for the top and bottom levels, all levels contain 
 
 *** do we have $\Info\idwn_i = \Info\iup_{i+1}$?
 
-Note that for the middle levels, for which two kinds of mapping information exist, each alternative of the definition contains only one kind. This is because the downward mapping information $\Info\idwn_{i}$ cannot be computed by the higher layers presentation mapping, and hence is part of its extra state: $\Extra_{\Pres,i}$. Analogously, viewed from the lower layer, $\Info\iup_{i}$ is part of $\Extra_{\Intr,i}$. Rather than further complicating the definition by splitting the extra state type in a mapping information part and a regular extra state part (eg. $\Extra_{\Pres,i} = \Extra_{\mathit{Regular},\Pres,i} \times \Info\idwn_{i}$), we choose to make explicit only the mapping information relevant for the direction from which the level is viewed.
+Note that for the middle levels, for which two kinds of mapping information exist, each alternative of the definition contains only one kind. This is because the downward mapping information $\Info\idwn_{i}$ cannot be computed by the higher layers presentation mapping, and hence is part of its extra state: $\Extra_{\Pres,i}$. Analogously, viewed from the lower layer, $\Info\iup_{i}$ is part of $\Extra_{\Intr,i}$. Rather than further complicating the definition by splitting the extra state type in a mapping information part and a regular extra state part (e.g.\ $\Extra_{\Pres,i} = \Extra_{\mathit{Regular},\Pres,i} \times \Info\idwn_{i}$), we choose to make explicit only the mapping information relevant for the direction from which the level is viewed.
 \ec
 
 \bc

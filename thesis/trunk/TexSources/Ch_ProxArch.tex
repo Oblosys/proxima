@@ -1,4 +1,4 @@
-\chapter{Architecture of the Proxima Editor}
+\chapter{Architecture of the Proxima editor}
 \label{chap:proxArch}
 
 \bc
@@ -101,7 +101,7 @@ A data level in Proxima is not just an intermediate value in the presentation co
 
 A document is the internal tree data structure that is edited by the user. The type of the document is described by a context free grammar, with special constructs for lists and optional values (similar to EBNF). Haskell data types, EBNF, DTDs and XML Schemas are all restricted forms of context free grammars suitable for describing the document type. In this thesis, we make use of simple Haskell data types without higher-order types, except for the list type.
 
-The exact type formalism is important for document to document transformations (ie. document edit operations), because it should be possible to guarantee type safety of such transformations. However, for the time being, the only supported document edit operations are simple tree based operations, such as cut and paste, and basic operations on lists and optionals, such as selecting a segment of a list. Therefore, using a context free grammar formalism for describing document structure is powerful enough.
+The exact type formalism is important for document to document transformations (i.e.\ document edit operations), because it should be possible to guarantee type safety of such transformations. However, for the time being, the only supported document edit operations are simple tree based operations, such as cut and paste, and basic operations on lists and optionals, such as selecting a segment of a list. Therefore, using a context free grammar formalism for describing document structure is powerful enough.
  
 Because the type of the document will vary for different applications of the editor, we can only give an example for a specific application. The example document consists of a list of declarations, each of which is an identifier declaration or a comment. An identifier declaration contains a string that represents the declared identifier, as well as an expression that may contain conditional expressions, integers, and booleans. The third field of the declaration is a string that may contain additional information about the declaration. It is used to illustrate the extra state concept in the Proxima editor. A comment consists of a list of strings. The types {\tt String}, {\tt Int}, and {\tt Bool} are primitive types. Although not very suitable for practical purposes, the chosen document type will allow us to illustrate the different aspects of the Proxima data levels and layers.
 
@@ -121,13 +121,13 @@ An example document of this type, as well as examples of the lower levels, is pr
 
 
 %																
-\subsection{Enriched Document} \label{sect:enrLevel}
+\subsection{Enriched document} \label{sect:enrLevel}
 
 An enriched document is a copy of the document, to which derived information has been added. In the word processor example, the enriched document contains a table of contents, and each section or subsection element has a field that contains its number. Such derived information is not present at the document level.
 
 Besides containing extra information, the enriched document, or a subtree of it, may also be a reordered version of the document. For example, if the document contains a list of elements, the enriched document may contain a sorted list of these elements.
 
-As an example of an enriched document, we take the sample document of the previous section and a type declaration alternative to the {\tt Decl} type. The type declaration is computed for each declaration. The type of an expression may be integer, boolean, or erroneous (eg. {\tt if True then 0 else False}). It is also possible to add the type as a field to the {\tt Decl} alternative, however, separate type declarations make it easier to show how enriched document edit operations are handled in Section~\ref{sect:reducer}.
+As an example of an enriched document, we take the sample document of the previous section and a type declaration alternative to the {\tt Decl} type. The type declaration is computed for each declaration. The type of an expression may be integer, boolean, or erroneous (e.g.\ {\tt if True then 0 else False}). It is also possible to add the type as a field to the {\tt Decl} alternative, however, separate type declarations make it easier to show how enriched document edit operations are handled in Section~\ref{sect:reducer}.
 
 \noindent
 \ttfamily
@@ -151,16 +151,16 @@ data Type$_{\Enr}$ = IntType$_{\Enr}$ | BoolType$_{\Enr}$ | ErrorType$_{\Enr}$
 %what is presentation
 A presentation is an abstract description of what the document will look like to the user. It consists of strings, images, and simple graphical elements (lines, rectangles, etc.) that are grouped in rows, columns and matrices. Elements have attributes for colors, line styles, fonts, and alignment. Attribution can be influenced using a {\em with} element, which contains a rule that specifies how the attribution is affected.
 
-There are three ways of positioning elements in the presentation. Firstly, the position can be specified relative to other elements in the presentation, by placing a list of elements next to each other in a {\em row}, or above each other in a {\em column}. Elements are aligned according to reference lines (eg. the baseline for a string), and stretchable elements may be used to influence the positioning. Besides rows and columns, a {\em matrix} construct presents a list of lists of elements aligned both horizontally as well as vertically, and an {\em overlay} presents a list of elements in front of each other (eg. for presenting a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line). 
+There are three ways of positioning elements in the presentation. Firstly, the position can be specified relative to other elements in the presentation, by placing a list of elements next to each other in a {\em row}, or above each other in a {\em column}. Elements are aligned according to reference lines (e.g.\ the baseline for a string), and stretchable elements may be used to influence the positioning. Besides rows and columns, a {\em matrix} construct presents a list of lists of elements aligned both horizontally as well as vertically, and an {\em overlay} presents a list of elements in front of each other (e.g.\ for presenting a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line). 
 %mention that alignment is modified easily?
 
 The second way of positioning presentation elements is by using a {\em formatter} element, that positions a list of children based on the available space. Currently, Proxima only supports horizontal formatting, suitable for line breaking in a paragraph. Vertical formatting is not fundamentaly different, but has not been implemented yet. Furthermore, support for a page model also requires extensions to the lower levels, which have not been realized yet.
 
-Finally, a presentation can consist of a list of tokens, which may be identifiers, operators, integers, strings, etc. If textual editing on a presentation is desired (eg. for a source editor), a parser is invoked on the presentation after it has been edited. A presentation that needs to be parsed may be specified using tokens, which make it possible to use a separate layer for scanning. A token contains information about the whitespace (line breaks and spaces) preceding it in the presentation. In some cases, a presentation may need to be parsed without using the Proxima scanner. For example, when explicit whitespace information is stored in the document. In that case, dummy tokens that are not processed by the scanner may be used for the presentation.
+Finally, a presentation can consist of a list of tokens, which may be identifiers, operators, integers, strings, etc. If textual editing on a presentation is desired (e.g.\ for a source editor), a parser is invoked on the presentation after it has been edited. A presentation that needs to be parsed may be specified using tokens, which make it possible to use a separate layer for scanning. A token contains information about the whitespace (line breaks and spaces) preceding it in the presentation. In some cases, a presentation may need to be parsed without using the Proxima scanner. For example, when explicit whitespace information is stored in the document. In that case, dummy tokens that are not processed by the scanner may be used for the presentation.
 
 In some cases, a presentation that needs to be parsed contains parts that we do not want to be parsed. For example, non-textual presentations, such as images. Such presentations can be included in the token list presentation with a {\em structural token}. A structural token contains a presentation, and is treated specially by the parser. Although the child presentation itself is not parsed, it may contain other token lists that will be parsed.
 
-Unlike the document and the enriched document, the presentation has a fixed type. It is discussed in more detail in Chapter~\ref{chap:xprez}. Here, we present a slightly simplified subset of the type. The details regarding the attribution (eg. color, font, and reference lines) of presentation elements have been left out, by leaving the type \verb|AttributionRule| abstract. 
+Unlike the document and the enriched document, the presentation has a fixed type. It is discussed in more detail in Chapter~\ref{chap:xprez}. Here, we present a slightly simplified subset of the type. The details regarding the attribution (e.g.\ color, font, and reference lines) of presentation elements have been left out, by leaving the type \verb|AttributionRule| abstract. 
 
 \noindent
 \ttfamily
@@ -327,7 +327,7 @@ The downward mappings from all the layers together form a logical whole (the pre
 %																
 %																
 %																
-\section{Presentation Process} \label{sect:presprocess}
+\section{Presentation process} \label{sect:presprocess}
 
 The presentation process is the stepwise mapping of a document onto its final rendering. Although the mapping is actually a mapping between edit operations on each of the levels, we will present it here as a mapping between edit levels. The reason for this is that the fact that the mapping is on edit operations rather than on levels is important mainly for reasons of incrementality, and regarding it as a mapping on levels makes the presentation process easier to explain.
 
@@ -499,7 +499,7 @@ Col$_{\Arr}^{(0,0)(80\times84)}$ \\
 
 The renderer maps each element of the arrangement onto a set of drawing commands for the user interface. All positions and size have already been computed by the arranger, and the renderer only scales these positions and sizes according to the current scaling factor of the view.
 
-%rendering sheet: how to render things, eg. corners of lines smooth or not. Maybe not very realistic.
+%rendering sheet: how to render things, e.g.\ corners of lines smooth or not. Maybe not very realistic.
 
 \bigskip {\bf Example:} The result of applying the renderer to the example arrangement is a set of rendering commands which display the comment and the declaration when executed. Note that the comment is rendered in a different font than the declaration. 
 
@@ -523,7 +523,7 @@ simple1 = \\
 %																
 %																
 %																
-\section{Interpretation Process} \label{sect:intrProcess}
+\section{Interpretation process} \label{sect:intrProcess}
 
 The interpretation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
 
@@ -763,7 +763,8 @@ $present :: \Level_{H}\times \Extra_{\Level_{H}} \rightarrow \Level_{L}\times \E
 $interpret :: \Level_{L} \rightarrow \Level_{H}$, whereas the editor needs the mapping 
 $interpret :: \Level_{L} \times \Extra_{\Level_{L}} \rightarrow \Level_{H}\times \Extra_{\Level_{H}}$. \note{check this now chapters 5 and 6 are finished}
 
-The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and interpretation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
+******** ZIN
+The problem with partial mappings, is that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and interpretation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
 
 
 %																

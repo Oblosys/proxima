@@ -1,16 +1,17 @@
 ------------------------ Thesis: annotated bibtex file
 
+TODO 
+ASK: how to get "et al." for long list of authors?
 
-updates wrt old papers on Xprez, Invariants and Architecture Combinators:
+Weird: "translated by" is converted, so we get: t. b. E. V. M. V. Quint
+Maybe use different bibliography style?
 
-roisin97implementin -> roisin97cutPaste
-kingston93design    -> kingston93lout
-haskel              -> peytonJones98haskell
+LATER: check if AG manual is tech report
+
+
 
 
 GENERAL PAPERS ON EDITING
-
-no ref to this one yet!
 
 @inproceedings{lang86usefulness,
  author = {Bernard Lang},
@@ -22,7 +23,6 @@ no ref to this one yet!
  location = {Trondheim, Norway},
  publisher = {Springer-Verlag},
  }
-
 
 @inproceedings{vanter94practical,
     author = "Michael L. Van de Vanter",
@@ -69,9 +69,32 @@ another Response to Waters
  publisher = {ACM Press}
  }
 
+@inproceedings{rubinNeal87design,
+ author = {Lisa {Rubin} Neal},
+ title = {Cognition-sensitive design and user modeling for syntax-directed editors},
+ booktitle = {Proceedings of the SIGCHI/GI conference on Human factors in computing systems and graphics interface},
+ year = {1987},
+ isbn = {0-89791-213-6},
+ pages = {99--102},
+ location = {Toronto, Ontario, Canada},
+ doi = {http://doi.acm.org/10.1145/29933.30866},
+ publisher = {ACM Press},
+ }
 
 
-@article{OmanCook90typography,
+@inproceedings{baecker88readability,
+ author = {R. Baecker},
+ title = {Enhancing program readability and comprehensibility with tools for program visualization},
+ booktitle = {Proceedings of the 10th international conference on Software engineering},
+ year = {1988},
+ isbn = {0-89791-258-6},
+ pages = {356--366},
+ location = {Singapore},
+ publisher = {IEEE Computer Society Press},
+ }
+
+
+@article{omanCook90typography,
  author = {Paul W. Oman and Curtis R. Cook},
  title = {Typographic style is more than cosmetic},
  journal = {Communications of the ACM},
@@ -83,8 +106,58 @@ another Response to Waters
  doi = {http://doi.acm.org/10.1145/78607.78611},
  publisher = {ACM Press},
  }
-
 Importance of good presentation for programming
+
+
+
+@inproceedings{wallace01cutpaste,
+ author = {Glen Wallace and Robert Biddle and Ewan Tempero},
+ title = {Smarter cut-and-paste for programming text editors},
+ booktitle = {Proceedings of the 2nd Australasian conference on User interface},
+ year = {2001},
+ isbn = {0-7695-0969-X},
+ pages = {56--63},
+ location = {Queensland, Australia},
+ publisher = {IEEE Computer Society Press},
+ }
+
+
+@inproceedings{reinke03refactoring,
+ author = {Huiqing Li and Claus Reinke and Simon Thompson},
+ title = {Tool support for refactoring functional programs},
+ booktitle = {Proceedings of the ACM SIGPLAN workshop on Haskell},
+ year = {2003},
+ isbn = {1-58113-758-3},
+ pages = {27--38},
+ location = {Uppsala, Sweden},
+ doi = {http://doi.acm.org/10.1145/871895.871899},
+ publisher = {ACM Press},
+ }
+
+@article{klein98glushkovRestr,
+ author = {Anne Br\"uggemann-Klein and Derick Wood},
+ title = {One-unambiguous regular languages},
+ journal = {Inf. Comput.},
+ volume = {140},
+ number = {2},
+ year = {1998},
+ issn = {0890-5401},
+ pages = {229--253},
+ doi = {http://dx.doi.org/10.1006/inco.1997.2688},
+ publisher = {Academic Press, Inc.},
+ }
+
+@inproceedings{sellen90modes,
+ author = {Abigail Sellen and Gordon Kurtenbach and William Buxton},
+ title = {The role of visual and kinesthetic feedback in the prevention of mode errors},
+ booktitle = {Proceedings of the IFIP TC13 Third Interantional Conference on Human-Computer Interaction},
+ year = {1990},
+ isbn = {0-444-88817-9},
+ pages = {667--673},
+ publisher = {North-Holland},
+ }
+
+
 
 
 @article{ berlage94selectiveUndo,
@@ -119,7 +192,7 @@ Importance of good presentation for programming
 
 
 
-A more general form of paste. Documents that have the same structure are matched. Also when the source type appears somewhere in the destination type, paste succeeds ((Section (Paragraph str)) can be pasted in (Chapter (Section (Paragraph str))))) Finally, also when source is a cluster of target, paste can succeed. Implemented in Grif editor. Trees are represented using Dyck words.
+A more general form of paste. Documents that have the same structure are matched. Also when the source type appears somewhere in the destination type, paste succeeds ((Section (Paragraph str)) can be pasted in (Chapter (Section (Paragraph str))))) Finally,  also when source is a cluster of target, paste can succeed. Implemented in Grif editor. Trees are represented using Dyck words.
 
 
 
@@ -171,11 +244,76 @@ loop { doc = deltadoc doc; deltarendering = ..deltadoc ..; rendering = deltarend
 
 ------------------------ W3C Stuff:
 
-TODO Fix w3c refs so they are correct
-  use author list instead of World Wide Web Consortium
-  use latest versions, or cite the ones that were used for the papers?)
+get info from: http://www.w3.org/TR/
+put Editors in Author field
 
-If you believe your usage falls within the exception of fair use (e.g., in the U.S. § 107 Title 17. Limitations on exclusive rights: Fair use) we ask that your citation or reference to the excerpted material include the document's title, editors/authors, publication date, URL and an indication of its maturity/status (e.g., Working Draft, Recommendation, Note, etc.).
+@article{,
+  author = {},
+  title = {},
+  journal = {W3C Recommendation },
+  volume = {\url||},
+  year = {},
+}
+
+@article{xml11,
+  author = {Tim Bray and Jean Paoli and C. M. Sperberg-McQueen and Eve Maler and Fran\c{c}ois Yergeau and John Cowan},
+  title = {Extensible {Markup} {Language}  ({XML}) 1.1},
+  journal = {W3C Recommendation 4 February 2004},
+  volume = {\url|http://www.w3.org/TR/2004/REC-xml11-20040204|},
+  year = 2004,
+}
+
+@article{xsl10,
+  author = {Sharon Adler and Anders Berglund and Jeff Caruso and Stephen Deach and Tony Graham and Paul Grosso and Eduardo Gutentag and Alex Milowski and Scott Parnell and Jeremy Richman and Steve Zilles},
+  title = {Extensible {Stylesheet} {Language} ({XSL}) {Version}~1.0},
+  journal = {W3C Recommendation  15 October 2001},
+  volume = {\url|http://www.w3.org/TR/2001/REC-xsl-20011015|},
+  year = 2001,
+}
+
+@article{xslt10,
+  author = {James Clark},
+  title = {{XSL} {Transformations} ({XSLT}) {Version}~1.0},
+  journal = {W3C Recommendation  16 November 1999},
+  volume = {\url|http://www.w3.org/TR/1999/REC-xslt-19991116|},
+  year = 1999,
+}
+
+@article{xmlSchema1,
+  author = {Henry Thompson and David Beech and Murray Maloney and Noah Mendelsohn},
+  title = {{XML} {Schema} {Part~1:} {Structures}},
+  journal = {W3C Recommendation 2 May 2001},
+  volume = {\url|http://www.w3.org/TR/2001/REC-xmlschema-1-20010502|},
+  year = 2001,
+}
+
+
+@article{xmlSchema2,
+  author = {Paul Biron and Ashok Malhotra},
+  title = {{XML} {Schema} {Part~2:} {Datatypes}},
+  journal = {W3C Recommendation 2 May 2001},
+  volume = {\url|http://www.w3.org/TR/2001/REC-xmlschema-2-20010502|},
+  year = 2001,
+}
+
+@article{css2,
+  author = {Bert Bos and H{\aa}kon Wium Lie and Chris Lilley and Ian Jacobs},
+  title = {{Cascading} {Style} {Sheets}, level~2 ({CSS2}) {Specification}},
+  journal = {W3C Recommendation 12 May 1998},
+  volume = {\url|http://www.w3.org/TR/1998/REC-CSS2-19980512 |},
+  year = 1998,
+}
+
+@article{mathml20,
+  author = {David Carlisle and Patrick Ion and Robert Miner and Nico Poppelier},
+  title = {Mathematical {Markup} {Language} ({Math}{ML}) {Version~2.0} ({Second} {Edition})},
+  journal = {W3C Recommendation 21 October 2003},
+  volume = {\url|http://www.w3.org/TR/2003/REC-MathML2-20031021|},
+  year = 2003,
+}
+
+W3 Consortium. Amaya web browser software. Web page, October 1998. http://www, w3.org/Amaya
+Nog niet ok:
 @TechReport{
 W3C:99-2,
 author = {{Dave Raggett, et al}},
@@ -186,43 +324,105 @@ type = {{Specification,
 http://www.w3.org/TR/1999/REC-html401-19991224}}
 }
 
-@TechReport{xml,
-    author = "World Wide Web Consortium",
-    title = "Extensible markup language (XML) 1.0 (2nd edition)",
-    year = "W3C Recommendation, Oct. 6, 2000",
-    journal = "",
-    url = {\url|http://www.w3.org/TR/REC-xml|}
-}
 
-@TechReport{xsl,
-    author = "World Wide Web Consortium",
-    title = "Extensible Stylesheet Language (XSL)",
-    year = "W3C Working Draft, 21 November 2000",
-    journal = "",
-    url = {\url|http://www.w3.org/TR/WD-xsl|}
-}
-
-@TechReport{css,
-    author = "World Wide Web Consortium",
-    title = "Cascading Style Sheets, level 2 (CSS2)",
-    year = "W3C Recommendation, 12 May 1998",
-    journal = "",
-    url = {\url|http://www.w3.org/TR/REC-CSS2|}
-}
-
-@TechReport{mathml,
-    author = "World Wide Web Consortium",
-    title = "Mathematical Markup Language (MathML)",
-    year = "W3C Recommendation, 21 February 2001",
-    journal = "",
-    url= {\url|http://www.w3.org/TR/MathML2|}
+@Book{sgml86,
+  author =       "{International Organization for Standardization}",
+  title =        "{ISO 8879:1986}: {Information} processing --- {Text}
+                 and office systems --- {Standard Generalized Markup
+                 Language} ({SGML})",
+  publisher =    "International Organization for Standardization",
+  address =      "Geneva, Switzerland",
+  pages =        "155",
+  day =          "17",
+  month =        aug,
+  year =         "1986",
+  bibdate =      "Fri May 28 21:52:25 1999",
+  price =        "CHF 212",
+  URL =          "http://www.iso.ch/cate/d16387.html",
+  acknowledgement = ack-nhfb,
+  pricecode =    "XC"
 }
 
 
+@Book{walsh02docbook,
+  author = {Norman Walsh and Leonard Muellner and Bob Stayton},
+  title = {DocBook: The Definitive Guide},
+  publisher = {O'Reilly},
+  year = 	{2003},
+  edition =  {2.0.9},
+  url =   {http://www.docbook.org/tdg/en/html/docbook.html}
+}
+
+
+@BOOK{ peytonJones03haskell,
+  AUTHOR    = {S.L. Peyton Jones},
+  TITLE     = {{Haskell 98 Language and Libraries}},
+  SERIES    = {},
+  VOLUME    = {},
+  PUBLISHER = {Cambridge University Press, Cambridge, UK},
+  YEAR      = 2003,
+  NOTE      = {},
+  CONTENTS  = {[ISBN: 0521826144]
+               Canonical reference for Haskell.},
+  sourceURL = {},
+  TOPICS    = {Haskell}
+}
 
 
 
 
+@Book{knuth84tex,
+  author =      "Donald E. Knuth",
+  title =       "The {\TeX}book",
+  publisher =   "Addison Wesley",
+  year =        "1984",
+  ISBN =        "0-201-13448-9",
+}
+
+
+@Book{lamport85latex,
+  author =      "Leslie Lamport",
+  title =       "{\LaTeX}\emdash A Document Preparation System\emdash
+                 User's Guide and Reference Manual",
+  publisher =   "Addison Wesley",
+  year =        "1985",
+  ISBN =        "0-201-15790-X",
+}
+
+@ARTICLE{knuth82breaking,
+	AUTHOR = {Donald E. Knuth and Michael F. Plass},
+	TITLE = {Breaking Paragraphs into Lines},
+	JOURNAL = {Software -- Practice and Experience},
+	YEAR = {1982},
+	VOLUME = {11},
+	NUMBER = {11},
+	PAGES = {1119--1184},
+	MONTH = Nov
+}
+
+@manual{swierstra04ag,
+    author = "S. Doaitse Swierstra and Arthur Baars",
+    title = "Attribute Grammar System",
+    organization = "Utrecht University, The Netherlands",
+    year = "2004",
+    address = {\url|http://www.cs.uu.nl/groups/ST/Center/AttributeGrammarSystem|}
+}
+
+
+
+@misc{ eclipse2001,
+author = "{Object Technology International, Inc.}",
+title = "Eclipse platform -- A universal tool platform ",
+howpublished = "available at: \url|http://www.eclipse.org/|",
+year = 2001
+}
+
+@misc{ amaya04,
+author = "{World Wide Web Consortium}",
+title = "Amaya Web Editor/Browser",
+howpublished = "\url|http://www.w3.org/Amaya/|",
+year = 2004
+}
 
 
 
@@ -231,7 +431,7 @@ http://www.w3.org/TR/1999/REC-html401-19991224}}
 EDITORS
 @inproceedings{reps84synGen,
  author = {Thomas Reps and Tim Teitelbaum},
- title = {The synthesizer generator},
+ title = {The {Synthesizer} {Generator}},
  booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
  year = {1984},
  isbn = {0-89791-131-8},
@@ -243,7 +443,7 @@ EDITORS
 
 @article{teitelbaum81progSynth,
  author = {Tim Teitelbaum and Thomas Reps},
- title = {The {Cornell} program synthesizer: a syntax-directed programming environment},
+ title = {The {Cornell} {Program} {Synthesizer:} a syntax-directed programming environment},
  journal = {Communications of the ACM},
  volume = {24},
  number = {9},
@@ -251,13 +451,26 @@ EDITORS
  issn = {0001-0782},
  pages = {563--573},
  doi = {http://doi.acm.org/10.1145/358746.358755},
- publisher = {ACM Press},
- }
+ publisher = {ACM Press}
+}
 
+@inproceedings{saraiva00lrc,
+   author    = {Jo{\~a}o Saraiva and Doaitse Swierstra and Matthijs Kuiper},
+   title     = {{F}unctional {I}ncremental {A}ttribute {E}valuation},
+   booktitle = {9th International Conference on Compiler Construction, CC/ETAPS2000},
+   year      = {2000},
+   editor    = {{David Watt}},
+   publisher = {Springer-Verlag},
+   pages     = {279-294},
+   volume    = {1781},
+   series    = {LNCS},
+   month     = mar,
+   urlpdf    = {http://www.cs.uu.nl/people/doaitse/Papers/2000/cc2000.pdf}
+}
 
 @inproceedings{stallman81emacs,
  author = {Richard M. Stallman},
- title = {EMACS the extensible, customizable self-documenting display editor},
+ title = {{EMACS} the extensible, customizable self-documenting display editor},
  booktitle = {Proceedings of the ACM SIGPLAN SIGOA symposium on Text manipulation},
  year = {1981},
  isbn = {0-89791-050-8},
@@ -275,13 +488,20 @@ EDITORS
  issn = {0001-0782},
  pages = {349--360},
  doi = {http://doi.acm.org/10.1145/77481.77487},
- publisher = {ACM Press},
- }
+ publisher = {ACM Press}
+}
 
+@book{reiss94field,
+ author = {Steven P. Reiss},
+ title = {The  Field Programming Environment: A Friendly Integrated Environment for Learning and Development},
+ year = {1995},
+ isbn = {0792395379},
+ publisher = {Kluwer Academic Publishers},
+}
 
 @article{reiss99desert,
  author = {Steven P. Reiss},
- title = {The Desert environment},
+ title = {The {Desert} environment},
  journal = {ACM Transactions on Software Engineering and Methodology (TOSEM)},
  volume = {8},
  number = {4},
@@ -289,12 +509,51 @@ EDITORS
  issn = {1049-331X},
  pages = {297--342},
  doi = {http://doi.acm.org/10.1145/322993.322994},
- publisher = {ACM Press},
- }
+ publisher = {ACM Press}
+}
+
+@article{ ballance92pan,
+    author = "Robert A. Ballance and Susan L. Graham and Michael L. Van de Vanter",
+    title = "The {Pan} language-based editing system",
+    journal = "ACM Transactions on Software Engineering and Methodology",
+    volume = "1",
+    number = "1",
+    pages = "95--127",
+    year = "1992",
+    url = \url|citeseer.nj.nec.com/ballance91pan.html|
+}
+
+@inproceedings{quint86grif,
+   author = "Quint, V. and I. Vatton",
+   title = "{G}rif: An Interactive System for Structured Document Manipulation",
+   booktitle = "Text Processing and Document Manipulation",
+   editor = "van Vliet, J. C.",
+   publisher = "Cambridge University Press",
+   year = "1986",
+   pages = "200-213",
+  abstract = "Grif manipulates structured documents containing objects of
+ various types: tables, mathematical formulae, programs, pictures, 
+ graphics atc.It is a structure directed editor which guides the 
+ user in accordance with the structure of the document and of 
+ the objects being edited; the image displayed on the screen also 
+ being constructed from the structure. The user can define new 
+ document structures and new types of objects, as well as to 
+ specify the way in which the system displays these documents
+ and objects."
+}
+
+
+@techreport{quint97thot,
+    author = "V. Quint, translated by E. V. Munson.",
+    title = "The languages of {Thot}",
+    institution = "INRIA",
+    year = "1997",
+    address = {\url|http://www.inrialpes.fr/opera/Thot/Doc/languages.html|}
+}
 
 @article{Bahlke86PSG,
  author = {Rolf Bahlke and Gregor Snelting},
- title = {The PSG system: from formal language definitions to interactive programming environments},
+ title = {The {PSG} system: from formal language definitions to interactive programming environments},
  journal = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
  volume = {8},
  number = {4},
@@ -313,10 +572,10 @@ EDITORS
   url = "citeseer.nj.nec.com/24610.html" }
 
 @techReport{ koorn92gse,
-  author = "J. Koorn",
+  author = "J. W. C. Koorn",
   title = "GSE: A generic text and structure editor",
-  text = "J.W.C. Koorn. GSE: A generic text and structure editor. Report P9202, University
-    of Amsterdam, 1992.",
+  number = "P9202",
+  institution = "University of Amsterdam",
   year = "1992",
   url = "citeseer.nj.nec.com/koorn92gse.html" }
 
@@ -329,13 +588,82 @@ EDITORS
 }
  
 
+@phdthesis{minor90editing,
+   author = "Sten {Min\"{o}r}",
+   school = "Department of Computer Science, Lund University, Sweden",
+   title = "On Structure-Oriented Editing",
+   year = "1990"
+}
+
+@phdthesis{brand92pregmatic,
+   author = "M. G. J. van den Brand",
+   school = "Katholieke Universiteit Nijmegen, Netherlands",
+   title = "Pregmatic, a generator for incremental programming environments",
+   year = "1992"
+}
+
+@article{klint93asfsdf,
+  author =      "Paul Klint",
+  title =        "A Meta-Environment for Generating Programming Environments",
+  year =         "1993",
+  journal =      "ACM Transactions of Software Engineering and Methodology",
+  volume =       "2",
+  pages =        "176--201",
+  number =       "2",
+  month =        Mar,
+  references =   "33"
+}
+
+@techreport{boshernitsan01harmonia,
+ author = {Marat Boshernitsan},
+ title = {Harmonia: A Flexible Framework for Constructing Interactive Language-Based Programming Tools},
+ year = {2001},
+ number = "CSD-01-1149",
+ source = {http://www.cs.berkeley.edu/Research/Projects/harmonia/papers/maratb-master.pdf},
+ institution = {University of California at Berkeley}
+ }
+
 
 
 --- crap editors:
+@ARTICLE{notkin85gandalf,
+    AUTHOR = "David Notkin",
+    TITLE = "{The {GANDALF} Project}",
+    JOURNAL = "Journal of Systems and Software",
+    YEAR = 1985,
+    VOLUME = 5,
+    PAGES = "91--105"
+    }
+
+@incollection{donzeau84mentor,
+  AUTHOR = {V. Donzeau-Gouge and G. Huet and G. Kahn and B. Lang},
+  TITLE = {Programming Environments Based on Structured Editors: The {MENTOR} Experience},
+  YEAR = 1984,
+  BOOKTITLE = {Interactive Programming Environments},
+  EDITOR = {D. R. Barstow and H. E. Shrobe and E. Sandewall},
+  PUBLISHER = {McGraw-Hill},
+  ADDRESS = {New York},
+  PAGES = {128-140},
+  KEYWORDS = {}
+ }
+
+@inproceedings{borras88centaur,
+ author = {P. Borras and D. Clement and Th. Despeyroux and J. Incerpi and G. Kahn and B. Lang and V. Pascual},
+ title = {{Centaur:} the system},
+ booktitle = {Proceedings of the third ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
+ year = {1988},
+ isbn = {0-89791-290-X},
+ pages = {14--24},
+ location = {Boston, Massachusetts, United States},
+ doi = {http://doi.acm.org/10.1145/64135.65005},
+ publisher = {ACM Press},
+ }
+
+
 
 @inproceedings{garlan84gnome,
  author = {David B. Garlan and Philip L. Miller},
- title = {GNOME: An introductory programming environment based on a family of structure editors},
+ title = {{GNOME:} An introductory programming environment based on a family of structure editors},
  booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
  year = {1984},
  isbn = {0-89791-131-8},
@@ -346,13 +674,26 @@ EDITORS
 
 @inproceedings{fischer84poe,
  author = {C. N. Fischer and Gregory F. Johnson and Jon Mauney and Anil Pal and Daniel L. Stock},
- title = {The Poe language-based editor project},
+ title = {The {Poe} language-based editor project},
  booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
  year = {1984},
  isbn = {0-89791-131-8},
  pages = {21--29},
  doi = {http://doi.acm.org/10.1145/800020.808245},
  }
+ 
+@article{kaiser88dose,
+ author = {Gail E. Kaiser and Peter H. Feiler and Fahimeh Jalili and Joann H. Schlichter},
+ title = {A retrospective on DOSE: an interpretive approach to structure editor generation},
+ journal = {Softw. Pract. Exper.},
+ volume = {18},
+ number = {8},
+ year = {1988},
+ issn = {0038-0644},
+ pages = {733--748},
+ publisher = {John Wiley \& Sons, Inc.},
+ }
+
 
 
 @inproceedings{reiss84pecan,
@@ -376,41 +717,71 @@ EDITORS
  doi = {http://doi.acm.org/10.1145/62453.62458},
  publisher = {ACM Press},
  }
-
-
-@inproceedings{wallace01cutpaste,
- author = {Glen Wallace and Robert Biddle and Ewan Tempero},
- title = {Smarter cut-and-paste for programming text editors},
- booktitle = {Proceedings of the 2nd Australasian conference on User interface},
- year = {2001},
- isbn = {0-7695-0969-X},
- pages = {56--63},
- location = {Queensland, Australia},
- publisher = {IEEE Computer Society Press},
+ 
+@inproceedings{fritzson84dice,
+ author = {Peter Fritzson},
+ title = {Preliminary experience from the dice system a distributed incremental compiling environment},
+ booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
+ year = {1984},
+ isbn = {0-89791-131-8},
+ pages = {113--123},
+ doi = {http://doi.acm.org/10.1145/800020.808256},
+ publisher = {ACM Press},
  }
 
-
-@inproceedings{reinke03refactoring,
- author = {Huiqing Li and Claus Reinke and Simon Thompson},
- title = {Tool support for refactoring functional programs},
- booktitle = {Proceedings of the ACM SIGPLAN workshop on Haskell},
- year = {2003},
- isbn = {1-58113-758-3},
- pages = {27--38},
- location = {Uppsala, Sweden},
- doi = {http://doi.acm.org/10.1145/871895.871899},
+@inproceedings{read96multiview,
+ author = {Michael Read and Chris Marlin},
+ title = {Generating direct manipulation program editors within the MultiView programming environment},
+ booktitle = {Joint proceedings of the second international software architecture workshop (ISAW-2) and international workshop on multiple perspectives in software development (Viewpoints '96) on SIGSOFT '96 workshops},
+ year = {1996},
+ isbn = {0-89791-867-3},
+ pages = {232--236},
+ location = {San Francisco, California, United States},
+ doi = {http://doi.acm.org/10.1145/243327.243670},
  publisher = {ACM Press},
  }
 
 
-- unclear:
+@inproceedings{kastens02vl-eli,
+    author = {Uwe Kastens and Carsten Schmidt},
+    title = {{VL-Eli:} A Generator for Visual Languages},
+    booktitle = {Electronic Notes in Theoretical Computer Science},
+    volume = {65},
+    issue = {3},
+    publisher = {Elsevier},
+    editor = {Mark van den Brand and Ralf L\"amel},
+    year = {2002}
+}
 
-article{ budinsky85sre }
 
-BUDINSKY, F. J., HOLT, R. C., AND ZAKY, S. G. SRE-a syntax-recognizing editor. Software--Practice & Experience 15, 5 (May 1985), 489-497. 
+@article{ budinsky85sre,
+	AUTHOR = {F. J. Budinsky and R. C. Holt and S. G. Zaky},
+	TITLE = { {SRE} -- a syntax-recognizing editor},
+	JOURNAL = {Software -- Practice and Experience},
+	YEAR = {1985},
+	VOLUME = {15},
+	NUMBER = {5},
+	PAGES = {489--497},
+	MONTH = May
+}
 
+@phdthesis{horton81babel,
+   author = "M.R. Horton",
+   school = {University of California at Berkeley},
+   title = "Design of a multi-language editor with static error detection capabilities",
+   year = "1981"
+}
 
-
+@inproceedings{campbell84saga,
+ author = {Roy H. Campbell and Peter A. Kirslis},
+ title = {The {SAGA} project: A system for software development},
+ booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
+ year = {1984},
+ isbn = {0-89791-131-8},
+ pages = {73--80},
+ doi = {http://doi.acm.org/10.1145/800020.808251},
+ publisher = {ACM Press},
+ }
 
 
 
@@ -450,20 +821,22 @@ publication_type = {inproceedings}
 
 
 @misc{ meertens98maintainers,
-author = "Lambert Meertens",
+author = "Lambert G. L. T. Meertens",
 title = "Designing Constraint Maintainers for User Interaction",
-url = "ftp://ftp.kestrel.edu/pub/papers/meertens/dcm.ps"
+howpublished = "\url|ftp://ftp.kestrel.edu/pub/papers/meertens/dcm.ps|",
+year = 1998
 }
 %url = "citeseer.ist.psu.edu/meertens98designing.html" 
 
-@misc{ pierce03lenses,
-author = "M. Greenwald and J. Moore and B. Pierce and A. Schmitt",
-title = "A language for bi-directional tree transformations",
-year = "2003",
-institution = "Department of Computer and Information Science, University of Pennsylvania",
-url = "http://www.cis.upenn.edu/~bcpierce/papers/lenses.pdf" 
+@InProceedings{pierce03lenses,
+  author =       "Michael B. Greenwald and Jonathan T. Moore and
+                 Benjamin C. Pierce and Alan Schmitt",
+  booktitle =    "Workshop on Programming Language Technologies for {XML} {(PLAN-X)}",
+  title =        "A Language for Bi-Directional Tree Transformations",
+  month =        "Jan",
+  year =         "2004",
+  bcp =          "Yes",
 }
-
 
 
 
@@ -499,6 +872,19 @@ url = "http://www.cis.upenn.edu/~bcpierce/papers/lenses.pdf"
  publisher = {ACM Press},
  }
  
+ @inproceedings{swierstra98combinators,
+  author    = {Swierstra, S. D. and Azero Alocer, P. R. and Saraiava, J.},
+  title     = {Designing and Implementing Combinator Languages},
+  booktitle = {Advanced Functional Programming, Third International School, AFP'98},
+  editor    = {Doaitse Swierstra and Pedro Henriques and Jos{\'e} Oliveira},
+  publisher = {Springer-Verlag},
+  series    = {LNCS},
+  volume    = {1608},
+  pages     = {150-206},
+  year      = {1999},
+}
+
+
 
 @article{kingston93lout,
     author = "Jeffrey H. Kingston",
@@ -598,27 +984,6 @@ In this paper we present a first formalisation of document formatting combinator
   number =       "5",
 }
 
-@article{ ballance92pan,
-    author = "Robert A. Ballance and Susan L. Graham and Michael L. Van de Vanter",
-    title = "The {Pan} language-based editing system",
-    journal = "ACM Transactions on Software Engineering and Methodology",
-    volume = "1",
-    number = "1",
-    pages = "95--127",
-    year = "1992",
-    url = \url|citeseer.nj.nec.com/ballance91pan.html|
-}
-
-Weird: "translated by" is converted, so we get: t. b. E. V. M. V. Quint
-Maybe use different bibliography style?
-@Article{quint97thot,
-    author = "V. Quint, translated by E. V. Munson.",
-    title = "The languages of Thot",
-    year = "INRIA, 1997",
-    journal = "",
-    url = {\url|http://www.inrialpes.fr/opera/Thot/Doc/languages.html|}
-}
-
 
 
 
@@ -626,3 +991,29 @@ Maybe use different bibliography style?
 
 
  
+
+
+
+
+both of these should have something like intr. e.s., see balance02pan
+
+@inproceedings{806450,
+ author = {O. Str\&\#246;mfors and L. Jonesj\&\#246;},
+ title = {The implementation and experiences of a structure-oriented text editor.},
+ booktitle = {Proceedings of the ACM SIGPLAN SIGOA symposium on Text manipulation},
+ year = {1981},
+ isbn = {0-89791-050-8},
+ pages = {22--27},
+ location = {Portland, Oregon, United States},
+ }
+
+editor from Cedar
+article{ terry90active,
+    author = "Douglas B. Terry and Donald G. Baker",
+    title = "Active {Tioga} documents: an exploration of two paradigms",
+    journal = "Electronic Pub\-lish\-ing\emdash{}Orig\-i\-na\-tion, Dissemination, and Design",
+    volume = "3",
+    number = "2",
+    pages = "105--122",
+    year = "1990",
+    url = "citeseer.ist.psu.edu/terry90active.html" }
