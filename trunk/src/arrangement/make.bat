@@ -1,1 +1,1 @@
-C:\apps\cygwin\usr\local\bin\uuagc -cfspm        ArrangerAG
+..\..\..\uust\tools\ag\uuagc -cfspm        ArrangerAG
