@@ -24,8 +24,8 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 present :: LayerStateLay -> PresentationLevel -> LayoutLevel -> EditPresentation' -> (EditLayout', LayerStateLay, PresentationLevel)
 present state doc (LayoutLevel pres focus dt) (SkipPres' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   let (pres', focus') = (,) {-normalizePresentation -} pres focus -- Normalize does not work in chess board, find out why
-      diffTree = DiffLeaf False
---      diffTree = dt
+--      diffTree = DiffLeaf False
+      diffTree = dt
   in  (SetLay' (LayoutLevel pres' focus' diffTree), state, doc)  -- we should re present here because of local state
 present state doc pres (SkipPres' i) = (SkipLay' (i-1), state, doc)
 present state doc (LayoutLevel presL focus dt) (SetPres' hp@(PresentationLevel presH (layout,idCounter,inserted, deleted)))  = 
