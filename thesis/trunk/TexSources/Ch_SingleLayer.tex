@@ -529,43 +529,41 @@ present_{i} :: sheet_{Pres}  \rightarrow  Level_{High} \rightarrow Level_{Low}\\
 \end{math}\end{small}
 
 % computation order
-on present, compute lower 
-on translate, compute higher
-Half of the mappings are not correct, all the time. 
-NECESSARY
-However before i is presented, it was translated, and the same.
+The mapping information that is used by $present$ is computed by $translate$ and vice versa. As a consequence, only one kind of mapping information is guaranteed to be valid. After presentation, the translation mapping is correct, but the presentation mapping may be incorrect, whereas after translation, the presentation information is correct, but the translation information may be incorrect. However, this does not cause any problems since a level is presented before its lower neighbor is translated, and vice versa. \note{when we have higher level edit ops, this will become a problem}
 
-equations
+It may seem more appropriate that presentation mapping information is a result of the presentation, rather than the translation, since it concerns information about the presentation of the level and not its translation, but this is not the case. Besides causing $present$ to return two levels, rather than one, there is another reason why the information cannot be computed by $present$. After a level is presented, the lower level may be updated by the lower adjacent layer. If $present$ computes the mapping information in the higher level, which refers to the lower level, then this information may not be correct anymore after a lower level update. By computing the mapping information during translation, the problem is avoided, since after its translation, the lower level is not edited before the higher level is presented again. The same thing holds for $translate$
+
+\note{does give a problem when mappings are not inverse}
+\note{eg. "chess:" "board" -> ChessBoard. Now ChessBoard has wrong pres info when presented on an image instead of tokens}
+% if pres.translate not is id, then translate map is different from pres map. ES is not valid. translate.pres is always id
+
+****
 
 %										
 %										
 \subsection{Vulnerability of extra state}
 
-First, only works when es is child.
+Edit operations on a level may invalidate the presentation and translation information, and therefore may cause the loss of extra state. 
 
-Mapping info is result and therefore es
 
-Two kinds of problems: not valid, or destroyed.
+\note{mention here the invalid mapping info?}
 
-if pres.translate not is id, then translate map is different from pres map. ES is not valid. translate.pres is always id
+Does not work when info not present, or node changed type. Or parent if context sensitive presentation. In that case use default value for es. When type changes, can try to reuse. Eg when plus changes to times, can reuse the tokens whitespace. left to presentation.
 
-Does not work when info not present, or node changed type. Or parent if context sensitive presentation. In that case use default value for es.
+If no es, 
 
 When does this happen? Examples?
  While changes to Repeat, is problematic.
 
 
-%Maybe this is when ES breaks: if other layer messes up the tree. Non child ES is then easily broken. Does this make sense?)
+For a translation, loss of ES is more important. But... Just don't allow too much editing. In a table of contents, only allow moving around . bla Still remove of a toc entry can remove a chapter. but we want this.
 
-REQ.an update of a level, we want extra at target to remain unchanged. How to spec.? It is not always the case (delete entry may delete a chapter and delete of function may delete its layout.) 
-
-
-
+Would be nice if we could guarantee safety. When? context free presentation?More on Difference between 
 
 \subsection{conclusions}
 % the final equations
-Finally, we can give the full equations. present uses presinfo and translate uses transinfo
 
+The equations that describe the behavior of $present$ and $translate$ in the presence of extra state are:
 
 \begin{small}\begin{align*}% \label{sse}
 Level_{0} = Core_{Trans,i} \times Extra_{Trans,i} \times Mapping_{Pres,i}\\
@@ -590,19 +588,19 @@ TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
 \end{small}
 {\centering ()\\}
 
-Remember ES on parsing stuff is fragile. unless strong restrictions. important for translation direction
+First, only works when es is child.
+Remember ES on parsing stuff is fragile, and only works for parent node. However very good for what we need.
+ unless strong restrictions. important for translation direction
 ES needs to be attached to a parent node. layout is an example. things like order are harder. extra layer?
 Many possibilities not researched yet.
 ONLY A MODEL!
+
 Specific layers should take care of keeping the necessary stuff, this only specifies what info should be kept and where.
 Not enforced by the invariants! Need more detailed stuff on element level. Future research.
 
-More on Difference between presentation and translation? One is vital, other isn't
 
 Have to figure out more about Focus ES, and other non node ES.
 order changes are not yet clear!
-
-
 
 
 %										
