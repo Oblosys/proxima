@@ -5,6 +5,13 @@
 \renewcommand{\interpret}{\ensuremath{\mathit{interpret}}}
 \newcommand{\spc}{\textvisiblespace}
 
+
+% not used, so we redefine these commands
+\renewcommand{\H}{_{\, \mathrm H}}  % old \H seems to put '' above the next character
+\renewcommand{\L}{_{\, \mathrm L}} % was an L with a dash in the middle
+
+
+
 {\em *** Version: \today~ ***}
 
 
@@ -12,94 +19,44 @@
 
 \subsection{Unclear}
 
+%\bl
+%\o what identifiers to use, $\present, \Present$?
+%\o how to layout the equations and put label at the right?
+%\o How to use increased vertical spacing in proofs?
+%\o Operators between identifiers look asymmetrical: $\Level\H \times \Level_L$. Fix using \verb|\:|? %(eg. \verb|\times\:| \rarr $\Level\H \times\, \Level_L$) solution: use \verb|\!|
+%\el
 \bl
-\* what identifiers to use, $\present, \Present$?
-\* how to layout the equations and put label at the right?
-\* How to use increased vertical spacing in proofs?
-\* Operators between identifiers look asymmetrical: $\Level_H \times \Level_L$. Fix using \verb|\:|? (eg. \verb|\times\:| \rarr $\Level_H \times\, \Level_L$) solution: use \verb|\!|
+%\o $True \imp P$ vs. $True \eq P$. Answer: usually $\eq$ only in some weird cases $\imp$
+\o $\set{\Level_L}$ vs. $\mathcal{P}\Level_L$
 \el
 
-More important:
-\bl
-\* $True \imp P$ vs. $True \eq P$
-\el
-
-\subsection{Problems}
-
-{\bf Asymmetry between $interpret$ and $present$:}
-
-\bl
-\* When two Documents present as the same presentation. They are equal up to extra state.
-\* When two Presentations interpret to the same document. They may be equal up to extra state, but they may also be incorrect presentations.
-\el
-
-Example: 
-
-\begin{math}
-Document \tp (Int, Char) ~~~ Presentation \tp String\\
-present (i,\_) = whitespace \cat english~i\\ 
-h \in {(7, 'a'),(7,'b'),(7,'c'),\dots} : present~h = \{"seven", "\spc seven", "\spc\spc seven", \dots\}\\
-l \in {
- }
- \left\{ \begin{array}{l}
-            "seven", " seven", "  seven", \dots \\
-            "sevven", "\spc sevven", "\spc\spc sevven", \dots \\
-            \dots
-            \end{array}
-\right\} : interpret~l = \{(7, 'a'),(7,'b'),(7,'c'),\dots\}\\
-\end{math}
-
-\bigskip {\bf Avoiding "close to" for extra state}
-
-Maybe define a $==^*$ ("equality up to extra state") instead of using close to?
-
-\begin{math}
-(==^*) \tp a^* \rightarrow a^* \rightarrow Bool\\
-x ==^* * ~=~ True\\
-* ==^* y ~=~ True\\
-x ==^* y ~=~ x == y\\
-\end{math}
-
-Useless, result of interpret/present will in general not be equal up to ES to old value. eg $\lnot (Token (1,0)~"True") ==^* (Token * "True")$
-
-\bigskip {\bf {\sc Extra} property}
-
-{\sc InterPresent}  is not enough. Following is not a valid pres/intr with e.s., but it does not break {\sc InterPresent}:
-
-This one is not allowed by {\sc InterPresent}
-\begin{math}
-\{a,aa\} = present 1\\
-\{1\} = interpret~a\\
-\{2\} = interpret~aa
-\end{math}
-
-This one is incorrect, but allowed by  {\sc InterPresent}
-
-Problem is that a is not in all presentations of (interpret a). 
-\begin{math}
-\{a\} = present~1\\
-\{aa\} = present~2\\
-\{1,2\} = interpret~a\\
-\{1,2\} = interpret~aa\\
-\end{math}
-
-However, if this is allowed, then interpreting a valid presentation $l'$ and presenting it, does not necessarily lead to $l'$ again. 
+%\subsection{Problems}
+%
+%{\bf Asymmetry between $interpret$ and $present$:}
+%
+%\bl
+%\o When two Documents present as the same presentation. They are equal up to extra state.
+%\o When two Presentations interpret to the same document. They may be equal up to extra state, but %they may also be incorrect presentations.
+%\el
+%
+%Example: 
+%
+%\begin{math}
+%Document \tp (Int, Char) ~~~ Presentation \tp String\\
+%present (i,\_) = whitespace \cat english~i\\ 
+%h \in {(7, 'a'),(7,'b'),(7,'c'),\dots} : present~h = \{"seven", "\spc seven", "\spc\spc seven", \dots\}\\
+%l \in {
+% }
+% \left\{ \begin{array}{l}
+%            "seven", " seven", "  seven", \dots \\
+%            "sevven", "\spc sevven", "\spc\spc sevven", \dots \\
+%            \dots
+%            \end{array}
+%\right\} : interpret~l = \{(7, 'a'),(7,'b'),(7,'c'),\dots\}\\
+%\end{math}
 
 
-In the next example "drrie" is not in every presentation of (interpret  "drrie"). But it's okay, since there is no h such that "drrie" = pres h.
-\begin{math}
-\{3\} = interpret~"drie"\\
-\{3\} = interpret~"drrie"\\
-\{drie\} = present~3
-\end{math}
 
-This property prevents the problem from occurring.
-
-\xprlab{
-l \in \present~h' \imp (h \in \interpret~l \imp l \in \present~h)
-}{Extra}
-
-If we add the {\sc Extra} requirement then second example is not allowed anymore. The requirement states that if the lower level $l$ is a presentation of some higher level, then all interpretations of $l$ have $l$ in their presentation.
 
 %																
 %																
@@ -107,7 +64,7 @@ If we add the {\sc Extra} requirement then second example is not allowed anymore
 \section{Old stuff about mappings and trees}
 
 \bl
-\* From first half of old chapter 5
+\o From first half of old chapter 5
 \el
 
 
@@ -120,11 +77,14 @@ If we add the {\sc Extra} requirement then second example is not allowed anymore
 %Somewhere: combinators guaranteeing safety are not what we want. 
 %Only spec. responsibility is left to layer. Pierce: only one way E.S. No 
 %structural updates. Incomplete. No duplicates.
+\bl
+\o Even in pure structure editor there are pres. oriented bits. eg navigation (pointing problem)
+\el
 
 \bl
-\* Specification of interpret
-\* Process we use is to start with basic case: an abstract editor. 
-\* Then step by step add complications.
+\o Following is a specification of interpret. Presentation is assumed to be given.
+\o Process we use is to start with basic case: an abstract editor. 
+\o Then step by step add complications.
 \el
 
 \note{Add small examples (a la $7 \leftrightarrow $"sevven")}
@@ -136,154 +96,181 @@ If we add the {\sc Extra} requirement then second example is not allowed anymore
 \section{Single layer}
 
 \bl
-\* Simple abstract editor: Two levels: document and presentation.
-\* Immediate presentation.
-\* Editing is changing presentation. (unrealistic)
+\o Simple abstract editor: Two levels: document and presentation.
+\o Immediate presentation.
+\o Editing is changing presentation. (unrealistic)
+\o Duplicates are allowed, but cannot be handled in a way that a user would expect.
 \el
 
 %The presentation invariant is satisfied if and only if the lower level is a correct presentation of the higher %level. The invariant is expressed using an abstract function  
-%$\Present \tp \Level_{H} \rightarrow \Level_{L}$.
+%$\Present \tp \Level\H \rightarrow \Level_L$.
 
 Given a $\present$, we specify an $\interpret$.
 
 \xpr{
-\present & \tp &  \Level_{H} \rightarrow \Level_{L}\\
-\interpret  & \tp & \Level_{L} \rightarrow \Level_{H}\\
+\present & \tp &  \Level\H \rightarrow \Level_L\\
+\interpret  & \tp & \Level_L \rightarrow \Level\H\\
 }
 
 
-\bigskip {\bf Presentation invariant}
+\head{Presentation invariant}
 
 \bl
-\* The presentation invariant states that the lower level is a correct presentation of the higher level.
+\o The presentation invariant states that the lower level is a correct presentation of the higher level.
 \el
 
 \xprlab{
-\level_{L} & \equ & \present~\level_{H}
+\level_L & \equ & \present~\level\H
 }{Present}
 
 $present$ is total function. all docs have pres. but not surjective. not all pres have doc. mention injective here?
 
-\bigskip {\bf InterPresent}
+$interpret$ is total as well.
+
+\head{InterPresent}
 
 \bl
-\* Property {\sc InterPresent}\note{name: Correctness/Well behaved/\dots?} 
-\* Presenting followed by interpreting is identity on higher level: \note{normalizing doc may not occur}
+\o Property {\sc InterPresent}\note{name: Correctness/Well behaved/\dots?} 
+\o Presenting followed by interpreting is identity on higher level: \note{normalizing doc may not occur}
+\o name comes from compose interpret and present
 \el
 
 \xprlab{
-\level_{L} \equ \present~\level_{H} \imp \level_{H} \equ \interpret~\level_{L}  
+l \equ \present~h \imp h \equ \interpret~l  
 }{InterPresent}
 
 Equivalently, we can express the {\sc InterPresent} property using function composition: \note{worry about domain?}
 
 \xpr{
-\interpret \oo \present = id_{\Level_H} 
+\interpret \oo \present = id_{\Level\H} 
 }
 
 \bl
-\* Consequence: $present$ is injective. \note{Explain, prove?}
+\o implies that present is injective ($present h = present h' \imp h = h'$)
+\o does not imply that present is total nor that it is surjective. (we do want it to be total)
+\o we also want interpret to be total. So it is more than just the inverse. 
 \el
 
 \bl
-\* Reverse need not hold.  (example here?)
-\* eg. syntax highlighting: \present ({\tt Return True}) = {\tt "{\bf Return} True"}
-\* but also need entering without colors/styles: \interpret ({\tt "Return True"}) = ({\tt Return True})
-\* And $\present \oo \interpret$ ({\tt "Return True"}) $\neq$ ({\tt "{\bf Return} True"}) 
-\* Reverse also does not hold for duplicates, but these are not explained until later.
+\o Reverse need not hold, since present is not nec. surjective.
+\o eg. syntax highlighting: \present ({\tt Return True}) = {\tt "{\bf Return} True"}
+\o but also need entering without colors/styles: \interpret ({\tt "Return True"}) = ({\tt Return True})
+\o And $\present \oo \interpret$ ({\tt "Return True"}) $\neq$ ({\tt "{\bf Return} True"}) 
+\o Reverse also does not hold for duplicates, but these are not explained until later.
 \el
 
 \subsection{Edit}
 
 \bl
-\* Modeling an Editor, so values change.
-\* Higher level update, simply re-present. No problem
-\* Lower level is updated by a user. Need to find updates on both levels.
+\o We are modeling an Editor, so values change.
+\o On a higher level update, simply re-present. No problem
+\o Lower level is updated by a user. Need to find updates on both levels.
 \el
 
-Explain that from now on $level_L$ and $level_H$ etc. are global. initial, $level_L$ and $level_H$. update and final.
+
+From now on $level\L$ and $level\H$ are state of editor before edit. $Level'\L$ is result of update, and  $level''\L$ and $level''\H$ are final values after computation.
 
 An edit operation takes place when {\sc Present} holds:
 
 \xpr{
-& & \level_{L} = \present~\level_{H}\\
-& & \level_{L} \leadsto \level'_{L} 
+& & \level\L = \present~\level\H\\
+& & \level\L \leadsto \level'\L 
 }
 
 \bl
-\* Most likely invariant no longer holds: $\level'_{L} \neq \present~\level_{H}$
-\* Find new upper level (and lower).
+\o Most likely the invariant no longer holds: $\level'\L \neq \present~\level\H$
+\o Find new upper level (and lower).
 \el
 
 \bl 
-\* If  $\level'$ is a presentation of some $\level''_H$, this is the one we want.
-\* However, possible that $\level'$ is not a presentation of any higher level. 
-\* Can discard the edit operation, but can also try to find one that is and was intended by the user
-\* Interpret chooses.
+\o If  $\level'$ is a presentation of some $\level''\H$, this is the one we want. (cannot guarantee that with extra state)
+\o mention no unn. higher level upd.
+\o Also possible that $\level'\L$ is not a presentation of any higher level. 
+\o Can discard the edit operation, but can also try to find one that is and was intended by the user
+\o Interpret chooses.
 \el
 
 Summarizing, we need:
 
 \xpr{
-(level''_{H}, level''_{L})~\text{such that}~ 
-\left\{ \begin{array}{l}
-            \level''_{L} = \present~\level''_{H}\\
-            \level''_{L}~\text{"close to"}~\level'_{L}\\
-           \end{array}
-\right.
+(level''\H, level''\L)~\text{such that:}
+}
+\xpr{
+\level''\L = \present~\level''\H 				& \jstf{Postcondition (?)}\\
+\level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit}\\
+\level'\L = \present~h \imp \level''\L = \level'\L	& \jstf{no unnecessary lower level changes}\\
+\level'\L = \present~\level\H \imp \level''\H = \level\H & \jstf{no unnecessary higher level changes}
 }
 
-We also want:
+\note{$h$ instead of $\level\H''$ in no unn. lower level change?}
+\note {"close to" is " zachte eis" unless equality is possible? Isn't that logical?}
 
-$\level'_L = \present~h \imp \level''_{L} = \level'_{L}$ \note{$h$ instead of $\level_H''$?}
-
-\note {"close to" zachte req unless equality is possible? Isn't that logical?}
-
-$\level'_L = \present~\level_H \imp \level''_{H} = \level_{H}$
-
+no unn. h.l. changes also implies $\level''\L = \level'\L$ by no unn. l.l. changes. Mention this?
 
 The solution is this computation: \note{align label with last eq.? how?}
 
 \xprlab{
-\level''_{H} & \equ & \interpret~\level'_{L}\\
-\level''_{L} & \equ & \present~\level''_{H} 
+\level''\H & \equ & \interpret~\level'\L\\
+\level''\L & \equ & \present~\level''\H 
 }{Compute}
 
-no unn. ll change:
+\head{Postcondition}
 
-If the updated lower level ($\level'_{L}$) is a valid presentation of some $h \tp Level_H$, then the {\sc InterPresent} guarantees that final value the lower level is equal to $\level'_{L}$.
+by definition, the postcondition holds.
 
-If we assume $\level''_{H}$ and $\level''_{L}$ to be defined according to {\sc Compute} then:
+\head{No unnecessary lower level changes}
 
-$\level'_L = \present~h \imp \level''_{L} = \level'_{L}$
+If the updated lower level ($\level'\L$) is a valid presentation of some $h \tp Level\H$, then the {\sc InterPresent} guarantees that final value the lower level is equal to $\level'\L$.
 
-\begin{proof} Assume $\level'_L = \present~h$ then
+If we assume $\level''\H$ and $\level''\L$ to be defined according to {\sc Compute} then:
+
+$\level'\L = \present~h \imp \level''\L = \level'\L$
+
+\begin{proof} Assume $\level'\L = \present~h$ then
 \prf{
-\level''_{L}						& \Eqv{\sc Compute}\\
-\present~\level''_{H}				& \Eqv{\sc Compute}\\
-\present~(\interpret~\level'_{L})		& \Eqv{$\level'_L = \present~h$}\\
-\present~(\interpret~(\present~h))	& \Eqv{definition of $\oo$}\\
-\present~((\interpret \oo \present)~h)	& \Eqv{\sc InterPresent}\\
-\present~h 						& \Eqv{$\level'_L = \present~h$}\\
-\level'_L
+\level''\L						& \Equ{\sc Compute}\\
+\present~\level''\H				& \Equ{\sc Compute}\\
+\present~(\interpret~\level'\L)		& \Equ{$\level'\L = \present~h$}\\
+\present~(\interpret~(\present~h))	& \Equ{\sc InterPresent}\\ % \Equ{definition of $\oo$}\\
+%\present~((\interpret \oo \present)~h)	& 
+\present~h 						& \Equ{$\level'\L = \present~h$}\\
+\level'\L
 }
 \end{proof}
 
-Other one (no unn. hl change) is trivial
+\head{No unnecessary higher level changes}
 
-On the other hand, if $\level'_{L}$ is not a valid presentation, $interpret$ needs to choose a  $\level''_{L}$ that resembles what the user intended by performing the edit operation. This is reflected in the specification by the requirement $\level'_{L}~\text{"close to"}~\level''_{L}$.
+$\level'\L = \present~\level\H \imp \level''\H = \level\H$ has a simple proof:
+
+
+\begin{proof} Assume $\level'\L = \present~\level\H$ then
+\prf{
+\level''\H 						& \Equ{\sc Compute}\\
+\interpret~\level'\L				& \Equ{$\level'\L = \present~\level\H$}\\
+\interpret~(\present~\level\H)		& \Equ{\sc InterPresent}\\
+\level\H
+}
+\end{proof}
+
+
+\head{Imprecise edit}
+
+On the other hand, if $\level'\L$ is not a valid presentation, $interpret$ needs to choose a  $\level''\L$ that resembles what the user intended by performing the edit operation. This is reflected in the specification by the requirement $\level'\L~\text{"close to"}~\level''\L$.
 
 \bl
-\* $\interpret$ must be defined in such a way that we get the closest one.
-\* Responsibility of the designer.
+\o $\interpret$ must be defined in such a way that we get the closest one.
+\o Responsibility of the designer.
 \el
 
 \bl
-\* Is "close to" what we want? For simple editors, maybe it is, but is "-$>$" close to \rarr? For duplicates, "close to" is definitely not what we want (but there are no duplicates here yet).
-\* What about Chapter titles and fonts? Will these be handled correctly with "close to" req.?
+\o Is "close to" what we want? For simple editors, maybe it is, but is "-$>$" close to \rarr? For duplicates, "close to" is definitely not what we want (but there are no duplicates here yet).
+\o What about Chapter titles and fonts? Will these be handled correctly with "close to" req.?
 \el
 %is interpret the inverse of present? If one exist, we can use it, but it must also work for L not in 
 %range of present.
+
+
+
 
 
 %																
@@ -292,226 +279,452 @@ On the other hand, if $\level'_{L}$ is not a valid presentation, $interpret$ nee
 \section{Extra state}
 
 
-Extra state: present and translate are no longer functions, but binary relations. example
+Extra state: present and translate are no longer functions, but binary relations. example, still, we model these with functions from sets to sets.
 
-Next section we give a concrete instance of these classes
+Next section we give a concrete instance of these classes.
 
 \bl
-\* Simple example a declaration (identifier \& rhs) in a source editor is presented by leaving out the righthand side:
-\* \verb| (Decl "b" True) <-> "b  =  ..."|\note{or complex expression?}
-\* Whitespace is presentation extra state: \verb| (Decl "b" True) -> "*b*=*..."|
-\* Right-hand side is interpretation extra state: \verb|b = ... -> (Decl "b" *)|
+\o Simple example a declaration (identifier \& rhs) in a source editor is presented by leaving out the righthand side:
+\o  \verb| (Decl "b" True) <-> "b  =  ..."|\note{or complex expression?}
+\o Whitespace is presentation extra state: \verb| (Decl "b" True) -> "*b*=*..."|
+\o Right-hand side is interpretation extra state: \verb|b = ... -> (Decl "b" *)|
 \el
 
 \bl
-\* Intuitively: Presentation extra state: information on how document is viewed. 
-\* Interpretation extra state: information in doc that is not visible. 
+\o Intuitively: Presentation extra state: information on how document is viewed. 
+\o Interpretation extra state: information in doc that is not visible. 
 \el
 
 \bl
-\* move these to first half (or previous chapter)
-\* Examples Pres: tree browser expansion state, table view sorting, file manager details/icons (positions), layout.
-\* Intr: Structure view.
+\o move these to first half (or previous chapter)
+\o Examples Pres: tree browser expansion state, table view sorting, file manager details/icons (positions), layout.
+\o Intr: Structure view.
 \el
 
 \bl
-\* Model as eq. classes on doc and on pres.
-\* Elements of result are equal except for E.S nodes.
-\* New types:
+\o Model as eq. classes on doc and on pres.
+\o Elements of class are equal except for E.S nodes.
+\el
+
+
+\subsection{Equivalence classes}
+
+\newcommand{\Eqclass}[2]{{#1}/_{\!{#2}}}
+\newcommand{\eqclass}[2]{[\,{#1}\,]_{#2}}
+
+\newcommand{\Eqcl}[2]{\Eqclass{#1}{\sim {\mathrm #2}}}
+\newcommand{\eqcl}[2]{\eqclass{#1}{\sim {\mathrm #2}}}
+\newcommand{\eqstarcl}[2]{{#1}/_{\!\stackrel{*}{\sim} {\mathrm #2}}}
+
+\newcommand{\eqr}{\ensuremath{\sim}}
+\newcommand{\eqstar}{\ensuremath{\stackrel{*}{\sim}}}
+
+\newcommand{\reuze}{\ensuremath{\triangleright}}
+\newcommand{\reuzestar}{\ensuremath{\stackrel{*}{\triangleright}}}
+
+Notation:
+
+Equivalence relation:
+
+$x \eqr y$ or if there are two:  $x \eqr\H y$  and $x \eqr\L y$ 
+
+
+$\eqclass{x}{R}$ is the equivalence class that contains $x$ Sometimes denoted as $[x]_R$
+
+\xpr{
+%( \eqclass{\hole}{R}) \tp S \to  \Eqclass{S}{R}\\
+\eqclass{x}{R} = \setof{y}{x R y}
+}
+
+
+$\Eqclass{S}{R}$ is set of all equivalence classes of $R$ (call it factor set)?
+\xpr{
+%( \eqclass{\hole}{R}) \tp S \to \Eqclass{S}{R}\\
+S\Eqclass{}{R} = \setof{x\eqclass{}{R}}{ x \in S}
+}
+
+
+For level types, we add a letter to disambiguate: (maybe get rid of $\sim$ and use $\Eqclass{Level\H}{H}$ and $\eqclass{h}{H}$, then $H$ and $L$ are the eq. relations)
+
+$\Eqcl{Level\H}{H}$ and $\eqcl{h}{H}$ vs $\Eqcl{Level\L}{L}$ and $\eqcl{h}{L}$ 
+
+Finite rep:
+
+$x \eqstar y$ and $x \eqstar\H y$  vs.  $x \eqstar\L y$ 
+
+Notation on a type:
+
+\xpr{
+\Eqclass{S}{R} \subset \mathcal{P} S
+}
+
+overload this one on values, to get from a value to its eq. class. \note{Figure out details. If types are sets, values and types are not that distinct anymore}
+
+
+
+The relations we use here are $\sim H$ and $\sim L$, so classes are 
+
+\xpr{
+\eqcl{Level\H}{H} \subset \mathcal{P} Level\H
+}
+
+and value:
+
+\xpr{
+(\eqcl{\hole}{H}) \tp Level\H \to \eqcl{\Level\H}{H}
+}
+
+Proposition:
+\xpr{
+\eqclass{x}{R} = \eqclass{y}{R} ~\lor~ (\eqclass{x}{R} \cap \eqclass{y}{R}) = \emptyset
+}
+
+
+Add some examples?
+
+
+\subsection{?}
+
+\bl
+\o New types, no longer on elements, but on sets of elements. And, more specifically on eq. classes.
+\o intuition: because arg is also an eq. class, es from one function can never influence result of its dual.
 \el
 
 \xpr{
-\present &\tp& \Level_{H} \rightarrow \{ \Level_{L} \}\\
-\interpret &\tp& \Level_{L} \rightarrow \{ \Level_{H} \}\\
+\present &\tp& \Level\H \eqcl{}{H} \rightarrow \Level\L  \eqcl{}{L}\\
+\interpret &\tp& \Level\L  \eqcl{}{L} \rightarrow \Level\H \eqcl{}{H}
 }
 
-\bigskip {\bf Presentation invariant}
+result is always an eq. class
+\xpr{
+L = \present~H \imp L = l\eqcl{}{L}\\
+H = \interpret~L \imp H = h\eqcl{}{H}
+}
+
+\head{Presentation invariant}
 
 \bl
-\* Presentation invariant changes: Any presentation in the result is ok: 
-\* (\verb|"b = ..."| as well as more spatious \verb|"b    =    ..."| are correct presentations of \verb|Decl "b" True|
+\o Presentation invariant changes: Works on sets now, so we use capital letters.
+\o provide $present$ with eq. class for $level\H$ and demand $level\L$ is in resulting class.
+%\o (\verb|"b = ..."| as well as more spatious \verb|"b    =    ..."| are correct presentations of \verb|Decl "b" True|
 \el
 
 \xprlab{
-\level_{L} \in \present~\level_{H}\\
+\level\L \in \present~\level\H \eqcl{}{H}
 }{Present}
 
-\bigskip {\bf {\sc InterPresent} property}
+\head{{\sc InterPresent} property}
 
 \bl
-\* {\sc InterPresent}  also changes. 
-\* Cannot compose $present$ and $interpret$ because $interpret$ returns several higher level values.
-\* Therefore restate: if l is a presentation of h then H must be an interpretation of L.
+\o {\sc InterPresent} is about sets instead of values, but it stays pretty much the same.
 \el
 
 \xprlab{
-\level_{L} \in \present~\level_{H} \imp \level_{H} \in \interpret~\level_{L}
+L = \present~H \imp H = \interpret~L\\
 }{InterPresent}
+
+or:
+
+\xpr{
+\interpret \oo \present = id_{\Level\H \eqcl{}{H}} 
+}
 
 % l in (pres  `kleisli` int) l       is not True, because that alread holds if there is s single h in int l
 % for which l in pres h, but we want for all h in int l that l in pres h
- 
 
-
-Extra property: (3 different notations, 2nd is probably the best)
+Extra property:
 
 \xprlab{
-(\exists h' : l \in \present~h') \imp \forall h : h \in \interpret~l \imp l \in \present~h\\
-l \in \present~h' \imp (h \in \interpret~l \imp l \in \present~h)\\
-l \in \present~h' \land h \in \interpret~l \imp l \in \present~h\\
+L = \present~H' \imp (H = \interpret~L \imp L = \present~H)\\
 }{Extra}
 
-Its reverse:
- 
-\xpr{
-(\exists l' : h \in \interpret~l') \imp \forall l : l \in \present~h \imp h \in \interpret~l
-}
+is not needed anymore, since it follows from {\sc InterPresent}. Easy to see. No proof here, because this will disappear, since the reader does not know there used to be an {\sc Extra}.
 
-is superfluous because it follows immediately from {\sc InterPresent}.
-
-For an editor without extra state (see previous section), {\sc Extra} (with $=$ instead of $\in$) also follows from {\sc InterPresent}
 
 \subsection{Edit}
 
 \bl
-\* Edit lower level, when presentation invariant holds:
+\o Edit lower level, when presentation invariant holds:
 \el
 
 \xpr{
-& & \level_{L} \in \present~\level_{H}\\
-& & \level_{L} \leadsto \level'_{L} 
+& & \level\L \in \present~\level\H\eqcl{}{H}\\
+& & \level\L \leadsto \level'\L 
 }
 
-Pres inv. must be restored, so compute $level''_{H}$ and $level''_{L}$ that restore the invariant. 
+Pres inv. must be restored, so compute $level''\H$ and $level''\L$ that restore the invariant. 
 Both $\interpret$ and $\present$ (may) provide several results, so we have to choose:
 
+functions are between sets, and levelh and levell are values, so we restate some of the requirements from previous section. (and maybe a new one arises)
+
+We need:
 \xpr{
-& & (level''_{H}, level''_{L})~\text{such that}~
-\left\{ \begin{array}{ll}
-            \level''_{L} \in \present~\level''_{H}\\
-            \level''_{L}~\text{"close to"}~\level'_{L} & \text{\{imprecise edit + preserve lower e.s\}}\\
-            \level''_{H}~\text{"close to"}~\level_{H} & \text{\{preserve higher e.s \}}\\
-           \end{array}
-\right.
+(level''\H, level''\L)~\text{such that:}
 }
 
-$\level'_L \in \present~h \imp \level''_{L} = \level'_{L}$
+\xpr{
+\level''\L \in \present~\level''\H \eqcl{}{H} 		& \jstf{Postcondition (?)}\\
+\level''\L~\text{"close to"}~\level'\L 			& \jstf{Imprecise edit (+pres. lower extr.st.?)}\\
+\level'\L \in \present~H \imp \level''\L = \level'\L	& \jstf{no unnecessary lower level changes}\\
+\level'\L \in \present~\level\H\eqcl{}{H} \imp \level''\H = \level\H & \jstf{no unnecessary higher level changes}\\
+\level''\H~\text{"close to"}~\level\H & \jstf{preserve higher es (is this one necessary?)}\\
+}
+\bl
+\o Two "close to"s, explain more. One is for correct behavior of intended edit. Other is for maintaining extra state
+\el
 
-$\level'_L \in \present~\level_H \imp \level''_{H} = \level_{H}$
+
+%Old version without eq. classes
+%\xpr{
+%            \level''\L \in \present~\level''\H\\
+%            \level''\L~\text{"close to"}~\level'\L & \text{\{imprecise edit + preserve lower e.s\}}\\
+%            \level''\H~\text{"close to"}~\level\H & \text{\{preserve higher e.s \}}\\
+%}
+%$\level'\L \in \present~h \imp \level''\L = \level'\L$
+%$\level'\L \in \present~\level\H \imp \level''\H = \level\H$
 
 Solution:
 
-Because we cannot use $\present$ and $\interpret$ directly, since both have a set as result type, we introduce two functions $\present*$ and $\interpret*$, which select the appropriate element from the resulting set:
+% Old compute without eq. classes
+%Because we cannot use $\present$ and $\interpret$ directly, since both have a set as result type, we %introduce two functions $\present*$ and $\interpret*$, which select the appropriate element from the %resulting set:
+%
+%\xpr{
+%\interpret^* \tp \Level\L \times \Level\H \rightarrow \Level\H\\
+%\present^* \tp \Level\H \times \Level\L \rightarrow \Level\L\\
+%}
+%
+%\xprlab{
+%\level''\H = \interpret^* (\level'\L,\level\H)\\ 
+%\level''\L = \present^* (\level''\H, level'\L)
+%}{Compute}
 
-\xpr{
-\interpret^* \tp \Level_{L} \times \Level_{H} \rightarrow \Level_{H}\\
-\present^* \tp \Level_{H} \times \Level_{L} \rightarrow \Level_{L}\\
-}
+Have to extract one from the eq. class. Choice from e.s. values. We want one for which e.s. resembles the previous value for the level as much as possible. (h'' resembles h, and l'' resembles l')
+
+Assume a function $\reuze$, which takes old and new value and returns resembling one from eq. class of new val. More precisely, we need two $\reuze$ functions (notation?).
+
+
+Here, only the type and a few requirements, but in next section, an actual instance.
 
 \xprlab{
-\level''_{H} = \interpret^* (\level'_{L},\level_{H})\\ 
-\level''_{L} = \present^* (\level''_{H}, level'_{L})
+\reuze ::  \eqclass{X}{R} \to X \to X\\
+}
+
+\xprlab{X \reuze y \in X}						{$\reuze$-Valid} 
+\xprlab{y \in X \imp X \reuze y = y}				{$\reuze$-Idem} 
+\xprlab{X \reuze y \imp x \text{~``close to''~} y}	{$\reuze$-Close} 
+
+If $y \in X$, then {\sc $\reuze$-Idem} guarantees close to, because we have equality. In other cases, the requirement remains vague.
+
+
+With $\reuze$ function we can extract, and with $\eqcl{}{X}$ we can inject, so now we can give compute:
+
+\xprlab{
+\level''\H = \interpret~\level'\L \eqcl{}{L}  \reuze   \level\H  \\ %(\level'\L,\level\H)\\ 
+\level''\L = \present~\level''\H \eqcl{}{H}   \reuze   \level'\L % ^* (\level''\H, level'\L)
 }{Compute}
 
-\bl
-\* Two "close to"s, explain more. One is for correct behavior of intended edit. Other is for maintaining extra state
-\el
+The levels defined by compute meet the requirements: (or say ``establish postcondition''?)
 
-\bigskip {\bf No unnecessary lower level changes}
+\head{Postcondition holds}
+
+Rather trivial again.
+
+\head{No unnecessary lower level changes}
 
 If result of edit is presentation of something, it is unchanged by {\sc Compute}: 
 
-$\exists h : level'_L \in \present~h \imp level''_L = level'_L$\note{how to make clear that $\level''_H$ comes from {\sc Compute}?}
 
+$\level'\L \in \present~H \imp \level''\L = \level'\L$
 
-\begin{proof}  In the proof, we assume: $level'_L \in \present~h$, and show that if we perform the substitutions from {\sc Compute} it follows that $level''_L = level'_L$.
+\begin{proof}  In the proof, we assume: $level'\L \in \present~H$, and show that if we perform the substitutions from {\sc Compute} it follows that $level''\L = level'\L$.
 
-First, we derive the values for $\level_H$ and $\level'_L$:
-
-$\level_H = \interpret^* (\level'_{L},\level_{H})$
-
-\prf{
-True 						& \Imp{assumption}\\
-\level'_L \in \present~h 			& \Imp{\sc Extra}\\
-\level_H \in \interpret~\level'_L 	& \Imp{\sc Intr$^*$-Idem}\\
-\level_H = \interpret^* (\level'_{L},\level_{H})
+\xpr{
+(x \eqcl{}{X} \reuze y) \eqcl{}{X} = x \eqcl{}{X}
 }
 
-
-And $\level'_{L} = \present^* (\level_{H}, level'_{L})$
+$y \in x \eqcl{}{X} ~\imp~ y \eqcl{}{X} =  x\eqcl{}{X}$
 
 \prf{
-True 						& \Imp{assumption}\\
-\level'_L \in \present~h 			& \Imp{\sc Extra}\\
-\level_H \in \interpret~\level'_L 	& \Imp{\sc InterPresent}\\
-\level'_L \in \present~\level_H	& \Imp{\sc Pres$^*$-Idem}\\
-\level'_{L} = \present^* (\level_{H}, level'_{L})\\
+\setof{x'}{ y \simeq x'}\\
+y \eqcl{}{X} =  x\eqcl{}{X} 
 }
 
-Using these results, we can show the equality of $level''_L$ and $level'_L$:
+\prf{
+True 						& \Imp{\sc $\reuze$-Valid}\\
+x \eqcl{}{X} \reuze y \in x \eqcl{}{X}	& \Imp{prop}\\
+x \eqcl{}{X} \reuze y \eqcl{}{X} =  x\eqcl{}{X}
+}
+
+$l \in \present~H \imp l\eqcl{}{L} = \present~H$
+Assume $l \in \present~H$ 
+\prf{
+l' \in l\eqcl{}{L} \imp l' \in \present~H\\
+l' \in \present~H \imp l' \in l\eqcl{}{L}\\
+}
 
 \prf{
-\level''_{L} 						& \Eqv{\sc Compute}\\
-\present^* (\level''_{H}, level'_{L})	& \Eqv{\sc Compute}\\
-\present^* (\interpret^* (\level'_{L},\level_{H}), level'_{L}) & \Eqv{$\level_H = \interpret^* (\level'_{L},\level_{H})$} \\
-\present^* (\level_{H}, level'_{L}) 	& \Eqv{$\level'_{L} = \present^* (\level_{H}, level'_{L})$} \\
-\level'_{L}
+\level''\L\\
+			\Equ{\sc Compute}\\
+\present~\level''\H \eqcl{}{H}   ~\reuze~   \level'\L\\
+			\Equ{\sc Compute}\\
+\present~(\interpret~\level'\L \eqcl{}{L}  ~\reuze~  \level\H) \eqcl{}{H}   ~\reuze~   \level'\L\\
+			\Equ{ }\\
+\present~(\interpret~(\present~H)  ~\reuze~  \level\H) \eqcl{}{H}   ~\reuze~   \level'\L\\
+			\Equ{\sc InterPresent }\\
+\present~(H  ~\reuze~   \level\H) \eqcl{}{H}   ~\reuze~   \level'\L\\
+			\Equ{ }\\
+\present~H  ~\reuze~  \level'\L\\
+			\Equ{ {\sc $\reuze$-Idem} and $\level'\L \in \present~H$ }\\
+\level'\L
+} 
+
+\end{proof}
+
+% Simple layer
+%Assume $\level'\L = \present~h$ then
+%\prf{
+%\level''\L						& \Equ{\sc Compute}\\
+%\present~\level''\H				& \Equ{\sc Compute}\\
+%\present~(\interpret~\level'\L)		& \Equ{$\level'\L = \present~h$}\\
+%\present~(\interpret~(\present~h))	& \Equ{\sc InterPresent}\\ % \Equ{definition of $\oo$}\\
+%%\present~((\interpret \oo \present)~h)	& 
+%\present~h 						& \Equ{$\level'\L = \present~h$}\\
+%\level'\L
+%} 
+%\end{proof}
+
+%OLD proof without eq. classes
+%First, we derive the values for $\level\H$ and $\level'\L$:
+%
+%$\level\H = \interpret^* (\level'\L,\level\H)$
+%
+%\prf{
+%True 						& \Imp{assumption}\\
+%\level'\L \in \present~h 			& \Imp{\sc Extra}\\
+%\level\H \in \interpret~\level'\L 	& \Imp{\sc Intr$^*$-Idem}\\
+%\level\H = \interpret^* (\level'\L,\level\H)
+%}
+%
+%
+%And $\level'\L = \present^* (\level\H, level'\L)$
+%
+%\prf{
+%True 						& \Imp{assumption}\\
+%\level'\L \in \present~h 			& \Imp{\sc Extra}\\
+%\level\H \in \interpret~\level'\L 	& \Imp{\sc InterPresent}\\
+%\level'\L \in \present~\level\H	& \Imp{\sc Pres$^*$-Idem}\\
+%\level'\L = \present^* (\level\H, level'\L)\\
+%}
+%
+%Using these results, we can show the equality of $level''\L$ and $level'\L$:
+%
+%\prf{
+%\level''\L 						& \Eqv{\sc Compute}\\
+%\present^* (\level''\H, level'\L)	& \Eqv{\sc Compute}\\
+%\present^* (\interpret^* (\level'\L,\level\H), level'\L) & \Eqv{$\level\H = \interpret^* %(\level'\L,\level\H)$} \\
+%\present^* (\level\H, level'\L) 	& \Eqv{$\level'\L = \present^* (\level\H, level'\L)$} \\
+%\level'\L
+%}
+%\end{proof}
+
+\head{No unnecessary higher level changes}
+
+
+%\level''\H = \interpret~\level'\L \eqcl{}{L}  \reuze   \level\H  \\
+%\level''\L =  \present~\level''\H \eqcl{}{H}   \reuze   \level'\L 
+$\level'\L \in \present~\level\H\eqcl{}{H} \imp \level''\H = \level\H $
+
+\begin{proof} Assume $\level'\L \in \present~\level\H\eqcl{}{H}$ then
+\prf{
+\level''\H 						                 	& \Equ{\sc Compute}\\
+\interpret~\level'\L \eqcl{}{L}  \reuze   \level\H 	& \Equ{$l \in \present~H \imp l\eqcl{}{L} ~=~ \present~H$}\\
+\interpret~(\present~\level\H\eqcl{}{H})  \reuze  \level\H 	& \Equ{\sc InterPresent}\\
+\level\H\eqcl{}{H}  \reuze  \level\H 				& \Equ{{\sc $\reuze$-Idem} and $\level\H \in \level\H\eqcl{}{H}$} \\
+\level\H
 }
 \end{proof}
 
-\bigskip {\bf No unnecessary higher level changes}
 
-With extra state, also possible to edit while preserving the invariant. (only add spaces in language without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not change. This is only an issue with extra state, since in previous section, $present$ was injective, and hence $\level_L' = present~\level_H \land \level_L'' = present~\level_H \imp \level'_L = \level''_L$ \dots \note{explain more?} 
+%With extra state, also possible to edit while preserving the invariant. (only add spaces in language %without layout rule). In that case not only we don't want $l'=l''$, but also that higher level does not %change. This is only an issue with extra state, since in previous section, $present$ was injective, and %hence $\level\L' = present~\level\H \land \level\L'' = present~\level\H \imp \level'\L = \level''\L$ %\dots \note{explain more?} 
+%
+%$\level'\L \in \present~\level\H \imp \level''\H = \level\H$\\
+%
+%\begin{proof} 
+%\prf{
+%\level'\L \in \present~\level\H	& \Imp{\sc InterPresent}\\
+%\level\H \in \interpret~\level'\L	& \Imp{\sc Intr$^*$-Idem}\\
+%\level\H = \interpret^* (\level'\L,\level\H) & \Imp{\sc Compute}\\ 
+%\level\H = \level''\H 
+%}
+%\end{proof}
+%
+%\note{Doing this proof by starting with $\level\H$ and substituting is tricky, because {\sc InterPresent} %is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
 
-$\level'_L \in \present~\level_H \imp \level''_H = \level_H$\\
-
-\begin{proof} 
-\prf{
-\level'_L \in \present~\level_H	& \Imp{\sc InterPresent}\\
-\level_H \in \interpret~\level'_L	& \Imp{\sc Intr$^*$-Idem}\\
-\level_{H} = \interpret^* (\level'_{L},\level_{H}) & \Imp{\sc Compute}\\ 
-\level_{H} = \level''_{H} 
-}
-\end{proof}
-
-\note{Doing this proof by starting with $\level_H$ and substituting is tricky, because {\sc InterPresent} is needed in one step, so we would need a lemma-like thing (like in the previous proof).}
+\head{Imprecise edit}
 
 \bl
-\* If $\level'_{L}$ is not a valid presentation, $\level''_{L}$ must resemble what the user intended (requirement $\level'_{L}~\text{"close to"}~\level''_{L}$).
+\o If $\level'\L$ is not a valid presentation, $\level''\L$ must resemble what the user intended (requirement $\level'\L~\text{"close to"}~\level''\L$).
 \el
 
 
 
+
+
+
+%																
+%																
+%																
 \section{Finite representation for equivalence classes}
+
+Notes:
+
+\bl
+\o $pres n = n `div` 2$ is no longer possible, since eq. classes on pres are then $\set{\set{0,1},\set{2,3}, \dots }$, for which there is no * rep. (0 and 1 in eq. class implies all elts in eq. class)
+\o can we handle $\set{ {\tt "return\spc1" },{\tt "return\spc\spc1" }, {\tt "return\spc\spc\spc1" }, \dots}$?
+\el 
 
 will give $present$ and $interpret$ that satisfy laws from prev. section.
 
+commit ourselves to certain eq. classes only.
+
+
+
+
+
+
 \subsection{Trees with holes}
-Introduce datatype with 'holes'. Not placeholders from prev. chapters, but holes. Holes represent any value (of correct type)
+Introduce datatype with some 'holes'. Not placeholders from prev. chapters, but holes. Holes represent any value (of correct type)
 
-A simple tree data type with boolean values in the leafs:
 
-\xpr{
-\data~Tree  = Bin~Tree~Tree~|~Leaf~Bool\\
-\data~Bool = True~|~False\\
-}
+vvv NOT RIGHT: only some children will be stars.
 
-becomes
+%A simple tree data type with boolean values in the leafs:
+%
+%\xpr{
+%\data~Tree  = Bin~Tree~Tree~|~Leaf~Bool\\
+%\data~Bool = True~|~False\\
+%}
+%
+%becomes 
+%
+%\xpr{
+%\data~Tree^*  = Bin~Tree^*~Tree^*~|~Leaf~Bool^*~|~*_{Tree}\\
+%\data~Bool^* = True~|~False~|~*_{Bool}\\
+%}
+%
+%
+%Example: $Bin *_{Tree} (Leaf~*_{Bool})$ 
 
-\xpr{
-\data~Tree^*  = Bin~Tree^*~Tree^*~|~Leaf~Bool^*~|~*_{Tree}\\
-\data~Bool^* = True~|~False~|~*_{Bool}\\
-}
-
-$Bin *_{Tree} (Leaf~*_{Bool})$ 
 Or, more generally:
 
 \xpr{
 \data~T  & = & C_0~T_{0,0} \dots T_{0,m_0} | \dots | C_n~T_{n,0} \dots T_{n,m_n} \\
-\data~T^* & = & C_0~T^*_{0,0} \dots T^*_{0,m_0} | \dots | C_n~T^*_{n,0} \dots T^*_{n,m_n} | *_T
+}
+becomes:
+\xpr{\data~T^* & = & C_0~T^*_{0,0} \dots T^*_{0,m_0} | \dots | C_n~T^*_{n,0} \dots T^*_{n,m_n} | *_T
 }\note{braces around * don't affect spacing}
 
-Same constructor, thus all vals of T are also values of $T^*$
+Same constructor, therefore all vals of T are also values of $T^*$
 
 Stars represent sets. All $t^*$ are sets, but not reverse. example
 
@@ -521,12 +734,140 @@ Stars represent sets. All $t^*$ are sets, but not reverse. example
 \para{C~x^*_0 \dots x^*_n} \eq \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} 
 }{$\para{\hole}$-Def}\note{name it {\sc $\para{\hole}$-Def} (or {\sc $\para{\hole}$-Char})?} \note{use $x^*_i$?}
 
-Restrict ourselves to reversible. So no longer all sets, but only those that have hole-representations.
+\subsection{An equivalence relation for $T^*$}
+
+For a type $T$, if we add some holes, we get an equivalence relation $\eqstar$ on $T$
+
+We define an ``equality up to extra state''. So two values are equal for those parts that are not in es (ie. *).
+
+Do it by making a function that drops all extra state and replaces by *. It depends on the *-data type. 
+
+\renewcommand{\core}{\mathbf{core}}
+
+* are always in a constructor. So root is no star (not logical either). If we want that add a Root constructor to level.
 
 \xprlab{
-interpret~l = \para{interpret'~l}\\
-present~h = \para{present'~h}
-}{Restrict}
+{\bf data}~T^* = \dots | C~t_0 \dots t_n | \dots\\
+\\  
+\core~(C~x_0 \dots x_n) \eq C~x'_0 \dots x'_n \\
+{\bf where}~ x'_i = \left\{
+\begin{array}{ll}
+* & , {\bf if}~ t_i = *   \\
+\core~x_i & , {\bf otherwise}
+\end{array}\right.
+}{$\core$-Def}
+
+
+Then compare the two core bits.
+
+
+\xprlab{
+%\setof{ x \eqstar y}{  x \in \para{x^*} \land y \in \para{y^*} \land x^* = y^*}
+x \eqstar y ~\eq~  \core~x = \core~y
+}{$\eqstar$-Def}
+
+Since $\eqstar$ is defined as equality on the result of a function (ie. $\core$), we know it is an equivalence relation on the domain of that function with the following theorem:
+
+\xprlab{
+x R y ~=~ (f~x = f~y) ~\imp~ R~\text{is an equivalence relation}
+}
+
+\begin{proof} \note{maybe leave this out}
+\prf{
+x R x 	& \Eqv{definition of $R$}\\
+f x = f x 	& \Eqv{reflexivity of =}\\
+True	
+}
+
+
+\prf{
+x R y  	& \Eqv{definition of $R$}\\
+f x = f y 	& \Eqv{symmetry of =}\\
+f y = f x 	& \Eqv{definition of $R$}\\
+y R x 
+}\note{get $\eqv$ instead of $\imp$}
+
+\prf{
+x R y  \land y R z 		& \Eqv{definition of $R$}\\
+f x = f y \land f y = f z	& \Imp{transitivity of =}\\
+f x = f z 				& \Eqv{definition of $R$}\\
+x R z 
+}
+\end{proof}
+%\xprlab{
+%(\eqstar) \tp a^* \rightarrow a^* \rightarrow Bool\\
+%x \eqstar * ~=~ True\\
+%* \eqstar y ~=~ True\\
+%C~x_0 \dots x_n \eqstar C~y_0 \dots y_n ~=~ (x_0 \eqstar y_0)  \land \dots \land  (x_n \eqstar y_n)\\
+%C~x_0 \dots x_n \eqstar C'~y_0 \dots y_m ~=~ False
+%}{$\eqstar$-Def}
+%
+%or with stars in identifiers (more consistent with other defs, but less readable\\
+%
+%\xpr{
+%(\eqstar) \tp a^* \rightarrow a^* \rightarrow Bool\\
+%x^* \eqstar * ~=~ True\\
+%* \eqstar y^* ~=~ True\\
+%C~x^*_0 \dots x^*_n \eqstar C~y^*_0 \dots y^*_n ~=~ (x^*_0 \eqstar y^*_0)  \land \dots \land  %(x^*_n \eqstar y^*_n)\\
+%C~x^*_0 \dots x^*_n \eqstar C'~y^*_0 \dots y^*_m ~=~ False
+%}\note{all recusive defs, say that $C' \neq C$}
+%
+%$\eqstar$ is equivalence relation:
+%
+%\xpr{
+%x \eqstar x							& \jstf{Reflexivity}\\
+%x \eqstar y \imp y \eqstar x				& \jstf{Symmetry}\\
+%x \eqstar y \land y \eqstar z \imp x \eqstar z	& \jstf{Transitivity}
+%}
+%
+%Give proofs?
+%
+%\begin{proof}
+%Assume $x \eqstar y \land y \eqstar z$ then by induction over $x$ , we prove $x \eqstar z$:
+%
+%{\bf Case} $x = *$:
+%\prf{
+%* \eqstar z & \Eqv{\sc $\eqstar$-Def}\\
+%True
+%}
+%
+%$x = C~x_0 \dots x_n$, three cases: $z = *$, $z = C~z_0 \dots z_n$ or $z = C'~z_0 \dots z_m$
+%
+%{\bf Case} $x = C~x_0 \dots x_n$ and $z = *$
+%\prf{
+%C~x_0 \dots x_n \eqstar * & \Eqv{\sc $\eqstar$-Def}\\
+%True
+%}
+%
+%{\bf Case} $x = C~x_0 \dots x_n$ and $z = C~z_0 \dots z_n$
+%\prf{
+%C~x_0 \dots x_n \eqstar C~z_0 \dots z_n 			& \Eqv{\sc $\eqstar$-Def}\\
+%(x_0 \eqstar z_0)  \land \dots \land  (x_n \eqstar z_n) 	& \Eqv{Induction Hypothesis}\\
+%True
+%}
+%
+%{\bf Case} $x = C~x_0 \dots x_n$ and $z = C'~z_0 \dots z_m$
+%?
+%
+%Inductive proofs on functions that only recurse in certain cases are a bit awkward. How should we do this %nicely?
+%
+%\end{proof}
+%%OLD REMARK, why eqstar was not useful: 
+%%Useless, result of interpret/present will in general not be equal up to ES to old value. eg 
+%%$\lnot (Token (1,0)~"True") ==^* (Token * "True")$
+
+
+Restrict ourselves to reversible. So no longer all eq. classes, but only those that have hole-representations. explain bit more, two or more implies all. also for constructor.
+
+\xprlab{
+\present &\tp& \Level\H\eqstarcl{}{H} \rightarrow \Level\L \eqstarcl{}{L}\\
+\interpret &\tp& \Level\L\eqstarcl{}{L} \rightarrow \Level\H \eqstarcl{}{H}
+}
+%interpret~l = \para{interpret'~l}\\
+%present~h = \para{present'~h}
+%}{Restrict}
+
+Now we define a reuse function.
 
 Reusing may fail. So we need a default function: $default \tp a^* \rightarrow a$.
 
@@ -535,87 +876,79 @@ default~x^* \in \para{x^*}\\
 }{$default$-Valid}
 
 \bl
-\* A default value is equal to its arg, except for the $*$'s, which are filled in with initial values.
-\* Def may be misleading, because recursive def means that each type has a default whereas it may be context sensitive: ie Whitespace = (int,int) , but we don't want (0,0) but (1,0).
-\* Moreover, default may depend on other information. Eg. whitespace coming from a pretty printing algorithm. This would be an extra argument to default, but the req. stays.
+\o A default value is equal to its arg, except for the $*$'s, which are filled in with initial values.
+\o Def may be misleading, because recursive def means that each type has a default whereas it may be context sensitive: ie Whitespace = (int,int) , but we don't want (0,0) but (1,0).
+\o Moreover, default may depend on other information. Eg. whitespace coming from a pretty printing algorithm. This would be an extra argument to default, but the req. stays.
 \el
 
-Now we define a function for reusing stuff. when *, just use righthand side. When not star, left has priority.
+When *, just use righthand side. When not star, left has priority. \note{subscribt X is not right in $\eqstarcl{X}{X}$}
 
 \xprlab{
-(\,\triangleright) \tp a^* \rightarrow a \rightarrow a\\
-*_a \triangleright  y = y\\
-C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n = C~(x^*_0 \triangleright y_0) \dots (x^*_n  \triangleright y_n) \\
-C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*_n)
-}{$\triangleright$-Def}
+\reuze ::  \eqstarcl{X}{X} \to X \to X\\
+*_a \reuzestar  y = y\\
+C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n = C~(x^*_0 \reuzestar y_0) \dots (x^*_n  \reuzestar y_n) \\
+C~x^*_0 \dots x^*_n \reuzestar C'~y_0 \dots y_m = default (C~x^*_0 \dots x^*_n)
+}{$\reuzestar$-Def}
 
 
 \bl
-\* Examples:
-\* $(\verb|Token |* \verb| "True"|) \triangleright  (\verb|Token (1,2) "False"|) = \verb|Token (1,2) "True"|$
-\* $(\verb|Decl "x" |*) \triangleright  (\verb|Decl "y" | True) = (\verb|Decl "x" | True)$\note{or complex expression?}
-\* When constructors don't match, there is a problem. Types of children most probably will not match, so can't recurse. 
-\* $\verb|Plus|~e_1~e_2 \leadsto \verb|Times|~e_1~e_2$ is a problem
-\* Responsibility of layer to handle. Whitespace always str. similar, no prob. Plus/Times. has to be specd by editor designer. Sometimes makes no sense. Then es gets lost.
-\* Also, no sub-object identities here, so $[e_0, e_1] \leadsto [e_1,e_0]$ is a problem
-\* even $[e_0, e_1] \leadsto [e_0]$ is not nice, because constructor does not match on tail
-\* IMPORTANT: Look at reuse for tokens, is this correct? 
+\o Examples:
+\o $(\verb|Token |* \verb| "True"|) \reuzestar  (\verb|Token (1,2) "False"|) = \verb|Token (1,2) "True"|$
+\o $(\verb|Decl "x" |*) \reuzestar  (\verb|Decl "y" | True) = (\verb|Decl "x" | True)$\note{or complex expression?}
+\o When constructors don't match, there is a problem. Types of children most probably will not match, so can't recurse. 
+\o $\verb|Plus|~e_1~e_2 \leadsto \verb|Times|~e_1~e_2$ is a problem
+\o Responsibility of layer to handle. Whitespace always str. similar, no prob. Plus/Times. has to be specd by editor designer. Sometimes makes no sense. Then es gets lost.
+\o Also, no sub-object identities here, so $[e_0, e_1] \leadsto [e_1,e_0]$ is a problem
+\o even $[e_0, e_1] \leadsto [e_0]$ is not nice, because constructor does not match on tail
+\o IMPORTANT: Look at reuse for tokens, is this correct? 
 \el
 
-With $\triangleright$ we can define $\interpret^*$ and $\present^*$. Define in terms of $\interpret'$ and $present'$. 
+Now we have to prove the requirements for $\reuze$
 
-\xpr{
-\interpret^* \tp \Level_{L} \times \Level_{H} \rightarrow \Level_{H}\\
-\interpret^*~(l, h) = \interpret'~l \triangleright h\\ 
-\present^* \tp \Level_{H} \times \Level_{L} \rightarrow \Level_{L}\\
-\present^*~(h, l) = \present'~h \triangleright l
-}
+\xprlab{X \reuze y \in X}						{$\reuze$-Valid} 
+\xprlab{y \in X \imp X \reuze y = y}				{$\reuze$-Idem} 
+\xprlab{X \reuze y \imp x \text{~``close to''~} y}	{$\reuze$-Close} 
 
-$\interpret^*$ and $\present^*$ meet following requirements. We show the proofs for $\interpret$. The $\present^*$ proofs are obtained by substituting $present$ for $interpret$ in the proofs.
-
-$\present*$ and $\interpret*$ only return results that are valid, and moreover, if old level is argument, then that one is returned: \note{only seem to need half of these reqs for the proofs.}
-
-\xprlab{
-\interpret^* (l,h) \in \interpret~l}{Intr$^*$-Valid} 
-\xprlab{
-h \in \interpret~l \imp h = \interpret^* (l,h)}{Intr$^*$-Idem} 
-\xprlab{
-\present^* (h,l) \in \present~h}{Pres$^*$-Valid}  %never used!
-\xprlab{
-l \in \present~h \imp l = \present^* (h,l)}{Pres$^*$-Idem}
-\note{find out when (and if) these are used}
+%$\present*$ and $\interpret*$ only return results that are valid, and moreover, if old level is argument, %then that one is returned: \note{only seem to need half of these reqs for the proofs.}
 
 
-\xpr{
-\interpret^* (l, h) \in \interpret~l		& \qquad \text{\sc Intr$^*$-Valid}\\ %Intr$^*$-Valid
-h \in \interpret~l \imp h = \interpret^* (l,h) 		& \qquad \text{\sc Intr$^*$-Idem}\\ 
-}
+%\xprlab{
+%\interpret^* (l,h) \in \interpret~l}{Intr$^*$-Valid} 
+%\xprlab{
+%h \in \interpret~l \imp h = \interpret^* (l,h)}{Intr$^*$-Idem} 
+%\xprlab{
+%\present^* (h,l) \in \present~h}{Pres$^*$-Valid}  %never used!
+%\xprlab{
+%l \in \present~h \imp l = \present^* (h,l)}{Pres$^*$-Idem}
+%\note{find out when (and if) these are used}
 
+\bc
+Old proofs:
 \bigskip
 {\bf Validity}
 
-In order to prove {\sc Intr$^*$-Valid}, we use the property $x \triangleright y \in \para{x}$, which can be proved by structural induction on $x$
+In order to prove {\sc Intr$^*$-Valid}, we use the property $x \reuzestar y \in \para{x}$, which can be proved by structural induction on $x$
 
 \begin{proof} 
 {\bf case} $x = *_T$:\\
 \prf{
 True & \Imp{$y \tp T$} \\
 y 				\in \setof{t}{t \tp T}	& \Imp{{\sc $\para{\hole}$-Def}}\\
-y 				\in \para{*_T}		& \Imp{{\sc $\triangleright$-Def}}\\
-*_T \triangleright y 	\in \para{*_T}
+y 				\in \para{*_T}		& \Imp{{\sc $\reuzestar$-Def}}\\
+*_T \reuzestar y 	\in \para{*_T}
 }
 
 
 {\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C~y_0 \dots y_n$\\
-Induction Hypothesis is $x^*_i \triangleright y_i \in \para{x*_i}$ \note{How to make this first step a bit nicer?}
+Induction Hypothesis is $x^*_i \reuzestar y_i \in \para{x*_i}$ \note{How to make this first step a bit nicer?}
 \prf{
 True\\
 				 \Imp{Induction Hypothesis}\\
-C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in  \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} \\
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n \reuzestar y_n) \in  \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \land x_n \in \para{x^*_n}} \\
 				 \Eqv{{\sc $\para{\hole}$-Def}}\\
-C~(x^*_0 \triangleright y_0) \dots (x^*_n \triangleright y_n) \in \para{C~x^*_0 \dots x^*_n}\\
-				 \Eqv{{\sc $\triangleright$-Def}}\\
-C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n \reuzestar y_n) \in \para{C~x^*_0 \dots x^*_n}\\
+				 \Eqv{{\sc $\reuzestar$-Def}}\\
+C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n}
 }
 
 {\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C'~y_0 \dots y_m$, with $C \neq C'$\\
@@ -623,8 +956,8 @@ C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n \in \para{C~x^*_0 \dots x^*_n
 True\\
 		\Imp{{\sc $default$-Valid}}\\
 default (C~x^*_0 \dots x^*_n) \in \para{C~x^*_0 \dots x^*_n}\\
-		\Eqv{{\sc $\triangleright$-Def}}\\
-C~x^*_0 \dots x^*_n \triangleright C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} 
+		\Eqv{{\sc $\reuzestar$-Def}}\\
+C~x^*_0 \dots x^*_n \reuzestar C'~y_0 \dots y_m \in \para{C~x^*_0 \dots x^*_n} 
 }
 \end{proof}
 
@@ -633,10 +966,10 @@ Now we can prove {\sc Intr$^*$-Valid}:
 \begin{proof}
 \prf{
 True 									\\
-		\Imp{$y \triangleright x \in \para{y}$}\\
-\interpret'~l \triangleright h \in \para{interpret' l}	\\
+		\Imp{$y \reuzestar x \in \para{y}$}\\
+\interpret'~l \reuzestar h \in \para{interpret' l}	\\
 		\Imp{\sc Restrict}\\
-\interpret'~l \triangleright h \in \interpret~l		& \Imp{definition of $interpret^*$}\\
+\interpret'~l \reuzestar h \in \interpret~l		& \Imp{definition of $interpret^*$}\\
 \interpret^* (l, h) \in \interpret~l
 }
 \end{proof}
@@ -646,20 +979,20 @@ True 									\\
 
 We prove the idempotency: {\sc Intr$^*$-Idem}.
 
-Need this property:  $y \in \para{x} \imp x \triangleright y = y$, structural induction on $x$:
+Need this property:  $y \in \para{x} \imp x \reuzestar y = y$, structural induction on $x$:
 
 \begin{proof}
 {\bf case} $x = *_T$:\\
 \prf{
 True					& \Eqv{reflexivity of $=$} \\
-y = y				& \Eqv {\sc $\triangleright$-Def}\\
-*_T \triangleright y = y	& \Imp{how do we call this?}\\
-y \in \para{*_T} \imp {*_T \triangleright y = y} % braces are for spacing around \triangle
+y = y				& \Eqv {\sc $\reuzestar$-Def}\\
+*_T \reuzestar y = y	& \Imp{how do we call this?}\\
+y \in \para{*_T} \imp {*_T \reuzestar y = y} % braces are for spacing around \triangle
 }
 
 {\bf case} $x = C~x^*_0 \dots x^*_n$ and $y = C~y_0 \dots y_n$\\
 Induction Hypothesis is 
-$y^i \in \para{x*^i} \imp  x^*_i \triangleright y_i = y_i$\\
+$y^i \in \para{x*^i} \imp  x^*_i \reuzestar y_i = y_i$\\
 \prf{
 y \in \para{x}
 				& \Eqv{definitions of $x$ and $y$}\\
@@ -669,13 +1002,13 @@ C~y_0 \dots y_n \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  \
 				& \Imp{property of set comprehension}\\
 y_0 \in \para{x^*_0} \land \dots \land y^n \in \para{x^*_n}
 				& \Eqv{Induction Hypothesis}\\
-x^*_0 \triangleright y_0 = y_0  \land \dots \land  x^*_n \triangleright y_n = y_n
+x^*_0 \reuzestar y_0 = y_0  \land \dots \land  x^*_n \reuzestar y_n = y_n
 				& \Imp{$n$ times {\sc Leibniz}}\\
-C~(x^*_0 \triangleright y_0) \dots (x^*_n  \triangleright y_n) = C~y_0 \dots y_n
-				& \Eqv{{\sc $\triangleright$-Def}}\\
-C~x^*_0 \dots x^*_n \triangleright C~y_0 \dots y_n = C~y_0 \dots y_n
+C~(x^*_0 \reuzestar y_0) \dots (x^*_n  \reuzestar y_n) = C~y_0 \dots y_n
+				& \Eqv{{\sc $\reuzestar$-Def}}\\
+C~x^*_0 \dots x^*_n \reuzestar C~y_0 \dots y_n = C~y_0 \dots y_n
 				& \Eqv{definitions of $x$ and $y$}\\
-x \triangleright y = y
+x \reuzestar y = y
 }
 
 The third case will not occur.\\
@@ -691,7 +1024,7 @@ C'~y_0 \dots y_m \in \setof{ C~x_0 \dots x_n}{x_0 \in \para{x^*_0} \land \dots  
 				& \Eqv{$C \neq C'$}\\
 False
 				& \Imp{This step seems a bit uncommon}\\
-x \triangleright y = y
+x \reuzestar y = y
 }
 \end{proof}
 
@@ -702,11 +1035,20 @@ Proof of $h \in \interpret~l \imp h = \interpret^* (l,h)$:
 \begin{proof}
 \prf{
 h \in \interpret~l 				& \Imp{\sc Restrict}\\
-h \in \para{\interpret'~l}		& \Imp{$y \in \para{x} \imp x \triangleright y = y$}\\
-h = \interpret'~l \triangleright h 	& \Imp{definition of $interpret^*$}\\
+h \in \para{\interpret'~l}		& \Imp{$y \in \para{x} \imp x \reuzestar y = y$}\\
+h = \interpret'~l \reuzestar h 	& \Imp{definition of $interpret^*$}\\
 h = \interpret^* (l,h)
 }
 \end{proof}
+\ec
+
+
+
+
+
+
+
+
 
 
 
@@ -716,124 +1058,130 @@ h = \interpret^* (l,h)
 %																
 \section{Combining two layers}
 
+Notes:
 \bl
-\* we want: H M L \{pres inv, identity, update \rarr new H'' M'' L'' close, bla\}
-\* we have H M and M L  \{pres inv, identity, update \rarr new H'' M'' L'' close, bla\}
-\* we can prove close, bla
+\o ES in middle level that is presented on lower will be ES there too.
+\o Are the eq. classes of combined layer still * eq. classes?
+\el
+
+\bl
+\o we want: H M L \{pres inv, identity, update \rarr new H'' M'' L'' close, bla\}
+\o we have H M and M L  \{pres inv, identity, update \rarr new H'' M'' L'' close, bla\}
+\o we can prove close, bla
 \el
 
 Want to model a layered architecture. bla bla. First split this one in two. An intermediate level appears $Level_M$, and we have two layers according to previous spec. 
 
 We have: 
 \xpr{
-\present_H &\tp& \Level_{H} \rightarrow \{ \Level_{M} \}\\
-\present_L &\tp& \Level_{M} \rightarrow \{ \Level_{L} \}\\
-\interpret_H &\tp& \Level_{L} \rightarrow \{ \Level_{M} \}\\
-\interpret_L &\tp& \Level_{M} \rightarrow \{ \Level_{H} \}\\
+\present\H &\tp& \Level\H \rightarrow \{ \Level_M \}\\
+\present\L &\tp& \Level_M \rightarrow \{ \Level\L \}\\
+\interpret\H &\tp& \Level\L \rightarrow \{ \Level_M \}\\
+\interpret\L &\tp& \Level_M \rightarrow \{ \Level\H \}\\
 }
 
 We can define $\present$ and $\interpret$ in terms of the two layers:
 
 \xpr{
-\present\ \level_{H} & \equ & \{ \level_L \:|\: \level_L \in \present_L~\level_M \land \level_M \in \present_L~\level_H \}\\
-\interpret~\level_{L} & \equ & \{ \level_H \:|\: \level_H \in \interpret_H~\level_M \land \level_M \in \interpret_L~\level_L \}\\
+\present\ \level\H & \equ & \{ \level\L \:|\: \level\L \in \present\L~\level_M \land \level_M \in \present\L~\level\H \}\\
+\interpret~\level\L & \equ & \{ \level\H \:|\: \level\H \in \interpret\H~\level_M \land \level_M \in \interpret\L~\level\L \}\\
 }
 
 or: (mention this?)
 
 \xpr{
-\present & \equ & \present_L \klei  \present_H\\
-\interpret & \equ &\interpret_H \klei  \interpret_L
+\present & \equ & \present\L \klei  \present\H\\
+\interpret & \equ &\interpret\H \klei  \interpret\L
 }
 
-\bigskip {\bf Presentation invariant}
+\head{Presentation invariant}
 
 Presentation invariant for combination:
 
 \xprlab{
-\level_{L} \in \present~\level_{H}\\
+\level\L \in \present~\level\H\\
 }{Present-HL}
 
 Equivalent to (?): 
-%there is an $\level_{M}$ such that {\sc Present-H} and {\sc Present-L} hold:
+%there is an $\level_M$ such that {\sc Present-H} and {\sc Present-L} hold:
 
 \xpr{
-\exists \level_{M}: \level_{L} \in \present_L~\level_{M} \wedge \level_{M} \in \present_H~\level_{H}\\
+\exists \level_M: \level\L \in \present\L~\level_M \wedge \level_M \in \present\H~\level\H\\
 }
 
 \bl
-\* make it an invariant for three levels? (dropping the $\exists \level_{M}$)
+\o make it an invariant for three levels? (dropping the $\exists \level_M$)
 \el
 
 Can express it with Kleisli as well:
 
 \xprlab{
-\level_{L} \in (\present_{L} \klei \present_{H})~\level_{H}
+\level\L \in (\present\L \klei \present\H)~\level\H
 }{Present-HL}
 
 
 
-\bigskip {\bf InterPresent}
+\head{InterPresent}
 
 Using:
 
 \xprlab{
-\level_{M} \in \present_H~\level_{H} \imp \level_{H} \in \interpret_H~\level_{M}
+\level_M \in \present\H~\level\H \imp \level\H \in \interpret\H~\level_M
 }{InterPresent-H}
 
 and
 
 \xprlab{
-\level_{L} \in \present_L~\level_{M} \imp \level_{M} \in \interpret_L~\level_{L}
+\level\L \in \present\L~\level_M \imp \level_M \in \interpret\L~\level\L
 }{InterPresent-L}
 
 
 we want to get:
 
 \xprlab{
-\level_{L} \in \present~\level_{H} \imp \level_{H} \in \interpret~\level_{L}
+\level\L \in \present~\level\H \imp \level\H \in \interpret~\level\L
 }{InterPresent}
 
 
 \begin{proof}
 \prf{
-\level_{L} \in \present~\level_{H} 
+\level\L \in \present~\level\H 
 		& \Imp{definition of $present$} \\
-\exists \level_M : \level_L = \present_L~\level_M \land \level_M = \present_L~\level_H 
+\exists \level_M : \level\L = \present\L~\level_M \land \level_M = \present\L~\level\H 
 		& \Imp{\sc InterPresent-H} \\
-\exists \level_M : \level_L = \present_L~\level_M \land \level_{H} \in \interpret_H~\level_{M}
+\exists \level_M : \level\L = \present\L~\level_M \land \level\H \in \interpret\H~\level_M
 		& \Imp{\sc InterPresent-L} \\
-\exists \level_M : \level_M = \interpret_L~\level_L \land \level_{H} \in \interpret_H~\level_{M} 
+\exists \level_M : \level_M = \interpret\L~\level\L \land \level\H \in \interpret\H~\level_M 
 		& \Imp{definition of $interpret$} \\
-\level_{H} \in \interpret~\level_{L}
+\level\H \in \interpret~\level\L
 }
 \end{proof}
 
 %Kleisli bits for {\sc InterPresent-L} and {\sc InterPresent-H}
 %
 %\xpr{
-%\level_{H}~ \in (\interpret_{H} \klei \present_{H})~\level_{H}\\
-%\level_{M}~ \in (\interpret_{M} \klei \present_{M})~\level_{M}
+%\level\H~ \in (\interpret\H \klei \present\H)~\level\H\\
+%\level_M~ \in (\interpret_M \klei \present_M)~\level_M
 %}
 
 
 \subsection{Edit}
 
-We have $level_{H}$, $level_{M}$, and $level_{L}$:
+We have $level\H$, $level_M$, and $level\L$:
 
 \xpr{
-\level_{L} \in \present_L~\level_{M} \wedge \level_{M} \in \present_H~\level_{H}\\
-\level_{L} \leadsto \level'_{L} 
+\level\L \in \present\L~\level_M \wedge \level_M \in \present\H~\level\H\\
+\level\L \leadsto \level'\L 
 }
 
-We need $level''_{H}$,  $level''_{M}$, and $level''_{L}$ that restore the invariant. \note{do we need to preserve medium? if apparent in H, or L, automatic, and if not maybe not necessary? Still, we probably do: eg. when med e.s is temporarily hidden, we don't want it to get lost}
+We need $level''\H$,  $level''_M$, and $level''\L$ that restore the invariant. \note{do we need to preserve medium? if apparent in H, or L, automatic, and if not maybe not necessary? Still, we probably do: eg. when med e.s is temporarily hidden, we don't want it to get lost}
 
 \xpr{
-& & (level''_{H}, level''_{L})~\text{such that}~
+& & (level''\H, level''\L)~\text{such that}~
 \left\{ \begin{array}{ll}
-            \level''_{L} \in \present~\level''_{H}\\
-            \level''_{L}~\text{"close to"}~\level'_{L} & \text{\{imprecise edit and preserve lower e.s \}}\\
-            \level''_{H}~\text{"close to"}~\level_{H} & \text{\{preserve higher e.s \}}\\
+            \level''\L \in \present~\level''\H\\
+            \level''\L~\text{"close to"}~\level'\L & \text{\{imprecise edit and preserve lower e.s \}}\\
+            \level''\H~\text{"close to"}~\level\H & \text{\{preserve higher e.s \}}\\
            \end{array}
 \right.
 }
@@ -842,55 +1190,55 @@ We need $level''_{H}$,  $level''_{M}$, and $level''_{L}$ that restore the invari
 Solution is these computations:
 
 %\xpr{
-%\interpret_L^* \tp \Level_{L} \times \Level_{M} \rightarrow \Level_{M}\\
-%\interpret_H^* \tp \Level_{M} \times \Level_{H} \rightarrow \Level_{H}\\
-%\present_H^* \tp \Level_{H} \times \Level_{M} \rightarrow \Level_{M}\\
-%\present_L^* \tp \Level_{M} \times \Level_{L} \rightarrow \Level_{L}\\
+%\interpret\L^* \tp \Level\L \times \Level_M \rightarrow \Level_M\\
+%\interpret\H^* \tp \Level_M \times \Level\H \rightarrow \Level\H\\
+%\present\H^* \tp \Level\H \times \Level_M \rightarrow \Level_M\\
+%\present\L^* \tp \Level_M \times \Level\L \rightarrow \Level\L\\
 %}
 
 \xprlab{
-\level'_{M} = \interpret_L^* (\level'_{L},\level_{M})\\ 
-\level''_{H} = \interpret_H^* (\level'_{M},\level_{H})\\
-\level''_{M} = \present_H^* (\level''_{H}, level'_{M})\\
-\level''_{L} = \present_L^* (\level''_{M}, level'_{L})
+\level'_M = \interpret\L^* (\level'\L,\level_M)\\ 
+\level''\H = \interpret\H^* (\level'_M,\level\H)\\
+\level''_M = \present\H^* (\level''\H, level'_M)\\
+\level''\L = \present\L^* (\level''_M, level'\L)
 }{Compute}
 
 
 not exactly the same. Upper is the same, but lower is split. Kind of nested: lowerUp (upper ) lowerDwn
 
-Mention that this can be made more uniform by always using $level' = \interpret$ and add $\level''_{H} = \level'_{H}$?
+Mention that this can be made more uniform by always using $level' = \interpret$ and add $\level''\H = \level'\H$?
 
 \bc more uniform:
-\interpret_L^* \tp \Level_{L} \times \Level_{M} \rightarrow \Level_{M}\\
-\level'_{M} = \interpret_L^* (\level'_{L},\level_{M})\\ 
-\interpret_H^* \tp \Level_{M} \times \Level_{H} \rightarrow \Level_{H}\\
-\level''_{H} = \interpret_H^* (\level'_{M},\level_{H})\\ 
-\present_H^* \tp \Level_{H} \times \Level_{M} \rightarrow \Level_{M}\\
-\level''_{M} = \present_H^* (\level''_{H}, level'_{M})
-\present_L^* \tp \Level_{M} \times \Level_{L} \rightarrow \Level_{L}\\
-\level''_{L} = \present_L^* (\level''_{H}, level'_{L})
+\interpret\L^* \tp \Level\L \times \Level_M \rightarrow \Level_M\\
+\level'_M = \interpret\L^* (\level'\L,\level_M)\\ 
+\interpret\H^* \tp \Level_M \times \Level\H \rightarrow \Level\H\\
+\level''\H = \interpret\H^* (\level'_M,\level\H)\\ 
+\present\H^* \tp \Level\H \times \Level_M \rightarrow \Level_M\\
+\level''_M = \present\H^* (\level''\H, level'_M)
+\present\L^* \tp \Level_M \times \Level\L \rightarrow \Level\L\\
+\level''\L = \present\L^* (\level''\H, level'\L)
 \ec
 
 \bl
-\* We want h'' s.t. l'' close to l
-\* Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
+\o We want h'' s.t. l'' close to l
+\o Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
 \el
 
 UNCLEAR: how do we relate old val for $level_M$? put it in presentation inv? We need it for es.
 
-\bigskip {\bf No unnecessary lower level changes}
+\head{No unnecessary lower level changes}
 
 If result of edit is presentation of something, it is unchanged by {\sc Compute}: \note{How to formulate this one?}
 
 \xpr{
-\exists h : level'_L \in \present~h \imp level''_L = level'_L
+\exists h : level'\L \in \present~h \imp level''\L = level'\L
 }
 
 Unfortunately, this is not true:
 
 \xpr{
-\present_H x\ = (x,x)   & \hspace{1cm} & \present_L\ (x,y) = y \\
-\interpret_H\ (x,y) = x &                     & \interpret_L\ y = (*,y)\\
+\present\H x\ = (x,x)   & \hspace{1cm} & \present\L\ (x,y) = y \\
+\interpret\H\ (x,y) = x &                     & \interpret\L\ y = (*,y)\\
 }
 
 we have $1 \in present 1$, but according to compute: 
@@ -904,25 +1252,32 @@ we have $1 \in present 1$, but according to compute:
 }
 
 \bl
-\* Counter example
-\* L' Pres H0 (L' Pres M0 Pres H0), but result is L'' Pres H' with L' /= L''
-\* interpret gives M' for which L' Pres M' (we know there is one (M0), so it cannot fail to return one, bla)
-\* if higher interpret gives H' for which M' Pres H' then Extra says M'' = M' and L'' = L', so (not M' Pres H')
+\o Counter example
+\o L' Pres H0 (L' Pres M0 Pres H0), but result is L'' Pres H' with L' /= L''
+\o interpret gives M' for which L' Pres M' (we know there is one (M0), so it cannot fail to return one, bla)
+\o if higher interpret gives H' for which M' Pres H' then Extra says M'' = M' and L'' = L', so (not M' Pres H')
 \el
 
-\bigskip {\bf No unnecessary higher level changes}
+\head{No unnecessary higher level changes}
 
-$\level'_L \in \present~\level_H \imp \level''_H = \level_H$\\
+$\level'\L \in \present~\level\H \imp \level''\H = \level\H$\\
 We should probably use the fact that $\level_M$ is related by {\sc Present}.
 
+
+
+
+
+
+
+\bc
 %																
 %																
 %																
 \section{Combining multiple layers}
 
 \bl
-\* Similar to previous section, but now $n$ instead of 2
-\* 'Recursive' approach? Does not seem possible because of explicit intermediate levels.
+\o Similar to previous section, but now $n$ instead of 2
+\o 'Recursive' approach? Does not seem possible because of explicit intermediate levels.
 \el
 
 We have:
@@ -940,16 +1295,16 @@ We define $\present$ and $\interpret$:
 }
 
 
-\bigskip {\bf Presentation invariant}
+\head{Presentation invariant}
 
-\bigskip {\bf InterPresent}
+\head{InterPresent}
 
 \subsection{Edit}
 
-We have $level_{H}$, $level_{M}$, and $level_{L}$:
+We have $level\H$, $level_M$, and $level\L$:
 
 \xpr{
-\level_{L} \in \present_L~\level_{M} \wedge \level_{M} \in \present_H~\level_{H}\\
+\level\L \in \present\L~\level_M \wedge \level_M \in \present\H~\level\H\\
 \level_{n} \leadsto \level'_{n} 
 }
 
@@ -975,6 +1330,8 @@ Solution is these computations: \note{be more precise about indices?}
 \present_{i}^* \tp \Level_{i} \times \Level_{i+1} \rightarrow \Level_{i+1}\\
 \level''_{i+1} = \present_i^* (\level''_{i}, level'_{i+1})
 }
+\ec
+
 
 %																
 %																
@@ -983,17 +1340,17 @@ Solution is these computations: \note{be more precise about indices?}
 
 Informal
 \bl
-\* Choice in interpret may be due to duplicates or '???'
-\* $type Document = Int$ 
-\* Duplicate: $present x = (x,x)$ with several possible interprets: $interpret (0,1) = 0 or 1$ 
-\* ???: $present x = 2x$ also with several interprets: $interpret 1 = 0 or 1$ 
-\* Hard to distinguish between the two.
-\* Somehow for duplicates, closeness is not an issue in selecting the one we want:
-\* eg. $present x = (x,x,x)$ with edit $(0,0,0)\leadsto(1,0,0)$ should give $(1,1,1)$, which is not as close as $(0,0,0)$
-\* A difference seems to be that using stars on other fields but the edited one, make a non-ambiguous interpret possible in the duplication case, but not in the other case.
-\* eg. $interpret (1,*,*) = 1$
-\* duplicates may be hard to spot: eg. $present x = (x `div` 0xff, x `mod` 0xff)$ is not a duplication.
-\* $1 \to "one"$ can be seen as three partial duplicates. 
+\o Choice in interpret may be due to duplicates or '???'
+\o $type Document = Int$ 
+\o Duplicate: $present x = (x,x)$ with several possible interprets: $interpret (0,1) = 0 or 1$ 
+\o ???: $present x = 2x$ also with several interprets: $interpret 1 = 0 or 1$ 
+\o Hard to distinguish between the two.
+\o Somehow for duplicates, closeness is not an issue in selecting the one we want:
+\o eg. $present x = (x,x,x)$ with edit $(0,0,0)\leadsto(1,0,0)$ should give $(1,1,1)$, which is not as close as $(0,0,0)$
+\o A difference seems to be that using stars on other fields but the edited one, make a non-ambiguous interpret possible in the duplication case, but not in the other case.
+\o eg. $interpret (1,*,*) = 1$
+\o duplicates may be hard to spot: eg. $present x = (x `div` 0xff, x `mod` 0xff)$ is not a duplication.
+\o $1 \to "one"$ can be seen as three partial duplicates. 
 \el
 
 Old statement: if there are several choices for interpret, which all obey {\sc InterPresent}, then there are duplicates. This does not seem to be true. (eg. $present n = 2n$)
@@ -1010,10 +1367,10 @@ Informal
 %																
 \section{Loose ends}
 \bl
-\* what about error nodes in document?
-\* what about inserting pres elts that resemble a chapter title? Is this handled well?
-\* difference between {\em presentation extra state} and {\em interpretion extra state}
-\* what if present is not total?
+\o what about error nodes in document?
+\o what about inserting pres elts that resemble a chapter title? Is this handled well?
+\o difference between {\em presentation extra state} and {\em interpretion extra state}
+\o what if present is not total?
 \el
 
 
@@ -1031,6 +1388,8 @@ Skipping lower layers
 \section{layer skipping}
 Skipping higher layers
 
+% restore old defs from thesis.sty
 \renewcommand{\present}[0]{{\tt present}}					%56
 \renewcommand{\interpret}[0]{{\tt interpret}}				%56
-                                                                          
+\renewcommand{\Core}[0]{\ensuremath{\mathit{Core}}}	%56
+                                 
