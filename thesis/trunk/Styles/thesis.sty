@@ -112,9 +112,9 @@
 \noindent 
 \begin{center}
 \begin{picture}(250,180)(0,0)
-\begin{tiny}
+\begin{scriptsize}
 \put(0,30){ \framebox(250,150){#1}}
-\end{tiny}
+\end{scriptsize}
 \put(0,0) { \makebox(250,30){#2}}
 \end{picture}
 \end{center}
@@ -125,30 +125,15 @@
 \noindent
 \begin{center}
 \begin{picture}(170,130)(0,0)
-\begin{tiny}
+\begin{scriptsize}
 \put(0,30){ \framebox(170,100){#1}}
-\end{tiny}
+\end{scriptsize}
 \put(0,0) { \makebox(170,30){#2}}
 \end{picture}
 \end{center}
 }
 
-\newcommand{\editScreenshot}[4]{%
-%
-\noindent
-\begin{center}
-\begin{picture}(350,130)(0,0)
-\begin{tiny}
-\put(0,30){ \framebox(170,100){#1}}
-\put(180,30){ \framebox(170,100){#2}}
-\end{tiny}
-\put(170,13){ $\Rightarrow$}
-\put(0,0) { \makebox(170,30){#3}}
-\put(180,0) { \makebox(170,30){#4}}
-\end{picture}
-\end{center}
-}
-
+%\newcommand{\editScreenshot}[4]{%
 
 
 
@@ -542,6 +527,8 @@
 \mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
 \hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
 
+\newcommand{\nonote}[1]{}%
+
 \newcommand{\inote}[1]{%
 \notewarning%
 \mbox{$^{\ast\ast\ast}$}\marginpar{\tiny$\ast\ast\ast$}%
@@ -605,6 +592,8 @@
 % your document are really centered on the A4 paper
 % format. Recommended! Leave the cropmarks out in the final version
 % though.
+
+% cropmarks are only visible in .ps file
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \newcommand{\thsetinfo}[1]{\special{!userdict begin /thtext

@@ -1,5 +1,4 @@
-\chapter{Specifying a layered editor}
-\label{chap:formalSpec}
+\chapter{Specifying a layered editor} \label{chap:formalSpec}
 
 
 \bc
@@ -10,7 +9,7 @@ ziet er vaak mooier uit en verloopt logischer. mixen met <= bewijzen geen proble
 
 \ec
 
-{\em *** Version: \today~ ***}
+%{\em *** Version: \today~ ***}
 
 
 %\bl
@@ -56,21 +55,22 @@ ziet er vaak mooier uit en verloopt logischer. mixen met <= bewijzen geen proble
 % Even in pure structure editor there are pres. oriented bits. eg navigation (pointing problem)
 
 
-In this chapter we give a formal specification of the layered architecture of the Proxima editor. We represent the presentation mapping $\Present$ by a function $\present$. Given $\present$, we state a number of requirements for a function $\interpret$, which is an inverse of $\present$, and maps an updated presentation back onto the document. Furthermore, we specify a computation for handling edit operations on the presentation. 
+In this chapter we give a formal specification of the layered architecture of the Proxima editor. We represent the presentation mapping $\Present$ by a function $\present$. Given $\present$, we state a number of requirements for a corresponding function $\interpret$, which is an inverse of $\present$, and maps an updated presentation back onto the document. Furthermore, we specify how the data levels are updated after the presentation has been edited.
 
+\bc 
 \toHere
 say why presentation is a relation. and interpret as well
 one doc more ws and table of contents many sections.
+
+In the presence of extra state, $\Present$ is an  relation, which cannot directly be represented by a function. Therefore, we introduce an equivalence class representation for extra state, which allows us to represent $\Present$ by a function between equivalence classes.
 \fromHere
+\ec
 
-In the presence of extra state, $\Present$ is an actual \note{} relation, which cannot directly be represented by a function. Therefore, we introduce an equivalence class representation for extra state, which allows us to represent $\Present$ by a function between equivalence classes.
-
-\note{and the types}
-Because we make only few assumptions on the presentation mapping, the specification gives requirements for $\interpret$, rather than an exact specification of how the inverse can be computed for a specific $\present$. The burden of defining an $\interpret$ that meets the requirements lies with the editor designer.
+Because we make only few assumptions on the presentation mapping and the level types, the specification gives requirements for $\interpret$, rather than an exact specification of how the inverse can automatically be computed for a specific $\present$. The burden of defining an $\interpret$ that meets the requirements lies with the editor designer.
 
 An automatically derived $\interpret$ is desirable, but this is not yet feasible for the complex presentation functions of the use cases from Chapter~\ref{chap:requirements}. Examples of presentation formalisms supporting the automatic construction of an inverse function for basic presentation functions can be found in \cite{meertens98maintainers}, \cite{muhu04inv}, and \cite{pierce03lenses}. 
 
-We develop the specification of the layered editor by starting with a simplified editor without layers, and then step by step adding extra functionality. Section~\ref{sect:singleSimple} specifies a simple editor that consists of a single layer and does not support extra state. In Section~\ref{sect:singleExtra}, the specification is extended with a general model of extra state. Section~\ref{sect:wildcardEq} provides a more concrete specification of extra state for tree data structures. The last step is the addition of layers to the specification in Section~\ref{sect:compositeExtra}. Finally, Section~\ref{sect:duplicates} informally discusses how the specification may be adapted to handle duplications in the presentation.
+We develop the specification of the layered editor by starting with a simplified editor without layers or extra state, and then step by step adding extra functionality. Section~\ref{sect:singleSimple} specifies a simple editor that consists of a single layer and does not support extra state. In Section~\ref{sect:singleExtra}, the specification is extended with a general model of extra state. Section~\ref{sect:wildcardEq} provides a more concrete specification of extra state for tree data structures. The last step is the addition of layers to the specification in Section~\ref{sect:compositeExtra}. Finally, Section~\ref{sect:duplicates} informally discusses how the specification may be adapted to handle duplications in the presentation.
 
 
 
@@ -79,18 +79,15 @@ We develop the specification of the layered editor by starting with a simplified
 %																
 \section{A single layer} \label{sect:singleSimple}
 
-First we consider a simple abstract editor consisting of a single layer between two data levels. The higher level is the document level and the lower level is the presentation level. In this section, we assume that the presentation mapping $Present$ maps each document onto exactly one presentation, and thus can be represented by a function $\present$.
-
-We assume that the total function $\present$ is given:
+First we consider a simple abstract editor consisting of a single layer between two data levels. The higher level is the document level and the lower level is the presentation level. In this section, we assume that the presentation mapping $Present$ maps each document onto exactly one presentation, and thus can be represented by a total function $\present$:
 
 \xpr{
 \present & \tp &  \Level\H \rightarrow \Level\L\\
 }
 
-Because not every value of type $\Level\L$ is the presentation of a document is, $\present$ need not be surjective.  \note{what if not total?}
+Because not every value of type $\Level\L$ is the presentation of a document is, $\present$ need not be surjective.  \nonote{what if not total?}
 
-Given $\present$, we will specify a total function $\interpret$, which maps a lower level back onto a higher level: \todo{Unclear: Say some things on totality of \interpret (is it easy to make it total?)??}
-
+Given $\present$, we will specify a total function $\interpret$, which maps a lower level back onto a higher level: 
 
 \xpr{
 \interpret  & \tp & \Level\L \rightarrow \Level\H\\
@@ -117,16 +114,16 @@ Or, equivalently, using function composition:
 \law{InterPresent} implies injectivity of $\present$ and (together with totality of $\present$) surjectivity of $\interpret$. 
 
 
-We do not require that $\interpret$ is a right inverse (i.e.\ $\present \oo \interpret = id_{\Level\L}$) in order to support ``imprecise'' editing. Imprecise editing means that although the user-updated lower level is not a completely valid presentation of a document, it does make clear what the user intended with the edit operation.
+Note that we do not require $\interpret$ to be a right inverse ($\present \oo \interpret = id_{\Level\L}$). The reason for this is to make it possible to interpret edit operations that are not entirely exact but still clearly show the intended update.
 
-Take a presentation function that presents a return statement by using a bold style for the keyword: 
-$\present~({\tt Return~True}) = {\tt "{\bf return}~True"}$. If we want to allow a user to enter a return statement without having to add the exact styles to the text, we must have $\interpret~({\tt "Return~True"}) = {\tt Return~True}$. 
-Hence, $\present \oo \interpret$ is not the identity, since $\present \oo \interpret~({\tt "Return~True"}) \eq {\tt "{\bf return}~True"}$.
+For example, take a presentation function that presents a return statement by using a bold style for the keyword: 
+$\present~({\tt Return~True}) = ``{\tt{\bf return}~True}\text{''}$. If we want to allow a user to enter a return statement without having to add the exact styles to the text, we must have $\interpret~``{\tt Return~True}\text{''} = {\tt Return~True}$. 
+Hence, $\present \oo \interpret$ is not the identity, since $\present \oo \interpret~``{\tt Return~True}\text{''} \eq ``{\tt {\bf return}~True}\text{''}$.
 %A consequence of \law{InterPresent} is that a document may not be No normalization may occur on doc.
 % Not nec. always normalized.
 
 
-Since we assume $\present$ is given, \law{InterPresent} is a requirement for $\interpret$. Yet, it is only a minimal requirement. In order to model an editor, we also want to say something about the result of $\interpret$ on lower level values outside the range of $\present$. The next section provides such a requirement.
+Since we assume $\present$ is given, \law{InterPresent} is a requirement for $\interpret$. Yet, it is only a minimal requirement. In order to model an editor, we also want to say something about the result of $\interpret$ on lower-level values outside the range of $\present$. The next section provides such a requirement.
 
 
 %\bl
@@ -137,7 +134,7 @@ Since we assume $\present$ is given, \law{InterPresent} is a requirement for $\i
 
 \subsection{Editing}\label{sect:single_Editing}
 
-A user may perform an edit operation on either the higher level (document) or the lower level (presentation). However, because after a document update, the presentation invariant can be restored by simply presenting the updated document, we only consider presentation-oriented editing here. When the lower level is edited, we need to interpret the updated lower level in order to find a new higher level, which subsequently may need to be presented again (as explained in Section~\ref{sect:editProces}). 
+A user may perform an edit operation on either the higher level (document) or the lower level (presentation). Because after a document update, the presentation invariant can be restored by simply presenting the updated document, we only consider presentation-oriented editing here. When the lower level is edited, we need to interpret the updated lower level in order to find a new higher level, which subsequently may need to be presented again (as explained in Section~\ref{sect:editProces}). 
 
 Let $level\L$ and $level\H$ denote the state of the layer at the beginning of an edit step. 
 
@@ -158,7 +155,7 @@ The user then updates the lower level:
     \end{center}
 \end{figure}
 
-after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$, in order to restore the presentation invariant. Figure~\ref{singleLayerEditFormal} (which also shown in the previous chapter) illustrates the edit process.
+after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$, in order to restore the presentation invariant. Figure~\ref{singleLayerEditFormal} (which was also shown in the previous chapter) illustrates the edit process.
 
 \bc The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi-layered editor specification (see Section~\ref{sect:compositeExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the editing process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
 
@@ -172,30 +169,31 @@ level\L 		&~\leadsto~ & level'\L 	& 			& level''\L\\
 \end{figure}
 
 
-Most likely, after editing, the presentation invariant does not hold between $\level'\L$ and $\level\H$. Hence, we need to find a new higher level value $\level''\H$. However, because it is possible that $\level'\L$ is not a valid presentation of a higher level value, we also need to find a new lower level $\level''\L$ in order to restore the presentation invariant. Figure~\ref{} shows the values of the higher and lower levels for the example from the previous section.
+Most likely, after editing, the presentation invariant does not hold between $\level'\L$ and $\level\H$. Hence, we need to find a new higher-level value $\level''\H$. However, because it is possible that $\level'\L$ is not a valid presentation of a higher-level value, we also need to find a new lower level $\level''\L$ in order to restore the presentation invariant. Figure~\ref{} shows the values of the higher and lower levels for the example from the previous section.
 \ec 
-Besides the presentation invariant, we impose several other requirements on the new levels.
 
-Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change because of the edit operation, and thus $\level''\H = \level\H$. Because in this section presentation is injective, $\level'\L$ can only be a valid presentation of $\level\H$, if it is equal to $\level\L$, meaning that the user did not change the lower level. However, in the next section, when extra state is added to the model, the reason for this property becomes clear. Because the property states that the document stays inert under an edit operation, we refer to it as \law{Doc-Inert}.
+Besides the presentation invariant, we impose several other requirements on the final levels.
 
-Secondly, if a user edits the lower level in such a way that $\level'\L$ is a valid presentation of some higher level value $h$, then the editor should not perform any further updates on the lower level, and the final value $level''\L$ should be equal $\level'\L$. Analogous to the previous property, this property is referred to as \law{Pres-Inert}.
+Firstly, if $\level'\L$ is a valid presentation of $\level\H$, we do not want $\level\H$ to change because of the edit operation, and thus $\level''\H = \level\H$. Because, in this section, the presentation mapping is a function, $\level'\L$ can only be a valid presentation of $\level\H$ if it is equal to $\level\L$, meaning that the user did not change the lower level. However, in the next section, when extra state is added to the model, the reason for this property becomes clear. Because the property states that the document stays inert under an edit operation, we refer to it as \law{Doc-Inert}.
+
+Secondly, if a user edits the lower level in such a way that $\level'\L$ is a valid presentation of some higher-level value, then the editor should not perform any further updates on the lower level, and the final value $level''\L$ should be equal $\level'\L$. Analogous to the previous property, this property is referred to as \law{Pres-Inert}.
 
 \bc
 Besides \law{Pres-Inert}, we could also add a requirement that if there exists an $h$, such that $level'\L = \present~h$, then $level''\H = h$, since because of \law{Pres-Inert} and injectivity of $\present$, $h$ is the only possible value for $\level''\H$. However, since this requirement will no longer hold in the presence of extra state, we will omit it here as well.
 \ec
 
-Our final requirement specifies what happens when $\level'\L$ is not a valid presentation of any higher level. In this case, the editor could simply forbid the edit operation, but a more user-friendly solution is to regard the operation as an imprecise edit operation and perform the intended edit operation. This means that the editor chooses a $level''\H$ and $level''\L$ such that $level''\L$ is close to the $level'\L$ that came from the user (and, of course, $\level''\L = \present~\level''\H$ ).
+Our final requirement specifies what happens when $\level'\L$ is not a valid presentation of any higher level. In this case, the editor could simply forbid the edit operation, but a more user-friendly solution is to regard the operation as an inexact edit operation and perform the intended edit operation. This means that the editor chooses a $level''\H$ and $level''\L$ such that $level''\L$ is as close as possible to the $level'\L$ that came from the user (and, of course, $\level''\L = \present~\level''\H$ ).
 
 Summarizing, if we let $Comp$ be a program fragment that assigns new values to the data levels, then the requirements on $Comp$, specified as Hoare triples, are:
 
 \xprlab{\hoare{\true} {Comp} { \level''\L = \present~\level''\H }}{Postcondition}
 \xprlab{\hoare{ \level'\L = \present~\level\H } {Comp} { \level''\H = \level\H }}{Doc-Inert}
 \xprlab{\hoare{ \level'\L = \present~h } {Comp} {\level'\L = \level''\L}}{Pres-Inert}
-\xprlab{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}{Imprecise}
+\xprlab{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}{Intended}
 
-Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close~to'' is equality. In order to prevent a conflict with \law{Postcondition}, \law{Imprecise} is slightly weaker than \law{Postcondition}.
+Note that \law{Pres-Inert} is a special case of \law{Intended}, in which ``close~to'' is equality. In order to prevent a conflict with \law{Postcondition}, \law{Intended} is slightly weaker than \law{Postcondition}.
 %\note{Maybe mention precondition more explicitly?} 
-%\todo{say that \law{Imprecise} is weaker} is not true. 
+%{say that \law{Intended} is weaker} is not true. 
 
 
 \head{Definition of $Comp$}
@@ -208,7 +206,7 @@ Comp \is 	& \level''\H \gets \interpret~\level'\L \semi\\
 				&\level''\L \gets  \present~\level''\H
 }{$Comp$-Def}
 
-Together with $Comp$, the requirements above provide a specification of $\interpret$. We can prove that \law{Postcondition} holds, and furthermore, if \law{InterPresent} holds, then \law{Doc-Inert} and \law{Pres-Inert} can be proved as well. \law{Imprecise} cannot be proved from \law{InterPresent}, and hence is a requirement on $\interpret$ (together with $Comp$).
+Together with $Comp$, the requirements above provide a specification of $\interpret$. We can prove that \law{Postcondition} holds, and furthermore, if \law{InterPresent} holds, then \law{Doc-Inert} and \law{Pres-Inert} can be proved as well. \law{Intended} cannot be proved from \law{InterPresent}, and hence is a requirement on $\interpret$ (together with $Comp$).
 
 
 \head{Basic Hoare logic}
@@ -268,21 +266,21 @@ According to \law{\fn{wp}-Char}, $\hoare{\true} {Comp} { \level''\L = \present~\
 
 $\true ~\imp~ \wp{Comp}{ \level''\L = \present~\level''\H }$
 
-Unlike the other proofs in this section, we start the weakest precondition proofs with the antecedent of the implication and work toward the conclusion. This way, the order of the subsitutions in the proof steps corresponds to the evaluation order of the assignment statements in $Comp$.
+\bc Unlike the other proofs in this section, we start the weakest precondition proofs with the antecedent of the implication and work toward the conclusion. This way, the order of the subsitutions in the proof steps corresponds to the evaluation order of the assignment statements in $Comp$. \ec
 
 \begin{proof} 
 \begin{Prf}&
-	\true\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~\level'\L}{\true} \\
-\Eqv{ reflexivity of $=$ }&
-	\wp{\level''\H \gets \interpret~\level'\L}{\present~\level''\H = \present~\level''\H} \\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{\level''\H \gets \interpret~\level'\L}{ \wp{ \level''\L \gets \present~\level''\H}{ \level''\L = \present~\level''\H }} \\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wpWide{\level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{ \level''\L = \present~\level''\H } \\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{ \level''\L = \present~\level''\H }\\
+\Eqv{\law{$Comp$-Def}}&
+	\wpWide{\level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{ \level''\L = \present~\level''\H } \\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wpWide{\level''\H \gets \interpret~\level'\L}{ \wp{ \level''\L \gets \present~\level''\H}{ \level''\L = \present~\level''\H }} \\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{\level''\H \gets \interpret~\level'\L}{\present~\level''\H = \present~\level''\H} \\
+\Eqv{ reflexivity of $=$ }&
+	\wp{\level''\H \gets \interpret~\level'\L}{\true} \\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\true\\
 \end{Prf}
 \end{proof}
 
@@ -297,17 +295,17 @@ $\level'\L = \present~\level\H ~\imp~ \wp{Comp}{ \level''\H = \level\H}$
 
 \begin{proof} 
 \begin{Prf}&
-	\level'\L = \present~\level\H\\
-\Imp{\law{InterPresent}}&
-	\level\H = \interpret~\level'\L\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~\level'\L}{\level\H = \level''\H} \\
-\Eqv{{\sc \fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~\level'\L}{ \wp{ \level''\L \gets \present~\level''\H}{\level\H = \level''\H}} \\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{\level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level\H = \level''\H} \\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\level\H = \level''\H}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{\level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level\H = \level''\H} \\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{\level''\H \gets \interpret~\level'\L}{ \wp{ \level''\L \gets \present~\level''\H}{\level\H = \level''\H}} \\
+\Eqv{{\sc \fn{wp}-$\gts$}}&
+	\wp{\level''\H \gets \interpret~\level'\L}{\level\H = \level''\H} \\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\level\H = \interpret~\level'\L\\
+\Ffr{\law{InterPresent}}&
+	\level'\L = \present~\level\H\\
 \end{Prf}
 \end{proof}
 
@@ -324,37 +322,37 @@ $\level'\L = \present~h ~\imp~\wp{Comp}{\level'\L = \level''\L}$
 In the proof, we assume $\level'\L = \present~h$:
 
 \begin{Prf}&
-	\level'\L = \present~h \}\\
-\Eqv{\law{InterPresent}}&
-	\level'\L = \present~(\interpret~(\present~h))\\
-\Imp{assumption} &
-	\level'\L = \present~(\interpret~\level'\L)\\
+	\wp{Comp}{\level'\L = \level''\L}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{ \level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level'\L = \level''\L }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{\level''\H \gets \interpret~\level'\L}{ \wp {\level''\L \gets \present~\level''\H}{\level'\L = \level''\L} }\\
 \Eqv{\law{\fn{wp}-$\gts$}}&
 	\wp{\level''\H \gets \interpret~\level'\L}{ \level'\L = \present~\level''\H}\\
 \Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~\level'\L}{ \wp {\level''\L \gets \present~\level''\H}{\level'\L = \level''\L} }\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{ \level''\H \gets \interpret~\level'\L \semi \level''\L \gets \present~\level''\H}{\level'\L = \level''\L }\\
-\Eqv{\law{$Comp$-Def}}&
-	\wp{Comp}{\level'\L = \level''\L}\\
+	\level'\L = \present~(\interpret~\level'\L)\\
+\Ffr{assumption} &
+	\level'\L = \present~(\interpret~(\present~h))\\
+\Eqv{\law{InterPresent}}&
+	\level'\L = \present~h \}\\
 \end{Prf}
 \end{proof}
 
 
 
-\head{\law{Imprecise} requirement}
+\head{\law{Intended} requirement}
 
-If $\level'\L$ is not a valid presentation, only \law{Postcondition} and \law{Imprecise} are of importance:
+If $\level'\L$ is not a valid presentation, only \law{Postcondition} and \law{Intended} are of importance:
 
 \xpr{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}
 
-This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close~to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
+This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close~to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement given.
 
 %\note{Is ``close to'' what we want? For simple editors, maybe it is, but is "-$>$" close to \rarr?}
 %\note{What about Chapter titles and fonts? Will these be handled correctly with ``close to'' req.?}
 
 %conclusions
-% give present, we have two requirements interpresent, imprecise. and together with $comp$ these specify an editor.
+% give present, we have two requirements interpresent, intended. and together with $comp$ these specify an editor.
 
 
 
@@ -366,11 +364,23 @@ This requirement states that $\interpret$ returns a higher level such that its p
 
 In this section, we extend the specification of the single-layered editor with extra state (see Section~\ref{sect:extraState}). The document level may contain interpretation extra state, whereas the presentation may contain presentation extra state.
 
-Because the presentation does not specify extra state, a single document may have several presentations that differ only in extra state. Similarly, a single presentation may be the presentation of several different documents. Hence, we cannot use a functional representation for $Present$.
+In the presence of extra state, a single document may have several presentations, and a single presentation may be the presentation of several documents. This means that we can no longer represent the relation $Present$ by a function $\present$ between values, since $\present~h$ would have to be a set of lower-level levels. Similarly, $\interpret~l$  would have to return a set of higher-level values.
 
-Because two levels that only differ in extra state are in a sense equivalent, we model extra state using an equivalence relation on the data level. The elements of an equivalence class are equal except for their extra state.
+To be able to use functional representations for the presentation and interpretation mappings after all, we introduce an equivalence class representation for extra state. 
+Because two levels that only differ in extra state are in a sense equivalent, we model extra state using an equivalence relation on the data level. The elements of an equivalence class are equal except for their extra state. Using this equivalence class representation for extra state, we can express $\present$ and $\interpret$ as set-valued functions between equivalence classes.
 
-The equivalence class model for extra state makes it possible to regard $Present$ as a function between equivalence classes, rather than a relation between data levels. As a result, the specification is largely similar to the specification of the previous section.
+%Sections~\ref{sect:editingExtraState} and \ref{sect:extraState} provide examples of extra state, but in order to
+%illustrate the equivalence class representation of extra state, we give two simple examples here as well. 
+We provide two examples to illustrate the equivalence class representation for extra state. Both examples are set in an editor for a simple programming language, for which layout is not part of the syntax.
+
+
+\todo{$H$ en $L$ uitleggen}
+A partially presented declaration is an example of interpretation extra state. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H \tp Level\H \rel Level\H$, we can express this as 
+$(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$. More generally, a declaration is equivalent to every declaration that has the same left-hand side identifier.
+
+Whitespace is an example of presentation extra state on the lower level. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Thus, for example, 
+$``\texttt{1\spc+\spc 2}\text{''}~L~``\texttt{1+2}\text{''}$.
+
 
 Because no assumptions are made about the types of the two levels, the model for extra state is  rather abstract. Section~\ref{sect:wildcardEq} provides a concrete representation of extra state in tree-structured data types.
 
@@ -418,7 +428,7 @@ x \in \eqcl{y}{R} ~\eqv~ \eqcl{x}{R} = \eqcl{y}{R}
 
 \subsection{An equivalence class for extra state} \label{sect:eqclassForES}
 
-If several lower level values are related to the same higher level value by the presentation relation, this means that when disregarding extra state, the lower level values are equal. Similarly, if two higher level values are related to the same lower value, the higher level values are equal up to extra state. We use an equivalence relation to express that two values are equal up to extra state. 
+If several lower-level values are related to the same higher-level value by the presentation relation, this means that when disregarding extra state, the lower-level values are equal. Similarly, if two higher-level values are related to the same lower value, the higher-level values are equal up to extra state. We use an equivalence relation to express that two values are equal up to extra state. 
 
 The two data levels give rise to two equivalence relations: $H$ and $L$.
 
@@ -426,16 +436,9 @@ The two data levels give rise to two equivalence relations: $H$ and $L$.
 H \tp Level\H \rel \Level\H~~~~~~\text{and}~~~~~~L \tp Level\L \rel \Level\L\\
 }
 
-Sections~\ref{sect:editingExtraState} and \ref{sect:extraState} provide examples of extra state, but in order to illustrate the equivalence class representation of extra state, we give two simple examples here as well. Both examples are set in an editor for a simple programming language, for which layout is not part of the syntax.
+In order to specify that extra state should be reused after an update, without making any assumptions on the level type, we use the ``close~to'' notion from the previous section. We specify that an updated value $x'$ contains reused extra state from $x$, by requiring that $x'$ is the element of its equivalence class that is as close as possible to $x$. 
 
-We use a partially presented declaration as an example of interpretation extra state. If we hide the right-hand side, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Hence, we have
-$(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$. More generally, a declaration is equivalent to every declaration that has the same left-hand side identifier.
-
-Whitespace is an example of presentation extra state on the lower level. Consider the expression \verb|Sum 1 2|, which is presented as {\tt 1\spc+\spc 2}. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Thus, for example, $(\texttt{1\spc+\spc 2})~L~(\texttt{1+2})$.
-
-In order to specify that extra state should be reused after an update, without making any assumptions on the level type, we use the ``close~to'' notion from the previous section. We express that an updated value $x'$ contains reused extra state from $x$, by requiring that $x'$ is the element of its equivalence class that is as close as possible to $x$. 
-
-As an example, consider an update on the presentation of \verb|Decl "f" (Sum 1 2)| from the example above:  $\verb|f = ...| \leadsto \verb|g = ...|$. The new higher level should have left-hand side \verb|"g"| and reuse the sum. This can be specified by requiring that from the equivalence class of declarations with left-hand side \verb|"g"|, we select the element that is as close as possible to \verb|Decl "f" (Sum 1 2)|. The obvious solution is \verb|Decl "g" (Sum 1 2)|.
+As an example, consider an update on the presentation of \verb|Decl "f" (Sum 1 2)| from the example above:  $``\verb|f = ...|\text{''} \leadsto ``\verb|g = ...|\text{''}$. The new higher level should have left-hand side \verb|"g"| and reuse the sum. This can be specified by requiring that from the equivalence class of declarations with left-hand side \verb|"g"|, we select the element that is as close as possible to \verb|Decl "f" (Sum 1 2)|. The obvious solution is \verb|Decl "g" (Sum 1 2)|.
 
 
 
@@ -529,7 +532,7 @@ l~Present~h ~\eqv~ \eqcl{l}{L} = \present~ \eqcl{h}{H}\\
 h~Interpret~l ~\eqv~ \eqcl{h}{H} = \interpret~\eqcl{l}{L}
 }{\interpret-Char}
 
-In the remainder of this section, we exclusively make use the functional representation.
+In the remainder of this section, we will use the functional representation.
 
 %\xpr{
 %\present~H = \setof{l}{h \in H \land l \in Present~h}
@@ -578,7 +581,7 @@ Similar to the previous section, \law{InterPresent} states that $\interpret$ is 
 
 \subsection{Editing} \label{sect:singleExtra_Editing}
 
-Similar to Section~\ref{sect:single_Editing}, we need to assign new values to the higher and the lower data levels when a user edits the lower level:
+Similar to Section~\ref{sect:single_Editing}, we assign new values to the higher and the lower data levels when a user edits the lower level:
 
 \xpr{
 \eqcl{\level\L}{L} = \present~\eqcl{\level\H}{H}\\
@@ -590,9 +593,9 @@ The old requirements, rewritten with equivalence classes, are:
 \xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} } }		{Postcondition}
 \xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
 \xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}} {Comp} { \level'\L = \level''\L}}		{Pres-Inert}
-\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Intended}
 
-With extra state, the \law{Doc-Inert} requirement becomes interesting, since it is now possible to update the lower level without breaking the presentation invariant. For example, if whitespace is not stored in the document, and a user edits only whitespace, then the document should remain unchanged.
+With extra state, the \law{Doc-Inert} requirement becomes interesting, since it is now possible to update $level\L$ to a (different) $level'\L$, which is still a valid presentation of $level\H$. For example, if whitespace is not stored in the document, and a user edits only whitespace, then the document should remain unchanged.
 
 In addition to the four requirements of the previous section, we need to require that extra state on both levels is reused after an update. For interpretation extra state on the higher level, we require that from the equivalence class specified by \law{Postcondition}, the element  that is as close as possible to the original value $level\H$ is selected:
 
@@ -600,29 +603,28 @@ In addition to the four requirements of the previous section, we need to require
 
 \law{Doc-Preserve} is weaker than the other requirements. It specifies which element of the equivalence class determined by \law{Postcondition} is the final value of the lower level.
 
-On the lower level, we need a similar requirement for presentation extra state, but here it coincides with \law{Imprecise}. Thus, \law{Imprecise} has a double function: it states that the resulting equivalence class of $\present$ must be close to the equivalence class of $level'\L$, as well as that the presentation extra state in $level''\L$ must resemble the extra state in $\level'\L$ as much as possible.
+On the lower level, we need a similar requirement for presentation extra state, but here it coincides with \law{Intended}. Thus, \law{Intended} has a double function: it states that the resulting equivalence class of $\present$ must be close to the equivalence class of $level'\L$, as well as that the presentation extra state in $level''\L$ must resemble the extra state in $\level'\L$ as much as possible.
 
 
-% es part weaker than others, not nec. either not valid, only imprecise and postcondition. 
-% pres of doc, then pres-inert holds, imprecise does not interfere.  Just valid, same thing.
+% es part weaker than others, not nec. either not valid, only intended and postcondition. 
+% pres of doc, then pres-inert holds, intended does not interfere.  Just valid, same thing.
 
-%\note{do we have to say the \law{Imprecise} is stronger than \law{Preserve}?}
+%\note{do we have to say the \law{Intended} is stronger than \law{Preserve}?}
 \head{Reusing extra state}
 
-$Comp$ realizes a mapping between data levels, but both $\present$ and $\interpret$ are mappings between equivalence classes on these data levels. Hence, we need a way to get from values to equivalence classes and back. We use the $\eqhole$ function to denote the equivalence class of a value. For going from an equivalence class to a value, we introduce a new function~$\reuz$.
+$Comp$ realizes a mapping between data levels, but both $\present$ and $\interpret$ are mappings between equivalence classes on these data levels. Hence, we need a way to get from values to equivalence classes and back. We use the $\eqhole$ function to denote the equivalence class of a value. For going from an equivalence class to a value, we need a selection function that takes as an extra argument the old value of the level.
 
-The resulting class of $\present$ or $\interpret$ contains all possible combinations for the extra state.
-From this class, we need to select an element for which the extra state resembles the extra state of the previous value as much as possible. Intuitively,~$\reuz$ ``reuses'' the extra state from the previous value of a level. Because we need to reuse extra state on the results of $\present$ as well as $\interpret$, we need two $\reuz$ functions: one for each level.
+The resulting class of $\present$ or $\interpret$ contains all possible extra state configurations.
+From this class, we need to select an element for which the extra state resembles the extra state of the previous value as much as possible. Thus, we introduce the function $\reuz \tp  \Eqcl{X}{R} \to X \to X$, which takes an equivalence class and a previous value, and selects the element from the class that is closest to the previous value. Intuitively,~$\reuz$ ``reuses'' the extra state from the previous value.  In this section, we will only give a number of requirements for $\reuz$. Section~\ref{sect:wildcardEq} provides a more concrete instance. 
 
-In this section, we only give the type of~$\reuz$, together with a number of requirements. Section~\ref{sect:wildcardEq} provides a more concrete instance. The type of~$\reuz$ is:
+%The type of~$\reuz$ is:
+%\xprlab{
+%\reuz \tp  \Eqcl{X}{R} \to X \to X\\
+%}
 
-\xprlab{
-\reuz \tp  \Eqcl{X}{R} \to X \to X\\
-}
+Because we need to reuse extra state on the results of $\present$ as well as $\interpret$, we need two $\reuz$ functions: one for each level. In order to disambiguate between the two functions, we add the corresponding relation as a subscript (e.g.\ $\reuze{H}$ and $\reuze{L}\!$). For the higher level we have $\reuze{H} \tp  \Eqcl{Level\H}{H} \to Level\H \to Level\H$, and for the lower level $\reuze{L} \tp  \Eqcl{Level\L}{L} \to Level\L \to Level\L$
 
-In order to disambiguate different $\reuz$ functions, we add the relation as a subscript to the operator (e.g.\ $\reuze{H}$ and $\reuze{L}\!$). For the higher level we have $\reuze{H} \tp  \Eqcl{Level\H}{H} \to Level\H \to Level\H$, and for the lower level $\reuze{L} \tp  \Eqcl{Level\L}{L} \to Level\L \to Level\L$
-
-We require several properties of~$\reuz$. First of all, the equivalence class of the result of~$\reuz$ must be equal to the  equivalence class argument: \note{reformulate: its eq. class must be equal to args eq.class?} 
+We require several properties of~$\reuz$. First of all, the equivalence class that is the result of~$\reuz$ must be equal to the argument equivalence class:
 
 %\xprlab{\eqcl{x}{R} \reuz y \in \eqcl{x}{R}}				{$\reuz$-Valid}
 \xprlab{\eqcl{\eqcl{x}{R} \reuz y}{R} = \eqcl{x}{R}}	{$\reuz$-Valid}
@@ -633,11 +635,13 @@ Furthermore, if the value argument is in the equivalence class argument, then~$\
 %\xprlab{y \in \eqcl{x}{R} \imp \eqcl{x}{R} \reuz y = y}			{$\reuz$-Idem} 
 \xprlab{\eqcl{y}{R} = \eqcl{x}{R} ~\imp~ \eqcl{x}{R} \reuz y = y}	{$\reuz$-Idem} 
 
+Note that, by \law{$\reuz$-Valid}, we also have the reverse: $\eqcl{x}{R} \reuz y = y ~\imp~ \eqcl{y}{R} = \eqcl{x}{R} $.\nonote{is \law{$\reuz$-Valid} implied by  equivalence version of \law{$\reuz$-Idem}?}
+
 Finally, if the value argument is not in the equivalence class argument, then~$\reuz$ returns an element of that class that is as close as possible to the value argument.
 
 \xprlab{\eqcl{x}{R} \reuz y \close y}		{$\reuz$-Close} 
 
-Similar to the \law{Doc-Inert} and \law{Imprecise} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close~to'' is equality.
+Similar to the \law{Doc-Inert} and \law{Intended} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close~to'' is equality.
 
 \head{Definition of $Comp$}
 
@@ -670,23 +674,23 @@ $\true ~~\imp~~\wp{Comp}{\eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H}}$
 
 \begin{proof} 
 \begin{Prf}&
-	 \true  \\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{  \true  }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{ \true }\\
-\Eqv{ reflexivity of~$=$ }&
-	\wp{Up}{ \present~ \eqcl{\level''\H}{H} = \present~\eqcl{\level''\H}{H}  }\\
-\Eqv{ \law{$\reuz$-Valid} }&
-	\wp{Up}{ \eqcl{\present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{L} = \present~\eqcl{\level''\H}{H}  }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{Up}{ \wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up}{ \wp{Dwn }{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Dwn}{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H}}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Dwn}{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{ \wp{Dwn }{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wpWide{Up}{ \wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up}{ \eqcl{\present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{L} = \present~\eqcl{\level''\H}{H}  }\\
+\Eqv{ \law{$\reuz$-Valid} }&
+	\wp{Up}{ \present~ \eqcl{\level''\H}{H} = \present~\eqcl{\level''\H}{H}  }\\
+\Eqv{ reflexivity of~$=$ }&
+	\wp{Up}{ \true }\\
+\Eqv{\law{$Up$-Def}}&
+	\wp{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{  \true  }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	 \true  \\
 \end{Prf}
 \end{proof}
 
@@ -698,25 +702,24 @@ $\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H} ~~\imp~~ \wp{Comp}{\level\H =
 
 \begin{proof}
 
-%\note{compress this thing a bit?}
 \begin{Prf}&
-	\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}\\
-\Eqv{\law{InterPresent}}&
-	\eqcl{\level\H}{H} = \interpret~\eqcl{\level'\L}{L} \\
-\Imp{\law{$\reuz$-Idem}}&
-	\level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H \\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{ \level\H = \level''\H }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{ \level\H = \level''\H }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{Up}{ \wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level\H = \level''\H }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up}{ \wp{Dwn }{ \level\H = \level''\H }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Dwn}{ \level\H = \level''\H }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\level\H = \level''\H}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Dwn}{ \level\H = \level''\H }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{ \wp{Dwn }{ \level\H = \level''\H }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wp{Up}{ \wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level\H = \level''\H }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up}{ \level\H = \level''\H }\\
+\Eqv{\law{$Up$-Def}}&
+	\wp{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{ \level\H = \level''\H }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\level\H = \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H \\
+\Ffr{\law{$\reuz$-Idem}}&
+	\eqcl{\level\H}{H} = \interpret~\eqcl{\level'\L}{L} \\
+\Eqv{\law{InterPresent}}&
+	\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}\\
 \end{Prf}
 \end{proof}
 
@@ -733,47 +736,46 @@ $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H} ~~\imp~~ \wp{Comp}{ \level'\L = \lev
 We assume $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$.
 	
 \begin{Prf}&
-	\true\\
-\Eqv{reflexivity of $=$}&
-	\eqcl{\level'\L}{L} = \eqcl{\level'\L}{L}\\
-\Eqv{ \law{$\reuz$-Idem} }&
-	\level'\L  = \eqcl{\level'\L}{L}~\reuz~  \level'\L\\
-\Eqv{assumption}&
-	\level'\L  = \present~\eqcl{h}{H}  ~\reuze{L}~  \level'\L\\
-\Eqv{\law{$\reuz$-Valid}}&
-	\level'\L  = \present~ \eqcl{(\eqcl{h}{H}  ~\reuze{H}~   \level\H)}{H}   ~\reuze{L}~   \level'\L\\
-\Eqv{\law{InterPresent }}&
-	\level'\L = \present~ \eqcl{(\interpret~(\present~\eqcl{h}{H})  ~\reuze{H}~  \level\H)}{H}   ~\reuze{L}~   
-\level'\L\\
-\Eqv{assumption}&
-	\level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{H}   ~\reuze{L}~   \level'\L\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{\level'\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{\level'\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{Up}{\wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level'\L = \level''\L  }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up}{\wp{Dwn}{ \level'\L = \level''\L  }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Dwn}{ \level'\L = \level''\L  }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{ \level'\L = \level''\L  }\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Dwn}{ \level'\L = \level''\L  }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{\wp{Dwn}{ \level'\L = \level''\L  }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wp{Up}{\wp{\level''\L \gets \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L}{ \level'\L = \level''\L  }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up}{\level'\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L }\\
+\Eqv{\law{$Up$-Def}}&
+	\wpWide{\level''\H \gets \interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{\level'\L = \present~ \eqcl{\level''\H}{H}   ~\reuze{L}~   \level'\L }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H}{H}   ~\reuze{L}~   \level'\L\\
+\Eqv{assumption}&
+	\level'\L = \present~ \eqcl{(\interpret~(\present~\eqcl{h}{H})  ~\reuze{H}~  \level\H)}{H}   ~\reuze{L}~  \level'\L\\
+\Eqv{\law{InterPresent }}&
+	\level'\L  = \present~ \eqcl{(\eqcl{h}{H}  ~\reuze{H}~   \level\H)}{H}   ~\reuze{L}~   \level'\L\\
+\Eqv{\law{$\reuz$-Valid}}&
+	\level'\L  = \present~\eqcl{h}{H}  ~\reuze{L}~  \level'\L\\
+\Eqv{assumption}&
+	\level'\L  = \eqcl{\level'\L}{L}~\reuz~  \level'\L\\
+\Eqv{ \law{$\reuz$-Idem} }&
+	\eqcl{\level'\L}{L} = \eqcl{\level'\L}{L}\\
+\Eqv{reflexivity of $=$}&
+	\true\\
 \end{Prf}
 \end{proof}
 
 
 
-\head{\law{Doc-Preserve} and \law{Imprecise} requirements}
+\head{\law{Doc-Preserve} and \law{Intended} requirements}
 
-For the \law{Doc-Preserve} and \law{Imprecise} requirements, we give an informal argumentation because of the informal nature of the \close requirement. 
+For the \law{Doc-Preserve} and \law{Intended} requirements, we give an informal argumentation because of the informal nature of the \close requirement. 
 
 From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H \close level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
 
-The \law{Imprecise} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This corresponds to the \law{Imprecise} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ is close to $\eqcl{\level'\L}{L}$. This part of the requirement is therefore a specification of $\interpret$.
+The \law{Intended} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This corresponds to the \law{Intended} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ is close to $\eqcl{\level'\L}{L}$. This part of the requirement is therefore a specification of $\interpret$.
 
 
-On the other hand, \law{Imprecise} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
+On the other hand, \law{Intended} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
 %$\present \eqcl{level''\H}$
  we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guararanteed by \law{$\reuz$-Close} in the same way as on the higher level for \law{Doc-Preserve}.
 
@@ -786,8 +788,7 @@ On the other hand, \law{Imprecise} also states that from the equivalence class $
 %																
 \section{A wildcard representation for equivalence classes} \label{sect:wildcardEq}
 
-%\note{call this a ``finite representation''?}
-In this section, we give a representation for equivalence classes for a simple kind of tree data structures. We introduce a wildcard notation for representing extra state. Furthermore, we specify a reuse function ($\reuz$) for such wildcard values.
+In this section, we give a representation for equivalence classes for a simple kind of tree data structures. We introduce a wildcard notation for representing extra state. Furthermore, we provide an instance of the reuse function ($\reuz$), specific to wildcard values.
 
 % now only trees, still enough. non tree also works if isomorphic.
 
@@ -807,7 +808,7 @@ The specification for reusing extra state is a first step, and needs to be exten
 % constructors are \tt
 % C constructors are meta-constructors  (and T is type var.)
 
-In a tree-structured data type, we can model extra state by leaving certain parts of the tree undetermined. We do this by representing each extra state part by a wildcard, which stands for any possible value of the correct type. The functions $\present$ and $\interpret$ return a value that contains wildcards, thus leaving the extra state in the result undetermined.
+In a tree-structured data type, we can model extra state by leaving certain parts of the tree undetermined. We do this by representing each extra state-part by a wildcard, which stands for any possible value of the correct type. The functions $\present$ and $\interpret$ return a value that contains wildcards, thus leaving the extra state in the result undetermined.
 
 For a type $T$, the corresponding wildcard is denoted by  $\texttt{*}_{T}$ and has type $*_T$ (note the different font):
 
@@ -815,7 +816,7 @@ For a type $T$, the corresponding wildcard is denoted by  $\texttt{*}_{T}$ and h
 \data~*_T  = \texttt{*}_{T}\\
 }
  
-The wildcard for type $T$ represents any possible value of type $T$. Thus, the value $\texttt{*}_{Bool}$ represents any value from the set $\set{{\tt True}, {\tt False}}$, and the value $\texttt{*}_{Int}$ represents any integer. An example shows how wildcards can be used to model extra state in a data type.
+The wildcard for type $T$ represents any possible value of type $T$. Thus, the value $\texttt{*}_{Bool}$ represents any value from the set $\set{{\tt True}, {\tt False}}$, and the value $\texttt{*}_{Int}$ represents any integer. An example shows how wildcards can be used to model extra state equivalence classes in a data type.
 
 %explain diff between type $*$ and value for $\texttt{*}$
 
@@ -825,25 +826,29 @@ Consider a simple binary tree data type:
 \data~Tree  = {\tt Bin}~Bool~Tree~Tree~|~{\tt Leaf}~Bool~Int\\
 }
 
-We can recursively define a type $Tree^*$ that declares the booleans in the nodes and the integers in the leaves to be extra state, by replacing these types in the declaration by wildcards.
+
+We can recursively define a type $Tree^*$ in which we specify for each child type whether or not it is extra state. If, for example, we wish to declare the boolean in the \p{Bin} node and the integer in the \p{Leaf} as extra state, we represent these children by wildcards:
 
 \xpr{
 \data~Tree^*  = {\tt Bin}~*_{Bool}~Tree^*~Tree^*~|~{\tt Leaf}~Bool^*~*_{Int}\\
 }
 
+Note that for a type without children, such as \p{Bool}, the wildcard type is the same as the original type ($\p{Bool}^*=\p{Bool}$). Nevertheless, for uniformity, we replace every child type $T$  by a type $T^*$, even if $T$ has no children.
+
 For simplicity, the constructors for type $T^*$ are the same as for $T$. A sample value of type $Tree^*$ is:
- ${\tt Bin} ~\texttt{*}_{Bool}~ ({\tt Leaf~True}~\texttt{*}_{Int})~({\tt Leaf~False}~\texttt{*}_{Int})$. Note that for a primitive type, such as the boolean in the {\tt Leaf}, we have $Bool^* \eq Bool$, because a primitive type has no children.
+ ${\tt Bin} ~\texttt{*}_{Bool}~ ({\tt Leaf~True}~\texttt{*}_{Int})~({\tt Leaf~False}~\texttt{*}_{Int})$. 
+ 
 % mention that * are terms
 
-For a type $T$, a type $T^*$ declares which parts are extra state. Note that for a single type $T$ several types $T^*$ are possible: whether or not a value is extra state is not determined by its type, but rather by the $T^*$ declarations in which  the value appears as a child. Hence, in the example, a boolean in a ${\tt Bin}$ node is extra state, whereas a boolean in a ${\tt Leaf}$ is not. 
+For a type $T$, a type $T^*$ specifies which parts of it are extra state. Note that for a single type $T$ several types $T^*$ are possible: whether or not a value is extra state is not determined by its type, but rather by the $T^*$ declarations in which  the value appears as a child. In the example, a boolean in a ${\tt Bin}$ node is extra state, whereas a boolean in a ${\tt Leaf}$ is not. The editor designer specifies which parts of a $Level$ type are extra state by declaring an appropriate $Level^*$.
 
-Because a wildcard represents the set of all possible values of a certain type, a value containing a wildcard represents a set of values. A value that contains several wildcards also represents the set that is formed by taking all possible combinations of values for the wildcards. 
+Because a wildcard represents the set of all possible values of a certain type, a value containing a wildcard also represents a set of values. A value that contains several wildcards also represents the set that is formed by taking all possible combinations of values for the wildcards.
 
 We use the notation $\para{x}$ for the set of values represented by a value $x \tp T^*$. Thus,  $\para{\texttt{C~*}_{Bool} \texttt{*}_{Bool}} = \set{{\tt C~True~True}, {\tt C~True~False}, {\tt C~False~True}, {\tt C~False~False}}$.
 
 In order to obtain a $T^*$ value for a value of type $T$, we define a function $\core \tp T \to T^*$, which drops all information that is masked by a wildcard in the $T^*$ definition. For example, for the type definition $\mathbf{data}~T^* = \texttt{T}~Int~*_{Bool}$, we have $\core~(\texttt{T}~1~\texttt{True}) = \texttt{T}~1~\texttt{*}_{Bool}$.
 
-The root of the document cannot be extra state, because it is not a child of any constructor. Even though it is unlikely that we want the root to be extra state, it may still be declared as such by using a dummy root type $\data~R = {\tt R}~Root$, and declare the $Root$ child as extra state: $\data~R^* = {\tt R}^*~*_{Root}$.  
+The root of the document cannot be extra state, because it is not a child of any constructor. Even though it is unlikely that we want the root to be extra state, it may still be declared as such by using a dummy root type $\data~R = {\tt R}~Root$, and declare the $Root$ child as extra state: $\data~R^* = {\tt R}~*_{Root}$.  
 
 In general, we regard a recursive first-order Haskell data type $T$ as:
 
@@ -912,7 +917,7 @@ x \eqstar y \is  \core~x = \core~y
 To see that $\eqstar$ is an equivalence relation, we need the theorem below, the simple proof of which has been omited:
 
 \xpr{
-(\exists f : \forall x,y : x\;R\;y ~\eqv~ (f~x = f~y)) ~\eqv~ \text{``$R$~is an equivalence relation''}
+\text{``$R$~is an equivalence relation''}~~\eqv~~\exists f : \forall x,y : x\;R\;y ~\eqv~ (f~x = f~y)
 }
 
 By substituting $\core$ for $f$ and $\eqstar$ for $R$ in this theorem, we can immediately conlude that $\eqstar$ is an equivalence relation on $T$. 
@@ -1043,8 +1048,8 @@ A wildcard type $\Level^*\H$ induces an equivalence relation $\eqstar$ and the c
 To disambiguate instances of $\core$ for the different levels, we use subscripts H and L (rather than the verbose $\Level^*\H$ and $\Level^*\H$).  The equivalence classes on the higher and lower levels can be expressed as: 
 
 \xprlab{
-h\;H\;h' \is  \core\!\H~h = \core\!\H~h'\\
-l\;L\;l' \is  \core\!\L~l = \core\!\L~l'\\
+h\;H\;h'	&\is	&\core\!\H~h = \core\!\H~h'\\
+l\;L\;l' 	&\is	&\core\!\L~l = \core\!\L~l'\\
 %\eqcl{h}{H} \eq \para{ \core_{\!H}~h}_{\!_{H}}\\
 %\eqcl{l}{L} \eq \para{ \core_{\!L}~l}_{\!_{L}}\\
 }{Restrict}
@@ -1082,13 +1087,10 @@ We define $\reuz$ in terms of $\reuzestar$:
 
 %\note{maybe mention that we cannot use this one on composition eq. classes}
 
-We have to prove that $\reuz$ is a well defined function and that it meets the \law{$\reuz$-Valid}, \law{$\reuz$-Idem}, and  
-\law{$\reuz$-Close} requirements from Section~\ref{sect:singleExtra_Editing}. 
-
-The function $\reuz$ is a well-defined function on equivalence classes if for all elements in an equivalence class, $\reuz$ gives the same result.
+In order for this definition to be valid, we have to verify that it returns the same result for all elements in an equivalence class.
 
 \xpr{
-\eqcl{x}{R} = \eqcl{x'}{R}  ~~\imp~~ \eqcl{x}{R} \reuz y \equ \eqcl{x'}{R} \reuz y
+x\;R\;x'  ~~\imp~~ \eqcl{x}{R} \reuz y \equ \eqcl{x'}{R} \reuz y
 }
 \begin{proof}
 \begin{Prf}&
@@ -1104,7 +1106,8 @@ The function $\reuz$ is a well-defined function on equivalence classes if for al
 \end{proof}
 
 
-Before we prove validity and idempotency, we introduce a more uniform wildcard type that simplifies the proofs.
+Before we prove that  $\reuz$ meets  the \law{$\reuz$-Valid}, \law{$\reuz$-Idem}, and  
+\law{$\reuz$-Close} requirements from Section~\ref{sect:singleExtra_Editing}, we introduce a more uniform wildcard type that will simplify the proofs.
 
 \head{The $T\st$ type}
 
@@ -1246,26 +1249,26 @@ $y^i \in \para{x\st_i} ~\imp~  x\st_i \reuzestar y_i = y_i$\\
 
 {\bf Case} $x\st = \p{C}~x\st_0 \dots x\st_n$ and $y = \p{C}'~y_0 \dots y_m$, with $\p{C} \neq \p{C}'$:\\
 
-This case does not occur, since the assumption $y \in \para{x\st}$ implies $\p{C} \equ \p{C}'$:
+This case does not occur, because we have $\p{C} \equ \p{C}'$ from the assumption $y \in \para{x\st}$:
 
 
 \begin{Prf}&
-	y \in \para{x\st}\\
-\Eqv{definitions of $x\st$ and $y$}&
-	\p{C}'~y_0 \dots y_m \in \para{\p{C}~x\st_0 \dots x\st_n}\\
-\Eqv{\law{$\para{\hole}$-Def}}&
-	\p{C}'~y_0 \dots y_m \in \setof{ \p{C}~x_0 \dots x_n}{x_0 \in \para{x\st_0} ~\land \dots  \land~ x_n \in \para{x\st_n}}\\
-\Eqv{property of set comprehension}&
 	\p{C}' \equ \p{C}\\
+\Eqv{property of set comprehension}&
+	\p{C}'~y_0 \dots y_m \in \setof{ \p{C}~x_0 \dots x_n}{x_0 \in \para{x\st_0} ~\land \dots  \land~ x_n \in \para{x\st_n}}\\
+\Eqv{\law{$\para{\hole}$-Def}}&
+	\p{C}'~y_0 \dots y_m \in \para{\p{C}~x\st_0 \dots x\st_n}\\
+\Eqv{definitions of $x\st$ and $y$}&
+	y \in \para{x\st}\\
 \end{Prf}
 \end{proof}
 
 
 \head{Closeness}
 
-For the requirement \law{$\reuz$-Close}, we cannot give a formal proof because we have no formal description of closeness. In fact, our first  definition of $\reuzestar$ based on structure only does not guarantee much closeness after a structural update.
+For the requirement \law{$\reuz$-Close}, we cannot give a formal proof because we have no formal description of closeness. In fact, as we have seen in Section~\ref{subsect:defReuseStar}, our first  definition of $\reuzestar$ does not guarantee much closeness after a structural update. The next section sketches a $\reuzestar$ function that can handle structural updates.
 
-Consider an expression editor with whitespace in extra state. If \verb|1+2| is updated to \verb|1*2|, then $\reuzestar$ will fail to recover the white space, because of the structural difference between the sum and the product. As a result, the default whitespace is chosen for the product, as well as for its children. Because of the structural similarity between sums and products, it can be argued that a product with white space copied from the sum is closer to the original sum than a product with default whitespace. The next section sketches a $\reuzestar$ function that can handle structural updates.
+%Consider an expression editor with whitespace in extra state. If \verb|1+2| is updated to \verb|1*2|, then %$\reuzestar$ will fail to recover the white space, because of the structural difference between the sum and the %product. As a result, the default whitespace is chosen for the product, as well as for its children. Because of the %structural similarity between sums and products, it can be argued that a product with white space copied from the %sum is closer to the original sum than a product with default whitespace. 
 
 
 \subsection{Improving reuse} \label{subsect:reuseid}
@@ -1278,18 +1281,18 @@ If tree nodes have identities that are preserved by edit operations, an extra st
 
 \xpr{
 \reuzestar ::  T^* \to Level \to T\\
-\p{C}_{id}~x^*_0 \dots x^*_n ~\reuzestar~ y = \p{C}_{id}~x'_0 \dots x'_n\\
+\p{C}_{id}~x^*_0 \dots x^*_n ~\reuzestar~ level = \p{C}_{id}~x'_0 \dots x'_n\\
 ~\textbf{where}~x'_i = \left\{
 \begin{array}{lll}
-x^*_i ~\reuzestar~ y	& \textbf{if}~x^*_i \neq \texttt{*}_{t}\\
-y_i  				& \textbf{if}~\fn{lookup}~id~y = \p{C}~y_0 \dots y_n \\
-y_j  				& \textbf{if}~\fn{lookup}~id~y = \p{C}'~y_0 \dots y_n \land \p{C} \neq \p{C}' \\
+x^*_i ~\reuzestar~ level	& \textbf{if}~x^*_i \neq \texttt{*}_{t}\\
+y_i  				& \textbf{if}~\fn{lookup}~id~level = \p{C}~y_0 \dots y_n \\
+y_j  				& \textbf{if}~\fn{lookup}~id~level = \p{C}'~y_0 \dots y_n \land \p{C} \neq \p{C}' \\
 				& ~~~~ \exists j : y_j~\text{``is similar to''}~x_i\\
 \default~(\p{C}~x^*_0 \dots x^*_n) & \textbf{otherwise}
 \end{array}\right.
 }
 
-In contrast to $\reuzestar$ from Section~\ref{subsect:defReuseStar}, this $\reuzestar$ only recurses on its first argument. The second argument $y$ is the previous value of the root of the level, from which a previous value of a node can be looked up based on its identity. In the definition, there are four cases for $x'_i$. The first case is when $x_i$ is not an extra state value, and its result is the recursive application of $\reuzestar$.
+In contrast to $\reuzestar$ from Section~\ref{subsect:defReuseStar}, this version of $\reuzestar$ only recurses on its first argument. The second argument ($level$) is the previous value of the root of the level, from which a previous value of a node can be looked up based on its identity. In the definition, there are four cases for $x'_i$. The first case is when $x_i$ is not an extra state value, and its result is the recursive application of $\reuzestar$.
 
 If $x_i$ is extra state, then $\fn{lookup}~id~y$ is used to obtain the previous value of its parent. If the lookup succeeds and the previous value has the same constructor ($\p{C}$), then all extra state children can be copied from the previous value.
 
@@ -1334,7 +1337,7 @@ In order to describe the architecture of Proxima, we refine the single-layer mod
 To make it explicit that $\present$ and $\interpret$ are composite functions in this section, we denote the functions by $\present\C$ and $\interpret\C$.
 
 We assume that  $\present\C$ is given and that it can be split into components $\present\H$ and $\present\L$. For these components, we recursively obtain specifications for  $\interpret\H$ and $\interpret\L$. The specification for $\interpret\C$ is a composition of $\interpret\H$ and $\interpret\L$.
-\todo{what about es?? partially specified?}
+\nonote{what about es?? partially specified?}
 
 \bc Rather than splitting aconsidering all layers at once, we look at a composite layer that consists of an upper and a lower layer with a middle data level in between. \ec
 
@@ -1380,11 +1383,11 @@ It turns out that splitting the presentation mapping and constructing $\interpre
 %}
 %
 
-Before we show the compositions for $\present\C$ and $\interpret\C$, we first take a look at what the composition looks like if we view the mappings as relations $\Present\C$ and $\Interpret\C$ rather than as functions between equivalence classes. The relation view is somewhat simpler because it does not explicitly refer to the various extra state equivalence classes in the composition.
+Before we show the compositions for $\present\C$ and $\interpret\C$, we first take a look at what the compositions look like if we view the mappings as relations $\Present\C$ and $\Interpret\C$ rather than as functions between equivalence classes. The relation view is somewhat simpler because it does not explicitly refer to the various extra state equivalence classes in the composition.
 
 \head{Composite $Present\C$ and $Interpret\C$}
 
-For the specification of a composite interpretation mapping, we split (or decompose) the presentation mapping whereas we compose the interpretation mapping. However, from a formal standpoint there is no distinction between splitting and composing, since both imply that the composite relation is the relational composition of two other relations. Hence, we ignore this distinction for $Present\C$ and $Interpret\C$.
+For the specification of a composite interpretation mapping, we split (or decompose) the presentation mapping, whereas we compose the interpretation mapping. However, from a formal point of view there is no distinction between splitting and composing, since in both cases the composite relation is the relational composition of two other relations. Hence, we ignore this distinction for $Present\C$ and $Interpret\C$.
 
 The components of $\Present\C$ and $\Interpret\C$ are 
 %$\Present\H$, $\Present\L$, $\Interpret\L$, $\Interpret\H$, with these types:
@@ -1416,18 +1419,24 @@ h~\Interpret\C ~l ~\eqv~ \exists m : h~\Interpret\H~m \land m~\Interpret\L~l\\
 \head{Composite $present\C$ and $interpret\C$}
 
 
-We can split $\present\C$ and compose $\interpret\C$, similar to $Present\C$ and $Interpret\C$  with the difference that all relations are now represented by functions between equivalence classes. This gives rise to various equivalence classes, which are explained in more detail below.
-
-Because not every composition of two relations that are functions between equivalence classes yields a relation that is a function between equivalence classes itself, the definitions below need additional restrictions to be valid. We will provide these restrictions in the form of two requirements for the components of $\present\C$ and $\interpret\C$.
+We can split $\present\C$ and compose $\interpret\C$, similar to $Present\C$ and $Interpret\C$  with the difference that all relations are now represented by functions between equivalence classes. 
+%This gives rise to various equivalence classes, which are explained in more detail below.
+However, even if two relations are both functions between equivalence classes, this does not guarantee that their composition is also function between equivalence classes. Hence, the composite definitions will need additional restrictions to be valid. We will provide these restrictions in the form of two extra requirements for the components of $\present\C$ and $\interpret\C$.
 
 %defs give problems, which are remedied with additional restriction.
 
 %However, because the composite relations as well as the components must be expressible as functions between %equivalence classes, we will need some additional restrictions that are explained below. First, we show the %compositions for $\present\C$ and $\interpret\C$.
 %In line with the composition of their relational counterparts, we define $\present\C$ and $\interpret\C$ as:
 
-We assume the existence of $\present\C$, which, for a certain $\Level\M$ (and certain equivalence classes $HH$, $HL$, $LH$, and $LL$), can be decomposed into 
-$\present\H  \tp \Eqcl{\Level\H}{HH} \to  \Eqcl{\Level\M}{HL}$  and $\present\L \to \Eqcl{\Level\M}{LH} \rightarrow  \Eqcl{\Level\L}{LL}$, similar to relation $\Present\C$. (Note the reversed order in the types, as was explained in Section~\ref{sect:editProces}.)
+We assume the existence of $\present\C$$~\tp~$$\Eqcl{\Level\H}{CH}$$~\to~$$\Eqcl{\Level\L}{CL}$, which, for a certain type $\Level\M$ (and certain equivalence classes $HH$, $HL$, $LH$, and $LL$), can be decomposed into 
+$\present\H  \tp \Eqcl{\Level\H}{HH} \to  \Eqcl{\Level\M}{HL}$  and $\present\L \tp \Eqcl{\Level\M}{LH} \rightarrow  \Eqcl{\Level\L}{LL}$.
 
+In the types of the $\present\C$, $\present\H$ and $\present\L$, there are six different equivalence relations: both the upper and lower layer have equivalence relations on their respective upper and lower levels ($HH$, $HL$, $LH$, and $LL$), and from $\present\C$ we have $CH$ and $CL$. 
+%The four relations are apparent in the types of $\present\H$ and $\present\L$:
+Although the type of the middle level ($\Level\M$) is equal for both layers, the equivalence relations are likely to be different 
+($HL \neq LH$) because the presentation extra state of the upper layer is most likely different from the interpretation extra state of the lower layer.  Similarly, on $Level\H$ and $\Level\L$, the equivalence relations for $\present\C$ ($CH$ and $CL$) do not have to be equal to the~relations of the two component layers ($HH$ and $LL$). Thus, in total, we have the six equivalence relations that are shown in Figure~\ref{relationsInLayer}.
+
+We cannot compose $\present\H$ and $\present\L$ using function composition, because the equivalence classes on the middle level do not match ($\Eqcl{\Level\M}{HL}$ versus $\Eqcl{\Level\M}{LH}$). Hence, we write the composition as a relational composition, similar to $\Present\C$. (Note the reversed order of the types, as was explained in Section~\ref{sect:editProces}.)
 
 \xprlab{
 \multicolumn{4}{@{}l}{\present\C \tp \Eqcl{\Level\H}{CH} \to  \Eqcl{\Level\L}{CL}}\\
@@ -1441,6 +1450,8 @@ $\present\H  \tp \Eqcl{\Level\H}{HH} \to  \Eqcl{\Level\M}{HL}$  and $\present\L 
 %\present\L    &\tp& \Eqcl{\Level\M}{LH} \rightarrow  \Eqcl{\Level\L}{LL}\\
 %}
 
+
+
 For the components $\present\L$ and $\present\H$, we have a specification of
 $\interpret\L \tp \Eqcl{\Level\L}{LL} \to \Eqcl{\Level\M}{LH}$ and $\interpret\H  \tp \Eqcl{\Level\M}{HL} \to \Eqcl{\Level\H}{HH}$, which we compose to define $\interpret\C$:
 
@@ -1452,16 +1463,14 @@ $\interpret\L \tp \Eqcl{\Level\L}{LL} \to \Eqcl{\Level\M}{LH}$ and $\interpret\H
  & &~~\land	& \eqcl{m}{LH} & = \interpret\L~\eqcl{l}{LL}
 }{$\interpret$-Compose}
 
-Because the equivalence classes on the middle level do not match ($\Eqcl{\Level\M}{HL}$ versus $\Eqcl{\Level\M}{LH}$), we cannot simply use function composition for $\present\C$ and $\interpret\C$. However, we can use Kleisli composition on set-valued functions to give a equivalent point-free definition of  the compositions:
+Although we cannot use function composition, we can use Kleisli composition on set-valued functions to give an equivalent point-free definition of  the compositions:
 
 \xpr{
 \present\C \oo \eqcl{\hole}{CH} \equ (\present\L \oo \eqcl{\hole}{LH}) \klei  (\present\H \oo \eqcl{\hole}{HH})\\
 \interpret\C \oo \eqcl{\hole}{CL} \equ (\interpret\H  \oo \eqcl{\hole}{HL}) \klei  (\interpret\L  \oo \eqcl{\hole}{LL})
 }
 
-Before we discuss the restrictions we need for both compositions to be valid, we take a look at the equivalence classes that play a role in a composite layer.
-
-\head{Equivalence classes in a composite layer}
+Before we discuss the restrictions we need for both compositions to be valid, we give a simple example, which shows that equivalence relations on the same level can be different. Consider a function $\present\C$  with its type written in the wildcard style from Section~\ref{sect:wildcardEq}.
 
 
 %\xpr{
@@ -1486,10 +1495,8 @@ In line with the previous sections, we would like to represent the two relations
 
 %%%%%%%%%%%%%%%% different es relations:
 %First, we take a look at the equivalence relations that play a role in the composition of two layers. 
-From the types of the $\present\C$, $\present\H$ and $\present\L$, we see that there are six equivalence classes involved. Both the upper and lower layer have equivalence relations on their respective upper and lower levels: $HH$, $HL$, $LH$, and $LL$. 
-%The four relations are apparent in the types of $\present\H$ and $\present\L$:
-Although the type of the middle level ($\Level\M$) is equal for both layers, the equivalence relations are likely to be different 
-($HL \neq LH$) because the presentation extra state of the upper layer is most likely different from the interpretation extra state of the lower layer.  Similarly, on $Level\H$ and $\Level\L$, the equivalence relations for $\present\C$ ($CH$ and $CL$) do not have to be equal to  the relations of the two component layers ($HH$ and $LL$). Thus, in total, we have the six equivalence relations that are shown in Figure~\ref{relationsInLayer}.
+
+
 
 \begin{figure}
 \begin{center} 
@@ -1509,7 +1516,6 @@ Although the type of the middle level ($\Level\M$) is equal for both layers, the
 
 
 
-A simple example shows that equivalence relations on one level can be different. Consider a function $\present\C$  with its type written in the wildcard style from Section~\ref{sect:wildcardEq}.
 
 \xpr{
 \present\C \tp (Int, *_{Int}) \to Int\\
@@ -1672,13 +1678,13 @@ The \law{InterPresent} requirement holds for a composition if it holds for the u
 The proof is simple:
 
 \begin{Prf}&
-	\eqcl{l}{CL} = \present\C~\eqcl{h}{CH}\\
-\Eqv{ \law{$\present$-Compose}}& 
-	\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
-\Imp{ \law{InterPresent} for higher and lower layers}&
-	\exists m : \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL} \land \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL}\\ 
-\Eqv{ \law{$\interpret$-Compose}}&
 	\eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL}\\
+\Eqv{ \law{$\interpret$-Compose}}&
+	\exists m : \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL} \land \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL}\\ 
+\Ffr{ \law{InterPresent} for higher and lower layers}&
+	\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
+\Eqv{ \law{$\present$-Compose}}& 
+	\eqcl{l}{CL} = \present\C~\eqcl{h}{CH}\\
 \end{Prf}
 
 
@@ -1703,7 +1709,7 @@ Layers are composed in a ``top-associative'' way: the higher component layer may
 $(\present_{n} \oo \present_{n-1} \oo \cdots \oo \present_1 \oo \interpret_1 \oo \cdots \oo \interpret_{n-1}\oo \interpret_{n})$
 
 The most logical way to decompose this computation is by splitting it into $\present_{n}$, $\interpret_{n}$, and
-$(\present_{n-1} \oo \cdots \oo \interpret_{n-1})$. This corresponds to splitting off an atomic layer at the bottom.
+$(\present_{n-1} \oo \cdots \oo \interpret_{n-1})$. This corresponds to splitting off an atomic layer at the bottom of a composite layer.
 
 
 
@@ -1800,9 +1806,7 @@ For the equivalence relations we denote $CH_i$, $CL_i$, $CH_{i-1}$, $CH_{i-1}$, 
 
 \subsection{Editing} \label{sect:compositeExtraEditing}
 
-Besides $level\H$ and $level\L$, a composite layer also keeps track of the middle level $level\M$. Before the edit operation we know $\eqcl{Level\L}{CL} \eq present\C \eqcl{Level\H}{CH}$. By \law{$\present$-Compose}, this implies there exists a middle level $m$ that is in the presentation of $level\H$ and that has $\level\L$ in its presentation. Although not explicitly denoted, we assume that $level\M$ is this $m$. 
-
-
+Besides $level\H$ and $level\L$, a composite layer also keeps track of the middle level $level\M$. Before the edit operation we know $\eqcl{Level\L}{CL} \eq present\C \eqcl{Level\H}{CH}$. By \law{$\present$-Compose}, this implies there exists a middle level $m$ for which we have $\eqcl{\level\L}{LL} = \present\L~\eqcl{m}{LH}$ and $\eqcl{m}{HL} = \present\H~\eqcl{\level\H}{HH}$ . Although not explicitly denoted, we assume that $level\M$ is this $m$.
 
 \begin{figure}
 \begin{small}
@@ -1836,6 +1840,8 @@ After the lower-level update, the lower layer computes an intermediate value $\l
 
 Figure~\ref{compositeEdit} sketches the updates to the various data levels. Note that the figure is just a sketch, since $\present$ and $\interpret$ are functions between equivalence classes instead of values (as the figure might suggest). 
 
+\head{Requirements}
+
 Apart from a few changes to the subscripts, the requirements for $level''\H$ and $level''\L$ are equal to the requirements for the single-layered editor in Section~\ref{sect:singleExtra_Editing}. The only difference is that we explicitly added the precondition of the edit step ($\eqcl{\level\L}{CL} = \present\C~\eqcl{\level\H}{CH}$) to the precondition of \law{Doc-Inert}. We need it here, because \law{Doc-Inert} can only hold if the middle level is a valid presentation of $\level\H$. 
 
 \xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} } }		{Postcondition}
@@ -1848,7 +1854,7 @@ Apart from a few changes to the subscripts, the requirements for $level''\H$ and
 {Comp} \{ \level\H = \level''\H\} }  {Doc-Inert}
 \xprlab{\hoare{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}} {Comp} { \level'\L = \level''\L}}		{Pres-Inert}
 \xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
-\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Intended}
 
 \head{Definition of $Comp$}
 
@@ -1918,25 +1924,25 @@ It has a simple proof:
 Using this result, we prove \law{Postcondition}.
 
 \begin{Prf}&
-	\true\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{ \true }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{ \true}\\
-\Imp{\law{\fn{wp}-Mono} and \law{I.H.}}&
-	\wp{Up}{ \wp{ Comp_{n-1}}{  \eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH} }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1}}{\eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH}} \\
-\Imp{\law{\fn{wp}-Mono} and previous result}&
-	\wp{Up \semi Comp_{n-1}}{ \eqcl{\present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\fn{wp}({Up \semi Comp_{n-1}},~{ \wpWide{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} )} }  \\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH}}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\fn{wp}({Up \semi Comp_{n-1}},~{ \wpWide{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} )} }  \\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up \semi Comp_{n-1}}{ \eqcl{\present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{CL} = \present\C~\eqcl{\level''\H}{CH} }\\
+\Ffr{\law{\fn{wp}-Mono} and previous result}&
+	\wp{Up \semi Comp_{n-1}}{\eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH}} \\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{ \wp{ Comp_{n-1}}{  \eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH} }}\\
+\Ffr{\law{\fn{wp}-Mono} and \law{I.H.}}&
+	\wp{Up}{ \true}\\
+\Eqv{\law{$Up$-Def}}&
+	\wp{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{ \true }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\true\\
 \end{Prf}
 \end{proof}
 
@@ -1983,17 +1989,17 @@ The proof of \law{Doc-Inert} is by induction over $n$.
 %\xpr{\true ~\imp~ \wp{Comp}{\eqcl{\level''_0}{=} = \id~\eqcl{\level''_0}{=}}}
 
 \begin{Prf}&
-	\eqcl{\level_0}{=} = \id~\eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \id~\eqcl{\level_0}{=}\\
-\Eqv{definition of $\id$}&
-	\eqcl{\level_0}{=} = \eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \eqcl{\level_0}{=}\\
-\Imp{\law{$\eqhole$-Member}}&
-	\level'_0 \in \eqcl{\level_0}{=}\\
-\Imp{property of equivalence class and symmetry of $=$}&
-	\level_0 = \level'_0\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''_0 \gets \level'_0}{\level_0 = \level''_0}\\
-\Eqv{\law{$Comp$-Def} and $\Level\H \eqv \Level_0$}&
 	\wp{Comp_0}{\level_0 = \level''_0}\\
+\Eqv{\law{$Comp$-Def} and $\Level\H \eqv \Level_0$}&
+	\wp{\level''_0 \gets \level'_0}{\level_0 = \level''_0}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\level_0 = \level'_0\\
+\Ffr{property of equivalence class and symmetry of $=$}&
+	\level'_0 \in \eqcl{\level_0}{=}\\
+\Ffr{\law{$\eqhole$-Member}}&
+	\eqcl{\level_0}{=} = \eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \eqcl{\level_0}{=}\\
+\Eqv{definition of $\id$}&
+	\eqcl{\level_0}{=} = \id~\eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \id~\eqcl{\level_0}{=}\\
 \end{Prf}
 
 
@@ -2018,7 +2024,7 @@ In the proof, we need the existence of an $m_0$ that is in the equivalence class
 	\eqcl{level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}\\
 \Eqv{assumption}&
 	\true\\
-\end{Prf} \note{how to call the ``let $m_0$ be the $m$ from the quantification'' step? }
+\end{Prf}
           
 %\begin{Prf}&
 %	\eqcl{m_0}{HL}\\
@@ -2052,38 +2058,35 @@ Note that the first conjunct in the antecedent of the induction hypothesis is al
 Because we assumed the antecedent of \law{Doc-Inert} (in weakest precondition notation), we complete the proof of the implication by proving its conclusion.
 
 \begin{Prf}&
-	\true\\
-\Eqv{symmetry of $=$}&
-	\present\H~\eqcl{\level\H}{HH} = \present\H~\eqcl{\level\H}{HH}\\
-\Eqv{\law{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}}&
-	\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}\\
-\Eqv{\law{Orthogonal} and $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$}&
-	\eqcl{\eqcl{m_0}{LH}   ~\reuze{LH}~   \level\M}{HL} = \present\H~\eqcl{\level\H}{HH}\\
-\Eqv{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}$}&
-	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{HL} = \present\H~\eqcl{\level\H}{HH}\\
-%\end{Prf}
-%
-%
-%\begin{Prf}&
-%	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{HL} =  \present\H~\eqcl{\level\H}{HH}\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{HH} }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{HH}}\\
-\Imp{\law{\fn{wp}-Mono}, \law{I.H.}, and $\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH}$}&
-	\wp{Up}{ \wp{ Comp_{n-1}}{ \level\H = \level''\H }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1}}{ \level\H = \level''\H }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{Up \semi Comp_{n-1}}{ \wp{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \level\H = \level''\H }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \level\H = \level''\H }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \level\H = \level''\H }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp_n}{\level\H = \level''\H}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \level\H = \level''\H }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \level\H = \level''\H }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wpWide{Up \semi Comp_{n-1}}{ \wp{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \level\H = \level''\H }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up \semi Comp_{n-1}}{ \level\H = \level''\H }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{ \wp{ Comp_{n-1}}{ \level\H = \level''\H }}\\
+\Ffr{\law{\fn{wp}-Mono}, \law{I.H.}, and $\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH}$}&
+	\wp{Up}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{HH}}\\
+\Eqv{\law{$Up$-Def}}&
+	\wpWide{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{HH} }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+%	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{HL} =  \present\H~\eqcl{\level\H}{HH}\\
+%\end{Prf}  
+%\begin{Prf}& 
+	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{HL} = \present\H~\eqcl{\level\H}{HH}\\
+\Eqv{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}$}&
+	\eqcl{\eqcl{m_0}{LH}   ~\reuze{LH}~   \level\M}{HL} = \present\H~\eqcl{\level\H}{HH}\\
+\Eqv{\law{Orthogonal} and $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$}&
+	\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}\\
+\Eqv{\law{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}}&
+	\present\H~\eqcl{\level\H}{HH} = \present\H~\eqcl{\level\H}{HH}\\
+\Eqv{symmetry of $=$}&
+	\true\\
 \end{Prf}
-\todo{Maybe reverse these proofs after all?}
 \end{proof}
 
 
@@ -2094,7 +2097,7 @@ Because we assumed the antecedent of \law{Doc-Inert} (in weakest precondition no
 
 \xprlab{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} ~~\imp~~ \wp{Comp_n} { \level'\L = \level''\L}}		{Pres-Inert}
 
-Similar to \law{Doc-Inert}, we cannot guarantee \law{Pres-Inert} without assuming extra conditions. It turns out that we can prove \law{Pres-Inert} if we assume \law{$\present$-Match} \bc \todo{not \law{$\interpret$-Match}??} \ec together with a reversed \law{Orthogonal}, in which the $HL$ and $LH$ relations are swapped. However, because \law{Orthogonal} refers to $\reuze{LH}$, its reverse would have to refer to $\reuze{HL}$, which does not exist. The reason for this is because of the association order in $Comp$, reuse in the presentation direction of the higher layer is the result of the combined effect of the $\reuze{LL}$ functions of the components of the higher layer. Thus, the only way to specify a reversed \law{Orthogonal} is as a condition on the composite layer:
+Similar to \law{Doc-Inert}, we cannot guarantee \law{Pres-Inert} without assuming extra conditions. It turns out that we can prove \law{Pres-Inert} if we assume \law{$\present$-Match} \nonote{not \law{$\interpret$-Match}??} together with a reversed \law{Orthogonal}, in which the $HL$ and $LH$ relations are swapped. However, because \law{Orthogonal} refers to $\reuze{LH}$, its reverse would have to refer to $\reuze{HL}$, which does not exist. The reason for this is the association order in $Comp$: reuse in the presentation direction of the higher layer is the result of the combined effect of the $\reuze{LL}$ functions of the components of the higher layer. Thus, the only way to specify a reversed \law{Orthogonal} is as a condition on the composite layer:
 
 \xprlab{
 \eqcl{\level'\L}{LH}  = \eqcl{m}{LH} ~\imp~ \wp{Comp_{n-1}} {\eqcl{\level''\L}{LH}  = \eqcl{m}{LH}}}{Orthogonal-R}
@@ -2144,21 +2147,17 @@ For wildcard types, \law{Absorption} holds if and only if for all possible value
 
 More generally, \law{Absorption} holds when each $HL$ equivalence class is a union of $LH$ classes. A result of \law{Absorption} is that  $CH$ is equal to $HH$. For the proof of \law{Pres-Inert}, \law{Absorption} implies that the intermediate level that results from interpreting a valid lower level, is itself also valid, which allows us to apply \law{Pres-Inert} inductively to the higher layer.
 
-We do not wish to assume \law{Absorption} for the top-most composition ($\present_1$, $\interpret_1$ and the identity), because it implies that the interpretation extra state of $\present_1$ is absorbed by the presentation extra state of $\id$. As a consequence, the top-most composition would not have interpretation extra state, and therefore neither of the composite layers.
 
+\bc We do not wish to assume \law{Absorption} for the top-most composition ($\present_1$, $\interpret_1$ and the identity), because it implies that the interpretation extra state of $\present_1$ is absorbed by the presentation extra state of $\id$. As a consequence, the top-most composition would not have interpretation extra state. Furthermore, due to absorption, each composite equivalence relation $CH_i$ is equal to $HH$ (or $CH_{i-1}$), 
+\ec
 
-%and thus none of the layers would since all other interpretation extra state is absorbed by presentation extra state.
-\toHere
-Dit nog even snappen en goed uitleggen.
-\fromHere
+Because of \law{Absorption} we have  $CH = HH$. If we denote this with the explicit indices from Figure~\ref{indicesInLayer}, we get $CH_i = CH_{i-1}$. Furthermore, since $CH_0 ~=~ (=)$, this means that $CH_i~=~(=)$, and, thus, no composite layer has interpretation extra state on $Level_0$. This is clearly not a desirable situation, and hence we do not assume \law{Absorption} for the top-most combination. Nevertheless, the result is still quite restrictive, since now the interpretation extra state relation $CH_i$ for each composite layer will be equal to the interpretation extra state relation $H_1$ for $\present_1$. Future research should determine whether this is a problem. If it is, a less-strict condition will need to be established.
 
-To allow interpretation extra state at the top-most composite layer, we give a separate proof the case $n=1$ for \law{Pres-Inert}, in which we do not use \law{Absorption}. 
-
-An important consequence of the fact that we do not assume \law{Absorption} on the top-most composite layer is that in the proof of \law{Doc-Inert}, we cannot use \law{Absorption} to imply \law{$\present$-Match}, \law{$\interpret$-Match}, and \law{Orthogonal} for case $n=1$. However, since for $n=1$, all three conditions trivially hold, we do not need to assume \law{Absorption} for this case.
+Because we do not assume \law{Absorption} at the top-most composite layer, we have to give a separate proof for case $n=1$ of \law{Pres-Inert}, in which we do not use the condition. Furthermore, in the proof of \law{Doc-Inert}, we cannot use \law{Absorption} to imply \law{$\present$-Match}, \law{$\interpret$-Match}, and \law{Orthogonal} for case $n=1$. However, since for $n=1$, these three conditions trivially hold, we do not need to assume \law{Absorption} for this case.
 
 
 \begin{proof}
-In the inductive step of the proof, we need the fact that the lower level is not affected by the assignments of the higher layer. Therefore, we strengthen the pre- and postcondition of \law{Pres-Inert}: \note{more on this?}
+In the inductive step of the proof, we need the fact that the lower level is not affected by the assignments of the higher layer. Therefore, we strengthen the pre- and postcondition of \law{Pres-Inert}:
 
 \xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  ~\land~ \level'_{n+1} = x ~~\imp\\ \wp{Comp_n}{\level'\L = \level''\L  ~\land~ \level'_{n+1} = x}}
 
@@ -2188,7 +2187,8 @@ is evident if we substitute according to \law{$Comp$-Def}:
 \xpr{\eqcl{\level'_0}{=} = \id~\eqcl{h}{H} \land \level'_{1} = x ~\imp~\wp {\level''_0 \gets \level'_0} { \level'_0 = \level''_0 \land \level'_{n+1} = x}}
 \ec
 
-{\bf Case} $n=0$: We omit the trivial proof of this case. \todo{mention we don't need it because we give $n=1$? (and since $n=0$ is only for \id-layer)}
+{\bf Case} $n=0$: We omit the trivial proof of this case. 
+%mention we don't need it because we give $n=1$? (and since $n=0$ is only for \id-layer)
 
 {\bf Case} $n=1$:
 
@@ -2204,45 +2204,44 @@ $\eqcl{\level'\L}{LL} = \present~\eqcl{h}{LH}$. The proof is similar to the proo
 
 	
 \begin{Prf}&
-	\true\\
-\Eqv{reflexivity of $=$}&
-	\eqcl{\level'\L}{LL} = \eqcl{\level'\L}{LL}\\
-\Eqv{\law{$\reuz$-Idem} }&
-	\level'\L  = \eqcl{\level'\L}{LL}~\reuze{LL}~  \level'\L\\
-\Eqv{assumption}&
-	\level'\L  = \present~\eqcl{h}{LH}  ~\reuze{LL}~  \level'\L\\
-\Eqv{\law{$\reuz$-Valid}}&
-	\level'\L  = \present~ \eqcl{\eqcl{h}{LH}  ~\reuze{LH}~   \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
-\Eqv{\law{InterPresent }}&
-	\level'\L = \present~ \eqcl{\interpret~(\present~\eqcl{h}{LH})  ~\reuze{LH}~  \level\M}{LH}   ~\reuze{LL}~   
-\level'\L\\
-\Eqv{assumption}&
-	\level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{\level'\M \gets \interpret~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{\level'\L = \present~ \eqcl{\level'\M}{LH}   ~\reuze{LL}~   \level'\L }\\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{\level'\L = \present~ \eqcl{\level'\M}{LH}   ~\reuze{LL}~   \level'\L }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{Up}{\wp{\level''\M \gets \level'\M}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }}\\
-\Eqv{\law{$Comp$-Def} and $Level\M \eqv \Level_0$}&
-	\wp{Up}{\wp{Comp_0}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_0}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{Up \semi Comp_0}{\wp{\level''\L \gets \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \level'\L = \level''\L  }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up \semi Comp_0}{\wp{Dwn}{ \level'\L = \level''\L  }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_0 \semi Dwn}{ \level'\L = \level''\L  }\\
-\Eqv{\law{$Comp$-Def}}&
 	\wp{Comp_1}{ \level'\L = \level''\L  }\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Comp_0 \semi Dwn}{ \level'\L = \level''\L  }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up \semi Comp_0}{\wp{Dwn}{ \level'\L = \level''\L  }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wp{Up \semi Comp_0}{\wp{\level''\L \gets \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{ \level'\L = \level''\L  }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up \semi Comp_0}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up}{\wp{Comp_0}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }}\\
+\Eqv{\law{$Comp$-Def} and $Level\M \eqv \Level_0$}&
+	\wp{Up}{\wp{\level''\M \gets \level'\M}{\level'\L = \present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up}{\level'\L = \present~ \eqcl{\level'\M}{LH}   ~\reuze{LL}~   \level'\L }\\
+\Eqv{\law{$Up$-Def}}&
+	\wpWide{\level'\M \gets \interpret~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{\level'\L = \present~ \eqcl{\level'\M}{LH}   ~\reuze{LL}~   \level'\L }\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
+\Eqv{assumption}&
+	\level'\L = \present~ \eqcl{\interpret~(\present~\eqcl{h}{LH})  ~\reuze{LH}~  \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
+\Eqv{\law{InterPresent }}&
+	\level'\L  = \present~ \eqcl{\eqcl{h}{LH}  ~\reuze{LH}~   \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
+\Eqv{\law{$\reuz$-Valid}}&
+	\level'\L  = \present~\eqcl{h}{LH}  ~\reuze{LL}~  \level'\L\\
+\Eqv{assumption}&
+	\level'\L  = \eqcl{\level'\L}{LL}~\reuze{LL}~  \level'\L\\
+\Eqv{\law{$\reuz$-Idem} }&
+	\eqcl{\level'\L}{LL} = \eqcl{\level'\L}{LL}\\
+\Eqv{reflexivity of $=$}&
+	\true\\
 \end{Prf}
 
 This completes the proof of the first conjunct of the postcondition. For the second conjunct, we need to prove:
 
 \xpr{ \eqcl{\level'\L}{LH} = \present\L~\eqcl{h}{LH}  ~\land~ \level'_{2} = x ~~\imp\\ \wp{Comp_1}{\level'_{2} = x}}
 
-which trivially holds, because $Comp_1$ only performs assignments on levels 0 and 1. Hence, by \law{\fn{wp}-And}, we conclude: 
+which trivially holds, because $Comp_1$ only performs assignments on levels~0 and~1. Hence, by \law{\fn{wp}-And}, we conclude: 
 
 \xpr{ \eqcl{\level'\L}{LH} = \present\L~\eqcl{h}{LH}  ~\land~ \level'_{2} = x ~~\imp\\ \wp{Comp_1}{\level'\L = \level''\L  ~\land~ \level'_{2} = x}}
 
@@ -2387,29 +2386,30 @@ Now we can prove the inductive step using the induction hypothesis:
 %	\end{array}\\
 %	 }
 
-The proof starts with the conjunction of the two intermediate results that we just proved.
 
-\begin{Prf}
-  &	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{HL} = \present\H~\eqcl{h}{HH} ~\land\\
-  &	\level'\L = \present\L~ \eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{LH}   \reuze{LL}   \level'\L\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{\eqcl{\level'\M}{HL} = \present\H~\eqcl{h}{HH} \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L} \\
-\Eqv{\law{$Up$-Def}}&
-	\wp{Up}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{h}{HH}  \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L}\\
-\Imp{\law{\fn{wp}-Mono} and \law{I.H.}}&
-	\fn{wp}({Up},~{ \wpWide{ Comp_{n-1}}{ \level'\M = \level''\M \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L)}}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1}}{  \level'\M = \level''\M \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L}\\
-\Imp{\law{\fn{wp}-Mono} and Leibniz}&
-	\wp{Up \semi Comp_{n-1}}{ \level'\L = \present\L~ \eqcl{\level''\M}{LH}   \reuze{LL}   \level'\L}\\
-\Eqv{\law{\fn{wp}-$\gts$}}&
-	\wpWide{Up \semi Comp_{n-1}}{ \wp{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   \reuze{LL}   \level'\L}{ \level'\L = \level''\L }}\\
-\Eqv{\law{$Dwn$-Def}}&
-	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \level'\L = \level''\L }}\\
-\Eqv{\law{\fn{wp}-$\smi$}}&
-	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \level'\L = \level''\L }\\
-\Eqv{\law{$Comp$-Def}}&
+\begin{Prf} &
 	\wp{Comp_n}{\level'\L = \level''\L}\\
+\Eqv{\law{$Comp$-Def}}&
+	\wp{Up \semi Comp_{n-1} \semi Dwn}{ \level'\L = \level''\L }\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\wp{Up \semi Comp_{n-1}}{ \wp{Dwn }{ \level'\L = \level''\L }}\\
+\Eqv{\law{$Dwn$-Def}}&
+	\wpWide{Up \semi Comp_{n-1}}{ \wp{\level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   \reuze{LL}   \level'\L}{ \level'\L = \level''\L }}\\
+\Eqv{\law{\fn{wp}-$\gts$}}&
+	\wp{Up \semi Comp_{n-1}}{ \level'\L = \present\L~ \eqcl{\level''\M}{LH}   \reuze{LL}   \level'\L}\\
+\Ffr{\law{\fn{wp}-Mono} and Leibniz}&
+	\wp{Up \semi Comp_{n-1}}{  \level'\M = \level''\M \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L}\\
+\Eqv{\law{\fn{wp}-$\smi$}}&
+	\fn{wp}({Up},~{ \wpWide{ Comp_{n-1}}{ \level'\M = \level''\M \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L)}}\\
+\Ffr{\law{\fn{wp}-Mono} and \law{I.H.}}&
+	\wp{Up}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{h}{HH}  \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L}\\
+\Eqv{\law{$Up$-Def}}&
+	\wpWide{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{\eqcl{\level'\M}{HL} = \present\H~\eqcl{h}{HH} \land \level'\L = \present\L~ \eqcl{\level'\M}{LH}   \reuze{LL}   \level'\L} \\
+\Eqv{\law{\fn{wp}-$\gts$}} &
+	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{HL} = \present\H~\eqcl{h}{HH} ~\land\\
+  &	\level'\L = \present\L~ \eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}  \level\M}{LH}   \reuze{LL}   \level'\L\\
+\Eqv{the two intermediate results we just proved} &
+	\true\\
 \end{Prf}
 
 This completes the proof of the first postcondition conjunct:
@@ -2430,7 +2430,7 @@ which holds, because $Comp_n$ only does assignments on levels $0 \dots n$. Thus,
 
 %Story on compatibility here? Or in conclusions?
 %
-%Explanation compatible. Even if h exists, moving in lower med eq. class could lead to levelH not in [h] (probably must be an %imprecise edit). This would cause $l$ update. 
+%Explanation compatible. Even if h exists, moving in lower med eq. class could lead to levelH not in [h] (probably must be an %intended edit). This would cause $l$ update. 
 %
 %In order to prevent, for all variation we require validity (and hence by pres-inert stay in correct class), or if invalid, at least stay %in same class.
 %
@@ -2471,21 +2471,21 @@ which holds, because $Comp_n$ only does assignments on levels $0 \dots n$. Thus,
 %
 
 
-\subsection{\law{Doc-Preserve} and \law{Imprecise} requirements}
+\subsection{\law{Doc-Preserve} and \law{Intended} requirements}
 
-Similar to the single-layered editor, \law{Doc-Preserve} states that interpretation extra state is reused, whereas \law{Imprecise} has a double function. The requirement states both that presentation extra state is reused, as well as that the final lower level resembles the updated lower level. 
+Similar to the single-layered editor, \law{Doc-Preserve} states that interpretation extra state is reused, whereas \law{Intended} has a double function. The requirement states both that presentation extra state is reused, as well as that the final lower level resembles the updated lower level. 
 
 Consider the interpretation extra state of the composition, which is represented by the equivalence classes of $CH$. Each of these classes consists of a number of $HH$ classes. If we do not assume \law{Absorption }, then closeness in a class of $CH$ is established in two steps. The lower layer selects the closest $HH$ class by \law{$\reuz$-Close}, after which  \law{Doc-Preserve}  of the higher layer selects the closest element from this class.
 
 On the other hand, if \law{Absorption} holds, then each $CH$ class corresponds to exactly one $HH$ class, and closeness is guaranteed by \law{Doc-Preserve} on the higher layer.
 
-The part of \law{Imprecise} for reusing presentation extra state is guaranteed by the component layers in a similar way as for interpretation extra state (without assuming \law{Absorption}). The other part of \law{Imprecise} must be guaranteed by 
+The part of \law{Intended} for reusing presentation extra state is guaranteed by the component layers in a similar way as for interpretation extra state (without assuming \law{Absorption}). The other part of \law{Intended} must be guaranteed by 
 $\interpret\L$ and $\interpret\H$, and thus serves as the specification of these functions. %\note{this seems to be quite complicated}
 
-\todo{more on nature of composite closeness?}
+\nonote{more on nature of composite closeness?}
 %\bl
 %\o preses is composition of pres es on middle and on lower, composite reuse must guarantee closeness.
-%\o imprecise is 2-step, each step does closer. hence, only editors that close is this way. if a h exists that is closer to l', but for %which m isn't, then not computed.
+%\o intended is 2-step, each step does closer. hence, only editors that close is this way. if a h exists that is closer to l', but for %which m isn't, then not computed.
 %\el
 
 %\bl
@@ -2497,10 +2497,10 @@ $\interpret\L$ and $\interpret\H$, and thus serves as the specification of these
 
 From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H ``close~to'' level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
 
-The \law{Imprecise} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This corresponds to the \law{Imprecise} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ is close to $\eqcl{\level'\L}{L}$. The requirement is therefore a specification of $\interpret$.
+The \law{Intended} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This corresponds to the \law{Intended} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ is close to $\eqcl{\level'\L}{L}$. The requirement is therefore a specification of $\interpret$.
 
 
-On the other hand, \law{Imprecise} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
+On the other hand, \law{Intended} also states that from the equivalence class $\eqcl{\level''\L}{L}$,
 %$\present \eqcl{level''\H}$
  we want to choose an element that is as close as possible to $level'\L$ regarding its extra state. This closeness is guararanteed by \law{$\reuz$-Close} analogous to the higher level.
 
@@ -2513,7 +2513,8 @@ On the other hand, \law{Imprecise} also states that from the equivalence class $
 
 
 \subsection{Conclusions}
-\todo{make explicit that we only need \law{InterPresent} and \law{Imprecise}?}
+
+\todo{make explicit that we only need \law{InterPresent} and \law{Intended}?}
 
 A layered editor consisting of two component layers can be specified in the same manner as a single-layered editor, but imposes additional requirements on the components. In order to guarantee that the composition is valid, \bc mapping between equivalence classes, \ec we need the 
 \law{$\present$-Match} and \law{$\interpret$-Match} conditions on the components. Furthermore, for \law{Doc-Inert} and \law{Pres-Inert} requirements, we need to assume the conditions \law{Orthogonal} and the rather complex \law{Orthogonal-R}.
@@ -2526,14 +2527,14 @@ The stronger condition \law{Absorption} implies all four additional conditions:
 
 For the top-most composition, we cannot assume \law{Absorption} because this would rule out interpretation extra state altogether. However, {$\present$-Match}, {$\interpret$-Match}, \law{Orthogonal} trivially hold for the top-most composition, and \law{Pres-Inert} is proven without assuming \law{Absorption} for the top-most composition.
 
-\note{split instead of constructed}
+\todo{split instead of constructed}
 Because an editor consisting of $n$ layers is constructed by taking the top layer and repeatedly putting layers underneath, we need to prove \law{Absorption} for each of the $n-1$ compositions, except the top-most composition. 
 
 \law{Absorption} is a rather strong condition. It only allows interpretation extra state at the document level, since all other interpretation extra state is absorbed by presentation extra state.  Further research is necessary to determine whether this restriction disallows the specification of useful editors, in which case a workable but less strict condition needs to be established. 
 
 %\note{mention that for actual editors, only a few layers are not fixed, making it easier to guarantee these conditions?}
 %\note{We don't want absorption for the composition of $id$ and $layer_0$, because then there is no document extra state}
-%Maybe different approach for handling imprecise edit will help.
+%Maybe different approach for handling intended edit will help.
 
 %\bl
 %\o In Proxima, only pres ES in lower layer and interpretation extra state in top.
@@ -2555,56 +2556,60 @@ Because an editor consisting of $n$ layers is constructed by taking the top laye
 
 
 % Introduction
-The specification developed in the previous sections does not yet offer support for presentations that duplicate information (see also Section~\ref{sect:informalDuplicates}). A simple example of a duplicate presentation is the function $\present~x = (x, x)$. An intuitive way to handle edit operations on duplicates is to let the edited duplicate determine the document update. However, this behavior cannot be expressed by the specifications in the previous sections, since the specification does not take into account the original $level\L$. Duplicates become particularly problematic in combination with extra state and multiple layers. \note{call them dependent values rather than duplicates?}
+The specification developed in the previous sections does not yet offer support for presentations that duplicate information (see also Section~\ref{sect:informalDuplicates}). A simple example of a duplicate presentation is the function $\present~x = (x, x)$. An intuitive way to handle edit operations on duplicates is to use the duplicate that was edited for computing the document update. This behavior, however, cannot be expressed by the specification from the previous section, since the specification does not take the original $level\L$ into account. 
 
+%{call them dependent values rather than duplicates?}
+
+Duplicates become particularly problematic in combination with extra state and multiple layers, but although the edit behavior for duplicates is difficult to specify formally, the implementation of this behavior is often rather clear. Hence, in this section, we only sketch how the editor specification may be adapted to support the handling of duplicate presentations. 
 
 %\note{add refs on duplicates from DB and inversion papers}
 
- \bc In fact, the pathological cases that give rise to the extra conditions in Section~\ref{sect:compositeExtraCompose} all contain some form of duplication. \ec 
-In this section, we discuss how the editor specification can be adapted to support the handling of duplicate presentations. A formal definition of when exactly a presentation contains duplicates is hard to give without making additional assumptions on the presentation formalism. We have established a tentative definition, but it still requires improvement. Therefore, the remainder of this section is rather informal.
+ \bc In fact, the pathological cases that give rise to the extra conditions in Section~\ref{sect:compositeExtraCompose} all contain some form of duplication. \ec
+
+
+
 % close on document gets into trouble with pres-inert
 
-\toHere
-Het is allemaal zo erg niet. Formeel lastig, maar eigenlijk wel duidelijk (misschien even uitleggen hoe). Daarom volgende secties vooral schets
-\fromHere
-
 \subsection{Dealing with duplicates}
+
+A precise definition of when a presentation contains duplicates is hard to give without making additional assumptions on the presentation formalism and the level types. Therefore, we adopt an informal notion of duplication, illustrated by a number of examples.
 
 % what are duplicates
 Besides the obvious $\present~x = (x, x)$, we speak of duplication whenever a presentation contains two or more values that depend on the same document value (e.g.\ $\present~x = (2x, -x)$). This holds even if the computation for the derived value does not have an inverse, as in $\present~x = (x, x~\fn{mod}~256)$. Although the term may seem somewhat odd in this case, we do refer to such presentations as duplicates. A related example $\present~x = (x~\fn{div}~256, x~\fn{mod}~256)$ shows the subtlety of duplication, since in this case there is no duplication of information, and both elements of the presentation tuple can be edited without causing a conflict. 
 
-Besides depending on a single document value, a duplicate may also depend on several values. Hence, an average value of a list of integers (when presented together with the list) can be regarded as a duplication of the values in the list. Other examples of duplication are derived type signatures for functions, or even the color of a keyword in a syntax-coloring editor.
+
+Further, besides depending on a single document value, a duplicate may also depend on several values. Hence, an average value of a list of integers (when presented together with the list) can be regarded as a duplication of the values in the list. Other examples of duplication are derived type signatures for functions, or even the color of a keyword in a syntax-coloring editor.
 
 % another one: $1 \to "one"$ can be seen as three partial duplicates. 
 % what's this note? parsing with correction. ??? 
 
 
 % simple solution
-The easiest way to deal with duplicate information is to simply ignore one of the duplicates on interpretation and thus making the ignored duplicate non-editable. This is in fact the only way that is allowed by the specification of the previous sections. For 
+The easiest way to deal with duplicate information is to simply ignore all but one of the duplicates on interpretation and thus making the ignored duplicates non-editable. This is in fact the only way that is allowed by the specification of the previous sections. For 
 $\present~x = (x,x)$, this leaves a choice of interpret functions: with $\interpret~(x,y) = x$, only the first value is editable, and with $\interpret~(x,y) = y$ only the second value.
 
-In some cases non-editable duplicates are perfectly acceptable. In case of the list of integers with its average, few people will expect to be able to edit the average value. And perhaps even fewer people will expect to be able to edit colors in a syntax-coloring editor and thereby modify the edited program source. However, in many cases we do want to be able to edit duplicate values.
+In some cases non-editable duplicates are perfectly acceptable. In case of the list of integers with its average, few people will expect to be able to edit the average value. Even fewer people will expect to be able to edit colors in a syntax-coloring editor and thereby modify the edited program source. In many cases, however, we do want to be able to edit duplicate values.
 
 We discuss how each of the requirements from the previous sections is affected by the presence of duplicates.
 
 
-\subsection{Adapting the \law{Imprecise} requirement}
+\subsection{Adapting the \law{Intended} requirement}
 % This is not consistent with ``close to'' on presentation.  
 % If $(1,1) \leadsto (1,8)$ then $(8,8)$ is probably closer as far as the user is concerned.
 
-Instead of ignoring one of the duplicates, a more user-friendly approach is to use the value of the modified duplicate to determine the document update. This is in line with the requirement that if an update is imprecise, the editor will perform the operation that the user intended. 
+When a duplicate value in a presentation is edited, the edited duplicate should determine the document update. This is in line with the requirement that if an update not exact, the editor will perform the operation that the user intended. 
 
 %\note{not entirely true if we block out duplicates}
-Edit operations on duplicates most probably result in an invalid presentation, unless a user has managed to consistently edit all occurrences of the duplicate. Hence, to a large extent, the result of an edit operation on a duplicate value is specified by the \law{Imprecise} requirement: 
+Edit operations on duplicates most probably result in an invalid presentation, unless a user has managed to edit all occurrences of the duplicated element in a consistent way. Hence, to a large extent, the result of an edit operation on a duplicate value is specified by the \law{Intended} requirement: 
 
 %The problem with duplicates is that information from the document is present several times in the presentation.
 %We tackle the problem by taking the 
 
-\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Intended}
 
-However, in its current form, \law{Imprecise} cannot specify the desired behavior, since it relates $\level''\L$ to $\level'\L$ without taking $\level\L$ into account. An example shows the problem that can occur.
+However, in its current form, \law{Intended} cannot specify the desired behavior for edited duplicates, since it relates $\level''\L$ to $\level'\L$ without taking $\level\L$ into account. An example shows the problem that can occur.
 
-Consider an editor with $\present~x = (x,x)$. Because the edit operation $(0,0) \leadsto (1,0)$, should result in the presentation $(1,1)$, we must have $(1,0) \close (1,1)$. On the other hand the desired result of $(1,1) \leadsto (1,0)$ should be $(0,0)$, implying $(1,0) \close (0,0)$. Thus, based on $level'\L$ alone, \law{Imprecise} cannot specify the correct behavior for an edit operation that updates the lower level to $(1,0)$.
+Consider an editor with $\present~x = (x,x)$. Because the edit operation $(0,0) \leadsto (1,0)$ should result in the presentation $(1,1)$, we must have $(1,0) \close (1,1)$. On the other hand the desired result of $(1,1) \leadsto (1,0)$ should be $(0,0)$, implying $(1,0) \close (0,0)$. Thus, based on $level'\L$ alone, \law{Intended} cannot specify the correct behavior for an edit operation that updates the lower level to $(1,0)$.
 
 %Hence, the value of $\interpret (1,0)$ depends not only on $\level'\L$, but also on the $level\L$.
 
@@ -2614,16 +2619,13 @@ $\present~x = (x,x,x)$. If a user edits the first element of the presentation
 
 
 % just looking at change is not really enough. 
-The problem with the \law{Imprecise} requirement is that the duplicates of the edited part of the presentation influence the final result of the edit operation. We tackle the problem by introducing an operator to ignore these duplicates:
+The problem with the \law{Intended} requirement is that the duplicates of the edited part of the presentation influence the final result of the edit operation. We tackle the problem by introducing an operator
+$\Delta \tp  T \to T \to T\st$, to ignore duplicates of edited values.
 
-\xpr{
-\Delta \tp  T \to T \to T\st\\
-}
+The application $level~\Delta~level'$ returns a value that is structurally the same as $level'$, but in which for each edited value, all duplicates have been replaced by wildcards. (Note that $\Delta$ thus depends on the presentation mapping.) For a presentation without duplicates, we have 
+$level \Delta level' = level'$. If two duplicates are updated simultaneously, the result of $\Delta$ is not defined.
 
-In the application $x~\Delta~x'$, $x'$ represent the value of $x$ after it is updated by a user ($x \leadsto x'$). The result of $\Delta$  is a value that is structurally the same as $x'$, but in which for each edited part, all duplicates are replaced by wildcards. Thus, for a presentation without duplicates, we have $x \Delta x' = x'$. 
-If two duplicates are updated simultaneously, the result of $\Delta$ is not defined.
-
-Similar to Section~\ref{sect:wildcardEq}, a wildcard stands for any value, and therefore can be ignored when testing for equality, or evaluating closeness. Hence, $(1,\texttt{*}_{Int},\texttt{*}_{Int})$ is maximally close to $(1,1,1)$, but also to $(1,3,5)$, for example. The effect of the wildcards is that in the specification of $\interpret$, the duplicates that cause conflicts are blocked out of the presentation. 
+Similar to Section~\ref{sect:wildcardEq}, a wildcard stands for any value. A wildcard is ignored when testing for equality, or evaluating closeness. Hence, both $(1,1,1)$ and  $(1,3,5)$ are equally (and maximally) close to $(1,\texttt{*}_{Int},\texttt{*}_{Int})$. If we use $level~\Delta~level'$ instead of $level'$ in the \law{Intended} requirement, the duplicates of the edited part of the presentation will have been replaced by wildcards and thus no longer influence the final result.
 
 We give two examples to illustrate the behavior of $\Delta$. For the first example, consider the presentation function $\present~(x,y) = (x,x,x,y,y)$. If a user updates the second element of the presentation tuple (e.g.\ $(1,1,1,5,5)\leadsto(1,2,1,5,5)$), we compute 
 $(1,1,1,5,5)~\Delta~(1,2,1,5,5) = (\texttt{*}_{Int},2,\texttt{*}_{Int},5,5)$, which can be interpreted unambiguously as $(2,5)$ . 
@@ -2660,11 +2662,11 @@ It is difficult to give a formal specification of $\Delta$, because we do not ha
 %
 %``close to'' on $T\st$ and $T$ is similar to $=\st$. everything is close to a $\texttt{*}$.
 
-Using $\Delta$, we define an \law{Imprecise} requirement that does not require closeness on duplicates of the edited part of the presentation:
+Using $\Delta$, we define an \law{Intended} requirement that does not require closeness on duplicates of the edited part of the presentation:
 
-\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Intended}
 
-However, this requirement alone is not sufficient. Recall that the old \law{Imprecise} also served to preserve the presentation extra state. Because duplicates are ignored by the new \law{Imprecise}, the requirement says nothing about their extra state. Therefore, we need to add a weaker requirement for preserving extra state of the duplicates. The new requirement corresponds to the old \law{Imprecise} requirement:
+However, this requirement alone is not sufficient. Recall that the old \law{Intended} also served to preserve the presentation extra state. Because duplicates are ignored by the new \law{Intended}, the requirement says nothing about their extra state. Therefore, we need to add a weaker requirement for preserving extra state of the duplicates. The new requirement corresponds to the old \law{Intended} requirement:
 
 \xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
 
@@ -2673,7 +2675,7 @@ With the new requirements, the two examples at the start of this section are no 
 
 \subsection{Adapting the \law{Pres-Inert} requirement}
 
-Besides the \law{Imprecise} requirement, also the \law{Pres-Inert} requirement needs to be adapted to support duplicates. An example shows the problem that can occur with the old \law{Pres-Inert} requirement.
+Besides the \law{Intended} requirement, also the \law{Pres-Inert} requirement needs to be adapted to support duplicates. An example shows the problem that can occur with the old \law{Pres-Inert} requirement.
 
 Consider an editor for a very simple functional language. The document is a list of declarations, which is presented as a list of strings together with a message about type correctness. Furthermore, the body of a function may be hidden (see Section~\ref{sect:sourceeditor}), in which case it is represented by the string \verb|"..."|. 
 
@@ -2694,19 +2696,21 @@ The problem that occurs is that because $level'\L$ (\verb|"f = ...; a = True;   
 %a = 1; f = ...            a = True; f = ...     a = True; f = ... [type err]          a = True; f = ...
 %                                \texttt{*}    True   \texttt{*}  
 
-To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the document, we adapt the requirement in a similar way as \law{Imprecise}; both the pre- and the postcondition are changed to ignore duplicates of the updated parts of the lower level. We use $=\st$ to denote equality on values that may contain wildcards.
+To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the document, we adapt the requirement in a similar way as \law{Intended}; both the pre- and the postcondition are changed to ignore duplicates of the updated parts of the lower level. We use $=\st$ to denote equality on values that may contain wildcards.
 
 %\note{Alternatively, could we make \law{Pres-Inert} weaker than \law{Doc-Preserve}?}
 % no, pres inert usually conflicts with doc-preserve, making it weaker would disable it.
+
 \xprlab{\hoare{\eqcl{\level\L ~\Delta~\level'\L}{L} =\st \present~\eqcl{h}{H}} {Comp} { \level\L ~\Delta~\level'\L =\st \level''\L}}		{} 
-\vspace{-3.5ex}
-\xprlab{}{Pres-Inert}
+\vspace*{-3.5ex}
+\xprlab{~}{Pres-Inert}
 \vspace{-1.5ex}
 
-The precondition has been weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondition, on the other hand, is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change. \todo{say something about delta in precondition, plus the fact that it is on equivalence class?}
+The precondition has been weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondition, on the other hand, is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change. 
+\nonote{say something about delta in precondition, plus the fact that it is on equivalence class?}
 
 Because the precondition of \law{Pres-Inert} has been weakened, it is satisfied by the two examples $\present~x = (x,x)$ and 
-$\present~x =(x,x,x)$. Hence, these examples no longer fall under the  \law{Imprecise} requirement. The \law{Imprecise} requirement now more appropriately only applies to presentation updates that are not valid even when duplicates are ignored. An example of such an update occurs in an expression editor with syntax coloring and  two views. If an expression is entered in one of the views, it is not a valid presentation even if the second view is ignored, because the new expression does not have the correct syntax coloring. Hence, the \law{Imprecise} requirement applies.
+$\present~x =(x,x,x)$. Hence, the editing behavior for these examples is no longer specified by the  \law{Intended} requirement. The \law{Intended} requirement now, more appropriately, only applies to presentation updates that are not valid even when duplicates are ignored. An example of such an update occurs in an expression editor with syntax coloring and  two views. If an expression is entered in one of the views, it is not a valid presentation even if the second view is ignored, because the new expression does not have the correct syntax coloring. Hence, the \law{Intended} requirement applies.
 
 
 \subsection{The remaining requirements}
@@ -2717,7 +2721,7 @@ The precondition of \law{Doc-Inert} could be changed in a similar way as the pre
 
 Further, \law{Postcondition} should still hold between the entire higher and lower level, and \law{Doc-Preserve} only refers to higher-level values and is therefore not affected by duplicates in the presentation.
 
-Finally, we have \law{InterPresent}: $\eqcl{l}{L} = \present~\eqcl{h}{H} \imp \eqcl{h}{H} = \interpret~\eqcl{l}{L}$, which is still a valid requirement in the presence of duplicates. However, the requirement does not say anything about presentations in which only one duplicate is edited, because in that case the presentation is invalid. Hence, \law{InterPresent} is no longer sufficient to prove \law{Pres-Inert} (although it probably still implies \law{Doc-Inert}). Moreover, because it does not refer to the data levels and $Comp$, \law{InterPresent} cannot be modified in a straightforward way, similar to \law{Doc-Inert} and \law{Imprecise}.
+Finally, we have \law{InterPresent}: $\eqcl{l}{L} = \present~\eqcl{h}{H} \imp \eqcl{h}{H} = \interpret~\eqcl{l}{L}$, which is still a valid requirement in the presence of duplicates. However, the requirement does not say anything about presentations in which only one duplicate is edited, because in that case the presentation is invalid. Hence, \law{InterPresent} is no longer sufficient to prove \law{Pres-Inert} (although it probably still implies \law{Doc-Inert}). Moreover, because it does not refer to the data levels and $Comp$, \law{InterPresent} cannot be modified in a straightforward way, similar to \law{Doc-Inert} and \law{Intended}.
 
 \subsection{Conclusions}
 
@@ -2730,7 +2734,7 @@ Summarizing, we have the following set of requirements:\nopagebreak[4]
 \vspace{-3.5ex}
 \xprlab{}{Pres-Inert}
 \vspace{-1.5ex}
-\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Intended}
 \xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
 \xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
 
@@ -2828,9 +2832,8 @@ Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierc
 
 The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentations of the use cases from Chapter~\ref{chap:requirements}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. And finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. 
 
-%\note{also say that \law{Imprecise} is not handled?}
+%\note{also say that \law{Intended} is not handled?}
 
-%\todo{?}
 %** more on incrementality, also more lazy pres. evaluation only send request when info is needed. (maybe More impl than spec.)
 
 

@@ -25,12 +25,12 @@ Check out  Yahu & wxHaskell for alternative ways of handling presentation attrib
 
 
 
+In this section, we introduce the presentation language of Proxima: {\Xprez}. The language is an extended version of the presentation level that was discussed in Section~\ref{sect:presLevel}. {\Xprez}  has been implemented in Haskell. \bc It does not yet have a domain-specific syntax, but other than that it meets the requirements.\ec Although the language is not yet fully developed, it \bc is already powerful enough to describe a \TeX -like presentation with a style sheet of about 300 lines. \ec
+ is already powerful enough to cover much of the \TeX~math typesetting as described in \cite{heckmann97functionalTex}. 
 
 
 Although there are many presentation languages for structured documents (e.g.~\cite{css2, badros99ccss, marden98psl, xsl10, quint97thot}), not a single one seems to have sufficient expressiveness and abstraction mechanisms to specify the presentations of the use cases from Chapter~\ref{chap:requirements}. Pretty-printing libraries (e.g~\cite{oppen80prettyPrinting, swierstra98combinators, hughes1995prettyPrinting, kahl99galleyCombs, brand96generationOfFormatters}) do offer expressiveness, abstraction mechanisms, but these libraries are mainly text-oriented. 
 
-In this section, we introduce the presentation language of Proxima: {\Xprez}. The language is an extended version of the presentation level that was discussed in Section~\ref{sect:presLevel}. {\Xprez}  has been implemented in Haskell. \bc It does not yet have a domain-specific syntax, but other than that it meets the requirements.\ec Although the language is not yet fully developed, it \bc is already powerful enough to describe a \TeX -like presentation with a style sheet of about 300 lines. \ec
- is already powerful enough to cover much of the \TeX~math typesetting as described in \cite{heckmann97functionalTex}. 
  
 Below are two screenshots of example {\Xprez} presentations containing ligatures (e.g.\ the ``fi'' in ``Scientific'') and several mathematical constructs. An editor for these presentations can already be instantiated with the Proxima prototype, but in order to support pleasant editing, the prototype requires a few more extensions.
 
@@ -62,7 +62,7 @@ Section~\ref{sect:targetlangs} discusses several existing presentation languages
 
 In this section, we discuss five presentation languages for structured documents. XSL~\cite{xsl10} is a presentation language for XML documents, whereas CCSS~\cite{badros99ccss} and PSL~\cite{marden98psl} are presentation languages for HTML. CSS~2.0~\cite{css2} can be used to present both XML and HTML documents. Finally, the language P~\cite{quint97thot} is the presentation language of the Thot editor toolkit (see Section~\ref{sect:toolkits}). 
 
-In Section~\ref{sect:presentationFormalism}, we mentioned that a presentation language consists of two parts. One part is the {\em presentation target language}, which describes the components (strings, boxes, rows, etc.) of a presentation. The other part is the {\em presentation specification language}, in which we specify how a document is mapped onto an element of the target language. Not every presentation language explicitly indentifies its presentation target language. Moreover, if the target language supports abstraction, a presentation may contain functions, which makes it difficult to clearly separate the two languages.
+In Section~\ref{sect:presentationFormalism}, we mentioned that a presentation language consists of two parts. One part is the {\em presentation target language}, which describes the components (strings, boxes, rows, etc.) of a presentation. The other part is the {\em presentation specification language}, in which we specify how a document is mapped onto an element of the target language. Not every presentation language explicitly identifies its presentation target language. Moreover, if the target language supports abstraction, a presentation may contain functions, which makes it difficult to clearly separate the two languages.
 
 In the remainder of this chapter, we focus on presentation target language, because {\Xprez} is the presentation target language of Proxima. The presentation specification language of Proxima is an attribute-grammar formalism, but the details of this formalism still require further research. Section~\ref{sect:instantiating} provides more information on the presentation attribute grammar, as well as a few example presentation specifications. 
 
@@ -85,7 +85,7 @@ Matrices can be used to create box presentations, but the extent to which this i
  % does not depend on doc structure, but on available space. final presentation is not tree of target, but split 
  %along lines and pages
 
-A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matix layout, the final structure of the presentation is only partially determined by the structure of the presentation.
+A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matix layout, the final structure of the presentation is only partially determined by the structure of the presentation.\todo{niet duidelijk}
 
 % How the presentations are divided over the lines and pages depends on the size of the presentation
 %
@@ -100,7 +100,7 @@ Besides constructs for specifying the structure of the presentation, presentatio
 
 Of the five presentation languages we examined, only XSL regards its target language as a language in its own right, with a separate syntax. The other languages only describe how presentation attributes of the elements of the target presentation tree can be set, but do not treat a presentation as an actual value in the language.
 
-\head{CSS~2.0:} Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer.  \bc The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. \todo{flow} \ec A presentation is a tree structure, in which the nodes specify presentation attributes such as font size or color, and the leaves are document content. A presentation attribute may be specified either absolutely or as a percentage. In the latter case, the kind of the attribute determines what attribute the percentage refers to. For instance, a percentage value for the {\em font-size} attribute refers to the font size of the parent element, but a percentage for the {\em line-height} attribute refers to the font size of the element itself. It is not possible to let the value of a presentation attribute depend on arbitrary presentation attributes of the parent or siblings in the presentation tree.
+\head{CSS~2.0:} Cascading Style Sheets, level~2~\cite{css2} is an example of a simple presentation language. Its target language is almost invisible to the style sheet designer.  \bc The presentation of a document is a tree that is almost isomorphic to the document tree, with the document content in the leaves. It is not entirely isomorphic, because content can be left out and simple text content can be added. \todo{flow} \ec A presentation is a tree structure, in which the nodes specify presentation attributes such as font size or color, and the leaves are document content. A presentation attribute may be specified either absolutely or as a percentage. The meaning of a percentage depends on the attribute. For instance, a percentage value for the {\em font-size} attribute refers to the font size of the parent element, but a percentage for the {\em line-height} attribute refers to the font size of the element itself. It is not possible to let the value of a presentation attribute depend on arbitrary presentation attributes of the parent or siblings in the presentation tree.
 
 CSS~2.0 supports a flow layout and a table format for a matrix layout. However, the control over alignment in the matrix model is rather weak.
 
@@ -119,15 +119,15 @@ XSL FO offers strong control over the flow model, but a box model is not support
 
 PSL supports a flow model and a constraint-based box model, but lacks a matrix model. A presentation can specify its attributes for position and size relative to position and size attributes of other presentations in the tree. These other presentations can be addressed using a number of primitive functions for accessing siblings, parents, ancestors of a specific type, etc.
 
-\head{P:} The  language P is the presentation language of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes, which may be composed according to a box, a flow, or a matrix model. P supports horizontal and vertical reference lines for automatic alignment of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of presentation attributes. In contrast to PSL, the box layout in P is not constraint-based. \bc Hence, the style sheet designer needs to take the order of computation of the layout properties** into account. \ec 
+\head{P:} The  language P is the presentation language of the Thot editor toolkit~\cite{quint97thot}. It has a target language that consists entirely of boxes, which may be composed according to a box, a flow, or a matrix model. P supports horizontal and vertical-reference lines for automatic alignment of boxes. Instead of having a large number of different presentation boxes, similar to XSL Formatting Objects, P has only three kinds of boxes with a large number of presentation attributes. In contrast to PSL, the box layout in P is not constraint-based. \bc Hence, the style sheet designer needs to take the order of computation of the layout properties** into account. \ec 
 
 \head{Discussion:} 
 
 The languages discussed above are all declarative and domain-specific languages that vary in expressive power. The languages CSS~2.0, CCSS, and PSL allow simple presentations to be specified in a simple way, but cannot be used to specify more complex presentations, such as mathematical formulas. In contrast, XSL and P allow complex presentations to be specified, but due to the lack of abstraction, simple presentations also have rather elaborate specifications, especially in P. 
 
-Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position attributes relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned, or that two presentations should have the same width. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
+Only P and PSL support a box model, but both models are of a rather object-oriented and imperative nature. Moreover, presentations are not first-class values. A box can specify its own position attributes relative to its parent or siblings, but it is not possible to state at parent-level that two child presentations should have their top and bottom aligned\todo{lambert: tops and bottoms, even verduidelijken}, or that two presentations should have the same widths. \bc Thus, a conceptually simple change of presenting the children of a node next to each other instead of below each other requires changing the presentations for all child elements.\ec 
 
-Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the the order of the children depends on an attribute of the parent, then the presentation definition of each child need to access this parent attribute and use its value to determine the alignment of the child.
+Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, to reverse the presentation of a horizontal list of children, each child must specify that its right side must be aligned with the preceding child's left side. Moreover, if the the order of the children depends on an attribute of the parent, then the presentation definition of each child needs to access this parent attribute and use its value to determine the alignment of the child.
 
 If, on the other hand, child presentations are first-class, and abstraction mechanisms can be used to define combinators on them, a list of children may be reversed with a reverse function in the presentation definition of the parent.  Another advantage of this approach is that the concepts of layout direction (horizontal or vertical) and order of the children are orthogonal now. The layout direction is determined by which combinator is applied to the list of children, whereas the order is determined by whether or not a reverse function is applied to the list. In the model of P and PSL, these concepts are intertwined, and reversing a horizontal list is conceptually different from reversing a vertical list.
 
@@ -199,11 +199,12 @@ A presentation box (from now on called presentation) has a number of attributes 
 \epsfig{file=pics/eps/PresentationBox.eps, width=2in}
 \end{center}
 
-A presentation tree in {Xprez} represents an attribute grammar with inherited and synthesized attributes. Presentation attributes that are typically specified for an entire subpresentation, such as color and font size, are inherited attributes  \bc (going downward in the tree)\ec. On the other hand, presentation attributes that are set by a child and used by its parent, such as  reference lines and size information, are synthesized attributes. Figure~\ref{xprezattributes} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the inherited and synthesized presentation attributes. The figure also shows the type of each attribute. 
+A presentation tree in {Xprez} represents an attribute grammar with inherited and synthesized attributes. Presentation attributes that are typically specified for an entire subpresentation, such as color and font size, are inherited attributes.  \bc (going downward in the tree)\ec On the other hand, presentation attributes that are set by a child and used by its parent, such as  reference lines and size information, are synthesized attributes. Figure~\ref{xprezattributes} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the inherited and synthesized presentation attributes. The figure also shows the type of each attribute. 
 
-The \p{hRef} and \p{vRef} attributes specify the horizontal and vertical reference lines that are used for aligning boxes when combined in composite presentations. Note that the vertical reference line is in fact a horizontal line and vice versa. The term vertical reference line stems from the fact that it is used for vertical alignment; modifying the vertical reference line affects the vertical position of the presentation. 
+The \p{hRef} and \p{vRef} attributes specify the reference lines that are used for aligning boxes horizontally and vertically when combined in composite presentations. Note that the vertical-reference line is in fact a horizontal line and vice versa. The term vertical-reference line stems from the fact that it is used for vertical alignment; modifying the vertical-reference line affects the vertical position of the presentation. 
 
-The boolean \p{hStretch} and \p{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The remaining attributes are the self-explanatory: \p{fontFamily}, \p{fontSize}, \p{textColor}, \p{lineColor}, \p{fillColor}, and \p{bgColor}. In the future, this set will be extended with other attributes such as line and font style, and attributes for modeling edit behavior (e.g.\ \p{onMouseClick~::~EditCommand}). \bc and user-defined attributes will be supported. \ec
+The boolean attributes \p{hStretch} and \p{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The remaining attributes are self-explanatory: \p{fontFamily}, \p{fontSize}, \p{textColor}, \p{lineColor}, \p{fillColor}, and \p{bgColor}. In the future, this set will be extended with other attributes such as line and font style, and attributes for modeling edit behavior (e.g.\ \p{onMouseClick~::~EditCommand}).
+ \bc and user-defined attributes will be supported. \ec
 
 \bc
 The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \p{Inh} for inherited properties, and \p{Syn} for synthesized properties.
@@ -212,9 +213,9 @@ The presentation tree is transformed into an attribute grammar in which the font
 %																
 \subsection{{\Xprez} primitives} \label{sect:primitives}
 
-The first five combinators in Figure~\ref{xprezprim} specify atomic presentations. The \p{empty} combinator is not visible and takes up no space, it is the neutral element for composite presentations. A string is presented with \p{text}, and a rectangle with \p{rect}. The \p{poly} combinator takes a list of relative coordinates between (0.0, 0.0) and (1.0, 1.0) and produces a line figure that connects these points. The coordinates are relative because the final coordinates depend on the size of the \p{poly} presentation. Finally, \p{img} can be used to display external images. The argument is a string that contains the path to the image file. In a future version, an \p{img} may also contain a reference to an image that is encoded as part of the document.
+The first five combinators in Figure~\ref{xprezprim} specify atomic presentations. The \p{empty} combinator has a presentation that is invisible and takes up no space; it is the neutral element for various presentation compositions. A string is presented with combinator \p{text}, and a rectangle with combinator \p{rect}. The \p{poly} combinator takes a list of relative coordinates between (0.0, 0.0) and (1.0, 1.0) and produces a line figure that connects these points. The coordinates are relative because the final coordinates depend on the size of the \p{poly} presentation. Finally, \p{img} can be used to display external images. The argument is a string that contains the path to the image file. In a future version, an \p{img} term may also contain a reference to an image that is encoded as part of the document.
 
-Except for \p{text}, the horizontal and vertical reference lines of an atomic presentation are both 0 (i.e.\ the north-west corner). For \p{text},  the vertical reference line is the baseline of the text and the horizontal reference line is 0. By default, a  simple presentation does not stretch.
+Except for \p{text}, the reference lines of an atomic presentation both have coordinate 0 (i.e.\ the north-west corner). For \p{text},  the vertical-reference line is the baseline of the text and the horizontal-reference line is at 0. By default, a  simple presentation does not stretch.
 
 \begin{figure}
 \begin{small}
@@ -244,19 +245,19 @@ format            :: [ Xprez ] -> Xprez
 %-- row, column, overlay  
 %-- row, col w/ reference 
 
-The remaining primitives in Figure~\ref{xprezprim} specify composite presentations. The behavior of columns (\p{col}) is equal to that of rows (\p{row}) with the horizontal and vertical directions swapped. Hence, we only discuss the \p{row} primitive. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical reference lines aligned. Horizontal reference lines have no effect on the positioning in a row.
+The remaining primitives in Figure~\ref{xprezprim} specify composite presentations. The behavior of columns (\p{col}) is equal to that of rows (\p{row}) with the horizontal and vertical directions swapped. Hence, we only discuss the \p{row} primitive. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical-reference lines aligned. Horizontal-reference lines have no effect on the positioning in a row.
 
 \begin{center}
 \epsfig{file=pics/eps/row.eps, width=3.2in}
 \end{center}
 
-The bounding box of a row is the smallest rectangle that encloses all elements of the row. The vertical reference line of the row is equal to the aligned reference lines of the children, whereas the horizontal reference line is taken from the first child. In order to use the horizontal reference line from one of the other children, we can use the \p{rowR} combinator. The integer argument of \p{rowR} specifies which child determines the horizontal reference line for the row, with 0 denoting the first child. 
+The bounding box of a row is the smallest rectangle that encloses all elements of the row. The vertical-reference line of the row is equal to the aligned reference lines of the children, whereas the horizontal-reference line is taken from the first child. In order to use the horizontal-reference line from one of the other children, we can use the \p{rowR} combinator. The integer argument of \p{rowR} specifies which child determines the horizontal-reference line for the row, with 0 denoting the first child. 
 
 By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. The defaults may be overridden by setting the stretch attributes with the method that is  shown in the next section. 
 
 The \p{matrix} combinator can be used to describe a table layout, in which elements are aligned with elements to their left and right as well as with elements above and below them. 
 
-Because \p{row}, \p{column} and \p{matrix} do not allow their children to overlap, we need a special combinator for overlapping presentations. The \p{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \p{overlayR} combinator is needed.
+Because \p{row}, \p{column} and \p{matrix} do not allow their children to overlap, we need a special combinator for overlapping presentations. The \p{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical-reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \p{overlayR} combinator is needed.
 
 A flow layout can be achieved with the \p{format} combinator for paragraph formatting. The combinator takes a list of presentations as argument and splits this list into rows based on the available horizontal space. The resulting rows are placed in a column.  Because \p{Xprez} does not yet have a page model, only horizontal formatting is supported. 
 
@@ -265,26 +266,26 @@ Here is an example {\Xprez} presentation that illustrates alignment and stretchi
 \begin{small}
 \begin{verbatim}
 let cross     = poly [(0,0),(1,0),(1,1),(0,1),(0,0),(1,1),(0,1),(1,0)]
-    greycross = cross `withbgColor` grey `withStretch` True
+    greycross = cross `withStretch` True `withbgColor` grey
 in  row [ text "Big" `withFontSize` 200
         , colR 2 [ cross, cross, text "small", greycross, greycross ] ] 
 \end{verbatim}
 \end{small}
 
-The code produces the following image (the dashed line has been added to show vertical reference line of the presentation):
+The code produces the following image (the dashed line has been added to show vertical-reference line of the presentation):
 
 \begin{center}
 \epsfig{file=pics/eps/align.png.eps, width=1in}
 \end{center}
 
-The second element in the row is a column that takes the vertical reference line from its third child. Therefore, the word ``Big'' is aligned with the word ``small''. The \p{cross} object is a line figure in the form of a rectangle with a cross, which is made stretchable in both directions by \p{withStretch}. The \p{greycross} is a \p{cross} with a grey background. 
+The second element in the row is a column that takes the vertical-reference line from its third child. Therefore, the word ``Big'' is aligned with the word ``small''. The \p{cross} object is a line figure in the form of a rectangle with a cross. The \p{greycross} is a \p{cross}, which is made stretchable in both directions by \p{withStretch}, and which has a grey background.
  
-Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The two stretching objects above the reference object (\p{text "small"}) are each assigned equal amounts of the remaining space above the vertical reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
+Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The two stretching objects above the reference object (\p{text "small"}) are each assigned equal amounts of the remaining space above the vertical-reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
 
 %																
 \subsection{Modifying presentation attributes}
 
-The presentation attributes of a presentation can be modified using the \p{with\symbol{95}} combinator (The name gets an underscore because the keyword \p{with} is already defined in Haskell).
+The presentation attributes of a presentation can be modified using the \p{with\symbol{95}} combinator (the name has an underscore because the keyword \p{with} is a reserved word in Haskell).
 
 \begin{small}
 \begin{verbatim}
@@ -302,7 +303,7 @@ The combinator takes a single child presentation as argument, together with a fu
 \end{figure}
 
 
-Figure shows the data flow for the attributes of \p{pres} and \p{pres `with\symbol{95}` f}. At the top-right of the figure, \p{Inh} and \p{Syn} are swapped to prevent crossing arrows. Because \p{f} may be an arbitrary function, the combinator may introduce cycles in the attribution. It is up to the designer of the presentation to ensure safety.
+Figure~\ref{withDataFlow} shows the data flow for the attributes of \p{pres} and \p{pres `with\symbol{95}` f}. At the top-right of the figure, \p{Inh} and \p{Syn} are swapped to prevent crossing arrows. Because \p{f} may be an arbitrary function, the combinator may introduce cycles in the attribution. It is up to the designer of the presentation to ensure safety.
 
 \bc \toHere
 In the specification of an attribute value, the original values of attributes can be used (e.g.\ the font size can be set to the old font size increased with 2 points). Therefore, the second argument of \p{with\symbol{95}} is a function that %takes as arguments the inherited attributes coming from the parent and the synthesized attributes coming from the %child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
@@ -329,7 +330,7 @@ withFontSize_ xp ffs =
 \end{verbatim}
 \end{small}
 
-With \p{pres `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we specify that \p{pres} gets a doubled font size. An application of \p{withFontSize\symbol{95}} has a function argument, but the function is considerably simpler than for \p{with\symbol{95}}. 
+With \p{pres `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we specify that \p{pres} gets a doubled font size. An application of \p{withFontSize\symbol{95}} has a function argument, but the function is considerably simpler than the function argument of \p{with\symbol{95}}. 
 
 \bc A more natural solution is the declaration of a special data type \p{Length}, with operations such as addition and multiplication, but which also has primitive values that represent current font properties***. In Haskell, type classes can be used to accomplish this. Using type classes, it will be possible to write: \p{vSpace (2*ex)}, which denotes a horizontal space of twice the height of the letter x in the current font.\ec 
 
@@ -340,12 +341,12 @@ A future version of {\Xprez} will support a domain-specific special syntax for \
 
 \begin{small}
 \p{pres\{ child.fontSize = 2*parent.fontSize, child.color = red, height = 1ex \}}
-\end{small}
+\end{small}\todo{niet duidelijk of ex voor ouderlijk of huidig font is}
 
 %																
 \subsection{Advanced examples} \label{sect:xprezFrac}
 
-Because a presentation in {\Xprez} is a first-class value, it is possible manipulate a child presentation (e.g.\ change its position or modify the font size) at the level of its parent.  This is illustrated in the presentation for a mathematical fraction: 
+Because a presentation in {\Xprez} is a first-class value, it is possible to manipulate a child presentation (e.g.\ change its position or modify the font size) at the level of its parent.  This is illustrated in the presentation for a mathematical fraction: 
 
 \begin{small}
 \begin{verbatim}
@@ -431,7 +432,7 @@ Current style sheet languages lack either the expressiveness or the abstraction 
 {\Xprez} can already describe a large variety of presentations, but the language does not yet meet all the requirements of  Section~\ref{sect:existingtarget}. The language still needs a page model (required for vertical flow layout), support for user-interface widgets, and a domain-specific syntax.
 
 %A page model for {\Xprez} also has consequences for the edit model of Proxima, since 
-Once {\Xprez} has a page model and vertical flow layout, it will be possible to support page related concepts such as footnotes and page references. In order to support such presentations, an abstraction similar to the {\em galley} of Lout~\cite{kingston93lout} may be added to {\Xprez}.
+Once {\Xprez} has a page model and vertical flow layout, it will be possible to support page-related concepts such as footnotes and page references. In order to support such presentations, an abstraction similar to the {\em galley} of Lout~\cite{kingston93lout} may be added to {\Xprez}.
 
 In a flow layout, spacing between two presentations should be visible when they end up on the same line or page, but not when there is a line or page break between them. Hence, {\Xprez} needs a primitive notion of padding and margins for a presentation, which can be left out when appropriate. Moreover, the horizontal and vertical formatting algorithms need support for optimal line- and page-breaking~\cite{knuth82breaking}. To support formatting during editing, we could use either a linear algorithm (e.g.\ \cite{demoor99breaking}), or even an incremental algorithm (e.g.\ \cite{jeuring91breaking}).
 
@@ -451,11 +452,11 @@ Syntax macro's - maybe intermediate sol. for syntax is properties as wxHaskell.
 \bc Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \p{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. 
 \ec
 
-In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possile to define presentations that crash, or cause cycles in the attribution.  A more restricted presentation language may guarantee safety, but will not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to guarantee safety.
+In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possible to define presentations that crash, or to create cycles in the attribution.  A more restricted presentation language may guarantee safety, but will not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to achieve safety.
 
 %Of course better to have, but when confronted with weak pres lang building custom editor is unsafer. Nevertheless, conditions %on app of with. 
 
-It will be interesting to see whether {\Xprez} can be integrated with a constraint solver. Constraints provide an elegant way to specify presentations, and also offer more safety . An entirely constraint-based version of {\Xprez}, which made use of the Cassowary linear constraint solving algorithm~\cite{badros01cassowary}, turned out too slow to be suitable for editing. However, it may be an option to use  a combination of the two formalisms (AG and constraints) in which constraints are used only for certain subpresentations, while attribute grammars are used for the remaining layout.
+It will be interesting to see whether {\Xprez} can be integrated with a constraint solver. Constraints provide an elegant way to specify presentations, and also offer more safety. An entirely constraint-based version of {\Xprez}, which made use of the Cassowary linear constraint solving algorithm~\cite{badros01cassowary}, turned out to be too slow to be suitable for editing. However, it may be an option to use  a combination of the two formalisms (AG and constraints) in which constraints are used only for certain subpresentations, while attribute grammars are used for the remaining layout.
 
 Besides extensions to the {\Xprez} formalism, an extensive library of well-chosen combinators must be established to facilitate the specification of complex presentations. And finally, it is desirable to have an algebraic model for {\Xprez} presentations. With such a model, we can describe the  exact behavior of the combinators with laws, rather than textual descriptions.
 

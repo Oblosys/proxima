@@ -1,5 +1,4 @@
-\chapter{Prelude to the specification}
-\label{chap:informalSpec}
+\chapter{Prelude to the specification} \label{chap:informalSpec}
 
 
 
@@ -108,7 +107,6 @@ Where say that mapping back is only when we need automatic editing: is it only i
 %																
 %																
 \section{The editing process}\label{sect:editProces}
-%\note{ mention that levels are trees.}
 
 % during editing one of the levels is changed, other changes along. in this section first give updates for entire editor
 %, then refine it for layers
@@ -191,7 +189,9 @@ $\Transform :: \Level_{H} \rightarrow \Level_{H}$. In the next chapter, when lay
 In order to describe the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), we refine the simple editor by splitting the presentation relation. A $Present$ relation that is split into $n$ components 
 ($Present_{i} \tp Level_{i} \rel \Level_{i-1}$) gives rise to $n+1$ data levels ($Level_{0 \dots n}$). Lower levels get higher indices, with $Level_{0}$ being the document level and $Level_{n}$ the presentation level. 
 
-From the perspective of a single layer, we only need to consider a single $Present_i$ relation and two data levels $Level_{i-1}$ and $Level_{i}$. We drop the subscript of the relation and refer to the data levels as $Level\H$ and $Level\L$. Figure~\ref{layerEditProcess} shows the updates during an edit step from the perspective of a single layer. It is similar to the simple editor without layers, except at the top. Instead of directly computing $level''\H$, the layer first computes an intermediate $level'\H$. This $level'\H$ is then processed by the layers above, yielding $level''\H$. At the top level, $level'\H$ is copied to $level''\H$. \note{mention: user \rarr lower layers?} \note{mention doc edit on intermediate levels?} \note{Mention: Here no intermediate results go horizontally}
+From the perspective of a single layer, we only need to consider a single $Present_i$ relation and two data levels $Level_{i-1}$ and $Level_{i}$. We drop the subscript of the relation and refer to the data levels as $Level\H$ and $Level\L$. Figure~\ref{layerEditProcess} shows the updates during an edit step from the perspective of a single layer. 
+Instead of being updated immediately by the user, the lower level gets updated by the layer below (which is the effect  of the user updating the lowest level). At the top of the figure, the layer computes an intermediate $level'\H$, instead of directly computing $level''\H$. This $level'\H$ is processed by the layers above, yielding $level''\H$. At the document level, $level'_0$ is copied to $level''_0$. Note that there is no incrementality in the model: level values are passed up and down, but not to the right.
+ \nonote{mention doc edit on intermediate levels?}
 
 
 % can we express when this happens with a condition? pres .. /= pres .. oid?
@@ -281,15 +281,17 @@ Because the presentation or interpretation does not specify the value of the ext
 
 % mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, for any two levels $Level\H$ and $Level\L$ between which the presentation invariant holds, we assume the existence of a $1:n$ relation between the nodes of these two trees. Hence, we have two mappings; a mapping between the upper and lower trees, and a mapping between the nodes of these trees. An example shows what we mean by this.
+In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, we asssume that $Present$ not only relates a higher level to a lower level, but that it also establishes a relation between the nodes on these levels. If, for example, a document containing an if expression is mapped onto a presentation that contains the three tokens ``\p{if}'', ``\p{then}'', and ``\p{else}'', then this establishes a relation between the \p{If} node in the document, and the three token nodes in the presentation.
+Thus, for any two levels $Level\H$ and $Level\L$ between which the presentation invariant holds, we also have a relation between the nodes of these two levels.
+\bc Hence, we have two relations; a relation between the upper and lower trees, and a relation between the nodes of these trees. An example shows what we mean by this. \ec
 
-Figure~\ref{nodeMapping} shows two levels for which the presentation invariant holds. In addition, the figure shows a mapping between the nodes of both levels. The dotted arrows denote to which lower-level nodes a higher-level node is mapped and vice versa. To reduce the number of arrows in the figure, the lower-level nodes are grouped. An arrow between two nodes only relates the nodes and not the subtrees rooted at these nodes. % why not?
+Figure~\ref{nodeMapping} shows two levels for which the presentation invariant holds. In addition, the figure shows the relation between the nodes of both levels, using dotted arrows. To reduce the number of arrows in the figure, the lower-level nodes are grouped. An arrow between two nodes only relates the nodes and not the subtrees rooted at these nodes. % \nonote{why not?}
 
-The restriction to $1:n$ relations implies that the presentation of a higher-level node may consist of several lower-level nodes, but each lower-level node is in the presentation of at most one higher-level node. This restriction concerns only the node mapping; the $Present$ relation itself between the two levels is still $n:m$. 
+We assume that the relation between nodes is a $1:n$ relation, which implies that the presentation of a higher-level node may consist of several lower-level nodes, but each lower-level node is in the presentation of at most one higher-level node. This restriction concerns only the node mapping; the $Present$ relation itself between the two levels is $n:m$. 
 
-The choice for $1:n$ relations follows naturally from the compositional way in which a presentation relation is usually specified: by specifying a presentation rule for each higher-level node. No practical examples have been found that suggest $n:m$ relations are needed. \note{maybe just say $n:m$ here and mention later that in Proxima we have $1:n$?}
+The choice for $1:n$ relations follows naturally from the compositional way in which a presentation relation is usually specified: by specifying a presentation rule for each higher-level node. No practical examples have been found that suggest $n:m$ relations are needed. \nonote{maybe just say $n:m$ here and mention later that in Proxima we have $1:n$?}
 
-The $1:n$ restriction is only for dealing with extra state. It is still possible to have a lower-level node depend on several higher-level nodes, but when dealing with extra state, each lower-level node is assumed to be the presentation of at most one higher-level node. \note{example?}
+The $1:n$ restriction is only for dealing with extra state. It is still possible to have a lower-level node depend on several higher-level nodes, but when dealing with extra state, each lower-level node is assumed to be the presentation of at most one higher-level node. \nonote{example?}
 
 
 % (mention fold/ag?) 
@@ -328,7 +330,7 @@ The $1:n$ restriction is only for dealing with extra state. It is still possible
 \end{center}
 \end{figure}
 
-$\Present$ relates each node of the higher level to zero or more lower-level nodes, forming zero or more subtrees with holes. Figure~\ref{nodePresentation} schematically shows the presentation of a node ($E_H$) in the higher level. $E_H$ has $n$ children ($C_{H,0\dots n-1}$). The presentation of $E_H$ is a number of trees (although usually just one) that may consist of several nodes. In the figure, the first tree is shown in more detail. It consists of $m$ nodes ($E_{L,0\dots m-1}$) and is rooted at $E_{L,0}$. 
+Thus, besides relating a set of higher-level values to a set of lower-level values, $\Present$ also relates each node of the higher level to zero or more lower-level nodes. Figure~\ref{nodePresentation} schematically shows the presentation of a node ($E_H$) in the higher level. $E_H$ has $n$ children ($C_{H,0\dots n-1}$). The presentation of $E_H$ is a number of trees (although usually just one) that may consist of several nodes. In the figure, the first tree is shown in more detail. It consists of $m$ nodes ($E_{L,0\dots m-1}$) and is rooted at $E_{L,0}$. 
 
 The $C_{L,0}$, \dots, $C_{L,l-1}$ subtrees in the lower-level tree are not part of the presentation of $E_H$. Typically, these are the presentations of the children of $E_H$, but in general they can be (part of) the presentation of any node in the higher level. 
 
@@ -393,7 +395,7 @@ The right-hand side of Figure~\ref{layerExtraState} shows an example of interpre
 
 For simplicity, we assume that the enriched document only contains the table of contents and not the chapters themselves. Thus, we only have to consider the extra state here and not the duplication (titles that appear in the table of contents as well as in the chapters). Section~\ref{sect:informalDuplicates} discusses how to handle duplications in general, and the same method can be used for the table of contents.
 
-On interpretation, the table of contents is mapped back onto a complete document, which includes the shaded content parts that are not in the enriched document. The title of a chapter comes from the enriched document, whereas its content is reused from the previous document.  \note{mention that intr ES is more important then pres ES here?}
+On interpretation, the table of contents is mapped back onto a complete document, which includes the shaded content parts that are not in the enriched document. The title of a chapter comes from the enriched document, whereas its content is reused from the previous document.
 
 
 

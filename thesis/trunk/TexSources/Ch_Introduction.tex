@@ -1,10 +1,9 @@
-\chapter{Introduction}
-\label{chap:introduction}
+\chapter{Introduction} \label{chap:introduction}
 
 %{\em *** Version: \today~ ***}
 
 
-Many applications of computers involve some form of editing: a user views a data structure and provides edit gestures in order to modify this data structure. Different kinds of documents require different ways of editing, and hence a multitude of editors applications is required, each with its own specific edit model and user-interface conventions. Moreover,  since application designers have different ideas on what constitutes a pleasant edit model, even editors for the same document type may show significantly different edit behavior. Nevertheless, the core edit behavior, whether performed in a word-processor or a spreadsheet, is largely similar: document fragments may be copied and pasted, and new parts of the document may be constructed by selecting from menus or entering text. 
+Many applications of computers involve some form of editing: a user views a data structure and provides edit gestures in order to modify this data structure. Different kinds of documents require different ways of editing, and hence a multitude of editors is required, each having its own specific edit model and user-interface conventions. Moreover,  since application designers have different ideas on what constitutes a pleasant edit model, even editors for the same document type may show significantly different edit behavior. Nevertheless, the core edit behavior, whether performed in a word-processor or a spreadsheet, is largely similar: document fragments may be copied and pasted, and new parts of the document may be constructed by selecting from menus or entering text. 
 
 % Although gradually, the edit model and user interface of editors seems to become more standard,
 % still many differences exist
@@ -22,16 +21,32 @@ A generic editor improves consistency between editors, because all instantiated 
 
 Especially in the nineteen-eighties, many research projects on structure editing were started. However, the editors developed were generally perceived as being overly restrictive, and attempts at developing less restrictive systems resulted mainly in text-only editors. \note{mention syntax-directed/recognizing here already?} Further, regardless of the restrictiveness of the edit model, the applicability of the generic editors was generally limited to source editors for programming languages and simple word-processing applications.
 %No generic editor However, no editor gained much popularity . either  applicable or perceived as restrictive.  but not %one has gained widespread acceptance.
-In the years following, research interest in structure editing steadily declined, and most of the generic editors that were developed are now used only for education purposes at the institute of origin.
+In the years following, research interest in structure editing steadily declined, and most of the generic editors that were developed are now used only for educational purposes at the institute of origin.
 %Nowadays, the term structure editor even has a rather negative connotation.
 
-In our opinion, the problem with these structure editors is that either they focus on editing the document, or on editing the presentation (often just text), but not on both. The document-oriented editors may have a powerful presentation mechanism, but poorly support editing in the presentation, which results in a restrictive edit model. On the other hand  purely presentation-oriented editors lack edit operations on the document, and also have relatively basic presentation mechanisms.
+In our opinion, the problem with these structure editors is that they either focus on editing the document structure, or on editing the presentation (often just text).
+%Lambert: (maar welke structuur-editors focussen op de presentatie en niet op de structuur??)
+The document-oriented editors may have a powerful presentation mechanism, but poorly support editing in the presentation, which results in a restrictive edit model. On the other hand,  purely presentation-oriented editors lack edit operations on the document, and also have relatively weak presentation mechanisms.
 
-With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many standards for XML document types are being developed, but support for editing the documents of these types is still poor. \bc ample support? geeft wel dubbele "there is" \ec There is a choice between using an expensive custom-made editor, or a generic XML editor, the functionality of which does  not come close to what a generic editor could potentially offer. It is not possible to use one of the current XML editors as an editor for a programming language or for mathematical equations.
+With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many standards for XML document types are being developed, but support for editing documents of these types is still poor. 
+% ample support? geeft wel dubbele "there is"
+There is a choice between using an expensive custom-made editor, or a generic XML editor, the functionality of which does  not come close to what a presentation-oriented (WYSIWYG) editor could potentially offer. It is not possible to use one of the current XML editors as a convenient editor for a programming language or for mathematical equations.
 
-In response to this situation, we have developed  the presentation-oriented structure editor Proxima. The editor has a layered architecture and combines a powerful document presentation mechanism with a non-restrictive edit model. Besides edit operations on the document structure, the editor also allows editing in the presentation. The editor can be used for a wide range of applications, such as word-processors or source editors, but also equation editing and spreadsheet behavior is possible. A platform-independent Haskell prototype has been implemented, and experiments with instantiated editors have yielded promising results.
 
-%al results with example editors built with the prototype seem to suggest the validity of our approach. \todo{zin?}
+\toHere
+First preliminary followed by different kinds of editors. Introduction of proxima
+\fromHere
+\bc
+In response to this situation, we have developed  the presentation-oriented structure editor Proxima. The editor can be used for a wide range of applications, such as word-processors or source editors, but also equation editing and spreadsheet behavior is possible. The editor has a layered architecture and combines a powerful document presentation mechanism with a non-restrictive edit model. Besides edit operations on the document structure, the editor also allows editing in the presentation.  A platform-independent Haskell prototype has been implemented, and experiments with instantiated editors have yielded promising results.
+\ec
+
+\bc para uit advantages of str editors
+Despite the advantages mentioned, generic structure editors are not widespread at all. Several structure editors are used in small communities, but most development projects have been terminated, and in the last decade, very few publications on the subject have appeared. The rise of the XML standard has spawned a large number of generic editors, but when regarded as structure editors, XML editors do not show much variation and do not offer many of the possibilies that a structure editor could offer. Hence, their applicability is limited, and using an XML editor to edit a Java program source, for example, is not possible with the current generation of editors.
+\ec
+
+
+
+
 
 %, and provided promising results.
 
@@ -112,7 +127,7 @@ A {\em structured document} is a collection of logical entities between which a 
 
 In this thesis, we restrict ourselves to structured documents that have a tree stucture that can be described by an EBNF grammar. Although graphs can be viewed as structured documents as well, algorithms for performing computations over graphs are far more complex than tree algorithms. Furthermore, parsers for graphs are less well understood than parsers for trees, as well as computationally more expensive. 
 
-We assume that the structure of a document is described by a formalism comparable to an EBNF grammar. In cases where we explicitly want to describe the structure of a document fragment, we use monomorphic (i.e.\ parameter free) Haskell~\cite{peytonJones03haskell} data types together with the list type. Example document fragments are represented by Haskell terms. For example, a document representing the let expression  $\mathbf{let}~x = 1;~y = 2~\mathbf{in}~x+y$
+In cases where we explicitly want to describe the structure of a document fragment, we use monomorphic (i.e.\ parameter free) Haskell~\cite{peytonJones03haskell} data types together with the list type. Example document fragments are represented by Haskell terms. For example, a document representing the let expression  $\mathbf{let}~x = 1;~y = 2~\mathbf{in}~x+y$
 \bc $(1+2) \times (3 + 4)$\ec can be denoted in Haskell by: 
 
 \begin{small}
@@ -122,8 +137,7 @@ $Let~[Decl~(Ident~\text{``x''})~(Int~1),~Decl~(Ident~\text{``y''})~(Int~2)]~(Sum
 
 \subsection{XML}
 
-
-The eXtensible Markup Language XML~\cite{xml11} is an increasingly popular standard for representing structured documents. The standard is a simplified descendent of SGML~\cite{sgml86} (Standard Generalized Markup Language). XML documents are tree-structured. The nodes of the tree are referred to as {\em elements}. The leaves of the tree are text or attributes (name-value pairs describing properties of an element). The tree structure is represented with opening and closing {\em tags}, and if these tags are nested correctly, the XML document is {\em well-formed}.
+The eXtensible Markup Language XML~\cite{xml11} is an increasingly popular standard for representing structured documents. The standard is a simplified descendant of SGML~\cite{sgml86} (Standard Generalized Markup Language). An XML document is a sequence of characters that encodes a tree structure. The nodes of the tree are referred to as {\em elements}. The leaves of the tree are text or attributes (name-value pairs describing properties of an element). The structure of the tree  is represented with opening and closing {\em tags}, and if these tags are nested correctly, the XML document is {\em well-formed}.
 
 The let expression example of the previous section may be represented in XML by:
 
@@ -164,7 +178,7 @@ The Mathematical Markup Language MathML~\cite{mathml20} is a standard for descri
 
 
 %what is an editor
-While the term {\em editor} is usually only associated with text editors such as Emacs~\cite{stallman81emacs} or the ubiquitous Microsoft Notepad, we will use the term in a much broader sense. We regard as an editor any application that presents a visual representation of an internal data structure to a user and allows the user to modify this structure. The internal data structure is referred to as the {\em document} and the visual representation is the {\em presentation}. 
+While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or the ubiquitous Microsoft Notepad, we will use the term in a much broader sense. We regard as an editor any application that presents a visual representation of an internal data structure to a user and allows the user to modify this structure. The internal data structure is referred to as the {\em document} and the visual representation is the {\em presentation}. 
 
 %boundaries of editor concept
 Obviously, word processors, image editors, and text editors are editors in this view, but there are also some less obvious examples. Take for example the preferences pane that is part of most window-based applications. The check boxes, selection lists, and text fields can be seen as a presentation of the preferences of the application. Another example of an application that is not usually regarded as an editor is a file browser.
@@ -189,7 +203,10 @@ A {\em presentation}, or {\em view}, is the only thing a user sees of the docume
 
 % what is presenting
 The relation between a document and its presentation is denoted by the term {\em presentation relation}, or {\em presentation mapping}. If, according to the presentation relation, the presentation shown to the user is a presentation of the document, we say that the {\em presentation invariant} holds. Computing the presentation of a document is called the {\em presentation process}, whereas computing a document from a presentation is called the {\em interpretation process}. Together, the two processes implement the presentation relation and maintain the presentation invariant if either side of the relation changes.
-\todo{define valid presentation!!}
+
+% what is valid
+A presentation is {\em valid} if there exists a document, which, when presented, yields that presentation. A presentation for which there is no corresponding document is invalid. An invalid presentation may result from an editing the presentation level. Note the difference with the term valid document, which denotes a document that is well typed.
+
 \bc
 When the presentation level is a presentation of the document, we refer to it as valid. This should not be confused with valid for XML documents which means type correct.
 also in defs
@@ -204,7 +221,7 @@ Generally speaking, editing consists of repeated interactive cycles of presentin
 \head{Document-oriented versus presentation-oriented editing}
 
 % doc-oriented vs pres-oriented 
-Because edit gestures may be targeted either at the document or the presentation, we distinguish two kinds of editing:  {\em document-oriented editing} or {\em structure editing}, versus {\em presentation-oriented editing}.
+Because edit gestures may be targeted either at the document or the presentation, we distinguish two kinds of editing:  {\em document-oriented} versus {\em presentation-oriented} editing.
 
 % also say document editing/presentation editing?
 
@@ -219,7 +236,7 @@ Section~\ref{sect:intrProcess} provides a more thorough discussion of both docum
 \head{Kinds of editors}
 
 %what is structure editor
-The term {\em structure editor} is used to make explicit that an editor has document-oriented editing functionality (also including navigation). We do not make a sharp distinction between text editing and structure editing. Instead, we regard all editing as structure editing, but with a varying level of structure. A text editor can be seen as a structure editor with a very simple structure model: a string or a list of strings. 
+The term {\em structure editor} is used to make explicit that an editor has document-oriented editing functionality (also including navigation). We do not make a sharp distinction between plain-text editing and structure editing. Instead, we regard all editing as structure editing, but with a varying level of structure. A text editor can be seen as a structure editor with a very simple structure model: a string or a list of strings. Document-oriented and presentation-oriented editing coincide for a text editor.
 
 %what is generic?
 An editor is a {\em generic editor} if it is not specifically built for a single document type but can be used to edit a whole class of document types. A generic editor may be {\em instantiated} to yield an editor for a specific document type. Genericity can be achieved with a single generic editor that edits documents of arbitrary types, but also with an editor generator. An {\em editor generator} is an environment that generates an editor application based on descriptions of the document type and its presentation. Although a generator is not as versatile as a single generic editor, we view both as generic editors. 
@@ -250,120 +267,13 @@ There is no fundamental problem with this view, but we do not adopt it because a
 Because it is difficult to give a precise definition of a generic structure editor and because such a definition might be restrictive, we will discuss a number of typical use cases to clarify what we mean by a generic structure editor. Section~\ref{sect:usecases} presents these use cases.
 
 
-%								
-\subsection{Classes of structure editors}
 
-Three classes of structure editors are distinguished in the literature: {\em syntax-directed}, {\em syntax-recognizing}, and {\em hybrid} editors. Syntax-directed editors mainly support edit operations targeted at the document structure, whereas syntax-recognizing editors support edit operations on the presentation of the document. A hybrid editor combines syntax-directed with syntax-recognizing features, but the term is not used consistently. To avoid confusion, we will refrain from using the term hybrid, except in the brief discussion below.
-
-\head{Syntax-directed editors} 
-% mention that structure editing is often source editing.
-
-The first structure editors that were developed are the {\em syntax-directed}, or {\em pure}, structure editors~\cite{reps84synGen,Bahlke86PSG,magnusson90orm}.
-
-Early syntax-directed editors show a textual presentation of the document (usually a program source) but exclusively offer edit operations targeted at the internal document structure, and not at the textual presentation. The original idea behind this was that if structural edit operations are available, a user would not need the textual edit operations anymore. Further, presentation-oriented edit operations would interfere with the user's structural model of the document and introduce errors. Hence they were prohibited altogether. Most editors for XML (see also Section~\ref{sect:xmlEditors}), as well as editors for preferences panes, can be regarded as syntax-directed editors.
-
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{center}
-\begin{small}
-\noindent \xymatrix{
-   \dataa{$Document$} \ar[dd]    &     \\
-                                              & User  \ar[lu] \ar@{.>}[ld] \\
- \dataa{$Presentation$}  &   \\
-}
-\end{small}
-\end{center}\caption{A syntax-directed editor (draft)}\label{synDirEdit} 
-\end{center}
-\end{small}
-\end{figure}
-
-
-Figure~\ref{synDirEdit} shows a schematic representation of a syntax-directed editor. The editor works by computing a presentation of the internal document structure, which is shown to the user together with a current focus of attention. The user provides an intended edit operation (edit gesture) on the document structure, from which a document update is computed. After the document is updated, a new presentation is computed, which is shown to the user.
-
-If the editor supports clicking in the presentation to set the focus, the editor also needs to keep track of the origin in the document for each position in the presentation.
-
-In the figure, the line between the user and the presentation is dotted because syntax-directed editors do not support edit operations on the presentation very well. Because the presentation is derived from the document, an intended edit operation on the presentation first needs to be mapped onto an edit operation on the document, which is difficult if the edit operation is not a logical operation on the document level.
-
-A major problem with syntax-directed editors is the restrictiveness of the edit model (e.g.~\cite{vanter94practical,rubinNeal87design}). New structures are easy to create, but not as easy to modify. For example, if a user wishes to change a while statement to an if statement, simply typing over the keyword is typically not supported. 
-
-Many later syntax-directed editors offer a form of presentation-oriented editing by providing a freely editable textual presentation of (part of) the document, and applying a parser to the edited text. Some publications~\cite{teitelbaum81progSynth, minor90editing} refer to such editors as hybrid, but, as we will explain below, we still regard these editors as syntax-directed editors. 
-
-Unless the two forms of editing are completely integrated, the textual presentation forces a user to work in a different mode of editing, which is referred to as {\em mode switching}. Mode switching does not solve the problem of restrictiveness adequately. Often, a separate window showing a text-only presentation is opened and before the mode can be switched back, the edited text has to be valid. Furthermore, separate modes require a user to be constantly aware of the current mode of the editor. The resulting increased cognitive burden has been shown to be a source of errors~\cite{sellen90modes}.
-
-% mention problems?
-\head{Syntax-recognizing editors} 
-
-At the other end of the spectrum are the {\em syntax-recognizing} structure editors~\cite{budinsky85sre, ballance92pan}. A syntax-recognizing editor keeps track of the textual presentation of the document. The user can freely edit the text, and the editor tries to recognize the document structure by means of a parser. Once the text has been (partially) recognized, structural information (e.g.\ syntax-coloring or type information), navigation, and, in some editors, edit operations are available.
-
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{center}
-\begin{small}
-\noindent
-\xymatrix{
-   \dataa{$Document$}     &     \\
-                                              & User  \ar[ld] \ar@{.>}[lu] \\
- \dataa{$Presentation$} \ar[uu] &   \\
-}
-\end{small}
-\end{center}\caption{A syntax-recognizing editor (draft)}\label{synRecEdit} 
-\end{center}
-\end{small}
-\end{figure}
-
-Figure~\ref{synRecEdit} schematically shows a syntax-recognizing editor. The user's edit operations are targeted at the presentation, which can be edited freely. The document is derived by parsing the presentation; hence the reversed direction of the arrow, compared to Figure~\ref{synDirEdit}.
-
-For each element in the document structure, the editor needs to keep track of what parts of the presentation it corresponds to, in order to show structural information in the presentation, as well as support structural navigation.  When a document structure has been recognized, the presentation may show additional information using font and color changes, context-sensitive menus, tooltips, etc.
-
-Similar to the syntax-directed editor, the picture of the syntax-recognizing editor in Figure~\ref{synRecEdit} also contains a dotted arrow. In this case, because the document is derived from the presentation, structural edit operations on the document are difficult to support. A document-oriented edit operation has to be mapped onto an update on the presentation, in such a way that parsing the updated presentation returns the intended updated document. Presentation information that is not stored in the document tree, such as whitespace and comments, has to be related to the document tree in some way, in order to be put in the right place after a structural edit operation.
-
-The main problem with syntax-recognizing editors lies in their limited applicability. Because the presentation needs to contain enough information to derive the document, interesting presentations that only show part of the document are hard to support. Furthermore, graphical presentations, as well as presentations containing computed values and structures, do not fit the model, as these are difficult to parse. As a result, syntax-recognizing editors are mainly limited to text-oriented applications, such as program-source editors.
-
-% mention: good for program editing?
-\head{Hybrid editors} 
-
-The term hybrid editor is used for an editor that supports structural edit operations as well as presentation-oriented (often just textual) edit operations.
-
-In some publications (e.g.~\cite{teitelbaum81progSynth, minor90editing}), the term hybrid is used to refer to syntax-directed structure editors that have a limited form of syntax-recognizing functionality. As a consequence, most syntax-directed editors would qualify as hybrid editors, because most editors support some form of text parsing.
-
-In contrast, other publications (e.g.~\cite{ballance92pan, koorn92gse}) advocate that the term hybrid should be reserved for editors that support full textual editing of the document, as well as limited syntax-directed functionality, even if structural modifications on the document are not supported. In this view, almost all syntax-recognizing editors would classify as hybrid editors, since most of these editors support a form of structural navigation.
-
-\head{A layered editor}
-
-\todo{Zie oude versie}
-Because of this confusion, and because of the strictness of the syntax-directed versus syntax-recognizing classification, we refrain from using the term hybrid. Instead, we refer to editors that primarily support document-oriented edit operations as syntax-directed editors, and to editors that primarily support presentation-oriented editing as syntax-recognizing editors.
-
-\subsection{Terminology}
-
-We give a summary of the terms that were introduced in the previous sections.
-
-\begin{description}
-\item[Editor:] Application for creating and modifying documents. In this thesis also used to refer to {\em structure editors} and {\em generic editors} (or generic structure editors).
-\item[Document:] Internal data structure that represents the information that is edited.
-\item[Presentation/View:] Visible representation of the document.
-\item[Level:] Intermediate  \todo{}
-\item[Presentation mapping/relation:] The relation between the document and its presentation.
-\item[Presentation-oriented editing:] Edit operation targeted at the presentation: e.g.\ deleting ``\;$+$\;'' from ``$1+2$'', yielding ``$12$''.
-\item[Document-oriented editing/structure editing:] Edit operation targeted at the document: e.g.\ swapping two sections in an article.
-\item[Presentation sheet:] Parameter to the presentation (and interpretation) process. 
-\item[Presentation process:] Process of computing the presentation of a document.
-\item[Interpretation process:] Process of computing a document from a presentation.
-\item[Structure editor:] An editor that has knowledge of the structure of the edited document. Usually assumed to be a {\em generic editor} as well.
-\item[Generic editor:] A structure editor that is suitable to edit documents of different types.
-\item[Syntax-directed editor:] An editor that primarily supports document-oriented editing.
-\item[Syntax-recognizing editor:] An editor that primarily supports presentation-oriented editing.
-%\item[valid document:] A type-correct document, mainly used for XML documents.
-%\item[valid resentation:] Presentation that is pres. of a document 
-%\item[focus:] Shared name for cursor and selection.
-\end{description} 
 
 
 %								
 \subsection{Advantages of generic structure editors}
 
-An editor that knows about the structure of the edited document can interesting\todo{Doaitse: ``a lot of offer document-type specific'', maar a lot of is niet ok.} functionality. We list several potential advantages of generic structure editors. The first two advantages stem from the genericity of the editor, whereas the rest are mainly about the structural (document-oriented) abilities.
+An editor that knows about the structure of the edited document can offer interesting\nonote{Doaitse: ``a lot of offer document-type specific'', maar a lot of is niet ok.} functionality. We list several potential advantages of generic structure editors. The first two advantages stem from the genericity of the editor, whereas the rest are mainly about the structural (document-oriented) abilities.
 
 \begin{description}
 \item[Uniform user interface/edit model.] Rather than a separate editor application for each type of document, a single generic editor can be used for a range of document types. Thus, instead of having to cope with several slightly different interfaces, a user only needs to deal with a single uniform interface and edit model.
@@ -392,13 +302,167 @@ sometimes basic structural navigation.  Even though some of the document structu
 %*********************************
 \ec
 
-Despite the advantages mentioned, generic structure editors are not widespread at all. Several structure editors are used in small communities, but most development projects have been terminated, and in the last decade, very few publications on the subject have appeared. The rise of the XML standard has spawned a large number of generic editors, but when regarded as structure editors, XML editors do not show much variation and do not offer many of the possibilies that a structure editor could offer. Hence, their applicability is limited, and using an XML editor to edit a Java program source, for example, is not possible with the current generation of editors.
-
 % maybe say we  explain why this is the case
 % maybe say we will change it? or put that in outline?
 
 % pan article
 
+
+
+
+%								
+\subsection{Classes of structure editors}
+
+Three classes of structure editors are distinguished in the literature: {\em syntax-directed}, {\em syntax-recognizing}, and {\em hybrid} editors. Syntax-directed editors mainly support edit operations targeted at the document structure, whereas syntax-recognizing editors support edit operations on the presentation of the document. A hybrid editor combines syntax-directed with syntax-recognizing features, but the term is not used consistently. 
+%To avoid confusion, we will refrain from using the term hybrid, except in the brief discussion below.
+
+\head{Syntax-directed editors} 
+% mention that structure editing is often source editing.
+
+The first structure editors that were developed are the {\em syntax-directed}, or {\em pure}, structure editors~\cite{reps84synGen,Bahlke86PSG,magnusson90orm}.
+
+Early syntax-directed editors show a textual presentation of the document (usually a program source) but exclusively offer edit operations targeted at the internal document structure, and not at the textual presentation. The original idea behind this was that if structural edit operations are available, a user would not need the textual edit operations anymore. Further, presentation-oriented edit operations would interfere with the user's structural model of the document and introduce errors. Hence they were prohibited altogether. Most editors for XML (see also Section~\ref{sect:xmlEditors}), as well as editors for preferences panes, can be regarded as syntax-directed editors.
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\begin{small}
+\noindent \xymatrix@=0.4cm{
+   \dataa{$Document$} \ar[dd]    &     \\
+                                              & User  \ar[lu] \ar@{.>}[ld] \\
+ \dataa{$Presentation$}  &   \\
+}
+\end{small}
+\end{center}\caption{A syntax-directed editor (draft)}\label{synDirEdit} 
+\end{center}
+\end{small}
+\end{figure}
+
+
+Figure~\ref{synDirEdit} shows a schematic representation of a syntax-directed editor. The editor works by computing a presentation of the internal document structure, which is shown to the user together with a current focus of attention. The user provides an intended edit operation (edit gesture) on the document structure, from which a document update is computed. After the document is updated, a new presentation is computed, which is shown to the user.
+
+If the editor supports clicking in the presentation to set the focus, the editor also needs to keep track of the origin in the document for each position in the presentation.
+
+In the figure, the line between the user and the presentation is dotted because syntax-directed editors do not support edit operations on the presentation very well. Because the presentation is derived from the document, the editor needs to map the intended edit operation on the presentation onto an edit operation on the document, which is difficult if the edit operation is not a logical operation on the document level.
+
+A major problem with syntax-directed editors is the restrictiveness of the edit model (e.g.~\cite{vanter94practical,rubinNeal87design}). New structures are easy to create, but not as easy to modify. For example, if a user wishes to change a while statement to an if statement, simply typing over the keyword is typically not supported. 
+
+Many later syntax-directed editors offer a form of presentation-oriented editing by providing a freely editable textual presentation of (part of) the document, and applying a parser to the edited text. Some publications~\cite{teitelbaum81progSynth, minor90editing} refer to such editors as hybrid, but, as we will explain below, we still regard these editors as syntax-directed editors. 
+
+Unless the two forms of editing are completely integrated, the textual presentation forces a user to work in a different mode of editing, which is referred to as {\em mode switching}. Mode switching does not solve the problem of restrictiveness adequately. Often, a separate window showing a text-only presentation is opened and before the mode can be switched back, the edited text has to be valid. Furthermore, separate modes require a user to be constantly aware of the current mode of the editor. The resulting increased cognitive burden has been shown to be a source of errors~\cite{sellen90modes}.
+
+% mention problems?
+\head{Syntax-recognizing editors} 
+
+At the other end of the spectrum are the {\em syntax-recognizing} structure editors~\cite{budinsky85sre, ballance92pan}. A syntax-recognizing editor keeps track of the textual presentation of the document. The user can freely edit the text, and the editor tries to recognize the document structure by means of a parser. Once the text has been (partially) recognized, structural information (e.g.\ syntax-coloring or type information), navigation, and, in some editors, edit operations are available.
+
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\begin{small}
+\noindent
+\xymatrix@=0.4cm{
+   \dataa{$Document$}     &     \\
+                                              & User  \ar[ld] \ar@{.>}[lu] \\
+ \dataa{$Presentation$} \ar[uu] &   \\
+}
+\end{small}
+\end{center}\caption{A syntax-recognizing editor (draft)}\label{synRecEdit} 
+\end{center}
+\end{small}
+\end{figure}
+
+Figure~\ref{synRecEdit} schematically shows a syntax-recognizing editor. The user's edit operations are targeted at the presentation, which can be edited freely. The document is derived by parsing the presentation; hence the reversed direction of the arrow, compared to Figure~\ref{synDirEdit}.
+
+For each element in the document structure, the editor needs to keep track of what parts of the presentation it corresponds to, in order to show structural information in the presentation, as well as support structural navigation.  When a document structure has been recognized, the presentation may show additional information using font and color changes, context-sensitive menus, tooltips, etc.
+
+Similar to the syntax-directed editor, the picture of the syntax-recognizing editor in Figure~\ref{synRecEdit} also contains a dotted arrow. In this case, because the document is derived from the presentation, structural edit operations on the document are difficult to support. A document-oriented edit operation has to be mapped onto an update on the presentation, in such a way that parsing the updated presentation returns the intended updated document. Presentation information that is not stored in the document tree, such as whitespace and comments, has to be related to the document tree in some way, in order to be put in the right place after a structural edit operation.
+
+The main problem with syntax-recognizing editors lies in their limited applicability. Because the presentation needs to contain enough information to derive the document, interesting presentations that only show part of the document are hard to support. Furthermore, graphical presentations, as well as presentations containing computed values and structures, do not fit the model, as these are difficult to parse. As a result, syntax-recognizing editors are mainly limited to text-oriented applications, such as program-source editors.
+
+% mention: good for program editing?
+\head{Hybrid editors} 
+
+The term hybrid editor is used for an editor that supports structural edit operations as well as presentation-oriented (often just textual) edit operations.
+
+In some publications (e.g.~\cite{teitelbaum81progSynth, minor90editing}), the term hybrid is used to refer to syntax-directed structure editors that have a limited form of syntax-recognizing functionality. As a consequence, most syntax-directed editors would qualify as hybrid editors, because most editors support some form of text parsing.
+
+In contrast, other publications (e.g.~\cite{ballance92pan, koorn92gse}) advocate that the term hybrid should be reserved for editors that support full textual editing of the document, as well as limited syntax-directed functionality, even if structural modifications on the document are not supported. In this view, almost all syntax-recognizing editors would classify as hybrid editors, since most of these editors support a form of structural navigation.
+
+%and because of the strictness of the syntax-directed versus syntax-recognizing classification,
+Because of this confusion we refrain from using the term hybrid. Instead, we refer to editors that primarily support document-oriented edit operations as syntax-directed editors, and to editors that primarily support presentation-oriented editing as syntax-recognizing editors.
+
+\todo{meestal is er wel eentje de belangrijkste}
+
+\subsection{Proxima}
+
+
+Proxima is echt hybrid. even veel pres als doc.
+Wat hier te zeggen?
+{\em level} {\em layer}
+In order to . 
+Instead of pres or doc, we have proxima, supports both. Proxima has a layered architecture translates both ways. Intermediate levels may also be targeted.
+
+A layered architecture, which breaks up the presentation proces. each intermediate value is a level components that map levels are layers
+
+Proxima The editor can be used for a wide range of applications, such as word-processors or source editors, but also equation editing and spreadsheet behavior is possible. The editor has a layered architecture and combines a powerful document presentation mechanism with a non-restrictive edit model. Besides edit operations on the document structure, the editor also allows editing in the presentation.  A platform-independent Haskell prototype has been implemented, and experiments with instantiated editors have yielded promising results.
+
+
+\nonote{toekomst, hier al verschillende levels en layers laten zien, probleem dat presentation dan rendering wordt}
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{center}
+\begin{small}
+\noindent
+\xymatrix@=0.4cm{
+   \dataa{$Document$}  \ar[dd]   &     \\
+                                            & User  \ar[ld]\ar[lu] \\
+ \dataa{$Presentation$} \ar[uu] &   \\
+}
+%\xymatrix@=0.4cm{
+%   \dataa{$Document (Level_0)$}  \ar[d]   &     \\
+%   \dataa{$Level_1$}  \ar[d]\ar[u]   &     \\
+%   \dots                                           & User  \ar[ldd]\ar[ld]\ar[lu]\ar[luu] \\
+% \dataa{$Level_{n-1}$} \ar[u] \ar[d] &   \\
+% \dataa{$Presentation (Level_n)$} \ar[u] &   \\
+%}
+\end{small}
+\end{center}\caption{Proxima (draft)}\label{synRecEdit} 
+\end{center}
+\end{small}
+\end{figure}
+
+ 
+% what about backward mapping, no ES needed? Probably won't know this until some more
+% research is done on mappings
+
+
+\subsection{Terminology}
+
+We give a summary of the terms that were introduced in the previous sections.
+
+\begin{description}
+\item[Editor:] Application for creating and modifying documents. In this thesis also used to refer to {\em structure editors} and {\em generic editors} (or generic structure editors).
+\item[Document:] Internal data structure that represents the information that is edited.
+\item[Presentation mapping/relation:] The relation between the document and its presentation.
+\item[Presentation-oriented editing:] Edit operation targeted at the presentation: e.g.\ deleting ``\;$+$\;'' from ``$1+2$'', yielding ``$12$''.
+\item[Document-oriented editing/structure editing:] Edit operation targeted at the document: e.g.\ swapping two sections in an article.
+\item[Presentation sheet:] Parameter to the presentation (and interpretation) process. 
+\item[Presentation process:] Process of computing the presentation of a document.
+\item[Interpretation process:] Process of computing a document from a presentation.
+\item[Layer:] \todo{Layer?}
+\item[Level:] Intermediate stage in the presentation/interpretation process, also includes document and presentation.
+\item[Structure editor:] An editor that has knowledge of the structure of the edited document. Usually assumed to be a {\em generic editor} as well.
+\item[Generic editor:] A structure editor that is suitable to edit documents of different types.
+\item[Syntax-directed editor:] An editor that primarily supports document-oriented editing.
+\item[Syntax-recognizing editor:] An editor that primarily supports presentation-oriented editing.
+\item[Valid document:] A well-typed document. Mainly used for XML documents.
+\item[Valid presentation:] A presentation that is the result of presenting some document.
+%\item[Focus:] Shared name for cursor and selection.
+\end{description} 
 
 %\section{Why Proxima}
 %
@@ -428,20 +492,13 @@ The remainder of the thesis has the following structure:
 
 
 %As mentioned, users regard structure editors as being either overly restrictive, and/or not powerful enough.
-Chapter~\ref{chap:requirements} explores applications of generic structure editing by providing five use cases of real-world editors. With these use cases in mind, we formulate a number of functional requirements that in our view are important for a flexible non-restrictive structure editor. The chapter also evaluates existing editors and explains why no single structure editor supports all five use cases.
-\toHere
-Introduce proxima
+Chapter~\ref{chap:requirements} explores applications of generic structure editing by providing five use cases of real-world editors. With these use cases in mind, we formulate a number of functional requirements that in our view are important for a flexible non-restrictive structure editor. We evaluate a number of existing editors according to the requirements, and conclude with an overview of how the Proxima editor is designed to meet the requirements and be able handle all use cases.ß
 
-The layered architecture of Proxima is introduced in Chapter~\ref{chap:proxArch}. The main data structures and components are discussed and examples of the presentation and interpretation processes are provided.
-\todo{mention levels and layers}
+The layered architecture of Proxima is introduced in Chapter~\ref{chap:proxArch}.  The chapter discusses the various data levels, as well as the layers that maintain the mappings between the levels. Furthermore,  examples of the presentation and interpretation processes are provided.
 
-\fromHere
-In chapters~\ref{chap:informalSpec} and~\ref{chap:formalSpec}, we develop a specification of the Proxima editor. Chapter~\ref{chap:informalSpec} serves as an introduction to the specification and introduces our model of the edit process, as well as the concepts of extra state and duplicates in the presentation. In chapter~\ref{chap:formalSpec}, we 
-\toHere
+In chapters~\ref{chap:informalSpec} and~\ref{chap:formalSpec}, we develop a specification of the Proxima editor. Chapter~\ref{chap:informalSpec} serves as an introduction to the specification and introduces our model of the edit process, as well as the concepts of extra state and duplicates in the presentation. In  Chapter~\ref{chap:formalSpec}, we start by specifying a simple editor, to which extra state and multiple layers are added in subsequent sections. The chapter ends with an informal discussion on how to handle presentations that contain duplicates.
 
-
-In Chapter~\ref{chap:presenting}, we discuss the {\Xprez} presentation formalism for the Proxima editor. {\Xprez} is a declarative ... . reqs. Important for editor.
-\fromHere
+In Chapter~\ref{chap:presenting}, we discuss the {\Xprez} presentation formalism of the Proxima. {\Xprez} is a declarative presentation language, suited for specifying a wide range of presentations. We state a number of requirements for a presentation language for structured documents, and provide an informal overview of {\Xprez} using a series of examples.
 
 A prototype that already offers much of the functionality mentioned in this thesis has been implemented in Haskell. Chapter~\ref{chap:prototype} discussed the implemented prototype and contains screenshots of editors that have been instantiated with it. The chapter also explains which components need to be provided to instantiate an editor.
 
