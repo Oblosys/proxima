@@ -200,7 +200,7 @@ anaGetFirsts :: AnaParser a b c d -> Exp c
 pLength :: AnaParser a b c d -> Nat
 anaCostSym :: SymParser a b => Int{-I-} -> b -> b -> a b
 anaCostRange :: InputState a b => Int{-I-} -> b -> SymbolR b -> AnaParser a c b b
-orOneOneDescr :: (Ord (Exp a), Eq (SymbolR a)) => OneDescr b c a d -> OneDescr b c a d -> Bool -> OneDescr b c a d
+orOneOneDescr :: (Ord a) => OneDescr b c a d -> OneDescr b c a d -> Bool -> OneDescr b c a d
 seqZeroZero :: Maybe (Bool,Either a b) -> Maybe (Bool,Either c (ParsRec d e f c)) -> (a -> ParsRec d e f c -> g) -> (b -> ParsRec d e f c -> g) -> (a -> c -> h) -> Maybe (Bool,Either h g)
 anaSeq :: (Ord (Exp a), Eq (SymbolR a), InputState b a) => (c -> ParsRec d e a f -> ParsRec b g a h) -> (ParsRec i j a c -> ParsRec d e a f -> ParsRec b g a h) -> (c -> f -> h) -> AnaParser i j a c -> AnaParser d e a f -> AnaParser b g a h
 anaOr :: (InputState a b, Ord (Exp b), Eq (SymbolR b), Show (Exp b)) => AnaParser a c b d -> AnaParser a c b d -> AnaParser a c b d
@@ -356,7 +356,7 @@ class Alternative p where
   (<|>) :: p a -> p a -> p a
   pFail :: p a
 
-class SymParser p s | p -> s where
+class Symbol s => SymParser p s | p -> s where
  pCostRange   :: Int{-I-} -> s -> SymbolR s -> p s
  pCostSym     :: Int{-I-} -> s -> s         -> p s
  pSym         ::             s         -> p s
@@ -1065,6 +1065,7 @@ pAnySym l = pAny pSym l -- used to be called pAnySym
     (\f (pv, qv) -> (pv, f qv)) <$> qp
   , \f (x, y) -> qunp (punp f x) y
   )
+
 
 sem `pMerged` (units, alts, unp)
  = let pres = alts <*> pres `opt` units
