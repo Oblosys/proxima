@@ -50,7 +50,7 @@ The contributions of this paper are:
 \end{itemize}
 \ec
 
-The {\Xprez} language consists of a set of Haskell combinators that can be used to define a presentation. A presentation is tree-structured and represents an attribute-grammar tree. The attributes are presentation attributes such as font size and color. A special combinator is available for modifying presentation attributes. 
+The {\Xprez} language consists of a set of Haskell combinators that can be used to define a presentation. A presentation is tree-structured and represents an attribute-grammar tree. The attributes are presentation attributes such as font size and color. A special combinator can be used for modifying presentation attributes. 
 
 Section~\ref{sect:targetlangs} discusses several existing presentation languages and states a number of requirements for a presentation language. This is followed by an informal description of the {\Xprez} presentation language in Section~\ref{sect:xpreztarget}. Section~\ref{sect:conclusions} concludes with an overview of future research.
 
@@ -64,7 +64,7 @@ In this section, we discuss five presentation languages for structured documents
 
 In Section~\ref{sect:presentationFormalism}, we mentioned that a presentation language consists of two parts. One part is the {\em presentation target language}, which describes the components (strings, boxes, rows, etc.) of a presentation. The other part is the {\em presentation specification language}, in which we specify how a document is mapped onto an element of the target language. Not every presentation language explicitly identifies its presentation target language. Moreover, if the target language supports abstraction, a presentation may contain functions, which makes it difficult to clearly separate the two languages.
 
-In the remainder of this chapter, we focus on presentation target language, because {\Xprez} is the presentation target language of Proxima. The presentation specification language of Proxima is an attribute-grammar formalism, but the details of this formalism still require further research. Section~\ref{sect:instantiating} provides more information on the presentation attribute grammar, as well as a few example presentation specifications. 
+In the remainder of this chapter, we focus on presentation target languages, because {\Xprez} is the presentation target language of Proxima. The presentation specification language of Proxima is an attribute-grammar formalism, but the details of using this formalism in Proxima still require further research. Section~\ref{sect:instantiating} provides more information on the presentation attribute grammar, as well as a few example presentation specifications. 
 
 In most presentation languages, a presentation is a tree structure, in which the leaves are atomic presentations and the nodes are composite presentations. An atomic presentation is a string or a simple graphical objects such as a line, a box, or an image. On the other hand, a composite presentation specifies for a number of child presentations how these are put together. We distinguish three different layout models for composite presentations: a box, a matrix, and a flow layout.
 
@@ -85,7 +85,7 @@ Matrices can be used to create box presentations, but the extent to which this i
  % does not depend on doc structure, but on available space. final presentation is not tree of target, but split 
  %along lines and pages
 
-A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matrix layout, the final structure of the presentation is only partially determined by the structure of the presentation.\nonote{niet duidelijk}
+A flow layout is used for line- and page-breaking. Child presentations are placed next to or below each other, until the remaining space is too small to fit the next presentation, in which case a new line or page is started. Thus, unlike in a box or matrix layout, the structure of the presentation as it is finally rendered is only partially determined by the structure of the presentation definition.\nonote{niet duidelijk}
 
 % How the presentations are divided over the lines and pages depends on the size of the presentation
 %
@@ -280,7 +280,7 @@ The code produces the following image (the dashed line has been added to show ve
 
 The second element in the row is a column that takes the vertical-reference line from its third child. Therefore, the word ``Big'' is aligned with the word ``small''. The \p{cross} object is a line figure in the form of a rectangle with a cross. The \p{greycross} is a \p{cross}, which is made stretchable in both directions by \p{withStretch}, and which has a grey background.
  
-Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The two stretching objects above the reference object (\p{text "small"}) are each assigned equal amounts of the remaining space above the vertical-reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
+Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The column is created with a \p{colR} combinator with argument \p{2}, which causes the third child (\p{text "small"}) to be the object from which the reference lines of the column are taken.  The two stretching objects above the reference object are each assigned equal amounts of the remaining space above the vertical-reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
 
 %																
 \subsection{Modifying presentation attributes}
@@ -303,7 +303,7 @@ The combinator takes a single child presentation as argument, together with a fu
 \end{figure}
 
 
-Figure~\ref{withDataFlow} shows the data flow for the attributes of \p{pres} and \p{pres `with\symbol{95}` f}. At the top-right of the figure, \p{Inh} and \p{Syn} are swapped to prevent crossing arrows. Because \p{f} may be an arbitrary function, the combinator may introduce cycles in the attribution. It is up to the designer of the presentation to ensure safety.
+Figure~\ref{withDataFlow} shows the data flow for the attributes of \p{pres} and \p{pres `with\symbol{95}` f}. Because \p{f} may be an arbitrary function, the combinator may introduce cycles in the attribution. It is up to the designer of the presentation to ensure safety.
 
 \bc \toHere
 In the specification of an attribute value, the original values of attributes can be used (e.g.\ the font size can be set to the old font size increased with 2 points). Therefore, the second argument of \p{with\symbol{95}} is a function that %takes as arguments the inherited attributes coming from the parent and the synthesized attributes coming from the %child presentation as arguments, and returns the new values (i.e.\ the inherited attributes that go to the child and the synthesized attributes that go to the parent).
@@ -452,7 +452,7 @@ Syntax macro's - maybe intermediate sol. for syntax is properties as wxHaskell.
 \bc Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \p{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. 
 \ec
 
-In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possible to define presentations that crash, or to create cycles in the attribution.  A more restricted presentation language may guarantee safety, but will not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to achieve safety.
+In {\Xprez}  expressiveness and efficient evaluation are considered to be more important than safety. An {\Xprez} value is translated to an attribute grammar, in which the attribution may be influenced directly using the  \p{with\symbol{95}} combinator. This results in an expressive presentation language that can be efficiently evaluated, but also makes it possible to define presentations that crash, or to create cycles in the attribution.  A more restricted presentation language may guarantee safety, but will most likely not be able to specify the complex presentations from Chapter~\ref{chap:requirements}. Hence, such editors need to be built by hand, which makes it considerably harder to achieve safety.\nonote{relativeren}
 
 %Of course better to have, but when confronted with weak pres lang building custom editor is unsafer. Nevertheless, conditions %on app of with. 
 
