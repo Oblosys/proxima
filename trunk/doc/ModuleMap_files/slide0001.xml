@@ -777,9 +777,7 @@
    to="184.5pt,306.375pt" strokecolor="black [1]">
    <v:stroke endarrow="block"/>
    <v:shadow color="gray [2]"/>
-  </v:line></p:shaperange>
- <p:shaperange id="_x0000_s2238">
-  <v:line id="_x0000_s2238" style='position:absolute;flip:y' from="218.25pt,270pt"
+  </v:line><v:line id="_x0000_s2238" style='position:absolute;flip:y' from="218.25pt,270pt"
    to="242.25pt,4in" strokecolor="black [1]">
    <v:stroke endarrow="block"/>
    <v:shadow color="gray [2]"/>

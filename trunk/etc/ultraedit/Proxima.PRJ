@@ -10,9 +10,9 @@ Create Tagfile=0
 Filter=*.*
 [Open Files]
 Open File0=D:\Data\src\Haskell\ProximaCVS\proxima\src\main\Main.hs
-Open File Pos0=355
-Open File Line0=182
-Open File Window Pos0=2,3,-1,-1,-4,-28,23,27,1027,406
+Open File Pos0=0
+Open File Line0=0
+Open File Window Pos0=2,3,-1,-1,-4,-28,69,81,1143,469
 Open File1=
 Open File Pos1=42274
 Open File Line1=41119

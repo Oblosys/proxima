@@ -238,15 +238,26 @@ After parsing (and re-presenting), the layout of currently invisible structures 
 \section{To Do}
 \subsection{Incrementality}
 Fix arrangement structure, so position is in parent row,col,ovl
-Also keep href and vref
 \subsection{Parsing}
-\begin{itemize}
-\item Error marking in arrangement
-\item Room in document for parse errors
-\end{itemize}
-\subsection{Dirty bits}
-Each node: self dirty children dirty
+New parser based on new version of UUAG error correcting parsers is necessary.
 
+Until then:
+
+Squigglies for parse errors:
+\begin{itemize}
+\item Parser: add error token nrs to ParseError
+\item Presentation: clean all squigglies in ParseError presentation, and add squigglies for appropriate token. If squiggly overlays have (IDP (-1)), then cleaning is easy
+\end{itemize}
+
+Easier structure parsing:
+\begin{description}
+\item[Scanner:] for structurals: produce structural tokens for all children as well. (can also be done in walk for now)
+\item[Parser:] when recognizing structural, just use a structural parser for the children. End structural tokens and structural with type make errors easier to spot. StrExp <Exp> <Exp> /StrExp instead of Str <Str>... <Str>... Structural parse errors are caused by error in presentation, not by user. Final parser needs safety. Structural tokens are never allowed to be deleted or inserted. If the parser deletes part of the structural tokens, things go wrong.
+\item[Non intrusive bits] structural parser specific for type can be implemented without breaking old parser.
+\end{description}
+
+\subsection{Dirty bits}
+Each node: self dirty children dirty. Find out which is the best representation.
 
 \subsection{Focus in nodes}
 Necessary to recover focus after transformations
