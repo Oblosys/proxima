@@ -108,12 +108,12 @@ Because the type of the document will vary for different applications of the edi
 \noindent
 \ttfamily
 \begin{tabbing}
-data Document = Root$_{Doc}$ [Decl$_{Doc}$]\\
-data Decl$_{Doc}$ \= = Decl$_{Doc}$ String Exp$_{Doc}$ String\\
-                            \> | Comment$_{Doc}$ [String]\\
-data Exp$_{Doc}$ \= =  IfExp $_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$ Exp$_{Doc}$\\
-                 \> | IntExp$_{Doc}$ Int\\
-                 \> | BoolExp$_{Doc}$ Bool\\
+data Document = Root$_{\Doc}$ [Decl$_{\Doc}$]\\
+data Decl$_{\Doc}$ \= = Decl$_{\Doc}$ String Exp$_{\Doc}$ String\\
+                            \> | Comment$_{\Doc}$ [String]\\
+data Exp$_{\Doc}$ \= =  IfExp $_{\Doc}$ Exp$_{\Doc}$ Exp$_{\Doc}$ Exp$_{\Doc}$\\
+                 \> | IntExp$_{\Doc}$ Int\\
+                 \> | BoolExp$_{\Doc}$ Bool\\
 \end{tabbing}
 \rmfamily
 
@@ -127,20 +127,20 @@ An enriched document is a copy of the document, to which derived information has
 
 Besides containing extra information, the enriched document, or a subtree of it, may also be a reordered version of the document. For example, if the document contains a list of elements, the enriched document may contain a sorted list of these elements.
 
-As an example of an enriched document, we take the sample document of the previous section and a type declaration alternative to the $Decl$ type. The type declaration is computed for each declaration. The type of an expression may be integer, boolean, or erroneous (eg. {\tt if True then 0 else False}). It is also possible to add the type as a field to the $Decl$ alternative, however, separate type declarations make it easier to show how enriched document edit operations are handled in Section~\ref{sect:reducer}.
+As an example of an enriched document, we take the sample document of the previous section and a type declaration alternative to the {\tt Decl} type. The type declaration is computed for each declaration. The type of an expression may be integer, boolean, or erroneous (eg. {\tt if True then 0 else False}). It is also possible to add the type as a field to the {\tt Decl} alternative, however, separate type declarations make it easier to show how enriched document edit operations are handled in Section~\ref{sect:reducer}.
 
 \noindent
 \ttfamily
 \begin{tabbing}
-data EnrichedDocument = Root$_{Enr}$ [Decl$_{Enr}$]\\
-data Decl$_{Enr}$ \= = TypeDecl$_{Enr}$ String Type$_{Enr}$\\
-                           \> | Decl$_{Enr}$ String Exp$_{Enr}$ String\\
-                           \> | Comment$_{Enr}$ [String]\\
-data Exp$_{Enr}$ \= =  IfExp $_{Enr}$ Exp$_{Enr}$ Exp$_{Enr}$ Exp$_{Enr}$\\
-                 \> | IntExp$_{Enr}$ Int\\
-                 \> | BoolExp$_{Enr}$ Bool\\
+data EnrichedDocument = Root$_{\Enr}$ [Decl$_{\Enr}$]\\
+data Decl$_{\Enr}$ \= = TypeDecl$_{\Enr}$ String Type$_{\Enr}$\\
+                           \> | Decl$_{\Enr}$ String Exp$_{\Enr}$ String\\
+                           \> | Comment$_{\Enr}$ [String]\\
+data Exp$_{\Enr}$ \= =  IfExp $_{\Enr}$ Exp$_{\Enr}$ Exp$_{\Enr}$ Exp$_{\Enr}$\\
+                 \> | IntExp$_{\Enr}$ Int\\
+                 \> | BoolExp$_{\Enr}$ Bool\\
 \\
-data Type$_{Enr}$ = IntType$_{Enr}$ | BoolType$_{Enr}$ | ErrorType$_{Enr}$
+data Type$_{\Enr}$ = IntType$_{\Enr}$ | BoolType$_{\Enr}$ | ErrorType$_{\Enr}$
 \end{tabbing}
 \rmfamily
 
@@ -165,15 +165,15 @@ Unlike the document and the enriched document, the presentation has a fixed type
 \noindent
 \ttfamily
 \begin{tabbing}
-data Presentation \= = Empty$_{Pres}$\\
-                  \> | String$_{Pres}$ String \\
-                  \> | Tokens$_{Pres}$ [Token]\\
-                  \> | Row$_{Pres}$ [Presentation]\\
-                  \> | Column$_{Pres}$ [Presentation]\\
-                  \> | Overlay$_{Pres}$ [Presentation]\\
-                  \> | Matrix$_{Pres}$ [Presentation]\\
-                  \> | Formatter$_{Pres}$ [Presentation]\\
-                  \> | With$_{Pres}$ AttributionRule Presentation\\
+data Presentation \= = Empty$_{\Pres}$\\
+                  \> | String$_{\Pres}$ String \\
+                  \> | Tokens$_{\Pres}$ [Token]\\
+                  \> | Row$_{\Pres}$ [Presentation]\\
+                  \> | Column$_{\Pres}$ [Presentation]\\
+                  \> | Overlay$_{\Pres}$ [Presentation]\\
+                  \> | Matrix$_{\Pres}$ [Presentation]\\
+                  \> | Formatter$_{\Pres}$ [Presentation]\\
+                  \> | With$_{\Pres}$ AttributionRule Presentation\\
 \\
 data Token \= = UCaseToken Whitespace String\\
            \> | LCaseToken Whitespace String\\
@@ -202,14 +202,14 @@ The similarity between the layout and the presentation level is clearly visible 
 \noindent
 \ttfamily
 \begin{tabbing}
-data Layout \= = Empty$_{Lay}$\\
-            \> | String$_{Lay}$ String \\
-            \> | Row$_{Lay}$ [Layout]\\
-            \> | Column$_{Lay}$ [Layout]\\
-            \> | Overlay$_{Lay}$ [Layout]\\
-            \> | Matrix$_{Lay}$ [Layout]\\
-            \> | Formatter$_{Lay}$ [Layout]\\
-            \> | With$_{Lay}$ AttributionRule Layout\\
+data Layout \= = Empty$_{\Lay}$\\
+            \> | String$_{\Lay}$ String \\
+            \> | Row$_{\Lay}$ [Layout]\\
+            \> | Column$_{\Lay}$ [Layout]\\
+            \> | Overlay$_{\Lay}$ [Layout]\\
+            \> | Matrix$_{\Lay}$ [Layout]\\
+            \> | Formatter$_{\Lay}$ [Layout]\\
+            \> | With$_{\Lay}$ AttributionRule Layout\\
 \\
 data AttributionRule = \dots\\
 \end{tabbing}
@@ -231,13 +231,13 @@ A \verb|With| node does not have a geometry field, because it only influences th
 % debugging?
 \ttfamily
 \begin{tabbing}
-data Arrangement \= = Empty$_{Arr}$ Geometry\\
-                 \> | String$_{Arr}$ Geometry String\\
-                 \> | Row$_{Arr}$ Geometry [Arrangement]\\
-                 \> | Column$_{Arr}$ Geometry [Arrangement]\\
-                 \> | Overlay$_{Arr}$ Geometry [Arrangement]\\
-                 \> | Matrix$_{Arr}$ Geometry [Arrangement]\\
-                 \> | With$_{Arr}$ AttributionRule Arrangement\\
+data Arrangement \= = Empty$_{\Arr}$ Geometry\\
+                 \> | String$_{\Arr}$ Geometry String\\
+                 \> | Row$_{\Arr}$ Geometry [Arrangement]\\
+                 \> | Column$_{\Arr}$ Geometry [Arrangement]\\
+                 \> | Overlay$_{\Arr}$ Geometry [Arrangement]\\
+                 \> | Matrix$_{\Arr}$ Geometry [Arrangement]\\
+                 \> | With$_{\Arr}$ AttributionRule Arrangement\\
 \\
 type Geometry = (Position, Size)\\
 type Position \= = (Int, Int)\\
@@ -269,7 +269,7 @@ data RenderingCommand = \dots
 
 Between each pair of data levels is a {\em layer} that takes care of mapping the higher level onto the lower level (downward mapping, or presentation) and that interprets edit operations on the lower level as edit operations on the higher level (upward mapping, or interpretation). 
 
-In the actual architecture, the downward mapping is not a mapping between the higher and lower levels, but between edit operations on those levels, similar to the upward mapping. Hence, the upward and the downward mappings are symmetrical, as both are concerned with edit operations. The layer has access to the adjacent higher and lower levels, and may update the higher level.  The exact types of the mappings in a layer are presented in Chapter~\ref{chap:layeredArchs}. Figure~\ref{singleLayer} contains a more detailed picture of a single layer. In the figure $\delta_{High}$ and $\delta_{Low}$ denote the edit operations on the higher and lower levels, and the $\leadsto$ symbol denotes the update on the higher level. \note{explain more?}
+In the actual architecture, the downward mapping is not a mapping between the higher and lower levels, but between edit operations on those levels, similar to the upward mapping. Hence, the upward and the downward mappings are symmetrical, as both are concerned with edit operations. The layer has access to the adjacent higher and lower levels, and may update the higher level.  The exact types of the mappings in a layer are presented in Chapter~\ref{chap:layeredArchs}. Figure~\ref{singleLayer} contains a more detailed picture of a single layer. In the figure $\delta_{\mathit{High}}$ and $\delta_{\mathit{Low}}$ denote the edit operations on the higher and lower levels, and the $\leadsto$ symbol denotes the update on the higher level. \note{TODO: Check notation now chapters 5 and 6 are done}\note{explain more?}
 
 \begin{figure}
 \begin{small}
@@ -295,6 +295,7 @@ interpretation of edit operations. The horizontal arrows  and the horizontal arr
 
 A mapping between edit operations is at least as expressive as a mapping between values, because any 
 mapping on values can be represented by a mapping 
+%TODO when uncommenting the following, fix math spacing
 $f :: Data_{High} \rightarrow Data_{Low}$ can be expressed as a mapping on edit operations
 $f' ::  \delta_{Data_{High}} \rightarrow \delta_{Data_{Low}}$ with $f' edit_{High} = set (f (edit_{High}high))$
 \ec
@@ -332,14 +333,14 @@ The presentation process is the stepwise mapping of a document onto its final re
 
 In order to illustrate the different stages in the presentation process, we follow the presentation of an simple document. After the description of each layer component, the intermediate result of the presentation of the document is given.
 
-The document type of the example is the expression list document type from Section~\ref{sect:docLevel}. The sample document consists of two items: a comment and an expression. For sake of clarity, we will denote strings on each level with {\tt "\dots"} instead of {\tt String$_{level}$ "\dots"}. 
+The document type of the example is the expression list document type from Section~\ref{sect:docLevel}. The sample document consists of two items: a comment and an expression. For sake of clarity, we will denote strings on each level with {\tt "\dots"} instead of {\tt String$_{\Level}$ "\dots"}. 
 
 Document:
 \small \ttfamily
 \begin{tabbing}
-Root$_{Doc}$ \= [ Comment$_{Doc}$ ["This", "is", "a", "simple", "expression"] \\
-       \> , Decl$_{Doc}$ \= "simple1" \\
-       \>                        \>(IfExp$_{Doc}$ (BoolExp$_{Doc}$ True) (IntExp$_{Doc}$ 1) (IntExp$_{Doc}$ 0))\\
+Root$_{\Doc}$ \= [ Comment$_{\Doc}$ ["This", "is", "a", "simple", "expression"] \\
+       \> , Decl$_{\Doc}$ \= "simple1" \\
+       \>                        \>(IfExp$_{\Doc}$ (BoolExp$_{\Doc}$ True) (IntExp$_{\Doc}$ 1) (IntExp$_{\Doc}$ 0))\\
        \>                        \> "info"\\
        \> ] 
 \end{tabbing}
@@ -360,10 +361,10 @@ Besides basic values, such as section numbers or the outcome of a computation in
 Enriched document:
 \small \ttfamily
 \begin{tabbing}
-Root$_{Enr}$ \= [ Comment$_{Enr}$ [ "This", "is", "a", "simple", "expression" ]\\
-       \> , TypeDecl$_{Enr}$ "simple1" IntType$_{Enr}$\\
-       \> , Decl$_{Enr}$ \= "simple1"\\
-       \>                       \> (IfExp$_{Enr}$ (BoolExp$_{Enr}$ True) (IntExp$_{Enr}$ 1) (IntExp$_{Enr}$ 0)) \\
+Root$_{\Enr}$ \= [ Comment$_{\Enr}$ [ "This", "is", "a", "simple", "expression" ]\\
+       \> , TypeDecl$_{\Enr}$ "simple1" IntType$_{\Enr}$\\
+       \> , Decl$_{\Enr}$ \= "simple1"\\
+       \>                       \> (IfExp$_{\Enr}$ (BoolExp$_{\Enr}$ True) (IntExp$_{\Enr}$ 1) (IntExp$_{\Enr}$ 0)) \\
        \>                        \> "info"\\
        \> ] 
 \end{tabbing}
@@ -394,17 +395,17 @@ The \verb|With| nodes specify the font for the presentation of the declarations.
 Presentation:
 \small \ttfamily
 \begin{tabbing}
-Col$_{Pres}$ \= [ With$_{Pres}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
-       \>  ~~~ (Formatter$_{Pres}$ [ "This", "is", "a", "simple", "expression" ])\\
-       \>, With$_{Pres}$ \{ fontFamily = "Courier New", fontSize = 12 \}\\
-       \>  ~~~ \= (Tokens$_{Pres}$ \= [ LCaseToken$_{Pres}$ (1,0) "simple1",  OpToken$_{Pres}$ (0,1) "::"\\  
-       \>          \>              \> , UCaseToken$_{Pres}$ (0,1) "Int"\\
+Col$_{\Pres}$ \= [ With$_{\Pres}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
+       \>  ~~~ (Formatter$_{\Pres}$ [ "This", "is", "a", "simple", "expression" ])\\
+       \>, With$_{\Pres}$ \{ fontFamily = "Courier New", fontSize = 12 \}\\
+       \>  ~~~ \= (Tokens$_{\Pres}$ \= [ LCaseToken$_{\Pres}$ (1,0) "simple1",  OpToken$_{\Pres}$ (0,1) "::"\\  
+       \>          \>              \> , UCaseToken$_{\Pres}$ (0,1) "Int"\\
        \>          \>              \> ])\\
-       \>, With$_{Pres}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-       \>  ~~~ \= (Tokens$_{Pres}$ \= [ LCaseToken$_{Pres}$ (1,0) "simple1", OpToken$_{Pres}$ (0,1) "="\\
-       \>          \>              \> , LCaseToken$_{Pres}$ (1,2) "if", UCaseToken$_{Pres}$ (0,1) "True"\\
-       \>          \>              \> , LCaseToken$_{Pres}$ (0,1) "then", IntToken$_{Pres}$ (0,1) "1"\\
-       \>          \>              \> , LCaseToken$_{Pres}$ (1,10) "else", IntToken$_{Pres}$ (0,1) "0"\\
+       \>, With$_{\Pres}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
+       \>  ~~~ \= (Tokens$_{\Pres}$ \= [ LCaseToken$_{\Pres}$ (1,0) "simple1", OpToken$_{\Pres}$ (0,1) "="\\
+       \>          \>              \> , LCaseToken$_{\Pres}$ (1,2) "if", UCaseToken$_{\Pres}$ (0,1) "True"\\
+       \>          \>              \> , LCaseToken$_{\Pres}$ (0,1) "then", IntToken$_{\Pres}$ (0,1) "1"\\
+       \>          \>              \> , LCaseToken$_{\Pres}$ (1,10) "else", IntToken$_{\Pres}$ (0,1) "0"\\
        \>          \>              \> ])\\
              \> ]
 \end{tabbing}
@@ -428,19 +429,19 @@ Structural tokens are treated specially, since they are not strings. A structura
 Layout:
 \small \ttfamily
 \begin{tabbing}
-Col$_{Lay}$ \= [  With$_{Lay}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
-                    \>  ~~~ (Formatter$_{Lay}$ [ "This", "is", "a", "simple", "expression" ])\\
-                    \> , With$_{Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-                    \>  ~~~ \= (Col$_{Lay}$ \= [ "" \\
-                    \>          \>        \> , Row$_{Lay}$ [ "simple1", "\textvisiblespace", "::",
+Col$_{\Lay}$ \= [  With$_{\Lay}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
+                    \>  ~~~ (Formatter$_{\Lay}$ [ "This", "is", "a", "simple", "expression" ])\\
+                    \> , With$_{\Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
+                    \>  ~~~ \= (Col$_{\Lay}$ \= [ "" \\
+                    \>          \>        \> , Row$_{\Lay}$ [ "simple1", "\textvisiblespace", "::",
                                                                            "\textvisiblespace", "Int" ]\\
                     \>          \>        \> ])\\
-                    \> , With$_{Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-                    \>  ~~~ \= (Col$_{Lay}$ \= [ Row$_{Lay}$ [ "simple1", "\textvisiblespace", "=" ]\\
-                    \>          \>        \> , Row$_{Lay}$  [ "\textvisiblespace\textvisiblespace", 
+                    \> , With$_{\Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
+                    \>  ~~~ \= (Col$_{\Lay}$ \= [ Row$_{\Lay}$ [ "simple1", "\textvisiblespace", "=" ]\\
+                    \>          \>        \> , Row$_{\Lay}$  [ "\textvisiblespace\textvisiblespace", 
                                                                              "if", "\textvisiblespace", "True", "\textvisiblespace", 
                                                                              "then", "\textvisiblespace", "1" ]\\
-                    \>          \>        \> , Row$_{Lay}$ [ "\textvisiblespace\textvisiblespace\textvisiblespace
+                    \>          \>        \> , Row$_{\Lay}$ [ "\textvisiblespace\textvisiblespace\textvisiblespace
                                                                              \textvisiblespace\textvisiblespace\textvisiblespace
                                                                              \textvisiblespace\textvisiblespace\textvisiblespace                                                                                         \textvisiblespace ", "else", "\textvisiblespace", "0" ]\\
                     \>          \>        \> ])\\
@@ -458,34 +459,34 @@ The arrangement layer also processes formatters by mapping them onto columns of 
 % no sheet
 
 
-\bigskip {\bf Example:} The formatter, which is the first element in the top-level column of the example layout, is replaced by a column of rows in the arrangement. Furthermore, each element in the arrangement tree contains has an exact size and a position relative to its parent, which are denoted with superscripts: {\em element}$^{(x,y)(width\times height)}$. 
+\bigskip {\bf Example:} The formatter, which is the first element in the top-level column of the example layout, is replaced by a column of rows in the arrangement. Furthermore, each element in the arrangement tree contains has an exact size and a position relative to its parent, which are denoted with superscripts: {\em element}$^{(x,y)(\mathit{width}\times \mathit{height})}$. 
 
 Note that the with elements are not removed, because the font information is required to render the arrangement.
 
 Arrangement:
 \small \ttfamily
 \begin{tabbing}
-Col$_{Arr}^{(0,0)(80\times84)}$ \\
-~~ \= [ With$_{Arr}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
-      \> ~~~ (Col$_{Arr}^{(0,0)(80\times24)}$ \\
-      \> ~~~~~~ \= [ Row$_{Arr}^{(0,0)(80\times12)}$ \= [ "This"$^{(0,0)(17\times12)}$, "is"$^{(25,0)(6\times12)}$, "a"$^{(41,0)(4\times12)}$ \\
+Col$_{\Arr}^{(0,0)(80\times84)}$ \\
+~~ \= [ With$_{\Arr}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
+      \> ~~~ (Col$_{\Arr}^{(0,0)(80\times24)}$ \\
+      \> ~~~~~~ \= [ Row$_{\Arr}^{(0,0)(80\times12)}$ \= [ "This"$^{(0,0)(17\times12)}$, "is"$^{(25,0)(6\times12)}$, "a"$^{(41,0)(4\times12)}$ \\
       \>       \>                                                      \>, "simple"$^{(53,0)(27\times12)}$]\\
-      \>       \> , Row$_{Arr}^{(0,12)(80\times12)}$  [ "expression"$^{(0,0)(42\times12)}$]\\
+      \>       \> , Row$_{\Arr}^{(0,12)(80\times12)}$  [ "expression"$^{(0,0)(42\times12)}$]\\
       \>       \> ])\\
                     
-      \> , With$_{Arr}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-      \> ~~~ (Col$_{Arr}^{(0,24)(75\times24)}$\\
+      \> , With$_{\Arr}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
+      \> ~~~ (Col$_{\Arr}^{(0,24)(75\times24)}$\\
       \> ~~~~~~ \= [ ""$^{(0,0)(0\times12)}$\\
-      \>      \> , Row$_{Arr}^{(0,12)(75\times12)}$ \= [ "simple1"$^{(0,0)(35\times12)}$, "\textvisiblespace"$^{(35,0)(5\times12)}$, "::"$^{(40,0)(10\times12)}$\\
+      \>      \> , Row$_{\Arr}^{(0,12)(75\times12)}$ \= [ "simple1"$^{(0,0)(35\times12)}$, "\textvisiblespace"$^{(35,0)(5\times12)}$, "::"$^{(40,0)(10\times12)}$\\
       \>      \>                                                      \> , "\textvisiblespace"$^{(50,0)(5\times12)}$, "Int"$^{(55,0)(15\times12)}$ ]\\
 
       \>      \>  ])\\
                     
-      \> , With$_{Arr}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-      \> ~~~ (Col$_{Arr}^{(0,48)(80\times36)}$\\
-      \> ~~~~~~ \= [  Row$_{Arr}^{(0,24)(50\times12)}$ [ "simple1"$^{(0,0)(35\times12)}$, "\textvisiblespace"$^{(35,0)(5\times12)}$, "="$^{(40,0)(5\times12)}$ ]\\
-      \>      \> , Row$_{Arr}^{(0,36)(80\times12)}$ [ \dots~]\\
-      \>      \> , Row$_{Arr}^{(0,48)(80\times12)}$ [ \dots~]\\
+      \> , With$_{\Arr}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
+      \> ~~~ (Col$_{\Arr}^{(0,48)(80\times36)}$\\
+      \> ~~~~~~ \= [  Row$_{\Arr}^{(0,24)(50\times12)}$ [ "simple1"$^{(0,0)(35\times12)}$, "\textvisiblespace"$^{(35,0)(5\times12)}$, "="$^{(40,0)(5\times12)}$ ]\\
+      \>      \> , Row$_{\Arr}^{(0,36)(80\times12)}$ [ \dots~]\\
+      \>      \> , Row$_{\Arr}^{(0,48)(80\times12)}$ [ \dots~]\\
       \>      \> ])\\
       \> ]
 
@@ -522,7 +523,7 @@ simple1 = \\
 %																
 %																
 %																
-\section{Interpretation Process}
+\section{Interpretation Process} \label{sect:intrProcess}
 
 The interpretation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
 
@@ -530,7 +531,7 @@ For the interpretation process, edit operations are the main focus, and therefor
 
 Another difference is that in the interpretation process layers may be skipped. For example, a document edit operation is passed upwards by the lower layers, until it reaches the evaluation layer, where it is performed on the document level.
 
-The interpretation of edit operations can take place either directly, or indirectly by applying the edit operation to a lower level, using a mapping between levels to compute the corresponding higher level and computing the higher level edit operation by taking the difference between the new and the previous higher level.
+The interpretation of edit operations can take place either {\em directly}, or {\em indirectly} by applying the edit operation to a lower level, using a mapping between levels to compute the corresponding higher level and computing the higher level edit operation by taking the difference between the new and the previous higher level.
 
 An example of a direct interpretation is when a mouse click on an absolute position in the arrangement is mapped onto a mouse click operation on a tree path in the layout level. An example of an indirect interpretation is the insertion of a character in the presentation level. Rather than mapping this edit operation immediately on an enriched document edit operation, the character is inserted in the presentation, the presentation is parsed, and the edit operation is distilled from the newly parsed enriched document.
 
@@ -551,13 +552,13 @@ The mouse edit operation is a single left click at pixel coordinates (84,57) in 
 Because of the scaling factor, the coordinates are divided by 1.5 to get the arrangement coordinates.
 
 \ttfamily
-MouseClick$_{Ren}$ Left 1 (84,57)) $\mapsto$ MouseClick$_{Arr}$ (56, 38) Left 1\\
+MouseClick$_{\Ren}$ Left 1 (84,57)) $\mapsto$ MouseClick$_{\Arr}$ (56, 38) Left 1\\
 \rmfamily
 
 The second example is a key press of the letter 'a', which is mapped onto an insert event. However, a textual insert event is targeted at the layout level instead of the arrangement level, since the arrangement level cannot be edited textually. The insert operation is therefore not of the arrangement edit type, and needs to be wrapped. The arrangement layer unwraps the insert operation and passes it on to the layout layer.
 
 \ttfamily
-KeyPress$_{Ren}$ 'a' $\mapsto$ Wrap$_{Arr}$ (Insert$_{Lay}$ 'a')
+KeyPress$_{\Ren}$ 'a' $\mapsto$ Wrap$_{\Arr}$ (Insert$_{\Lay}$ 'a')
 \rmfamily
 
 
@@ -570,7 +571,7 @@ The main task of the unarranger is mapping locations in arrangement level edit o
 An mouse left click event at position (56,38) in the example arrangement from Section~\ref{sect:arranger} represents a click on the string "\verb|Int|" in the layout (Section~\ref{sect:layouter}). To be precise, it is a click on the left side of the letter '\verb|I|'. If we represent a path in the arrangement tree by list of integers and a 0 denotes the first child, then this position is represented by \verb|[1,0,1,4,0]|. Hence:
 
 \ttfamily
-unarrange (MouseClick$_{Arr}$ (56,38) Left 1) = MouseClick$_{Lay}$ [1,0,1,4,0] Left 1
+unarrange (MouseClick$_{\Arr}$ (56,38) Left 1) = MouseClick$_{\Lay}$ [1,0,1,4,0] Left 1
 \rmfamily
 
 
@@ -592,12 +593,12 @@ In order to compute the edit operation on the presentation, we first apply the l
 
 \small \ttfamily
 \begin{tabbing}
-%Col$_{Lay}$ \= [ "" \\
-                  %\> , Row$_{Lay}$ [ "simple 1", "\textvisiblespace", "::", "\textvisiblespace", "Int" ]\\
+%Col$_{\Lay}$ \= [ "" \\
+                  %\> , Row$_{\Lay}$ [ "simple 1", "\textvisiblespace", "::", "\textvisiblespace", "Int" ]\\
 %                  \> ]\\
 \dots\\
-Col$_{Lay}$ \= [ Row$_{Lay}$ [ "simple\textvisiblespace1", "\textvisiblespace", "=" ]\\
-                   \> , Row$_{Lay}$ [ "\textvisiblespace\textvisiblespace", 
+Col$_{\Lay}$ \= [ Row$_{\Lay}$ [ "simple\textvisiblespace1", "\textvisiblespace", "=" ]\\
+                   \> , Row$_{\Lay}$ [ "\textvisiblespace\textvisiblespace", 
                                                  "if", "\textvisiblespace", "True", "\textvisiblespace", \dots ] \\
                    \> \dots ]\\
 \dots
@@ -608,10 +609,10 @@ Now, the scanner is invoked on the updated parts of the layout, which gives rise
 
 \small \ttfamily
 \begin{tabbing}
-Tokens$_{Pres}$ \= [ \dots \\
-                           \> , LCaseToken$_{Pres}$ (1,0) "simple", IntToken (1,0) 1,\\
-                           \> , OpToken$_{Pres}$ (0,1) "="\\
-                           \> , LCaseToken$_{Pres}$ (1,2) "if", UCaseToken$_{Pres}$ (0,1) "True"\\
+Tokens$_{\Pres}$ \= [ \dots \\
+                           \> , LCaseToken$_{\Pres}$ (1,0) "simple", IntToken (1,0) 1,\\
+                           \> , OpToken$_{\Pres}$ (0,1) "="\\
+                           \> , LCaseToken$_{\Pres}$ (1,2) "if", UCaseToken$_{\Pres}$ (0,1) "True"\\
                            \> \dots ]                      
 \end{tabbing}
 \rmfamily \normalsize
@@ -620,10 +621,10 @@ From the new token list and the old presentation, an edit operation on the prese
 
 \small \ttfamily
 \begin{tabbing}
-\rmfamily {\em insert$_{Lay}$} \ttfamily ' ' \\
+\rmfamily {\em insert$_{\Lay}$} \ttfamily ' ' \\
 $\mapsto$\\
-\rmfamily {\em replace$_{Pres}$} \ttfamily [ LCaseToken$_{Pres}$ (1,0) "simple1" ]\\  
-\rmfamily {\em by} \ttfamily [ LCaseToken$_{Pres}$ (1,0) "simple", IntToken (1,0) 1 ] 
+\rmfamily {\em replace$_{\Pres}$} \ttfamily [ LCaseToken$_{\Pres}$ (1,0) "simple1" ]\\  
+\rmfamily {\em by} \ttfamily [ LCaseToken$_{\Pres}$ (1,0) "simple", IntToken (1,0) 1 ] 
 \end{tabbing}
 \rmfamily \normalsize
 
@@ -651,10 +652,10 @@ The presentation level for the example is the same as in Section~\ref{sect:prese
 \small \ttfamily
 \begin{tabbing}
 \dots\\
-Tokens$_{Pres}$ \= [ LCaseToken$_{Pres}$ (1,0) "simple1", OpToken$_{Pres}$ (0,1) "="\\
-                         \> , LCaseToken$_{Pres}$ (1,2) "if", UCaseToken$_{Pres}$ (0,1) "True"\\
-                         \> , LCaseToken$_{Pres}$ (0,1) "then", IntToken$_{Pres}$ (0,1) "1"\\
-                         \> , LowercaseToken$_{Pres}$ (1,10) "else", IntToken$_{Pres}$ (0,1) "0"\\
+Tokens$_{\Pres}$ \= [ LCaseToken$_{\Pres}$ (1,0) "simple1", OpToken$_{\Pres}$ (0,1) "="\\
+                         \> , LCaseToken$_{\Pres}$ (1,2) "if", UCaseToken$_{\Pres}$ (0,1) "True"\\
+                         \> , LCaseToken$_{\Pres}$ (0,1) "then", IntToken$_{\Pres}$ (0,1) "1"\\
+                         \> , LowercaseToken$_{\Pres}$ (1,10) "else", IntToken$_{\Pres}$ (0,1) "0"\\
                          \> ]\\
 \dots                                                  
 \end{tabbing}
@@ -665,8 +666,8 @@ The delete operation removes the \verb|"if"|,  \verb|"True"|,  \verb|"then"|,  \
 \small \ttfamily
 \begin{tabbing}
 \dots\\
-Tokens$_{Pres}$ \= [ LCaseToken$_{Pres}$ (1,0) "simple1", OpToken$_{Pres}$ (0,1) "="\\
-                         \> ,  IntToken$_{Pres}$ (0,1) "0"\\
+Tokens$_{\Pres}$ \= [ LCaseToken$_{\Pres}$ (1,0) "simple1", OpToken$_{\Pres}$ (0,1) "="\\
+                         \> ,  IntToken$_{\Pres}$ (0,1) "0"\\
                          \> ]\\
 \dots                                                  
 \end{tabbing}
@@ -676,7 +677,7 @@ Now, a parser is invoked on the new list of tokens. The result is not an entire 
 
 \small \ttfamily
 \begin{tabbing}
-Decl$_{Enr}$ \= "simple1" (IntExp$_{Enr}$ 0) "info"
+Decl$_{\Enr}$ \= "simple1" (IntExp$_{\Enr}$ 0) "info"
 \end{tabbing}
 \rmfamily \normalsize
 
@@ -684,14 +685,14 @@ The edit operation is extracted from the new enriched document part and the prev
 
 \small \ttfamily
 \begin{tabbing}
-\rmfamily {\em delete}$_{Pres}$\ttfamily  "if" \dots~"else"\\
+\rmfamily {\em delete}$_{\Pres}$\ttfamily  "if" \dots~"else"\\
 $\mapsto$\\
- \rmfamily {\em replace$_{Enr}$} \ttfamily (IfExp$_{Enr}$ (BoolExp$_{Enr}$ True) (IntExp$_{Enr}$ 1) (IntExp$_{Enr}$ 0))\\
- \rmfamily {\em by} \ttfamily (IntExp$_{Enr}$ 0) 
+ \rmfamily {\em replace$_{\Enr}$} \ttfamily (IfExp$_{\Enr}$ (BoolExp$_{\Enr}$ True) (IntExp$_{\Enr}$ 1) (IntExp$_{\Enr}$ 0))\\
+ \rmfamily {\em by} \ttfamily (IntExp$_{\Enr}$ 0) 
 \end{tabbing}
 \rmfamily \normalsize
 
-It should ne noted that the second \ttfamily (IntExp$_{Enr}$ 0)\rmfamily in the replacement operation is exactly the same as the one in the else part of the if expression. In this case, the expression is uniquely determined by its presentation, and hence parsing it gives an exact copy, but even if this were not the case, both expressions would be the same, due to the reuse strategy of the parser. For example, if the int expression has an extra field that is not presented, the replacement int expression gets the same value for that field, since the first int expression is reused by the parser. This is analogous to the \verb|"info"| string for the declaration.
+It should ne noted that the second \ttfamily (IntExp$_{\Enr}$ 0)\rmfamily in the replacement operation is exactly the same as the one in the else part of the if expression. In this case, the expression is uniquely determined by its presentation, and hence parsing it gives an exact copy, but even if this were not the case, both expressions would be the same, due to the reuse strategy of the parser. For example, if the int expression has an extra field that is not presented, the replacement int expression gets the same value for that field, since the first int expression is reused by the parser. This is analogous to the \verb|"info"| string for the declaration.
 
 After it is edited, an enriched document may be inconsistent with regard to the document and the evaluator. For example, if the declaration is edited in such a way that its type no longer matches the one in its type declaration. The consistency is guaranteed again when the reducer and evaluator have been invoked.
 
@@ -717,10 +718,10 @@ The enriched document edit operation that is interpreted is an update on the ide
 
 \small \ttfamily
 \begin{tabbing}
-Root$_{Enr}$ \= [ Comment$_{Enr}$ [ "This", "is", "a", "simple", "expression" ]\\
-       \> , TypeDecl$_{Enr}$ "simple" IntType$_{Enr}$\\
-       \> , Decl$_{Enr}$ \= "simple1"\\
-       \>                       \> (IfExp$_{Enr}$ (BoolExp$_{Enr}$ True) (IntExp$_{Enr}$ 1) (IntExp$_{Enr}$ 0)) \\
+Root$_{\Enr}$ \= [ Comment$_{\Enr}$ [ "This", "is", "a", "simple", "expression" ]\\
+       \> , TypeDecl$_{\Enr}$ "simple" IntType$_{\Enr}$\\
+       \> , Decl$_{\Enr}$ \= "simple1"\\
+       \>                       \> (IfExp$_{\Enr}$ (BoolExp$_{\Enr}$ True) (IntExp$_{\Enr}$ 1) (IntExp$_{\Enr}$ 0)) \\
        \>                       \> "info"\\
        \> ] 
 \end{tabbing}
@@ -730,9 +731,9 @@ The reducer processes the enriched document and maps both the type declaration a
 
 \small \ttfamily
 \begin{tabbing}
-Root$_{Doc}$ \= [ Comment$_{Doc}$ ["This", "is", "a", "simple", "expression"] \\
-       \> , Decl$_{Doc}$ \= "simple" \\
-       \>                        \>(IfExp$_{Doc}$ (BoolExp$_{Doc}$ True) (IntExp$_{Doc}$ 1) (IntExp$_{Doc}$ 0))\\
+Root$_{\Doc}$ \= [ Comment$_{\Doc}$ ["This", "is", "a", "simple", "expression"] \\
+       \> , Decl$_{\Doc}$ \= "simple" \\
+       \>                        \>(IfExp$_{\Doc}$ (BoolExp$_{\Doc}$ True) (IntExp$_{\Doc}$ 1) (IntExp$_{\Doc}$ 0))\\
        \>                       \> "info"\\
        \> ] 
 \end{tabbing}
@@ -742,7 +743,7 @@ And the document level edit operation thus becomes:
 
 \small \ttfamily
 \begin{tabbing}
-\rmfamily {\em replace$_{Enr}$} \ttfamily "simple1" \rmfamily {\em by} \ttfamily  "simple" $\mapsto$ \rmfamily {\em replace$_{Doc}$} \ttfamily  "simple1" \rmfamily {\em by} \ttfamily  "simple"
+\rmfamily {\em replace$_{\Enr}$} \ttfamily "simple1" \rmfamily {\em by} \ttfamily  "simple" $\mapsto$ \rmfamily {\em replace$_{\Doc}$} \ttfamily  "simple1" \rmfamily {\em by} \ttfamily  "simple"
 \end{tabbing}
 \rmfamily \normalsize
 
@@ -758,10 +759,10 @@ An example of a partial presentation mapping can be found between the enriched d
 
 The interpretation of edit operations also has to deal with partial mappings. Take for example an enriched document subtree that contains only the titles of the chapters, sections, and subsections of a document. This structure does not contain enough information to construct the document. Therefore, if a title in the enriched document is edited, and we want to be able to perform the title update in the document, each enriched document node needs to keep track of the document node from which it originated. 
 
-In short, the presentation function that is given by the editor designer, specifies a mapping between the two levels $high$ and a $low$:  $present :: high \rightarrow low$. However, because the lower level may contain extra information, the mapping that needs to be maintained by the editor is 
-$present :: high+extra_{high} \rightarrow low+extra_{low}$. Similarly, for interpretation, the specified mapping function is 
-$interpret :: low \rightarrow high$, whereas the editor needs the mapping 
-$interpret :: low+extra_{low} \rightarrow high+extra_{high}$. 
+In short, the presentation function that is given by the editor designer, specifies a mapping between the two levels $\Level_{H}$ and $\Level_{L}$:  $present :: \Level_{H} \rightarrow \Level_{L}$. However, because the lower level may contain extra information, the mapping that needs to be maintained by the editor is 
+$present :: \Level_{H}\times \Extra_{\Level_{H}} \rightarrow \Level_{L}\times \Extra_{\Level_{L}}$. Similarly, for interpretation, the specified mapping function is 
+$interpret :: \Level_{L} \rightarrow \Level_{H}$, whereas the editor needs the mapping 
+$interpret :: \Level_{L} \times \Extra_{\Level_{L}} \rightarrow \Level_{H}\times \Extra_{\Level_{H}}$. \note{check this now chapters 5 and 6 are finished}
 
 The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and interpretation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
 
@@ -781,7 +782,7 @@ Below the layout level are the arrangement level and the rendering level. The se
 
 The arrangement process itself also consists of steps, since formatters are mapped on arrangement rows and columns which are then arranged similar to other rows and columns. However, these steps are very closely intertwined, and separating the arrangement into different layers does not offer enough advantages. 
 
-Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes and formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{Hags} for the evaluation layer. In fact, the whole presentation process can be specified with a higher-order attribute grammar. However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to interpret edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammers in Proxima, more research is necessary.
+Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes and formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{Hags} for the evaluation layer. In fact, the whole presentation process can be specified with a higher-order attribute grammar.\note{is this true? Probably only useful for parts} However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to interpret edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammers in Proxima, more research is necessary.
 
 \note{make a Conclusions section?}
 % multiple eval is handy

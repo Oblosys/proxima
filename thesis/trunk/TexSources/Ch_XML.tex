@@ -4,7 +4,7 @@
 \bc
 
 LANGUAGE:
-*** Lefthand shreenshot instead of left screenshot??
+*** Left-hand shreenshot instead of left screenshot??
 cross-links?
 
 TODO: change wordprocessor screenshot to actual thesis chapter text
@@ -164,7 +164,7 @@ In order to show structural information in the presentation, as well as perform 
 
 Similar to the syntax-directed editor, the picture of the syntax-recognizing editor also has a dotted arrow. In this case, because the document is derived from the presentation, edit operations on the document are difficult to support. A document edit operation has to be mapped onto an update on the presentation, such that parsing the updated presentation returns the intended updated document. Presentation information that is not stored in the document tree, such as whitespace and comments, has to be related to the document tree in some way, so that it can be put in the right place after a structural edit operation.
 
-The main problem with syntax-recognizing editors lies in their limited applicability. Because the presentation needs to contain enough information to derive the document, interesting presentations that only show part of the document are hard to support. Furthermore, graphical presentations, as well as presentations containing computed values and structures do not fit the model, as these are difficult to parse. As a result, syntax-recognizing editors are mainly limited to text-oriented applications, such as program editors.
+The main problem with syntax-recognizing editors lies in their limited applicability. Because the presentation needs to contain enough information to derive the document, interesting presentations that only show part of the document are hard to support. Furthermore, graphical presentations, as well as presentations containing computed values and structures do not fit the model, as these are difficult to parse. As a result, syntax-recognizing editors are mainly limited to text-oriented applications, such as program source editors.
 
 % mention: good for program editing?
 \bigskip{\bf Hybrid Editors} 
@@ -188,11 +188,11 @@ An editor that knows about the structure of the edited document can offer a lot 
 
 \item[Graphical Views.] A view may contain color and fonts in order to clarify document structure, but also use layout alignment, and graphical elements such as lines and rectangles. Graphical views may also be used for WYSIWYG document editing.
 
-\item[Derived Information in the Presentation.] The editor can analyze the document during editing and display information that is computed from the document structure. Examples are the results of static and type analyses in program editors, but also chapter numbers or an automatically generated table of contents.
+\item[Derived Information in the Presentation.] The editor can analyze the document during editing and display information that is computed from the document structure. Examples are the results of static and type analyses in source editors, but also chapter numbers or an automatically generated table of contents.
 
 \item[Structural Edit Operations.] Some operations, such as changing a section with subsections to a subsection with subsubsections in a scientific article, are straightforward to specify at structural level, but awkward on presentation level.
 
-\item[Structural Navigation.] Navigating over the document structure instead of its presentation can be very useful. In program editors, when the focus is on an identifier, a jump to its definition in the source may be performed. Furthermore, an outline view of the document can be shown in which a user can click to jump to the corresponding position in the document.
+\item[Structural Navigation.] Navigating over the document structure instead of its presentation can be very useful. In source editors, when the focus is on an identifier, a jump to its definition in the source may be performed. Furthermore, an outline view of the document can be shown in which a user can click to jump to the corresponding position in the document.
 \bc
 \item[Integration with Other Tools] Integrating with other tools, such as compilers, spell checkers, and theorem provers, program transformation systems, and relayingis easier when the editor has knowledge of the document structure. 
 
@@ -266,14 +266,14 @@ Unlike any current structure editor, the Proxima editor will be able to handle a
 
 
 %								
-\subsection{An Editor for Haskell} As an example of a program editor, we take an editor for the functional language Haskell. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language based edit operations. Unlike most text editors, the editor supports highlighting at a semantic rather than syntactic level, making it possible to use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
+\subsection{A Source Editor for Haskell}  \label{sect:sourceeditor} As an example of a program source editor, we take an editor for the functional language Haskell. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language based edit operations. Unlike most text editors, the editor supports highlighting at a semantic rather than syntactic level, making it possible to use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
 \note{somewhere: mention \cite{reinke03refactoring} (maybe near or instead of Rename in Scope}
 
 %mention module handling etc.?
  
 \screenshot{colorful (also type decls) haskell listing with pop-up type info  (layered)}{The Haskell source editor}
 
-Haskell is a particularly interesting language for a program editor because it has a rich type system and information about types is very useful during programming. Haskell programmers often experience that once type errors have been removed, a function is correct. Therefore, an environment that supports in-place display of type errors, as well as easy access to type information of variables in scope, will help rapid program development. 
+Haskell is a particularly interesting language for a source editor because it has a rich type system and information about types is very useful during programming. Haskell programmers often experience that once type errors have been removed, a function is correct. Therefore, an environment that supports in-place display of type errors, as well as easy access to type information of variables in scope, will help rapid program development. 
 
 The screenshot shows the type of the expression in focus, together with a list of variables in scope. Selection in the menu causes a jump to the definition of the identifier. Because many identifiers may be in scope, the menu is layered according. If many identifiers are in scope, a separate window may be used for inspecting type information.
 
@@ -319,7 +319,7 @@ The rename operation takes into account the scoping rules of Haskell, and only c
 \bigskip
 {\bf Hide Function Definitions}
 
-Function definitions in the source presentation may be collapsed, leaving only one lefthand side and the (possibly inferred) type declaration:
+Function definitions in the source presentation may be collapsed, leaving only one left-hand side and the (possibly inferred) type declaration:
 
 \editScreenshot{
 \begin{tabular}[t]{l}
@@ -364,12 +364,12 @@ Function definitions in the source presentation may be collapsed, leaving only o
 \end{tabular}
 }{Hide Function Definition}{}
 
-The two functions \verb|widthA| and \verb|heightA| have a large number of uninteresting clauses. After applying the {\em hide function body} edit operation to the function \verb|widthA|,  only one clause remains with a collapsed righthand side ({\tt \frame{\rule{0cm}{1.5ex}\dots}}). The function is expanded again by clicking on the dots.
+The two functions \verb|widthA| and \verb|heightA| have a large number of uninteresting clauses. After applying the {\em hide function body} edit operation to the function \verb|widthA|,  only one clause remains with a collapsed right-hand side ({\tt \frame{\rule{0cm}{1.5ex}\dots}}). The function is expanded again by clicking on the dots.
 
 \bigskip {\bf Requirements} % haskell editor
 
 
-The program editor generates a number of requirements, an important one being possibility of freely editing the textual program source, including the layout. At the same time, it must be possible to let the layout be set automatically as well. Furthermore, a formalism for specifying computations over the document is required for performing static analysis and type checking.
+The source editor generates a number of requirements, an important one being possibility of freely editing the textual program source, including the layout. At the same time, it must be possible to let the layout be set automatically as well. Furthermore, a formalism for specifying computations over the document is required for performing static analysis and type checking.
 
 
 %																
@@ -499,7 +499,7 @@ Although structure changing operations on derived structures may not always make
  
 \bigskip {\bf Requirements} % word processor
 
-Compared to the program editor, the word processor requires a more powerful presentation formalism. Besides text in different fonts, colors, and sizes, the presentation also contains images and basic graphical elements. Furthermore, optimal line and page breaking support is needed for formatting paragraphs and pages. 
+Compared to the source editor, the word processor requires a more powerful presentation formalism. Besides text in different fonts, colors, and sizes, the presentation also contains images and basic graphical elements. Furthermore, optimal line and page breaking support is needed for formatting paragraphs and pages. 
 
 Finally, in order to handle edit operations on the table of contents, the editor must support editing not only on presentation and document level, but also on the level of derived structures. In order to do so, a mapping must be maintained between a derived structure and its origin in the document.
 
@@ -775,7 +775,7 @@ The editing strength of an editor is determined by the levels at which edit oper
 syntax-recognizing editors edit the presentation level. Both levels, however, are important. Furthermore, as we will show in Chapter~\ref{chap:proxArch}, a number of other levels may be distinguished, among which a level that contains derived structures and values.
 
 %refs
-The program editor use case shows the necessity for free textual editing in the presentation. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g. \cite{syngen, minor90}). However, no clear consensus has been reached on the subject (e.g. \cite{ waters} and reactions \cite{ reaction1, reaction2}, and \cite{vanter practical lang based editing }) and nowadays even most syntax-directed editors support some form of free text editing. Furthermore, because up to now, no pure structure editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for program editing.
+The source editor use case shows the necessity for free textual editing in the presentation. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g. \cite{syngen, minor90}). However, no clear consensus has been reached on the subject (e.g. \cite{ waters} and reactions \cite{ reaction1, reaction2}, and \cite{vanter practical lang based editing }) and nowadays even most syntax-directed editors support some form of free text editing. Furthermore, because up to now, no pure structure editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for program editing.
 
 Besides presentation oriented-edit operations, document-oriented operations are important as well. The equation editor as well as the outline editor rely heavily on document editing. For equation editing, structure entry is typically a document edit operation, because many expression structures, such as a quotient, a power expression, or a square root, have no presentation that can easily be entered with conventional editing methods. The outline editor requires document editing because it has to support navigation over the structure, as well as  support moving nodes in the tree to other locations, which is a document oriented operation. Document edit operations typically include basic copy, paste, and delete operations, as well as selection and navigation operations.
 
@@ -908,7 +908,7 @@ No information on this one yet. Order paper at library.
 
 \bigskip {\bf Pan}
 
-Pan~\cite{ballance92pan} is a text-only program editor environment. The presentations are text with multiple fonts, styles, and colors. The system has good support for handling partially incorrect or incomplete documents.
+Pan~\cite{ballance92pan} is a text-only source editor environment. The presentations are text with multiple fonts, styles, and colors. The system has good support for handling partially incorrect or incomplete documents.
 
 The computation formalisms in Pan are oriented towards semantic analysis. Logical constraint grammars are used for specifying, checking, and maintenaining of contextual constraints. Computed information is shown in the presentation by changing the font and color attributes of the text, but it is not possible to specify arbitrary computations that form part of the document presentation. Furthermore, it is not possible to specify an editable presentation that shows only part of the document (eg. a presentation in which function bodies may be hidden), as the editor is syntax-recognizing, and therefore the presentation must contain all information necessary to derive the document structure.
 
@@ -969,7 +969,7 @@ Thot editors are of a syntax-directed nature. Multiple views on the document may
 
 \bigskip {\bf Visual Studio model}
 
-The Microsoft Visual Studio environment includes an integrated program editor. Although the editor does not contain any novel features, and  thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
+The Microsoft Visual Studio environment includes an integrated source editor. Although the editor does not contain any novel features, and  thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
 
 The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
 
@@ -987,7 +987,7 @@ Opendoc.\\
 
 % FIELD? and its relation to Desert?
 
-% what about non program editors? mention, ref, ignore?
+% what about non source editors? mention, ref, ignore?
 \ec
 
 %																

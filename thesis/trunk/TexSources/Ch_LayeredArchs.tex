@@ -24,7 +24,7 @@ Using the single layer specification from the previous chapter, we can give a sp
 
 \bl
 \o Spec for editor is combined spec for single layers.
-\o abstract {\em Edit} and {\em Transform} removed
+\o abstract $\Edit$ and $\Transform$ removed
 \o Next chapter, we give Haskell for the combination.
 \el
 
@@ -67,9 +67,9 @@ Figure~\ref{singleToMulti1} shows a simplified version of the final figure (Figu
 \bigskip
 {\bf Replacing $H$ and $L$:}
 
-To be able to combine multiple layers, the $H$ and $L$ subscripts are replaced by natural numbers. Because the document is $\level_0$, and the rendering is $\level_n$, a higher level gets an index $i$ whereas a lower level gets an index $i+1$. The functions ${\tt interpret}$ and ${\tt present}$ get a subscript $i$. Figure~\ref{singleToMulti2} contains the resulting indexed layer. 
+To be able to combine multiple layers, the $H$ and $L$ subscripts are replaced by natural numbers. Because the document is $\level_0$, and the rendering is $\level_n$, a higher level gets an index $i$ whereas a lower level gets an index $i+1$. The functions $\interpret$ and $\present$ get a subscript $i$. Figure~\ref{singleToMulti2} contains the resulting indexed layer. 
 
-Note that the abstract functions {\em Edit} and {\em Transform} have been dropped because except at the top and bottom, adjacent layers will now take care of this functionality. At the end of this section, we explain how the situation at the top and the bottom is dealt with.
+Note that the abstract functions $\Edit$ and $\Transform$ have been dropped because except at the top and bottom, adjacent layers will now take care of this functionality. At the end of this section, we explain how the situation at the top and the bottom is dealt with.
 
 \bigskip
 {\bf Dropping superfluous updates:} 
@@ -77,7 +77,7 @@ Note that the abstract functions {\em Edit} and {\em Transform} have been droppe
 The layer in Figure~\ref{singleToMulti2} is not ready to be combined yet, because it because on interpretation and presentation, it updates both the upper level ($i$) and the lower level ($i+1$). Hence, if it is combined with an adjacent layer, the level in between is updated twice on interpretation, and twice on presentation. Therefore, we drop one update in the interpration phase and one in the presentation phase. 
 
 In order to decide which update to drop, recall that Section~\ref{sect:incrementalSpec} explained that an implementation of a mapping function may perform an update on the source level of the mapping. Thus, 
-${\tt interpret}$ may update the lower level, and ${\tt present}$ may update the higher level. In order to still allow this behavior, we choose to drop the updates on the target levels: the higher level update in the interpretation phase (upper left dotted arrow), and the lower level update in the presentation phase (lower right dotted arrow). 
+$\interpret$ may update the lower level, and $\present$ may update the higher level. In order to still allow this behavior, we choose to drop the updates on the target levels: the higher level update in the interpretation phase (upper left dotted arrow), and the lower level update in the presentation phase (lower right dotted arrow). 
 
 Figure~\ref{combiningLayers1} shows a layer after the two target level update are dropped. When the layer is combined, the dropped target level updates are performed by an adjacent layer, except at the top and the bottom where we need to handle the updates explicitly. Figure~\ref{combiningLayers2} shows a combination of several layers.
 
@@ -103,9 +103,9 @@ Figure~\ref{combiningLayers1} shows a layer after the two target level update ar
 \bigskip
 {\bf Handling the top and bottom:}
 
-The combination in Figure~\ref{combiningLayers2}, shows what happens for internal layers that are surrounded by other layers. However at the top and the bottom of the layered architecture, still some work needs to be done, because of the missing {\em Edit} and {\em Transform} functions and the dropped updates. 
+The combination in Figure~\ref{combiningLayers2}, shows what happens for internal layers that are surrounded by other layers. However at the top and the bottom of the layered architecture, still some work needs to be done, because of the missing $\Edit$ and $\Transform$ functions and the dropped updates. 
 
-At the top, edit operations coming out of the interpretation phase need to be put back into the presentation phase. And at the bottom, an edit gesture from the user must be put into the combined layers combination, and an updated rendering must be shown to the user. The lefthand side of Figure~\ref{topAndBottom} shows the loose ends that need to be dealt with.
+At the top, edit operations coming out of the interpretation phase need to be put back into the presentation phase. And at the bottom, an edit gesture from the user must be put into the combined layers combination, and an updated rendering must be shown to the user. The left-hand side of Figure~\ref{topAndBottom} shows the loose ends that need to be dealt with.
 
 \begin{figure}\begin{center}\begin{center}
 \epsfig{file=pics/eps/topAndBottom.eps, width=125mm}\end{center}
@@ -114,11 +114,11 @@ At the top, edit operations coming out of the interpretation phase need to be pu
 
 \note{gesture depends on level, not edit. Also on other levels?}
 
-At the top, the result of the combined interpret mappings is a document edit operation $e_{\Level_0}$. Because the target update of each layer has been dropped, the operation is not performed on the document $\level_0$. Furthermore, due to the missing {\em Transform} we need to specify how to get from $e_{\Level_0}$ to $e'_{\Level_0}$. Rather than explicitly adding an update on $\level_0$, we put the level and the edit operation back into the presentation part of the combined layers. This way, the document update is performed by the presentation phase of the top layer.
+At the top, the result of the combined interpret mappings is a document edit operation $e_{\Level_0}$. Because the target update of each layer has been dropped, the operation is not performed on the document $\level_0$. Furthermore, due to the missing $\Transform$ we need to specify how to get from $e_{\Level_0}$ to $e'_{\Level_0}$. Rather than explicitly adding an update on $\level_0$, we put the level and the edit operation back into the presentation part of the combined layers. This way, the document update is performed by the presentation phase of the top layer.
 
 Similar to the top, the bottom also misses an update. Therefore, we add an update at the bottom right, which applies $e'_{\Level_n}$ to $\level'_n$. For sake of clarity, we use the explicit notation rather than a dashed arrow. 
 
-Finally, because of the missing {\em Edit}, we need to specify how the edit gesture from the user is to be fed into the layer structure, and how the updated lower level is to be shown to the user. The righthand side of Figure~\ref{topAndBottom} shows the data flow at the top and the bottom of the layers. Note that $\level''_n$ has both an incoming arrow from the update, as well as an outgoing arrow symbolizing that the rendering is shown to the user.
+Finally, because of the missing $\Edit$, we need to specify how the edit gesture from the user is to be fed into the layer structure, and how the updated lower level is to be shown to the user. The right-hand side of Figure~\ref{topAndBottom} shows the data flow at the top and the bottom of the layers. Note that $\level''_n$ has both an incoming arrow from the update, as well as an outgoing arrow symbolizing that the rendering is shown to the user.
 
 \subsection{Specifying combined layers}
 
@@ -135,8 +135,8 @@ We construct the specification of the combined layers along the same lines as in
 \bigskip
 {\bf Replacing $H$ and $L$:}
 
-First, we take the  final single layer specification from Section~\ref{sect:maintainingInc}, and replace the $H$ and $L$ subscripts by $i$ and $i+1$. Except for ${\tt update}$, the values and functions without an $H$ or $L$ subscript in specification~\ref{spec:incrementality} (${\tt sheet}$, ${\tt interpret}$, ${\tt present}$, and
- ${\tt reuse}$) are now specific to a certain layer and get an $i$ subscript. Because ${\tt update}$ is a generic function it can be used in all layers without a subscript. Finally, because we specify all layers instead of just a single one, we no longer need the {\em Edit} and {\em Transform} equations for describing the behavior of adjacent layers.
+First, we take the  final single layer specification from Section~\ref{sect:maintainingInc}, and replace the $H$ and $L$ subscripts by $i$ and $i+1$. Except for $\update$, the values and functions without an $H$ or $L$ subscript in specification~\ref{spec:incrementality} ($\sheet$, $\interpret$, $\present$, and
+ $\reuse$) are now specific to a certain layer and get an $i$ subscript. Because $\update$ is a generic function it can be used in all layers without a subscript. Finally, because we specify all layers instead of just a single one, we no longer need the $\Edit$ and $\Transform$ equations for describing the behavior of adjacent layers.
 
 \begin{small}
 \refstepcounter{specification} \label{spec:combinationFirstAttempt}
@@ -145,17 +145,17 @@ First, we take the  final single layer specification from Section~\ref{sect:main
 {\tt present_i} & :: & \multicolumn{2}{l}{ \Sheet_{\Pres,i} \rightarrow \Level_{i} \rightarrow \Level_{i+1}  \rightarrow \Edit_{\Level_{i}} \rightarrow \Edit_{\Core_{i+1}\times \Info\iup_{i+1}} } \\
 \level_{i+1} 	& = & \Present_{i}~\level_{i}						& \text{\{Precondition\}}\\
 \\
-\level'_{i+1} 	& = & {\tt update}~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
-e_{\Core_{i} \times \Info\idwn_{i}}  & = & {\tt interpret}_{i}~sheet_{\Intr,i}~\level_{i+1}~\level_{i}~e_{\Level_{i+1}} & \text{\{Compute higher core update\}}\\
-e_{\Level_{i}} & = & {\tt reuse}_{\Intr,i}~\level_{i}~e_{\Core_{i}\times \Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
-\level'_{i} & = & {\tt update}~e_{\Level_{i}}~\level_{i}                 & \text{\{Compute intermediate higher level\}}\\
+\level'_{i+1} 	& = & \update~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
+e_{\Core_{i} \times \Info\idwn_{i}}  & = & \interpret_{i}~\sheet_{\Intr,i}~\level_{i+1}~\level_{i}~e_{\Level_{i+1}} & \text{\{Compute higher core update\}}\\
+e_{\Level_{i}} & = & \reuse_{\Intr,i}~\level_{i}~e_{\Core_{i}\times \Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
+\level'_{i} & = & \update~e_{\Level_{i}}~\level_{i}                 & \text{\{Compute intermediate higher level\}}\\
 \\\
 \level'_{i} & = & \Interpret_{i}~\level'_{i+1}						& \text{\{Intermediate condition\}}\\
 \\
-\level''_{i} & = & {\tt update}~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
-e'_{\Core_{i+1}\times \Info\iup_{i+1}}  & = & {\tt present}_{i}~sheet_{\Pres,i}~\level'_{i}~\level'_{i+1}~e'{\Level_{i}} & \text{\{Compute new lower core\}}\\
-e'_{\Level_{i+1}} & = & {\tt reuse}_{\Pres,i}~\level_{i+1}~e'_{\Core_{i+1}\times \Info\iup_{i+1}} & \text{\{Reuse extra state\}}\\
-\level''_{i+1} & = & {\tt update}~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute final lower level\}}\\
+\level''_{i} & = & \update~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
+e'_{\Core_{i+1}\times \Info\iup_{i+1}}  & = & \present_{i}~\sheet_{\Pres,i}~\level'_{i}~\level'_{i+1}~e'{\Level_{i}} & \text{\{Compute new lower core\}}\\
+e'_{\Level_{i+1}} & = & \reuse_{\Pres,i}~\level_{i+1}~e'_{\Core_{i+1}\times \Info\iup_{i+1}} & \text{\{Reuse extra state\}}\\
+\level''_{i+1} & = & \update~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute final lower level\}}\\
 \\
 \level''_{i+1} & = & \Present_{i}~\level''_{i}						& \text{\{Postcondition\}}\\
 \end{array}\)
@@ -170,15 +170,15 @@ e'_{\Level_{i+1}} & = & {\tt reuse}_{\Pres,i}~\level_{i+1}~e'_{\Core_{i+1}\times
 The specification has double updates on all levels except the document and the rendering, because updates for $\level$ and $\level'$ are specified on the higher level $i$ as well as the lower level $i+1$. This problem has been solved in the previous section by dropping the updates on the target levels (equations \{Compute intermediate higher level\} and \{Compute final lower level\}). The remaining updates are:
 
 \begin{small}\( \begin{array}{lcll} 
-\level'_{i+1} 	& = & {\tt update}~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
-\level''_{i} & = & {\tt update}~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
+\level'_{i+1} 	& = & \update~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
+\level''_{i} & = & \update~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
 \end{array}\)
 \end{small}
 
 \bigskip
 {\bf Handling the top and bottom:}
 
-Due to the dropped updates, there are no computations for $\level'_0$ and $\level''{n}$. And moreover, $e_{\Level_n}$ and $e'_{\Level_0}$ need to be defined, since {\em Edit} and {\em Transform} have been dropped. 
+Due to the dropped updates, there are no computations for $\level'_0$ and $\level''{n}$. And moreover, $e_{\Level_n}$ and $e'_{\Level_0}$ need to be defined, since $\Edit$ and $\Transform$ have been dropped. 
 
 At the top, the document and the edit operation on it ($\level_0$ and $e_{\Level_0}$) are put back into the computation by assigning them to $\level'_0$ and $e'_{\Level_0}$, yielding:
 
@@ -191,8 +191,8 @@ e'_{\Level_{0}}  & = & e_{\Level_{0}}		& \text{\{?\}}\\
 At the bottom, we add a rendering update on $\level'_n$ and specify that $e_{\Level_n}$ is the edit gesture that comes from the user. The fact that the updated rendering $\level''_n$ is shown to the user is not explicitly visible in the specification.\note{how to encode EditGesture?}
 
 \begin{small}\( \begin{array}{lcll} 
-e_{\Level_{n}} & = & EditGesture ??		& \text{\{Receive edit gesture\}}\\
-\level''_{n}  & = & {\tt update}~e'_{\Level_{n}}~\level'_{n}	& \text{\{Update rendering\}}\\
+e_{\Level_{n}} & = & \mathit{EditGesture} ??		& \text{\{Receive edit gesture\}}\\
+\level''_{n}  & = & \update~e'_{\Level_{n}}~\level'_{n}	& \text{\{Update rendering\}}\\
 \end{array}\)
 \end{small}
 
@@ -216,21 +216,21 @@ If we remove the double updates and add the equations for handling the top and b
 {\tt interpret_i}  & :: & \multicolumn{2}{l}{ \Sheet_{\Intr,i} \rightarrow \Level_{i+1} \rightarrow \Level_{i} \rightarrow  \Edit_{\Level_{i+1}} \rightarrow \Edit_{\Core_{i}\times \Info\idwn_{i}} } \\
 {\tt present_i} & :: &  \multicolumn{2}{l}{ \Sheet_{\Pres,i} \rightarrow \Level_{i} \rightarrow \Level_{i+1}  \rightarrow \Edit_{\Level_{i}} \rightarrow \Edit_{\Core_{i+1}\times \Info\iup_{i+1}} } \\
 \\
-e_{\Level_{n}}  & = & EditGesture ??		& \text{\{Receive edit gesture\}}\\
+e_{\Level_{n}}  & = & \mathit{EditGesture} ??		& \text{\{Receive edit gesture\}}\\
 e'_{\Level_{0}}  & = & e_{\Level_{0}}		& \text{\{?\}}\\
 \level'_{0} & = & \level_{0}				& \text{\{?\}}\\
-\level''_{n}  & = & {\tt update}~e'_{\Level_{n}}~\level'_{n}			& \text{\{Update rendering\}}\\
+\level''_{n}  & = & \update~e'_{\Level_{n}}~\level'_{n}			& \text{\{Update rendering\}}\\
 \level_{i+1} 	& = & \Present_{i}~\level_{i}						& \text{\{Precondition\}}\\
 \\
-\level'_{i+1} 	& = & {\tt update}~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
-e_{\Core_{i} \times \Info\idwn_{i}}  & = & {\tt interpret}_{i}~sheet_{\Intr,i}~\level_{i+1}~\level_{i}~e_{\Level_{i+1}} & \text{\{Compute higher core update\}}\\
-e_{\Level_{i}} & = & {\tt reuse}_{\Intr,i}~\level_{i}~e_{\Core_{i}\times \Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
+\level'_{i+1} 	& = & \update~e_{\Level_{i+1}}~\level_{i+1}                 & \text{\{Compute intermediate lower level\}}\\
+e_{\Core_{i} \times \Info\idwn_{i}}  & = & \interpret_{i}~\sheet_{\Intr,i}~\level_{i+1}~\level_{i}~e_{\Level_{i+1}} & \text{\{Compute higher core update\}}\\
+e_{\Level_{i}} & = & \reuse_{\Intr,i}~\level_{i}~e_{\Core_{i}\times \Info\idwn_{i}}     & \text{\{Reuse extra state\}}\\
 \\
 \level'_{i} & = & \Interpret_{i}~\level'_{i+1}						& \text{\{Intermediate condition\}}\\
 \\
-\level''_{i} & = & {\tt update}~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
-e'_{\Core_{i+1}\times \Info\iup_{i+1}}  & = & {\tt present}_{i}~sheet_{\Pres,i}~\level'_{i}~\level'_{i+1}~e'{\Level_{i}} & \text{\{Compute new lower core\}}\\
-e'_{\Level_{i+1}} & = & {\tt reuse}_{\Pres,i}~\level_{i+1}~e'_{\Core_{i+1}\times \Info\iup_{i+1}} & \text{\{Reuse extra state\}}\\
+\level''_{i} & = & \update~e'_{\Level_{i}}~\level'_{i}                 & \text{\{Compute final higher level\}}\\
+e'_{\Core_{i+1}\times \Info\iup_{i+1}}  & = & \present_{i}~\sheet_{\Pres,i}~\level'_{i}~\level'_{i+1}~e'{\Level_{i}} & \text{\{Compute new lower core\}}\\
+e'_{\Level_{i+1}} & = & \reuse_{\Pres,i}~\level_{i+1}~e'_{\Core_{i+1}\times \Info\iup_{i+1}} & \text{\{Reuse extra state\}}\\
 \\
 \level''_{i+1} & = & \Present_{i}~\level''_{i}						& \text{\{Postcondition\}}\\
 \end{array}\)
