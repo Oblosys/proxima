@@ -4,6 +4,7 @@
 %  at least override preface and toc. because roman numbers look silly at the bottom
 % 
 {
+\usepackage[dutch,english]{babel}
 
 % \usepackage{alltt} % probably needed for Haskell as an adl
 
@@ -11,18 +12,18 @@
 %\usepackage{mypslatex}    % why use this?
 %\usepackage{ipe}
 %\usepackage{algo}
+
+
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{epsfig}
 \usepackage{fancyhdr}
 \usepackage{cite}
 \usepackage{ifthen}
-\usepackage[dutch,english]{babel}
 
 %%%%%%%%%
 % Begin Martijn  %
 %%%%%%%%%
-
 
 \usepackage{url}
 \usepackage[usenames]{color}
@@ -31,7 +32,8 @@
 \usepackage{wasysym} % for nice squiggly arrow: \leadsto
 \usepackage{textcomp} % for \textdownarrow and \textuparrow
 \usepackage{pifont}
-%\usepackage{txfonts} % for :=
+%\usepackage{txfonts} % for :=   % These two mess up all fonts
+%\usepackage{pxfonts}                 % so do not use
 
 %% block comment stuff %%
 %\usepackage{version}
@@ -75,6 +77,11 @@
 \newsavebox{\slashobox}
 \sbox{\slashobox}{\o}
 \newcommand{\slasho}{\usebox{\slashobox}}
+
+\newsavebox{\bfslashobox} 
+\sbox{\bfslashobox}{\bf \o}
+\newcommand{\bfslasho}{\usebox{\bfslashobox}}
+
 \renewcommand{\o}{\item}
 
 
@@ -86,7 +93,10 @@
 
 \newcounter{specification}
 
-% also do this for \Doc \Enr, etc.
+
+
+\fboxsep = 1pt % framebox padding
+
 \newcommand{\Doc}[0]{\ensuremath{\mathit{Doc}}}		%
 \newcommand{\Enr}[0]{\ensuremath{\mathit{Enr}}}		%
 %\newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}	%        is defined below
@@ -159,6 +169,7 @@
 \newcommand{\eqstarcl}[2]{[{#1}]_{\!\eqstar {\mathrm {#2}}}}
 \newcommand{\eqhole}{[\hole]} % \eqcl{\hole}{} gets wrong spacing
 
+
 \newcommand{\eqr}{\ensuremath{\simeq}}
 \newcommand{\reuz}{\ensuremath{\triangleright}}
 \newcommand{\reuze}[1]{\ensuremath{\,\reuz_{_{\!\!#1}}\,}} % rm prevents {\sc $\reuzestar$} from changing the *
@@ -167,8 +178,10 @@
 \newcommand{\rel}{\ensuremath{\sim}}
 \newcommand{\law}[1]{{\sc {#1}}}
 
+\newcommand{\st}{^\star}
 
-\newcommand{\is}{\widehat{=}} % instead of {\stackrel{\wedge}{=}}
+
+\newcommand{\is}{~~\widehat{=}~~} % instead of {\stackrel{\wedge}{=}}
 \newcommand{\gts}{\text{\tt :=}}
 \renewcommand{\gets}{~\gts~}
 \newcommand{\smi}{\text{\tt ;}}
@@ -434,6 +447,14 @@
 \notewarning%
 \mbox{$^{\ast\ast\ast}$}\marginpar{\tiny$\ast\ast\ast$}%
 {\sffamily #1}}
+
+%\newcommand{\todo}[1]{%
+%}
+\newcommand{\todo}[1]{%
+\notewarning%
+\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
+\hspace{0pt}\sffamily\tiny{\sc todo:}\\ #1}}
+
 
 \def\figpath{Figures/}
 \newcommand{\ipefig}[2]{
