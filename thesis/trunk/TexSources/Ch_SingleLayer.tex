@@ -24,8 +24,7 @@ P x   \eq   x \in { x |  P x }
 \renewcommand{\core}{\fn{core}}
 \newcommand{\default}{\fn{default}}
 \newcommand{\valid}{\fn{valid}}
-
-
+\newcommand{\close}{~\text{``close to''}~}
 
 
 % not used, so we redefine these commands
@@ -268,11 +267,11 @@ Summarizing, if we let $Comp$ be a program fragment that assigns new values to t
 \xprlab{\hoare{\true} {Comp} { \level''\L = \present~\level''\H }}{Present}
 \xprlab{\hoare{ \level'\L = \present~\level\H } {Comp} { \level''\H = \level\H }}{Doc-Inert}
 \xprlab{\hoare{ \level'\L = \present~h } {Comp} {\level'\L = \level''\L}}{Pres-Inert}
-\xprlab{\hoare{ \true } {Comp} {\level'\L~\text{``close to''}~\level''\L}}{Imprecise}
+\xprlab{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}{Imprecise}
 
 Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close to'' is equality.
 
-\note{Presentation invariant is not needed in the precondition.}
+\note{Maybe mention precondition more explicitly?}
 
 A straightforward definition of $Comp$ that meets all requirements is:
 
@@ -412,7 +411,7 @@ In the proof, we assume $\level'\L = \present~h$:
 
 If $\level'\L$ is not a valid presentation, only \law{Present} and \law{Imprecise} are of importance:
 
-\xpr{\hoare{ \true } {Comp} {\level'\L~\text{``close to''}~\level''\L}}
+\xpr{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}
 
 the requirement states that $\interpret$ needs to return a higher level such that its presentation resembles what the user intended with the edit operation. Since $\present$ is given, this requirement provides a specification of $\interpret$. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
 
@@ -645,7 +644,7 @@ The old requirements rewritten with equivalence classes, together with the new r
 \xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} } }		{Postcondition}
 \xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
 \xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}} {Comp} { \level'\L = \level''\L}}		{Pres-Inert}
-\xprlab{\hoare{\true} {Comp} {\level'\L~\text{``close to''}~\level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
 
 With extra state, the \law{Doc-Inert} requirement becomes interesting, since it is now possible to update the lower level while preserving the presentation invariant. For example, if layout is not stored in the document, and a user edits only the layout, then the document must remain unchanged.
 
@@ -654,9 +653,9 @@ $\eqcl{\level'\L}{L} \neq \present~\eqcl{\level\H}{H}$, nothing is said about th
 
 In order to preserve the extra state, we require that from the elements in the equivalence class specified by \law{Postcondition}, the one that is as close as possible to the original value $level\H$ is selected:
 
-\xprlab{\hoare{\true} {Comp} {\level\H~\text{``close to''}~\level''\H}}	{Preserve}
+\xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
 
-\law{Preserve} is weaker than \law{Postcondition}. It specifies which element is chosen, within the freedom that is left by \law{Postcondition}.
+\law{Doc-Preserve} is weaker than \law{Postcondition}. It specifies which element is chosen, within the freedom that is left by \law{Postcondition}.
 
 On the lower level, we need a similar requirement, but here it coincides with \law{Imprecise}. The \law{Imprecise} requirement now serves a double function. On the one hand, the resulting equivalence class of $\present$ must be close to the equivalence class of $level'\L$, which is the responsibility of $\interpret$. And on the other hand, the extra state in $level''\L$ must resemble the extra state in $\level'\L$ as much as possible.
 
@@ -688,7 +687,7 @@ Furthermore, if the argument value is in the argument equivalence class, then~$\
 
 Finally, if the argument value is not in the argument equivalence class, then~$\reuz$ returns the element of that class, which is closest to the argument value.
 
-\xprlab{\eqclass{x}{R} \reuz y \text{~``close to''~} y}		{$\reuz$-Close} 
+\xprlab{\eqclass{x}{R} \reuz y \close y}		{$\reuz$-Close} 
 
 Similar to the \law{Doc-Inert} and \law{Imprecise} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close to'' is equality.
 
@@ -817,11 +816,11 @@ We assume $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$.
 
 
 
-\head{\law{Preserve} and \law{Imprecise} requirements}
+\head{\law{Doc-Preserve} and \law{Imprecise} requirements}
 
-Because of the nature of the \law{Preserve} and \law{Imprecise} requirements, we give an informal argumentation instead of a proof. 
+Because of the nature of the \law{Doc-Preserve} and \law{Imprecise} requirements, we give an informal argumentation instead of a proof. 
 
-From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H ``close~to'' level''\H$ by \law{$\reuz$-Close}. Hence, \law{Preserve} holds.
+From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H ``close~to'' level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
 
 The \law{Imprecise} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This resembles\note{look up: overeenkomen} the \law{Imprecise} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ close to $\eqcl{\level'\L}{L}$. The requirement is therefore a specification of $\interpret$.
 
@@ -1298,6 +1297,7 @@ The new $\reuzestar$ is able to reuse extra state after structural updates, such
 %																
 \section{Combining two layers}  \label{sect:combinedExtra}
 
+\toHere
 
 Want to model a layered architecture. bla bla. First split this one in two. An intermediate level appears $Level\M$, and we have two layers according to previous spec. 
 
@@ -1313,8 +1313,9 @@ Want to model a layered architecture. bla bla. First split this one in two. An i
 %\o we cannot prove much yet.
 %\el
 
+\fromHere
 
-\head{Composing $Present$ and $Interpret$}
+\head{Composing $Present$ and $Interpret$} \label{sect:combinedExtraCompose}
 
 The presentation and interpretation relations for the combined layer are compositions of the relations from the upper and higher relations: % ($Interpret$ and $Present$ are total in left ...)
 
@@ -1627,14 +1628,14 @@ Apart from a few changes to the subscripts, the requirements for $level''\H$ and
 %\xprlab{\hoare{\eqcl{\level\L}{L} = \present\C~\eqcl{\level\H}{H} \land \eqcl{\level'\L}{CL} = %\present\C~\eqcl{\level\H}{CH}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
 \xprlab{ 
 \left\{ \begin{array}{l}
- \eqcl{\level\L}{L} = \present\C~\eqcl{\level\H}{H} \land\\
+ \eqcl{\level\L}{CL} = \present\C~\eqcl{\level\H}{CH} \land\\
  \eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}
 \end{array}\right\}
 {Comp} \{ \level\H = \level''\H\} }  {Doc-Inert}
 \xprlab{\hoare{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}} {Comp} { \level'\L = \level''\L}}		{Pres-Inert}
-\xprlab{\hoare{\true} {Comp} {\level\H~\text{``close to''}~\level''\H}}	{Preserve}
-\xprlab{\hoare{\true} {Comp} {\level'\L~\text{``close to''}~\level''\L}}	{Imprecise}
-
+\xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
+\note{put supscripts in $Comp$? (eg. $Comp_n$)}
 
 The inductive definition of $Comp$ reads:
 
@@ -2143,173 +2144,9 @@ Hence, by \law{\fn{wp}-And}, we can conclude:
 
 \bl
 \o Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
+\o do es reqs also say something about middle es?
 \el
 
-
-
-
-
-
-\bc          pre-Hoare proofs
-
-
-OLD DOC-INERT
-
-TODO: fix existentials in proof
-
-$\level'\L ~\Present~\level\H \imp \level''\H = \level\H$\\
-
-\begin{proof}
-\begin{Prf}&
-	\true\\
-\Imp{\law{Present}}&
-	\level\M ~\Present\H~\level\H\\
-\Eqv{\law{\present-Char}}&
-	\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH}\\
-\end{Prf}
-
-\begin{Prf}&
-	\level'\L ~\Present\C~\level\H\\
-\Eqv{\law{\present-Char}}&
-	\eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}\\
-\Imp{bla}&
-	\exists m : \eqcl{\level'\L}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H 
-\eqcl{\level\H}{HH}\\
-\end{Prf}
-
-Let $m_0$ be this $m$: we have
-
-$\eqcl{\level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$ and 
-$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$
-
-\begin{Prf}&
-	\present\L~\eqcl{m_0}{LH}\\
-\Imp{\law{InterPresent} on lower layer}&
-	\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}\\
-\end{Prf}
-
-\begin{Prf}&
-	\eqcl{m_0}{HL}\\
-\Equ{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}&
-	\present\H~\eqcl{\level\H}{HH}\\
-\Equ{\law{Present}}&
-	\eqcl{\level\M}{HL}\\
-\end{Prf}
-
-So now we have:
-\xpr{
-\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}\\
-\eqcl{m_0}{HL} =\eqcl{\level\M}{HL}\\
-}
-First, we prove that $\level'\M~\Present\H~\level\H$
-
-\begin{Prf}&
-	\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH} \level\M\\
-\Imp{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}$}&
-	\level'\M = \eqcl{m_0}{LH}  \reuze{LH}   \level\M\\
-\Imp{\law{Orthogonal} and $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$}&
-	\level'\M \in  \eqcl{\level\M}{HL}\\
-\Eqv{\law{$\eqhole$-Member}}&
-	\eqcl{\level'\M}{HL} = \eqcl{\level\M}{HL}\\
-\Imp{\law{Present} on lower layer, or prove this?}&
-	\eqcl{\level'\M}{HL} =  \present\H~\eqcl{\level\H}{HH}\\
-\Eqv{\law{\present-Char}}&
-	\level'\M~\Present\H~\level\H\\
-%\level'\M = \interpret\L {level'\L}{LL} \reuze{LH} \level\M\\
-%\exists m : \level'\M = {m}{LH} \reuze{LH} \level\M\\
-\end{Prf}
-
-Now proof is easy:
-
-\begin{Prf}&
-	\level'\H\\
-\Equ{\law{Compute}}&
-	compute^{intr}\H \level'\M  \level\H\\
-\Equ{$\level'\M~\Present\H~\level\H$ and \law{Doc-Inert} on higher layer}&
-	\level\H\\
-\end{Prf}
-\end{proof}
-\ec
-
-
-\bc
-OLD PRES-INERT
-
-
-If result of edit is presentation of something, it is unchanged by \law{Compute}:
-
-\xpr{
-(\exists h : level'\L~\Present\C~h) \imp level''\L = level'\L
-}
-
-Assume we have $h_0$ such that $level'\L~\Present\C~h_0$:
-
-\begin{Prf}&
-	level'\L~\Present\C~h_0\\
-\Eqv{\law{\present-Char}}&
-	\eqcl{level'\L}{CL} = \present\C~\eqcl{h_0}{CH}\\
-\Imp{bla}&
-	\exists m : \eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h_0}{HH}\\
-\end{Prf}
-
-Let $m_0$ be the $m$ from the existential quantification:
-
-$\eqcl{level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$ and $\eqcl{m_0}{HL} = \present\H~\eqcl{h_0}{HH}$
-
-From assumption we know that \interpret gets us in class of $m_0$
-
-\begin{Prf}&
-	\eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH}\\
-\Imp{\law{InterPresent} on lower layer}&
-	\eqcl{m_0}{LH} = \interpret\L~\eqcl{level'\L}{LL}\\
-\end{Prf}
-
-\begin{Prf}&
-	\eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH}\\
-\Imp{\law{InterPresent} on lower layer}&
-	\eqcl{m_0}{LH} = \interpret\L~\eqcl{level'\L}{LL}\\
-\end{Prf}
-
-$\level'\M$ and $m_0$ are in same LH class.
-
-\begin{Prf}&
-	\true\\
-\Eqv{Compute}&
-	\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
-\Imp{$\eqcl{m_0}{LH} = \interpret\L~\eqcl{level'\L}{LL}$}&
-	\level'\M = \eqcl{m_0}{LH}  \reuze{LH}   \level\M  \\
-\Imp{\law{$\reuz$-Valid}}&
-	\level'\M \in \eqcl{m_0}{LH}\\
-\Imp{\law{Absorption}}&
-	\level'\M \in \eqcl{m_0}{HL}\\
-\Imp{\law{$\eqhole$-Member}}&
-	\eqcl{\level'\M}{HL} = \eqcl{m_0}{HL}\\
-\end{Prf}
-
-
-
-Now by substituting from \law{Compute}
-
-\begin{Prf}&
-	\level''\L\\
-\Equ{\law{Compute}}&
-	\present\L~ \eqcl{\level''\M}{LH}  \reuze{LL}  \level'\L\\
-\Equ{\law{Compute}}&
-	\present\L~ \eqcl{compute^{pres}\H \level''\H~\level'\M}{LH}  \reuze{LL}  \level'\L\\
-\Equ{\law{Compute}}&
-	\present\L~ \eqcl{compute^{pres}\H \level'\H~\level'\M}{LH}  \reuze{LL}  \level'\L\\
-\Equ{\law{Compute}}&
-	\present\L~ \eqcl{compute^{pres}\H (compute^{intr}\H \level'\M  \level\H)~\level'\M}{LH}  \reuze{LL}  \level'\L\\
-\Equ{$\exists h : \level'\M~Present\H~h$ and \law{Pres-Inert} on higher layer}&
-	\present\L~ \eqcl{\level'\M}{LH}  \reuze{LL}  \level'\L\\
-\Equ{$\eqcl{\level'\M}{LH} = \eqcl{m_0}{LH}$}&
-	\present\L~ \eqcl{m_0}{LH}  \reuze{LL}  \level'\L\\
-\Equ{$\eqcl{level'\L}{LL} = \present\L~\eqcl{m_0}{LH}$}&
-	\eqcl{level'\L}{LL}  \reuze{LL}  \level'\L\\
-\Equ{\law{$\reuz$-Idem}}&
-\level'\L\\
-\end{Prf}
-\ec
 
 
 \subsection{Conclusions?}
@@ -2327,96 +2164,250 @@ Problem: in one eq. class, can there be several situations? eg (*,*) \dbarr (), 
 
 
 
+\fromHere
 %																
 %																
 %																
 \section{Duplicate presentations}
 
-Informal
+% Introduction
+The specification developed in the previous sections is suitable for describing a large class of editors, but still lacks support for presentations that duplicate information. A simple example of a duplicate presentation is the function $\present~x = (x, x)$. An intuitive way to handle edit operations on duplicates is to let the edited duplicate determine the document update. However, this behavior cannot be expressed by the specifications in the previous sections, since the specification does not take into account the original $level\L$.
+
+Duplicates become especially problematic in the combination with extra state and multiple layers. In fact, the pathological cases that give rise to the extra conditions in Section~\ref{sect:combinedExtraCompose} all contain some form of duplication. Other... \note{add refs on duplicates from DB and inversion papers}
+
+In this section, we discuss how the specification can be adapted to support the handling of duplicate presentations. Although we have established a tentative specification of when exactly a presentation contains duplicates, it is still requires much improvement. Therefore, the remainder of this section is of an informal nature.
+
+% close on document gets into trouble with pres-inert
+
+\subsection{Dealing with duplicates}
+
+% what are duplicates
+Besides the obvious $\present~x = (x, x)$, we also speak of duplication when a presentation contains a value together with a value that is derived from it (eg. $\present~x = (x, -x)$). This holds even if computation for the derived value does not have an inverse, as in $\present~x = (x, x~\fn{mod}~256)$.  A related example $\present~x = (x~\fn{div}~256, x~\fn{mod}~256)$ shows the subtlety of duplication, since in this case there is no duplication of information. 
+
+Besides depending on a single document value, a duplicate may also depend on several values. Hence, an average value of a list of integers can be regarded as a duplication of the values in the list.\note{term duplicates seems a bit odd here} Other examples of duplication are derived type signatures for functions, or even the color of a keyword in a syntax-coloring editor.
+
+% another one: $1 \to "one"$ can be seen as three partial duplicates. 
+% what's this note? parsing with correction. ??? 
+
+
+% simple solution
+The easiest way to deal with duplicate information is to simply ignore one of the duplicates on interpretation and thereby rendering the ignored duplicate non-editable. This is in fact the only way that is allowed by the specification of the previous sections. For $\present~x = (x,x)$, this leaves a choice of interpret functions: with $\interpret~(x,y) = x$, only the left value is editable, and with $\interpret~(x,y) = y$ only the right value.
+
+In some cases non-editable duplicates are perfectly acceptable. In case of the list of integers with its average, few people will expect to be able to edit the average value. And perhaps even fewer people will expect to be able to edit colors in a syntax-coloring editor and thereby modify the edited program source. However, in some cases we do want to be able to edit duplicate values.
+
+\subsection{Adapting the specification}
+% This is not consistent with ``close to'' on presentation.  
+% If $(1,1) \leadsto (1,8)$ then $(8,8)$ is probably closer as far as the user is concerned.
+Instead of ignoring one of the duplicates, a more user-friendly approach is to use the value of the changed duplicate to determine the document update. This is in line with the requirement that if an update is imprecise, the editor will perform the operation that the user intended. 
+
+Edit operations on duplicates most probably result in an invalid presentation, unless a user has managed to consistently edit all appearences of the duplicate. Hence, the result of an edit operation on a duplicate value is mainly specified by the \law{Imprecise} requirement: \note{if we change \law{Pres-Inert} this is not entirely true anymore}
+
+%The problem with duplicates is that information from the document is present several times in the presentation.
+%We tackle the problem by taking the 
+
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Imprecise}
+
+However, in its current form, \law{Imprecise} cannot specify the desired behavior, since it relates $\level''\L$ to $\level'\L$ without taking $\level\L$ into account. An example shows the problem that can occur.
+
+Consider an editor with $\present~x = (x,x)$. Because the edit operation $(0,0) \leadsto (1,0)$, should result in the presentation $(1,1)$, we must have $(1,0) \close (1,1)$. On the other hand the desired result of $(1,1) \leadsto (1,0)$ should be $(0,0)$, implying $(1,0) \close (0,0)$. Because it does not refer to $\level\L$, \law{Imprecise} cannot specify the desired behavior.
+
+%Hence, the value of $\interpret (1,0)$ depends not only on $\level'\L$, but also on the $level\L$.
+
+A second example shows more precisely what the problem is. Consider the function 
+$\present~x = (x,x,x)$. If a user edits the first element of the presentation
+($(0,0,0) \leadsto (1,0,0)$) the intuitive result would be to change the document to $1$. However, since $(1,0,0)$ is arguably closer to $(0,0,0)$ than $(1,1,1)$, $level''\H$ is specified to be $0$ instead of $1$. Therefore, an editor conforming to the specification does not allow any editing in the presentation, unless two or more values are edited simultaneously and consistently. 
+
+The problem with the \law{Imprecise} requirement is that the duplicates that were not edited influence the result at the cost of the edited duplicate. We tackle the problem by weakening the \law{Imprecise} requirement. Rather than requiring the entire final presentation to be ``close to'' the result of the user update, we only require closeness for those parts of the presentation that were changed.
+\note{mention already that a weaker form is still needed?}
+
+In order to make explicit which parts of $\level\L$ have changed, we introduce a new operator:
+ 
+\xpr{
+\Delta \tp  T \to T \to T\st\\
+}
+
+The result of  $x~\Delta~x'$ is a value that is structurally the same as $x'$, but only contains those parts that are different from $x$. The other parts are represented by wildcards ($*$). Thus, for example $(1,2,3)~\Delta~(1,3,2) = (*,3,*)$.
+
+\note{say a bit more about structural diffs?}
+
+\toHere
+
 \bl
-\o Choice in \interpret may be due to duplicates or '???'
-\o $type Document = Int$ 
-\o Duplicate: $\present x = (x,x)$ with several possible interprets: $\interpret (0,1) = 0 or 1$ 
-\o ???: $\present x = 2x$ also with several interprets: $\interpret 1 = 0 or 1$ 
-\o Hard to distinguish between the two.
-\o Somehow for duplicates, closeness is not an issue in selecting the one we want:
-\o eg. $\present x = (x,x,x)$ with edit $(0,0,0)\leadsto(1,0,0)$ should give $(1,1,1)$, which is not as close as $(0,0,0)$
-\o A difference seems to be that using stars on other fields but the edited one, make a non-ambiguous \interpret possible in the duplication case, but not in the other case.
-\o eg. $\interpret (1,*,*) = 1$
-\o duplicates may be hard to spot: eg. $\present x = (x `div` 0xff, x `mod` 0xff)$ is not a duplication.
-\o $1 \to "one"$ can be seen as three partial duplicates. 
+\o informally introduce an operator that blocks out all duplicates 
+\el
+\xpr{
+\Delta \tp  T \to T \to T\st\\
+}
+
+Maybe instead of $\Delta$, it is better to introduce an operator that blocks out all values that are duplicates of/dependent on the changed parts? It is even harder to define, but seems more appropriate, because no unnecessary *'s are introduced.
+Furthermore, if there are no duplicates, the requirements become the same as in the previous section.
+
+The rest of the story remains largely similar if we use this alternative operator.
+
+operator introduces problems, what if structure depends on other value, what in case of conflict. say something about this.
+
+conflict: unspecified behavior 
+\fromHere
+
+Similar to Section~\ref{sect:wildcardEq}, a wildcard stands for any value, and therefore can be ignored when testing for equality, or evaluating closeness. Hence, $(1,*,*)$ is maximally close to $(1,1,1)$, but also to $(1,3,5)$, for example.
+
+
+%Can we give a definition?
+%
+%\xpr{
+%\Delta \tp  T \to T \to T\st\\
+%C~x\st_0 \dots x\st_n =\st C~y_0 \dots y_n ~=~ x\st_0 = y_0 \land \dots \land x\st_n  = y_n\\
+%C~x\st_0 \dots x\st_n =\st C'~y_0 \dots y_m ~=~ \false\\
+%}
+%what about constructors? what about Bin 1 2 $\leadsto$ Bin 0 (Bin 1 2)  Bin 0 * ?
+%Lists? same story with subobj. identities?
+
+%
+%\xpr{
+%=\st ::  T\st \to T \to T\\
+%* =\st  y ~=~ \true\\
+%C~x\st_0 \dots x\st_n =\st C~y_0 \dots y_n ~=~ x\st_0 =\st y_0 \land \dots \land x\st_n =\st y_n\\
+%C~x\st_0 \dots x\st_n =\st C'~y_0 \dots y_m ~=~ \false\\
+%}{$\st$-Def}
+%
+%don't use = core, because we have no data def. Closeness between a wildcard value and an ordinary value is similar. 
+%
+%``close to'' on $T\st$ and $T$ is similar to $=\st$. everything is close to a $*$.
+
+The new \law{Imprecise} requirement only requires closeness on the edited part of the presentation:
+
+\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Imprecise}
+
+For the $present~x = (x,x)$ example, after $(0,0) \leadsto (1,0)$ the requirement states $(1,*) \close level''\L$, with $(1,1)$ as a solution, whereas for $(1,1)\leadsto (1,0)$ it states $(*,0)$, with $(0,0)$, as a solution. For the triple presentation, the requirement after updating the first element states $(1,*,*) \close level''\L$, which has $(1,1,1)$ as a solution.
+
+Although the duplicate updates can be specified now, the requirements no longer say anything about the unchanged parts of the presentation. Therefore, we add a weaker requirement for preserving extra state of the unchanged parts of the presentation. The extra requirement that we need corresponds exactly to the old \law{Imprecise} requirement:
+\note{could unchanged parts also need an imprecise req? or is it only for the preserve part}
+
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
+
+\subsection{Requirements} % maybe call this Pres-Inert and make separate subsection Requirements
+
+Besides the \law{Imprecise} requirement, also the \law{Pres-Inert} requirement needs to be adapted to support duplicates. An example shows the problem that can occur with the old \law{Pres-Inert} requirement.
+
+Consider an editor for a very simple functional language. The document type is a list of declarations, which is presented as a list of strings together with a message about type correctness. Furthermore, the body of a function may be hidden (see Section~\ref{sect:sourceeditor}), in which case it is represented by the string \verb|"..."|. 
+
+A type correct document $[f = a+2, a = 1]$, can be presented while hiding the body of $f$, yielding: \verb|"f = ...; a = 1;    ok"|. In the presentation, the string \verb|ok| signals that the program is type correct. 
+
+If a user performs the update $a = 1 \leadsto a = True$, the most logical result would be an updated document 
+$[f = a+2, a = True]$, with a presentation that shows the type error: \verb|"f = ...; a = True;    error"|. Of course, in a real-world editor we would like to have a somewhat more informative error message, but this basic message is sufficient for our example.
+
+The problem that occurs is that because $level'\L$ (\verb|"f = ...; a = True;    ok"|) is a valid presentation (consider for example the document  $[f = 2, a = True]$), \law{Pres-Inert} states that $level'\L = level''\L$. This would entail a document update to 
+$[f = 2, a = True]$ or something similar, which is clearly not the desired behavior.
+
+%\bl
+%\o Pres-Inert suggests to update the hidden parts of the document!
+%\el
+
+%
+%a = 1; f = a + 2;                                    a = True; f = a + 2              or   a = True; f = undefined
+%
+%a = 1; f = ...            a = True; f = ...     a = True; f = ... [type err]          a = True; f = ...
+%                                *    True   *  
+
+To prevent \law{Pres-Inert} from suggesting updates on hidden parts of the document, we weaken the requirement in a similar way as \law{Imprecise}; both the pre- and the postcondition are changed to refer only to the updated parts of the lower level:
+
+%\note{Alternatively, could we make \law{Pres-Inert} weaker than \law{Doc-Preserve}?}
+% no, pres inert usually conflicts with doc-preserve, making it weaker would disable it.
+
+\xprlab{\hoare{\eqcl{\level\L ~\Delta~\level'\L}{L} =\st \present~\eqcl{h}{H}} {Comp} { \level\L ~\Delta~\level'\L =\st \level''\L}}		{Pres-Inert}
+
+The precondition needs to be weakened because otherwise the presence of duplicates in the presentation may disable the requirement. The postcondtion on the other hand is weakened because we only require the updated parts to stay the same. Duplicates of the updated part, such as the type error in the example above, may change.
+
+\note{say something about delta in precondition, plus the fact that it is on equivalence class.}
+\note{\law{Pres-Inert} now seems cover some of \law{Imprecise}'s cases}.
+
+The other requirements (\law{Postcondition}, \law{Doc-Inert}, and \law{Doc-Preserve}) do not need to be updated . The postcondition should still hold between the entire higher and lower level, and \law{Doc-Preserve} only refers to higher level values and therefore is not affected by duplicates in the presentation.
+
+The precondition of \law{Doc-Inert} could be changed in a similar way as the precondition of \law{Pres-Inert}, but this is not necessary. Because the precondition ensures that the unchanged parts of the presentation are valid with respect to $\level\H$, only the changed parts may break the precondition. Hence it makes no difference to also include the unchanged parts in the precondition, as the changed parts determine whether it holds or not.
+
+\subsection{Conclusions}
+
+Summarizing, we have the following set of requirements:
+
+\xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{L} = \present~\eqcl{\level''\H}{H} } }		{Postcondition}
+\xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
+\xprlab{\hoare{\eqcl{\level\L ~\Delta~\level'\L}{L} =\st \present~\eqcl{h}{H}} {Comp} { \level\L ~\Delta~\level'\L = \level''\L}}		{Pres-Inert}
+\xprlab{\hoare{\true} {Comp} {\level\L ~\Delta~\level'\L \close \level''\L}}	{Imprecise}
+\xprlab{\hoare{\true} {Comp} {\level'\L \close \level''\L}}	{Pres-Preserve}
+\xprlab{\hoare{\true} {Comp} {\level\H \close \level''\H}}	{Doc-Preserve}
+
+\toHere
+
+\bl
+\o Duplicates are tricky
+\o Easy to make impossible situations, but not a design requirement to solve these. Simple things should be possible.
+\o How Proxima duplicates
 \el
 
-Old statement: if there are several choices for \interpret, which all obey \law{InterPresent}, then there are duplicates. This does not seem to be true. (eg. $\present n = 2n$)
 
 
-\bl
-\o Story so far allows spec of many editors but some are not possible
-\o simplest is duplicate: $\lambda n \to (n,n)$
-\o (1,2) ambiguous
-\o derived values: can be made non-editable
-\o syntax coloring. can be seen as a derived value.
-\o parsing with correction. 
-\el
+%%%%%%%%% Choice crap:
 
-\bl
-\o with one \interpret, we have to make a choice.
-\o by always taking the same alternative, the other becomes non-editable.
-\o This is not consistent with ``close to'' on presentation.  If $(1,1) \leadsto (1,8)$ then $(8,8)$ is probably closer as far as the user is concerned.
-\el
+%\bl
+%\o Choice in $\interpret$ may be due to duplicates or '???'
+%\o $type Document = Int$ 
+%\o ???: $\present x = 2x$ also with several interprets: $\interpret 1 = 0 or 1$ 
+%\o Hard to distinguish between the two.
+%\o A difference seems to be that using stars on other fields but the edited one, make a non-ambiguous \interpret possible in the %duplication case, but not in the other case. eg. $\interpret (1,*,*) = 1$
+%\o Old statement: if there are several choices for \interpret, which all obey \law{InterPresent}, then there are duplicates. This %does not seem to be true. (eg. $\present n = 2n$)
+%\el
 
-\bl
-\o If we have more interprets, ``close to'' is not sufficient anyway.
-\o $pres~n = (n,n,n)$, after changing one val, the original is always closer than what the user intended.
-\o We use a different concept. result is ''close to'' for the edited bits.
-\el
 
-\bl
-\o Duplicates get nasty with extra state
-\o close on document gets into trouble with pres-inert
-\el
 
-\bl
-\o Example: editor with functions and type declarations. also folding. a = 1; f = a + 2; Pres a = 1; f = ..., edit 1 $\leadsto$ True. 
-\el
 
 
 %																
 %																
 %																
-\section{Incrementality}
-Informal
+%\section{Incrementality}
+%Informal. Maybe leave this one out
 
 
 %																
 %																
 %																
-\section{Loose ends}
-\bl
-\o what about error nodes in document?
-\o what about inserting pres elts that resemble a chapter title? Is this handled well?
-\o difference between {\em presentation extra state} and {\em interpretion extra state}
-\o what if present is not total?
-\el
+%\section{Loose ends}
+%\bl
+%\o what about error nodes in document?
+%\o what about inserting pres elts that resemble a chapter title? Is this handled well?
+%\o difference between {\em presentation extra state} and {\em interpretion extra state}
+%\o what if present is not total?
+%\el
 
 
 %																
 %																
 %																
-\section{document editing}
-Skipping lower layers
-
-update (pres upd) pres \rarr pres'
-update (doc upd) pres \rarr pres$\times$(doc upd) , which interprets to (update (doc upd) doc)
+%\section{document editing}
+%
+%
+%Skipping lower layers
+%
+%update (pres upd) pres \rarr pres'
+%update (doc upd) pres \rarr pres$\times$(doc upd) , which interprets to (update (doc upd) doc)
 
 
 %																
 %																
 %																
-\section{layer skipping}
-Skipping higher layers. Probably won't say much about that here.
+%\section{layer skipping}
+%
+%
+%Skipping higher layers. Probably won't say much about that here.
 
 \section{Conclusions}
+
+Do we need additional sections about:
+\bl
+\o Document editing
+\o Layer skipping
+\o incrementality
+\el
 
 Always possible to find pathological cases.
 We try to define what's a natural editor
@@ -2426,9 +2417,9 @@ Future: specification formalism for presentation mappings that guarantees correc
 % restore old defs from thesis.sty
 
 \pagebreak
-bla
-\pagebreak
 \section{Appendix with nasty proofs}
+
+Probably not included in thesis
 
 Problems:
 
