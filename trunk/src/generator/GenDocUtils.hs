@@ -28,19 +28,21 @@ genDocUtils include parsedFile =
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
 
-{- Path Node -} 
+{- Path Node -} -- hole support is nasty, it should be in the decls already
+-- so we need a function that adds holes and a function that adds parse errs, then the 
+-- generator parts can use the datatype with holes & parse errors, or without.
 genPathNode (File _ ds) = [ "pathNode :: Node -> PathDoc"
                          , "pathNode NoNode            = NoPathD"
                          , "pathNode (EnrichedDocNode _ pth) = PathD pth"]  -- RUI: added this line
                          ++ (map makeNodeAlt (allConstructors ds)) 
-                         where
-                         
-                         allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) | Decl tp prods decltp <- ds, decltp /= DeclConsList, Prod cnstr cs <-prods]
---                         makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
-                         makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
+ where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) 
+                            | Decl tp prods decltp <- ds
+                            , decltp /= DeclConsList
+                            , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hac
+       makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
 
 
----
+--- this one doesn't work for holes, but it will be obsolete soon anyway
 {- Function IDD -} 
 genFuncIDD :: File -> [String]
 genFuncIDD (File _ decls) = concatMap printDeclIDD decls

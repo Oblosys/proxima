@@ -30,15 +30,17 @@ genDocumentTypes include parsedFile =
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
 
+--- generation of ParseErr and Hole should be done more abstractely, now it is hard to generate for them
 
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line
 genNode (File _ ds) = [    "data Node = NoNode "]
                         ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
                         ++ indent 10 (map makeNodeAlt (allConstructors ds))
- where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) | Decl tp prods decltp <- ds, decltp /= DeclConsList, Prod cnstr cs <-prods]
-       --                fields = removeRepeat(getFields' extendedTypes)
-       --makeNodeAlt (Decl  _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
+ where allConstructors ds = [ (tp, cnstr, map fieldType cs, decltp) 
+                            | Decl tp prods decltp <- ds
+                            , decltp /= DeclConsList
+                            , Prod cnstr cs <- prods ++[Prod ("Hole"++tp) []] ]  --- *** hack
        makeNodeAlt (tp, cnstr, _, _) = "| "++ cnstr ++"Node "++ tp ++" Path "
 ---
        
