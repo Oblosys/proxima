@@ -267,6 +267,7 @@ Unlike any current structure editor, the Proxima editor will be able to handle a
 
 %								
 \subsection{An Editor for Haskell} As an example of a program editor, we take an editor for the functional language Haskell. The editor supports an extended form of syntax highlighting, in-place display of syntactic and semantic errors, and a range of language based edit operations. Unlike most text editors, the editor supports highlighting at a semantic rather than syntactic level, making it possible to use different display styles for language constructs that are hard to recognize purely syntactically. The type declarations in the next screenshot are an example of such a construct. Although syntactically identical, identifiers in type expressions are colored differently from identifiers in ordinary expressions.
+\note{somewhere: mention \cite{reinke03refactoring} (maybe near or instead of Rename in Scope}
 
 %mention module handling etc.?
  
@@ -970,7 +971,7 @@ Thot editors are of a syntax-directed nature. Multiple views on the document may
 
 The Microsoft Visual Studio environment includes an integrated program editor. Although the editor does not contain any novel features, and  thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
 
-The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
+The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
 
 \bc
 \toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
