@@ -401,7 +401,7 @@ Col$_{Pres}$ \= [ With$_{Pres}$ \{ fontFamily = "Times New Roman", fontSize = 12
        \>  ~~~ \= (Tokens$_{Pres}$ \= [ LCaseToken$_{Pres}$ (1,0) "simple1", OpToken$_{Pres}$ (0,1) "="\\
        \>          \>              \> , LCaseToken$_{Pres}$ (1,2) "if", UCaseToken$_{Pres}$ (0,1) "True"\\
        \>          \>              \> , LCaseToken$_{Pres}$ (0,1) "then", IntToken$_{Pres}$ (0,1) "1"\\
-       \>          \>              \> , LowercaseToken$_{Pres}$ (1,10) "else", IntToken$_{Pres}$ (0,1) "0"\\
+       \>          \>              \> , LCaseToken$_{Pres}$ (1,10) "else", IntToken$_{Pres}$ (0,1) "0"\\
        \>          \>              \> ])\\
              \> ]
 \end{tabbing}
@@ -426,7 +426,7 @@ Layout:
 \small \ttfamily
 \begin{tabbing}
 Col$_{Lay}$ \= [  With$_{Lay}$ \{ fontFamily = "Times New Roman", fontSize = 12 \}\\
-                    \>  ~~~ Formatter$_{Lay}$ [ "This", "is", "a", "simple", "expression" ]\\
+                    \>  ~~~ (Formatter$_{Lay}$ [ "This", "is", "a", "simple", "expression" ])\\
                     \> , With$_{Lay}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
                     \>  ~~~ \= (Col$_{Lay}$ \= [ "" \\
                     \>          \>        \> , Row$_{Lay}$ [ "simple1", "\textvisiblespace", "::",
@@ -494,7 +494,7 @@ Col$_{Arr}^{(0,0)(80\times84)}$ \\
       \>      \>  ])\\
                     
       \> , With$_{Arr}$ \{ fontFamily = "Courier New,  fontSize = 12 \}\\
-      \> ~~~ (Col$_{Arr}^{(0,24)(80\times36)}$\\
+      \> ~~~ (Col$_{Arr}^{(0,48)(80\times36)}$\\
       \> ~~~~~~ \= [  Row$_{Arr}^{(0,24)(50\times12)}$ [ "simple1"$^{(0,0)(35\times12)}$, "\textvisiblespace"$^{(35,0)(5\times12)}$, "="$^{(40,0)(5\times12)}$ ]\\
       \>      \> , Row$_{Arr}^{(0,36)(80\times12)}$ [ \dots~]\\
       \>      \> , Row$_{Arr}^{(0,48)(80\times12)}$ [ \dots~]\\
