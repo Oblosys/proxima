@@ -56,9 +56,9 @@ reduceEnr state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrD
 reduceEnr state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = -- other cases, just copy from decls
   (SetDoc (RootDoc idd idp dcls),state, enrDoc )
 reduceEnr state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) =
-  (SetDoc (HoleDoc),state, enrDoc )
+  (SetDoc (HoleDocument),state, enrDoc )
 reduceEnr state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) =
-  (SetDoc (ParseErrDoc nd prs),state, enrDoc )  -- nd is not right
+  (SetDoc (ParseErrDocument nd prs),state, enrDoc )  -- nd is not right
 
 
 

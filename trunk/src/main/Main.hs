@@ -52,7 +52,7 @@ gain = main -- when typing during compilation GHCI replaces the first command li
 main =                         -- system (layer)local state,  initial higher level value
  do { fontMetricsRef <- initFontMetrics
     ; let layers = 
-            proximaLayers (LayerStateEval, DocumentLevel HoleDoc NoPathD Clip_Nothing)   
+            proximaLayers (LayerStateEval, DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                           ((),     EnrichedDocLevel HoleEnrichedDoc NoPathD)   
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], emptyFM))   
                           (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))

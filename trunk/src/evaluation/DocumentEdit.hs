@@ -287,7 +287,7 @@ insertElt doclvl@(DocumentLevel doc path clp) i =
 
 -- Document type specific part
 
-sample = HoleDoc {-RootDoc NoIDD NoIDP $
+sample = HoleDocument {-RootDoc NoIDD NoIDP $
            ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "tup") 
                                 (ProductExp NoIDD NoIDP NoIDP [] $ 
                                    ConsExps NoIDD (PlusExp NoIDD NoIDP (IntExp NoIDD NoIDP 2) (IntExp NoIDD NoIDP  3)) $

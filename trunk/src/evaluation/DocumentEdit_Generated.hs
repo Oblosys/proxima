@@ -16,16 +16,19 @@ import IOExts
 
 
 
-instance Editable Document
-instance Editable HeliumTypeInfo
-
-
-
+instance Editable Document where
+  hole = HoleDocument
+  
+instance Editable HeliumTypeInfo where
+  hole =  ([],[],[])
+  
+  
 class Editable a where
   select :: PathD -> a -> ClipDoc
   paste :: PathD -> ClipDoc -> a -> a
   alternatives :: a -> [ (String, ClipDoc) ]
   arity :: a -> Int
+  parseErr :: Node -> Presentation -> a
   hole :: a
   
   isList :: a -> Bool
@@ -241,6 +244,8 @@ instance Editable Decl where
   arity (PPPresentationDecl _ _ _ x1) = 1
   arity _                        = 0
 
+  parseErr = ParseErrDecl
+
   hole = HoleDecl
 
 
@@ -261,6 +266,8 @@ instance Editable Ident where
 
   arity (Ident _ _ _ x1) = 1
   arity _                        = 0
+
+  parseErr = ParseErrIdent
 
   hole = HoleIdent
 
@@ -359,6 +366,8 @@ instance Editable Exp where
   arity (ProductExp _ _ _ _ x1) = 1
   arity _                        = 0
 
+  parseErr = ParseErrExp
+
   hole = HoleExp
 
 
@@ -381,6 +390,8 @@ instance Editable Alt where
 
   arity (Alt _ _ _ x1 x2) = 2
   arity _                        = 0
+
+  parseErr = ParseErrAlt
 
   hole = HoleAlt
 
@@ -417,6 +428,8 @@ instance Editable Board where
   arity (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = 8
   arity _                        = 0
 
+  parseErr = ParseErrBoard
+
   hole = HoleBoard
 
 
@@ -451,6 +464,8 @@ instance Editable BoardRow where
 
   arity (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = 8
   arity _                        = 0
+
+  parseErr = ParseErrBoardRow
 
   hole = HoleBoardRow
 
@@ -495,6 +510,8 @@ instance Editable BoardSquare where
   arity (Empty) = 0
   arity _                        = 0
 
+  parseErr = ParseErrBoardSquare
+
   hole = HoleBoardSquare
 
 
@@ -517,6 +534,8 @@ instance Editable PPPresentation where
 
   arity (PPPresentation _ x1 x2) = 2
   arity _                        = 0
+
+  parseErr = ParseErrPPPresentation
 
   hole = HolePPPresentation
 
@@ -541,6 +560,8 @@ instance Editable Slide where
   arity (Slide _ x1 x2) = 2
   arity _                        = 0
 
+  parseErr = ParseErrSlide
+
   hole = HoleSlide
 
 
@@ -564,6 +585,8 @@ instance Editable ItemList where
   arity (ItemList _ x1 x2) = 2
   arity _                        = 0
 
+  parseErr = ParseErrItemList
+
   hole = HoleItemList
 
 
@@ -586,6 +609,8 @@ instance Editable ListType where
   arity (Number _) = 0
   arity (Alpha _) = 0
   arity _                        = 0
+
+  parseErr = ParseErrListType
 
   hole = HoleListType
 
@@ -616,6 +641,8 @@ instance Editable Item where
   arity (ListItem _ x1) = 1
   arity _                        = 0
 
+  parseErr = ParseErrItem
+
   hole = HoleItem
 
 
@@ -636,6 +663,8 @@ instance Editable String_ where
 
   arity (String_ _ x1) = 1
   arity _                        = 0
+
+  parseErr = ParseErrString_
 
   hole = HoleString_
 
@@ -680,6 +709,8 @@ instance Editable List_Decl where
 
   arity (List_Decl _ x1) = length (fromConsList_Decl x1)
   arity _                        = 0
+
+  parseErr = ParseErrList_Decl
 
   hole = List_Decl NoIDD Nil_Decl
 
@@ -734,6 +765,8 @@ instance Editable List_Alt where
   arity (List_Alt _ x1) = length (fromConsList_Alt x1)
   arity _                        = 0
 
+  parseErr = ParseErrList_Alt
+
   hole = List_Alt NoIDD Nil_Alt
 
   isList _ = True
@@ -786,6 +819,8 @@ instance Editable List_Exp where
 
   arity (List_Exp _ x1) = length (fromConsList_Exp x1)
   arity _                        = 0
+
+  parseErr = ParseErrList_Exp
 
   hole = List_Exp NoIDD Nil_Exp
 
@@ -840,6 +875,8 @@ instance Editable List_Slide where
   arity (List_Slide _ x1) = length (fromConsList_Slide x1)
   arity _                        = 0
 
+  parseErr = ParseErrList_Slide
+
   hole = List_Slide NoIDD Nil_Slide
 
   isList _ = True
@@ -893,6 +930,8 @@ instance Editable List_Item where
   arity (List_Item _ x1) = length (fromConsList_Item x1)
   arity _                        = 0
 
+  parseErr = ParseErrList_Item
+
   hole = List_Item NoIDD Nil_Item
 
   isList _ = True
@@ -916,6 +955,8 @@ instance Editable Int where
                    , ("{Int}", Clip_Int hole) ]
   
   arity _ = 0
+  parseErr _ _ = 0
+
   hole = 0
 
 instance Editable Bool where                         
@@ -928,6 +969,8 @@ instance Editable Bool where
                    , ("False", Clip_Bool False)      
                    , ("{Bool}", Clip_Bool hole) ]    
   arity _ = 0                                          
+  parseErr _ _ = False
+
   hole = False
 
 instance Editable String where
@@ -942,6 +985,8 @@ instance Editable String where
                    , ("{String}", Clip_String hole) ] 
  
   arity _ = 0
+  parseErr _ _= "{ParseErr}"
+
   hole = "{String}"
 
 

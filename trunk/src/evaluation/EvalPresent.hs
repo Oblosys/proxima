@@ -6,8 +6,8 @@ import EvalLayerUtils
 
 import DocumentEdit
 
-import EvaluateTypes
---import EvaluateTypesStubs
+--import EvaluateTypes
+import EvaluateTypesStubs
 
 
 {-
@@ -94,8 +94,8 @@ getOldTypeInfo (ParseErrEnrichedDoc _ _)            = ([],[],[])
 evalDoc :: LayerStateEval -> DocumentLevel -> EnrichedDoc -> EnrichedDoc
 evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls@(ParseErrList_Decl _ _)) _ _) enr = RootEnr idd idp (List_Decl NoIDD Nil_Decl) dcls (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls) _ _) enr = RootEnr idd idp dcls dcls (getOldTypeInfo enr) doc
-evalDoc state (DocumentLevel (HoleDoc) _ _) _ = HoleEnrichedDoc
-evalDoc state (DocumentLevel (ParseErrDoc nd pr) _ _) _ = ParseErrEnrichedDoc nd pr -- not the right node type
+evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc
+evalDoc state (DocumentLevel (ParseErrDocument nd pr) _ _) _ = ParseErrEnrichedDoc nd pr -- not the right node type
 
 
 

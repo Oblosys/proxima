@@ -30,77 +30,8 @@ data HeliumMessage =
 
 
 
--- separate class for this show instance?
--- probably there will be a lot more document dependent utility functions.
--- maybe put all of them in DocUtils_Generated?
-
-instance Show Node where
---  show _ = "#"
-  show (NoNode)                 = "None" 
-  show (EnrichedDocNode _ _)    = "EnrichedDoc"
-  show (List_DeclNode _ _)      = "List_DeclNode"
-  show (HeliumTypeInfoNode _ _) = "HeliumTypeInfoNode"
-  show (DocumentNode _ _)       = "DocumentNode" 
-  show (BoolNode _ _)           = "BoolNode"      
-  show (IdentNode _ _)          = "IdentNode"     
-  show (ExpNode _ _)            = "ExpNode"       
-  show (BoardNode _ _)          = "BoardNode"     
-  show (PPPresentationNode _ _) = "PPPresentationNode"
-  show (StringNode _ _)         = "StringNode"    
-  show (IntNode _ _)            = "IntNode"       
-  show (List_AltNode _ _)       = "List_AltNode"  
-  show (List_ExpNode _ _)       = "List_ExpNode"  
-  show (BoardRowNode _ _)       = "BoardRowNode"  
-  show (BoardSquareNode _ _)    = "BoardSquareNode"  
-  show (List_SlideNode _ _)     = "List_SlideNode"
-  show (SlideNode _ _)          = "SlideNode"
-  show (String_Node  _ _)       = "String_Node "  
-  show (ItemListNode _ _)       = "ItemListNode"  
-  show (ListTypeNode _ _)       = "ListTypeNode"  
-  show (List_ItemNode  _ _)     = "List_ItemNode"
-  show (DeclNode _ _)           = "DeclNode"      
-  show _                        = "{No Show}"
-
-nodeTypeInt :: Node -> Int           -- for an easy Eq and Ord instance declaration
-nodeTypeInt (NoNode)                 = 0
-nodeTypeInt (EnrichedDocNode _ _)    = 1
-nodeTypeInt (List_DeclNode _ _)      = 2
-nodeTypeInt (HeliumTypeInfoNode _ _) = 3
-nodeTypeInt (DocumentNode _ _)       = 4
-nodeTypeInt (BoolNode _ _)           = 5
-nodeTypeInt (IdentNode _ _)          = 6
-nodeTypeInt (ExpNode _ _)            = 7
-nodeTypeInt (BoardNode _ _)          = 8
-nodeTypeInt (PPPresentationNode _ _) = 9
-nodeTypeInt (StringNode _ _)         = 10
-nodeTypeInt (IntNode _ _)            = 11
-nodeTypeInt (List_AltNode _ _)       = 12
-nodeTypeInt (List_ExpNode _ _)       = 13
-nodeTypeInt (BoardRowNode _ _)       = 14
-nodeTypeInt (BoardSquareNode _ _)    = 15
-nodeTypeInt (List_SlideNode _ _)     = 16
-nodeTypeInt (String_Node  _ _)       = 17
-nodeTypeInt (ItemListNode _ _)       = 18
-nodeTypeInt (ListTypeNode _ _)       = 19
-nodeTypeInt (List_ItemNode  _ _)     = 20
-nodeTypeInt (DeclNode _ _)           = 21
-nodeTypeInt _                        = 9999
-
-instance Eq Node where
-  nd1 == nd2 = nodeTypeInt nd1 == nodeTypeInt nd2
-  
-instance Ord Node where
-  nd1 <= nd2 = nodeTypeInt nd1 <= nodeTypeInt nd2
-
--- does not work anymore
-instance Read Node where
-  readsPrec _ inp = case dropWhile isSpace inp of -- requires: import Char
-                      ('#':rest) -> [(NoNode, rest)]
-                      _          -> []
 
 
-
--- clip is not a good name, since nothing is clipped, maybe node is ok after all
 
 
 -- ?? what does this old comment mean:
@@ -110,8 +41,8 @@ instance Read Node where
 
 -- this one cannot be generated, but needs to be here for now
 data Document = RootDoc IDD IDP List_Decl
-              | HoleDoc
-              | ParseErrDoc Node Presentation deriving Show
+              | HoleDocument
+              | ParseErrDocument Node Presentation deriving Show
 
 
 type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
@@ -120,6 +51,20 @@ type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 -}
 
+
+-- does not work anymore
+instance Read Node where
+  readsPrec _ inp = case dropWhile isSpace inp of -- requires: import Char
+                      ('#':rest) -> [(NoNode, rest)]
+                      _          -> []
+
+
+--instance Show Node where
+--  show _ = "#"
+
+
+
+-- show Node needs to be here because ParseErr alternatives contain a Node and derive Show
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -332,33 +277,144 @@ data ClipDoc = Clip_List_Decl List_Decl
              
              | Clip_Nothing deriving Show
 
+
+
+
 data Node = NoNode 
-          | EnrichedDocNode EnrichedDoc Path
-          | List_DeclNode List_Decl Path 
-          | HeliumTypeInfoNode HeliumTypeInfo Path 
-          | DocumentNode Document Path 
-          | BoolNode Bool Path 
-          | IdentNode Ident Path 
-          | ExpNode Exp Path 
-          | BoardNode Board Path 
-          | PPPresentationNode PPPresentation Path 
-          | StringNode String Path 
-          | IntNode Int Path 
-          | List_AltNode List_Alt Path 
-          | List_ExpNode List_Exp Path 
-          | BoardRowNode BoardRow Path 
-          | BoardSquareNode BoardSquare Path 
-          | List_SlideNode List_Slide Path 
-          | String_Node String_ Path 
-          | ItemListNode ItemList Path 
-          | ListTypeNode ListType Path 
-          | List_ItemNode List_Item Path 
+          | RootDocNode Document Path
+          | HoleDocumentNode Document Path
+          | RootEnrNode EnrichedDoc Path 
+          | HoleEnrichedDocNode EnrichedDoc Path 
           | DeclNode Decl Path 
-          
+          | BoardDeclNode Decl Path 
+          | PPPresentationDeclNode Decl Path 
+          | HoleDeclNode Decl Path 
+          | IdentNode Ident Path 
+          | HoleIdentNode Ident Path 
+          | PlusExpNode Exp Path 
+          | TimesExpNode Exp Path 
+          | DivExpNode Exp Path 
+          | PowerExpNode Exp Path 
+          | BoolExpNode Exp Path 
+          | IntExpNode Exp Path 
+          | LamExpNode Exp Path 
+          | AppExpNode Exp Path 
+          | CaseExpNode Exp Path 
+          | LetExpNode Exp Path 
+          | IdentExpNode Exp Path 
+          | IfExpNode Exp Path 
+          | ParenExpNode Exp Path 
+          | ListExpNode Exp Path 
+          | ProductExpNode Exp Path 
+          | HoleExpNode Exp Path 
           | AltNode Alt Path 
-          
-          
+          | HoleAltNode Alt Path 
+          | BoardNode Board Path 
+          | HoleBoardNode Board Path 
+          | BoardRowNode BoardRow Path 
+          | HoleBoardRowNode BoardRow Path 
+          | QueenNode BoardSquare Path 
+          | KingNode BoardSquare Path 
+          | BishopNode BoardSquare Path 
+          | KnightNode BoardSquare Path 
+          | RookNode BoardSquare Path 
+          | PawnNode BoardSquare Path 
+          | EmptyNode BoardSquare Path 
+          | HoleBoardSquareNode BoardSquare Path 
+          | PPPresentationNode PPPresentation Path 
+          | HolePPPresentationNode PPPresentation Path 
           | SlideNode Slide Path 
-          
-          | ItemNode Item Path 
-          
+          | HoleSlideNode Slide Path 
+          | ItemListNode ItemList Path 
+          | HoleItemListNode ItemList Path 
+          | BulletNode ListType Path 
+          | NumberNode ListType Path 
+          | AlphaNode ListType Path 
+          | HoleListTypeNode ListType Path 
+          | StringItemNode Item Path 
+          | HeliumItemNode Item Path 
+          | ListItemNode Item Path 
+          | HoleItemNode Item Path 
+          | String_Node String_ Path 
+          | HoleString_Node String_ Path 
+          | List_DeclNode List_Decl Path 
+          | HoleList_DeclNode List_Decl Path 
+          | List_AltNode List_Alt Path 
+          | HoleList_AltNode List_Alt Path 
+          | List_ExpNode List_Exp Path 
+          | HoleList_ExpNode List_Exp Path 
+          | List_SlideNode List_Slide Path 
+          | HoleList_SlideNode List_Slide Path 
+          | List_ItemNode List_Item Path 
+          | HoleList_ItemNode List_Item Path 
+
+
+
+instance Show Node where
+  show NoNode            = "NoNode"
+  show (RootDocNode _ _) = "RootDocNode"
+  show (HoleDocumentNode _ _) = "HoleDocumentNode"
+  show (RootEnrNode _ _)  = "RootEnrNode"
+  show (HoleEnrichedDocNode _ _)  = "HoleEnrichedDocNode"
+  show (DeclNode _ _)  = "DeclNode"
+  show (BoardDeclNode _ _)  = "BoardDeclNode"
+  show (PPPresentationDeclNode _ _)  = "PPPresentationDeclNode"
+  show (HoleDeclNode _ _)  = "HoleDeclNode"
+  show (IdentNode _ _)  = "IdentNode"
+  show (HoleIdentNode _ _)  = "HoleIdentNode"
+  show (PlusExpNode _ _)  = "PlusExpNode"
+  show (TimesExpNode _ _)  = "TimesExpNode"
+  show (DivExpNode _ _)  = "DivExpNode"
+  show (PowerExpNode _ _)  = "PowerExpNode"
+  show (BoolExpNode _ _)  = "BoolExpNode"
+  show (IntExpNode _ _)  = "IntExpNode"
+  show (LamExpNode _ _)  = "LamExpNode"
+  show (AppExpNode _ _)  = "AppExpNode"
+  show (CaseExpNode _ _)  = "CaseExpNode"
+  show (LetExpNode _ _)  = "LetExpNode"
+  show (IdentExpNode _ _)  = "IdentExpNode"
+  show (IfExpNode _ _)  = "IfExpNode"
+  show (ParenExpNode _ _)  = "ParenExpNode"
+  show (ListExpNode _ _)  = "ListExpNode"
+  show (ProductExpNode _ _)  = "ProductExpNode"
+  show (HoleExpNode _ _)  = "HoleExpNode"
+  show (AltNode _ _)  = "AltNode"
+  show (HoleAltNode _ _)  = "HoleAltNode"
+  show (BoardNode _ _)  = "BoardNode"
+  show (HoleBoardNode _ _)  = "HoleBoardNode"
+  show (BoardRowNode _ _)  = "BoardRowNode"
+  show (HoleBoardRowNode _ _)  = "HoleBoardRowNode"
+  show (QueenNode _ _)  = "QueenNode"
+  show (KingNode _ _)  = "KingNode"
+  show (BishopNode _ _)  = "BishopNode"
+  show (KnightNode _ _)  = "KnightNode"
+  show (RookNode _ _)  = "RookNode"
+  show (PawnNode _ _)  = "PawnNode"
+  show (EmptyNode _ _)  = "EmptyNode"
+  show (HoleBoardSquareNode _ _)  = "HoleBoardSquareNode"
+  show (PPPresentationNode _ _)  = "PPPresentationNode"
+  show (HolePPPresentationNode _ _)  = "HolePPPresentationNode"
+  show (SlideNode _ _)  = "SlideNode"
+  show (HoleSlideNode _ _)  = "HoleSlideNode"
+  show (ItemListNode _ _)  = "ItemListNode"
+  show (HoleItemListNode _ _)  = "HoleItemListNode"
+  show (BulletNode _ _)  = "BulletNode"
+  show (NumberNode _ _)  = "NumberNode"
+  show (AlphaNode _ _)  = "AlphaNode"
+  show (HoleListTypeNode _ _)  = "HoleListTypeNode"
+  show (StringItemNode _ _)  = "StringItemNode"
+  show (HeliumItemNode _ _)  = "HeliumItemNode"
+  show (ListItemNode _ _)  = "ListItemNode"
+  show (HoleItemNode _ _)  = "HoleItemNode"
+  show (String_Node _ _)  = "String_Node"
+  show (HoleString_Node _ _)  = "HoleString_Node"
+  show (List_DeclNode _ _)  = "List_DeclNode"
+  show (HoleList_DeclNode _ _)  = "HoleList_DeclNode"
+  show (List_AltNode _ _)  = "List_AltNode"
+  show (HoleList_AltNode _ _)  = "HoleList_AltNode"
+  show (List_ExpNode _ _)  = "List_ExpNode"
+  show (HoleList_ExpNode _ _)  = "HoleList_ExpNode"
+  show (List_SlideNode _ _)  = "List_SlideNode"
+  show (HoleList_SlideNode _ _)  = "HoleList_SlideNode"
+  show (List_ItemNode _ _)  = "List_ItemNode"
+  show (HoleList_ItemNode _ _)  = "HoleList_ItemNode"

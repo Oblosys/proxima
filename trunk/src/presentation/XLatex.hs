@@ -139,3 +139,50 @@ slide title body = overlay [
                       
                 , rect 500 300 `withfColor` blue `withColor` blue
                 ] `withColor` yellow `withbgColor` blue `withFont'` ("Arial", 15)
+
+
+
+
+{-
+-- tree:
+--               isExp isLast
+l1 = mkTreeLeaf        False (text "leaf 1")
+n2 = mkTreeNode False False (text "node 2" `withFontSize` 50) []
+l3 = mkTreeLeaf        True  (text "leaf 3")
+tr1 = mkTreeNode True False (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n2, l3]
+l4 = mkTreeLeaf        False (text "leaf 4")
+l5 = mkTreeLeaf        False (text "leaf 5")
+l6 = mkTreeLeaf        True  (text "leaf 6")
+                           -- (boxed testcase `withFontSize_` (`div` 2))
+tree = mkTreeNode True True (text "node") [l4, tr1, l6]
+-}
+-------------------------------------------------------------------------
+mkTreeLeaf :: Bool -> Xprez -> Xprez
+mkTreeLeaf isLast label = 
+  row [ leafHandle isLast, hLine `withWidth` 5, leafImg
+      , hLine `withWidth` 5, refHalf label ] 
+
+mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
+mkTreeNode isExp isLast label children =
+  rowR 1 [ hSpace 4, nodeHandle isExp isLast, hLine `withWidth` 5
+         , col $ [ row [ col [ nodeImg , if isExp then vLine else empty ]
+                       , hLine `withWidth` 5,refHalf label 
+                       ] 
+                 ] ++ (if isExp then children else [] )
+         ]
+
+nodeHandle isExp isLast 
+ = colR 1 ([ vLine, handleImg isExp ]++ if isLast then [] else [ vLine])
+
+leafHandle isLast 
+ = colR 1 ([vLine, empty]++ if isLast then [] else [vLine])
+
+handleImg isExp = if isExp then minusImg else plusImg
+
+nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
+
+leafImg = img "img/help.bmp" `withSize` (16,16) `withRef` (7,6)
+
+plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
