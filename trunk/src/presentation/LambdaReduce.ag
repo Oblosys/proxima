@@ -60,13 +60,7 @@ SEM Exp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
                                  (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (^)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1^int2))))]
                                  _                                         -> []    
-  | BoolExp     
-      loc.reductionEdit = [] -- cannot be reduced
-  | IntExp      
-      loc.reductionEdit = [] -- cannot be reduced
-  | LamExp      
-      loc.reductionEdit = [] -- cannot be reduced
-  | AppExp -- pattern matching is not ok \in ag
+  | AppExp -- pattern matching is not ok in ag
       loc.reductionEdit = case removeParens @exp1.self of
                                   LamExp _ _ _ ident exp -> [ ("Beta reduce",
                                                                pasteExp @lhs.path 
@@ -74,10 +68,6 @@ SEM Exp
                                                               )
                                                             ] 
                                   _                      -> []    
-  | CaseExp   -- Case only matches on variables so reducing is rather useless
-      loc.reductionEdit = []
-  | LetExp    -- have to think about this one
-      loc.reductionEdit = []
   | IdentExp  -- only for top level, until it is clear how to do let expressions
       loc.reductionEdit =  case lookupFM  @lhs.varsInScope (strFromIdent @ident.self) of
                              Nothing      -> []
@@ -95,20 +85,19 @@ SEM Exp
                                    -- differences between enriched and doc become should be taken into account then
                
                 -- pth is path of ident, path is current doc focus and @lhs.path is path to identExp
-                                                
-                                          
   | IfExp
       loc.reductionEdit = case removeParens @exp1.self of
                                  BoolExp _ _ (Bool_ _ bool) -> [ ("Reduce primitive if" , pasteExp @lhs.path 
                                                                                           (if bool then setIDPExp @idP0 @exp2.self 
                                                                                                    else setIDPExp @idP0 @exp3.self))]
                                  _                          -> []    
-  | ParenExp -- 
-      loc.reductionEdit = [] -- ("Remove parens" , pasteExp @lhs.path @exp.self)]
-  | ListExp -- cannot be reduced (although maybe its children can)
-      loc.reductionEdit = []
-  | ProductExp -- cannot be reduced (although maybe its children can)
-      loc.reductionEdit = []
+  | BoolExp IntExp LamExp CaseExp LetExp ParenExp ListExp ProductExp   
+      loc.reductionEdit = [] -- cannot be reduced
+  
+{- CaseExp   -- Case only matches on variables so reducing is rather useless
+   LetExp    -- have to think about this one
+   ParenExp loc.reductionEdit = [] -- ("Remove parens" , pasteExp @lhs.path @exp.self)]
+-}
 
 -- need higher order ag here
 SEM Exp [|| substitute :{( [(String, Exp)] -> Exp )}]
@@ -120,20 +109,12 @@ SEM Exp [|| substitute :{( [(String, Exp)] -> Exp )}]
       loc.substitute = \substs -> DivExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
   | PowerExp    
       loc.substitute = \substs -> PowerExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
-  | BoolExp     
-      loc.substitute = \substs -> @self
-  | IntExp      
-      loc.substitute = \substs -> @self
   | LamExp --   filter substs
       loc.substitute = \substs -> LamExp @idD @idP0 @idP1 @ident.self (@exp.substitute 
                                                                         (filter (\(str,_) -> str /= strFromIdent @ident.self)
                                                                                 substs))
   | AppExp 
       loc.substitute = \substs -> AppExp @idD (@exp1.substitute substs) (@exp2.substitute substs)
-  | CaseExp
-      loc.substitute = \substs -> @self
-  | LetExp
-      loc.substitute = \substs -> @self
   | IdentExp
       loc.substitute = \substs -> case lookup (strFromIdent @ident.self) substs of -- parseErr & hole give ""
                                           Just exp -> exp
@@ -142,51 +123,18 @@ SEM Exp [|| substitute :{( [(String, Exp)] -> Exp )}]
       loc.substitute = \substs -> IfExp @idD @idP0 @idP1 @idP2 (@exp1.substitute substs) (@exp2.substitute substs) (@exp3.substitute substs)
   | ParenExp
       loc.substitute = \substs -> ParenExp @idD @idP0 @idP1 (@exp.substitute substs)
-  | ListExp
-      loc.substitute = \substs -> @self
-  | ProductExp
-      loc.substitute = \substs -> @self
-  | HoleExp
-      loc.substitute = \substs -> @self
-  | ParseErrExp
+  
+  | BoolExp IntExp CaseExp LetExp ListExp ProductExp HoleExp ParseErrExp
       loc.substitute = \substs -> @self
 
 
--- would be nice to be able to pattern match in AG code      or at least have a default _ case 
 SEM Exp [|| lamBody : {([(String, Exp)] -> Exp)} ]
-  | PlusExp
-      lhs.lamBody = @substitute
-  | TimesExp
-      lhs.lamBody = @substitute
-  | DivExp      
-      lhs.lamBody = @substitute
-  | PowerExp    
-      lhs.lamBody = @substitute
-  | BoolExp     
-      lhs.lamBody = @substitute
-  | IntExp      
-      lhs.lamBody = @substitute
   | LamExp
       lhs.lamBody = @exp.substitute
-  | AppExp 
-      lhs.lamBody = @substitute
-  | CaseExp
-      lhs.lamBody = @substitute
-  | LetExp
-      lhs.lamBody = @substitute
-  | IdentExp
-      lhs.lamBody = @substitute
-  | IfExp
-      lhs.lamBody = @substitute
   | ParenExp
       lhs.lamBody = @exp.lamBody
-  | ListExp
-      lhs.lamBody = @substitute
-  | ProductExp
-      lhs.lamBody = @substitute
-  | HoleExp
-      lhs.lamBody = @substitute
-  | ParseErrExp
+  | PlusExp TimesExp DivExp PowerExp BoolExp IntExp AppExp CaseExp LetExp
+            IdentExp IfExp ListExp ProductExp HoleExp ParseErrExp
       lhs.lamBody = @substitute
 
 {-
