@@ -49,10 +49,10 @@ Figure~\ref{simpleeditprocess} contains a schematic representation of the edit p
 \begin{center}
 \begin{scriptsize}
 %\xymatrix{
-% & \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \data{$doc$}\ar[d] & \data{$upd$} \ar@{.>}[r]& \\
+% & \dataa{$doc$}\ar[d] & \dataa{$upd$} \ar@{.>}[r]& \dataa{$doc$}\ar[d] & \dataa{$upd$} \ar@{.>}[r]& \dataa{$doc$}\ar[d] & \dataa{$upd$} \ar@{.>}[r]& \\
 %& present & interpret\ar[u]& present & interpret \ar[u]& present & interpret \ar[u] & \\ 
 %& \ar[d] & & \ar[d] & & \ar[d] & & \\ 
-% & \data{$pres$} \ar@{.>}[r] &  \data{$gest$}\ar[u] & \data{$pres$} \ar@{.>}[r]&  \data{$gest$}\ar[u] & \data{$pres$} \ar@{.>}[r]&  \data{$gest$}\ar[u] &
+% & \dataa{$pres$} \ar@{.>}[r] &  \dataa{$gest$}\ar[u] & \dataa{$pres$} \ar@{.>}[r]&  \dataa{$gest$}\ar[u] & \dataa{$pres$} \ar@{.>}[r]&  \dataa{$gest$}\ar[u] &
 % \save"2,2"."3,2"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
 % \save"2,2"."3,3"*!=<14.47em,12.2ex>[F]\frm{}\restore 
 % \save"2,4"."3,4"*!=<6.105em,12.2ex>[F.]\frm{}\restore 
@@ -79,12 +79,12 @@ If we look at the figure, we see that there are values that go from left to righ
 \begin{center}
 \begin{scriptsize}
 \xymatrix{
- & \data{$doc$}\ar[d] & \data{$upd$} & \\
+ & \dataa{$doc$}\ar[d] & \dataa{$upd$} & \\
  \ar[r] & \dimcomponent{5em}{2ex}{present$_0$} \ar[d] \ar[r] &  \dimcomponent{6em}{2ex}{interpret$_0$} \ar[u] \ar[r] &  \\
  \ar[r] & \dimcomponent{5em}{2ex}{present$_1$} \ar@{.>}[d] \ar[r] &  \dimcomponent{6em}{2ex}{interpret$_1$} \ar[u] \ar[r] &  \\
  & \ar@{.>}[d] & \ar@{.>}[u]  & \\ 
  \ar[r] & \dimcomponent{5em}{2ex}{present$_{n-1}$} \ar[d] \ar[r] & \dimcomponent{6em}{2ex}{interpret$_{n-1}$} \ar@{.>}[u] \ar[r] &  \\
- & \data{$pres$} &  \data{$gest$}\ar[u] &
+ & \dataa{$pres$} &  \dataa{$gest$}\ar[u] &
 % \save"2,2"."2,3"*!+<2.8em>[F]\frm{}\restore 
 % \save"3,2"."3,3"*!+<2.8em>[F]\frm{}\restore 
 % \save"5,2"."5,3"*!+<2.8em>[F]\frm{}\restore 
@@ -101,11 +101,11 @@ If we look at the figure, we see that there are values that go from left to righ
 \begin{center}
 \begin{scriptsize}
 \xymatrix{
- & \data{$doc$}\ar[d] & & & \data{$upd$} & \\
- \data{$state$}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar[r] &
-     \data{$mapping$} \ar[rr] & & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \data{$state$} \\
+ & \dataa{$doc$}\ar[d] & & & \dataa{$upd$} & \\
+ \dataa{$state$}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar[r] &
+     \dataa{$mapping$} \ar[rr] & & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
  & & & & \hspace{3.5em} &  \\
- & \data{$pres$} & & & \data{$gest$}\ar[uu] & 
+ & \dataa{$pres$} & & & \dataa{$gest$}\ar[uu] & 
  \save"2,2"."3,5"*+<2em>[F]\frm{}\restore 
 }
 \end{scriptsize}
@@ -175,11 +175,11 @@ Now that the building blocks have been established, we need a way to connect the
 \begin{center}
 \begin{scriptsize}
 \xymatrix{
- & \data{$doc$}\ar[d] & & & \data{$upd$} & \\
- \data{$state$}\ar[r] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
-     \data{$mapping$}\ar@{.>}[r] & \data{$mapping$} \ar[r] & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \data{$state$} \\
- & & \data{$state$}\ar@{.>}[r] & \data{$state$} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
- & \data{$pres$} & & & \data{$gest$}\ar[uu] & 
+ & \dataa{$doc$}\ar[d] & & & \dataa{$upd$} & \\
+ \dataa{$state$}\ar[r] & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
+     \dataa{$mapping$}\ar@{.>}[r] & \dataa{$mapping$} \ar[r] & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
+ & & \dataa{$state$}\ar@{.>}[r] & \dataa{$state$} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
+ & \dataa{$pres$} & & & \dataa{$gest$}\ar[uu] & 
  \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
 }
 \end{scriptsize}
@@ -202,19 +202,19 @@ The components of the editor are modeled with layers, but to get a working imple
 \begin{center}
 \begin{scriptsize}
 \xymatrix{
- & \data{{\tt doc}} \ar[d] & & & \data{{\tt update}} & \\
- \data{{\tt state0}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
-     \data{{\tt mapping0}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \data{{\tt state0'}} \\
+ & \dataa{{\tt doc}} \ar[d] & & & \dataa{{\tt update}} & \\
+ \dataa{{\tt state0}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
+     \dataa{{\tt mapping0}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state0'}} \\
  & & {\tt layer0} & & \hspace{3.5em} &  \\
- & \data{{\tt pres1}} \ar[d] & & & \data{{\tt gest1}}\ar[uu] & \\
- \data{{\tt state1}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
-     \data{{\tt mapping1}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \data{{\tt state1'}} \\
+ & \dataa{{\tt pres1}} \ar[d] & & & \dataa{{\tt gest1}}\ar[uu] & \\
+ \dataa{{\tt state1}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
+     \dataa{{\tt mapping1}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state1'}} \\
  & & {\tt layer1} & & \hspace{3.5em} &  \\
- & \data{{\tt pres2}} \ar[d] & & & \data{{\tt gest2}}\ar[uu] & \\
- \data{{\tt state2}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
-     \data{{\tt mapping2}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \data{{\tt state2'}} \\
+ & \dataa{{\tt pres2}} \ar[d] & & & \dataa{{\tt gest2}}\ar[uu] & \\
+ \dataa{{\tt state2}}\ar[r] \ar@<-1ex> `r[d] `[rrr] `[rrr] `[rrrr] [rrrr] & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar[r] &
+     \dataa{{\tt mapping2}} \ar[rr] & & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state2'}} \\
  & & {\tt layer2} & & \hspace{3.5em} &  \\
- & \data{{\tt pres3}} & & & \data{{\tt gest3}}\ar[uu] & 
+ & \dataa{{\tt pres3}} & & & \dataa{{\tt gest3}}\ar[uu] & 
  \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
  \save"5,2"."6,5"*+<2em>[F.]\frm{}\restore 
  \save"8,2"."9,5"*+<2em>[F.]\frm{}\restore 
@@ -281,11 +281,11 @@ A disadvantage of the implementation of the edit loop sketched in this section i
 \begin{center}
 \begin{scriptsize}
 \xymatrix{
-\data{(horArg$_0$, (horArg$_1$, ($\dots$)))} \ar `d[dr] [dr] \ar@{.} `d[dddr] [dddr] & \data{vertArg} \ar[d]\\
+\dataa{(horArg$_0$, (horArg$_1$, ($\dots$)))} \ar `d[dr] [dr] \ar@{.} `d[dddr] [dddr] & \dataa{vertArg} \ar[d]\\
  & \component{f$_0$} \ar@{.>}[d] \ar @{.} `r[dddr] [dddr] \ar@{-} `r[dddr] & \\
 \ar `d[dr] [dr]& \dots  \ar@{.>}[d] & \\
 & \component{f$_{n-1}$} \ar[d] \ar `r[dr] [dr] & \\
-& \data{vertRes} & \data{(horRes$_0$, (horRes$_1$, ($\dots$)))} \\
+& \dataa{vertRes} & \dataa{(horRes$_0$, (horRes$_1$, ($\dots$)))} \\
 }
 \end{scriptsize}
 \end{center}\caption{ Horizontal parameters in nested cartesian products.}\label{ncp} 
@@ -330,35 +330,35 @@ composeDown higher lower =
 \begin{center}
 \begin{tiny}
 \xymatrix{
- &\data{{\tt arg}}\ar[d] &   
+ &\dataa{{\tt arg}}\ar[d] &   
   \\
-\data{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[d]\ar[r] & \data{{\tt hResH}} 
+\dataa{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[d]\ar[r] & \dataa{{\tt hResH}} 
   \\  
- & \data{{\tt interm}} &    
-  &          &          & \data{{\tt arg}}\ar[d] & \\
+ & \dataa{{\tt interm}} &    
+  &          &          & \dataa{{\tt arg}}\ar[d] & \\
  & {\tt composeDown}   &                     
-  &  {\tt =} & \data{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
-  & \component{{\tt h}} \ar[d] \ar[r] & \data{{\tt (hResH, hResL)}}\\
- & \data{{\tt interm}}\ar[d] & 
+  &  {\tt =} & \dataa{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
+  & \component{{\tt h}} \ar[d] \ar[r] & \dataa{{\tt (hResH, hResL)}}\\
+ & \dataa{{\tt interm}}\ar[d] & 
   &          &      & \component{{\tt l}} \ar[d] \ar `r [u] `[ur] [ur] & \\
-\data{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[d] \ar[r]&\data{{\tt hResL}}
-  &           &          & \data{{\tt res}} & \\
- & \data{{\tt res}}               &  & \\
+\dataa{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[d] \ar[r]&\dataa{{\tt hResL}}
+  &           &          & \dataa{{\tt res}} & \\
+ & \dataa{{\tt res}}               &  & \\
  & \\
- &\data{{\tt res}} &   
+ &\dataa{{\tt res}} &   
   \\
-\data{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[u]\ar[r] & \data{{\tt hResH}} 
+\dataa{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[u]\ar[r] & \dataa{{\tt hResH}} 
   \\  
- & \data{{\tt interm}} \ar[u] &    
-  &          &          & \data{{\tt res}} & \\
+ & \dataa{{\tt interm}} \ar[u] &    
+  &          &          & \dataa{{\tt res}} & \\
  & {\tt composeUp}   &                     
-  &  {\tt =} & \data{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
-  & \component{{\tt h}} \ar[u] \ar[r] & \data{{\tt (hResH, hResL)}}\\
- & \data{{\tt interm}} & 
+  &  {\tt =} & \dataa{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
+  & \component{{\tt h}} \ar[u] \ar[r] & \dataa{{\tt (hResH, hResL)}}\\
+ & \dataa{{\tt interm}} & 
   &          &      & \component{{\tt l}} \ar[u] \ar `r [u] `[ur] [ur] & \\
-\data{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[u]\ar[r]&\data{{\tt hResL}}
-  &           &          & \data{{\tt arg}} \ar[u] & \\
- & \data{{\tt arg}}\ar[u]      &  & \\
+\dataa{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[u]\ar[r]&\dataa{{\tt hResL}}
+  &           &          & \dataa{{\tt arg}} \ar[u] & \\
+ & \dataa{{\tt arg}}\ar[u]      &  & \\
 \save"4,6"."5,6"*+<2em>[F.]\frm{}\restore
 \save"12,6"."13,6"*+<2em>[F.]\frm{}\restore 
 }

@@ -11,7 +11,6 @@
 %\usepackage{mypslatex}    % why use this?
 %\usepackage{ipe}
 %\usepackage{algo}
-\usepackage{textcomp}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{epsfig}
@@ -28,7 +27,8 @@
 \usepackage{url}
 \usepackage[usenames]{color}
 \usepackage[all]{xy}
-\usepackage{wasysym} % for nice squiggly arrow
+\usepackage{wasysym} % for nice squiggly arrow: \leadsto
+\usepackage{textcomp} % for \textdownarrow and \textuparrow
 
 %% block comment stuff %%
 %\usepackage{version}
@@ -43,7 +43,8 @@
 %\usepackage{calc} % Lambert
 %\usepackage{math} % Lambert
 
-
+% kopje met skip ervoor en geen pagebreak erna
+\newcommand{\head}[1]{\bigskip{\bf #1}\nopagebreak[4]}
 
 %% Minder royale itemize
 
@@ -67,8 +68,15 @@
 
 %% Easy lists %%
 
+% first save the old \o in an sbox and call it \slasho (it's used in the name Mj\o lner)
+\newsavebox{\slashobox}
+\sbox{\slashobox}{\o}
+\newcommand{\slasho}{\usebox{\slashobox}}
+\renewcommand{\o}{\item}
+
+
 \newcommand{\bl}[0]{\begin{itize}}
-\renewcommand{\*}[0]{\item}  % don't know what \* used to be. Should check this.
+\renewcommand{\o}[0]{\item}
 \newcommand{\el}[0]{\end{itize}}
 
 %% new counters %%
@@ -112,7 +120,6 @@
 \newcommand{\rarr}{\ensuremath{\rightarrow}~}
 \newcommand{\larr}{\ensuremath{\leftarrow}~}
 \newcommand{\dbarr}{\ensuremath{\leftrightarrow}~}
-
 
 %%%%%%%%
 % End Martijn %
@@ -393,31 +400,6 @@
 
 
 
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{6}
-\setcounter{topnumber}{2}
-
-%
-% macros and definitions used in Subdivision Traversal
-%
-
-\newif\ifSayCells
-\SayCellstrue
-\ifSayCells
-  \def\Cell{Cell}
-  \def\Cells{Cells}
-  \def\cell{cell}
-  \def\cells{cells}
-  \def\c{c}
-\else
-  \def\Cell{Face}
-  \def\Cells{Faces}
-  \def\cell{face}
-  \def\cells{faces}
-  \def\c{f}
-\fi
-
-\newcommand{\subdiv}{\mathcal{S}}
 
 
 
@@ -440,7 +422,7 @@
 \newcommand{\component}[1]{*+[F-:<3pt>]\txt{#1}}
 \newcommand{\dimcomponent}[3]{*=<#1,#2>+[F-:<3pt>]\txt{#3}}
 \newcommand{\abscomponent}[1]{*+[F.:<3pt>]\txt{#1}}
-%\newcommand{\data}[1]{*+[F]\txt{#1}}
+\newcommand{\dataa}[1]{*+[F]\txt{#1}}
 \newcommand{\dataH}{\ensuremath{{\rm Data}_H}}
 \newcommand{\dataL}{\ensuremath{{\rm Data}_L}}
 \newcommand{\dH}{\ensuremath{\delta_H}}

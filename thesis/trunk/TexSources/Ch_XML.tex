@@ -108,7 +108,7 @@ Three classes of structure editors are distinguished in literature: syntax-direc
 
 \bigskip{\bf Syntax-Directed Editors} 
 % mention that structure editing is often source editing.
-The first structure editors that were developed are the {\em syntax-directed editors}~\cite{syngen,lrc,sbys}, also known as pure structure editors. Early syntax-directed editors show a plain text presentation of the document, usually a program source, but exclusively offer edit operations targeted at the internal document structure, and not at the presentation. The idea behind this was that if structural edit operations were available, a user would not need the textual edit operations anymore. Worse still, presentation-oriented edit operations would interfere with the user's structural model of the document and introduce errors, so they were prohibited altogether. Most XML editors and editors for preferences panes can be regarded as syntax directed editors.
+The first structure editors that were developed are the {\em syntax-directed editors}~\cite{reps89synGen,lrc,sbys}, also known as pure structure editors. Early syntax-directed editors show a plain text presentation of the document, usually a program source, but exclusively offer edit operations targeted at the internal document structure, and not at the presentation. The idea behind this was that if structural edit operations were available, a user would not need the textual edit operations anymore. Worse still, presentation-oriented edit operations would interfere with the user's structural model of the document and introduce errors, so they were prohibited altogether. Most XML editors and editors for preferences panes can be regarded as syntax directed editors.
 
 \begin{figure}
 \begin{small}
@@ -117,9 +117,9 @@ The first structure editors that were developed are the {\em syntax-directed edi
 \begin{small}
 \bigskip \noindent
 \xymatrix{
-   \data{$Document$} \ar[dd]    &     \\
+   \dataa{$Document$} \ar[dd]    &     \\
                                               & User  \ar[lu] \ar@{.>}[ld] \\
- \data{$Presentation$}  &   \\
+ \dataa{$Presentation$}  &   \\
 }
 \end{small}
 \end{center}\caption{A syntax-directed editor}\label{synDirEdit} 
@@ -148,9 +148,9 @@ At the other end of the spectrum, there are the {\em syntax-recognizing} structu
 \begin{small}
 \bigskip \noindent
 \xymatrix{
-   \data{$Document$}     &     \\
+   \dataa{$Document$}     &     \\
                                               & User  \ar[ld] \ar@{.>}[lu] \\
- \data{$Presentation$} \ar[uu] &   \\
+ \dataa{$Presentation$} \ar[uu] &   \\
 }
 \end{small}
 \end{center}\caption{A syntax-recognizing editor}\label{synRecEdit} 
@@ -171,7 +171,7 @@ The main problem with syntax-recognizing editors lies in their limited applicabi
 
 The class of hybrid editors is used for editors that support structural edit operations as well as presentation (often just textual) edit operations. 
 
-In some publications (e.g.~\cite{syngen, minor90}), the term hybrid is used to refer to syntax-directed structure editors that support some form of presentation editing. As a consequence, most syntax-directed editors would qualify as hybrid editors, because most editors support some form of text parsing.
+In some publications (e.g.~\cite{eithersyngenorprogsynth, minor90})\note{check syn gen publication}, the term hybrid is used to refer to syntax-directed structure editors that support some form of presentation editing. As a consequence, most syntax-directed editors would qualify as hybrid editors, because most editors support some form of text parsing.
 
 Others (e.g.~\cite{bahlkesneltingswillusp20, ballance92pan, koorn92gse}), however, advocate that hybrid should be reserved for editors that support full textual editing of the document, as well as structural edit functionality, even if structural modifications on the document are not supported. In this view, almost all syntax-recognizing editors would classify as hybrid editors. 
 
@@ -775,7 +775,7 @@ The editing strength of an editor is determined by the levels at which edit oper
 syntax-recognizing editors edit the presentation level. Both levels, however, are important. Furthermore, as we will show in Chapter~\ref{chap:proxArch}, a number of other levels may be distinguished, among which a level that contains derived structures and values.
 
 %refs
-The source editor use case shows the necessity for free textual editing in the presentation. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g. \cite{syngen, minor90}). However, no clear consensus has been reached on the subject (e.g. \cite{ waters} and reactions \cite{ reaction1, reaction2}, and \cite{vanter practical lang based editing }) and nowadays even most syntax-directed editors support some form of free text editing. Furthermore, because up to now, no pure structure editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for program editing.
+The source editor use case shows the necessity for free textual editing in the presentation. Purists argue that text editing may introduce syntactic errors, and that it is not necessary for programming (e.g. \cite{eithersyngenorprogsynth, minor90}).\note{check syn gen publication} However, no clear consensus has been reached on the subject (e.g. \cite{abandonText82waters} and reactions \cite{shani83notAbandon, responseToWaters83notkin}, and \cite{vanter94practical}) and nowadays even most syntax-directed editors support some form of free text editing. Furthermore, because up to now, no pure structure editor has ever become popular with programmers, we believe that free textual editing is an essential requirement for program editing.
 
 Besides presentation oriented-edit operations, document-oriented operations are important as well. The equation editor as well as the outline editor rely heavily on document editing. For equation editing, structure entry is typically a document edit operation, because many expression structures, such as a quotient, a power expression, or a square root, have no presentation that can easily be entered with conventional editing methods. The outline editor requires document editing because it has to support navigation over the structure, as well as  support moving nodes in the tree to other locations, which is a document oriented operation. Document edit operations typically include basic copy, paste, and delete operations, as well as selection and navigation operations.
 
@@ -850,7 +850,7 @@ Most of the editors in this section are specially designed for program editing a
 
 \bigskip {\bf Synthesizer Generator}
 
-The Synthesizer Generator~\cite{syngen} is the successor of the Cornell Program Synthesizer~\cite{ProgSyn}, one of the early syntax-directed editors. Because the system is targeted at programming languages, the presentation is simple and text-only, although newer versions have some font and color control. 
+The Synthesizer Generator~\cite{reps84synGen} is the successor of the Cornell Program Synthesizer~\cite{teitelbaum81progSynth}, one of the early syntax-directed editors. Because the system is targeted at programming languages, the presentation is simple and text-only, although newer versions have some font and color control. 
 
 %prog Sys is monolithic, also for program execution.
 
@@ -866,9 +866,9 @@ The LRC attribute grammar system~\cite{lrc} was a research project at Utrecht Un
 
 For the presentation of the document, the Tcl/Tk language is used. This allows for complex presentations with multiple windows, GUI widgets, colors, and basic graphical elements. However, the integration between the generated presentation and the editor is very weak. No general focus model is present, and although edit events can be attached to the Tcl presentation, free editing is only possible a separate window that contains a purely textual presentation of the document. The textual presentation cannot be used to edit the layout of the main presentation, and it does not contain derived values. 
 
-\bigskip {\bf SbyS, Mj\o lner/Orm} %90
+\bigskip {\bf SbyS, Mj\slasho lner/Orm} %90
 
-SbyS~\cite{sbys} is the structure editor from the Mj\o lner/Orm environment~\cite{magnusson90orm}. Mj\o lner/Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most other systems are editor generators, that generate an editor for a specific language.
+SbyS~\cite{sbys} is the structure editor from the Mj\slasho lner/Orm environment~\cite{magnusson90orm}. Mj\slasho lner/Orm is a generic language and software development environment. An interesting aspect of the environment is that it is truly a generic environment, since language descriptions can be changed without the need to recompile or regenerate the editor. In contrast, most other systems are editor generators, that generate an editor for a specific language.
 
 The structure editor is syntax-directed text and text-oriented with a parser only for entering expressions. In order to overcome the usability problems associated with pure syntax-directed editing, the editor employs the concept of direct manipulation. Program constructs are shown in a pallette, from which they can be dragged to the program source or a clipboard.
 
@@ -886,9 +886,9 @@ However, the presentation may not contain derived values or structures. And alth
 \bigskip {\bf Other syntax-directed editors} % 86
 
 % mention text only syn-dir editors with parser mentor
-Other textual syntax-directed editors for program editing are the Aloe editor in Gandalf environment\cite{}, Mentor~\cite{}, its successor Centaur~\cite{}, Pregmatic~\cite{} Poe~\cite{fischer84poe} , Dose~\cite{} Gnome~\cite{garlan84gnome}, Pecan~\cite{reiss84pecan}, Muir~\cite{normark88muir},  Dice~\cite{}. These systems have their own interesting aspects, but as far as the editors are concerned they do not deviate much from the systems already discussed, and hence are not discussed separately.
+Other textual syntax-directed editors for program editing are the Aloe editor in Gandalf environment\cite{gandalf}, Mentor~\cite{mentor}, its successor Centaur~\cite{centaur}, Pregmatic~\cite{pregmatic} Poe~\cite{fischer84poe} , Dose~\cite{dose} Gnome~\cite{garlan84gnome}, Pecan~\cite{reiss84pecan}, Muir~\cite{normark88muir},  Dice~\cite{dice}. These systems have their own interesting aspects, but as far as the editors are concerned they do not deviate much from the systems already discussed, and hence are not discussed separately.
 
-Some more exotic editors, that do not support editing on the presentation are Multiview~\cite{} and VL-Eli~\cite{}.
+Some more exotic editors, that do not support editing on the presentation are Multiview~\cite{multiview} and VL-Eli~\cite{vlEli}.
 
 
 %																
@@ -1062,7 +1062,7 @@ Editor		& Genericity & Computations & Presentation & Editing    & Modeless & Loc
 Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    - -	\\
 LRC			&   ++	&   ++	&   + 	&   +	&   - - 	&    - -	\\
 PSG			&   ++	&    +	&   - -	&   ?+/-	&    +	&    - -	\\
-SbyS, Mj\o lner/Orm	&   ++	&    -	&   - - 	&   -	&   n/a	&    - -	\\
+SbyS, Mj\slasho lner/Orm	&   ++	&    -	&   - - 	&   -	&   n/a	&    - -	\\
 \hline
 %SRE			&   ?	&   ?	&   ? 	&   ?	&   ?	&    - -	\\
 Pan			&   ++	&  +/-	&   - 	&   +/-	&   ++	&    - -	\\

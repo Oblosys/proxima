@@ -61,7 +61,7 @@
 \DeclareSymbolFontAlphabet{\bbold}{AMSb}
 \mathversion{zed}
 
-% this seems to make text in math mode normal, but somehow \mathit{text} gets math spacing
+% Martijn: this seems to make text in math mode normal, but somehow \mathit{text} gets math spacing
 \def\@setmcodes#1#2#3{{\count0=#1 \count1=#3
     \loop \global\mathcode\count0=\count1 \ifnum \count0<#2
     \advance\count0 by1 \advance\count1 by1 \repeat}}
@@ -71,6 +71,7 @@
 % fix problem by making mathit empty. Don't know what to do if we do want math spacing
 \renewcommand{\mathit}[1]{#1}
 
-\DeclareRobustCommand\em
-        {\@nomath\em \ifdim \fontdimen\@ne\font >\z@
-                       \upshape \else \slshape \fi}
+% what's this? new def of \em?
+%\DeclareRobustCommand\em
+%        {\@nomath\em \ifdim \fontdimen\@ne\font >\z@
+%                       \upshape \else \slshape \fi}

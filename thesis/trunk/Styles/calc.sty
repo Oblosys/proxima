@@ -36,39 +36,61 @@
 \newlength{\xprindent}
 \setlength{\xprindent}{-1em}
 
-\newcommand{\bqaM}{ \hspace*{\xprindent}\begin{array}{
+\newcommand{\bqaM}{ \hspace*{\xprindent}\begin{array}[b]{
 @{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}    % or @{}r@{}c.. 
 \newcommand{\eqaM}{\end{array}}
 \newenvironment{xprenvM}{\nopagebreak[4]\bqaM}{\eqaM}
 
 \newcommand{\xpr}[1]{\vspace{-.3\baselineskip}\begin{displaymath}
 \begin{xprenvM}#1\end{xprenvM}
-\end{displaymath}\vspace{-.7\baselineskip}}
+\end{displaymath}\vspace{-.3\baselineskip}}
+
+
+% very complex command for adding a label that flushes to the right, even in a displaymath env.
+\newlength{\templen} % because we can't seem to subtract two lengths except in a variable
+\newcommand{\addlabel}[2]{
+\setlength{\templen}{\columnwidth} \addtolength{\templen}{-\mathindent}
+\begin{tabular*}{\templen} {@{\extracolsep{0pt}}l@{\extracolsep{\fill}}l@{\extracolsep{0pt}}}
+#1 & #2 
+\end{tabular*}
+}
 
 \newcommand{\xprlab}[2]{\vspace{-.3\baselineskip}\begin{displaymath}
-\begin{array}{
-@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}    % or @{}r@{}c.. 
-#1 
-\end{array}
-\end{displaymath} \hfill \text{\sc #2}\vspace{-.7\baselineskip}}
+\addlabel{ \begin{xprenvM} #1 \end{xprenvM}} {\text{\sc #2}}
+\end{displaymath}\vspace{-.3\baselineskip}}
 % use \begin{math} instead of \[, otherwise \hfill does not work.
 
 
-\newenvironment{xprenvPrf}
-{\nopagebreak[4]\hspace*{\xprindent} \begin{array}{@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}
-{\end{array}}
-
-% same as \xpr{} but with \Box Probably not very useful, since \Box is not always immediately after math
-% maybe merge, if xpr has {llll..} array instead of {rcll..}
-\newcommand{\prf}[1]{\vspace{-.3\baselineskip}\begin{displaymath}
-\begin{xprenvPrf}#1 \end{xprenvPrf}
-\end{displaymath}   \vspace{-.7\baselineskip}}
-
+\newcommand{\prf}[1]{
+\renewcommand{\arraystretch}{1.5}
+\xpr{#1}
+\renewcommand{\arraystretch}{1}
+} % let's hope that the old arraystretch was 1
 
 \newenvironment{proof}{\par{\bf Proof:}}{$\Box$}
 %\newcommand{\prooff}{{\bf Proof:\ }}
 %\newcommand{\proofEnd}{$\Box$}
 
-\newcommand{\jstf}[1]{\text{\{~#1~\}}} % justification (right term?) of a proof step 
+\newcommand{\jstf}[1]{\text{\{~#1~\}}} % justification (= correct word?) of a proof step 
 \newcommand{\tp}{\: ::\:} % Haskell type decl
 
+
+\newcommand\set[1]               % set:  { #1 }
+{\{ {#1} \}
+}
+
+\newcommand\setof[2]%             % set comprehension:  { #1 | #2 }
+{\{ {#1}|\,{#2}\}
+}
+
+% The two defs below give very big sets:
+%\newcommand\set[1]%               % set:  { #1 }
+%{\left\{{#1}\right\}%             %
+%}                                 %
+
+%\newcommand\setof[2]%             % set comprehension:  { #1 | #2 }
+%{\left\{{#1}                      %
+%  \left|\,{#2}                    %
+%  \right.                         %
+% \right\}                         %
+%}                                 %
