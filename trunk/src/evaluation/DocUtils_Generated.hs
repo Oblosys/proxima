@@ -64,21 +64,29 @@ showXML xml =
 -- because this function is only temporary
 
 
-toXMLRoot (RootDoc _ _ dcls)  = Elt "Module" [] $ toXMLDecls dcls
+toXMLRoot (RootDoc _ _ dcls)  = Elt "Module" [] $ toXMLList_Decl dcls
+
 toXMLRoot _                    =  Elt "ErrRoot" [] []
 
-toXMLExps (ConsExps _ exp exps) = toXMLExp exp : toXMLExps exps
-toXMLExps (NilExps _)           = []
-toXMLExps _                     = []
 
+toXMLList_Decl (List_Decl _ decls) = toXMLConsList_Decl decls
 
-toXMLDecls (ConsDecls _ decl decls) = toXMLDecl decl : toXMLDecls decls
-toXMLDecls (NilDecls _)             = []
-toXMLDecls _                        = []
+toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
+toXMLConsList_Decl Nil_Decl             = []
+toXMLDecls _                           = []
 
-toXMLAlts (ConsAlts _ alt alts) = toXMLAlt alt : toXMLAlts alts
-toXMLAlts (NilAlts _)           = []
-toXMLAlts _                     = []
+toXMLList_Exp (List_Exp _ exps) = toXMLConsList_Exp exps
+
+toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLExps exps
+toXMLConsList_Exp Nil_Exp             = []
+toXMLExps _                           = []
+
+toXMLList_Alt (List_Alt _ alts) = toXMLConsList_Alt alts
+
+toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLAlts alts
+toXMLConsList_Alt Nil_Alt             = []
+toXMLAlts _                           = []
+
 
 toXMLExp (PlusExp _ _ x1 x2)      = Elt "Sum" [] $ map toXMLExp [x1,x2] 
 toXMLExp (TimesExp _ _ x1 x2)     = Elt "Product" [] $ map toXMLExp [x1,x2] 
@@ -93,7 +101,7 @@ toXMLExp (AppExp _ x1 x2)         = Elt "Application" [] $ map toXMLExp [x1,x2]
 toXMLExp (IdentExp _ x1)          = Elt "Ident" [] [toXMLIdent x1]
 toXMLExp (IfExp _ _ _ _ x1 x2 x3) = Elt "If" [] $ map toXMLExp [x1,x2,x3]
 toXMLExp (ParenExp _ _ _ x1)      = Elt "Paren" [] $ [toXMLExp x1]
-toXMLExp (ProductExp _ _ _ _ x1)  = Elt "Tuple" [] $ toXMLExps x1
+--toXMLExp (ProductExp _ _ _ _ x1)  = Elt "Tuple" [] $ toXMLExps x1
 toXMLExp _                        = Elt "ErrExp" [] []
 
 toXMLBool True = Elt "True" [] [] 
@@ -138,22 +146,22 @@ pathNode :: Node -> PathDoc
 pathNode NoNode            = NoPathD
 pathNode (DocumentNode _ pth)   = PathD pth
 pathNode (EnrichedDocNode _ pth)   = PathD pth
-pathNode (DeclsNode _ pth) = PathD pth
+pathNode (List_DeclNode _ pth) = PathD pth
 pathNode (DeclNode _ pth)  = PathD pth
 pathNode (IdentNode _ pth) = PathD pth
 pathNode (ExpNode _ pth)   = PathD pth
-pathNode (ExpsNode _ pth)  = PathD pth
-pathNode (AltsNode _ pth) = PathD pth
+pathNode (List_ExpNode _ pth)  = PathD pth
+pathNode (List_AltNode _ pth) = PathD pth
 pathNode (AltNode _ pth)  = PathD pth
 pathNode (BoardNode _ pth)  = PathD pth
 pathNode (BoardRowNode _ pth)  = PathD pth
 pathNode (BoardSquareNode _ pth)  = PathD pth
 pathNode (PPPresentationNode _ pth)  = PathD pth
-pathNode (SlidesNode _ pth)  = PathD pth
+pathNode (List_SlideNode _ pth)  = PathD pth
 pathNode (SlideNode _ pth)  = PathD pth
 pathNode (ItemListNode _ pth)  = PathD pth
 pathNode (ListTypeNode _ pth)  = PathD pth
-pathNode (ItemsNode _ pth)  = PathD pth
+pathNode (List_ItemNode _ pth)  = PathD pth
 pathNode (ItemNode _ pth)  = PathD pth
 pathNode (String_Node _ pth)  = PathD pth
 -- id functions: 

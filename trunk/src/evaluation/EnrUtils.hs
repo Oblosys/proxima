@@ -9,13 +9,18 @@ import DocUtils
 --  and disregards presentation identities
 
 -- in case of parse error, return true so other pres is used
-instance Eq Decls where
-  (ConsDecls _ decl1 decls1) == (ConsDecls _ decl2 decls2) = decl1 == decl2 && decls1 == decls2
-  (NilDecls _ )              == (NilDecls _)               = True
-  HoleDecls                  == HoleDecls                  = True
-  (ParseErrDecls _ _ _)      == _                          = True
-  _                          == (ParseErrDecls _ _ _)      = True
-  _                          == _                          = False
+instance Eq List_Decl where
+  (List_Decl _ decls1) == (List_Decl _ decls2)          = decls1 == decls2
+  HoleList_Decl              == HoleList_Decl           = True
+  (ParseErrList_Decl _ _)    == _                       = True
+  _                          == (ParseErrList_Decl _ _) = True
+  _                          == _                       = False
+
+
+instance Eq ConsList_Decl where
+  (Cons_Decl decl1 decls1) == (Cons_Decl decl2 decls2) = decl1 == decl2 && decls1 == decls2
+  Nil_Decl                 == Nil_Decl                 = True
+  _                        == _                        = False
 
   
 instance Eq Decl where

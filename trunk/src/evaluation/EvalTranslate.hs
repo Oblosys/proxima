@@ -55,9 +55,9 @@ reduceEnr state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrD
 --
 reduceEnr state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = -- other cases, just copy from decls
   (SetDoc (RootDoc idd idp dcls),state, enrDoc )
-reduceEnr state _ _ enrDoc@(EnrichedDocLevel (HoleEnr) oldfocus) =
+reduceEnr state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) =
   (SetDoc (HoleDoc),state, enrDoc )
-reduceEnr state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnr nd prs) oldfocus) =
+reduceEnr state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) =
   (SetDoc (ParseErrDoc nd prs),state, enrDoc )  -- nd is not right
 
 
@@ -75,7 +75,7 @@ initDoc =
  do { let filePath = "Heliumfile.hs"
     ; debugLnIO Prs $ "Opening file: "++"Proxima.hs"
     ; fileContents <- readFile filePath
-    ; return $ RootDoc NoIDD NoIDP $ ParseErrDecls (DeclsNode (NilDecls NoIDD) []) (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) []
+    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (List_DeclNode (List_Decl NoIDD Nil_Decl) []) (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
     
 -- lines' works for Unix, Mac, and Dos format

@@ -1,4 +1,4 @@
-module DocumentEdit where
+module DocumentEdit (module DocumentEdit, module DocumentEdit_Generated) where
 
 
 {-
@@ -287,7 +287,7 @@ insertElt doclvl@(DocumentLevel doc path clp) i =
 
 -- Document type specific part
 
-sample = RootDoc NoIDD NoIDP $
+sample = HoleDoc {-RootDoc NoIDD NoIDP $
            ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "tup") 
                                 (ProductExp NoIDD NoIDP NoIDP [] $ 
                                    ConsExps NoIDD (PlusExp NoIDD NoIDP (IntExp NoIDD NoIDP 2) (IntExp NoIDD NoIDP  3)) $
@@ -299,7 +299,7 @@ sample = RootDoc NoIDD NoIDP $
            ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "g") (IntExp NoIDD NoIDP 1) 
                           ) $
            NilDecls NoIDD
-
+-}
 
 -- functions that work with select need a ..Clip definition. Maybe this can be eliminated by using
 -- some type trickery

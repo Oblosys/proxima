@@ -44,35 +44,35 @@ backRow c = BoardRow NoIDD (Rook NoIDD c) (Knight NoIDD c) (Bishop NoIDD c) (Que
 
 
 initPPPresentation = 
-  PPPresentation NoIDD True $
+  PPPresentation NoIDD True $ List_Slide NoIDD $
     mkSlides
       [ Slide NoIDD (String_ NoIDD "slide_1") $
-          ItemList NoIDD (Bullet NoIDD) $ 
+          ItemList NoIDD (Bullet NoIDD) $ List_Item NoIDD $
                          mkItems [ StringItem NoIDD (String_ NoIDD "item_1")
                                  , HeliumItem NoIDD (DivExp NoIDD NoIDP (IntExp NoIDD NoIDP 1)(IntExp NoIDD NoIDP 2))
                                  , ListItem NoIDD listItem
                                  ]
        , Slide NoIDD (String_ NoIDD "slide_2") $
-          ItemList NoIDD (Alpha NoIDD) $ 
+          ItemList NoIDD (Alpha NoIDD) $  List_Item NoIDD $
                          mkItems [ StringItem NoIDD (String_ NoIDD "item_1")
                                  ]
       ]
- where listItem = ItemList NoIDD (Number NoIDD) $ 
+ where listItem = ItemList NoIDD (Number NoIDD) $  List_Item NoIDD $
                     mkItems [ StringItem NoIDD (String_ NoIDD "nested_item_1")
                             , StringItem NoIDD (String_ NoIDD "nested_item_2")
                             ]
                                   
-mkSlides []     = NilSlides NoIDD
-mkSlides (s:ss) = ConsSlides NoIDD s (mkSlides ss)
+mkSlides []     = Nil_Slide
+mkSlides (s:ss) = Cons_Slide s (mkSlides ss)
 
-mkItems []     = NilItems NoIDD
-mkItems (s:ss) = ConsItems NoIDD s (mkItems ss)
-
-
+mkItems []     = Nil_Item 
+mkItems (s:ss) = Cons_Item s (mkItems ss)
 
 
 
 
+
+{-
 
 class Editable a where
   select :: PathD -> a -> ClipDoc
@@ -89,5 +89,5 @@ class Editable a where
   removeList _ _ = Clip_Nothing
 
 
-
+-}
 
