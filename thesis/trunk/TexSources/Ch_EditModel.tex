@@ -263,6 +263,10 @@ Practical experience with several editor instances is required to decide what is
 %																
 %																
 \section{Focus model} \label{sect:focus}
+\bc
+FOCUS IS NOT ENTIRELY RIGHT! elts can be  in focus, lists can't. Find out whether this is a problem or not.
+\ec
+
 
 \bc
 is this linked to consistency between levels?
@@ -357,6 +361,11 @@ Formatter elements of the presentation level, which are used for line breaking (
  
 %																
 \subsection{Presenting and interpreting the focus}
+
+\bc
+Stress that presentation as focus is not always nec. For presentation editing, it is nice, but sometimes doc
+focus will have a presentation of its own (actual pres, not focus). For example. Tree, where in between two nodes a line is shown where paste would be. This is not just a presentation focus, but a presentation element.
+\ec 
 
 Higher levels can contain information that is not present in lower levels (eg.\ part of a document that is not presented), and lower levels can contain information not present in higher levels (eg.\ whitespace), or in other words, a mapping between the focus from one level onto another can be partial and therefore does not always have an inverse. Therefore, it is not possible to keep track of the focus at a fixed level. If focus is kept track of in the higher levels, focus on whitespace cannot be modeled, and analogously, if focus is kept track of in a lower level, then focus in non-presented parts of the document cannot be modeled. Hence, we keep track of the focus simultaneously at all levels. 
 
