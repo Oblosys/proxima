@@ -2,7 +2,6 @@
 \label{chap:editing}
 
 \bc
-!!!TODO: rename local state to extra state
 
 LANGUAGE:
 *** Lefthand shreenshot instead of left screenshot??
@@ -617,7 +616,7 @@ Similar to the equation editor, the tree browser has a two dimensional graphical
 
 Edit operations on the tree structure are similar to edit operations on the table of contents in the word processing example, because the tree is typically a derived structure that follows the structure of the document (or part of it). Updates on the tree need to be mapped on updates on the document itself. Navigation operations can be considered as an update on the  focus, and hence, the document edit specification formalism must support for focus updates.
 
-An aspect specific to the tree browser is that it has a notion of state. Each node in the tree view is either collapsed or expanded and this information must be stored somewhere. Such presentation state, or {\em local state}, as we call it, does not belong in the document, because if it stored there, the document type will need to be changed whenever a tree view is added to the presentation. The fact that this state is not part of the document, but rather of the presentation of the document, makes it hard to model in a structure editor. A mapping between the document and the presentation state needs to be maintained to associate a document node with its expansion state, even when the document is edited. 
+An aspect specific to the tree browser is that it has a notion of state. Each node in the tree view is either collapsed or expanded and this information must be stored somewhere. Such presentation state, or {\em extra state}, as we call it, does not belong in the document, because if it stored there, the document type will need to be changed whenever a tree view is added to the presentation. The fact that this state is not part of the document, but rather of the presentation of the document, makes it hard to model in a structure editor. A mapping between the document and the presentation state needs to be maintained to associate a document node with its expansion state, even when the document is edited. 
 
 
 %																
@@ -798,13 +797,13 @@ If the editable textual presentation is displayed in-place in the document prese
 
 
 %																
-\subsection{Local State}
+\subsection{Extra State} \label{sect:editingExtraState}
 
-A feature that is not explicitly present in any of the current structure editors, is the notion of local state. With local state, we mean information that needs to be kept track of when editing a document, but which does not conceptually belong to the document itself. 
+A feature that is not explicitly present in any of the current structure editors, is the notion of extra state. With extra state, we mean information that needs to be kept track of when editing a document, but which does not conceptually belong to the document itself. 
 
-A clear example of local state is present in the outline view example. The expansion state of the nodes of the tree view needs to be kept track of. However, this is not information that should be stored in the document tree structure, since the design of the document type should not have to consider what views may be defined for that document type. Moreover, several views may be opened simultaneously, each with their own expansion state.  Other examples of local state are focus information, local layout settings (e.g. whether or not auto-layout is turned on), and whitespace in the presentation. These examples all concern local state at presentation level, but local state also appears on other levels, as will be shown in Chapter~\ref{proxArch}. In order to handle local state declaration, a formalism must be present to declare variables local to presentation elements. Furthermore, when the editor application is closed, and reopened, it must be possible to preserve the local state. 
+A clear example of extra state is present in the outline view example. The expansion state of the nodes of the tree view needs to be kept track of. However, this is not information that should be stored in the document tree structure, since the design of the document type should not have to consider what views may be defined for that document type. Moreover, several views may be opened simultaneously, each with their own expansion state.  Other examples of extra state are focus information, local layout settings (e.g. whether or not auto-layout is turned on), and whitespace in the presentation. These examples all concern extra state at presentation level, but extra state also appears on other levels, as will be shown in Chapter~\ref{proxArch}. In order to handle extra state, a formalism must be present to declare variables local to presentation elements. Furthermore, when the editor application is closed, and reopened, it must be possible to preserve the extra state. 
 
-Support for local state complicates the presentation process as well as the translation of edit events onto document updates. A document element needs to keep track of its presentation elements, and when it is re-presented, it must be mapped onto those same presentation elements because local state may be associated with the presentation. The editor needs to have facilities for easily maintaining the required mappings between a document and its presentation to keep track of the local state, and when no local state is used, no extra effort should be required from the editor designer.
+Support for extra state complicates the presentation process as well as the translation of edit events onto document updates. A document element needs to keep track of its presentation elements, and when it is re-presented, it must be mapped onto those same presentation elements because extra state may be associated with the presentation. The editor needs to have facilities for easily maintaining the required mappings between a document and its presentation to keep track of the extra state, and when no extra state is used, no extra effort should be required from the editor designer.
 
 \bc
 more?
@@ -831,7 +830,7 @@ Summarizing, to support all five use cases, a generic structure editor must meet
 \item A graphical presentation language with a powerful mapping formalism.
 \item Support for edit operations on all levels, including edit operations on derived structures.
 \item Modeless editing
-\item Support for local state
+\item Support for extra state
 \end{itemize}
 
 
@@ -1022,8 +1021,8 @@ In each of the editors, free text editing is supported only in the raw XML sourc
 \item[Modeless editing.]
 None of the editors support free editing on the presentation without a mode switch. Each type of view has a separate window, and though some editors have a shared undo history for some of the views, no editor has a shared undo history for the XML source presentation and its other presentations. Hence, after switching to source mode, previous edit operations on other views cannot be undone anymore, and vice versa.
 
-\item[Local state.]
-The XML editors do not support user specified local state.
+\item[Extra State.]
+The XML editors do not support user specified extra state.
 
 \end{description}
 
@@ -1057,7 +1056,7 @@ Figure~\ref{scoretable} contains a score table for all discussed editors.
 Editor		& Genericity & Computations & Presentation & Editing    & Modeless & Local \\
 		&                 &                       &   formalism   & strength     &  editing   & state \\
 \hline
-%                                           generic  comps      pres        editing    integration local state
+%                                           generic  comps      pres        editing    integration extra state
 Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    - -	\\
 LRC			&   ++	&   ++	&   + 	&   +	&   - - 	&    - -	\\
 PSG			&   ++	&    +	&   - -	&   ?+/-	&    +	&    - -	\\
@@ -1097,12 +1096,12 @@ An xml editor for Haskell would never be possible
 \begin{itemize}
 \item No computation formalism
 \item Presentation formalism too weak. 
-\item No local state support. layout, treebrowser expansion
+\item No extra state support. layout, treebrowser expansion
 \item Mode switching editors hard to use
 \item Either text only, or no free editing
 \end{itemize}
 \ec
-In the table of the previous section, none of the existing systems has a line that contains only positives. No editor supports local state, and besides that, each of the editors has at least one more column with a low score (+/- or less). One of the reasons for this is that the requirements for computations and a powerful presentation formalism interfere with the requirements for editing strength and modelessness.
+In the table of the previous section, none of the existing systems has a line that contains only positives. No editor supports extra state, and besides that, each of the editors has at least one more column with a low score (+/- or less). One of the reasons for this is that the requirements for computations and a powerful presentation formalism interfere with the requirements for editing strength and modelessness.
 
 The first two requirements determine the presentation complexity of the editor, whereas the last two determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
 
@@ -1131,7 +1130,7 @@ Proxima is a generic structure editor that can handle all five use cases from Se
 
 The Proxima editor uses the attribute grammar formalism for performing semantic analysis, as well as the specification of derived document structures and values, which may appear in the presentation. The presentation formalism supports graphical presentations, and a box layout model with alignment, strong enough to specify presentations of mathematical equations. Furthermore, edit operations may be targeted at both presentation and document level, as well as at derived document structures, without mode switching.
 
-In order to support the edit operations at multiple levels, the editor keeps track of bidirectional mappings between the document and its presentations. A layered architecture, which breaks up the presentation process, as well as the handling of edit operations in a number of steps, facilitates the process of keeping the mappings consistent. The problem that a higher level does not contain enough information to compute the lower level (eg. when the document does not contain the  whitespace of the presentation) is handled by storing the required information as local state on the lower level. 
+In order to support the edit operations at multiple levels, the editor keeps track of bidirectional mappings between the document and its presentations. A layered architecture, which breaks up the presentation process, as well as the handling of edit operations in a number of steps, facilitates the process of keeping the mappings consistent. The problem that a higher level does not contain enough information to compute the lower level (eg. when the document does not contain the  whitespace of the presentation) is handled by storing the required information as extra state on the lower level. 
 
 % what about backward mapping, no LS needed? Probably won't know this until some more
 % research is done on mappings
@@ -1143,13 +1142,13 @@ To accomplish the requirements, Proxima makes use of the following concepts:
 \begin{itemize}
 \item A layered architecture
 \item Bidirectional mappings between document and presentation
-\item Concept of local state on several levels of the presentation process
+\item Concept of extra state on several levels of the presentation process
 \item Declarative specification languages with strong abstraction mechanisms for specifying mappings between levels
 \end{itemize}
 
 Of course, many more requirements exist, but our focus is on the editing model. The computation model of Proxima is general, and in order to easily use it for example to do semantic analysis or code generation, libraries are required. Other requirements that we consider orthogonal to ours, concern document management and database connectivity. 
 
-Many of the features in Proxima are optional rather than enforced. Edit operations on derived structures may be specified or automatically derived in cases for which they make sense, but if this is not the case, the editor designer need not specify them. A similar thing holds for the local state. Supporting local state in a Proxima application puts some effort on the editor designer, but if no local state is present, the editor designer does not need to take it into account.
+Many of the features in Proxima are optional rather than enforced. Edit operations on derived structures may be specified or automatically derived in cases for which they make sense, but if this is not the case, the editor designer need not specify them. A similar thing holds for the extra state. Supporting extra state in a Proxima application puts some effort on the editor designer, but if no extra state is present, the editor designer does not need to take it into account.
 
 
 

@@ -5,8 +5,6 @@
 
 \bc
 
-Screen width similar to latex output width:
-ii                                                                                                                       
 
 mention navigation in basic edit op discussion and don't say incorrect things about focus.
 Check Johans comments
@@ -39,9 +37,6 @@ alles al (lazy) opslaan, of edit cycle maken?
 fall back on lower level?
 macros?
 
-presentation oriented editing is done at layout. 
-would be nice to call it presentation. However:
-enr.doc --- present -> presentation. level gets name from producing function. 
 \ec
 
 
@@ -365,14 +360,14 @@ Formatter elements of the presentation level, which are used for line breaking (
 
 Higher levels can contain information that is not present in lower levels (eg.\ part of a document that is not presented), and lower levels can contain information not present in higher levels (eg.\ whitespace), or in other words, a mapping between the focus from one level onto another can be partial and therefore does not always have an inverse. Therefore, it is not possible to keep track of the focus at a fixed level. If focus is kept track of in the higher levels, focus on whitespace cannot be modeled, and analogously, if focus is kept track of in a lower level, then focus in non-presented parts of the document cannot be modeled. Hence, we keep track of the focus simultaneously at all levels. 
 
-When the focus changes on one level, it is updated on the other levels in the same way as the data levels are updated; it is {\em presented} and {\em translated}. The presentation of a focus is the computation of a lower level focus from an upper level focus and hence can be seen as having a downward direction, whereas the translation of a focus is the reverse computation of an upper level focus from a lower level one. Because each level has a focus, each layer maintains a focus mapping, hence the upper and lower levels mentioned in this section may denote any pair of adjacent levels. By presentation in this context we mean the mapping from a level to an adjacent lower level. It can denote any of the downward mappings in the presentation proces (Section~\ref{sect:presprocess}): evaluation, presentation, layout, arrangement, or rendering.
+When the focus changes on one level, it is updated on the other levels in the same way as the data levels are updated; it is {\em presented} and {\em translated}. The presentation of a focus is the computation of a lower level focus from a higher level focus and hence can be seen as having a downward direction, whereas the translation of a focus is the reverse computation of an higher level focus from a lower level one. Because each level has a focus, each layer maintains a focus mapping, hence the higher and lower levels mentioned in this section may denote any pair of adjacent levels. By presentation in this context we mean the mapping from a level to an adjacent lower level. It can denote any of the downward mappings in the presentation proces (Section~\ref{sect:presprocess}): evaluation, presentation, layout, arrangement, or rendering.
 
 The difference between presentation and translation of the focus and presentation and translation of the data levels, is that the latter form a cycle, whereas the former do not. After a focus update, focus on the levels above is computed by translating, and on the levels below by presentation, but both are only one way processes. Unlike the data level, a translated focus is not presented again, and the presented focus is not translated. Figure~\ref{focusUpdates} shows a sequence of focus updates on respectively the enriched document, layout, and document levels, and the resulting updates on the other levels. After each update, first the focus on higher levels is recomputed, and then the focus on lower levels. The reason for this order is that the process follows the cycle of presentation and translation on data levels, as explained in Section~\ref{sect:editDifferentLevels}.
 
 
 We use a simplified presentation and translation for focus because of  the partial nature and possible lack of inverse of the focus mapping, or in other words, because focus on one level cannot always be represented by focus on another level. For example, when an if expression is partly selected in the layout level ("{\tt \frame{if c then}\verb| 1 else 2|}"), the corresponding \verb|If| node in the enriched document level is not in focus. However, when the enriched document focus is presented, it should not cause the layout focus on half of the expression to disappear. In order to handle the situation, focus would have to be considered as extra state and be reused when it cannot be computed. However, such a complex model of focus requires more research and implementation. Therefore, Proxima uses a simplified model. \note{can't seem to think of any cases in which this model does not work well} 
 \note{Mention weird effects in some cases when mixing navigation on different levels? (happens also with other model)}
-\note{It's a bit more complicated, focus is ES after all}
+\note{It's a bit more complicated, focus is ES after all (will fix this later)}
 
 \begin{figure}
 \begin{small}
@@ -394,7 +389,7 @@ Legend:     ---: focus     /: translation     \: presentation
 
 
 % extra mapping info is used
-Between each pair of adjacent levels, Proxima keeps track of exactly which element is mapped onto which during presentation and translation.  One upper level element may be mapped onto several lower level elements, or none if the element is part of the upper level's extra state. On the other hand, a lower level element may be mapped onto at most one upper level element (or zero if it is part of the lower level's extra state). The information about the mappings is used when presenting and translating the focus. Note that when saying that an element is mapped onto elements in another level, we regard the elements separate from their children. Thus, an element can be mapped onto another element without being mapped onto its children, or only on some of its children. Figure~\ref{elementmapping} shows an element A, which is mapped onto \verb|A1|, \verb|A2|, and \verb|A3|, even though \verb|A1| is the only root. \verb|A| is not mapped onto \verb|B1| and \verb|C1|, since \verb|B1| and \verb|C1| come from respectively \verb|B| and \verb|C|.  
+Between each pair of adjacent levels, Proxima keeps track of exactly which element is mapped onto which during presentation and translation.  One higher level element may be mapped onto several lower level elements, or none if the element is part of the higher level's extra state. On the other hand, a lower level element may be mapped onto at most one higher level element (or zero if it is part of the lower level's extra state). The information about the mappings is used when presenting and translating the focus. Note that when saying that an element is mapped onto elements in another level, we regard the elements separate from their children. Thus, an element can be mapped onto another element without being mapped onto its children, or only on some of its children. Figure~\ref{elementmapping} shows an element A, which is mapped onto \verb|A1|, \verb|A2|, and \verb|A3|, even though \verb|A1| is the only root. \verb|A| is not mapped onto \verb|B1| and \verb|C1|, since \verb|B1| and \verb|C1| come from respectively \verb|B| and \verb|C|.  
 
 \note{somewhere: forward ref to single layer}
 \begin{figure}

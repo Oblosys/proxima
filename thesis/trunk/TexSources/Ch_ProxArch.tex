@@ -752,7 +752,7 @@ And the document level edit operation thus becomes:
 %																
 %																
 %																
-\section{Extra state at each level}
+\section{Extra state at each level} \label{sect:archExtraState}
 
 Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a more fundamental reason is that the presentation and translation mappings are not complete. More specifically, a level does not always contain enough information to compute the level below it and vice versa. By storing both layers, together with information on how elements in each layer depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
 
