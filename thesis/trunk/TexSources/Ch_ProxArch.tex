@@ -25,11 +25,9 @@ formal story. however, design reasons for first are hard to comprehend without i
 
 {\em *** Version: \today~***}
 
-% IMPORTANT: translate is a bad name!
-
 % Explain tokens more general?
 
-A generic editor is a large system consisting of many components. In this chapter, we focus on those components of the architecture that are involved in the process of presenting the internal document to the user, and translating the edit gestures given by the user to edit operations on the document structure. Of course, other functionality, such as IO handling, macro processing, or a search facility is very important for the usability of the final editor, but its implementation is mainly straightforward despite the fact that it may require a substantial amount of engineering. The presentation and handling of edit gestures, on the other hand, is of great importance, because it determines for which applications the editor can be used, and how powerful the editing behavior will be.
+A generic editor is a large system consisting of many components. In this chapter, we focus on those components of the architecture that are involved in the process of presenting the internal document to the user, and interpreting the edit gestures given by the user as edit operations on the document structure. Of course, other functionality, such as IO handling, macro processing, or a search facility is very important for the usability of the final editor, but its implementation is mainly straightforward despite the fact that it may require a substantial amount of engineering. The presentation and handling of edit gestures, on the other hand, is of great importance, because it determines for which applications the editor can be used, and how powerful the editing behavior will be.
 
 The core architecture of the Proxima system consists of a number of layers, which only communicate with their direct neighbors. This layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto an intermediate data structure. This intermediate data structure is mapped onto another intermediate data structure, until the last intermediate data structure is mapped onto the rendering. We will use the term {\em level} for the document, the rendering and the intermediate data structures, and the term {\em layer} for the components that take care of the mapping. Figure~\ref{proxlayers} schematically shows the levels and layers of Proxima. Only two levels are visible to each layer: an higher and a lower level.
 
@@ -61,7 +59,7 @@ There are a number of reasons why the Proxima architecture is layered:
 The presentation process is naturally staged. The process consists of repeatedly mapping  structures that have a different meaning on a higher level onto a common set of lower level structures. For example, a table of contents, once its structure has been computed, can be presented in the same way as a chapter structure. Similarly, a line that comes from a formatted paragraph is rendered in the same way as a line that was explicitly specified in the presentation. Mappings like these form stages in the presentation process that can be performed by separate layers.
 
 \item[Specification of presentation and edit behavior.]
-A layered architecture provides natural hooks for the editor designer to specify presentation and edit behavior. A separate evaluation layer, for example, makes it possible to separate computation and presentation, thus allowing different style sheets to be used for a document together with its derived structures. At the same time, layers offer more control over backward mappings, for example specifications of how edit operations on derived structures should be translated to edit operations on the document.
+A layered architecture provides natural hooks for the editor designer to specify presentation and edit behavior. A separate evaluation layer, for example, makes it possible to separate computation and presentation, thus allowing different style sheets to be used for a document together with its derived structures. At the same time, layers offer more control over backward mappings, for example specifications of how edit operations on derived structures should be interpreted as edit operations on the document.
 
 \item[Extra state.]
 An important aspect of the Proxima editor is the concept of {\em extra state}, which is inherently connected to a layered architecture. Each level in the presentation process may contain information that is not present in the surrounding higher or lower levels. Applications of extra state include keeping track of the focus and storing whitespace for tokens. 
@@ -269,7 +267,7 @@ data RenderingCommand = \dots
 %																
 \section{The layers of Proxima} \label{sect:archProximaLayers}
 
-Between each pair of data levels is a {\em layer} that takes care of mapping the higher level onto the lower level (downward mapping, or presentation) and that translates edit operations on the lower level to edit operations on the higher level (upward mapping, or translation). 
+Between each pair of data levels is a {\em layer} that takes care of mapping the higher level onto the lower level (downward mapping, or presentation) and that interprets edit operations on the lower level as edit operations on the higher level (upward mapping, or interpretation). 
 
 In the actual architecture, the downward mapping is not a mapping between the higher and lower levels, but between edit operations on those levels, similar to the upward mapping. Hence, the upward and the downward mappings are symmetrical, as both are concerned with edit operations. The layer has access to the adjacent higher and lower levels, and may update the higher level.  The exact types of the mappings in a layer are presented in Chapter~\ref{chap:layeredArchs}. Figure~\ref{singleLayer} contains a more detailed picture of a single layer. In the figure $\delta_{High}$ and $\delta_{Low}$ denote the edit operations on the higher and lower levels, and the $\leadsto$ symbol denotes the update on the higher level. \note{explain more?}
 
@@ -281,7 +279,7 @@ In the actual architecture, the downward mapping is not a mapping between the hi
 \begin{tabular}{ccc}
 $\delta_{High}$ & $\leadsto$ \hspace{3.5em} higher level \hspace{5em} & $\delta_{High}$\\
 $\downarrow$ & $\downarrow ~~~~~ \downarrow$ & $\uparrow$ \\
-\multicolumn{3}{c}{ \framebox[7cm][c]{presentation component / ~~translation component}\vspace{1ex}}\\
+\multicolumn{3}{c}{ \framebox[7cm][c]{presentation component / ~~interpretation component}\vspace{1ex}}\\
 $\downarrow$ & $\uparrow ~~~~~ \uparrow$ & $\uparrow$\\
 $\delta_{Low}$ & {lower level} & $\delta_{Low}$
 \end{tabular}
@@ -293,7 +291,7 @@ $\delta_{Low}$ & {lower level} & $\delta_{Low}$
 \bc
 Three kinds of arrows are visible in the picture: downward, upward, and horizontal arrows pointing to the
 right. The downward arrows represent the presentation process and the upward arrows represent the
-translation of edit operations. The horizontal arrows  and the horizontal arrows 
+interpretation of edit operations. The horizontal arrows  and the horizontal arrows 
 
 A mapping between edit operations is at least as expressive as a mapping between values, because any 
 mapping on values can be represented by a mapping 
@@ -302,7 +300,7 @@ $f' ::  \delta_{Data_{High}} \rightarrow \delta_{Data_{Low}}$ with $f' edit_{Hig
 \ec
 
 %thing is parameterized!!!
-A layer has two separate components, one for the downward mapping (presentation) and one for the upward mapping (translation). Because each layer is between two levels and the Proxima system consists of six data levels, we have five layers:
+A layer has two separate components, one for the downward mapping (presentation) and one for the upward mapping (interpretation). Because each layer is between two levels and the Proxima system consists of six data levels, we have five layers:
 
 \begin{itemize}
 \item Evaluation layer: Evaluator/Reducer 
@@ -322,7 +320,7 @@ A layer has two separate components, one for the downward mapping (presentation)
 
 Some of the components in the architecture are parameterized with so called {\em sheets} that describe the specifics of a particular editor instance, similar to stylesheets in a web browser. The sheets are the parts that need to be specified when building an editor. Currently, the evaluation layer has an {\em evaluation sheet} and a {\em reduction sheet} and the presentation layer has {\em presentation sheet} and a {\em parsing sheet}.  The layout layer, on the other hand only has a {\em scanning sheet}, and the lower layers do not have any sheets at all. The reason why some components do not have sheets is that as of yet no sensible purpose has been found for them. The components without sheets can realize the required mappings without the need for parameters specific to a particular editor instance. However, a future version of Proxima may also support layout sheet and sheets for the lower levels. For example, a layout sheet could be useful for specifying token based syntax-coloring, whereas a rendering sheet could be used to specify rendering details, such as the rounding of corners in line drawings.
 
-The downward mappings from all the layers together form a logical whole (the presentation process), just as the upward mappings (the translation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the translation process.
+The downward mappings from all the layers together form a logical whole (the presentation process), just as the upward mappings (the interpretation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the interpretation process.
 
 
 %																
@@ -524,30 +522,30 @@ simple1 = \\
 %																
 %																
 %																
-\section{Translation Process}
+\section{Interpretation Process}
 
-The translation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
+The interpretation process of edit operations is layered in the same way as the presentation process. However, there are important differences between the two.
 
-For the translation process, edit operations are the main focus, and therefore we do not regard a translation mapping as a mapping between levels, like we did for the presentation process.
+For the interpretation process, edit operations are the main focus, and therefore we do not regard an interpretation mapping as a mapping between levels, like we did for the presentation process.
 
-Another difference is that in the translation process layers may be skipped. For example, a document edit operation is passed upwards by the lower layers, until it reaches the evaluation layer, where it is performed on the document level.
+Another difference is that in the interpretation process layers may be skipped. For example, a document edit operation is passed upwards by the lower layers, until it reaches the evaluation layer, where it is performed on the document level.
 
-The translation of edit operations can take place either directly, or indirectly by applying the edit operation to a lower level, using a mapping between levels to compute the corresponding higher level and computing the higher level edit operation by taking the difference between the new and the previous higher level.
+The interpretation of edit operations can take place either directly, or indirectly by applying the edit operation to a lower level, using a mapping between levels to compute the corresponding higher level and computing the higher level edit operation by taking the difference between the new and the previous higher level.
 
-An example of the direct translation is when a mouse click on an absolute position in the arrangement is mapped onto a mouse click operation on a tree path in the layout level. An example of an indirect translation is the insertion of a character in the presentation level. Rather than mapping this edit operation immediately on an enriched document edit operation, the character is inserted in the presentation, the presentation is parsed, and the edit operation is distilled from the newly parsed enriched document.
+An example of a direct interpretation is when a mouse click on an absolute position in the arrangement is mapped onto a mouse click operation on a tree path in the layout level. An example of an indirect interpretation is the insertion of a character in the presentation level. Rather than mapping this edit operation immediately on an enriched document edit operation, the character is inserted in the presentation, the presentation is parsed, and the edit operation is distilled from the newly parsed enriched document.
 
-On the lowest two layers (rendering and arrangement), only direct translation takes place, whereas on the higher levels also indirect translation is possible. The reason for this is that the rendering and the arrangement level cannot be edited by the user, and an indirect translation only takes place when a lower level is edited and the edited level is then mapped onto the new higher level. The lowest level that may be edited by the user is the layout level. However, the architecture does not fundamentally prohibit editing the lower levels, and a future version of Proxima may support editing on the arrangement, by allowing a user to change the absolute positions of arrangement elements. Editing the rendering seems to be rather far fetched, since the rendering is a set of GUI-specific commands.
+On the lowest two layers (rendering and arrangement), only direct interpretation takes place, whereas on the higher levels also indirect interpretation is possible. The reason for this is that the rendering and the arrangement level cannot be edited by the user, and an indirect interpretation only takes place when a lower level is edited and the edited level is then mapped onto the new higher level. The lowest level that may be edited by the user is the layout level. However, the architecture does not fundamentally prohibit editing the lower levels, and a future version of Proxima may support editing on the arrangement, by allowing a user to change the absolute positions of arrangement elements. Editing the rendering seems to be rather far fetched, since the rendering is a set of GUI-specific commands.
 
-Because the translation of edit operations does not go through all stages like the presentation does, and because of the variation in edit operations, it is not possible to give a running example of the translation process. A number of separate examples are therefore provided together with the descriptions of the translation components.
+Because the interpretation of edit operations does not go through all stages like the presentation does, and because of the variation in edit operations, it is not possible to give a running example of the interpretation process. A number of separate examples are therefore provided together with the descriptions of the interpretation components.
 
 
 %																
 \subsection{Renderering layer: Gesture Interpreter} \label{sect:gestureInterpreter}
 
-The gesture interpreter has two tasks. It maps edit gestures onto edit operations for the designated levels, and it translates edit operations on the rendering onto edit operations on the arrangement, which means that absolute positions in pixel coordinates are translated descaled to arrangement level coordinates. 
+The gesture interpreter has two tasks. It maps edit gestures onto edit operations for the designated levels, and it interprets direct edit operations on the rendering as edit operations on the arrangement, which means that absolute positions in pixel coordinates are descaled to arrangement level coordinates. 
 
 \bigskip {\bf Example:} 
-We will give two example translations by the gesture interpreter: a mouse click and a key press. 
+We give two interpretation examples for the gesture interpreter: a mouse click and a key press. 
 
 The mouse edit operation is a single left click at pixel coordinates (84,57) in a rendering that has been scaled to 150\%.
 Because of the scaling factor, the coordinates are divided by 1.5 to get the arrangement coordinates.
@@ -646,7 +644,7 @@ Parsing takes place by invoking a parser, which is specified in the parsing shee
 Even though it is possible to specify a presentation for which it is not possible to automatically determine the originating enriched document elements, this is not a problem. In that case, automatic handling of presentation editing is simply not supported, and the editor designer will have to take care of handling it, or prohibit it altogether. 
 
 \bigskip {\bf Example:}  
-For the example translation at the parser component, we consider a delete operation on a number of succesive tokens in the presentation. Due to the simplicity of the example presentation, each declaration or type declaration is presented with a separate token list. Hence, presentation edit operations are always local to a single declaration or type declaration and cannot span several declarations. Therefore, the resulting edit behavior for the example is somewhat restrictive. However, in an actual source editor, the the token lists may be concatenated.
+For an example of the parser, we consider a delete operation on a number of succesive tokens in the presentation. Due to the simplicity of the example presentation, each declaration or type declaration is presented with a separate token list. Hence, presentation edit operations are always local to a single declaration or type declaration and cannot span several declarations. Therefore, the resulting edit behavior for the example is somewhat restrictive. However, in an actual source editor, the the token lists may be concatenated.
 
 The presentation level for the example is the same as in Section~\ref{sect:presenter}. The part that is affected by the edit operation is: 
 
@@ -715,7 +713,7 @@ Another application of reduction is the handling of rendundancy in a document pr
 
 For the reducer example, assume that the editor supports editing on an identifier in a type declaration, leading to an update on the indentifier in the corresponding declaration. Although this may not be desirable behavior in an actual source editor, it provides a good example of editing on derived values.
 
-The enriched document edit operation that is translated is an update on the identifier in the type declaration of the enriched document from Section~\ref{sect:evaluator}. The identifier is changed from \verb|"simple1"| to \verb|"simple"|. Thus, we get the following updated enriched document.
+The enriched document edit operation that is interpreted is an update on the identifier in the type declaration of the enriched document from Section~\ref{sect:evaluator}. The identifier is changed from \verb|"simple1"| to \verb|"simple"|. Thus, we get the following updated enriched document.
 
 \small \ttfamily
 \begin{tabbing}
@@ -754,18 +752,18 @@ And the document level edit operation thus becomes:
 %																
 \section{Extra state at each level} \label{sect:archExtraState}
 
-Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a more fundamental reason is that the presentation and translation mappings are not complete. More specifically, a level does not always contain enough information to compute the level below it and vice versa. By storing both layers, together with information on how elements in each layer depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
+Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a more fundamental reason is that the presentation and interpretation mappings are not complete. More specifically, a level does not always contain enough information to compute the level below it and vice versa. By storing both layers, together with information on how elements in each layer depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
 
 An example of a partial presentation mapping can be found between the enriched document and the presentation. An enriched document element that is presented with tokens, does not contain the layout information that is present in the tokens. Therefore, if the element is re-presented, it must reuse the tokens from its previous presentation. In order to be able to reuse the tokens, the element must keep track of which parts of the presentation it is mapped on.
 
-The translation of edit operations also has to deal with partial mappings. Take for example an enriched document subtree that contains only the titles of the chapters, sections, and subsections of a document. This structure does not contain enough information to construct the document. Therefore, if a title in the enriched document is edited, and we want to be able to perform the title update in the document, each enriched document node needs to keep track of the document node from which it originated. 
+The interpretation of edit operations also has to deal with partial mappings. Take for example an enriched document subtree that contains only the titles of the chapters, sections, and subsections of a document. This structure does not contain enough information to construct the document. Therefore, if a title in the enriched document is edited, and we want to be able to perform the title update in the document, each enriched document node needs to keep track of the document node from which it originated. 
 
 In short, the presentation function that is given by the editor designer, specifies a mapping between the two levels $high$ and a $low$:  $present :: high \rightarrow low$. However, because the lower level may contain extra information, the mapping that needs to be maintained by the editor is 
-$present :: high+extra_{high} \rightarrow low+extra_{low}$. Similarly, for the translation, the specified mapping function is 
-$translate :: low \rightarrow high$, whereas the editor needs the mapping 
-$translate :: low+extra_{low} \rightarrow high+extra_{high}$. 
+$present :: high+extra_{high} \rightarrow low+extra_{low}$. Similarly, for interpretation, the specified mapping function is 
+$interpret :: low \rightarrow high$, whereas the editor needs the mapping 
+$interpret :: low+extra_{low} \rightarrow high+extra_{high}$. 
 
-The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and translation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
+The problem with partial mappings, ie. that when mapping one level onto another, information from a previous mapping must be reused, appears in several layers of the Proxima editor. In the lower layers, the mappings can be maintained by the system, because the lower layers operate between levels that have fixed types, and the presentation and interpretation mappings at these layers are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings should be maintained. The formalisms for the sheets on these levels offer special support for making this more easy. Furthermore, for frequently appearing patterns in the presentation process, special functionality is present for automatic maintenance of the mappings. Chapter~\ref{chap:singleLayer} deals more extensively with the problem.
 
 
 %																
@@ -783,7 +781,7 @@ Below the layout level are the arrangement level and the rendering level. The se
 
 The arrangement process itself also consists of steps, since formatters are mapped on arrangement rows and columns which are then arranged similar to other rows and columns. However, these steps are very closely intertwined, and separating the arrangement into different layers does not offer enough advantages. 
 
-Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes and formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{Hags} for the evaluation layer. In fact, the whole presentation process can be specified with a higher-order attribute grammar. However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to translate the edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammers in Proxima, more research is necessary.
+Besides the current layers, several other layers are imaginable. For example, a post-arrangement layer could process the arrangement in order to handle footnotes and formatting of paragraphs that contain text in languages with different reading directions. Similarly, an extra evaluation layer is conceivable when computations over computed structures need to be specified. When yet other computations are desired on the resulting computed structures, even multiple evaluation layers may be required. This brings up the issue of using higher-order attribute grammars~\cite{Hags} for the evaluation layer. In fact, the whole presentation process can be specified with a higher-order attribute grammar. However, when using higher-order attribute grammars, it is not straightforward anymore to handle extra state at intermediate levels, nor is it clear how to interpret edit operations on lower levels. In Proxima, these problems are dealt with by the layered architecture. Before it is possible to do presentation, or even just evaluation, with higher-order attribute grammers in Proxima, more research is necessary.
 
 \note{make a Conclusions section?}
 % multiple eval is handy
