@@ -1,0 +1,255 @@
+\documentclass[]{article}
+
+\begin{document}
+\title{Proxima Prototype Architecture}
+\author{Martijn M. Schrage}
+\maketitle
+
+\section{Module Structure}
+\begin{figure}
+\begin{tiny}
+\begin{center}
+\begin{center}
+import powerpoint map
+\end{center}\caption{Proxima modules}
+\end{center}
+\end{tiny}
+\end{figure}
+
+TODO before sending sources
+
+Implementation
+Arch doc:
+fill it in a bit
+
+
+- ModuleMap is clickable module overview in html
+
+Proxima consists of six levels: Document, Enriched Document, Presentation, Layout, Arrangement and Rendering. For each level, a \verb|<level>Types| module and a \verb|<level>Utils| module exist. \verb|<level>Types| contains the basic data type definitions for the level, including smart constructors and selector functions. \verb|<level>Utils| contains basic utility functions operating on the tree structure of the level.
+
+Between each pair of levels is a layer, yielding five layers: Evaluation, Presentation, Layout, Arrangement, and Rendering. The module for a layer are in the same directory as the modules for its lower level (eg. presentation layer and presentation level are in the same directory). The Evaluation directory contains both its higher and lower level: the Document and the Enriched Document. Similar to the levels, for each layer we have a \verb|<layer>LayerTypes| and a \verb|<layer>LayerUtils| module. Empty in many cases
+
+every layer has a \verb|<layer>Present| and \verb|<layer>Translate|, which export functions present and translate. These are imported by architecture which combines all. Dataflow between levels is specified by Arch.
+
+Because the document type is implemented directly with a Haskell type, all functions dealing with the document are generic. The \verb|<module>_Generated| modules contain all document type specific functions. Although most of these modules can be generated automatically from the document type definition, in practice some still need to be written by hand.
+
+\section{Module overview}
+
+The next sections present a short description of each module, following hierarchical module structure. The type and utility modules, as well as the present and translate modules are shown in an item list:
+
+\begin{itemize}
+\item $<$FullLayerName$>$Types
+\item $<$FullLayerName$>$Utils
+\item $<$AbbreviatedLayerName$>$LayerTypes
+\item $<$AbbreviatedLayerName$>$LayerUtils
+\item $<$AbbreviatedLayerName$>$Present
+\item $<$AbbreviatedLayerName$>$Translate
+\end{itemize}
+
+\subsection{Evaluation}
+\begin{itemize}
+\item DocumentTypes
+\item DocumentUtils
+\item EnrichedDocTypes
+\item EnrichedDocUtils
+\item EvalLayerTypes
+\item EvalLayerUtils
+\item EvalPresent  (Evaluator)
+\item EvalTranslate (Reducer)
+\end{itemize}
+\subsubsection{DocumentTypes\_Generated}
+\subsubsection{DocumentUtils\_Generated}
+
+\subsubsection{DocumentEdit}
+
+\subsubsection{DocumentEdit\_Generated}
+
+\subsubsection{EvaluateTypes}
+\subsubsection{EvaluateTypesStubs}
+
+
+\subsection{Presentation}
+\begin{itemize}
+\item PresentationTypes
+\item PresentationUtils
+\item PresLayerTypes
+\item PresLayerUtils
+\item PresPresent (Presenter)
+\item PresTranslate (Parser)
+\end{itemize}
+
+\subsubsection{Presenter}
+
+\subsubsection{PresentationAG}
+\subsubsection{PresentationAG\_Generated}
+\subsubsection{Chess}
+
+Generator for possible Chess moves.
+
+\subsubsection{XprezLib}
+\subsubsection{XLatex}
+
+Xprez utility functions for creating \LaTeX like presentations.
+
+
+\subsubsection{ProxParser}
+
+parsing vs structure recognition
+
+Parsing is when structure depends on tokens encountered. Structural is not editable, type remains the same. However, desc. may be parsing, so the whole thing is rebuilt.
+
+both reuse, so if Int 2 is presented as "<INT>", the parser can reuse the old Int node, giving Int 2 back on parsing. Same for structural.
+
+structure recognition 
+parseStructural calls a recognizer
+
+recognize ... calls a parser.
+
+
+
+
+\subsubsection{PresentationParsing}
+
+
+\subsection{Layout}
+performs edit operations on layout layer
+has focus and clipboard
+
+\begin{itemize}
+\item LayoutTypes
+\item LayoutUtils
+\item LayLayerTypes
+\item LayLayerUtils
+\item LayPresent (Layouter)
+\item LayTranslate (Scanner)
+\end{itemize}
+
+
+
+\subsubsection{Layout}
+\subsubsection{Scanner}
+
+For all parsing bits, make tokens from Arrangement.
+
+\subsubsection{TreeEditPres}
+
+
+\subsection{Arrangement}
+
+\begin{itemize}
+\item ArrangementTypes
+\item ArrangementUtils
+\item ArrLayerTypes
+\item ArrLayerUtils
+\item ArrPresent (Arranger)
+\item ArrTranslate (Unarranger)
+\end{itemize}
+
+\subsubsection{Arranger}
+\subsubsection{ArrangerAG}
+
+Defines the presentation of the enriched document. The Haskell source is 
+
+\subsubsection{FontLib}
+
+
+\subsection{Rendering}
+\begin{itemize}
+\item RenderingTypes
+\item RenderingUtils
+\item RenLayerTypes
+\item RenLayerUtils
+\item RenPresent (Renderer)
+\item RenTranslate (Gesture Interpreter)
+\end{itemize}
+
+\subsubsection{Renderer}
+
+\subsection{Common}
+
+\subsubsection{CommonTypes}
+\subsubsection{CommonUtils}
+
+\subsubsection{DebugLevels}
+
+\subsubsection{UU\_Parsing}
+
+\subsection{Main}
+\subsubsection{Architecture}
+\subsubsection{ArchitectureLibM}
+\subsubsection{GUI}
+\subsubsection{Main}
+
+\section{Misc}
+
+*Recursive import
+
+\subsubsection{Helium}
+Helium compiler, imported by EvaluateTypes (imported by..). EvaluateTypeStubs can be imported to cut off helium compiler and speed up compilation.
+
+\subsubsection{ObjectIO}
+\_OIO modules contain old ObjectIO stuff.
+
+\section{Hacks/deviances from arch}
+
+popup hack, types in enriched
+
+\section{One Layer}
+Each layer has a present and translate
+
+Set \& Skip up and down
+implementation and meaning
+ 
+
+\section{Focus models}
+
+Document focus has special support for lists
+Presentation focus
+
+\section{The Helium editor}
+
+The evaluator layer is still primitive, and right now the only thing it does is map between:
+
+RootDoc Decls   <-->  RootEnr Decls Decls
+
+The Decls list is duplicated in the enriched document, so it can be presented twice; once as a list of top level identifiers and once as the source presentation itself.
+
+Both presentations are parsed to a complete list of declarations. So if one of the top level identifiers is changed, it is parsed to the complete program with one of the identifiers updated. The same thing holds for the source presentation. The reducer now has to decide which of the Decls lists should be put in the document. Presently, this is done by simply comparing the decls lists with their old values and using the one that was edited. This all happens at top level.
+
+
+------
+
+Important!!: Always parse before doing higher level edit operations (such as F2, doc navigate, creating a popup menu, etc.)
+
+Type checker hangs on tricky functions such as the Y combinator.
+
+
+\subsection{Known bugs/problems}
+After parsing (and re-presenting), the layout of currently invisible structures (on clipboard or collapsed), is lost.
+
+\section{Known bugs/problems}
+
+\begin{itemize}
+\item Presentation focus gets lost often.
+\item On creation of a popup menu with the right mouse button, the selection changes when the mouse is moved. The WX mouse handler currently does not distinguish between left and right button drag events.
+\end{itemize}
+
+
+\section{To Do}
+\subsection{Incrementality}
+Fix arrangement structure, so position is in parent row,col,ovl
+Also keep href and vref
+\subsection{Parsing}
+\begin{itemize}
+\item Error marking in arrangement
+\item Room in document for parse errors
+\end{itemize}
+\subsection{Dirty bits}
+Each node: self dirty children dirty
+
+
+\subsection{Focus in nodes}
+Necessary to recover focus after transformations
+
+\end{document}
+

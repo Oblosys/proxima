@@ -1,0 +1,17 @@
+
+Fix: polygons
+Fix: layout loss on collapse
+
+
+TODO::: Use 'case' in big pattern matchers!!!
+TODO::: parsing structurals
+TODO::: parse before structure edit
+TODO::: figure out popups and dialogues
+TODO::: improve scanner
+TODO::: drag and drop
+TODO::: doc focus between elements
+TODO::: integrate foci
+
+Find out: what are doc id's for exactly
+Find out: where should local state be stored
+

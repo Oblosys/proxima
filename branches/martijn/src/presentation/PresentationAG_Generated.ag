@@ -1,0 +1,564 @@
+DATA EnrichedDoc | RootEnr id:IDD idP:IDP idListDecls:Decls  Decls HeliumTypeInfo Document -- Document is only for popup menu hack (see RootEnr.pres in presentationAg.hs)
+                 | HoleEnr
+                 | ParseErrEnr Node Presentation
+
+
+DATA Decls | ConsDecls IDD Decl Decls
+           | NilDecls IDD
+           | HoleDecls
+           | ParseErrDecls Node Presentation parseErrs: {[String]}
+
+DATA Decl | Decl idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool autoLayout:Bool Ident Exp
+          | BoardDecl idD: IDD idP0:IDP idP1:IDP Board
+          | PPPresentationDecl idD: IDD idP0:IDP idP1:IDP PPPresentation
+          | HoleDecl
+          | ParseErrDecl Node Presentation
+
+DATA Ident | Ident idD:IDD idP0:IDP idP1:IDP String
+           | HoleIdent
+           | ParseErrIdent Node Presentation
+
+
+DATA Exp | PlusExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
+         | TimesExp idD:IDD idP0:IDP exp1:Exp exp2:Exp
+         | DivExp idD:IDD idP0:IDP exp1:Exp exp2:Exp
+         | PowerExp idD:IDD idP0:IDP exp1:Exp exp2:Exp
+         | BoolExp idD:IDD idP0:IDP Bool
+         | IntExp idD:IDD idP0:IDP Int
+         | LamExp idD:IDD idP0:IDP idP1:IDP Ident Exp
+         | AppExp IDD exp1:Exp exp2:Exp
+         | CaseExp idD:IDD idP0:IDP idP1:IDP Exp Alts
+         | LetExp idD:IDD idP0:IDP idP1:IDP Decls Exp
+         | IdentExp IDD Ident
+         | IfExp idD:IDD idP0:IDP idP1:IDP idP2:IDP exp1:Exp exp2:Exp exp3:Exp
+         | ParenExp idD:IDD idP0:IDP idP1:IDP Exp
+         | ListExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} Exps
+         | ProductExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} Exps
+         | HoleExp
+         | ParseErrExp Node Presentation
+
+DATA Exps | ConsExps IDD Exp Exps
+          | NilExps IDD
+          | HoleExps
+          | ParseErrExps Node Presentation
+
+DATA Alts | ConsAlts IDD Alt Alts
+          | NilAlts IDD
+          | HoleAlts
+          | ParseErrAlts Node Presentation
+
+DATA Alt | Alt idD:IDD idP0:IDP idP1:IDP Ident Exp
+         | HoleAlt
+         | ParseErrAlt Node Presentation
+
+
+DATA Board       | Board    idD: IDD r1, r2, r3, r4, r5, r6, r7, r8 : BoardRow
+DATA BoardRow    | BoardRow idD: IDD ca, cb, cc, cd, ce, cf, cg, ch : BoardSquare
+DATA BoardSquare | Queen idD : IDD color : Bool
+                 | King  idD : IDD color : Bool
+                 | Bishop idD : IDD color : Bool
+                 | Knight idD : IDD color : Bool
+                 | Rook idD : IDD color : Bool
+                 | Pawn idD : IDD color : Bool
+                 | Empty 
+
+
+DATA PPPresentation | PPPresentation idd : IDD viewType : Bool Slides
+                    | HolePPPresentation
+                    | ParseErrPPPresentation Node Presentation
+
+DATA Slides | ConsSlides idd : IDD Slide Slides
+            | NilSlides idd : IDD
+            | HoleSlides
+            | ParseErrSlides Node Presentation
+
+DATA Slide | Slide idd : IDD title : String_ ItemList
+           | HoleSlide
+           | ParseErrSlide Node Presentation
+
+DATA ItemList | ItemList idd : IDD ListType Items
+              | HoleItemList
+              | ParseErrItemList Node Presentation
+
+DATA ListType | Bullet idd : IDD
+              | Number idd : IDD
+              | Alpha idd : IDD
+              | HoleListType
+              | ParseErrListType Node Presentation
+
+DATA Items | ConsItems idd : IDD Item Items
+           | NilItems idd : IDD
+           | HoleItems
+           | ParseErrItems Node Presentation
+
+DATA Item | StringItem idd : IDD string : String_
+          | HeliumItem idd : IDD Exp
+          | ListItem idd : IDD ItemList
+          | HoleItem
+          | ParseErrItem Node Presentation
+
+DATA String_ | String_ idd : IDD string : String
+             | HoleString_
+             | ParseErrString_ Node Presentation
+
+-- Path computation
+
+ATTR Decls Decl Ident Exp Exps Alts Alt 
+     Board BoardRow BoardSquare 
+     PPPresentation Slides Slide ItemList ListType Items Item String_ [ path : {[Int]} | | ]
+
+
+SEM EnrichedDoc
+  | RootEnr
+      decls.path = []
+      
+SEM Decls
+  | ConsDecls   decl.path  = @lhs.path++[@lhs.ix]
+                decls.path = @lhs.path
+
+SEM Decl
+  | Decl        ident.path = @lhs.path++[0]
+                exp.path   = @lhs.path++[1]
+  | BoardDecl   board.path = @lhs.path++[0]
+  | PPPresentationDecl  pPPresentation.path = @lhs.path++[0]
+
+-- SEM Ident
+--   | Ident
+
+SEM Exp
+  | PlusExp     exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+  | TimesExp    exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+  | DivExp      exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+  | PowerExp    exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+  | LamExp      ident.path = @lhs.path++[0]
+                exp.path   = @lhs.path++[1]
+  | AppExp      exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+  | CaseExp     exp.path   = @lhs.path++[0]
+                alts.path  = @lhs.path++[1]
+  | LetExp      decls.path = @lhs.path++[0]
+                exp.path   = @lhs.path++[1]
+  | IdentExp    ident.path = @lhs.path++[0]
+  | IfExp       exp1.path  = @lhs.path++[0]
+                exp2.path  = @lhs.path++[1]
+                exp3.path  = @lhs.path++[2]
+  | ParenExp    exp.path   = @lhs.path++[0]
+  | ListExp     exps.path  = @lhs.path++[0]
+  | ProductExp  exps.path  = @lhs.path++[0]
+               
+SEM Exps
+  | ConsExps   exp.path  = @lhs.path++[@lhs.ix]
+               exps.path = @lhs.path
+
+SEM Alts
+  | ConsAlts   alt.path  = @lhs.path++[@lhs.ix]
+               alts.path = @lhs.path
+
+SEM Alt
+  | Alt        ident.path = @lhs.path++[0]
+               exp.path   = @lhs.path++[1]
+
+
+SEM Board
+  | Board       r1.path = @lhs.path++[0]
+                r2.path = @lhs.path++[1]
+                r3.path = @lhs.path++[2]
+                r4.path = @lhs.path++[3]
+                r5.path = @lhs.path++[4]
+                r6.path = @lhs.path++[5]
+                r7.path = @lhs.path++[6]
+                r8.path = @lhs.path++[7]
+                
+SEM BoardRow
+  | BoardRow    ca.path = @lhs.path++[0]
+                cb.path = @lhs.path++[1]
+                cc.path = @lhs.path++[2]
+                cd.path = @lhs.path++[3]
+                ce.path = @lhs.path++[4]
+                cf.path = @lhs.path++[5]
+                cg.path = @lhs.path++[6]
+                ch.path = @lhs.path++[7]
+
+
+-- define syn attr path for all children except id's and primitive (bool, String, etc.)
+-- id's are ignored when counting children, but primitives are not, even though no attr is
+-- defined for them
+-- hence DATA Element = Element IDD IDP String Child1 Int Child2 
+-- will get:
+--SEM Element
+--  | Element -- string.path = @lhs.path++[0]        not defined but does count for a child
+--            child1.path = @lhs.path++[1]
+--            -- int.path = @lhs.path++[2]           idem
+--            child2.path = @lhs.path++[3]
+
+-- TODO use boxed versions of string, bool, etc. to eliminate this inconsistency
+
+-- Lists are treated specially: each element gets the inherited @ix appended to its path
+
+
+SEM PPPresentation
+  | PPPresentation -- bool.path = @lhs.path++[0]
+                   slides.path = @lhs.path++[1]
+  
+SEM Slides
+  | ConsSlides slide.path  = @lhs.path++[@lhs.ix]
+               slides.path = @lhs.path
+
+SEM Slide
+  | Slide title.path = @lhs.path++[0]
+          itemList.path = @lhs.path++[1]
+
+SEM ItemList
+  | ItemList listType.path = @lhs.path++[0]
+             items.path   = @lhs.path++[1]
+
+--SEM ListType
+
+SEM Items
+  | ConsItems item.path  = @lhs.path++[@lhs.ix]
+              items.path = @lhs.path
+  
+SEM Item
+  | StringItem string.path = @lhs.path++[0]
+  | HeliumItem exp.path = @lhs.path++[0]
+  | ListItem   itemList.path = @lhs.path++[0]
+
+-- SEM String_
+
+
+-- Unique IDs  (add the amount of pres IDs to threaded id counter)
+-- TODO make this amount a local attribute, so the counter attribution can be generated
+
+-- bit weird for list of idp's. probably not accounted for here
+-- anyway attribution seems wrong. For IntExp, no increment is done.
+-- it should be: 
+--  | Constructor
+--      child1.idC = @lhs.idC;
+--      child2.idC = @child1.idC
+--      ...
+--      lhs.idC = childn.idC + used id's by presentation of Constructor itself
+
+ATTR Decls Decl Ident Exp Exps Alts Alt
+     Board BoardRow BoardSquare 
+     PPPresentation Slides Slide ItemList ListType Items Item [ | idC : Int | ]
+
+SEM EnrichedDoc
+  | RootEnr
+      idListDecls.idC = 1000
+      decls.idC = @idListDecls.idC
+            
+SEM Decls
+  | ConsDecls   decl.idC  = @lhs.idC + 0
+                decls.idC = @decl.idC
+                lhs.idC   = @decls.idC
+
+SEM Decl
+  | Decl        ident.idC = @lhs.idC + 3 
+                exp.idC   = @ident.idC
+                lhs.idC   = @exp.idC
+
+SEM Ident
+  | Ident       lhs.idC   = @lhs.idC + 1
+
+SEM Exp
+  | PlusExp     exp1.idC  = @lhs.idC + 1
+                exp2.idC  = @exp1.idC
+                lhs.idC   = @exp2.idC
+  | TimesExp    exp1.idC  = @lhs.idC + 1
+                exp2.idC  = @exp1.idC
+                lhs.idC   = @exp2.idC
+  | DivExp      exp1.idC  = @lhs.idC + 1
+                exp2.idC  = @exp1.idC
+                lhs.idC   = @exp2.idC
+  | PowerExp    exp1.idC  = @lhs.idC + 1
+                exp2.idC  = @exp1.idC
+                lhs.idC   = @exp2.idC
+  | LamExp      ident.idC = @lhs.idC + 2
+                exp.idC   = @ident.idC
+                lhs.idC   = @exp.idC
+  | AppExp      exp1.idC  = @lhs.idC + 0
+                exp2.idC  = @exp1.idC
+                lhs.idC   = @exp2.idC
+  | CaseExp     exp.idC   = @lhs.idC + 2
+                alts.idC  = @exp.idC
+                lhs.idC   = @alts.idC
+  | LetExp      decls.idC = @lhs.idC + 2
+                exp.idC   = @decls.idC
+                lhs.idC   = @exp.idC
+  | IdentExp    ident.idC = @lhs.idC + 2
+                lhs.idC   = @ident.idC
+  | IfExp       exp1.idC  = @lhs.idC + 3
+                exp2.idC  = @exp1.idC
+                exp3.idC  = @exp2.idC
+                lhs.idC   = @exp3.idC
+  | ParenExp    exp.idC   = @lhs.idC + 2
+                lhs.idC   = @exp.idC
+  | ListExp     exps.idC   = @lhs.idC + 2
+                lhs.idC   = @exps.idC
+  | ProductExp  exps.idC   = @lhs.idC + 2
+                lhs.idC   = @exps.idC
+
+SEM Exps
+  | ConsExps    exp.idC  = @lhs.idC + 100
+                exps.idC = @exp.idC
+                lhs.idC   = @exps.idC
+
+SEM Alts
+  | ConsAlts    alt.idC   = @lhs.idC + 0
+                alts.idC  = @alt.idC
+                lhs.idC   = @alts.idC
+
+SEM Alt
+  | Alt         ident.idC = @lhs.idC + 2
+                exp.idC   = @lhs.idC
+
+SEM Decl
+  | BoardDecl   lhs.idC = @lhs.idC + 1 
+
+-- no pres elts with ids in chess board, so attribution is standard chaining
+
+
+SEM PPPresentation
+  | PPPresentation slides.idC = @lhs.idC + 1
+                   lhs.idC   = @slides.idC
+  
+SEM Slides
+  | ConsSlides     slide.idC  = @lhs.idC + 1
+                   slides.idC = @slide.idC
+                   lhs.idC   = @slides.idC
+
+SEM Slide
+  | Slide          itemList.idC  = @lhs.idC + 1
+                   lhs.idC   = @itemList.idC
+
+SEM ItemList
+  | ItemList       listType.idC = @lhs.idC + 10
+                   items.idC = @listType.idC
+                   lhs.idC   = @items.idC
+
+SEM ListType
+  | Bullet         lhs.idC = @lhs.idC + 10
+  | Number         lhs.idC = @lhs.idC + 10
+  | Alpha          lhs.idC = @lhs.idC + 10
+
+SEM Items
+  | ConsItems    item.idC  = @lhs.idC + 100
+                 items.idC = @item.idC
+                 lhs.idC   = @items.idC
+
+SEM Item
+  | StringItem     lhs.idC  = @lhs.idC + 10
+  | HeliumItem     lhs.idC  = @lhs.idC + 10
+  | ListItem       lhs.idC  = @lhs.idC + 10
+
+-- SEM String_
+
+
+
+
+
+
+
+-- List Stuff
+
+SEM Decls [ ix : Int | | path : {[Int]} ]
+  | ConsDecls     decls.ix  = @lhs.ix + 1
+                  lhs.path = @lhs.path
+  | NilDecls      lhs.path = @lhs.path
+  | HoleDecls     lhs.path = @lhs.path
+  | ParseErrDecls lhs.path = @lhs.path
+
+SEM Exps [ ix : Int | | path : {[Int]} ]
+  | ConsExps     exps.ix  = @lhs.ix + 1
+                 lhs.path = @lhs.path
+  | NilExps      lhs.path = @lhs.path
+  | HoleExps     lhs.path = @lhs.path
+  | ParseErrExps lhs.path = @lhs.path
+
+SEM Alts [ ix : Int | | path : {[Int]} ]
+  | ConsAlts     alts.ix  = @lhs.ix + 1
+                 lhs.path = @lhs.path
+  | NilAlts      lhs.path = @lhs.path
+  | HoleAlts     lhs.path = @lhs.path
+  | ParseErrAlts lhs.path = @lhs.path
+
+SEM Slides [ ix : Int | | path : {[Int]} ]
+  | ConsSlides     slides.ix  = @lhs.ix + 1
+                   lhs.path = @lhs.path
+  | NilSlides      lhs.path = @lhs.path 
+  | HoleSlides     lhs.path = @lhs.path
+  | ParseErrSlides lhs.path = @lhs.path
+
+SEM Items [ ix : Int | | path : {[Int]} ]
+  | ConsItems     item.ix = @lhs.ix
+                  items.ix  = @lhs.ix + 1
+                  lhs.path = @lhs.path
+  | NilItems      lhs.path = @lhs.path
+  | HoleItems     lhs.path = @lhs.path
+  | ParseErrItems lhs.path = @lhs.path
+
+ATTR Decl [ ix : Int || ]
+-- ATTR Exp [ ix : Int || ]  -- TODO: fix ag hack code for exp evaluator
+ATTR Alt [ ix : Int || ]
+ATTR Slide [ ix : Int || ]
+ATTR Item [ ix : Int || ]
+
+
+-- all parents of Decls list.  This calls for a top node in each list, for initializing list attrs
+SEM EnrichedDoc
+  | RootEnr   decls.ix = 0
+
+SEM Exp
+  | LetExp    decls.ix = 0
+
+-- all parents of Exps list.
+
+SEM Exp
+  | ListExp exps.ix = 0
+SEM Exp
+  | ProductExp exps.ix = 0
+
+-- all parents of Alts list.
+
+SEM Exp
+  | CaseExp alts.ix = 0
+  
+
+-- all parents of Slides list.
+
+SEM PPPresentation
+  | PPPresentation slides.ix = 0
+
+-- all parents of Items list.
+
+SEM ItemList
+  | ItemList items.ix = 0
+
+
+
+
+
+-- all elements have focusD attribute
+
+ATTR EnrichedDoc Decls Decl Ident Exp Exps Alts Alt
+     Board BoardRow BoardSquare 
+     PPPresentation Slides Slide ItemList ListType Items Item String_ [ focusD : FocusDoc | | ]
+
+
+
+
+
+
+-- all lists have press, all other elts have pres attriubute
+ATTR Decls Exps Alts
+     Slides Items[ | | press : {[Presentation]} ]
+ATTR EnrichedDoc Decl Ident Exp Alt
+     PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation ]
+
+
+
+
+
+
+
+
+
+-- need top node for decls list, otherwise the parent (doc) has to specify its location
+-- doing it in decls itself will make n locations and n withfonts (n=list length)
+-- also path access is a hassle in the parent
+
+-- default press attributions for lists
+SEM Exps
+  | ConsExps     lhs.press = @exp.pres : @exps.press
+  | NilExps      lhs.press = []
+
+SEM Alts
+  | ConsAlts     lhs.press = @alt.pres : @alts.press
+  | NilAlts      lhs.press = []
+
+SEM Decls 
+  | ConsDecls     lhs.press = @decl.pres : @decls.press
+  | NilDecls      lhs.press = []
+
+
+SEM Slides
+  | ConsSlides lhs.press = @slide.pres : @slides.press
+  | NilSlides  lhs.press = []
+
+SEM Items
+  | ConsItems lhs.press = @item.pres : @items.press
+  | NilItems  lhs.press = []
+
+
+
+
+-- default presentations for Holes and ParseErrs
+
+SEM EnrichedDoc
+  | HoleEnr     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (EnrNode @self []) []  -- does not exist
+  | ParseErrEnr lhs.pres = presParseErr @node @presentation
+
+SEM Decls
+  | HoleDecls     lhs.press = [presHole @lhs.focusD "Decls" (DeclsNode @self @lhs.path) @lhs.path]
+  | ParseErrDecls lhs.press = [presParseErr @node @presentation]
+
+SEM Decl      
+  | HoleDecl     lhs.pres =  presHole @lhs.focusD "Decl" (DeclNode @self @lhs.path) @lhs.path
+  | ParseErrDecl lhs.pres = presParseErr @node @presentation
+
+SEM Ident 
+  | HoleIdent     lhs.pres =  presHole @lhs.focusD "Ident" (IdentNode @self @lhs.path) @lhs.path
+  | ParseErrIdent lhs.pres = presParseErr @node @presentation
+
+SEM Exp
+  | HoleExp     lhs.pres =  presHole @lhs.focusD "Exp" (ExpNode @self @lhs.path) @lhs.path
+  | ParseErrExp lhs.pres = presParseErr @node @presentation
+
+SEM Exps
+  | HoleExps     lhs.press = [presHole @lhs.focusD "Exps" (ExpsNode @self @lhs.path) @lhs.path]
+  | ParseErrExps lhs.press = [presParseErr @node @presentation]
+
+SEM Alts
+  | HoleAlts     lhs.press = [presHole @lhs.focusD "Alts" (AltsNode @self @lhs.path) @lhs.path]
+  | ParseErrAlts lhs.press = [presParseErr @node @presentation]
+
+SEM Alt
+  | HoleAlt     lhs.pres = presHole @lhs.focusD "Alt" (AltNode @self @lhs.path) @lhs.path
+  | ParseErrAlt lhs.pres = presParseErr @node @presentation
+
+
+SEM PPPresentation
+  | HolePPPresentation      lhs.pres = presHole @lhs.focusD "PPPresentation" (PPPresentationNode @self @lhs.path) @lhs.path
+  | ParseErrPPPresentation lhs.pres = presParseErr @node @presentation
+  
+SEM Slides
+  | HoleSlides     lhs.press = [presHole @lhs.focusD "Slides" (SlidesNode @self @lhs.path) @lhs.path]
+  | ParseErrSlides lhs.press = [presParseErr @node @presentation]
+
+SEM Slide
+  | HoleSlide     lhs.pres = presHole @lhs.focusD "Slide" (SlideNode @self @lhs.path) @lhs.path
+  | ParseErrSlide lhs.pres = presParseErr @node @presentation
+
+SEM ItemList
+  | HoleItemList     lhs.pres = presHole @lhs.focusD "ItemList" (ItemListNode @self @lhs.path) @lhs.path
+  | ParseErrItemList lhs.pres = presParseErr @node @presentation
+
+SEM ListType
+  | HoleListType     lhs.pres = presHole @lhs.focusD "ListType" (ListTypeNode @self @lhs.path) @lhs.path
+  | ParseErrListType lhs.pres = presParseErr @node @presentation
+
+SEM Items
+  | HoleItems     lhs.press = [presHole @lhs.focusD "Items" (ItemsNode @self @lhs.path) @lhs.path]
+  | ParseErrItems lhs.press = [presParseErr @node @presentation]
+
+SEM Item
+  | HoleItem     lhs.pres = presHole @lhs.focusD "Item" (ItemNode @self @lhs.path) @lhs.path
+  | ParseErrItem lhs.pres = presParseErr @node @presentation
+
+SEM String_
+  | HoleString_    lhs.pres =  presHole @lhs.focusD "String_" (String_Node @self @lhs.path) @lhs.path
+  | ParseErrString_ lhs.pres = presParseErr @node @presentation

@@ -1,0 +1,1019 @@
+imports
+{
+import IOExts
+
+import CommonTypes
+import ArrLayerTypes
+import ArrLayerUtils
+
+import DocumentTypes -- for Node
+import FontLib
+
+-- Uedit, transforming AG to new syntax: Find   ^([a-z][a-z,A-Z]++^)_     Replace  @^1.
+}
+
+
+
+{
+
+{- for AlternativeP
+selectFirstFit :: Int -> [ Int ] -> Int       
+selectFirstFit availableWidth widths = 
+  if null widths 
+  then error "Alternative presentation has no alternatives"
+  else select widths 0
+ where
+  select [_] n = n
+  select (w:ws) n = if w <= availableWidth then n else select ws (n+1)
+
+-- maybe nicer as synth attribute for presentationList
+
+-}
+
+
+{- for MatrixP
+divide n [] = []
+divide n xs = let (line, rest) = splitAt n xs in line : divide n rest
+
+getRows n [] = []
+getRows n xs = let (line, rest) = splitAt n xs in line : divide n rest
+
+getCols n xs = foldr (zipWith (:)) (repeat []) (getRows n xs)
+-}
+
+
+
+{- for FormatterP
+unfoldAGFormatter w ws presentations = 
+ let breaks = firstFit w ws
+     dividedPresentations = linesFromBreaks breaks presentations
+     rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
+         map (RowP NoID 0) dividedPresentations
+     unfoldedList = ColP NoID 0 (rows)
+ in  --debug Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
+           unfoldedList
+
+
+
+-- just add words until line overflow
+firstFit lineWidth widths = buildFFBreaks lineWidth 0 0 widths
+
+buildFFBreaks _ pos _ [] = [] -- add a breakpoint after last word? prob. not, otherwise return [pos]
+buildFFBreaks maxLength pos currentLength (width:widths) =
+  let space = if currentLength == 0 then 0 else 0 -- hard coded minimum space, and widths must be >= 0 
+      newLength = currentLength + space + width
+  in if currentLength == 0 && width > maxLength
+     then if null widths 
+          then []
+          else (pos+1) : buildFFBreaks maxLength pos 0 (widths)
+     else if newLength <= maxLength
+          then buildFFBreaks maxLength (pos+1) newLength widths
+          else pos : buildFFBreaks maxLength (pos) 0 (width:widths)
+
+linesFromBreaks :: [Int] -> [a] -> [[a]]
+linesFromBreaks brks wrds = tolines' brks 0 wrds 
+   where
+   tolines' [] _ wrds = [wrds]
+   tolines' (brk:brks) lastbrk wrds = take (brk-lastbrk) wrds :
+                                      tolines' brks brk (drop (brk-lastbrk) wrds)
+
+-}
+
+
+assign [] _ _ = []
+assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
+
+
+data Root = Root Presentation
+
+type PresentationList = [Presentation]
+                      
+-- We don't want AG to generate the Presentation data types, so data type generation is turned off.
+-- However, we do need Root and PresentationList
+}
+
+DATA Root 
+  | Root presentation : Presentation 
+
+
+DATA Presentation
+  | EmptyP      id : IDP
+  | StringP     id : IDP text : String
+  | ImageP      id : IDP src : String
+  | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int
+  | RectangleP  id : IDP w,h : Int lineWidth : Int
+  | RowP        id : IDP vRefNr : Int presentationList : PresentationList
+  | ColP        id : IDP hRefNr : Int presentationList : PresentationList
+  | OverlayP    id : IDP              presentationList : PresentationList
+  | WithP       attrRule : AttrRule  child : Presentation
+  | StructuralP id : IDP  child : Presentation
+  | ParsingP    id : IDP  child : Presentation
+  | LocatorP location : Node child : Presentation
+  | ArrangedP -- pres : Presentation
+
+--  | TestPresentation id : IDP  area : Int color : Color
+--  | MatrixPresentation id : IDP  m, n : Int presentationList : PresentationList
+--  | LayedOutRowP id : IDP  presentationList : PresentationList w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
+--  | FormatterPresentation id : IDP  presentationList : PresentationList
+--  | AlternativePresentation id : IDP  presentationList : PresentationList
+
+
+
+--  For each Nonterminal:
+ -- add id propagation
+ -- add formatter depth computation
+ -- add attributed tree definition
+
+
+TYPE PresentationList = [Presentation]
+
+
+ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
+            mouseDown : {Maybe UpdateDoc}
+            popupMenuItems : {[ PopupMenuItem ]}
+            screenWidth : Int  
+          || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : Arrangement ]
+SEM Root
+  | Root
+      lhs.maxFormatterDepth = @presentation.maxFormatterDepth
+      lhs.unfoldedTree  = @presentation.unfoldedTree
+      lhs.arrangement   = @presentation.arrangement
+
+
+-- Presentation Attribute Propagation in Presentation Tree
+-- Root: copy rule
+
+-- Optimize: maybe we only want to update the attrs that are set by the with rule? Or won't that improve much?
+
+SEM Presentation [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
+            mouseDown : {Maybe UpdateDoc}
+            popupMenuItems : {[ PopupMenuItem ]}
+            | | ]
+  | WithP
+      loc.newAttrs   = @attrRule ( Inh @lhs.font 
+                                      @lhs.textColor @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+                                      @lhs.mouseDown @lhs.popupMenuItems
+				      @lhs.assignedWidth @lhs.assignedHeight @lhs.assignedHRef @lhs.assignedVRef
+				, Syn @child.hRf @child.vRf @child.minWidth @child.minHeight
+				      @child.hStretch @child.vStretch
+				      @child.finalWidth @child.finalHeight @child.finalHRef @child.finalVRef) 
+				           -- no names because ag parser can't handle braces (now it can)
+      loc.newSyn = fst @newAttrs
+      loc.newInh = snd @newAttrs
+      child.font = font @newSyn
+      child.textColor = textColor @newSyn
+      child.lineColor = lineColor @newSyn
+      child.fillColor = fillColor @newSyn
+      child.backgroundColor = backgroundColor @newSyn     
+      child.mouseDown = mouseDown @newSyn
+      child.popupMenuItems = popupMenuItems @newSyn
+      child.assignedWidth = assignedWidth @newSyn
+      child.assignedHeight = assignedHeight @newSyn
+      child.assignedHRef = assignedHRef @newSyn
+      child.assignedVRef = assignedVRef @newSyn
+      lhs.hRf = hRef @newInh
+      lhs.vRf = vRef @newInh
+      lhs.minWidth = minWidth @newInh
+      lhs.minHeight = minHeight @newInh
+      lhs.hStretch = hStretch @newInh
+      lhs.vStretch = vStretch @newInh
+      lhs.finalWidth = finalWidth @newInh
+      lhs.finalHeight = finalHeight @newInh
+      lhs.finalHRef = finalHRef @newInh
+      lhs.finalVRef = finalVRef @newInh
+
+-- rest is taken care of by copy rule
+
+ATTR PresentationList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
+                 mouseDown : {Maybe UpdateDoc} popupMenuItems : {[ PopupMenuItem ]} | | ]
+
+
+
+-- Font Metrics
+
+-- first, collect all used fonts. They can only change at a with node, so only one check.
+-- This could be optimised by only checking with nodes that update the font, instead of e.g.
+-- color
+
+ATTR Root [ | allFonts : {[Font]} | ]
+-- copy rule
+
+SEM Presentation [ | allFonts : {[Font]} | ]
+  | WithP
+      child.allFonts = let inhs = @newSyn
+                       in  font inhs : @lhs.allFonts
+-- these are nubbed later. Maybe they should only be added if not present?
+
+ATTR PresentationList [ | allFonts : {[Font]} | ] 
+
+ATTR Root [ fontMetrics : FontMetrics | | ]
+
+ATTR Presentation [ fontMetrics : FontMetrics | | ]
+  
+ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
+
+
+
+
+-- formatterDepth and maxFormatterDepth definitions   
+
+ATTR Presentation [ | | maxFormatterDepth : Int ]
+SEM Presentation
+  | EmptyP
+      lhs.maxFormatterDepth = 0
+  | StringP
+      lhs.maxFormatterDepth = 0
+  | RectangleP
+      lhs.maxFormatterDepth = 0
+  | ImageP
+      lhs.maxFormatterDepth = 0
+  | PolyP
+      lhs.maxFormatterDepth = 0
+  | RowP
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | ColP
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | OverlayP
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+{-
+  | TestPresentation 
+      lhs.maxFormatterDepth = 0
+
+  | MatrixPresentation 
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | LayedOutRowP
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | FormatterPresentation 
+      lhs.maxFormatterDepth = 1 + maximum @presentationList.maxFormatterDepthList
+  | AlternativePresentation 
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+-}
+-- | WithP       copy
+-- | StructuralP copy
+-- | ParsingP    copy
+-- | LocatorP    copy
+
+ATTR PresentationList [ | | maxFormatterDepthList : {[Int]} ]
+SEM PresentationList
+  | Nil 
+      lhs.maxFormatterDepthList = [0]
+  | Cons 
+      lhs.maxFormatterDepthList = @hd.maxFormatterDepth : @tl.maxFormatterDepthList
+
+
+-- Creating the unfoldedTree
+ATTR Presentation [  | | unfoldedTree : Presentation ]
+SEM Presentation
+  | EmptyP 
+      lhs.unfoldedTree = EmptyP @id 
+  | StringP 
+      lhs.unfoldedTree = StringP @id @text 
+  | RectangleP    
+      lhs.unfoldedTree = RectangleP @id @w @h @lineWidth
+  | ImageP    
+      lhs.unfoldedTree = ImageP @id @src
+  | PolyP
+      lhs.unfoldedTree = PolyP @id @pointList @lineWidth
+  | RowP 
+      lhs.unfoldedTree = RowP @id @vRefNr @presentationList.unfoldedTreeList
+  | ColP 
+      lhs.unfoldedTree = ColP @id @hRefNr @presentationList.unfoldedTreeList
+  | OverlayP 
+      lhs.unfoldedTree = OverlayP @id @presentationList.unfoldedTreeList
+{-
+  | TestPresentation             
+      lhs.unfoldedTree = TestPresentation @id @area @color
+  | MatrixPresentation 
+      lhs.unfoldedTree = MatrixPresentation @id @m @n @presentationList.unfoldedTreeList
+  | LayedOutRowP 
+      lhs.unfoldedTree = LayedOutRowP @id @presentationList.unfoldedTreeList @w @h @offsets
+  | FormatterPresentation 
+      lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
+  | AlternativePresentation 
+      lhs.unfoldedTree = AlternativePresentation @id @presentationList.unfoldedTreeList
+-}
+  | WithP
+      lhs.unfoldedTree = WithP @attrRule @child.unfoldedTree
+  | StructuralP
+      lhs.unfoldedTree = StructuralP @id  @child.unfoldedTree
+  | ParsingP
+      lhs.unfoldedTree = ParsingP @id  @child.unfoldedTree
+  | LocatorP
+      lhs.unfoldedTree = LocatorP @location @child.unfoldedTree
+-- bit of a hack, but the children are needed as values of type Presentation, so we can use unfoldedTreeList,
+-- as there will not be any formatters inside anyway
+
+ATTR PresentationList [  | |  unfoldedTreeList : {[Presentation]} ]
+SEM PresentationList
+  | Nil
+      lhs.unfoldedTreeList = []
+  | Cons 
+      lhs.unfoldedTreeList = @hd.unfoldedTree : @tl.unfoldedTreeList
+
+
+
+-- char width not ok for more complicated (overlapping) glyphs like ff ligature in tex. 
+-- char height sometimes needed for individual characters
+
+-- matrix does not work correctly yet: empty `withWidth` 50 `beside` matrix is problem
+-- no stretch in matrix
+
+-- row in row has problems with vRef
+-- hRef and vRef updates do not work properly
+
+
+-- ref and size as ag aspects:
+
+SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRf, vRf : Int ]
+  | EmptyP
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = 0
+      loc.vRf = 0
+  | StringP 
+      loc.minWidth = textWidth @lhs.fontMetrics @lhs.font @text
+      loc.minHeight = charHeight @lhs.fontMetrics @lhs.font
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = baseLine @lhs.fontMetrics @lhs.font
+      loc.vRf = 0       
+  | RectangleP 
+      loc.minWidth = @w
+      loc.minHeight = @h
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = 0
+      loc.vRf = 0
+  | ImageP 
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = True
+      loc.vStretch = True
+      loc.hRf = 0
+      loc.vRf = 0
+  | PolyP 
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = True
+      loc.vStretch = True
+      loc.hRf = 0
+      loc.vRf = 0
+  | RowP 
+      loc.minTopHeight = if null @presentationList.hRfList then 0
+                            else maximum @presentationList.hRfList
+      loc.minBottomHeight = if null @presentationList.hRfList then 0
+                            else maximum [ minHeight - hRf | (minHeight, hRf) <- zip @presentationList.minHeightList @presentationList.hRfList ]
+      loc.minWidth = sum @presentationList.minWidthList
+      loc.minHeight = @minTopHeight + @minBottomHeight
+      loc.hStretch = or @presentationList.hStretchList
+      loc.vStretch = and @presentationList.vStretchList -- False  -- maybe true if there are only stretch children
+      loc.hRf = @minTopHeight
+      loc.vRf = if null @presentationList.vRfList then 0
+                else sum (take @vRefNr @presentationList.minWidthList) + @presentationList.vRfList !! @vRefNr
+  | ColP
+      loc.minLeftWidth = if null @presentationList.vRfList then 0
+                         else maximum @presentationList.vRfList
+      loc.minRightWidth = if null @presentationList.vRfList then 0
+                          else maximum [ minWidth - vRf | (minWidth, vRf) <- zip @presentationList.minWidthList @presentationList.vRfList ]
+      loc.minWidth = @minLeftWidth + @minRightWidth 
+      loc.minHeight = sum @presentationList.minHeightList
+      loc.hStretch = and @presentationList.hStretchList -- False  -- maybe true if there are only stretch children
+      loc.vStretch = or @presentationList.vStretchList
+      loc.hRf = if null @presentationList.hRfList then 0
+                else sum (take @hRefNr @presentationList.minHeightList) + @presentationList.hRfList !! @hRefNr
+      loc.vRf = @minLeftWidth
+  | OverlayP 
+      loc.minLeftWidth = maximum @presentationList.vRfList
+      loc.minRightWidth = maximum [ minWidth - vRf | (minWidth, vRf) <- zip @presentationList.minWidthList @presentationList.vRfList ]
+      loc.minWidth = @minLeftWidth + @minRightWidth 
+      loc.minTopHeight = maximum @presentationList.hRfList 
+      loc.minBottomHeight = maximum [ minHeight - hRf | (minHeight, hRf) <- zip @presentationList.minHeightList @presentationList.hRfList ]
+      loc.minHeight = @minTopHeight + @minBottomHeight
+      loc.hStretch = and @presentationList.hStretchList
+      loc.vStretch = and @presentationList.vStretchList
+      loc.hRf = @minTopHeight
+      loc.vRf = @minLeftWidth
+    {-  loc.topHeight = maximum @presentationList.hRfList
+      loc.bottomHeight = maximum [ minHeight - hRf | (minHeight, hRf) <- zip @presentationList.minHeightList @presentationList.hRfList ]
+      loc.leftWidth = maximum @presentationList.vRfList
+      loc.rightWidth = maximum [ minWidth - vRf | (minWidth, vRf) <- zip @presentationList.minWidthList @presentationList.vRfList ]
+      loc.minWidth = @leftWidth + @rightWidth 
+      loc.minHeight = @topHeight + @bottomHeight
+      loc.hRf = @topHeight
+      loc.vRf = @leftWidth-}
+{-
+  | TestPresentation 
+      loc.minWidth = error "not implemented"
+      loc.minHeight = error "not implemented"
+      loc.hStretch = error "not implemented" 
+      loc.vStretch = error "not implemented" 
+      loc.hRf = error "not implemented"
+      loc.vRf = error "not implemented"
+
+  | MatrixPresentation
+      loc.rowTopHeights = map maximum (getRows @n @presentationList.hRfList)
+      loc.rowBottomHeights = showDebug' Arr "rws:" $ map (\minHghtsHRefs ->
+                                   maximum [ minHeight - hRf | (minHeight, hRf) <- minHghtsHRefs ]
+				 ) (getRows @n (zip @presentationList.minHeightList @presentationList.hRfList))
+      loc.colLeftWidths = map maximum (getCols @n @presentationList.vRfList)
+      loc.colRightWidths = showDebug' Arr  "rws:" $ map (\minWdthsVRefs ->
+                                   maximum [ minWidth - vRf | (minWidth, vRf) <- minWdthsVRefs ]
+				 ) (getCols @n (zip @presentationList.minWidthList @presentationList.vRfList))
+      loc.rowHeights = showDebug' Arr "rhgts:" $ zipWith (+) @rowTopHeights @rowBottomHeights
+      loc.colWidths = showDebug' Arr "cwdths:" $ zipWith (+) @colLeftWidths @colRightWidths
+      loc.minWidth = sum @colLeftWidths + sum @colRightWidths
+      loc.minHeight = sum @rowTopHeights + sum @rowBottomHeights
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = if null @presentationList.hRfList then 0
+                else head @rowTopHeights
+      loc.vRf = 0
+  | LayedOutRowP 
+      loc.minWidth = error "not implemented"
+      loc.minHeight = error "not implemented"
+      loc.hStretch = error "not implemented" 
+      loc.vStretch = error "not implemented" 
+      loc.hRf = error "not implemented"
+      loc.vRf = error "not implemented"
+  | FormatterPresentation 
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = True
+      loc.vStretch = True
+      loc.hRf = 0
+      loc.vRf = 0
+  | AlternativePresentation 
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = True
+      loc.vStretch = True
+      loc.hRf = 0
+      loc.vRf = 0
+-}
+  | WithP
+{-
+      loc.wdth = 
+      loc.minHeight = 
+      loc.hRf = 
+      loc.vRf = 
+-}
+ATTR PresentationList [  | |  minWidthList, minHeightList : {[Int]} hRfList, vRfList : {[Int]}
+                       hStretchList, vStretchList : {[Bool]} ]
+SEM PresentationList
+  | Nil
+      lhs.minWidthList = []
+      lhs.minHeightList = []
+      lhs.hStretchList = []
+      lhs.vStretchList = []
+      lhs.hRfList = []
+      lhs.vRfList = []
+  | Cons 
+      lhs.minWidthList = @hd.minWidth : @tl.minWidthList
+      lhs.minHeightList = @hd.minHeight : @tl.minHeightList
+      lhs.hStretchList = @hd.hStretch : @tl.hStretchList
+      lhs.vStretchList = @hd.vStretch : @tl.vStretchList
+      lhs.hRfList = @hd.hRf : @tl.hRfList
+      lhs.vRfList = @hd.vRf : @tl.vRfList
+
+
+
+
+SEM Root
+  | Root -- if scr < min, assign min
+      presentation.assignedWidth = if @presentation.hStretch then @lhs.screenWidth else @presentation.minWidth
+      presentation.assignedHeight = if @presentation.vStretch then 300 else @presentation.minHeight -- should be screenHeight
+      presentation.assignedHRef = @presentation.hRf -- is ignored anyway 
+      presentation.assignedVRef = @presentation.vRf 
+
+SEM Presentation [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : Int | | ]
+  | RowP
+      loc.assignedWidths = if @presentationList.hStretchList!! @vRefNr -- if Ref Object is stretch, all children get
+                                 then assign @presentationList.hStretchList -- equal space           +1, because refobj is stretch too
+                                               (repeat((@leftTotalSpace+ @rightTotalSpace)`div`(@leftHStretches+1+ @rightHStretches))
+						
+					       )
+					       @presentationList.minWidthList
+		                 else assign @presentationList.hStretchList
+                                               (  replicate @vRefNr (@leftChildSpace) 
+					       ++ [0] -- not used
+					       ++ repeat @rightChildSpace
+					       )
+					       @presentationList.minWidthList
+      presentationList.assignedWidthList    = @assignedWidths
+      presentationList.assignedVRefList     = @presentationList.vRfList -- is not right, nested rows don't work now
+
+      presentationList.assignedHeightList   = assign @presentationList.vStretchList
+                                              (repeat @lhs.assignedHeight) @presentationList.minHeightList 
+      presentationList.assignedHRefList     = assign @presentationList.vStretchList
+                                              (repeat @hRf)--@lhs.assignedHRef)
+					                           @presentationList.hRfList 
+
+       -- width of stretching children should not be subtracted from available width
+       -- for the moment this amount is added back to it as left and right corrections
+      loc.stretchMinWidths = assign @presentationList.hStretchList @presentationList.minWidthList (repeat 0)
+      -- this list contains the widths for the non stretchers, the other widths are 0
+
+      loc.leftCorrection = sum (take @vRefNr @stretchMinWidths) 
+                              + if @presentationList.hStretchList!! @vRefNr then @stretchMinWidths !! @vRefNr else 0
+      loc.rightCorrection = sum (drop (@vRefNr+1) @stretchMinWidths)
+
+      loc.leftTotalSpace = @lhs.assignedVRef - @vRf    + @leftCorrection
+      loc.rightTotalSpace = @lhs.assignedWidth - @minWidth - @leftTotalSpace  + @rightCorrection
+      loc.leftHStretches = length . filter (==True) . take @vRefNr $ @presentationList.hStretchList 
+      loc.rightHStretches = length . filter (==True) . drop (@vRefNr+1) $ @presentationList.hStretchList 
+      loc.leftChildSpace = round (fromIntegral @leftTotalSpace / fromIntegral @leftHStretches )
+      loc.rightChildSpace = round (fromIntegral @rightTotalSpace / fromIntegral @rightHStretches )
+ 
+       
+      -- @lhs.assigned vs final????
+  | ColP
+      presentationList.assignedWidthList    = assign @presentationList.hStretchList
+                                              (repeat @lhs.assignedWidth) @presentationList.minWidthList 
+      -- in case of stretch, return composite's ref
+      presentationList.assignedVRefList     = assign @presentationList.hStretchList
+                                              (repeat @lhs.assignedVRef)
+					      @presentationList.vRfList 
+      loc.assignedHeights = if @presentationList.vStretchList!! @hRefNr -- if Ref Object is stretch, all children get
+                            then assign @presentationList.vStretchList -- equal space           +1, because refobj is stretch too
+                                               (repeat((@topTotalSpace+ @bottomTotalSpace)`div`(@topVStretches+1+ @bottomVStretches))
+						
+					       )
+					       @presentationList.minHeightList
+		            else assign @presentationList.vStretchList
+                                               (  replicate @hRefNr (@topChildSpace) 
+					       ++ [0] -- not 0
+					       ++ repeat @bottomChildSpace
+					       )
+					       @presentationList.minHeightList
+      presentationList.assignedHeightList    = @assignedHeights
+      presentationList.assignedHRefList     = {-debug Arr (  "assHRef:"++show @lhs.assignedHRef
+						++ "HRef:"++ show @hRf
+						++ "minHeight:"++show minHeight
+						++ "assHeight:"++show @lhs.assignedHeight
+						++ "topTotal:"++ show topTotalSpace
+						++ "botTotal:"++ show bottomTotalSpace
+						)-}  @presentationList.hRfList -- is not right, nested cols don't work now
+
+       -- width of stretching children should not be subtracted from available height
+       -- for the moment this amount is added back to it as top and bottom corrections
+      loc.stretchMinHeights = assign @presentationList.vStretchList @presentationList.minHeightList (repeat 0)
+      -- this list contains the heights for the non stretchers, the other heights are 0
+
+      loc.topCorrection = sum (take @hRefNr @stretchMinHeights) 
+                              + if @presentationList.vStretchList!! @hRefNr then @stretchMinHeights !! @hRefNr else 0
+      loc.bottomCorrection = sum (drop (@hRefNr+1) @stretchMinHeights)
+
+      
+      
+      
+      loc.topTotalSpace = @lhs.assignedHRef - @hRf  + @topCorrection     -- minTopHeight
+      loc.bottomTotalSpace = @lhs.assignedHeight - @minHeight - @topTotalSpace   + @bottomCorrection
+      loc.topVStretches = length . filter (==True) . take @hRefNr $ @presentationList.vStretchList 
+      loc.bottomVStretches = length . filter (==True) . drop (@hRefNr+1) $ @presentationList.vStretchList 
+      loc.topChildSpace = round (fromIntegral @topTotalSpace / fromIntegral @topVStretches )
+      loc.bottomChildSpace = round (fromIntegral @bottomTotalSpace / fromIntegral @bottomVStretches )
+  | OverlayP
+      presentationList.assignedHeightList    =assign @presentationList.vStretchList
+                                              (repeat @lhs.assignedHeight) @presentationList.minHeightList 
+      presentationList.assignedHRefList     = assign @presentationList.vStretchList
+                                              (repeat @lhs.assignedHRef) @presentationList.hRfList 
+      presentationList.assignedWidthList    = assign @presentationList.hStretchList
+                                              (repeat @lhs.assignedWidth) @presentationList.minWidthList 
+      presentationList.assignedVRefList     = assign @presentationList.hStretchList
+                                              (repeat @lhs.assignedVRef) @presentationList.vRfList 
+{-
+  | MatrixPresentation
+-- is a lot more complicated than this
+      presentationList.assignedHeightList    =assign @presentationList.vStretchList
+                                              (concat. map (replicate @n)$ @rowHeights)
+					      @presentationList.minHeightList 
+      presentationList.assignedHRefList     = assign @presentationList.vStretchList
+                                              (concat. map (replicate @n)$ @rowTopHeights) --(repeat @lhs.assignedHRef)
+					      @presentationList.hRfList 
+      presentationList.assignedWidthList    = assign @presentationList.hStretchList
+                                              (concat . repeat $ @colWidths) 
+					      @presentationList.minWidthList 
+      presentationList.assignedVRefList     = assign @presentationList.hStretchList
+                                              (concat . repeat $ @colLeftWidths) --(repeat @lhs.assignedVRef)
+					      @presentationList.vRfList 
+   --   presentationList.assignedWidthList    = @presentationList.minWidthList
+ --     presentationList.assignedHeightList   = @presentationList.minHeightList
+ --     presentationList.assignedHRefList     = @presentationList.hRfList
+   --   presentationList.assignedVRefList     = @presentationList.vRfList
+  | LayedOutRowP
+      presentationList.assignedWidthList    = error "LayedOut row not implemented yet."
+      presentationList.assignedHeightList    = error "LayedOut row not implemented yet."
+      presentationList.assignedHRefList    = error "LayedOut row not implemented yet."
+      presentationList.assignedVRefList    = error "LayedOut row not implemented yet."
+  | FormatterPresentation
+      presentationList.assignedWidthList    = error "FormatterPresentation must be unfolded first"
+      presentationList.assignedHeightList    = error "FormatterPresentation must be unfolded first"
+      presentationList.assignedHRefList     =  error "FormatterPresentation must be unfolded first"
+      presentationList.assignedVRefList     =  error "FormatterPresentation must be unfolded first"
+  | AlternativePresentation
+      presentationList.assignedWidthList    = repeat @lhs.assignedWidth
+      presentationList.assignedHeightList    = repeat @lhs.assignedHeight
+      presentationList.assignedHRefList     = repeat @lhs.assignedHRef
+      presentationList.assignedVRefList     = repeat @lhs.assignedVRef
+-}
+--  | WithP
+
+SEM PresentationList [ assignedWidthList, assignedHeightList, assignedHRefList, assignedVRefList : {[Int]} | | ]
+  | Cons 
+      hd.assignedWidth = head @lhs.assignedWidthList
+      tl.assignedWidthList = tail @lhs.assignedWidthList
+      hd.assignedHeight = head @lhs.assignedHeightList
+      tl.assignedHeightList = tail @lhs.assignedHeightList
+      hd.assignedHRef = head @lhs.assignedHRefList
+      tl.assignedHRefList = tail @lhs.assignedHRefList
+      hd.assignedVRef = head @lhs.assignedVRefList
+      tl.assignedVRefList = tail @lhs.assignedVRefList
+
+
+-- why do presentations need this value themselves? Poly & rect need it for scaling.
+-- instead of sending back, maybe row and col can keep a local copy? or will this interfere
+-- with top/bottom/etc-aligning? 
+SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
+  | EmptyP
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | StringP 
+      loc.finalWidth  = @minWidth
+      loc.finalHeight = @minHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | RectangleP  
+      loc.finalWidth  = @minWidth
+      loc.finalHeight = @minHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | ImageP  
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | PolyP 
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | RowP -- asymmetric??
+      loc.finalWidth  =  sum @presentationList.finalWidthList
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = if null @presentationList.vRfList then 0
+                        else if @presentationList.hStretchList!! @vRefNr then @lhs.assignedVRef
+		                else sum (take @vRefNr @assignedWidths) + (@presentationList.vRfList !! @vRefNr)
+  | ColP
+      loc.finalWidth = @lhs.assignedWidth
+      loc.finalHeight =  sum @presentationList.finalHeightList--@lhs.assignedHeight
+      loc.finalHRef = if null @presentationList.hRfList then 0
+                      else if @presentationList.vStretchList!! @hRefNr then @lhs.assignedHRef
+		              else sum (take @hRefNr @assignedHeights) + (@presentationList.hRfList !! @hRefNr)
+      loc.finalVRef = @lhs.assignedVRef
+  | OverlayP 
+      loc.finalWidth = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef = @lhs.assignedHRef
+      loc.finalVRef = @lhs.assignedVRef
+{-
+  | TestPresentation 
+      loc.finalWidth = error "not implemented"
+      loc.finalHeight = error "not implemented"
+      loc.finalHRef = error "not implemented"
+      loc.finalVRef = error "not implemented"
+  | MatrixPresentation
+      loc.finalWidth = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef = if null @presentationList.hRfList then 0 -- we need H/VRefNrs here, but there not in MatrixPresentation yet
+                      else head @rowTopHeights
+      loc.finalVRef = if null @presentationList.hRfList then 0
+                      else head @colLeftWidths
+  | LayedOutRowP 
+      loc.finalWidth = error "not implemented"
+      loc.finalHeight = error "not implemented"
+      loc.finalHRef = error "not implemented"
+      loc.finalVRef = error "not implemented"
+  | FormatterPresentation 
+      loc.finalWidth =  error "FormatterPresentation must be unfolded first"
+      loc.finalHeight =  error "FormatterPresentation must be unfolded first"
+      loc.finalHRef =  error "FormatterPresentation must be unfolded first"
+      loc.finalVRef =  error "FormatterPresentation must be unfolded first"
+  | AlternativePresentation 
+      loc.finalWidth = @presentationList.finalWidthList !! @firstFit
+      loc.finalHeight = @presentationList.finalHeightList !! @firstFit
+      loc.finalHRef = @presentationList.finalHRefList !! @firstFit
+      loc.finalVRef = @presentationList.finalVRefList !! @firstFit
+      loc.firstFit = selectFirstFit @lhs.assignedWidth @presentationList.finalWidthList -- no VRefs (yet)
+-}
+  | WithP
+{-
+      loc.wdth = 
+      loc.hght = 
+      loc.hRf = 
+      loc.vRf = 
+-}
+
+
+ATTR PresentationList [  | |  finalWidthList, finalHeightList, finalHRefList, finalVRefList : {[Int]} ]
+SEM PresentationList
+  | Nil
+      lhs.finalWidthList = []
+      lhs.finalHeightList = []
+      lhs.finalHRefList = []
+      lhs.finalVRefList = []
+  | Cons 
+      lhs.finalWidthList = @hd.finalWidth : @tl.finalWidthList
+      lhs.finalHeightList = @hd.finalHeight : @tl.finalHeightList
+      lhs.finalHRefList = @hd.finalHRef : @tl.finalHRefList
+      lhs.finalVRefList = @hd.finalVRef : @tl.finalVRefList
+
+
+
+
+
+-- Position calculation
+
+SEM Root
+  | Root 
+      presentation.x = 0
+      presentation.y = 0
+
+ATTR Presentation [ x, y : Int | | ]
+SEM Presentation
+  | RowP
+      presentationList.xList    = init.scanl (+) 0 $ @presentationList.finalWidthList
+      presentationList.yList    = [ @finalHRef - chRf | chRf <- @presentationList.finalHRefList ]
+  | ColP
+      presentationList.xList    = [ @finalVRef - cvRf | cvRf <- @presentationList.finalVRefList ]
+      presentationList.yList    = init.scanl (+) 0 $ @presentationList.finalHeightList
+  | OverlayP
+      presentationList.xList    = [ @finalVRef - cvRf | cvRf <- @presentationList.finalVRefList ]
+      presentationList.yList    = [ @finalHRef - chRf | chRf <- @presentationList.finalHRefList ]
+{-
+  | MatrixPresentation -- x and y are added to cumulative heights and widths
+      loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
+      loc.cumulativeRowHeights = init. scanl (+) 0 $ @rowHeights
+      loc.absoluteRowRefYs = zipWith (+) @cumulativeRowHeights @rowTopHeights
+      loc.absoluteColRefXs = zipWith (+) @cumulativeColWidths @colLeftWidths 
+      presentationList.xList    = zipWith (-) (concat . repeat $ @absoluteColRefXs) @presentationList.finalVRefList
+      presentationList.yList    = zipWith (-) (concat . map (replicate @n) $ @absoluteRowRefYs) @presentationList.finalHRefList
+  | LayedOutRowP
+      presentationList.xList    = error "LayedOut row not implemented yet."
+      presentationList.yList    = error "LayedOut row not implemented yet."
+  | FormatterPresentation
+      presentationList.xList    = error "FormatterPresentation must be unfolded first"
+      presentationList.yList    = error "FormatterPresentation must be unfolded first"
+  | AlternativePresentation
+      presentationList.xList    = repeat 0
+      presentationList.yList    = repeat 0
+-}
+
+ATTR PresentationList [ xList, yList : {[Int]} | | ]
+SEM PresentationList
+  | Cons 
+      hd.x = head @lhs.xList
+      hd.y = head @lhs.yList
+      tl.xList = tail @lhs.xList
+      tl.yList = tail @lhs.yList
+
+
+
+
+
+
+
+-- Creating the Arrangement
+
+-- are the widths and heights really needed in the attributed tree?
+-- yes, they define the area of the presentation, used for background coloring etc.
+
+
+-- bit unclear what to do when href and vref are changed in with nodes  @finalHRef @finalVRef
+-- for a child in a composite are not the same as the  @finalHRef @finalVRef at the with nodes
+-- however in such a case we probably can't do it incrementally anyway
+ATTR Presentation [  | | arrangement : Arrangement ]
+SEM Presentation
+  | EmptyP
+      lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
+  | StringP 
+      lhs.arrangement = StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
+  | RectangleP
+      lhs.arrangement = RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+  | ImageP
+      lhs.arrangement = ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
+  | PolyP      
+      lhs.arrangement = let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
+			                                   , round (ry * fromIntegral (@finalHeight-1)) )
+		        in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @lhs.lineColor @lhs.backgroundColor
+		      
+{-
+  | TestPresentation
+      lhs.arrangement =  RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight 0 Solid @lhs.lineColor @lhs.fillColor
+-}
+  | RowP 
+      lhs.arrangement = {- debug Arr ( "rowattrs:"++show 
+                                                  ( (@presentationList.minWidthList
+						  , @presentationList.vRfList
+						  , @presentationList.finalWidthList 
+                                                  , @presentationList.finalVRefList )
+                                                  , @lhs.assignedWidth
+						  , leftCorrection
+						  , rightCorrection
+						  , assignedWidths 
+						  ))$ -}
+						  RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+  | ColP 
+      lhs.arrangement = {- debug Arr ( "colattrs:"++show 
+                                                  ( (@presentationList.minWidthList
+						  , @presentationList.vRfList
+						  , @presentationList.finalWidthList 
+                                                  , @presentationList.finalVRefList )
+                                                  , @lhs.assignedWidth
+						  , assign @presentationList.hStretchList (repeat @lhs.assignedWidth) @presentationList.minWidthList 
+					          ))$ -}
+						  ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
+  | OverlayP 
+      lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+{-
+  | LayedOutRowP 
+      lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+  | MatrixPresentation 
+      lhs.arrangement = StringA NoID 0 40 0 0 0 0 ("unimplemented AttrPresentation MatrixPresentation") (0,0,0) defaultFont []
+       -- MatrixPresentation (idAFromP @id) @presentationList.arrangementList @lhs.x @lhs.y finalWidth finalHeight @lhs.backgroundColor
+  | FormatterPresentation 
+      lhs.arrangement = error "FormatterPresentation must be unfolded first"
+  | AlternativePresentation -- remove the alternative presentation
+      lhs.arrangement = @presentationList.arrangementList !! @firstFit 
+   -- with node is removed by copy rule
+-}
+  | StructuralP 
+      lhs.arrangement = StructuralA (idAFromP @id) @child.arrangement
+  | ParsingP 
+      lhs.arrangement = ParsingA (idAFromP @id) @child.arrangement
+  | LocatorP 
+      lhs.arrangement = LocatorA @location @child.arrangement
+  | ArrangedP
+      lhs.arrangement = setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr --RectangleA NoIDA @lhs.x @lhs.y 10 10 1 Solid black yellow
+ -- @finalHRef @finalVRef are taken from arrangedP
+
+
+  | ArrangedP       -- not exactly clear how to assign these attributes using the old values
+                          -- what if the AG computes a different value for the refs, reassign?
+      loc.minWidth = @finalWidth
+      loc.minHeight = @finalHeight
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = hRefA @lhs.oldArr
+      loc.vRf = vRefA @lhs.oldArr
+      loc.finalWidth  = widthA @lhs.oldArr
+      loc.finalHeight = heightA @lhs.oldArr
+      loc.finalHRef   = hRefA @lhs.oldArr
+      loc.finalVRef   = vRefA @lhs.oldArr
+      loc.unfoldedTree = ArrangedP  -- ?
+      loc.maxFormatterDepth = 0     -- ?
+
+
+
+
+-- why the repeat Empties?
+ATTR Root         [ oldArr : Arrangement  | | ]
+
+SEM Presentation  [ oldArr : Arrangement   | | ]
+  | RowP 
+      presentationList.oldArrList = case @lhs.oldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+--      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
+--                                                            _                -> repeat $ DiffLeaf False
+  | ColP 
+      presentationList.oldArrList = case @lhs.oldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+--      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
+--                                                            _                -> repeat $ DiffLeaf False
+  | OverlayP 
+      presentationList.oldArrList = case @lhs.oldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
+                                                        _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+--      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
+--                                                            _                -> repeat $ DiffLeaf False
+  | StructuralP 
+      child.oldArr = case @lhs.oldArr of StructuralA _ arr -> arr
+                                         _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+--      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
+--                                             _                   -> DiffLeaf False
+  | ParsingP 
+      child.oldArr = case @lhs.oldArr of ParsingA _ arr -> arr
+                                         _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+--      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
+--                                             _                   -> DiffLeaf False
+  | LocatorP 
+      child.oldArr = case @lhs.oldArr of LocatorA _ arr -> arr
+                                         _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+--      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
+--                                             _                   -> DiffLeaf False
+
+
+SEM PresentationList [  oldArrList : {[Arrangement]} | | ] --  diffTreeList : {[DiffTree]} | | ]
+  | Cons 
+      hd.oldArr     = head @lhs.oldArrList
+      tl.oldArrList = tail @lhs.oldArrList
+--      hd.diffTree     = head @lhs.diffTreeList
+--      tl.diffTreeList = tail @lhs.diffTreeList
+ 
+ 
+ATTR PresentationList [  | |  arrangementList : {[Arrangement]} ]
+SEM PresentationList
+  | Nil
+      lhs.arrangementList = []
+  | Cons 
+      lhs.arrangementList = @hd.arrangement : @tl.arrangementList
+{-
+-- dummy arrangement, does not require any other attribute computations
+
+
+ATTR Presentation [  | | arrangement : Arrangement ]
+SEM Presentation
+  | EmptyP
+      lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
+  | StringP 
+      lhs.arrangement = StringA (idAFromP @id) 0 0 20 20 0 0 @text black defaultFont []
+  | RectangleP
+      lhs.arrangement = RectangleA (idAFromP @id) 0 0 20 20 0 0 @lineWidth Solid black white
+  | ImageP
+      lhs.arrangement = ImageA (idAFromP @id) 0 0 20 20 0 0 @src Tile black white
+  | PolyP      
+      lhs.arrangement = let mkPoint (rx, ry) = ( round (rx * fromIntegral 10)
+			                                   , round (ry * fromIntegral 10) )
+		        in   PolyA (idAFromP @id) 0 0 20 20 0 0 (map mkPoint @pointList) @lineWidth black white
+		      
+  | RowP 
+      lhs.arrangement = RowA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList
+  | ColP 
+      lhs.arrangement = ColA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList 
+  | OverlayP 
+      lhs.arrangement = OverlayA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList
+  | StructuralP 
+      lhs.arrangement = StructuralA (idAFromP @id) @child.arrangement
+  | ParsingP 
+      lhs.arrangement = ParsingA (idAFromP @id) @child.arrangement
+  | LocatorP 
+      lhs.arrangement = LocatorA @location @child.arrangement
+-}
+
+
+-- dummy final attrs, require only little other attribute computations (eg x&y)
+
+-- PROF, 15X ->: arrange             ArrPresent          64.7   88.0
+-- same profile for full computation                     76.3   89.1
+-- seems that most of the time in arranging is spent on administrative stuff, like building tuples    
+{-
+SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
+  | EmptyP
+      loc.finalWidth  = 30 -- @lhs.assignedWidth
+      loc.finalHeight = 40 --@lhs.assignedHeight
+      loc.finalHRef   = 10 --@lhs.assignedHRef
+      loc.finalVRef   = 0  --@lhs.assignedVRef
+  | StringP 
+      loc.finalWidth  = 30 -- @minWidth
+      loc.finalHeight = 40 --@minHeight
+      loc.finalHRef   = 10 -- @lhs.assignedHRef
+      loc.finalVRef   = 0 --@lhs.assignedVRef
+  | RectangleP  
+      loc.finalWidth  =  30 --@minWidth
+      loc.finalHeight =  40 --@minHeight
+      loc.finalHRef   = 10 -- @lhs.assignedHRef
+      loc.finalVRef   =  0 --@lhs.assignedVRef
+  | ImageP  
+      loc.finalWidth  = 30 --@lhs.assignedWidth
+      loc.finalHeight = 40 --@lhs.assignedHeight
+      loc.finalHRef   = 10 --@lhs.assignedHRef
+      loc.finalVRef   = 0 --@lhs.assignedVRef
+  | PolyP 
+      loc.finalWidth  = 30 --@lhs.assignedWidth
+      loc.finalHeight = 40 --@lhs.assignedHeight
+      loc.finalHRef   = 10 --@lhs.assignedHRef
+      loc.finalVRef   = 0 --@lhs.assignedVRef
+  | RowP -- asymmetric??
+      loc.finalWidth  = 30 --  sum @presentationList.finalWidthList
+      loc.finalHeight = 30 --  @lhs.assignedHeight
+      loc.finalHRef   = 10 --  @lhs.assignedHRef
+      loc.finalVRef   = 0 --  if null @presentationList.vRfList then 0
+                      -- else if @presentationList.hStretchList!! @vRefNr then @lhs.assignedVRef
+		              -- else sum (take @vRefNr @assignedWidths) + (@presentationList.vRfList !! @vRefNr)
+  | ColP
+      loc.finalWidth = 100 --@lhs.assignedWidth
+      loc.finalHeight = 300 -- sum @presentationList.finalHeightList--@lhs.assignedHeight
+      loc.finalHRef = 50 --if null @presentationList.hRfList then 0
+                      -- else if @presentationList.vStretchList!! @hRefNr then @lhs.assignedHRef
+		              -- else sum (take @hRefNr @assignedHeights) + (@presentationList.hRfList !! @hRefNr)
+      loc.finalVRef = 0 -- @lhs.assignedVRef
+  | OverlayP 
+      loc.finalWidth = 300 --@lhs.assignedWidth
+      loc.finalHeight = 300 --@lhs.assignedHeight
+      loc.finalHRef = 100 --@lhs.assignedHRef
+      loc.finalVRef = 100 --@lhs.assignedVRef
+
+-}
