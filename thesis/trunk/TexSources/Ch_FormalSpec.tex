@@ -377,11 +377,11 @@ We provide two examples to illustrate the equivalence class representation for e
 As an example of interpretation extra state, we take a partially presented declaration. If we hide the right-hand side of a declaration, \verb|Decl "f" (Sum 1 2)| is presented as \verb|f = ...|, which is also a presentation of \verb|Decl "f" (Product 3 4)|. Thus, \verb|(Sum 1 2)| and \verb|(Product 3 4)| are interpretation extra state. If we denote the extra state equivalence relation by $H$$~\tp~$$Level\H$$~\rel~$$Level\H$, we have 
 $(\verb|Decl "f" (Sum 1 2)|)~H~(\verb|Decl "f" (Product 3 4)|)$, which means that the two declarations are equal up to extra state. More generally, according to  $H$ a declaration is equivalent to every declaration that has the same left-hand side identifier.
 
-Whitespace is an example of presentation extra state. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Thus, for example, 
+Whitespace is an example of presentation extra state. Consider the expression \verb|Sum 1 2|, which is presented as ``{\tt 1\spc+\spc 2}''. The presentation is equivalent to a string containing `\verb|1|', `\verb|+|', and `\verb|2|' with any configuration of whitespace. Let $L$$~\tp~$$Level\L$$~\rel~$$Level\L$ be the equivalence relation for presentation extra state, then, for example,
 $``\texttt{1\spc+\spc 2}\text{''}~L~``\texttt{1+2}\text{''}$.
 
 
-Because no assumptions are made about the types of the two levels, the model for extra state is  rather abstract. Section~\ref{sect:wildcardEq} provides a concrete representation of extra state in tree-structured data types.
+Because no assumptions are made about the types of the two levels, the model for extra state is  rather abstract. Section~\ref{sect:wildcardEq} provides a concrete representation of extra state for tree-structured data types.
 
 
 %?Next section we give a concrete instance of these classes.
@@ -2150,7 +2150,7 @@ More generally, \law{Absorption} holds when each $HL$ equivalence class is a uni
 \bc We do not wish to assume \law{Absorption} for the top-most composition ($\present_1$, $\interpret_1$ and the identity), because it implies that the interpretation extra state of $\present_1$ is absorbed by the presentation extra state of $\id$. As a consequence, the top-most composition would not have interpretation extra state. Furthermore, due to absorption, each composite equivalence relation $CH_i$ is equal to $HH$ (or $CH_{i-1}$), 
 \ec
 
-Because of \law{Absorption} we have  $CH = HH$. If we denote this with the explicit indices from Figure~\ref{indicesInLayer}, we get $CH_i = CH_{i-1}$. Furthermore, since $CH_0 ~=~ (=)$, this means that $CH_i~=~(=)$, and, thus, no composite layer has interpretation extra state on $Level_0$. This is clearly not a desirable situation, and hence we do not assume \law{Absorption} for the top-most combination. Nevertheless, the result is still quite restrictive, since now the interpretation extra state relation $CH_i$ for each composite layer will be equal to the interpretation extra state relation $H_1$ for $\present_1$. Future research should determine whether this is a problem. If it is, a less-strict condition will need to be established.
+Because of \law{Absorption} we have  $CH = HH$. If we denote this with the explicit indices from Figure~\ref{indicesInLayer}, we get $CH_i = CH_{i-1}$. Furthermore, since $CH_0 ~=~ (=)$, this means that $CH_i~=~(=)$, and, thus, no composite layer has interpretation extra state on $Level_0$. This is clearly not a desirable situation, and hence we do not assume \law{Absorption} for the top-most combination. Nevertheless, the result is still quite restrictive, since now the interpretation extra state relation $CH_i$ for each composite layer will be equal to the interpretation extra state relation $H_1$ for $\present_1$. Future research should determine whether this is a problem. If it is, a less-strict condition needs to be established.
 
 Because we do not assume \law{Absorption} at the top-most composite layer, we have to give a separate proof for case $n=1$ of \law{Pres-Inert}, in which we do not use the condition. Furthermore, in the proof of \law{Doc-Inert}, we cannot use \law{Absorption} to imply \law{$\present$-Match}, \law{$\interpret$-Match}, and \law{Orthogonal} for case $n=1$. However, since for $n=1$, these three conditions trivially hold, we do not need to assume \law{Absorption} for this case.
 
@@ -2258,9 +2258,10 @@ which trivially holds, because $Comp_1$ only performs assignments on levels~0 an
 %	\wp{Comp_0}{\level'_0 = \level''_0}\\
 %\end{Prf}
 
-{\bf Case} $n>1$:
+{\bf Case} $n>1$:\nopagebreak[4]
 
-Similar to the $n=1$ case, prove the first part of postcondition conjunct:
+Similar to the $n=1$ case, prove the first part of postcondition conjunct:\nopagebreak[4]
+
 
 \xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} ~\land~ \level'_{n+1} = x  ~~\imp~~ \wp{Comp_n}{\level'\L = \level''\L}}
 
@@ -2828,7 +2829,7 @@ Related to the specification in this chapter is the work by Meertens~\cite{meert
 
 Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierce03lenses}, and Mu, Hu, and Takeichi~\cite{muhu04inv}, describe injective languages that allow the computation of a document from its (possibly edited) presentation. The language by Mu, Hu, and Takeichi also takes into account duplication of information.
 
-The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentations of the use cases from Chapter~\ref{chap:requirements}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. And finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. 
+The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentations of the use cases from Chapter~\ref{chap:requirements}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. Finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. 
 
 %\note{also say that \law{Intended} is not handled?}
 
