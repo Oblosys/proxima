@@ -40,6 +40,43 @@ GENERAL PAPERS ON EDITING
 Importance of good presentation for programming
 
 
+@article{ berlage94selectiveUndo,
+ author = {Thomas Berlage},
+ title = {A selective undo mechanism for graphical user interfaces based on command objects},
+ journal = {ACM Trans. Comput.-Hum. Interact.},
+ volume = {1},
+ number = {3},
+ year = {1994},
+ issn = {1073-0516},
+ pages = {269--294},
+ doi = {http://doi.acm.org/10.1145/196699.196721},
+ publisher = {ACM Press},
+ }
+
+
+
+@misc{ mancini-reflections,
+  author = "Roberta Mancini and Alan Dix and Stefano Levialdi",
+  title = "Reflections on Undo",
+  url = "citeseer.nj.nec.com/mancini96reflections.html" }
+
+
+@misc{ roisin97cutPaste,
+    author = "C. Roisin and P. Claves and E. Akpotsui",
+    title = "Implementing the Cut-and-Paste Operation in a Structured Editing System",
+    text = "C. Roisin, P. Claves, E. Akpotsui, Implementing the Cut-and-Paste Operation
+      in a Structured Editing System, Mathematical and Computer Modelling, vol.
+      vol. 26, num. 1, pp. 85-96, 1997.",
+    year = "1997"
+} -- partial
+
+
+
+A more general form of paste. Documents that have the same structure are matched. Also when the source type appears somewhere in the destination type, paste succeeds ((Section (Paragraph str)) can be pasted in (Chapter (Section (Paragraph str))))) Finally, also when source is a cluster of target, paste can succeed. Implemented in Grif editor. Trees are represented using Dyck words.
+
+
+
+
 
 
 EDITORS
@@ -139,20 +176,6 @@ BUDINSKY, F. J., HOLT, R. C., AND ZAKY, S. G. SRE-a syntax-recognizing editor. S
 }
  
 
-
-
-@misc{ roisin97cutPaste,
-    author = "C. Roisin and P. Claves and E. Akpotsui",
-    title = "Implementing the Cut-and-Paste Operation in a Structured Editing System",
-    text = "C. Roisin, P. Claves, E. Akpotsui, Implementing the Cut-and-Paste Operation
-      in a Structured Editing System, Mathematical and Computer Modelling, vol.
-      vol. 26, num. 1, pp. 85-96, 1997.",
-    year = "1997"
-} -- partial
-
-
-
-A more general form of paste. Documents that have the same structure are matched. Also when the source type appears somewhere in the destination type, paste succeeds ((Section (Paragraph str)) can be pasted in (Chapter (Section (Paragraph str))))) Finally, also when source is a cluster of target, paste can succeed. Implemented in Grif editor. Trees are represented using Dyck words.
 
 
 
