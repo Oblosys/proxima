@@ -62,7 +62,7 @@ SEM View
                    row' [ text " \"", @string_.pres, text "\"" ]
   | Pr
       lhs.pres = loc (PrNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row' [ text "<", @view1.pres, text ", ", @view2.pres, text ">" ]
+                   row' [ text "<", @view1.pres, text ", ", @view2.pres, text " >" ]
   | Ls
       lhs.pres = loc (LsNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    addInsOp @lhs.path @self $
