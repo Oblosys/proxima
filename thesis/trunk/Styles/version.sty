@@ -1,0 +1,56 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Version control macros. These let you define environments whose contents
+% will be optionally added to or deleted from the text when you run LaTeX.
+% Usage: place either of the following near the start of your file:
+%     \includeversion{NAME}
+%     \excludeversion{NAME}
+% Here, "NAME" is any name you choose. The first one indicates that text
+% between \begin{NAME} and \end{NAME} will be processed in the normal way.
+% The second indicates that text between \begin{NAME} and \end{NAME} will
+% be totally deleted.
+% You can define environments for as many versions as you want.
+% A ``comment'' environment has already been pre-defined for you with
+% \excludeversion{comment}; you can override this using \includeversion.
+%
+% Example:
+%   \includeversion{abridged}\excludeversion{unabridged}
+%   Text for the
+%   \begin{abridged}
+%      short
+%   \end{abridged}
+%   \begin{unabridged}
+%      long and really longwinded, opaque and boring
+%   \end{unabridged}
+%   version of the paper. Punctuation works correctly\begin{unabridged}
+%   because sphack is used\end{unabridged}.
+%   \begin{comment} This is deleted by default. \end{comment}
+%
+% Stephen Bellantoni 1990, loosely based on "annotation.sty" by Tom Hofmann.
+%
+% Additional Notes:  This package still works in LaTeX2e. Large 
+% tracts of excluded text will likely cause a "TeX capacity exceeded"
+% error though.  See also comment.sty, verbatim.sty, optional.sty.
+%   -- Donald Arseneau      April, 2000
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\begingroup
+\catcode`@=11\relax%
+\catcode`{=12\relax\catcode`}=12\relax%
+\catcode`(=1\relax \catcode`)=2\relax%
+\gdef\includeversion#1(%
+  \expandafter\gdef\csname #1\endcsname%
+    ()%
+  \expandafter\gdef\csname end#1\endcsname%
+    ()%
+)%
+\gdef\excludeversion#1(%
+  \expandafter\gdef\csname #1\endcsname%
+    (\@bsphack\catcode`{=12\relax\catcode`}=12\relax\csname #1@NOTE\endcsname)%
+  \long\expandafter\gdef\csname #1@NOTE\endcsname ##1\end{#1}%
+    (\csname #1END@NOTE\endcsname)%
+  \expandafter\gdef\csname #1END@NOTE\endcsname%
+    (\@esphack\end(#1))%
+)%
+\endgroup
+\excludeversion{comment}
+ 
