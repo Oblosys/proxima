@@ -1,0 +1,57 @@
+% Simple title page for partial versions. Handy when a table of contents is included.
+
+% \subtitle must be defined in Thesis.tex
+
+\newcommand{\engtitle}{Proxima\\
+a~generic~XML~editor}
+
+\newcommand{\nltitle}{Proxima\\
+een~generieke~XML~editor}
+
+\thispagestyle{empty}
+
+\parbox{141mm}{
+\begin{center}
+  {\sffamily\bfseries\Huge\engtitle\\}
+  \vspace{1cm}
+  \selectlanguage{dutch}
+  {\sffamily\Large\nltitle\\}
+  \vspace{2cm}
+  {\sffamily\Large BIJNA PROEFSCHRIFT\\}
+  \vspace{2cm}
+  {\sffamily\Large\subtitle}
+
+  \vspace{0.2cm}
+  {\sffamily\large (version: \today)\\}
+  \vspace{2cm}
+  {\sffamily\Large Martijn Michiel Schrage\\}
+\end{center}
+}
+
+\clearpage
+\thispagestyle{empty}
+\marginpar{\parbox{147mm}{
+\begin{tabular}[t]{ll}
+promotores:
+ & Prof.\,Dr.~S.\,D.~Swierstra\\ 
+ & Prof.\,Dr.~J.~Jeuring\\
+ & Prof.\,L.\,G.\,T.\,M.~Meertens\\
+% &  Instituut voor Informatica en Informatiekunde, Universiteit Utrecht
+\\
+\multicolumn{2}{l}{Instituut voor Informatica en Informatiekunde, Universiteit Utrecht}\\
+\end{tabular}}}
+
+\vfill
+
+\marginpar{\parbox{147mm}{
+\vspace{-1in}
+\begin{tabular}{l}
+ISBN 12-345-6789-0\\
+IPA logo?
+\end{tabular}}}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End: 
