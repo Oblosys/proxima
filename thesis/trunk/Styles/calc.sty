@@ -1,4 +1,5 @@
 \usepackage{fleqn,leqno}
+\usepackage{supertabular}
 %------------------- calc ---------------
 %\newlength{\xprindent}
 %\setlength{\xprindent}{1.5em}
@@ -7,6 +8,10 @@
 \newcommand{\eqa}{\end{array}\]\vspace{.3\baselineskip}}
 \newenvironment{xprenv}{\nopagebreak[4]\bqa}{\eqa}
 %\newcommand{\xpr}[1]{\begin{xprenv}#1\end{xprenv}}
+
+
+
+\bc From Lambert
 \newenvironment{zenv}[1]{\nopagebreak\vspace*{-.8\baselineskip}\hspace*{\mathindent}\makebox[3em][l]{$#1$}\begin{tabular}[t]{@{}l@{}l@{}l@{}l}\{$~$&}{$~$\}\end{tabular}\vspace*{-.8\baselineskip}}
 \newcommand{\z}[2]{\begin{zenv}{#1}#2\end{zenv}}
 \newcommand{\zz}[1]{\nopagebreak\vspace*{-.8\baselineskip}\hspace*{\mathindent}\makebox[3em][l]{$#1$}\vspace*{-.8\baselineskip}}
@@ -24,26 +29,63 @@
 \newcommand{\Imp}[1]{\z{\impsym}{#1}}
 \newcommand{\Ffr}[1]{\z{\ffrsym}{#1}}
 \newcommand{\FFr}{\Ffr}
-%----------------- style ----------------
-\newcommand{\defof}[1]{definition of $#1$}
-\newcommand{\defsof}[1]{definitions of $#1$}
 
 % \z and \zz are for putting comments in proofs
 % \z{sym}{comment}:             sym  { comment }
 % \zz{sym}:                              sym
+\ec
 
 
+%From Frank:
+\newcommand{\hint}[2]{#1 & \omit \qquad\hbox{\small\{~#2~\}}\cr }
+%---------------- symbols ------------------
+\newcommand{\equsym}{\hspace*{.06em}{=}\hspace*{.185em}}
+\newcommand{\eqvsym}{\hspace*{.06em}{\equiv}\hspace*{.166em}}
+\newcommand{\impsym}{\hspace*{.00em}{\Rightarrow}\hspace*{.00em}}
+\newcommand{\ffrsym}{\hspace*{-.06em}{\Leftarrow}\hspace*{.06em}}
+\newcommand{\andsym}{\hspace*{.06em}{\wedge}\hspace*{.166em}}
+\newcommand{\equ}{\:\equsym\:}
+\newcommand{\eqv}{\;\eqvsym\;}
+\newcommand{\imp}{\:\impsym\:}
+\newcommand{\ffr}{\:\ffrsym\:}
+%\newcommand{\cnj}{\;~\andsym~\;}
+\newcommand{\cnj}{\mathrel{\wedge}}
+% use {}\cnj to indent an n-ary conjunction split across multiple lines
+\newcommand{\Equ}{\hint{\equsym}}
+\newcommand{\Eqv}{\hint{\equiv}}
+\newcommand{\Imp}{\hint{\Rightarrow}}
+\newcommand{\Ffr}{\hint{\Leftarrow}}
+\newcommand{\FFr}{\Ffr}
+%\newcommand{\And}{\wedge &}
+\newcommand{\All}{\forall &}
+\newcommand{\Exi}{\exists &}
+% end from Frank
 \newlength{\xprindent}
 \setlength{\xprindent}{-1em}
 
 \newcommand{\bqaM}{ \hspace*{\xprindent}\begin{array}[b]{
 @{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}    % or @{}r@{}c.. 
 \newcommand{\eqaM}{\end{array}}
+
 \newenvironment{xprenvM}{\nopagebreak[4]\bqaM}{\eqaM}
 
-\newcommand{\xpr}[1]{\vspace{-.3\baselineskip}\begin{displaymath}
+\newcommand{\bprfqaM}{ \hspace*{\xprindent}\begin{array}[b]{
+@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l}}    % or @{}r@{}c.. 
+\newcommand{\eprfqaM}{\end{array}}
+
+\newenvironment{prfenvM}{\bprfqaM}{\eprfqaM} % proofs should be able to have page breaks
+
+\newcommand{\xpr}[1]{\vspace{-.3\baselineskip}
+\begin{displaymath}
 \begin{xprenvM}#1\end{xprenvM}
-\end{displaymath}\vspace{-.3\baselineskip}}
+\end{displaymath}
+\vspace{-.3\baselineskip}}
+
+\newcommand{\xprf}[1]{\vspace{-.3\baselineskip}
+\begin{displaymath}
+\begin{prfenvM}#1\end{prfenvM}
+\end{displaymath}
+\vspace{-.3\baselineskip}}
 
 
 % very complex command for adding a label that flushes to the right, even in a displaymath env.
@@ -61,9 +103,15 @@
 % use \begin{math} instead of \[, otherwise \hfill does not work.
 
 
+\newcommand{\smallprf}[1]{ % for proofs with equation and justification on single line
+\renewcommand{\arraystretch}{1.5} % for a little more space between proof lines
+\xprf{#1}
+\renewcommand{\arraystretch}{1}
+} % let's hope that the old arraystretch was 1
+
 \newcommand{\prf}[1]{
-\renewcommand{\arraystretch}{1.5}
-\xpr{#1}
+\renewcommand{\arraystretch}{1.5} % for a little more space between proof lines
+\xprf{#1}
 \renewcommand{\arraystretch}{1}
 } % let's hope that the old arraystretch was 1
 
@@ -71,7 +119,7 @@
 %\newcommand{\prooff}{{\bf Proof:\ }}
 %\newcommand{\proofEnd}{$\Box$}
 
-\newcommand{\jstf}[1]{\text{\{~#1~\}}} % justification (= correct word?) of a proof step 
+\newcommand{\jstf}[1]{\text{\{~#1~\}}} % justification of a proof step 
 \newcommand{\tp}{\: ::\:} % Haskell type decl
 
 
