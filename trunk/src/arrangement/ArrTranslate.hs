@@ -63,8 +63,8 @@ unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) 
 mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = addWithSteps pthA layout
   in  case mouseDownDocPres pthP layout of
-        Just upd -> debug Err ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
-        Nothing  -> debug Err ("mouseDownDoc EVENT: Nothing:"++show pthP++ show layout)   
+        Just upd -> debug UnA ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
+        Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)   
                     $ case TreeEditPres.locateTree (PathP pthP 0) layout of
                         Just node -> case pathNode node of
                                        (PathD pth) -> ( UpdateDocLay (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)

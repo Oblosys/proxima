@@ -993,6 +993,7 @@ sem_PresentationList_Nil (_lhs_allFonts) (_lhs_assignedHRefList) (_lhs_assignedH
    inherited attributes:
       backgroundColor      : Color
       fillColor            : Color
+      focus                : FocusPres
       font                 : Font
       fontMetrics          : FontMetrics
       lineColor            : Color
@@ -1019,6 +1020,7 @@ sem_PresentationList_Nil (_lhs_allFonts) (_lhs_assignedHRefList) (_lhs_assignedH
 type T_Root = ([Font]) ->
               (Color) ->
               (Color) ->
+              (FocusPres) ->
               (Font) ->
               (FontMetrics) ->
               (Color) ->
@@ -1035,7 +1037,7 @@ sem_Root ((Root (_presentation))) =
     (sem_Root_Root ((sem_Presentation (_presentation))))
 sem_Root_Root :: (T_Presentation) ->
                  (T_Root)
-sem_Root_Root (_presentation) (_lhs_allFonts) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (_lhs_oldArr) (_lhs_popupMenuItems) (_lhs_screenWidth) (_lhs_textColor) =
+sem_Root_Root (_presentation) (_lhs_allFonts) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_focus) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (_lhs_oldArr) (_lhs_popupMenuItems) (_lhs_screenWidth) (_lhs_textColor) =
     let ( _presentation_allFonts,_presentation_arrangement,_presentation_finalHRef,_presentation_finalHeight,_presentation_finalVRef,_presentation_finalWidth,_presentation_hRf,_presentation_hStretch,_presentation_maxFormatterDepth,_presentation_minHeight,_presentation_minWidth,_presentation_unfoldedTree,_presentation_vRf,_presentation_vStretch) =
             (_presentation (_lhs_allFonts) (_presentation_hRf) (if _presentation_vStretch then 300 else _presentation_minHeight) (_presentation_vRf) (if _presentation_hStretch then _lhs_screenWidth else _presentation_minWidth) (_lhs_backgroundColor) (_lhs_fillColor) (_lhs_font) (_lhs_fontMetrics) (_lhs_lineColor) (_lhs_mouseDown) (_lhs_oldArr) (_lhs_popupMenuItems) (_lhs_textColor) (0) (0))
     in  ( _presentation_allFonts,_presentation_arrangement,_presentation_maxFormatterDepth,_presentation_unfoldedTree)

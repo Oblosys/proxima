@@ -10,21 +10,21 @@ import ArrangerAG
 import FontLib
 import IOExts
 
-arrangePresentation :: FontMetricsRef -> Arrangement -> DiffTree -> Presentation -> IO Arrangement
-arrangePresentation fontMetricsRef oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
+arrangePresentation :: FontMetricsRef -> FocusPres -> Arrangement -> DiffTree -> Presentation -> IO Arrangement
+arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
 
  do { let screenSize = 1000      
     ; let pres' = prunePres dt pres
   --  ; debugLnIO Err ("Diff tree"++show dt)
   --  ; debugLnIO Err ("pruned presentation"++show pres')
-    ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef pres' screenSize oldArrangement
+    ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' screenSize oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
     ; if maxFDepth == 0 then
         return attrTree
       else if maxFDepth == 1 
       then 
        do { --debugLnIO Arr "Unfolding formatters"
-           (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef unfoldedTree screenSize oldArrangement
+           (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree screenSize oldArrangement
           ; return arrangement
           }
       else 
@@ -36,8 +36,8 @@ arrangePresentation fontMetricsRef oldArrangement dt pres = -- return $ sel $ du
 -- non pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
 -- unsafePerformDraw is not available     -- obsolete comment
 -- Monad is IO again so fixIO can be used
-fixed :: FontMetricsRef -> Presentation -> Int -> Arrangement -> IO (Arrangement,Int,Presentation)
-fixed fontMetricsRef pres screenSize oldArrangement = f --fixit
+fixed :: FontMetricsRef -> FocusPres -> Presentation -> Int -> Arrangement -> IO (Arrangement,Int,Presentation)
+fixed fontMetricsRef focus pres screenSize oldArrangement = f --fixit
  where f :: IO (Arrangement,Int,Presentation)
        f = 
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (white, white, black, black)
@@ -47,6 +47,7 @@ fixed fontMetricsRef pres screenSize oldArrangement = f --fixit
             ; let (allFonts, _, _, _) = 
                     sem_Root (Root pres) [defFont]
                                                defBackColor defFillColor
+                                               focus
                                                defFont 
                                                (error "font computation depends on font metrics")
                                                defLineColor
@@ -78,6 +79,7 @@ fixed fontMetricsRef pres screenSize oldArrangement = f --fixit
             ; let (_, arrangement,  maxFDepth, unfoldedTree) = 
                     sem_Root (Root pres) [defFont]
                                           defBackColor defFillColor
+                                          focus
                                           defFont
                                           updatedMetrics
                                           defLineColor

@@ -20,11 +20,11 @@ presentIO state high low editHigh =
 -- on a skipLay, the local arr state may have changed, so rearrange
 arrange :: LocalStateArr -> LayoutLevel -> ArrangementLevel -> EditLayout' -> IO (EditArrangement', LocalStateArr, LayoutLevel)
 arrange state layLvl@(LayoutLevel pres focus dt) arrLvl@(ArrangementLevel oldArrangement _ _) (SkipLay' 0) =
- do { arr' <- arrangePresentation state oldArrangement dt pres -- DiffLeaf True? or can arr have changed
+ do { arr' <- arrangePresentation state focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
     ; return (SetArr' (ArrangementLevel arr' (focusAFromFocusP focus pres) pres), state, layLvl)
     }
 arrange state layLvl arrLvl (SkipLay' i) = return (SkipArr' (i-1), state, layLvl)
 arrange state layLvl arrLvl@(ArrangementLevel oldArrangement _ _) (SetLay' (LayoutLevel pres' focus' dt)) = 
- do { arrangement' <- arrangePresentation state oldArrangement dt pres'
+ do { arrangement' <- arrangePresentation state focus' oldArrangement dt pres'
     ; return (SetArr' (ArrangementLevel arrangement' (focusAFromFocusP focus' pres') pres'), state, LayoutLevel pres' focus' dt)
     }

@@ -6,7 +6,7 @@ import CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
 
-import DocumentTypes -- for Node
+import DocTypes -- for Node
 import FontLib
 
 -- Uedit, transforming AG to new syntax: Find   ^([a-z][a-z,A-Z]++^)_     Replace  @^1.
@@ -129,6 +129,7 @@ TYPE PresentationList = [Presentation]
 
 
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
+            focus : FocusPres
             mouseDown : {Maybe UpdateDoc}
             popupMenuItems : {[ PopupMenuItem ]}
             screenWidth : Int  
@@ -212,6 +213,16 @@ ATTR Presentation [ fontMetrics : FontMetrics | | ]
   
 ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
 
+
+
+-- Focus
+--ATTR Presentation [ focus : FocusPres | | ]
+-- need some way to represent focus in arrangement.
+-- putting in overlays changes paths, and may have many consequences
+-- probably best to have a focus attribute in each arr node, but this involves
+-- changing many patterns in arrangement functions
+-- In the future we probably want an info node with (ID Focus Dirty etc.)
+-- maybe for now just fix markFocusArr and diffArr a bit.
 
 
 
