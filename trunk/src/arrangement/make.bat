@@ -1,1 +1,1 @@
-copy ..\..\..\uust\tools\ag\uuagc -cfspm        ArrangerAG
+d:\bin\uuagc -cfspm        ArrangerAG
