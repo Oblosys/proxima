@@ -4,7 +4,6 @@ Fix: layout loss on collapse
 
 
 TODO::: Use 'case' in big pattern matchers!!!
-TODO::: parsing structurals
 TODO::: parse before structure edit
 TODO::: figure out popups and dialogues
 TODO::: improve scanner
