@@ -1,0 +1,55 @@
+\chapter{The Proxima Prototype}
+A layer in proxima
+One layer
+show edit diff etc. 
+\section{Architecture}
+
+
+
+
+
+
+
+\section{Renderer}
+Why ObjectIO. 
+Easy and fast.
+Tcl is slow, problem with diffing. 
+OpenGL: Alas, there are no real documents describing HOpenGL yet. Incomplete and under construction. Maybe some day ok. However, might be optimized for 3-d rendering of graphical objects instead of heaps of text with a few lines and symbols + some nice menus.
+GTK+HS/GTK2HS No documentation yet. Windows GTK does not appear stable (GIMP may crash at any time). Because the development platform (== my computer) is a Windows machine right now, this is not a wise choice.
+Prent C renderer by Xander is incomplete, hard to update and not very portable. Also socket communication is expensive.
+For now platform dependence is not a problem.
+Porting to different Renderer is relatively easy, because of Layered implementation.
+Future Proxima will perhaps use a standard Haskell GUI, or dedicated Renderer.
+
+
+Krasimir:
+
+  * Gtk+HS
+   * iHaskell
+   * Gtk2HS
+   * HTk
+   * TclHaskell
+   * Fudgets
+   * FranTk
+   * Object I/O
+   * Yahu
+
+None of them are capable for large scale development 
+for some reason. The HTk, TclHaskell, FranTk and Yahu 
+are based on Tcl/Tk. The Tcl/Tk backend are portable 
+but slow. The Gtk+HS, iHaskell, Gtk2HS are based on
+GTK. The backend is powerful and portable (GTK >= 2.0)
+but I prefer to use just native libraries on 
+different platforms. The Object I/O is Win32 specific.
+I think that there are need of one portable and 
+efficient library. It needs to have advantages of
+existing library but must have single uniform
+interface. I post this message to haskell@haskell.org 
+because I think that development of nice libraries 
+requires agreement of the entire Haskell Community on
+basic design lines. I looking for peoples which are
+interested in the development of "standard" GUI
+library.
+--
+
+\section{Example Editors}
