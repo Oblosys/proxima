@@ -2,17 +2,18 @@
 % 11pt?
 % conclusions?
 \documentclass[twoside]{report}
+	
 \usepackage{thesis}
 \begin{document}
 \selectlanguage{english}
 
 \pagenumbering{roman}
 
-%\newcommand{\subtitle}{Chapter 5}     \include{P_AltTitlePages}
+%\newcommand{\subtitle}{Chapters 2-8}     \include{P_AltTitlePages}
 %\include{P_Titlepages}
 
 %\include{P_Preface}
-%\tableofcontents
+\tableofcontents
 
 \clearpage
 \pagenumbering{arabic}
@@ -21,10 +22,10 @@
 %\setcounter{chapter}{1} \include{Ch_XML}   		% 2
 %\setcounter{chapter}{2} \include{Ch_ProxArch}    	% 3
 %\setcounter{chapter}{3} \include{Ch_EditModel}   	% 4
-%\setcounter{chapter}{4} \include{Ch_SingleLayer}	% 5
+\setcounter{chapter}{4} \include{Ch_SingleLayer}	% 5
 %\setcounter{chapter}{5} \include{Ch_LayeredArchs}	% 6
 %\setcounter{chapter}{6} \include{Ch_ArchCombs}	% 7
-\setcounter{chapter}{7} \include{Ch_Xprez}   		% 8
+%\setcounter{chapter}{7} \include{Ch_Xprez}   		% 8
 %\setcounter{chapter}{8} \include{Ch_Prototype}    	% 9	 yet to be written
 %\setcounter{chapter}{9} \include{Ch_Conclusions}	% 10 yet to be written
 
@@ -45,11 +46,13 @@ Urgent problems:
 - direct/indirect editing? direct interpretation in editmodel is op->op without applying. However, directly editing a level is applying.
 
 General TODO
+* Fix math fonts.
+* Sentence case for titles?
 * check labeling of sections, mayba add chapter to labels (eg. now {sect:conclusions} might be used several times)
+
+
+
 * explain Parsing/Structure recognizing model somewhere
-
-
-
 
 
 
