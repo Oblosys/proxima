@@ -290,7 +290,7 @@ The tree example is given here to show that a rather complex and graphical prese
 
 {\sc Xprez} meets the requirements listed at the bottom of Section~\ref{existingtarget}, except for domain-specific syntax, for which a special parser will have to be added to the system. Furthermore, there are a number of things that are still lacking in the current model and that are being investigated. Firstly, there is no page model yet, and hence no page related concepts such as footnotes and page references are possible. Probably, an abstraction similar to the {\em Galley} from Lout~\cite{kingston93lout} can be used for this. Secondly, there is no primitive notion of padding, which will allow spacing in columns and rows to be specified more naturally. Both of these concepts are related to the need for a more powerful \texttt{format} primitive that can handle both horizontal and vertical formatting while offering more control over the generated rows and columns. Finally, the \texttt{with\symbol{95}} combinator only gives access to the properties of a parent and its child. It is not possible to access properties of siblings, or presentations elsewhere in the tree, but it is also not yet clear whether such access is really necessary in a presentation language. Nevertheless, the set of combinators presented so far is powerful enough to cover much of the \TeX ~math typesetting as described in \cite{heckmann97functionalTex}, including superscripts and subscripts. We also expect that defining a presentation sheet for the MathML~\cite{mathml} language will be rather straightforward in {\sc Xprez}.
 
-
+\bc
 %																
 %																
 %																
@@ -341,7 +341,7 @@ The attribute definitions are written in Haskell and can contain references to i
 As in P, only one presentation can be specified for each element. Context-specific presentations have to be encoded using attributes. For example, by using an inherited attribute that contains the elements on the path to the root, an element can let its presentation depend on the type of its parent, or the presence of certain elements among its ancestors. Specifying such an attribute for each element in the document type is a hassle, so a collection of pre-defined attributes (e.g. positions, sibling lists, etc.) is present. 
 
 The transformation component of {\sc Xprez} has been realized in Haskell, using the MAG attribute grammar system\cite{ag}. Currently, the system can handle only a subset of all document types, as there is no support for XML attributes and entities yet.
-
+\ec
 
 %																
 %																

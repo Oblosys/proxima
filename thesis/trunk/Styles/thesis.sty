@@ -107,10 +107,10 @@
 
 \newcommand{\Present}[0]{\ensuremath{\mathit{Present}}} 	%56
 \newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}		%56
-\newcommand{\present}[0]{{\tt present}}					%56
+%\newcommand{\present}[0]{{\tt present}}					%56
 \newcommand{\Interpret}[0]{\ensuremath{\mathit{Interpret}}}%56
 \newcommand{\Intr}[0]{\ensuremath{\mathit{Intr}}}		%56
-\newcommand{\interpret}[0]{{\tt interpret}}				%56
+%\newcommand{\interpret}[0]{{\tt interpret}}				%56
 \newcommand{\reuse}[0]{{\tt reuse}}						%56
 \newcommand{\update}[0]{{\tt update}}					%56
 \newcommand{\Edit}[0]{\ensuremath{\mathit{Edit}}} 		%56 Edit is overloaded
@@ -123,6 +123,70 @@
 \newcommand{\rarr}{\ensuremath{\rightarrow}~}
 \newcommand{\larr}{\ensuremath{\leftarrow}~}
 \newcommand{\dbarr}{\ensuremath{\leftrightarrow}~}
+
+
+
+\newcommand{\spc}{\textvisiblespace}
+
+\newcommand{\fn}[1]{{\ensuremath{\mathsf {#1}}}}
+
+\newcommand{\present}{\fn{present}}
+\newcommand{\interpret}{\fn{interpret}}
+\renewcommand{\core}{\fn{core}}
+\newcommand{\default}{\fn{default}}
+\newcommand{\valid}{\fn{valid}}
+\newcommand{\close}{~\text{``close to''}~}
+
+
+% not used, so we redefine these commands
+\renewcommand{\H}{_{\, \mathrm H}}  % old \H seems to put '' above the next character
+\renewcommand{\L}{_{\, \mathrm L}} % was an L with a dash in the middle
+\newcommand{\M}{_{\, \mathrm M}}
+\newcommand{\HH}{_{\, \mathrm {HH}}} 
+\newcommand{\HL}{_{\, \mathrm {HL}}} 
+\newcommand{\LH}{_{\, \mathrm {LH}}} 
+\newcommand{\LL}{_{\, \mathrm {LL}}} 
+\newcommand{\CH}{_{\, \mathrm {CH}}} 
+\newcommand{\CL}{_{\, \mathrm {CL}}} 
+\newcommand{\C}{_{\, \mathrm C}} 
+\newcommand{\Eqclass}[2]{{#1}\!/_{{#2}}}
+\newcommand{\eqclass}[2]{[{#1}]_{{#2}}}  % maybe pad [] with \' spaces?
+\newcommand{\Eqcl}[2]{\Eqclass{#1}{_{\!\!{#2}}}}
+\newcommand{\eqcl}[2]{\eqclass{#1}{\!_{#2}}}
+\newcommand{\eqstar}{\ensuremath{\simeq}}
+%\newcommand{\eqstar}{\ensuremath{\stackrel{*}{\simeq}}}
+\newcommand{\Eqstarcl}[2]{{#1}/_{\!\eqstar {\mathrm {#2}}}}
+\newcommand{\eqstarcl}[2]{[{#1}]_{\!\eqstar {\mathrm {#2}}}}
+\newcommand{\eqhole}{[\hole]} % \eqcl{\hole}{} gets wrong spacing
+
+\newcommand{\eqr}{\ensuremath{\simeq}}
+\newcommand{\reuz}{\ensuremath{\triangleright}}
+\newcommand{\reuze}[1]{\ensuremath{\,\reuz_{_{\!\!#1}}\,}} % rm prevents {\sc $\reuzestar$} from changing the *
+\newcommand{\reuzestar}{\ensuremath{\,\overlay{\protect\raisebox{0.3em}{\rm \:\:\scriptsize *}}{\reuz}\,}}
+%\newcommand{\reuzestar}{\ensuremath{\stackrel{ * }{\reuz}}}
+\newcommand{\rel}{\ensuremath{\sim}}
+\newcommand{\law}[1]{{\sc {#1}}}
+
+
+\newcommand{\is}{\widehat{=}} % instead of {\stackrel{\wedge}{=}}
+\newcommand{\gts}{\text{\tt :=}}
+\renewcommand{\gets}{~\gts~}
+\newcommand{\smi}{\text{\tt ;}}
+\newcommand{\semi}{\smi~}
+\newcommand{\assert}[1]{\{ \ensuremath{#1} \}}
+\newcommand{\hoare}[3]{{\assert{#1}\:{#2}\;\assert{#3}}} % #2 is italic, so space looks bigger
+
+\newsavebox{\wpbox}
+\sbox{\wpbox}{$\wp$}
+\newcommand{\powerset}{\usebox{\wpbox}}
+\renewcommand{\wp}[2]{\fn{wp}(#1,~#2)}
+
+
+
+
+
+
+
 
 %%%%%%%%
 % End Martijn %

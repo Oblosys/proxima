@@ -29,9 +29,13 @@ In this paper we give four implementation models for layered architectures. Firs
 %																
 \section{A Simple editor}
 
+\bl
+\o introduce a simple 
+\el
+
 In this section, we introduce a simple layered architecture for an editor that is used in the next sections to illustrate the architecture description methods. The system that is described by the architecture is an editor in which the user can edit a presentation of a document. Although the architecture of the editor is simple, it still contains the typical features of the layered architectures discussed in~\cite{architecture} \note{is chapter now}. 
 
-
+\bc
 \bigskip {\bf The edit process: }The main loop of the simple editor consists of the following 5 phases: 
  \begin{enumerate}
  \item Compute a rendering, or {\it presentation}, of the document  (presentation phase)
@@ -42,6 +46,7 @@ In this section, we introduce a simple layered architecture for an editor that i
  \end{enumerate} \note{add backward ref to \ref{sect:editDifferentLevels}, and also sync the two descriptions}
 
 Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and interpretation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
+\ec
 
 \begin{figure}
 \begin{small}
@@ -65,6 +70,7 @@ Figure~\ref{simpleeditprocess} contains a schematic representation of the edit p
 \end{center}
 \end{small}
 \end{figure}
+
 
 \bigskip {\bf The layers: } Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret} shows a more detailed view of a single edit cycle. For now, we focus on the presentation and interpretation phases (phase 1 and phase 4). Both the presentation and the interpretation functions (we will call them {\em present} and {\em interpret}) are compositions of a number of subfunctions, similar to the layered editor in~\cite{architecture}. The presentation of the document is computed via a number of intermediate data structures that are increasingly concrete, and the edit operation on the document is computed via edit operations on the same intermediate data structures. Therefore, the subfunctions of {\em present} and {\em interpret} are grouped pairwise in horizontal layers. Another reason for grouping the subfunctions is that each subfunction in a layer has some parameters that are the result of the subfunction immediately to the left of it. We will refer to the subfunctions as {\em layer functions}.
 
@@ -120,7 +126,7 @@ If we look at the figure, we see that there are values that go from left to righ
 %																
 \section{A layer in Haskell}
 
-In the following sections, we will explore the possibilities of implementing the layered architecture described in the previous section, using the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra interpretation step that could possibly lead to errors.
+In the following sections, we explore the possibilities of implementing the layered architecture described in the previous section, using the functional language Haskell. The use of a typed programming language for describing an architecture ensures that the types of all components are correct. Furthermore, because the architecture description language is equal to the implementation language, the architecture description is an executable framework for the system being described. We have the certainty that if the types in the architecture description are correct, then the types in the implementation are correct as well. If, on the other hand, a separate architecture description language is used, then the architecture has to be implemented in a programming language, after it has been type checked or proven correct. This is an extra interpretation step that could possibly lead to errors.
 
 There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. The layer functions can simply be modeled with Haskell functions that are put in a record to model a layer. Connecting the layer functions is more complicated. We will present three alternatives in the next sections, but first we give the precise types of the layer functions. 
 
@@ -1241,7 +1247,7 @@ Figure~\ref{proxlayers} schematically shows the layers of Proxima. The figure sh
 
 The {\em document} at the top of the architecture is mapped on the {\em rendering} at the bottom, which is shown to the user. The {\em evaluator} takes the document and a computation sheet and produces the {\em enriched document}, which is the document together with all derived values. Similarly, the {\em presenter} takes the enriched document together with a presentation sheet, and computes the {\em abstract presentation}. Until this point, the presentation does not contain any absolute layout; all elements in the presentation are positioned relative to each other and do not yet have an absolute size.
 
-The absolute coordinates are computed by the {\em arranger}. It maps the abstract presentation on an {\em arrangement}, which is a absolute positioning of all elements of the presentation. The arranger also takes care of hyphenation, line and page breaking. Finally, the arrangement is rendered as a bitmap by the {\em renderer}.
+The absolute coordinates are computed by the {\em arranger}. It maps the abstract presentation on an {\em arrangement}, which is a absolute positioning of all elements of the presentation. The arranger also takes care of hyphenation, line and page breaking. Finally, the arrangement is rendered to an image by the {\em renderer}.
 
 A prototype of the Proxima editor has been implemented with the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
 
