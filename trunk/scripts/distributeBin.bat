@@ -7,14 +7,14 @@ mkdir c:\windows\temp\proxima
 c:
 cd c:\windows\temp\proxima
 
-copy d:\data\src\hugs\proxima\Test\Proxima.exe 
+copy D:\Data\Src\Haskell\ProximaCVS\proxima\test\Proxima.exe 
 copy c:\apps\ghc\bin\wxc.dll 
 copy c:\apps\ghc\bin\wxcd.dll 
-copy d:\data\src\hugs\proxima\Test\*.lvm
-copy d:\data\src\hugs\proxima\Test\*.hs
-xcopy d:\data\src\hugs\proxima\Test\Docs            Docs\
-xcopy d:\data\src\hugs\proxima\Test\Fonts           Fonts\
-xcopy d:\data\src\hugs\proxima\Test\Img             Img\
+xcopy D:\Data\Src\Haskell\ProximaCVS\proxima\test\lvm        lvm\
+xcopy D:\Data\Src\Haskell\ProximaCVS\proxima\test\img        img\
+copy D:\Data\Src\Haskell\ProximaCVS\proxima\test\*.hs
+xcopy D:\Data\Src\Haskell\ProximaCVS\proxima\docs            docs\
+xcopy D:\Data\Src\Haskell\ProximaCVS\proxima\etc\fonts       fonts\
 cd ..
 
 del "c:\Documents and Settings\Martijn\Desktop\ProximaBin.zip"

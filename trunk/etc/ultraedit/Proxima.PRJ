@@ -1,7 +1,7 @@
 [Project ID]
 Signature=UE Proj: v.1
 [Project Information]
-Project Directory=D:\Data\src\hugs\toCVSProxima\
+Project Directory=D:\Data\src\Haskell\ProximaCVS\proxima\
 Use Relative Directory=1
 Relative to Project File=1
 Project Wordfile=
@@ -9,10 +9,10 @@ Project Tagfile=
 Create Tagfile=0
 Filter=*.*
 [Open Files]
-Open File0=
-Open File Pos0=0
-Open File Line0=0
-Open File Window Pos0=2,3,-1,-1,-4,-28,0,0,1004,439
+Open File0=D:\Data\src\Haskell\ProximaCVS\proxima\src\main\Main.hs
+Open File Pos0=355
+Open File Line0=182
+Open File Window Pos0=2,3,-1,-1,-4,-28,23,27,1027,406
 Open File1=
 Open File Pos1=42274
 Open File Line1=41119
@@ -31,7 +31,7 @@ Open File Line4=0
 Active File Index=0
 Open File Window Pos4=2,2,640,442,-4,-28,168,168,1218,556
 Open File5=d:\Data\src\hugs\Proxima\Layout\LayPresent.hs
-Active File Display Mode=-1
+Active File Display Mode=3
 Open File Pos5=1119
 Open File Line5=284
 Open File Window Pos5=2,2,960,442,-4,-28,144,144,1194,532
@@ -342,4 +342,4 @@ SaveAllFiles9=0
 Save Active File9=1
 Replace Type9=0
 [Files]
-0=d:\Data\src\hugs\toCVSProxima\src\main\Main.hs
+0=D:\Data\src\Haskell\ProximaCVS\proxima\src\

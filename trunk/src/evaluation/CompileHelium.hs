@@ -260,7 +260,7 @@ phaseStaticChecks fullName doneModules module_ importEnvs options = do
 
     let (_, baseName, _) = splitFilePath fullName
 
-        (localEnv, errors, _, warnings) =
+        (localEnv, errors, _, _, warnings) =
             StaticChecks.sem_Module module_ baseName importEnvs
 
 {-    when (not (null errors)) $ do
