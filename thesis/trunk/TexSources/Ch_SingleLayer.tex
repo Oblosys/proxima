@@ -21,7 +21,8 @@ ES
 
 
 
-
+TODO
+check super & subscripts in figures and text: h/high h,trans or h_trans, etc.
 
 
 IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are correct 
@@ -630,6 +631,8 @@ It may seem more appropriate that presentation mapping information is a result o
 
 
 
+
+
 %																
 %																
 %																
@@ -637,70 +640,64 @@ It may seem more appropriate that presentation mapping information is a result o
 
 The abstract functions $Present$ and $Translate$ from the previous section specify what values need to be computed on a user edit, but do not specify how the values are computed, since the functions are abstract and cannot be evaluated. In this section, we develop a number of concrete  functions that implement the behavior of the abstract functions.
 
-First, we start with two functions $present$ and $translate$ that are assumed directly implement $Present$ and $Translate$. The lefthand side of Figure~\ref{maintainingInvs} shows how the abstract and concrete functions are related. The precondition is that the lower level is a correct presentation of the higher level. When the lower level is updated due to a user edit, a new higher level is computed by $translate$, establishing the translation invariant. Subsequently, when the higher layers have computed a final value for the higher level, $present$ computes a final lower level value, establishing the presentation invariant. The functions $Edit$ and $Transform$ are left abstract until the layers are connected in Chapter~\ref{chap:layeredArchs}.
-
-We can express the computation using equations:
-
-\begin{small}
-\begin{math}
-{\tt present} :: Level_{High} \rightarrow Level_{Low} \\
-{\tt translate} ::  Level_{Low} \rightarrow Level_{High} \\
-level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}\\
-level'_{High} = {\tt translate}~level'_{Low} \hfill \text{\{Compute new higher level\}}\\
-level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{High} = Transform~level'_{High}\\
-level''_{Low} = {\tt present}~level''_{High} \hfill \text{\{Compute new lower level\}}\\\\
-level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
-\end{math}\end{small}
-
-This first set of equations is not very informative, because $present$ and $translate$ are assumed to directly implement their abstract counterparts. In the next sections, refine the functions
-
-
-\bigskip {\bf Presentation/Translation sheets}
-
-However, this set of equations gives an oversimplified view of the situation, as it implies that presentation of the higher data level depends only on the higher level itself and the presentation mapping. A similar thing holds for the translation. We might wish to influence how a level is presented without altering the data level or using a different presentation mapping. A more elegant solution is to paremeterize the presentation function with a separate style sheet that specifies the presentation ${\tt present}$ and ${\tt translate}$. \note{explain separation of data and presentation} \note{mention recompiling?} Therefore, we parameterize the presentation and translation functions with a {\em sheet} argument. The presentation sheet has the abstract type $Sheet_{Pres}$, and the translation sheet is of type $Sheet_{Trans}$.
-
-\begin{small} \begin{math}
-{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low} \\
-{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \\
-level'_{Low} = Edit~level_{Low}\\
-level''_{High} = Transform~level'_{High}\\
-level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
-level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
-level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
-{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\\
-\end{math}\end{small}
-\note{also put id condition in previous invariant? And add the PRES TRANS one too?}
-
 \begin{figure}
 \begin{center}
 \begin{center}
 \epsfig{file=pics/eps/maintain.eps, height=1.5in} \epsfig{file=pics/eps/maintainSheet.eps, height=1.5in}
-\bc
-\begin{footnotesize}
-\begin{verbatim}
-LevelH       Level'H .....  Level''H       # LevelH       Level'H .....  Level''H     
-.              ^ ^             | .         # .              ^ ^             | .       
-.        trans | . Trans  pres | . Pres    # .        trans | . Trans  pres | . Pres  
-.              | .             | .         # .              | .             | .       
-v              | .             v v         # v              | .   sheet     v v       
-Level....... Level'L         Level''L      # Level....... Level'L         Level''L    
-\end{verbatim}
-\end{footnotesize}
-\ec\end{center}
-\caption{**Maintaining the invariants, and with sheets.}\label{maintainingInvs} 
 \end{center}
-\end{figure}
+\caption{Maintaining the invariants: without sheets (left) and with sheets (right)}\label{maintainingInvs} 
+\end{center}
+\end{figure}\note{split the figure? rhs is used in next subsection}
 
+First, we start with two functions $present$ and $translate$ that are assumed directly implement $Present$ and $Translate$. The lefthand side of Figure~\ref{maintainingInvs} shows how the abstract and concrete functions are related. The precondition is that the lower level is a correct presentation of the higher level. When the lower level is updated due to a user edit, a new higher level is computed by $translate$, establishing the translation invariant. Subsequently, when the higher layers have computed a final value for the higher level, $present$ computes a final lower level value, establishing the presentation invariant. The functions $Edit$ and $Transform$ are left abstract until the layers are connected in Chapter~\ref{chap:layeredArchs}.
 
-The sheet parameter contains information about how to present or translate the elements of the respective data levels. The presentation sheet for the presentation layer specifies the presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The translation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $Present$ and $Translate$ functions, as these represent the intended presentation and translation mappings that we implement with the functions ${\tt present}$, ${\tt translate}$ and the respecitive sheet parameters. \note{scanner sheet}
+We can express the computation using equations:
 
+\begin{small} \begin{math} \label{inv:immediate}
+{\tt translate}	::  Level_{Low} \rightarrow Level_{High} \hfill ~\\
+{\tt present}	:: Level_{High} \rightarrow Level_{Low}  \hfill ~\\
+level_{Low} = Present~level_{High}		\hfill \text{\{Precondition\}}\\
+level'_{Low} = Edit~level_{Low}			\hfill\text{\{User edit\}}\\
+level'_{High} = {\tt translate}~level'_{Low} \hfill \text{\{Compute new higher level\}}\\
+level'_{High} = Translate~level'_{Low}		\hfill \text{\{Intermediate condition\}}\\
+level''_{High} = Transform~level'_{High}	\hfill \text{\{Higher layer update\}}\\
+level''_{Low} = {\tt present}~level''_{High} 	\hfill \text{\{Compute new lower level\}}\\
+level''_{Low} = Present~level''_{High}		\hfill \text{\{Postcondition\}}\\
+\end{math}\end{small}\\
+{\centering (Invariant 1: Direct implementation of $Translate$ and $Present$)\\}\vspace{1em}
+
+This first set of equations is not very informative, because the mapping functions $present$ and $translate$ are assumed to directly implement their abstract counterparts. In order to give a more detailed specification, and also because the presence of extra state makes it difficult to directly implement the abstract functions, we refine the specification in the next sections. Section~\ref{sect:maintainingSheet} adds style sheets to $present$ and $translate$, Section~\ref{sect:maintainingSheet} adds support for extra state handling, and finally in Section~\ref{sect:maintainingSheet} contains an incremental version of the mapping functions.
+
+%																
+%																
+%																
+\subsection{Presentation and translation sheets} \label{sect:maintainingSheet}
+
+The first refinement we make is the addition of $sheet$ parameters to ${\tt present}$ and ${\tt translate}$. In the first set of equations, the presentation of the higher data level depends only on the higher level itself and the presentation mapping. The same holds for the translation. However, we might wish to influence how a level is presented without altering the data level or using a different presentation mapping. Therefore, we parameterize the presentation and translation functions with style sheets that specify the presentation and the translation (also see Section~\ref{sect:archProximaLayers}). The righthandside of Figure~\ref{maintainingInvs} shows a graphical representation of the computation when style sheets are added. 
+
+The presentation sheet has the abstract type $Sheet_{Pres}$, and the translation sheet is of type $Sheet_{Trans}$. The equations thus become:
+
+\begin{small} \begin{math} \label{inv:sheets}
+{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low} \\
+level_{Low} = Present~level_{High}						\hfill \text{\{Precondition\}}\\
+level'_{Low} = Edit~level_{Low}							\hfill \text{\{User edit\}}\\
+level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}	\hfill \text{\{Compute new higher level\}}\\
+level'_{High} = Translate~level'_{Low}						\hfill \text{\{Intermediate condition\}}\\
+level''_{High} = Transform~level'_{High} 					\hfill \text{\{Higher layer update\}}\\
+level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High} 		\hfill \text{\{Compute new lower level\}}\\
+level''_{Low} = Present~level''_{High}						\hfill \text{\{Postcondition\}}\\
+{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\hfill \text{\{***??***\}}\\
+\end{math}\end{small}\\
+{\centering (Invariant 2: Support for presentation and translation sheets)\\}\vspace{1em}
+\note{also put id condition in previous invariant? And add the PRES TRANS one too?}
+
+The sheet parameter contains information about how to present or translate the elements of the respective data levels. The presentation sheet for the presentation layer specifies the presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The translation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $Present$ and $Translate$ functions, as these functions represent the intended presentation and translation mappings that we implement with the functions 
+${\tt present}$, ${\tt translate}$ and the respecitive sheet parameters.
+
+\note{?????????}
 Although a layer has two sheets, the two are closely related as they have to satisfy the
 $Translate \cdot Present = id_{High}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
-
 
 
 %																
@@ -716,17 +713,6 @@ present and translate gaan niet naar level, maar naar core (see Section~\ref{sec
 The available mapping functions $Present$ and $Translate$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions ${\tt present}$ and ${\tt translate}$ that have a result type of $Core \times Extra$:
 % not for top and bottom
 
-\begin{small}\begin{math}
-{\tt translate} :: Sheet_{Trans} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}  \times Extra_{Trans,High} \\
-level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{Low} = Edit~level_{Low}\\
-level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
-level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-core'_{Trans,High} \times info_{Trans,High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
-level'_{High} = {\tt reuse}~?level_{Low}~?level_{High}~core'_{High}\\
-\end{math}\end{small}
-%{\tt present} :: Sheet_{Pres} \rightarrow Level_{High} \rightarrow Core_{Pres,Low} \times
-%Extra_{Pres,Low} \\
 
 % what extra info to keep
 The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, ${\tt translate}$ and ${\tt present}$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For ${\tt translate}$, the extra argument is of type $Info_{Trans}$, and it is computed by ${\tt present}$. Analogously, ${\tt present}$ gets an extra argument of type $Info_{Pres}$, which is computed by ${\tt translate}$. \note{already mention computation order here?}
@@ -736,26 +722,30 @@ The $Extra$ information in the result types cannot be computed from the argument
 \begin{center}
 \begin{center}
 \epsfig{file=pics/eps/maintainES.eps}
-\bc\begin{footnotesize}
-\begin{verbatim}
-CorexExtraH   Level'H ......... Level''H     # LevelH       Level'H .....  Level''H     
-.       \      ^      ^            |  .      # .              ^ ^             | .       
-.        \     |      .            |  .      # .              | .             | .       
-.         reuse|      .        pres|  .      #
-.              |      .            |  .      # .              | .             | .       
-.Pres      CoreHxInfo .Trans    CoreL .Pres  #
-.              |      .            |  .      # .              | .             | .       
-.         trans|      .       reuse|  .      # .        trans | . Trans  pres | . Pres  
-.              |      .    /       |  .      #
-v              |      .   /        v  v      # v              | .   sheet     v v       
-Level.......  Level'L           Level''L     # Level....... Level'L         Level''L    
-\end{verbatim}
-\end{footnotesize}
-\ec
 \end{center}
-\caption{**Maintain with es.}\label{layerExtraState} 
+\caption{Maintaing the invariants in the presence of extra state.}\label{layerExtraState} 
 \end{center}
 \end{figure}
+
+
+\begin{small}\begin{math} \label{inv:extraState}
+Level_{High} = core'_{Trans,High} \times extra'_{Trans,High}\\
+Level_{Low} = core'_{Pres,Low} \times extra'_{Pres,High}\\
+{\tt translate} :: Sheet_{Trans} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}\\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Core_{Pres,Low}\\
+level_{Low} = Present~level_{High}						\hfill \text{\{Precondition\}}\\
+level'_{Low} = Edit~level_{Low}							\hfill \text{\{User edit\}}\\
+core'_{Trans,High}  = {\tt translate}~sheet_{Trans}~level'_{Low}	\hfill \text{\{Compute new higher core\}}\\
+level'_{High} = {\tt reuse}~level_{High}~?level_{Low}~core'_{High}\hfill \text{\{Reuse extra state\}}\\
+level'_{High} = Translate~level'_{Low}						\hfill \text{\{Intermediate condition\}}\\
+level''_{High} = Transform~level'_{High} 					\hfill \text{\{Higher layer update\}}\\
+core''_{Pres,Low}  = {\tt present}~sheet_{Pres}~level''_{High}		\hfill \text{\{Compute new lower core\}}\\
+level''_{Low} = {\tt reuse}~level_{Low}~?level_{High}~core''_{Low}\hfill \text{\{Reuse extra state\}}\\
+level''_{Low} = Present~level''_{High}						\hfill \text{\{Postcondition\}}\\
+\end{math}\end{small}\note{does reuse need the other level as well?}\\
+{\centering (Invariant 3: Support for extra state)}\vspace{1em}
+%{\tt present} :: Sheet_{Pres} \rightarrow Level_{High} \rightarrow Core_{Pres,Low} \times
+%Extra_{Pres,Low} \\
 
 
 
@@ -843,21 +833,14 @@ Figure~\ref{fromLevelToOp} shows the difference between a translation mapping be
  ${\tt update} :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha$ to the edit operation and the level. A 
  ${\tt present}$ function between edit operations instead of levels can be specified similarly.
 
+*now we also need the old values for the level!
+
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{center}
-\begin{small}
-\bigskip \noindent
-\xymatrix{
-                               &                &                                      & \data{$e_{Level_{High}}$} \ar[dr]        &                           &                        \\
-\data{$level'_{High}$}         &                & \data{$level_{High}$} \ar[rr]\ar[dr] &                                          & \component{${\tt update}$} \ar[r] & \data{$level'_{High}$} \\
-\component{${\tt translate}$} \ar[u] & {\rm becomes: }&                                      & \component{${\tt translate}$}  \ar[uu]         &                           &                        \\
-\data{$level'_{Low}$}   \ar[u] &                & \data{$level_{Low}$}  \ar[rr]\ar[ur] &                                          & \component{${\tt update}$} \ar[r] & \data{$level'_{Low}$}  \\
-                               &                &                                      & \data{$e_{Level_{Low}}$} \ar[uu] \ar[ur] &                           &                        \\
-}
-\end{small}
-\end{center}\caption{Level to level versus edit operation to edit operation }\label{fromLevelToOp} 
+\epsfig{file=pics/eps/levelMapVsdeltaMap.eps}
+\end{center}\caption{Level to level vs. edit operation to edit operation }\label{fromLevelToOp} 
 \end{center}
 \end{small}
 \end{figure}
@@ -871,28 +854,13 @@ The arrows going from the higher and the lower level to ${\tt translate}$ in the
 \begin{small}
 \begin{center}
 \begin{center}
-\begin{small}
-\bigskip \noindent
-\xymatrix{
- \data{$e_{Level_{High}}$}  & \component{diff} \ar[l] & \data{$Level_{High}$} \ar[l] \\
- & \data{$Level_{High'}$} \ar[u] & \\ 
- & \component{$translate'$} \ar[u] & \\
- & \data{$Level_{Low'}$} \ar[u] & \\
-\data{$e_{Level_{Low}}$} \ar[r] & \component{${\tt update}$} \ar[u] & \data{$Level_{Low}$} \ar[l]
-% same thing for present
-% \data{$e_{Level_{High}}$} \ar[r] & \component{${\tt update}$} \ar[d] & \data{$Level_{High}$} \ar[l] \\
-% & \data{$Level_{High'}$} \ar[d] & \\ 
-% & \component{$Presenter$} \ar[d] & \\
-% & \data{$Level_{Low'}$} \ar[d] & \\
-%\data{$e_{Level_{Low}}$} & \component{diff} \ar[l] & \data{$Level_{Low}$} \ar[l]  \\
-}
-\end{small}
-\end{center}\caption{Computation of $e_{High}$ from $e_{Low}$ (add box: and say trans = [upd trans' diff] )) }\label{computeOps} 
+\epsfig{file=pics/eps/levelMap2deltaMap.eps}
+\end{center}\caption{Computation of $e_{High}$ from $e_{Low}$}\label{computeOps} 
 \end{center}
 \end{small}
 \end{figure}
 
-For the presentation mapping, a similar computation can be performed. Hence, ${\tt present}$ also needs the values of the two levels. 
+For the presentation mapping, a similar computation can be performed. Hence, ${\tt present}$ also needs the values of the two adjacent levels. 
 
 Before we give the invariants for the incremental versions of the layer functions, we introduce a short-hand notation for the ${\tt update}$ functions. Especially for larger computations, these functions clutter the diagrams, due to crossing arrows and the many rather uninformative appearances of ${\tt update}$. In the normal notation, an update $data' = {\tt update}~e_{Data}~data$, for values 
 $data, data' :: Data$, is represented as:\\
@@ -901,8 +869,7 @@ $data, data' :: Data$, is represented as:\\
 
 \smallskip
 Because an edit operation on a value of type $Data$ can also be regarded as a function of type 
-$Data \rightarrow Data$, we use a squiggly arrow notation that leaves the function ${\tt update}$ implicit:\\
-******* not a squiggly anymore
+$Data \rightarrow Data$, we use a dashed arrow notation that leaves the function ${\tt update}$ implicit:\\
 
 \epsfig{file=pics/eps/updateNotationShort.eps}
 
@@ -912,14 +879,7 @@ Figure~\ref{incrementalTranslate}, shows the righthand side of Figure~\ref{fromL
 \begin{small}
 \begin{center}
 \begin{center}
-\begin{small}
-\bigskip \noindent
-\xymatrix{
-\data{$level_{High}$} \ar@{~>}[r]\ar[dr] & \data{$e_{Level_{High}}$} \ar@{~>}[r] &\data{$level'_{High}$} \\
-                                         & \component{${\tt translate}$}  \ar[u]           &                           &                           \\
-\data{$level_{Low}$}  \ar@{~>}[r]\ar[ur] & \data{$e_{Level_{Low}}$}  \ar[u] \ar@{~>}[r]          & \data{$level'_{Low}$}  \\
-}
-\end{small}
+\epsfig{file=pics/eps/translateShortNotation.eps}
 \end{center}\caption{Incremental ${\tt translate}$.}\label{incrementalTranslate} 
 \end{center}
 \end{small}
@@ -933,6 +893,11 @@ Figure~\ref{incrementalTranslate}, shows the righthand side of Figure~\ref{fromL
 \caption{**Maintain with es inc.}\label{layerExtraStateInc} 
 \end{center}
 \end{figure}
+
+**
+Now we only need to add reuse, sheets and some arrows to get bla. Also for present.
+**
+
 
 In addition to the extra parameters, and the change from level to edit operation, the equations for the incremental versions of ${\tt present}$ and ${\tt translate}$ also contain a number of explicit ${\tt update}$ functions. Furthermore, note that compared to ${\tt translate}$, the order of the level parameters for         ${\tt present}$ is swapped (ie. first the higher and then the lower level) since the direction of the mapping is also swapped.
  
