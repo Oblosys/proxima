@@ -57,7 +57,7 @@ genSem' d@(Decl "EnrichedDoc" l _) = []     --- No SEM should be created for Enr
 genSem' d@(Decl e l DeclConsList) = semConsList e 
 genSem' d@(Decl e l DeclList) = semList e 
 genSem' d@(Decl e l _)   = [("\n\nSEM "++e)] ++ indent 2 (concatMap doIdC  l) ++ --- SEM
-                           [ "  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" ("++e++"Node @self @lhs.path) @lhs.path"
+                           [ "  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" (Hole"++e++"Node @self @lhs.path) @lhs.path"
                             ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"]++
                          --- quick dirty fix so no SEM is generated if no path rules are generated
                          let pathRules = concatMap doPath l  ---
