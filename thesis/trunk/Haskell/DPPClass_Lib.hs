@@ -8,69 +8,40 @@ fix a = let fixa = a fixa
          in fixa
 
 type LayerFunction horArg vertArg horRes vertRes =
-       horArg -> vertArg -> (horRes, vertRes)  --
+       horArg -> vertArg -> (horRes, vertRes)
 
-class Pack step arg res nStep | step -> arg res nStep where
+class Pack step arg res nStep | step -> arg res nStep, nStep -> step where
   pack :: (arg -> (nStep, res)) -> step
   unpack :: step -> arg -> (nStep, res)
 
 liftStep :: Pack step vArg vRes nStep => 
-            (hArg -> vArg -> (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
+            (hArg -> vArg -> (hRes,vRes)) ->
+            (hRes -> nStep) ->
+            hArg -> step
 liftStep layerF next horArg = pack $
-    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg --
-                in  (next horRes, vertRes)                     --
+    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg
+                in  (next horRes, vertRes)                    
 
 combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepU h m nStepU
+                   , Pack stepH h m nStepH
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown nextStep upr lwr = pack $
-    \high -> let (nextUpr, med) = (unpack upr) high
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown nStep hghr lwr = pack $
+    \high -> let (nextHghr, med) = (unpack hghr) high
                  (nextLwr, low) = (unpack lwr) med
-             in  (nextStep nextUpr nextLwr, low)
+             in  (nStep nextHghr nextLwr, low)
 
 combineStepUp :: ( Pack stepC l h nStepC 
-                 , Pack stepU m h nStepU
+                 , Pack stepH m h nStepH
                  , Pack stepL l m nStepL ) => 
-                 (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepUp nextStep upr lwr = pack $
+                 (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepUp nStep hghr lwr = pack $
     \low -> let (nextLwr, med) = (unpack lwr) low
-                (nextUpr, high) = (unpack upr) med
-            in  (nextStep nextUpr nextLwr, high)
+                (nextHghr, high) = (unpack hghr) med
+            in  (nStep nextHghr nextLwr, high)
 
 
-{- original  (nstep, vres) instead of (vres, nstep)
-
-class Pack step arg res nStep | step -> arg res nStep where
-  pack :: (arg -> (res, nStep)) -> step
-  unpack :: step -> arg -> (res, nStep)
-
-liftStep :: Pack step vArg vRes nStep => 
-            (hArg -> vArg -> (hRes,vRes)) -> (hRes -> nStep) -> hArg -> step
-liftStep layerF next horArg = pack $
-    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg --
-                in  (vertRes, next horRes)                     --
-
-combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepU h m nStepU
-                   , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpack upr) high
-                 (low, nextLwr) = (unpack lwr) med
-             in  (low, nextStep nextUpr nextLwr)
-
-combineStepUp :: ( Pack stepC l h nStepC 
-                 , Pack stepU m h nStepU
-                 , Pack stepL l m nStepL ) => 
-                 (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepUp nextStep upr lwr = pack $
-    \low -> let (med, nextLwr) = (unpack lwr) low
-                (high, nextUpr) = (unpack upr) med
-            in  (high, nextStep nextUpr nextLwr)
--}
-
-{- Different version (does not type check). Probably for Jurre Laven's MSc thesis
+{- Different version (does not type check). Is this for Jurre Laven's MSc thesis?
 
 class Pack step a b c d nStep where
   pack :: (arg -> (res, nStep c d a b)) -> step a b c d
@@ -84,20 +55,20 @@ liftStep layerF next horArg = pack $
 
 
 combineStepDown :: ( Pack stepC h l c d nStepC 
-                   , Pack stepU h m nStepU
+                   , Pack stepU h m nStepH
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpack upr) high
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown nStep hghr lwr = pack $
+    \high -> let (med, nextHghr) = (unpack hghr) high
                  (low, nextLwr) = (unpack lwr) med
-             in  (low, nextStep nextUpr nextLwr)
+             in  (low, nStep nextHghr nextLwr)
 
 combineStepUp :: ( Pack stepC l h nStepC 
-                 , Pack stepU m h nStepU
+                 , Pack stepH m h nStepH
                  , Pack stepL l m nStepL ) => 
-                 (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepUp nextStep upr lwr = pack $
+                 (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepUp nStep hghr lwr = pack $
     \low -> let (med, nextLwr) = (unpack lwr) low
-                (high, nextUpr) = (unpack upr) med
-            in  (high, nextStep nextUpr nextLwr)
+                (high, nextHghr) = (unpack hghr) med
+            in  (high, nStep nextHghr nextLwr)
 -}

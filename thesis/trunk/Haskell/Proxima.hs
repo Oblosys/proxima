@@ -6,7 +6,7 @@ module Main where
 import DPP_Lib
 import ProximaLayers
 
-type Step nextstep a b c d e f = (a ->(b, nextstep c d e f a b))
+type Step nStep a b c d e f = (a ->(b, nStep c d e f a b))
 
 newtype PresStep a b c d e f = PresStep (Step TransStep a b c d e f)
 newtype TransStep a b c d e f = TransStep(Step HStep a b c d e f)

@@ -33,7 +33,7 @@ wrap (Layer f1 f2) = Layer' (\() str -> ((), f1 str) )
 -- Almost automaticallly we can define the step type and Pack instances
 -- step type for two layer steps:
 
-type Step nextstep a b c d = (a ->(nextstep c d a b, b))
+type Step nStep a b c d = (a ->(nStep c d a b, b))
 
 newtype Step1 l h h' l' = 
             Step1 {step1 :: Step Step2 l h h' l'}

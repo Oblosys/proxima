@@ -33,7 +33,7 @@ wrap (Layer f1 f2) = Layer' (\() str -> ((), f1 str) )
 -- Almost automaticallly we can define the step type and Pack instances
 -- step type for two layer steps:
 
-type Step nextstep a b c d = (a ->(nextstep c d a b, b))
+type Step nStep a b c d = (a ->(nStep c d a b, b))
 
 newtype Step1 l h h' l' = 
             Step1 {step1 :: Step Step2 l h h' l'}
@@ -53,18 +53,16 @@ instance Pack (Step2  h' l' l h) h' l' (Step1 l h h' l')
 
 
 -- Combinator definitions
-
+lift :: Layer' -> () -> Step1 String String String String
 lift (Layer' f1 f2) = fix $ liftStep f1
                           . liftStep f2
 
 
 -- for combine we have to write down the type. It cannot be inferred
-combine :: Step1 b c d e -> Step1 a b e f -> Step1 a c d f
-combine upper lower = (fix $ combineStepUp 
-                           . combineStepDown) upper lower
+--combine :: Step1 b c d e -> Step1 a b e f -> Step1 a c d f
+combine h l = (fix $ combineStepUp . combineStepDown) h l 
 
   
-
 
 -- two example layers:
 layer1 = Layer (map toUpper) (map toLower)
@@ -72,8 +70,9 @@ layer2 = Layer reverse       reverse
 
 
 -- create an architecture:
+--layers :: Layer
 layers =           lift (wrap layer1) () 
-         `combine` lift (wrap layer2) ()
+ --        `combine` lift (wrap layer2) ()
 
 
 
@@ -92,7 +91,7 @@ layer2:    (reverse) ------> () ------> (reverse) ---> () ---> (reverse) ---> ()
 -}
 
 
-run :: Step1 String String String String -> IO ()
+--run :: Step1 String String String String -> IO ()
 run layers =
  do { let (Step1 fUp) = layers
     
@@ -125,6 +124,9 @@ run layers =
 
 
 
+
+{-
+
 -- More interesting layers with horizontal dataFlow. We directly put LayerFunctions in the layer, so no wrap is needed
 -- The LayersAB datatype is parameterized with the type of the horizontal parameter
 
@@ -154,6 +156,10 @@ liftAB (LayerAB f1 f2) = fix $ liftStep f1
 -- The second architecture:
 layersAB =           liftAB layerA 0 
            `combine` liftAB layerB 'a'
+
+
+
+-}
 
 {-
 

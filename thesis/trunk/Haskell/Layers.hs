@@ -5,19 +5,19 @@ import DPPClass_Lib
 
 data Simple' state mapping doc pres gest upd =
        Simple' { present' ::   LayerFunction state doc mapping pres
-               , translate' :: LayerFunction (mapping, state) gest state upd
+               , interpret' :: LayerFunction (mapping, state) gest state upd
                }
 
 data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction state doc (mapping, state) pres
-              , translate :: LayerFunction (mapping, state) gest state upd
+              , interpret :: LayerFunction (mapping, state) gest state upd
               }
 
 wrap :: Simple' state mapping doc pres gest upd -> Simple state mapping doc pres gest upd 
-wrap (Simple' present' translate') =
+wrap (Simple' present' interpret') =
   Simple { present = \state doc -> let (mapping, pres) = present' state doc
                                    in  ((mapping, state), pres)
-         , translate = translate'
+         , interpret = interpret'
          }
 
 
@@ -49,13 +49,13 @@ initDoc = undefined
 initStates :: IO (State0, State1, State2)
 initStates = undefined
 
-layer0 :: Simple' State0 Mapping0 Document Presentation EditPresentation EditDocument
+layer0 :: Simple State0 Mapping0 Document Presentation EditPresentation EditDocument
 layer0 = undefined
 
-layer1 :: Simple' State1 Mapping1 Presentation Arrangement EditArrangement EditPresentation
+layer1 :: Simple State1 Mapping1 Presentation Arrangement EditArrangement EditPresentation
 layer1 = undefined
 
-layer2 :: Simple' State2 Mapping2 Arrangement Rendering EditRendering EditArrangement
+layer2 :: Simple State2 Mapping2 Arrangement Rendering EditRendering EditArrangement
 layer2 = undefined
 
 updateDocument :: EditDocument -> Document -> Document

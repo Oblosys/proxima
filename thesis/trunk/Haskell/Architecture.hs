@@ -16,7 +16,7 @@ import qualified RenderingDefs
 import Graphics.UI.ObjectIO
 -}
 
-type Step m nextstep a b c d = (a -> m (b, nextstep m c d a b))
+type Step m nStep a b c d = (a -> m (b, nStep m c d a b))
 
 newtype TransStep m a b c d = 
             TransStep {transStep :: Step m PresStep a b c d}

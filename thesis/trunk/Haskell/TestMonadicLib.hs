@@ -7,7 +7,7 @@ import ArchitectureLibM
 
 --------------------
 
-type Step nextstep a b c d = (a -> IO (nextstep c d a b, b))
+type Step nStep a b c d = (a -> IO (nStep c d a b, b))
 
 newtype PresStep doc pres gest upd = 
             PresStep {presStep :: Step TransStep doc pres gest upd}
@@ -30,8 +30,8 @@ lift simple =
       . liftStep (translate simple) 
 
 combine :: PresStep a b e f -> PresStep b c d e -> PresStep a c d f
-combine upr lwr =  
-  fix (combineStepDown . combineStepUp) upr lwr
+combine hghr lwr =  
+  fix (combineStepDown . combineStepUp) hghr lwr
 
 
 data Simple state mapping doc pres gest upd =
