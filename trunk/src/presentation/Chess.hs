@@ -28,12 +28,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'n'
        pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'r'
        pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'p'
-       pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) True _  = img "img/Chess/pieceBW.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ True)  False _  =  img "img/Chess/pieceWB.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) False _  = img "img/Chess/pieceBB.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ False) True _  = img "img/Chess/pieceBW.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ True)  False _  =  img "img/Chess/pieceWB.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King _ False) False _  = img "img/Chess/pieceBB.bmp" `withSize` (80,84)
        
        txtPiece  ch = (if isReachable then (\x -> withMouseDown x (moveHere path focus)) else id) 
                        $ overlay $
@@ -55,13 +55,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        backgroundColor False False = (160,80,0)--(117,58,0)
        backgroundColor False True  = blue
 
-
-
 moveHere tPath focus (Prox.DocumentLevel d path cl) =
-  let (Prox.DocumentLevel d' path' pCl )    = editCopyD (Prox.DocumentLevel d focus cl)
-      (Prox.DocumentLevel d'' _ _ )         = editPasteD (Prox.DocumentLevel d focus (Prox.Clip_BoardSquare Prox.Empty)) 
-      (Prox.DocumentLevel d''' path'' cl'') = editPasteD (Prox.DocumentLevel d'' (Prox.PathD tPath) pCl)
-  in  (Prox.DocumentLevel d''' path'' cl)
+  let emptySquareClip = Prox.Clip_BoardSquare Prox.Empty
+      (Prox.DocumentLevel _  _ piece )  = editCopyD  (Prox.DocumentLevel d focus cl)
+      (Prox.DocumentLevel d' _ _)       = editPasteD (Prox.DocumentLevel d focus emptySquareClip)
+      (Prox.DocumentLevel d'' path'' _) = editPasteD (Prox.DocumentLevel d' (Prox.PathD tPath) piece)
+  in  (Prox.DocumentLevel d'' path'' cl)
                
 
 -- talking to Prometheus
@@ -334,5 +333,4 @@ setLocation loc field board =
         col = getColumn loc
         rowContents = board !! row
         modifiedRow = take col rowContents ++ [ field ] ++ drop (col + 1) rowContents
-    in take row board ++ [ modifiedRow ] ++ drop (row+1) board
-   
+    in take row board ++ [ modifiedRow ] ++ drop (row+1) board   
