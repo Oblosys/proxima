@@ -1,4 +1,5 @@
-\documentclass{entcs} \usepackage{entcsmacro}
+\documentclass{entcs} 
+\usepackage{entcsmacro}
 \usepackage{graphicx}
 \usepackage{utils}
 \usepackage{requirements}
@@ -114,15 +115,19 @@ $\Rightarrow$\\
 \editStepScrshot{\parbox{#1}{#2}}{\parbox{#1}{#3}}{#4}{#5}
 }
 
+Many software applications involve some form of editing: a user views a data structure and provides edit gestures in order to modify this data structure. Different kinds of documents require different ways of editing, and hence a multitude of editors exists, each having its own specific edit model and user-interface conventions. Moreover, since application designers have different ideas on what constitutes a pleasant edit model, even editors for the same document type may show significantly different edit behavior. Nevertheless, the core edit behavior, whether performed in a word-processor or a spreadsheet, is largely similar: document fragments may be copied and pasted, and new parts of the document may be constructed by selecting from menus or entering text. 
 
+An obvious research question is to abstract from the specific aspects of each editor and construct a generic system that can be instantiated to a specific editor application. Building an editor with such a system would require only a fraction of the amount of engineering required to build an editor from scratch. A generic editor enhances consistency between editors, because all instantiated editors share the same edit model, and, furthermore, it facilitates the integration of editors for different document types. 
 
+Especially in the nineteen-eighties, many research projects on structure editing were started. However, the editors developed were generally perceived as being overly restrictive, and attempts at developing less restrictive systems resulted mainly in text-only editors. Further, regardless of the restrictiveness of the edit model, the applicability of the generic editors was generally limited to source editors for programming languages and simple word-processing applications. In the years following, research interest in structure editing steadily declined, and many of the generic editors that were developed are now used only for educational purposes at the institute of origin. 
 
+In our opinion, the problem with most of these structure editors is that they either focus on editing the document structure, or the presentation (often just text). The document-oriented editors may have a powerful presentation mechanism, but poor editing support in the presentation, which results in a restrictive edit model. On the other hand, purely presentation-oriented editors lack edit operations on the document, and have relatively weak presentation mechanisms. 
 
+With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many XML document types are being developed, but support for editing documents of these types is still poor. There is a choice between using an expensive custom-made editor, or a generic XML editor, but the functionality of the latter does not come close to what a presentation-oriented (WYSIWYG) editor could potentially offer. It is, for instance, not possible to use any of the current XML editors as a convenient editor for a programming language or for mathematical equations. 
 
+In this paper we investigate requirements for structure editors. We present five use cases in detail. The use cases serve to illustrate the term generic editor, and to formulate requirements for structure editors. 
 
-In this chapter, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the definition of the term editor from the previous chapter, and provide standard examples to explain and define edit behavior in the coming chapters. A design requirement of Proxima is that the editor is able to handle all five use cases. 
-
-Section~\ref{sect:usecases} presents the five use cases, from which we formulate a set of functional requirements for a flexible non-restrictive structure editor, in Section~\ref{sect:reqs}. Existing editors are evaluated according to these requirements in sections~\ref{sect:editorOverview} and~\ref{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how the Proxima editor meets the requirements and thus will be able to implement all of the use cases.
+Section~\ref{sect:usecases} presents the use cases. From these use cases we formulate a set of functional requirements for a flexible non-restrictive structure editor in Section~\ref{sect:reqs}. Existing editors are evaluated according to these requirements in sections~\ref{sect:editorOverview} and~\ref{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how Proxima, a generic structure editor developed at Utrecht University, meets the requirements and thus will be able to implement all of the use cases.
 
 \section{Use cases} \label{sect:usecases}
 
