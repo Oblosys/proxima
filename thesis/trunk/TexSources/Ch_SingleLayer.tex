@@ -1,12 +1,29 @@
 \chapter{One Layer}
 \label{chap:singleLayer}
 
-branch testing
-
-more branch testing
-
 {\em *** Version: \today~ ***}
 \bc
+
+
+
+Contents
+
+
+Relation
+lev low lev high
+
+at element level 2 levels also relation
+
+ES
+
+
+
+
+
+
+
+
+
 IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are correct 
   ..           ...       
  .  .    ..   .   .   .. 
@@ -14,9 +31,8 @@ IMPORTANT there seems to be an invariant that for a j:  i>j, all mappings are co
  no it's not asymmetric. find out more about this.
  maybe it's just that a level is never presented twice without trans, and vice versa
 
-SOMEWHERE: mappings important for extra state, but also for editing on several levels. (is this really true?)
 
-UPPER LEVEL OR HIGHER LEVEL  and H/L or U/L
+SOMEWHERE: mappings important for extra state, but also for editing on several levels. (is this really true?)
 
 RENDERER IS SPECIAL, LOWER THING IS NOT A TREE, EXPLAIN THAT THIS CHAPTER ONLY HOLDS FOR HIGHER LAYERS
 
@@ -38,15 +54,14 @@ No i's in this chapter!!! all is High and Low Is this possible?
 translation is bit strange as edit ops can be on higher level
 * could this also be the case with presentation?
 
-Main trunk edit
 
 
 !!!!!!!!!
-MAYBE we want to make PRESENT and TRANSLATE the intended and specified mappings, 
+MAYBE we want to make Present and Translate the intended and specified mappings, 
 without extra stuff and mappings, then the editor has to implement the incremental ones
- and mapping preserving things, so the result is that PRESENT and TRANSLATE hold.
+ and mapping preserving things, so the result is that Present and Translate hold.
 
-!however, in that case PRESENT.TRANSLATE will not be id if PRESENT is ambiguous, or 
+!however, in that case Present.Translate will not be id if Present is ambiguous, or 
 has extra state. But maybe we don't care and only require the implementation to be id.
 
 !what about sheets? 
@@ -62,9 +77,15 @@ IMPL: mapping downward, how to store in doc? Now datatype changes when pres is m
 
 %* explain edit steps? Before fitting it all together, we first build one layer
 
-In the layered architecture of Proxima, each layer maintains an invariant between two adjacent levels. When one level is changed, the adjacent level is updated in an appropriate way. Moreover, on one layer, the mappings in one direction turn out to be largely symmetrical to the mappings in the other direction.
+In the layered architecture of Proxima, each layer maintains invariants between two adjacent levels. When one level is changed, the adjacent level is updated in an appropriate way. Moreover, at each layer, the mappings in one direction turn out to be largely symmetrical to the mappings in the other direction.
 
-This chapter discusses the invariant that is maintained between two adjacent levels, as well as the way in which the layer in between maintains this invariant by using presentation and translation mappings. Furthermore, it specifies the additional information that needs to be kept track of in order to be able to compute the layer mappings. The information in this chapter holds for any layer in the Proxima system, although several layers will be simpler than the generic layer as presented here.
+This chapter discusses the invariants that are maintained between two adjacent levels, as well as the way in which the layer in between maintains the invariants by evaluating presentation and translation mappings. Furthermore, it specifies the additional information necessary for computing the layer mappings. The invariants given in this chapter holds for any layer in the Proxima system, although several layers will be simpler than the generic layer presented here.
+
+% behavior is denoted with abstract, and then we give concrete functions that implement the abstract.
+
+% next chapter, we connect everything.
+
+
 
 % based on a mapping between levels
 % add sheets, add extra and add incrementality
@@ -73,44 +94,46 @@ This chapter discusses the invariant that is maintained between two adjacent lev
 \note{Stress that it's only an architecture. Safety, impl. etc is left to layer. Future research (Pierce?)}
 %rather than safe toy, complete arch for many ed's Safety and patterns need to be researched
 
-%Where say that mapping back is only when we need automatic editing:
-%** is it only important for duplicates? It seems to be important for 2:1 presentations as well. 
-%** In some complicated cases, the mapping back cannot be spec'd if mapping back is does not work, it means that lower
-%edit cannot be handled, and is forbidden. However, we always have the higher level edit left.
+\bc
+Where say that mapping back is only when we need automatic editing: is it only important for duplicates? It seems to be important for 2:1 presentations as well.  In some complicated cases, the mapping back cannot be spec'd if mapping back is does not work, it means that lower edit cannot be handled, and is forbidden. However, we always have the higher level edit left.
+\ec
 
-
-%								
-%								
-%								
+%																
+%																
+%																
 \section{The Presentation and Translation invariants}
 
 % will become more a computation order
 
-In order to relate the data levels surrounding one layer, we use two invariants: the {\em presentation invariant} and the {\em translation invariant}. The presentation invariant holds if and only if the lower level is a correct presentation of the higher level. It is expressed using an abstract function $PRESENT$:
+In order to relate the data levels surrounding one layer, we use two invariants: the {\em presentation invariant} and the {\em translation invariant}. The presentation invariant is satisfied if and only if the lower level is a correct presentation of the higher level. It is expressed using an abstract function $Present$:
 
 \begin{math}
-PRESENT :: Level_{High} \rightarrow Level_{Low} \\
+Present :: Level_{High} \rightarrow Level_{Low} \\
 \end{math}
 
-Similarly, the translation invariant holds if and only if the higher level is a correct translation of the lower level. The translation invariant is expressed with a function $TRANSLATE$:
+Similarly, the translation invariant is satisfied if and only if the higher level is a correct translation of the lower level. The translation invariant is expressed with a function $Translate$:
 
 \begin{math}
-TRANSLATE ::  Level_{Low} \rightarrow Level_{High} \\
+Translate ::  Level_{Low} \rightarrow Level_{High} \\
 \end{math}
 
-The functions $PRESENT$ and $TRANSLATE$ are abstract concepts used to express a property of two levels, not actual functions that can be computed. The functions are used to give a specification of the computations that are performed by a layer.
+\note{not functions but relations because of extra state}
+The functions $Present$ and $Translate$ are abstract concepts used to express a property of two levels, not actual functions that can be evaluated. The functions are used specify the behavior of a layer.
 
-Figure~\ref{layerEditProcess} shows how the invariants can be used to specify the data level updates. The precondition before the edit operation takes place is that $level_{Low} = PRESENT~level_{High}$, meaning that the lower level is a correct presentation of the higher level. In the levels below, an edit operation takes place, which results in an updated lower level: $level'_{Low}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the translation invariant:
-$level'_{High} = TRANSLATE~level_{Low}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $level''_{High}$. Finally, the postcondition is established by updating the lower level to $level''_{Low}$ for which 
-$level''_{Low} = PRESENT~level''_{High}$ holds. Expressed as equations, the invariants \note{are these things really invariants?} are:
+Figure~\ref{layerEditProcess} shows how the invariants can be used to specify the data level updates. The precondition before the edit operation takes place is that the lower level is a correct presentation of the higher level, that is $level_{Low} = Present~level_{High}$. In the levels below, an edit operation takes place, which results in an updated lower level: $level'_{Low}$. Because the presentation invariant will not necessarily hold anymore, an appropriate higher level is specified by the translation invariant:
+$level'_{High} = Translate~level'_{Low}$. The new higher level is then processed by higher layers, resulting in the final higher level value for this edit step: $level''_{High}$. Finally, the postcondition is established by updating the lower level to $level''_{Low}$ for which 
+$level''_{Low} = Present~level''_{High}$ holds. Expressed as equations, the invariants \note{are these things really invariants?} are:
 
 \begin{math}
-level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
+level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
+level'_{Low} = Edit~level_{Low}\\
+level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level''_{High} = Transform~level'_{High}\\
+level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
 \end{math}
-% also do an EDIT condition that says the new thing is what we intend with the edit gesture? Does not seem
-% to make sense for a single layer. Maybe do it in the next chapter
+
+% also do an EDIT condition that says the new thing is what we intend with the 
+% edit gesture? Does not seem to make sense for a single layer. Maybe do it in the % next chapter
 
 % can we express when this happens with a condition? pres .. /= pres .. oid?
 The reason why $level'_{High}$ is not immediately presented, is that it has to be processed by the higher layers, just as $level'_{Low}$ is processed by this layer. The final value $level''_{High}$ may be equal to $level'_{High}$, but this is not always the case. Take, for example, an enriched document that contains a list of numbers together with the sum of the numbers. When one of the numbers is edited on presentation level, the new enriched document that results from parsing ($level'_{High}$) is a list of numbers together with a sum value that might not be correct anymore. In order to get the correct value, the enriched document is passed on to the reducer and evaluator, resulting in a final enriched document ($level''_{High}$) that contains a correct sum.
@@ -124,7 +147,7 @@ The reason why $level'_{High}$ is not immediately presented, is that it has to b
 \xymatrix{
                       \ar@{.>}[d] &  &                       \ar@{.}[rr] & &                   \ar@{.>}[d]  \\
  \data{$level_{High}$} \ar[d]     &  & \data{$level'_{High}$} \ar@{.}[u] & & \data{$level''_{High}$} \ar[d] \\ 
- \component{$PRESENT$} \ar[d]     &  & \component{$TRANSLATE$} \ar[u]    & & \component{$PRESENT$}  \ar[d]  \\
+ \component{$Present$} \ar[d]     &  & \component{$Translate$} \ar[u]    & & \component{$Present$}  \ar[d]  \\
  \data{$level_{Low}$}  \ar@{.}[d] &  & \data{$level'_{Low}$}  \ar[u]     & & \data{$level''_{Low}$} \ar@{.>}[d]\\
                       \ar@{.}[r] & \abscomponent{User Edit} \ar@{.}[r]  &                      \ar@{.>}[u]  & &                                \\
  {\rm Precondition}               &  & {\rm Intermediate~condition}      & & {\rm Postcondition}            \\
@@ -136,132 +159,140 @@ The reason why $level'_{High}$ is not immediately presented, is that it has to b
 \end{figure}
 
 % why two:
-Instead of using two invariants, the relation between two levels could also be expressed using only one presentation invariant that states that the lower level is a presentation of the higher level, and at the same time the higher level is a translation of the lower level. However, this makes it impossible to distinguish between the intermediate condition and the postcondition. We want to be able to express that a higher level is a correct translation of a lower level, without this lower level being a correct presentation of the higher level.
+The reason why two invariants are used instead of one, is to make it possible to distinguish between the intermediate condition and the postcondition. The alternative would be a single invariant, stating that the lower level is a presentation of the higher level, as well as that the higher level is a translation of the lower level. However, now we cannot express the situation that a higher level is a correct translation of a lower level, without this lower level being a correct presentation of the higher level.
 
 % example of this
-As an example, consider an editor in which an enriched document node \verb|Plus (Int 1) (Int 2)| is presented as a list of presentation level tokens, colored according to the syntax. The integer values are presented in black, and the operator is green. If we denote the tokens as a string value with a color between braces, the presentation is \verb|["1" {black}, "+" {green}, "2" {black}]|. Because the presentation level is a correct presentation of the document level, the presentation invariant holds. But now consider a list of tokens typed by the user, that do not have the correct coloring: \verb|["1" {black}, "+" {black}, "2" {black}]|. If we want to be able to express with only one invariant that the enriched document \verb|Plus (Int 1) (Int 2)| is the appropriate translation of this list, then the uncolored sequence must also be a correct presentation of the sum. Hence, we cannot use the single invariant to express that in the final state, the presentation is the colored presentation of the sum, and not the uncolored presentation. \note{are we saying that with one invariant, pres is inverse of trans?}
+As an example, consider an editor in which an enriched document node \verb|Plus (Int 1) (Int 2)| is presented as a list of presentation level tokens, colored according to the syntax. The integer values are presented in black, and the operator in green. If we denote a token as a string value with a color in between braces, the presentation is \verb|["1" {black}, "+" {green}, "2" {black}]|. Because the presentation level is a correct presentation of the document level, the presentation invariant is satisfied. But now consider a list of tokens typed by the user, which do not have the correct coloring: \verb|["1" {black}, "+" {black}, "2" {black}]|. If we want to be able to express with only one invariant that the enriched document \verb|Plus (Int 1) (Int 2)| is the appropriate translation of this list, then the uncolored sequence must also be a correct presentation of the sum. Hence, with a single invariant, we cannot express that in the final state the colored presentation is a correct presentation of the sum, whereas the uncolored presentation is not. \note{are we saying that with one invariant, pres is inverse of trans?}
 
 
 ******** NOT TRUE, this will appear somewhere more downward, probably in ES section
-The functions $PRESENT$ and $TRANSLATE$ are closely related, but in contrast to what the types might suggest, the functions are in general not each others inverse. Because translating a presented document should not change the document, we do have: 
+The functions $Present$ and $Translate$ are closely related, but in contrast to what the types might suggest, the functions are in general not each others inverse. Because translating a presented document should not change the document, we do have: 
 
 \begin{math}
-TRANSLATE \cdot PRESENT = id_{High}
+Translate \cdot Present = id_{High}
 \end{math}
 
 \note{what about ambiguity?}
 
-However, the reverse ($PRESENT \cdot TRANSLATE = id_{Low}$) does not have to hold. The condition implies that an edited lower level does not change when it is translated and presented \note{also say that higher layers should not change it?}, which is not always true. The syntax coloring example provides a case in which it does not hold; if an uncolored presentation is translated and then presented, the result is a colored presentation. 
+However, the reverse ($Present \cdot Translate = id_{Low}$) does not necessarily hold. The condition implies that an edited lower level does not change when it is translated and presented \note{also say that higher layers should not change it?}, which is not always true. The syntax coloring example provides a case in which it does not hold; if an uncolored presentation is translated and then presented, the result is a colored presentation. 
 \note{pres is injective, and trans isn't?}
 
 %summary
-Summarizing, the presentation invariant specifies that two levels are in a final state, in which the lower is a correct presentation of the higher. When the lower level is updated, the translation invariant specifies a correct new higher level, which is passed on to the higher levels. The higher levels return a final for this edit step value for the higher level, for which a correct final lower level is specified by the presentation invariant. The layer in between each pair of levels takes care of maintaining the invariants, by invoking functions that establish the presentation and translation invariants.
+Summarizing, the $Presentation$ invariant specifies that two levels are in a final state, in which the lower is a correct presentation of the higher. When the lower level is updated, the $Translation$ invariant specifies a correct new higher level, which is passed on to the higher levels. The higher levels return a final for this edit step value for the higher level, for which a correct final lower level is specified by the $Presentation$ invariant. The layer in between each pair of levels takes care of maintaining the invariants, by invoking functions that establish the presentation and translation invariants.
 
-\note{say something about TRANSLATE.PRESENT here as well?}
-%?present~sheet~.~translate~sheet = id_{High}\\
+\note{say something about Translate.Present here as well?}
 
-%OTHER EXAMPLE?: Apart from the syntax coloring example, the problem also arises when for example a textual arrow 
-%\verb|"->"| is presented as a $\rightarrow$. In that case, a lower level containing textual arrows is 
-%translated on a higher level 
+\bc
+?present~sheet~.~translate~sheet = id_{High}\\
 
-%Vice versa? Fix by remembering extra?
-% layer shortcutting can now be expressed by only letting the lower pres invariants hold
+OTHER EXAMPLE?: Apart from the syntax coloring example, the problem also arises when for example a textual arrow 
+\verb|"->"| is presented as a $\rightarrow$. In that case, a lower level containing textual arrows is 
+translated on a higher level 
 
-% -explain that in incremental, present and translate cannot be used instead of PRESENT and TRANSLATE
-% -how does this relate to inc with diff etc. maybe that can be expressed nicely with PRESENT
-% (or even present, then PRESENT will be superfluous.)
+Vice versa? Fix by remembering extra?
+ layer shortcutting can now be expressed by only letting the lower pres invariants hold
 
-%* does   trans.pres = id hold for a layer? pres.trans never needs to hold due to syntax coloring, normalization etc., but also because Chess board is not a presentation of ChessBoard   
-%* trans.pres = id? then each pres has unique doc. Is this true? Can't doc variants be presented as same thing?
-%   present( translate uncolored ) = colored, so present.translate /= id
-%   translate ( present ) = id? if so, what if two docs are presented on the same pres?
-% it seems true, translate.present cycles should not alter the doc. In case of ambiguity, the system should
-% take care of conservative behavior. On an edit, the doc may change, but that's not a (translate.present) cycle
+ -explain that in incremental, present and translate cannot be used instead of Present and Translate
+ -how does this relate to inc with diff etc. maybe that can be expressed nicely with Present
+ (or even present, then Present will be superfluous.)
 
-% ****** When this is figured out, update sheet paragraph
+* does   trans.pres = id hold for a layer? pres.trans never needs to hold due to syntax coloring, normalization etc., but also because Chess board is not a presentation of ChessBoard   
+* trans.pres = id? then each pres has unique doc. Is this true? Can't doc variants be presented as same thing?
+   present( translate uncolored ) = colored, so present.translate /= id
+   translate ( present ) = id? if so, what if two docs are presented on the same pres?
+ it seems true, translate.present cycles should not alter the doc. In case of ambiguity, the system should
+ take care of conservative behavior. On an edit, the doc may change, but that's not a (translate.present) cycle
 
+ ****** When this is figured out, update sheet paragraph
+\ec
 
-%								
-\subsection{Upward and downward mappings in one layer} \label{mappingsInLayer}
+%																
+\subsection{Upward and downward mappings at one layer} \label{mappingsInLayer}
 
-The presentation and translation invariants are expressed with two functions: $PRESENT$ and $TRANSLATE$. The functions are of type $Level_i \rightarrow Level_j$, which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view the mappings as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
+% mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-It is important to note that we we speak of a mapping between tree nodes, we mean only the nodes, and not the subtrees rooted at theses nodes. Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, it is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
+The presentation and translation invariants are expressed using two functions\note{incorrect:relations}: $Present$ and $Translate$. The functions are of type $Level_i \rightarrow Level_j$ (where $j = i+1$ or $j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
 
-A second important point is that even though the mapping can express an $n:m$ relation between tree nodes, the entire mapping is always expressed as a function from one data level to another. Hence it is not a relation, but a function from a tree to another tree.
+By mapping between tree nodes, we mean a mapping that relates only the nodes, and not the subtrees rooted at theses nodes. Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, this is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
 
+When regarded as relating tree nodes, a mapping can express an $n:m$ relation between the nodes of the higher and the lower levels. However, when regarded as relating levels, a mapping is always a function (ie. an $n:1$ relation). Thus, $Present$ and $Translate$ are functions rather than relations.
+\note{WITH ES, they are relations!}
 
 %Figure~\ref{nodeMapping} shows two levels for which the presentation invariant holds.
 \begin{figure}
 \begin{center}
 \begin{center}
-\begin{verbatim}
-
-     aH        higher level
- bH      cH
- 
-
-                    Layer
-
- 
-     a1L 
- a2L         a3L   Lower level
- bL         cL
-\end{verbatim}
+\epsfig{file=pics/eps/presentation.eps, width=2in}
+%\begin{verbatim}
+%
+%     aH        higher level
+% bH      cH
+% 
+%
+%                    Layer
+%
+% 
+%     a1L 
+% a2L         a3L   Lower level
+% bL         cL
+%\end{verbatim}
 \end{center}
-\caption{A mapping between the nodes of two levels. $<$add arrows$>$}\label{nodeMapping} 
+\caption{A mapping between the nodes of two levels.}\label{nodeMapping} 
 \end{center}
 \end{figure}
 
 
 \bigskip {\bf The presentation mapping}
+
 \note {maybe say something about 1:n presentation restriction, but also about having $>$1 doc nodes influence same pres.?  Or before?}
 
-First we take a closer look at the downward, or presentation, direction. The abstract function $PRESENT$ maps each element of the higher level onto zero or more lower level elements. Figure~\ref{elementPresentation} shows the presentation of one node in the higher level. $E_H$ is an element in the higher data level, that has $n$ children ($C_{H,0}$, \dots, $C_{H,n-1}$). The presentation of \verb|E|$_H$ is the tree of \verb|E|$_L,i$ shown on the right.
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/presentationEh.eps, width=2in}
+%\begin{verbatim}
+%                  ..
+%                    \
+%..                   EL0
+%  \                 ELEL.
+%   EH       ->     EL..EL.
+%  / \             EL....EL. 
+% C...C           EL......EL.
+%                EL/\EL.EL/\EL.
+%                 /__\   /__\
+%                    
+%\end{verbatim}
+\end{center}
+\caption{The presentation of element {\tt EH}.}\label{elementPresentation} 
+\end{center}
+\end{figure}
+
+First we take a closer look at the downward, or presentation, direction. The abstract function $Present$ maps each element of the higher level onto zero or more lower level elements. Figure~\ref{elementPresentation} shows the presentation of one node in the higher level. $E_H$ is an element in the higher data level that has $n$ children ($C_{H,0}$, \dots, $C_{H,n-1}$). The presentation of \verb|E|$_H$ is the tree of \verb|E|$_L,i$ shown on the right.
 
 % restriction is on presentation. pres is like a fold
-% iets algemener verhaaltje hier. over dat het wel kan, maar dat de automatische dingen (focus etc.) dan weg zijn
+% iets algemener verhaaltje hier. over dat het wel kan, maar dat de
+% automatische dingen (focus etc.) dan weg zijn
 
 The shaded subtrees in the lower level tree are not part of the presentation of $E_H$. Typically, these are the presentations of the children of $E_H$, but in general they can be (part of) the presentation of any element in the higher level. Furthermore, a shaded subtree may be extra state of the lower level, which is explained in the next section.
 \note{they're not trees, but trees with holes, how do you such a thing?}
 
 %* if then else? tokens as list? then focus does not work (no?). tokens as tree?
 
-In the example, the resulting presentation is a single tree, but this is not always the case. For example, during evaluation in a word processor (Section~\ref{sect:wordprocessor}), each chapter is mapped onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
-
-\begin{figure}
-\begin{center}
-\begin{center}
-\begin{verbatim}
-                  ..
-                    \
-..                   E
-  \                 EEE
-   EH       ->     EEEEE
-  / \             EEEEEEE 
- C...C           EEEEEEEEE
-                E/\E...E/\E
-                /__\   /__\
-                    
-\end{verbatim}
-\end{center}
-\caption{The presentation of element {\tt EH}.}\label{elementPresentation} 
-\end{center}
-\end{figure}
+In the example, the resulting presentation is a single tree, but this is not always the case. For example, the evaluation layer in a word processor (see Section~\ref{sect:wordprocessor}), maps each chapter onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
 
 
 \bigskip {\bf The translation mapping}
 
-The upward direction, or translation, is slightly more restricted than the downward direction, because a lower level element is allowed to be mapped onto at most one higher level element. Figure~\ref{elementTranslation} contains an example translation of a subtree rooted at \verb|EL|. The children in the lower level tree are not mapped onto \verb|EH|, but may be mapped onto its children (or they may be ignored in the mapping).  Again, the lower level structure is not necessarily a single subtree (with holes), it may consist of several subtrees, e.g. when three presentation tokens \verb|"if"|, \verb|"then"| and \verb|"else"| are mapped onto an \verb|If| node in the enriched document during parsing.
+The upward direction, or translation, is slightly more restricted than the downward direction, because a lower level element is allowed to be mapped onto at most one higher level element. Figure~\ref{elementTranslation} contains an example translation of a subtree rooted at \verb|EL|. The children in the lower level tree are not mapped onto \verb|EH|, but may be mapped onto its children (or they may be ignored in the mapping).  Again, the lower level structure is not necessarily a single subtree (with holes), it may consist of several subtrees, e.g. when three presentation tokens \verb|"if"|, \verb|"then"| and \verb|"else"| are mapped onto an \verb|If| node in the enriched document in the parsing phase.
 
 \begin{figure}
 \begin{center}
 \begin{center}
 \begin{verbatim}
 
-       EL                 ->   EH
-  EEEEEEEEEEE               C ..  C
- E  C  E  C  E
+        EL                 ->    EH
+    EL.......EL               CH ..  CH
+ EL  CL  EL  CL  EL
 
 \end{verbatim}
 \end{center}
@@ -281,74 +312,37 @@ The upward direction, or translation, is slightly more restricted than the downw
 %if we propagate a value downward as an attribute, it already happens.
 %\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-A consequence from the difference between the presentation and the translation mappings is that even when a lower level element depends on several higher level elements, only one is responsible for its presentation. \note{where does this become important?} 
-
-%Word (True) "bla"             BLA
+A consequence of the difference between the presentation and the translation mappings is that even when a lower level element depends on several higher level elements, only one is responsible for its presentation. \note{where does this become important?} \note{example: leaf Color Int -> colored int. When selecting, either lead or int,  Color affects but is not responsible. can be accessed by special edit ops though.}
 
 
-\bigskip {\bf Duplicate presentations}
+\bigskip {\bf Duplicates in presentation}
 
-The presentation of a higher level element may consist of several lower level elements, for example when an \verb|If| node is presented with three tokens. In this case, the three tokens together are translated to the \verb|If| node. However, it is also possible that an element is duplicated in the presentation, in which case two (or more) lower level structures  translate to the same higher level element. An example of such a copy is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is translated, several alternatives for one element may arise, and a choice must be made. \note{hard to express this as a mapping}
+\note{duplicates in translation?}
+The presentation of a higher level element may consist of several lower level elements, for example when an \verb|If| node is presented with three tokens. In this case, the three tokens together are translated to the \verb|If| node. However, it is also possible that an element is duplicated in the presentation, in which case two (or more) lower level structures  translate to the same higher level element. An example of such a copy is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is translated, several alternatives for one element may arise, and a choice has to be made. \note{hard to express this as a mapping}
 
-The only two layers in which duplicates could be specified are the evaluation and the presentation layer. The presentation mappings for the other layers are largely predefined, and do not duplicate any structures. Currently, in order to separate the parsing process from the dealing with duplicates, duplications are allowed only at the evaluation layer, although this restriction may be lifted for a future version. Hence, if a presentation needs to contain duplicates, the evaluation should take care of duplicating the involved structures or elements.
+The only two layers in which duplicates can be created are the evaluation and the presentation layer. The presentation mappings for the other layers are largely predefined, and do not duplicate any structures. To avoind having to deal with duplicates when parsing, duplications are allowed only at the evaluation layer. However, this restriction may be lifted in a future version. For now, if a presentation contains duplicates, the evaluation should take care of duplicating the involved structures or elements.
 
-The table of contents view in a word processor is an example of a presentation that contains duplicates. The evaluator in the word processor creates a table of contents tree that follows the structure of the sections and subsections in the document, but only contains the titles and not the actual content. The presenter simply presents both the table of contents tree as the chapter tree, and does not duplicate any structures. The table of contents example is somewhat complex, because it does not only involve a duplicated presentation, but also a partial presentation (a section in the table of contents is shown without its content). Section~\ref{sect:extraState} discusses how partial presentations are handled.
+The table of contents view in a word processor is an example of a presentation that contains duplicates. The evaluator in the word processor creates a table of contents tree that follows the structure of the sections and subsections in the document, but only contains the titles and not the content. The presenter simply presents both the table of contents tree as well as the chapter tree, and does not duplicate any structures. The table of contents example is somewhat complex, because it does not only involve a duplicated presentation, but also a partial presentation (a section in the table of contents is shown without its content). Section~\ref{sect:extraState} discusses how partial presentations are handled.
 
 When translating the enriched document, the reducer makes a choice between the alternatives for each duplicated element. Three situations are possible. Firstly, if none of the alternatives has been edited, all alternative values are equal and any one can be chosen. Secondly, if one alternative has been edited, the choice is in favor of the edited element. Hence, if a chapter title is edited in the table of contents, the resulting reduced document contains the updated title. Finally, if more than one value has been edited, an error is signaled to the user. In this case the edit operation may be forbidden, or one of the values may be chosen.  \note{say that we cannot skip the evaluation layer with this scheme}
 
-A disadvantage of the described method for handling duplicates is that the enriched document type now depends on the presentation; if a presentation contains a tree view on the document, then the enriched document has to take care of duplicating it. A special facility for creating the necessary enriched document data definitions as well as the evaluation and reduction of the duplicates is desirable. However, it may be possible to capture the standard behavior for duplicates in a parser combinator that will allow the duplicate editing conflicts to be resolved during parsing. In that case, the whole process takes place in the presentation layer, and the evaluation layer is not affected. \note{parse (dirty arrangement) -> dirty presentation? May be tricky as well}
+A disadvantage of the described method for handling duplicates is that the enriched document type now depends on the presentation; if a presentation contains a tree view of the document, then the enriched document has to take care of duplicating it. A special facility for creating the necessary enriched document data definitions as well as the evaluation and reduction of the duplicates is desirable. However, it may be possible to capture the standard behavior for duplicates in a parser combinator that will allow the duplicate editing conflicts to be resolved during parsing. In that case, the whole process takes place in the presentation layer, and the evaluation layer is not affected. \note{parse (dirty arrangement) -$>$ dirty presentation? May be tricky as well}
 
 
-%								
-\subsection{Maintaining the presentation invariant during editing}
-
-During editing, data levels are updated as a result of user interaction. When a level changes, the adjacent level needs to be updated to establish the appropriate invariant. We specify two mapping functions {\em present} and {\em translate} that compute new levels. On a higher level update, {\em present} computes a lower level that establishes the presentation invariant. Similarly, on a lower level update, a new higher level is computed by the {\em translate} mapping, establishing the translation invariant. 
-
-We can express this with two equations:
-
-\begin{math}
-present :: Level_{High} \rightarrow Level_{Low} \\
-translate ::  Level_{Low} \rightarrow Level_{High} \\
-level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = translate~level'_{Low}\\
-level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = present~level''_{High}\\
-level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
-\end{math}
-%INV seems a bit silly, but this will change
-% precondition not used yet
-
-\bigskip {\bf Presentation/Translation sheets}
-
-However, this set of equations gives an oversimplified view of the situation, as it implies that presentation of the higher data level depends only on the higher level itself and the presentation mapping. A similar thing holds for the translation. We might wish to influence how a level is presented without altering the data level or taking an entirely different presentation mapping. A more elegant solution is to have a separate style sheet that specifies the presentation and pass that style sheet as an argument to the function $present$ and $translate$. \note{explain separation of data and presentation} \note{mention recompiling?} Therefore, we parameterize the presentation and translation functions with a {\em sheet} argument. The presentation sheet has the abstract type $Sheet_{Pres}$, and the translation sheet is of type $Sheet_{Trans}$.
-
-\begin{math}
-present :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low} \\
-translate :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \\
-level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = translate~sheet_{Trans}~level'_{Low}\\
-level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = present~sheet_{Pres}~level''_{High}\\
-level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
-translate~sheet_{Trans}  \cdot present~sheet_{Pres} = id_{High}\\
-\end{math}
-\note{also put id condition in previous invariant? And add the PRES TRANS one too?}
-
-The sheet parameter contains information on how to present or translate the elements of the respective data levels. The presentation sheet for the presentation layer specifies the actual presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The translation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $PRESENT$ and $TRANSLATE$ functions, as these represent the intended presentation and translation mappings that we implement with the functions $present$, $translate$ and the respecitive sheet parameters.
-
-Although a layer has two sheets, the two are closely related as they have to satisfy the
-$TRANSLATE \cdot PRESENT = id_{High}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
 
 
 %																
+%																
+%																
 \section{Extra state} \label{sect:extraState}
 
-%SOMEWHERE: when es is hard. If no parent with a presentation is parent then tricky. Hence invisible elements with %extra state may lose it during editing.
+%SOMEWHERE: when es is hard. If no parent with a presentation is parent then 
+% tricky. Hence invisible elements with extra state may lose it during editing.
 
 \note{specify conditions for safety? like in Pierce's lenses stuff?}
 \note{mention Pierce paper}
 
-The equations from the previous section assume that a level can be computed from the old values for the two levels together with a sheet and an edit operation on one of the levels. However, this turns out not to be entirely true in the presence of {\em extra state}. If we consider two adjacent data levels, some elements in one level cannot be derived from the other level. Figure~\ref{layerExtraState} shows two levels with the presentation mapping expressed with arrows. The shaded nodes on the top level have no presentation elements and hence cannot be computed from the lower level during translation. Such elements that cannot be computed from the other level, are referred to as extra state elements.  \note{explain dependency on direction already here?}
+The equations from the previous section assume that a level can be computed from the old values for the two levels together with a sheet and an edit operation on one of the levels. However, this turns out not to be entirely true in the presence of {\em extra state} (also see sections~\ref{sect:editingExtraState}~and~\ref{sect:archExtraState}). If we consider two adjacent data levels, some elements in one level cannot be derived from the other level. Figure~\ref{layerExtraState} shows two levels with the presentation mapping expressed with arrows. The shaded nodes on the higher level have no presentation elements and hence cannot be computed from the lower level during translation. Such elements that cannot be computed from the other level, are referred to as extra state elements.  \note{explain dependency on direction already here?}
 
 % also show a vice versa? with two invariants, it's maybe not logical to show both in one figure
 
@@ -357,19 +351,20 @@ The equations from the previous section assume that a level can be computed from
 \begin{figure}
 \begin{center}
 \begin{center}
-\begin{verbatim}
-
-        aH        higher level
-  bH         cH
-<shaded>
-
-                    Layer
-
- 
-     a1L 
-          a3L   Lower level
-          cL
-\end{verbatim}
+\epsfig{file=pics/eps/2levelES.eps, width=4in}
+%\begin{verbatim}
+%
+%        aH        higher level
+%  bH         cH
+%<shaded>
+%
+%                    Layer
+%
+% 
+%     a1L 
+%          a3L   Lower level
+%          cL
+%\end{verbatim}
 \end{center}
 \caption{Elements without presentation. $<$add arrows \& more elements, also more without pres.$>$}\label{layerExtraState} 
 \end{center}
@@ -388,12 +383,9 @@ The equations from the previous section assume that a level can be computed from
 % One layer: two kinds of extra
 Since a presentation of an element may consist of zero or more elements, and a translation consists of at most one, it is possible that an element is not mapped onto any elements in the other level. In that case, the other level simply does not contain the information needed to compute the element, and hence it is part of the former level's extra state. Because the property of extra state depends on the direction of the mapping, we distinguish two kinds of extra state: presentation extra state and translation extra state. The {\em presentation extra state} consists of elements that during presentation cannot be computed from the higher level (the shaded elements at the top level of Figure~\ref{layerExtraState}), and the {\em translation extra state} consists of elements that during translation cannot be computed from the lower level (the shaded elements at the bottom layer of the figure).
 
-% even with pres, there can still be extra state
-Even if an element \verb|X| is mapped onto one or more elements \verb|Y|$_n$  in the other level, it can still be part of the extra state, if the elements \verb|Y|$_n$ do not constitute enough information to be mapped back onto \verb|X|. Consider for example a presentation of a Haskell source, in which al integers are presented with the string \verb|<Int>|. The integer nodes do have a presentation, but since it does not contain enough information for the backward mapping, the integer nodes are in extra state. \note {Is this also the case for focus} \note{Don't know much about this kind of ES yet}
-%%%
 
 % example pres extra
-An example of presentation extra state is the whitespace information of a token at the presentation level. This information is not present in the enriched document layer. Instead, the information is reused from the previous presentation of the enriched document. During presentation, tokens are reused, causing the whitespace information to stay the same. In order to do this, we need to know exactly on which presentation elements an enriched document node was mapped during the previous presentation.
+An example of presentation extra state is the whitespace information of a token at the presentation level. This information is not present in the enriched document layer. Instead, the information is reused from the previous presentation of the enriched document. During presentation, tokens are reused, causing the whitespace information to stay the same. In order to do this, we need to know exactly on which presentation elements an enriched document node is mapped in the previous presentation.
 
 % example trans extra
 A word processor with an editable table of contents view provides an example of translation extra state.  For sake of simplicity, we will assume that the enriched document only contains the table of contents and not the chapters themselves. This way, we only have to consider the extra state here and not the duplication. Section~\ref{mappingsInLayer} already showed how handle duplications in general, and the same method can be used for the table of contents. 
@@ -401,6 +393,10 @@ A word processor with an editable table of contents view provides an example of 
 The evaluator maps chapters, sections, and subsections in the document onto entries in the table of contents tree. An  entry does not contain the content of the corresponding document section, but only its title and entries for its children. During reduction, the table of contents is mapped back onto a complete document, including the parts that are not present in the enriched document. The title of a section comes from the table of contents entry enriched document, but the missing section content is obtained mapping an entry back onto the section that was mapped onto it during the evaluation phase. The section contents, as well as any other child elements that are not in the table of contents, are translation extra state of the evaluation layer.
  
 \note{mention that trans ES is more important then pres ES here?}
+
+% even with pres, there can still be extra state
+Even if an element \verb|X| is mapped onto one or more elements \verb|Y|$_n$  in the other level, it can still be part of the extra state, if the elements \verb|Y|$_n$ do not constitute enough information to be mapped back onto \verb|X|. Consider for example a presentation of a Haskell source, in which al integers are presented with the string \verb|<Int>|. The integer nodes do have a presentation, but since it does not contain enough information for the backward mapping, the integer nodes are in translation extra state. \note {Is this also the case for focus} \note{Don't know much about this kind of ES yet}
+%%%
 
 An important point to note is that extra state with regard to a certain mapping, is extra state for the {\em result} type of the mapping. Hence, presentation extra state for a presentation mapping between $Level_{High}$ and $Level_{Low}$ is part of $Level_{Low}$. Although the term presentation extra state of $Level_i$ may suggest that this concerns state that is used during the presentation of $Level_i$, this is not the case. The extra state of $Level_i$ refers to the extra state with regard to the presentation of the level above ($Level_{i-1}$) on level $Level_i$. The only extra state that involved in the presentation of $Level_i$ is that of its lower neighbor: $Level_{i+1}$
 
@@ -414,15 +410,16 @@ Figure~\ref{layerExtraState} only shows one layer, but since each data level exc
 \begin{figure}
 \begin{center}
 \begin{center}
-\begin{verbatim}
-Level                elt   elt
-                         v    v 
-Level    shaded  elt  bold
-               ^        ^
-Level       elt      elt
-\end{verbatim}
+\epsfig{file=pics/eps/3levelES.eps, width=5in}
+%\begin{verbatim}
+%Level                elt   elt
+%                         v    v 
+%Level    shaded  elt  bold
+%               ^        ^
+%Level       elt      elt
+%\end{verbatim}
 \end{center}
-\caption{Presentation and translation extra state in one level. $<$add arrows \& more elements, also more without pres.$>$}\label{levelExtraState} 
+\caption{Presentation and translation extra state in one level.}\label{levelExtraState} 
 \end{center}
 \end{figure}
 
@@ -434,7 +431,7 @@ The whitespace extra state in tokens provides an example of the fact that the pr
 %So always Info Pres and Trans. bla core extra:
 
 % equations:
-More formally, a data level ($Level_{i}$) can be considered either as the product of the presentation extra state ($Extra_{Pres,i}$ and non-extra state ($Core_{Pres,i}$), or as the product of the translation extra and non-extra state ($Extra_{Trans,i}$ and $Core_{Pres,i}$). The document ($Level_0$) and the rendering ($Level_n$) are special cases, since the document has no presentation extra state, and the rendering has no translation extra state. Expressed with equations, we get:
+More formally, a data level ($Level_{i}$) can be considered either as the product of the presentation extra state ($Extra_{Pres,i}$) and non-extra state ($Core_{Pres,i}$), or as the product of the translation extra and non-extra state ($Extra_{Trans,i}$ and $Core_{Pres,i}$). The document ($Level_0$) and the rendering ($Level_n$) are special cases, since the document has no presentation extra state, and the rendering has no translation extra state. Expressed with equations, we get:
 
 % Note that pres es for level i is important for pres of level i-1
 % and trans es for level i is important for trans of levl i+1
@@ -446,37 +443,89 @@ Level_{n} = Core_{Pres,n} \times Extra_{Pres,n}
 \forall 1 \le i \le n-1:  \\
 Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{Pres,i} 
 \\
-PRESENT_{i} :: Level_{i} \rightarrow Core_{Pres,i+1} \\
-TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
+Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1} \\
+Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i} \\
 \end{math}\end{small}
 
 
+
 %																
-\subsection{Maintaining extra state during editing} \label{sect:maintainingExtraState}
+%																
+%																
+\section{Maintaining the presentation invariant during editing}
+
+% say that now we develop an actual function present/translate that implements the mapping
+
+During editing, data levels are updated as a result of user interaction. When a level changes, the adjacent level needs to be updated to establish the appropriate invariant. We specify two mapping functions  ${\tt present}$ and ${\tt translate}$ that compute new levels. On a higher level update, ${\tt present}$ computes a lower level that establishes the presentation invariant. Similarly, on a lower level update, a new higher level is computed by the ${\tt translate}$ mapping, establishing the translation invariant. 
+
+We can express this with two equations:
+
+\begin{math}
+{\tt present} :: Level_{High} \rightarrow Level_{Low} \\
+{\tt translate} ::  Level_{Low} \rightarrow Level_{High} \\
+level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
+level'_{High} = {\tt translate}~level'_{Low}\\
+level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level''_{Low} = {\tt present}~level''_{High}\\
+level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
+\end{math}
+%INV seems a bit silly, but this will change
+% precondition not used yet
+
+\bigskip {\bf Presentation/Translation sheets}
+
+However, this set of equations gives an oversimplified view of the situation, as it implies that presentation of the higher data level depends only on the higher level itself and the presentation mapping. A similar thing holds for the translation. We might wish to influence how a level is presented without altering the data level or taking an entirely different presentation mapping. A more elegant solution is to have a separate style sheet that specifies the presentation and pass that style sheet as an argument to the function ${\tt present}$ and ${\tt translate}$. \note{explain separation of data and presentation} \note{mention recompiling?} Therefore, we parameterize the presentation and translation functions with a {\em sheet} argument. The presentation sheet has the abstract type $Sheet_{Pres}$, and the translation sheet is of type $Sheet_{Trans}$.
+
+\begin{math}
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low} \\
+{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \\
+level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
+level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
+level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
+level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
+{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\\
+\end{math}
+\note{also put id condition in previous invariant? And add the PRES TRANS one too?}
+
+The sheet parameter contains information about how to present or translate the elements of the respective data levels. The presentation sheet for the presentation layer specifies the presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The translation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $Present$ and $Translate$ functions, as these represent the intended presentation and translation mappings that we implement with the functions ${\tt present}$, ${\tt translate}$ and the respecitive sheet parameters. \note{scanner sheet}
+
+Although a layer has two sheets, the two are closely related as they have to satisfy the
+$Translate \cdot Present = id_{High}$ condition. For simple editors, the sheets at the evaluation and presentation layer may even originate from a single specification. However, we choose to represent the sheets as two separate entities because the mappings they define do not have to be the same. \note{Say this differently, of course the mappings are not the same. trans is more liberal? trans is not injective?} Furthermore, the two sheets may be specified in completely different formalisms. For example, at presentation level, the presentation of the document may be specified using an attribute grammar, whereas the parser may be specified using parser combinators.
+
+
+
+
+
+
+%																
+%																
+%																
+\section{Maintaining extra state during editing} \label{sect:maintainingExtraState}
 
 %***** WHAT ABOUT PRES . TRANS = ID?
 
 % mapping we have is not good enough
-The available mapping functions $PRESENT$ and $TRANSLATE$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions $present$ and $translate$ that have a result type of $Core \times Extra$:
+The available mapping functions $Present$ and $Translate$ both go from $Level$ to $Core$. However, the editor layer has to realize mappings between levels, and hence we need functions ${\tt present}$ and ${\tt translate}$ that have a result type of $Core \times Extra$:
 % not for top and bottom
 
 \begin{math}
-translate :: Sheet_{Trans} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}  \times Extra_{Trans,High} \\
-present :: Sheet_{Pres} \rightarrow Level_{High} \rightarrow Core_{Pres,Low} \times Extra_{Pres,Low} \\
+{\tt translate} :: Sheet_{Trans} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}  \times Extra_{Trans,High} \\
+{\tt present} :: Sheet_{Pres} \rightarrow Level_{High} \rightarrow Core_{Pres,Low} \times Extra_{Pres,Low} \\
 \end{math}
 
 % what extra info to keep
-The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, $translate$ and $present$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For $translate$, the extra argument is of type $Info_{Trans}$, and it is computed by $present$. Analogously, $present$ gets an extra argument of type $Info_{Pres}$, which is computed by $translate$. \note{already mention computation order here?}
+The $Extra$ information in the result types cannot be computed from the arguments. Instead, we try to reuse its previous value. In order to do so, ${\tt translate}$ and ${\tt present}$ get an extra argument which, for each node, contains the nodes it was previously mapped onto. For ${\tt translate}$, the extra argument is of type $Info_{Trans}$, and it is computed by ${\tt present}$. Analogously, ${\tt present}$ gets an extra argument of type $Info_{Pres}$, which is computed by ${\tt translate}$. \note{already mention computation order here?}
 
 \begin{small}\begin{align*}
 translate_{i} :: sheet_{Trans} \times Info_{Trans,Low} \rightarrow Level_{Low} \rightarrow Core_{Trans,High}  \times Extra_{Trans,High}  \times Info_{Press,High}\\
 present_{i} :: sheet_{Pres}  \rightarrow Info_{Pres,High} \rightarrow  Level_{High} \rightarrow Core_{Pres,Low} \times Extra_{Pres,Low}   \times Info_{Pres,Low} \\
 %\\
-%level'_{High} = translate~sheet_{Trans}~info'~level'_{Low}\\
-%level''_{Low} = present~sheet_{Pres}~level''_{High}\\
+%level'_{High} = {\tt translate}~sheet_{Trans}~info'~level'_{Low}\\
+%level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
 %\\
-%PRESENT_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
-%TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
+%Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
+%Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
 \end{align*} 
 \end{small}
 {\centering ()\\}
@@ -522,7 +571,7 @@ legend   ^ is pres info       v is trans info     {node} is extra state
 
 
 %What about keeping list [ID->Info?] that switches and is not part of level.
-We choose to make the mapping information part of the $Level$ type. The reason for this is that both adjacent layers may update a level, and therefore also affect the mapping information on the level. \note{need an example?} With the mapping information in the level types, $present$ and $translate$ do not need additional arguments anymore.
+We choose to make the mapping information part of the $Level$ type. The reason for this is that both adjacent layers may update a level, and therefore also affect the mapping information on the level. \note{need an example?} With the mapping information in the level types, ${\tt present}$ and ${\tt translate}$ do not need additional arguments anymore.
 
 Except for the top and bottom levels, all levels contain presentation and translation information. The top level is never the result of a presentation mapping, and hence has no presentation information, whereas the bottom level has no translation information. The definition of $Level_i$ and the types of $present_i$ and $translate_i$ become:
 
@@ -540,9 +589,9 @@ present_{i} :: sheet_{Pres}  \rightarrow  Level_{High} \rightarrow Level_{Low}\\
 \end{math}\end{small}
 
 % computation order
-The mapping information that is used by $present$ is computed by $translate$ and vice versa. As a consequence, only one kind of mapping information is guaranteed to be valid. After presentation, the translation mapping is correct, but the presentation mapping may be incorrect, whereas after translation, the presentation information is correct, but the translation information may be incorrect. However, this does not cause any problems since a level is presented before its lower neighbor is translated, and vice versa. \note{when we have higher level edit ops, this will become a problem}
+The mapping information that is used by ${\tt present}$ is computed by ${\tt translate}$ and vice versa. As a consequence, only one kind of mapping information is guaranteed to be valid. After presentation, the translation mapping is correct, but the presentation mapping may be incorrect, whereas after translation, the presentation information is correct, but the translation information may be incorrect. However, this does not cause any problems since a level is presented before its lower neighbor is translated, and vice versa. \note{when we have higher level edit ops, this will become a problem}
 
-It may seem more appropriate that presentation mapping information is a result of the presentation, rather than the translation, since it concerns information about the presentation of the level and not its translation, but this is not the case. Besides causing $present$ to return two levels, rather than one, there is another reason why the information cannot be computed by $present$. After a level is presented, the lower level may be updated by the lower adjacent layer. If $present$ computes the mapping information in the higher level, which refers to the lower level, then this information may not be correct anymore after a lower level update. By computing the mapping information during translation, the problem is avoided, since after its translation, the lower level is not edited before the higher level is presented again. The same thing holds for $translate$.
+It may seem more appropriate that presentation mapping information is a result of the presentation, rather than the translation, since it concerns information about the presentation of the level and not its translation, but this is not the case. Besides causing ${\tt present}$ to return two levels, rather than one, there is another reason why the information cannot be computed by ${\tt present}$. After a level is presented, the lower level may be updated by the lower adjacent layer. If ${\tt present}$ computes the mapping information in the higher level, which refers to the lower level, then this information may not be correct anymore after a lower level update. By computing the mapping information during translation, the problem is avoided, since after its translation, the lower level is not edited before the higher level is presented again. The same thing holds for ${\tt translate}$.
 
 \note{does give a problem when mappings are not inverse}
 \note{eg. "chess:" "board" -> ChessBoard. Now ChessBoard has wrong pres info when presented on an image instead of tokens}
@@ -557,9 +606,9 @@ Because the reuse of extra state depends on the mapping information, extra state
 
 First of all, a level may be updated in such a way that the mapping information that was computed at the previous presentation or translation, is no longer correct. An example is when a document edit operation in a Haskell source editor changes a sum to a product. The old presentation mapping in invalid, since it points to the presentation of the sum. In this case, because of the similarity between the presentations of a sum and a product, the tokens can be reused, but if the updated node has a completely different presentation, then the layout information of the tokens is lost.
 
-The second situation in which the mapping information may be invalid, is if $present \cdot translate$ is not identity function for a node. \note{say this some other way?} An example is found in a source editor that provides graphical presentations for some of its tokens (eg. $\rightarrow$ for the token \verb|"->"|). If a \verb|"->"| token is parsed, the mapping information in the resulting enriched document node points toward the textual arrow. However, if the enriched document is presented, the presentation contains a graphical arrow, and hence the mapping information with respect to the arrow token is incorrect. In such a case, the presentation function itself must take care of reusing extra state from the textual arrow token for the graphical arrow token.
+The second situation in which the mapping information may be invalid, is if ${\tt present} \cdot {\tt translate}$ is not identity function for a node. \note{say this some other way?} An example is found in a source editor that provides graphical presentations for some of its tokens (eg. $\rightarrow$ for the token \verb|"->"|). If a \verb|"->"| token is parsed, the mapping information in the resulting enriched document node points toward the textual arrow. However, if the enriched document is presented, the presentation contains a graphical arrow, and hence the mapping information with respect to the arrow token is incorrect. In such a case, the presentation function itself must take care of reusing extra state from the textual arrow token for the graphical arrow token.
 
-The reverse situation does not occur, since we require that $translate \cdot present$ is identity for a node. \note{add this to the invariants}
+The reverse situation does not occur, since we require that ${\tt translate} \cdot {\tt present}$ is identity for a node. \note{add this to the invariants}
 
 In case the extra state cannot be restored, it is set to an initial value. Thus, if an entry is added to a table of contents in the enriched document of a word processor, a chapter (or section) without any content is added to the document. Similarly, if a document edit operation in a source editor adds a new structure to the document, its presentation gets a default layout.
 
@@ -575,10 +624,12 @@ The responsibility of restoring extra state and handling problem situations, cur
 %higher level update without lower level translation gives problem. but not mentioned here, only in layered archs
 %lower level update without higher level pres?   is this not just editing and skipping higher layers?
 
+
+%																
 \subsection{conclusions}
 % the final equations
 
-The equations that describe the behavior of $present$ and $translate$ in the presence of extra state are:
+The equations that describe the behavior of ${\tt present}$ and ${\tt translate}$ in the presence of extra state are:
 
 \begin{small}\begin{align*}% \label{sse}
 Level_{0} = Core_{Trans,i} \times Extra_{Trans,i} \times Mapping_{Pres,i}\\
@@ -590,15 +641,15 @@ Level_{i} = Core_{Trans,i} \times Extra_{Trans,i} = Core_{Pres,i} \times Extra_{
 translate_{i} :: sheet_{Trans,i} \rightarrow Level_{i+1} \rightarrow Level_{i}\\
 present_{i} :: sheet_{Pres,i}  \rightarrow  Level_{i} \rightarrow Level_{i+1}\\
 \\
-%level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{High} = translate~sheet_{Trans}~level'_{Low}\\
-%level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
-level''_{Low} = present~sheet_{Pres}~level''_{High}\\
-%level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
-translate~sheet_{Trans}  \cdot present~sheet_{Pres} = id_{High}\\
+%level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
+level'_{High} = {\tt translate}~sheet_{Trans}~level'_{Low}\\
+%level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level''_{Low} = {\tt present}~sheet_{Pres}~level''_{High}\\
+%level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
+{\tt translate}~sheet_{Trans}  \cdot {\tt present}~sheet_{Pres} = id_{High}\\
 \\
-PRESENT_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
-TRANSLATE_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
+Present_{i} :: Level_{i} \rightarrow Core_{Pres,i+1}\\
+Translate_{i} :: Level_{i+1} \rightarrow Core_{Trans,i}\\
 \end{align*} 
 \end{small}
 {\centering ()\\}
@@ -621,13 +672,14 @@ Still, besides these restrictions, the model works for specifying the whitespace
 
 
 %																
-\subsection{Incrementality}
+\section{Incrementality}
 % meer uitleg?: no choice on inc, even memo may be used, but do need old level for that.
 
-The proposed $present$ and $translate$ mappings from the previous sections take one level as argument and return another. This means that each time the mapping is computed, the entire result level needs to computed. However, changes in one level frequently only cause local changes in the other level. For example, if the presentation of a paragraph in a word processor is changed, the corresponding enriched document update only concerns that single paragraph. Hence, we will change the mapping functions in such a way that instead of mapping one level onto another, they map an edit operation on one level onto an edit operation on the other level. \note{explain that this is at least as powerful as non-incremental? ({\tt $\backslash$(Set lvl) -$>$ Set lvl')}}
+The proposed ${\tt present}$ and ${\tt translate}$ mappings from the previous sections take one level as argument and return another. This means that each time a mapping is computed, the entire result level needs to computed. However, changes in one level frequently only cause local changes in the other level. For example, if the presentation of a paragraph in a word processor is changed, the corresponding enriched document update only concerns that single paragraph. Hence, we will change the mapping functions in such a way that instead of mapping one level onto another, they map an edit operation on one level onto an edit operation on the other level. \note{explain that this is at least as powerful as non-incremental? ({\tt $\backslash$(Set lvl) -$>$ Set lvl')}}
 
-Figure~\ref{fromLevelToOp} shows the difference between a translation mapping between levels and a mapping between edit operations. On the lefthand side is the mapping between levels, in which a new higher level is mapped onto an updated lower level. On the righthand side, the mapping between edit operations is shown. The values for the updated levels are computed with by applying a function
- $update :: Edit_\alpha -> \alpha -> \alpha$ to the edit operation and the level. A $present$ function between edit operations instead of levels can be specified in a similar way.
+Figure~\ref{fromLevelToOp} shows the difference between a translation mapping between levels and a mapping between edit operations. On the lefthand side is the mapping between levels, in which a new higher level is mapped onto an updated lower level. On the righthand side, the mapping between edit operations is shown. The values for the updated levels are computed by applying a function
+ ${\tt update} :: Edit_\alpha \rightarrow \alpha \rightarrow \alpha$ to the edit operation and the level. A 
+ ${\tt present}$ function between edit operations instead of levels can be specified similarly.
 
 \begin{figure}
 \begin{small}
@@ -637,9 +689,9 @@ Figure~\ref{fromLevelToOp} shows the difference between a translation mapping be
 \bigskip \noindent
 \xymatrix{
                                &                &                                      & \data{$e_{Level_{High}}$} \ar[dr]        &                           &                        \\
-\data{$level'_{High}$}         &                & \data{$level_{High}$} \ar[rr]\ar[dr] &                                          & \component{update} \ar[r] & \data{$level'_{High}$} \\
-\component{$translate$} \ar[u] & {\rm becomes: }&                                      & \component{$translate$}  \ar[uu]         &                           &                        \\
-\data{$level'_{Low}$}   \ar[u] &                & \data{$level_{Low}$}  \ar[rr]\ar[ur] &                                          & \component{update} \ar[r] & \data{$level'_{Low}$}  \\
+\data{$level'_{High}$}         &                & \data{$level_{High}$} \ar[rr]\ar[dr] &                                          & \component{${\tt update}$} \ar[r] & \data{$level'_{High}$} \\
+\component{${\tt translate}$} \ar[u] & {\rm becomes: }&                                      & \component{${\tt translate}$}  \ar[uu]         &                           &                        \\
+\data{$level'_{Low}$}   \ar[u] &                & \data{$level_{Low}$}  \ar[rr]\ar[ur] &                                          & \component{${\tt update}$} \ar[r] & \data{$level'_{Low}$}  \\
                                &                &                                      & \data{$e_{Level_{Low}}$} \ar[uu] \ar[ur] &                           &                        \\
 }
 \end{small}
@@ -651,9 +703,7 @@ Figure~\ref{fromLevelToOp} shows the difference between a translation mapping be
 
 % there is PRES, which is a level thing, pres, which is incremental, and also presLevel
 % pres will work on mappings, presLevel won't. Is this PRES? or do we keep PRES abstract
-The arrows going from the higher and the lower level to $translate$ in Figure~\ref{incrementalTranslate}, are necessary because in some cases, it is hard to map a lower level edit operation onto a higher level edit operation without reference to the respective data levels. If such a mapping is not available, but there is a non-incremental mapping between levels, then the computation sketched in Figure~\ref{computeOps} can be used to obtain a mapping between edit operations. The figure shows how a function with type 
-$Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}}$ can be created when a function with type 
-$Level_{High} \rightarrow Level_{Low}$  is available. In the figure, the edit operation is applied as an update to the old higher level, using the function $update$. A new lower level is then computed by applying $present'$ to the updated updated higher level. Finally, the incremental lower level update is computed by taking the difference of the updated lower level and the original. Of course, this is only a sketch, and the difference function does not exist in general, but for some editors, it will be a feasible solution. In order to allow this kind of computation, $present$ needs the values of the higher and lower level as arguments.
+The arrows going from the higher and the lower level to ${\tt translate}$ in the righthand side of Figure~\ref{fromLevelToOp}, are necessary because in some cases, it is hard to map a lower level edit operation onto a higher level edit operation without reference to the respective data levels. If such a mapping is not available, but there is a non-incremental mapping between levels, then the computation sketched in Figure~\ref{computeOps} can be used to obtain a mapping between edit operations. The figure shows how a function ${\tt translate} :: Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}}$ can be constructed when only a function with type ${\tt translate'} :: Level_{High} \rightarrow Level_{Low}$  is available. In the figure, the edit operation is applied as an update to the old higher level, using the function ${\tt update}$. A new lower level is then computed by applying ${\tt translate'}$ to the updated updated higher level. Finally, the incremental lower level update is computed by taking the difference of the updated lower level and the original. Of course, this is only a sketch, and the difference function does not exist in general, but for some editors, it will be a feasible solution. In order to allow this kind of computation, ${\tt translate}$ needs the values of the higher and lower level as arguments.
 
 \begin{figure}
 \begin{small}
@@ -662,31 +712,39 @@ $Level_{High} \rightarrow Level_{Low}$  is available. In the figure, the edit op
 \begin{small}
 \bigskip \noindent
 \xymatrix{
- \data{$e_{Level_{High}}$} \ar[r] & \component{update} \ar[d] & \data{$Level_{High}$} \ar[l] \\
- & \data{$Level_{High}$} \ar[d] & \\ 
- & \component{$Presenter$} \ar[d] & \\
- & \data{$Level_{Low}$} \ar[d] & \\
-\data{$e_{Level_{Low}}$} & \component{diff} \ar[l] & \data{$rendering$} \ar[l]  
+ \data{$e_{Level_{High}}$}  & \component{diff} \ar[l] & \data{$Level_{High}$} \ar[l] \\
+ & \data{$Level_{High'}$} \ar[u] & \\ 
+ & \component{$translate'$} \ar[u] & \\
+ & \data{$Level_{Low'}$} \ar[u] & \\
+\data{$e_{Level_{Low}}$} \ar[r] & \component{${\tt update}$} \ar[u] & \data{$Level_{Low}$} \ar[l]
+% same thing for present
+% \data{$e_{Level_{High}}$} \ar[r] & \component{${\tt update}$} \ar[d] & \data{$Level_{High}$} \ar[l] \\
+% & \data{$Level_{High'}$} \ar[d] & \\ 
+% & \component{$Presenter$} \ar[d] & \\
+% & \data{$Level_{Low'}$} \ar[d] & \\
+%\data{$e_{Level_{Low}}$} & \component{diff} \ar[l] & \data{$Level_{Low}$} \ar[l]  \\
 }
 \end{small}
-\end{center}\caption{Computation of $e_{Low}$ from $e_{High}$ (put box around upd pres. and diff)) }\label{computeOps} 
+\end{center}\caption{Computation of $e_{High}$ from $e_{Low}$ (add box: and say trans = [upd trans' diff] )) }\label{computeOps} 
 \end{center}
 \end{small}
 \end{figure}
 
-For the translation mapping, a similar computation can be performed. Hence, $translate$ also needs the values of the two levels. Compared to $present$, the order of the level parameters for $translate$ is switched (first the lower and then the higher level) since the direction of the mapping is also switched.
+For the presentation mapping, a similar computation can be performed. Hence, ${\tt present}$ also needs the values of the two levels. 
 
-Before we give the equations for the incremental versions of the layer functions, we introduce a short-hand notation for and the \verb|update| functions. Especially for larger computations, these functions clutter the diagrams, due to crossed arrows and the many rather uninformative appearances of $update$. In the normal notation, an update $data' = update~e_{Data}~data$, for values 
+Before we give the invariants for the incremental versions of the layer functions, we introduce a short-hand notation for the ${\tt update}$ functions. Especially for larger computations, these functions clutter the diagrams, due to crossing arrows and the many rather uninformative appearances of ${\tt update}$. In the normal notation, an update $data' = {\tt update}~e_{Data}~data$, for values 
 $data, data' :: Data$, is represented as:\\
 
 \begin{small}
 \xymatrix{
-\data{$data$} \ar[r] & \data{$e_{Data}$} \ar[r] & \component{$update$} \ar[r] & \data{$data'$} \\
+                               &  \data{$e_{Data}$} \ar[d] \\
+\data{$data$} \ar[r] &  \component{${\tt update}$} \ar[r] & \data{$data'$} \\
 }
 \end{small}
 
-Because an edit operation on a values of type $Data$ can also be regarded as a function of type 
-$Data \rightarrow Data$, we use a squiggly arrow notation that leaves the function $update$ implicit:\\
+\smallskip
+Because an edit operation on a value of type $Data$ can also be regarded as a function of type 
+$Data \rightarrow Data$, we use a squiggly arrow notation that leaves the function ${\tt update}$ implicit:\\
 
 \begin{small}
 \xymatrix{
@@ -704,45 +762,46 @@ Figure~\ref{incrementalTranslate}, shows the righthand side of Figure~\ref{fromL
 \bigskip \noindent
 \xymatrix{
 \data{$level_{High}$} \ar@{~>}[r]\ar[dr] & \data{$e_{Level_{High}}$} \ar@{~>}[r] &\data{$level'_{High}$} \\
-                                         & \component{$translate$}  \ar[u]           &                           &                           \\
+                                         & \component{${\tt translate}$}  \ar[u]           &                           &                           \\
 \data{$level_{Low}$}  \ar@{~>}[r]\ar[ur] & \data{$e_{Level_{Low}}$}  \ar[u] \ar@{~>}[r]          & \data{$level'_{Low}$}  \\
 }
 \end{small}
-\end{center}\caption{Incremental $translate$.}\label{incrementalTranslate} 
+\end{center}\caption{Incremental ${\tt translate}$.}\label{incrementalTranslate} 
 \end{center}
 \end{small}
 \end{figure}
 
-In addition to the extra parameters, and the change from level to edit operation, the equations for the incremental versions of $present$ and $translate$ also contain a number of explicit $update$ functions. 
+In addition to the extra parameters, and the change from level to edit operation, the equations for the incremental versions of ${\tt present}$ and ${\tt translate}$ also contain a number of explicit ${\tt update}$ functions. Furthermore, note that compared to ${\tt translate}$, the order of the level parameters for         ${\tt present}$ is swapped (ie. first the higher and then the lower level) since the direction of the mapping is also swapped.
  
 % PRES and TRANS are not incremental
 \begin{math}
-present :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low}  \rightarrow Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}} \\
-translate :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \rightarrow  Edit_{Level_{Low}} \rightarrow Edit_{Level_{High}} \\
+{\tt present} :: Sheet_{Pres} \rightarrow  Level_{High} \rightarrow Level_{Low}  \rightarrow Edit_{Level_{High}} \rightarrow Edit_{Level_{Low}} \\
+{\tt translate} :: Sheet_{Trans} \rightarrow  Level_{Low} \rightarrow Level_{High} \rightarrow  Edit_{Level_{Low}} \rightarrow Edit_{Level_{High}} \\
 \text{\{\}}\\
 \\
-level_{Low} = PRESENT~level_{High}\hfill \text{\{Precondition\}}\\
-level'_{Low} = update~e_{Level_{Low}}~level_{Low}\\
-e_{Level_{High}} = translate~sheet_{Trans}~level_{Low}~level_{High}~e_{Level_{Low}} \hfill 
+level_{Low} = Present~level_{High}\hfill \text{\{Precondition\}}\\
+level'_{Low} = {\tt update}~e_{Level_{Low}}~level_{Low}\\
+e_{Level_{High}} = {\tt translate}~sheet_{Trans}~level_{Low}~level_{High}~e_{Level_{Low}} \hfill 
 \text{\{\}}\\
-level'_{High} = update~e_{Level_{High}}~level_{High}\\
-level'_{High} = TRANSLATE~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
+level'_{High} = {\tt update}~e_{Level_{High}}~level_{High}\\
+level'_{High} = Translate~level'_{Low}\hfill \text{\{Intermediate condition\}}\\
 \\
-level''_{High} = update~e'_{Level_{High}}~level'_{High}\\
-e'_{Level_{Low}} = present~sheet_{Pres}~level'_{High}~level'_{Low}~e'_{Level_{High}} \hfill 
+level''_{High} = {\tt update}~e'_{Level_{High}}~level'_{High}\\
+e'_{Level_{Low}} = {\tt present}~sheet_{Pres}~level'_{High}~level'_{Low}~e'_{Level_{High}} \hfill 
 \text{\{\}}\\
-level''_{Low} = update~e'_{Level_{Low}}~level_{Low}\\
-level''_{Low} = PRESENT~level''_{High}\hfill \text{\{Postcondition\}}\\
+level''_{Low} = {\tt update}~e'_{Level_{Low}}~level_{Low}\\
+level''_{Low} = Present~level''_{High}\hfill \text{\{Postcondition\}}\\
 \end{math}
 
-Two updates take place on the higher level, and two on the lower level. However, if we look at Figure~\ref{computeOps}, we can see that a higher level update is performed in the computation of $present$. Thus, besides $e'_{Low}$ an implementation of $present$ may also return $level''_{High}$. \note{say the the remaining updates disappear because of composition} Similarly, $translate$ may return $e'_{Low}$. \note{Mention that on composition two of the four updates can be dropped?}
+Two updates take place on the higher level, and two on the lower level. However, if we look at Figure~\ref{computeOps}, we can see that a higher level update is performed in the computation of
+ ${\tt present}$. Thus, besides $e'_{Level_{Low}}$ an implementation of ${\tt present}$ may also return $level''_{High}$. \note{say the the remaining updates disappear because of composition} Similarly, ${\tt translate}$ may return $e'_{Low}$. \note{Mention that on composition two of the four updates can be dropped?}
 
 %However, because a layer does not exist on its own, but is composed with other layers (as will be explained 
 %in the next Chapter), an adjacent layer will also do an update on the level. Hence
 
 
 %																
-\subsection{Conclusions}
+\section{Conclusions}
 
 In one level,  mapping info to higher and lower (except for doc \& rendering), furthermore, the tree can can be regarded bla.
 
@@ -761,22 +820,28 @@ Proxima offers possibility of solving, not always solution. non tree stuff, or i
 
 
 
+%																
+%																
+%																
+%\section{Bidirectional mappings}
+%
+%What do we lose exactly by not keeping the mappings
+%
+%reuse original trees, update mappings upward and downward
 
 
-\section{Bidirectional mappings}
 
-What do we lose exactly by not keeping the mappings
-
-reuse original trees, update mappings upward and downward
-
-\section{Consequences for each layer}
-Layer examples.
-In arrangement, mappings automatic, formatters etc. rest is easy
-
-In rendering, no mappings
-Doc-Pres, left to editor builder. what happens if we don't do them
-tokens contain origin in edoc. identity is reused. What if type changes?
-
-
-Using caching of parsers and presenters to preserve the mapping
--- List support for these mappings
+%																
+%																
+%																
+%\section{Consequences for each layer}
+%Layer examples.
+%In arrangement, mappings automatic, formatters etc. rest is easy
+%
+%In rendering, no mappings
+%Doc-Pres, left to editor builder. what happens if we don't do them
+%tokens contain origin in edoc. identity is reused. What if type changes?
+%
+%
+%Using caching of parsers and presenters to preserve the mapping
+%-- List support for these mappings
