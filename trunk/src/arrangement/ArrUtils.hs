@@ -185,7 +185,11 @@ markDirty _ (DiffLeaf False) = DiffLeaf False -- subtree already dirty
 markDirty (p:pth) (DiffLeaf True) = DiffNode False True $  -- make self clean node with one dirty child on the path
                                          replicate (p) (DiffLeaf True)
                                       ++ [markDirty pth (DiffLeaf True)] -- do the same thing for the rest of the path
-                                      ++ replicate 10 (DiffLeaf True)
+                                      ++ replicate 100 (DiffLeaf True) -- aargh! This standalone diff tree is not a good solution
+                                                                                     -- can't repeat here, since renderer sometimes does a reverse
+-- need to pass the arrangement along (which is a nasty pattern match), just for that case.
+-- Otherwise, fix renderer hack with overlay order (so no reverse is needed)
+-- or fix dirty bit in actual arrangement nodes.
 markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self 
                                                take p dts
                                             ++ [markDirty pth (dts !! p)]
