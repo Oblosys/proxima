@@ -201,13 +201,13 @@ A presentation box (from now on called presentation) has a number of properties 
 
 \toHere
 
-Figure~\ref{xprezproperties} shows the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when combined in composite presentations. The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self-explanatory. In the future, this set will be extended with other properties such as more line-style and font attributes, and user-defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
+Figure~\ref{xprezproperties} shows the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when combined in composite presentations. \todo{note h is vertical line} The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self-explanatory. In the future, this set will be extended with other properties such as more line-style and font attributes, and user-defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
 
 
 %																
 \subsection{{\sc Xprez} primitives} \label{sect:primitives}
 
-Simple presentations can be created with the first five combinators in Figure~\ref{xprezprim}. The \texttt{empty} combinator is a neutral element that is not visible and takes up no space. A piece of text can be presented with \texttt{text}, and a rectangle with \texttt{rect}, which takes the width and height as arguments. The \texttt{poly} combinator takes a list of relative coordinates between (0,0) and (1,1) and produces a line figure that connects these points. A \texttt{poly} presentation stretches in horizontal and vertical direction. Finally, \texttt{img} can be used to display bitmap images. The argument is a string that contains the path to the bitmap file. By default, the reference lines of simple presentations are 0, except for the horizontal reference line of a text presentation, which is equal to the baseline of the current font.
+Simple presentations can be created with the first five combinators in Figure~\ref{xprezprim}. The \texttt{empty} combinator is a neutral element that is not visible and takes up no space. A piece of text can be presented with \texttt{text}, and a rectangle with \texttt{rect}, which takes the width and height as arguments. The \texttt{poly} combinator takes a list of relative coordinates between (0,0) and (1,1) and produces a line figure that connects these points. A \texttt{poly} presentation stretches in horizontal and vertical direction. Finally, \texttt{img} can be used to display bitmap images. The argument is a string that contains the path to the bitmap file. By default, the reference lines of simple presentations are 0\todo{expl more}, except for the vertical reference line of a text presentation, which is the baseline of the current font.
 
 \begin{figure}
 \begin{small}
@@ -230,13 +230,13 @@ format            :: [ Xprez ] -> Xprez
 \end{small}
 \end{figure}
 
-There are several kinds of composite presentations, the simplest being rows and columns (combinators \texttt{row} and \texttt{col}), which are duals. In a row, each child presentation is placed immediately to the right of its predecessor, with their horizontal reference lines aligned. Vertical reference lines have no effect on the positioning in a row.
+There are several kinds of composite presentations, the simplest being rows and columns (combinators \texttt{row} and \texttt{col}), which are duals. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical reference lines aligned. Horizontal reference lines have no effect on the positioning in a row.
 
 \begin{center}
 \epsfig{file=pics/eps/row.eps, width=3.2in}
 \end{center}
 
-The bounding box of a row is the smallest rectangle that encloses all its children. The horizontal reference line is equal to the aligned reference lines of the children, whereas the vertical reference line is taken from one of the children (by default the first one). The \texttt{rowR} combinator takes an extra argument of type \texttt{Int} that specifies which child carries the vertical reference line for the row. \texttt{}By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. However, by setting the stretch properties, these defaults can be overridden. 
+The bounding box of a row is the smallest rectangle that encloses all its children. The vertical reference line is equal to the aligned reference lines of the children, whereas the horizontal reference line is taken from one of the children (by default the first one). The \texttt{rowR} combinator takes an extra argument of type \texttt{Int} that specifies which child carries the horizontal reference line for the row. \texttt{}By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. However, by setting the stretch properties, these defaults can be overridden. 
 
 The \texttt{matrix} combinator can be used to describe a table layout, in which elements are aligned with elements to their left and right as well as with elements above and below them. 
 
@@ -258,16 +258,16 @@ in  row [ text "Big" `withFontSize` 200
 \end{small}
 
 \toHere
-The code produces the following image (the dashed line has been added to show horizontal reference line of the presentation):
+The code produces the following image (the dashed line has been added to show vertical reference line of the presentation):
 
 \begin{center}
 \epsfig{file=pics/eps/align.png.eps, width=1in}
 \end{center}
 
-The second element in the row is a column that takes the horizontal reference line from its third child (the numbering starts at 0). Therefore, the word ``Big'' is aligned with the word ``small''. The \texttt{cross} object is a line figure in the form of a rectangle with a cross, and the \texttt{greycross} is a \texttt{cross} with a grey background. 
+The second element in the row is a column that takes the vertical reference line from its third child (the numbering starts at 0). Therefore, the word ``Big'' is aligned with the word ``small''. The \texttt{cross} object is a line figure in the form of a rectangle with a cross, and the \texttt{greycross} is a \texttt{cross} with a grey background. 
  \todo{these?}
  
-Because these presentations stretch in vertical direction, so does the containing column. The two stretching objects above the reference object (\texttt{text "small"}) are each assigned equal amounts of the remaining space above the horizontal reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is added and distributed equally over all stretching objects. In this case, there will no longer be any alignment of the reference object. 
+Because these presentations stretch in vertical direction, so does the containing column. The two stretching objects above the reference object (\texttt{text "small"}) are each assigned equal amounts of the remaining space above the vertical reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is added and distributed equally over all stretching objects. In this case, there will no longer be any alignment of the reference object. 
 
 
 %																
