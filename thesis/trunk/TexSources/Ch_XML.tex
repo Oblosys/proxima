@@ -40,7 +40,7 @@ Section~\ref{sect:usecases} presents the five use cases, from which we formulate
 
 \section{Use cases} \label{sect:usecases}
 
-Some of the five example editors, presented in this section, are well-known applications of structure editors. However, a few more exotic applications have been included as well. None of the current generic structure editors can handle all five use cases.
+Some of the five example editors, presented in this section, are well-known applications of structure editors. However, a few more exotic applications have been included as well. None of the current generic structure editors can handle all five use cases. \todo{edit behavior is illustrated by screenshots, actual screenshots can be found in chapter proto}
 
 It is important to note that although the use cases are discussed as separate applications, aspects of them can be combined in a single editor instance.
 
@@ -84,19 +84,24 @@ Some structure editors use an automatic layout scheme while editing program sour
 \end{center}
 }
 
-\newcommand{\editScreenshotTrns}[3]{%
+\newcommand{\editScreenshotTrnsSz}[4]{%
 %
 \noindent
 \begin{center}
 \begin{picture}(350,130)(0,0)
 \begin{scriptsize}
-\put(0,30){ \framebox(160,105){#1}}
-\put(180,30){ \framebox(160,105){#2}}
+\put(0,30){ \framebox#1{#2}}
+\put(180,30){ \framebox#1{#3}}
 \end{scriptsize}
 \put(165,80){ $\Rightarrow$}
-\put(96,0) { \makebox(150,30){#3}}
+\put(96,0) { \makebox(150,30){#4}}
 \end{picture}
 \end{center}
+}
+
+\newcommand{\editScreenshotTrns}[3]{%
+%
+\editScreenshotTrnsSz{(160,105)}{#1}{#2}{#3}
 }
 
 \editScreenshotTrns{
@@ -274,6 +279,8 @@ normal text $\langle$e$\rangle$$\langle$b$\rangle${\em {\bf \em italic and bold}
 \end{tabular}
 }{switch to structural presentation}
 
+\todo{add cursor to figure}
+
 The two screenshots show two presentations of the same document fragment. The left-hand presentation is the regular WYSIWYG presentation, whereas the right-hand one is a more structural presentation that shows the markup tags. The example document also contains a fictitious \verb|<Warning>| element that is presented in a bold and italic style. Only in the structural presentation can the warning be distinguished from text that has been explicitly formatted as bold and italic.
 
 The structural view is also helpful for positioning the focus. For example, in the left-hand presentation, the start of the first piece of italic text just before the bold part coincides with the start of the bold part; therefore inserting text that is italic but not bold is rather tricky. In the right-hand presentation the positions do not coincide and text that is only italic as well as text that is italic and bold can be inserted without a problem. In order for the structural views to be helpful, the editor supports easy switching between views while preserving the current focus.
@@ -285,6 +292,8 @@ The structural view is also helpful for positioning the focus. For example, in t
 Edit operations that rearrange the document structure, such as promoting a subsection to section, are awkward to perform on a textually represented document, such as a \TeX\ source. All tags or \TeX\ commands that specify the subsection and its descendants need to be changed. This is a rather specific search/replace operation on only part of the document source, which is a hassle to automate.
 
 A structure editor may be of some help here, because the structural similarities between sections and subsections are known to the editor and can be used to define edit operations for restructuring the document.
+
+
 
 \editScreenshotTrns{
 \begin{tabular}[t]{l}
@@ -316,6 +325,8 @@ An operation that changes the level of a section or subsection is rather complex
 \head{Editing a section title in the table of contents}
 
 The word processor has support for the specification of a generated table of contents. From an entry in the table, a user can jump to the corresponding position in the document presentation. The presentation of the table of contents itself can be customized to match the style of the rest of the presentation. When the document is edited, the table of contents is updated accordingly. Moreover, editing an entry in the table of contents causes an update to the title of the corresponding chapter or section.
+
+
 
 \editScreenshotTrns{
 \begin{tiny}
@@ -370,7 +381,23 @@ The screenshot shows a document with a table of contents. The dots (\dots) are n
 
 Besides textual edit operations, it is also possible to perform structural edit operations on derived structures. The screenshot shows a move operation on a section title in the table of contents, which has the result that the corresponding section is moved in the document.
 
-\editScreenshot{
+\newcommand{\editScreenshotTrnsFr}[3]{%
+%
+\noindent
+\begin{center}
+\begin{picture}(350,130)(0,0)
+\begin{scriptsize}
+\put(0,30){ \makebox(160,105){#1}}
+\put(0,30){ \epsfig{file=pics/eps/frame.eps, height=105pt} }
+\put(180,30){ \framebox(160,105){#2}}
+\end{scriptsize}
+\put(165,80){ $\Rightarrow$}
+\put(96,0) { \makebox(150,30){#3}}
+\end{picture}
+\end{center}
+}
+
+\editScreenshotTrnsFr{
 \begin{tiny}
 \begin{tabular}[t]{p{5.2cm}}
 {\small Contents}\\
@@ -414,7 +441,8 @@ While the term {\em editor} is usually only associated\\ % with text editors suc
 \dots 
 \end{tabular}
 \end{tiny}
-}{during drag}{after drop}
+}{during drag}
+%{after drop}
 
 The section entry for the ``Editing structured documents'' section is selected and dragged to its new location, just below the entry for the ``Use cases'' section. The result is an edit operation on the document structure that puts the first section after the second section. The section numbers switch because they are generated automatically. Whenever an edit operation on a derived structure is performed, the user may be signaled that the operation affects more than just the visible selection.
 
@@ -432,6 +460,7 @@ Finally, in order to handle edit operations on the table of contents, the editor
 
 Because mathematical formulas have a high degree of structure, a mathematical equation editor is a good candidate for structure editing. Equation editing functionality is typically integrated with a word processor to support in-place editing of equations in a document. An example of an editor for mathematical documents is the MathSpad editor~\cite{verhoeven00mathspad}, which offers word-processing functionality as well. MathSpad also supports a form of genericity, but does not allow the document type to be specified. Furthermore, both the edit model and the document presentation have a tendency towards documents of a mathematical nature.
 
+
 %The TexMacs and Lyx editors mentioned in the previous section support math editing. 
 
 %However, we separate the two examples here because of the different requirements they generate.
@@ -440,7 +469,15 @@ Because mathematical formulas have a high degree of structure, a mathematical eq
 
 The screenshot shows a WYSIWYG equation editor with support for mathematical constructs such as fractions, roots, and integrals. A possible document type for  the equation editor is the Mathematical Markup Language MathML~\cite{mathml20}.
 
-\screenshot{$\langle$Impressive formula with many symbols and a few placeholders$\rangle$}{The equation editor}
+\screenshot{
+\parbox{100mm}{\begin{displaymath}
+U(\vec{x}_1,\vec{x}_2,t) = 
+- \frac{\hbar^2}{R(\vec{x}_1,\vec{x}_2,t)} 
+\left( \frac{\nabla^2_1R(\vec{x}_1,\vec{x}_2,t)}{2m_1} +
+ \frac{ \nabla^2_{2\vline}}{2m_2} \right)
+\end{displaymath}}
+% \nabla^2_2R(\vec{x}_1,\vec{x}_2,t)
+}{The equation editor}
 
 Mathematical formulas are suitable for document-oriented edit operations, using menus and buttons for structure entry. Free presentation-oriented editing, on the other hand, is not as clearly defined on a formula as it is on a program source. For example, shrinking the 2 in the number 42 and moving it upwards a bit, could theoretically lead to recognition of the square $4^2$. However, this requires a complicated visual parsing scheme, the exact behavior of which is not clear. Therefore, the editor only allows free editing in the textual parts of a formula that can be parsed unambiguously.
 
@@ -469,6 +506,40 @@ In practice, we do not expect this restriction to be a major problem. A fragment
 \head{Textual structure entry/parser}
 
 For quick and easy structure entry, the editor supports textual entry of mathematical structures without having to switch to a different mode.
+
+\newcommand{\editScrshot}[3]{\fbox{%
+\parbox{#1mm}{
+\begin{center} #2\\
+{\vspace{2mm}\small #3}
+\end{center}
+}}}
+\newcommand{\thenn}{\hspace{\stretch{1}}$\Rightarrow$\hspace{\stretch{1}}}
+
+
+\newcommand{\editStepScrshot}[3]{%
+\begin{center}
+\hspace{\stretch{1}}\fbox{
+\begin{tabular}[c]{@{}c@{}} \\ [-3mm]
+#1 \\ [1mm]
+\end{tabular}
+}
+\thenn
+\fbox{
+\begin{tabular}[c]{@{}c@{}} \\ [-3mm]
+#2 \\ [1mm]
+\end{tabular}
+} \hspace*{\stretch{1}} \\ [3mm]
+#3
+\end{center}}
+
+\newcommand{\editStepScrshotSz}[4]{%
+\editStepScrshot{\parbox{#1}{#2}}{\parbox{#1}{#3}}{#4}
+}
+
+\editStepScrshot
+{\begin{normalsize}$a_nb_n = \frac{4\theta_{ab}\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$ \end{normalsize}}
+{\begin{normalsize}$a_nb_n = \frac{4\theta_{ab} - 4(\pi - \theta_{ab})\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$ \end{normalsize}}
+{\hspace*{-3em}enter:  ``{\tt -4($\backslash$pi-$\backslash$theta\_\{ab\})}'' }
 
 \editScreenshotTrns
 {\begin{normalsize}$a_nb_n = \frac{4\theta_{ab}\vline}{4\pi } = -1 + \frac{2\theta_{ab}}{\pi}$ \end{normalsize}}
@@ -630,6 +701,8 @@ Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
 The number of input fields for job information depends on the number of jobs. When the number is increased, the structure of the input form changes accordingly, showing an extra line of input fields. Decreasing the number hides the corresponding input fields, but after a subsequent increase, the fields reappear containing their previous values.
 
 \head{The tax-man view} 
+
+\todo{Emphasize that figure is just an impression}
 
 A different presentation of the tax form allows a user to design the form by editing the structure of the form, rather than the values of its input fields.
 
@@ -818,6 +891,12 @@ page refs are a bit tricky.
 
 Because of the large number of existing systems, we can only mention a selection of editors in this overview. The editors mentioned are some of the early systems, together with a number of other editors that contain novel features.
 
+
+\todo{iets relativeren}
+
+\toHere
+Many are program editors, with unique features, but not suitable for our use cases. Nevertheless, research in many cases orthogonal and parsing techniques may be applicable to Proxima editors as well.
+\fromHere
 
 %																
 \subsection{Syntax-directed editors} \label{sect:synDirEditors}
