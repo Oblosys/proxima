@@ -28,8 +28,8 @@ In a comparative study of a number of existing languages, we determined the foll
 {\sc Xprez} has been implemented in the functional language Haskell. It does not yet have a domain-specific syntax, but other than that it meets the requirements. Although the language is not yet fully developed, it is already powerful enough to describe a \LaTeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of an example document presented using this style sheet. The style sheet handles section numbering, ligatures (e.g. the ``fi'' in Scientific), and several mathematical constructs.
 
 \begin{center}
-\epsfig{file=xprezpics/eps/xlatex1.png.eps, width=2in} \qquad
-\epsfig{file=xprezpics/eps/xlatex2.png.eps, width=2in}
+\epsfig{file=pics/eps/xlatex1.png.eps, width=2in} \qquad
+\epsfig{file=pics/eps/xlatex2.png.eps, width=2in}
 \end{center}
 
 %Contributions of this paper:
@@ -139,7 +139,7 @@ data Syn = Syn {hRef, vRef, minWidth, minHeight :: Int,
 A presentation box (from now on called presentation) has a number of properties that describe its size and its appearance: 
 
 \begin{center}
-\epsfig{file=xprezpics/picob.eps, width=2in}
+\epsfig{file=pics/eps/picob.eps, width=2in}
 \end{center}
 
 \noindent Figure~\ref{xprezproperties} contains the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when they are combined in composite presentations. The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self explanitory. In the future, this set will be extended with other properties such as more line style and font attributes, and user defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
@@ -174,7 +174,7 @@ format            :: [ Xprez ] -> Xprez
 There are several kinds of composite presentations, the simplest being rows and columns (combinators \texttt{row} and \texttt{col}), which are duals. In a row, each child presentation is placed immediately to the right of its predecessor, with their horizontal reference lines aligned. Vertical reference lines have no effect on the positioning in a row.
 
 \begin{center}
-\epsfig{file=xprezpics/eps/row.png.eps, width=2.5in}
+\epsfig{file=pics/eps/row.png.eps, width=2.5in}
 \end{center}
 
 \noindent The bounding box of a row is the smallest rectangle that encloses all its children. The horizontal reference line is equal to the aligned reference lines of the children, whereas the vertical reference line is taken from one of the children (by default the first one). The \texttt{rowR} combinator takes an extra argument of type \texttt{Int} that specifies which child carries the vertical reference line for the row. \texttt{}By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. However, by setting the stretch properties, these defaults can be overridden. 
@@ -199,7 +199,7 @@ in  row [ text "Big" `withFontSize` 200
 \noindent This produces the following image (the dashed line has been added and represents the horizontal reference line of the presentation):
 
 \begin{center}
-\epsfig{file=xprezpics/eps/align.png.eps, width=1in}
+\epsfig{file=pics/eps/align.png.eps, width=1in}
 \end{center}
 
 The second element in the row is a column that takes the horizontal reference line from its third child (the numbering starts at 0), so the word {\bf ``Big''}, displayed with a font size of 200 pixels, is aligned with the word {\bf ``small''}, which has the default font size. The \texttt{cross} object is a line figure in the form of an X, and the \texttt{greycross} is that same figure with a grey background color. Because these presentations stretch in vertical direction, so does the column that contains them. The two stretching objects above the reference object (\texttt{text "small"}) are each assigned equal amounts of the remaining space above the horizontal reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is added and distributed equally over all stretching objects. In this case, there will no longer be any alignment of the reference object. 
@@ -264,7 +264,7 @@ shrink e = e `withFontSize_` (\fs -> (70 `percent` fs) `max` 10)
 \noindent The non-primitive library function \texttt{hAlignCenter}, centers its argument horizontally, and the \texttt{shrink} function reduces the font size to 70\%, with a minimum of 10. The result of \texttt{(text "x" `frac` text "2") `frac` text "1 + y"} is:
 
 \begin{center}
-\epsfig{file=xprezpics/eps/frac.png.eps, width=0.5in}
+\epsfig{file=pics/eps/frac.png.eps, width=0.5in}
 \end{center}
 
 The \texttt{pad} and \texttt{shrink} functions illustrate the {\em first-class} and {\em abstraction} requirements. Because a presentation is a first-class values, the presentations of the numerator and the denominator can be addressed and manipulated in the presentation of the fraction. Furthermore, using abstraction, the manipulations can be captured in the functions \texttt{pad} and \texttt{shrink}. In contrast, child presentations in both P or PSL cannot be addressed at parent level, so the fraction presentation must be created by letting each child, including the fraction bar specify its appearance and relative position. As a result, it is difficult to reuse parts of a presentation in another presentation, since all parts refer to each other, and the manipulations on the appearance are harder to read, because no abstraction can be used. 
@@ -272,7 +272,7 @@ The \texttt{pad} and \texttt{shrink} functions illustrate the {\em first-class} 
 The second example is a pair of combinators that can be used to create tree browser presentations:
 
 \begin{center}
-\epsfig{file=xprezpics/eps/tree.png.eps, width=1in}
+\epsfig{file=pics/eps/tree.png.eps, width=1in}
 \end{center}
 
 \noindent This image has been created with the \texttt{mkTreeLeaf} and \texttt{mkTreeNode} combinators, which are defined in 20 lines of {\sc Xprez} code (see the Appendix for the source). Both combinators take an \texttt{Xprez} argument that is the presentation of the label, and the tree node also takes a list of child presentations (which should be either nodes or leaves for a correct tree, but can actually be any value of type \texttt{Xprez}). Labels are not restricted to text, but can also be images, or composite {\sc Xprez} presentations, like the label that contains the case expression in the last leaf of the example tree. 
