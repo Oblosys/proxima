@@ -303,19 +303,20 @@ Because nested cartesian products with different structure are of different type
 
 We first define two combinators for composing layer functions. We need two combinators because there are two ways in which layer functions can be composed, depending on the direction of the vertical parameter. An upward vertical parameter passes through the bottom layer first, and then through the top layer, whereas a downward vertical parameter passes through the top layer first. The two combinators are \texttt{composeDown} and \texttt{composeUp}. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
 
-The combinator \texttt{composeDown} composes two layers \texttt{u} and \texttt{l} by feeding the intermediate vertical result of \texttt{u} into \texttt{l}, establishing a downward data flow. At the same time, the horizontal parameters for \texttt{u} and \texttt{l} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \texttt{u} and \texttt{l}.
+\note{maybe not h and l, but high and low?}
+The combinator \texttt{composeDown} composes two layers \texttt{h} and \texttt{l} by feeding the intermediate vertical result of \texttt{h} into \texttt{l}, establishing a downward data flow. At the same time, the horizontal parameters for \texttt{h} and \texttt{l} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \texttt{h} and \texttt{l}.
 
 %code from thesis/ncp.hs
 \begin{small}
 \begin{verbatim}
-composeDown :: LayerFunction horArgsU arg horRessU interm ->
+composeDown :: LayerFunction horArgsH arg horRessH interm ->
                LayerFunction horArgsL interm horRessL res ->
-               LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
-composeDown upper lower = 
-  \(horArgsU, horArgsL) arg ->                                           
-    let (horRessU, interm) = upper horArgsU arg
+               LayerFunction (horArgsH, horArgsL) arg (horRessH,horRessL) res
+composeDown higher lower = 
+  \(horArgsH, horArgsL) arg ->                                           
+    let (horRessH, interm) = higher horArgsH arg
         (horRessL, res)    = lower horArgsL interm            
-    in  ((horRessU,horRessL), res)
+    in  ((horRessH,horRessL), res)
 \end{verbatim}
 \end{small}
 
@@ -327,13 +328,13 @@ composeDown upper lower =
 \xymatrix{
  &\data{{\tt arg}}\ar[d] &   
   \\
-\data{{\tt hArgU}}\ar[r] & \component{{\tt u}} \ar[d]\ar[r] & \data{{\tt hResU}} 
+\data{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[d]\ar[r] & \data{{\tt hResH}} 
   \\  
  & \data{{\tt interm}} &    
   &          &          & \data{{\tt arg}}\ar[d] & \\
  & {\tt composeDown}   &                     
-  &  {\tt =} & \data{{\tt (hArgU,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
-  & \component{{\tt u}} \ar[d] \ar[r] & \data{{\tt (hResU, hResL)}}\\
+  &  {\tt =} & \data{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
+  & \component{{\tt h}} \ar[d] \ar[r] & \data{{\tt (hResH, hResL)}}\\
  & \data{{\tt interm}}\ar[d] & 
   &          &      & \component{{\tt l}} \ar[d] \ar `r [u] `[ur] [ur] & \\
 \data{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[d] \ar[r]&\data{{\tt hResL}}
@@ -342,13 +343,13 @@ composeDown upper lower =
  & \\
  &\data{{\tt res}} &   
   \\
-\data{{\tt hArgU}}\ar[r] & \component{{\tt u}} \ar[u]\ar[r] & \data{{\tt hResU}} 
+\data{{\tt hArgH}}\ar[r] & \component{{\tt h}} \ar[u]\ar[r] & \data{{\tt hResH}} 
   \\  
  & \data{{\tt interm}} \ar[u] &    
   &          &          & \data{{\tt res}} & \\
  & {\tt composeUp}   &                     
-  &  {\tt =} & \data{{\tt (hArgU,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
-  & \component{{\tt u}} \ar[u] \ar[r] & \data{{\tt (hResU, hResL)}}\\
+  &  {\tt =} & \data{{\tt (hArgH,hArgL)}} \ar[r] \ar `r [d] `[dr] [dr]
+  & \component{{\tt h}} \ar[u] \ar[r] & \data{{\tt (hResH, hResL)}}\\
  & \data{{\tt interm}} & 
   &          &      & \component{{\tt l}} \ar[u] \ar `r [u] `[ur] [ur] & \\
 \data{{\tt hArgL}}\ar[r] & \component{{\tt l}} \ar[u]\ar[r]&\data{{\tt hResL}}
@@ -369,9 +370,9 @@ In a similar way, we define a combinator \texttt{composeUp} for combining layer 
 
 \begin{small}
 \begin{verbatim}
-composeUp :: LayerFunction horArgsU interm horRessU res ->
+composeUp :: LayerFunction horArgsH interm horRessH res ->
              LayerFunction horArgsL arg horRessL interm ->
-             LayerFunction (horArgsU, horArgsL) arg (horRessU,horRessL) res
+             LayerFunction (horArgsH, horArgsL) arg (horRessH,horRessL) res
 \end{verbatim}
 \end{small}
 
@@ -410,9 +411,9 @@ The \texttt{combine} combinator is defined by using the appropriate compose comb
 \begin{verbatim}
 combine :: LayerC a b c d e f -> LayerC g h d i j e -> 
            LayerC (a,g) (b,h) c i j f
-combine upper lower =
-  LayerC { presentC = composeDown (presentC upper) (presentC lower)
-         , translateC = composeUp (translateC upper) (translateC lower)
+combine higher lower =
+  LayerC { presentC = composeDown (presentC higher) (presentC lower)
+         , translateC = composeUp (translateC higher) (translateC lower)
          }
 \end{verbatim}
 \end{small}
@@ -549,21 +550,21 @@ combine :: Layer high med emed ehigh -> Layer med low elow emed ->
 
 The order of the parameters in the type of \texttt{combine} might seem a bit odd. The reason for this order is that the first type in each pair of parameters specifies an argument type, and the second type specifies a result type. The composed \texttt{pres} function is created by applying the \texttt{pres} function of the first layer (\texttt{high -> med}) to the \texttt{high} argument and then applying the \texttt{pres} function of the second layer (\texttt{med -> low}) to the result. The \texttt{trans} function, however, has a different direction: the \texttt{trans} function of the second layer (\texttt{elow -> emed}) is applied to the argument, and the \texttt{trans} function of the first layer (\texttt{emed -> ehigh}) is applied to the result.
 
-The implementation of combine is just plumbing to get the parameters at the right places. The direction of the vertical parameters is encoded in the definition of \texttt{combine}. For \texttt{pres}, this direction is downward (the function from the upper layer is applied first), whereas for \texttt{trans}, it is upward (the function from the lower layer is applied first).
+The implementation of combine is just plumbing to get the parameters at the right places. The direction of the vertical parameters is encoded in the definition of \texttt{combine}. For \texttt{pres}, this direction is downward (the function from the higher layer is applied first), whereas for \texttt{trans}, it is upward (the function from the lower layer is applied first).
 
 \begin{small}
 \begin{verbatim}
 combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 combine = presStep
- where presStep (PresStep upr) (PresStep lwr) = PresStep $ 
-           \high -> let (med, uprTrans) = upr high
+ where presStep (PresStep hghr) (PresStep lwr) = PresStep $ 
+           \high -> let (med, hghrTrans) = hghr high
                         (low, lwrTrans) = lwr med
-                    in  (low, transStep uprTrans lwrTrans)
-       transStep (TransStep upr) (TransStep lwr) = TransStep $
+                    in  (low, transStep hghrTrans lwrTrans)
+       transStep (TransStep hghr) (TransStep lwr) = TransStep $
            \elow -> let (emed, lwrPres') = lwr elow
-                        (ehigh, uprPres') = upr emed
-                    in  (ehigh, presStep uprPres' lwrPres') 
+                        (ehigh, hghrPres') = hghr emed
+                    in  (ehigh, presStep hghrPres' lwrPres') 
 \end{verbatim}
 \end{small}
 
@@ -809,21 +810,21 @@ The \texttt{liftStep} metacombinator can therefore be used to create the \texttt
 %																
 \subsection{Derivation for \texttt{combine}} \label{subsubsectcombine}
 
-The derivation of the meta combinators for \texttt{combine} is largely similar to the derivation for \texttt{lift}. We start with the original definition of \texttt{combine} for layers with two steps (see Section~\ref{sectdpp}), in which we have renamed some variables. The two local functions are renamed to \texttt{step1} and \texttt{step2}. Both \texttt{uprTrans} and \texttt{uprPres'} are renamed to \texttt{nextUpr}, and both \texttt{lwrTrans} and \texttt{lwrPres'} to \texttt{nextLwr}. The names of the vertical parameters and results in \texttt{presStep} (\texttt{low}, \texttt{med} and \texttt{high}) are already appropriate, so \texttt{elow}, \texttt{emed} and \texttt{ehigh} in \texttt{transStep} are also renamed to \texttt{low}, \texttt{med} and \texttt{high}.
+The derivation of the meta combinators for \texttt{combine} is largely similar to the derivation for \texttt{lift}. We start with the original definition of \texttt{combine} for layers with two steps (see Section~\ref{sectdpp}), in which we have renamed some variables. The two local functions are renamed to \texttt{step1} and \texttt{step2}. Both \texttt{hghrTrans} and \texttt{hghrPres'} are renamed to \texttt{nextHghr}, and both \texttt{lwrTrans} and \texttt{lwrPres'} to \texttt{nextLwr}. The names of the vertical parameters and results in \texttt{presStep} (\texttt{low}, \texttt{med} and \texttt{high}) are already appropriate, so \texttt{elow}, \texttt{emed} and \texttt{ehigh} in \texttt{transStep} are also renamed to \texttt{low}, \texttt{med} and \texttt{high}.
 
 \begin{small}
 \begin{verbatim}
 combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 combine = step1
- where step1 (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
+ where step1 (PresStep hghr) (PresStep lwr) = PresStep $
+           \high -> let (med, nextHghr) = hghr high
                         (low, nextLwr) = lwr med
-                    in  (low, step2 nextUpr nextLwr)
-       step2 (TransStep upr) (TransStep lwr) = TransStep $
+                    in  (low, step2 nextHghr nextLwr)
+       step2 (TransStep hghr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, step1 nextUpr nextLwr)
+                        (high, nextHghr) = hghr med
+                    in  (high, step1 nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
@@ -832,14 +833,14 @@ The explicit mutual recursion in the local functions is removed by passing the n
 \begin{small}
 \begin{verbatim}
 combine = step1 (step2 combine)
- where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
+ where step1 nextStep (PresStep hghr) (PresStep lwr) = PresStep $
+           \high -> let (med, nextHghr) = hghr high
                         (low, nextLwr) = lwr med
-                    in  (low, nextStep nextUpr nextLwr)
-       step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
+                    in  (low, nextStep nextHghr nextLwr)
+       step2 nextStep (TransStep hghr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)
+                        (high, nextHghr) = hghr med
+                    in  (high, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
@@ -848,20 +849,20 @@ Analogously to \texttt{lift}, the \texttt{fix} combinator can be used to abstrac
 \begin{small}
 \begin{verbatim}
 combine = fix $ step1 . step2
- where step1 nextStep (PresStep upr) (PresStep lwr) = PresStep $
-           \high -> let (med, nextUpr) = upr high
+ where step1 nextStep (PresStep hghr) (PresStep lwr) = PresStep $
+           \high -> let (med, nextHghr) = hghr high
                         (low, nextLwr) = lwr med
-                    in  (low, nextStep nextUpr nextLwr)
-       step2 nextStep (TransStep upr) (TransStep lwr) = TransStep $
+                    in  (low, nextStep nextHghr nextLwr)
+       step2 nextStep (TransStep hghr) (TransStep lwr) = TransStep $
            \low ->  let (med, nextLwr) = lwr low
-                        (high, nextUpr) = upr med
-                    in  (high, nextStep nextUpr nextLwr)
+                        (high, nextHghr) = hghr med
+                    in  (high, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
 Because the constructors in the two local functions not only appear in the righthand side, but also in the patterns of the lefthand side, it is not as straightforward to factorize the constructors out of the definition. For the righthand side occurrences, we can pass the constructor as an argument \texttt{pack} to the local function, similar to what was done for \texttt{lift}. The constructors also appear on the lefthand side of the local functions. Because we cannot use a parameter for the pattern matching, we pass a selector function \texttt{unpack}. Instead of pattern matching, the \texttt{unpack} function is used to unpack the arguments of the local functions.
 
-Unfortunately, the selector function is used on two arguments with different types, whereas Haskell only allows monomorphic applications of function arguments. Using a universally quantified type does not work, because we have to quantify over all parameters in the types, and the number of parameters is not determined. For now, the selector function is passed twice, as \texttt{unpackL} and \texttt{unpackH}. The two unpack functions are used to unpack the \texttt{upr} and \texttt{lwr} parameters. Together with the constructor (the pack function), the unpack functions are put in a 3-tuple. In the next section, we show how a more elegant approach that uses a type class for the pack and unpack functions.
+Unfortunately, the selector function is used on two arguments with different types, whereas Haskell only allows monomorphic applications of function arguments. Using a universally quantified type does not work, because we have to quantify over all parameters in the types, and the number of parameters is not determined. For now, the selector function is passed twice, as \texttt{unpackL} and \texttt{unpackH}. The two unpack functions are used to unpack the \texttt{hghr} and \texttt{lwr} parameters. Together with the constructor (the pack function), the unpack functions are put in a 3-tuple. In the next section, we show how a more elegant approach that uses a type class for the pack and unpack functions.
 
 We assume that the selector functions \texttt{presStep} and \texttt{transStep} are defined by declaring the \texttt{PresStep} and \texttt{TransStep} types as records, according to the method shown in Section~\ref{subsecttypedef}.
 
@@ -869,14 +870,14 @@ We assume that the selector functions \texttt{presStep} and \texttt{transStep} a
 \begin{verbatim}
 combine = fix $ step1 (PresStep,presStep,presStep) 
               . step2 (TransStep,transStep,transStep) 
- where step1 (pack, unpackU, unpackL) nextStep upr lwr = pack $
-           \high -> let (med, nextUpr) = (unpackU upr) high
+ where step1 (pack, unpackH, unpackL) nextStep hghr lwr = pack $
+           \high -> let (med, nextHghr) = (unpackH hghr) high
                         (low, nextLwr) = (unpackL lwr) med
-                    in  (low, nextStep nextUpr nextLwr)
-       step2 (pack, unpackU, unpackL) nextStep upr lwr = pack $
+                    in  (low, nextStep nextHghr nextLwr)
+       step2 (pack, unpackH, unpackL) nextStep hghr lwr = pack $
            \low ->  let (med, nextLwr) = (unpackL lwr) low
-                        (high, nextUpr) = (unpackU upr) med
-                    in  (high, nextStep nextUpr nextLwr)
+                        (high, nextHghr) = (unpackH hghr) med
+                    in  (high, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
@@ -890,22 +891,22 @@ combine = fix $ combineStepDown (PresStep,presStep,presStep)
                . combineStepUp (TransStep,transStep,transStep) 
 
 combineStepDown :: ( (h -> (l,nStepC)) -> stepC 
-                   , stepU -> h -> (m, nStepU)
+                   , stepH -> h -> (m, nStepH)
                    , stepL -> m -> (l, nStepL) ) -> 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown (pack, unpackU, unpackL) nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpackU upr) high
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown (pack, unpackH, unpackL) nextStep hghr lwr = pack $
+    \high -> let (med, nextHghr) = (unpackH hghr) high
                  (low, nextLwr) = (unpackL lwr) med
-             in  (low, nextStep nextUpr nextLwr)
+             in  (low, nextStep nextHghr nextLwr)
 
 combineStepUp :: ( (l -> (h,nStepC)) -> stepC 
-                 , stepU -> m -> (h, nStepU)
+                 , stepH -> m -> (h, nStepH)
                  , stepL -> l -> (m, nStepL)) -> 
-                 (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepUp (pack, unpackU, unpackL) nextStep upr lwr = pack $
+                 (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepUp (pack, unpackH, unpackL) nextStep hghr lwr = pack $
     \low -> let (med, nextLwr) = (unpackL lwr) low
-                (high, nextUpr) = (unpackU upr) med
-            in  (high, nextStep nextUpr nextLwr)
+                (high, nextHghr) = (unpackH hghr) med
+            in  (high, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
@@ -922,17 +923,17 @@ First, we take a look at the types of the pack and unpack parameters of the meta
 \begin{small}
 \begin{verbatim}
 combineStepDown :: ( (h -> (l,nStepC)) -> stepC 
-                   , stepU -> h -> (m, nStepU)
+                   , stepH -> h -> (m, nStepH)
                    , stepL -> m -> (l, nStepL)) -> 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown (pack, unpackU, unpackL) nextStep upr lwr = pack $ ...
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown (pack, unpackH, unpackL) nextStep hghr lwr = pack $ ...
 
 \end{verbatim}
 \end{small}
 
 The type of \texttt{pack} is \texttt{(h -> (l, nStepC)) -> stepC}. The result of the function (\texttt{stepC}) is a step type (\texttt{PresStep} or \texttt{TransStep} in the \texttt{Simple'} case) and its argument is a function from \texttt{h} to a tuple of \texttt{l} and the next step value (\texttt{nStepC}). We rename the parameters in the type of \texttt{pack} to the more general: \texttt{(arg -> (res, nStep)) -> step}.
 
-For the unpack function, we only look at \texttt{unpackU}, since the structure of both unpack functions is the same. The type of \texttt{unpackU} is \texttt{stepU -> h -> (m,nStepU)}. The function takes a step value (\texttt{stepU}) and returns a function from type \texttt{h} to a tuple of \texttt{m} and the next step type (\texttt{nStepU}). Analogously to \texttt{pack}, we rename the type variables: \texttt{unpack :: step -> arg -> (res,nStep)}. 
+For the unpack function, we only look at \texttt{unpackH}, since the structure of both unpack functions is the same. The type of \texttt{unpackH} is \texttt{stepH -> h -> (m,nStepH)}. The function takes a step value (\texttt{stepH}) and returns a function from type \texttt{h} to a tuple of \texttt{m} and the next step type (\texttt{nStepH}). Analogously to \texttt{pack}, we rename the type variables: \texttt{unpack :: step -> arg -> (res,nStep)}. 
 
 Thus, our first shot at a type class with \texttt{pack} and \texttt{unpack} is:
 
@@ -949,9 +950,9 @@ However, this definition is not complete yet. In order to see why, we have to lo
 \begin{small}
 \begin{verbatim}
 combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepU h m nStepU
+                   , Pack stepH h m nStepH
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
 \end{verbatim}
 \end{small}
 
@@ -988,32 +989,32 @@ class Pack step arg res nStep | step -> arg res nStep where
 
 With the use of the type class, the meta combinators change slightly. We show the changes to the definition of \texttt{combineStepDown}. The other meta combinators undergo similar changes and are shown in the next section.
 
-The \texttt{combineStepDown} function loses the 3-tuple parameter with the pack and unpack functions, and \texttt{unpackL} and \texttt{unpackU} are replaced by \texttt{unpack}. In addition, a type constraint is added to the type.
+The \texttt{combineStepDown} function loses the 3-tuple parameter with the pack and unpack functions, and \texttt{unpackL} and \texttt{unpackH} are replaced by \texttt{unpack}. In addition, a type constraint is added to the type.
 
 \begin{small}
 \begin{verbatim}
 combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepU h m nStepU
+                   , Pack stepH h m nStepH
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpack upr) high
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown nextStep hghr lwr = pack $
+    \high -> let (med, nextHghr) = (unpack hghr) high
                  (low, nextLwr) = (unpack lwr) med
-             in  (low, nextStep nextUpr nextLwr)
+             in  (low, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{small}
 
-From the type constraint, we can see how the type class approach solves the double unpack parameter problem. Three \texttt{Pack} constraints are present in the type. The last two state that parameter types \texttt{stepU} and \texttt{stepL} are instances of \texttt{Pack}, and the first constraint states that result type \texttt{stepC} is instance of \texttt{Pack}. From this we can see that the first two constraints arise from the use of \texttt{unpack} on the \texttt{upr} and \texttt{lwr} arguments (of types \texttt{stepU} and \texttt{stepL}), whereas the last constraint comes from the use of \texttt{pack}. In the implementation, this means that three dictionaries are passed, and that the two occurrences of \texttt{unpack} come from different dictionaries. In other words, the type system takes care of passing the double unpack functions.
+From the type constraint, we can see how the type class approach solves the double unpack parameter problem. Three \texttt{Pack} constraints are present in the type. The last two state that parameter types \texttt{stepH} and \texttt{stepL} are instances of \texttt{Pack}, and the first constraint states that result type \texttt{stepC} is instance of \texttt{Pack}. From this we can see that the first two constraints arise from the use of \texttt{unpack} on the \texttt{hghr} and \texttt{lwr} arguments (of types \texttt{stepH} and \texttt{stepL}), whereas the last constraint comes from the use of \texttt{pack}. In the implementation, this means that three dictionaries are passed, and that the two occurrences of \texttt{unpack} come from different dictionaries. In other words, the type system takes care of passing the double unpack functions.
 
 The type class does have a small drawback. Due to the monomorphism restriction, Haskell only allows a function to have an overloaded type if it is defined with parameters on the lefthand side of the definition (ie. \texttt{f x$_1$~}\dots \texttt{~x$_n$ =} \dots, instead of \texttt{f = \symbol{92}x$_1$~}\dots \texttt{~x$_n$}\verb|-> |\dots), or if it has an explicit type signature. Due to the type class, the inferred types of \texttt{lift} and \texttt{combine} are overloaded. However, \texttt{combine} has no parameters on the lefthand side of the definition, so it needs to be rewritten, or it needs a type signature.
 
 Because the type of \texttt{combine} can be complex, as the order of the parameters depends on the direction of the layer functions, it is inconvenient to have to give the type signature. If a type signature in the architecture source is desired, the compiler can be asked for the type, which can then be pasted in the source.
 
-To eliminate the need for an explicit type signature for \texttt{combine}, we explicitly add the upper and lower layer parameters to the definition. For \texttt{Simple}, \texttt{combine} becomes: 
+To eliminate the need for an explicit type signature for \texttt{combine}, we explicitly add the higher and lower layer parameters to the definition. For \texttt{Simple}, \texttt{combine} becomes: 
 
 \begin{small}
 \begin{verbatim}
-combine upper lower = fix (combineStepDown . combineStepUp) upper lower
+combine higher lower = fix (combineStepDown . combineStepUp) higher lower
 \end{verbatim}
 \end{small}
 
@@ -1049,22 +1050,22 @@ liftStep layerF next horArgs = pack $
                 in  (vertRes, next horRess)
 
 combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepU h m nStepU
+                   , Pack stepH h m nStepH
                    , Pack stepL m l nStepL ) => 
-                   (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepDown nextStep upr lwr = pack $
-    \high -> let (med, nextUpr) = (unpack upr) high
+                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepDown nextStep hghr lwr = pack $
+    \high -> let (med, nextHghr) = (unpack hghr) high
                  (low, nextLwr) = (unpack lwr) med
-             in  (low, nextStep nextUpr nextLwr)
+             in  (low, nextStep nextHghr nextLwr)
 
 combineStepUp :: ( Pack stepC l h nStepC 
-                 , Pack stepU m h nStepU
+                 , Pack stepH m h nStepH
                  , Pack stepL l m nStepL ) => 
-                 (nStepU -> nStepL -> nStepC) -> stepU -> stepL -> stepC
-combineStepUp nextStep upr lwr = pack $
+                 (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
+combineStepUp nextStep hghr lwr = pack $
     \low -> let (med, nextLwr) = (unpack lwr) low
-                (high, nextUpr) = (unpack upr) med
-            in  (high, nextStep nextUpr nextLwr)
+                (high, nextHghr) = (unpack hghr) med
+            in  (high, nextStep nextHghr nextLwr)
 \end{verbatim}
 \end{footnotesize}\caption{Final meta combinators for \texttt{lift} and \texttt{combine}}\label{metacombinators} 
 \end{center}
@@ -1119,15 +1120,15 @@ The only thing left to do now, is to define the \texttt{lift} and \texttt{combin
 \>\>\verb|. lift|{\tt Step (layerFunction$_n$ theLayer)}
 \end{tabbing}
 
-The \texttt{combine} combinator is a composition of either \texttt{combineStepUp} or \texttt{combineStepDown} meta combinators to which \texttt{fix} is applied. The choice of \texttt{combineStepUp} or \texttt{combineStepDown} for a layer function is determined by the direction of the vertical data flow in that layer. Note that the \texttt{upper} and \texttt{lower} arguments are added because of the monomorphism restriction. The type of combine cannot be given in a general definition and is explained below.
+The \texttt{combine} combinator is a composition of either \texttt{combineStepUp} or \texttt{combineStepDown} meta combinators to which \texttt{fix} is applied. The choice of \texttt{combineStepUp} or \texttt{combineStepDown} for a layer function is determined by the direction of the vertical data flow in that layer. Note that the \texttt{higher} and \texttt{lower} arguments are added because of the monomorphism restriction. The type of combine cannot be given in a general definition and is explained below.
 
 \begin{tabbing}
 {\tt combine}\verb| :: |{\tt Layer \dots}\verb| -> |{\tt Layer \dots}\verb| -> |{\tt Layer \dots }\\
-{\tt co}\={\tt mbin}\={\tt e upper lower = }\\
+{\tt co}\={\tt mbin}\={\tt e higher lower = }\\
 \>{\tt fix ( combineStep$<$Up$/$Down$>$}\\
 \>\>{\tt \dots}\\ 
 \>\>\verb|. combine|{\tt Step$<$Up$/$Down$>$}\\
-\>\>{\tt ) upper lower}
+\>\>{\tt ) higher lower}
 \end{tabbing}
 
 A general type definition of combine cannot be given, because the order of the type variables depends on the direction of the layer functions. For each pair of type variables, a$_i$ and r$_i$ in the \texttt{Layer \dots~a$_i$ r$_i$ \dots} types of the two arguments and the result, we have the following dependency. If the $i$-th layer function is downward:
