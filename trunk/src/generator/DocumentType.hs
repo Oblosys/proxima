@@ -5,12 +5,8 @@ data EnrichedDoc = RootEnr idListDecls:[Decl] decls:[Decl] HeliumTypeInfo Docume
 
 --  4 pres elts: "=", ";", TypeDecl, and "[...]"
 data Decl = Decl expanded:Bool autoLayout:Bool Ident Exp { idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP }
-          | BoardDecl Board                               { idD: IDD idP0:IDP idP1:IDP }
-          | PPPresentationDecl PPPresentation             { idD: IDD idP0:IDP idP1:IDP }
-          | DateDecl Date                                 { idD: IDD idP0:IDP idP1:IDP } 
-
-data Date  = EuDate day:Int month:Int year:Int             { idD:IDD idP0:IDP  idP1:IDP idP2:IDP }
-           | UsDate month:Int day:Int year:Int             { idD:IDD idP0:IDP  idP1:IDP idP2:IDP }
+          | BoardDecl Board                              { idD: IDD idP0:IDP idP1:IDP }
+          | PPPresentationDecl PPPresentation            { idD: IDD idP0:IDP idP1:IDP }
 
 
 -- one pres elt for in program source, other for in list
@@ -26,7 +22,7 @@ data Exp = PlusExp exp1:Exp exp2:Exp                     { idD:IDD idP0:IDP  }
          | LamExp Ident Exp                              { idD:IDD idP0:IDP idP1:IDP }
          | AppExp exp1:Exp exp2:Exp                      { idD:IDD }
          | CaseExp Exp alts:[Alt]                        { idD:IDD idP0:IDP idP1:IDP }
-         | LetExp [Decl] Exp                             { idD:IDD idP0:IDP idP1:IDP }
+         | LetExp [Decl] Exp                              { idD:IDD idP0:IDP idP1:IDP }
          | IdentExp Ident                                { idd:IDD }
          | IfExp exp1:Exp exp2:Exp exp3:Exp              { idD:IDD idP0:IDP idP1:IDP idP2:IDP }
          | ParenExp Exp                                  { idD:IDD idP0:IDP idP1:IDP }

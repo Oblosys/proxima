@@ -1,0 +1,1 @@
+ghc Generator.hs --make -package uust  -fglasgow-exts 

@@ -27,10 +27,7 @@ SEM EnrichedDoc
   | RootEnr idListDecls.path  = []
             decls.path  = []
 
-
-
-
--- don't edit this line or below !!!
+----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 {- ------------------------------------
 

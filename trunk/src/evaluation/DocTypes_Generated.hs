@@ -122,7 +122,7 @@ Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 
 
 
--- don't edit this line or below !!!
+----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 {- ------------------------------------
 
