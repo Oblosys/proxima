@@ -239,8 +239,16 @@ The user then updates the lower level:
 
 after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$.
 
-The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{bla} schematically shows the edit process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
-\note{add figure} 
+The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the edit process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
+
+\begin{figure}
+\xpr{
+level\H 		&   			&		 & 			& level''\H\\
+~~~\downarrow &   		&		&~\nearrow~&~~~\downarrow \\
+level\L 		&~\leadsto~ & level'\L 	& 			& level''\L\\
+}
+\caption{Single edit step.(draft)} \label{singleLayerEdit}
+\end{figure}
 
 
 Most likely, after editing, the presentation invariant does not hold between $\level'\L$ and $\level\H$. Hence, we need to find a new higher level value $\level''\H$. However, because it is possible that $\level'\L$ is not a valid presentation of a higher level value, we also need to find a new lower level $\level''\L$ in order to restore the presentation invariant. Figure~\ref{} shows the values of the higher and lower levels for the example from the previous section.
@@ -1375,8 +1383,9 @@ We wish to define $\present\C$ and $\interpret\C$ as:
 
 Varying $h$ must end up in same lower set. varying $m$ must end up in same lower set.
 similar for \interpret. Plus both must be equal.
+\fromHere
 
-Unfortunately, it turns out that a composition of two mappings between equivalence classes is itself not always a mapping between equivalence classes. \note{maybe use concept of well-defined editor} A simple though far-fetched example shows this fact. Consider the following $\present\H$ and $\present\L$
+Unfortunately, it turns out that a composition of two mappings between equivalence classes is itself not always a mapping between equivalence classes. \note{maybe use concept of well-defined editor} A simple example shows this fact. Consider the following $\present\H$ and $\present\L$
 
 \xpr{
 \present\H \tp Int \to (Int,Int)	&				& \present\L \tp (*,Int) \to Int\\
@@ -1424,52 +1433,6 @@ By taking $(0,0)$ and $(0,1)$ for the middle level $m$, we have: $\eqcl{0}{CH} =
 
 
 
-%explanation of def.
-%
-%\xpr{
-%	\present\C~H \\
-%\Eqv{need a name for this one}&
-%	\setof{l}{h \in H \land l~Present\C~h}\\
-%\Eqv{$Present\C \eqv Present\L \oo Present\H$}&
-%	\setof{l}{h \in H \land \exists m : l~Present\L~m \and m~Present\H~h}\\
-%\Eqv{\law{\present-Char}}&
-%	\setof{l}{h \in H \land \exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \and \eqcl{m}{HL} = %\present\H~\eqcl{h}{HH}}\\
-%%\Eqv{}&
-%%	\present~H = \setof{l}{h \in H \land l \in Present~h}\\
-%}
-
-%Implications: $\imp$ follows from def.
-
-%\xpr{
-%%l \in \eqcl{\level\L}{CL} \imp \exists m,h : \eqcl{l}{LL} = \present\L~\eqcl{m0}{LH} \land %\eqcl{m}{HL} = %\present\H~\eqcl{h}{HH} \land h \in \eqcl{\level\H}{CH} ??
-%\eqcl{l}{CL} = \present\C~\eqcl{h}{CH} ~\imp\\ 
-%\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
-%\text{and}\\
-%\eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL} ~\imp\\
-%\exists m : \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}
-%}
-
-%Reverse ($\ffr$) is tricky:
-
-
-%Is there reason to give the Kleisli variant?
-%
-%Kleisli:
-%
-%\xpr{
-%\present\C & \equ & (\present\L \oo \eqcl{\hole}{LH}) \klei  (\present\H \oo \eqcl{\hole}{HH})\\
-%\interpret\C & \equ &(\interpret\H  \oo \eqcl{\hole}{HL}) \klei  (\interpret\L  \oo \eqcl{\hole}{LL})
-%}
-
-%old notation with $\bigcup$:
-%
-%\xpr{
-%\present\C~H & \equ & \bigcup~\setof{ \present\L~\eqcl{m}{LH}~} {~ h \in H \land \eqcl{m}{HL} = %\present\H~\eqcl{h}{HH}}\\
-%\interpret\C~L & \equ & \bigcup~\setof{ \interpret\H~\eqcl{m}{HL}~} {~ l \in L \land \eqcl{m}{LH} = %\interpret\L~\eqcl{l}{LL}}\\
-%%\interpret~\level\L & \equ & \{ \level\H \:|\: \level\H \in \interpret\H~\level\M \land \level\M \in 
-%%\interpret\L~\level\L \}\\
-%}\note{use $\exists$ before $h$ in set comprehension?}
-
 
 \bc
 
@@ -1492,17 +1455,24 @@ Unclear:
 \o How do we know that classes did not get to big?
 \el
 
+Maybe also add that combined classes are unions of component classes.
+
+Maybe say something about invalid l's. They don't imply a class in CL, but we do have to be sure that classes in LL coming from Present L (and maybe interpretL) do not interfere with CL classes.
+
 see appendix
 \ec
 
-We can express a condition on the two composing layers:
+The combination is okay if the following two conditions hold:
 
 \xprlab{
-\forall m_0 & : & (\exists m \in \eqcl{m_0}{LH} : \valid~m) ~\imp~ \exists m_1 \in \eqcl{m_0}{LH} : \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL}
+\forall m_0, m_0' : \eqcl{m_0}{LH} = \eqcl{m_0'}{LH} \imp & \exists m_1, m_1' : \eqcl{m_1}{LH} = \eqcl{m_1'}{LH} \\
+& \land \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL}\\
+& \land \eqcl{m_1'}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0'}{HL}\\
 }{Sane}
 
-For a class in LH that has at least one valid element.
-
+\xprlab{
+\eqcl{x}{LH} = \eqcl{y}{LH} \land \eqcl{x}{HL} = \eqcl{y'}{HL} ~\imp~ \exists z : \eqcl{z}{HL} = \eqcl{y}{HL} \land \eqcl{z}{LH} = \eqcl{y'}{LH}
+}{Commute}
 
 
 
@@ -1547,66 +1517,6 @@ The proof is simple:
 
 
 
-\bc
-\begin{Prf}&
-	\eqcl{l'}{CL} = \present\C~\eqcl{h'}{CH}\\
-\Imp{corollary}& 
-	\exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h'}{HH}\\
-\Imp{\law{InterPresent} on higher and lower}&
-	\exists m : \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL} \\ 
-\Imp{corollary (with equivalences instead of implications}&
-	\eqcl{h'}{CH} = \interpret\C~\eqcl{l'}{CL}\\
-\end{Prf}
-
-% or say l \in {set def of \interpret}
-% => l in \interpret =>{eq. classes are okay} [l] = \interpret
-%
-%	\Eqv{def. of combination}\\
-%\eqcl{l'}{CL} = \setof{l}{\exists h \in \eqcl{h'}{CH} : \exists m : \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} %\land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}}\\
-%	\Imp{}\\
-%\forall l \in \eqcl{l'}{CL} : \exists h \in \eqcl{h'}{CH} : \exists m :  l \in \eqcl{l'}{CL} \land 
-%   \eqcl{l}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\ 
-%	\Imp{\law{InterPresent} on higher and lower}\\
-%\forall h \in \eqcl{h'}{CH} : \exists m,l :  l \in \eqcl{l'}{CL} \land 
-%   \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL} \\ 
-%	\Imp{}\\
-%	\Imp{}\\
-%
-
-About the proof:
-\xpr{
-h \in \interpret\C~\eqcl{l}{LL}			& \Imp{higher class for $Interpret\C$ includes $\eqcl{}{H}$}\\
-h \in \interpret\C~\eqcl{l}{CL}			& \Imp{lower class for $Interpret\C$ is same as for $Present$}\\
-\eqcl{h}{CH} = \interpret\C~\eqcl{l}{CL}\\
-}
-
-\head{old stuff}
-Probably $\eqcl{h}{CH} \subset \interpret\C~\eqcl{l}{CL}$ is straightforward, but we also need to prove that the class from \interpret does not get too big.
-
-Interpret's lower class may be bigger than \present's, but higher must be equal.
-
-Prove that classes do not get bigger?
-
-\begin{Prf}&
-	h \in \eqcl{h'}{CH}\\
-\Imp{ previous proof, existentials in proof?}&
-\exists m,l :  l \in \eqcl{l'}{CL} \land 
-   \eqcl{h}{HH} = \interpret\H~\eqcl{m}{HL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL} \\ 
-\Imp{??}&
-	h \in \setof{ \interpret\H~\eqcl{m}{HL}~} {~ l \in \eqcl{l'}{CL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}}\\
-\Imp{??}&
-	h \in \bigcup~\setof{ \interpret\H~\eqcl{m}{HL}~} {~ l \in \eqcl{l'}{CL} \land \eqcl{m}{LH} = \interpret\L~\eqcl{l}{LL}}\\
-\end{Prf}
-
-If we use interpresent on relations, this proof might be easier, since we don't need to do it for entire class?
-\xpr{
-\l~\Present\C~h \imp h~\Interpret\C~l\\
-vs\\
-\eqcl{l}{L} = \present\C~\eqcl{h}{H} \imp \eqcl{h}{H} = \interpret\C~\eqcl{l}{L}\\
-}
-
-\ec
-
 \subsection{Inductive definition of $\present$ and $\interpret$}
 
 In this section, we give the inductive definition for the presentation and interpretation functions of an editor consisting of $n$ layers.  The building blocks of the combination are $n+1$ data level and $n$ pairs of presentation and interpretation functions and corresponding equivalence relations:
@@ -1645,11 +1555,10 @@ The equivalence relations for the basis ($H_0$ and $L_0$) both are the equality 
 
 Figure~\ref{indexedLayer} shows an overview of the levels, mapping functions, and relations that appear in a combined layer. Because indices make proofs harder to read, and because at any time we only regard two layers and three levels, we introduce a shorthand notation. The data levels, $Level_0$, $Level_i$ and $Level_{i+1}$ are denoted by $Level\H$, $Level\M$, and $Level\L$, similar to the first part of this section. For the mapping functions, the combination $\present_{\mathrm{C},i}$ becomes $\present\C$, and the components $\present_{\mathrm{C},{i-1}}$ and $\present_i$ become $\present\H$ and $\present\L$. The same thing is done for $\interpret$.
 
-For the relations we denote $CH_i$, $CL_i$, $CH_{i-1}$, $CH_{i-1}$, $H_i$, and $L_i$ by $CH$, $CL$, $HH$, $HL$, $LH$, and $LL$. Figure~\ref{relativeLayer} shows what Figure~\ref{indexedLayer} looks like when using the short-hand notation. 
+For the equivalence relations we denote $CH_i$, $CL_i$, $CH_{i-1}$, $CH_{i-1}$, $H_i$, and $L_i$ by $CH$, $CL$, $HH$, $HL$, $LH$, and $LL$. Figure~\ref{relativeLayer} shows what Figure~\ref{indexedLayer} looks like when using the short-hand notation. 
 \note{mention that for levels $h$ stands for $0$, whereas for rels and mapping fns it stands for $i-1$?}
 %Note that this means that for functions the H subscript stands for $n-1$ and not for $0$. Same thing holds for $\interpret$.
-
-****** shorthand not for basis
+\note{mention that shorthand is not used for basis}
 
 \begin{figure}[h]
   \hfill
@@ -1684,12 +1593,23 @@ LevelL CL           LL
 \end{figure}
 
 
+
+
 \subsection{Editing} \label{sect:combinedExtra_Editing}
 
-\bl
-\o Pres inv holds for high and low, so we have $level\H$, $level\M$, and $level\L$:
-\o Explain that $m$ is $\level\M$
-\el
+Besides $Level\H$ and $Level\L$, a combined layer also keeps track of the middle level $Level\M$. Before the edit operation takes place we know that $\eqcl{Level\L}{CL} = present\C \eqcl{Level\H}{CH}$. By \law{$\present\C$-Def}, this implies there exists a middle level $m$ that is in the presentation of $level\H$ and that has $\level\L$ in its presentation. Although not explicitly denoted, we assume that $level\M$ is this $m$. 
+
+\begin{figure}
+\xpr{
+level\H 		&   			& level'\H 	&~\rightarrow~& level''\H\\
+~~~\downarrow&   		&~~~\uparrow&			&~~~\downarrow \\
+level\M 		&   			& level'\M 	& 			& level''\M\\
+~~~\downarrow 	&   		&~~~\uparrow&			&~~~\downarrow \\
+level\L 		&~\leadsto~& level'\L 	& 			& level''\L\\
+} \caption{Single edit step in a combined layer. (draft)} \label{combinedEdit}
+\end{figure}
+
+Hence, before the lower level is updated, we have:
 
 \xpr{
 \eqcl{\level\L}{LL} = \present\L~\eqcl{\level\M}{LH} ~\land~
@@ -1697,27 +1617,25 @@ LevelL CL           LL
 \level\L \leadsto \level'\L 
 }
 
+After the lower level update, the lower layer computes an intermediate value $\level'\M$, from which the higher layer (which may be a combined layer itself) computes $\level'\H$. At the top, $\level'\H$ is assigned to $\level''\H$, which is subsequently presented onto $level''\M$. Finally, $level''\M$ presented onto $level''\L$. Figure~\ref{combinedEdit} sketches the updates to the various data levels.
 
-Apart from a few changes to the subscripts, the requirements for $level''\H$ and $level''\L$ are equal to the requirements for the single layer editor in Section~\ref{sect:singleExtra_Editing}.
+
+\note{add invariant to \law{Doc-Inert} precondition?}
+Apart from a few changes to the subscripts, the requirements for $level''\H$ and $level''\L$ are equal to the requirements for the single layer editor in Section~\ref{sect:singleExtra_Editing}. The only difference is that to the precondition of \law{Doc-Inert}, we added the invariant that $\level\L$ is a presentation of $\level\H$, which was not necessary in the previous sections. 
 
 \xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} } }		{Postcondition}
-\xprlab{\hoare{\eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
+%\xprlab{\hoare{\eqcl{\level\L}{L} = \present\C~\eqcl{\level\H}{H} \land \eqcl{\level'\L}{CL} = %\present\C~\eqcl{\level\H}{CH}} {Comp} { \level\H = \level''\H}}  {Doc-Inert}
+\xprlab{ 
+\left\{ \begin{array}{l}
+ \eqcl{\level\L}{L} = \present\C~\eqcl{\level\H}{H} \land\\
+ \eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}
+\end{array}\right\}
+{Comp} \{ \level\H = \level''\H\} }  {Doc-Inert}
 \xprlab{\hoare{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}} {Comp} { \level'\L = \level''\L}}		{Pres-Inert}
 \xprlab{\hoare{\true} {Comp} {\level\H~\text{``close to''}~\level''\H}}	{Preserve}
 \xprlab{\hoare{\true} {Comp} {\level'\L~\text{``close to''}~\level''\L}}	{Imprecise}
 
 
-%\xprlab{
-%compute^{intr}:
-%\level'\M = (\interpret\L~ \eqcl{\level'\L}{LL})  \reuze{LH}   \level\M  \\
-%\level'\H = compute^{intr}\H \level'\M  \level\H \\
-%\\
-%\level''\H = \level'\H\\
-%\\
-%compute^{pres}:
-%\level''\M = compute^{pres}\H \level''\H  \level'\M\\
-%\level''\L = (\present\L~ \eqcl{\level''\M}{LH})   \reuze{LL}   \level'\L
-%}{Compute}
 The inductive definition of $Comp$ reads:
 
 \xprlab{
@@ -1731,25 +1649,22 @@ Dwn ~~\is~~		& \level''\L \gets \present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~
 We prove that $Comp$ meets the requirements.
 
 
-
 \head{\law{Postcondition} requirement}
 
-%\xprlab{\hoare{\true} {Comp} { \eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH} } }		{Postcondition}
-%\xprlab{\hoare{\true} {Comp_{n-1}} { \eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH} } }		{I.H.}
 In \fn{wp} notation, the \law{Postcondition} is:
 
-\xprlab{\true ~\imp~ \wp{Comp}{\eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH}}} {Postcondition}
+\xprlab{\true ~\imp~ \wp{Comp_n}{\eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH}}} {Postcondition}
 
 
 \begin{proof} We prove the requirement by induction over the number of layers $n$. 
 
 {\bf Case~} $n=0$
-% not right
-Filling in the base cases for $present\C$, $Level\H$ and $\Level\L$, as well as the for relations $CH$ and $CL$, yields:
+
+Filling in the base cases for $present\C$, the data levels, and relations $CH$ and $CL$ yields:
 
 \xpr{\true ~\imp~ \wp{Comp}{\eqcl{\level''_0}{=} = \id~\eqcl{\level''_0}{=}}}
 
-which holds, because it is equivalent to $\true ~\imp~ \wp{Comp}{\true}$.
+which holds because it is equivalent to $\true ~\imp~ \wp{Comp}{\true}$.
 
 {\bf Case~} $n>0$
 
@@ -1763,31 +1678,26 @@ The induction hypothesis is:
 In the proof, we need the property that the lower presentation of a valid middle level is in the result of the combined presentation:
 
 \xpr{
-\eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH} ~~~\imp~~~ \eqcl{\present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{CL} = \present\C~\eqcl{\level''\H}{CH} \\
+\eqcl{m}{HL} = \present\H~\eqcl{h}{HH} ~\imp~ \eqcl{\present~ \eqcl{m}{LH}   ~\reuze{LL}~   l}{CL} = \present\C~\eqcl{h}{CH} \\
 }
 
 It has a simple proof:
 
 \begin{Prf}&
-	\eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH} \\
+	\eqcl{m}{HL} = \present\H~\eqcl{h}{HH} \\
 \Eqv{reflexivity of $=$}&
- 	\present\L~ \eqcl{\level''\M}{LH} = \present\L~\eqcl{\level''\M}{LH} \land
- 	\eqcl{\level''\M}{HL} = \present\H~\eqcl{\level''\H}{HH}\\
-\Imp{let $m = \level''\M$}&
- 	\exists m :\present\L~ \eqcl{\level''\M}{LH} = \present\L~\eqcl{m}{LH} \land
- 	\eqcl{m}{HL} = \present\H~\eqcl{\level''\H}{HH}\\
+ 	\present\L~ \eqcl{m}{LH} = \present\L~\eqcl{m}{LH} \land
+ 	\eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
 \Eqv{\law{$\reuz$-Valid}}&
- 	\exists m :\eqcl{\present\L~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{LL} = \present\L~\eqcl{m}{LH} \land
- 	\eqcl{m}{HL} = \present\H~\eqcl{\level''\H}{HH}\\
+ 	\eqcl{\present\L~ \eqcl{m}{LH}   ~\reuze{LL}~   l}{LL} = \present\L~\eqcl{m}{LH} \land
+ 	\eqcl{m}{HL} = \present\H~\eqcl{h}{HH}\\
+\Imp{let $m' = m$}&
+ 	\exists m' :\eqcl{\present\L~ \eqcl{m}{LH}   ~\reuze{LL}~   l}{LL} = \present\L~\eqcl{m'}{LH} \land
+ 	\eqcl{m'}{HL} = \present\H~\eqcl{h}{HH}\\
 \Eqv{\law{$\present\C$-Def}}&
-	\eqcl{\present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{CL} = \present\C~\eqcl{\level''\H}{CH} \\
+	\eqcl{\present~ \eqcl{m}{LH}   ~\reuze{LL}~   l}{CL} = \present\C~\eqcl{h}{CH} \\
 \end{Prf}
 
-%\begin{Prf}&
-%	\eqcl{\present~ \eqcl{\level''\M}{LH}   ~\reuze{LL}~   \level'\L}{CL}\\
-%\Equ{}&
-%	\present\C~\eqcl{\level''\H}{CH} \\
-%\end{Prf}
 
 Using this result, we prove \law{Postcondition}.
 
@@ -1812,9 +1722,7 @@ Using this result, we prove \law{Postcondition}.
 \Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\eqcl{\level''\L}{CL} = \present\C~\eqcl{\level''\H}{CH}}\\
 \end{Prf}
-
 \end{proof}
-
 
 
 
@@ -1823,13 +1731,16 @@ Using this result, we prove \law{Postcondition}.
 
 \head{\law{Doc-Inert} requirement}
 
-\xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}} {Comp_n} { \level\H = \level''\H}}  {Doc-Inert}
+\xprlab{\eqcl{\level\L}{CL} = \present\C~\eqcl{\level\H}{CH} \land \eqcl{\level'\L}{CL} = \present\C~\eqcl{\level\H}{CH} ~\imp\\ \wp{Comp_n}{\level\H = \level''\H}}{Doc-Inert}
 
-We need an extra requirement in order for \law{Doc-Inert} to hold.
+Besides the two conditions specified in Section~\ref{sect:combinedExtra}, we need an additional condition for \law{Doc-Inert} to hold. From \law{InterPresent}, we know that if $\level'\L$ is a presentation of $\level\H$, then $\level\H$ is in the interpretation of $\level'\L$. Thus, there exists a middle level $m$ in the interpretation of $\level'\L$, which has $\level\H$ in its interpretation. However, the mere existence of such a middle level does not guarantee that this is the middle level resulting from $Comp$.
 
-From \law{InterPresent}, we know that if $\level'\L$ is a presentation of $\level\H$, then $\level\H$ is in the interpretation of $\level'\L$. Thus, there exists a middle level . However, the existence of such a middle level does not guarantee that the middle level computed by $Comp$ is . 
+The problem lies in the fact that $level'\M$ is selected by $\reuze{LH}$ from an $LH$ class of elements, instead of an $HL$ class. Thus, reusing extra state from $level\M$ could cause $\level'M$ to end up in an $HL$ class that does not contain $level\M$, which would break \law{Doc-Inert}. We avoid the problem by requiring that the result of $\reuze{LH}$ is in the correct $HL$ class, if possible:
 
-We need something extra. previous m could pull m out of path to levelh.
+\xprlab{
+\eqcl{m'}{HL} = \eqcl{m}{HL} ~\imp~ \eqcl{\eqcl{m'}{LH} \reuze{LH} m}{HL} = \eqcl{m}{HL}}{Orthogonal}
+
+If both $HL$ and $LH$ are described by wildcard types (see Section~\ref{}), \law{Orthogonal} holds.
 
 %
 %\xprlab{
@@ -1841,70 +1752,68 @@ We need something extra. previous m could pull m out of path to levelh.
 %m'~HL~m ~\imp~ \eqcl{m'}{LH} \reuze{LH} m~HL~m}{Orthogonal}
 
 
-\xprlab{
-\eqcl{m'}{HL} = \eqcl{m}{HL} ~\imp~ \eqcl{\eqcl{m'}{LH} \reuze{LH} m}{HL} = \eqcl{m}{HL}}{Orthogonal}
-
-For the wildcard types from Section~\ref{}, \law{Orthogonal} holds ...
-
-Now we can prove. 
 
 \note{say why it is $HL$ and not $LH$)}
 \note{figure out if it is L or CL, etc}
 
 %\xprlab{\hoare{\eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{H}} {Comp_{n-1}} { \level\H = \level''\H}}{I.H.}
 
-\xpr{\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H} ~\imp~ \wp{Comp_n}{\level\H = \level''\H}}
-
 \begin{proof}
 
-Th prroof is by induction over $n$. 
+Th proof is by induction over $n$. 
 
 {\bf Case~} $n=0$
-\xpr{\eqcl{\level'\L}{L} = present_0~\eqcl{\level\H}{H} ~\imp~ \wp{Comp_0}{\level\H = \level''\H}}
+
+\xpr{\eqcl{\level_0}{=} = \id~\eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \id~\eqcl{\level_0}{=} ~\imp~ \wp{Comp_0}{\level_0 = \level''_0}}
+
+%\xpr{\true ~\imp~ \wp{Comp}{\eqcl{\level''_0}{=} = \id~\eqcl{\level''_0}{=}}}
 
 \begin{Prf}&
-	\eqcl{\level'L}{L} = present_0~\eqcl{\level\H}{H}\\
-\Eqv{$level\L = level\H$ and $present_0 = \id$}&
-	\eqcl{\level'H}{H} = \eqcl{\level\H}{H}\\
-\Imp{eq. classes  are singletons + symmetry of $=$}&
-	\level\H = \level'\H\\
+	\eqcl{\level_0}{=} = \id~\eqcl{\level_0}{=} \land \eqcl{\level'_0}{=} = \id~\eqcl{\level_0}{=}\\
+\Eqv{definition of $\id$}&
+	\eqcl{\level_0}{=} = \eqcl{\level_0}{=} \land\eqcl{\level'_0}{=} = \eqcl{\level_0}{=}\\
+\Imp{reflexivity of $=$ and \law{$\eqhole$-Member}}&
+	\level'_0 \in \eqcl{\level_0}{=}\\
+\Imp{property of equivalence class and symmetry of $=$}&
+	\level_0 = \level'_0\\
 \Eqv{\law{\fn{wp}-$\gts$}}&
-	\wp{\level''\H \gets \level'\H}{\level\H = \level''\H}\\
+	\wp{\level''_0 \gets \level'_0}{\level_0 = \level''_0}\\
 \Eqv{\law{$Comp$-Def}}&
-	\wp{Comp_0}{\level\H = \level''\H}\\
+	\wp{Comp_0}{\level_0 = \level''_0}\\
 \end{Prf}
 
 
 {\bf Case~} $n>0$
 
-We assume the antecedent of the implication: $\eqcl{\level'\L}{L} = \present~\eqcl{\level\H}{H}$
+For the inductive case, we assume the antecedent of the implication. The first combined $present$ has already been written out according to \law{$\present\C$-Def} and the implicit assumption that the middle level between $level\H$ and $\level\L$ is $level\M$.
+
+\xpr{\eqcl{\level\L}{LL} = \present\L~\eqcl{\level\M}{LH} \land \eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{HH} \land\\
+ \eqcl{\level'\L}{L} = \present\C~\eqcl{\level\H}{H}}
 
 
-$m_0$ that is in the interpretation of $\level'\L$ and at the same time Then we have  
-$\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL}$
- and
-$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$
+In the proof, we need the existence of an $m_0$ that is in the interpretation of $\level'\L$ and at the same time in the presentation of $\level\H$:
 
 \begin{Prf}&
+	\eqcl{m_0}{LH} = \interpret\L~\eqcl{\level'\L}{LL} \land \eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}\\
+\FFr{let $m_0$ be the $m$ from the quantification}&
 	\exists m : \eqcl{m}{LH} = \interpret\L~\eqcl{level'\L}{LL} \land \eqcl{m}{HL} = \present\H~\eqcl{\level\H}{HH}\\
 \Eqv{\law{InterPresent}}&
 	\exists m : \eqcl{level'\L}{LL} = \present\L~\eqcl{m}{LH} \land \eqcl{m}{HL} = \present\H~\eqcl{\level\H}{HH}\\
-\Imp{\law{$\present\C$-Def}}&
+\Eqv{\law{$\present\C$-Def}}&
 	\eqcl{level'\L}{CL} = \present\C~\eqcl{\level\H}{CH}\\
 \Eqv{assumption}&
 	\true\\
 \end{Prf}
           
-Let $m_0$ be the $m$ from the existential quantification:
+%\begin{Prf}&
+%	\eqcl{m_0}{HL}\\
+%\Equ{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}&
+%	\present\H~\eqcl{\level\H}{HH}\\
+%\Equ{\law{Present}}&
+%	\eqcl{\level\M}{HL}\\
+%\end{Prf}
 
-Because of the precondition, we know that $m_0$ and $\level\M$ are in the same $HL$ class: $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$
-\begin{Prf}&
-	\eqcl{m_0}{HL}\\
-\Equ{$\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$}&
-	\present\H~\eqcl{\level\H}{HH}\\
-\Equ{\law{Present}}&
-	\eqcl{\level\M}{HL}\\
-\end{Prf}
+Together with $\present\H~\eqcl{\level\H}{HH} = \eqcl{\level\M}{HL}$ from the precondition, $\eqcl{m_0}{HL} = \present\H~\eqcl{\level\H}{HH}$ implies that $m_0$ and $\level\M$ are in the same $HL$ class: $\eqcl{m_0}{HL}=\eqcl{\level\M}{HL}$. This result is needed in order to apply \law{Orthogonal}.
 
 % can be put in linear wp proof
 %\begin{Prf}&
@@ -1917,11 +1826,11 @@ Because of the precondition, we know that $m_0$ and $\level\M$ are in the same $
 %	\present\H~\eqcl{\level\H}{HH}\\
 %\end{Prf}
 
+For the inductive step, we have the following induction hypothesis:
 
+\xprlab{\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{H} \land \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{H} ~\imp~ \wp{Comp_{n-1}}{\level\H = \level''\H}}{I.H.}
 
-Inductive proof:
-
-\xprlab{\eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{H} ~\imp~ \wp{Comp_{n-1}}{\level\H = \level''\H}}{I.H.}
+Note that the first part of the conjunction in the antecedent is already satisfied due to the assumption above.
 
 \begin{Prf}&
 	\present\H~\eqcl{\level\H}{HH} = \present\H~\eqcl{\level\H}{HH}\\
@@ -1940,7 +1849,7 @@ Inductive proof:
 	\wp{\level'\M \gets \interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~   \level\M}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{HH} }\\
 \Eqv{\law{$Up$-Def}}&
 	\wp{Up}{ \eqcl{\level'\M}{HL} = \present\H~\eqcl{\level\H}{H}}\\
-\Imp{\law{\fn{wp}-Mono} and \law{I.H.}}&
+\Imp{\law{\fn{wp}-Mono}, \law{I.H.}, and $\eqcl{\level\M}{HL} = \present\H~\eqcl{\level\H}{H}$}&
 	\wp{Up}{ \wp{ Comp_{n-1}}{ \level\H = \level''\H }}\\
 \Eqv{\law{\fn{wp}-$\smi$}}&
 	\wp{Up \semi Comp_{n-1}}{ \level\H = \level''\H }\\
@@ -1953,9 +1862,7 @@ Inductive proof:
 \Eqv{\law{$Comp$-Def}}&
 	\wp{Comp}{\level\H = \level''\H}\\
 \end{Prf}
-
 \end{proof}
-
 
 
 
@@ -1964,59 +1871,45 @@ Inductive proof:
 
 \head{\law{Pres-Inert} requirement}
 
-\xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}} {Comp_n} { \level'\L = \level''\L}}		{Pres-Inert}
+\xprlab{\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} ~\imp~ \wp{Comp_n} { \level'\L = \level''\L}}		{Pres-Inert}
 
-Similar to the \law{Doc-Inert} requirement, we need an extra condition for \law{Pres-Inert} to hold.
+The two conditions from Section~\ref{sect:combinedExtra} are strong enough to guarantee \law{Pres-Inert}. However, the proof of this is very tedious, partly because of the reference to $present\H$ and $interpret\H$ in \law{Sane}. Therefore, we introduce a stronger condition \law{Absorption}, which allows for a simpler proof of \law{Pres-Inert}, and which can be proven to imply the other two conditions, as well as \law{Orthogonal}.
 
-Absorption is simplest
-
-\xprlab{
-\forall m : \eqcl{m}{LH} \subset \eqcl{m}{HL}}{Absorption}
+%\xprlab{
+%\forall m : \eqcl{m}{LH} \subset \eqcl{m}{HL}}{Absorption}
 
 \xprlab{
 \eqcl{m}{LH} = \eqcl{m'}{LH} ~\imp~ \eqcl{m}{HL} = \eqcl{m'}{HL}}{Absorption}
 
-Absorption occurs when all lower es is inside higher es (and hence does not influence the document). Eq $(Int,(Int,*))$ is absorbed by  $(Int,(*,*))$ and $(Int,*)$, but also by $(Int,(Int,*))$.
+Absorption holds when each $HL$ equivalence class is a union of $LH$ classes. Hence, variations in the $LH$ extra state can never cause a change of the $HL$ equivalence class (and hence never influence the document). 
 
-Absorption means that all higher es of lower layer gets absorbed by layer above. So only the highest layer can have doc extra state. This seems to strict.
-
-Problem: in one eq. class, can there be several situations? eg (*,*) \dbarr (), one absorbed, the other always valid (or other condition)
-
-Another one is \law{Compatibility} see Section~\ref{}. proof gets nasty.
+For wildcard types, \law{Absorption} holds when for each $*$ in the type definition of the $LH$ type the corresponding child in the $HL$ type is also a $*$, or the corresponding type of one of its ancestors is a $*$.  For example, $(Int,(Int,*))$ is absorbed by $(Int,(*,*))$, but also by $(Int,*)$.
 
 
-%\xprlab{\hoare{\eqcl{\level'\M}{HL} = \present\H~\eqcl{h}{H}} {Comp_{n-1}} { \level'\M = \level''\M}}		{I.H.}
+\begin{proof}
 
-\begin{proof} 
-\bl
-\o in the inductive step, we need to know that level n is not changed by layern-1
-\o therefore, we strengthen pre and postconditions
-\el
+In the inductive step of the proof, we need the fact that the lower level is not affected by the computations of the higher layer. Therefore, we strengthen the pre- and postcondition of \law{Pres-Inert}: \note{more on this?}
 
-Here we need:
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level_{n+1} = x ~\imp\\ \wp{Comp_n}{\level'\L = \level''\L  \land \level_{n+1} = x}}
 
-\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level_{n+1} = x ~~~\imp\\ \wp{Comp_n}{\level'\L = \level''\L  \land \level_{n+1} = x}}
-which implies
-
-\begin{Prf}&
-	\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}\\
-\Imp{magic}&
-	\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} \land \level_{n+1} = x\\
-\Imp{assumption}&
-	\wp{Comp_n}{\level'\L = \level''\L  \land \level_{n+1} = x}\\
-\Imp{\law{\fn{wp}-Mono} and $X \land Y ~\imp~ X$}&
-	\wp{Comp_n}{\level'\L = \level''\L}\\
-\end{Prf}
-
-% or say it with Hoare?
-%\xprlab{\hoare{\eqcl{\level'\L}{L} = \present~\eqcl{h}{H} \land \level_{n+1} = x} {Comp_n} { \level'\L = \level''\L  \land %\level_{n+1} = x}}	
+%Here we need:
+%
+%which implies
+%
+%\begin{Prf}&
+%	\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}\\
+%\Imp{magic}&
+%	\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} \land \level_{n+1} = x\\
+%\Imp{assumption}&
+%	\wp{Comp_n}{\level'\L = \level''\L  \land \level_{n+1} = x}\\
+%\Imp{\law{\fn{wp}-Mono} and $X \land Y ~\imp~ X$}&
+%	\wp{Comp_n}{\level'\L = \level''\L}\\
+%\end{Prf}
 
 
 {\bf Case~} $n=0$
 
-add extra thing on $Level_1$
-
-\xpr{\hoare{\eqcl{\level'_0}{H} = \present~\eqcl{h}{H}} {Comp_0} { \level'_0 = \level''_0}}
+\xpr{\eqcl{\level'_0}{H} = \present~\eqcl{h}{H} \land \level_{1} = x ~\imp~\wp {Comp_0} { \level'_0 = \level''_0 \land \level_{n+1} = x}}
 
 evident from def of $Comp_0$:
 
@@ -2038,11 +1931,12 @@ evident from def of $Comp_0$:
 
 {\bf Case~} $n>0$
 
-First only prove first part of postcondition conjunct.
+First we prove the first part of postcondition conjunct:
 
-\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} ~\imp~ \wp{Comp_n}{\level'\L = \level''\L}}
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} \land \level_{n+1} = x  ~\imp~ \wp{Comp_n}{\level'\L = \level''\L}}
 
-Assume the antecedent: $\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}$.
+We only need to assume half of the antecedent:
+ $\eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}$.
 
 
 %result of $Up$ and $m_0$ are in same LH class.
@@ -2100,7 +1994,7 @@ Furthermore, by the first part of this conjunct and \law{InterPresent} on the lo
 
 %or alternatively: using rewritten \law{Absorption}
 %\eqcl{m}{LH} = \eqcl{m'}{LH} ~\imp~ \eqcl{m}{HL} = \eqcl{m'}{HL}}{Absorption}
-The fist one is:
+We need two intermediate results for the inductive step of the proof. The first one is:
 
 \begin{Prf}&
 	\eqcl{\interpret~ \eqcl{\level'\L}{L}  ~\reuze{LH}~  \level\M}{HL} = \present\H~\eqcl{h}{HH} \\
@@ -2116,7 +2010,7 @@ The fist one is:
 	\true\\
 \end{Prf}
 
-A corollary from the proof is that $\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}   \level\M}{LH} = \eqcl{m_0}{LH}$, which is used in the proof of the second property.
+A corollary from this proof is that $\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \reuze{LH}   \level\M}{LH} = \eqcl{m_0}{LH}$, which is used in the proof of the second intermediate result:
 % this used to be a separate proof
 %For the first equality in conjunct:
 %\xpr{
@@ -2131,8 +2025,6 @@ A corollary from the proof is that $\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  \r
 %	\present\H~\eqcl{h}{HH}\\
 %\end{Prf}
 
-
-The second property is:
 
 \xpr{
 \level'\L = \present~ \eqcl{\interpret~ \eqcl{\level'\L}{LH}  ~\reuze{LH}~  \level\M}{LH}   ~\reuze{LL}~   \level'\L\\
@@ -2158,7 +2050,8 @@ Now we can prove the inductive step with induction hypothesis:
 %	 \level'\L = \present\L~ \eqcl{\interpret\L~ \eqcl{\level'\L}{L}  ~\reuze{H}~  \level\M}{LH}   ~\reuze{L}~   \level'\L\\
 %	\end{array}\\
 %	 }
-The proof starts with a conjunction of the two properties that we just proved.
+
+The proof starts with the conjunction of the two intermediate results that we just proved.
 
 \begin{Prf}
   &	\eqcl{\interpret\L~ \eqcl{\level'\L}{LL}  ~\reuze{LH}~  \level\M}{HL} = \present\H~\eqcl{h}{HH} ~~\land\\
@@ -2184,71 +2077,69 @@ The proof starts with a conjunction of the two properties that we just proved.
 	\wp{Comp}{\level'\L = \level''\L}\\
 \end{Prf}
 
-This completes proof of 
+This completes proof of:
 
-\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  ~\imp~ \wp{Comp_n}{\level'\L = \level''\L}}
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} \land \level_{n+1} = x  ~\imp~ \wp{Comp_n}{\level'\L = \level''\L}}
 
-beacuse of bla, we also have\note{maybe add it to pre}
+Because $Comp_n$ only does assignments on levels $0 \dots n$, we also have:
 
-\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level_{n+1} = x ~\imp~ \wp{Comp_n}{\level'\L = \level''\L}}
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH} \land \level_{n+1} = x ~\imp~ \wp{Comp_n}{\level_{n+1} = x}}
 
-No formal proof for:
-\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level_{n+1} = x ~\imp~ \wp{Comp_n}{\level_{n+1} = x}}
+Hence, by \law{\fn{wp}-And}, we can conclude: 
 
-because easy to see that $Comp_n$ only affects levels $n \dots 0$.
-
-Finally bt \law{\fn{wp}-And}, we get the whole thing:
-
+\xpr{ \eqcl{\level'\L}{CL} = \present\C~\eqcl{h}{CH}  \land \level_{n+1} = x ~\imp~ \wp{Comp_n}{\level'\L = \level''\L  \land \level_{n+1} = x}}
 
 \end{proof}
 
 
 
-
-Story on compatibility here? Or in conclusions?
-
-Explanation compatible. Even if h exists, moving in lower med eq. class could lead to levelH not in [h] (probably must be an imprecise edit). This would cause $l$ update. 
-
-In order to prevent, for all variation we require validity (and hence by pres-inert stay in correct class), or if invalid, at least stay in same class.
-
-
-Compatibility:
-% old version:
-%\xprlab{
-%\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \exists h: m~Present~h) \imp\\
-%                   & \begin{array}[b]{@{}l@{}l@{}l}
-%                      \forall m' \in \eqcl{m_0}{LH} :~&  (\exists h_0 : \eqcl{m'}{HL} = pres \eqcl{h_0}{HH})~\lor\\
-%                    							& (\present\H \oo \interpret\H) \eqcl{m'}{HL} \subset 			\end{array}
-%\eqcl{m_0}{LH}}{Compatible}
+%Story on compatibility here? Or in conclusions?
 %
-%or if we define: $\valid~l \eqv \exists h : \eqcl{l}{L} \present \eqcl{h}{H}$ (note that this is on {\em a} layer, not on higher %or lower)
+%Explanation compatible. Even if h exists, moving in lower med eq. class could lead to levelH not in [h] (probably must be an %imprecise edit). This would cause $l$ update. 
 %
+%In order to prevent, for all variation we require validity (and hence by pres-inert stay in correct class), or if invalid, at least stay %in same class.
+%
+%
+%Compatibility (obsolete):
+
+%% old version:
+%%\xprlab{
+%%\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \exists h: m~Present~h) \imp\\
+%%                   & \begin{array}[b]{@{}l@{}l@{}l}
+%%                      \forall m' \in \eqcl{m_0}{LH} :~&  (\exists h_0 : \eqcl{m'}{HL} = pres \eqcl{h_0}{HH})~\lor\\
+%%                    							& (\present\H \oo \interpret\H) \eqcl{m'}{HL} \subset 			\end{array}
+%%\eqcl{m_0}{LH}}{Compatible}
+%%
+%%or if we define: $\valid~l \eqv \exists h : \eqcl{l}{L} \present \eqcl{h}{H}$ (note that this is on {\em a} layer, not on higher %%or lower)
+%%
+%%\xprlab{
+%%\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \valid~m) \imp\\
+%%                   & \begin{array}[b]{@{}l@{}l@{}l}
+%%                       \forall m' \in \eqcl{m_0}{LH} : ~ & \valid~m'~\lor\\
+%%									&(\present\H \oo \interpret\H) \eqcl{m'}{HL} \subset \eqcl{m_0}{LH}
+%%			\end{array}
+%%}{Compatible}
+%%
+%%Lambert:
+%%\xprlab{
+%%\forall m_0 : \forall m,m' : \valid~m \land \lnot \valid~m' ~~\imp \dots \subset \dots
+%%}
+
 %\xprlab{
 %\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \valid~m) \imp\\
 %                   & \begin{array}[b]{@{}l@{}l@{}l}
-%                       \forall m' \in \eqcl{m_0}{LH} : ~ & \valid~m'~\lor\\
-%									&(\present\H \oo \interpret\H) \eqcl{m'}{HL} \subset \eqcl{m_0}{LH}
+%                       & \valid~m_0~\lor\\
+%			&(\present\H \oo \interpret\H) \eqcl{m_0}{HL} \subset \eqcl{m_0}{LH}
 %			\end{array}
 %}{Compatible}
 %
-%Lambert:
-%\xprlab{
-%\forall m_0 : \forall m,m' : \valid~m \land \lnot \valid~m' ~~\imp \dots \subset \dots
-%}
-
-\xprlab{
-\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \valid~m) \imp\\
-                   & \begin{array}[b]{@{}l@{}l@{}l}
-                       & \valid~m_0~\lor\\
-			&(\present\H \oo \interpret\H) \eqcl{m_0}{HL} \subset \eqcl{m_0}{LH}
-			\end{array}
-}{Compatible}
-
-
+%
 
 
 
 \head{\law{Imprecise} and preservation of extra state requirement}
+
+\toHere
 
 \bl
 \o Is this the case when m'' is close to m and l'' is close to l, for the individual layers? Or is there an m'' that is not closest to m, but for which pres m is closest to l?
@@ -2421,9 +2312,16 @@ Now by substituting from \law{Compute}
 \ec
 
 
+\subsection{Conclusions?}
 
+Absorption means that all higher es of lower layer gets absorbed by layer above. So only the highest layer can have doc extra state. This seems to strict.
 
+Problem: in one eq. class, can there be several situations? eg (*,*) \dbarr (), one absorbed, the other always valid (or other condition)
 
+\bl
+\o restate conditions
+\o explain situation in Proxima
+\el
 
 
 
@@ -2528,8 +2426,22 @@ Future: specification formalism for presentation mappings that guarantees correc
 % restore old defs from thesis.sty
 
 \pagebreak
+bla
+\pagebreak
 \section{Appendix with nasty proofs}
 
+Problems:
+
+\xpr{
+l~Present~h \land l'~Present~h ~\imp~ (l~Present~h' \imp l'~Present~h')\\
+}
+
+Three conditions: \law{Sane} \law{Commute} and \law{Orthogonal}. Is there any way to get rid of some?
+
+What about underspecified relation? (invalid classes). orthogonal is only on valid HL classes, but commute also says something about  restriction also on invalid HL classes. Is this affected by choosing different HL classes?
+
+Solutions.
+\law{Absorption} implies all three. Putting doc extra state only in upper layer seems to prevent most problems.
 
 Formal definition of \valid
 \xprlab{
@@ -2544,13 +2456,58 @@ l~\Present\C~h \eqv \exists m : l~\Present\L~m \land m~\Present\H~h\\
 h~\Interpret\C~l \eqv \exists m : h~\Interpret\H~m \land m~\Interpret\L~l\\
 }{$Interpret\C$-Def}
 
-rewritten \law{Sane}:
+\xprlab{
+\forall m_0 & : & (\exists m \in \eqcl{m_0}{LH} : \valid~m) ~\imp~ \exists m_1 \in \eqcl{m_0}{LH} : \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL}
+}{Sane'} % also in chapter "combining two layers"
+
+rewritten \law{Sane'}:
 \xpr{
-\forall m_0 & : & (\exists  : \eqcl{m}{LH} = \eqcl{m_0}{LH} \land \valid~m) ~\imp~ \exists m_1 : \eqcl{m_1}{LH } = \eqcl{m_0}{LH} \land \eqcl{m_1}{HL} = \present\H (\interpret\H \eqcl{m_0}{HL})
-}
+\forall m_0 & : & (\exists m : \eqcl{m}{LH} = \eqcl{m_0}{LH} \land \valid~m) ~\imp~ \exists m_1 : \eqcl{m_1}{LH } = \eqcl{m_0}{LH} \land \eqcl{m_1}{HL} = \present\H (\interpret\H \eqcl{m_0}{HL})
+} % also in chapter "combining two layers"
+or even:
+\xpr{
+\forall m_0, m : \eqcl{m}{LH} = \eqcl{m_0}{LH} \land \valid~m ~\imp~ \exists m_1 : \eqcl{m_1}{LH } = \eqcl{m_0}{LH} \land \eqcl{m_1}{HL} = \present\H (\interpret\H \eqcl{m_0}{HL})
+} % also in chapter "combining two layers"
+
+\pagebreak
+
+Seem to need:
+
+\xprlab{
+\forall m_0, m_0' : \eqcl{m_0}{LH} = \eqcl{m_0'}{LH} \imp & \exists m_1, m_1' : \eqcl{m_1}{LH} = \eqcl{m_1'}{LH} \\
+& \land \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL}\\
+& \land \eqcl{m_1'}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0'}{HL}\\
+}{Sane}
+
+\xprlab{
+\eqcl{x}{LH} = \eqcl{y}{LH} \land \eqcl{x}{HL} = \eqcl{y'}{HL} ~\imp~ \exists z : \eqcl{z}{HL} = \eqcl{y}{HL} \land \eqcl{z}{LH} = \eqcl{y'}{LH}
+}{Commute}
+\law{Commute} only on valid $HL$ classes?
 
 
+\law{Sane} and \law{Commute} imply \law{Sane'}:
 
+\begin{Prf}&
+	\eqcl{m}{LH} = \eqcl{m_0}{LH} \land \valid~m\\
+\Imp{\law{Saner}}&
+	\eqcl{m_1}{LH} = \eqcl{m_1'}{LH} \land \\ & \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL} \land \eqcl{m_1'}{HL} = (\present\H \oo \interpret\H) \eqcl{m}{HL}\\
+\Eqv{validity $m$}&
+	\eqcl{m_1}{LH} = \eqcl{m_1'}{LH} \land \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL} \land 
+	\eqcl{m_1'}{HL} = \eqcl{m}{HL}\\
+\Imp{\law{Commute} and $\eqcl{m}{HL} = \eqcl{m_1'}{HL} \land \eqcl{m}{LH} = \eqcl{m_0}{LH}$}&
+	\eqcl{m_1}{LH} = \eqcl{m_1'}{LH} \land \eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL} \land\\
+	&\eqcl{m_0'}{LH} = \eqcl{m_1'}{LH} \land \eqcl{m_0'}{HL} = \eqcl{m_0}{LH}\\
+\Imp{transitivity of $=$}&
+	\eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL} \land\\
+	& \eqcl{m_0'}{LH} = \eqcl{m_1}{LH} \land \eqcl{m_0'}{HL} = \eqcl{m_0}{HL}\\
+\Imp{\law{Commute} and $\eqcl{m'_0}{HL} = \eqcl{m_0}{HL} \land \eqcl{m'_0}{LH} = \eqcl{m_1}{LH}$}&
+	\eqcl{m_1}{HL} = (\present\H \oo \interpret\H) \eqcl{m_0}{HL} \land\\ &
+	\eqcl{m_2}{LH} = \eqcl{m_0}{LH} \land \eqcl{m_2}{HL} = \eqcl{m_1}{HL}\\
+\Imp{transitivity of $=$}&
+	\eqcl{m_2}{LH} = \eqcl{m_0}{LH} \land \eqcl{m_2}{HL} =  (\present\H \oo \interpret\H) \eqcl{m_0}{HL}\\
+\Imp{}&
+	\exists m_2 : \eqcl{m_2}{LH } = \eqcl{m_0}{LH} \land \eqcl{m_2}{HL} = \present\H (\interpret\H \eqcl{m_0}{HL})\\
+\end{Prf}
 % Old compatible
 %\xprlab{
 %\forall m_0 : & (\exists m \in \eqcl{m_0}{LH} : \fn{valid}~m) \imp\\
@@ -2571,7 +2528,7 @@ In the next section, we need the following condition:
 
 
 
-\subsection{\law{Compatible} implies \law{Sane}}
+\subsection{\law{Compatible} implies \law{Sane'}}
 
 \begin{proof}
 \begin{Prf}&
@@ -2609,11 +2566,11 @@ Assume $(\present\H \oo \interpret\H) \eqcl{m_0}{HL} \subset \eqcl{m_0}{LH}$
 
 
 
-\law{Absorption} implies this condition. The more relaxed \law{Compatible} condition implies \law{Sane} for valid $m$, but needs a different clause for non-valid $m$.
+\law{Absorption} implies this condition. The more relaxed \law{Compatible} condition implies \law{Sane'} for valid $m$, but needs a different clause for non-valid $m$.
 
-\law{Sane} together with a reverse \law{Orthogonal} is enough to prove \law{Pres-Inert} (although the proof may be tricky).
+\law{Sane'} together with a reverse \law{Orthogonal} is enough to prove \law{Pres-Inert} (although the proof may be tricky).
 
-What is the intuitive meaning of \law{Sane}? Is there a condition that is enough for easy proof of \law{Pres-Inert} and which also implies \law{Sane}?
+What is the intuitive meaning of \law{Sane'}? Is there a condition that is enough for easy proof of \law{Pres-Inert} and which also implies \law{Sane'}?
 
 
 
@@ -2662,7 +2619,7 @@ All goes well if \law{Sanity} condition holds:
 %\xprlab{
 %\forall m : \forall m_0, m_0' \in \eqcl{m}{LH} & ~: & \exists m_1,m'_1 : \eqcl{m_1}{LH} = \eqcl{m'_1}{LH}\\   &\land   %&\eqcl{h}{HH} = \interpret\H \eqcl{m_0}{HL} \imp \eqcl{m_1}{HL} = \present\H~\eqcl{h}{HH}\\
 %  &\land ~&\eqcl{h'}{HH} = \interpret\H \eqcl{m'_0}{HL} \imp \eqcl{m'_1}{HL} = \present\H ~\eqcl{h'}{HH} 
-%}{Sane}
+%}{Sane'}
 
 % old Sanity condition
 %\xpr{
@@ -2842,7 +2799,7 @@ $h~\Interpret\C~l \land (\exists h' : l~\Present\C~h') ~\imp~ l~\Present\C~h$
 &	\eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH} \land \eqcl{m'_0}{LH} = \interpret\L~\eqcl{l}{LL} \land \valid~m'_0\\
 \Imp{proposition calculus}&
 	\eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH} \land \eqcl{h}{HH} = \interpret\H~\eqcl{m_0}{HL} \land \eqcl{m'_0}{LH} = \eqcl{m_0}{LH} \land \valid~m'_0\\
-\Imp{\law{Sane}}&
+\Imp{\law{Sane'}}&
        \eqcl{m_1}{LH} = \eqcl{m_0}{LH} \land \eqcl{m_1}{HL} = \present\H (\interpret\H \eqcl{m_0}{HL})\\
 \Imp{$\eqcl{l}{LL} = \present\L~\eqcl{m'_0}{LH} \land \eqcl{m'_0}{LH} = \eqcl{m_0}{LH}$ }&
        \eqcl{l}{LL} = \present\L~\eqcl{m_1}{LH} \land \eqcl{m_1}{HL} = \present\H \eqcl{h}{HL}\\
