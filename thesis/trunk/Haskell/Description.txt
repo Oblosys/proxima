@@ -1,0 +1,42 @@
+This directory contains various instances of the layered architecture combinators for Haskell, together with a few example usages.
+
+A description of the combinators can be found in:
+
+Martijn M. Schrage, Johan Jeuring, Doaitse S. Swierstra:
+  "Combinators for layered software architectures", Technical report UU-CS-2002-030,
+  http://www.cs.uu.nl/research/techreps/UU-CS-2002-030.html
+
+
+
+Contents of directory:
+
+Layers.hs            Definitions of the Simple and Simple' layer data types plus some basic (undefined) instances.
+
+Explicit.hs          Example edit loop with parameter passing                  (uses Layers.hs)
+NCP.hs               Example edit loop + Nested Cartesian Product combinators  (uses Layers.hs)
+DPP.hs               Example edit loop + manually constructed Direct Parameter
+                     Passing combinators                                       (uses Layers.hs)
+
+DevelopLib.hs        Intermediate steps in the derivation of the meta combinators
+                     from the manually constructed combinators                 (uses Layers.hs)
+                     (derivation: DPP -> DevelopLib -> DPPClass_Lib)
+
+DPPClass_Lib.hs      Final Direct Parameter Passing meta combinators using classes                        
+DPPClass_Main.hs     Example editloop + combinator definitions using library   (uses DPPClass_Lib.hs + Layers.hs)
+
+ArchitectureLibM.hs  Meta combinators parameterized with arbitrary monad
+Architecture.hs      Actual architecture module from the Proxima editor        ( uses ArchitecturLibM.hs
+                                                                               + actual proxima layers   ) 
+Example.hs           Some examples with layers that are not undefined          (uses DPPClass_Lib.hs)
+
+Explanation.txt      This file
+
+
+-- obsolete stuff:
+
+DPP_Lib.hs           Old Direct Parameter Passing meta combinators without classes
+DPP_Main.hs          Example edit loop + Combinator definitions using old library  (uses DPP_Lib.hs + Layers.hs)
+
+ProximaLayers.hs     Definitions of layer data types that are similar to the actual Proxima layers
+Proxima.hs           Example edit loop using the toy Proxima layers            (uses ProximaLayers.hs + DPP_Lib.hs)
+
