@@ -148,9 +148,10 @@ onMouse handler renderingLvlVar window mouseEvt =
           MouseLeftDrag (Point x y) mods -> return $ MouseDragRen x y (translateModifiers mods)
           MouseLeftUp   (Point x y) mods -> return $ MouseUpRen x y   (translateModifiers mods)
           MouseRightUp  (Point x y) mods -> do { (RenderingLevel _ makePopupMenu _ _ _ _)  <- varGet renderingLvlVar
-                                               ; (Point x' y') <- scrolledWindowCalcScrolledPosition window (pt x y)
+                                               -- x and y are on the underlying window, not on the scrolled window
+                                               -- ; (Point x' y') <- scrolledWindowCalcScrolledPosition window (pt x y)
 
-                                               ; makePopupMenu handler renderingLvlVar window x' y'
+                                               ; makePopupMenu handler renderingLvlVar window x y
                                                ; return $ SkipRen 0
                                                }
                                    -- do { propagateEvent; return $ SkipRen 0 } 
