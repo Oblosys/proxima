@@ -220,19 +220,29 @@ Vice versa? Fix by remembering extra?
 
 % mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-The presentation and translation invariants are expressed using two functions\note{incorrect:relations}: $Present$ and $Translate$. The functions are of type $Level_i \rightarrow Level_j$ (where $j = i+1$ or
-$j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} Figure~\ref{nodeMapping} shows an example of such a mapping between two levels. \note{say more on how this view works?}
+During presentation and translation, elements in one data level are mapped onto elements in another level. Hence, when either the presentation or the translation invariant holds between two levels, we also have a mapping between the tree nodes of these levels. 
 
-By mapping between tree nodes, we mean a mapping that relates only the nodes, and not the subtrees rooted at theses nodes. Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, this is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
+Figure~\ref{nodeMapping} shows an example of such a mapping between two levels that satisfy the presentation invariant. The dotted arrows denote on which lower level nodes a higher level node is mapped. To reduce the number of arrows in the figure, the lower level nodes are grouped.
 
+\bc The presentation and translation invariants are expressed using two functions\note{incorrect:relations}: $Present$ and $Translate$. The functions are of type $Level_i \rightarrow Level_j$ (where $j = i+1$ or
+$j = i-1$), which means that both functions map a tree onto another tree. However, since a tree structure consist of nodes, we can also view each mapping as a mapping between the nodes of one tree and the nodes of another tree. \note{do we put a restriction on the possible mapping functions with this?} 
+\ec
+
+By mapping between tree nodes, we mean a mapping that relates only the nodes, and not the subtrees rooted at theses nodes. We can see this in Figure~\ref{nodeMapping}, by the fact that a child of a lower level node is not necessarily inside the same dotted ellipse as its parent.
+
+\bc
+Hence, when an element \verb|A| is mapped onto an element \verb|B|, this does not say anything about the children of \verb|A| and \verb|B|. If \verb|A| is mapped onto \verb|B| including its children, this is mentioned explicitly. In Figure~\ref{nodeMapping} element \verb|aH| is mapped onto the elements \verb|a1L|,\verb|a2L|, and \verb|a3L|, so in this case the children of \verb|a1L| are included in the mapping, but the children of \verb|a2L| and \verb|a3L| are not. 
+\ec
+
+\bc
 When regarded as relating tree nodes, a mapping can express an $n:m$ relation between the nodes of the higher and the lower levels. However, when regarded as relating levels, a mapping is always a function (ie. an $n:1$ relation). Thus, $Present$ and $Translate$ are functions rather than relations.
 \note{WITH ES, they are relations!}
+\ec
 
-%Figure~\ref{nodeMapping} shows two levels for which the presentation invariant holds.
 \begin{figure}
 \begin{center}
 \begin{center}
-\epsfig{file=pics/eps/presentation.eps, width=2in}
+\epsfig{file=pics/eps/mapping.eps, width=2in}
 %\begin{verbatim}
 %
 %     aH        higher level
@@ -251,11 +261,11 @@ When regarded as relating tree nodes, a mapping can express an $n:m$ relation be
 \end{center}
 \end{figure}
 
-
 \bigskip {\bf The presentation mapping}
 
 \note {maybe say something about 1:n presentation restriction, but also about having $>$1 doc nodes influence same pres.?  Or before?}
 
+** El Color Tree color for tree
 \begin{figure}
 \begin{center}
 \begin{center}
@@ -273,40 +283,60 @@ When regarded as relating tree nodes, a mapping can express an $n:m$ relation be
 %                    
 %\end{verbatim}
 \end{center}
-\caption{The presentation of element {\tt EH}.}\label{elementPresentation} 
+\caption{The presentation of element $E_H$.}\label{elementPresentation} 
 \end{center}
 \end{figure}
 
-First we take a closer look at the downward, or presentation, direction. The abstract function $Present$ maps each element of the higher level onto zero or more lower level elements. Figure~\ref{elementPresentation} shows the presentation of one node in the higher level. $E_H$ is an element in the higher data level that has $n$ children ($C_{H,0}$, \dots, $C_{H,n-1}$). The presentation of \verb|E|$_H$ is the tree of \verb|E|$_L,i$ shown on the right.
+First we take a closer look at the downward, or presentation, direction. $Present$ maps each element of the higher level onto zero or more lower level elements, forming zero or more subtrees with holes. \note{is there a name for "tree with holes?"} Figure~\ref{elementPresentation} shows the presentation of one node ($E_H$) in the higher level. $E_H$ is an element in the higher data level that has $n$ children ($C_{H,0}$, \dots, $C_{H,n-1}$). The presentation of $E_H$ is a number of trees (although usually just one) that may consist of several nodes. In the figure, the first tree is shown in more detail. It consists of $m$ nodes has root at $E_{L,0}$. 
 
 % restriction is on presentation. pres is like a fold
 % iets algemener verhaaltje hier. over dat het wel kan, maar dat de
 % automatische dingen (focus etc.) dan weg zijn
 
-The shaded subtrees in the lower level tree are not part of the presentation of $E_H$. Typically, these are the presentations of the children of $E_H$, but in general they can be (part of) the presentation of any element in the higher level. Furthermore, a shaded subtree may be extra state of the lower level, which is explained in the next section.
-\note{they're not trees, but trees with holes, how do you such a thing?}
-
-%* if then else? tokens as list? then focus does not work (no?). tokens as tree?
-
-In the example, the resulting presentation is a single tree, but this is not always the case. For example, the evaluation layer in a word processor (see Section~\ref{sect:wordprocessor}), maps each chapter onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
-
-
-\bigskip {\bf The translation mapping}
-
-The upward direction, or translation, is slightly more restricted than the downward direction, because a lower level element is allowed to be mapped onto at most one higher level element. Figure~\ref{elementTranslation} contains an example translation of a subtree rooted at \verb|EL|. The children in the lower level tree are not mapped onto \verb|EH|, but may be mapped onto its children (or they may be ignored in the mapping).  Again, the lower level structure is not necessarily a single subtree (with holes), it may consist of several subtrees, e.g. when three presentation tokens \verb|"if"|, \verb|"then"| and \verb|"else"| are mapped onto an \verb|If| node in the enriched document in the parsing phase.
+The $C_{L,0}$, \dots, $C_{L,l-1}$ subtrees in the lower level tree are not part of the presentation of $E_H$. Typically, these are the presentations of the children of $E_H$, but in general they can be (part of) the presentation of any element in the higher level. Alternatively, if a subtree is not part of the presentation of any higher level element, it is part of the extra state of the lower level, which is explained in the next section.
 
 \begin{figure}
 \begin{center}
 \begin{center}
-\begin{verbatim}
-
-        EL                 ->    EH
-    EL.......EL               CH ..  CH
- EL  CL  EL  CL  EL
-
-\end{verbatim}
+\epsfig{file=pics/eps/presentParenSum.eps, width=4in}
+%
+%  ( )       Tk   ( 1+2 )
+%   +      Tk ...
+%  1 2       .....  
+%
 \end{center}
-\caption{The translation of the tree rooted at {\tt EL}}\label{elementTranslation} 
+\caption{The presentation of a parenthesized sum.}\label{presentExample} 
+\end{center}
+\end{figure}
+
+***
+Figure~\ref{presentExample} provides a more concrete example of a presentation. A parenthesized sum in the enriched document is presented as a list of tokens on the presentation level. The unlabeled nodes group o is concat. tuples are is extra state (line breaks, spaces)Section~\ref{layout in arch} so final is "\verb|( 1+2 )|" 
+
+
+
+%* if then else? tokens as list? then focus does not work (no?). tokens as tree?
+
+\bc
+In the example, the resulting presentation is a single tree, but this is not always the case. For example, the evaluation layer in a word processor (see Section~\ref{sect:wordprocessor}), maps each chapter onto an entry in the table of contents, as well as onto the presentation of the chapter itself. Hence, the presentation (in this case the evaluation) of a chapter consists of two separate enriched document trees.
+\ec
+
+\bigskip {\bf The translation mapping}
+
+The upward direction, or translation, is slightly more restricted than the downward direction, because a lower level element is allowed to be mapped onto at most one higher level element. Figure~\ref{elementTranslation} contains an example translation of a subtree rooted at $E_L$. The children in the lower level tree are not mapped onto $E_H$, but may be mapped onto its children (or they may be ignored in the mapping).  Again, the lower level structure is not necessarily a single subtree (with holes); it may consist of several subtrees, e.g. when three presentation tokens \verb|"if"|, \verb|"then"| and \verb|"else"| are mapped onto an \verb|If| node in the enriched document in the parsing phase.
+
+\begin{figure}
+\begin{center}
+\begin{center}
+\epsfig{file=pics/eps/translationEh.eps, width=2in}
+%\begin{verbatim}
+%
+%        EL                 ->    EH
+%    EL.......EL               CH ..  CH
+% EL  CL  EL  CL  EL
+%
+%\end{verbatim}
+\end{center}
+\caption{The translation of the tree rooted at {\tt EL} (beetje dubbel?)}\label{elementTranslation} 
 \end{center}
 \end{figure}
 
@@ -324,10 +354,10 @@ The upward direction, or translation, is slightly more restricted than the downw
 
 A consequence of the difference between the presentation and the translation mappings is that even when a lower level element depends on several higher level elements, only one is responsible for its presentation. \note{where does this become important?} \note{example: leaf Color Int -> colored int. When selecting, either lead or int,  Color affects but is not responsible. can be accessed by special edit ops though.}
 
-
 \bigskip {\bf Duplicates in presentation}
 
 \note{duplicates in translation?}
+
 The presentation of a higher level element may consist of several lower level elements, for example when an \verb|If| node is presented with three tokens. In this case, the three tokens together are translated to the \verb|If| node. However, it is also possible that an element is duplicated in the presentation, in which case two (or more) lower level structures  translate to the same higher level element. An example of such a copy is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is translated, several alternatives for one element may arise, and a choice has to be made. \note{hard to express this as a mapping}
 
 The only two layers in which duplicates can be created are the evaluation and the presentation layer. The presentation mappings for the other layers are largely predefined, and do not duplicate any structures. To avoind having to deal with duplicates when parsing, duplications are allowed only at the evaluation layer. However, this restriction may be lifted in a future version. For now, if a presentation contains duplicates, the evaluation should take care of duplicating the involved structures or elements.
@@ -336,6 +366,7 @@ The table of contents view in a word processor is an example of a presentation t
 
 When translating the enriched document, the reducer makes a choice between the alternatives for each duplicated element. Three situations are possible. Firstly, if none of the alternatives has been edited, all alternative values are equal and any one can be chosen. Secondly, if one alternative has been edited, the choice is in favor of the edited element. Hence, if a chapter title is edited in the table of contents, the resulting reduced document contains the updated title. Finally, if more than one value has been edited, an error is signaled to the user. In this case the edit operation may be forbidden, or one of the values may be chosen.  \note{say that we cannot skip the evaluation layer with this scheme}
 
+** positiever **
 A disadvantage of the described method for handling duplicates is that the enriched document type now depends on the presentation; if a presentation contains a tree view of the document, then the enriched document has to take care of duplicating it. A special facility for creating the necessary enriched document data definitions as well as the evaluation and reduction of the duplicates is desirable. However, it may be possible to capture the standard behavior for duplicates in a parser combinator that will allow the duplicate editing conflicts to be resolved during parsing. In that case, the whole process takes place in the presentation layer, and the evaluation layer is not affected. \note{parse (dirty arrangement) -$>$ dirty presentation? May be tricky as well}
 
 
@@ -361,7 +392,8 @@ The equations from the previous section assume that a level can be computed from
 \begin{figure}
 \begin{center}
 \begin{center}
-\epsfig{file=pics/eps/2levelES.eps, width=4in}
+\epsfig{file=pics/eps/prestransESExamples.eps, width=4in}
+%\epsfig{file=pics/eps/2levelES.eps, width=4in}
 %\begin{verbatim}
 %
 %        aH        higher level
@@ -376,7 +408,7 @@ The equations from the previous section assume that a level can be computed from
 %          cL
 %\end{verbatim}
 \end{center}
-\caption{Elements without presentation. $<$add arrows \& more elements, also more without pres.$>$}\label{layerExtraState} 
+\caption{Two examples of extra state.}\label{layerExtraState} 
 \end{center}
 \end{figure}
 %CAPTION: shaded is extra
