@@ -21,8 +21,12 @@ import ArrTypes -- temporarily
 import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
-import ProxParser -- for debugging on command line and for initMap
-import PresentationParsing hiding (walk) -- for debugging on command line and for initMap
+--import ProxParser -- for debugging on command line and for initMap
+
+import NewParser
+import ProxParser (initLayout)-- for debugging on command line and for initMap
+
+--import PresentationParsing hiding (walk)
 import Layout hiding (combine)
 import Scanner
 import ArrUtils
@@ -49,7 +53,7 @@ main =                         -- system (layer)local state,  initial higher lev
  do { fontMetricsRef <- initFontMetrics
     ; let layers = 
             proximaLayers (LayerStateEval, DocumentLevel HoleDoc NoPathD Clip_Nothing)   
-                          ((),     EnrichedDocLevel HoleEnr NoPathD)   
+                          ((),     EnrichedDocLevel HoleEnrichedDoc NoPathD)   
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], emptyFM))   
                           (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
                           ((),             ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
