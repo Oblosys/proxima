@@ -1,9 +1,6 @@
 module CompileHelium (compileHelium) where
 
--- Arjan: ProximaTypeInferencing.ag in helium cvs
 -- Daan: lvm export Set problem with ghci
--- Bastiaan: CompileHelium:No substitution in case of type error
--- Arjan: overloading? 1+x :: b? 
 
 -- in order to get lvm files ["Prelude", "PreludePrim", "HeliumLang", "LvmLang", "LvmIO", "LvmException"]
 -- use helium on HeliumNt/lib/Prelude.hs for Prelude.lvm and coreasm on .core sources for the rest
@@ -23,7 +20,7 @@ import IOExts(writeIORef)
 import CompileUtils
 import ResolveOperators(resolveOperators, operatorsFromModule)
 import qualified PrettyPrinting(sem_Module)
-import FiniteMap
+import Data.FiniteMap
 --module PhaseStaticChecks(phaseStaticChecks) where
 import CompileUtils
 import Warnings(Warning)
@@ -31,12 +28,12 @@ import StaticErrors(errorsLogCode)
 import qualified StaticChecks(sem_Module)
 --module PhaseTypeInferencer (phaseTypeInferencer) where
 import CompileUtils
-import Tree(flattenM, flattenW)
+--import Tree
 import Warnings(Warning)
 import qualified ProximaTypeInferencing(sem_Module)
 
 import Types -- temporary
-import FiniteMap
+import Data.FiniteMap
 import UHA_Utils
 import UHA_Syntax
 ----
@@ -78,14 +75,14 @@ each now returns its errors and warnings.
 
 
 
-lvmPath = ["."]
+lvmPath = ["lvm"]
 
 --                                              type env       substitution        top level env
-compileHelium :: Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, WrappedSubstitution, [(Range, Tp)])))
+compileHelium :: Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, [(Range, TpScheme)])))
 compileHelium mod =
- do {  mapM (checkExistence lvmPath) 
-        ["Prelude", "PreludePrim", "HeliumLang", "LvmLang", "LvmIO", "LvmException"]
-    ; compile "Henk" [NoLogging] lvmPath [] mod
+ do {  --mapM (checkExistence lvmPath) 
+      --  ["Prelude", "PreludePrim", "HeliumLang", "LvmLang", "LvmIO", "LvmException"]
+    ; compile "Main" [NoLogging] lvmPath [] mod
     }
 
 
@@ -118,7 +115,7 @@ checkExistence path name =
                                            
 
 
-compile :: String -> [Option] -> [String] -> [String] -> Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, WrappedSubstitution, [(Range, Tp)])))
+compile :: String -> [Option] -> [String] -> [String] -> Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, [(Range, TpScheme)])))
 compile fullName options lvmPath doneModules mod =
     do
         putStrLn ("Compiling " ++ fullName)
@@ -172,15 +169,16 @@ compile fullName options lvmPath doneModules mod =
         (completeEnv, typingStrategiesDecls) <-
             phaseTypingStrategies fullName localEnv importEnvs options
 -}
-            let completeEnv = localEnv
+            let completeEnv = foldr combineImportEnvironments localEnv importEnvs
+ 
          
             -- Phase 7: Type inferencing
             phase7 <- phaseTypeInferencer fullName resolvedModule doneModules localEnv 
                                           completeEnv options
             case phase7 of
-              Left typeErrs -> return $ Right ( typeErrs, (emptyFM, error "CompileHelium:No substitution in case of type error", []))
-              Right (subst, alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, typeWarnings) ->
-               do return $ Right ([], (toplevelTypes, subst, alltypes))
+              Left typeErrs -> return $ Right ( typeErrs, (emptyFM, []))
+              Right (alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, typeWarnings) ->
+               do return $ Right ([], (toplevelTypes, alltypes))
                
                
                
@@ -283,13 +281,13 @@ phaseTypeInferencer ::
     String -> Module -> [String] -> ImportEnvironment ->
         ImportEnvironment -> [Option] -> 
            IO (Either TypeErrors
-                     (WrappedSubstitution, [(Range, Tp)],
+                     ([(Range, TpScheme)],
                       ImportEnvironment, FiniteMap NameWithRange TpScheme  {- == LocalTypes -}, 
                       FiniteMap NameWithRange (NameWithRange, QType) {- OverloadedVariables -}, TypeEnvironment, [Warning]))
 phaseTypeInferencer fullName module_ doneModules localEnv completeEnv options = do
     enterNewPhase "Type inferencing" options
                                               -- prox                         prox
-    let (debugIO, localTypes, overloadedVars, _, substitution, toplevelTypes, alltypes, typeErrors, warnings) =
+    let (debugIO, localTypes, overloadedVars, _, toplevelTypes, alltypes, typeErrors, warnings) =
             ProximaTypeInferencing.sem_Module module_
                 completeEnv
                 options        
@@ -299,13 +297,14 @@ phaseTypeInferencer fullName module_ doneModules localEnv completeEnv options = 
         inferredTypes = addListToFM localTypes 
                 [ (NameWithRange name, ts) | (name, ts) <- fmToList (typeEnvironment finalEnv) ]
     
+    
     when (DumpTypeDebug `elem` options) debugIO  
     
-{-
+
     putStrLn (unlines ("" : "toplevelTypes: " : map (\(n,ts) -> show (NameWithRange n) ++ " :: "++show (getQualifiedType ts)) (fmToList toplevelTypes)))
     putStrLn (unlines ("" : "localTypes:" : map show (fmToList localTypes)))
     putStrLn (unlines ("" : "overloadedVars:"   : map (\(n,(m,t)) -> show n ++ " in scope of " ++ show m ++" has type " ++ show t) (fmToList overloadedVars)))        
--}
+
 {-
     when (not (null typeErrors)) $ do
         when (DumpInformationForAllModules `elem` options) $
@@ -323,7 +322,7 @@ phaseTypeInferencer fullName module_ doneModules localEnv completeEnv options = 
                 putStrLn (show (addToTypeEnvironment toplevelTypes localEnv))
              else
                 return ()
-    if (null typeErrors) then return $ Right (substitution, alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, warnings)
+    if (null typeErrors) then return $ Right (alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, warnings)
                          else return $ Left typeErrors 
 
 

@@ -1,11 +1,12 @@
 inc = \x -> x+1;
+val = \num -> (num inc) 0; 
+test = val ((add one) one);
 
-h = [(1,False),(2,True),(3,False)];
+zero = \s -> \z -> z;
+one =  \s -> \z -> s z;
+two =  \s -> \z -> s (s z);
+three =  \s -> \z -> s ((two s) z);
 
-x = let local = 1+2+3+4; h = 1; in if True then inc 18 else 0;
-
-g = case 5*7 of aaa -> 2+4; b -> 10;;
-
-ttest = f 3;
-
-f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
+add = \n -> \m -> \s -> \z -> (n s) ((m s) z);
+mult = \n -> \m -> \s -> \z -> (n (m s)) z;
+y = \h -> (\x -> h (x x)) (\x -> h (x x));

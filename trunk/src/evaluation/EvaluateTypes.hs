@@ -5,7 +5,7 @@ import DocTypes
 import DebugLevels
 import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
-import FiniteMap
+import Data.FiniteMap
 
 
 import UHA_Syntax
@@ -206,16 +206,11 @@ henk2 mod =
                             ; return errs
                             } of
     Left staticErrs -> debug Prs (show (map showMessage staticErrs)) (map hErrFromStaticErr staticErrs, [], [])
-    Right ([], (types, subst,typeEnv)) -> 
-      let typeEnv'  =[ (pathFromRange r, show (generalizeAll  (subst |-> t))) | (r,t)<- typeEnv ]
+    Right ([], (types,typeEnv)) -> 
+      let typeEnv'  =[ (pathFromRange r, show t) | (r,t)<- typeEnv ]
           toplvlEnv = [ (getNameName nm,show tp) | (nm,tp) <- fmToList types ]
       in  ( [], typeEnv', toplvlEnv )
     Right (typeErrs, _) ->  (map hErrFromTypeErr typeErrs,[] ,[])
-
-
-showtypes :: Substitution a => a -> String  
-showtypes subst =
-  concat [ show b ++ "  "++  show (generalizeAll  (subst |-> TVar b))  ++ "\n" | b<-[1..50] ]
 
 
 hErrFromStaticErr e@(NoFunDef entity name names)           = HError (lines $ showMessage e) [] (pathFromName name : map (pathFromName) names) []
