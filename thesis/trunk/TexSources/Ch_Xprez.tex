@@ -139,7 +139,7 @@ data Syn = Syn {hRef, vRef, minWidth, minHeight :: Int,
 A presentation box (from now on called presentation) has a number of properties that describe its size and its appearance: 
 
 \begin{center}
-\epsfig{file=xprezpics/eps/picob.eps, width=2in}
+\epsfig{file=xprezpics/picob.eps, width=2in}
 \end{center}
 
 \noindent Figure~\ref{xprezproperties} contains the definition of the two records \texttt{Inh} and \texttt{Syn} (as explained below) with the type of each of the properties. The \texttt{hRef} and \texttt{vRef} properties specify the horizontal and vertical reference lines that are used for aligning boxes when they are combined in composite presentations. The boolean properties \texttt{hStretch} and \texttt{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The rest of the properties are \texttt{fontFamily}, \texttt{fontSize}, \texttt{textColor}, \texttt{lineColor}, \texttt{fillColor}, and \texttt{backgroundColor}, which should be self explanitory. In the future, this set will be extended with other properties such as more line style and font attributes, and user defined properties will be supported. The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \texttt{Inh} for inherited properties, and \texttt{Syn} for synthesized properties.
