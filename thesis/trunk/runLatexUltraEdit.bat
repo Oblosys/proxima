@@ -14,10 +14,9 @@ IF %texerr%==1 echo ******************** Latex ERROR ********************
 
 copy TexOutput\%1.dvi texSources\latest.dvi > nul:
 rem dvi is copied to source directory, so yap can find eps pictures and tex sources
-
+echo Starting Yap
 rem yap:  --find-src-special=<line><filepath>
 IF %texerr%==0 yap texSources\latest.dvi --single-instance --find-src-special=%3%2
-rem IF %texerr%==0 yap texSources\latest.dvi --single-instance
 
 
-
+cd texSources
