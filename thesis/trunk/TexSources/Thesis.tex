@@ -1,12 +1,19 @@
 \documentclass[twoside,epsf]{report}
+
 \setcounter{errorcontextlines}{\maxdimen}
 
 \usepackage{thesis}
 
-% dummy labels for chapters until Ch_FormalSpec
-%\newlabel{chap:formalSpec}{{5}{91}}
-%\newlabel{sect:singleExtra}{{5.2}{97}}
-%\newlabel{chap:presenting}{{7}{1}}
+% dummy labels for chapters until Ch_ProxArch
+%\newlabel{sect:extraState}{{4.2}{78}}
+%\newlabel{chap:proxArch}{{3}{47}}
+%\newlabel{sect:intrProcess}{{3.5}{64}}
+%\newlabel{chap:informalSpec}{{4}{75}}
+%\newlabel{chap:formalSpec}{{5}{89}}
+%\newlabel{sect:singleExtra} {{5.2}{95}}
+%\newlabel{chap:presenting}{{6}{139}}
+%\newlabel{chap:prototype}{{7}{153}}
+%\newlabel{chap:conclusions}{{8}{173}}
 
 % dummy labels for Ch_FormalSpec
 %\newlabel{chap:requirements}{{2}{13}}
@@ -41,6 +48,7 @@
 %\newlabel{sect:xprezFrac}{{7.2.4}{185}}
 
 % dummy labels for Ch_Conclusions
+%\newlabel{chap:introduction}{{1}{1}}
 %\newlabel{chap:requirements}{{2}{13}}
 %\newlabel{chap:proxArch}{{3}{49}}
 %\newlabel{chap:informalSpec}{{4}{77}}
@@ -55,8 +63,8 @@
 \selectlanguage{english}
 
 \pagenumbering{roman}
-
-                %\newcommand{\subtitle}{Chapters 7\&8: Prototype and Conclusions}     \include{P_AltTitlePages}
+        % check chapter refs
+%        \newcommand{\subtitle}{Chapters 1\&2: Introduction and requirements}\include{P_AltTitlePages}
 \include{P_Titlepages}
 
 \tableofcontents
@@ -82,10 +90,10 @@
 % tex chapter, bibthesis.bat, tex chapter, texall.bat  (so chap refs are ok), tex chapter
 % (biball.bat is only for checking entire thesis for bib problems)
 
-% \include{P_Dankwoord}
-% \include{P_Samenvatting}
-% \include{P_CV}
-%\include{P_IpaDissertations}
+\include{P_Samenvatting}
+\include{P_Dankwoord}
+\include{P_CV}
+\include{P_IpaDissertations}
 
 \thispagestyle{empty}
 \cleardoublepage
@@ -97,11 +105,9 @@ IMPORTANT
 incrementality vs reuse? check what Proxima really does.
 
 Urgent problems:
-!!!figure out reqs and levels in intro and requirements chapters
 presentation/rendering image?  mention that lower layers are fixed and hence presentation often used for rendering
 
 General TODOs
-* ISBN
 * Check main font & size
 
 * Check for important bits:
@@ -113,9 +119,6 @@ General TODOs
 
 * Fix math fonts.
 
-* E elimination vs E introduction
-
-* mention that doc-oriented is always easy. Even for a syn dir editor, the hard bits are in pointing, which is a pres-oriented op.
 
 
 
@@ -130,7 +133,8 @@ What are H equivalence classes if rhs is not always hidden? Then hidden or not m
 
 NOTES
 Screen width similar to latex output width:
-iii                                                                                                                       
+iii                                                                                                             
+          
 
 presentation oriented editing is done at layout. 
 would be nice to call it presentation. However:
