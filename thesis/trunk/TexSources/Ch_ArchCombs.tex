@@ -916,7 +916,7 @@ Like \texttt{liftStep}, the meta combinators do not depend on the number of step
 %																
 \subsection{A type class for \texttt{pack} and \texttt{unpack}} \label{subsecttypeclass}
 
-The previous subsections define meta combinators for the functions \texttt{lift} and \texttt{combine}. Because explicit constructor appearances have been removed from the meta combinators, both functions have a function argument that is used for packing the result, and \texttt{combine} has two function arguments to unpack its two layer arguments. Although the unpack function for both layer arguments is the same, it has to be passed twice because the function is used on arguments of different type. In this section, we construct a type class \texttt{Pack} that contains the pack and unpack functions for the step data types. The type class eliminates the need for explicitly passing the pack and unpack functions to the meta combinators. Consequently, the unpack function does not need to be passed twice anymore. 
+The previous subsections define meta combinators for the functions \texttt{lift} and \texttt{combine}. Because explicit constructor appearances have been removed from the meta combinators, both functions have a function argument that is used for packing the result, and \texttt{combine} has two function arguments to unpack its two layer arguments. Although the unpack function for both layer arguments is the same, it has to be passed twice because the function is used on arguments of different type. In this section, we define a type class \texttt{Pack} that contains the pack and unpack functions for the step data types. The type class eliminates the need for explicitly passing the pack and unpack functions to the meta combinators. Consequently, the unpack function does not need to be passed twice anymore. 
 
 First, we take a look at the types of the pack and unpack parameters of the meta combinators. Because the types of the pack and unpack functions have the same structure in each of the three combinators, it does not matter which meta combinator we look at, exception that \texttt{liftStep} does not have an unpack parameter. Therefore, we take a look at \texttt{combineStepDown}:
 
@@ -1018,7 +1018,7 @@ combine higher lower = fix (combineStepDown . combineStepUp) higher lower
 \end{verbatim}
 \end{small}
 
-A more general description of the construction of \texttt{combine} is given in the next section.
+A more general description of how to construct \texttt{combine} is given in the next section.
 
 
 %																
