@@ -353,7 +353,7 @@ The program editor generates a number of requirements, an important one being po
 
 \screenshot{Piece of document, with toc, section, subsection, citations, refs}{Word processor}
 
-The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG document presentation with support for optimal line breaking, a derived table of contents and an automatic bibliography. Cross-references such as references to tables and figures or citations, can be clicked to bring the referred part of the document into focus.
+The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG presentation with optimal line breaking, a derived table of contents, and an automatic bibliography. Cross-references such as references to tables and figures or citations, can be clicked to bring the referred part of the document into focus.
 
 \bigskip {\bf Structural View on the Document}
 
@@ -726,9 +726,9 @@ The presentation transformation language has to support the specification of com
 
 Although the transformation language is related to the computation formalism, since a presentation can be seen as a computed value, we do separate the two. One reason is that separation of computation and presentation makes it possible to specify multiple presentations of a document together with its computed values. Another reason is that the separation makes it easier to support edit operations on derived structures.
 
-\subsection{Editing Power}
+\subsection{Editing Strength}
 
-The editing power of an editor is determined by the levels at which edit operations can be targeted, together with the complexity of the edit operations and the extent in which they are user specifyable. Levels at which editing is possible are the presentation level and document level. Syntax-directed editors mainly offer edit operations targeted at the document level, whereas
+The editing strength of an editor is determined by the levels at which edit operations can be targeted, together with the complexity of the edit operations and the extent in which they are user specifyable. Levels at which editing is possible are the presentation level and document level. Syntax-directed editors mainly offer edit operations targeted at the document level, whereas
 syntax-recognizing editors edit the presentation level. Both levels, however, are important. Furthermore, as we will show in Chapter~\ref{chap:proxArch}, a number of other levels may be distinguished, among which a level that contains derived structures and values.
 
 %refs
@@ -806,8 +806,6 @@ Over the years, the behaviour and design have not undergone many drastic changes
 The LRC attribute grammar system~\cite{lrc} was a research project at Utrecht University. Higher-order attribute grammars are used to specify the derived values, as well as the presentation. The system is based on an efficient higher-order attribute grammar evaluator. Higher-order attribute grammars allow some computations to be specified more elegantly than normal attribute grammars.
 
 For the presentation of the document, the Tcl/Tk language is used. This allows for complex presentations with multiple windows, GUI widgets, colors, and basic graphical elements. However, the integration between the generated presentation and the editor is very weak. No general focus model is present, and although edit events can be attached to the Tcl presentation, free editing is only possible a separate window that contains a purely textual presentation of the document. The textual presentation cannot be used to edit the layout of the main presentation, and it does not contain derived values. 
-
-LRC is still being used in a number of commercial settings, but is not maintained or developed anymore.
 
 \bigskip {\bf SbyS, Mj\"olner Orm} %90
 
@@ -897,9 +895,7 @@ The advantage of a toolkit is that the final editor can be customized to a high 
 
 \bigskip {\bf Amaya, Thot}
 
-*Thot is probably also a generic editor, not just a toolkit*\\
-
-Amaya~\cite{amaya} is the W3C web browser that is built on top of the editor toolkit Thot\cite{thot}, which is a successor of GRIF~\cite{grif}. The Thot toolkit supports a number of specification languages for document structure, presentation, and transformation, but in order to build an actual editor C code is required to connect the various components\note{can it be done without?}.
+\note{Thot is probably also a generic editor, not just a toolkit} Amaya~\cite{amaya} is the W3C web browser that is built on top of the editor toolkit Thot\cite{thot}, which is a successor of GRIF~\cite{grif}. The Thot toolkit supports a number of specification languages for document structure, presentation, and transformation, but in order to build an actual editor C code is required to connect the various components\note{can it be done without?}.
 
 The presentation formalism in Thot, called P, is a powerful graphical presentation formalism, somewhat similar to Proteus (Ensemble), but with more advanced alignment features. As a result, complex presentations are possible, such as the presentation for equation editor use case.
 
@@ -911,20 +907,20 @@ The Microsoft Visual Studio environment includes an integrated program editor. A
 
 The Visual Studio editor is of the syntax-recognizing kind with colored text presentations. No document edit functionality is supported, other than the displaying results of semantic analyses. The visual mechanism for displaying the results is by marking a location in the source presentation with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/squiggly.bmp.eps, width=0.042in}}line, and showing a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically valid, the editor provides a surprisingly usable environment. 
 
-\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-\bigskip{\bf Other editor toolkits}
-
-*First find out more about them.*\\
-Xemacs\\
-Andrew system\\
-Opendoc.\\
-
-\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-
-% FIELD? and its relation to Desert?
-
-% what about non program editors? mention, ref, ignore?
+%\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%
+%\bigskip{\bf Other editor toolkits}
+%
+%*First find out more about them.*\\
+%Xemacs\\
+%Andrew system\\
+%Opendoc.\\
+%
+%\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+%
+%% FIELD? and its relation to Desert?
+%
+%% what about non program editors? mention, ref, ignore?
 
 \subsection{XML Editors}
 
@@ -948,7 +944,7 @@ Some editors support a user definable presentation, or at least allow the user t
 
 It is remarkable that support for textual presentations of XML documents is this weak, since many languages for processing and describing XML documents are specified in XML itself (for example XML Schema or XSLT) and editing these languages would be greatly simplified by providing the user with a concise concrete syntax, rather than the verbose XML syntax.
 
-\item[Editing power.]
+\item[Editing strength.]
 %check transformation
 Most XML editors offer simple document edit operations for structure entry and manipulation. However, none of the reviewed editors support user specified transformations on the tree structure.
 
@@ -966,14 +962,14 @@ Two XML editors have a more sophisticated presentation engine and some basic sup
 
 \bigskip {\bf X-Metal}
 
-The commercial system X-Metal from SoftQuad is a highly customizable XML editor, with support for many XML standards and database connectivity. Besides regular source and outline views, the editor offers built-in table editing and an editable CSS presentation of the document. CSS provides a quick and easy way to specify a document presentation, but its power is limited. General computations cannot be specified, but CSS does allow the specification of basic counters in the presentation. 
+The commercial system X-Metal from SoftQuad is a highly customizable XML editor, with support for many XML standards and database connectivity. Besides regular source and outline views, it offers built-in table editing and an editable CSS presentation of the document. CSS provides a quick and easy way to specify a document presentation, but its expressive power is limited. Although general computations cannot be specified, CSS does allow the specification of basic counters in the presentation. 
 
 Document edit operations in X-Metal are rather weak, and transformations cannot be specified. Furthermore, the freely editable source presentation can only be edited in a separate mode.
 
 % mention frame maker here?
-\bigskip {\bf XML Spy}
+\bigskip {\bf XMLSPY}
 
-XML-Spy is a large system that has similar functionality as X-Metal. An important difference is the presentation system. XML-Spy supports a larger number of built-in presentations and also has a user-defined presentation that supports the specification of simple derived document structures. Values from the document that appear in the derived structure may be edited in place.
+XMLSPY is a large system that has similar functionality as X-Metal. An important difference is the presentation system. XMLSPY supports a larger number of built-in presentations and also supports a user-defined presentation definition for the specification of simple derived document structures. Values from the document that appear in the derived structure may be edited in place, but the structure itself is not editable.
 
 %\bigskip {\bf Frame maker?}\\
 
@@ -990,7 +986,7 @@ Figure~\ref{scoretable} contains a score table for all discussed editors.
 \begin{footnotesize}
 \begin{tabular}[t]{l|c|c|c|c|c|c}
 Editor		& Genericity & Computations & Presentation & Editing    & Modeless & Local \\
-		&                 &                       &   formalism   & power     &  editing   & state \\
+		&                 &                       &   formalism   & strength     &  editing   & state \\
 \hline
 %                                           generic  comps      pres        editing    integration local state
 Synthesizer Generator	&   ++	&   ++	&  +/- 	&   +	&   - -	&    - -	\\
@@ -1009,7 +1005,7 @@ Thot/Amaya		&   +	&   +/-	&  + 	&   +	&   - -	&    - -	\\
 VisualStudio		&   +/-	&   +/-	&   - 	&   -	&   n/a	&    - -	\\
 \hline
 XMetal			&   ++	&   -	&  +/- 	&  +/-	&   - -	&   - -	\\
-XMLSpy			&   ++	&   +/-	&   + 	&  +/-	&   - -	&   - -	\\
+XMLSPY			&   ++	&   +/-	&   + 	&  +/-	&   - -	&   - -	\\
 Other XML editors		&   ++	&  max. - & max. +/-&  +/-	&   - -	&   - -	\\
 \hline
 %\dots			&   ?	&   ?	&   ? 	&   ?	&   ?	&     --	\\
@@ -1041,13 +1037,13 @@ Proxima			&   ++	&   ++	&   ++ 	&   ++	&   ++	&     ++	\\
 %\item Either text only, or no free editing
 %\end{itemize}
 
-In the table of the previous section, none of the existing systems has a line that contains only plusses. No editor supports local state, but besides that, each of the editors has at least one column with a low score (+/- or less). One of the reasons for this is that the requirements for computations and a powerful presentation formalism are difficult to reconcile with the requirements for editing power and modelessness.
+In the table of the previous section, none of the existing systems has a line that contains only positives. No editor supports local state, and besides that, each of the editors has at least one more column with a low score (+/- or less). One of the reasons for this is that the requirements for computations and a powerful presentation formalism interfere with the requirements for editing strength and modelessness.
 
 The first two requirements determine the presentation complexity of the editor, whereas the last two determine the useability of the editor. A problem is that the more complex a presentation is, the harder it will be to still offer modeless free editing on the presentation level.
 
-{\bf Syntax-Directed Editors.} The syntax-directed editors tend to do well on the computation requirement, but at the same time, presentation editing is weakly supported, leading to a lower score on editing power, and modelessness is not supported at all. However, if the presentation formalism is simple, and no computations appear in it, then modelessness can be supported (see PSG). 
+{\bf Syntax-Directed Editors.} The syntax-directed editors tend to do well on the computation requirement, but at the same time, presentation editing is weakly supported, leading to a lower score on editing strength. Furthermore, modelessness is not supported at all. However, if the presentation formalism is simple, and no computed values appear in the presentation, then modelessness can be supported (see PSG). 
 
-{\bf Syntax-Recognizing Editors.} The syntax-recognizing editors, on the other hand do well on the presentation editing and modelessness requirements, but the fact that a document is derived from its presentation has a number of consequences. Firstly, the presentation must at all times contain enough information to derive the document, which puts restrictions on the presentation formalism. Secondly, having derived values and structures in the presentation makes parsing a lot harder and is therefore not supported, hence the low scores on the computation requirement. And finally, edit operations on the document are harder to implement. As a result, syntax-recognizing editors will not score maximally in the computation, presentation, and edit power columns.
+{\bf Syntax-Recognizing Editors.} The syntax-recognizing editors on the other hand do well on the presentation editing and modelessness requirements, but the fact that a document is derived from its presentation has a number of consequences. Firstly, the presentation must at all times contain sufficient information to derive the document, which puts restrictions on the presentation formalism. Secondly, having derived values and structures in the presentation makes parsing a lot harder and is therefore not supported, hence the low scores on the computation requirement. And finally, edit operations on the document are harder to implement. As a result, syntax-recognizing editors will not score maximally in the computation, presentation, and editing strength columns.
 
 {\bf XML Editors.} XML editors are similar to syntax-directed editors, but somehow the computation and presentation formalisms are not very well developed. Semantic analysis, is of course not a big requirement for an XML editor, but computations and derived structures have many applications also for XML editing. Furthermore, specification of a textual presentation with a parser is not supported, which is odd because the raw XML source has an extremely verbose syntax that is not very suitable for viewing or editing directly.
 
@@ -1183,7 +1179,7 @@ Many of the features in Proxima are optional rather than enforced. Edit operatio
 %pres: -- text only - text \& atrs +/- graphics + graphics, aligning, formatting
 % 
 %The strength of the presentation transformation formalism is added to (or distracted from) the %score.
-%\item[Editing Power] points are earned for: Structure edit operations, User-specifyable %transformations, Free text editing, Free layout editing, and Derived structure editing
+%\item[Editing Strength] points are earned for: Structure edit operations, User-specifyable %transformations, Free text editing, Free layout editing, and Derived structure editing
 %\item[Modeless Editing] Mode switching (--), , Seemless integration (++). If only one level %can be edited, the modeless property is not meaningful (n/a).\note{niet goed}
 %%\section{Discussion}
 %\end{description}
