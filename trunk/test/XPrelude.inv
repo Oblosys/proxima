@@ -1,5 +1,10 @@
 wrap = dup nil; cons,
+
+consi = cons^o,
+snoci = snoc^o,
+
 subr = assocl; (swap * id); assocr,
+
 trans = assocr; (id * subr); assocl,
 distr = (delta * id); trans,
 eq = delta^o,
@@ -33,6 +38,4 @@ merge = %(x: (dup nil)^o; map(inl) |
                 (gt * id); (swap*id); assocr;
                   (id * assocl;(cons * id);x);(inr * id)); cons),
 unmerge = merge^o
-
-
 .
