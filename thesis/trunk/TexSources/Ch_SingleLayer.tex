@@ -1,6 +1,7 @@
 \chapter{One Layer}
 \label{chap:singleLayer}
 
+\newcounter{specification}
 {\em *** Version: \today~ ***}
 \bc
 New name for translate:
@@ -212,6 +213,7 @@ DISCUSS: is this restriction necessary? Or could we have n:m mappings?
 % automatische dingen (focus etc.) dan weg zijn
 
 AG automatically does it, but do we need to enforce? What about focus, is that the reason?
+Parser makes it hard to do n:m reuse. So implementation suggests the 1:n. Maybe lift when we know how. For eval layer might be possible already. Right now only one is responsible.  Only that one can be reused and therefore may have ES (color example, only string is reused). IntExp Int example, IntExp no pres elts, so no ES. (bit different again, since Int is entire presentation, unlike String Color example) 
 **
 \fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
@@ -359,7 +361,7 @@ Need more experience
 \subsection{Duplicates in presentation}
 
 \note{mention duplicates in interpretation?}
-
+\note{mention that this can also be used for multiple views?}
 %* not just because multiple trees: elements may depend on several trees. without duplication.
 
 The presentation of a higher level element may consist of several lower level elements, for example in Figure~\ref{interpretExample}. In this case, the \verb|If| node is the interpretation of all three tokens together. However, it is also possible that a higher level element is duplicated in the presentation, in which case interpretation of the lower level may yield conflicting values for the higher level element. An example of such a duplication is the title of a chapter that appears in the table of contents as well as in the presentation of the chapter itself. When the lower level is interpreted, several alternatives for one element may arise, and a choice has to be made.
@@ -540,17 +542,17 @@ Level_{n} & = & Core_{Pres,n} \times Extra_{Pres,n} \times  Info\iup_{n}\\
 Level_{i} & = & Core_{Pres,i} \times Extra_{Pres,i}  \times Info\iup_{i} & \text{\{Viewed from upper layer\}}\\  
                & = & Core_{Intr,i} \times Extra_{Intr,i} \times Info\idwn_{i} & \text{\{Viewed from lower layer\}}
 \end{array}\)\end{small}
-\begin{center}(?? Final level types)\end{center}\vspace{1em}\note{caption?}
+\begin{center}(??Multiple layer pespective: Final level types)\end{center}\vspace{1em}\note{caption?}
 
 Note that for the middle levels, on which two kinds of mapping information exist, each alternative of the definition only contains one kind. This is because the downward mapping information $Info\idwn_{i}$ cannot be computed by the higher layers presentation mapping, and hence is part of its extra state: $Extra_{Pres,i}$. Analogously, viewed from the lower layer, $Info\iup_{i}$ is part of $Extra_{Intr,i}$. Rather than further complicating the definition by splitting the extra state type in a mapping information part and a regular extra state part (eg. $Extra_{Pres,i} = Extra_{Regular,Pres,i} \times Info\idwn_{i}$), we choose to make explicit only the mapping information relevant for the direction from which the level is viewed.
 
 Again, the definition can be simplified by taking a single layer perspective. Note that we leave the arrows in the  mapping information types, even though they are redundant now.
 
-\begin{small}\(\begin{array}{lcll} \label{inv:extraStateSL}
+\begin{small}\(\begin{array}{lcll} \label{spec:extraStateSL}
 Level_{H} & = & Core_{H} \times Extra_{H} \times Info\idwn_{H}\\
 Level_{L} & = & Core_{L} \times Extra_{L} \times Info\iup_{L}\\
 \end{array}\)\end{small}
-\begin{center}(?? Single layer perspective: Final level types)\end{center}\vspace{1em}\note{caption?}
+\begin{center}(?? Single layer perspective: Final level types)\end{center}\vspace{1em}\note{caption? is this a definition or a specification?}
 
 \bc
 % example in picture 
@@ -623,7 +625,9 @@ In this first approach, the results of the previous edit step
 
 We can specify the computation with equations:
 
-\begin{small} \begin{math} \label{inv:immediate}
+\begin{small}
+\refstepcounter{specification} \label{spec:immediate}
+\begin{math} 
 {\tt interpret}	::  Level_{L} \rightarrow Level_{H} \hfill ~\\
 {\tt present}	:: Level_{H} \rightarrow Level_{L}  \hfill ~\\
 level_{L} = Present~level_{H}		\hfill \text{\{Precondition\}}\\
@@ -634,11 +638,10 @@ level''_{H} = Transform~level'_{H}	\hfill \text{\{Higher layer update\}}\\
 level''_{L} = {\tt present}~level''_{H} 	\hfill \text{\{Compute new lower level\}}\\
 level''_{L} = Present~level''_{H}		\hfill \text{\{Postcondition\}}\\
 \end{math}\end{small}\\
-\begin{center}(Specification 1: Direct implementation of $Interpret$ and $Present$)\end{center}\vspace{1em}
+\begin{center}(Specification \thespecification: Direct implementation of $Interpret$ and $Present$)\end{center}\vspace{1em}
 
 This first specifications is not very informative, because the mapping functions ${\tt present}$ and 
 ${\tt interpret}$ are assumed to directly implement their abstract counterparts. In order to give a more detailed specification, and also because the presence of extra state makes it difficult to directly implement the abstract functions, we refine the specification in the next sections. Section~\ref{sect:maintainingSheet} adds style sheets to ${\tt present}$ and ${\tt present}$, Section~\ref{sect:maintainingExtraState} adds support for extra state handling, and finally Section~\ref{sect:maintainingInc} specifies an incremental version of the mapping functions.
-
 
 
 %																
@@ -650,7 +653,9 @@ The first refinement we make is the addition of $sheet$ parameters to ${\tt pres
 
 The presentation sheet has the abstract type $Sheet_{Pres}$, and the interpretation sheet is of type $Sheet_{Intr}$. The equations thus become:
 
-\begin{small}\( \begin{array}{lcll} \label{inv:sheets}
+\begin{small}
+\refstepcounter{specification} \label{spec:sheets}
+\( \begin{array}{lcll}
 {\tt interpret} &::& Sheet_{Intr} \rightarrow  Level_{L} \rightarrow Level_{H} \\
 {\tt present} &::& Sheet_{Pres} \rightarrow  Level_{H} \rightarrow Level_{L} \\
 level_{L} & = & Present~level_{H}					& \text{\{Precondition\}}\\
@@ -662,7 +667,7 @@ level''_{L} & = & {\tt present}~sheet_{Pres}~level''_{H}    & \text{\{Compute ne
 level''_{L} & = & Present~level''_{H}					& \text{\{Postcondition\}}\\
 \lefteqn{{\tt interpret}~sheet_{Intr} \cdot {\tt present}~sheet_{Pres} = id_{H}} & & & \text{\{***add this one?***\}}\\
 \end{array}\)\end{small}\\
-\begin{center}(Specification 2: Support for presentation and interpretation sheets)\end{center}\vspace{1em}
+\begin{center}(Specification \thespecification: Support for presentation and interpretation sheets)\end{center}\vspace{1em}
 \note{also put id condition in previous invariant? And add the PRES INTR one too?}
 
 The sheet parameter contains information about how to present or interpret the elements of the respective data levels. The presentation sheet for the presentation layer specifies the presentation of the enriched document. At the evaluation layer, the presentation sheet is called the evaluation sheet, which specifies the computation of the derived values. The interpretation sheet at the presentation level specifies the parser, and at the evaluation layer it specifies the reducer, which maps updates on derived structures back onto updates on the document. Note that the sheets do not appear in the abstract $Present$ and $Interpret$ functions, as these functions represent the intended presentation and interpretation mappings that we implement with the functions 
@@ -741,7 +746,9 @@ Figure~\ref{maintainExtraState} shows how the invariants are maintained when tak
 
 The specification of the computation now reads: \note{explain more?}
 
-\begin{small}\begin{math} \label{inv:extraState}
+\begin{small}
+\refstepcounter{specification} \label{spec:extraState}
+\begin{math} 
 \text{\bf type}~Level_{H} = Core_{H} \times Extra_{H} \times Info\idwn_{H}\\
 \text{\bf type}~Level_{L} = Core_{L} \times Extra_{L} \times Info\iup_{L}\\
 {\tt interpret} :: Sheet_{Intr} \rightarrow Level_{L} \rightarrow Core_{H} \times Info\idwn_{H}\\
@@ -758,7 +765,7 @@ core''_{L} \times info''\iup_{L} & = & {\tt present}~sheet_{Pres}~level''_{H}		&
 level''_{L} & = & {\tt reuse}_{Pres}~level_{L}~core''_{L} \times info''\iup_{L} & \text{\{Reuse extra state\}}\\
 level''_{L} & = & Present~level''_{H}						& \text{\{Postcondition\}}\\
 \end{array}\)\end{small}
-\begin{center}(Specification 3: Support for extra state)\end{center} 
+\begin{center}(Specification \thespecification: Support for extra state)\end{center} 
 \vspace{1em}
 
 % computation order
@@ -921,7 +928,7 @@ Figure~\ref{incrementalInterpret}, shows the righthand side of Figure~\ref{fromL
 
 
 %																
-\subsection{Maintaining the presentation invariant}
+\subsection{Maintaining the presentation invariant} \label{sect:incrementalSpec}
 
 By adding an explicit ${\tt reuse}$ function and a sheet parameter to ${\tt interpret}$ of Figure~\ref{incrementalInterpret}, and doing the same for ${\tt present}$, we obtain an incremental version of the computation specified in Section~\ref{sect:maintainingExtraState}. Figure~\ref{layerExtraStateInc} shows the incremental computation. This is the final version of the computation, which is used in the next chapter. The layer has two kinds of input and output values: the edit operations, which come from and go to upper and lower layers, and the data levels, which are the result of the previous edit step and are input to the next edit step.
 
@@ -937,7 +944,9 @@ By adding an explicit ${\tt reuse}$ function and a sheet parameter to ${\tt inte
 In addition to the extra parameters, and the changes to the types of the mapping functions (now mapping edit operations instead of data levels),  the new equations for the incremental versions of ${\tt present}$ and 
 ${\tt interpret}$ also contain a number of explicit  ${\tt update}$ functions: 
 
-\begin{small}\( \begin{array}{lcl}  \label{inv:incrementality}
+\begin{small}
+\refstepcounter{specification} \label{spec:incrementality}
+\( \begin{array}{lcl}
 \text{\bf type}~Level_{H}  =  Core_{H} \times Extra_{H} \times Info\idwn_{H}\\
 \text{\bf type}~Level_{L}  =  Core_{L} \times Extra_{L} \times Info\iup_{L}\\
 {\tt interpret}  ::  Sheet_{Intr} \rightarrow Level_{L} \rightarrow Level_{H} \rightarrow  Edit_{Level_{L}} \rightarrow Edit_{Core_{H}\times Info\idwn_{H}} \\
@@ -964,7 +973,7 @@ level''_{L} & = & {\tt update}~e_{Level_{L}}~level_{L}                 & \text{\
 level''_{L} & = & Present~level''_{H}						& \text{\{Postcondition\}}\\
 \end{array}\)
 \end{small}
-\begin{center}(Specification 4: Incrementality)\end{center}\vspace{1em}
+\begin{center}(Specification \thespecification: Incrementality)\end{center}\vspace{1em}
 
 Note that compared to ${\tt interpret}$, the order of the level parameters for 
 ${\tt present}$ is swapped (ie. first the higher and then the lower level), since the direction of the mapping is also swapped.\note{Mention apparent mismatch with ','' on args of present and interpret now we use edit ops?} \note{user edit is weird. maybe this is not a function but some kind of constant. elow = EDIT}
@@ -995,7 +1004,10 @@ levels from the left, updated levels to the right, and deltas up and down. In ne
 
 Parse errors in tokens requires intr update on lower. Different model. First research necessary if this way of parsing is good
 
+
+
 Proxima offers possibility of solving, not always solution. non tree stuff, or inserted nodes? (redundant parens, tree order) Many problems, need to be solved, but then they can be implemented.
+No panacea, but at least we know where to do the difficult work. (maybe this one belongs in previous chapter?)
 
 
 %																
