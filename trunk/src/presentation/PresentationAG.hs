@@ -35,7 +35,7 @@ errColor = red
 
 
 presentFocus NoPathD     path pres = pres
-presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` lightBlue else pres
+presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
 
 squiggleRanges (rngs1, rngs2, rngs3) pth pres =
   if (PathD pth) `elem` rngs1 then squiggly error1Color pres
@@ -124,7 +124,7 @@ cons :: IDP -> String -> Xprez
 cons idc str = StringP idc str `withColor` consCol
 
 typeD :: IDP -> String -> Xprez
-typeD idc str = bold $ StringP idc str `withColor` typeDCol
+typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 
 
@@ -134,6 +134,8 @@ keyCol = blue
 sepCol = brown
 consCol = black
 typeDCol = purple --darkViolet
+focusCol = lightBlue -- lightGrey
+commentCol = (240,240,240)
 --idC = unsafePerformIO $ newIORef (0 :: Int)
 
 --newIDP _ = IDP $ unsafePerformIO $ do {modifyIORef idC (+1); readIORef idC}
@@ -183,7 +185,7 @@ instance Show Value where
   show (LamVal _)  = "<function>"
   show (ListVal vs) = "[" ++ concat (intersperse ", " (map show vs)) ++ "]"
   show (ProdVal vs) = "(" ++ concat (intersperse ", " (map show vs)) ++ ")"
-  show (ErrVal)   = "ERROR"
+  show (ErrVal)   = "<undefined>"
 {-
 
 evaluate :: Exp -> [(String, Val)] -> Val
@@ -195,10 +197,11 @@ evaluateIntOp _  _           _           = ErrVal
 
 
 
-presentList []     = row' [sep NoIDP "  []"]
-presentList (p:ps) = col' $  [ row' [sep NoIDP "  [ ", p ] ]
+presentList [] = empty
+presentList ps = row' [ text "  ", col' ps ]
+{-presentList (p:ps) = col' $  [ row' [sep NoIDP "  [ ", p ] ]
                           ++ [ row' [sep NoIDP "  , ", p]| p <- ps ]
-                          ++ [ sep NoIDP "  ] "]
+                          ++ [ sep NoIDP "  ] "] -}
 
 toggleViewType :: [Int] -> PPPresentation -> UpdateDoc
 toggleViewType pth (PPPresentation idD viewtp slides) =
@@ -287,6 +290,42 @@ removeParens (ParenExp _ _ _ x1) = removeParens x1
 removeParens exp                 = exp
 
 ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
+
+pressEvalButton pth = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_EvalButton (ReEvaluate1 NoIDD))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+addMarkOp pth view pres = pres `addPopupItems` [("Mark", markOp pth view)]
+
+markOp pth view = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (Mark NoIDD view))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+
+addDelOp pth view pres = pres `addPopupItems` [("Delete", deleteOp pth view)]
+
+deleteOp pth (Ls idD v1 v2) = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (DelL NoIDD v1 v2))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+addInsOp pth view pres = pres `addPopupItems` [("Insert", insertOp pth view)]
+
+insertOp pth view = 
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_View (InsL NoIDD HoleView view))
+                                            )
+    in  (DocumentLevel d' path cl)
+
 -- Alt ---------------------------------------------------------
 {-
    inherited attributes:
@@ -1664,6 +1703,12 @@ sem_ConsList_Slide_Nil_Slide  =
 
 -}
 {-
+   local variables for Decl.InvDecl:
+      typeStr
+      self
+
+-}
+{-
    local variables for Decl.PPPresentationDecl:
       typeStr
       self
@@ -1702,6 +1747,8 @@ sem_Decl ((Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout)
     (sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) ((sem_Bool_ (_expanded))) ((sem_Bool_ (_autoLayout))) ((sem_Ident (_ident))) ((sem_Exp (_exp))))
 sem_Decl ((HoleDecl )) =
     (sem_Decl_HoleDecl )
+sem_Decl ((InvDecl (_idD) (_idP0) (_idP1) (_inv))) =
+    (sem_Decl_InvDecl (_idD) (_idP0) (_idP1) ((sem_Inv (_inv))))
 sem_Decl ((PPPresentationDecl (_idD) (_idP0) (_idP1) (_pPPresentation))) =
     (sem_Decl_PPPresentationDecl (_idD) (_idP0) (_idP1) ((sem_PPPresentation (_pPPresentation))))
 sem_Decl ((ParseErrDecl (_node) (_presentation))) =
@@ -1816,11 +1863,11 @@ sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (
                                     case _exp_val of
                                             ErrVal -> [ StructuralP sigIDP $ row'
                                                          [text ("-- No value"++autoLStr)]
-                                                           `withbgColor` lightGrey
+                                                           `withbgColor` commentCol
                                                       ]
                                             v      -> [ StructuralP sigIDP $ row'
                                                          [text ("-- Value: " ++ show _exp_val++autoLStr )]
-                                                           `withbgColor` lightGrey
+                                                           `withbgColor` commentCol
                                                       ]
                                  Just tpstr ->
                                    [  StructuralP sigIDP . row' $
@@ -1828,9 +1875,9 @@ sem_Decl_Decl (_idD) (_idP0) (_idP1) (_idP2) (_idP3) (_expanded) (_autoLayout) (
                                         , text " "
                                         , case _exp_val of
                                             ErrVal -> row' [text ("-- No value"++autoLStr)]
-                                                               `withbgColor` lightGrey
+                                                               `withbgColor` commentCol
                                             v      -> row' [ text ("-- Value: " ++ show _exp_val++autoLStr)]
-                                                               `withbgColor` lightGrey
+                                                               `withbgColor` commentCol
                                         ]
                                    ]
                       else [empty])
@@ -1877,6 +1924,51 @@ sem_Decl_HoleDecl  =
             (_typeStr) =
                 Nothing
         in  ( _lhs_col,("XXXXXX", ErrVal),[],presHole _lhs_focusD "Decl" (HoleDeclNode _self _lhs_path) _lhs_path,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presHole _lhs_focusD "Decl" (HoleDeclNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Decl" (HoleDeclNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Decl" (HoleDeclNode _self _lhs_path) _lhs_path,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
+sem_Decl_InvDecl :: (IDD) ->
+                    (IDP) ->
+                    (IDP) ->
+                    (T_Inv) ->
+                    (T_Decl)
+sem_Decl_InvDecl (_idD) (_idP0) (_idP1) (_inv) =
+    \ _lhs_col
+      _lhs_env
+      _lhs_errs
+      _lhs_focusD
+      _lhs_ix
+      _lhs_layoutMap
+      _lhs_level
+      _lhs_newlines
+      _lhs_pIdC
+      _lhs_path
+      _lhs_ranges
+      _lhs_spaces
+      _lhs_topLevelEnv
+      _lhs_typeEnv
+      _lhs_varsInScope
+      _lhs_varsInScopeAtFocus ->
+        let (_self) =
+                InvDecl _idD _idP0 _idP1 _inv_self
+            (_typeStr) =
+                Nothing
+            ( _inv_pIdC,_inv_pres,_inv_presTree,_inv_presXML,_inv_self) =
+                (_inv (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 2) (_lhs_path++[0]))
+        in  ( _lhs_col
+             ,("XXXXXX", ErrVal)
+             ,[]
+             ,loc (InvDeclNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                       row' [ text "inv;" ]
+             ,_lhs_layoutMap
+             ,_lhs_newlines
+             ,_inv_pIdC
+             ,loc (InvDeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text' (mkIDP _idP0 _lhs_pIdC 0) "Inv: ", _inv_pres ]
+             ,presentElementTree _lhs_focusD (InvDeclNode _self _lhs_path) _lhs_path "InvDecl" [ _inv_presTree ]
+             ,presentElementXML _lhs_focusD (InvDeclNode _self _lhs_path) _lhs_path "InvDecl" [ _inv_presXML ]
+             ,_self
+             ,_lhs_spaces
+             ,_typeStr
+             ,_lhs_varsInScopeAtFocus
+             )
 sem_Decl_PPPresentationDecl :: (IDD) ->
                                (IDP) ->
                                (IDP) ->
@@ -1914,7 +2006,7 @@ sem_Decl_PPPresentationDecl (_idD) (_idP0) (_idP1) (_pPPresentation) =
              ,_lhs_newlines
              ,_pPPresentation_pIdC
              ,loc (PPPresentationDeclNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
-                row' [ text' (mkIDP _idP0 _lhs_pIdC 0) "PPT: ", _pPPresentation_pres ]
+                row' [ text' (mkIDP _idP0 _lhs_pIdC 0) "Slides: ", _pPPresentation_pres ]
              ,presentElementTree _lhs_focusD (PPPresentationDeclNode _self _lhs_path) _lhs_path "PPPresentationDecl" [ _pPPresentation_presTree ]
              ,presentElementXML _lhs_focusD (PPPresentationDeclNode _self _lhs_path) _lhs_path "PPPresentationDecl" [ _pPPresentation_presXML ]
              ,_self
@@ -1947,6 +2039,118 @@ sem_Decl_ParseErrDecl (_node) (_presentation) =
             (_typeStr) =
                 Nothing
         in  ( _lhs_col,("XXXXXX", ErrVal),[],presParseErr _node _presentation,_lhs_layoutMap,_lhs_newlines,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self,_lhs_spaces,_typeStr,_lhs_varsInScopeAtFocus)
+-- EitherDocView -----------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for EitherDocView.HoleEitherDocView:
+      self
+
+-}
+{-
+   local variables for EitherDocView.LeftDocView:
+      self
+
+-}
+{-
+   local variables for EitherDocView.ParseErrEitherDocView:
+      self
+
+-}
+{-
+   local variables for EitherDocView.RightDocView:
+      self
+
+-}
+-- semantic domain
+type T_EitherDocView = (FocusDoc) ->
+                       (Int) ->
+                       (Int) ->
+                       ([Int]) ->
+                       ( (Int),(Presentation),(Presentation),(Presentation),(EitherDocView))
+-- cata
+sem_EitherDocView :: (EitherDocView) ->
+                     (T_EitherDocView)
+sem_EitherDocView ((HoleEitherDocView )) =
+    (sem_EitherDocView_HoleEitherDocView )
+sem_EitherDocView ((LeftDocView (_idd) (_error))) =
+    (sem_EitherDocView_LeftDocView (_idd) ((sem_String_ (_error))))
+sem_EitherDocView ((ParseErrEitherDocView (_node) (_presentation))) =
+    (sem_EitherDocView_ParseErrEitherDocView (_node) (_presentation))
+sem_EitherDocView ((RightDocView (_idd) (_doc))) =
+    (sem_EitherDocView_RightDocView (_idd) ((sem_View (_doc))))
+sem_EitherDocView_HoleEitherDocView :: (T_EitherDocView)
+sem_EitherDocView_HoleEitherDocView  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleEitherDocView
+        in  ( _lhs_pIdC,presHole _lhs_focusD "EitherDocView" (HoleEitherDocViewNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "EitherDocView" (HoleEitherDocViewNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "EitherDocView" (HoleEitherDocViewNode _self _lhs_path) _lhs_path,_self)
+sem_EitherDocView_LeftDocView :: (IDD) ->
+                                 (T_String_) ->
+                                 (T_EitherDocView)
+sem_EitherDocView_LeftDocView (_idd) (_error) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                LeftDocView _idd _error_self
+            ( _error_length,_error_pIdC,_error_pres,_error_presTree,_error_presXML,_error_self,_error_str) =
+                (_error (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _error_pIdC
+             ,loc (LeftDocViewNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "Reduction error: ", col (map presMsg (lines (string_ _error_self))) ]
+             ,presentElementTree _lhs_focusD (LeftDocViewNode _self _lhs_path) _lhs_path "LeftDocView" [ _error_presTree ]
+             ,presentElementXML _lhs_focusD (LeftDocViewNode _self _lhs_path) _lhs_path "LeftDocView" [ _error_presXML ]
+             ,_self
+             )
+sem_EitherDocView_ParseErrEitherDocView :: (Node) ->
+                                           (Presentation) ->
+                                           (T_EitherDocView)
+sem_EitherDocView_ParseErrEitherDocView (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrEitherDocView _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
+sem_EitherDocView_RightDocView :: (IDD) ->
+                                  (T_View) ->
+                                  (T_EitherDocView)
+sem_EitherDocView_RightDocView (_idd) (_doc) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                RightDocView _idd _doc_self
+            ( _doc_pIdC,_doc_pres,_doc_presTree,_doc_presXML,_doc_self) =
+                (_doc (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _doc_pIdC
+             ,loc (RightDocViewNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "Doc: ", _doc_pres ]
+             ,presentElementTree _lhs_focusD (RightDocViewNode _self _lhs_path) _lhs_path "RightDocView" [ _doc_presTree ]
+             ,presentElementXML _lhs_focusD (RightDocViewNode _self _lhs_path) _lhs_path "RightDocView" [ _doc_presXML ]
+             ,_self
+             )
 -- EnrichedDoc -------------------------------------------------
 {-
    inherited attributes:
@@ -2057,18 +2261,17 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
              ,loc (RootDocNode _document []) $
               loc (RootEnrNode _self []) $ structural $
                 col [ row' [ hSpace 3
-                           , text $ "Document focus: "++show _lhs_focusD
+                           , text "Focused expression"  `withFontFam` "verdana"
                            , typeD NoIDP $ ( case lookup _lhs_focusD _typeEnv of
                                               Nothing -> ""
                                               Just tp -> " :: "++tp)
                                             ++ replicate 80 ' '
+                           ] `withFontSize` 10
+                    , row' [ hSpace 3
+                           , row[ text "Top level identifiers: " `withFontFam` "verdana", _idListDecls_idsPres] `withFontSize` 10
                            ]
                     , vSpace 4
                     , hLine
-                    , row' [ hSpace 3
-                           , text "Top level identifiers:"
-                           , row[ text " ", _idListDecls_idsPres] `withFontSize` 10
-                           ]
                     , vSpace 4
                     , row' [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                     , row' [ hSpace 3, _decls_pres ]
@@ -2080,11 +2283,140 @@ sem_EnrichedDoc_RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (
                     , vSpace 10
                     , hLine
                     , vSpace 4
-                    , text "Variables in scope:"
+                    , text "Variables in scope:" `withFont'` ("verdana",10)
                     , col [ typeD NoIDP (var++" :: "++tpStr) `link` pth
                           | (var,(pth,tpStr)) <- fmToList _decls_varsInScopeAtFocus ]
                     ]
                   `withFont'` ("Courier New",14)
+             ,_self
+             )
+-- EvalButton --------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for EvalButton.HoleEvalButton:
+      self
+
+-}
+{-
+   local variables for EvalButton.ParseErrEvalButton:
+      self
+
+-}
+{-
+   local variables for EvalButton.ReEvaluate1:
+      self
+
+-}
+{-
+   local variables for EvalButton.ReEvaluate2:
+      self
+
+-}
+{-
+   local variables for EvalButton.Skip:
+      self
+
+-}
+-- semantic domain
+type T_EvalButton = (FocusDoc) ->
+                    (Int) ->
+                    (Int) ->
+                    ([Int]) ->
+                    ( (Int),(Presentation),(Presentation),(Presentation),(EvalButton))
+-- cata
+sem_EvalButton :: (EvalButton) ->
+                  (T_EvalButton)
+sem_EvalButton ((HoleEvalButton )) =
+    (sem_EvalButton_HoleEvalButton )
+sem_EvalButton ((ParseErrEvalButton (_node) (_presentation))) =
+    (sem_EvalButton_ParseErrEvalButton (_node) (_presentation))
+sem_EvalButton ((ReEvaluate1 (_idd))) =
+    (sem_EvalButton_ReEvaluate1 (_idd))
+sem_EvalButton ((ReEvaluate2 (_idd))) =
+    (sem_EvalButton_ReEvaluate2 (_idd))
+sem_EvalButton ((Skip (_idd))) =
+    (sem_EvalButton_Skip (_idd))
+sem_EvalButton_HoleEvalButton :: (T_EvalButton)
+sem_EvalButton_HoleEvalButton  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleEvalButton
+        in  ( _lhs_pIdC,presHole _lhs_focusD "EvalButton" (HoleEvalButtonNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "EvalButton" (HoleEvalButtonNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "EvalButton" (HoleEvalButtonNode _self _lhs_path) _lhs_path,_self)
+sem_EvalButton_ParseErrEvalButton :: (Node) ->
+                                     (Presentation) ->
+                                     (T_EvalButton)
+sem_EvalButton_ParseErrEvalButton (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrEvalButton _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
+sem_EvalButton_ReEvaluate1 :: (IDD) ->
+                              (T_EvalButton)
+sem_EvalButton_ReEvaluate1 (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ReEvaluate1 _idd
+        in  ( _lhs_pIdC
+             ,loc (ReEvaluate1Node _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row [ box $ text "Evaluate" ]
+             ,presentElementTree _lhs_focusD (ReEvaluate1Node _self _lhs_path) _lhs_path "ReEvaluate1" [  ]
+             ,presentElementXML _lhs_focusD (ReEvaluate1Node _self _lhs_path) _lhs_path "ReEvaluate1" [  ]
+             ,_self
+             )
+sem_EvalButton_ReEvaluate2 :: (IDD) ->
+                              (T_EvalButton)
+sem_EvalButton_ReEvaluate2 (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ReEvaluate2 _idd
+        in  ( _lhs_pIdC
+             ,loc (ReEvaluate2Node _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row [ box $ text "Evaluate" `withbgColor` blue ]
+             ,presentElementTree _lhs_focusD (ReEvaluate2Node _self _lhs_path) _lhs_path "ReEvaluate2" [  ]
+             ,presentElementXML _lhs_focusD (ReEvaluate2Node _self _lhs_path) _lhs_path "ReEvaluate2" [  ]
+             ,_self
+             )
+sem_EvalButton_Skip :: (IDD) ->
+                       (T_EvalButton)
+sem_EvalButton_Skip (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Skip _idd
+        in  ( _lhs_pIdC
+             ,loc (SkipNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                row [ box $ text "Evaluate" ] `withMouseDown` pressEvalButton _lhs_path
+             ,presentElementTree _lhs_focusD (SkipNode _self _lhs_path) _lhs_path "Skip" [  ]
+             ,presentElementXML _lhs_focusD (SkipNode _self _lhs_path) _lhs_path "Skip" [  ]
              ,_self
              )
 -- Exp ---------------------------------------------------------
@@ -2538,7 +2870,9 @@ sem_Exp_DivExp (_idD) (_idP0) (_exp1) (_exp2) =
              ,_exp2_spaces
              ,_substitute
              ,_type
-             ,evaluateIntOp div _exp1_val _exp2_val
+             ,case _exp2_val of
+                IntVal 0 -> ErrVal
+                IntVal _ -> evaluateIntOp div _exp1_val _exp2_val
              ,_exp2_varsInScopeAtFocus
              )
 sem_Exp_HoleExp :: (T_Exp)
@@ -3548,6 +3882,104 @@ sem_Int__ParseErrInt_ (_node) (_presentation) =
         let (_self) =
                 ParseErrInt_ _node _presentation
         in  ( 0,_lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
+-- Inv ---------------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for Inv.HoleInv:
+      self
+
+-}
+{-
+   local variables for Inv.Inv:
+      self
+
+-}
+{-
+   local variables for Inv.ParseErrInv:
+      self
+
+-}
+-- semantic domain
+type T_Inv = (FocusDoc) ->
+             (Int) ->
+             (Int) ->
+             ([Int]) ->
+             ( (Int),(Presentation),(Presentation),(Presentation),(Inv))
+-- cata
+sem_Inv :: (Inv) ->
+           (T_Inv)
+sem_Inv ((HoleInv )) =
+    (sem_Inv_HoleInv )
+sem_Inv ((Inv (_idd) (_doc) (_enr) (_eval) (_evalButton))) =
+    (sem_Inv_Inv (_idd) ((sem_EitherDocView (_doc))) ((sem_View (_enr))) ((sem_String_ (_eval))) ((sem_EvalButton (_evalButton))))
+sem_Inv ((ParseErrInv (_node) (_presentation))) =
+    (sem_Inv_ParseErrInv (_node) (_presentation))
+sem_Inv_HoleInv :: (T_Inv)
+sem_Inv_HoleInv  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleInv
+        in  ( _lhs_pIdC,presHole _lhs_focusD "Inv" (HoleInvNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Inv" (HoleInvNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "Inv" (HoleInvNode _self _lhs_path) _lhs_path,_self)
+sem_Inv_Inv :: (IDD) ->
+               (T_EitherDocView) ->
+               (T_View) ->
+               (T_String_) ->
+               (T_EvalButton) ->
+               (T_Inv)
+sem_Inv_Inv (_idd) (_doc) (_enr) (_eval) (_evalButton) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Inv _idd _doc_self _enr_self _eval_self _evalButton_self
+            ( _doc_pIdC,_doc_pres,_doc_presTree,_doc_presXML,_doc_self) =
+                (_doc (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _enr_pIdC,_enr_pres,_enr_presTree,_enr_presXML,_enr_self) =
+                (_enr (_lhs_focusD) (_lhs_ix) (_doc_pIdC) (_lhs_path++[1]))
+            ( _eval_length,_eval_pIdC,_eval_pres,_eval_presTree,_eval_presXML,_eval_self,_eval_str) =
+                (_eval (_lhs_focusD) (_lhs_ix) (_enr_pIdC) (_lhs_path++[2]))
+            ( _evalButton_pIdC,_evalButton_pres,_evalButton_presTree,_evalButton_presXML,_evalButton_self) =
+                (_evalButton (_lhs_focusD) (_lhs_ix) (_eval_pIdC) (_lhs_path++[3]))
+        in  ( _evalButton_pIdC
+             ,loc (InvNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
+                col [ row [ text "get: \"", _eval_pres, text "\"" ]
+                    , _doc_pres
+                    , row [ text "src = ", _enr_pres ]
+                    ]
+             ,presentElementTree _lhs_focusD (InvNode _self _lhs_path) _lhs_path "Inv" [ _doc_presTree, _enr_presTree, _eval_presTree, _evalButton_presTree ]
+             ,presentElementXML _lhs_focusD (InvNode _self _lhs_path) _lhs_path "Inv" [ _doc_presXML, _enr_presXML, _eval_presXML, _evalButton_presXML ]
+             ,_self
+             )
+sem_Inv_ParseErrInv :: (Node) ->
+                       (Presentation) ->
+                       (T_Inv)
+sem_Inv_ParseErrInv (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrInv _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
 -- Item --------------------------------------------------------
 {-
    inherited attributes:
@@ -3639,14 +4071,15 @@ sem_Item_HeliumItem (_idd) (_exp) =
                 (_exp (0) ([]) ([]) (_lhs_focusD) (_lhs_ix) (emptyFM) (0) (0) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (0) ([]) ([]) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _exp_pIdC
              ,loc (HeliumItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ text "HeliumItem $"
+                col' [ text "<heliumItem>"
                      , row [text "  ", _exp_pres]
+                     , text "</heliumItem>"
                      ]
              ,loc (HeliumItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 row' [itemStart _lhs_ix _lhs_listType _lhs_typeLoc, _exp_pres
                                                           `withColor` black
                                                           `withbgColor` white
-                                                          `withFontFam` "Courier New" ]
+                                                          `withFontFam` "Courier New" `withFontSize_` (\s->s-3) ]
              ,presentElementTree _lhs_focusD (HeliumItemNode _self _lhs_path) _lhs_path "HeliumItem" [ _exp_presTree ]
              ,presentElementXML _lhs_focusD (HeliumItemNode _self _lhs_path) _lhs_path "HeliumItem" [ _exp_presXML ]
              ,_self
@@ -3685,11 +4118,12 @@ sem_Item_ListItem (_idd) (_itemList) =
                 (_itemList (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _itemList_pIdC
              ,loc (ListItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ text "ListItem $"
+                col' [ text "<listItem>"
                      , row [text "  ", _itemList_pres]
+                     , text "</listItem>"
                      ]
              ,loc (ListItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                row' [ text "   ",
+                row' [ hSpace 25,
                        _itemList_pres2
                                    `withFontSize_` (\fs -> if fs > 5 then fs * 80 `div` 100 else fs)
                      ]
@@ -3733,11 +4167,7 @@ sem_Item_StringItem (_idd) (_string) =
                 (_string (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
         in  ( _string_pIdC
              ,loc (StringItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                 row' [ text "StringItem "
-                      , row' [ text "\""
-                             , _string_pres
-                             , text "\""
-                             ] `withColor` darkViolet ]
+                 row' [ text "<stringItem>", _string_pres `withColor` darkViolet, text "</stringItem>" ]
              ,loc (StringItemNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 row' [itemStart _lhs_ix _lhs_listType _lhs_typeLoc, _string_pres]
              ,presentElementTree _lhs_focusD (StringItemNode _self _lhs_path) _lhs_path "StringItem" [ _string_presTree ]
@@ -3831,8 +4261,9 @@ sem_ItemList_ItemList (_idd) (_listType) (_items) =
                 (_items (_lhs_focusD) (_listType_self) (_listType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_listType_typeLoc) (_lhs_varsInScope) (_listType_varsInScopeAtFocus))
         in  ( _items_pIdC
              ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ row' [ text "ItemList ", _listType_pres, text " $"]
+                col' [ row' [ text "<itemList style=", row' [text "\"", _listType_pres, text "\""] `withColor` darkViolet, text ">"]
                      , _items_pres
+                     , text "</itemList>"
                   ]
              ,loc (ItemListNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                 row' [ _listType_pres2
@@ -4944,17 +5375,18 @@ sem_PPPresentation_PPPresentation (_idd) (_viewType) (_slides) =
                 (_slides (_lhs_focusD) (_viewType_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _slides_pIdC
              ,loc (PPPresentationNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                 col' $ [ row' [ text "View type: "
-                             ,  if _viewType_bool
-                                then (box $ text $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
-                                else (box $ text $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType _lhs_path _self)]
+                 col' $ [ row' [
+                                if _viewType_bool
+                                then (box $ text $ "XML view") `addPopupItems` [("Change to presentation view",toggleViewType _lhs_path _self)]
+                                else (box $ text $"Presentation view") `addPopupItems` [("Change to XML view",toggleViewType _lhs_path _self)]
                               ]
                       , vSpace 10
                       ] ++
                         if _viewType_bool
                         then
-                          [ row' [ text "pres ",key NoIDP "=",text " Presentation ", text " $"]
-                          , row' [ text "         ", _slides_pres]
+                          [ text "<slides>"
+                          , _slides_pres
+                          , text "</slides>"
                           ]
                         else
                           [ _slides_pres2
@@ -5078,9 +5510,10 @@ sem_Slide_Slide (_idd) (_title) (_itemList) =
                 (_itemList (_lhs_focusD) (_lhs_ix) (_title_pIdC) (_lhs_path++[1]) (_lhs_ranges) (_lhs_varsInScope) (_lhs_varsInScopeAtFocus))
         in  ( _itemList_pIdC
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
-                col' [ row' [ text "Slide ", row' [ text "\"", _title_pres, text "\""
-                                                           ] `withColor` darkViolet  , text " $"]
+                col' [ row' [ text "<slide>", row' [ text "<title>", _title_pres `withColor` darkViolet , text "</title>"
+                                                           ]]
                      , row' [ text "  ", _itemList_pres ]
+                     , text "</slide>"
                      ]
              ,loc (SlideNode _self _lhs_path) $ structural $ presentFocus _lhs_focusD _lhs_path $
                  slide _title_pres
@@ -5177,5 +5610,516 @@ sem_String__String_ (_idd) (_string) =
              ,presentElementXML _lhs_focusD (String_Node _self _lhs_path) _lhs_path "String_" [ presentPrimXMLString _string ]
              ,_self
              ,_string
+             )
+-- View --------------------------------------------------------
+{-
+   inherited attributes:
+      focusD               : FocusDoc
+      ix                   : Int
+      path                 : [Int]
+
+   chained attributes:
+      pIdC                 : Int
+
+   synthesised attributes:
+      pres                 : Presentation
+      presTree             : Presentation
+      presXML              : Presentation
+      self                 : SELF
+
+-}
+{-
+   local variables for View.AN:
+      self
+
+-}
+{-
+   local variables for View.ANil:
+      self
+
+-}
+{-
+   local variables for View.AS:
+      self
+
+-}
+{-
+   local variables for View.DelL:
+      self
+
+-}
+{-
+   local variables for View.FstP:
+      self
+
+-}
+{-
+   local variables for View.HoleView:
+      self
+
+-}
+{-
+   local variables for View.IfNil:
+      self
+
+-}
+{-
+   local variables for View.InsL:
+      self
+
+-}
+{-
+   local variables for View.L:
+      self
+
+-}
+{-
+   local variables for View.Ls:
+      self
+
+-}
+{-
+   local variables for View.Mark:
+      self
+
+-}
+{-
+   local variables for View.ParseErrView:
+      self
+
+-}
+{-
+   local variables for View.Pr:
+      self
+
+-}
+{-
+   local variables for View.R:
+      self
+
+-}
+{-
+   local variables for View.SndP:
+      self
+
+-}
+{-
+   local variables for View.Tr:
+      self
+
+-}
+{-
+   local variables for View.Undef:
+      self
+
+-}
+{-
+   local variables for View.Unit:
+      self
+
+-}
+-- semantic domain
+type T_View = (FocusDoc) ->
+              (Int) ->
+              (Int) ->
+              ([Int]) ->
+              ( (Int),(Presentation),(Presentation),(Presentation),(View))
+-- cata
+sem_View :: (View) ->
+            (T_View)
+sem_View ((AN (_idd) (_int_))) =
+    (sem_View_AN (_idd) ((sem_Int_ (_int_))))
+sem_View ((ANil (_idd))) =
+    (sem_View_ANil (_idd))
+sem_View ((AS (_idd) (_string_))) =
+    (sem_View_AS (_idd) ((sem_String_ (_string_))))
+sem_View ((DelL (_idd) (_view1) (_view2))) =
+    (sem_View_DelL (_idd) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((FstP (_idd) (_bool_) (_view1) (_view2))) =
+    (sem_View_FstP (_idd) ((sem_Bool_ (_bool_))) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((HoleView )) =
+    (sem_View_HoleView )
+sem_View ((IfNil (_idd) (_bool_) (_view))) =
+    (sem_View_IfNil (_idd) ((sem_Bool_ (_bool_))) ((sem_View (_view))))
+sem_View ((InsL (_idd) (_view1) (_view2))) =
+    (sem_View_InsL (_idd) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((L (_idd) (_view))) =
+    (sem_View_L (_idd) ((sem_View (_view))))
+sem_View ((Ls (_idd) (_view1) (_view2))) =
+    (sem_View_Ls (_idd) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((Mark (_idd) (_view))) =
+    (sem_View_Mark (_idd) ((sem_View (_view))))
+sem_View ((ParseErrView (_node) (_presentation))) =
+    (sem_View_ParseErrView (_node) (_presentation))
+sem_View ((Pr (_idd) (_view1) (_view2))) =
+    (sem_View_Pr (_idd) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((R (_idd) (_view))) =
+    (sem_View_R (_idd) ((sem_View (_view))))
+sem_View ((SndP (_idd) (_bool_) (_view1) (_view2))) =
+    (sem_View_SndP (_idd) ((sem_Bool_ (_bool_))) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((Tr (_idd) (_view1) (_view2))) =
+    (sem_View_Tr (_idd) ((sem_View (_view1))) ((sem_View (_view2))))
+sem_View ((Undef (_idd))) =
+    (sem_View_Undef (_idd))
+sem_View ((Unit (_idd))) =
+    (sem_View_Unit (_idd))
+sem_View_AN :: (IDD) ->
+               (T_Int_) ->
+               (T_View)
+sem_View_AN (_idd) (_int_) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                AN _idd _int__self
+            ( _int__int,_int__pIdC,_int__pres,_int__presTree,_int__presXML,_int__self) =
+                (_int_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _int__pIdC
+             ,loc (ANNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                addMarkOp _lhs_path _self $
+                row' [ text " #", _int__pres ]
+             ,presentElementTree _lhs_focusD (ANNode _self _lhs_path) _lhs_path "AN" [ _int__presTree ]
+             ,presentElementXML _lhs_focusD (ANNode _self _lhs_path) _lhs_path "AN" [ _int__presXML ]
+             ,_self
+             )
+sem_View_ANil :: (IDD) ->
+                 (T_View)
+sem_View_ANil (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ANil _idd
+        in  ( _lhs_pIdC
+             ,loc (ANilNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                addInsOp _lhs_path _self $
+                row' [ text "[]" ]
+             ,presentElementTree _lhs_focusD (ANilNode _self _lhs_path) _lhs_path "ANil" [  ]
+             ,presentElementXML _lhs_focusD (ANilNode _self _lhs_path) _lhs_path "ANil" [  ]
+             ,_self
+             )
+sem_View_AS :: (IDD) ->
+               (T_String_) ->
+               (T_View)
+sem_View_AS (_idd) (_string_) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                AS _idd _string__self
+            ( _string__length,_string__pIdC,_string__pres,_string__presTree,_string__presXML,_string__self,_string__str) =
+                (_string_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _string__pIdC
+             ,loc (ASNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                addMarkOp _lhs_path _self $
+                row' [ text " \"", _string__pres, text "\"" ]
+             ,presentElementTree _lhs_focusD (ASNode _self _lhs_path) _lhs_path "AS" [ _string__presTree ]
+             ,presentElementXML _lhs_focusD (ASNode _self _lhs_path) _lhs_path "AS" [ _string__presXML ]
+             ,_self
+             )
+sem_View_DelL :: (IDD) ->
+                 (T_View) ->
+                 (T_View) ->
+                 (T_View)
+sem_View_DelL (_idd) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                DelL _idd _view1_self _view2_self
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[1]))
+        in  ( _view2_pIdC
+             ,loc (DelLNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "(", overlay [ row [ _view1_pres, text " :- " ]
+                                         , hLine `withHRef` 6
+                                         , empty ] `withColor` red
+                     , _view2_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (DelLNode _self _lhs_path) _lhs_path "DelL" [ _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (DelLNode _self _lhs_path) _lhs_path "DelL" [ _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_FstP :: (IDD) ->
+                 (T_Bool_) ->
+                 (T_View) ->
+                 (T_View) ->
+                 (T_View)
+sem_View_FstP (_idd) (_bool_) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                FstP _idd _bool__self _view1_self _view2_self
+            ( _bool__bool,_bool__pIdC,_bool__pres,_bool__presTree,_bool__presXML,_bool__self) =
+                (_bool_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_bool__pIdC) (_lhs_path++[1]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[2]))
+        in  ( _view2_pIdC
+             ,loc (SndPNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text $ "<", _view1_pres, text ", ", _view2_pres
+                     , text $ (if bool_ _bool__self then "+" else "-" ) ++ ">" ]
+             ,presentElementTree _lhs_focusD (FstPNode _self _lhs_path) _lhs_path "FstP" [ _bool__presTree, _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (FstPNode _self _lhs_path) _lhs_path "FstP" [ _bool__presXML, _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_HoleView :: (T_View)
+sem_View_HoleView  =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                HoleView
+        in  ( _lhs_pIdC,presHole _lhs_focusD "View" (HoleViewNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "View" (HoleViewNode _self _lhs_path) _lhs_path,presHole _lhs_focusD "View" (HoleViewNode _self _lhs_path) _lhs_path,_self)
+sem_View_IfNil :: (IDD) ->
+                  (T_Bool_) ->
+                  (T_View) ->
+                  (T_View)
+sem_View_IfNil (_idd) (_bool_) (_view) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                IfNil _idd _bool__self _view_self
+            ( _bool__bool,_bool__pIdC,_bool__pres,_bool__presTree,_bool__presXML,_bool__self) =
+                (_bool_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view_pIdC,_view_pres,_view_presTree,_view_presXML,_view_self) =
+                (_view (_lhs_focusD) (_lhs_ix) (_bool__pIdC) (_lhs_path++[1]))
+        in  ( _view_pIdC
+             ,loc (IfNilNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text $ "([]"++(if bool_ _bool__self then "+" else "-" )++">"
+                     , text " ", _view_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (IfNilNode _self _lhs_path) _lhs_path "IfNil" [ _bool__presTree, _view_presTree ]
+             ,presentElementXML _lhs_focusD (IfNilNode _self _lhs_path) _lhs_path "IfNil" [ _bool__presXML, _view_presXML ]
+             ,_self
+             )
+sem_View_InsL :: (IDD) ->
+                 (T_View) ->
+                 (T_View) ->
+                 (T_View)
+sem_View_InsL (_idd) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                InsL _idd _view1_self _view2_self
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[1]))
+        in  ( _view2_pIdC
+             ,loc (InsLNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row [ text "(", overlay [ row [_view1_pres, text " :+ "]
+                                        , hLine `withHRef` (-3)
+                                        , empty ] `withColor` green
+                    , _view2_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (InsLNode _self _lhs_path) _lhs_path "InsL" [ _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (InsLNode _self _lhs_path) _lhs_path "InsL" [ _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_L :: (IDD) ->
+              (T_View) ->
+              (T_View)
+sem_View_L (_idd) (_view) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                L _idd _view_self
+            ( _view_pIdC,_view_pres,_view_presTree,_view_presXML,_view_self) =
+                (_view (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _view_pIdC
+             ,loc (LNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "(L ", _view_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (LNode _self _lhs_path) _lhs_path "L" [ _view_presTree ]
+             ,presentElementXML _lhs_focusD (LNode _self _lhs_path) _lhs_path "L" [ _view_presXML ]
+             ,_self
+             )
+sem_View_Ls :: (IDD) ->
+               (T_View) ->
+               (T_View) ->
+               (T_View)
+sem_View_Ls (_idd) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Ls _idd _view1_self _view2_self
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[1]))
+        in  ( _view2_pIdC
+             ,loc (LsNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                addInsOp _lhs_path _self $
+                addDelOp _lhs_path _self $
+                row' [ text "(", _view1_pres, text " : ", _view2_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (LsNode _self _lhs_path) _lhs_path "Ls" [ _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (LsNode _self _lhs_path) _lhs_path "Ls" [ _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_Mark :: (IDD) ->
+                 (T_View) ->
+                 (T_View)
+sem_View_Mark (_idd) (_view) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Mark _idd _view_self
+            ( _view_pIdC,_view_pres,_view_presTree,_view_presXML,_view_self) =
+                (_view (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _view_pIdC
+             ,loc (MarkNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row [ _view_pres, text " ", move 0 (-4) $ shrink (text "*")]
+             ,presentElementTree _lhs_focusD (MarkNode _self _lhs_path) _lhs_path "Mark" [ _view_presTree ]
+             ,presentElementXML _lhs_focusD (MarkNode _self _lhs_path) _lhs_path "Mark" [ _view_presXML ]
+             ,_self
+             )
+sem_View_ParseErrView :: (Node) ->
+                         (Presentation) ->
+                         (T_View)
+sem_View_ParseErrView (_node) (_presentation) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                ParseErrView _node _presentation
+        in  ( _lhs_pIdC,presParseErr _node _presentation,presParseErr _node _presentation,presParseErr _node _presentation,_self)
+sem_View_Pr :: (IDD) ->
+               (T_View) ->
+               (T_View) ->
+               (T_View)
+sem_View_Pr (_idd) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Pr _idd _view1_self _view2_self
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[1]))
+        in  ( _view2_pIdC
+             ,loc (PrNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "<", _view1_pres, text ", ", _view2_pres, text ">" ]
+             ,presentElementTree _lhs_focusD (PrNode _self _lhs_path) _lhs_path "Pr" [ _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (PrNode _self _lhs_path) _lhs_path "Pr" [ _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_R :: (IDD) ->
+              (T_View) ->
+              (T_View)
+sem_View_R (_idd) (_view) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                R _idd _view_self
+            ( _view_pIdC,_view_pres,_view_presTree,_view_presXML,_view_self) =
+                (_view (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+        in  ( _view_pIdC
+             ,loc (RNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "(R ", _view_pres, text ")" ]
+             ,presentElementTree _lhs_focusD (RNode _self _lhs_path) _lhs_path "R" [ _view_presTree ]
+             ,presentElementXML _lhs_focusD (RNode _self _lhs_path) _lhs_path "R" [ _view_presXML ]
+             ,_self
+             )
+sem_View_SndP :: (IDD) ->
+                 (T_Bool_) ->
+                 (T_View) ->
+                 (T_View) ->
+                 (T_View)
+sem_View_SndP (_idd) (_bool_) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                SndP _idd _bool__self _view1_self _view2_self
+            ( _bool__bool,_bool__pIdC,_bool__pres,_bool__presTree,_bool__presXML,_bool__self) =
+                (_bool_ (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_bool__pIdC) (_lhs_path++[1]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[2]))
+        in  ( _view2_pIdC
+             ,loc (SndPNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text $ "<" ++ (if bool_ _bool__self then "+" else "-" )
+                     , _view1_pres, text ", ", _view2_pres, text ">" ]
+             ,presentElementTree _lhs_focusD (SndPNode _self _lhs_path) _lhs_path "SndP" [ _bool__presTree, _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (SndPNode _self _lhs_path) _lhs_path "SndP" [ _bool__presXML, _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_Tr :: (IDD) ->
+               (T_View) ->
+               (T_View) ->
+               (T_View)
+sem_View_Tr (_idd) (_view1) (_view2) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Tr _idd _view1_self _view2_self
+            ( _view1_pIdC,_view1_pres,_view1_presTree,_view1_presXML,_view1_self) =
+                (_view1 (_lhs_focusD) (_lhs_ix) (_lhs_pIdC + 0) (_lhs_path++[0]))
+            ( _view2_pIdC,_view2_pres,_view2_presTree,_view2_presXML,_view2_self) =
+                (_view2 (_lhs_focusD) (_lhs_ix) (_view1_pIdC) (_lhs_path++[1]))
+        in  ( _view2_pIdC
+             ,loc (TrNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                 row' [ text "{", _view1_pres, text ", ", _view2_pres, text "}" ]
+             ,presentElementTree _lhs_focusD (TrNode _self _lhs_path) _lhs_path "Tr" [ _view1_presTree, _view2_presTree ]
+             ,presentElementXML _lhs_focusD (TrNode _self _lhs_path) _lhs_path "Tr" [ _view1_presXML, _view2_presXML ]
+             ,_self
+             )
+sem_View_Undef :: (IDD) ->
+                  (T_View)
+sem_View_Undef (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Undef _idd
+        in  ( _lhs_pIdC
+             ,loc (UndefNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                text "^"   `withFontFam` "Symbol" `withFontSize_` (\fs -> fs - 3)
+             ,presentElementTree _lhs_focusD (UndefNode _self _lhs_path) _lhs_path "Undef" [  ]
+             ,presentElementXML _lhs_focusD (UndefNode _self _lhs_path) _lhs_path "Undef" [  ]
+             ,_self
+             )
+sem_View_Unit :: (IDD) ->
+                 (T_View)
+sem_View_Unit (_idd) =
+    \ _lhs_focusD
+      _lhs_ix
+      _lhs_pIdC
+      _lhs_path ->
+        let (_self) =
+                Unit _idd
+        in  ( _lhs_pIdC
+             ,loc (UnitNode _self _lhs_path) $ parsing $ presentFocus _lhs_focusD _lhs_path $
+                row' [ text "()" ]
+             ,presentElementTree _lhs_focusD (UnitNode _self _lhs_path) _lhs_path "Unit" [  ]
+             ,presentElementXML _lhs_focusD (UnitNode _self _lhs_path) _lhs_path "Unit" [  ]
+             ,_self
              )
 

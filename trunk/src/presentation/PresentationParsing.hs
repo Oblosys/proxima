@@ -416,12 +416,23 @@ mkToken str@(c:_)   ctxt i | str `elem` keywords = StrTk str ctxt i
 
 --makeToken str ctxt i = Tk str ctxt i
 
-isSymbolChar c = c `elem` ";,(){}"
+isSymbolChar c = c `elem` ";,(){}#_|"
 
-
+keywords :: [String]
 keywords = 
-  [ "<"
+  [ ":-"
+  , ":+"
+  , "_|_"
+  , "#"
+  , "<"
   , ">"
+  , "L"
+  , "R"
+  , "<-"
+  , "->"
+  , "<+"
+  , "+>"
+  , "\""
   , "</"
   , "/>"
   , "," --
@@ -439,9 +450,9 @@ keywords =
   , "*"
   , "/"
   , "^"
-  , "->"
   , "\174"
-  , "\\"
+  , "\\" 
+--  , "l"      -- not very nice, just for demonstrating lambdas
   , "False"
   , "True"
   , "if"
@@ -453,8 +464,10 @@ keywords =
   , "of"
   , "Chess"
   , "board"
-  , "PPT"
+  , "Slides"
   , "pres"
+  , "Inv"
+  , "inv"
   , ":"
   , "..."
   ]

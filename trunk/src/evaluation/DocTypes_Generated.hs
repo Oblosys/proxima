@@ -89,6 +89,7 @@ data EnrichedDoc = RootEnr IDD IDP List_Decl List_Decl HeliumTypeInfo Document
 data Decl = Decl IDD IDP IDP IDP IDP Bool_ Bool_ Ident Exp 
           | BoardDecl IDD IDP IDP Board 
           | PPPresentationDecl IDD IDP IDP PPPresentation 
+          | InvDecl IDD IDP IDP Inv 
           | HoleDecl
           | ParseErrDecl Node Presentation
              deriving Show
@@ -184,6 +185,48 @@ data Item = StringItem IDD String_
              deriving Show
 
 
+data Inv = Inv IDD EitherDocView View String_ EvalButton 
+         | HoleInv
+         | ParseErrInv Node Presentation
+            deriving Show
+
+
+data EvalButton = ReEvaluate1 IDD 
+                | ReEvaluate2 IDD 
+                | Skip IDD 
+                | HoleEvalButton
+                | ParseErrEvalButton Node Presentation
+                   deriving Show
+
+
+data EitherDocView = LeftDocView IDD String_ 
+                   | RightDocView IDD View 
+                   | HoleEitherDocView
+                   | ParseErrEitherDocView Node Presentation
+                      deriving Show
+
+
+data View = ANil IDD 
+          | AN IDD Int_ 
+          | AS IDD String_ 
+          | Pr IDD View View 
+          | Ls IDD View View 
+          | Tr IDD View View 
+          | L IDD View 
+          | R IDD View 
+          | Mark IDD View 
+          | DelL IDD View View 
+          | InsL IDD View View 
+          | SndP IDD Bool_ View View 
+          | FstP IDD Bool_ View View 
+          | IfNil IDD Bool_ View 
+          | Undef IDD 
+          | Unit IDD 
+          | HoleView
+          | ParseErrView Node Presentation
+             deriving Show
+
+
 data String_ = String_ IDD String 
              | HoleString_
              | ParseErrString_ Node Presentation
@@ -267,6 +310,7 @@ data ClipDoc = Clip_List_Decl List_Decl
              | Clip_Exp Exp
              | Clip_Board Board
              | Clip_PPPresentation PPPresentation
+             | Clip_Inv Inv
              | Clip_String_ String_
              | Clip_Int_ Int_
              | Clip_List_Alt List_Alt
@@ -277,6 +321,9 @@ data ClipDoc = Clip_List_Decl List_Decl
              | Clip_ItemList ItemList
              | Clip_ListType ListType
              | Clip_List_Item List_Item
+             | Clip_EitherDocView EitherDocView
+             | Clip_View View
+             | Clip_EvalButton EvalButton
              | Clip_String String
              | Clip_Bool Bool
              | Clip_Int Int
@@ -302,6 +349,7 @@ data Node = NoNode
           | DeclNode Decl Path 
           | BoardDeclNode Decl Path 
           | PPPresentationDeclNode Decl Path 
+          | InvDeclNode Decl Path 
           | HoleDeclNode Decl Path 
           | IdentNode Ident Path 
           | HoleIdentNode Ident Path 
@@ -349,6 +397,32 @@ data Node = NoNode
           | HeliumItemNode Item Path 
           | ListItemNode Item Path 
           | HoleItemNode Item Path 
+          | InvNode Inv Path 
+          | HoleInvNode Inv Path 
+          | ReEvaluate1Node EvalButton Path 
+          | ReEvaluate2Node EvalButton Path 
+          | SkipNode EvalButton Path 
+          | HoleEvalButtonNode EvalButton Path 
+          | LeftDocViewNode EitherDocView Path 
+          | RightDocViewNode EitherDocView Path 
+          | HoleEitherDocViewNode EitherDocView Path 
+          | ANilNode View Path 
+          | ANNode View Path 
+          | ASNode View Path 
+          | PrNode View Path 
+          | LsNode View Path 
+          | TrNode View Path 
+          | LNode View Path 
+          | RNode View Path 
+          | MarkNode View Path 
+          | DelLNode View Path 
+          | InsLNode View Path 
+          | SndPNode View Path 
+          | FstPNode View Path 
+          | IfNilNode View Path 
+          | UndefNode View Path 
+          | UnitNode View Path 
+          | HoleViewNode View Path 
           | String_Node String_ Path 
           | HoleString_Node String_ Path 
           | Bool_Node Bool_ Path 
@@ -377,6 +451,7 @@ instance Show Node where
   show (DeclNode _ _)  = "DeclNode"
   show (BoardDeclNode _ _)  = "BoardDeclNode"
   show (PPPresentationDeclNode _ _)  = "PPPresentationDeclNode"
+  show (InvDeclNode _ _)  = "InvDeclNode"
   show (HoleDeclNode _ _)  = "HoleDeclNode"
   show (IdentNode _ _)  = "IdentNode"
   show (HoleIdentNode _ _)  = "HoleIdentNode"
@@ -424,6 +499,32 @@ instance Show Node where
   show (HeliumItemNode _ _)  = "HeliumItemNode"
   show (ListItemNode _ _)  = "ListItemNode"
   show (HoleItemNode _ _)  = "HoleItemNode"
+  show (InvNode _ _)  = "InvNode"
+  show (HoleInvNode _ _)  = "HoleInvNode"
+  show (ReEvaluate1Node _ _)  = "ReEvaluate1Node"
+  show (ReEvaluate2Node _ _)  = "ReEvaluate2Node"
+  show (SkipNode _ _)  = "SkipNode"
+  show (HoleEvalButtonNode _ _)  = "HoleEvalButtonNode"
+  show (LeftDocViewNode _ _)  = "LeftDocViewNode"
+  show (RightDocViewNode _ _)  = "RightDocViewNode"
+  show (HoleEitherDocViewNode _ _)  = "HoleEitherDocViewNode"
+  show (ANilNode _ _)  = "ANilNode"
+  show (ANNode _ _)  = "ANNode"
+  show (ASNode _ _)  = "ASNode"
+  show (PrNode _ _)  = "PrNode"
+  show (LsNode _ _)  = "LsNode"
+  show (TrNode _ _)  = "TrNode"
+  show (LNode _ _)  = "LNode"
+  show (RNode _ _)  = "RNode"
+  show (MarkNode _ _)  = "MarkNode"
+  show (DelLNode _ _)  = "DelLNode"
+  show (InsLNode _ _)  = "InsLNode"
+  show (SndPNode _ _)  = "SndPNode"
+  show (FstPNode _ _)  = "FstPNode"
+  show (IfNilNode _ _)  = "IfNilNode"
+  show (UndefNode _ _)  = "UndefNode"
+  show (UnitNode _ _)  = "UnitNode"
+  show (HoleViewNode _ _)  = "HoleViewNode"
   show (String_Node _ _)  = "String_Node"
   show (HoleString_Node _ _)  = "HoleString_Node"
   show (Bool_Node _ _)  = "Bool_Node"

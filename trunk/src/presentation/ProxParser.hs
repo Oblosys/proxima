@@ -50,7 +50,7 @@ recognizeRootEnr = pStr' $
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (Structural (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
 
-      <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -} <*> recognizeList_Decl
+      <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 -- ?remove pStr from this parser?
 parseIDListList_Decl :: ListParser List_Decl
@@ -68,7 +68,9 @@ recognizeIDListDecl = pStr $
       <$> pStructural BoardDeclNode
   <|>     (\str -> reusePPPresentationDecl [tokenNode str] Nothing Nothing Nothing Nothing)
       <$> pStructural PPPresentationDeclNode
-      {- <|>  
+  <|>     (\str -> reuseInvDecl [tokenNode str] Nothing Nothing Nothing Nothing)
+      <$> pStructural InvDeclNode
+     {- <|>  
                       (\str -> HoleDecl
                   <$> pSym declHoleTk
 -}       
@@ -87,6 +89,7 @@ parseBoard =
   <|>     (\str -> reuseBoard [tokenNode str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing) 
       <$> pStructural BoardNode -- don't descend into structure, so no pres edit
 
+
 -------------------- Powerpoint parser:
    
 parsePPPresentation = 
@@ -94,7 +97,7 @@ parsePPPresentation =
   <|> recognizePPPresentation
 
 recognizePPPresentation = pStr $                       -- IDD     viewTp
-         (\str list_slide -> reusePPPresentation [tokenNode str] Nothing Nothing (Just list_slide))
+         (\str list_slide -> reusePPPresentation [tokenNode str] reuse Nothing (Just list_slide))
      <$> pStructural PPPresentationNode
      <*> recognizeList_Slide
  
@@ -109,14 +112,6 @@ recognizeSlide =  pStr $
          (\str title itemList -> reuseSlide [tokenNode str] Nothing (Just title) (Just itemList))
      <$> pStructural SlideNode
      <*> parseString_ <*> recognizeItemList
-
--- parseString needs to parse the ParseToken, rewrite, so it doesn't use reuseString
-parseString_ = pStr $
---           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
-          mkString_
-     <$   pSym parsingTk
-     <*>  pLIdent
-
 
 recognizeItemList = pStr $                          -- ListType
          (\str listType list_item -> reuseItemList [tokenNode str] Nothing (Just listType) (Just list_item))
@@ -180,11 +175,12 @@ parseDecl  =                                                              -- IDD
       <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
   <|>     (\sig ident tk1 tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
       <$> pMaybe (pStructural DeclNode) -- type sig/value
-      <*> parseIdent <*> pKey "=" <*> pKey "..."  -- bit weird what happens when typing ... maybe this must be done with a structural presentation (wasn't possible before with structural parser that was too general)
- <|>      (\t ->  BoardDecl NoIDD (tokenIDP t) NoIDP) 
+      <*> parseIdent <*> pKey "=" <*> pKey "..." -- bit weird what happens when typing ... maybe this must be done with a structural presentation (wasn't possible before with structural parser that was too general)
+ <|>      (\tk board ->  BoardDecl NoIDD (tokenIDP tk) NoIDP board) 
       <$> pKey "Chess" <* pKey ":" <*> parseBoard        
- <|>      (\t ->  PPPresentationDecl NoIDD (tokenIDP t) NoIDP)
-      <$> pKey "PPT" <* pKey ":" <*> parsePPPresentation
+ <|>      (\tk slides ->  PPPresentationDecl NoIDD (tokenIDP tk) NoIDP slides)
+      <$> pKey "Slides" <* pKey ":" <*> parsePPPresentation
+ <|>  parseInvDecl
  where typeSigTokenIDP Nothing   = Nothing
        typeSigTokenIDP (Just tk) = Just (tokenIDP tk)
 
@@ -250,7 +246,7 @@ parseList_Exp =
          
          
     
-parseExp = -- use chain!!
+parseExp = -- use chain!!  and fix associativity of application!
           parseExp'   -- e and t are flipped in lambda for <??>
      <??> (    (\tk e t-> reusePlusExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just t) (Just e))
            <$> pKey "+" <*> parseExp 
@@ -341,7 +337,7 @@ mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool))
 --     <$> pLIdent
 
 
--------------------- Keyword parsers, remember to keep these consistent with keywords in Scanner.hs
+-------------------- Keyword parsers, remember to keep these consistent with keywords in PresentationParsing.hs
 
 pIf     = pKey "if"
 
@@ -349,7 +345,7 @@ pThen   = pKey "then"
 
 pElse   = pKey "else"
 
-pLambda = pKey "\\" 
+pLambda = pKey "\\" -- <|> pKey "l"
 
 pArrow  = pKey "->" <|> pKey "\174"
 
@@ -365,7 +361,33 @@ pTrue   = pKey "True"
 
 pFalse  = pKey "False"
 
--------------------- more or less primitive parsers: (because int & bool are unboxed)
+-------------------- more or less primitive parsers: (because int & bool are unboxed) -- not anymore
+
+-- parseString needs to parse the ParseToken, rewrite, so it doesn't use reuseString
+parseString_ = pStr $
+--           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+          mkString_
+     <$   pSym parsingTk
+     <*>  pLIdent     
+     <|> (HoleString_ <$ pStructural HoleString_Node)
+
+
+parseInt_ = pStr $
+--           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+          mkInt_
+     <$   pSym parsingTk
+     <*>  pInt
+     <|> (HoleInt_ <$ pStructural HoleInt_Node)
+-- bit hacky
+
+
+parseBool_ = pStr $
+--           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+         mkBool_
+     <$  pSym parsingTk
+     <*> (True <$ pTrue <|> False <$ pFalse)
+     <|> (HoleBool_ <$ pStructural HoleBool_Node)
+
 
 parseIntExp =
          (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkInt_ tk))
@@ -487,7 +509,7 @@ For each parse, reuse everything that is not in the parse
 
  
 -- ******** rename plus to sum
--- remember to that "Chess", "PPT", "board", and "pres" must be keywords in PresentationParsing
+-- remember to that "Chess", "Slides", "board", and "pres" must be keywords in PresentationParsing
 
 
 {-
@@ -511,4 +533,294 @@ HOLE = 2;                                 copied from following token
 
 
 -}
+
+
+
+
+
+
+
+-------------------- Inv parser:
+
+reuse = Nothing
+set = Just
+
+
+{-
+<|>      (\tk board ->  BoardDecl NoIDD (tokenIDP tk) NoIDP board) 
+      <$> pKey "Chess" <* pKey ":" <*> parseBoard        
+ 
+parseBoard = 
+      ((\_ -> initBoard) <$> pKey "board")
+  <|>     (\str -> reuseBoard [tokenNode str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing) 
+      <$> pStructural BoardNode -- don't descend into structure, so no pres edit
+
+-}
+
+parseInvDecl = (\tk inv ->  InvDecl NoIDD (tokenIDP tk) NoIDP inv)
+      <$> pKey "Inv" <* pKey ":" <*> parseInv
+
+parseInv = 
+         (\tk eval view -> initInv (mkString_ eval) view) 
+     <$> pKey "inv"
+     <*> pLIdent
+     <*> parseView'
+--     <*> parseString_  
+  <|>    recognizeInv
+  
+
+initInv eval view = Inv NoIDD (LeftDocView NoIDD (String_ NoIDD "not evaluated yet"))
+                       view --(ANil NoIDD)
+                       --(Pr NoIDD (ANil NoIDD) --(Ls NoIDD (AN NoIDD (Int_ NoIDD 1)) (ANil NoIDD))
+                       --          (ANil NoIDD) --(Ls NoIDD (AS NoIDD (String_ NoIDD "bla")) (ANil NoIDD))
+                       --)
+                       eval
+                       (Skip NoIDD)
+
+
+recognizeInv = pStr $
+         (\str eval errDoc enr -> reuseInv [tokenNode str] reuse reuse (set enr) (set eval) reuse)
+     <$> pStructural InvNode
+     <*> parseString_ 
+     <*> recognizeEitherDocView
+      <*> recognizeView
+--       <* parseView'
+--     <*> recognizeEvalButton
+     
+recognizeEitherDocView = pStr $
+         (\str -> reuseLeftDocView [tokenNode str] reuse reuse)
+     <$> pStructural LeftDocViewNode
+  <|>    (\str vw -> reuseRightDocView [tokenNode str] reuse (set vw)) -- (set doc))
+     <$> pStructural RightDocViewNode
+     <*> recognizeView
+
+recognizeEvalButton = pStr $
+         (\str -> reuseReEvaluate1 [tokenNode str] reuse)
+     <$> pStructural ReEvaluate1Node
+  <|>    (\str -> reuseReEvaluate2 [tokenNode str] reuse)
+     <$> pStructural ReEvaluate2Node
+  <|>    (\str -> reuseSkip [tokenNode str] reuse)
+     <$> pStructural SkipNode
+
+recognizeView = pStr $
+         pSym parsingTk
+      *> parseView'
+    
+--
+-- quickly written parser, needs some factorizing and cleaning up
+--
+-- all keywords parsed with pKey should be declared in PresentationParsing.hs: keywords::[String]
+
+parseView' =
+         (\vw mrk -> case mrk of Nothing -> vw
+                                 Just _  -> Mark NoIDD vw)
+     <$> parseView
+     <*> (Just <$> pKey "*" `opt` Nothing)
+
+
+parseView = 
+         (\tk1 tk2 -> reuseANil [tokenNode tk1, tokenNode tk2] reuse)
+     <$> pKey "[" <*> pKey "]"
+  <|>    (\tk i -> reuseAN [tokenNode tk] reuse (set (mkInt_ i)))
+     <$> pKey "#"
+     <*> pInt 
+  <|>    (\tk1 str tk2 -> reuseAS [tokenNode tk1, tokenNode tk2] reuse (set (mkString_ str)))
+     <$> pKey "\""  -- cannot use "'" because string is lIdent, which may contain "'"
+     <*> pLIdent
+     <*> pKey "\""
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reusePr [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v1) (set v2))
+     <$> pKey "<"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey ">"
+  <|>    (\tk1 tk2  v tk3 -> reuseL [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v))
+     <$> pKey "("
+     <*> pKey "L"
+     <*> parseView' 
+     <*> pKey ")"
+  <|>    (\tk1 tk2 v tk3 -> reuseR [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v))
+     <$> pKey "("
+     <*> pKey "R"
+     <*> parseView' 
+     <*> pKey ")"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseLs [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v1) (set v2))
+     <$> pKey "("
+     <*> parseView' 
+     <*> pKey ":"
+     <*> parseView' 
+     <*> pKey ")"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseTr [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v1) (set v2))
+     <$> pKey "{"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey "}"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseDelL [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v1) (set v2))
+     <$> pKey "("
+     <*> parseView' 
+     <*> pKey ":-"
+     <*> parseView' 
+     <*> pKey ")"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseInsL [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set v1) (set v2))
+     <$> pKey "("
+     <*> parseView' 
+     <*> pKey ":+"
+     <*> parseView' 
+     <*> pKey ")"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseSndP [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set $ mkBool_ False)(set v1) (set v2))
+     <$> pKey "<-"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey ">"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseSndP [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set $ mkBool_ True)(set v1) (set v2))
+     <$> pKey "<+"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey ">"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseFstP [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set $ mkBool_ False)(set v1) (set v2))
+     <$> pKey "<"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey "->"
+  <|>    (\tk1 v1 tk2 v2 tk3  -> reuseFstP [tokenNode tk1, tokenNode tk2, tokenNode tk3] reuse (set $ mkBool_ True) (set v1) (set v2))
+     <$> pKey "<"
+     <*> parseView' 
+     <*> pKey ","
+     <*> parseView' 
+     <*> pKey "+>"
+  <|>    (\tk1 tk2 tk3 tk4 v tk5 -> reuseIfNil [tokenNode tk1, tokenNode tk2, tokenNode tk3, tokenNode tk4, tokenNode tk5] reuse (set $ mkBool_ True) (set v))
+     <$> pKey "("
+     <*> pKey "["
+     <*> pKey "]"
+     <*> pKey "+>"
+     <*> parseView'      
+     <*> pKey ")"
+  <|>    (\tk1 tk2 tk3 tk4 v tk5 -> reuseIfNil [tokenNode tk1, tokenNode tk2, tokenNode tk3, tokenNode tk4, tokenNode tk5] reuse (set $ mkBool_ False) (set v))
+     <$> pKey "("
+     <*> pKey "["
+     <*> pKey "]"
+     <*> pKey "->"
+     <*> parseView'      
+     <*> pKey ")"
+  <|>    (\tk -> reuseUndef [tokenNode tk] reuse)
+     <$> (pKey "_|_" <|> pKey "\200")
+  <|>    recognizeTree
+  <|>    HoleView
+     <$ pStructural HoleViewNode
+
+recognizeTree = pStr $ -- div&power recognizers are copied here, separating is hard because parse cannot fail on structural token
+--         pSym parsingTk
+--      *> parseTree
+--  <|>
+         (\str v1 v2 -> reuseTr [tokenNode str ] reuse (set v1) (set v2))
+     <$> pStructural TrNode
+     <*> parseView' 
+     <*> parseView' 
+
+
+{- parseIntExp =
+         (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkInt_ tk))
+     <$> pInt
+-}
+
+{-
+recognizeView = pStr $
+  <|>    (\str s -> reuseAS [tokenNode str] reuse (set s))
+     <$> pStructural ASNode
+     <*> parseString_ 
+  <|>    (\str v -> reuseL [tokenNode str] reuse (set v))
+     <$> pStructural LNode
+     <*> recognizeView 
+  <|>    (\str v -> reuseR [tokenNode str] reuse (set v))
+     <$> pStructural RNode
+     <*> recognizeView 
+  <|>    (\str v -> reuseMark [tokenNode str] reuse (set v))
+     <$> pStructural MarkNode
+     <*> recognizeView 
+  <|>    (\str v1 v2 -> reuseInsL [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural InsLNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v1 v2 -> reuseSndP [tokenNode str] reuse (set b) (set v1) (set v2))
+     <$> pStructural SndPNode
+     <*> parseBool_
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v1 v2 -> reuseFstP [tokenNode str] reuse (set b) (set v1) (set v2))
+     <$> pStructural FstPNode
+     <*> parseBool_
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v -> reuseIfNil [tokenNode str] reuse (set b) (set v))
+     <$> pStructural IfNilNode
+     <*> parseBool_
+     <*> recognizeView 
+  <|>    (\str -> reuseUndef [tokenNode str] reuse)
+     <$> pStructural UndefNode
+-}
+{-
+recognizeView = pStr $
+         (\str -> reuseANil [tokenNode str] reuse)
+     <$> pStructural ANilNode
+  <|>    (\str i -> reuseAN [tokenNode str] reuse (set i))
+     <$> pStructural ANNode
+     <*> parseInt_ 
+  <|>    (\str s -> reuseAS [tokenNode str] reuse (set s))
+     <$> pStructural ASNode
+     <*> parseString_ 
+  <|>    (\str v1 v2 -> reusePr [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural PrNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str v1 v2 -> reuseLs [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural LsNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str v1 v2 -> reuseTr [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural TrNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str v1 v2 -> reuseDelL [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural DelLNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str v -> reuseL [tokenNode str] reuse (set v))
+     <$> pStructural LNode
+     <*> recognizeView 
+  <|>    (\str v -> reuseR [tokenNode str] reuse (set v))
+     <$> pStructural RNode
+     <*> recognizeView 
+  <|>    (\str v -> reuseMark [tokenNode str] reuse (set v))
+     <$> pStructural MarkNode
+     <*> recognizeView 
+  <|>    (\str v1 v2 -> reuseInsL [tokenNode str] reuse (set v1) (set v2))
+     <$> pStructural InsLNode
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v1 v2 -> reuseSndP [tokenNode str] reuse (set b) (set v1) (set v2))
+     <$> pStructural SndPNode
+     <*> parseBool_
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v1 v2 -> reuseFstP [tokenNode str] reuse (set b) (set v1) (set v2))
+     <$> pStructural FstPNode
+     <*> parseBool_
+     <*> recognizeView 
+     <*> recognizeView 
+  <|>    (\str b v -> reuseIfNil [tokenNode str] reuse (set b) (set v))
+     <$> pStructural IfNilNode
+     <*> parseBool_
+     <*> recognizeView 
+  <|>    (\str -> reuseUndef [tokenNode str] reuse)
+     <$> pStructural UndefNode
+  <|>    HoleView
+     <$ pStructural HoleViewNode
+  <|>    (\str -> reuseUnit [tokenNode str] reuse)
+     <$> pStructural UnitNode
+-}
+
 

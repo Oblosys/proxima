@@ -18,10 +18,10 @@ type PresentationLS = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap
 
 type Layout = (Int, Int)
 
-type LayoutMap = FiniteMap IDP Layout
-type IDPCounter = Int
-type InsertedTokenList = [IDP]
-type DeletedTokenMap = FiniteMap IDP Presentation    -- maps deleted tokens to their successors
+type LayoutMap = FiniteMap IDP Layout   -- Layout information for each element in Presentation
+type IDPCounter = Int                   -- Counter for generating new unique IDPs
+type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
+type DeletedTokenMap = FiniteMap IDP Presentation    -- Not used now. Maps deleted tokens to their successors
 
 instance (Show a, Show b) => Show (FiniteMap a b) where
  show fm = "{FiniteMap}" -- ++show (fmToList fm)

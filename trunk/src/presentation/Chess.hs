@@ -51,11 +51,15 @@ piece pc color sqColor rowNr colNr moves focus path =
                             `withRef` (-10,-10)
                         ] -- moveHere cannot be added to markReachable, because it is not always the object in front.
                           -- should add it to the square itself
-       backgroundColor True  False = (251,251,0)
-       backgroundColor True  True  = blue
+       -- backgroundColor True  False = gr 240 -- **Screenshot**
+       -- backgroundColor True  True  = gr 200 -- **Screenshot**
+       -- backgroundColor False False = gr 160 -- **Screenshot**
+       -- backgroundColor False True  = gr 115 -- **Screenshot**
+       backgroundColor True  False = (240,240,0) 
+       backgroundColor True  True  = lightBlue -- (200,200,0) 
        backgroundColor False False = (160,80,0)--(117,58,0)
-       backgroundColor False True  = blue
-
+       backgroundColor False True  = blue -- (115,57,0)
+       gr x = (x,x,x)
 moveHere tPath focus (Prox.DocumentLevel d path cl) =
   let emptySquareClip = Prox.Clip_BoardSquare Prox.Empty
       (Prox.DocumentLevel _  _ piece )  = editCopyD  (Prox.DocumentLevel d focus cl)

@@ -167,19 +167,18 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-y, v-x))
 
 
 
-
 hLine :: Xprez
-hLine = poly [(0,0),(1,0)] `withHeight` 1
+hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
 
 vLine :: Xprez
-vLine = poly [(0,0),(0,1)] `withWidth` 1
+vLine = poly [(0,0),(0,1.0)] `withWidth` 1
 
 -- lineWidth should be an attribute, so we can use a with here
 hLineW :: Int -> Xprez
-hLineW lw = polyW lw [(0,0),(1,0)] `withHeight` 1
+hLineW lw = polyW lw [(0,0),(1.0,0)] `withHeight` 1
 
 vLineW :: Int -> Xprez
-vLineW lw = polyW lw [(0,0),(0,1)] `withWidth` 1
+vLineW lw = polyW lw [(0,0),(0,1.0)] `withWidth` 1
 
 hvStretch = empty `withHStretch` True `withVStretch` True
 

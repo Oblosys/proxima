@@ -273,7 +273,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
      do { let (lnlux,lnluy, lnrlx, lnrly)=(lux+scaleInt scale lux', luy+scaleInt scale luy', scaleInt scale rlx', scaleInt scale rly')
         ; line dc (pt lnlux lnluy) (pt lnrlx lnrly) [color := colorRGB lr lg lb]
         }
-
+-- Poly seems to be rendered incorrectly (bottom/right line is blank)
     (PolyA id x' y' w' h' _ _ pts' lw' (lr,lg,lb) (br,bg,bb)) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> pt (x+scaleInt scale x') (y+scaleInt scale y')) pts'

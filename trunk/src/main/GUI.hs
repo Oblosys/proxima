@@ -37,11 +37,11 @@ import IOExts
 import Directory
 
 initialWindowSize :: Size
-initialWindowSize = sz 1200 900
+initialWindowSize = sz 1000 600
 
 startGUI :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) -> (RenderingLevel, EditRendering) -> IO ()
 startGUI handler (initRenderingLvl, initEvent) = run $
- do { frame <- frameCreateTopFrame "Proxima V1.1"
+ do { frame <- frameCreateTopFrame "Proxima v0.2"
 
        -- for good measure: put a scrolled window inside the frame
        -- note that 'wxNO_FULL_REPAINT_ON_RESIZE'  is needed to prevent flicker on resize.
@@ -60,13 +60,13 @@ startGUI handler (initRenderingLvl, initEvent) = run $
     ; windowOnPaint window {- double buffer? -}         (onPaint renderingLvlVar)
        
     ; file <- menuPane [ text := "&File"]
-    ; open   <- menuItem file [ text := "Open\tCtrl+O", help := "Open an existing document" ]
-    ; saveAs <- menuItem file [ text := "Save\tCtrl+S", help := "Save the document in XML format" ]
-    ; quit   <- menuItem file [ text := "Quit\tCtrl+Q", help := "Quit the application"  ]
+    ; open   <- menuItem file [ text := "&Open...\tCtrl+O", help := "Open an existing document" ]
+    ; saveAs <- menuItem file [ text := "&Save As...\tCtrl+S", help := "Save the document in XML format" ]
+    ; quit   <- menuItem file [ text := "&Quit\tCtrl+Q", help := "Quit the application"  ]
           
     ; set frame [menubar := [file]]
-    ; set frame [on (menu open)   := openFileMenuHandler handler renderingLvlVar window "open" ] 
-    ; set frame [on (menu saveAs) := openFileMenuHandler handler renderingLvlVar window "save" ] 
+    ; set frame [on (menu open)   := fileMenuHandler handler renderingLvlVar window "open" ] 
+    ; set frame [on (menu saveAs) := fileMenuHandler handler renderingLvlVar window "save" ] 
     ; set frame [on (menu quit) := close frame] 
 
      -- show the frame
@@ -103,6 +103,12 @@ furthermore, 10pt has height 20m and 100pt has height 181
 
  MAC: dcSetMapMode has no effect
       somehow fonts are smaller than on windows
+
+from http://www.wxwindows.org/manuals/2.4.2/wx482.htm#wxfontoverview :
+> Note: There is currently a difference between the appearance of fonts on the two platforms, if the mapping
+> mode is anything other than wxMM_TEXT. Under X, font size is always specified in points. Under MS Windows,
+> the unit for text is points but the text is scaled according to the current mapping mode. However, user scaling
+> on a device context will also scale fonts under both environments.
 -}
 {-
     ; dcSetMapMode dc wxMM_TEXT
@@ -190,12 +196,12 @@ popupMenuHandler handler renderingLvlVar window editDoc =
     ; genericHandler handler renderingLvlVar window editRendering
     }
 
---openFileMenuHandler :: String -> Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
+--fileMenuHandler :: String -> Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
 --                    -> RenderingLevel -> GUI RenderingLevel RenderingLevel
-openFileMenuHandler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
+fileMenuHandler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
                        Var RenderingLevel -> ScrolledWindow a ->
                        String -> IO ()
-openFileMenuHandler handler renderingLvlVar window menuItem =
+fileMenuHandler handler renderingLvlVar window menuItem =
  do { editRendering <- 
         case menuItem of
           "open" ->
@@ -208,7 +214,8 @@ openFileMenuHandler handler renderingLvlVar window menuItem =
               }
           "save" -> 
            do { debugLnIO Err "Save"
-              ; filePathM <- fileSaveDialog window False True "Save" "" "doc.xml"
+              ; filePathM <- fileSaveDialog window False True "Save" [] "" "doc.xml"
+ 
               
               --; filePathM <- fileSaveDialog window False True "Select" "." "doc.xml"
               ; debugLnIO Err $ show filePathM

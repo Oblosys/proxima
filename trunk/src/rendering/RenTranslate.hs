@@ -89,7 +89,7 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
           , state, renLvl)
 
 
-    MouseDownRen x' y' ms@(Modifiers False False True) i ->  -- shift down
+    MouseDownRen x' y' ms@(Modifiers False False True) i ->  -- alt down
       let (x,y) = (descaleInt scale x',descaleInt scale y') -- hack, alt mouse is mouseclick for doc
       in  ( MouseDownDocArr (navigateFocus x y arr) ms i
           , state, renLvl)

@@ -1,12 +1,14 @@
 
-x = let f = 1; in ( 1+2+3, [1,2,3,4], [4,5,6] );
+inc = \x -> x+1;
 
-spelling = evem 3; 
-
-list = [ True, 1, False, 3, True ];
-
-test = f 3;
+h = [(1,False),(2,True),(3,False)];
 
 s = \f -> \g -> \x -> f x (g x);
 
+x = let local = 1+2+3+4; h = 1; in if True then local + h else 0;
+
+test = f 3;
+
 f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
+
+

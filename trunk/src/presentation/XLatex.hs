@@ -58,7 +58,6 @@ allchars = col [line i (i+31) | i <- [32,64..224]]
  where line b e = rowR 1 [text (show b++":") `withFontFam` "courier new", text [chr b..chr e] ]
 
 
-
 frac e1 e2 = let numerator   = hAlignCenter (shrink e1)
                  bar         = hLine
                  denominator = hAlignCenter (shrink e2)
@@ -128,7 +127,31 @@ flChar = chr 176
 
 
 
+presType :: String -> Xprez
+presType tpStr = row $ intersperse rightArrow (map text (splitAtArrows "" tpStr))
 
+rightArrow :: Xprez
+rightArrow = text  "\174" `withFontFam` "mt symbol"
+
+
+splitAtArrows :: String -> String -> [String]
+splitAtArrows seg []           = [seg]
+splitAtArrows seg [c]          = [seg++[c]]
+splitAtArrows seg ('-':'>':cs) = seg : splitAtArrows [] cs
+splitAtArrows seg (c:cs)       = splitAtArrows (seg++[c]) cs
+
+presMsg :: String -> Xprez
+presMsg tpStr = row $ intersperse wok (map text (splitAtWoks "" tpStr))
+
+wok :: Xprez
+wok = move 0 (-6) $ (shrink . shrink) (text  "\200" `withFontFam` "mt symbol") 
+
+
+splitAtWoks :: String -> String -> [String]
+splitAtWoks seg []           = [seg]
+splitAtWoks seg [c]          = [seg++[c]]
+splitAtWoks seg ('^':'o':cs) = seg : splitAtWoks [] cs
+splitAtWoks seg (c:cs)       = splitAtWoks (seg++[c]) cs
 
 slide title body = overlay [
                  move 0 30 $
@@ -143,46 +166,131 @@ slide title body = overlay [
 
 
 
-{-
+trroot  = mkTreeNode True  True  (text "food") [trnode1, trnode2, trleaf6]
+trnode1 = mkTreeNode False True  (text "fruit") [trleaf1]
+trleaf1 = mkTreeLeaf True        (text "peach")
+trnode2 = mkTreeNode False True (text "vegetables") [trnode3,trleaf2,trnode4]
+trnode3 = mkTreeNode False False (text "cabbage") []
+trleaf2 = mkTreeLeaf False (text "spinach")
+trnode4 = mkTreeNode True  True  (row[text "citrus"] `withbgColor` lightGrey) [trleaf3,trleaf4]
+trleaf3 = mkTreeLeaf False (text "orange")
+trleaf4 = mkTreeLeaf True  (text "lemon")
+trleaf6 = mkTreeLeaf       True  (text "snack")
+
+trrroot  = mkTreeNode True  True  (text "food") [trrnode1, trrnode2, trrleaf6]
+trrnode1 = mkTreeNode False True  (text "fruit") [trrnode4, trrleaf1]
+trrleaf1 = mkTreeLeaf True        (text "peach")
+trrnode2 = mkTreeNode False True (text "vegetables") [trrnode3,trrleaf2]
+trrnode3 = mkTreeNode False False (text "cabbage") []
+trrleaf2 = mkTreeLeaf True (text "spinach")
+trrnode4 = mkTreeNode False  True  (row[text "citrus"] `withbgColor` lightGrey) [trrleaf3,trrleaf4]
+trrleaf3 = mkTreeLeaf False (text "orange")
+trrleaf4 = mkTreeLeaf True  (text "lemon")
+trrleaf6 = mkTreeLeaf True  (text "snack")
+
+modroot  = mkTreeNode True  True  (text "Proxima") [commonNd,evalNd,presentNd,layoutNd,modNd1,modNd2,mainNd]
+commonNd = mkTreeNode False False  (text "Common") []
+evalNd = mkTreeNode False False  (text "Evaluation") []
+modLf2   = mkTreeLeaf       True  (text "EvaluateTypes")
+presentNd = mkTreeNode False True  (text "Presentation") [typesLf, utilsLf, presentLf, interpretLf, modLf1,modLf3]
+typesLf = mkTreeLeaf       False  (text "Types")
+utilsLf = mkTreeLeaf       False  (text "Utils")
+interpretLf = mkTreeLeaf       False  (text "Interpret")
+presentLf   = mkTreeLeaf       False  (text "Present")
+modLf1   = mkTreeLeaf       False  (row[text "XprezLib"] `withbgColor` lightGrey)
+modLf3   = mkTreeLeaf       True  (text "Parser")
+layoutNd = mkTreeNode False False  (text "Layout") [presentLf, interpretLf]
+modNd1 = mkTreeNode False False  (text "Arrangement") []
+modNd2 = mkTreeNode False False  (text "Rendering") []
+mainNd =  mkTreeNode True True  (text "Main") [modLf4,modLf5,modLf6]
+modLf4   = mkTreeLeaf       False  (text "Architecture")
+modLf5   = mkTreeLeaf       False  (text "Gui")
+modLf6   = mkTreeLeaf       True  (text "Main")
 -- tree:
---               isExp isLast
+--               isLast isExp
 l1 = mkTreeLeaf        False (text "leaf 1")
-n2 = mkTreeNode False False (text "node 2" `withFontSize` 50) []
+n2 = mkTreeNode True False (text "leafnode 2") [] --  `withFontSize` 50) []
+n3 = mkTreeNode False False (text "node 3") [] 
 l3 = mkTreeLeaf        True  (text "leaf 3")
-tr1 = mkTreeNode True False (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n2, l3]
+tr1 = mkTreeNode False True (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n3, l3]
 l4 = mkTreeLeaf        False (text "leaf 4")
 l5 = mkTreeLeaf        False (text "leaf 5")
-l6 = mkTreeLeaf        True  (text "leaf 6")
+l6 = mkTreeLeaf        False  (text "leaf 6")
                            -- (boxed testcase `withFontSize_` (`div` 2))
-tree = mkTreeNode True True (text "node") [l4, tr1, l6]
--}
+myTree = row [ trroot, hSpace 10, trrroot, hSpace 10, modroot ] -- mkTreeNode True True (text "root") [l4, tr1, l6, n2]
+
 -------------------------------------------------------------------------
+-- change hLine and vLine to empty to get rid of lines
+hLine' = hLine -- empty
+vLine' = vLine -- empty
+
+
 mkTreeLeaf :: Bool -> Xprez -> Xprez
 mkTreeLeaf isLast label = 
-  row [ leafHandle isLast, empty {-hLine-} `withWidth` 12, leafImg
-      , empty {-hLine-} `withWidth` 5, refHalf label ] 
+  row [ leafHandle isLast, hLine `withWidth` 12, leafImg
+      , hLine `withWidth` 5, refHalf label ]
 
 mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
 mkTreeNode isLast isExp label children =
-  rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
-         , col $ [ row [ col [ nodeImg , if isExp then empty {-vLine-} else empty ]
-                       , empty {-hLine-} `withWidth` 5,refHalf label 
+  rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
+         , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
+                       , hLine `withWidth` 5,refHalf label 
                        ] 
                  ] ++ (if isExp then children else [] )
          ]
 
 nodeHandle isExp isLast 
- = colR 1 ([ empty{-vLine-}, rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [empty{- vLine-}])
+ = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])          -- old version
+-- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
 
 leafHandle isLast 
- = colR 1 ([empty{-vLine-}, empty `withSize` (9,9) `withRef` (4,4)]++ if isLast then [] else [empty{-vLine-}])
+ = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
 
 handleImg isExp = if isExp then minusImg else plusImg
 
-nodeImg = empty -- img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
+nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
 
-leafImg = empty -- img "img/help.bmp" `withSize` (16,16) `withRef` (7,6)
+leafImg = img "img/text.bmp" `withSize` (13,16) `withRef` (7,6)
 
 plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
 
 minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+
+{-  version that works for built-in tree presentation
+
+hLine' = hLine -- empty
+vLine' = vLine -- empty
+
+mkTreeLeaf :: Bool -> Xprez -> Xprez
+mkTreeLeaf isLast label = 
+  row [ leafHandle isLast, hLine `withWidth` 12, leafImg
+      , hLine `withWidth` 5, refHalf label ]
+
+mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
+mkTreeNode isLast isExp label children =
+  rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
+         , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
+                       , hLine `withWidth` 5,refHalf label 
+                       ] 
+                 ] ++ (if isExp then children else [] )
+         ]
+
+nodeHandle isExp isLast 
+ = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])
+-- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
+
+leafHandle isLast 
+ = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
+
+handleImg isExp = if isExp then minusImg else plusImg
+
+nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
+
+leafImg = img "img/help.bmp" `withSize` (16,16) `withRef` (7,6)
+
+plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+-}

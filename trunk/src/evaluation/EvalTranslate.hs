@@ -7,6 +7,8 @@ import EvalLayerUtils
 
 import PresTypes -- for initDoc 
 
+import qualified EvaluateInv
+
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> EditEnrichedDoc -> IO (EditDocument, LayerStateEval, EnrichedDocLevel)
 translateIO state low high editLow = 
@@ -24,12 +26,15 @@ reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = setUpd Nothin
 reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
                                               ; return (SetDoc doc' {-([], emptyFM) -}, state, enrLvl) }
 
+reduceIO state enrLvl docLvl EvaluateDocEnr = return (EvaluateDoc, state, enrLvl) -- uncomment for Helium type checker
+--reduceIO state enrLvl docLvl EvaluateDocEnr = do { (doc', state', enrLvl') <- reduceInvLevel state enrLvl docLvl 
+--                                                   ; return (SetDoc doc', state', enrLvl') } -- uncomment for Inv interpreter
+reduceIO state enrLvl docLvl (SetEnr enrLvl')  = setUpd AllUpdated $ reduceEnrIO state enrLvl docLvl enrLvl'
 reduceIO state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
 
 
 reduce :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> EditEnrichedDoc ->
          (EditDocument, LayerStateEval, EnrichedDocLevel)
-reduce state enrLvl docLvl (SetEnr enrLvl')  = setUpd AllUpdated $ reduceEnr state enrLvl docLvl enrLvl'
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
@@ -41,23 +46,24 @@ reduce state enrLvl docLvl PasteDocEnr  = (PasteDoc, state, enrLvl)
 reduce state enrLvl docLvl DeleteDocEnr = (DeleteDoc, state, enrLvl)
 reduce state enrLvl docLvl (UpdateDocEnr upd) = (UpdateDoc upd, state, enrLvl)
 
-reduce state enrLvl docLvl EvaluateDocEnr     = (EvaluateDoc, state, enrLvl)
 reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 
 
 -- just copy the enriched document
-reduceEnr :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> EnrichedDocLevel ->
-             (EditDocument, LayerStateEval, EnrichedDocLevel)
-reduceEnr state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
-  if oldIdldcls == idldcls
-  then (SetDoc (RootDoc idd idp dcls),state, enrDoc )
-  else (SetDoc (RootDoc idd idp idldcls),state, enrDoc ) -- if list has been edited, take that one
+reduceEnrIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> EnrichedDocLevel ->
+             IO (EditDocument, LayerStateEval, EnrichedDocLevel)
+reduceEnrIO state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
+ do { let -- dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
+          dcls' = dcls -- ignore updates on id list
+    ; dcls'' <- reduceList_Decl dcls'
+    ; return (SetDoc (RootDoc idd idp dcls''),state, enrDoc )
+    }
 --
-reduceEnr state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = -- other cases, just copy from decls
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = return $ -- other cases, just copy from decls
   (SetDoc (RootDoc idd idp dcls),state, enrDoc )
-reduceEnr state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) =
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
-reduceEnr state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) =
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) = return $
   (SetDoc (ParseErrDocument nd prs),state, enrDoc )  -- nd is not right
 
 
@@ -87,5 +93,56 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
                                ('\n' :s'') -> lines' s''         -- the current platform's linebreak (?)
                                                                  -- or a Unix "\n" encountered on a Dos or Mac platform
                                ('\r':s'') -> lines' s''          -- a  Mac "\r" encountered on Dos or Unix platform 
-
 -- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"?
+
+
+
+
+
+
+
+reduceInvLevel :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> IO (Document, LayerStateEval, EnrichedDocLevel)
+reduceInvLevel state enrDocLvl@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) docLevel =
+ do { dcls'' <- reduceList_Decl dcls
+ --   ; dcls'' <- return $ evalList_Decl dcls'
+    ; return ((RootDoc idd idp dcls''),state, enrDocLvl )
+    }
+
+reduceList_Decl :: List_Decl -> IO List_Decl
+reduceList_Decl (List_Decl idd clst) =
+  do { clst' <- reduceInvConsList_Decl clst
+     ; return $ List_Decl idd clst'
+     }
+reduceList_Decl lst = return $ lst -- Hole or parseErr
+
+reduceInvConsList_Decl :: ConsList_Decl -> IO ConsList_Decl
+reduceInvConsList_Decl Nil_Decl             = return $ Nil_Decl
+reduceInvConsList_Decl (Cons_Decl dcl clst) =
+  do { dcl'  <- reduceInvDecl dcl
+     ; clst' <- reduceInvConsList_Decl clst
+     ; return $ Cons_Decl dcl' clst'
+     }
+
+reduceInvDecl :: Decl -> IO Decl
+reduceInvDecl (InvDecl idd idp0 idp1 inv) =
+  do { inv' <- reduceInv inv
+     ; return $ InvDecl idd idp0 idp1 inv'
+     }
+reduceInvDecl dcl = return dcl
+
+
+
+reduceInv :: Inv -> IO Inv
+reduceInv inv@(Inv idd errDoc enr eval button) = 
+  do { errDoc' <- reduceInvView eval enr
+     ; enr'    <- evalErrDoc eval errDoc' enr
+     ; return $ Inv idd errDoc' enr' eval (Skip NoIDD) 
+     }
+reduceInv inv = return inv
+
+reduceInvView :: String_ -> View -> IO EitherDocView
+reduceInvView eval view = EvaluateInv.reduce (string_ eval) view
+
+
+evalErrDoc :: String_ -> EitherDocView -> View -> IO View
+evalErrDoc eval errDoc oldEnr = EvaluateInv.evaluate (string_ eval) errDoc oldEnr

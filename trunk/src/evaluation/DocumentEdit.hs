@@ -241,7 +241,7 @@ alternativesD p (RootDoc id1 id2  x) = alternativesClip (select p x)
  
 -- a simple structure editor:
 
-main = do { putStrLn "\n\n\n\n****** Simple structural editor for testing DocumentEdit module ******"
+test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing DocumentEdit module ******"
           ; edit (DocumentLevel sample NoPathD Clip_Nothing)
           }
 

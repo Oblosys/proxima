@@ -66,69 +66,96 @@ rankNode (HoleEnrichedDocNode _ _)  = 4
 rankNode (DeclNode _ _)  = 5
 rankNode (BoardDeclNode _ _)  = 6
 rankNode (PPPresentationDeclNode _ _)  = 7
-rankNode (HoleDeclNode _ _)  = 8
-rankNode (IdentNode _ _)  = 9
-rankNode (HoleIdentNode _ _)  = 10
-rankNode (PlusExpNode _ _)  = 11
-rankNode (TimesExpNode _ _)  = 12
-rankNode (DivExpNode _ _)  = 13
-rankNode (PowerExpNode _ _)  = 14
-rankNode (BoolExpNode _ _)  = 15
-rankNode (IntExpNode _ _)  = 16
-rankNode (LamExpNode _ _)  = 17
-rankNode (AppExpNode _ _)  = 18
-rankNode (CaseExpNode _ _)  = 19
-rankNode (LetExpNode _ _)  = 20
-rankNode (IdentExpNode _ _)  = 21
-rankNode (IfExpNode _ _)  = 22
-rankNode (ParenExpNode _ _)  = 23
-rankNode (ListExpNode _ _)  = 24
-rankNode (ProductExpNode _ _)  = 25
-rankNode (HoleExpNode _ _)  = 26
-rankNode (AltNode _ _)  = 27
-rankNode (HoleAltNode _ _)  = 28
-rankNode (BoardNode _ _)  = 29
-rankNode (HoleBoardNode _ _)  = 30
-rankNode (BoardRowNode _ _)  = 31
-rankNode (HoleBoardRowNode _ _)  = 32
-rankNode (QueenNode _ _)  = 33
-rankNode (KingNode _ _)  = 34
-rankNode (BishopNode _ _)  = 35
-rankNode (KnightNode _ _)  = 36
-rankNode (RookNode _ _)  = 37
-rankNode (PawnNode _ _)  = 38
-rankNode (EmptyNode _ _)  = 39
-rankNode (HoleBoardSquareNode _ _)  = 40
-rankNode (PPPresentationNode _ _)  = 41
-rankNode (HolePPPresentationNode _ _)  = 42
-rankNode (SlideNode _ _)  = 43
-rankNode (HoleSlideNode _ _)  = 44
-rankNode (ItemListNode _ _)  = 45
-rankNode (HoleItemListNode _ _)  = 46
-rankNode (BulletNode _ _)  = 47
-rankNode (NumberNode _ _)  = 48
-rankNode (AlphaNode _ _)  = 49
-rankNode (HoleListTypeNode _ _)  = 50
-rankNode (StringItemNode _ _)  = 51
-rankNode (HeliumItemNode _ _)  = 52
-rankNode (ListItemNode _ _)  = 53
-rankNode (HoleItemNode _ _)  = 54
-rankNode (String_Node _ _)  = 55
-rankNode (HoleString_Node _ _)  = 56
-rankNode (Bool_Node _ _)  = 57
-rankNode (HoleBool_Node _ _)  = 58
-rankNode (Int_Node _ _)  = 59
-rankNode (HoleInt_Node _ _)  = 60
-rankNode (List_DeclNode _ _)  = 61
-rankNode (HoleList_DeclNode _ _)  = 62
-rankNode (List_AltNode _ _)  = 63
-rankNode (HoleList_AltNode _ _)  = 64
-rankNode (List_ExpNode _ _)  = 65
-rankNode (HoleList_ExpNode _ _)  = 66
-rankNode (List_SlideNode _ _)  = 67
-rankNode (HoleList_SlideNode _ _)  = 68
-rankNode (List_ItemNode _ _)  = 69
-rankNode (HoleList_ItemNode _ _)  = 70
+rankNode (InvDeclNode _ _)  = 8
+rankNode (HoleDeclNode _ _)  = 9
+rankNode (IdentNode _ _)  = 10
+rankNode (HoleIdentNode _ _)  = 11
+rankNode (PlusExpNode _ _)  = 12
+rankNode (TimesExpNode _ _)  = 13
+rankNode (DivExpNode _ _)  = 14
+rankNode (PowerExpNode _ _)  = 15
+rankNode (BoolExpNode _ _)  = 16
+rankNode (IntExpNode _ _)  = 17
+rankNode (LamExpNode _ _)  = 18
+rankNode (AppExpNode _ _)  = 19
+rankNode (CaseExpNode _ _)  = 20
+rankNode (LetExpNode _ _)  = 21
+rankNode (IdentExpNode _ _)  = 22
+rankNode (IfExpNode _ _)  = 23
+rankNode (ParenExpNode _ _)  = 24
+rankNode (ListExpNode _ _)  = 25
+rankNode (ProductExpNode _ _)  = 26
+rankNode (HoleExpNode _ _)  = 27
+rankNode (AltNode _ _)  = 28
+rankNode (HoleAltNode _ _)  = 29
+rankNode (BoardNode _ _)  = 30
+rankNode (HoleBoardNode _ _)  = 31
+rankNode (BoardRowNode _ _)  = 32
+rankNode (HoleBoardRowNode _ _)  = 33
+rankNode (QueenNode _ _)  = 34
+rankNode (KingNode _ _)  = 35
+rankNode (BishopNode _ _)  = 36
+rankNode (KnightNode _ _)  = 37
+rankNode (RookNode _ _)  = 38
+rankNode (PawnNode _ _)  = 39
+rankNode (EmptyNode _ _)  = 40
+rankNode (HoleBoardSquareNode _ _)  = 41
+rankNode (PPPresentationNode _ _)  = 42
+rankNode (HolePPPresentationNode _ _)  = 43
+rankNode (SlideNode _ _)  = 44
+rankNode (HoleSlideNode _ _)  = 45
+rankNode (ItemListNode _ _)  = 46
+rankNode (HoleItemListNode _ _)  = 47
+rankNode (BulletNode _ _)  = 48
+rankNode (NumberNode _ _)  = 49
+rankNode (AlphaNode _ _)  = 50
+rankNode (HoleListTypeNode _ _)  = 51
+rankNode (StringItemNode _ _)  = 52
+rankNode (HeliumItemNode _ _)  = 53
+rankNode (ListItemNode _ _)  = 54
+rankNode (HoleItemNode _ _)  = 55
+rankNode (InvNode _ _)  = 56
+rankNode (HoleInvNode _ _)  = 57
+rankNode (ReEvaluate1Node _ _)  = 58
+rankNode (ReEvaluate2Node _ _)  = 59
+rankNode (SkipNode _ _)  = 60
+rankNode (HoleEvalButtonNode _ _)  = 61
+rankNode (LeftDocViewNode _ _)  = 62
+rankNode (RightDocViewNode _ _)  = 63
+rankNode (HoleEitherDocViewNode _ _)  = 64
+rankNode (ANilNode _ _)  = 65
+rankNode (ANNode _ _)  = 66
+rankNode (ASNode _ _)  = 67
+rankNode (PrNode _ _)  = 68
+rankNode (LsNode _ _)  = 69
+rankNode (TrNode _ _)  = 70
+rankNode (LNode _ _)  = 71
+rankNode (RNode _ _)  = 72
+rankNode (MarkNode _ _)  = 73
+rankNode (DelLNode _ _)  = 74
+rankNode (InsLNode _ _)  = 75
+rankNode (SndPNode _ _)  = 76
+rankNode (FstPNode _ _)  = 77
+rankNode (IfNilNode _ _)  = 78
+rankNode (UndefNode _ _)  = 79
+rankNode (UnitNode _ _)  = 80
+rankNode (HoleViewNode _ _)  = 81
+rankNode (String_Node _ _)  = 82
+rankNode (HoleString_Node _ _)  = 83
+rankNode (Bool_Node _ _)  = 84
+rankNode (HoleBool_Node _ _)  = 85
+rankNode (Int_Node _ _)  = 86
+rankNode (HoleInt_Node _ _)  = 87
+rankNode (List_DeclNode _ _)  = 88
+rankNode (HoleList_DeclNode _ _)  = 89
+rankNode (List_AltNode _ _)  = 90
+rankNode (HoleList_AltNode _ _)  = 91
+rankNode (List_ExpNode _ _)  = 92
+rankNode (HoleList_ExpNode _ _)  = 93
+rankNode (List_SlideNode _ _)  = 94
+rankNode (HoleList_SlideNode _ _)  = 95
+rankNode (List_ItemNode _ _)  = 96
+rankNode (HoleList_ItemNode _ _)  = 97
 
 
 
@@ -141,6 +168,7 @@ pathNode (HoleEnrichedDocNode _ pth)  = PathD pth
 pathNode (DeclNode _ pth)  = PathD pth
 pathNode (BoardDeclNode _ pth)  = PathD pth
 pathNode (PPPresentationDeclNode _ pth)  = PathD pth
+pathNode (InvDeclNode _ pth)  = PathD pth
 pathNode (HoleDeclNode _ pth)  = PathD pth
 pathNode (IdentNode _ pth)  = PathD pth
 pathNode (HoleIdentNode _ pth)  = PathD pth
@@ -188,6 +216,32 @@ pathNode (StringItemNode _ pth)  = PathD pth
 pathNode (HeliumItemNode _ pth)  = PathD pth
 pathNode (ListItemNode _ pth)  = PathD pth
 pathNode (HoleItemNode _ pth)  = PathD pth
+pathNode (InvNode _ pth)  = PathD pth
+pathNode (HoleInvNode _ pth)  = PathD pth
+pathNode (ReEvaluate1Node _ pth)  = PathD pth
+pathNode (ReEvaluate2Node _ pth)  = PathD pth
+pathNode (SkipNode _ pth)  = PathD pth
+pathNode (HoleEvalButtonNode _ pth)  = PathD pth
+pathNode (LeftDocViewNode _ pth)  = PathD pth
+pathNode (RightDocViewNode _ pth)  = PathD pth
+pathNode (HoleEitherDocViewNode _ pth)  = PathD pth
+pathNode (ANilNode _ pth)  = PathD pth
+pathNode (ANNode _ pth)  = PathD pth
+pathNode (ASNode _ pth)  = PathD pth
+pathNode (PrNode _ pth)  = PathD pth
+pathNode (LsNode _ pth)  = PathD pth
+pathNode (TrNode _ pth)  = PathD pth
+pathNode (LNode _ pth)  = PathD pth
+pathNode (RNode _ pth)  = PathD pth
+pathNode (MarkNode _ pth)  = PathD pth
+pathNode (DelLNode _ pth)  = PathD pth
+pathNode (InsLNode _ pth)  = PathD pth
+pathNode (SndPNode _ pth)  = PathD pth
+pathNode (FstPNode _ pth)  = PathD pth
+pathNode (IfNilNode _ pth)  = PathD pth
+pathNode (UndefNode _ pth)  = PathD pth
+pathNode (UnitNode _ pth)  = PathD pth
+pathNode (HoleViewNode _ pth)  = PathD pth
 pathNode (String_Node _ pth)  = PathD pth
 pathNode (HoleString_Node _ pth)  = PathD pth
 pathNode (Bool_Node _ pth)  = PathD pth
@@ -222,6 +276,10 @@ boardDeclIDD _                                   = Nothing
 pPPresentationDeclIDD :: Node -> Maybe IDD
 pPPresentationDeclIDD (PPPresentationDeclNode (PPPresentationDecl iDP _ _ _) _) = Just iDP
 pPPresentationDeclIDD _                                   = Nothing
+
+invDeclIDD :: Node -> Maybe IDD
+invDeclIDD (InvDeclNode (InvDecl iDP _ _ _) _) = Just iDP
+invDeclIDD _                                   = Nothing
 
 identIDD :: Node -> Maybe IDD
 identIDD (IdentNode (Ident iDP _ _ _) _) = Just iDP
@@ -361,6 +419,94 @@ listItemIDD :: Node -> Maybe IDD
 listItemIDD (ListItemNode (ListItem iDP _) _) = Just iDP
 listItemIDD _                                   = Nothing
 
+invIDD :: Node -> Maybe IDD
+invIDD (InvNode (Inv iDP _ _ _ _) _) = Just iDP
+invIDD _                                   = Nothing
+
+reEvaluate1IDD :: Node -> Maybe IDD
+reEvaluate1IDD (ReEvaluate1Node (ReEvaluate1 iDP) _) = Just iDP
+reEvaluate1IDD _                                   = Nothing
+
+reEvaluate2IDD :: Node -> Maybe IDD
+reEvaluate2IDD (ReEvaluate2Node (ReEvaluate2 iDP) _) = Just iDP
+reEvaluate2IDD _                                   = Nothing
+
+skipIDD :: Node -> Maybe IDD
+skipIDD (SkipNode (Skip iDP) _) = Just iDP
+skipIDD _                                   = Nothing
+
+leftDocViewIDD :: Node -> Maybe IDD
+leftDocViewIDD (LeftDocViewNode (LeftDocView iDP _) _) = Just iDP
+leftDocViewIDD _                                   = Nothing
+
+rightDocViewIDD :: Node -> Maybe IDD
+rightDocViewIDD (RightDocViewNode (RightDocView iDP _) _) = Just iDP
+rightDocViewIDD _                                   = Nothing
+
+aNilIDD :: Node -> Maybe IDD
+aNilIDD (ANilNode (ANil iDP) _) = Just iDP
+aNilIDD _                                   = Nothing
+
+aNIDD :: Node -> Maybe IDD
+aNIDD (ANNode (AN iDP _) _) = Just iDP
+aNIDD _                                   = Nothing
+
+aSIDD :: Node -> Maybe IDD
+aSIDD (ASNode (AS iDP _) _) = Just iDP
+aSIDD _                                   = Nothing
+
+prIDD :: Node -> Maybe IDD
+prIDD (PrNode (Pr iDP _ _) _) = Just iDP
+prIDD _                                   = Nothing
+
+lsIDD :: Node -> Maybe IDD
+lsIDD (LsNode (Ls iDP _ _) _) = Just iDP
+lsIDD _                                   = Nothing
+
+trIDD :: Node -> Maybe IDD
+trIDD (TrNode (Tr iDP _ _) _) = Just iDP
+trIDD _                                   = Nothing
+
+lIDD :: Node -> Maybe IDD
+lIDD (LNode (L iDP _) _) = Just iDP
+lIDD _                                   = Nothing
+
+rIDD :: Node -> Maybe IDD
+rIDD (RNode (R iDP _) _) = Just iDP
+rIDD _                                   = Nothing
+
+markIDD :: Node -> Maybe IDD
+markIDD (MarkNode (Mark iDP _) _) = Just iDP
+markIDD _                                   = Nothing
+
+delLIDD :: Node -> Maybe IDD
+delLIDD (DelLNode (DelL iDP _ _) _) = Just iDP
+delLIDD _                                   = Nothing
+
+insLIDD :: Node -> Maybe IDD
+insLIDD (InsLNode (InsL iDP _ _) _) = Just iDP
+insLIDD _                                   = Nothing
+
+sndPIDD :: Node -> Maybe IDD
+sndPIDD (SndPNode (SndP iDP _ _ _) _) = Just iDP
+sndPIDD _                                   = Nothing
+
+fstPIDD :: Node -> Maybe IDD
+fstPIDD (FstPNode (FstP iDP _ _ _) _) = Just iDP
+fstPIDD _                                   = Nothing
+
+ifNilIDD :: Node -> Maybe IDD
+ifNilIDD (IfNilNode (IfNil iDP _ _) _) = Just iDP
+ifNilIDD _                                   = Nothing
+
+undefIDD :: Node -> Maybe IDD
+undefIDD (UndefNode (Undef iDP) _) = Just iDP
+undefIDD _                                   = Nothing
+
+unitIDD :: Node -> Maybe IDD
+unitIDD (UnitNode (Unit iDP) _) = Just iDP
+unitIDD _                                   = Nothing
+
 string_IDD :: Node -> Maybe IDD
 string_IDD (String_Node (String_ iDP _) _) = Just iDP
 string_IDD _                                   = Nothing
@@ -380,6 +526,7 @@ shallowShowEnrichedDoc1 (RootEnr  _ _ _ _ _ _) = "RootEnr"
 shallowShowDecl1 (Decl  _ _ _ _ _ _ _ _ _) = "Decl"
 shallowShowDecl1 (BoardDecl  _ _ _ _) = "BoardDecl"
 shallowShowDecl1 (PPPresentationDecl  _ _ _ _) = "PPPresentationDecl"
+shallowShowDecl1 (InvDecl  _ _ _ _) = "InvDecl"
 shallowShowIdent1 (Ident  _ _ _ _) = "Ident"
 shallowShowExp1 (PlusExp  _ _ _ _) = "PlusExp"
 shallowShowExp1 (TimesExp  _ _ _ _) = "TimesExp"
@@ -415,6 +562,28 @@ shallowShowListType1 (Alpha  _) = "Alpha"
 shallowShowItem1 (StringItem  _ _) = "StringItem"
 shallowShowItem1 (HeliumItem  _ _) = "HeliumItem"
 shallowShowItem1 (ListItem  _ _) = "ListItem"
+shallowShowInv1 (Inv  _ _ _ _ _) = "Inv"
+shallowShowEvalButton1 (ReEvaluate1  _) = "ReEvaluate1"
+shallowShowEvalButton1 (ReEvaluate2  _) = "ReEvaluate2"
+shallowShowEvalButton1 (Skip  _) = "Skip"
+shallowShowEitherDocView1 (LeftDocView  _ _) = "LeftDocView"
+shallowShowEitherDocView1 (RightDocView  _ _) = "RightDocView"
+shallowShowView1 (ANil  _) = "ANil"
+shallowShowView1 (AN  _ _) = "AN"
+shallowShowView1 (AS  _ _) = "AS"
+shallowShowView1 (Pr  _ _ _) = "Pr"
+shallowShowView1 (Ls  _ _ _) = "Ls"
+shallowShowView1 (Tr  _ _ _) = "Tr"
+shallowShowView1 (L  _ _) = "L"
+shallowShowView1 (R  _ _) = "R"
+shallowShowView1 (Mark  _ _) = "Mark"
+shallowShowView1 (DelL  _ _ _) = "DelL"
+shallowShowView1 (InsL  _ _ _) = "InsL"
+shallowShowView1 (SndP  _ _ _ _) = "SndP"
+shallowShowView1 (FstP  _ _ _ _) = "FstP"
+shallowShowView1 (IfNil  _ _ _) = "IfNil"
+shallowShowView1 (Undef  _) = "Undef"
+shallowShowView1 (Unit  _) = "Unit"
 shallowShowString_1 (String_  _ _) = "String_"
 shallowShowBool_1 (Bool_  _ _) = "Bool_"
 shallowShowInt_1 (Int_  _ _) = "Int_"
@@ -440,6 +609,7 @@ toXMLEnrichedDoc (RootEnr _ _ idListDecls decls heliumTypeInfo document) = Elt "
 toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool_ expanded] ++ [toXMLBool_ autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLDecl (BoardDecl _ _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board] ++ []
 toXMLDecl (PPPresentationDecl _ _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation] ++ []
+toXMLDecl (InvDecl _ _ _ inv) = Elt "InvDecl" [] $ [toXMLInv inv] ++ []
 toXMLIdent (Ident _ _ _ string_) = Elt "Ident" [] $ [toXMLString_ string_] ++ []
 toXMLExp (PlusExp _ _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (TimesExp _ _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
@@ -475,6 +645,28 @@ toXMLListType (Alpha _) = Elt "Alpha" [] $ []
 toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString_ string] ++ []
 toXMLItem (HeliumItem _ exp) = Elt "HeliumItem" [] $ [toXMLExp exp] ++ []
 toXMLItem (ListItem _ itemList) = Elt "ListItem" [] $ [toXMLItemList itemList] ++ []
+toXMLInv (Inv _ doc enr eval evalButton) = Elt "Inv" [] $ [toXMLEitherDocView doc] ++ [toXMLView enr] ++ [toXMLString_ eval] ++ [toXMLEvalButton evalButton] ++ []
+toXMLEvalButton (ReEvaluate1 _) = Elt "ReEvaluate1" [] $ []
+toXMLEvalButton (ReEvaluate2 _) = Elt "ReEvaluate2" [] $ []
+toXMLEvalButton (Skip _) = Elt "Skip" [] $ []
+toXMLEitherDocView (LeftDocView _ error) = Elt "LeftDocView" [] $ [toXMLString_ error] ++ []
+toXMLEitherDocView (RightDocView _ doc) = Elt "RightDocView" [] $ [toXMLView doc] ++ []
+toXMLView (ANil _) = Elt "ANil" [] $ []
+toXMLView (AN _ int_) = Elt "AN" [] $ [toXMLInt_ int_] ++ []
+toXMLView (AS _ string_) = Elt "AS" [] $ [toXMLString_ string_] ++ []
+toXMLView (Pr _ view1 view2) = Elt "Pr" [] $ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (Ls _ view1 view2) = Elt "Ls" [] $ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (Tr _ view1 view2) = Elt "Tr" [] $ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (L _ view) = Elt "L" [] $ [toXMLView view] ++ []
+toXMLView (R _ view) = Elt "R" [] $ [toXMLView view] ++ []
+toXMLView (Mark _ view) = Elt "Mark" [] $ [toXMLView view] ++ []
+toXMLView (DelL _ view1 view2) = Elt "DelL" [] $ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (InsL _ view1 view2) = Elt "InsL" [] $ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (SndP _ bool_ view1 view2) = Elt "SndP" [] $ [toXMLBool_ bool_] ++ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (FstP _ bool_ view1 view2) = Elt "FstP" [] $ [toXMLBool_ bool_] ++ [toXMLView view1] ++ [toXMLView view2] ++ []
+toXMLView (IfNil _ bool_ view) = Elt "IfNil" [] $ [toXMLBool_ bool_] ++ [toXMLView view] ++ []
+toXMLView (Undef _) = Elt "Undef" [] $ []
+toXMLView (Unit _) = Elt "Unit" [] $ []
 toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
 toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
 toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []

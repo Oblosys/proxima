@@ -1,9 +1,50 @@
--- Content design demo:
+-- Inv
 
-PPT: pres
+s = \ f -> \ g -> \ x -> f x (g x);
+
+
+Inv: inv toc < ( < #1 , #7 > : ( < #2 , #7 > : ( < #3 , #7 > : [] ) ) ), ( #1: ( #2: ( #3 : [] ) ) ) >
+
+Inv: inv myddId ( []+> "hallo")
+
+
+
+-- Thesis  change focusCol and chess colors to grey, change '\' to 'l' withFont "Symbol"
+
+list = [ 1+2, 27, 3*5 ];
+
+large = \ x -> \ y -> \ z -> x+y+z+1;
+
+x = f 3;
+
+s = \ f -> \ g -> \ x -> f x (g x);
+
+f = \ x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
+
+
+
+
+increase = \ x -> x+1;
+
+Slides: pres
+
+
+-- Japan monday
+
+simple = \x -> 1+2*3+x;
+
+frac = 1*2*3 % 4*5*6;
+
+nestedFrac = 1*2^2*3 % 4*5*6;
+
+-- ToPS Japan demo
+
+
 inc = \x -> x+1;
 
 h = [(1,False),(2,True),(3,False)];
+
+s = \f -> \g -> \x -> f x (g x);
 
 x = let local = 1+2+3+4; h = 1; in if True then local + h else 0;
 
@@ -18,6 +59,29 @@ test = f 3;
 
 
 
+
+
+
+
+
+
+f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
+
+
+
+
+-- Content design demo:
+
+Slides: pres
+inc = \x -> x+1;
+
+h = [(1,False),(2,True),(3,False)];
+
+x = let local = 1+2+3+4; h = 1; in if True then local + h else 0;
+
+g = case 5*7 of aaa -> 2+4; b -> 10;;
+
+test = f 3;
 
 f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
 

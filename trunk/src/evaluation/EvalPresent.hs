@@ -9,6 +9,7 @@ import DocumentEdit
 import EvaluateTypes
 --import EvaluateTypesStubs
 
+import qualified EvaluateInv
 
 {-
 
@@ -98,6 +99,33 @@ evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc
 evalDoc state (DocumentLevel (ParseErrDocument nd pr) _ _) _ = ParseErrEnrichedDoc nd pr -- not the right node type
 
 
+-- connection to inv interpreter:
+
+-- apply (put f) to all Inv declarations
+
+evalList_Decl :: List_Decl -> List_Decl
+evalList_Decl (List_Decl idd clst) = List_Decl idd (evalInvConsList_Decl clst)
+evalList_Decl lst = lst -- Hole or parseErr
+
+evalInvConsList_Decl :: ConsList_Decl -> ConsList_Decl
+evalInvConsList_Decl Nil_Decl             = Nil_Decl
+evalInvConsList_Decl (Cons_Decl dcl clst) = Cons_Decl (evalInvDecl dcl) (evalInvConsList_Decl clst)
+
+evalInvDecl :: Decl -> Decl
+evalInvDecl (InvDecl idd idp0 idp1 inv) = InvDecl idd idp0 idp1 (evalInv inv)
+evalInvDecl dcl = dcl
+
+evalInv :: Inv -> Inv
+evalInv inv@(Inv idd errDoc enr eval button) =  
+  case debug Err ("button is "++ show button) button of
+    ReEvaluate1 _ -> Inv idd errDoc enr eval (ReEvaluate2 NoIDD) 
+    ReEvaluate2 _ -> Inv idd errDoc (evalErrDoc eval errDoc enr) eval (Skip NoIDD) -- only evaluate when evalButton is True
+    _            -> inv
+evalInv inv = inv
+
+-- obsolete
+evalErrDoc :: String_ -> EitherDocView -> View -> View
+evalErrDoc eval errDoc oldEnr = oldEnr -- debug Err ("EVALUATING") $ EvaluateInv.evaluate (string_ eval) errDoc oldEnr
 
 {-
 

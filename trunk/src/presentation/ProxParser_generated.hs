@@ -47,6 +47,12 @@ reusePPPresentationDecl nodes  ma0 ma1 ma2 ma3
            (PPPresentationDecl a0 a1 a2 a3) -> reuse4 PPPresentationDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePPPresentationDecl"
 
+reuseInvDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Inv -> Decl
+reuseInvDecl nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractInvDecl defaultInvDecl nodes of
+           (InvDecl a0 a1 a2 a3) -> reuse4 InvDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseInvDecl"
+
 reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String_ -> Ident
 reuseIdent nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractIdent defaultIdent nodes of
@@ -257,6 +263,138 @@ reuseListItem nodes  ma0 ma1
            (ListItem a0 a1) -> reuse2 ListItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseListItem"
 
+reuseInv :: [Maybe Node] -> Maybe IDD -> Maybe EitherDocView -> Maybe View -> Maybe String_ -> Maybe EvalButton -> Inv
+reuseInv nodes  ma0 ma1 ma2 ma3 ma4
+  = case extractFromNodes extractInv defaultInv nodes of
+           (Inv a0 a1 a2 a3 a4) -> reuse5 Inv a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
+           _ -> error "System error:<module>.reuseInv"
+
+reuseReEvaluate1 :: [Maybe Node] -> Maybe IDD -> EvalButton
+reuseReEvaluate1 nodes  ma0
+  = case extractFromNodes extractReEvaluate1 defaultReEvaluate1 nodes of
+           (ReEvaluate1 a0) -> reuse1 ReEvaluate1 a0 ma0
+           _ -> error "System error:<module>.reuseReEvaluate1"
+
+reuseReEvaluate2 :: [Maybe Node] -> Maybe IDD -> EvalButton
+reuseReEvaluate2 nodes  ma0
+  = case extractFromNodes extractReEvaluate2 defaultReEvaluate2 nodes of
+           (ReEvaluate2 a0) -> reuse1 ReEvaluate2 a0 ma0
+           _ -> error "System error:<module>.reuseReEvaluate2"
+
+reuseSkip :: [Maybe Node] -> Maybe IDD -> EvalButton
+reuseSkip nodes  ma0
+  = case extractFromNodes extractSkip defaultSkip nodes of
+           (Skip a0) -> reuse1 Skip a0 ma0
+           _ -> error "System error:<module>.reuseSkip"
+
+reuseLeftDocView :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> EitherDocView
+reuseLeftDocView nodes  ma0 ma1
+  = case extractFromNodes extractLeftDocView defaultLeftDocView nodes of
+           (LeftDocView a0 a1) -> reuse2 LeftDocView a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseLeftDocView"
+
+reuseRightDocView :: [Maybe Node] -> Maybe IDD -> Maybe View -> EitherDocView
+reuseRightDocView nodes  ma0 ma1
+  = case extractFromNodes extractRightDocView defaultRightDocView nodes of
+           (RightDocView a0 a1) -> reuse2 RightDocView a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseRightDocView"
+
+reuseANil :: [Maybe Node] -> Maybe IDD -> View
+reuseANil nodes  ma0
+  = case extractFromNodes extractANil defaultANil nodes of
+           (ANil a0) -> reuse1 ANil a0 ma0
+           _ -> error "System error:<module>.reuseANil"
+
+reuseAN :: [Maybe Node] -> Maybe IDD -> Maybe Int_ -> View
+reuseAN nodes  ma0 ma1
+  = case extractFromNodes extractAN defaultAN nodes of
+           (AN a0 a1) -> reuse2 AN a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseAN"
+
+reuseAS :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> View
+reuseAS nodes  ma0 ma1
+  = case extractFromNodes extractAS defaultAS nodes of
+           (AS a0 a1) -> reuse2 AS a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseAS"
+
+reusePr :: [Maybe Node] -> Maybe IDD -> Maybe View -> Maybe View -> View
+reusePr nodes  ma0 ma1 ma2
+  = case extractFromNodes extractPr defaultPr nodes of
+           (Pr a0 a1 a2) -> reuse3 Pr a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reusePr"
+
+reuseLs :: [Maybe Node] -> Maybe IDD -> Maybe View -> Maybe View -> View
+reuseLs nodes  ma0 ma1 ma2
+  = case extractFromNodes extractLs defaultLs nodes of
+           (Ls a0 a1 a2) -> reuse3 Ls a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseLs"
+
+reuseTr :: [Maybe Node] -> Maybe IDD -> Maybe View -> Maybe View -> View
+reuseTr nodes  ma0 ma1 ma2
+  = case extractFromNodes extractTr defaultTr nodes of
+           (Tr a0 a1 a2) -> reuse3 Tr a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseTr"
+
+reuseL :: [Maybe Node] -> Maybe IDD -> Maybe View -> View
+reuseL nodes  ma0 ma1
+  = case extractFromNodes extractL defaultL nodes of
+           (L a0 a1) -> reuse2 L a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseL"
+
+reuseR :: [Maybe Node] -> Maybe IDD -> Maybe View -> View
+reuseR nodes  ma0 ma1
+  = case extractFromNodes extractR defaultR nodes of
+           (R a0 a1) -> reuse2 R a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseR"
+
+reuseMark :: [Maybe Node] -> Maybe IDD -> Maybe View -> View
+reuseMark nodes  ma0 ma1
+  = case extractFromNodes extractMark defaultMark nodes of
+           (Mark a0 a1) -> reuse2 Mark a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseMark"
+
+reuseDelL :: [Maybe Node] -> Maybe IDD -> Maybe View -> Maybe View -> View
+reuseDelL nodes  ma0 ma1 ma2
+  = case extractFromNodes extractDelL defaultDelL nodes of
+           (DelL a0 a1 a2) -> reuse3 DelL a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseDelL"
+
+reuseInsL :: [Maybe Node] -> Maybe IDD -> Maybe View -> Maybe View -> View
+reuseInsL nodes  ma0 ma1 ma2
+  = case extractFromNodes extractInsL defaultInsL nodes of
+           (InsL a0 a1 a2) -> reuse3 InsL a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseInsL"
+
+reuseSndP :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> Maybe View -> Maybe View -> View
+reuseSndP nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractSndP defaultSndP nodes of
+           (SndP a0 a1 a2 a3) -> reuse4 SndP a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseSndP"
+
+reuseFstP :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> Maybe View -> Maybe View -> View
+reuseFstP nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractFstP defaultFstP nodes of
+           (FstP a0 a1 a2 a3) -> reuse4 FstP a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseFstP"
+
+reuseIfNil :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> Maybe View -> View
+reuseIfNil nodes  ma0 ma1 ma2
+  = case extractFromNodes extractIfNil defaultIfNil nodes of
+           (IfNil a0 a1 a2) -> reuse3 IfNil a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseIfNil"
+
+reuseUndef :: [Maybe Node] -> Maybe IDD -> View
+reuseUndef nodes  ma0
+  = case extractFromNodes extractUndef defaultUndef nodes of
+           (Undef a0) -> reuse1 Undef a0 ma0
+           _ -> error "System error:<module>.reuseUndef"
+
+reuseUnit :: [Maybe Node] -> Maybe IDD -> View
+reuseUnit nodes  ma0
+  = case extractFromNodes extractUnit defaultUnit nodes of
+           (Unit a0) -> reuse1 Unit a0 ma0
+           _ -> error "System error:<module>.reuseUnit"
+
 reuseString_ :: [Maybe Node] -> Maybe IDD -> Maybe String -> String_
 reuseString_ nodes  ma0 ma1
   = case extractFromNodes extractString_ defaultString_ nodes of
@@ -320,6 +458,10 @@ extractBoardDecl _ = Nothing
 extractPPPresentationDecl :: Maybe Node -> Maybe Decl
 extractPPPresentationDecl (Just (PPPresentationDeclNode x@(PPPresentationDecl _ _ _ _) _)) = Just x
 extractPPPresentationDecl _ = Nothing
+
+extractInvDecl :: Maybe Node -> Maybe Decl
+extractInvDecl (Just (InvDeclNode x@(InvDecl _ _ _ _) _)) = Just x
+extractInvDecl _ = Nothing
 
 extractIdent :: Maybe Node -> Maybe Ident
 extractIdent (Just (IdentNode x@(Ident _ _ _ _) _)) = Just x
@@ -461,6 +603,94 @@ extractListItem :: Maybe Node -> Maybe Item
 extractListItem (Just (ListItemNode x@(ListItem _ _) _)) = Just x
 extractListItem _ = Nothing
 
+extractInv :: Maybe Node -> Maybe Inv
+extractInv (Just (InvNode x@(Inv _ _ _ _ _) _)) = Just x
+extractInv _ = Nothing
+
+extractReEvaluate1 :: Maybe Node -> Maybe EvalButton
+extractReEvaluate1 (Just (ReEvaluate1Node x@(ReEvaluate1 _) _)) = Just x
+extractReEvaluate1 _ = Nothing
+
+extractReEvaluate2 :: Maybe Node -> Maybe EvalButton
+extractReEvaluate2 (Just (ReEvaluate2Node x@(ReEvaluate2 _) _)) = Just x
+extractReEvaluate2 _ = Nothing
+
+extractSkip :: Maybe Node -> Maybe EvalButton
+extractSkip (Just (SkipNode x@(Skip _) _)) = Just x
+extractSkip _ = Nothing
+
+extractLeftDocView :: Maybe Node -> Maybe EitherDocView
+extractLeftDocView (Just (LeftDocViewNode x@(LeftDocView _ _) _)) = Just x
+extractLeftDocView _ = Nothing
+
+extractRightDocView :: Maybe Node -> Maybe EitherDocView
+extractRightDocView (Just (RightDocViewNode x@(RightDocView _ _) _)) = Just x
+extractRightDocView _ = Nothing
+
+extractANil :: Maybe Node -> Maybe View
+extractANil (Just (ANilNode x@(ANil _) _)) = Just x
+extractANil _ = Nothing
+
+extractAN :: Maybe Node -> Maybe View
+extractAN (Just (ANNode x@(AN _ _) _)) = Just x
+extractAN _ = Nothing
+
+extractAS :: Maybe Node -> Maybe View
+extractAS (Just (ASNode x@(AS _ _) _)) = Just x
+extractAS _ = Nothing
+
+extractPr :: Maybe Node -> Maybe View
+extractPr (Just (PrNode x@(Pr _ _ _) _)) = Just x
+extractPr _ = Nothing
+
+extractLs :: Maybe Node -> Maybe View
+extractLs (Just (LsNode x@(Ls _ _ _) _)) = Just x
+extractLs _ = Nothing
+
+extractTr :: Maybe Node -> Maybe View
+extractTr (Just (TrNode x@(Tr _ _ _) _)) = Just x
+extractTr _ = Nothing
+
+extractL :: Maybe Node -> Maybe View
+extractL (Just (LNode x@(L _ _) _)) = Just x
+extractL _ = Nothing
+
+extractR :: Maybe Node -> Maybe View
+extractR (Just (RNode x@(R _ _) _)) = Just x
+extractR _ = Nothing
+
+extractMark :: Maybe Node -> Maybe View
+extractMark (Just (MarkNode x@(Mark _ _) _)) = Just x
+extractMark _ = Nothing
+
+extractDelL :: Maybe Node -> Maybe View
+extractDelL (Just (DelLNode x@(DelL _ _ _) _)) = Just x
+extractDelL _ = Nothing
+
+extractInsL :: Maybe Node -> Maybe View
+extractInsL (Just (InsLNode x@(InsL _ _ _) _)) = Just x
+extractInsL _ = Nothing
+
+extractSndP :: Maybe Node -> Maybe View
+extractSndP (Just (SndPNode x@(SndP _ _ _ _) _)) = Just x
+extractSndP _ = Nothing
+
+extractFstP :: Maybe Node -> Maybe View
+extractFstP (Just (FstPNode x@(FstP _ _ _ _) _)) = Just x
+extractFstP _ = Nothing
+
+extractIfNil :: Maybe Node -> Maybe View
+extractIfNil (Just (IfNilNode x@(IfNil _ _ _) _)) = Just x
+extractIfNil _ = Nothing
+
+extractUndef :: Maybe Node -> Maybe View
+extractUndef (Just (UndefNode x@(Undef _) _)) = Just x
+extractUndef _ = Nothing
+
+extractUnit :: Maybe Node -> Maybe View
+extractUnit (Just (UnitNode x@(Unit _) _)) = Just x
+extractUnit _ = Nothing
+
 extractString_ :: Maybe Node -> Maybe String_
 extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
 extractString_ _ = Nothing
@@ -504,6 +734,9 @@ defaultBoardDecl = BoardDecl NoIDD NoIDP NoIDP hole
 
 defaultPPPresentationDecl :: Decl
 defaultPPPresentationDecl = PPPresentationDecl NoIDD NoIDP NoIDP hole
+
+defaultInvDecl :: Decl
+defaultInvDecl = InvDecl NoIDD NoIDP NoIDP hole
 
 defaultIdent :: Ident
 defaultIdent = Ident NoIDD NoIDP NoIDP hole
@@ -609,6 +842,72 @@ defaultHeliumItem = HeliumItem NoIDD hole
 
 defaultListItem :: Item
 defaultListItem = ListItem NoIDD hole
+
+defaultInv :: Inv
+defaultInv = Inv NoIDD hole hole hole hole
+
+defaultReEvaluate1 :: EvalButton
+defaultReEvaluate1 = ReEvaluate1 NoIDD
+
+defaultReEvaluate2 :: EvalButton
+defaultReEvaluate2 = ReEvaluate2 NoIDD
+
+defaultSkip :: EvalButton
+defaultSkip = Skip NoIDD
+
+defaultLeftDocView :: EitherDocView
+defaultLeftDocView = LeftDocView NoIDD hole
+
+defaultRightDocView :: EitherDocView
+defaultRightDocView = RightDocView NoIDD hole
+
+defaultANil :: View
+defaultANil = ANil NoIDD
+
+defaultAN :: View
+defaultAN = AN NoIDD hole
+
+defaultAS :: View
+defaultAS = AS NoIDD hole
+
+defaultPr :: View
+defaultPr = Pr NoIDD hole hole
+
+defaultLs :: View
+defaultLs = Ls NoIDD hole hole
+
+defaultTr :: View
+defaultTr = Tr NoIDD hole hole
+
+defaultL :: View
+defaultL = L NoIDD hole
+
+defaultR :: View
+defaultR = R NoIDD hole
+
+defaultMark :: View
+defaultMark = Mark NoIDD hole
+
+defaultDelL :: View
+defaultDelL = DelL NoIDD hole hole
+
+defaultInsL :: View
+defaultInsL = InsL NoIDD hole hole
+
+defaultSndP :: View
+defaultSndP = SndP NoIDD hole hole hole
+
+defaultFstP :: View
+defaultFstP = FstP NoIDD hole hole hole
+
+defaultIfNil :: View
+defaultIfNil = IfNil NoIDD hole hole
+
+defaultUndef :: View
+defaultUndef = Undef NoIDD
+
+defaultUnit :: View
+defaultUnit = Unit NoIDD
 
 defaultString_ :: String_
 defaultString_ = String_ NoIDD hole
