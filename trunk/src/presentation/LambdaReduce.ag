@@ -1,0 +1,235 @@
+-- somehow, app is parsed right associative! Fix this.
+
+-- renaming is not supported yet
+{
+--addReductionPopupItems :: [ PopupItem ] -> Presentation -> Presentation
+addReductionPopupItems its pres = addPopupItems pres its
+
+pasteExp :: [Int] -> Exp -> UpdateDoc
+pasteExp pth exp =
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+                                              (Clip_Exp exp)
+                                            )
+    in  (DocumentLevel d' path cl)
+
+
+setIDPExp newIdp (PlusExp idd idp0 x1 x2)           = PlusExp idd newIdp x1 x2          
+setIDPExp newIdp (TimesExp idd idp x1 x2)           = TimesExp idd newIdp x1 x2          
+setIDPExp newIdp (DivExp idd idp0 x1 x2)            = DivExp idd idp0 x1 x2           
+setIDPExp newIdp (PowerExp idd idp0 x1 x2)          = PowerExp idd newIdp x1 x2         
+setIDPExp newIdp (BoolExp idd idp0 x1)              = BoolExp idd newIdp x1             
+setIDPExp newIdp (IntExp idd idp0 x1)               = IntExp idd newIdp x1              
+setIDPExp newIdp (CaseExp idd idp0 idp1 x1 x2)       = CaseExp idd newIdp idp1 x1 x2      
+setIDPExp newIdp (LetExp idd idp0 idp1 dcls x2)     = LetExp idd newIdp idp1 dcls x2    
+setIDPExp newIdp (LamExp idd idp0 idp1 x1 x2)       = LamExp idd newIdp idp1 x1 x2      
+setIDPExp newIdp (AppExp idd x1 x2)                 = AppExp idd (setIDPExp newIdp x1) x2  -- has no pid of its own
+setIDPExp newIdp (IdentExp idd x1)                  = IdentExp idd (setIDPIdent newIdp x1) -- has no pid of its own
+setIDPExp newIdp (IfExp idd idp0 idp idp1 x1 x2 x3) = IfExp idd newIdp idp idp1 x1 x2 x3
+setIDPExp newIdp (ParenExp idd idp0 idp1 x1)        = ParenExp idd newIdp idp1 x1    
+setIDPExp newIdp (ListExp idd idp0 idp1 idps x1)    = ListExp idd newIdp idp1 idps x1
+setIDPExp newIdp (ProductExp idd idp0 idp1 idps x1) = ProductExp idd newIdp idp1 idps x1
+setIDPExp _   exp                                   = exp
+
+setIDPIdent newIdp (Ident idd idp0 idp1 str) = Ident idd newIdp idp1 str
+
+removeParens (ParenExp _ _ _ x1) = removeParens x1
+removeParens exp                 = exp
+
+ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
+}
+
+-- The explicit parenthesis style of Helium makes reduction a bit tricky.
+-- If they are removed, the document may change when the presentation is parsed  "(\...) ..."   => "\... ..."
+-- therefore, disregard parentheses during reduction
+
+SEM Exp
+  | PlusExp
+      loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
+                                 (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (+)" , pasteExp @lhs.path (IntExp idd1 idp1 (int1+int2)))]
+                                 _                                         -> []    
+  | TimesExp
+      loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
+                                 (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (*)" , pasteExp @lhs.path (IntExp idd1 idp1 (int1*int2)))]
+                                 _                                         -> []    
+  | DivExp      
+      loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
+                                 (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive div" ,  pasteExp @lhs.path (IntExp idd1 idp1 (int1 `div` int2)))]
+                                 _                                         -> []    
+  | PowerExp    
+      loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
+                                 (IntExp idd1 idp1 int1, IntExp _ _ int2 ) -> [ ("Reduce primitive (^)" , pasteExp @lhs.path (IntExp idd1 idp1 (int1^int2)))]
+                                 _                                         -> []    
+  | BoolExp     
+      loc.reductionEdit = [] -- cannot be reduced
+  | IntExp      
+      loc.reductionEdit = [] -- cannot be reduced
+  | LamExp      
+      loc.reductionEdit = [] -- cannot be reduced
+  | AppExp -- pattern matching is not ok \in ag
+      loc.reductionEdit = case removeParens @exp1.self of
+                                  LamExp _ _ _ ident exp -> [ ("Beta reduce",
+                                                               pasteExp @lhs.path 
+                                                                        (ensureParens (@exp1.lamBody [(strFromIdent ident, @exp2.self)] ))
+                                                              )
+                                                            ] 
+                                  _                      -> []    
+  | CaseExp   -- Case only matches on variables so reducing is rather useless
+      loc.reductionEdit = []
+  | LetExp    -- have to think about this one
+      loc.reductionEdit = []
+  | IdentExp  -- only for top level, until it is clear how to do let expressions
+      loc.reductionEdit =  case lookupFM  @lhs.varsInScope (strFromIdent @ident.self) of
+                             Nothing      -> []
+                             Just (PathD pth@(_:_),_) -> 
+                               [( "Replace by definition" 
+                                , \(DocumentLevel d path cl) ->
+                                  case selectD (init pth) d of -- pattern matched, so pth is not null
+                                    (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 _ _ _ exp)) ->
+                                          let (DocumentLevel d' _ _) = 
+                                                editPasteD (DocumentLevel d (PathD @lhs.path) (Clip_Exp ( setIDPExp (idP0FromIdent @ident.self) $ ensureParens exp)))
+                                          in  (DocumentLevel d' path cl)
+                                    _ -> (DocumentLevel d path cl)
+                                )] -- The menu now also appears for idents refering to lambda vars. A nicer
+                                   -- impl. needs a select function in the ag, or an inh. root doc attr so selectD can be used
+                                   -- differences between enriched and doc become should be taken into account then
+               
+                -- pth is path of ident, path is current doc focus and @lhs.path is path to identExp
+                                                
+                                          
+  | IfExp
+      loc.reductionEdit = case removeParens @exp1.self of
+                                 BoolExp _ _ bool -> [ ("Reduce primitive if" , pasteExp @lhs.path (if bool then setIDPExp @idP0 @exp2.self 
+                                                                                           else setIDPExp @idP0 @exp3.self))]
+                                 _                                         -> []    
+  | ParenExp -- 
+      loc.reductionEdit = [] -- ("Remove parens" , pasteExp @lhs.path @exp.self)]
+  | ListExp -- cannot be reduced (although maybe its children can)
+      loc.reductionEdit = []
+  | ProductExp -- cannot be reduced (although maybe its children can)
+      loc.reductionEdit = []
+
+-- need higher order ag here
+SEM Exp [|| substitute :{( [(String, Exp)] -> Exp )}]
+  | PlusExp
+      loc.substitute = \substs -> PlusExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
+  | TimesExp
+      loc.substitute = \substs -> TimesExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
+  | DivExp      
+      loc.substitute = \substs -> DivExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
+  | PowerExp    
+      loc.substitute = \substs -> PowerExp @idD @idP0 (@exp1.substitute substs) (@exp2.substitute substs)
+  | BoolExp     
+      loc.substitute = \substs -> @self
+  | IntExp      
+      loc.substitute = \substs -> @self
+  | LamExp --   filter substs
+      loc.substitute = \substs -> LamExp @idD @idP0 @idP1 @ident.self (@exp.substitute 
+                                                                        (filter (\(str,_) -> str /= strFromIdent @ident.self)
+                                                                                substs))
+  | AppExp 
+      loc.substitute = \substs -> AppExp @iDD (@exp1.substitute substs) (@exp2.substitute substs)
+  | CaseExp
+      loc.substitute = \substs -> @self
+  | LetExp
+      loc.substitute = \substs -> @self
+  | IdentExp
+      loc.substitute = \substs -> case lookup (strFromIdent @ident.self) substs of -- parseErr & hole give ""
+                                          Just exp -> exp
+                                          Nothing  -> @self
+  | IfExp
+      loc.substitute = \substs -> IfExp @idD @idP0 @idP1 @idP2 (@exp1.substitute substs) (@exp2.substitute substs) (@exp3.substitute substs)
+  | ParenExp
+      loc.substitute = \substs -> ParenExp @idD @idP0 @idP1 (@exp.substitute substs)
+  | ListExp
+      loc.substitute = \substs -> @self
+  | ProductExp
+      loc.substitute = \substs -> @self
+  | HoleExp
+      loc.substitute = \substs -> @self
+  | ParseErrExp
+      loc.substitute = \substs -> @self
+
+
+-- would be nice to be able to pattern match in AG code      or at least have a default _ case 
+SEM Exp [|| lamBody : {([(String, Exp)] -> Exp)} ]
+  | PlusExp
+      lhs.lamBody = @substitute
+  | TimesExp
+      lhs.lamBody = @substitute
+  | DivExp      
+      lhs.lamBody = @substitute
+  | PowerExp    
+      lhs.lamBody = @substitute
+  | BoolExp     
+      lhs.lamBody = @substitute
+  | IntExp      
+      lhs.lamBody = @substitute
+  | LamExp
+      lhs.lamBody = @exp.substitute
+  | AppExp 
+      lhs.lamBody = @substitute
+  | CaseExp
+      lhs.lamBody = @substitute
+  | LetExp
+      lhs.lamBody = @substitute
+  | IdentExp
+      lhs.lamBody = @substitute
+  | IfExp
+      lhs.lamBody = @substitute
+  | ParenExp
+      lhs.lamBody = @exp.lamBody
+  | ListExp
+      lhs.lamBody = @substitute
+  | ProductExp
+      lhs.lamBody = @substitute
+  | HoleExp
+      lhs.lamBody = @substitute
+  | ParseErrExp
+      lhs.lamBody = @substitute
+
+{-
+
+-- 
+
+-- ATTR Exp [ reductionEdit :: {[PopupItem]} || ]
+
+-- SEM Plus  reductionEdit = 
+        if left and right are int then Int + right
+
+-- SEM Ident
+       if lookup yields path, then substitute exp at path for IdentExp (use new doc ids!!)
+      
+                
+-- SEM Apply fn arg
+      only if fn == Lambda id -> exp
+      substitute all free occ. of id for arg
+       
+
+Issues:
+Only substitute free variables
+(\y -> (\y -> y) ) x
+wrong:  (\y -> x)
+right: (\y -> y)
+
+Rename when free variable is captured:
+(\y -> (\x -> y) ) x
+wrong: (\x -> x) 
+right: (\x' -> x)
+
+attr subst. tree :: [bindings ] -> tree
+
+
+Let dcls exp: \substs -> Let dcls (exp.subst (remove dcls from substs))
+Lambda param body: \substs -> Lambda param (body.subst (remove param from substs))
+Rest is simple
+
+How to avoid capturing? x := exp
+Also pass freevars from exp, and if let decl or arg is freevar, rename it uniquely to something not in freevar or freevar of exp
+
+Lambda param body \substs, freevars -> Lambda let param' = 
+                                                                        in exp.subst (remove param from substs ++ if param is in freevar then [param := new param] else []
+                                                                        
+subst is not recursive [x = y, y =2] x is y and not 2, otherwise we need HAG                                                                        
+
+-}
