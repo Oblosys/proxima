@@ -139,7 +139,7 @@ A user may perform an edit operation on either the higher level (document) or th
 Let $level\L$ and $level\H$ denote the state of the layer at the beginning of an edit step. 
 
 \xprlab{
-\level_L & \equ & \present~\level\H
+\level\L & \equ & \present~\level\H
 }
 
 The user then updates the lower level:
@@ -440,7 +440,7 @@ H \tp Level\H \rel \Level\H~~~~~~\text{and}~~~~~~L \tp Level\L \rel \Level\L\\
 
 In order to specify that extra state should be reused after an update, without making any assumptions on the level type, we use the ``close~to'' notion from the previous section. We specify that an updated value $x'$ contains reused extra state from $x$, by requiring that $x'$ is the element of its equivalence class that is as close as possible to $x$. 
 
-As an example, consider an update on the presentation of \verb|Decl "f" (Sum 1 2)| from the example above:  $``\verb|f = ...|\text{''} \leadsto ``\verb|g = ...|\text{''}$. The new higher level should have left-hand side \verb|"g"| and reuse the sum. This can be specified by requiring that from the equivalence class of declarations with left-hand side \verb|"g"|, we select the element that is as close as possible to \verb|Decl "f" (Sum 1 2)|. The obvious solution is \verb|Decl "g" (Sum 1 2)|.
+As an example, consider an update on the presentation of\verb| Decl "f" (Sum 1 2)| from the example above:  $``\verb|f = ...|\text{''} \leadsto ``\verb|g = ...|\text{''}$. The new higher level should have left-hand side \verb|"g"| and reuse the sum. This can be specified by requiring that from the equivalence class of declarations with left-hand side \verb|"g"|, we select the element that is as close as possible to \verb|Decl "f" (Sum 1 2)|. The obvious solution is \verb|Decl "g" (Sum 1 2)|.
 
 
 
@@ -2674,7 +2674,7 @@ The problem with the \law{Intended} requirement is that the duplicates of the ed
 $\Delta \tp  T \to T \to T\st$, to ignore duplicates of edited values.
 
 The application $level~\Delta~level'$ returns a value that is structurally the same as $level'$, but in which for each edited value, all duplicates have been replaced by wildcards. (Note that $\Delta$ thus depends on the presentation mapping.) For a presentation without duplicates, we have 
-$level \Delta level' = level'$. If two duplicates are updated simultaneously, the result of $\Delta$ is not defined.
+$level~\Delta~level' = level'$. If two duplicates are updated simultaneously, the result of $\Delta$ is not defined.
 
 Similar to Section~\ref{sect:wildcardEq}, a wildcard stands for any value. A wildcard is ignored when testing for equality, or evaluating closeness. Hence, both $(1,1,1)$ and  $(1,3,5)$ are equally (and maximally) close to $(1,\texttt{*}_{Int},\texttt{*}_{Int})$. If we use $level~\Delta~level'$ instead of $level'$ in the \law{Intended} requirement, the duplicates of the edited part of the presentation will have been replaced by wildcards and thus no longer influence the final result.
 
