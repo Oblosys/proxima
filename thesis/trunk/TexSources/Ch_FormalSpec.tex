@@ -60,16 +60,22 @@ TODO:
 \o fix fonts for examples $Decl$ or \verb|Decl|
 \o fix subscripts in figures
 \o figure out Interpret/Present in figures; these are not relations or functions, but computations
+\o check $H$ vs H etc. in $\reuz$, $Level$, end $\eqcl{\hole}{R}$ 
 \el
 
 % Even in pure structure editor there are pres. oriented bits. eg navigation (pointing problem)
 
+***** $\Present$ vs $\present$ is not okay.
 
 In this chapter we give a formal specification of the layered architecture of the Proxima editor. Given a presentation mapping $\Present$, we state a number of requirements for a function $\interpret$, which is an inverse of $\Present$ and maps an updated presentation back onto the document. Furthermore, we specify a computation for handling edit operations on the presentation.
 
 Because we make only few assumptions on the presentation mapping, the specification gives requirements for $\interpret$, rather than specifying how the inverse can be computed for a specific $\Present$. The burden of defining an $\interpret$ that meets the requirements lies with the editor designer.
 
-An automatically derived $\interpret$ is desirable, but this is not yet feasible for the complex presentation functions of the use cases from Chapter~\ref{chap:editing}. Examples of presentation formalisms supporting an automatic inverse of the presentaiton function can be found in \cite{meertens98maintainers}, \cite{muhu04inv}, and \cite{pierce03lenses}. 
+An automatically derived $\interpret$ is desirable, but this is not yet feasible for the complex presentation functions of the use cases from Chapter~\ref{chap:requirements}. Examples of presentation formalisms supporting an automatic inverse for basic functions can be found in \cite{meertens98maintainers}, \cite{muhu04inv}, and \cite{pierce03lenses}. 
+
+*** no longer edit ops, but levels. (pres-oriented) easier to spec. Change to edit ops is future work
+
+A difference with the 
 
 We develop the specification by starting with a simplified editor, and then step by step adding extra functionality. Section~\ref{sect:singleSimple} specifies a simple editor that consists of a single layer and does not support extra state. In Section~\ref{sect:singleExtra}, the specification is extended with a general model of extra state. Section~\ref{sect:wildcardEq} provides a more concrete specification of extra state for tree data structures. The last step is the addition of layers to the specification in Section~\ref{sect:combinedExtra}. Finally, Section~\ref{sect:duplicates} discusses informally how the specification can be adapted to handle duplications in the presentation.
 
@@ -187,7 +193,7 @@ Summarizing, if we let $Comp$ be a program fragment that assigns new values to t
 \xprlab{\hoare{ \level'\L = \present~h } {Comp} {\level'\L = \level''\L}}{Pres-Inert}
 \xprlab{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}{Imprecise}
 
-Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close to'' is equality.
+Note that \law{Pres-Inert} is a special case of \law{Imprecise}, in which ``close~to'' is equality.
 
 \note{Maybe mention precondition more explicitly?}
 
@@ -335,7 +341,7 @@ If $\level'\L$ is not a valid presentation, only \law{Postcondition} and \law{Im
 
 \xpr{\hoare{ \true } {Comp} {\level'\L \close \level''\L}}
 
-This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Since $\present$ is given, this requirement provides a specification of $\interpret$. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
+This requirement states that $\interpret$ returns a higher level such that its presentation resembles what the user intended with the edit operation. Since $\present$ is given, this requirement provides a specification of $\interpret$. Because the intention of a user is a rather vague concept, we cannot give a formal specification of the ``close~to'' relation here. It is left to the editor designer to assign a meaning to it and provide an $\interpret$ function that meets the requirement.
 
 %\note{Is ``close to'' what we want? For simple editors, maybe it is, but is "-$>$" close to \rarr?}
 \note{What about Chapter titles and fonts? Will these be handled correctly with ``close to'' req.?}
@@ -415,7 +421,7 @@ On the higher level, interpretation extra state occurs when a declaration is pre
 
 Whitespace is an example of presentation extra state on the lower level. Consider the sum $Sum~1~2$, which is presented as {\tt 1\spc+\spc 2}. The presentation is equivalent to the symbols \verb|1|,\verb|+|, and \verb|2| with any configuration of whitespace. Thus, for example, ${\tt 1\spc+\spc 2}~L~{\tt 1+2}$.
 
-In order to specify that extra state should be reused after an update without making any assumptions on the level type, we use the ``close to'' notion from the previous section. We express that an updated value $x'$ contains reused extra state from $x$, by requiring that $x'$ is the element of its equivalence class that is as close as possible to $x$. 
+In order to specify that extra state should be reused after an update without making any assumptions on the level type, we use the ``close~to'' notion from the previous section. We express that an updated value $x'$ contains reused extra state from $x$, by requiring that $x'$ is the element of its equivalence class that is as close as possible to $x$. 
 
 As an example, consider an update on the presentation of the $Decl~\verb|"f"|~(Sum~1~2)$ declaration from the example above:  $\verb|f = ...| \leadsto \verb|g = ...|$. The new higher level should have left-hand side \verb|"g"| and reuse the sum. This can be specified by requiring that from the equivalence class of declarations with left-hand side \verb|"g"|, we select the element that is as close as possible to $Decl~\verb|"f"|~(Sum~1~2)$. The obvious solution is $Decl~\verb|"g"|~(Sum~1~2)$.
 
@@ -616,7 +622,7 @@ Finally, if the value argument is not in the equivalence class argument, then~$\
 
 \xprlab{\eqclass{x}{R} \reuz y \close y}		{$\reuz$-Close} 
 
-Similar to the \law{Doc-Inert} and \law{Imprecise} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close to'' is equality.
+Similar to the \law{Doc-Inert} and \law{Imprecise} requirements, \law{$\reuz$-Idem} is a special case of \law{$\reuz$-Close}, for which ``close~to'' is equality.
 
 Using $\eqcl{\hole}{X}$ and ~$\reuz$ we can define $Comp$. The definition is split in $Up$ and $Dwn$ to make the proofs of the requirements more readable. %(will be split for composite layers anyway).
 
@@ -745,7 +751,7 @@ We assume $\eqcl{\level'\L}{L} = \present~\eqcl{h}{H}$.
 
 Because of the nature of the \law{Doc-Preserve} and \law{Imprecise} requirements, we give an informal argumentation instead of a proof. 
 
-From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H ``close~to'' level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
+From \law{$Up$-Def}, we know that $level''\H$ is the result of  $\interpret~ \eqcl{\level'\L}{L}  ~\reuze{H}~   \level\H$, which implies $level\H \close level''\H$ by \law{$\reuz$-Close}. Hence, \law{Doc-Preserve} holds.
 
 The \law{Imprecise} requirement is somewhat more subtle, since it has a double function. On the one hand, it states that the equivalence class $\eqcl{\level''\L}{L}$ must be close to $\eqcl{\level'\L}{L}$. This corresponds to the \law{Imprecise} requirement in Section~\ref{sect:single_Editing} without extra state. In this sense, closeness is used to express that the final lower level resembles what the user intended. Thus, if $level'\L$ is not a valid presentation, then $\eqcl{level''\H}{H}$, must be chosen such that its presentation equivalence class $\eqcl{\level''\L}{L}$ is close to $\eqcl{\level'\L}{L}$. The requirement is therefore a specification of $\interpret$.
 
@@ -783,13 +789,13 @@ The specification for reusing extra state is a first step, and needs to be exten
 \note{say that result of pres/intr has *s}
 In a tree data type, we can model extra state by declaring that we are not interested in certain parts of the tree. In order to do so, we represent the extra state parts by wildcards. A wildcard for a type $T$ is denoted by $*_T$ and stands for any possible value of type $T$. Hence $*_{Bool}$ stands for the set $\set{True, False}$, and $*_{Int}$ stands for the set of all integers. An example shows how wildcards can be used to model extra state.
 
-Consider a binary tree data type that has boolean values in the nodes and leafs, and integer values in the leafs.
+Consider a binary tree data type that has boolean values in the nodes and leaves, and integer values in the leaves.
 
 \xpr{
 \data~Tree  = Bin~Bool~Tree~Tree~|~Leaf~Bool~Int\\
 }
 
-We can define a type $Tree^*$ that declares the booleans in the nodes and the integers in the leafs to be extra state.
+We can define a type $Tree^*$ that declares the booleans in the nodes and the integers in the leaves to be extra state.
 
 \xpr{
 \data~Tree^*  = Bin~*_{Bool}~Tree^*~Tree^*~|~Leaf~Bool~*_{Int}\\
@@ -1635,8 +1641,8 @@ Besides $level\H$ and $level\L$, a combined layer also keeps track of the middle
 \begin{small}
 \begin{center}
 \begin{center}
-\epsfig{file=pics/eps/LayerSingle.eps, height=1.4in}
-\end{center}\caption{Single edit step in a combined layer. (draft)} \label{combinedEdit}
+\epsfig{file=pics/eps/LayerCombined.eps, height=2in} % visio: Layer.vsd
+\end{center}\caption{Single edit step in a combined layer.} \label{combinedEdit}
 \end{center}
 \end{small}
 \end{figure}
@@ -2366,7 +2372,7 @@ Because an editor consisting of $n$ layers is constructed by taking the top laye
 
 
 % Introduction
-The specification developed in the previous sections does not yet offer support for presentations that duplicate information. A simple example of a duplicate presentation is the function $\present~x = (x, x)$. An intuitive way to handle edit operations on duplicates is to let the edited duplicate determine the document update. However, this behavior cannot be expressed by the specifications in the previous sections, since the specification does not take into account the original $level\L$.
+The specification developed in the previous sections does not yet offer support for presentations that duplicate information (also see Section~\ref{sect:informalDuplicates}). A simple example of a duplicate presentation is the function $\present~x = (x, x)$. An intuitive way to handle edit operations on duplicates is to let the edited duplicate determine the document update. However, this behavior cannot be expressed by the specifications in the previous sections, since the specification does not take into account the original $level\L$.
 
 Duplicates become particularly problematic in the combination with extra state and multiple layers. \note{add refs on duplicates from DB and inversion papers}
 
@@ -2622,7 +2628,7 @@ With duplicates it is easy to specify presentation mappings for which it is diff
 %																
 %																
 %																
-%\section{document editing}
+%\section{Document-oriented editing}
 %
 %
 %Skipping lower layers
@@ -2639,16 +2645,14 @@ With duplicates it is easy to specify presentation mappings for which it is diff
 %
 %Skipping higher layers. Probably won't say much about that here.
 
-\toHere
-\subsection{}
-Do we need additional sections about (or mention) the subjects below?
-
-\bl
-\o Document editing
+%\subsection{}
+%Do we need additional sections about (or mention) the subjects below?
+%
+%\bl
+%\o Document-oriented editing
 %\o Layer skipping
-\o Incrementality
-\el
-\fromHere
+%\o Incrementality
+%\el
 
 \subsection{Related work and conclusions}
 
@@ -2662,13 +2666,15 @@ In this chapter, we have provided a specification of the $\interpret$ mapping, g
 
 The combination of extra state and duplications make it easy to construct a presentation mapping for which we cannot specify an $\interpret$. However, the aim of the specification is not to specify an editor for every imaginable presentation mapping, but rather to be able to formally specify the editors for real-world examples in which basic cases of duplication and extra state occur.
 
-
 Related to the specification in this chapter is the work by Meertens~\cite{meertens98maintainers} on maintainers for constraints between a document and its presentation. Given a constraint between two values, Meertens formulates a number of requirements for a pair of functions to be a maintainer for that constraint. In our case, the constraint would be the presentation relation. Meertens also provides a more formal approach to the concept of closeness and gives a number of maintainers for specific constraints.
 
 Rather than specifying requirements for an editor, Greenwald, et al.~\cite{pierce03lenses}, and Mu, Hu, and Takeichi~\cite{muhu04inv}, describe injective languages that allow the computation of a document from its (possibly edited) presentation. The language by Mu, Hu, and Takeichi takes into account duplication of information.
 
-The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentation examples of Chapter~\ref{chap:editing}\note{or mention section instead?}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. And finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. \note{also say that \law{Imprecise} is not handled?}
+The three formalisms have in common that in their current state they only handle simple presentations. It is not yet clear whether these simple presentations are scalable to the presentation examples of Chapter~\ref{chap:requirements}\note{or mention section instead?}. Furthermore, all of the formalisms only take into account interpretation extra state, while disregarding presentation extra state. And finally, only \cite{meertens98maintainers} deals explicitly with a layered presentation relation. \note{also say that \law{Imprecise} is not handled?}
 
+
+
+** more on incrementality, also more lazy pres. evaluation only send request when info is needed. (maybe More impl than spec.)
 %\bl
 %\o all are just simple functions, map, zip, dup, etc. Nothing scaleable yet. None address layered architecture
 %\o Lambert: combinators for specifying maintainers. no expl. model for es 
@@ -2688,6 +2694,7 @@ An important area of future research lies in the development of a presentation l
 % restore old defs from thesis.sty
 
 
+\endinput
 
 \pagebreak
 \section{Appendix with nasty proofs}
