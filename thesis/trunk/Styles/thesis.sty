@@ -6,12 +6,14 @@
 
 \newcommand{\loc}{}     % for ultra edit line number search
 
+\usepackage[dvipdfm]{hyperref}
 
 % \usepackage{alltt} % probably needed for Haskell as an adl
 
 \usepackage{url}
 \usepackage[usenames]{color}
 \usepackage[all]{xy}
+
 
 %\usepackage{mypslatex}    % why use this?
 %\usepackage{ipe}
@@ -32,6 +34,7 @@
 %% block comment stuff %%
 %\usepackage{version}
 %\usepackage{comment}
+
 \let\bc=\iffalse % start block comment
 \let\ec=\fi        % end block comment
 
@@ -67,27 +70,35 @@
 
 \newcounter{specification}
 
-
+% also do this for \Doc \Enr, etc.
+\newcommand{\Doc}[0]{\ensuremath{\mathit{Doc}}}		%
+\newcommand{\Enr}[0]{\ensuremath{\mathit{Enr}}}		%
+%\newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}	%        is defined below
+\newcommand{\Lay}[0]{\ensuremath{\mathit{Lay}}}		%
+\newcommand{\Arr}[0]{\ensuremath{\mathit{Arr}}}		%
+\newcommand{\Ren}[0]{\ensuremath{\mathit{Ren}}}	%
 
 \newcommand{\Level}[0]{\ensuremath{\mathit{Level}}}	%56
-\newcommand{\level}[0]{\ensuremath{\mathit{level}}} 	%  6 
+\newcommand{\level}[0]{\ensuremath{\mathit{level}}} 	%56
 \newcommand{\Core}[0]{\ensuremath{\mathit{Core}}}	%56
 \newcommand{\core}[0]{\ensuremath{\mathit{core}}}	%56
 \newcommand{\Extra}[0]{\ensuremath{\mathit{Extra}}}	%56
-\newcommand{\extra}[0]{\ensuremath{\mathit{extra}}}	%% Never used
+\newcommand{\extra}[0]{\ensuremath{\mathit{extra}}}	%56 Not used
 \newcommand{\Info}[0]{\ensuremath{\mathit{Info}}}	%56
 \newcommand{\info}[0]{\ensuremath{\mathit{info}}}	%56
+\newcommand{\Sheet}[0]{\ensuremath{\mathit{Sheet}}}	%56
+\newcommand{\sheet}[0]{\ensuremath{\mathit{sheet}}}	%56
 
-\newcommand{\Present}[0]{\ensuremath{\mathit{Present}}} 	% 6
-\newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}		%6
-\newcommand{\present}[0]{\tt present}					%6
-\newcommand{\Interpret}[0]{\ensuremath{\mathit{Interpret}}}% 6
-\newcommand{\Intr}[0]{\ensuremath{\mathit{Intr}}}		%6
-\newcommand{\interpret}[0]{\tt interpret}					%6
-\newcommand{\update}[0]{\tt update}						%6
-\newcommand{\Sheet}[0]{\ensuremath{\mathit{Sheet}}}		% 6
-\newcommand{\Edit}[0]{\ensuremath{\mathit{Edit}}} 		% 6 Edit is overloaded
-\newcommand{\Transform}[0]{\ensuremath{\mathit{Transform}}}% 6
+\newcommand{\Present}[0]{\ensuremath{\mathit{Present}}} 	%56
+\newcommand{\Pres}[0]{\ensuremath{\mathit{Pres}}}		%56
+\newcommand{\present}[0]{\tt present}					%56
+\newcommand{\Interpret}[0]{\ensuremath{\mathit{Interpret}}}%56
+\newcommand{\Intr}[0]{\ensuremath{\mathit{Intr}}}		%56
+\newcommand{\interpret}[0]{\tt interpret}					%56
+\newcommand{\reuse}[0]{\tt reuse}						%56
+\newcommand{\update}[0]{{\tt update}}					%56
+\newcommand{\Edit}[0]{\ensuremath{\mathit{Edit}}} 		%56 Edit is overloaded
+\newcommand{\Transform}[0]{\ensuremath{\mathit{Transform}}}%56
 
 %\newcommand{\}[0]{\ensuremath{\mathit{}}}
 
