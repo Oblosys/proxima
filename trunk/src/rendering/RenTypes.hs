@@ -1,7 +1,7 @@
 module RenTypes where
 
 import Graphics.UI.WX hiding (Size, Modifiers)
-import Graphics.UI.WXH (DC)
+import Graphics.UI.WXCore (DC)
 
 import CommonTypes
 import CommonUtils

@@ -8,7 +8,7 @@ import Char
 import IOExts
 
 import Graphics.UI.WX
-import Graphics.UI.WXH hiding (Font)
+import Graphics.UI.WXCore hiding (Font)
 
 -- use different structure to make lookup more efficient? Or is this a waste of time
 type FontMetrics = FiniteMap Font (Int, Int, Array Int Int)

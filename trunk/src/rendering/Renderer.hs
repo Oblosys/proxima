@@ -5,7 +5,7 @@ import qualified CommonTypes
 import RenLayerTypes
 import RenLayerUtils
 
-import ArrLayerUtils hiding (rect) -- for context menu hack
+import ArrLayerUtils hiding (rect,text) -- for context menu hack
 import PresTypes hiding (font) -- For Locations
 import DocTypes -- For Locations
 import DocUtils
@@ -13,7 +13,7 @@ import DocumentEdit -- Just for now
 import GUI
 
 import Graphics.UI.WX hiding (Color) 
-import Graphics.UI.WXH hiding (Color)
+import Graphics.UI.WXCore hiding (Color)
 import IOExts
 
 {-
@@ -81,7 +81,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
          do { let alts = menuD pth doc
             ; let items = ctxtItems++alts
             --; putStrLn $ "popup"++show (map fst items)
-            ; popupMenu <- menuList "" []
+            ; popupMenu <- menuPane []
             ; sequence_ (map (mkMenuItem popupMenu) items)
             
             ; (Point scrX scrY) <- scrolledWindowCalcScrolledPosition window (pt x y)
@@ -91,7 +91,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
         _ -> return ()  
     }                         -- This stuff belongs in GUI, renderer should only export names + edit ops
   where mkMenuItem popupMenu (str, upd) =
-         do { item <- menuItem popupMenu str "Select me" []
+         do { item <- menuItem popupMenu [ text := str ]
             ; set window [on (menu item) := popupMenuHandler handler renderingLvlVar window upd ]
             ; return item
             }

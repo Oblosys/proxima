@@ -22,7 +22,7 @@ Unclear: if edit is skip, update renderingLevel? Maybe it was changed by rendere
 -}
 --import Graphics.UI.ObjectIO
 import Graphics.UI.WX
-import Graphics.UI.WXH
+import Graphics.UI.WXCore
 
 import CommonTypes (DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO)
 import qualified CommonTypes
@@ -57,12 +57,12 @@ startGUI handler (initRenderingLvl, initEvent) = run $
     ; windowOnMouse window True {- get motion events -} (onMouse handler renderingLvlVar window)
     ; windowOnContextMenu window                        (onContextMenu handler renderingLvlVar window)
     ; windowOnKeyChar window                            (onKeyboard handler renderingLvlVar window)
-    ; windowOnPaint window True {- double buffer? -}    (onPaint renderingLvlVar)
+    ; windowOnPaint window {- double buffer? -}         (onPaint renderingLvlVar)
        
-    ; file <- menuList "&File" []
-    ; open   <- menuItem file "Open\tCtrl+O" "Open an existing document" []
-    ; saveAs <- menuItem file "Save\tCtrl+S" "Save the document in XML format" []
-    ; quit   <- menuItem file "Quit\tCtrl+Q" "Quit the application" []
+    ; file <- menuPane [ text := "&File"]
+    ; open   <- menuItem file [ text := "Open\tCtrl+O", help := "Open an existing document" ]
+    ; saveAs <- menuItem file [ text := "Save\tCtrl+S", help := "Save the document in XML format" ]
+    ; quit   <- menuItem file [ text := "Quit\tCtrl+Q", help := "Quit the application"  ]
           
     ; set frame [menubar := [file]]
     ; set frame [on (menu open)   := openFileMenuHandler handler renderingLvlVar window "open" ] 
@@ -84,8 +84,8 @@ startGUI handler (initRenderingLvl, initEvent) = run $
     ; return ()
     }    
     
-onPaint :: Var RenderingLevel -> DC () -> Rect -> [Rect]-> IO ()          
-onPaint renderingLvlVar dc viewRect updateAreas =
+onPaint :: Var RenderingLevel -> DC () -> Rect -> IO ()          
+onPaint renderingLvlVar dc viewRect =
  do { dcClear dc
     ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions <- varGet renderingLvlVar
     --; dcSetUserScale dc 2.0 2.0
@@ -208,7 +208,7 @@ openFileMenuHandler handler renderingLvlVar window menuItem =
               }
           "save" -> 
            do { debugLnIO Err "Save"
-              ; filePathM <- fileOpenDialog window False False "Save   {Open == Save}" [("XML Files",["*.xml"]),("Any Files",["*.*"])] "" "doc.xml"
+              ; filePathM <- fileSaveDialog window False True "Save" "" "doc.xml"
               
               --; filePathM <- fileSaveDialog window False True "Select" "." "doc.xml"
               ; debugLnIO Err $ show filePathM
