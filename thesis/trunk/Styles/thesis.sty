@@ -13,8 +13,7 @@
 \usepackage[usenames]{color}
 \usepackage[all]{xy}
 
-
-\usepackage{mypslatex}    % why use this?
+%\usepackage{mypslatex}    % why use this?
 %\usepackage{ipe}
 %\usepackage{algo}
 \usepackage{amssymb}
@@ -24,6 +23,15 @@
 \usepackage{cite}
 \usepackage{ifthen}
 \usepackage[dutch,english]{babel}
+
+% Begin Martijn
+%\usepackage{version}
+%\usepackage{comment}
+\let\bc=\iffalse % start block comment
+\let\ec=\fi        % end block comment
+
+% if comments give problems, one of the packages can be used.
+% End Martijn
 
 \setlength{\paperheight}{240mm}
 \setlength{\textheight}{190mm}
