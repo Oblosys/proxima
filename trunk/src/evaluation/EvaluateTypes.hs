@@ -88,7 +88,7 @@ uhaFromIdent pth _              = (Name_Identifier (range pth) [] "x")
 uhaFromExp :: [Int] -> Exp -> Expression
 uhaFromExp pth (PlusExp _ _ exp1 exp2)     = mkInfixApp pth "+" exp1 exp2
 uhaFromExp pth (TimesExp _ _ exp1 exp2)    = mkInfixApp pth "*" exp1 exp2
-uhaFromExp pth (DivExp _ _ exp1 exp2)      = mkInfixApp pth "/" exp1 exp2
+uhaFromExp pth (DivExp _ _ exp1 exp2)      = mkInfixApp pth "div" exp1 exp2
 uhaFromExp pth (PowerExp _ _ exp1 exp2)    = mkInfixApp pth "^" exp1 exp2
 uhaFromExp pth (BoolExp _ _ bool)          = Expression_Constructor (range pth) 
                                              $ Name_Special (range pth) [] (show bool)
