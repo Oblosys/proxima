@@ -1,2 +1,2 @@
- rm -r proxima.app
-/usr/local/wxhaskell/bin/macosx-app --libname=libwx_mac-2.4.0 --program=proxima
+ rm -r Proxima.app
+/usr/local/wxhaskell/bin/macosx-app --libname=libwx_mac-2.4.0 --program=Proxima
