@@ -7,7 +7,7 @@ import CommonUtils
 import XprezLib
 
 squiggly :: Color -> Xprez -> Xprez
-squiggly c xp = overlay [xp, img "Img/squiggly.png" `withHeight` 3 `withColor` c, empty]
+squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
 -- png is the red one, only temporary
 
 ifFocusP NoFocusP           _   = NoFocusP
@@ -600,7 +600,7 @@ popupMenuItemsPres' its pth      pres                      = debug Err ("PresTyp
 
 
 prez = prez2' --fontChars
-prez1 = row [text "bla", img "Img/squiggly.bmp" `withSize` (20,3),img "Img/squiggly.bmp" `withSize` (20,3) ,text "Xxx",overlay [text "vout", img "Img/squiggly.bmp" `withHeight` 3 `withColor` red], text "X"] `withHStretch` False
+prez1 = row [text "bla", img "img/squiggly.bmp" `withSize` (20,3),img "img/squiggly.bmp" `withSize` (20,3) ,text "Xxx",overlay [text "vout", img "img/squiggly.bmp" `withHeight` 3 `withColor` red], text "X"] `withHStretch` False
 prez2 =                             col [text "12345"
     ,  structural $ bold $ rowR 1 [text "abcd",  rowR 1 [ text "ref", vLineW 2,text "ref", strikeOut $ text "ref"], text "noppes", text "bla"],
                 rowR 2 [text "ab",   text "cd", underline $ text "ref", text "noppes", text "bla"]

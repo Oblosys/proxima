@@ -28,12 +28,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'n'
        pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'r'
        pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'p'
-       pieceXp (Prox.King _ True)  sqc True  = img "Img/Chess/pieceWF.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) sqc True  = img "Img/Chess/pieceBF.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ True)  True _  = img "Img/Chess/pieceWW.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) True _  = img "Img/Chess/pieceBW.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ True)  False _  =  img "Img/Chess/pieceWB.bmp" `withSize` (80,84)
-       pieceXp (Prox.King _ False) False _  = img "Img/Chess/pieceBB.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ False) True _  = img "img/Chess/pieceBW.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ True)  False _  =  img "img/Chess/pieceWB.bmp" `withSize` (80,84)
+       pieceXp (Prox.King _ False) False _  = img "img/Chess/pieceBB.bmp" `withSize` (80,84)
        
        txtPiece  ch = (if isReachable then (\x -> withMouseDown x (moveHere path focus)) else id) 
                        $ overlay $
