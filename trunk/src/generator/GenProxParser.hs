@@ -57,7 +57,7 @@ genReuse (tp,cnstr,cs,_) =
 
 genExtract (tp,cnstr,cs,_) =
   "extract"++cnstr++" :: Maybe Node -> Maybe "++tp++"\n"++
-  "extract"++cnstr++" (Just ("++tp++"Node x@("++cnstr++(concat $ replicate arity " _")++") _)) = Just x\n"++
+  "extract"++cnstr++" (Just ("++cnstr++"Node x@("++cnstr++(concat $ replicate arity " _")++") _)) = Just x\n"++
   "extract"++cnstr++" _ = Nothing\n"
  where arity = length cs
 
