@@ -28,27 +28,27 @@ formal story. however, design reasons for first are hard to comprehend without i
 % Explain tokens more general?
 %***** Mention more explicitly that formalisms are AG? elegant efficient. pres more info in Xprez chapter.
 
-A generic editor is a large system consisting of many components. In this chapter, we focus on those components of the Proxima architecture that are involved in the process of presenting the internal document to the user, and interpreting the edit gestures given by the user as edit operations on the document structure. Of course, other functionality, such as IO handling, macro processing, or a search facility is also important for the usability of the final editor, but implementation of these features is mainly straightforward, despite the fact that it may require a substantial amount of engineering. The presentation of the document and the handling of edit gestures, on the other hand, is of great importance, because it determines for which applications the editor can be used, as well as how powerful the editing behavior will be.
+A generic editor is a large system consisting of many components. In this chapter, we focus on those components of the Proxima architecture that are involved in the process of presenting the internal document to the user, and interpreting the edit gestures given by the user. Of course, other functionality, such as IO handling, macro processing, or a search facility, is also important for the usability of the final editor, but implementation of these features is largely straightforward, despite the fact that it may require a substantial amount of engineering. The presentation of the document and the handling of edit gestures, on the other hand, is of paramount importance, because it determines for which applications the editor can be used, as well as how powerful the editing behavior will be.
 
 The core architecture of Proxima consists of a number of layers, which only communicate with their direct neighbors. This layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto an intermediate data structure. This intermediate data structure is mapped onto another intermediate data structure, until the last intermediate data structure is mapped onto the rendering. 
 
-The positions at which the document, rendering, and intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{proxlayers} schematically shows the levels and layers of Proxima. Only two levels are visible to each layer: a higher and a lower level.
+The positions at which the document, rendering, and intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{proxlayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
 
 \begin{figure}
 \begin{center}
 \begin{small}
-\begin{tabular}{lc}
-level: &{Document}\vspace{1ex}\\
-layer: &\framebox[5cm][c]{Evaluation layer}\vspace{1ex}\\
-level: &{Enriched document}\vspace{1ex}\\
-\dots &\framebox[5cm][c]{Presentation layer}\vspace{1ex}\\
-&{Presentation}\vspace{1ex}\\
-&\framebox[5cm][c]{Layout layer}\vspace{1ex}\\
-&{Layout}\vspace{1ex}\\
-&\framebox[5cm][c]{Arrangement layer}\vspace{1ex}\\
-&{Arrangement}\vspace{1ex}\\
-&\framebox[5cm][c]{Rendering layer}\vspace{1ex}\\
-&{Rendering}
+\begin{tabular}{c}
+{Document level}\vspace{1ex}\\
+\framebox[5cm][c]{Evaluation layer}\vspace{1ex}\\
+{Enriched document level}\vspace{1ex}\\
+\framebox[5cm][c]{Presentation layer}\vspace{1ex}\\
+{Presentation level}\vspace{1ex}\\
+\framebox[5cm][c]{Layout layer}\vspace{1ex}\\
+{Layout level}\vspace{1ex}\\
+\framebox[5cm][c]{Arrangement layer}\vspace{1ex}\\
+{Arrangement level}\vspace{1ex}\\
+\framebox[5cm][c]{Rendering layer}\vspace{1ex}\\
+{Rendering level}
 \end{tabular}
 \end{small}\caption{ The levels and layers of Proxima (draft)}\label{proxlayers} 
 \end{center}
@@ -65,7 +65,7 @@ There are several reasons why the Proxima architecture is layered:
 The presentation process is naturally staged. The process consists of repeatedly mapping  structures that have a different meaning on a higher level onto a common set of lower level structures. For example, a table of contents, once its structure has been computed, can be presented in the same way as a chapter structure. Similarly, a line that comes from a formatted paragraph is rendered in the same way as a line that was explicitly specified in the presentation. Mappings like these form stages in the presentation process that can be performed by separate layers.
 
 \item[Specification of presentation and edit behavior.]
-A layered architecture provides natural hooks for the editor designer to specify presentation and edit behavior. A separate evaluation layer, for example, makes it possible to separate computation and presentation, thus allowing different style sheets to be used for a document together with its derived structures. At the same time, layers offer more control over backward mappings, such as the specification of how edit operations on derived structures are interpreted as edit operations on the document.
+A layered architecture provides natural hooks for the editor designer to specify specific parts of the presentation and edit behavior. A separate evaluation layer, makes it possible to separate computation and presentation, thus allowing different style sheets to be used for a document together with its derived structures. At the same time, layers offer more control over backward mappings, such as the specification of how edit operations on derived structures are to be interpreted as edit operations on the document.
 
 \item[Extra state.]
 An important aspect of the Proxima editor is the concept of {\em extra state}, which is inherently connected to a layered architecture. If information on a level cannot be computed by presenting the level above, it is presentation extra state, and if it cannot be computed by interpreting the level below, it is interpretation extra state.
@@ -77,7 +77,7 @@ Because Proxima supports editing on all levels, a mapping between each pair of l
 Some steps in the presentation process, especially in the higher layers, may be time consuming because global computations need to be performed. In a layered architecture, it is possible to perform the higher layer computations not at every keystroke, but only once in a while. For example, in a program editor, parsing the program may be delayed until the user enters a whitespace character or performs a navigation operation. Type checking the program may be delayed until after a certain period of inactivity, or when requested by the user.
 \end{description}
 
-The remainder of this chapter contains an informal description of the levels and layers in the Proxima architecture. A formal specification of the editor is provided in Chapter~\ref{chap:formalSpec} (preceded by an informal introduction in Chapter~\ref{chap:informalSpec}).
+The remainder of this chapter contains an informal description of the levels and layers in the Proxima architecture. A more formal specification of the editor is provided in Chapter~\ref{chap:formalSpec} (preceded by an informal introduction in Chapter~\ref{chap:informalSpec}).
 
 
 %																
@@ -88,7 +88,7 @@ The remainder of this chapter contains an informal description of the levels and
 A data level in Proxima is not just an intermediate value in the presentation computation, but an entity in its own right. Together, the data levels constitute the state of the editor. The six data levels of Proxima are:
 
 \begin{description}
-\item[Document:] The edited document, the type of which is described by a DTD or an EBNF grammar.
+\item[Document:] The edited document, the type of which is specified by a DTD or an EBNF grammar.
 
 \item[Enriched Document:] The document enriched with computed information.
 
@@ -105,9 +105,9 @@ A data level in Proxima is not just an intermediate value in the presentation co
 %																
 \subsection{Document} \label {sect:docLevel}
 
-A document is the internal tree data structure that is edited by the user. The type of the document is described by a context free grammar, with special constructs for lists and optional values (similar to EBNF). Haskell data types, EBNF, DTDs and XML Schemas are all, possibly restricted, forms of context free grammars suitable for describing the document type. In this thesis, we make use of simple Haskell data types without higher-order types, except for the list type.
+A document is the internal tree data structure that is edited by the user. The type of the document is specified by a context-free grammar, with special constructs for lists and optional values (similar to EBNF). Haskell data types, EBNF, DTDs and XML Schemas are all, possibly restricted, forms of context-free grammars suitable for describing the document type. In this thesis, we make use of simple monomorphic Haskell data types together with the list type.
 
-The exact type formalism is important for document to document transformations (i.e.\ document-oriented edit operations), because it should be possible to guarantee type safety of such transformations. However, for the time being, the only supported document-oriented edit operations are simple tree based operations, such as cut and paste, and basic operations on lists and optionals, such as selecting a segment of a list. Therefore, using a context free grammar formalism for describing document structure is powerful enough.
+The exact type formalism is important for document to document transformations (i.e.\ document-oriented edit operations), because it should be possible to guarantee type safety of such transformations. However, for the time being, the only supported document-oriented edit operations are simple tree-based operations, such as cut and paste, and basic operations on lists, such as selecting a segment of a list. Therefore, using a context-free grammar formalism for specifying the document structure is expressive enough.
  
 Because different instances of a generic editor may have different document types, we give an example document type for a specific instance. The example document consists of a list of declarations, each of which is an identifier declaration or a comment. An identifier declaration contains a string that represents the declared identifier, as well as an expression that consists of conditional expressions, integers, and booleans. The third field of the declaration is a string that contains additional information about the declaration. It is used to illustrate the concept of interpretation extra state in the Proxima editor. A comment consists of a list of strings. The types {\tt String}, {\tt Int}, and {\tt Bool} are primitive types. Although not very suitable for practical purposes, the chosen document type allows us to illustrate the different aspects of the Proxima data levels and layers.
 
@@ -128,11 +128,11 @@ The explanation of the presentation process in Section~\ref{sect:presprocess} pr
 %																
 \subsection{Enriched document} \label{sect:enrLevel}
 
-An enriched document is a copy of the document, to which derived information has been added. In the word processor example, the enriched document contains a table of contents, and each section or subsection element has a field that contains its number. Such derived information is not present at the document level.
+An enriched document is a copy of the document to which derived information has been added. In the word processor example, the enriched document contains a table of contents, and each section or subsection element has a field that contains its number. Such derived information is not present at the document level.
 
 Besides containing extra information, the enriched document, or a subtree of it, may also be a reordered version of the document. For example, if the document contains a list of elements, the enriched document may contain a sorted list of these elements.
 
-As an example of an enriched document type, we take the document type of the previous section and add a type declaration alternative {\tt TypeDecl} to the {\tt Decl} type. The type declaration is computed for each declaration. The type of an expression may be integer, boolean, or erroneous (e.g.\ the type of {\tt if True then 0 else False}). It is also possible to add the type as a field to the {\tt Decl} alternative, but separate type declarations make it easier to show how edit operations targeted at the enriched document are handled in Section~\ref{sect:reducer}.
+As an example of an enriched document type, we take the document type of the previous section and add a type declaration alternative {\tt TypeDecl} to the {\tt Decl} type. The type declaration is inferred for each declaration. The type of an expression may be integer, boolean, or erroneous (e.g.\ the type of {\tt if True then 0 else False}). It is also possible to add the type as a field to the {\tt Decl} alternative, but separate type declarations make it easier to show how edit operations targeted at the enriched document are handled in Section~\ref{sect:reducer}.
 
 \noindent
 \ttfamily
@@ -159,7 +159,7 @@ A presentation is an abstract description of what the document will look like to
 There are three ways of positioning elements in the presentation. Firstly, the position can be specified relative to other elements in the presentation, by placing a list of elements next to each other in a {\em row}, or above each other in a {\em column}. Elements are aligned according to reference lines (e.g.\ the baseline for a string), and stretchable elements may be used to influence the positioning. Besides rows and columns, a {\em matrix} construct presents a list of lists of elements aligned both horizontally as well as vertically, and an {\em overlay} presents a list of elements in front of each other (e.g.\ for presenting a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line). 
 %mention that alignment is modified easily?
 
-The second way of positioning presentation elements is by using a {\em formatter} element, that positions a list of elements based on the available space. Currently, Proxima only supports horizontal formatting, suitable for line breaking in a paragraph. Vertical formatting (for page breaking) is not fundamentaly different, but has not been implemented yet. Furthermore, support for a page model also requires extensions to the lower levels, which have not been realized yet.
+The second way of positioning presentation elements is by using a {\em formatter} element, which positions a list of elements based on the available space. Currently, Proxima only supports horizontal formatting, suitable for line breaking in a paragraph. Vertical formatting (for page breaking) is not fundamentally different, but has not been implemented yet. Furthermore, support for a page model also requires extensions to the lower levels, which have not been realized yet.
 
 Finally, a presentation (or part of it) may consist of a list of tokens, which may be identifiers, operators, integers, strings, etc. Tokens are used for presentations that use the scanner layer and its features for automatically handling whitespace. Each token contains information about the whitespace (line breaks and spaces) that precedes the token in the presentation. This whitespace is an example of presentation extra state, since it is not stored in the enriched document. 
 
@@ -169,7 +169,7 @@ Finally, a presentation (or part of it) may consist of a list of tokens, which m
 
 A presentation that needs to be parsed may contain parts that we do not want to be parsed. For example, a textual equation or source editor may have a non-textual presentation for fractions ($\frac{1}{1+x}$). Such a presentation can be included in the token list presentation with a {\em structural token}. A structural token contains a presentation, and is treated specially by the parser. Although a structural presentation itself is not parsed, it may contain other token lists that will be parsed (e.g. the numerator and denominator of the fraction may be parsed again).
 
-Unlike the document and the enriched document, the presentation has a fixed type, of which we present a slightly simplified subset here. Here, we present a slightly simplified subset of the type. The details regarding the attribution (e.g.\ color, font, and reference lines) of presentation elements have been left out, by leaving the type \verb|AttributionRule| abstract. Chapter~\ref{chap:presenting} discusses the presentation type in more detail.
+Unlike the document and the enriched document, the presentation has a fixed type, of which we present a slightly simplified subset here. The details regarding the attribution (e.g.\ color, font, and reference lines) of presentation elements have been left out by leaving the type \verb|AttributionRule| abstract. Chapter~\ref{chap:presenting} discusses the presentation type in more detail.
 
 \noindent
 \ttfamily
@@ -259,7 +259,7 @@ data AttributionRule = \dots\\
 %																
 \subsection{Rendering}
 
-A rendering is a set of user interface drawing commands that are actually drawn on the screen. Positions are expressed in pixel coordinates. In contrast to the other levels, a rendering is a list rather than a tree. However, in the future it may change to a tree structure, to support incremental updates on the rendering. 
+A rendering is a set of user interface drawing commands that actually draw on the screen. Positions are expressed in pixel coordinates. In contrast to the other levels, a rendering is a list rather than a tree. However, in the future it may change to a tree structure, to support incremental updates on the rendering. 
 
 Because the rendering is highly dependent on the GUI library that is used, we only give an abstract type.
 
@@ -279,7 +279,7 @@ data RenderingCommand = \dots
 %																
 \section{Editing on different levels in Proxima}
 
-Before we proceed with a description of the layers, we briefly discuss which levels can be edited in Proxima. When a level is targeted by an edit operation, the edit operation is directly performed on that level. Afterwards, the other levels are updated indirectly, as a result of the interpretation and presentation processes. To offer document-oriented as well as presentation-oriented editing, several levels may be targeted in Proxima. However, on some levels it does not make much sense to support direct editing, whereas on others the semantics of direct editing are not clear. Hence, only some of the levels may be edited directly. We briefly discuss how each level may be edited, starting with the rendering.
+Before we proceed with a description of the layers, we briefly discuss which levels can be edited in Proxima. When a level is targeted by an edit operation, the edit operation is directly performed on that level. Afterwards, the other levels are updated indirectly, as a result of the interpretation and presentation processes. To offer document-oriented as well as presentation-oriented editing, several levels may be targeted in Proxima. However, on some levels it does not make much sense to support direct editing, whereas on others the semantics of direct editing is not clear. We briefly discuss how each level may be edited, starting with the rendering.
 
 \head{Rendering}
 
@@ -297,7 +297,7 @@ Proxima does not support direct editing at the arrangement level. It is not poss
 
 \head{Layout}
 
-The layout level is the lowest level that can be edited directly. At the layout level, all presentation-oriented editing takes place. This includes the typing in program text in a source editor, but also text entry in the tax form editor or the word processor. Besides text insertion and deletion, also cut, copy and paste operations are supported.
+The layout level is the lowest level that can be edited directly. All presentation-oriented editing takes place at the layout level. This includes entering program text in a source editor, but also text entry in the tax form editor or the word processor. Besides text insertion and deletion, also cut, copy and paste operations are supported.
 
 \head{Presentation}
 
@@ -308,10 +308,10 @@ The presentation level does not need to be edited directly because of its direct
 Because the enriched document and the document are both trees, the edit functionality on both levels is similar. The only difference between the two is that if the enriched document is edited, a subsequent interpretation takes place to compute the document update. Because of the similarities, both levels are discussed together.
 % mention isomorphic parts?
 
-The edit operations at the document level are basic tree operations, such as cut, copy and paste on subtrees. If an list element has a parent that is also a list (eg.\ a list of subsections in a list of sections), split and join operations can be applied. Besides the standard edit operations, an editor designer may specify other generic transformations, or domain specific transformations.
+The edit operations at the document level are basic tree operations, such as cut, copy and paste on subtrees. If a list element has a parent that is also a list (eg.\ a list of subsections in a list of sections), split and join operations can be applied. Besides the standard edit operations, an editor designer may specify other generic transformations, or domain-specific transformations.
 
 %placeholders
-Child elements that are not of optional or list type are required and hence cannot be left out of the parent element. In order to still be able to manipulate an element without its children, Proxima employs the concept of a placeholder (also found in the Synthesizer Generator~\cite{reps84synGen}). A placeholder of a type $T$ is a dummy value that can be used in any place where an element of type $T$ is required. A built-in presentation is available for placeholders, but it can be overridden in a presentation sheet. A document containing a placeholder is not complete. The placeholders are typically only present during the construction of a document (or part of it), or as an intermediate situation during a document modification consisting of several steps. Lists and optional types do not require placeholders: for a list type, the empty list is the placeholder, and for an optional it is the empty alternative.
+Child elements that are not of optional or list type are required and hence cannot be left out of the parent element. In order to still be able to manipulate an element without its children, Proxima employs the concept of a placeholder (also found in the Synthesizer Generator~\cite{reps84synGen}). A placeholder of a type $T$ is a dummy value that can be used in any place where an element of type $T$ is required. A built-in presentation is available for placeholders, but it can be overridden in a presentation sheet. A document containing a placeholder is incomplete. The placeholders are typically only present during the construction of a document (or part of it), or as an intermediate situation during a document modification that consists of several steps. Lists and optional types do not require placeholders: for a list type, the empty list is the placeholder, and for an optional it is the empty alternative.
 
 \bc %also higher
 For example, moving a section entry in a table of contents is a direct edit operation on the enriched document level. An indirect document edit operation that moves the corresponding section (rather than just the entry) is computed from it by the reducer. Because the levels below the targeted level are skipped during interpretation in this case, these levels are not updated until the document is presented again.  \ec
@@ -340,7 +340,7 @@ Between each pair of data levels is a {\em layer} that takes care of mapping the
 
 In the actual architecture, the downward mapping is not a mapping between the higher and lower levels, but between edit operations on those levels, similar to the upward mapping. Hence, the upward and the downward mappings are symmetrical, as both are concerned with edit operations. 
 
-Besides mapping edit operations onto edit operations, a layer also takes care of updating the data levels by performing the edit operations on them. Data levels are updated on presentation as well as on interpretation. Each layer only updates one of its neighboring levels, because otherwise levels would be updated twice (each level is surrounded by two layers). For implementation reasons we will not discuss here, a layer component updates its argument level. Hence, the presentation component updates the higher level, whereas the interpretation component updates the lower level. 
+Besides mapping edit operations onto edit operations, a layer also takes care of updating the data levels by performing the edit operations on them. Data levels are updated on presentation as well as on interpretation. Each layer only updates one of its neighboring levels, because otherwise levels would be updated twice (each level is surrounded by two layers). For implementation reasons that we will not discuss here, a layer component updates its argument level; the presentation component updates its higher level, whereas the interpretation component updates its lower level. 
 
 \bc The exact types of the mappings in a layer are presented in Chapter~\ref{chap:layeredArchs}.\ec 
 Figure~\ref{singleLayer} contains a picture of a single layer. In the figure, $level\H$ and $level\L$ denote the higher and lower levels, and $\delta\!\H$ and $\delta\!\L$ denote the edit operations on these levels. The $\present$ component computes $\delta\!\H$ from $\delta\!\L$, $level\H$ and $level\L$. And, dually, the $\interpret$ component computes $\delta\!\L$ from $\delta\!\H$, $level\L$ and $level\H$. The squiggly arrows ($\leadsto$) denote that $\present$ updates $level\H$ and $\interpret$ updates  $level\L$.
@@ -350,7 +350,7 @@ Figure~\ref{singleLayer} contains a picture of a single layer. In the figure, $l
 \begin{center}
 \begin{center}
 \epsfig{file=pics/eps/ArchLayerSingle.eps, width=5cm} % visio: LayerOverview.vsd
-\end{center}\caption{A single proxima layer}\label{singleLayer} 
+\end{center}\caption{A single Proxima layer}\label{singleLayer} 
 \end{center}
 \end{small}
 \end{figure}
@@ -385,11 +385,11 @@ $f' ::  \delta_{Data_{High}} \rightarrow \delta_{Data_{Low}}$ with $f' edit_{Hig
 
 %thing is parameterized!!!
 
-Because each layer is between two levels and Proxima  consists of six data levels, we have five layers, one for each of the following steps: evaluation, presentation, layout, arrangement and rendering.
+Because each layer connects two levels and Proxima  consists of six data levels, we have five layers, one for each of the following steps: evaluation, presentation, layout, arrangement and rendering.
 
-Some of the components in the architecture are parameterized with so called {\em sheets}, which describe the specifics of a particular editor instance, similar to style sheets in a web browser. Together with the document type definition, the sheets specify the editor instance. Currently, the evaluation layer has an {\em evaluation sheet} and a {\em reduction sheet} and the presentation layer has {\em presentation sheet} and a {\em parsing sheet}.  The layout layer, on the other hand only has a {\em scanning sheet}, and the lower layers do not have any sheets at all. 
+Some of the components in the architecture are parameterized with so called {\em sheets}, which describe the specifics of a particular editor instance, similar to style sheets in a web browser. Together with the document type definition, the sheets determine the editor instance. Currently, the evaluation layer has an {\em evaluation sheet} and a {\em reduction sheet} and the presentation layer has a {\em presentation sheet} and a {\em parsing sheet}.  The layout layer, on the other hand only has a {\em scanning sheet}, and the lower layers do not have any sheets at all. 
 
-The formalisms for most of the sheets have not been established exactly yet, except for the presentation and parsing sheets. The presentation sheet is specified as an attribute grammar, whereas the parsing sheet is specified using a Haskell parser combinator library.
+The formalisms for most of the sheets have not been established exactly yet, except for the presentation and parsing sheets. The presentation sheet is specified by an attribute grammar, whereas the parsing sheet is specified using a Haskell parser combinator library.
 
 The reason why some components do not have sheets is that as of yet no sensible purpose has been found for them. The components without sheets can realize the required mappings without the need for parameters specific to a particular editor instance. However, a future version of Proxima may also support layout sheet and sheets for the lower levels. A layout sheet could be useful for specifying token based syntax coloring, whereas a rendering sheet could be used to specify rendering details, such as the rounding of corners in line drawings.
 
@@ -405,7 +405,7 @@ The reason why some components do not have sheets is that as of yet no sensible 
 
 Figure~\ref{proxLayers} shows an overview of the layers of Proxima. For clarity, the arrows between the layers and the levels are omitted, and a single arrow is used to denote the arrows between the layers and the edit operations. Because the edit gesture is not an edit operation on the rendering, it has no update arrow ($\leadsto$). Furthermore, because the document only needs to be updated once, there is no update arrow on the top-right of the figure. Instead, $\delta_{Doc}$ is passed on to the evaluator, which performs the edit operation on the document.
 
-The downward mappings from all layers together form a logical whole (the presentation process), just as the upward mappings (the interpretation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the interpretation process. 
+The downward mappings from all layers together form a logical whole (the presentation process), as do the upward mappings (the interpretation process). Therefore, rather than discussing the components pairwise from layer to layer, we give a description of all the components involved in the presentation process, followed by the components of the interpretation process. 
 
 The examples accompanying the component descriptions show a few instances of both presentation and interpretation extra state. Section~\ref{sect:extraState} discusses extra state in more detail and Section~\ref{sect:singleExtra} provides a formal specification. 
 
@@ -422,7 +422,7 @@ Arranger: Performs line-breaking and computes absolute sizes and positions.
 Unarranger: Translates absolute positions in edit operations to relative positions.
 \item [Rendering layer.]
 Renderer: Scales the arrangement and maps it onto user interface drawing commands.
-Gesture Interpreter: Maps edit gestures onto edit operations targeted at the appropriate levels, and descales positions in edit operations.
+Gesture interpreter: Maps edit gestures onto edit operations targeted at the appropriate levels, and descales positions in edit operations.
 \end{description}
 \ec
 
@@ -437,11 +437,11 @@ In the discussion of each of the layers, we present three examples of extra stat
 %																
 \section{Presentation process} \label{sect:presprocess}
 
-The presentation process is the stepwise mapping of a document onto its final rendering. Although the mapping is actually a mapping between edit operations on each of the levels, we will present it here as a mapping between levels. The reason for this is that the fact that the mapping is between edit operations is important mainly for reasons of incrementality, and viewing the presentation process as a mapping between levels makes it easier to explain.
+The presentation process is the stepwise mapping of a document onto its final rendering. Although the mapping is actually a mapping between edit operations on each of the levels, we will present it here as a mapping between levels. The reason for this is that the mapping between edit operations is important mainly for incrementality, and viewing the presentation process as a mapping between levels makes it easier to explain.
 
-In order to illustrate the different stages in the presentation process, we follow the presentation of an simple document. After the description of each layer component, the intermediate result of the presentation of the document is given. 
+In order to illustrate the different stages in the presentation process, we follow the presentation of a simple document. After the description of each layer component, the intermediate result of the presentation of the document is given. 
 
-The document type is the expression list document type from Section~\ref{sect:docLevel}. The document itself consists of two items: a comment and an expression. For brevity, we denote strings on each level with {\tt "\dots"} instead of {\tt String$_{\Level}$ "\dots"}. Note that the comment is part of the document, unlike regular comments in programs.
+The document type is the expression list document type from Section~\ref{sect:docLevel}. The document itself consists of two items: a comment and an expression. For brevity, we denote strings on each level with {\tt "\dots"} instead of {\tt String$_{\Level}$ "\dots"}. Note that the comment is part of the document, unlike comments in regular programs.
 
 Document:
 \small \ttfamily
@@ -476,7 +476,7 @@ This is a simple
 %what is evaluator
 The first step in the presentation process is the computation of the derived information in the document. The component that takes care of this is the evaluator. The evaluator is parameterized with an {\em evaluation sheet}, which is a declarative specification of the derived values. The evaluation sheet may be specified with an attribute grammar, but no final choice for the formalism has been made yet.
 
-Besides basic values, such as section numbers or the outcome of a computation in a spread sheet, the evaluator may also derive tree structures, such as a table of contents. The derived structures may be partial, duplicated, or reordered versions of the document.
+Besides basic values, such as section numbers or the outcome of a computation in a spreadsheet, the evaluator may also derive tree structures, such as a table of contents. The derived structures may be partial, duplicated, or reordered versions of the document.
 
 %.computing values, type errors , page numbers, table of contents
 \bigskip {\bf Example:} For each declaration, the evaluator computes a type declaration in the enriched document. In the example this means that a type declaration for \verb|"simple1"| with type {\tt IntType} is included in the item list.
@@ -500,18 +500,18 @@ Root$_{\Enr}$ \= [ Comment$_{\Enr}$ [ "This", "is", "a", "simple", "expression" 
 %what is presenter
 The enriched document is mapped onto the presentation by the presenter. Similar to the evaluator, the presenter is parameterized with a {\em presentation sheet} that specifies the presentation. The presentation sheet is an attribute grammar that defines the presentation as a synthesized attribute for each element in the enriched document. 
 
-In order to support extra state, the presentation layer keeps track of the mappings between the elements of the enriched document and the elements of the presentation. The presenter stores the enriched document origin in each presentation element, whereas the parser stores in each enriched document element the presentation elements that were used for parsing.
+In order to support extra state, the presentation layer keeps track of the mappings between the elements of the enriched document and the elements of the presentation. The presenter stores the enriched document origin in each presentation element, whereas the parser stores the presentation elements that were used for parsing, in the enriched document.
 
-Tokens are an example of presentation extra state in the presenter, because a token contains its own whitespace, which is not represented in the document or enriched document levels. If an enriched document structure is re-presented, the old tokens (and corresponding white\-space) are reused. 
+Tokens are an example of presentation extra state in the presenter, because a token contains its own whitespace, which is not represented in the document or enriched document levels. If an enriched document structure is re-presented, the originial tokens (and corresponding white\-space) are reused. 
 
 If an enriched document element that is presented with tokens, is newly created or has not been presented before, a default value for the whitespace of its tokens is chosen. This default may come from a pretty printing algorithm. A default value may also be used in case a structure has been edited in such a way that reusing the old tokens does not make sense.
 
 The mechanism of reusing presentation tokens is also used to handle ambiguities in token representations. For example, when a user has entered the text ``001'' which is stored in the document as the integer 1, the mapping between the enriched document and the presentation ensures that on re-presentation, the integer is presented as ``001'' instead of ``1''.
 
 % strongly related to evaluator
-The separation between evaluating and presenting is not strict. On the one hand, the entire presentation can be regarded as a derived structure, and on the other hand the presentation sheet can reorder elements in the presentation and introduce structures, which is more appropriately done in the evaluation sheet. 
+The separation between evaluating and presenting is more pragmatic than theoretical. On the one hand, the entire presentation can be regarded as a derived structure, and on the other hand the presentation sheet can reorder elements in the presentation and introduce structures, which is more appropriately done in the evaluation sheet. 
 
-The editor designer must make a careful decision on where to specify document evaluation and presentation. Whenever editing on a derived structure is supported, the computation of the structure must be part of the evaluation. But even if a derived structure is not intended to be editable, it may be wise to compute it during evaluation. Take for example a table of contents or a bibliography in a word processor. If the computation of such a structure is part of the evaluation, then its presentation can be changed without having to know about the details of the computation.
+The editor designer must make a careful decision on where to specify document evaluation and presentation. Whenever editing on a derived structure is supported, the computation of the structure must be part of the evaluation. But even if a derived structure is not intended to be editable, it may be wise to compute it during evaluation. Take for example a table of contents or a bibliography in a word processor. If the computation of such a structure is part of the evaluation, then its presentation can be changed without having to know the details of the computation.
 
 \bigskip {\bf Example:} The example presentation of the enriched document is basic: a comment is put in a formatted paragraph and a (type) declaration is presented in a textual infix representation using tokens. The third string field of the declaration \verb|"info"| is not included in the presentation in order to have an example of interpretation extra state. \bc The reason for this becomes apparent in Section~\ref{sect:parser} on parsing.\ec  The pair of numbers in each token represents the whitespace ({\em line breaks}, {\em spaces}) preceding it. This is a rather basic representation, in which spaces at the end of a line cannot be encoded, but for demonstration purposes it is sufficient.
 
@@ -657,16 +657,16 @@ This is a simple
 %																
 \section{Interpretation process} \label{sect:intrProcess}
 
-The interpretation of edit operations is layered in the same way as the presentation process. However, there are important differences between the two. For the interpretation process, edit operations are the main focus, and therefore we do not regard an interpretation mapping as a mapping between levels, as we did for the presentation process. \bc Another difference is that in the interpretation process layers may be skipped. For example, a document-oriented edit operation is passed upwards by the lower layers, until it reaches the evaluation layer, where it is performed on the document level. \ec
+The interpretation of edit operations is layered in the same way as the presentation process. However, there are important differences between the two. For the interpretation process, edit operations are the main focus. Therefore we will not view interpretation mappings as mappings between levels, as we did for the presentation process, but stay with the mapping between edit operations. \bc Another difference is that in the interpretation process layers may be skipped. For example, a document-oriented edit operation is passed upwards by the lower layers, until it reaches the evaluation layer, where it is performed on the document level. \ec
 
 
 
-An edit operation may be interpreted either {\em indirectly}, or {\em directly} (not to be confused with directly/indirectly editing a level). If an edit operation is interpreted indirectly, the operation is performed on the lower level, yielding an updated lower level. The updated lower level is then mapped onto a new higher level, from which a higher level edit operation is computed by taking the difference between the new and the previous higher level.
+An edit operation may be interpreted either {\em indirectly}, or {\em directly} (not to be confused with directly/indirectly editing a level). If an edit operation is interpreted indirectly, the operation is performed on the lower level, yielding an updated lower level. The updated lower level is then mapped onto a new higher level, from which a higher-level edit operation is computed by taking the difference between the new and the previous higher level.
 
 For an example of indirect interpretation, consider the insertion of a token in the presentation level. 
 Rather than mapping this edit operation directly on an edit operation on the enriched document, the token is inserted in the presentation, the presentation is parsed, and the edit operation is distilled from the new enriched document and its previous value.
 
-An edit operation that is directly interpreted, on the other hand, is not performed on the lower level, but is immediately translated to an edit operation on the higher level. An example is the interpretation of a mouse-click on an absolute position in the arrangement, which is mapped onto a mouse-click on a tree path in the layout level. 
+An edit operation that is directly interpreted, on the other hand, is not performed on the lower level, but is immediately translated to an edit operation on the higher level. An example is the interpretation of a mouse click on a position in the arrangement, which is mapped onto a mouse click on a tree path in the layout level. 
 
 Note the difference between direct or indirect interpretation versus direct or indirect editing. Directly editing a level means that it is targeted by an edit gesture. When a certain level is targeted by an edit gesture, this results in direct interpretation on all layers below that level, and indirect interpretation on the layers above. Hence, because the rendering and arrangement levels may not be edited directly, the lowest two layers (rendering and arrangement) only support direct interpretation.
 
@@ -682,7 +682,7 @@ Note the difference between direct or indirect interpretation versus direct or i
 Because the interpretation of edit operations does not always go through all stages like the presentation does, and because of the variation in edit operations, it is not helpful to give a running example of the interpretation process. Instead, a number of separate examples are provided together with the descriptions of the interpretation components.
 
 %																
-\subsection{Renderering layer: Gesture Interpreter} \label{sect:gestureInterpreter}
+\subsection{Rendering layer: Gesture interpreter} \label{sect:gestureInterpreter}
 
 The gesture interpreter has two tasks. It maps edit gestures onto edit operations for the designated levels, and it interprets direct edit operations on the rendering as edit operations on the arrangement, which means that absolute positions in pixel coordinates are descaled to arrangement level coordinates. 
 
@@ -693,7 +693,7 @@ The mouse edit operation is a single left-click at pixel coordinates (84,57) in 
 Because of the scaling factor, the coordinates are divided by 1.5 to get the arrangement coordinates.
 
 \ttfamily
-MouseClick$_{\Ren}$ Left (84,57)) $\mapsto$ MouseClick$_{\Arr}$ (56, 38) Left\\
+MouseClick$_{\Ren}$ Left (84,57) $\mapsto$ MouseClick$_{\Arr}$ Left (56, 38)\\
 \rmfamily
 
 The second example is a key press of the letter '\verb|a|', which is mapped onto an insert event. However, a textual insert event is targeted at the layout level instead of the arrangement level, since the arrangement level cannot be edited textually. The insert operation is therefore not of the arrangement edit type, and needs to be wrapped. The arrangement layer unwraps the insert operation and passes it on to the layout layer.
@@ -706,7 +706,7 @@ KeyPress$_{\Ren}$ 'a' $\mapsto$ Wrap$_{\Arr}$ (Insert$_{\Lay}$ 'a')
 %																
 \subsection{Arrangement layer: Unarranger}
 
-The main task of the unarranger is to map locations in arrangement level edit operations onto locations in layout level edit operations. A location that is specified in absolute coordinates is first converted to a location in the arrangement tree, which is specified as a tree path. Subsequently, the arrangement tree path is mapped onto a layout tree path. The arrangement tree is largely isomorphic to the layout tree, except for the formatter subtrees, as these are represented by rows and columns in the arrangement. Therefore, the mapping is mainly the identity function, except for paths in rows that originate from a formatter, which are mapped to paths in the originating formatter.
+The main task of the unarranger is to map locations in arrangement-level edit operations onto locations in layout-level edit operations. A location that is specified in absolute coordinates is first converted to a location in the arrangement tree, which is specified as a tree path. Subsequently, the arrangement tree path is mapped onto a layout tree path. The arrangement tree is largely isomorphic to the layout tree, except for the formatter subtrees, as these are represented by rows and columns in the arrangement. Therefore, the mapping is almost the identity function, except for paths in rows that originate from a formatter, which are mapped to paths in the originating formatter.
 
 \bigskip {\bf Example:}
 A left-click mouse event at position (56,38) in the example arrangement from Section~\ref{sect:arranger} represents a click on the string ``\verb|Int|'' in the layout (Section~\ref{sect:layouter}). To be precise, it is a click on the left side of the letter '\verb|I|'. If we represent a path in the arrangement tree by a list of integers and a 0 denotes the first child, then this position is represented by \verb|[1,0,1,4,0]|. Thus:
@@ -725,15 +725,15 @@ The scanner operates only on the subtrees in the layout layer that originate fro
 
 If the scanner encounters an error during the scanning process, (e.g.\ in case of an unterminated string), it generates an error token, which subsequently causes a parse error in the parser. The details of this process are not discussed here. 
 
-The scanner is parameterized with a {\em scanner sheet}, which contains a set of regular expressions describing the tokens. Since different parts of a layout may require different scanners (e.g.\ in a presentation that shows both Java and Haskell code), a scanner sheet can contain several sets of token descriptions. The layout level contains information on what kind of presentation gave rise to the parts that need to be scanned, which allows the scanner to use the appropriate set of token descriptions.
+The scanner is parameterized with a {\em scanner sheet}, which contains a set of regular expressions describing the allowed set of tokens. Since different parts of a layout may require different scanners (e.g.\ in a presentation that shows both Java and Haskell code), a scanner sheet can contain several sets of token descriptions. The layout level contains information on what kind of presentation gave rise to the parts that need to be scanned, which allows the scanner to use the appropriate set of token descriptions.
 
-Scanning is usually a rather localized process, so rather than re-scanning an entire token list, only the edited part of the layout level is scanned and used to compute the appropriate presentation-oriented edit commands. An exception to this local behavior is formed by tokens with an explicit start and end tag such as strings or characters. If a string or character quote is entered, this may affect more than just the edited part of the layout.
+Scanning is usually a localized process, so rather than re-scanning an entire token list, only the edited part of the layout level is scanned and used to compute the appropriate presentation-oriented edit commands. An exception to this local behavior is formed by tokens with an explicit start and end tag, such as strings or characters. If a string or character quote is entered, this may affect more than just the edited part of the layout.
 
 The scanner layer does not yet support the handling of comments that may appear anywhere in the source. Because such comments are not part of the document, they need to be handled as presentation extra state, similar to whitespace. Comments may affect the locality of the scanning process in the same way as strings.
 
 
 \bigskip {\bf Example:}
-Consider the example layout level from Section~\ref{sect:layouter} and assume that the edit operation on the layout is the insertion of a space between the characters 'e' and '1' in the identifer \verb|"simple1"| of the declaration. Because "\verb|simple 1 = if |\dots" is not a valid declaration, the edit operation will cause a parse error in the presentation layer, but that has no consequences for the example on the layout layer.
+Consider the example layout level from Section~\ref{sect:layouter} and assume that the edit operation on the layout is the insertion of a space between the characters 'e' and '1' in the identifer \verb|"simple1"| of the declaration. Because "\verb|simple 1 = if |\dots" is not a valid declaration, the edit operation will cause a parse error in the presentation layer, but this has no consequences for the example at the layout layer.
 
 In order to compute the edit operation on the presentation, we first apply the layout edit operation to the layout level, yielding:
 
@@ -782,25 +782,25 @@ We use an informal notation for both the {\em insert} and the {\em replace} edit
         
 % mention error correction and other repairing parsers? or do this in conclusions?
 
-It is not possible to directly map edit operations on the presentation to edit operations on the enriched document. Consider, for example, the insertion of the string ``\verb|if|'' in a source editor. From this insertion command only, we cannot compute an enriched document update. Instead, we need to take the indirect approach: the edit operation is applied to the presentation, which is then parsed to yield a new enriched document. Similar to the scanner, the parser layer computes an edit operation on the enriched document by taking the difference between the new enriched document and its previous value. 
+It is not possible to map edit operations on the presentation directly onto edit operations on the enriched document. Consider, for example, the insertion of the string ``\verb|if|'' in a source editor. From this insertion command only, we cannot compute an enriched document update. Instead, we need to take the indirect approach: the edit operation is applied to the presentation, which is then parsed to yield a new enriched document. Similar to the scanner, the parser layer computes an edit operation on the enriched document by taking the difference between the new enriched document and its previous value. 
 
 The parser component is parameterized with a {\em parsing sheet}, which contains the actual specification of the parser. The parser is specified in Haskell, using a specialized parser combinator library. The parser combinators from this library parse a presentation tree instead of a string. Furthermore, special support is available for handling interpretation extra state.
 
-The parser makes a distinction between token lists and the rest of the presentation. Only the token lists are actually parsed. The other parts of the presentation may not be edited at presentation level and are therefore mapped onto their originating enriched document structures. Because parsed presentations may contain parts that are not parsed, and vice versa, the two processes alternate.
+The parser makes a distinction between token lists and the rest of the presentation. Only the token lists are actually parsed. The other parts of the presentation may not be edited at the presentation level and are therefore mapped onto their originating enriched document structures. Because parsed presentations may contain parts that are not parsed, and vice versa, the two processes alternate.
 
 Each part of the presentation that is not parsed is mapped directly onto the enriched document element of which it is the presentation. In order to do so, the parser layer uses the information on the enriched document origin that is stored in each presentation element by the presenter.
 
 If the originating enriched document element has children that are also presented, these children are determined via the same process. A child that does not appear in the presentation is reused from the previous enriched document level, or, if this is not possible, it is initialized to a default value. If a child has a token list presentation, the parser process takes over.
 
-The parser that is applied to the list of tokens is specified  in the parsing sheet. Parse errors are represented in the document by error nodes that may appear anywhere in the document tree. Because the enriched document may contain information that is not presented (i.e.\ interpretation extra state), the parser tries to reuse the enriched document nodes from the previous version of the enriched document. If a node cannot be reused, the extra information is initialized to a default value. If a structural node is encountered, the previously described mapping process is invoked again.
+The parser that is applied to the list of tokens is specified  in the parsing sheet. Parse errors are represented in the document by error nodes that may appear anywhere in the document tree. Because the enriched document may contain information that is not presented (i.e.\ interpretation extra state), the parser tries to reuse the enriched document nodes from the previous version of the enriched document. If a node cannot be reused, the extra information is initialized to a default value. If a \p{structural} node is encountered, the previously described mapping process is invoked again.
 
-In order to support presentation extra state for tokens (i.e.\ whitespace), the parser stores a reference to the tokens it parses in the resulting enriched document node. This information is used when the enriched document is presented. Because currently the only form of presentation extra state is whitespace in tokens, the mapping information only needs to be kept for enriched document elements that are parsed.
+In order to support presentation extra state for tokens (e.g.\ whitespace), the parser stores a reference to the parsed tokens in the resulting enriched document node. This information is used when the enriched document is presented. Because currently the only form of presentation extra state is whitespace in tokens, the mapping information only needs to be kept for enriched document elements that are parsed.
 
 \bc
 Even though it is possible to specify a presentation for which it is impossible to automatically determine the originating enriched document elements, this need not be a problem. In that case, automatic handling of presentation-oriented editing is not supported, and the editor designer will have to take care of handling it, or prohibit it altogether. \ec
 
 \bigskip {\bf Example:}
-We consider a delete operation on a number of succesive tokens in the presentation. For simplicity, each declaration or type declaration in our example is presented as a separate token list. Hence, presentation-oriented edit operations have to be local to a single declaration. However, in an actual source editor, the token lists are concatenated, and edit editing may span several declarations.
+We consider a delete operation on a number of successive tokens in the presentation. For simplicity, each declaration or type declaration in our example is presented as a separate token list. Hence, presentation-oriented edit operations have to be local to a single declaration. However, in an actual source editor, the token lists are concatenated, and editing may span several declarations.
 
 The presentation level for the example is the same as in Section~\ref{sect:presenter}. The part that is affected by the edit operation is: 
 
@@ -828,7 +828,7 @@ Tokens$_{\Pres}$ \= [ LCaseToken$_{\Pres}$ (1,0) "simple1", OpToken$_{\Pres}$ (0
 \end{tabbing}
 \rmfamily \normalsize
 
-A parser is invoked on the new list of tokens. The result is not an entire enriched document, but only an updated declaration for \verb|simple1|. In the resulting declaration, its previous value, is partly reused. This is why the declaration contains the string \verb|"info"|, even though it is not present at the presentation level. The previous value of the declaration is obtained from a reference that is stored in its tokens on presentation. The string is part of the interpretation extra state of the enriched document level.
+A parser is invoked on the new list of tokens. The result is not an entire enriched document, but only an updated declaration for \verb|simple1|. In the resulting declaration, its previous value is partly reused. This is why the declaration contains the string \verb|"info"|, even though it is not present at the presentation level. The previous value of the declaration is obtained from a reference that is stored in its tokens on presentation. The string is part of the interpretation extra state at the enriched document level.
 
 \small \ttfamily
 \begin{tabbing}
@@ -836,7 +836,7 @@ Decl$_{\Enr}$ \= "simple1" (IntExp$_{\Enr}$ 0) "info"
 \end{tabbing}
 \rmfamily \normalsize
 
-The edit operation is extracted from the new enriched document part and the previous enriched document, yielding:
+The edit operation is computed from the new enriched document part and the previous enriched document, yielding:
 
 \small \ttfamily
 \begin{tabbing}
@@ -858,20 +858,20 @@ After it is edited, an enriched document may be inconsistent with regard to the 
 %																
 \subsection{Evaluation layer: Reducer} \label{sect:reducer}
 
-The reducer takes care of mapping edit operations in derived structures on edit operations on the document. The specification of the mapping is in the {\em reduction sheet}, which in many cases can be automatically derived from the evaluation sheet. Automatic reduction behavior is typically possible for parts of the enriched document that are duplicated, reordered, or partial versions of parts of the document. 
+The reducer takes care of mapping edit operations on derived structures onto edit operations on the document. The specification of the mapping is in the {\em reduction sheet}, which in many cases can be automatically derived from the evaluation sheet. Automatic reduction behavior is typically possible for parts of the enriched document that are duplicated, reordered, or partial versions of parts of the document. 
 
-If a document structure appears duplicated in the enriched document, and one of the duplicates has been edited, the reducer resolves the situation by taking the duplicate that was edited. If both duplicates have been edited, either the edit operation may be blocked, or a choice between the two may be made. Reordered and partially presented document structures are handled by maintaining a mapping between each enriched document element and the document element from which it originated.
+If a document structure is duplicated in the enriched document, and one of the duplicates has been edited, the reducer resolves the situation by taking the duplicate that was edited. If both duplicates have been edited, either the edit operation is blocked, or a choice between the two is made. Reordered and partially presented document structures are handled by maintaining a mapping between each enriched document element and the document element from which it originated.
 
-Although it is possible to have a derived structure be editable, this behavior is of course not enforced. For many derived structures, a reverse mapping does not make much sense. For example, it is hard to give a clear semantics of editing a chapter number directly. However, when two chapters in a table of contents are swapped, swapping the two chapters in the document may be considered a logical operation in some editors. In the cases for which the reverse mapping makes sense, it may be specified in the reduction sheet. In the other cases, editing derived structures may be forbidden.
+Although it is possible for a derived structure to be editable, this behavior is not enforced. For many derived structures, a reverse mapping does not make much sense. For example, it is hard to give a clear semantics to the direct editing of a chapter number. However, when two chapters in a table of contents are swapped, swapping the two corresponding chapters in the document could well be the desired effect. When the reverse mapping makes sense, it can be specified in the reduction sheet. When not, editing derived structures can be forbidden.
 
-Besides regarding the reduction as the reverse of the evaluation, it is also possible to use reduction as an extension of the parser. As an example, consider a program source that contains definitions of infix operators with a user-specified associativity and precedence. Parsing such operators in one pass requires a sophisticated parser, whereas the two-pass solution is straightforward.
+Besides regarding the reduction as the reverse of the evaluation, it is also possible to use reduction as an extension of the parser. As an example, consider a program source that contains definitions of infix operators with user-specified associativity and precedence. Parsing such operators in one pass requires a sophisticated parser, whereas the two-pass solution is straightforward.
 
-Another application of reduction is the handling of rendundancy in a document presentation. For example, when a document type for expressions does not have an explicit representation for parentheses, redundant parentheses that are entered by a user can be removed by the reducer, to be added again by the evaluator.
+Another application of reduction is the handling of redundancy in a document presentation. For example, when a document type for expressions does not have an explicit representation for parentheses, redundant parentheses that are entered by a user can be removed by the reducer, to be added again by the evaluator.
 
 \bigskip {\bf Example:} 
-Assume that the example editor supports editing on the identifier in a type declaration, leading to an update on the identifier in the corresponding declaration. 
+Assume that the example editor supports editing on the identifier in a type declaration, leading to an update of the identifier in the corresponding declaration. 
 %Although this may not always be desirable behavior in an actual source editor, it provides a good example of editing on derived values.
-The interpreted edit operation is an update on the identifier in the type declaration of the enriched document from Section~\ref{sect:evaluator}. The identifier is changed from \verb|"simple1"| to \verb|"simple"|. Thus, we get the following updated enriched document.
+The interpreted edit operation is an update of the identifier in the type declaration of the enriched document from Section~\ref{sect:evaluator}. The identifier is changed from \verb|"simple1"| to \verb|"simple"|. Thus, we get the following updated enriched document.
 
 \small \ttfamily
 \begin{tabbing}
@@ -901,7 +901,7 @@ Root$_{\Doc}$ \= [ Comment$_{\Doc}$ ["This", "is", "a", "simple", "expression"] 
 \end{tabbing}
 \rmfamily \normalsize
 
-And the document level edit operation thus becomes:
+And the document-level edit operation thus becomes:
 
 \small \ttfamily
 \begin{tabbing}
@@ -944,11 +944,11 @@ The problem with partial mappings, is that when mapping one level onto another, 
 %																
 \section{The choice of layers in Proxima}
 
-The choice of layers for the Proxima editor is not an exact one. On the one extreme, the entire edit process can be put in one large layer, and on the other extreme a separate layer can be defined for every small step in the process. The choice of layers in Proxima is a balance between these extremes. This section explains why Proxima consists of the five layers that were presented in this chapter.
+The choice of layers for the Proxima editor is based on pragmatic considerations. On the one extreme, the entire editing process could be put in one large layer, resulting in an unwieldy presentation relation. On the other extreme a separate layer could be defined for every small step in the process, giving an awkward and inefficient editing proces. The choice of layers in Proxima is a balance between these two extremes. This section explains why Proxima consists of the five layers that were presented in this chapter.
 
-The separation of document evaluation and presentation serves two purposes. Firstly, the separation makes it possible to have different presentations for a document together with its derived structures. And secondly, it facilitates the specification of edit behavior on derived structures. When parsing and reduction are mixed, such behavior is harder to specify.
+The separation of document evaluation and presentation serves two purposes. Firstly, the separation makes it possible to have different presentations for a document together with its derived structures. Secondly, it facilitates the specification of edit behavior on derived structures. When parsing and reduction are mixed, such behavior is harder to specify.
 
-The reasons for a separate layout layer are the automatic whitespace handling for token presentations, as well as efficiency, since first scanning and then parsing is more efficient than parsing on a character basis. A downside is that different languages require slightly different scanning methods, and a generic scanner that is able to handle all exotic cases is hard to construct. Moreover, in some cases, an editor designer may be interested in dealing with whitespace at enriched document or document level. However, in these cases, the scanner layer may be bypassed altogether, allowing the editor designer to parse on a character basis and explicitly deal with whitespace.
+The reasons for a separate layout layer are the automatic whitespace handling for token presentations, as well as efficiency, since first scanning and then parsing is more efficient than parsing on a character basis. A downside is that different document types require slightly different scanning methods, and a generic scanner that is able to handle all exotic cases is hard to construct. Moreover, in some cases, an editor designer may be interested in dealing with whitespace at enriched document or document level. However, in these cases, the scanner layer may be bypassed altogether, allowing the editor designer to parse on a character basis and explicitly deal with whitespace.
 
 Below the layout level are the arrangement level and the rendering level. The separation between these two levels and the higher levels is obvious, since the position and size computations are similar for different elements in the layout, and keeping the computations in a separate layer prevents cluttering the higher layers. The reason why the arrangement and rendering have been split is to keep the part of the architecture that deals with the GUI-specific issues as small as possible. Furthermore, the arrangement contains exact information on the location and size of each item that is to be rendered, which is useful for resolving pointing issues and performing incremental updates. 
 
@@ -958,14 +958,14 @@ Besides the current layers, several other layers are imaginable. For example, a 
 
 \section{Conclusions}
 
-The architecture of the Proxima editor consists of five layers, which are surrounded by six data levels. Several layers are parameterized with sheets that specify the behavior of the layer. The most imporant sheets are the presentation and parsing sheets, which are specified, respectively, with an attribute grammar and a combinator parser. The other sheets are the evaluation and reduction sheets of the evaluation layer, and the scanning sheet of the scanning layer, but no final choice has been made about the formalisms for these sheets.
+The architecture of the Proxima editor consists of five layers connecting six data levels. Several layers are parameterized with sheets that specify the behavior of the layer. The most imporant sheets are the presentation and parsing sheets, which are specified, respectively, with an attribute grammar and a combinator parser. The other sheets are the evaluation and reduction sheets of the evaluation layer, and the scanning sheet of the scanning layer, but no final choice has been made about the formalisms for these sheets.
 
 Proxima has an open architecture, to which an extra layer can be added with relatively little effort. Moreover, each layer may easily be extended or modified. Instead of specifying the computations in an evaluation sheet, the evaluation layer may, for example, invoke an external type checker. 
 
 % edit ops only on layout?
 Each level in the Proxima editor is part of the total editor state, rather than just an intermediate value in a computation. One reason for this is to support incrementality, but a second reason is that a level may contain extra state. More specifically, from the perspective of a single layer, a higher level does not always contain enough information to compute the lower level and vice versa. By storing both layers, together with information on how elements in each level depend on each other, it is possible to compute the lower level from an updated higher level and vice versa.
 
-Each layer in the Proxima system maintains information on the bidirectional mapping between the neighboring higher and lower levels. In the lower layers, the mappings can be maintained by the editor, because the lower layers operate between levels that have fixed types, and furthermore, have presentation and interpretation mappings that are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings are maintained. 
+Each layer in the Proxima system maintains information on the bidirectional mapping between the neighboring higher and lower levels. In the lower layers, the mappings can be maintained by the editor, because the lower layers operate between levels that have fixed types, and furthermore, have presentation and interpretation mappings that are less customizable by the editor designer. For the higher levels, however, the editor designer in some cases needs to specify how the mappings are to be maintained. 
 
 % es is tricky, need further research
 The formalisms for the sheets at the presentation layer offer special support for maintaining the mapping information, but more research on extra state is required to improve this support. Furthermore, the formalisms for the evaluation and reduction sheets need to be determined. Ideally, only the evaluation sheet needs to be provided, from which the reduction sheet is derived automatically. However, for the time being, we consider it an acceptable solution that both sheets are provided by the editor designer. For frequently appearing patterns in the evaluation process, automatic reduction could be supported. Similar functionality is desirable for the presentation layer: for frequently appearing patterns in the presentation, a parser may automatically be generated.

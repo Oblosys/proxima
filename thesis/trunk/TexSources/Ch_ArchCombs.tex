@@ -51,7 +51,7 @@ In this chapter we give four implementation models for layered architectures. Fi
 
 We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture discussed in Chapter~\ref{chap:proxArch}. In Section~\ref{sect:proxima} we will show how the architecture combinators are used in the implementation of Proxima.
 
-Figure~\ref{simpleeditprocess} depicts the edit process for our simple editor. The editor keeps track of a document ($doc$), which is mapped onto a presentation ($pres$). The presentation process is split into $n$ components: $\present_1 \dots \present_n$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture ($gest$) in response. The edit gesture is then mapped onto a document update ($upd$) by $\interpret_n \dots \interpret_1$, after which it is performed on the document.
+Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document ($doc$), which is mapped onto a presentation ($pres$). The presentation process is split into $n$ components: $\present_1 \dots \present_n$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture ($gest$) in response. The edit gesture is then mapped onto a document update ($upd$) by $\interpret_n \dots \interpret_1$, after which it is performed on the document.
 
 %\bl
 %\o ref to informal spec
@@ -99,7 +99,7 @@ Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is som
 }
 \end{scriptsize}
 \end{minipage}
-\end{center}\caption{Two cycles in the edit process. (draft)}\label{simpleeditprocess} 
+\end{center}\caption{Two cycles in the editing process. (draft)}\label{simpleeditprocess} 
 \end{center}
 \end{small}
 \end{figure}
@@ -146,7 +146,7 @@ Figure~\ref{simplelayers} \note{figure: dotted line between present and interpre
 
 
 \bc
-Figure~\ref{simpleeditprocess} contains a schematic representation of the edit process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and interpretation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
+Figure~\ref{simpleeditprocess} contains a schematic representation of the editing process. Each of the boxes represents one complete edit cycle. The emphasis in the figure is put on the presentation and interpretation phases (phases 1 and 4). Phases 2 and 3 are represented by the dotted arrows at the bottom of the figure, and phase 5 is represented by the dotted arrows at the top.
 \ec
 
 
@@ -1466,7 +1466,7 @@ The main difference between a Proxima layer and a \p{Simple} layer is that in Pr
 
 In Section~\ref{sect:archProximaLayers}, we explained that a layer function updates its source level. Thus, each intermediate level can be updated by two different layers: on interpretation by the layer below, and on presentation by the layer below. Thus, a data level cannot stay exclusively in one layer, but has to alternate between two layers.
 
-Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower level edit operation $\delta_{Low}$, $\interpret$ gets both levels and a $state$ argument (which is explained below). The result of $\interpret$ is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, $\interpret$ returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of $\present$ is symmetrical.
+Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, $\interpret$ gets both levels and a $state$ argument (which is explained below). The result of $\interpret$ is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, $\interpret$ returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of $\present$ is symmetrical.
 
 The figure also shows how the higher level is updated by $\interpret$ of layer above, before coming back down as $high'$. Similarly, $\present$ of the layer below updates $low'$ to $low''$. 
 
@@ -1556,6 +1556,6 @@ Because the architecture description language is embedded in the implementation 
 
 According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture description language should describe the components of an architecture, the connectors, and the configuration. For the architecture combinators defined in this chapter, we can identify these aspects as follows: the layer functions are the components; \p{lift} and \p{combine} are the connectors; and the applications of \p{lift} and \p{combine} determine the configuration.
 
-The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spread-sheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns how dynamic aspects of the architecture, such as the requirements of Chapter~\ref{chap:formalSpec}, can be described and, if possible, verified.
+The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns how dynamic aspects of the architecture, such as the requirements of Chapter~\ref{chap:formalSpec}, can be described and, if possible, verified.
 
 %conclusions dependent types. ?? others?

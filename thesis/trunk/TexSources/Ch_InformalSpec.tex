@@ -1,6 +1,5 @@
 \chapter{Prelude to the specification}
 \label{chap:informalSpec}
-\note{different chapter title?}
 
 
 
@@ -87,9 +86,9 @@ This chapter discusses the invariant that is maintained between adjacent levels 
 
 \ec
 
-In this chapter, we introduce several concepts that play a role in the specification of a layered editor. Although many examples come from the Proxima editor, the concepts are general and apply to any layered structure editor. The discussion is informal and serves as an introduction to the formal specification in the next chapter.
+In this chapter, we informally introduce several concepts that play a role in the specification of a layered editor, to be given in Chapter~\ref{chap:formalSpec}. The discussion in this chapter also recapitulates some issues already mentioned in Chapter~\ref{chap:proxArch}. Although many examples come from the Proxima editor, the concepts are general and apply to any layered structure editor.
 
-Section~\ref{sect:editProces} introduces the presentation invariant that is maintained by an editor and sketches the different steps of the edit process. In Section~\ref{sect:extraState} we explore the concept of extra state for presentation mappings between tree structures, and sketch a method for handling such extra state. Finally, Section~\ref{sect:informalDuplicates} discusses how to handle edit operations on presentations that contain duplicate information.
+Section~\ref{sect:editProces} introduces the presentation invariant that is to be maintained by an editor and sketches the different steps of the editing process. In Section~\ref{sect:extraState} we explore the concept of extra state for presentation mappings between tree structures, and sketch a method for handling such extra state. Finally, Section~\ref{sect:informalDuplicates} discusses how to handle edit operations on presentations that contain duplicate information.
 
 
 % based on a mapping between levels
@@ -108,9 +107,8 @@ Where say that mapping back is only when we need automatic editing: is it only i
 %																
 %																
 %																
-\section{The edit process}\label{sect:editProces}
+\section{The editing process}\label{sect:editProces}
 %\note{ mention that levels are trees.}
-\note{add figure with levels en layers and user?}
 
 % during editing one of the levels is changed, other changes along. in this section first give updates for entire editor
 %, then refine it for layers
@@ -122,11 +120,11 @@ The invariant, maintained by the editor is that the lower level is a valid prese
 \text{\bf Presentation invariant:~~~} \level_{L}~\Present~\level_{H}\\
 \end{math}
 
-The precondition of an edit step is that the presentation invariant holds. The user then modifies the presentation, and most likely breaks the invariant. In order to restore the invariant, the editor updates the document level by interpreting the modified presentation. However, because often the user-updated lower level is not a completely valid presentation, the document update alone may not yet restore the presentation invariant. For example, a program fragment may have been entered without proper syntax-coloring, or a chapter title may have been modified in the chapter itself but not in the table of contents. In order to guarantee that the restoration of the presentation invariant, the updated document is presented again.
+The precondition of an edit step is that the presentation invariant holds. The user then modifies the presentation (giving $\level'\L$), and most likely breaks the invariant. In order to restore the invariant, the editor updates the document level by interpreting the modified presentation, which yields $\level''\H$. However, because the user-updated lower level is often not a completely valid presentation, the document update alone may not yet restore the presentation invariant. For example, a program fragment may have been entered without proper syntax coloring, or a chapter title may have been modified in the chapter itself but not in the table of contents. In order to guarantee the restoration of the presentation invariant, the updated document is presented again ($\level''L$).
 
-Figure~\ref{singleLayerEdit} schematically shows the edit process for one edit step.  The final higher level-value is called $level''\H$ rather than $level'\H$ to enable a consistent notation for final values. Furthermore, in the multi-layered editor, introduced in the next section, $level'\H$ will denote an intermediate value for the higher level.
+Figure~\ref{singleLayerEdit} schematically shows the editing process for one edit step.  The final higher-level value is called $level''\H$ rather than $level'\H$ to enable a consistent notation for final values. Furthermore, in the multi-layered editor, introduced in the next section, $level'\H$ will denote an intermediate value for the higher level.
 
-The final values $level''\H$ and $level''\L$ satisfy the presentation invariant and are the initial values $level\H$ and $level\L$ for the next edit step. In the rest of this chapter, as well as in the next, we use this notation for the values of the data levels in the different stages of an edit step.
+The final values $level''\H$ and $level''\L$ satisfy the presentation invariant and serve as initial values for the next edit step. In the rest of this chapter, as well as in the next, we use this notation for the values of the data levels in the different stages of an edit step.
 
 \begin{figure}[h]
   \hfill
@@ -165,9 +163,10 @@ The final values $level''\H$ and $level''\L$ satisfy the presentation invariant 
 %\caption{Single edit step example.(draft)} \label{singleLayerEditExample}
 %\end{figure}
 
-Figure~\ref{singleLayerEditExample} shows the values of the higher and lower levels for an actual example. The document is an expression that is presented using an italic style for identifiers and mathematical symbols for operators. The presentation of a sum in modified by entering the text "\verb|\x->|" at the beginning. After the document update, the presentation invariant clearly does not hold. It is restored by re-presenting the document.
+Figure~\ref{singleLayerEditExample} shows the values of the higher and lower levels for an actual example. The document is an expression that is presented using an italic style for identifiers and mathematical symbols for operators. The presentation of a sum in modified by entering the text "\verb|\x->|" at the beginning. After the document update, the presentation invariant clearly does not hold. It is restored by re-presenting the document, and thus changing "\verb|\x->|$1+x$" to "$\lambda x \to 1+x$".
 
-Instead of updating the lower level (presentation-oriented editing), a user may also perform an direct update on the higher level (document-oriented editing). However, we do not consider document-oriented editing in much detail, because after a document update the presentation invariant can be restored by simply presenting the updated document.
+
+Instead of updating the lower level (presentation-oriented editing), a user may also perform an direct update on the higher level (document-oriented editing). However, we do not consider document-oriented editing in much detail, because after a document update the presentation invariant can be restored by simply re-presenting the updated document.
 
 
 \bc
@@ -183,12 +182,9 @@ $\Transform :: \Level_{H} \rightarrow \Level_{H}$. In the next chapter, when lay
 
 % why layers?
 In order to describe the layered architecture of Proxima (see Chapter~\ref{chap:proxArch}), we refine the simple editor by splitting the presentation relation. A $Present$ relation that is split into $n$ components 
-($Present_{i} \tp Level_{i-1} \rel \Level_{i}$) gives rise to $n+1$ data levels ($Level_{0 \dots n}$). Lower levels have increasing numbers, and hence $Level_{0}$ is the document level and $Level_{n}$ is the presentation level.
+($Present_{i} \tp Level_{i-1} \rel \Level_{i}$) gives rise to $n+1$ data levels ($Level_{0 \dots n}$). Lower levels get higher indices, with $Level_{0}$ being the document level and $Level_{n}$ the presentation level. 
 
-From the perspective of a single layer, we only need to consider a single $Present_i$ relation and two data levels $Level_{i-1}$ and $Level_{i}$. We drop the subscript of the relation and refer to the data levels as $Level\H$ and $Level\L$. Figure~\ref{layerEditProcess} shows the updates during an edit step from the perspective of a single layer. It is similar to the simple editor without layers, except at the top. Instead of directly computing $level''\H$, the layer first computes an intermediate $level'\H$. This $level'\H$ is then processed by the layers above, yielding $level''\H$. At the top of the layered structure, $level'\H$ is copied to $level''\H$. \note{mention: user \rarr lower layers?}
-
-\note{mention doc edit on intermediate levels?}
-\note{All intermediate results also go horizontally}
+From the perspective of a single layer, we only need to consider a single $Present_i$ relation and two data levels $Level_{i-1}$ and $Level_{i}$. We drop the subscript of the relation and refer to the data levels as $Level\H$ and $Level\L$. Figure~\ref{layerEditProcess} shows the updates during an edit step from the perspective of a single layer. It is similar to the simple editor without layers, except at the top. Instead of directly computing $level''\H$, the layer first computes an intermediate $level'\H$. This $level'\H$ is then processed by the layers above, yielding $level''\H$. At the top level, $level'\H$ is copied to $level''\H$. \note{mention: user \rarr lower layers?} \note{mention doc edit on intermediate levels?} \note{Mention: Here no intermediate results go horizontally}
 
 
 % can we express when this happens with a condition? pres .. /= pres .. oid?
@@ -245,16 +241,15 @@ Vice versa? Fix by remembering extra?
 %SOMEWHERE: when es is hard. If no parent with a presentation is parent then 
 % tricky. Hence invisible nodes with extra state may lose it during editing.
 
-\note{specify conditions for safety? like in Pierce's lenses stuff?}
-\note{mention Pierce paper?}
 
-In some cases, a lower level contains information that cannot be computed by presenting its adjacent higher level. Similarly, a higher level may contain information that cannot be computed by interpreting the lower level. The information in a level that cannot be computed by presenting, or interpreting an adjacent level, is referred to as {\em extra state} (also see Section~\ref{sect:editingExtraState}). In this section, we give an informal description of extra state, as well as a number of examples. Section~\ref{sect:singleExtra} presents a formal specification.
+As we saw in Section~\ref{sect:editingExtraState}, a lower level may contain information that cannot be computed by presenting its adjacent higher level. Similarly, a higher level may contain information that cannot be computed by interpreting the lower level. The information in a level that cannot be computed by presenting, or interpreting an adjacent level, is referred to as {\em extra state}. In this section, we give an informal description of extra state, as well as a number of examples. Section~\ref{sect:singleExtra} presents a formal specification.
 
-Generally speaking, interpretation extra state consists of the parts of the higher level that are not shown in the presentation. An example of this is a tree browser presentation (see Section~\ref{sect:treeBrowser}), which shows the structure of the document while leaving out most of the details. The details that are left out are part of the interpretation extra state.
+Generally speaking, {\em presentation extra state} is information that influences the way in which the higher level is viewed without being part of the higher level. An example of this is found in a tree-browser presentation (see Section~\ref{sect:treeBrowser}). The information whether a node in the tree is expanded or collapsed is not part of the document. Therefore, this expansion state is part of the presentation extra state.
 
-Presentation extra state, on the other hand, is information that influences the way in which the higher level is viewed without being part of the higher level. Again, the tree browser provides an example. The information whether a node in the tree is expanded or collapsed is not part of the document. Therefore, this expansion state is part of the presentation extra state.
+{\em Interpretation extra state}, on the other hand, consists of the parts of the higher level that are not shown in the presentation. Again, the tree browser provides an example, since it shows the structure of the document while leaving out the content. The content that is left out is part of the interpretation extra state.
 
-Because the presentation or interpretation does not specify the value of the extra state in the resulting level, extra state is reused, if possible, from the previous value of the level. A general method for reusing extra state is difficult, if not impossible, to give. Therefore, in this section, we consider a special case of extra state, for which we sketch a method for reuse. We only consider extra state that is associated to a specific parent node in the tree. Whether or not the extra state can be reused then depends on whether or not its parent node can be tracked down in the updated level. This form of extra state is sufficient for specifying the use cases presented in Section~\ref{sect:usecases}. Chapter~\ref{chap:formalSpec} contains a more formal specification of extra state.
+Because the presentation or interpretation does not specify the value of the extra state in the resulting level, extra state is reused, if possible, from the previous value of the level. A general method for reusing extra state is difficult, if not impossible, to give. Therefore, in this section, we consider a special case of extra state, for which we sketch a method for reuse. We only consider extra state that is associated with a specific parent node in the tree. Whether or not the extra state can be reused depends on whether or not its parent node can be tracked down in the updated level. This form of extra state is sufficient for specifying the use cases presented in Section~\ref{sect:usecases}. Chapter~\ref{chap:formalSpec} contains a more formal specification of extra state.\note{mention that extra state may get lost on editing?}
+
 
 
 %\note{explain what this kind } First, we take a closer look at the presentation, followed by an informal definition of extra state. %Finally, we sketch how it can be reused.
@@ -266,7 +261,6 @@ Because the presentation or interpretation does not specify the value of the ext
 %\o Intr: Structure view.
 %\el
 
-\note{mention that extra state may get lost on editing?}
 %In this section, we discuss the two give an informal definition of extra state and also sketch how extra state can be reused.
 %refine the definitions of the data levels in order to give a more precise definition of this extra state. Furthermore, we specify %what information needs to be kept track of in order to handle extra state.
 
@@ -276,11 +270,11 @@ Because the presentation or interpretation does not specify the value of the ext
 
 
 %																
-\subsection{The Presentation mapping}\label{mappingsInLayer}
+\subsection{The presentation mapping}\label{mappingsInLayer}
 
 % mapping is relation levelH levelL but each two levels express a mapping between nodes.
 
-In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, for any two levels $Level\H$ and $Level\L$ between which the presentation invariant holds, we assume the existence of a $1:n$ relation between the nodes of the two trees. Hence, we have two mappings; a mapping between the upper and lower trees, and a mapping between the nodes of these trees. An example shows what we mean by this.
+In order to specify when a node is extra state, we first take a closer look at the presentation relation. In this section, we assume that both $Level\H$ and $Level\L$ are tree structures. Furthermore, for any two levels $Level\H$ and $Level\L$ between which the presentation invariant holds, we assume the existence of a $1:n$ relation between the nodes of these two trees. Hence, we have two mappings; a mapping between the upper and lower trees, and a mapping between the nodes of these trees. An example shows what we mean by this.
 
 Figure~\ref{nodeMapping} shows two levels for which the presentation invariant holds. In addition, the figure shows a mapping between the nodes of both levels. The dotted arrows denote to which lower-level nodes a higher-level node is mapped and vice versa. To reduce the number of arrows in the figure, the lower-level nodes are grouped. An arrow between two nodes only relates the nodes and not the subtrees rooted at these nodes. % why not?
 
@@ -358,9 +352,9 @@ In the example, the resulting presentation is a single tree, but this is not alw
 
 
 %																
-\subsection{Extra state nodes}
+\subsection{Extra-state nodes}
 
-In Figures~\ref{nodeMapping} and~\ref{presentExample}, each node is connected to a node in the adjacent level, either by a direct arrow, or by being inside an ellipse that is connected by an arrow. However, it is possible that a node does not have an arrow connecting it to a node in the adjacent level. Such nodes are not specified by the presentation relation, and hence are part of the extra state of the level.
+In Figures~\ref{nodeMapping} and~\ref{presentExample}, each node is connected to a node in the adjacent level, either by a direct arrow, or by being inside an ellipse that is connected by an arrow. However, it is possible that a node does not have an arrow connecting it to a node in the adjacent level. Such nodes are not determined by the presentation relation, and hence are part of the extra state of the level.
 
 %** mention that es elt must be associated to parent.
 
@@ -388,11 +382,11 @@ Figure~\ref{layerExtraState} shows two examples of extra state, one in the lower
 
 % example intr extra
 
-The right-hand side of Figure~\ref{layerExtraState} shows an example of interpretation extra state: a word processor with an editable table of contents. A document chapter is presented only partially on the enriched document level, since the content of the chapter is left out. For simplicity, we assume that the enriched document only contains the table of contents and not the chapters themselves. Thus, we only have to consider the extra state here and not the duplication (titles appearing in the table of contents as well as in the chapters). Section~\ref{sect:informalDuplicates} discusses how to handle duplications in general, and the same method can be used for the table of contents.
+The right-hand side of Figure~\ref{layerExtraState} shows an example of interpretation extra state: a word processor with an editable table of contents. A document chapter is presented only partially, since the content of the chapter is left out.
 
-On interpretation, the table of contents is mapped back onto a complete document, including the shaded content parts that are not in the enriched document. The title of a chapter comes from the enriched document, whereas its content is reused from the previous document. 
+For simplicity, we assume that the enriched document only contains the table of contents and not the chapters themselves. Thus, we only have to consider the extra state here and not the duplication (titles that appear in the table of contents as well as in the chapters). Section~\ref{sect:informalDuplicates} discusses how to handle duplications in general, and the same method can be used for the table of contents.
 
-\note{mention that intr ES is more important then pres ES here?}
+On interpretation, the table of contents is mapped back onto a complete document, which includes the shaded content parts that are not in the enriched document. The title of a chapter comes from the enriched document, whereas its content is reused from the previous document.  \note{mention that intr ES is more important then pres ES here?}
 
 
 
@@ -405,7 +399,7 @@ An important point to note is that extra state with regard to a certain mapping 
 
 
 %																
-\subsection{One level has two kinds of extra state} \label{sect:oneLevelDoubleES}
+\subsection{Each intermediate level has two kinds of extra state} \label{sect:oneLevelDoubleES}
 
 % One level: two kinds of extra
 Figure~\ref{layerExtraState} only shows one layer, but since each data level except the document and the rendering is in between two layers, each level between the document and the rendering may have both presentation and interpretation extra state. 
@@ -433,18 +427,18 @@ When the scanner layer interprets the layout level, spaces and row transitions b
 
 \subsection{Reusing extra state}
 
-When a new value for a level is computed on presentation, or interpretation, the values for its extra state nodes are taken from the previous value of that level. 
+When a new value for a level is computed on presentation, or interpretation, the values for its Extra-state nodes are taken from the previous value of that level. 
 
 %\note{mention that we only need to keep track of roots?}
 In order to reuse nodes, a layer needs to keep track of additional information regarding the presentation mapping. For each higher-level node, the layer must keep references to the lower-level nodes of its presentation, and for each lower-level node there must be  a reference to the higher-level node whose presentation it is part of. These references corresponds to the dotted arrows between nodes in the figures of this section.
 
 We sketch the process of reusing for the presentation direction. For interpretation, the process is analogous.
 
-We assume that the update on the higher level is incremental; except for the parts that have been edited, the updated level is equal to its previous value.  On presentation of a higher-level node, the lower-level nodes of its previous presentation are used to construct its new presentation, if possible. If the higher-level node is new, the presentation consists of new lower-level nodes. Furthermore, also if the node is changed in such a way that its previous lower-level nodes cannot be reused, new lower-level nodes are used.
+We assume that the update on the higher level is incremental; except for the parts that have been edited, the updated level is equal to its previous value.  On presentation of a higher-level node, the lower-level nodes of its previous presentation are used to construct its new presentation, if possible. If the higher-level node is new, the presentation consists of new lower-level nodes. Furthermore, if the node is changed in such a way that its previous lower-level nodes cannot be reused, new lower-level nodes are used also.
 
 The resulting lower level is not a completely new value, but an incrementally updated version of the previous value. Only those parts of the presentation that correspond to a changed part of the higher level are changed. 
 
-When a lower-level node is reused, also its extra state children are reused.  For nodes that are no longer present in the presentation, extra state children are lost. Extra state children for new lower-level nodes are set to a default value. Thus, if an entry is added to a table of contents in the (presentation of the) enriched document of a word processor, an empty chapter (or section) is added to the document. Similarly, if a document-oriented edit operation in a source editor adds a new structure to the document, its presentation gets a default layout.
+When a lower-level node is reused, also its Extra-state children are reused.  For nodes that are no longer present in the presentation, Extra-state children are lost. Extra-state children for new lower-level nodes are set to a default value. Thus, if an entry is added to a table of contents in the (presentation of the) enriched document of a word processor, an empty chapter (or section) is added to the document. Similarly, if a document-oriented edit operation in a source editor adds a new structure to the document, its presentation gets a default layout.
 
 
 \subsection{Safety of extra state}
@@ -460,13 +454,13 @@ For interpretation extra state, updates elsewhere in the tree can be  even more 
 
 Secondly, if a node is transformed, it may make sense to reuse its extra state in the result of the transformation. For example, when in an expression editor, a sum node at document level is transformed to a product node, it makes sense to reuse its whitespace extra state. However, if the transformation is performed by simply removing the old sum and inserting a fresh product node, then the extra state is lost. In such a case, an editor designer may specify for a transformations that source nodes are reused in the result, thereby also reusing their extra state. 
 
-More research is necessary to establish clearly in what situations extra state is vulnerable, and also how reusing it can be maximized. Although in general it cannot be guaranteed that extra state is always be recovered, this does not necessarily pose a problem. Because presentation extra state generally consists of non-essential information, it is not a big problem that in some rare cases, it is reset to a default value.
+More research is necessary to establish clearly in what situations extra state is vulnerable, and also how reusing it can be maximized. Although in general it cannot be guaranteed that extra state is always recoverable, this does not necessarily pose a problem. Because presentation extra state generally consists of non-essential information, it is not a big problem that in some rare cases, it is reset to a default value.
 
 Interpretation extra state, on the other hand, may represent essential information, but by restricting the edit behavior on presentations that have interpretation extra state, an editor designer can protect it from accidentally getting lost. For example, the edit behavior on a table of contents can be restricted to updates on titles, and insertion and deletion of entire entries. For these edit operations, the reuse of extra state does not fail. Furthermore, a warning may be issued when document extra state is about to get lost, for example when a user deletes a table of contents entry.
 
 \subsection{Conclusions}
 
-The method of handling extra state, presented in this section, applies only to extra state that is clearly associated to a certain parent node. The method works for specifying the whitespace extra state for token presentations as well as interpretation extra state for editing partial presentations. However, the method of reusing is only sketched, and the exact way in which to reuse extra state is left to the editor designer.
+The method of handling extra state, presented in this section, applies only to extra state that is clearly associated with a certain parent node. The method works for specifying the whitespace extra state for token presentations as well as interpretation extra state for editing partial presentations. However, the method of reusing is only sketched, and the exact way in which to reuse extra state is left to the editor designer.
 
 Extra state is vulnerable, and it is easy to create situations in which reusing it is impossible, for example by allowing full text editing in a presentation that hides a large part of the document. However, the point is that the model allows those instances of extra state that are useful and for which a clear method of reuse can be established.
 
@@ -475,8 +469,7 @@ Extra state in one layer also has consequences for the other layers in the edito
 Besides extra state that is attached to a certain parent node, other forms of extra state exist. For example, when a list in the document has a fixed order, but is allowed to be reordered by the user in the presentation, the order can be seen as either presentation or interpretation extra state.
 
 
-Since extra state arises whenever a presentation or interpretation mapping has no inverse, many other kinds of extra state exist.
-Further research is required not only to establish more precisely how to deal with extra state attached to a certain parent, but also to establish other kinds of extra state, as well as methods of handling it. Finally, it would be desirable to have automatic handling of extra state for certain kinds of presentations (or interpretations).
+Since extra state arises whenever a presentation or interpretation mapping has no unambiguous inverse, many other kinds of extra state exist. Further research is required not only to establish more precisely how to deal with extra state attached to a certain parent, but also to establish other kinds of extra state, as well as methods of handling it. Finally, it would be desirable to have automatic handling of extra state for certain kinds of presentations (or interpretations).
 
 
 
@@ -513,9 +506,9 @@ A consequence of the difference between the presentation and the interpretation 
 
 Duplication occurs when a higher-level structure is presented on more than one lower-level structure. An example of duplication is a chapter title that appears both in the derived table of contents as well as in the document. But also multiple windows with (possibly different) presentations of the same part of the document give rise to duplications. 
 
-The problem with duplicate values is that if only one of the duplicates is edited, a conflict may arise during interpretation, and the editor needs to choose which value to use for computing the higher level. We tackle the problem by giving priority to the changed duplicate. In case both duplicates have been edited and yield different higher-level results, the editor can either prohibit the edit operation, or make a default choice for one of the duplicates.
+The problem with duplicate values is that if only one of the duplicates is edited, a conflict may arise during interpretation, and the editor needs to choose which value to use for computing the higher level. As mentioned already in Section~\ref{sect:reducer}, we tackle the problem by giving priority to the changed duplicate. In case both duplicates have been edited and yield different higher-level results, the editor can either prohibit the edit operation, or make a default choice for one of the duplicates.
 
-It is hard to give a precise definition of duplication of information without making additional assumptions on the presentation mappings and level types. Moreover, even if part of a presentation is a duplicate, the editor designer may not wish to regard it as such. The "\verb|(|" and "\verb|)|" tokens in Figure~\ref{presentExample} are both in the presentation of the \verb|Paren| node, but it is not immediately obvious to consider these tokens as duplicates. Consider for example a presentation \verb|(1+2)*(3+4)| in which the middle two parentheses are deleted. If parentheses are regarded as duplicates, this results in the deletion of both pairs of parentheses, yielding \verb|1+2*3+4|. However, it may be more natural to get the result \verb|(1+2*3+4)|.
+It is hard to give a precise definition of duplication of information without making additional assumptions on the presentation mappings and level types. Moreover, even if part of a presentation is a duplicate, the editor designer may prefer not to regard it as such. The "\verb|(|" and "\verb|)|" tokens in Figure~\ref{presentExample} are both in the presentation of the \verb|Paren| node, but it is not immediately obvious to consider these tokens duplicates. Consider for example a presentation \verb|(1+2)*(3+4)| in which the middle two parentheses are deleted. If parentheses are regarded as duplicates, this results in the deletion of both pairs of parentheses, yielding \verb|1+2*3+4|. However, it may be more natural to get the result \verb|(1+2*3+4)|.
 
 
 \bc
@@ -550,7 +543,7 @@ The evaluator maps a chapter in the document on a chapter in the enriched docume
 
 When a user performs an update on the presentation, this results in an updated enriched document. Updates can be either in the table of contents, or in the chapters themselves. If the update is not in the table of contents, the document is computed from the chapters in the enriched document, while ignoring the table of contents altogether. On the other hand, if the table of contents tree is modified, the chapters in the enriched document tree are ignored on interpretation, and the document is obtained from the table of contents tree only. In this case, the chapter content is treated as interpretation extra state. 
 
-By treating the table of contents as a partial duplicate of the chapters, it is easy to support structural updates on the table of contents, such as swapping two titles. The reuse process for extra state takes care of swapping the chapter content correspondingly. The editor designer only needs to specify what happens when a new title is inserted, or when an entry is moved to a different level (e.g.\ a section to a subsection). Furthermore, it may be desirable to issue a warning when deleting a table of contents entry.
+By treating the table of contents as a partial duplicate of the chapters, it is easy to support structural updates on the table of contents, such as swapping two titles. The reuse process for extra state takes care of swapping the chapter content correspondingly. The editor designer only needs to specify what happens when a new title is inserted, or when an entry is moved to a different level (e.g.\ a section to a subsection).
 
 %\note{mention that we need change management as well as incremental updates for this to work?}
 
@@ -569,7 +562,7 @@ Specifying duplications in the evaluation and reduction sheets is not ideal, sin
 
 \section{Conclusions}
 
-In this section we described the editing process of a layered editor, as well as two concepts that play a role the desing of such an  editor. The first of these concepts is extra state, which may have two forms. Presentation extra state is information that cannot be computed by presenting the higher level, whereas interpretation extra state cannot be computed by interpreting the lower level. Both forms may exist independently on one level.
+In this section we described the editing process of a layered editor, as well as two concepts that play a role in the design of such an editor. The first of these concepts is extra state, which may have two forms. Presentation extra state is information that cannot be computed by presenting the higher level, whereas interpretation extra state cannot be computed by interpreting the lower level. Both forms may exist independently at one level.
 
 When the higher and lower levels are tree structures, we can identify a form of extra state consisting of nodes (or subtrees) that are clearly attached to a certain parent node in the tree. Such extra state may be reused after an edit operation by looking up the parent node in the previous value of the level (before the edit operation was applied). If this fails, a default value is used.
 
@@ -610,7 +603,7 @@ The specification of the data level types reads:
 % could say Extra_{\Pres,0} = Extra_{\Int,n} = ()
 
 
-Note that the representation of a level type as a product is only used to show that the type consists of two kinds of information. In an implementation, a level type does not need to be a product of the core and the extra state. It is likely that a level type is a tree that contains the core nodes as well as the extra state nodes.
+Note that the representation of a level type as a product is only used to show that the type consists of two kinds of information. In an implementation, a level type does not need to be a product of the core and the extra state. It is likely that a level type is a tree that contains the core nodes as well as the extra-state nodes.
 
 We can use a simplified version of this specification in this chapter, because here we focus on a single layer only. Thus, we can drop several subscripts and for each adjacent level ($\Level_{H}$ and $\Level_{L}$) only consider one of the views from Specification~\ref{spec:levelMultiFirst}, thereby improving readability of the layer specification that will be presented further on. 
 

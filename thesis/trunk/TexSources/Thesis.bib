@@ -1,13 +1,12 @@
 ------------------------ Thesis: annotated bibtex file
 
 TODO 
-ASK: how to get "et al." for long list of authors?
+ASK: how to get "et al." 
+ASK: "van den Brand" at B?
 
-Weird: "translated by" is converted, so we get: t. b. E. V. M. V. Quint
-Maybe use different bibliography style?
 
 LATER: check if AG manual is tech report
-
+check if wxHaskell was accepted
 
 
 
@@ -285,22 +284,12 @@ put Editors in Author field
   year = {2001},
 }
 
-Nog niet ok:
-@TechReport{
-W3C:99-2,
-author = {{Dave Raggett, et al}},
-title = {{HTML 4.01 Specification}},
-year = {{W3C Recommendation, 24 December 1999}},
-institution = {{W3C HTML Working Group.}},
-type = {{Specification,
-http://www.w3.org/TR/1999/REC-html401-19991224}}
-}
 
 
 @Book{sgml86,
   author =       "{International Organization for Standardization}",
-  title =        "{ISO 8879:1986}: {Information} processing --- {Text}
-                 and office systems --- {Standard Generalized Markup
+  title =        "{ISO 8879:1986}: {Information} processing -- {Text}
+                 and office systems -- {Standard Generalized Markup
                  Language} ({SGML})",
   publisher =    "International Organization for Standardization",
   address =      "Geneva, Switzerland",
@@ -314,7 +303,19 @@ http://www.w3.org/TR/1999/REC-html401-19991224}}
   acknowledgement = ack-nhfb,
   pricecode =    "XC"
 }
+@Book{ dsssl96,
+  author =       "{International Organization for Standardization}",
+  title =        "{ISO 10179:1996({E})}: {I}nformation technology -- {Text} and office systems --
+                   {D}ocument {S}tyle {S}emantics and {S}pecification
+                   {L}anguages ({DSSSL})",
+  publisher =    "International Organization for Standardization",
+  address =      "Geneva, Switzerland",
+  day =          "1",
+  month =        apr,
+  year =         "1996"
+}
 
+  title		= 
 
 @Book{walsh02docbook,
   author = {Norman Walsh and Leonard Muellner and Bob Stayton},
@@ -344,8 +345,8 @@ http://www.w3.org/TR/1999/REC-html401-19991224}}
 }
 
 @article{trex01,
-  author = {James Clarke},
-  title = {{TREX} -- Tree Regular {XML}},
+  author = {James Clark},
+  title = {{TREX} -- {Tree} {Regular} {XML}},
   journal = {Thai Open Source Software Center},
   volume = {\url|http://www.thaiopensource.com/trex/|},
   year = {2001},
@@ -367,6 +368,35 @@ http://www.w3.org/TR/1999/REC-html401-19991224}}
   TOPICS    = {Haskell}
 }
 
+@techreport{clarke02genericHaskell,
+  author      = {Dave Clarke and Johan Jeuring and Andres L{\"o}h},
+  title       = {The {Generic} {Haskell} User's Guide ({Beryl} Release)},
+  institution = {Utrecht University},
+  year        = 2002,
+  number      = {UU-CS-2002-047},
+  month       = {July},
+  pubcat      = {report},
+}
+
+
+
+inproceedings{leijen04wxHaskell,
+ author    = {Daan Leijen},
+ title     = {{wxHaskell}},
+ booktitle = {{ACM} Sigplan 2004 {Haskell} Workshop},
+ year      = {2004},
+ month     = sep,
+ publisher = {ACM Press},
+ address   = {{Snowbird, Utah, USA}},
+ pubcat    = {workshop},
+}
+
+@misc{leijen04wxHaskell,
+ author    = {Daan Leijen},
+ title     = {{wxHaskell}},
+ booktitle = {{ACM} Sigplan 2004 {Haskell} Workshop},
+ note = {submitted to {\em {ACM} Sigplan 2004 {Haskell} Workshop}}
+}
 
 
 
@@ -399,12 +429,45 @@ http://www.w3.org/TR/1999/REC-html401-19991224}}
 	MONTH = Nov
 }
 
+@article{ demoor99breaking,
+    author = "Oege de Moor and Jeremy Gibbons",
+    title = "Bridging the algorithm gap: {A} linear-time functional program for paragraph formatting",
+    journal = "Science of Computer Programming",
+    volume = "35",
+    number = "1",
+    pages = "3--27",
+    year = "1999",
+    url = "citeseer.ist.psu.edu/demoor97bridging.html" }
+
+@inproceedings{jeuring91breaking,
+  author    = {Jeuring, Johan},
+  title     = {Incremental algorithms on lists},
+  editor    = {Leeuwen, J. van},
+  booktitle = {Proceedings SION Computing Science in the Netherlands},
+  pages     = {315--335},
+  year      = {1991},
+  note      = {Also appeared in EURICS Workshop on Calculational Theories of Program Structure, Hollum-Ameland, 1991},
+}
+
+
 @manual{swierstra04ag,
     author = "S. Doaitse Swierstra and Arthur Baars",
     title = "Attribute Grammar System",
     organization = "Utrecht University, The Netherlands",
     year = "2004",
     address = {\url|http://www.cs.uu.nl/groups/ST/Center/AttributeGrammarSystem|}
+}
+
+@inproceedings{swierstra01parsers,
+  author    = {Doaitse Swierstra},
+  title     = {Combinator Parsers: From Toys to Tools},
+  booktitle = {Electronic Notes in Theoretical Computer Science},
+  volume    = {41},
+  issue     = {1},
+  publisher = {Elsevier Science Publishers},
+  editor    = {Graham Hutton},
+  year      = {2001},
+  url       = {http://math.tulane.edu/~entcs/},
 }
 
 
@@ -643,16 +706,15 @@ EDITORS
  }
 
 
-@incollection{ ganzevoort92views,
-    author = "Job Ganzevoort",
-    title = "Maintaining presentation invariants in the Views system.",
-    booktitle = "243",
-    month = "31",
-    publisher = "Centrum voor Wiskunde en Informatica (CWI)",
-    address = "ISSN 0169-118X",
-    pages = "45",
-    year = "1992",
-    url = "citeseer.ist.psu.edu/ganzevoort92maintaining.html" }
+@techreport{ ganzevoort92views,
+ author = "Job Ganzevoort",
+ title = "Maintaining presentation invariants in the {Views} system.",
+ month = "December",
+ year = "1992",
+ number = "CS-R9262",
+ institution = "Centrum voor Wiskunde en Informatica (CWI), Amsterdam",
+ url = "citeseer.ist.psu.edu/ganzevoort92maintaining.html"
+ }
 
 
 @techreport{christopher90constraints,
@@ -738,7 +800,7 @@ EDITORS
  
 @article{kaiser88dose,
  author = {Gail E. Kaiser and Peter H. Feiler and Fahimeh Jalili and Joann H. Schlichter},
- title = {A retrospective on DOSE: an interpretive approach to structure editor generation},
+ title = {A retrospective on {DOSE}: an interpretive approach to structure editor generation},
  journal = {Software -- Practice and Experience},
  volume = {18},
  number = {8},
@@ -774,7 +836,7 @@ EDITORS
  
 @inproceedings{fritzson84dice,
  author = {Peter Fritzson},
- title = {Preliminary experience from the dice system a distributed incremental compiling environment},
+ title = {Preliminary experience from the {DICE} system -- a {Distributed} {Incremental} {Compiling} {Environment}},
  booktitle = {Proceedings of the first ACM SIGSOFT/SIGPLAN software engineering symposium on Practical software development environments},
  year = {1984},
  isbn = {0-89791-131-8},
@@ -803,7 +865,7 @@ EDITORS
     volume = {65},
     issue = {3},
     publisher = {Elsevier},
-    editor = {Mark van den Brand and Ralf L\"amel},
+    editor = {Mark van den Brand and Ralf L\"ammel},
     year = {2002}
 }
 
@@ -1115,6 +1177,19 @@ In this paper we present a first formalisation of document formatting combinator
         url={citeseer.nj.nec.com/hansen90functionbased.html}
 }
 
+@article{badros01cassowary,
+ author = {Greg J. Badros and Alan Borning and Peter J. Stuckey},
+ title = {The Cassowary linear arithmetic constraint solving algorithm},
+ journal = {ACM Trans. Comput.-Hum. Interact.},
+ volume = {8},
+ number = {4},
+ year = {2001},
+ issn = {1073-0516},
+ pages = {267--306},
+ doi = {http://doi.acm.org/10.1145/504704.504705},
+ publisher = {ACM Press},
+ }
+
 
 
 --- Chapter: Prototype
@@ -1187,6 +1262,19 @@ Wel leuk. lijkt doc & pres edit te combineren. Alleen geen layers of extra state
 }
 
 Zie ook Rui's bibliografie
+
+@article{leavenworth66synMacros,
+ author = {B. M. Leavenworth},
+ title = {Syntax macros and extended translation},
+ journal = {Commun. ACM},
+ volume = {9},
+ number = {11},
+ year = {1966},
+ issn = {0001-0782},
+ pages = {790--793},
+ doi = {http://doi.acm.org/10.1145/365876.365879},
+ publisher = {ACM Press},
+ }
 
 
 

@@ -90,7 +90,7 @@ Given $\present$, we will specify a total function $\interpret$, which maps a lo
 \interpret  & \tp & \Level\L \rightarrow \Level\H\\
 }
 
-Note that in constrast to the architecture description in Chapter~\ref{chap:proxArch}, $\present$ and $\interpret$ in the specification are functions between values rather than edit operations.
+Note that in contrast to the architecture description in Chapter~\ref{chap:proxArch}, $\present$ and $\interpret$ in the specification are functions between values rather than edit operations.
 
 
 \head{The \law{InterPresent} requirement}
@@ -131,7 +131,7 @@ Since we assume $\present$ is given, \law{InterPresent} is a requirement for $\i
 
 \subsection{Editing}\label{sect:single_Editing}
 
-A user may perform an edit operation on either the higher level (document) or the lower level (presentation). However, because after a document update, the presentation invariant can be restored by simply presenting the updated document, we only consider presentation-oriented editing here. When the lower level is edited, we need to interpret the updated lower level in order to find a new higher level, which subsequently may need to be presented again (as explained in Section~\ref{sect:editProces}).
+A user may perform an edit operation on either the higher level (document) or the lower level (presentation). However, because after a document update, the presentation invariant can be restored by simply presenting the updated document, we only consider presentation-oriented editing here. When the lower level is edited, we need to interpret the updated lower level in order to find a new higher level, which subsequently may need to be presented again (as explained in Section~\ref{sect:editProces}). 
 
 Let $level\L$ and $level\H$ denote the state of the layer at the beginning of an edit step. 
 
@@ -145,9 +145,16 @@ The user then updates the lower level:
 & & \level\L \leadsto \level'\L 
 }
 
-after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$, in order to restore the presentation invariant.
+\begin{figure}
+    \begin{center}   
+      \epsfig{file=pics/eps/LayerSimple.eps, height=1.4in} %width = 60mm}
+      \caption{A single edit step.} \label{singleLayerEdit2}  % visio: Layer.vsd
+    \end{center}
+\end{figure}
 
-\bc The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the edit process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
+after which the editor computes the final values for the data levels: $level''\L$ and $level''\H$, in order to restore the presentation invariant. Figure~\ref{singleLayerEditFormal} (which also shown in the previous chapter) illustrates the edit process.
+
+\bc The final higher level is denoted by $level''\H$ rather than $level'\H$ to have a consistent notation for final values. Furthermore, in the multi layered editor specification (see Section~\ref{sect:combinedExtra}) $level'\H$ will denote the intermediate value for the higher level $level'H$. Figure~\ref{singleLayerEdit} schematically shows the editing process for one edit step. In the rest of this chapter we use the same notation for the different stages of the data levels.
 
 \begin{figure}
 \xpr{
@@ -796,15 +803,15 @@ The specification for reusing extra state is a first step, and needs to be exten
 % constructors are \tt
 % C constructors are meta-constructors  (and T is type var.)
 
-In a tree structured-data type, we can model extra state by leaving certain parts of the tree undetermined. We do this by representing each extra state part by a wildcard, which stands for any possible value of the correct type. The functions $\present$ and $\interpret$ return a value that contains wildcards, thus leaving the extra state in the result undetermined.
+In a tree-structured data type, we can model extra state by leaving certain parts of the tree undetermined. We do this by representing each extra state part by a wildcard, which stands for any possible value of the correct type. The functions $\present$ and $\interpret$ return a value that contains wildcards, thus leaving the extra state in the result undetermined.
 
-For a type $T$, the corresponding wildcard has type $*_T$ and is denoted by  $\texttt{*}_{T}$ (in a different font):
+For a type $T$, the corresponding wildcard is denoted by  $\texttt{*}_{T}$ and has type $*_T$ (note the different font):
 
 \xpr{
 \data~*_T  = \texttt{*}_{T}\\
 }
  
- A wildcard for a type $T$ stands for any possible value of type $T$. Thus, the value $\texttt{*}_{Bool}$ represents the set $\set{{\tt True}, {\tt False}}$, and the value $\texttt{*}_{Int}$ represents the set of all integers. An example shows how wildcards can be used to model extra state in a data type.
+The wildcard for type $T$ stands for any possible value of type $T$. Thus, the value $\texttt{*}_{Bool}$ represents the set $\set{{\tt True}, {\tt False}}$, and the value $\texttt{*}_{Int}$ represents the set of all integers. An example shows how wildcards can be used to model extra state in a data type.
 
 %explain diff between type $*$ and value for $\texttt{*}$
 
@@ -820,20 +827,19 @@ We can recursively define a type $Tree^*$ that declares the booleans in the node
 \data~Tree^*  = {\tt Bin}~*_{Bool}~Tree^*~Tree^*~|~{\tt Leaf}~Bool^*~*_{Int}\\
 }
 
-For simplicity, the constructors for a type $T^*$ are the same as for $T$. A sample value of type $Tree^*$ is:
+For simplicity, the constructors for type $T^*$ are the same as for $T$. A sample value of type $Tree^*$ is:
  ${\tt Bin} ~\texttt{*}_{Bool}~ ({\tt Leaf~True}~\texttt{*}_{Int})~({\tt Leaf~False}~\texttt{*}_{Int})$. Note that for a primitive type, such as the boolean in the {\tt Leaf}, we have $Bool^* \eq Bool$, because a primitive type has no children.
 % mention that * are terms
 
-For a type $T$, a type $T^*$ declares which parts are extra state. Note that the choice whether a value is extra state is not based on its type, but rather on the $T^*$ declarations in which  the value appears as a child. Hence, in the example, a boolean in a 
-${\tt Bin}$ node is extra state, whereas a boolean in a ${\tt Leaf}$ is not. Furthermore, note that for a single type $T$ several possible types $T^*$ exist.
+For a type $T$, a type $T^*$ declares which parts are extra state. Note that for a single type $T$ several possible types $T^*$ exist: whether or not a value is extra state is not determined by its type, but rather by the $T^*$ declarations in which  the value appears as a child. Hence, in the example, a boolean in a ${\tt Bin}$ node is extra state, whereas a boolean in a ${\tt Leaf}$ is not. 
 
 Because a wildcard represents the set of all possible values of a certain type, a value containing a wildcard represents a set of values. A value that contains several wildcards also represents the set that is formed by taking all possible combinations of values for the wildcards. 
 
 We use the notation $\para{x}$ for the set of values represented by a value $x \tp T^*$. Thus,  $\para{ C \texttt{*}_{Bool} \texttt{*}_{Bool}} = \set{{\tt C~True~True}, {\tt C~True~False}, {\tt C~False~True}, {\tt C~False~False}}$.
 
-In order to obtain a $T^*$ value for a value of type $T$, we define a function $\core \tp T \to T^*$, which drops all information that is masked by a wildcard in the $T^*$ definition. For example, for the type definition $\mathbf{data}~T^* = \texttt{T}~Int~*_{Int}$, we have $\core~(\texttt{T}~1~\texttt{True}) = \texttt{T}~1~\texttt{*}_{Bool}$.
+In order to obtain a $T^*$ value for a value of type $T$, we define a function $\core \tp T \to T^*$, which drops all information that is masked by a wildcard in the $T^*$ definition. For example, for the type definition $\mathbf{data}~T^* = \texttt{T}~Int~*_{Bool}$, we have $\core~(\texttt{T}~1~\texttt{True}) = \texttt{T}~1~\texttt{*}_{Bool}$.
 
-Because the root type is not a child of any constructor, it cannot be extra state. Even though it is unlikely that we want the root to be extra state, it may still be declared as such by using a dummy root type $\data~R = {\tt R}~Root$, and declare the $Root$ child as extra state: $\data~R^* = {\tt R}^*~*_{Root}$.  
+The root of the document cannot be extra state, because it is not a child of any constructor. Even though it is unlikely that we want the root to be extra state, it may still be declared as such by using a dummy root type $\data~R = {\tt R}~Root$, and declare the $Root$ child as extra state: $\data~R^* = {\tt R}^*~*_{Root}$.  
 
 In general, we can regards a recursive first-order Haskell data type $T$ as:
 
@@ -940,7 +946,7 @@ x\;R\;z\\
 \end{proof}
 \ec
 
-\subsection{Reuse on wildcard types}\label{subsect:wildreuse}
+\subsection{Reuse on wildcard types}\label{subsect:defReuseStar}
 
 We use wildcard types to represent the results of $\present$ and $\interpret$.  Because each wildcard represents a set of values, we need to select an element from each of these sets to obtain a final value for the result. This selection corresponds to filling in a value of type $T$ for each wildcard $\texttt{*}_{T}$ in the result. The values that are filled in for the wildcards are taken from a previous value of the level, if possible.
 
@@ -1093,7 +1099,7 @@ Before we prove validity and idempotency, we introduce a more uniform wildcard t
 
 \head{The $T\st$ type}
 
-The structure of a wildcard type definition $T^*$ leads to awkward proofs, because each child of a constructor can be either a wildcard or a regular child. When pattern matching, this means that children cannot be handled uniformly. Therefore, we introduce a uniform construction assigining a data type $T\st$, which has an extra wildcard constructor, to every type $T$, including the primitive types. 
+The structure of a wildcard type definition $T^*$ leads to awkward proofs, because each child of a constructor can be either a wildcard or a regular child. When pattern matching, this means that children cannot be handled uniformly. Therefore, we introduce a uniform construction assigning a data type $T\st$, which has an extra wildcard constructor, to every type $T$, including the primitive types. 
 (Note the different star symbols: `$\star$' for the uniform type versus `$*$' for the regular wildcard type.) 
 
 For a type $T$:
@@ -1274,11 +1280,9 @@ y_j  				& \textbf{if}~\fn{lookup}~id~y = C'~y_0 \dots y_n \land C \neq C' \\
 \end{array}\right.
 }
 
-In contrast to $\reuzestar$ from Section~\ref{sect:defReuse}, this $\reuzestar$ only recurses on its first argument. The second argument $y$ is the previous value of the root of the level, from which a previous value of a node can be looked up based on its identity. In the definition, there are four cases for $x'_i$. The first case is when $x_i$ is not an extra state value, and its result is the recursive application of $\reuzestar$.
+In contrast to $\reuzestar$ from Section~\ref{subsect:defReuseStar}, this $\reuzestar$ only recurses on its first argument. The second argument $y$ is the previous value of the root of the level, from which a previous value of a node can be looked up based on its identity. In the definition, there are four cases for $x'_i$. The first case is when $x_i$ is not an extra state value, and its result is the recursive application of $\reuzestar$.
 
 If $x_i$ is extra state, then $\fn{lookup}~id~y$ is used to obtain the previous value of its parent. If the lookup succeeds and the previous value has the same constructor ($C$), then all extra state children can be copied from the previous value. This consitutes the second case of the definition.
-
-% Unlike $\reuzestar$ from Section~\ref{sect:defReuse},
 
 If the lookup returns a parent with a different constructor $C'$, it may still be possible to recover its previous value, provided that $C'~y_0 \dots y_n$ has a child that represents the same information as $x_i$. This is expressed by the phrase \hbox{``is~similar~to''} in the third case of the definition. An example illustrates this case.
 
@@ -1286,7 +1290,7 @@ Consider an expression editor with an edit operation that transforms a sum into 
 
 The last case of the definition applies if the extra state from the old value cannot be reused or if lookup fails. In that case, extra state is set to a default value.
 
-Note that since the recursion is only on the first argument, the type is slightly different from the reuse function from Section~\ref{subsect:wildreuse}, which is $\reuzestar ::  T^* \to T \to T$. However, for the application on the root of the level, $T$ is equal to $Level$, yielding the type $\reuzestar \tp Level^* \to Level \to Level$.
+Note that since the recursion is only on the first argument, the type is slightly different from the reuse function from Section~\ref{subsect:defReuseStar}, which is $\reuzestar ::  T^* \to T \to T$. However, for the application on the root of the level, $T$ is equal to $Level$, yielding the type $\reuzestar \tp Level^* \to Level \to Level$.
 
 
 The $\reuzestar$ from this section is able to reuse extra state after a structural update, such as moving a subtree or deleting from a list. Moreover, it also allows reuse when a node is updated to a similar node that has the same kind of extra state. However, it does require that editing preserves node identities. 
@@ -2484,6 +2488,10 @@ The specification developed in the previous sections does not yet offer support 
  \bc In fact, the pathological cases that give rise to the extra conditions in Section~\ref{sect:combinedExtraCompose} all contain some form of duplication. \ec 
 In this section, we discuss how the editor specification can be adapted to support the handling of duplicate presentations. A formal definition of when exactly a presentation contains duplicates is hard to give without making additional assumptions on the presentation formalism. We have established a tentative definition, but it still requires improvement. Therefore, the remainder of this section is rather informal.
 % close on document gets into trouble with pres-inert
+
+\toHere
+Het is allemaal zo erg niet. Formeel lastig, maar eigenlijk wel duidelijk (misschien even uitleggen hoe). Daarom volgende secties vooral schets
+\fromHere
 
 \subsection{Dealing with duplicates}
 
