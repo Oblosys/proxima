@@ -35,8 +35,11 @@ The popularity of the document standard XML has led to an increasing demand for 
 \o just enriched/pres level now?
 \el
 
-There exist a number of style sheet or presentation languages for XML, for example CSS~\cite{css2}, CCSS~\cite{badros99ccss}, PSL~\cite{marden98psl}, XSL~\cite{xsl10}, and P~\cite{quint97thot}, but they lack either the expressiveness or the abstraction mechanisms to specify the complex presentations required for an XML editor. Pretty-printing combinators \cite{oppen80prettyPrinting,swierstra98combinators,hughes1995prettyPrinting,kahl99galleyCombs,brand96generationOfFormatters} do offer expressiveness, abstraction mechanisms and first-class presentations, but most of these libraries only have combinators for text, and all require a program for traversing the document tree and generating the presentation. 
+There exist a number of style sheet or presentation languages for XML, for example CSS~\cite{css2}, CCSS~\cite{badros99ccss}, PSL~\cite{marden98psl}, XSL~\cite{xsl10}, and P~\cite{quint97thot}, but they lack either the expressiveness or the abstraction mechanisms to specify the presentations for the use cases from Chapter~\ref{chap:requirements}. Pretty-printing combinators \cite{oppen80prettyPrinting,swierstra98combinators,hughes1995prettyPrinting,kahl99galleyCombs,brand96generationOfFormatters} do offer expressiveness, abstraction mechanisms and first-class presentations, but these libraries are mainly text-oriented.
 
+%, and all require a program for traversing the document tree and generating the presentation. 
+
+\bc
 In a comparative study of a number of existing languages, we determined the following list of requirements for a presentation language:
 
 \begin{itemize}
@@ -47,6 +50,7 @@ In a comparative study of a number of existing languages, we determined the foll
 \item Presentations should be first-class values. Thus presentations can be manipulated, passed as arguments to functions, etc.
 \item It should have a powerful abstraction mechanism. Thus, similar presentations can be specified with one, appropriately parameterized, function.
 \end{itemize}
+\ec
 
 {\sc Xprez} has been implemented in the functional language Haskell. It does not yet have a domain-specific syntax, but other than that it meets the requirements. Although the language is not yet fully developed, it is already powerful enough to describe a \TeX -like presentation with a style sheet of about 300 lines. Below are two screenshots of an example document presented using this style sheet. The style sheet handles section numbering, ligatures (e.g.\ the ``fi'' in Scientific), and several mathematical constructs.
 
@@ -67,8 +71,8 @@ The contributions of this paper are:
 \ec
 
 
-
-Section~\ref{sect:targetlangs} discusses existing presentation target languages, followed by the introduction of the target language of {\sc Xprez} in Section~\ref{sect:xpreztarget}. *** Include this section? *** Section\bc ~\ref{sect:transformlangs} \ec deals with the transformation languages and Section~\ref{sect:conclusions} concludes.
+\todo{}
+Section~\ref{sect:targetlangs} discusses existing presentation languages and states a number of requirements for a presentation language. followed by the introduction of the target language of {\sc Xprez} in Section~\ref{sect:xpreztarget}.  Section~\ref{sect:conclusions} concludes.
 
 
 %																
@@ -78,8 +82,8 @@ Section~\ref{sect:targetlangs} discusses existing presentation target languages,
 
 \todo{change title}
 
-In this section, we will examine the target sublanguages of five presentation languages: CSS~2.0, CCSS, XSL, PSL and P. 
-
+In this section, we discuss five presentation languages: CSS~2.0, CCSS, XSL, PSL and P. 
+\cite{sgml86} and \cite{dsssl96}
 
 %Paper organisation move this to introduction
 Two kinds of languages are involved in the presentation process: a presentation target language, and a presentation specification or transformation language. The presentation target language describes the building blocks of the presentation that is displayed on the screen or sent to a printer, whereas the transformation language specifies how an XML document is mapped onto the target language to create this presentation. The Extensible Stylesheet Language (XSL) gives a clear example of the distinction, as it has been split into a transformation language (XSL Transformations or XSLT) and a target language (XSL Formatting Objects). XSLT documents specify transformations that map a source document tree to a tree of Formatting Objects, which can then be rendered. 
@@ -91,7 +95,7 @@ Maybe not say Xprez has a target language, but that Xprez is a target language?
 
 
 
-The elementary building blocks of most presentation target languages are basic presentations of strings and small graphical objects such as lines, squares and circles. They can be composed according to a number of models:
+The elementary building blocks of most presentation target languages are basic presentations of strings and simple graphical objects such as lines, boxes and circles. The building blocks can be composed according to a severaln models:
 
 \begin{description}
 \item[Flow model]
@@ -123,7 +127,7 @@ CSS~2.0 supports a flow layout and absolute positioning. There is also a table f
 
 \head{CCSS:} Constraint Cascading Style Sheets~\cite{badros99ccss} is an extension of the CSS~2.0 standard that is based on constraints. The target language of CCSS closely resembles the CSS~2.0 target language, but child properties are specified using constraints instead of percentages of the parent's property values. Another difference is that the constraints may refer to global constraint variables and to left-siblings in the presentation tree as well as to the parent node. 
 
-\head{XSL FO:} On the other side of the spectrum is the XSL stylesheet language for XML. The target language, XSL Formatting Objects, consists of a large collection of elements that can be used to specify page models, presentation properties, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
+\head{XSL FO:} On the other side of the spectrum is the XSL stylesheet language for XML. The design of the target language, XSL Formatting Objects, was based on the*** flow objects of the DSSSL presentation language for SGML. consists of a large collection of elements that can be used to specify page models, presentation properties, and more complicated presentation aspects, such as hyphenation and counters. A presentation is a tree that consists of these formatting objects. 
 
 XSL formatting objects offer  strong control over the flow model, but no box model is supported. There is a table model, but using it to do a box layout is difficult, because that requires the style sheet to take care of computing the alignment, and XSLT does not support a strong computational formalism.
 
@@ -139,9 +143,11 @@ Only P and PSL support a box model, but both models are of a rather object-orien
 
 Letting a child presentation specify its own layout makes it more difficult to understand a presentation. For example, a reverse order presentation of a list of children is obtained by aligning each right side with the previous child's left side. If, on the other hand, child presentations are first-class, and abstraction mechanisms can be used to define combinators on them, reversing can be specified by a simple reverse combinator. Another advantage of this approach is that the concepts of reversing and direction of layout are orthogonal now. Changing the layout from a horizontal list to a vertical list can be achieved by applying a different combinator to the reversed children, while the order of the children is controlled by applying the reverse combinator or not. In the P and PSL model, these concepts are intertwined.
 
+\fromHere
+
 \head{ Requirements}
 
-Based on the previous discussion, we can conclude that a presentation target language, and in particular the target language for Proxima, will have to meet the following requirements: 
+Based on the previous discussion, we can conclude that a presentation target language, and in particular the target language for Proxima, should meet the following requirements: 
 
 \begin{description}
 \item[Proportional effort]
@@ -149,15 +155,14 @@ It must be possible to specify complex presentations, but the specification of s
 \item[Declarative]
 In a declarative language, understanding a composite presentation is easier, because the computation of a presentation does not generate side effects. Another advantage is that the designer need not worry about the order of computation of presentations and properties.
 \item[Domain-specific]
-The language should have syntax for presentation specific constructs such as an {\bf em} (the height of the letter m in the current font and size) and different measuring units such as pixels and inches.
+The language should have syntax for presentation-specific constructs such as an {\bf em} (the height of the letter m in the current font and size) and different measuring units such as pixels and inches.
 \item[Flow and Box model with alignment]
 The language supports a flow model for textual parts of a presentation, and a box model for displaying mathematical formulas and other more graphical presentations such as trees. Automatic alignment can be used to specify composite presentations without having to position each child presentation explicitly.
 \item[First-class presentations]
-A first-class presentation can be named and manipulated at the level of its parent, which in many cases is the natural place for manipulating it. At the same time, it is still possible to specify properties at child presentation level when this is more appropriate.
+A first-class presentation can be named and manipulated at the level of its parent, which in many cases is the natural place for such manipultation. At the same time, it is also possible to specify properties at child presentation level when this is more appropriate. \todo{clear enough?}
 \item[Powerful abstraction mechanism]
-User-defined functions and var\-i\-ables help to reduce code duplication, facilitate code reuse, and increase transparency, because complicated pieces of code may be replaced by functions with well-chosen names.
+User-defined functions and var\-i\-ables help to reduce code duplication, facilitate code reuse, and increase transparency, because complex pieces of code may be replaced by functions with well-chosen names.
 \end{description}
-
 
 %																
 %																
@@ -166,11 +171,10 @@ User-defined functions and var\-i\-ables help to reduce code duplication, facili
 
 With the requirements from the previous subsection in mind, we have developed the declarative presentation language {\sc Xprez}. 
 
-
 %																
 \subsection{{\sc Xprez} presentation model}
 
-{\sc Xprez} is a box language, similar to P and the document formatting languages \TeX ~and Lout~\cite{kingston93lout}. A presentation is a value of the abstract data type \texttt{Xprez}, the definition of which is omitted. A presentation is either a simple box containing a piece of text or a graphical object, or a composite box that contains a list of child presentation boxes. It can therefore be viewed as a tree in which the leaves are simple presentations and the nodes are composite presentations. We construct \texttt{Xprez} values in the functional language Haskell extended with a number of primitive functions that will be described in Section~\ref{sect:primitives}.
+{\sc Xprez} is a box language, similar to P and the document formatting languages \TeX ~and Lout~\cite{kingston93lout}. A presentation is a value of the abstract type \texttt{Xprez}, and is either a simple box containing a text or a graphical object, or a composite box that contains a list of child presentation boxes. Thus, a presentation is a tree, in which the leaves are simple presentations and the nodes are composite presentations. We construct \texttt{Xprez} values in the functional language Haskell, using a number of primitive functions that are described in Section~\ref{sect:primitives}.
 
 \begin{figure}
 \begin{small}
@@ -188,9 +192,8 @@ data Syn = Syn {hRef, vRef, minWidth, minHeight :: Int,
 \end{small}
 \end{figure}
 
-\fromHere
 
-A presentation box (from now on called presentation) has a number of properties, which describe its size and its appearance: 
+A presentation box (from now on called presentation) has a number of properties that describe its size and its appearance: 
 
 \begin{center}
 \epsfig{file=pics/eps/PresentationBox.eps, width=2in}
