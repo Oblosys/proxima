@@ -1,0 +1,9 @@
+row.ppt  save as gif, use snagit to crop and convert to png. (ppt save to png gives weird background)
+tree: capture image, save as bmp, use paint to finish rectangles
+align: capture image, save as bmp, use paint to finish rectangles
+frac: capture image, save as png
+
+
+!!
+change align.png.eps to align.bmp.eps
+change tree.png.eps to tree.bmp.eps

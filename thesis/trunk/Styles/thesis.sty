@@ -1,0 +1,407 @@
+%
+% headers include chapter number? and a .?
+% page number for first page of chapter? also for star chapters (dankwoord/toc/etc.)?
+%  at least override preface and toc. because roman numbers look silly at the bottom
+% 
+
+\newcommand{\loc}{}     % for ultra edit line number search
+
+
+% \usepackage{alltt} % probably needed for Haskell as an adl
+
+\usepackage{url}
+\usepackage[usenames]{color}
+\usepackage[all]{xy}
+
+
+\usepackage{mypslatex}    % why use this?
+%\usepackage{ipe}
+%\usepackage{algo}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{fancyhdr}
+\usepackage{cite}
+\usepackage{ifthen}
+\usepackage[dutch,english]{babel}
+
+\setlength{\paperheight}{240mm}
+\setlength{\textheight}{190mm}
+
+\setlength{\voffset}{21.5mm}
+\setlength{\headheight}{12pt}
+\setlength{\topmargin}{-\headheight}
+\setlength{\headsep}{20pt}
+\setlength{\footskip}{36pt}
+
+\setlength{\paperwidth}{170mm}
+\setlength{\textwidth}{125mm}
+\setlength{\hoffset}{0pt}
+
+\setlength{\oddsidemargin}{9.1mm}
+\setlength{\evensidemargin}{25.1mm}
+\setlength{\marginparsep}{2mm}
+\setlength{\marginparwidth}{14mm}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+%\raggedbottom
+
+
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection~~#1}}
+\lhead[\fancyplain{}{\sffamily\bfseries\thepage}]%
+     {\fancyplain{}{\sffamily\bfseries\rightmark}}
+\rhead[\fancyplain{}{\sffamily\bfseries\leftmark}]%
+     {\fancyplain{}{\sffamily\bfseries\thepage}}
+\cfoot{}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+
+\def\@dottedtocline#1#2#3#4#5{%
+  \ifnum #1>\c@tocdepth \else
+  \vskip \z@ \@plus.2\p@
+  {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+    \parindent #2\relax\@afterindenttrue
+    \interlinepenalty\@M
+    \leavevmode
+    \@tempdima #3\relax
+    \advance\leftskip \@tempdima \null\nobreak\hskip -\leftskip
+    {\sffamily #4}\nobreak
+    \leaders\hbox{$\m@th
+      \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+      mu$}\hfill
+    \nobreak
+    \hb@xt@\@pnumwidth{\hfil\sffamily\normalcolor #5}%
+    \par}%
+  \fi}
+
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \sffamily\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+
+
+\renewcommand{\chapter}{%
+\secdef\myChapter\mysChapter%
+}
+
+% Martijn
+\fancypagestyle{plain}{%              % normal plain does not work, but this one displays the page at the bottom
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[R]{\fancyplain{}{\sffamily\bfseries\thepage}} % except the right     Don't start chapters on left page!
+\renewcommand{\headrulewidth}{0pt}                  % what are these for?
+\renewcommand{\footrulewidth}{0pt}}                 %
+
+
+%
+% headers include chapter number? and a .?
+% page number for first page of chapter? also for small chapters (dankwoord/toc/etc.)?
+% 
+
+\newcommand{\myChapter}[2][?]{%
+  \clearpage                                  %%%%%%% added by Piet  
+  \thispagestyle{empty}
+  
+  \cleardoublepage
+  \refstepcounter{chapter}%
+  \chaptermark{\thechapter~~~#1}                   % chapter number in head
+  \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}%
+  {\flushright\sffamily\bfseries%
+  \rule{141mm}{1pt}\par
+  \vspace{-8pt}
+  \parbox{125mm}{\flushright\textsc{\huge\chaptername}}%
+  \parbox{16mm}{\flushright\textsc{\huge\thechapter}}\par%
+  \vspace{-17pt}
+  \rule{141mm}{1pt}
+  \Huge#2\par}%
+  \vspace{10\baselineskip}  
+
+  \thispagestyle{plain}    % Rene has this empty
+
+
+}
+
+
+\newcommand{\mysChapter}[1]{%
+  \clearpage                                  %%%%%%% added by Piet
+  \thispagestyle{empty}
+  \cleardoublepage
+  %\refstepcounter{chapter}%
+  \chaptermark{#1}
+  %\addcontentsline{toc}{chapter}{#1}%
+   {\flushright\sffamily\bfseries\Huge#1\par}%
+   \vspace{10\baselineskip}
+
+     \thispagestyle{plain}    % Rene has this empty
+}
+
+\renewcommand{\section}{\@startsection
+  {section}%
+  {1}% 
+  {0mm}%
+  {-\baselineskip}%
+  {\baselineskip}%
+  {\sffamily\bfseries\Large}}%
+
+\renewcommand{\subsection}{\@startsection
+  {subsection}%
+  {2}% 
+  {0mm}%
+  {-\baselineskip}%
+  {0.5\baselineskip}%
+  {\sffamily\bfseries\large}}%
+
+\renewcommand{\subsubsection}{\@startsection
+  {subsubsection}%
+  {3}% 
+  {0mm}%
+  {0.5\baselineskip}%
+  {0.01mm}%\baselineskip}%
+  {\sffamily\bfseries}}%
+
+\renewcommand{\paragraph}{\@startsection
+  {paragraph}%
+  {4}% 
+  {0mm}%
+  {0mm}%
+  {-1em}%
+  {\bfseries}}%
+
+\renewcommand\tableofcontents{%
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \chapter*{\contentsname}
+    \thispagestyle{empty}             % no page number in foot
+    \chaptermark{\contentsname}
+    \@starttoc{toc}%
+    \if@restonecol\twocolumn\fi
+    }
+
+\newsavebox{\rwbox}
+\renewcommand{\@makecaption}[2]{%
+  \vspace{10pt}\sbox{\rwbox}{\sffamily #1: #2}%
+  \ifthenelse{\lengthtest{\wd\rwbox > \linewidth}}%
+    {\sffamily #1: #2}%
+    {\begin{center}\sffamily #1: #2\end{center}}%
+}
+
+
+\renewenvironment{thebibliography}[1]
+     {\chapter*{\bibname}%
+      \chaptermark{\bibname}%
+      \addcontentsline{toc}{chapter}{\bibname}%
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist}
+
+
+\newcommand{\finallongpage}{\enlargethispage{\baselineskip}}
+\newcommand{\finalshortpage}{\enlargethispage{-\baselineskip}}
+\newcommand{\finalforcedpage}{\enlargethispage*{100cm}}
+\newcommand{\finalpagebreak}{\pagebreak}
+
+\newcommand{\notewarning}{%
+\typeout{******}%
+\typeout{Warning: there's a (marginal) note}%
+\typeout{******}}
+
+\newcommand{\paranote}[1]{%
+\notewarning%
+\marginpar{\raggedright
+\hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
+
+\newcommand{\note}[1]{%
+\notewarning%
+\mbox{$^{\ast\ast\ast}$}\marginpar{\raggedright
+\hspace{0pt}\sffamily\tiny$\ast\ast\ast$ #1}}
+
+\newcommand{\inote}[1]{%
+\notewarning%
+\mbox{$^{\ast\ast\ast}$}\marginpar{\tiny$\ast\ast\ast$}%
+{\sffamily #1}}
+
+\def\figpath{Figures/}
+\newcommand{\ipefig}[2]{
+  \begin{figure}[htb!]
+    \begin{center}
+    \Ipe{\figpath#1.ipe}
+    \end{center}
+    \caption{#2}
+    \label{fig:#1}
+  \end{figure}
+}
+
+\newcommand{\fig}[1]{Figure~\ref{fig:#1}}
+
+
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+%
+\newbox\ProofSym
+\setbox\ProofSym=\hbox{%
+\unitlength=0.18ex%
+\begin{picture}(10,10)
+\put(0,0){\framebox(9,9){}}
+\put(0,3){\framebox(6,6){}}
+\end{picture}}
+%
+\newenvironment{proof}{\par\noindent{\bf Proof:}}{\hfill%
+\copy\ProofSym\medskip\endtrivlist}
+
+
+
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{6}
+\setcounter{topnumber}{2}
+
+%
+% macros and definitions used in Subdivision Traversal
+%
+
+\newif\ifSayCells
+\SayCellstrue
+\ifSayCells
+  \def\Cell{Cell}
+  \def\Cells{Cells}
+  \def\cell{cell}
+  \def\cells{cells}
+  \def\c{c}
+\else
+  \def\Cell{Face}
+  \def\Cells{Faces}
+  \def\cell{face}
+  \def\cells{faces}
+  \def\c{f}
+\fi
+
+\newcommand{\subdiv}{\mathcal{S}}
+
+
+
+%
+%\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{defi}{Definition}% not used
+
+
+% Martijn:
+% commands used for architecture pictures
+%
+\newcommand{\component}[1]{*+[F-:<3pt>]\txt{#1}}
+\newcommand{\dimcomponent}[3]{*=<#1,#2>+[F-:<3pt>]\txt{#3}}
+\newcommand{\abscomponent}[1]{*+[F.:<3pt>]\txt{#1}}
+\newcommand{\data}[1]{*+[F]\txt{#1}}
+\newcommand{\dataH}{\ensuremath{{\rm Data}_H}}
+\newcommand{\dataL}{\ensuremath{{\rm Data}_L}}
+\newcommand{\dH}{\ensuremath{\delta_H}}
+\newcommand{\dHl}{\ensuremath{\delta_{H,l}}}
+\newcommand{\dHr}{\ensuremath{\delta_{H,r}}}
+\newcommand{\dL}{\ensuremath{\delta_L}}
+\newcommand{\dLl}{\ensuremath{\delta_{L,l}}}
+\newcommand{\dLr}{\ensuremath{\delta_{L,r}}}
+\newcommand{\arr}{\ensuremath{\rightarrow}}
+
+
+
+\newcommand{\fromHere}{~\\ \ensuremath{\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow\downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow \downarrow}\\}
+
+\newcommand{\toHere}{~\\ \ensuremath{\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow\uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow \uparrow}\\}
+
+%%
+
+
+
+% dirty PostScript hacks to print cropmarks, graybar and info 
+% Uncomment the region below if you want to check if the pages in
+% your document are really centered on the A4 paper
+% format. Recommended! Leave the cropmarks out in the final version
+% though.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newcommand{\thsetinfo}[1]{\special{!userdict begin /thtext
+%     (#1) def end}}
+
+% \thsetinfo{thesis.dvi (generated from thesis.tex on \today),}
+
+% \special{!userdict begin
+% /thpt { 72 div 25.4 mul } def
+% /thtop 268.5 def /thbot 28.5 def
+% /thleft 20 def /thright 190 def
+% /thcroplen 13 def /thcropsep 2 def
+% /thcroph { thcroplen 0 rlineto stroke } def
+% /thcropv { 0 thcroplen rlineto stroke } def
+% /thcropmark { gsave translate rotate 0 0 moveto
+% gsave 0 thcropsep sub thcroplen sub 0 rmoveto 
+% thcroplen 0 rlineto stroke grestore
+% 0 0 thcropsep sub thcroplen sub rmoveto
+% 0 thcroplen rlineto stroke grestore } def
+% /bop-hook { gsave
+% dup 1 add 16 string cvs
+% /Helvetica findfont 8 thpt scalefont setfont
+% 72 25.4 div dup scale
+% .05 setlinewidth
+% 0 setgray
+% 25 276 moveto thtext show ( page ) show show
+% 0 thleft thbot thcropmark
+% 90 thright thbot thcropmark
+% 180 thright thtop thcropmark
+% 270 thleft thtop thcropmark
+% 0 .1 1 {dup setgray 1 exch sub 70 mul 63 add 18.5 moveto
+% 7 0 rlineto 0 5 rlineto -7 0 rlineto closepath fill} for
+% grestore } def 
+% /start-hook { 135 45 { dup mul exch dup mul add 1 exch sub } 
+% setscreen } def
+% end}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+% Set the lpi and angle of the type-setter's halftone screen. Leave
+% this in for proper rastering of gray-scale images.
+
+\special{!userdict begin
+/start-hook { 135 45 { dup mul exch dup mul add 1 exch sub }
+setscreen } def
+end}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End: 
