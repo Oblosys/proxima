@@ -3,8 +3,12 @@ module GenCommon where
 import Char (toLower)
 import List
 
-defaultLimit = "-- don't edit this line or below !!!"
---- maybe use something a bit more visible like: ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----"
+
+defaultLimit = "----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----"
+--defaultLimit = "-- don't edit this line or below !!!"
+
+
+
 
 
 ---------------------------------------------------------------------
@@ -91,7 +95,7 @@ fieldType (Field _ tp _)    = tp
 ---
 
 
-{-  Generate Types         -}    --- was "Genereate"
+{-  Generate Types         -} 
 genListTypes :: File -> [Decl]
 genListTypes parsedFile = concatMap genListType (getLists parsedFile) --- Extra nonterminal added
 

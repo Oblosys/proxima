@@ -15,11 +15,14 @@ genDocumentTypes include parsedFile =
                  ,  "\n-------------------------------------- -}"
                  ]
                  ++ ["\n\n-- Generated Types --\n"]
-                 ++ genDataTypes (addedTypes parsedFile)
+                 ++ genDataTypes extendedTypes 
                  ++ ["\n\n-- Generated Types --\n"]
-                 ++ genClipDoc (addedTypes parsedFile)
-                 ++ genNode (addedTypes parsedFile)   
- where addedTypes parsedFile@(File m d) = File m (d++(genListTypes parsedFile))
+                 ++ genClipDoc   extendedTypes 
+                 ++ genNode      extendedTypes 
+                 where
+                 extendedTypes = extendTypes parsedFile
+                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+
 
 --- no node for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- it also produces an empty line

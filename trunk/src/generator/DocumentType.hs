@@ -22,7 +22,7 @@ data Exp = PlusExp exp1:Exp exp2:Exp                     { idD:IDD idP0:IDP  }
          | LamExp Ident Exp                              { idD:IDD idP0:IDP idP1:IDP }
          | AppExp exp1:Exp exp2:Exp                      { idD:IDD }
          | CaseExp Exp alts:[Alt]                        { idD:IDD idP0:IDP idP1:IDP }
-         | LetExp [Decl] Exp                              { idD:IDD idP0:IDP idP1:IDP }
+         | LetExp [Decl] Exp                             { idD:IDD idP0:IDP idP1:IDP }
          | IdentExp Ident                                { idd:IDD }
          | IfExp exp1:Exp exp2:Exp exp3:Exp              { idD:IDD idP0:IDP idP1:IDP idP2:IDP }
          | ParenExp Exp                                  { idD:IDD idP0:IDP idP1:IDP }

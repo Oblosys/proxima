@@ -14,18 +14,34 @@ genDocUtils include parsedFile =
                  ,  "\n generated part"
                  ,  "\n-------------------------------------- -}"
                  ]
-                 ++ genPathNode         (addedTypes parsedFile)
-                 ++ genFuncIDD          parsedFile
-                 ++ genShallowShow      (addedTypes parsedFile)
-                 ++ genToXML            (addedTypes parsedFile)
+                 ++ genPathNode    extendedTypes 
+                 ++ ["\n\n"]
+                 ++ genFuncIDD     parsedFile
+                 ++ ["\n\n"]
+                 ++ genShallowShow extendedTypes 
+                 ++ ["\n\n"]
+                 ++ genToXML       extendedTypes 
                  where
-                 addedTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+                 extendedTypes = extendTypes parsedFile
+                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
 
 {- Path Node -} 
 genPathNode parsedFile = [ "pathNode :: Node -> PathDoc","pathNode NoNode            = NoPathD"]
-                         ++ (map (\e->"pathNode ("++e ++"Node _ pth)  = PathD pth") fields)  where
-                         fields = removeRepeat(getFields parsedFile)
+                         ++ (map makeNodeAlt fields) 
+                         where
+                         fields = removeRepeat(getFields' parsedFile)
+                         makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
+                         makeNodeAlt e = "pathNode ("++fieldType e ++"Node _ pth)  = PathD pth"
 
+
+{-
+genNode parsedFile    = [    "data Node = NoNode "]
+                        ++ [ "          | EnrichedDocNode EnrichedDoc Path" ] --- does not appear as field, but should be in Node
+                        ++ indent 10 (map makeNodeAlt fields)  where
+                        fields = removeRepeat(getFields' parsedFile)
+                        makeNodeAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
+                        makeNodeAlt e = "| "++fieldType e ++"Node "++fieldType e++" Path "
+-}
 
 {- Function IDD -} 
 genFuncIDD :: File -> [String]
@@ -36,10 +52,10 @@ printDeclIDD (Decl d prods _) =  concatMap (printProdIDD d) prods
 printProdIDD d (Prod s fields) 
           = let name = decapitalize s
             in
-                if null fields then [name++"IDD _                                   = Nothing\n\n"]
+                if null fields then [name++"IDD _                                   = Nothing\n"]
                 else    [ name++"IDD :: Node -> Maybe IDD"
                         , name++"IDD ("++d++"Node ("++s++ " iDP"++concat(replicate ((length fields)-1) " _")++") _) = Just iDP"
-                        , name++"IDD _                                   = Nothing\n\n"]
+                        , name++"IDD _                                   = Nothing\n"]
 
 
 {-
@@ -81,18 +97,41 @@ shallowShowExp1 (ParseErrExp _ _)     = "ParseErrExp"
 shallowShowExp1 _                     = "<EXP>"
 -}
 
+{-
 
+toXMLConsList_Slide-- ??????????
+
+
+toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
+toXMLConsList_Decl Nil_Decl             = []
+toXMLDecls _                           = []
+
+toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLExps exps
+toXMLConsList_Exp Nil_Exp             = []
+toXMLExps _                           = []
+
+
+toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLAlts alts
+toXMLConsList_Alt Nil_Alt             = []
+toXMLAlts _                           = []
+-}
 
 genToXML :: File -> [String]
 genToXML (File _ decls) = concatMap printDeclXML decls
 
+printDeclXML (Decl d prods DeclConsList) =  
+          let   decl =  drop 9 d
+          in    [ "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXML"++ decl++"s "++(decapitalize decl)++"s"
+                , "toXMLConsList_"++decl++" Nil_"++decl++"             = []"
+                , "toXML"++decl++"s _                           = []"
+                ]
 
 printDeclXML (Decl d prods DeclDef)  =  map (printProdXML d) prods
-printDeclXML (Decl d _ DeclList) =  
-            [ "toXML"++d++" (Cons"++d++" _ x xs) = toXML"++(init d)++" x : toXML"++d++" xs" --not so nice
-            , "toXML"++d++" (Nil"++d++" _)       = []"
-            , "toXML"++d++" _                    = []"]
-printDeclXML _  =  ["???????"]
+printDeclXML (Decl d _ DeclList) =  []
+--            [ "toXML"++d++" (Cons"++d++" _ x xs) = toXML"++(init d)++" x : toXML"++d++" xs" --not so nice
+--            , "toXML"++d++" (Nil"++d++" _)       = []"
+--            , "toXML"++d++" _                    = []"]
+
 
 printProdXML d (Prod p fields) =
              let fieldsNotListNotIDs = filter isNotListNotIDs  fields
@@ -117,5 +156,4 @@ listArg  d fields   = "map toXML"++d++" "++concat(showAsList(getVar fields))
 
 singleArg :: Field -> String
 singleArg (Field varName varType _)= "[toXML"++varType++" "++varName++"]"
-
 

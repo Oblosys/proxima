@@ -16,11 +16,14 @@ genPresentationAG include parsedFile =
                  ,  "\n generated part"
                  ,  "\n------------------------------------- -}"
                  ]                                                  --- always the same, use abstraction!
-                 ++ genAgTypes (addedTypes parsedFile)
-                 ++ genSem     (addedTypes parsedFile)
-                 ++ genAtt     (addedTypes parsedFile)
+                 ++ genAgTypes extendedTypes
+                 ++ genSem     extendedTypes
+                 ++ genAtt     extendedTypes
                  where
-                 addedTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+                 extendedTypes = extendTypes parsedFile
+                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+
+
 
 -------------------------------------------------------------------
 --        D A T A    T Y P E     D E C L A R A T I O N           --
@@ -51,10 +54,11 @@ genSem (File _ decls) = concatMap genSem' decls
 
 genSem' d@(Decl "EnrichedDoc" l _) = []     --- No SEM should be created for EnrichedDoc
 
-genSem' d@(Decl e l DeclConsList) = semConsList e ++ (genHoles e DeclConsList) 
-genSem' d@(Decl e l DeclList) = semList e ++ (genHoles e DeclList) 
-genSem' d@(Decl e l _)   = [("\n\nSEM "++e)] ++ indent 2 (concatMap doIdC  l) ++ (genHoles  e DeclDef) ++ --- SEM
-                         
+genSem' d@(Decl e l DeclConsList) = semConsList e 
+genSem' d@(Decl e l DeclList) = semList e 
+genSem' d@(Decl e l _)   = [("\n\nSEM "++e)] ++ indent 2 (concatMap doIdC  l) ++ --- SEM
+                           [ "  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" ("++e++"Node @self @lhs.path) @lhs.path"
+                            ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"]++
                          --- quick dirty fix so no SEM is generated if no path rules are generated
                          let pathRules = concatMap doPath l  ---
                          in (if null pathRules then [] else [("\n\nSEM "++e)])    ---
@@ -100,7 +104,6 @@ doIx (Prod e ls) = let l =  takeFieldsListNames ls
                 ++ indent (3+(length e)) (map (\a->a ++ ".ix = 0") (tail l))
 -}
 
---- why is holes added to this in some other place than here?
 semList e =  [ "\nSEM "++e
              , "  | "++e
              , "      lhs.press = map ( loc ("++e++"Node @self @lhs.path) "
@@ -109,27 +112,13 @@ semList e =  [ "\nSEM "++e
              , "                      -- parent is reponsible for setting parsing/structural"
              , "      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def."
              , "      lhs.pIdC = @elts.pIdC"
-
-
-
----          ,"                 lhs.path = @lhs.path"
----          ,"  | Nil"++e++"      lhs.path = @lhs.path"
----          ,"  | Hole"++e++"     lhs.path = @lhs.path"
---          ,"  | ParseErr"++e++" lhs.path = @lhs.path"
              , "      elts.path = @lhs.path"
              , "      elts.ix = 0"
-          ]
+             , "  | Hole"++e++"     lhs.press = []"
+             , "  | ParseErr"++e++" lhs.press = [ presParseErr @node @presentation ]" ------ ??? ok?
+             ]
  where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
 
-
-
-{-
-SEM ConsList_Exp
-  | Cons_Exp head.pIdC = @lhs.pIdC + 2
-             tail.pIdC = @head.pIdC
-             lhs.pIdC = @tail.pIdC
-
--}
 
 ---
 semConsList e =  [ "\nSEM "++e
@@ -150,14 +139,7 @@ semConsList e =  [ "\nSEM "++e
  where listTp = drop (length "ConsList_") e --- !!! need to access the type name here in an safe way
 
 --- genHoles suggests that holes are generated. However, it is pres and press rules that are generated
-genHoles e DeclDef  = 
-    ["  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" ("++e++"Node @self @lhs.path) @lhs.path"
-    ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"
-    ]
-genHoles e DeclList =
-    ["  | Hole"++e++"     lhs.press = []"
-    ,"  | ParseErr"++e++" lhs.press = [ presParseErr @node @presentation ]" ------ ??? ok?
-    ]
+
 
 genHoles e DeclConsList =
     []
@@ -208,4 +190,27 @@ enumRepData l = c l l
          chg v l =  if (length(filter (==v) l)>1) then chg' (v,1,l) else l
          chg' (_,_,[])     = []
          chg' (v,n,(x:xs)) = if (v == x) then (x++(show n)):(chg' (v,n+1,xs)) else x:(chg' (v,n,xs))
+-}
+
+
+
+{-
+genHoles e DeclDef  = 
+    ["  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" ("++e++"Node @self @lhs.path) @lhs.path"
+    ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"
+    ]
+genHoles e DeclList =
+    [
+    ]
+
+SEM ConsList_Exp
+  | Cons_Exp head.pIdC = @lhs.pIdC + 2
+             tail.pIdC = @head.pIdC
+             lhs.pIdC = @tail.pIdC
+
+
+---          ,"                 lhs.path = @lhs.path"
+---          ,"  | Nil"++e++"      lhs.path = @lhs.path"
+---          ,"  | Hole"++e++"     lhs.path = @lhs.path"
+--          ,"  | ParseErr"++e++" lhs.path = @lhs.path"
 -}

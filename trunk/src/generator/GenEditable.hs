@@ -15,15 +15,15 @@ genDocumentEdit include parsedFile =
                  ,  "\n-------------------------------------- -}"
                  ]
                  ++ ["\n\n-- Generated clipfunctions  --\n"]
-                 ++ clipfunctions (listFields(addedTypes parsedFile))
---                 ++ ["\n\n-- Editable Class --\n"]
---                 ++ editableClass
+                 ++ clipfunctions (listFields extendedTypes)
                  ++ ["\n\n-- Editable Instances --\n"]
-                 ++ genEditableInstances (addedTypes parsedFile) 
-                 ++ (concatMap primitiveEdit primTypes)
+                 ++ genEditableInstances extendedTypes
+                 ++ concatMap primitiveEdit primTypes
                  ++ ["\n\n\n\n\n\n-- ProxParser_Generated --\n"] ---
-                 ++ genProxParser (addedTypes parsedFile)   
- where           addedTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
+                 ++ genProxParser        extendedTypes
+                 where
+                 extendedTypes = extendTypes parsedFile
+                 extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
                  primTypes = ["Int", "Bool", "String"]  --- This doesn't belong here!
 
 
