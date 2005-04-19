@@ -1,1 +1,1 @@
-..\..\..\uust\tools\ag\uuagc -cfspm --self PresentationAG.ag
+..\..\..\uust\tools\ag\uuagc -cfmspw --self PresentationAG.ag

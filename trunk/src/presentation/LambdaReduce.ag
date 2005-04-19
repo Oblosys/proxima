@@ -37,6 +37,17 @@ removeParens (ParenExp _ _ _ x1) = removeParens x1
 removeParens exp                 = exp
 
 ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
+
+-- OU print exp function
+
+showExpCode :: Exp -> PopupMenuItem
+showExpCode exp = 
+  ( "Show Expression code"
+  , trace ("Expression:\n" ++ (show . PrettyPrinting.sem_Expression . uhaFromExp [] $ exp) ) id
+  )
+  
+                   
+
 }
 
 -- The explicit parenthesis style of Helium makes reduction a bit tricky.
@@ -46,33 +57,35 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
 SEM Exp
   | PlusExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (+)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1+int2))))]
-                                 _                                         -> []    
+                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ showExpCode @self, ("Reduce primitive (+)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1+int2))))]
+                                 _                                         -> [showExpCode @self]    
   | TimesExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (*)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1*int2))))]
-                                 _                                         -> []    
+                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ showExpCode @self, ("Reduce primitive (*)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1*int2))))]
+                                 _                                         -> [showExpCode @self]    
   | DivExp      
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive div" ,  pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1 `div` int2))))]
-                                 _                                         -> []    
+                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ showExpCode @self, ("Reduce primitive div" ,  pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1 `div` int2))))]
+                                 _                                         -> [showExpCode @self]    
   | PowerExp    
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ ("Reduce primitive (^)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1^int2))))]
-                                 _                                         -> []    
+                                 (IntExp idd1 idp1 (Int_ _ int1), IntExp _ _ (Int_ _ int2) ) -> [ showExpCode @self, ("Reduce primitive (^)" , pasteExp @lhs.path (IntExp idd1 idp1 (Int_ NoIDD (int1^int2))))]
+                                 _                                         -> [showExpCode @self]    
   | AppExp -- pattern matching is not ok in ag
       loc.reductionEdit = case removeParens @exp1.self of
-                                  LamExp _ _ _ ident exp -> [ ("Beta reduce",
+                                  LamExp _ _ _ ident exp -> [ showExpCode @self,
+                                                              ("Beta reduce",
                                                                pasteExp @lhs.path 
                                                                         (ensureParens (@exp1.lamBody [(strFromIdent ident, @exp2.self)] ))
                                                               )
                                                             ] 
-                                  _                      -> []    
+                                  _                      -> [showExpCode @self]    
   | IdentExp  -- only for top level, until it is clear how to do let expressions
       loc.reductionEdit =  case lookupFM  @lhs.varsInScope (strFromIdent @ident.self) of
-                             Nothing      -> []
+                             Nothing      -> [showExpCode @self]
                              Just (PathD pth@(_:_),_) -> 
-                               [( "Replace by definition" 
+                               [ showExpCode @self
+                               ,( "Replace by definition" 
                                 , \(DocumentLevel d path cl) ->
                                   case selectD (init pth) d of -- pattern matched, so pth is not null
                                     (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 _ _ _ exp)) ->
@@ -87,12 +100,12 @@ SEM Exp
                 -- pth is path of ident, path is current doc focus and @lhs.path is path to identExp
   | IfExp
       loc.reductionEdit = case removeParens @exp1.self of
-                                 BoolExp _ _ (Bool_ _ bool) -> [ ("Reduce primitive if" , pasteExp @lhs.path 
+                                 BoolExp _ _ (Bool_ _ bool) -> [showExpCode @self, ("Reduce primitive if" , pasteExp @lhs.path 
                                                                                           (if bool then setIDPExp @idP0 @exp2.self 
                                                                                                    else setIDPExp @idP0 @exp3.self))]
-                                 _                          -> []    
+                                 _                          -> [showExpCode @self]    
   | BoolExp IntExp LamExp CaseExp LetExp ParenExp ListExp ProductExp   
-      loc.reductionEdit = [] -- cannot be reduced
+      loc.reductionEdit = [showExpCode @self] -- cannot be reduced
   
 {- CaseExp   -- Case only matches on variables so reducing is rather useless
    LetExp    -- have to think about this one

@@ -53,8 +53,8 @@ reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 reduceEnrIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel -> EnrichedDocLevel ->
              IO (EditDocument, LayerStateEval, EnrichedDocLevel)
 reduceEnrIO state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
- do { let -- dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
-          dcls' = dcls -- ignore updates on id list
+ do { let dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
+          -- dcls' = dcls -- ignore updates on id list
     ; dcls'' <- reduceList_Decl dcls'
     ; return (SetDoc (RootDoc idd idp dcls''),state, enrDoc )
     }

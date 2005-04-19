@@ -22,9 +22,9 @@ SEM Decl
 SEM Inv
   | Inv
       lhs.pres = loc (InvNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   col [ row [ text "get: \"", @eval.pres, text "\"" ]
+                   col [ row [ text "\"", @eval.pres, text "\"" ]
                        , @doc.pres
-                       , row [ text "src = ", @enr.pres ]
+                       , row [ text "View = ", @enr.pres ]
                        ] 
                                           
 SEM EvalButton

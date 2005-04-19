@@ -28,7 +28,9 @@ rev = foldr(snoc,nil),
 mapdfst = %(x: nil^o; nil |
                cons^o; (dup (fst) * x); cons),
 
-toc = map(dup(fst)); unzip,
+toc = map(dup(fst)); unzip; swap,
+
+toc2 = map(dup(fst)); unzip,
 
 
 merge = %(x: (dup nil)^o; map(inl) |

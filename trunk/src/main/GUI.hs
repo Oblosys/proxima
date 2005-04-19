@@ -37,7 +37,7 @@ import IOExts
 import Directory
 
 initialWindowSize :: Size
-initialWindowSize = sz 1000 600
+initialWindowSize = sz 1260 900
 
 startGUI :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) -> (RenderingLevel, EditRendering) -> IO ()
 startGUI handler (initRenderingLvl, initEvent) = run $
@@ -251,12 +251,12 @@ genericHandler handler renderingLvlVar window evt =
 -----            ; setWindowViewDomain windowID (rectBetween (Point 0 0) (Point w' h'))  
 -----            ; setWindowTitle windowID ("Proxima v1.0   ("++show (scaleInt scale 100)++"%)")
            ; viewStart <- scrolledWindowGetViewStart window
-           ; putStrLn $ "viewStart :"++show point
+--           ; putStrLn $ "viewStart :"++show point
 
            -- ; windowSetClientSize window (sz w' h')
            ; scrolledWindowSetScrollbars window 1 1 w' h' (pointX viewStart) (pointY viewStart) False
                     
-           ; putStrLn $ "virtSize :"++show w' ++","++ show h'
+--           ; putStrLn $ "virtSize :"++show w' ++","++ show h'
 
             -- hack: only partial window updates for flickering reduce, see RenTypes.hs      
             ; let (fCur, fOld, editedRegion) = updRegions

@@ -15,6 +15,8 @@ import Data.FiniteMap
 import IOExts
 
 import qualified Chess
+import EvaluateTypes                                   -- for OU demo
+import qualified PrettyPrinting       (sem_Expression) -- for OU demo
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -781,38 +783,38 @@ SEM Ident
       lhs.varsInScopeAtFocus =  if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
 
 
--- Default attribute?
+-- TODO: group constructors
 SEM Exp
   | PlusExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | TimesExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | DivExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | PowerExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | BoolExp
-      lhs.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      lhs.varsInScopeAtFocus   = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | IntExp
-      lhs.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      lhs.varsInScopeAtFocus   = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | LamExp
       ident.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | AppExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | CaseExp
-      alts.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      alts.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | LetExp
       decls.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | IdentExp
       ident.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | IfExp
-      exp1.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp1.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | ParenExp
-      exp.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exp.varsInScopeAtFocus   = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | ListExp
-      exps.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exps.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
   | ProductExp
-      exps.varsInScopeAtFocus = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
+      exps.varsInScopeAtFocus  = if (PathD @lhs.path) == @lhs.focusD then @lhs.varsInScope else @lhs.varsInScopeAtFocus
 
 SEM Alt
   | Alt

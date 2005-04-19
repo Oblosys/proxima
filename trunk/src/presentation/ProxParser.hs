@@ -561,6 +561,32 @@ parseInvDecl = (\tk inv ->  InvDecl NoIDD (tokenIDP tk) NoIDP inv)
       <$> pKey "Inv" <* pKey ":" <*> parseInv
 
 parseInv = 
+         (\tk {-eval view-} -> initInv) 
+     <$> pKey "inv"
+{-     <*> pLIdent
+     <*> parseView'
+--     <*> parseString_  -}
+  <|>    recognizeInv
+
+
+initInv  = Inv NoIDD (LeftDocView NoIDD (String_ NoIDD "not evaluated yet"))
+                        (pr (as "ichi" `cons` (as "ni" `cons` (as "san" `cons` nil))) 
+                            ((as "ichi" `pr` an 1) `cons` ((as "ni" `pr` an 2) `cons` ((as "san" `pr` an 3) `cons` nil))))
+                       (String_ NoIDD "toc")
+                       (Skip NoIDD)
+ where as str = AS NoIDD (String_ NoIDD str)
+       an i   = AN NoIDD (Int_ NoIDD i)    
+       cons x xs = Ls NoIDD x xs
+       nil = ANil NoIDD      
+       pr x y = Pr NoIDD x y
+--                       view --(ANil NoIDD)
+                       --(Pr NoIDD (ANil NoIDD) --(Ls NoIDD (AN NoIDD (Int_ NoIDD 1)) (ANil NoIDD))
+                       --          (ANil NoIDD) --(Ls NoIDD (AS NoIDD (String_ NoIDD "bla")) (ANil NoIDD))
+                       --)
+-- toc < ( "one" : ( "two" : ( "three" : [] ) ) ) , ( < "one" , #1 > : ( < "two" , #2 > : ( < "three" , #3 > : [] ) ) )  >
+                       
+{- original versions, before modifying for PSD workshop demo
+parseInv = 
          (\tk eval view -> initInv (mkString_ eval) view) 
      <$> pKey "inv"
      <*> pLIdent
@@ -576,6 +602,7 @@ initInv eval view = Inv NoIDD (LeftDocView NoIDD (String_ NoIDD "not evaluated y
                        --)
                        eval
                        (Skip NoIDD)
+-}
 
 
 recognizeInv = pStr $
