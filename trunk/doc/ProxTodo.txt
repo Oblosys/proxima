@@ -63,7 +63,40 @@ Focus:
 
 
 
+TODO: (from test/Notes Japan.txt)
+
+repeated type without name is not numbered yet
+idD is always necessary (only for childless constructor it can be left out)
+
+
+type definition
+parser
+few ag defs for helium editor
+lhs.pres rules
+ - every token should be put in a row'   (figure out why)
+
+
+- bools and ints are still a bit tricky. Is this fixed with boxed versions?
+
+
+REQS:
+generated marshaling functions from Proxima types to Haskell types
+
+reuse: map tokenNode
+
+
+after pres edit, always parse before doc edit
+add makefile
 
 
 
+BUGS: (from test/bug.txt, may have been (partially) fixed by new GHC version)
 
+Crash wen adding IfExp at last elt of: list = [ 1+2, 3*5, 27 ];
+
+Soms bij select (uit popup) op "Slides:"                                   ^  
+                                   
+Regelmatig bij cut op 27 uit bovenstaande lijst, gevolgd door enkele keren cut op de Int_ placeholder     
+
+
+TODO pattern match problem when inserting div expression in list                         
