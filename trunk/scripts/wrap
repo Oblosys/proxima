@@ -1,0 +1,12 @@
+# Wrapper that touches the source in case of a compiler error
+#
+# For compilers that generate target even in case of error, in which
+# case make thinks target is up to date
+
+$*
+if [ $? -ne 0 ]; then
+   # 1 second sleep is necessary, otherwise touched source has same time-stamp as target
+   sleep 1 
+   touch PresentationAG.ag
+fi
+
