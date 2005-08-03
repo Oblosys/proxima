@@ -16,14 +16,14 @@ HC = ghc
 # --make ../src/main/Main.hs -o Proxima.exe
 HC_OPTS = -fglasgow-exts -fallow-undecidable-instances -package lang -package wx -i$(Common_DIR):$(Main_DIR):$(Gui_DIR):$(Evaluation_DIR):$(Presentation_DIR):$(Layout_DIR):$(Arrangement_DIR):$(Rendering_DIR)
 
-Arrangement_DIR = ../src/arrangement
-Common_DIR = ../src/common
-Evaluation_DIR = ../src/evaluation
-Generator_DIR = ../src/generator
-Layout_DIR = ../src/layout
-Main_DIR = ../src/main
+Arrangement_DIR  = ../src/arrangement
+Common_DIR       = ../src/common
+Evaluation_DIR   = ../src/evaluation
+Generator_DIR    = ../src/generator
+Layout_DIR       = ../src/layout
+Main_DIR         = ../src/main
 Presentation_DIR = ../src/presentation
-Rendering_DIR = ../src/rendering
+Rendering_DIR    = ../src/rendering
 
 Parsec_DIRS = ../../parsec
 LVM_DIRS = ../../lvm/src/lib/common \
@@ -49,14 +49,14 @@ Helium_DIRS = ../../heliumNT/src/syntax \
 
 GENERATOR = $(Generator_DIR)/Generate
 
-H_SRCS = $(Main_DIR)/Main.hs
-  $(Arrangement_DIR)/.hs \
-  $(Common_DIR)/.hs \
-  $(Evaluation_DIR)/.hs \
-  $(Layout_DIR)/.hs \
-  $(Main_DIR)/.hs \
-  $(Presentation_DIR)/.hs \
-  $(Generated_Srcs)
+H_SRCS = $(Main_DIR)/Main.hs\
+         $(Arrangement_DIR)/.hs \
+         $(Common_DIR)/.hs \
+         $(Evaluation_DIR)/.hs \
+         $(Layout_DIR)/.hs \
+         $(Main_DIR)/.hs \
+         $(Presentation_DIR)/.hs \
+         $(Generated_Srcs)
 
 Generated_Srcs = $(Evaluation_DIR)/DocTypes_Generated.hs $(Evaluation_DIR)/DocumentEdit_Generated.hs $(Evaluation_DIR)/DocUtils_Generated.hs $(Presentation_DIR)/PresentationAG_Generated.ag $(Presentation_DIR)/ProxParser_Generated.hs
 
