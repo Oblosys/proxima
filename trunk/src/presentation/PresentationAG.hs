@@ -17,7 +17,7 @@ import IOExts
 
 import qualified Chess
 import EvaluateTypes                                   -- for OU demo
-import qualified PrettyPrinting       (sem_Expression) -- for OU demo
+import qualified UHA_Pretty      (sem_Expression) -- for OU demo
 
 pthFrmMsg :: HeliumMessage -> ([PathDoc], [PathDoc], [PathDoc])
 pthFrmMsg (HError _ ps1 ps2 ps3) = (ps1, ps2, ps3)
@@ -30,7 +30,7 @@ presMessage :: HeliumMessage -> Presentation
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text) lns) `withColor` errColor
                                                              rng:_   -> col' (map (text) lns) `withColor` errColor
                                                                         `link` rng
-presMessage (HMessage lns)           = col' (map (text) lns) `withColor` msgColor 
+presMessage (HMessage lns)           = col' (map (text) lns) `withColor` msgColor
 
 msgColor = blue
 errColor = red
@@ -63,7 +63,7 @@ navigateTo (PathD pth) = (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth)
 expand :: [Int] -> Decl -> UpdateDoc
 expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD True) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
@@ -71,7 +71,7 @@ expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
 toggleExpanded :: [Int] -> Decl -> UpdateDoc
 toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD (not $ boolVal expanded)) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
@@ -80,7 +80,7 @@ toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) 
 toggleAutoLayout :: [Int] -> Decl -> UpdateDoc
 toggleAutoLayout pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (Bool_ NoIDD (not $ boolVal autoLayout)) ident exp))
                                             )
     in  (DocumentLevel d' path cl)
@@ -94,24 +94,24 @@ idP0FromIdent (Ident _ idp0 _ str) = idp0
 idP0FromIdent _                    = NoIDP
 
 box xp = overlay [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)],empty]
-presHole focus typeStr nd pth = loc nd $ 
+presHole focus typeStr nd pth = loc nd $
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
-  
+
 --  structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
-  
+
 presParseErr node pres =
-  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -} 
+  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -}
                                                                                      -- empty trick
                           `withbgColor` whiteSmoke
 
 
-row'  = RowP (NoIDP) 0 
+row'  = RowP (NoIDP) 0
 col'  = ColP (NoIDP) 0
 text' idc = StringP idc
 
 der:: IDP -> String -> Xprez
 der idc str = StringP idc str `withColor` derCol
- 
+
 
 op :: IDP -> String -> Xprez
 op idc str = StringP idc str `withColor` opCol
@@ -161,11 +161,11 @@ mkIDP NoIDP idC offset = IDP (idC + offset)
 mkIDP id@(IDP _) _ _   = id
 
 
-data TypeTree = TypeNode TypeInfo [TypeTree]  
+data TypeTree = TypeNode TypeInfo [TypeTree]
 
 data TypeInfo = TypeInfo String (Maybe String)
 
-lookupType typeEnv path = case lookup (PathD path) typeEnv of 
+lookupType typeEnv path = case lookup (PathD path) typeEnv of
                             Nothing -> "<no type>"  -- use Maybe here?
                             Just tp -> tp
 
@@ -179,7 +179,7 @@ data Value = BoolVal Bool
          | LamVal (Value -> Value)
          | ListVal [Value]
          | ProdVal [Value]
-         | ErrVal 
+         | ErrVal
 
 instance Show Value where
   show (BoolVal b) = show b
@@ -192,7 +192,7 @@ instance Show Value where
 
 evaluate :: Exp -> [(String, Val)] -> Val
 evaluate (Lam ident exp) env =
-evaluate (AppExp f a) env =   
+evaluate (AppExp f a) env =
 -}
 evaluateIntOp op (IntVal v1) (IntVal v2) = IntVal $ v1 `op` v2
 evaluateIntOp _  _           _           = ErrVal
@@ -208,7 +208,7 @@ presentList ps = row' [ text "  ", col' ps ]
 toggleViewType :: [Int] -> PPPresentation -> UpdateDoc
 toggleViewType pth (PPPresentation idD viewtp slides) =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_PPPresentation (PPPresentation idD (Bool_ NoIDD (not $ boolVal viewtp)) slides))
                                             )
     in  (DocumentLevel d' path cl)
@@ -222,13 +222,13 @@ itemStart i (_)        typeLoc = typeLoc $ text "  "
 
 presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
 presentElementXML focusD node path tag children =
-  loc node $ parsing $ presentFocus focusD path $                  
+  loc node $ parsing $ presentFocus focusD path $
     if null children
     then col [ text $ "<"++tag++"/>"]
     else col [ text  $ "<"++tag++">"
              , row [ text "  ", col children ]
-             , text $ "</"++tag++">" ]      
-    
+             , text $ "</"++tag++">" ]
+
 presentPrimXMLBool :: Bool -> Presentation
 presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
 
@@ -241,11 +241,11 @@ presentPrimXMLString x = text $ "<String>"++x++"<String>"
 
 presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
 presentElementTree focusD node path tag children =
-  loc node $ parsing $ presentFocus focusD path $                  
+  loc node $ parsing $ presentFocus focusD path $
     if null children
     then mkTreeLeaf False $ text $ tag
     else mkTreeNode False True (text tag) children
-    
+
 presentPrimTreeBool :: Bool -> Presentation
 presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
 
@@ -263,25 +263,25 @@ addReductionPopupItems its pres = addPopupItems pres its
 pasteExp :: [Int] -> Exp -> UpdateDoc
 pasteExp pth exp =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_Exp exp)
                                             )
     in  (DocumentLevel d' path cl)
 
 
-setIDPExp newIdp (PlusExp idd idp0 x1 x2)           = PlusExp idd newIdp x1 x2          
-setIDPExp newIdp (TimesExp idd idp x1 x2)           = TimesExp idd newIdp x1 x2          
-setIDPExp newIdp (DivExp idd idp0 x1 x2)            = DivExp idd idp0 x1 x2           
-setIDPExp newIdp (PowerExp idd idp0 x1 x2)          = PowerExp idd newIdp x1 x2         
-setIDPExp newIdp (BoolExp idd idp0 x1)              = BoolExp idd newIdp x1             
-setIDPExp newIdp (IntExp idd idp0 x1)               = IntExp idd newIdp x1              
-setIDPExp newIdp (CaseExp idd idp0 idp1 x1 x2)       = CaseExp idd newIdp idp1 x1 x2      
-setIDPExp newIdp (LetExp idd idp0 idp1 dcls x2)     = LetExp idd newIdp idp1 dcls x2    
-setIDPExp newIdp (LamExp idd idp0 idp1 x1 x2)       = LamExp idd newIdp idp1 x1 x2      
+setIDPExp newIdp (PlusExp idd idp0 x1 x2)           = PlusExp idd newIdp x1 x2
+setIDPExp newIdp (TimesExp idd idp x1 x2)           = TimesExp idd newIdp x1 x2
+setIDPExp newIdp (DivExp idd idp0 x1 x2)            = DivExp idd idp0 x1 x2
+setIDPExp newIdp (PowerExp idd idp0 x1 x2)          = PowerExp idd newIdp x1 x2
+setIDPExp newIdp (BoolExp idd idp0 x1)              = BoolExp idd newIdp x1
+setIDPExp newIdp (IntExp idd idp0 x1)               = IntExp idd newIdp x1
+setIDPExp newIdp (CaseExp idd idp0 idp1 x1 x2)       = CaseExp idd newIdp idp1 x1 x2
+setIDPExp newIdp (LetExp idd idp0 idp1 dcls x2)     = LetExp idd newIdp idp1 dcls x2
+setIDPExp newIdp (LamExp idd idp0 idp1 x1 x2)       = LamExp idd newIdp idp1 x1 x2
 setIDPExp newIdp (AppExp idd x1 x2)                 = AppExp idd (setIDPExp newIdp x1) x2  -- has no pid of its own
 setIDPExp newIdp (IdentExp idd x1)                  = IdentExp idd (setIDPIdent newIdp x1) -- has no pid of its own
 setIDPExp newIdp (IfExp idd idp0 idp idp1 x1 x2 x3) = IfExp idd newIdp idp idp1 x1 x2 x3
-setIDPExp newIdp (ParenExp idd idp0 idp1 x1)        = ParenExp idd newIdp idp1 x1    
+setIDPExp newIdp (ParenExp idd idp0 idp1 x1)        = ParenExp idd newIdp idp1 x1
 setIDPExp newIdp (ListExp idd idp0 idp1 idps x1)    = ListExp idd newIdp idp1 idps x1
 setIDPExp newIdp (ProductExp idd idp0 idp1 idps x1) = ProductExp idd newIdp idp1 idps x1
 setIDPExp _   exp                                   = exp
@@ -296,26 +296,26 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
 -- OU print exp function
 
 showExpCode :: Exp -> PopupMenuItem
-showExpCode exp = 
+showExpCode exp =
   ( "Show Expression code"
-  , trace ("Expression:\n" ++ (show . PrettyPrinting.sem_Expression . uhaFromExp [] $ exp) ) id
+  , trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id
   )
-  
-                   
 
 
-pressEvalButton pth = 
+
+
+pressEvalButton pth =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_EvalButton (ReEvaluate1 NoIDD))
                                             )
     in  (DocumentLevel d' path cl)
 
 addMarkOp pth view pres = pres `addPopupItems` [("Mark", markOp pth view)]
 
-markOp pth view = 
+markOp pth view =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_View (Mark NoIDD view))
                                             )
     in  (DocumentLevel d' path cl)
@@ -323,18 +323,18 @@ markOp pth view =
 
 addDelOp pth view pres = pres `addPopupItems` [("Delete", deleteOp pth view)]
 
-deleteOp pth (Ls idD v1 v2) = 
+deleteOp pth (Ls idD v1 v2) =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_View (DelL NoIDD v1 v2))
                                             )
     in  (DocumentLevel d' path cl)
 
 addInsOp pth view pres = pres `addPopupItems` [("Insert", insertOp pth view)]
 
-insertOp pth view = 
+insertOp pth view =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) 
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
                                               (Clip_View (InsL NoIDD HoleView view))
                                             )
     in  (DocumentLevel d' path cl)
@@ -1323,7 +1323,7 @@ sem_Board_ParseErrBoard (node_) (presentation_) =
       possibleMoves        : [(Int, Int)]
 
    chained attributes:
-      focusedPiece         :  Maybe (BoardSquare,(Int,Int)) 
+      focusedPiece         :  Maybe (BoardSquare,(Int,Int))
       pIdC                 : Int
       rowNr                : Int
       sqCol                : Bool
@@ -1907,7 +1907,7 @@ sem_BoardRow_ParseErrBoardRow (node_) (presentation_) =
 
    chained attributes:
       colNr                : Int
-      focusedPiece         :  Maybe (BoardSquare,(Int,Int)) 
+      focusedPiece         :  Maybe (BoardSquare,(Int,Int))
       pIdC                 : Int
       sqCol                : Bool
 

@@ -10,9 +10,9 @@ fontsize = 20 :: Int
 
 tex xp = xp `withFont'` ("CMR12", fontsize)
 
-latex = 
+latex =
   overlay [ text"L" `withFontSize` 24
-          , move 7 (-5) $ text "A" `withFontSize` 17 
+          , move 7 (-5) $ text "A" `withFontSize` 17
           , move 17 0 $ text"T" `withFontSize` 24
           , move 29 5 $ text"E" `withFontSize` 24
           , move 43 0 $ text"X" `withFontSize` 24
@@ -24,7 +24,7 @@ bold xp = xp `withFontFam` "CMBX12"
 
 math xp = centerline xp
 
-plusSym = text "+" 
+plusSym = text "+"
 minusSym = text "\161" `withFontFam` "CMSY10" `withHeight` fontsize
 multiplySym = text "\162" `withFontFam` "CMSY10" `withHeight` fontsize
 timesSym = text "\163" `withFontFam` "CMSY10" `withHeight` fontsize
@@ -40,16 +40,16 @@ gammaSym = text "\176"  `withFontFam` "CMMI6" `withHeight` fontsize
 sigmaSym = move 0 7 $ text "\167"  `withFont'` ("CMR12", 120 `percent` fontsize) `withHeight` fontsize
 rSym = text "R" `withFontFam` "CMBX6" `withHeight` fontsize
 
-sigma = 
+sigma =
   polyW 2 [(0.9,0.1),(0.9,0),(0,0),(0.5,0.5),(0,1),(0.9,1),(0.9,0.9)]
-  `with_` (\(i,s) -> let i' = i 
+  `with_` (\(i,s) -> let i' = i
                          s' = s { minWidth = (assignedHeight i*7`div`10), hStretch = True }
                      in  (i',s'))
 
 
-rootSym = 
-  polyW 2 [(0.0,0.6),(0.1,0.6),(0.4,1.0),(1.0,0.0)] 
-  `with_` (\(i,s) -> let i' = i 
+rootSym =
+  polyW 2 [(0.0,0.6),(0.1,0.6),(0.4,1.0),(1.0,0.0)]
+  `with_` (\(i,s) -> let i' = i
                          s' = s { minWidth = (assignedHeight i*5`div`10), hStretch = False }
                      in  (i',s'))
 
@@ -72,7 +72,7 @@ dif e1 e2 = row [ e1, hSpace 4, minusSym, hSpace 4, e2]
 
 prod e1 e2 = row [ e1, hSpace 4, multiplySym, hSpace 4, e2]
 
-power xp exp = row [ xp, move 0 (-12) $ shrink exp 
+power xp exp = row [ xp, move 0 (-12) $ shrink exp
                                ]
 subscript exp sup = row [ exp, hSpace 1, move 0 5 $ shrink $ sup ]
 --  where subHRef i = - (fontSize i * 1 `div` 6)
@@ -82,7 +82,7 @@ superscript exp sup = row [ exp, hSpace 1, move 0 (-10) $ shrink $ sup ]
 --  where superHRef i = fontSize i * 1 `div` 3
 --        ex i = fontSize i `div` 3
 
-subsuperscript exp sub sup = row [ exp, hSpace 1, overlay [ move 0 (-10) $ shrink $ sup 
+subsuperscript exp sub sup = row [ exp, hSpace 1, overlay [ move 0 (-10) $ shrink $ sup
                                                   , move 0 (7) $ shrink $ sub
                                                   ]
                                    ]
@@ -91,11 +91,11 @@ subsuperscript exp sub sup = row [ exp, hSpace 1, overlay [ move 0 (-10) $ shrin
 
 centerline xp = xp `with_` (\(i,s) -> let i' = i { assignedHRef = assignedHRef i - cmttex i
                                                  }
-                                          s' = s { hRef = hRef s + cmttex i 
+                                          s' = s { hRef = hRef s + cmttex i
                                                  , finalHRef = finalHRef s + cmttex i
                                                    -- , fontSize = fontSize s + 2
                                                  } -- great error when i field update is added, eg fontSize
-                                    
+
                                                    in (i',s'))
 
 cmttex i = fSize (font i) * 185 `div` 600
@@ -121,9 +121,9 @@ mapLigatures ('f':'i':cs) = fiChar : mapLigatures cs
 mapLigatures ('f':'l':cs) = flChar : mapLigatures cs
 mapLigatures (c:cs)       = c : mapLigatures cs
 
-ffChar = chr 174 
-fiChar = chr 175 
-flChar = chr 176 
+ffChar = chr 174
+fiChar = chr 175
+flChar = chr 176
 
 
 
@@ -131,7 +131,7 @@ presType :: String -> Xprez
 presType tpStr = row $ intersperse rightArrow (map text (splitAtArrows "" tpStr))
 
 rightArrow :: Xprez
-rightArrow = text  "\174" `withFontFam` "mt symbol"
+rightArrow = text  "\174" `withFontFam` "symbol"
 
 
 splitAtArrows :: String -> String -> [String]
@@ -144,7 +144,7 @@ presMsg :: String -> Xprez
 presMsg tpStr = row $ intersperse wok (map text (splitAtWoks "" tpStr))
 
 wok :: Xprez
-wok = move 0 (-6) $ (shrink . shrink) (text  "\200" `withFontFam` "mt symbol") 
+wok = move 0 (-6) $ (shrink . shrink) (text  "\200" `withFontFam` "mt symbol")
 
 
 splitAtWoks :: String -> String -> [String]
@@ -156,10 +156,10 @@ splitAtWoks seg (c:cs)       = splitAtWoks (seg++[c]) cs
 slide title body = overlay [
                  move 0 30 $
                   col [ hAlignCenter $ title `withColor` white
-                                                    `withFont'` ("cmr10", 20) 
+                                                    `withFont'` ("cmr10", 20)
                       , row [ hSpace 20, body `withbgColor` myBlue ]
                       ] `withHStretch` True
-                      
+
                 , rect 500 300 `withfColor` myBlue `withColor` myBlue
                 ] `withColor` yellow `withbgColor` myBlue `withFont'` ("Arial", 15)
   where myBlue = (0,0,192)
@@ -210,7 +210,7 @@ modLf6   = mkTreeLeaf       True  (text "Main")
 --               isLast isExp
 l1 = mkTreeLeaf        False (text "leaf 1")
 n2 = mkTreeNode True False (text "leafnode 2") [] --  `withFontSize` 50) []
-n3 = mkTreeNode False False (text "node 3") [] 
+n3 = mkTreeNode False False (text "node 3") []
 l3 = mkTreeLeaf        True  (text "leaf 3")
 tr1 = mkTreeNode False True (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n3, l3]
 l4 = mkTreeLeaf        False (text "leaf 4")
@@ -226,7 +226,7 @@ vLine' = vLine -- empty
 
 
 mkTreeLeaf :: Bool -> Xprez -> Xprez
-mkTreeLeaf isLast label = 
+mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
       , hLine `withWidth` 5, refHalf label ]
 
@@ -234,16 +234,16 @@ mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
 mkTreeNode isLast isExp label children =
   rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
-                       , hLine `withWidth` 5,refHalf label 
-                       ] 
+                       , hLine `withWidth` 5,refHalf label
+                       ]
                  ] ++ (if isExp then children else [] )
          ]
 
-nodeHandle isExp isLast 
+nodeHandle isExp isLast
  = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])          -- old version
 -- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
 
-leafHandle isLast 
+leafHandle isLast
  = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
 
 handleImg isExp = if isExp then minusImg else plusImg
@@ -263,7 +263,7 @@ hLine' = hLine -- empty
 vLine' = vLine -- empty
 
 mkTreeLeaf :: Bool -> Xprez -> Xprez
-mkTreeLeaf isLast label = 
+mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
       , hLine `withWidth` 5, refHalf label ]
 
@@ -271,16 +271,16 @@ mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
 mkTreeNode isLast isExp label children =
   rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
-                       , hLine `withWidth` 5,refHalf label 
-                       ] 
+                       , hLine `withWidth` 5,refHalf label
+                       ]
                  ] ++ (if isExp then children else [] )
          ]
 
-nodeHandle isExp isLast 
+nodeHandle isExp isLast
  = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])
 -- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
 
-leafHandle isLast 
+leafHandle isLast
  = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
 
 handleImg isExp = if isExp then minusImg else plusImg

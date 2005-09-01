@@ -19,7 +19,7 @@ import IOExts(writeIORef)
 --module PhaseResolveOperators(phaseResolveOperators) where
 import CompileUtils
 import ResolveOperators(resolveOperators, operatorsFromModule)
-import qualified PrettyPrinting(sem_Module)
+import qualified UHA_Pretty(sem_Module)
 import Data.FiniteMap
 --module PhaseStaticChecks(phaseStaticChecks) where
 import CompileUtils
@@ -32,7 +32,7 @@ import CompileUtils
 import Warnings(Warning)
 import qualified ProximaTypeInferencing(sem_Module)
 
-import Types -- temporary
+import Top.Types
 import Data.FiniteMap
 import UHA_Utils
 import UHA_Syntax
@@ -80,9 +80,9 @@ lvmPath = ["lvm"]
 --                                              type env       substitution        top level env
 compileHelium :: Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, [(Range, TpScheme)])))
 compileHelium mod =
- do {  --mapM (checkExistence lvmPath) 
+ do {  --mapM (checkExistence lvmPath)
       --  ["Prelude", "PreludePrim", "HeliumLang", "LvmLang", "LvmIO", "LvmException"]
-    ; compile "Main" [NoLogging] lvmPath [] mod
+    ; compile "Main" [NoLogging, Overloading] lvmPath [] mod
     }
 
 
@@ -90,11 +90,11 @@ compileHelium mod =
 
 -- compiler is not invoked, so .hs will not do. We need the .lvm
 resolve :: [String] -> String -> IO (Maybe String)
-resolve path name = 
+resolve path name =
    -- do maybeFullName <- searchPathMaybe path ".hs" name
    --    case maybeFullName of
    --        Just fullName -> return (Just fullName)
-   --        Nothing       -> 
+   --        Nothing       ->
            searchPathMaybe path ".lvm" name
 
 
@@ -112,7 +112,7 @@ checkExistence path name =
                 )
             exitWith (ExitFailure 1)
 
-                                           
+
 
 
 compile :: String -> [Option] -> [String] -> [String] -> Module -> IO (Either [Error] ([TypeError], (TypeEnvironment, [(Range, TpScheme)])))
@@ -128,33 +128,33 @@ compile fullName options lvmPath doneModules mod =
         contents <- safeReadFile fullName
 
         -- Phase 1: Lexing
-        (lexerWarnings, tokens) <- 
+        (lexerWarnings, tokens) <-
             phaseLexer fullName doneModules contents options
-                        
+
         unless (NoWarnings `elem` options) $
             showMessages lexerWarnings
 
         -- Phase 2: Parsing
-        parsedModule <- 
+        parsedModule <-
             phaseParser fullName doneModules tokens options
 -}
         let parsedModule = mod
-        
+
         -- Phase 3: Importing
         (indirectionDecls, importEnvs) <-
             phaseImport fullName parsedModule lvmPath options
-      
-        
+
+
         -- Phase 4: Resolving operators
-{-        resolvedModule <- 
+{-        resolvedModule <-
             phaseResolveOperators fullName doneModules parsedModule importEnvs options
 -}
         let resolvedModule = parsedModule
-                    
+
 --        stopCompilingIf (StopAfterParser `elem` options)
 
         -- Phase 5: Static checking
-        phase5 <- phaseStaticChecks fullName doneModules resolvedModule importEnvs options   
+        phase5 <- phaseStaticChecks fullName doneModules resolvedModule importEnvs options
         case phase5 of
           Left staticErrs -> return (Left staticErrs)
           Right (localEnv, staticWarnings) ->
@@ -164,43 +164,43 @@ compile fullName options lvmPath doneModules mod =
 
 --        stopCompilingIf (StopAfterStaticAnalysis `elem` options)
 
-        
+
 {-        -- Phase 6: Typing Strategies
         (completeEnv, typingStrategiesDecls) <-
             phaseTypingStrategies fullName localEnv importEnvs options
 -}
             let completeEnv = foldr combineImportEnvironments localEnv importEnvs
- 
-         
+
+
             -- Phase 7: Type inferencing
-            phase7 <- phaseTypeInferencer fullName resolvedModule doneModules localEnv 
+            phase7 <- phaseTypeInferencer fullName resolvedModule doneModules localEnv
                                           completeEnv options
             case phase7 of
               Left typeErrs -> return $ Right ( typeErrs, (emptyFM, []))
-              Right (alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, typeWarnings) ->
+              Right (alltypes, _, _, _, toplevelTypes, _) ->
                do return $ Right ([], (toplevelTypes, alltypes))
-               
-               
-               
+
+
+
     --        unless (NoWarnings `elem` options) $
     --            showMessages typeWarnings
     {-
             stopCompilingIf (StopAfterTypeInferencing `elem` options)
-    
+
             -- Phase 8: Desugaring
-            coreModule <-                
-                phaseDesugarer fullName resolvedModule 
-                                (typingStrategiesDecls ++ indirectionDecls) 
+            coreModule <-
+                phaseDesugarer fullName resolvedModule
+                                (typingStrategiesDecls ++ indirectionDecls)
                                 finalEnv inferredTypes overloadedVars toplevelTypes options
-    
+
             stopCompilingIf (StopAfterDesugar `elem` options)
-    
+
             -- Phase 9: Code generation
             phaseCodeGenerator fullName coreModule options
-            
-            unless (NoLogging `elem` options) $ 
+
+            unless (NoLogging `elem` options) $
                 sendLog "C" fullName doneModules options
-    
+
             let number = length staticWarnings + length typeWarnings + length lexerWarnings
             putStrLn $ "Compilation successful" ++
                           if number == 0 || (NoWarnings `elem` options)
@@ -210,11 +210,11 @@ compile fullName options lvmPath doneModules mod =
 
 
 safeReadFile :: String -> IO String
-safeReadFile fullName = 
-    catch 
+safeReadFile fullName =
+    catch
         (readFile fullName)
-        (\ioError -> 
-            let message = "Unable to read file " ++ show fullName 
+        (\ioError ->
+            let message = "Unable to read file " ++ show fullName
                        ++ " (" ++ show ioError ++ ")"
             in throw message)
 
@@ -226,26 +226,26 @@ stopCompilingIf bool = when bool (exitWith (ExitFailure 1))
 
 ---------module PhaseResolveOperators(phaseResolveOperators) where
 
-phaseResolveOperators :: String -> [String] -> Module -> [ImportEnvironment] -> 
+phaseResolveOperators :: String -> [String] -> Module -> [ImportEnvironment] ->
                             [Option] -> IO Module
 phaseResolveOperators fullName doneModules moduleBeforeResolve importEnvs options = do
     enterNewPhase "Resolving operators" options
 
-    let importOperatorTable = 
+    let importOperatorTable =
             foldr1 plusFM ( operatorsFromModule moduleBeforeResolve
                           : map operatorTable importEnvs
                           )
-        (module_, resolveErrors) = 
+        (module_, resolveErrors) =
                   resolveOperators importOperatorTable moduleBeforeResolve
 
     when (not (null resolveErrors)) $ do
-        unless (NoLogging `elem` options) $ 
+        unless (NoLogging `elem` options) $
             sendLog "R" fullName doneModules options
         showErrorsAndExit resolveErrors 20 options
 
     when (DumpUHA `elem` options) $
-        putStrLn $ show $ PrettyPrinting.sem_Module module_
-    
+        putStrLn $ show $ UHA_Pretty.sem_Module module_
+
     return module_
 
 
@@ -253,7 +253,7 @@ phaseResolveOperators fullName doneModules moduleBeforeResolve importEnvs option
 ---------module PhaseStaticChecks(phaseStaticChecks) where
 
 
-phaseStaticChecks :: String -> [String] -> Module -> [ImportEnvironment] -> 
+phaseStaticChecks :: String -> [String] -> Module -> [ImportEnvironment] ->
                         [Option] -> IO (Either Errors (ImportEnvironment, [Warning]))
 phaseStaticChecks fullName doneModules module_ importEnvs options = do
     enterNewPhase "Static checking" options
@@ -261,55 +261,56 @@ phaseStaticChecks fullName doneModules module_ importEnvs options = do
     let (_, baseName, _) = splitFilePath fullName
 
         (localEnv, errors, _, _, warnings) =
-            StaticChecks.sem_Module module_ baseName importEnvs
+            StaticChecks.sem_Module module_ baseName importEnvs options
 
 {-    when (not (null errors)) $ do
         when (DumpInformationForAllModules `elem` options) $
-            putStrLn (show (foldr combineImportEnvironments 
+            putStrLn (show (foldr combineImportEnvironments
                 emptyEnvironment importEnvs))
-        unless (NoLogging `elem` options) $ 
+        unless (NoLogging `elem` options) $
             sendLog ("S"++errorsLogCode errors) fullName doneModules options
         showErrorsAndExit errors 20 options
-  -}  
+  -}
     if (null errors) then return $ Right (localEnv, warnings)
                      else return $ Left errors
 
 ---------module PhaseTypeInferencer (phaseTypeInferencer) where
 
-
-phaseTypeInferencer :: 
+{-
+phaseTypeInferencer ::
     String -> Module -> [String] -> ImportEnvironment ->
-        ImportEnvironment -> [Option] -> 
+        ImportEnvironment -> [Option] ->
            IO (Either TypeErrors
                      ([(Range, TpScheme)],
-                      ImportEnvironment, FiniteMap NameWithRange TpScheme  {- == LocalTypes -}, 
+                      ImportEnvironment, FiniteMap NameWithRange TpScheme  {- == LocalTypes -},
                       FiniteMap NameWithRange (NameWithRange, QType) {- OverloadedVariables -}, TypeEnvironment, [Warning]))
+-}
 phaseTypeInferencer fullName module_ doneModules localEnv completeEnv options = do
     enterNewPhase "Type inferencing" options
                                               -- prox                         prox
-    let (debugIO, localTypes, overloadedVars, _, toplevelTypes, alltypes, typeErrors, warnings) =
+    let (_, debugIO, localTypes, overloadedVars, _, toplevelTypes, alltypes, typeErrors, warnings) =
             ProximaTypeInferencing.sem_Module module_
                 completeEnv
-                options        
-        
+                options
+
         -- add the top-level types (including the inferred types)
         finalEnv = addToTypeEnvironment toplevelTypes completeEnv
-        inferredTypes = addListToFM localTypes 
+{-        inferredTypes = addListToFM localTypes
                 [ (NameWithRange name, ts) | (name, ts) <- fmToList (typeEnvironment finalEnv) ]
-    
-    
-    when (DumpTypeDebug `elem` options) debugIO  
-    
+-}
+
+    when (DumpTypeDebug `elem` options) debugIO
+
 {-
     putStrLn (unlines ("" : "toplevelTypes: " : map (\(n,ts) -> show (NameWithRange n) ++ " :: "++show (getQualifiedType ts)) (fmToList toplevelTypes)))
     putStrLn (unlines ("" : "localTypes:" : map show (fmToList localTypes)))
-    putStrLn (unlines ("" : "overloadedVars:"   : map (\(n,(m,t)) -> show n ++ " in scope of " ++ show m ++" has type " ++ show t) (fmToList overloadedVars)))        
+    putStrLn (unlines ("" : "overloadedVars:"   : map (\(n,(m,t)) -> show n ++ " in scope of " ++ show m ++" has type " ++ show t) (fmToList overloadedVars)))
 -}
 {-
     when (not (null typeErrors)) $ do
         when (DumpInformationForAllModules `elem` options) $
             putStr (show completeEnv)
-        unless (NoLogging `elem` options) $ 
+        unless (NoLogging `elem` options) $
             sendLog "T" fullName doneModules options
         showErrorsAndExit (reverse typeErrors) maximumNumberOfTypeErrors options
 -}
@@ -322,8 +323,8 @@ phaseTypeInferencer fullName module_ doneModules localEnv completeEnv options = 
                 putStrLn (show (addToTypeEnvironment toplevelTypes localEnv))
              else
                 return ()
-    if (null typeErrors) then return $ Right (alltypes, finalEnv, inferredTypes, overloadedVars, toplevelTypes, warnings)
-                         else return $ Left typeErrors 
+    if (null typeErrors) then return $ Right (alltypes, finalEnv, undefined{-inferredTypes-}, overloadedVars, toplevelTypes, warnings)
+                         else return $ Left typeErrors
 
 
 
@@ -336,7 +337,7 @@ maximumNumberOfTypeErrors = 3
 
 
 -- Martijn: function to extract name from compiled program
-getModuleName m@(Module_Module moduleRange maybeName exports 
+getModuleName m@(Module_Module moduleRange maybeName exports
                     (Body_Body bodyRange explicitImportDecls decls)) =
     case maybeName of
         MaybeName_Just n -> getNameName n
