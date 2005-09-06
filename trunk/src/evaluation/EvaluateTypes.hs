@@ -209,14 +209,17 @@ henk2 mod =
   case unsafePerformIO $ do { debugLnIO Prs  "Helium compiler start type check"
                             ; errs <- compileHelium mod
                             ; debugLnIO Prs  "Helium compiler finish type check"
+                            ; putStr "Het is inderdaad de laatste versie"
                             ; return errs
                             } of
-    Left staticErrs -> debug Prs (show (map showMessage staticErrs)) (map hErrFromStaticErr staticErrs, [], [])
-    Right ([], (types,typeEnv)) ->
+    Left errs -> debug Prs (show (map showMessage errs)) (map hErrFromErr errs, [], [])
+    Right (types,typeEnv) ->
       let typeEnv'  =[ (pathFromRange r, show t) | (r,t)<- typeEnv ]
           toplvlEnv = [ (getNameName nm,show tp) | (nm,tp) <- fmToList types ]
       in  ( [], typeEnv', toplvlEnv )
-    Right (typeErrs, _) ->  (map hErrFromTypeErr typeErrs,[] ,[])
+
+
+hErrFromErr = either hErrFromStaticErr hErrFromTypeErr
 
 
 hErrFromStaticErr e@(NoFunDef entity name names)           = HError (lines $ showMessage e) [] (pathFromName name : map (pathFromName) names) []
@@ -237,4 +240,4 @@ hErrFromTypeErr e@(TypeError ranges _ _ _) = HError (lines $ showMessage e) [] [
 hErrFromTypeErr err = HError ("Unhandled Type Error" : lines (showMessage err)) [] [] []
 
 
-pathFromName = pathFromRange.getNameRange
+pathFromName = pathFromRange . getNameRange
