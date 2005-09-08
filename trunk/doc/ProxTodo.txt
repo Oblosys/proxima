@@ -1,3 +1,4 @@
+TODO: Arrangement ag compiled with latest uuagc is bigger than SVN version 160+ vs 50k, is it also slower?
 
 Fix: polygons
 Fix: layout loss on collapse
