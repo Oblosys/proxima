@@ -10,8 +10,12 @@
 # TODO:
 # add platform dependent stuff (configure?)
 # add strip
+# fix make clean
 # HC
-
+# moet er in de regel voor Proxima niet een ref naar de executable zitten?
+# generator is mixed with the rest, maybe should be in different makefile, but
+# since there is no conflict, this solution is okay
+# now, because standard rules are used, generator ifaces must be added to hcopts
 default: all
 all: proxima
 
@@ -22,12 +26,14 @@ PROXIMATESTDIR = $(PROXIMADIR)/test
 MAIN           = Proxima
 EXE            = .exe
 
+AGC     = $(PROXIMATESTDIR)/uuagc.exe
+GEN	= $(PROXIMATESTDIR)/generate.exe
 HC	= ghc
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
 		-package lang -package wx -package util -package net -package data -package parsec\
 		-i$(IFACES) $(EXTRA_HC_OPTS)
 
-IFACES = $(PROXIMAIFACES):$(HELIUMIFACES)
+IFACES = $(PROXIMAIFACES):$(HELIUMIFACES):$(GENERATORIFACES)
 
 
 OBJS = $(SRCS:.hs=.o)
@@ -49,7 +55,7 @@ SRCS = $(PROXIMASRCS) $(HELIUMSRCS)
 # Inter-module dependencies
 depend :
 	# Checking dependencies
-	$(HC) -M $(HC_OPTS) $(SRCS)
+	$(HC) -M $(HC_OPTS) $(SRCS) $(GENERATORSRCS)
 
 
 
@@ -163,7 +169,6 @@ RENDERINGSRCS = \
 
 
 
-IFACES = $(PROXIMAIFACES):$(HELIUMIFACES)
 
 
 
@@ -364,14 +369,92 @@ $(LVMLIBDIR)/common/ghc/Special.hi: $(LVMLIBDIR)/common/ghc/Special.hs
 	# GHC Special.hs
 	$(HC) -c $< -cpp -fglasgow-exts $(HC_OPTS) 
 
+
+
+# TODO: order is important???? moving BinaryTrees below CharParser causes error
+
+# also includes the uu lib sources
+GENERATORSRCS = \
+	../../uust/lib/util/UU/Util/BinaryTrees.hs \
+	../../uust/lib/scanner/UU/Scanner/Position.hs \
+	../../uust/lib/parsing/UU/Parsing/MachineInterface.hs \
+	../../uust/lib/parsing/UU/Parsing/Machine.hs \
+	../../uust/lib/parsing/UU/Parsing/Interface.hs \
+	../../uust/lib/parsing/UU/Parsing/Derived.hs \
+	../../uust/lib/parsing/UU/Parsing.hs \
+	../../uust/lib/parsing/UU/Parsing/CharParser.hs	\
+	$(GENERATORDIR)/GenCommon.hs \
+	$(GENERATORDIR)/GenParser.hs \
+	$(GENERATORDIR)/GenAG.hs \
+	$(GENERATORDIR)/GenTypes.hs \
+	$(GENERATORDIR)/GenEditable.hs \
+	$(GENERATORDIR)/GenProxParser.hs \
+	$(GENERATORDIR)/GenDocUtils.hs \
+	$(GENERATORDIR)/Generator.hs
+GENERATOROBJS = $(GENERATORSRCS:.hs=.o)
+
+GENERATORIFACES = $(GENERATORDIR):../../uust/lib/parsing:../../uust/lib/scanner:../../uust/lib/util
+
+
+
 # The main target
-proxima: $(OBJS)
+proxima: $(OBJS) $(GEN)
 	@echo "****************************************************"
 	@echo "  Proxima: the Proxima generic editor"
 	@echo "****************************************************"
-	$(HC)	-o $(PROXIMATESTDIR)/$(MAIN)$(EXE) $(HC_OPTS) $(OBJS)
+	$(HC)	-o $(PROXIMATESTDIR)/$(MAIN) $(HC_OPTS) $(OBJS)
+
+# The Generator
+$(GEN): $(GENERATOROBJS)
+	ghc -package lang -fglasgow-exts \
+	-o $(PROXIMATESTDIR)/generate -i$(GENERATORIFACES) $(GENERATOROBJS)
 
 
+# Generation 
+# TODO: fix generator, so we can pass the proxima path.
+
+$(EVALUATIONDIR)/DocTypes_Generated.hs : $(GEN) $(GENERATORDIR)/DocumentType.hs
+	$(GEN) $(PROXIMADIR)/src $(GENERATORDIR)/DocumentType.hs
+	
+# The AG compiler
+# no dependencies, uuagc is assumed not to be modified
+$(AGC): 
+	ghc --make -o $(AGC) ../../uust/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i../../uust/tools/ag:../../uust/lib/ddata:../../uust/lib/pretty:../../uust/lib/scanner:../../uust/lib/util:../../uust/lib/parsing
+
+
+# The presentation AG
+
+# target for only compiling presentationAG, useful when working with GHCi
+present: $(PRESENTATIONDIR)/PresentationAG.hs
+	
+# TODO: make dependencies easy to see and to maintain (important for editor builder)
+
+$(PRESENTATIONDIR)/PresentationAG.hs : $(AGC) \
+	$(PRESENTATIONDIR)/PresentationAG.ag \
+	$(PRESENTATIONDIR)/PresentationAG_Generated.ag \
+	$(PRESENTATIONDIR)/InvPresentation.ag \
+	$(PRESENTATIONDIR)/LambdaReduce.ag \
+	
+	@echo "Compiling presentationAG.ag"
+	$(AGC) -o $(PRESENTATIONDIR)/PresentationAG.hs \
+	-cfmspw --self --module=PresentationAG \
+	$(PRESENTATIONDIR)/PresentationAG.ag -P $(PRESENTATIONDIR)
+
+# -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
+
+
+
+# The arrangemer AG
+
+$(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
+	
+	@echo "Compiling arrangerAG.ag"
+	$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
+	-cfmsp --module=ArrangerAG \
+	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
+
+# -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
+	
 # Standard suffix rules
 .o.hi:
 	@:
@@ -389,7 +472,7 @@ proxima: $(OBJS)
 	$(HC) -c $< $(HC_OPTS)
 
 .ag.hs:
-	$(AG) -a $<
+	$(AGC) -a $<
 
 
 
@@ -1920,4 +2003,44 @@ proxima: $(OBJS)
 ../../heliumNT/src/modulesystem/ExtractImportDecls.o : ../../lvm/src/lib/common/Id.hi
 ../../heliumNT/src/modulesystem/ExtractImportDecls.o : ../../heliumNT/src/syntax/UHA_Utils.hi
 ../../heliumNT/src/modulesystem/ExtractImportDecls.o : ../../heliumNT/src/syntax/UHA_Syntax.hi
+../../uust/lib/util/UU/Util/BinaryTrees.o : ../../uust/lib/util/UU/Util/BinaryTrees.hs
+../../uust/lib/scanner/UU/Scanner/Position.o : ../../uust/lib/scanner/UU/Scanner/Position.hs
+../../uust/lib/parsing/UU/Parsing/MachineInterface.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hs
+../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/parsing/UU/Parsing/Machine.hs
+../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hi
+../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/util/UU/Util/BinaryTrees.hi
+../../uust/lib/parsing/UU/Parsing/Interface.o : ../../uust/lib/parsing/UU/Parsing/Interface.hs
+../../uust/lib/parsing/UU/Parsing/Interface.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hi
+../../uust/lib/parsing/UU/Parsing/Interface.o : ../../uust/lib/parsing/UU/Parsing/Machine.hi
+../../uust/lib/parsing/UU/Parsing/Derived.o : ../../uust/lib/parsing/UU/Parsing/Derived.hs
+../../uust/lib/parsing/UU/Parsing/Derived.o : ../../uust/lib/parsing/UU/Parsing/Interface.hi
+../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing.hs
+../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing/Interface.hi
+../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing/Derived.hi
+../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/parsing/UU/Parsing/CharParser.hs
+../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/scanner/UU/Scanner/Position.hi
+../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/parsing/UU/Parsing/Interface.hi
+../../proxima/src/generator/GenCommon.o : ../../proxima/src/generator/GenCommon.hs
+../../proxima/src/generator/GenParser.o : ../../proxima/src/generator/GenParser.hs
+../../proxima/src/generator/GenParser.o : ../../uust/lib/parsing/UU/Parsing/CharParser.hi
+../../proxima/src/generator/GenParser.o : ../../uust/lib/parsing/UU/Parsing.hi
+../../proxima/src/generator/GenParser.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/GenAG.o : ../../proxima/src/generator/GenAG.hs
+../../proxima/src/generator/GenAG.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/GenTypes.o : ../../proxima/src/generator/GenTypes.hs
+../../proxima/src/generator/GenTypes.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/GenEditable.o : ../../proxima/src/generator/GenEditable.hs
+../../proxima/src/generator/GenEditable.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/GenProxParser.o : ../../proxima/src/generator/GenProxParser.hs
+../../proxima/src/generator/GenProxParser.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/GenDocUtils.o : ../../proxima/src/generator/GenDocUtils.hs
+../../proxima/src/generator/GenDocUtils.o : ../../proxima/src/generator/GenCommon.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/Generator.hs
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenProxParser.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenDocUtils.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenEditable.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenTypes.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenAG.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenParser.hi
+../../proxima/src/generator/Generator.o : ../../proxima/src/generator/GenCommon.hi
 # DO NOT DELETE: End of Haskell dependencies
