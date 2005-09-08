@@ -31,23 +31,23 @@ import GenProxParser
 ---------------------------------------------------------------------
 
 main =
-  getArgs >>= \args->
-  if length args /= 1 then
-    putStrLn "Usage: generate file" >>
-    exitWith (ExitFailure 1)
-  else
-    generateFiles (head args)
+ do { args <- getArgs
+    ; case args of
+        [srcPath, fname] -> generateFiles srcPath fname
+        _            -> do { putStrLn "Usage: generate <path to proxima src directory> <document type definition>.hs"
+                           ; exitWith (ExitFailure 1)
+                           }
+    }
 
-
-generateFiles fname  
+generateFiles srcPath fname  
      = do putStr $ "Parsing File: "++(show fname)++" ..."
           parsedFile <- parseDataTypesFile fname       -- What if the parser goes wrong?? 
           putStr $ " done\n"                           --- simply terminate with a parse error.
-          generate "../evaluation/DocTypes_Generated.hs"         genDocumentTypes   parsedFile
-          generate "../evaluation/DocumentEdit_Generated.hs"     genDocumentEdit    parsedFile
-          generate "../evaluation/DocUtils_Generated.hs"         genDocUtils        parsedFile
-          generate "../presentation/PresentationAG_Generated.ag" genPresentationAG  parsedFile
-          generate "../presentation/ProxParser_Generated.hs"     genProxParser      parsedFile
+          generate (srcPath++"/evaluation/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
+          generate (srcPath++"/evaluation/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
+          generate (srcPath++"/evaluation/DocUtils_Generated.hs")         genDocUtils        parsedFile
+          generate (srcPath++"/presentation/PresentationAG_Generated.ag") genPresentationAG  parsedFile
+          generate (srcPath++"/presentation/ProxParser_Generated.hs")     genProxParser      parsedFile
 
 -- make this function more clear
 generate filename func parsedFile
