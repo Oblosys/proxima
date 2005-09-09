@@ -27,6 +27,8 @@ instance (Show a, Show b) => Show (FiniteMap a b) where
  show fm = "{FiniteMap}" -- ++show (fmToList fm)
  
 
+initLayout :: LayoutMap
+initLayout = listToFM [(IDP (-1), (0,1))]
 
 data EditPresentation' =
     SetPres' PresentationLevel

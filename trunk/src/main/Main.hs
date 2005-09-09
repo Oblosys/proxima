@@ -22,8 +22,8 @@ import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
 import ProxParser -- for debugging on command line and for initMap
+import PresentationAG
 
-import ProxParser (initLayout)-- for debugging on command line and for initMap
 
 import PresentationParsing
 import Layout hiding (combine)
@@ -51,7 +51,9 @@ gain = main -- when typing during compilation GHCI replaces the first command li
 main =                         -- system (layer)local state,  initial higher level value
  do { fontMetricsRef <- initFontMetrics
     ; let layers = 
-            proximaLayers (LayerStateEval, DocumentLevel HoleDocument NoPathD Clip_Nothing)   
+            proximaLayers sem_EnrichedDoc parsePres -- sheet parameters
+
+                          (LayerStateEval, DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                           ((),     EnrichedDocLevel HoleEnrichedDoc NoPathD)   
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], emptyFM))   
                           (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))

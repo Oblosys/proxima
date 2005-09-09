@@ -1,4 +1,4 @@
-module ProxParser where
+module ProxParser (parsePres) where
 
 import CommonTypes
 import PresLayerTypes
@@ -22,15 +22,11 @@ import Char
 
 import Scanner (tokenize)
 
--- why is this here?
-initLayout :: LayoutMap
-initLayout = listToFM [(IDP (-1), (0,1))]
-
 
 parsePres pres = let tokens = postScanStr pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
                  in --  showDebug' Err ("Parsing:\n"++concatMap (deepShow 0) (tokens)++"\nhas result:") $
-                    if null errs then Just (enr, [], []) else Nothing
+                    if null errs then Just enr else Nothing
  where deepShow i tok@(Structural _ _ cs _) = indent i ++ show tok ++ "\n"
                                            ++ indent (i+1)++"[\n"
                                            ++ concatMap (deepShow (i+1)) cs 
