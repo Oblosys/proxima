@@ -10,7 +10,7 @@ import ArrangerAG
 import FontLib
 import IOExts
 
-arrangePresentation :: FontMetricsRef -> FocusPres -> Arrangement -> DiffTree -> Presentation -> IO Arrangement
+arrangePresentation :: FontMetricsRef -> FocusPres -> Arrangement Node -> DiffTree -> Presentation -> IO (Arrangement Node)
 arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
 
  do { let screenSize = 1000      
@@ -33,18 +33,18 @@ arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ se
    
     }
 
--- non pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
+-- non-pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
 -- unsafePerformDraw is not available     -- obsolete comment
 -- Monad is IO again so fixIO can be used
-fixed :: FontMetricsRef -> FocusPres -> Presentation -> Int -> Arrangement -> IO (Arrangement,Int,Presentation)
+fixed :: FontMetricsRef -> FocusPres -> Presentation -> Int -> Arrangement Node -> IO (Arrangement Node,Integer,Presentation)
 fixed fontMetricsRef focus pres screenSize oldArrangement = f --fixit
- where f :: IO (Arrangement,Int,Presentation)
+ where f :: IO (Arrangement Node,Integer,Presentation)
        f = 
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (white, white, black, black)
             ; let defFont = defaultFont 
          
             ; -- debugLnIO Arr ("Start collecting fonts")
-            ; let (allFonts, _, _, _) = 
+            ; let (allFonts, _, _, _) =
                     sem_Root (Root pres) [defFont]
                                                defBackColor defFillColor
                                                focus
@@ -76,7 +76,7 @@ fixed fontMetricsRef focus pres screenSize oldArrangement = f --fixit
             ; let updatedMetrics = queriedMetrics `plusFM` mkFontMetrics metrics
             ; writeIORef fontMetricsRef updatedMetrics
             
-            ; let (_, arrangement,  maxFDepth, unfoldedTree) = 
+            ; let (_, arrangement,  maxFDepth, unfoldedTree) =
                     sem_Root (Root pres) [defFont]
                                           defBackColor defFillColor
                                           focus
@@ -88,7 +88,7 @@ fixed fontMetricsRef focus pres screenSize oldArrangement = f --fixit
                                           []
                                           screenSize 
                                           defTextColor
-                                               
+                                              
             ; return (arrangement, maxFDepth, unfoldedTree)
             }
             

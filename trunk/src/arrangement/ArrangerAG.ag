@@ -5,11 +5,11 @@ import IOExts
 import CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
-
-import DocTypes -- for Node
 import FontLib
 
 -- Uedit, transforming AG to new syntax: Find   ^([a-z][a-z,A-Z]++^)_     Replace  @^1.
+
+
 }
 
 
@@ -108,7 +108,7 @@ DATA Presentation
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
-  | LocatorP location : Node child : Presentation
+  | LocatorP location : {node} child : Presentation
   | ArrangedP -- pres : Presentation
 
 --  | TestPresentation id : IDP  area : Int color : Color
@@ -133,7 +133,7 @@ ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color ba
             mouseDown : {Maybe UpdateDoc}
             popupMenuItems : {[ PopupMenuItem ]}
             screenWidth : Int  
-          || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : Arrangement ]
+          || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : {Arrangement node} ]
 SEM Root
   | Root
       lhs.maxFormatterDepth = @presentation.maxFormatterDepth
@@ -807,7 +807,7 @@ SEM PresentationList
 -- bit unclear what to do when href and vref are changed in with nodes  @finalHRef @finalVRef
 -- for a child in a composite are not the same as the  @finalHRef @finalVRef at the with nodes
 -- however in such a case we probably can't do it incrementally anyway
-ATTR Presentation [  | | arrangement : Arrangement ]
+ATTR Presentation [  | | arrangement : {Arrangement node} ]
 SEM Presentation
   | EmptyP
       lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
@@ -892,9 +892,9 @@ SEM Presentation
 
 
 -- why the repeat Empties?
-ATTR Root         [ oldArr : Arrangement  | | ]
+ATTR Root         [ oldArr : {Arrangement node}  | | ]
 
-SEM Presentation  [ oldArr : Arrangement   | | ]
+SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
                                                         _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
@@ -927,7 +927,7 @@ SEM Presentation  [ oldArr : Arrangement   | | ]
 --                                             _                   -> DiffLeaf False
 
 
-SEM PresentationList [  oldArrList : {[Arrangement]} | | ] --  diffTreeList : {[DiffTree]} | | ]
+SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 
       hd.oldArr     = head @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
@@ -935,7 +935,7 @@ SEM PresentationList [  oldArrList : {[Arrangement]} | | ] --  diffTreeList : {[
 --      tl.diffTreeList = tail @lhs.diffTreeList
  
  
-ATTR PresentationList [  | |  arrangementList : {[Arrangement]} ]
+ATTR PresentationList [  | |  arrangementList : {[Arrangement node]} ]
 SEM PresentationList
   | Nil
       lhs.arrangementList = []
@@ -945,7 +945,7 @@ SEM PresentationList
 -- dummy arrangement, does not require any other attribute computations
 
 
-ATTR Presentation [  | | arrangement : Arrangement ]
+ATTR Presentation [  | | arrangement : {Arrangement node} ]
 SEM Presentation
   | EmptyP
       lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0

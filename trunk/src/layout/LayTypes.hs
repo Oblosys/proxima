@@ -1,7 +1,7 @@
 module LayTypes (module PresTypes, module LayTypes) where
 
 import CommonTypes
-import PresTypes 
+import PresTypes
 
 import CommonUtils
 

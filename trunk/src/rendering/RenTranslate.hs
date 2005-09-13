@@ -29,7 +29,7 @@ translate state low high editLow =
 
 
 
-interpret :: LocalStateRen -> RenderingLevel -> ArrangementLevel -> EditRendering -> (EditArrangement, LocalStateRen, RenderingLevel)
+interpret :: Show node => LocalStateRen -> RenderingLevel -> ArrangementLevel node -> EditRendering -> (EditArrangement, LocalStateRen, RenderingLevel)
 interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
                 arrLvl@(ArrangementLevel arr focus _) editRen =
   case editRen of

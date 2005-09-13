@@ -472,7 +472,7 @@ parsingBGColor    = colorRGB 255 230 230
 -- focus is not perfect, but this has to do with the selection algorithm as well.
 -- for now, it is a working solution
 
-arrangeFocus :: FocusArr -> Arrangement -> [Arrangement]
+arrangeFocus :: Show node => FocusArr -> Arrangement node -> [Arrangement node]
 arrangeFocus (FocusA from to) arrangement = {- scaleFocusArrList scale $-} {-debug Ren ("focus:" ++show (from,to)) $-} mkFocus (FocusA from to) arrangement
                                       --[ picobToCaretC from arrangement green
                                       --, picobToCaretC to arrangement blue 
@@ -483,7 +483,7 @@ arrangeFocus (NoFocusA) _ = []
 -- caret at end rendered 1 pixel to the left because of poor man's incrementality algorithm
 
 -- ref lines not used, because caret is not incrementally rendered
-picobToCaretC :: ([Int], Int) -> Arrangement -> Color -> Arrangement
+picobToCaretC :: Show node => ([Int], Int) -> Arrangement node -> Color -> Arrangement node
 picobToCaretC path p color = picobToCaret 0 0 path p
  where picobToCaret x' y' _            (EmptyA _ _ _ _ _ _ _)               = debug Err "picobToCaret: empty Arrangement" (EmptyA NoIDA 0 0 0 0 0 0)
        picobToCaret x' y'  (_,o)       (StringA _  x y w h _ _ _ _ _ cxs')  = let cxs = init cxs' ++ [last cxs'-1]
@@ -505,7 +505,7 @@ picobToCaretC path p color = picobToCaret 0 0 path p
 
 
 
-mkFocus :: FocusArr -> Arrangement -> [Arrangement]
+mkFocus :: Show node => FocusArr -> Arrangement node -> [Arrangement node]
 mkFocus focus arr = mkFocus' [] 0 0 (orderFocusA focus) arr
 
 
@@ -546,7 +546,7 @@ mkBoxCaret x y w h =
     [ LineA NoIDA x y x (y+h-1) 0 0 1 color, LineA NoIDA x (y+h-1) (x+w-1) (y+h-1) 0 0 1 color
     , LineA NoIDA (x+w-1) (y+h-1) (x+w-1) y 0 0 1 color, LineA NoIDA (x+w-1) y x y 0 0 1 color ]
 
-arrangedFocusArea :: [Arrangement] -> (Int,Int,Int,Int)
+arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
 arrangedFocusArea fArrList = -- compute the region that is covered by the focus
   let (xs, ys, xs', ys') = unzip4 [(xA fLine, yA fLine, xA fLine + widthA fLine, yA fLine + heightA fLine) | fLine <- fArrList ]
   in  (if null xs then 0 else minimum xs, if null ys then 0 else minimum ys, maximum (0:xs'), maximum (0:ys'))
@@ -554,7 +554,7 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 -- do we need draw the focus with appWindowPicture or accWindowPicture?
 
-testArr :: String -> Arrangement
+testArr :: Read node => String -> Arrangement node
 testArr filePath = unsafePerformIO $
  do { putStrLn $ "Opening Arrangement file " ++ filePath
     ; str <- readFile filePath

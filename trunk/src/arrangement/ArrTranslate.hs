@@ -16,7 +16,7 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
-unArrange :: LocalStateArr -> ArrangementLevel -> LayoutLevel -> EditArrangement -> (EditLayout, LocalStateArr, ArrangementLevel)
+unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel -> EditArrangement -> (EditLayout, LocalStateArr, ArrangementLevel node)
 unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) editArr = 
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 

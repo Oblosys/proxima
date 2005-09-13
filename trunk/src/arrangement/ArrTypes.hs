@@ -1,17 +1,17 @@
 module ArrTypes where
 
 import CommonTypes
-import DocTypes -- for Locations
+import DocTypes (DocumentLevel) -- for Locations
 
 import PresTypes
                   
 data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
-data ArrangementLevel = ArrangementLevel Arrangement FocusArr Presentation deriving Show
+data ArrangementLevel node = ArrangementLevel (Arrangement node) FocusArr Presentation deriving Show
 
-data EditArrangement' =
-    SetArr' ArrangementLevel
+data (EditArrangement' node) =
+    SetArr' (ArrangementLevel node)
   | SkipArr' Int deriving Show
 
 data EditArrangement =
@@ -53,20 +53,20 @@ data EditArrangement =
   | DocumentLoadedArr String deriving Show
 
 
-
-data Arrangement =
+-- node is parameter for Node type
+data Arrangement node =
     EmptyA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef
   | StringA     !IDA !XCoord !YCoord !Width !Height !HRef !VRef !String !Color !Font [Int]
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !Color !Color
   | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Color !Color
   | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
   | LineA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
-  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement]
-  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement]
-  | StructuralA !IDA  !Arrangement
-  | ParsingA    !IDA  !Arrangement
-  | LocatorA    Node !Arrangement deriving (Show, Read) -- do we want a ! for location  ?  
+  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | StructuralA !IDA  !(Arrangement node)
+  | ParsingA    !IDA  !(Arrangement node)
+  | LocatorA    node !(Arrangement node) deriving (Show, Read) -- do we want a ! for location  ?  
   -- make some choices here: lower right/or width height, w h/(w,h)
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 

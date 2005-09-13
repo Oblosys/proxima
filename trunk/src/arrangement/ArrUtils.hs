@@ -5,7 +5,6 @@ import ArrTypes
 
 import CommonUtils
 
-import DocTypes -- for Node
 -- utils
 
 ifFocusA NoFocusA           _   = NoFocusA
@@ -141,10 +140,10 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
                 then repeat (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
                 else childDiffs)
 
-updatedRectArr :: DiffTree -> Arrangement -> Maybe (Int, Int, Int, Int)
+updatedRectArr :: Show node => DiffTree -> Arrangement node -> Maybe (Int, Int, Int, Int)
 updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
 
-updatedRectArr' :: Int -> Int -> DiffTree -> Arrangement -> Maybe (Int, Int, Int, Int)
+updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> Maybe (Int, Int, Int, Int)
 updatedRectArr' x' y' dt arr = 
   case dt of
     DiffLeaf True            -> Nothing                --
@@ -202,7 +201,7 @@ markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self
 -- function is a bit weird anyway, accumulating parameter is list of paths
 
 -- result is list of paths because pointing can be ambiguous (overlays)
-point' :: Int -> Int -> [[Int]] -> Arrangement -> [[Int]]
+point' :: Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
 point' x' y' loc p@(EmptyA _)                     = [] -- ?? strange case, does empty have size?
 point' x' y' loc p@(StringA _ x y w h _ _ _ _)    = if inside x' y' x y w h then loc else [] 
 point' x' y' loc p@(RectangleA _ x y w h _ _ _ _) = if inside x' y' x y w h then loc else [] 
@@ -220,12 +219,12 @@ point' x' y' loc p@(LocatorA location child)      = point' x' y' (map (++[0]) lo
 inside x' y' x y w h = x' >= x && x' <= x+w && y' >= y && y'<= y+h
 -}
 -- Stretching rows do not lead to correct pointing.
-point' :: Int -> Int -> [[Int]] -> Arrangement -> [[Int]]
+point' :: Show node => Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
 point' x' y' _ arr = showDebug Ren $ point (clip 0 (widthA arr-1) (x'-xA arr)) 
                                        (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
 
 -- precondition: x' y' falls inside the arrangement
-point :: Int -> Int -> [Int] -> Arrangement -> [[Int]]
+point :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
 --point x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
 point x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
 point x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
@@ -240,7 +239,7 @@ point x' y' loc p@(LocatorA location child)         = point x' y' (loc++[0]) chi
 point x' y' _   arr                                 = debug Err ("ArrTypes.point': unhandled arrangement: "++show x'++show y'++show arr) [[]]
 
 -- precondition: x' y' falls inside the arrangement width
-pointRowList :: Int -> Int -> Int -> [Int] -> [Arrangement] -> [[Int]]
+pointRowList :: Show node => Int -> Int -> Int -> [Int] -> [Arrangement node] -> [[Int]]
 pointRowList i x' y' loc []         = debug Err "ArrTypes.pointRowList: empty Row list" $ []
 pointRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
                                       then pointRowList (i+1) x' y' loc arrs
@@ -257,12 +256,12 @@ pointColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr
 ---pointOvlRef is just for now, until overlays are adjusted to have last arr in front
 -- this point is called from popupMenu handler 
 
-pointOvlRev' :: Int -> Int -> [[Int]] -> Arrangement -> [[Int]]
+pointOvlRev' :: Show node => Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
 pointOvlRev' x' y' _ arr = showDebug Ren $ pointOvlRev (clip 0 (widthA arr-1) (x'-xA arr)) 
                                        (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
 
 -- precondition: x' y' falls inside the arrangement
-pointOvlRev :: Int -> Int -> [Int] -> Arrangement -> [[Int]]
+pointOvlRev :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
 --pointOvlRev x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
 pointOvlRev x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
 --pointOvlRev x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
@@ -279,7 +278,7 @@ pointOvlRev x' y' loc p@(LocatorA location child)         = pointOvlRev x' y' (l
 pointOvlRev x' y' _   arr                                 = debug Err ("ArrTypes.pointOvlRev': unhandled arrangement: "++show x'++show y'++show arr) [[]]
 
 -- precondition: x' y' falls inside the arrangement width
-pointOvlRevRowList :: Int -> Int -> Int -> [Int] -> [Arrangement] -> [[Int]]
+pointOvlRevRowList :: Show node => Int -> Int -> Int -> [Int] -> [Arrangement node] -> [[Int]]
 pointOvlRevRowList i x' y' loc []         = debug Err "ArrTypes.pointOvlRevRowList: empty Row list" $ []
 pointOvlRevRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
                                       then pointOvlRevRowList (i+1) x' y' loc arrs
@@ -297,18 +296,19 @@ pointOvlRevColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr
 
 -- Temporary pointing stuff for hacked popups
 
---getDoc :: Arrangement -> () -- Document
+--getDoc :: Arrangement node -> () -- Document
 --getDoc arr = debug err (show rr) $ 
 
-
-pointDoc' :: Int -> Int -> Arrangement -> [Node]
+pointDoc' :: Show node =>  Int -> Int -> Arrangement node -> [node]
 pointDoc' x' y' arr = showDebug Ren $ pointDoc (clip 0 (widthA arr-1) (x'-xA arr)) 
-                                       (clip 0 (heightA arr-1) (y'-yA arr)) NoNode arr
+                                       (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
+
+-- loc is now list of nodes, but should be a (Maybe node).
 
 -- precondition: x' y' falls inside the arrangement
-pointDoc :: Int -> Int -> Node -> Arrangement -> [Node]
+pointDoc :: Show node => Int -> Int -> [node] -> Arrangement node -> [node]
 --pointDoc x' y' loc p@(EmptyA _ _ _ _ _ _)                     = [] -- does not occur at the moment
-pointDoc x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
+pointDoc x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = loc
 --pointDoc x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
 --pointDoc x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
 pointDoc x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointDocRowList 0 (x') (y') loc arrs
@@ -317,22 +317,19 @@ pointDoc x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = pointDoc (clip 0 
                                                             (clip 0 (heightA arr-1) y') loc arr -- (last arrs)
 pointDoc x' y' loc p@(StructuralA _ child)             = pointDoc x' y' loc child
 pointDoc x' y' loc p@(ParsingA _ child)                = pointDoc x' y' loc child
-pointDoc x' y' loc p@(LocatorA location child)         = pointDoc x' y' location child
-pointDoc x' y' loc arr                                 = debug Err ("ArrTypes.pointDoc': unhandled arrangement: "++show x'++show y'++show arr) [loc]
+pointDoc x' y' loc p@(LocatorA location child)         = pointDoc x' y' [location] child
+pointDoc x' y' loc arr                                 = debug Err ("ArrTypes.pointDoc': unhandled arrangement: "++show x'++show y'++show arr) loc
 
 -- precondition: x' y' falls inside the arrangement width
-pointDocRowList :: Int -> Int -> Int -> Node -> [Arrangement] -> [Node]
-
-
-
-pointDocRowList i x' y' loc []         = debug Err "ArrTypes.pointDocRowList: empty Row list" $ [loc]
+pointDocRowList :: Show node => Int -> Int -> Int -> [node] -> [Arrangement node] -> [node]
+pointDocRowList i x' y' loc []         = debug Err "ArrTypes.pointDocRowList: empty Row list" $ loc
 pointDocRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
                                       then pointDocRowList (i+1) x' y' loc arrs
                                       else pointDoc (x'-xA arr) (clip 0 (heightA arr-1) (y'- yA arr)) 
                                                  loc arr
                                                  
-pointDocColList :: Int -> Int -> Int -> Node -> [Arrangement] -> [Node]
-pointDocColList i x' y' loc [] = debug Err "ArrTypes.pointDocRowList: empty Row list" $ [loc]
+pointDocColList :: Show node => Int -> Int -> Int -> [node] -> [Arrangement node] -> [node]
+pointDocColList i x' y' loc [] = debug Err "ArrTypes.pointDocRowList: empty Row list" $ loc
 pointDocColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr 
                                       then pointDocColList (i+1) x' y' loc arrs
                                       else pointDoc (clip 0 (widthA arr-1) (x'-xA arr)) (y'-yA arr) 
@@ -346,7 +343,7 @@ pointDocColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr
 ---
  
                                                                    
-
+selectTreeA :: Show node => [Int] -> Arrangement node -> (Int, Int, Arrangement node)
 selectTreeA = selectTreeA' 0 0
 
 selectTreeA' x' y' []       tr                                = (x', y', tr)
@@ -469,11 +466,11 @@ zipWith3' _ _ _ _          = []
 -- only encountering whitespace     <PlusExp>  <IntExp>  | 12</IntExp> <Exp> </PlusExp>
 -- for |, the paths would include [IntExp, PlusExp] ++ ...
 {-
-docFocusArr :: FocusArr -> Arrangement -> FocusDoc
+docFocusArr :: FocusArr -> Arrangement node -> FocusDoc
 docFocusArr NoFocusA = NoFocusD
 docFocusArr 
 
-leftDocPathsA :: PathArr -> Arrangement -> [PathDoc]
+leftDocPathsA :: PathArr -> Arrangement node -> [PathDoc]
 leftDocPathsA 
 
 -}
