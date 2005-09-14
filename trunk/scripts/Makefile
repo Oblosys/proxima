@@ -23,15 +23,15 @@ all: proxima
 
 
 PROXIMATESTDIR = $(PROXIMADIR)/test
-MAIN           = Proxima
-EXE            = .exe
+EXE            = 
+MAIN           = proxima$(EXE)
 
-AGC     = $(PROXIMATESTDIR)/uuagc.exe
-GEN	= $(PROXIMATESTDIR)/generate.exe
+AGC     = $(PROXIMATESTDIR)/uuagc$(EXE)
+GEN	= $(PROXIMATESTDIR)/generate$(EXE)
 HC	= ghc
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
 		-package lang -package wx -package util -package net -package data -package parsec\
-		-i$(IFACES) $(EXTRA_HC_OPTS)
+		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_HC_OPTS)
 
 IFACES = $(PROXIMAIFACES):$(HELIUMIFACES):$(GENERATORIFACES)
 
@@ -114,7 +114,7 @@ EVALUATIONSRCS = \
 	$(EVALUATIONDIR)/EvalPresent.hs \
 	$(EVALUATIONDIR)/EvalTranslate.hs \
 	$(EVALUATIONDIR)/EvaluateInv.lhs \
-	$(EVALUATIONDIR)/EvaluateTypes.hs \
+	$(EVALUATIONDIR)/EvaluateTypesStubs.hs \
 	$(EVALUATIONDIR)/GetPut.lhs \
 	$(EVALUATIONDIR)/View.lhs \
 	$(EVALUATIONDIR)/X.lhs \
@@ -404,16 +404,16 @@ proxima: $(OBJS) $(GEN)
 	@echo "****************************************************"
 	$(HC)	-o $(PROXIMATESTDIR)/$(MAIN) $(HC_OPTS) $(OBJS)
 
+
 # The Generator
 $(GEN): $(GENERATOROBJS)
 	ghc -package lang -fglasgow-exts \
 	-o $(PROXIMATESTDIR)/generate -i$(GENERATORIFACES) $(GENERATOROBJS)
 
-
 # Generation 
-# TODO: fix generator, so we can pass the proxima path.
+generate : $(PRESENTATIONDIR)/PresentationAG_Generated.hs
 
-$(EVALUATIONDIR)/DocTypes_Generated.hs : $(GEN) $(GENERATORDIR)/DocumentType.hs
+$(PRESENTATIONDIR)/PresentationAG_Generated.hs : $(GEN) $(GENERATORDIR)/DocumentType.hs
 	$(GEN) $(PROXIMADIR)/src $(GENERATORDIR)/DocumentType.hs
 	
 # The AG compiler
@@ -425,7 +425,7 @@ $(AGC):
 # The presentation AG
 
 # target for only compiling presentationAG, useful when working with GHCi
-present: $(PRESENTATIONDIR)/PresentationAG.hs
+presenter: $(PRESENTATIONDIR)/PresentationAG.hs
 	
 # TODO: make dependencies easy to see and to maintain (important for editor builder)
 
@@ -443,6 +443,7 @@ $(PRESENTATIONDIR)/PresentationAG.hs : $(AGC) \
 # -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 
 
+arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
 # The arrangemer AG
 
@@ -450,7 +451,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo "Compiling arrangerAG.ag"
 	$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfmsp --module=ArrangerAG \
+	-cfmp --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
 # -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
@@ -489,6 +490,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/arrangement/ArrLayerUtils.o : ../../proxima/src/arrangement/ArrLayerTypes.hi
 ../../proxima/src/arrangement/ArrLayerUtils.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/arrangement/ArrPresent.o : ../../proxima/src/arrangement/ArrPresent.hs
+../../proxima/src/arrangement/ArrPresent.o : ../../proxima/src/evaluation/DocTypes_Generated.hi
 ../../proxima/src/arrangement/ArrPresent.o : ../../proxima/src/arrangement/Arranger.hi
 ../../proxima/src/arrangement/ArrPresent.o : ../../proxima/src/arrangement/ArrLayerUtils.hi
 ../../proxima/src/arrangement/ArrPresent.o : ../../proxima/src/arrangement/ArrLayerTypes.hi
@@ -505,7 +507,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/arrangement/ArrTypes.o : ../../proxima/src/evaluation/DocTypes.hi
 ../../proxima/src/arrangement/ArrTypes.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/arrangement/ArrUtils.o : ../../proxima/src/arrangement/ArrUtils.hs
-../../proxima/src/arrangement/ArrUtils.o : ../../proxima/src/evaluation/DocTypes.hi
 ../../proxima/src/arrangement/ArrUtils.o : ../../proxima/src/common/CommonUtils.hi
 ../../proxima/src/arrangement/ArrUtils.o : ../../proxima/src/arrangement/ArrTypes.hi
 ../../proxima/src/arrangement/ArrUtils.o : ../../proxima/src/common/CommonTypes.hi
@@ -518,7 +519,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/arrangement/Arranger.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/arrangement/ArrangerAG.hs
 ../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/arrangement/FontLib.hi
-../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/evaluation/DocTypes.hi
 ../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/arrangement/ArrLayerUtils.hi
 ../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/arrangement/ArrLayerTypes.hi
 ../../proxima/src/arrangement/ArrangerAG.o : ../../proxima/src/common/CommonTypes.hi
@@ -587,7 +587,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/evaluation/EvalLayerUtils.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvalPresent.hs
 ../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvaluateInv.hi
-../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvaluateTypes.hi
+../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvaluateTypesStubs.hi
 ../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/DocumentEdit.hi
 ../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvalLayerUtils.hi
 ../../proxima/src/evaluation/EvalPresent.o : ../../proxima/src/evaluation/EvalLayerTypes.hi
@@ -606,20 +606,10 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/evaluation/EvaluateInv.o : ../../proxima/src/evaluation/XParse.hi
 ../../proxima/src/evaluation/EvaluateInv.o : ../../proxima/src/evaluation/X.hi
 ../../proxima/src/evaluation/EvaluateInv.o : ../../proxima/src/evaluation/View.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../proxima/src/evaluation/EvaluateTypes.hs
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/syntax/UHA_Pretty.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/staticanalysis/messages/HeliumMessages.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/syntax/UHA_Range.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/syntax/UHA_Utils.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../Top/src/Top/Types.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/staticanalysis/messages/TypeErrors.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/staticanalysis/messages/StaticErrors.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/utils/Utils.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../proxima/src/evaluation/CompileHelium.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../heliumNT/src/syntax/UHA_Syntax.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../proxima/src/evaluation/DocumentEdit.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../proxima/src/common/DebugLevels.hi
-../../proxima/src/evaluation/EvaluateTypes.o : ../../proxima/src/evaluation/DocTypes.hi
+../../proxima/src/evaluation/EvaluateTypesStubs.o : ../../proxima/src/evaluation/EvaluateTypesStubs.hs
+../../proxima/src/evaluation/EvaluateTypesStubs.o : ../../heliumNT/src/syntax/UHA_Syntax.hi
+../../proxima/src/evaluation/EvaluateTypesStubs.o : ../../proxima/src/common/DebugLevels.hi
+../../proxima/src/evaluation/EvaluateTypesStubs.o : ../../proxima/src/evaluation/DocTypes.hi
 ../../proxima/src/evaluation/GetPut.o : ../../proxima/src/evaluation/GetPut.lhs
 ../../proxima/src/evaluation/GetPut.o : ../../proxima/src/evaluation/Error.hi
 ../../proxima/src/evaluation/GetPut.o : ../../proxima/src/evaluation/X.hi
@@ -686,6 +676,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/main/Architecture.o : ../../proxima/src/evaluation/EvalTranslate.hi
 ../../proxima/src/main/Architecture.o : ../../proxima/src/evaluation/EvalPresent.hi
 ../../proxima/src/main/Architecture.o : ../../proxima/src/main/ArchitectureLibM.hi
+../../proxima/src/main/Architecture.o : ../../proxima/src/presentation/PresentationAG.hi
 ../../proxima/src/main/ArchitectureLibM.o : ../../proxima/src/main/ArchitectureLibM.hs
 ../../proxima/src/main/GUI.o : ../../proxima/src/main/GUI.hs
 ../../proxima/src/main/GUI.o : ../../proxima/src/evaluation/DocTypes.hi
@@ -698,6 +689,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/main/Main.o : ../../proxima/src/layout/Scanner.hi
 ../../proxima/src/main/Main.o : ../../proxima/src/layout/Layout.hi
 ../../proxima/src/main/Main.o : ../../proxima/src/presentation/PresentationParsing.hi
+../../proxima/src/main/Main.o : ../../proxima/src/presentation/PresentationAG.hi
 ../../proxima/src/main/Main.o : ../../proxima/src/presentation/ProxParser.hi
 ../../proxima/src/main/Main.o : ../../proxima/src/arrangement/FontLib.hi
 ../../proxima/src/main/Main.o : ../../proxima/src/rendering/RenTypes.hi
@@ -736,7 +728,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresLayerTypes.hi
 ../../proxima/src/presentation/PresPresent.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresTranslate.hs
-../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/ProxParser.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresLayerUtils.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresLayerTypes.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/common/CommonTypes.hi
@@ -770,7 +761,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/Presenter.hs
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/layout/TreeEditPres.hi
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/XprezLib.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/PresentationAG.hi
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/evaluation/DocumentEdit.hi
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/PresLayerUtils.hi
 ../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/PresLayerTypes.hi
