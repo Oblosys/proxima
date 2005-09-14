@@ -313,10 +313,10 @@ parseIdent =
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Token node (Maybe Node) -> String_
+mkString_ :: Show node => Token node (Maybe node) -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
 
-mkInt_ :: Token node (Maybe Node) -> Int_
+mkInt_ :: Show node => Token node (Maybe node) -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different

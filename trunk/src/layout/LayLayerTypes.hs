@@ -10,3 +10,6 @@ import LayTypes
 type LayerStateLay = Presentation -- clipboard
 -- is this  layer local state, instead of level local state? It is focus related, so probably, it should be 
 -- local to LayoutLevel, just like the focus
+
+type ScannerSheet node = IDPCounter -> Maybe node -> Presentation node ->
+                         (Presentation node, LayoutMap, IDPCounter)

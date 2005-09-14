@@ -6,8 +6,6 @@ import ArrLayerUtils
 
 import Arranger
 
-import DocTypes_Generated (Node)
-
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
 presentIO state high low editHigh =
   do { (editLow, state', high') <- arrange state high low editHigh
@@ -20,7 +18,7 @@ presentIO state high low editHigh =
 -- SkipLay' 0: layout has been edited dt contains the correct diffs
 
 -- on a skipLay, the local arr state may have changed, so rearrange
-arrange :: LocalStateArr -> LayoutLevel Node -> ArrangementLevel Node -> EditLayout' Node -> IO (EditArrangement' Node, LocalStateArr, LayoutLevel Node)
+arrange :: Show node => LocalStateArr -> LayoutLevel node -> ArrangementLevel node -> EditLayout' node -> IO (EditArrangement' node, LocalStateArr, LayoutLevel node)
 arrange state layLvl@(LayoutLevel pres focus dt) arrLvl@(ArrangementLevel oldArrangement _ _) (SkipLay' 0) =
  do { arr' <- arrangePresentation state focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
     ; return (SetArr' (ArrangementLevel arr' (focusAFromFocusP focus pres) pres), state, layLvl)

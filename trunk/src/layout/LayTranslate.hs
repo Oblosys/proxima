@@ -4,17 +4,15 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
-import Scanner
 
 import TreeEditPres
 
-import DocTypes_Generated (Node)
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: LayerStateLay Node -> LayoutLevel Node -> PresentationLevel Node -> EditLayout node
-            -> IO (EditPresentation Node, LayerStateLay Node, LayoutLevel Node)
-translateIO state low high editLow =
-  do { (editHigh, state', low') <- parseIO state low high editLow
+translateIO :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout node
+            -> IO (EditPresentation node, LayerStateLay node, LayoutLevel node)
+translateIO scannerSheet state low high editLow =
+  do { (editHigh, state', low') <- parseIO scannerSheet state low high editLow
      ; debugLnIO Prs $ "Edit Layout: "++show editLow
      ; return (editHigh, state', low')
      }
@@ -28,60 +26,60 @@ translateIO state low high editLow =
 
 
 -- split in monadic and non-monadic part
-parseIO :: LayerStateLay Node -> LayoutLevel Node -> PresentationLevel Node -> EditLayout node -> IO (EditPresentation Node, LayerStateLay Node, LayoutLevel Node)
---parseIO state layLvl prs (OpenFileLay str) = openFile str state layLvl prs
---parseIO state layLvl prs (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prs str 
---parseIO state layLvl prs (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prs
-parseIO state layLvl prs (OpenFileLay str) = return (OpenFilePres str, state, layLvl)
-parseIO state layLvl prs (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
-parseIO state layLvl prs event = return $ parse state layLvl prs event
+parseIO :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout node -> IO (EditPresentation node, LayerStateLay node, LayoutLevel node)
+--parseIO _ state layLvl prs (OpenFileLay str) = openFile str state layLvl prs
+--parseIO _ state layLvl prs (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prs str 
+--parseIO _ state layLvl prs (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prs
+parseIO _ state layLvl prs (OpenFileLay str) = return (OpenFilePres str, state, layLvl)
+parseIO _ state layLvl prs (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
+parseIO scannerSheet state layLvl prs event = return $ parse scannerSheet state layLvl prs event
 
-parse :: LayerStateLay Node -> LayoutLevel Node -> PresentationLevel Node -> EditLayout node -> (EditPresentation Node, LayerStateLay Node, LayoutLevel Node)
-parse state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
+parse :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout node -> (EditPresentation node, LayerStateLay node, LayoutLevel node)
+parse _ state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
   setUpd NothingUpdated $ (SkipPres 0, state, LayoutLevel pres focus dt)
-parse state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
-parse state layLvl prs InitLay       = (InitPres, state, layLvl)
-parse state layLvl prs (InsertLay c) = editLay (editInsert c) state layLvl prs
-parse state layLvl prs CutLay   = editLay editCut state layLvl prs
-parse state layLvl prs CopyLay   = setUpd NothingUpdated $ editCopy state layLvl prs
-parse state layLvl prs PasteLay  = editLay editPaste state layLvl prs
-parse state layLvl prs DeleteLay = editLay editDelete state layLvl prs 
-parse state layLvl prs SplitLay  = editLay editSplit state layLvl prs
-parse state layLvl prs LeftDeleteLay = editLay editLeftDelete state layLvl prs
-parse state layLvl prs RightDeleteLay = editLay editRightDelete state layLvl prs
-parse state layLvl prs LeftLay   = setUpd NothingUpdated $ navigateLeft state layLvl prs 
-parse state layLvl prs RightLay  = setUpd NothingUpdated $ navigateRight state layLvl prs
+parse _ state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
+parse _ state layLvl prs InitLay       = (InitPres, state, layLvl)
+parse _ state layLvl prs (InsertLay c) = editLay (editInsert c) state layLvl prs
+parse _ state layLvl prs CutLay   = editLay editCut state layLvl prs
+parse _ state layLvl prs CopyLay   = setUpd NothingUpdated $ editCopy state layLvl prs
+parse _ state layLvl prs PasteLay  = editLay editPaste state layLvl prs
+parse _ state layLvl prs DeleteLay = editLay editDelete state layLvl prs 
+parse _ state layLvl prs SplitLay  = editLay editSplit state layLvl prs
+parse _ state layLvl prs LeftDeleteLay = editLay editLeftDelete state layLvl prs
+parse _ state layLvl prs RightDeleteLay = editLay editRightDelete state layLvl prs
+parse _ state layLvl prs LeftLay   = setUpd NothingUpdated $ navigateLeft state layLvl prs 
+parse _ state layLvl prs RightLay  = setUpd NothingUpdated $ navigateRight state layLvl prs
 
-parse state layLvl prs EnlargeLeftLay   = setUpd NothingUpdated $ enlargeLeft state layLvl prs
-parse state layLvl prs EnlargeRightLay  = setUpd NothingUpdated $ enlargeRight state layLvl prs
+parse _ state layLvl prs EnlargeLeftLay   = setUpd NothingUpdated $ enlargeLeft state layLvl prs
+parse _ state layLvl prs EnlargeRightLay  = setUpd NothingUpdated $ enlargeRight state layLvl prs
 
-parse state layLvl prs NormalizeLay       = setUpd NothingUpdated $ editLay editNormalize state layLvl prs  
+parse _ state layLvl prs NormalizeLay       = setUpd NothingUpdated $ editLay editNormalize state layLvl prs  
 
-parse state layLvl prs TestLay            = tokenizeLay state layLvl prs
-parse state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
+parse scannerSheet state layLvl prs TestLay            = tokenizeLay scannerSheet state layLvl prs
+parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
 
 
-parse state layLvl prs (UpdateDocLay upd) = (UpdateDocPres upd, state, layLvl)
-parse state layLvl prs NavUpDocLay        = (NavUpDocPres, state, layLvl)
-parse state layLvl prs NavDownDocLay      = (NavDownDocPres, state, layLvl)
-parse state layLvl prs NavLeftDocLay      = (NavLeftDocPres, state, layLvl)
-parse state layLvl prs NavRightDocLay     = (NavRightDocPres, state, layLvl)
-parse state layLvl prs CutDocLay          = (CutDocPres, state, layLvl)
-parse state layLvl prs CopyDocLay         = (CopyDocPres, state, layLvl)
-parse state layLvl prs PasteDocLay        = (PasteDocPres, state, layLvl)
-parse state layLvl prs DeleteDocLay       = (DeleteDocPres, state, layLvl)
-parse state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
+parse _ state layLvl prs (UpdateDocLay upd) = (UpdateDocPres upd, state, layLvl)
+parse _ state layLvl prs NavUpDocLay        = (NavUpDocPres, state, layLvl)
+parse _ state layLvl prs NavDownDocLay      = (NavDownDocPres, state, layLvl)
+parse _ state layLvl prs NavLeftDocLay      = (NavLeftDocPres, state, layLvl)
+parse _ state layLvl prs NavRightDocLay     = (NavRightDocPres, state, layLvl)
+parse _ state layLvl prs CutDocLay          = (CutDocPres, state, layLvl)
+parse _ state layLvl prs CopyDocLay         = (CopyDocPres, state, layLvl)
+parse _ state layLvl prs PasteDocLay        = (PasteDocPres, state, layLvl)
+parse _ state layLvl prs DeleteDocLay       = (DeleteDocPres, state, layLvl)
+parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
 -- We want to be able to set the presentation here and probably do a Layout to Presentation mapping.
 -- Not possible with just single edit commands. The problem is that the parser must not always be called. This
 -- does not readily fit in the current model.
 -- We can fix it by not setting the higher pres level if we don't want a parse.
 
 
-{-parse state layLvl prs Test2Lay   = setUpd AllUpdated $editReadFile state layLvl prs focus 
---parse state layLvl prs (MouseDownLay path ms i) = setUpd AllUpdated $ editMouseDown state layLvl prs path -- Helium
+{-parse _ state layLvl prs Test2Lay   = setUpd AllUpdated $editReadFile state layLvl prs focus 
+--parse _ state layLvl prs (MouseDownLay path ms i) = setUpd AllUpdated $ editMouseDown state layLvl prs path -- Helium
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
-parse state layLvl prs _            = (SkipPres 0, state, layLvl)
+parse _ state layLvl prs _            = (SkipPres 0, state, layLvl)
 
 
 -- edit ops need to be consistent, when navigating with non-empty focus, collapse focus
@@ -95,8 +93,8 @@ parse state layLvl prs _            = (SkipPres 0, state, layLvl)
 -- unparsed presentation.
 
 
-tokenizeLay state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
- let (pres', layout', idCounter') = tokenize idCounter Nothing pres
+tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
+ let (pres', layout', idCounter') = scannerSheet idCounter Nothing pres
      pres''                       = deleteInsertedTokens inserted pres'
      presLvl'                     = debug Err ("layTranslate: inss="++show inserted) $ PresentationLevel pres'' (layout',idCounter', inserted, deleted)
  in  setUpd AllUpdated $ (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))

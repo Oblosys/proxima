@@ -25,52 +25,8 @@ import IOExts
 import DocumentEdit_Generated 
 
 
+
 {-
-type FocusDoc = PathDoc
-data PathDoc = NoPathD | PathD PathD deriving Show
-
-
-data ID = NoID | ID Int deriving Show
-type Presentation = Int
-type Node = Int
-
-data DocumentLevel = DocumentLevel Document FocusDoc ClipDoc
-
-
-data Document = RootDoc ID ID Decls
-
-data Decls = ConsDecls ID Decl Decls
-           | NilDecls ID
-           | HoleDecls
-           | ParseErrDecls Node Presentation
-
-data Decl = Decl ID ID ID Ident Exp
-          | HoleDecl
-          | ParseErrDecl Node Presentation
-
-
-data Ident = Ident ID ID String
-           | HoleIdent
-           | ParseErrIdent Node Presentation
-
-data Exp = PlusExp ID ID Exp Exp 
-         | TimesExp ID ID Exp Exp
-         | DivExp ID ID Exp Exp
-         | PowerExp ID ID Exp Exp
-         | BoolExp ID ID Bool
-         | IntExp ID ID Int
-         | CaseExp ID ID ID Exp Alts
-         | LetExp ID ID ID Decls Exp
-         | LamExp ID ID ID Ident Exp
-         | AppExp ID Exp Exp
-         | IdentExp ID Ident
-         | IfExp ID ID ID ID Exp Exp Exp
-         | ParenExp ID ID ID Exp
-         | ProductExp ID ID ID [ID] Exps
-         | HoleExp
-         | ParseErrExp Node Presentation
-         
-
 
 instance Show Document where
   show (RootDoc _ _ decls) = "Document\n"++show decls
@@ -118,7 +74,7 @@ lstFromExps (ParseErrExps _ _) = []
 data Exps = ConsExps ID Exp Exps
            | NilExps ID
            | HoleExps
-           | ParseErrExps Node Presentation
+           | ParseErrExps node Presentation
 
 instance Show Exps where
   show (ConsExps _ d ds) = show d ++ show ds

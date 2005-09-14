@@ -47,10 +47,10 @@ data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp
           | BoardDecl IDD IDP IDP Board
           | PPPresentationDecl IDD IDP IDP PPPresentation
           | HoleDecl
-          | ParseErrDecl Node Presentation deriving Show
+          | ParseErrDecl node Presentation deriving Show
 
 data Ident = Ident IDD IDP String
            | HoleIdent
-           | ParseErrIdent Node Presentation deriving Show
+           | ParseErrIdent node Presentation deriving Show
 
   -}

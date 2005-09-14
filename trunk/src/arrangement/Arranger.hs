@@ -4,13 +4,11 @@ import CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
 
-import DocTypes
-
 import ArrangerAG
 import FontLib
 import IOExts
 
-arrangePresentation :: FontMetricsRef -> FocusPres -> Arrangement Node -> DiffTree -> Presentation Node -> IO (Arrangement Node)
+arrangePresentation :: Show node => FontMetricsRef -> FocusPres -> Arrangement node -> DiffTree -> Presentation node -> IO (Arrangement node)
 arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
 
  do { let screenSize = 1000      
@@ -36,9 +34,9 @@ arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ se
 -- non-pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
 -- unsafePerformDraw is not available     -- obsolete comment
 -- Monad is IO again so fixIO can be used
-fixed :: FontMetricsRef -> FocusPres -> Presentation Node -> Int -> Arrangement Node -> IO (Arrangement Node,Integer,Presentation Node)
-fixed fontMetricsRef focus pres screenSize oldArrangement = f --fixit
- where f :: IO (Arrangement Node,Integer,Presentation Node)
+fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation node -> Int -> Arrangement node -> IO (Arrangement node,Integer,Presentation node)
+fixed fontMetricsRef focus (pres :: Presentation node) screenSize oldArrangement = f --fixit
+ where f :: IO (Arrangement node, Integer,Presentation node) -- node is a scoped type variable
        f = 
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (white, white, black, black)
             ; let defFont = defaultFont 

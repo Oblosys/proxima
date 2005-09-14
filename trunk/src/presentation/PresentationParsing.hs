@@ -57,7 +57,7 @@ an option.
 -}
 
 
-type ListParser node a = AnaParser [] Pair  (Token node (Maybe Node)) a 
+type ListParser node a = AnaParser [] Pair  (Token node (Maybe node)) a 
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
@@ -68,7 +68,7 @@ pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr' :: ListParser node a -> ListParser node a
+pStr' :: (Ord node, Show node) => ListParser node a -> ListParser node a
 pStr' p = unfoldStructure  
      <$> pSym (Structural Nothing empty [] NoIDP)
  where unfoldStructure structTk@(Structural nd _ children _) = 
@@ -181,19 +181,19 @@ postScanPrs pres _ = debug Err ("*** PresentationParser.postScanPrs: unimplement
 
 
 
-pKey :: String -> ListParser node (Token node (Maybe Node))
+pKey :: (Ord node, Show node) => String -> ListParser node (Token node (Maybe node))
 pKey str = pSym  (strTk str)
 
-pKeyC :: Int -> String -> ListParser node (Token node (Maybe Node))
+pKeyC :: (Ord node, Show node) => Int -> String -> ListParser node (Token node (Maybe node))
 pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: ListParser node (Token node (Maybe Node))
+pLIdent :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
 pLIdent = pCSym 20 (LIdentTk "ident" Nothing (IDP (-1)))
 --pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: ListParser node (Token node (Maybe Node))
+pInt :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
 pInt = pCSym 20 (IntTk "0" Nothing (IDP (-1)))
 --pInt = pCSym 20 intTk
 
@@ -202,18 +202,18 @@ pInt = pCSym 20 (IntTk "0" Nothing (IDP (-1)))
 -- intTk and lIntTk calls are replaced by their bodies, otherwise GHC panics
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: ListParser node (Token node (Maybe Node))
+pStruct :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
 pStruct = pCSym 4 (Structural Nothing empty [] NoIDP)
 
 
 -- pCostSym expects the parser twice
 pCSym c p = pCostSym c p p
 
-lIdentVal :: Token node (Maybe Node) -> String
+lIdentVal :: Show node => Token node (Maybe node) -> String
 lIdentVal (LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
-strValTk :: Token node (Maybe Node) -> String
+strValTk :: Show node => Token node (Maybe node) -> String
 strValTk (StrTk str _ _)    = str
 strValTk (IntTk str _ _)    = str
 strValTk (LIdentTk str _ _) = str
@@ -222,7 +222,7 @@ strValTk (OpTk str _ _)     = str
 strValTk (SymTk str _ _)    = str
 strValTk tk                 = debug Err ("PresentationParser.strValTk: StructuralToken " ++ show tk) $ show tk
   
-intVal :: Token node (Maybe Node) -> Int
+intVal :: Show node => Token node (Maybe node) -> Int
 intVal (IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
@@ -345,7 +345,7 @@ instance   Ord Token where
         || (ttypel == ttyper && stringl <= stringr)
 
 -}
-tokenString :: Token node (Maybe Node) -> String                  
+tokenString :: Token node (Maybe node) -> String                  
 tokenString (StrTk s n id)      = s
 tokenString (IntTk s n id)      = s
 tokenString (LIdentTk s n id)   = s
@@ -354,7 +354,7 @@ tokenString (OpTk s n id)       = s
 tokenString (SymTk s n id)      = s
 tokenString (Structural n _ _ id) = "<structural token>"
                              
-tokenNode :: Token node (Maybe Node) -> Maybe Node                 
+tokenNode :: Token node (Maybe node) -> Maybe node                 
 tokenNode (StrTk s n id)      = n
 tokenNode (IntTk s n id)      = n
 tokenNode (LIdentTk s n id)   = n
@@ -363,7 +363,7 @@ tokenNode (OpTk s n id)       = n
 tokenNode (SymTk s n id)      = n
 tokenNode (Structural n _ _ id) = n
 
-tokenIDP :: Token node (Maybe Node) -> IDP       
+tokenIDP :: Token node (Maybe node) -> IDP       
 tokenIDP (StrTk s n id)    = id
 tokenIDP (IntTk s n id)    = id
 tokenIDP (LIdentTk s n id) = id
@@ -389,7 +389,7 @@ strucTk   = Structural Nothing empty [] (IDP (-1))
 
 
 
-mkToken :: String -> Maybe Node -> IDP -> Token node (Maybe Node)
+mkToken :: String -> Maybe node -> IDP -> Token node (Maybe node)
 mkToken str@(c:_)   ctxt i | str `elem` keywords = StrTk str ctxt i
                            | isDigit c           = IntTk str ctxt i
                            | isLower c           = LIdentTk str ctxt i

@@ -23,7 +23,7 @@ data Xprez = Empty
            | Alternative [ Xprez ]
            | With Xprez AttrRule
            | WithC Xprez ConstrRule 
-           | Locator Xprez Node deriving Show
+           | Locator Xprez node deriving Show
 -}
 
 -- the with parameters are ordered for infix use:  xp `with` ...

@@ -51,7 +51,7 @@ gain = main -- when typing during compilation GHCI replaces the first command li
 main =                         -- system (layer)local state,  initial higher level value
  do { fontMetricsRef <- initFontMetrics
     ; let layers = 
-            proximaLayers sem_EnrichedDoc parsePres -- sheet parameters
+            proximaLayers sem_EnrichedDoc parsePres tokenize -- sheet parameters
 
                           (LayerStateEval, DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                           ((),     EnrichedDocLevel HoleEnrichedDoc NoPathD)   
