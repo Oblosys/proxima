@@ -17,7 +17,7 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
-unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel Node -> EditArrangement -> (EditLayout node, LocalStateArr, ArrangementLevel node)
+--unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel Node -> EditArrangement documentLevel -> (EditLayout documentLevel node, LocalStateArr, ArrangementLevel node)
 unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) editArr = 
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
@@ -61,6 +61,10 @@ unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) 
     DocumentLoadedArr str -> (DocumentLoadedLay str, state, arrLvl) 
     _                     -> (SkipLay 0,             state, arrLvl) 
 
+
+-- mouseDownDocPres and \DocumentLevel cause dependency on type DocumentLevel
+mouseDownDoc :: state -> ArrangementLevel node -> Presentation Node -> PathArr ->
+                Int -> (EditLayout DocumentLevel node, state, ArrangementLevel node)  
 mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = addWithSteps pthA layout
   in  case mouseDownDocPres pthP layout of
@@ -72,8 +76,6 @@ mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of foc
                                                       , state, arrLvl)
                                        _                -> (SkipLay 0, state, arrLvl) -- node has no path
                         _         -> (SkipLay 0, state, arrLvl) -- no locator
-
-  
 mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)
 {-

@@ -35,6 +35,8 @@ tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . S
           in  ParsePres toks
 
 
+
+
 -- incrementality:
 -- renPresent   render (SetArr ..) ..  diffTree    = DiffLeaf False   
 --                                             ->  diffTree    = diffArr arr' arrOld
@@ -73,7 +75,7 @@ main =                         -- system (layer)local state,  initial higher lev
     
     ; stepRf <- newIORef translate
     
-    ; let handler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering'))
+    ; let --handler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel))
           handler (renderingLvl, SkipRen 0) = return $ (renderingLvl, SkipRen' 0) -- just so unimportant events don't flood debugging traces
           handler (renderingLvl, event) =
            do {

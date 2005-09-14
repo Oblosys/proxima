@@ -18,7 +18,7 @@ data EditLayout' node =
     SetLay' (LayoutLevel node)
   | SkipLay' Int deriving Show
 
-data EditLayout node =
+data EditLayout documentLevel node =
     SkipLay Int
   | SetFocusLay FocusPres
   | SetLay (LayoutLevel node)
@@ -44,7 +44,7 @@ data EditLayout node =
   | TestLay
   | Test2Lay
   
-  | UpdateDocLay (DocumentLevel -> DocumentLevel) -- should encapsulate these so they automatically go to doc level
+  | UpdateDocLay (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocLay
   | NavDownDocLay
   | NavLeftDocLay

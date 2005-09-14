@@ -6,7 +6,6 @@ import PresLayerTypes
 
 import PresLayerUtils
 
-import DocumentEdit
 
 
 import XprezLib
@@ -16,6 +15,8 @@ import IOExts
 
 import List
 import Char
+
+import DocTypes_Generated (Node)
 
 
 -- Testing:

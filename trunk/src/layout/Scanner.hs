@@ -4,7 +4,7 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
-import DocTypes -- for Node
+import DocTypes_Generated (Node (..))
 
 
 tokenize :: Int -> Maybe Node -> Presentation Node -> (Presentation Node, LayoutMap, Int)

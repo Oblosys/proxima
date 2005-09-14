@@ -31,7 +31,7 @@ top level Enr should be called EnrichedDoc (in node, makestructural, etc)
 
 -}
 
-presentIO :: LayerStateEval -> DocumentLevel -> EnrichedDocLevel -> EditDocument' -> IO (EditEnrichedDoc', LayerStateEval, DocumentLevel)
+presentIO :: LayerStateEval -> DocumentLevel -> EnrichedDocLevel -> EditDocument' DocumentLevel -> IO (EditEnrichedDoc', LayerStateEval, DocumentLevel)
 presentIO  state high low@(EnrichedDocLevel enr focus) editHigh =
   let (editLow, state', high') = eval state high low editHigh
   in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
@@ -60,7 +60,7 @@ eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docE
 
 
 -- TODO: make sure that document is parsed before doing these:
-editDoc :: LayerStateEval -> DocumentLevel -> EditDocument' -> (DocumentLevel, LayerStateEval)
+editDoc :: LayerStateEval -> DocumentLevel -> EditDocument' DocumentLevel -> (DocumentLevel, LayerStateEval)
 editDoc state doclvl                        (UpdateDoc' upd) = (upd doclvl, state)
 editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavDownDoc'      = ((DocumentLevel doc (navigateDownD pth doc) clipD), state)

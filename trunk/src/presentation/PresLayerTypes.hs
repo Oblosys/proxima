@@ -4,7 +4,7 @@ module PresLayerTypes ( module EnrTypes
 
 
 import CommonTypes
-import EnrTypes
+import EnrTypes hiding (DocumentLevel, Node)
 import PresTypes
 
 

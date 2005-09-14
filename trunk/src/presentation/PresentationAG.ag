@@ -18,6 +18,10 @@ import qualified Chess
 --import EvaluateTypes                                   -- for OU demo
 --import qualified UHA_Pretty       (sem_Expression) -- for OU demo
 
+import DocTypes (DocumentLevel (..))
+import DocTypes_Generated (Node)
+
+
 type PresentationNode = Presentation Node
 }
 

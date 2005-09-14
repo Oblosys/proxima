@@ -29,7 +29,6 @@ import qualified CommonTypes
 import RenTypes hiding (Size)
 import CommonUtils
 
-import DocTypes
 
 import Char
 import IO
@@ -39,7 +38,7 @@ import Directory
 initialWindowSize :: Size
 initialWindowSize = sz 1260 900
 
-startGUI :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) -> (RenderingLevel, EditRendering) -> IO ()
+startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> (RenderingLevel documentLevel, EditRendering documentLevel) -> IO ()
 startGUI handler (initRenderingLvl, initEvent) = run $
  do { frame <- frameCreateTopFrame "Proxima v0.2"
 
@@ -84,7 +83,7 @@ startGUI handler (initRenderingLvl, initEvent) = run $
     ; return ()
     }    
 
-onPaint :: Var RenderingLevel -> DC () -> Rect -> IO ()          
+onPaint :: Var (RenderingLevel documentLevel) -> DC () -> Rect -> IO ()          
 onPaint renderingLvlVar dc viewRect =
  do { dcClear dc
     ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions <- varGet renderingLvlVar
@@ -144,8 +143,8 @@ from http://www.wxwindows.org/manuals/2.4.2/wx482.htm#wxfontoverview :
 -}    
     }
 
-onMouse :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-              Var RenderingLevel -> ScrolledWindow () ->
+onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+              Var (RenderingLevel documentLevel) -> ScrolledWindow () ->
               EventMouse -> IO ()
 onMouse handler renderingLvlVar window mouseEvt =
  do { editRendering <-
@@ -168,8 +167,8 @@ onMouse handler renderingLvlVar window mouseEvt =
   
 -- not used because position is not available here, when using this, be sure to propagateEvent in mouse handler
 -- (and also in keyboard handler for f10)
-onContextMenu :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-                 Var RenderingLevel -> ScrolledWindow () ->
+onContextMenu :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+                 Var (RenderingLevel documentLevel) -> ScrolledWindow () ->
                  IO ()
 onContextMenu handler renderingLvlVar window =
  do { (RenderingLevel _ makePopupMenu _ _ _ _)  <- varGet renderingLvlVar
@@ -177,8 +176,8 @@ onContextMenu handler renderingLvlVar window =
     ; makePopupMenu handler renderingLvlVar window 130 120
     }
 
-onKeyboard :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-              Var RenderingLevel -> ScrolledWindow a ->
+onKeyboard :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+              Var (RenderingLevel documentLevel) -> ScrolledWindow a ->
               EventKey -> IO ()
 onKeyboard handler renderingLvlVar window (EventKey key mods fp) = 
   do { putStrLn $ "key:" ++ show key ++ ", "++ show mods ++ ", "++ show fp ++ show (keyKey (EventKey key mods fp))
@@ -187,19 +186,17 @@ onKeyboard handler renderingLvlVar window (EventKey key mods fp) =
     -- add skip event?
      }
 
-popupMenuHandler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-                    Var RenderingLevel -> ScrolledWindow a ->
-                    (DocumentLevel -> DocumentLevel) -> IO ()
+popupMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+                    Var (RenderingLevel documentLevel) -> ScrolledWindow a ->
+                    (documentLevel -> documentLevel) -> IO ()
 popupMenuHandler handler renderingLvlVar window editDoc =
  do { let editRendering = (UpdateDocRen editDoc)
                                 
     ; genericHandler handler renderingLvlVar window editRendering
     }
 
---fileMenuHandler :: String -> Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
---                    -> RenderingLevel -> GUI RenderingLevel RenderingLevel
-fileMenuHandler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-                       Var RenderingLevel -> ScrolledWindow a ->
+fileMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+                       Var (RenderingLevel documentLevel) -> ScrolledWindow a ->
                        String -> IO ()
 fileMenuHandler handler renderingLvlVar window menuItem =
  do { editRendering <- 
@@ -235,8 +232,8 @@ fileMenuHandler handler renderingLvlVar window menuItem =
 -- current EditLevel to genericHandler.
 -- If successful, the updated RenderingLevel is returned.
 
-genericHandler :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
-               -> Var RenderingLevel -> ScrolledWindow a -> EditRendering -> IO ()
+genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) 
+               -> Var (RenderingLevel documentLevel) -> ScrolledWindow a -> EditRendering documentLevel -> IO ()
 genericHandler handler renderingLvlVar window evt =   
  do { renderingLvl <- varGet renderingLvlVar
     ; (renderingLvl', editRendering) <- handler (renderingLvl,evt)
@@ -285,7 +282,7 @@ genericHandler handler renderingLvlVar window evt =
             }
     }
 
-translateKey :: Key -> CommonTypes.Modifiers -> EditRendering
+translateKey :: Key -> CommonTypes.Modifiers -> EditRendering documentLevel
 translateKey (KeyChar ch) m  = KeyCharRen (if CommonTypes.shift m then ch else toLower ch)
 translateKey KeySpace m  = KeyCharRen ' '
 translateKey KeyReturn m = KeySpecialRen CommonTypes.EnterKey m
@@ -329,8 +326,8 @@ downCast a = objectCast a
 -}
 
 {-
-startGUI' :: ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) -> 
-             (RenderingLevel, EditRendering) -> [Id] -> IO () 
+startGUI' :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> 
+             (RenderingLevel documentLevel, EditRendering documentLevel) -> [Id] -> IO () 
 startGUI' handler (initRendering, initEvent) [windowID, editorControlID, id0, id1] =
  do {
     ; startIO SDI initRendering initialize [ProcessClose closeProcess]

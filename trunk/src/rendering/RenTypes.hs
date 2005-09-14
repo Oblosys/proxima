@@ -8,15 +8,15 @@ import CommonUtils
 
 import DocTypes
 
-data RenderingLevel = RenderingLevel Scale GUICommand Rendering Size Debugging UpdatedRegions
+data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions
 
 type LocalStateRen = ()
 
-data EditRendering' =
-    SetRen' RenderingLevel
+data EditRendering' documentLevel =
+    SetRen' (RenderingLevel documentLevel)
   | SkipRen' Int deriving Show
 
-data EditRendering =
+data EditRendering documentLevel =
     SkipRen Int
   | InitRen
   | CloseRen
@@ -25,13 +25,13 @@ data EditRendering =
   | MouseDownRen Int Int Modifiers Int
   | MouseDragRen Int Int Modifiers
   | MouseUpRen Int Int Modifiers
-  | UpdateDocRen (DocumentLevel -> DocumentLevel)   -- don't really want this doc ref in rendering level
+  | UpdateDocRen (documentLevel -> documentLevel)   -- don't really want this doc ref in rendering level
   | OpenFileRen String
   | SaveFileRen String
   | DocumentLoadedRen String deriving Show
 
 
-instance Show RenderingLevel where
+instance Show (RenderingLevel documentLevel) where
   show (RenderingLevel scale _ _ size debugging updRegions) =
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}"
@@ -39,8 +39,8 @@ instance Show RenderingLevel where
 -- GUICommand is to specify GUI commands like menu creation etc. This cannot be done in the repaint draw monad.
 
 type Scale = Double
-type GUICommand = ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
-                  Var RenderingLevel -> ScrolledWindow () -> 
+type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+                  Var (RenderingLevel documentLevel) -> ScrolledWindow () -> 
                                 Int -> Int -> IO ()
 --type GUICommand = Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
 --                  Int -> Int -> GUI RenderingLevel ()

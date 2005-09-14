@@ -1,9 +1,9 @@
 module PresTypes where
 
 import CommonTypes
-import {-# SOURCE #-} DocTypes_Generated
-import {-# SOURCE #-} DocTypes
-                    -- for Node
+import {-# SOURCE #-} DocTypes_Generated (Node)
+import {-# SOURCE #-} DocTypes (DocumentLevel)
+--                    -- for Node
 
 import CommonUtils
 
@@ -34,7 +34,7 @@ data EditPresentation' node =
     SetPres' (PresentationLevel node)
   | SkipPres' Int deriving Show
 
-data EditPresentation node =
+data EditPresentation documentLevel node =
     SkipPres Int
   | SetFocusPres FocusPres
   | SetPres (PresentationLevel node)
@@ -47,7 +47,7 @@ data EditPresentation node =
   | OpenFilePres String
   | SaveFilePres String
    
-  | UpdateDocPres (DocumentLevel -> DocumentLevel) -- should encapsulate these so they automatically go to doc level
+  | UpdateDocPres (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocPres
   | NavDownDocPres
   | NavLeftDocPres
@@ -155,7 +155,7 @@ presentation is as big as the presentation, it will always get the focus in that
 
 
 
--- lineWidth must be an attribute here
+-- lineWidth should be an attribute here
 data Inherited = Inh { font :: Font
                      , textColor :: Color, lineColor :: Color, fillColor, backgroundColor :: Color
                      , mouseDown :: Maybe UpdateDoc

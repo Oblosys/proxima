@@ -28,8 +28,7 @@ translate state low high editLow =
 
 
 
-
-interpret :: Show node => LocalStateRen -> RenderingLevel -> ArrangementLevel node -> EditRendering -> (EditArrangement, LocalStateRen, RenderingLevel)
+interpret :: Show node => LocalStateRen -> RenderingLevel documentLevel -> ArrangementLevel node -> EditRendering documentLevel -> (EditArrangement documentLevel, LocalStateRen, RenderingLevel documentLevel)
 interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
                 arrLvl@(ArrangementLevel arr focus _) editRen =
   case editRen of
@@ -63,7 +62,6 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
     KeySpecialRen F1Key ms        -> (TestArr, state, renLvl)
     KeySpecialRen F2Key ms        -> (Test2Arr, state, renLvl)
     KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
--- F8Key cannot be used for some reason, probably already bound by objectIO
 
 
 -- partial redraw hack

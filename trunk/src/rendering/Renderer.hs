@@ -68,8 +68,8 @@ arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]
 
 -- end of hack.
       
---mkPopupMenuXY :: Presentation -> Scale -> Arrangement -> Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) 
---              -> Int -> Int -> GUI RenderingLevel ()
+--mkPopupMenuXY :: Presentation -> Scale -> Arrangement -> Id -> ((RenderingLevel documentLevel, EditRendering) -> IO (RenderingLevel documentLevel, EditRendering')) 
+--              -> Int -> Int -> GUI (RenderingLevel documentLevel) ()
 mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case pointOvlRev' x y [[]] arr of

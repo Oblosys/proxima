@@ -30,9 +30,9 @@ data HeliumMessage =
 -- due to stupid acyclic module restriction. Recursive import support is incomprehensible
 -- and buggy
 
-data EditDocument' = -- Document in SetDoc' should be a DocumentLevel!
+data EditDocument' documentLevel = -- Document in SetDoc' should be a DocumentLevel!
     SetDoc' Document -- (InsertedTokenList, DeletedTokenMap)
-  | UpdateDoc' (DocumentLevel -> DocumentLevel)
+  | UpdateDoc' (documentLevel -> documentLevel)
   | NavUpDoc'
   | NavDownDoc'
   | NavLeftDoc'
@@ -44,11 +44,11 @@ data EditDocument' = -- Document in SetDoc' should be a DocumentLevel!
   | EvaluateDoc' -- for type evaluation
   | SkipDoc' Int
 
-data EditDocument =
+data EditDocument documentLevel =
     InitDoc
   | CloseDoc
   | SetDoc Document -- (InsertedTokenList, DeletedTokenMap)
-  | UpdateDoc (DocumentLevel -> DocumentLevel)
+  | UpdateDoc (documentLevel -> documentLevel)
   | NavUpDoc
   | NavDownDoc
   | NavLeftDoc
@@ -60,7 +60,7 @@ data EditDocument =
   | EvaluateDoc -- for type evaluation
   | SkipDoc Int
 
-instance Show EditDocument where
+instance Show (EditDocument documentLevel) where
   show InitDoc         = "InitDoc" 
   show CloseDoc        = "CloseDoc"
   show (SetDoc doc )    = "(SetDoc {Document} {inserted&deleted} )"
@@ -77,7 +77,7 @@ instance Show EditDocument where
   show (SkipDoc i)     = "(SkipDoc " ++ show i ++ ")"   
 
 
-instance Show EditDocument' where
+instance Show (EditDocument' documentLevel) where
   show (SetDoc' doc )    = "(SetDoc' "++show doc++" {inserted&deleted} )"
   show (UpdateDoc' upd) = "(UpdateDoc' <function>)"
   show NavUpDoc'        = "NavUpDoc'"

@@ -14,7 +14,7 @@ data (EditArrangement' node) =
     SetArr' (ArrangementLevel node)
   | SkipArr' Int deriving Show
 
-data EditArrangement =
+data EditArrangement documentLevel =
     SkipArr Int
   | SetFocusArr FocusArr
   | InitArr
@@ -40,7 +40,7 @@ data EditArrangement =
   | MouseUpArr PathArr Modifiers
   | OpenFileArr String
   | SaveFileArr String
-  | UpdateDocArr (DocumentLevel -> DocumentLevel) -- should encapsulate these so they automatically go to doc level
+  | UpdateDocArr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocArr
   | NavDownDocArr
   | NavLeftDocArr

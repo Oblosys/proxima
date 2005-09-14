@@ -20,7 +20,8 @@ import UU_Parsing hiding (Exp, parse, parseIO)
 import qualified UU_Parsing
 import Char
 
-import Scanner (tokenize)
+import DocTypes_Generated (Node)
+
 
 
 parsePres pres = let tokens = postScanStr pres Nothing
@@ -397,7 +398,7 @@ parseBoolExp =
 
 --------------------------------------------------------------
 --- testing bits
-
+{-
 clparse str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
                    tokens = enrichedDocTk : postScanStr prs Nothing
                    result = runParser recognizeRootEnr tokens
@@ -409,7 +410,7 @@ clparsep p str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP No
                   in  debug Err ("Parsing: "++show (tokens)++"\nhas result:") $
                       result 
 
-
+-}
 --------------------------------------------------------------
 
 

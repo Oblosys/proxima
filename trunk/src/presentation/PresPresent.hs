@@ -4,7 +4,7 @@ import CommonTypes
 import PresLayerTypes
 import PresLayerUtils
 
-import DocumentEdit
+import DocTypes_Generated (Node)
 
 import Presenter
 

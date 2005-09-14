@@ -23,14 +23,14 @@ data EditEnrichedDoc' =
     SetEnr' EnrichedDocLevel -- (InsertedTokenList, DeletedTokenMap)
   | SkipEnr' Int
 
-data EditEnrichedDoc =
+data EditEnrichedDoc documentLevel =
      InitEnr
    | SetEnr EnrichedDocLevel
    | SkipEnr Int
    | OpenFileEnr String
    | SaveFileEnr String
    | EvaluateDocEnr
-   | UpdateDocEnr (DocumentLevel -> DocumentLevel) -- should encapsulate these so they automatically go to doc level
+   | UpdateDocEnr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
    | NavUpDocEnr
    | NavDownDocEnr
    | NavLeftDocEnr

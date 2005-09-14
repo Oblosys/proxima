@@ -1,7 +1,7 @@
 module PresentationParsing where
 
 import CommonTypes
-import DocTypes
+import DocTypes_Generated (Node (..))
 import PresTypes
 
 import DocumentEdit
