@@ -8,7 +8,8 @@ import DocumentEdit
 
 import Presenter
 
-presentIO :: PresentationSheet -> LayerStatePres -> EnrichedDocLevel -> PresentationLevel -> EditEnrichedDoc' -> IO (EditPresentation', LayerStatePres, EnrichedDocLevel)
+
+presentIO :: PresentationSheet Node -> LayerStatePres -> EnrichedDocLevel -> PresentationLevel Node -> EditEnrichedDoc' -> IO (EditPresentation' Node, LayerStatePres, EnrichedDocLevel)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
   let (editLow, state', high') = present presentationSheet state high low editHigh
   in do { -- debugLnIO Prs ("editDoc':"++show editHigh)

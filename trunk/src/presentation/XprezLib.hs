@@ -8,7 +8,7 @@ import PresTypes
 
 -- switch href and vref href is y and vref is x, so (vref, href) is more logical
 
-type Xprez = Presentation
+type Xprez node = Presentation node
 {-
 data Xprez = Empty
            | Text String
@@ -55,103 +55,103 @@ topXp `above` bottomXp = col [topXp, bottomXp]
 withInh xp inf =  with_ xp (\(i,s) -> (inf i, s))
 withSyn xp snf =  with_ xp (\(i,s) -> (i, snf s))
 
-withColor :: Xprez -> Color -> Xprez
+withColor :: Xprez node -> Color -> Xprez node
 withColor xp c = withInh xp (\i -> i { textColor = c, lineColor = c})
 
-withtxtColor :: Xprez -> Color -> Xprez
+withtxtColor :: Xprez node -> Color -> Xprez node
 withtxtColor xp c = withInh xp (\i -> i { textColor = c})
 
-withtxtColor_ :: Xprez -> (Color -> Color) -> Xprez
+withtxtColor_ :: Xprez node -> (Color -> Color) -> Xprez node
 withtxtColor_ xp f = withInh xp (\i -> i { textColor = f (textColor i)})
 
-withlnColor :: Xprez -> Color -> Xprez
+withlnColor :: Xprez node -> Color -> Xprez node
 withlnColor xp c = withInh xp (\i -> i { lineColor = c})
 
-withfColor :: Xprez -> Color -> Xprez
+withfColor :: Xprez node -> Color -> Xprez node
 withfColor xp c = withInh xp (\i -> i { fillColor = c})
 
-withbgColor :: Xprez -> Color -> Xprez
+withbgColor :: Xprez node -> Color -> Xprez node
 withbgColor xp c = withInh xp (\i -> i { backgroundColor = c})
 
-withbgColor_ :: Xprez -> (Color -> Color) -> Xprez
+withbgColor_ :: Xprez node -> (Color -> Color) -> Xprez node
 withbgColor_ xp f = withInh xp (\i -> i { backgroundColor = f (backgroundColor i)})
 
-withFontSize :: Xprez -> Int -> Xprez
+withFontSize :: Xprez node -> Int -> Xprez node
 withFontSize xp fs = withInh xp (\i -> i { font = (font i) { fSize = fs }})
 
-withFontFam :: Xprez -> String -> Xprez
+withFontFam :: Xprez node -> String -> Xprez node
 withFontFam xp ff = withInh xp (\i -> i { font = (font i) { fFamily = ff }})
 
-withFontSize_ :: Xprez -> (Int -> Int) -> Xprez
+withFontSize_ :: Xprez node -> (Int -> Int) -> Xprez node
 withFontSize_ xp ffs = withInh xp (\i -> i { font = (font i) { fSize = ffs (fSize (font i)) }})
 
-withFont :: Xprez -> Font -> Xprez
+withFont :: Xprez node -> Font -> Xprez node
 withFont xp f = withInh xp (\i -> i { font = f })
 
-withFont_ :: Xprez -> (Font -> Font) -> Xprez
+withFont_ :: Xprez node -> (Font -> Font) -> Xprez node
 withFont_ xp ff = withInh xp (\i -> i { font = ff (font i) })
 
 -- just set Family and Size
-withFont' :: Xprez -> (String, Int) -> Xprez
+withFont' :: Xprez node -> (String, Int) -> Xprez node
 withFont' xp (ff,fs) = withFont_ xp (\f -> f { fFamily = ff, fSize = fs })
 
-bold :: Xprez -> Xprez
+bold :: Xprez node -> Xprez node
 bold xp = withFont_ xp (\f -> f { fBold = True })
 
-italic :: Xprez -> Xprez
+italic :: Xprez node -> Xprez node
 italic xp = withFont_ xp (\f -> f { fItalic = True })
 
-underline :: Xprez -> Xprez
+underline :: Xprez node -> Xprez node
 underline xp = withFont_ xp (\f -> f { fUnderline = True })
 
-strikeOut :: Xprez -> Xprez
+strikeOut :: Xprez node -> Xprez node
 strikeOut xp = withFont_ xp (\f -> f { fStrikeOut = True })
 
 
-withMouseDown :: Xprez -> UpdateDoc -> Xprez
+withMouseDown :: Xprez node -> UpdateDoc -> Xprez node
 withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just upd })
 
-withPopupMenuItems :: Xprez -> [PopupMenuItem] -> Xprez
+withPopupMenuItems :: Xprez node -> [PopupMenuItem] -> Xprez node
 withPopupMenuItems xp mis = withInh xp (\i -> i { popupMenuItems = mis })
 
-withPopupMenuItems_ :: Xprez -> ([PopupMenuItem] -> [PopupMenuItem]) -> Xprez
+withPopupMenuItems_ :: Xprez node -> ([PopupMenuItem] -> [PopupMenuItem]) -> Xprez node
 withPopupMenuItems_ xp fmis = withInh xp (\i -> i { popupMenuItems = fmis (popupMenuItems i) })
 
-addPopupItems :: Xprez -> [PopupMenuItem] -> Xprez
+addPopupItems :: Xprez node -> [PopupMenuItem] -> Xprez node
 addPopupItems xp mis = withPopupMenuItems_ xp (\pmis -> mis++pmis) 
 
-withHRef :: Xprez -> Int -> Xprez
+withHRef :: Xprez node -> Int -> Xprez node
 withHRef xp h = withSyn xp (\s -> s { hRef = h })
 
-withHRef_ :: Xprez -> (Int -> Int) -> Xprez
+withHRef_ :: Xprez node -> (Int -> Int) -> Xprez node
 withHRef_ xp fh = withSyn xp (\s -> s { hRef = fh (hRef s) })
 
-withVRef :: Xprez -> Int -> Xprez
+withVRef :: Xprez node -> Int -> Xprez node
 withVRef xp v = withSyn xp (\s -> s { vRef = v })
 
-withVRef_ :: Xprez -> (Int -> Int) -> Xprez
+withVRef_ :: Xprez node -> (Int -> Int) -> Xprez node
 withVRef_ xp fw = withSyn xp (\s -> s { vRef = fw (vRef s) })
 
-withRef :: Xprez -> (Int, Int) -> Xprez
+withRef :: Xprez node -> (Int, Int) -> Xprez node
 withRef xp (h,v) = withSyn xp (\s -> s { hRef = h, vRef = v })
 
-withRef_ :: Xprez -> ((Int, Int) -> (Int, Int)) -> Xprez
+withRef_ :: Xprez node -> ((Int, Int) -> (Int, Int)) -> Xprez node
 withRef_ xp fhw = withSyn xp (\s -> let (h,v) = fhw (hRef s, vRef s)
                                      in  s { hRef = h, vRef = v })
 
-withHStretch :: Xprez -> Bool -> Xprez
+withHStretch :: Xprez node -> Bool -> Xprez node
 withHStretch xp hs = withSyn xp (\s -> s { hStretch = hs })
 
-withVStretch :: Xprez -> Bool -> Xprez
+withVStretch :: Xprez node -> Bool -> Xprez node
 withVStretch xp vs = withSyn xp (\s -> s { vStretch = vs })
 
-withWidth :: Xprez -> Int -> Xprez
+withWidth :: Xprez node -> Int -> Xprez node
 withWidth xp w = withSyn xp (\s -> s { minWidth = w, hStretch = False })
 
-withHeight :: Xprez -> Int -> Xprez
+withHeight :: Xprez node -> Int -> Xprez node
 withHeight xp h = withSyn xp (\s -> s { minHeight = h, vStretch = False })
 
-withSize :: Xprez -> (Int, Int) -> Xprez
+withSize :: Xprez node -> (Int, Int) -> Xprez node
 withSize xp (w,h) = withSyn xp (\s -> s { minWidth = w, hStretch = False 
                                         , minHeight = h, vStretch = False  })
 
@@ -167,17 +167,17 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-y, v-x))
 
 
 
-hLine :: Xprez
+hLine :: Xprez node
 hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
 
-vLine :: Xprez
+vLine :: Xprez node
 vLine = poly [(0,0),(0,1.0)] `withWidth` 1
 
 -- lineWidth should be an attribute, so we can use a with here
-hLineW :: Int -> Xprez
+hLineW :: Int -> Xprez node
 hLineW lw = polyW lw [(0,0),(1.0,0)] `withHeight` 1
 
-vLineW :: Int -> Xprez
+vLineW :: Int -> Xprez node
 vLineW lw = polyW lw [(0,0),(0,1.0)] `withWidth` 1
 
 hvStretch = empty `withHStretch` True `withVStretch` True

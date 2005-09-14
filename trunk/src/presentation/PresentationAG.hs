@@ -16,8 +16,10 @@ import Data.FiniteMap
 import IOExts
 
 import qualified Chess
-import EvaluateTypes                                   -- for OU demo
-import qualified UHA_Pretty       (sem_Expression) -- for OU demo
+--import EvaluateTypes                                   -- for OU demo
+--import qualified UHA_Pretty       (sem_Expression) -- for OU demo
+
+type PresentationNode = Presentation Node
 
 pthFrmMsg :: HeliumMessage -> ([PathDoc], [PathDoc], [PathDoc])
 pthFrmMsg (HError _ ps1 ps2 ps3) = (ps1, ps2, ps3)
@@ -26,7 +28,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage str = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation
+presMessage :: HeliumMessage -> Presentation Node
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text) lns) `withColor` errColor
                                                              rng:_   -> col' (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -51,7 +53,7 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Xprez -> PathDoc -> Xprez
+link :: Xprez node -> PathDoc -> Xprez node
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
@@ -109,23 +111,23 @@ row'  = RowP (NoIDP) 0
 col'  = ColP (NoIDP) 0
 text' idc = StringP idc
 
-der:: IDP -> String -> Xprez
+der:: IDP -> String -> Xprez node
 der idc str = StringP idc str `withColor` derCol
 
 
-op :: IDP -> String -> Xprez
+op :: IDP -> String -> Xprez node
 op idc str = StringP idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez
+key :: IDP -> String -> Xprez node
 key idc str = StringP idc str `withColor` keyCol
 
-sep :: IDP -> String -> Xprez
+sep :: IDP -> String -> Xprez node
 sep idc str = StringP idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez
+cons :: IDP -> String -> Xprez node
 cons idc str = StringP idc str `withColor` consCol
 
-typeD :: IDP -> String -> Xprez
+typeD :: IDP -> String -> Xprez node
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 
@@ -220,7 +222,7 @@ itemStart i (Alpha  _) typeLoc = typeLoc $ text (chr (ord 'a' + i):") ")
 itemStart i (_)        typeLoc = typeLoc $ text "  "
 
 
-presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
+presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [PresentationNode] -> PresentationNode
 presentElementXML focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  
     if null children
@@ -229,35 +231,35 @@ presentElementXML focusD node path tag children =
              , row [ text "  ", col children ]
              , text $ "</"++tag++">" ]      
     
-presentPrimXMLBool :: Bool -> Presentation
+presentPrimXMLBool :: Bool -> PresentationNode
 presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
 
-presentPrimXMLInt :: Int -> Presentation
+presentPrimXMLInt :: Int -> PresentationNode
 presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
 
-presentPrimXMLString :: String -> Presentation
+presentPrimXMLString :: String -> PresentationNode
 presentPrimXMLString x = text $ "<String>"++x++"<String>"
 
 
-presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [Presentation] -> Presentation
+presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [PresentationNode] -> PresentationNode
 presentElementTree focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  
     if null children
     then mkTreeLeaf False $ text $ tag
     else mkTreeNode False True (text tag) children
     
-presentPrimTreeBool :: Bool -> Presentation
+presentPrimTreeBool :: Bool -> PresentationNode
 presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
 
-presentPrimTreeInt :: Int -> Presentation
+presentPrimTreeInt :: Int -> PresentationNode
 presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
 
-presentPrimTreeString :: String -> Presentation
+presentPrimTreeString :: String -> PresentationNode
 presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 --n2 = mkTreeNode False False (text "node 2" `withFontSize` 50) []
 
---addReductionPopupItems :: [ PopupItem ] -> Presentation -> Presentation
+--addReductionPopupItems :: [ PopupItem ] -> Presentation node -> Presentation node
 addReductionPopupItems its pres = addPopupItems pres its
 
 pasteExp :: [Int] -> Exp -> UpdateDoc
@@ -298,7 +300,7 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
 showExpCode :: Exp -> PopupMenuItem
 showExpCode exp =
   ( "Show Expression code"
-  , trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id
+  , id -- trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id
   )
 
 
@@ -365,9 +367,9 @@ insertOp pth view =
    synthesised attributes:
       alt                  : Binding
       lhsLength            : Int
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -405,7 +407,7 @@ type T_Alt = (Int) ->
              ([(PathDoc,String)]) ->
              (FiniteMap String (PathDoc, String)) ->
              (FiniteMap String (PathDoc, String)) ->
-             ( (Binding),(Int),(LayoutMap),(Int),(Int),(Int),(Presentation),(Presentation),(Presentation),(Alt),(Int),(FiniteMap String (PathDoc, String)))
+             ( (Binding),(Int),(LayoutMap),(Int),(Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Alt),(Int),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Alt :: (Alt) ->
            (T_Alt)
@@ -433,7 +435,7 @@ data Inh_Alt = Inh_Alt {col_Inh_Alt :: Int
                        ,varsInScope_Inh_Alt :: FiniteMap String (PathDoc, String)
                        ,varsInScopeAtFocus_Inh_Alt :: FiniteMap String (PathDoc, String)
                        }
-data Syn_Alt = Syn_Alt {alt_Syn_Alt :: Binding,col_Syn_Alt :: Int,layoutMap_Syn_Alt :: LayoutMap,lhsLength_Syn_Alt :: Int,newlines_Syn_Alt :: Int,pIdC_Syn_Alt :: Int,pres_Syn_Alt :: Presentation,presTree_Syn_Alt :: Presentation,presXML_Syn_Alt :: Presentation,self_Syn_Alt :: Alt,spaces_Syn_Alt :: Int,varsInScopeAtFocus_Syn_Alt :: FiniteMap String (PathDoc, String)}
+data Syn_Alt = Syn_Alt {alt_Syn_Alt :: Binding,col_Syn_Alt :: Int,layoutMap_Syn_Alt :: LayoutMap,lhsLength_Syn_Alt :: Int,newlines_Syn_Alt :: Int,pIdC_Syn_Alt :: Int,pres_Syn_Alt :: PresentationNode,presTree_Syn_Alt :: PresentationNode,presXML_Syn_Alt :: PresentationNode,self_Syn_Alt :: Alt,spaces_Syn_Alt :: Int,varsInScopeAtFocus_Syn_Alt :: FiniteMap String (PathDoc, String)}
 wrap_Alt :: (T_Alt) ->
             (Inh_Alt) ->
             (Syn_Alt)
@@ -471,21 +473,21 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
             _lhsOlhsLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _identIcol :: (Int)
             _identIfirstToken :: (IDP)
-            _identIidsPres :: (Presentation)
+            _identIidsPres :: (PresentationNode)
             _identIlayoutMap :: (LayoutMap)
             _identInewlines :: (Int)
             _identIpIdC :: (Int)
-            _identIpres :: (Presentation)
-            _identIpresTree :: (Presentation)
-            _identIpresXML :: (Presentation)
+            _identIpres :: (PresentationNode)
+            _identIpresTree :: (PresentationNode)
+            _identIpresXML :: (PresentationNode)
             _identIself :: (Ident)
             _identIspaces :: (Int)
             _identIstr :: (String)
@@ -507,9 +509,9 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -536,7 +538,7 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 364, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 366, column 7)
             (_lhsOpres@_) =
                 loc (AltNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
@@ -546,43 +548,43 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                           , _expIpres
                           , sep (mkIDP idP1_ _lhsIpIdC 1) ";"
                           ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 701, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 703, column 13)
             (_lhsLength@_) =
                 length $ strFromIdent _identIself
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 700, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 702, column 13)
             (_lhsOspaces@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 699, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 701, column 13)
             (_lhsOnewlines@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 698, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 700, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 697, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 699, column 13)
             (_expOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 696, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 698, column 13)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 695, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 697, column 13)
             (_expOcol@_) =
                 _identIcol+ _lhsItotalMaxLHSLength - _lhsLength + 3
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 694, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 696, column 13)
             (_identOspaces@_) =
                 _lhsIspaces
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 693, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 695, column 13)
             (_identOnewlines@_) =
                 _lhsInewlines
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 692, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 694, column 13)
             (_identOcol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 691, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 693, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap [(idP0_, (0,_lhsItotalMaxLHSLength - _lhsLength+1)), (idP1_, (0,0))]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 821, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 823, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 993, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 995, column 17)
             (_lhsOalt@_) =
                 (_identIstr, _expIval)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 384, column 9)
@@ -695,16 +697,16 @@ sem_Alt_HoleAlt  =
             _lhsOlhsLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 703, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 705, column 9)
             (_lhsOlhsLength@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 994, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 996, column 17)
             (_lhsOalt@_) =
                 ("XXXXXX", ErrVal)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 385, column 17)
@@ -742,7 +744,7 @@ sem_Alt_HoleAlt  =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOalt,_lhsOcol,_lhsOlayoutMap,_lhsOlhsLength,_lhsOnewlines,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOspaces,_lhsOvarsInScopeAtFocus)
 sem_Alt_ParseErrAlt :: (Node) ->
-                       (Presentation) ->
+                       (PresentationNode) ->
                        (T_Alt)
 sem_Alt_ParseErrAlt (node_) (presentation_) =
     \ _lhsIcol
@@ -768,16 +770,16 @@ sem_Alt_ParseErrAlt (node_) (presentation_) =
             _lhsOlhsLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 705, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 707, column 9)
             (_lhsOlhsLength@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 995, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 997, column 17)
             (_lhsOalt@_) =
                 ("XXXXXX", ErrVal)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 386, column 17)
@@ -825,9 +827,9 @@ sem_Alt_ParseErrAlt (node_) (presentation_) =
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -852,7 +854,7 @@ type T_Board = (FocusDoc) ->
                (Int) ->
                (Int) ->
                ([Int]) ->
-               ( (Int),(Presentation),(Presentation),(Presentation),(Board))
+               ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(Board))
 -- cata
 sem_Board :: (Board) ->
              (T_Board)
@@ -863,7 +865,7 @@ sem_Board ((HoleBoard )) =
 sem_Board ((ParseErrBoard (_node) (_presentation))) =
     (sem_Board_ParseErrBoard (_node) (_presentation))
 data Inh_Board = Inh_Board {focusD_Inh_Board :: FocusDoc,ix_Inh_Board :: Int,pIdC_Inh_Board :: Int,path_Inh_Board :: [Int]}
-data Syn_Board = Syn_Board {pIdC_Syn_Board :: Int,pres_Syn_Board :: Presentation,presTree_Syn_Board :: Presentation,presXML_Syn_Board :: Presentation,self_Syn_Board :: Board}
+data Syn_Board = Syn_Board {pIdC_Syn_Board :: Int,pres_Syn_Board :: PresentationNode,presTree_Syn_Board :: PresentationNode,presXML_Syn_Board :: PresentationNode,self_Syn_Board :: Board}
 wrap_Board :: (T_Board) ->
               (Inh_Board) ->
               (Syn_Board)
@@ -887,15 +889,15 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Board)
             _r1IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r1IpIdC :: (Int)
-            _r1Ipres :: (Presentation)
-            _r1IpresTree :: (Presentation)
-            _r1IpresXML :: (Presentation)
+            _r1Ipres :: (PresentationNode)
+            _r1IpresTree :: (PresentationNode)
+            _r1IpresXML :: (PresentationNode)
             _r1IrowNr :: (Int)
             _r1Iself :: (BoardRow)
             _r1IsqCol :: (Bool)
@@ -909,9 +911,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r1OsqCol :: (Bool)
             _r2IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r2IpIdC :: (Int)
-            _r2Ipres :: (Presentation)
-            _r2IpresTree :: (Presentation)
-            _r2IpresXML :: (Presentation)
+            _r2Ipres :: (PresentationNode)
+            _r2IpresTree :: (PresentationNode)
+            _r2IpresXML :: (PresentationNode)
             _r2IrowNr :: (Int)
             _r2Iself :: (BoardRow)
             _r2IsqCol :: (Bool)
@@ -925,9 +927,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r2OsqCol :: (Bool)
             _r3IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r3IpIdC :: (Int)
-            _r3Ipres :: (Presentation)
-            _r3IpresTree :: (Presentation)
-            _r3IpresXML :: (Presentation)
+            _r3Ipres :: (PresentationNode)
+            _r3IpresTree :: (PresentationNode)
+            _r3IpresXML :: (PresentationNode)
             _r3IrowNr :: (Int)
             _r3Iself :: (BoardRow)
             _r3IsqCol :: (Bool)
@@ -941,9 +943,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r3OsqCol :: (Bool)
             _r4IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r4IpIdC :: (Int)
-            _r4Ipres :: (Presentation)
-            _r4IpresTree :: (Presentation)
-            _r4IpresXML :: (Presentation)
+            _r4Ipres :: (PresentationNode)
+            _r4IpresTree :: (PresentationNode)
+            _r4IpresXML :: (PresentationNode)
             _r4IrowNr :: (Int)
             _r4Iself :: (BoardRow)
             _r4IsqCol :: (Bool)
@@ -957,9 +959,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r4OsqCol :: (Bool)
             _r5IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r5IpIdC :: (Int)
-            _r5Ipres :: (Presentation)
-            _r5IpresTree :: (Presentation)
-            _r5IpresXML :: (Presentation)
+            _r5Ipres :: (PresentationNode)
+            _r5IpresTree :: (PresentationNode)
+            _r5IpresXML :: (PresentationNode)
             _r5IrowNr :: (Int)
             _r5Iself :: (BoardRow)
             _r5IsqCol :: (Bool)
@@ -973,9 +975,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r5OsqCol :: (Bool)
             _r6IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r6IpIdC :: (Int)
-            _r6Ipres :: (Presentation)
-            _r6IpresTree :: (Presentation)
-            _r6IpresXML :: (Presentation)
+            _r6Ipres :: (PresentationNode)
+            _r6IpresTree :: (PresentationNode)
+            _r6IpresXML :: (PresentationNode)
             _r6IrowNr :: (Int)
             _r6Iself :: (BoardRow)
             _r6IsqCol :: (Bool)
@@ -989,9 +991,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r6OsqCol :: (Bool)
             _r7IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r7IpIdC :: (Int)
-            _r7Ipres :: (Presentation)
-            _r7IpresTree :: (Presentation)
-            _r7IpresXML :: (Presentation)
+            _r7Ipres :: (PresentationNode)
+            _r7IpresTree :: (PresentationNode)
+            _r7IpresXML :: (PresentationNode)
             _r7IrowNr :: (Int)
             _r7Iself :: (BoardRow)
             _r7IsqCol :: (Bool)
@@ -1005,9 +1007,9 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
             _r7OsqCol :: (Bool)
             _r8IfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _r8IpIdC :: (Int)
-            _r8Ipres :: (Presentation)
-            _r8IpresTree :: (Presentation)
-            _r8IpresXML :: (Presentation)
+            _r8Ipres :: (PresentationNode)
+            _r8IpresTree :: (PresentationNode)
+            _r8IpresXML :: (PresentationNode)
             _r8IrowNr :: (Int)
             _r8Iself :: (BoardRow)
             _r8IsqCol :: (Bool)
@@ -1035,21 +1037,21 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
                 (r7_ (_r7OfocusD) (_r7OfocusedPiece) (_r7Oix) (_r7OpIdC) (_r7Opath) (_r7OpossibleMoves) (_r7OrowNr) (_r7OsqCol))
             ( _r8IfocusedPiece,_r8IpIdC,_r8Ipres,_r8IpresTree,_r8IpresXML,_r8IrowNr,_r8Iself,_r8IsqCol) =
                 (r8_ (_r8OfocusD) (_r8OfocusedPiece) (_r8Oix) (_r8OpIdC) (_r8Opath) (_r8OpossibleMoves) (_r8OrowNr) (_r8OsqCol))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1021, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1023, column 7)
             (_r1OfocusedPiece@_) =
                 Nothing
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1018, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1020, column 7)
             (_possibleMoves@_) =
                 case _r8IfocusedPiece of
                   Just (square, (r,c)) -> Chess.computeMoves _self (r,c)
                   Nothing              -> []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1017, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1019, column 7)
             (_r1OsqCol@_) =
                 False
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1016, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1018, column 7)
             (_r1OrowNr@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1014, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1016, column 7)
             (_lhsOpres@_) =
                 loc (BoardNode _self _lhsIpath) $ presentFocus _lhsIfocusD _lhsIpath $
                   structural $ colR 4 (reverse [_r1Ipres,_r2Ipres,_r3Ipres,_r4Ipres,_r5Ipres,_r6Ipres,_r7Ipres,_r8Ipres])
@@ -1259,9 +1261,9 @@ sem_Board_HoleBoard  =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Board)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 404, column 19)
             (_lhsOpres@_) =
@@ -1283,7 +1285,7 @@ sem_Board_HoleBoard  =
                 _lhsIpIdC
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_Board_ParseErrBoard :: (Node) ->
-                           (Presentation) ->
+                           (PresentationNode) ->
                            (T_Board)
 sem_Board_ParseErrBoard (node_) (presentation_) =
     \ _lhsIfocusD
@@ -1291,9 +1293,9 @@ sem_Board_ParseErrBoard (node_) (presentation_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Board)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 405, column 19)
             (_lhsOpres@_) =
@@ -1329,9 +1331,9 @@ sem_Board_ParseErrBoard (node_) (presentation_) =
       sqCol                : Bool
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -1359,7 +1361,7 @@ type T_BoardRow = (FocusDoc) ->
                   ([(Int, Int)]) ->
                   (Int) ->
                   (Bool) ->
-                  ( ( Maybe (BoardSquare,(Int,Int)) ),(Int),(Presentation),(Presentation),(Presentation),(Int),(BoardRow),(Bool))
+                  ( ( Maybe (BoardSquare,(Int,Int)) ),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Int),(BoardRow),(Bool))
 -- cata
 sem_BoardRow :: (BoardRow) ->
                 (T_BoardRow)
@@ -1370,7 +1372,7 @@ sem_BoardRow ((HoleBoardRow )) =
 sem_BoardRow ((ParseErrBoardRow (_node) (_presentation))) =
     (sem_BoardRow_ParseErrBoardRow (_node) (_presentation))
 data Inh_BoardRow = Inh_BoardRow {focusD_Inh_BoardRow :: FocusDoc,focusedPiece_Inh_BoardRow ::  Maybe (BoardSquare,(Int,Int)) ,ix_Inh_BoardRow :: Int,pIdC_Inh_BoardRow :: Int,path_Inh_BoardRow :: [Int],possibleMoves_Inh_BoardRow :: [(Int, Int)],rowNr_Inh_BoardRow :: Int,sqCol_Inh_BoardRow :: Bool}
-data Syn_BoardRow = Syn_BoardRow {focusedPiece_Syn_BoardRow ::  Maybe (BoardSquare,(Int,Int)) ,pIdC_Syn_BoardRow :: Int,pres_Syn_BoardRow :: Presentation,presTree_Syn_BoardRow :: Presentation,presXML_Syn_BoardRow :: Presentation,rowNr_Syn_BoardRow :: Int,self_Syn_BoardRow :: BoardRow,sqCol_Syn_BoardRow :: Bool}
+data Syn_BoardRow = Syn_BoardRow {focusedPiece_Syn_BoardRow ::  Maybe (BoardSquare,(Int,Int)) ,pIdC_Syn_BoardRow :: Int,pres_Syn_BoardRow :: PresentationNode,presTree_Syn_BoardRow :: PresentationNode,presXML_Syn_BoardRow :: PresentationNode,rowNr_Syn_BoardRow :: Int,self_Syn_BoardRow :: BoardRow,sqCol_Syn_BoardRow :: Bool}
 wrap_BoardRow :: (T_BoardRow) ->
                  (Inh_BoardRow) ->
                  (Syn_BoardRow)
@@ -1399,18 +1401,18 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
       _lhsIsqCol ->
         let _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOrowNr :: (Int)
             _lhsOself :: (BoardRow)
             _lhsOsqCol :: (Bool)
             _caIcolNr :: (Int)
             _caIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _caIpIdC :: (Int)
-            _caIpres :: (Presentation)
-            _caIpresTree :: (Presentation)
-            _caIpresXML :: (Presentation)
+            _caIpres :: (PresentationNode)
+            _caIpresTree :: (PresentationNode)
+            _caIpresXML :: (PresentationNode)
             _caIself :: (BoardSquare)
             _caIsqCol :: (Bool)
             _caOcolNr :: (Int)
@@ -1425,9 +1427,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _cbIcolNr :: (Int)
             _cbIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _cbIpIdC :: (Int)
-            _cbIpres :: (Presentation)
-            _cbIpresTree :: (Presentation)
-            _cbIpresXML :: (Presentation)
+            _cbIpres :: (PresentationNode)
+            _cbIpresTree :: (PresentationNode)
+            _cbIpresXML :: (PresentationNode)
             _cbIself :: (BoardSquare)
             _cbIsqCol :: (Bool)
             _cbOcolNr :: (Int)
@@ -1442,9 +1444,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _ccIcolNr :: (Int)
             _ccIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _ccIpIdC :: (Int)
-            _ccIpres :: (Presentation)
-            _ccIpresTree :: (Presentation)
-            _ccIpresXML :: (Presentation)
+            _ccIpres :: (PresentationNode)
+            _ccIpresTree :: (PresentationNode)
+            _ccIpresXML :: (PresentationNode)
             _ccIself :: (BoardSquare)
             _ccIsqCol :: (Bool)
             _ccOcolNr :: (Int)
@@ -1459,9 +1461,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _cdIcolNr :: (Int)
             _cdIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _cdIpIdC :: (Int)
-            _cdIpres :: (Presentation)
-            _cdIpresTree :: (Presentation)
-            _cdIpresXML :: (Presentation)
+            _cdIpres :: (PresentationNode)
+            _cdIpresTree :: (PresentationNode)
+            _cdIpresXML :: (PresentationNode)
             _cdIself :: (BoardSquare)
             _cdIsqCol :: (Bool)
             _cdOcolNr :: (Int)
@@ -1476,9 +1478,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _ceIcolNr :: (Int)
             _ceIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _ceIpIdC :: (Int)
-            _ceIpres :: (Presentation)
-            _ceIpresTree :: (Presentation)
-            _ceIpresXML :: (Presentation)
+            _ceIpres :: (PresentationNode)
+            _ceIpresTree :: (PresentationNode)
+            _ceIpresXML :: (PresentationNode)
             _ceIself :: (BoardSquare)
             _ceIsqCol :: (Bool)
             _ceOcolNr :: (Int)
@@ -1493,9 +1495,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _cfIcolNr :: (Int)
             _cfIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _cfIpIdC :: (Int)
-            _cfIpres :: (Presentation)
-            _cfIpresTree :: (Presentation)
-            _cfIpresXML :: (Presentation)
+            _cfIpres :: (PresentationNode)
+            _cfIpresTree :: (PresentationNode)
+            _cfIpresXML :: (PresentationNode)
             _cfIself :: (BoardSquare)
             _cfIsqCol :: (Bool)
             _cfOcolNr :: (Int)
@@ -1510,9 +1512,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _cgIcolNr :: (Int)
             _cgIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _cgIpIdC :: (Int)
-            _cgIpres :: (Presentation)
-            _cgIpresTree :: (Presentation)
-            _cgIpresXML :: (Presentation)
+            _cgIpres :: (PresentationNode)
+            _cgIpresTree :: (PresentationNode)
+            _cgIpresXML :: (PresentationNode)
             _cgIself :: (BoardSquare)
             _cgIsqCol :: (Bool)
             _cgOcolNr :: (Int)
@@ -1527,9 +1529,9 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
             _chIcolNr :: (Int)
             _chIfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _chIpIdC :: (Int)
-            _chIpres :: (Presentation)
-            _chIpresTree :: (Presentation)
-            _chIpresXML :: (Presentation)
+            _chIpres :: (PresentationNode)
+            _chIpresTree :: (PresentationNode)
+            _chIpresXML :: (PresentationNode)
             _chIself :: (BoardSquare)
             _chIsqCol :: (Bool)
             _chOcolNr :: (Int)
@@ -1557,16 +1559,16 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
                 (cg_ (_cgOcolNr) (_cgOfocusD) (_cgOfocusedPiece) (_cgOix) (_cgOpIdC) (_cgOpath) (_cgOpossibleMoves) (_cgOrowNr) (_cgOsqCol))
             ( _chIcolNr,_chIfocusedPiece,_chIpIdC,_chIpres,_chIpresTree,_chIpresXML,_chIself,_chIsqCol) =
                 (ch_ (_chOcolNr) (_chOfocusD) (_chOfocusedPiece) (_chOix) (_chOpIdC) (_chOpath) (_chOpossibleMoves) (_chOrowNr) (_chOsqCol))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1029, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1031, column 7)
             (_caOcolNr@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1028, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1030, column 7)
             (_lhsOrowNr@_) =
                 1 + _lhsIrowNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1027, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1029, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1025, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1027, column 7)
             (_lhsOpres@_) =
                 loc (BoardRowNode _self _lhsIpath) $ presentFocus _lhsIfocusD _lhsIpath $
                 structural $  row' [_caIpres,_cbIpres,_ccIpres,_cdIpres,_ceIpres,_cfIpres,_cgIpres,_chIpres]
@@ -1814,9 +1816,9 @@ sem_BoardRow_HoleBoardRow  =
       _lhsIsqCol ->
         let _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOrowNr :: (Int)
             _lhsOself :: (BoardRow)
             _lhsOsqCol :: (Bool)
@@ -1849,7 +1851,7 @@ sem_BoardRow_HoleBoardRow  =
                 _lhsIsqCol
         in  ( _lhsOfocusedPiece,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOrowNr,_lhsOself,_lhsOsqCol)
 sem_BoardRow_ParseErrBoardRow :: (Node) ->
-                                 (Presentation) ->
+                                 (PresentationNode) ->
                                  (T_BoardRow)
 sem_BoardRow_ParseErrBoardRow (node_) (presentation_) =
     \ _lhsIfocusD
@@ -1862,9 +1864,9 @@ sem_BoardRow_ParseErrBoardRow (node_) (presentation_) =
       _lhsIsqCol ->
         let _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOrowNr :: (Int)
             _lhsOself :: (BoardRow)
             _lhsOsqCol :: (Bool)
@@ -1912,9 +1914,9 @@ sem_BoardRow_ParseErrBoardRow (node_) (presentation_) =
       sqCol                : Bool
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -1973,7 +1975,7 @@ type T_BoardSquare = (Int) ->
                      ([(Int, Int)]) ->
                      (Int) ->
                      (Bool) ->
-                     ( (Int),( Maybe (BoardSquare,(Int,Int)) ),(Int),(Presentation),(Presentation),(Presentation),(BoardSquare),(Bool))
+                     ( (Int),( Maybe (BoardSquare,(Int,Int)) ),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(BoardSquare),(Bool))
 -- cata
 sem_BoardSquare :: (BoardSquare) ->
                    (T_BoardSquare)
@@ -1996,7 +1998,7 @@ sem_BoardSquare ((Queen (_idD) (_color))) =
 sem_BoardSquare ((Rook (_idD) (_color))) =
     (sem_BoardSquare_Rook (_idD) ((sem_Bool_ (_color))))
 data Inh_BoardSquare = Inh_BoardSquare {colNr_Inh_BoardSquare :: Int,focusD_Inh_BoardSquare :: FocusDoc,focusedPiece_Inh_BoardSquare ::  Maybe (BoardSquare,(Int,Int)) ,ix_Inh_BoardSquare :: Int,pIdC_Inh_BoardSquare :: Int,path_Inh_BoardSquare :: [Int],possibleMoves_Inh_BoardSquare :: [(Int, Int)],rowNr_Inh_BoardSquare :: Int,sqCol_Inh_BoardSquare :: Bool}
-data Syn_BoardSquare = Syn_BoardSquare {colNr_Syn_BoardSquare :: Int,focusedPiece_Syn_BoardSquare ::  Maybe (BoardSquare,(Int,Int)) ,pIdC_Syn_BoardSquare :: Int,pres_Syn_BoardSquare :: Presentation,presTree_Syn_BoardSquare :: Presentation,presXML_Syn_BoardSquare :: Presentation,self_Syn_BoardSquare :: BoardSquare,sqCol_Syn_BoardSquare :: Bool}
+data Syn_BoardSquare = Syn_BoardSquare {colNr_Syn_BoardSquare :: Int,focusedPiece_Syn_BoardSquare ::  Maybe (BoardSquare,(Int,Int)) ,pIdC_Syn_BoardSquare :: Int,pres_Syn_BoardSquare :: PresentationNode,presTree_Syn_BoardSquare :: PresentationNode,presXML_Syn_BoardSquare :: PresentationNode,self_Syn_BoardSquare :: BoardSquare,sqCol_Syn_BoardSquare :: Bool}
 wrap_BoardSquare :: (T_BoardSquare) ->
                     (Inh_BoardSquare) ->
                     (Syn_BoardSquare)
@@ -2020,16 +2022,16 @@ sem_BoardSquare_Bishop (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2037,16 +2039,16 @@ sem_BoardSquare_Bishop (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1049, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1051, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1048, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1050, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1047, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1049, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1045, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1047, column 7)
             (_lhsOpres@_) =
                 loc (BishopNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2092,18 +2094,18 @@ sem_BoardSquare_Empty  =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1073, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1075, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1072, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1074, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1070, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1072, column 7)
             (_lhsOpres@_) =
                 loc (EmptyNode _self _lhsIpath) $
                   structural $ Chess.piece _self False _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2140,9 +2142,9 @@ sem_BoardSquare_HoleBoardSquare  =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 457, column 25)
@@ -2189,16 +2191,16 @@ sem_BoardSquare_King (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2206,16 +2208,16 @@ sem_BoardSquare_King (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1037, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1039, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1036, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1038, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1035, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1037, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1033, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1035, column 7)
             (_lhsOpres@_) =
                 loc (KingNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2263,16 +2265,16 @@ sem_BoardSquare_Knight (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2280,16 +2282,16 @@ sem_BoardSquare_Knight (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1055, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1057, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1054, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1056, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1053, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1055, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1051, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1053, column 7)
             (_lhsOpres@_) =
                 loc (KnightNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2322,7 +2324,7 @@ sem_BoardSquare_Knight (idD_) (color_) =
                 _lhsIix
         in  ( _lhsOcolNr,_lhsOfocusedPiece,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOsqCol)
 sem_BoardSquare_ParseErrBoardSquare :: (Node) ->
-                                       (Presentation) ->
+                                       (PresentationNode) ->
                                        (T_BoardSquare)
 sem_BoardSquare_ParseErrBoardSquare (node_) (presentation_) =
     \ _lhsIcolNr
@@ -2337,9 +2339,9 @@ sem_BoardSquare_ParseErrBoardSquare (node_) (presentation_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 458, column 25)
@@ -2386,16 +2388,16 @@ sem_BoardSquare_Pawn (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2403,16 +2405,16 @@ sem_BoardSquare_Pawn (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1068, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1070, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1067, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1069, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1066, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1068, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1064, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1066, column 7)
             (_lhsOpres@_) =
                 loc (PawnNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2460,16 +2462,16 @@ sem_BoardSquare_Queen (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2477,16 +2479,16 @@ sem_BoardSquare_Queen (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1043, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1045, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1042, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1044, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1041, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1043, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1039, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1041, column 7)
             (_lhsOpres@_) =
                 loc (QueenNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2534,16 +2536,16 @@ sem_BoardSquare_Rook (idD_) (color_) =
         let _lhsOcolNr :: (Int)
             _lhsOfocusedPiece :: ( Maybe (BoardSquare,(Int,Int)) )
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
             _colorIbool :: (Bool)
             _colorIpIdC :: (Int)
-            _colorIpres :: (Presentation)
-            _colorIpresTree :: (Presentation)
-            _colorIpresXML :: (Presentation)
+            _colorIpres :: (PresentationNode)
+            _colorIpresTree :: (PresentationNode)
+            _colorIpresXML :: (PresentationNode)
             _colorIself :: (Bool_)
             _colorOfocusD :: (FocusDoc)
             _colorOix :: (Int)
@@ -2551,16 +2553,16 @@ sem_BoardSquare_Rook (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1061, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1063, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1060, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1062, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1059, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1061, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1057, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1059, column 7)
             (_lhsOpres@_) =
                 loc (RookNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2604,9 +2606,9 @@ sem_BoardSquare_Rook (idD_) (color_) =
 
    synthesised attributes:
       bool                 : Bool
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -2630,7 +2632,7 @@ type T_Bool_ = (FocusDoc) ->
                (Int) ->
                (Int) ->
                ([Int]) ->
-               ( (Bool),(Int),(Presentation),(Presentation),(Presentation),(Bool_))
+               ( (Bool),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Bool_))
 -- cata
 sem_Bool_ :: (Bool_) ->
              (T_Bool_)
@@ -2641,7 +2643,7 @@ sem_Bool_ ((HoleBool_ )) =
 sem_Bool_ ((ParseErrBool_ (_node) (_presentation))) =
     (sem_Bool__ParseErrBool_ (_node) (_presentation))
 data Inh_Bool_ = Inh_Bool_ {focusD_Inh_Bool_ :: FocusDoc,ix_Inh_Bool_ :: Int,pIdC_Inh_Bool_ :: Int,path_Inh_Bool_ :: [Int]}
-data Syn_Bool_ = Syn_Bool_ {bool_Syn_Bool_ :: Bool,pIdC_Syn_Bool_ :: Int,pres_Syn_Bool_ :: Presentation,presTree_Syn_Bool_ :: Presentation,presXML_Syn_Bool_ :: Presentation,self_Syn_Bool_ :: Bool_}
+data Syn_Bool_ = Syn_Bool_ {bool_Syn_Bool_ :: Bool,pIdC_Syn_Bool_ :: Int,pres_Syn_Bool_ :: PresentationNode,presTree_Syn_Bool_ :: PresentationNode,presXML_Syn_Bool_ :: PresentationNode,self_Syn_Bool_ :: Bool_}
 wrap_Bool_ :: (T_Bool_) ->
               (Inh_Bool_) ->
               (Syn_Bool_)
@@ -2659,15 +2661,15 @@ sem_Bool__Bool_ (idd_) (bool_) =
       _lhsIpath ->
         let _lhsObool :: (Bool)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Bool_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1470, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1472, column 7)
             (_lhsOpres@_) =
                 loc (Bool_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text $ show bool_, text ""]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1474, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1476, column 14)
             (_lhsObool@_) =
                 bool_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 997, column 7)
@@ -2694,11 +2696,11 @@ sem_Bool__HoleBool_  =
       _lhsIpath ->
         let _lhsObool :: (Bool)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Bool_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1476, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1478, column 13)
             (_lhsObool@_) =
                 False
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 640, column 19)
@@ -2721,7 +2723,7 @@ sem_Bool__HoleBool_  =
                 _lhsIpIdC
         in  ( _lhsObool,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_Bool__ParseErrBool_ :: (Node) ->
-                           (Presentation) ->
+                           (PresentationNode) ->
                            (T_Bool_)
 sem_Bool__ParseErrBool_ (node_) (presentation_) =
     \ _lhsIfocusD
@@ -2730,11 +2732,11 @@ sem_Bool__ParseErrBool_ (node_) (presentation_) =
       _lhsIpath ->
         let _lhsObool :: (Bool)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Bool_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1476, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1478, column 13)
             (_lhsObool@_) =
                 False
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 641, column 19)
@@ -2782,9 +2784,9 @@ sem_Bool__ParseErrBool_ (node_) (presentation_) =
    synthesised attributes:
       alts                 : Bindings
       maxLHSLength         : Int
-      press                : [Presentation]
-      pressTree            : [Presentation]
-      pressXML             : [Presentation]
+      press                : [PresentationNode]
+      pressTree            : [PresentationNode]
+      pressXML             : [PresentationNode]
       self                 : SELF
 
 -}
@@ -2816,7 +2818,7 @@ type T_ConsList_Alt = (Int) ->
                       ([(PathDoc,String)]) ->
                       (FiniteMap String (PathDoc, String)) ->
                       (FiniteMap String (PathDoc, String)) ->
-                      ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),([Presentation]),([Presentation]),([Presentation]),(ConsList_Alt),(Int),(FiniteMap String (PathDoc, String)))
+                      ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),([PresentationNode]),([PresentationNode]),([PresentationNode]),(ConsList_Alt),(Int),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ConsList_Alt :: (ConsList_Alt) ->
                     (T_ConsList_Alt)
@@ -2848,9 +2850,9 @@ data Syn_ConsList_Alt = Syn_ConsList_Alt {alts_Syn_ConsList_Alt :: Bindings
                                          ,maxLHSLength_Syn_ConsList_Alt :: Int
                                          ,newlines_Syn_ConsList_Alt :: Int
                                          ,pIdC_Syn_ConsList_Alt :: Int
-                                         ,press_Syn_ConsList_Alt :: [Presentation]
-                                         ,pressTree_Syn_ConsList_Alt :: [Presentation]
-                                         ,pressXML_Syn_ConsList_Alt :: [Presentation]
+                                         ,press_Syn_ConsList_Alt :: [PresentationNode]
+                                         ,pressTree_Syn_ConsList_Alt :: [PresentationNode]
+                                         ,pressXML_Syn_ConsList_Alt :: [PresentationNode]
                                          ,self_Syn_ConsList_Alt :: ConsList_Alt
                                          ,spaces_Syn_ConsList_Alt :: Int
                                          ,varsInScopeAtFocus_Syn_ConsList_Alt :: FiniteMap String (PathDoc, String)
@@ -2889,9 +2891,9 @@ sem_ConsList_Alt_Cons_Alt (head_) (tail_) =
             _lhsOmaxLHSLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -2901,9 +2903,9 @@ sem_ConsList_Alt_Cons_Alt (head_) (tail_) =
             _headIlhsLength :: (Int)
             _headInewlines :: (Int)
             _headIpIdC :: (Int)
-            _headIpres :: (Presentation)
-            _headIpresTree :: (Presentation)
-            _headIpresXML :: (Presentation)
+            _headIpres :: (PresentationNode)
+            _headIpresTree :: (PresentationNode)
+            _headIpresXML :: (PresentationNode)
             _headIself :: (Alt)
             _headIspaces :: (Int)
             _headIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -2930,9 +2932,9 @@ sem_ConsList_Alt_Cons_Alt (head_) (tail_) =
             _tailImaxLHSLength :: (Int)
             _tailInewlines :: (Int)
             _tailIpIdC :: (Int)
-            _tailIpress :: ([Presentation])
-            _tailIpressTree :: ([Presentation])
-            _tailIpressXML :: ([Presentation])
+            _tailIpress :: ([PresentationNode])
+            _tailIpressTree :: ([PresentationNode])
+            _tailIpressXML :: ([PresentationNode])
             _tailIself :: (ConsList_Alt)
             _tailIspaces :: (Int)
             _tailIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -2957,10 +2959,10 @@ sem_ConsList_Alt_Cons_Alt (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtotalMaxLHSLength) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIalts,_tailIcol,_tailIlayoutMap,_tailImaxLHSLength,_tailInewlines,_tailIpIdC,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtotalMaxLHSLength) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 715, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 717, column 9)
             (_lhsOmaxLHSLength@_) =
                 _headIlhsLength `max` _tailImaxLHSLength
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 989, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 991, column 18)
             (_lhsOalts@_) =
                 _headIalt : _tailIalts
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 693, column 18)
@@ -3124,16 +3126,16 @@ sem_ConsList_Alt_Nil_Alt  =
             _lhsOmaxLHSLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 717, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 719, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 990, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 992, column 18)
             (_lhsOalts@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 694, column 18)
@@ -3195,11 +3197,11 @@ sem_ConsList_Alt_Nil_Alt  =
    synthesised attributes:
       dcls                 : Bindings
       declaredVars         : [(String,(PathDoc,String))]
-      idsPres              : Presentation
+      idsPres              : PresentationNode
       parseErrs            : [String]
-      press                : [Presentation]
-      pressTree            : [Presentation]
-      pressXML             : [Presentation]
+      press                : [PresentationNode]
+      pressTree            : [PresentationNode]
+      pressXML             : [PresentationNode]
       self                 : SELF
 
 -}
@@ -3230,7 +3232,7 @@ type T_ConsList_Decl = (Int) ->
                        ([(PathDoc,String)]) ->
                        (FiniteMap String (PathDoc, String)) ->
                        (FiniteMap String (PathDoc, String)) ->
-                       ( (Int),(Bindings),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),([String]),([Presentation]),([Presentation]),([Presentation]),(ConsList_Decl),(Int),(FiniteMap String (PathDoc, String)))
+                       ( (Int),(Bindings),([(String,(PathDoc,String))]),(PresentationNode),(LayoutMap),(Int),(Int),([String]),([PresentationNode]),([PresentationNode]),([PresentationNode]),(ConsList_Decl),(Int),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ConsList_Decl :: (ConsList_Decl) ->
                      (T_ConsList_Decl)
@@ -3258,14 +3260,14 @@ data Inh_ConsList_Decl = Inh_ConsList_Decl {col_Inh_ConsList_Decl :: Int
 data Syn_ConsList_Decl = Syn_ConsList_Decl {col_Syn_ConsList_Decl :: Int
                                            ,dcls_Syn_ConsList_Decl :: Bindings
                                            ,declaredVars_Syn_ConsList_Decl :: [(String,(PathDoc,String))]
-                                           ,idsPres_Syn_ConsList_Decl :: Presentation
+                                           ,idsPres_Syn_ConsList_Decl :: PresentationNode
                                            ,layoutMap_Syn_ConsList_Decl :: LayoutMap
                                            ,newlines_Syn_ConsList_Decl :: Int
                                            ,pIdC_Syn_ConsList_Decl :: Int
                                            ,parseErrs_Syn_ConsList_Decl :: [String]
-                                           ,press_Syn_ConsList_Decl :: [Presentation]
-                                           ,pressTree_Syn_ConsList_Decl :: [Presentation]
-                                           ,pressXML_Syn_ConsList_Decl :: [Presentation]
+                                           ,press_Syn_ConsList_Decl :: [PresentationNode]
+                                           ,pressTree_Syn_ConsList_Decl :: [PresentationNode]
+                                           ,pressXML_Syn_ConsList_Decl :: [PresentationNode]
                                            ,self_Syn_ConsList_Decl :: ConsList_Decl
                                            ,spaces_Syn_ConsList_Decl :: Int
                                            ,varsInScopeAtFocus_Syn_ConsList_Decl :: FiniteMap String (PathDoc, String)
@@ -3300,27 +3302,27 @@ sem_ConsList_Decl_Cons_Decl (head_) (tail_) =
         let _lhsOcol :: (Int)
             _lhsOdcls :: (Bindings)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
             _lhsOparseErrs :: ([String])
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _headIcol :: (Int)
             _headIdcl :: (Binding)
             _headIdeclaredVars :: ([(String,(PathDoc,String))])
-            _headIidsPres :: (Presentation)
+            _headIidsPres :: (PresentationNode)
             _headIlayoutMap :: (LayoutMap)
             _headInewlines :: (Int)
             _headIpIdC :: (Int)
-            _headIpres :: (Presentation)
-            _headIpresTree :: (Presentation)
-            _headIpresXML :: (Presentation)
+            _headIpres :: (PresentationNode)
+            _headIpresTree :: (PresentationNode)
+            _headIpresXML :: (PresentationNode)
             _headIself :: (Decl)
             _headIspaces :: (Int)
             _headItypeStr :: (Maybe String)
@@ -3344,14 +3346,14 @@ sem_ConsList_Decl_Cons_Decl (head_) (tail_) =
             _tailIcol :: (Int)
             _tailIdcls :: (Bindings)
             _tailIdeclaredVars :: ([(String,(PathDoc,String))])
-            _tailIidsPres :: (Presentation)
+            _tailIidsPres :: (PresentationNode)
             _tailIlayoutMap :: (LayoutMap)
             _tailInewlines :: (Int)
             _tailIpIdC :: (Int)
             _tailIparseErrs :: ([String])
-            _tailIpress :: ([Presentation])
-            _tailIpressTree :: ([Presentation])
-            _tailIpressXML :: ([Presentation])
+            _tailIpress :: ([PresentationNode])
+            _tailIpressTree :: ([PresentationNode])
+            _tailIpressXML :: ([PresentationNode])
             _tailIself :: (ConsList_Decl)
             _tailIspaces :: (Int)
             _tailIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -3375,13 +3377,13 @@ sem_ConsList_Decl_Cons_Decl (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIcol,_tailIdcls,_tailIdeclaredVars,_tailIidsPres,_tailIlayoutMap,_tailInewlines,_tailIpIdC,_tailIparseErrs,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 69, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 71, column 19)
             (_lhsOparseErrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 920, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 922, column 19)
             (_lhsOdcls@_) =
                 _headIdcl : _tailIdcls
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1089, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1091, column 19)
             (_lhsOidsPres@_) =
                 row' [ _headIidsPres, text " ", _tailIidsPres ]
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 667, column 18)
@@ -3538,24 +3540,24 @@ sem_ConsList_Decl_Nil_Decl  =
         let _lhsOcol :: (Int)
             _lhsOdcls :: (Bindings)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
             _lhsOparseErrs :: ([String])
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 70, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 72, column 19)
             (_lhsOparseErrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 921, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 923, column 19)
             (_lhsOdcls@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1090, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1092, column 19)
             (_lhsOidsPres@_) =
                 empty
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 668, column 19)
@@ -3618,9 +3620,9 @@ sem_ConsList_Decl_Nil_Decl  =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      press                : [Presentation]
-      pressTree            : [Presentation]
-      pressXML             : [Presentation]
+      press                : [PresentationNode]
+      pressTree            : [PresentationNode]
+      pressXML             : [PresentationNode]
       self                 : SELF
       vals                 : [Value]
 
@@ -3652,7 +3654,7 @@ type T_ConsList_Exp = (Int) ->
                       ([(PathDoc,String)]) ->
                       (FiniteMap String (PathDoc, String)) ->
                       (FiniteMap String (PathDoc, String)) ->
-                      ( (Int),(LayoutMap),(Int),(Int),([Presentation]),([Presentation]),([Presentation]),(ConsList_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
+                      ( (Int),(LayoutMap),(Int),(Int),([PresentationNode]),([PresentationNode]),([PresentationNode]),(ConsList_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ConsList_Exp :: (ConsList_Exp) ->
                     (T_ConsList_Exp)
@@ -3681,9 +3683,9 @@ data Syn_ConsList_Exp = Syn_ConsList_Exp {col_Syn_ConsList_Exp :: Int
                                          ,layoutMap_Syn_ConsList_Exp :: LayoutMap
                                          ,newlines_Syn_ConsList_Exp :: Int
                                          ,pIdC_Syn_ConsList_Exp :: Int
-                                         ,press_Syn_ConsList_Exp :: [Presentation]
-                                         ,pressTree_Syn_ConsList_Exp :: [Presentation]
-                                         ,pressXML_Syn_ConsList_Exp :: [Presentation]
+                                         ,press_Syn_ConsList_Exp :: [PresentationNode]
+                                         ,pressTree_Syn_ConsList_Exp :: [PresentationNode]
+                                         ,pressXML_Syn_ConsList_Exp :: [PresentationNode]
                                          ,self_Syn_ConsList_Exp :: ConsList_Exp
                                          ,spaces_Syn_ConsList_Exp :: Int
                                          ,vals_Syn_ConsList_Exp :: [Value]
@@ -3720,9 +3722,9 @@ sem_ConsList_Exp_Cons_Exp (head_) (tail_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Exp)
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
@@ -3732,9 +3734,9 @@ sem_ConsList_Exp_Cons_Exp (head_) (tail_) =
             _headIlayoutMap :: (LayoutMap)
             _headInewlines :: (Int)
             _headIpIdC :: (Int)
-            _headIpres :: (Presentation)
-            _headIpresTree :: (Presentation)
-            _headIpresXML :: (Presentation)
+            _headIpres :: (PresentationNode)
+            _headIpresTree :: (PresentationNode)
+            _headIpresXML :: (PresentationNode)
             _headIself :: (Exp)
             _headIspaces :: (Int)
             _headIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -3761,9 +3763,9 @@ sem_ConsList_Exp_Cons_Exp (head_) (tail_) =
             _tailIlayoutMap :: (LayoutMap)
             _tailInewlines :: (Int)
             _tailIpIdC :: (Int)
-            _tailIpress :: ([Presentation])
-            _tailIpressTree :: ([Presentation])
-            _tailIpressXML :: ([Presentation])
+            _tailIpress :: ([PresentationNode])
+            _tailIpressTree :: ([PresentationNode])
+            _tailIpressXML :: ([PresentationNode])
             _tailIself :: (ConsList_Exp)
             _tailIspaces :: (Int)
             _tailIvals :: ([Value])
@@ -3788,10 +3790,10 @@ sem_ConsList_Exp_Cons_Exp (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIcol,_tailIlayoutMap,_tailInewlines,_tailIpIdC,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvals,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 687, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 689, column 7)
             (_tailOcol@_) =
                 _headIcol + 2
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 979, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 981, column 18)
             (_lhsOvals@_) =
                 _headIval : _tailIvals
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 719, column 18)
@@ -3943,14 +3945,14 @@ sem_ConsList_Exp_Nil_Exp  =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Exp)
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 980, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 982, column 18)
             (_lhsOvals@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 720, column 18)
@@ -3995,7 +3997,7 @@ sem_ConsList_Exp_Nil_Exp  =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      typeLoc              : Presentation -> Presentation
+      typeLoc              : PresentationNode -> PresentationNode
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -4003,10 +4005,10 @@ sem_ConsList_Exp_Nil_Exp  =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      press                : [Presentation]
-      press2               : [Presentation]
-      pressTree            : [Presentation]
-      pressXML             : [Presentation]
+      press                : [PresentationNode]
+      press2               : [PresentationNode]
+      pressTree            : [PresentationNode]
+      pressXML             : [PresentationNode]
       self                 : SELF
 
 -}
@@ -4027,10 +4029,10 @@ type T_ConsList_Item = (FocusDoc) ->
                        (Int) ->
                        ([Int]) ->
                        (([PathDoc],[PathDoc],[PathDoc])) ->
-                       (Presentation -> Presentation) ->
+                       (PresentationNode -> PresentationNode) ->
                        (FiniteMap String (PathDoc, String)) ->
                        (FiniteMap String (PathDoc, String)) ->
-                       ( (Int),([Presentation]),([Presentation]),([Presentation]),([Presentation]),(ConsList_Item),(FiniteMap String (PathDoc, String)))
+                       ( (Int),([PresentationNode]),([PresentationNode]),([PresentationNode]),([PresentationNode]),(ConsList_Item),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ConsList_Item :: (ConsList_Item) ->
                      (T_ConsList_Item)
@@ -4044,11 +4046,11 @@ data Inh_ConsList_Item = Inh_ConsList_Item {focusD_Inh_ConsList_Item :: FocusDoc
                                            ,pIdC_Inh_ConsList_Item :: Int
                                            ,path_Inh_ConsList_Item :: [Int]
                                            ,ranges_Inh_ConsList_Item :: ([PathDoc],[PathDoc],[PathDoc])
-                                           ,typeLoc_Inh_ConsList_Item :: Presentation -> Presentation
+                                           ,typeLoc_Inh_ConsList_Item :: PresentationNode -> PresentationNode
                                            ,varsInScope_Inh_ConsList_Item :: FiniteMap String (PathDoc, String)
                                            ,varsInScopeAtFocus_Inh_ConsList_Item :: FiniteMap String (PathDoc, String)
                                            }
-data Syn_ConsList_Item = Syn_ConsList_Item {pIdC_Syn_ConsList_Item :: Int,press_Syn_ConsList_Item :: [Presentation],press2_Syn_ConsList_Item :: [Presentation],pressTree_Syn_ConsList_Item :: [Presentation],pressXML_Syn_ConsList_Item :: [Presentation],self_Syn_ConsList_Item :: ConsList_Item,varsInScopeAtFocus_Syn_ConsList_Item :: FiniteMap String (PathDoc, String)}
+data Syn_ConsList_Item = Syn_ConsList_Item {pIdC_Syn_ConsList_Item :: Int,press_Syn_ConsList_Item :: [PresentationNode],press2_Syn_ConsList_Item :: [PresentationNode],pressTree_Syn_ConsList_Item :: [PresentationNode],pressXML_Syn_ConsList_Item :: [PresentationNode],self_Syn_ConsList_Item :: ConsList_Item,varsInScopeAtFocus_Syn_ConsList_Item :: FiniteMap String (PathDoc, String)}
 wrap_ConsList_Item :: (T_ConsList_Item) ->
                       (Inh_ConsList_Item) ->
                       (Syn_ConsList_Item)
@@ -4070,17 +4072,17 @@ sem_ConsList_Item_Cons_Item (head_) (tail_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _headIpIdC :: (Int)
-            _headIpres :: (Presentation)
-            _headIpres2 :: (Presentation)
-            _headIpresTree :: (Presentation)
-            _headIpresXML :: (Presentation)
+            _headIpres :: (PresentationNode)
+            _headIpres2 :: (PresentationNode)
+            _headIpresTree :: (PresentationNode)
+            _headIpresXML :: (PresentationNode)
             _headIself :: (Item)
             _headIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _headOfocusD :: (FocusDoc)
@@ -4089,14 +4091,14 @@ sem_ConsList_Item_Cons_Item (head_) (tail_) =
             _headOpIdC :: (Int)
             _headOpath :: ([Int])
             _headOranges :: (([PathDoc],[PathDoc],[PathDoc]))
-            _headOtypeLoc :: (Presentation -> Presentation)
+            _headOtypeLoc :: (PresentationNode -> PresentationNode)
             _headOvarsInScope :: (FiniteMap String (PathDoc, String))
             _headOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _tailIpIdC :: (Int)
-            _tailIpress :: ([Presentation])
-            _tailIpress2 :: ([Presentation])
-            _tailIpressTree :: ([Presentation])
-            _tailIpressXML :: ([Presentation])
+            _tailIpress :: ([PresentationNode])
+            _tailIpress2 :: ([PresentationNode])
+            _tailIpressTree :: ([PresentationNode])
+            _tailIpressXML :: ([PresentationNode])
             _tailIself :: (ConsList_Item)
             _tailIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _tailOfocusD :: (FocusDoc)
@@ -4105,20 +4107,20 @@ sem_ConsList_Item_Cons_Item (head_) (tail_) =
             _tailOpIdC :: (Int)
             _tailOpath :: ([Int])
             _tailOranges :: (([PathDoc],[PathDoc],[PathDoc]))
-            _tailOtypeLoc :: (Presentation -> Presentation)
+            _tailOtypeLoc :: (PresentationNode -> PresentationNode)
             _tailOvarsInScope :: (FiniteMap String (PathDoc, String))
             _tailOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _headIpIdC,_headIpres,_headIpres2,_headIpresTree,_headIpresXML,_headIself,_headIvarsInScopeAtFocus) =
                 (head_ (_headOfocusD) (_headOix) (_headOlistType) (_headOpIdC) (_headOpath) (_headOranges) (_headOtypeLoc) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIpIdC,_tailIpress,_tailIpress2,_tailIpressTree,_tailIpressXML,_tailIself,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOfocusD) (_tailOix) (_tailOlistType) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOtypeLoc) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1394, column 15)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1396, column 15)
             (_headOtypeLoc@_) =
                 _lhsItypeLoc
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1393, column 15)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1395, column 15)
             (_headOlistType@_) =
                 _lhsIlistType
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1392, column 15)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1394, column 15)
             (_lhsOpress2@_) =
                 _headIpres2 : _tailIpress2
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 771, column 18)
@@ -4203,13 +4205,13 @@ sem_ConsList_Item_Nil_Item  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1395, column 15)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1397, column 15)
             (_lhsOpress2@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 772, column 19)
@@ -4248,10 +4250,10 @@ sem_ConsList_Item_Nil_Item  =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      press                : [Presentation]
-      press2               : [Presentation]
-      pressTree            : [Presentation]
-      pressXML             : [Presentation]
+      press                : [PresentationNode]
+      press2               : [PresentationNode]
+      pressTree            : [PresentationNode]
+      pressXML             : [PresentationNode]
       self                 : SELF
 
 -}
@@ -4273,7 +4275,7 @@ type T_ConsList_Slide = (FocusDoc) ->
                         (([PathDoc],[PathDoc],[PathDoc])) ->
                         (FiniteMap String (PathDoc, String)) ->
                         (FiniteMap String (PathDoc, String)) ->
-                        ( (Int),([Presentation]),([Presentation]),([Presentation]),([Presentation]),(ConsList_Slide),(FiniteMap String (PathDoc, String)))
+                        ( (Int),([PresentationNode]),([PresentationNode]),([PresentationNode]),([PresentationNode]),(ConsList_Slide),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ConsList_Slide :: (ConsList_Slide) ->
                       (T_ConsList_Slide)
@@ -4282,7 +4284,7 @@ sem_ConsList_Slide ((Cons_Slide (_head) (_tail))) =
 sem_ConsList_Slide ((Nil_Slide )) =
     (sem_ConsList_Slide_Nil_Slide )
 data Inh_ConsList_Slide = Inh_ConsList_Slide {focusD_Inh_ConsList_Slide :: FocusDoc,ix_Inh_ConsList_Slide :: Int,pIdC_Inh_ConsList_Slide :: Int,path_Inh_ConsList_Slide :: [Int],ranges_Inh_ConsList_Slide :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_ConsList_Slide :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_ConsList_Slide :: FiniteMap String (PathDoc, String)}
-data Syn_ConsList_Slide = Syn_ConsList_Slide {pIdC_Syn_ConsList_Slide :: Int,press_Syn_ConsList_Slide :: [Presentation],press2_Syn_ConsList_Slide :: [Presentation],pressTree_Syn_ConsList_Slide :: [Presentation],pressXML_Syn_ConsList_Slide :: [Presentation],self_Syn_ConsList_Slide :: ConsList_Slide,varsInScopeAtFocus_Syn_ConsList_Slide :: FiniteMap String (PathDoc, String)}
+data Syn_ConsList_Slide = Syn_ConsList_Slide {pIdC_Syn_ConsList_Slide :: Int,press_Syn_ConsList_Slide :: [PresentationNode],press2_Syn_ConsList_Slide :: [PresentationNode],pressTree_Syn_ConsList_Slide :: [PresentationNode],pressXML_Syn_ConsList_Slide :: [PresentationNode],self_Syn_ConsList_Slide :: ConsList_Slide,varsInScopeAtFocus_Syn_ConsList_Slide :: FiniteMap String (PathDoc, String)}
 wrap_ConsList_Slide :: (T_ConsList_Slide) ->
                        (Inh_ConsList_Slide) ->
                        (Syn_ConsList_Slide)
@@ -4302,17 +4304,17 @@ sem_ConsList_Slide_Cons_Slide (head_) (tail_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _headIpIdC :: (Int)
-            _headIpres :: (Presentation)
-            _headIpres2 :: (Presentation)
-            _headIpresTree :: (Presentation)
-            _headIpresXML :: (Presentation)
+            _headIpres :: (PresentationNode)
+            _headIpres2 :: (PresentationNode)
+            _headIpresTree :: (PresentationNode)
+            _headIpresXML :: (PresentationNode)
             _headIself :: (Slide)
             _headIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _headOfocusD :: (FocusDoc)
@@ -4323,10 +4325,10 @@ sem_ConsList_Slide_Cons_Slide (head_) (tail_) =
             _headOvarsInScope :: (FiniteMap String (PathDoc, String))
             _headOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _tailIpIdC :: (Int)
-            _tailIpress :: ([Presentation])
-            _tailIpress2 :: ([Presentation])
-            _tailIpressTree :: ([Presentation])
-            _tailIpressXML :: ([Presentation])
+            _tailIpress :: ([PresentationNode])
+            _tailIpress2 :: ([PresentationNode])
+            _tailIpressTree :: ([PresentationNode])
+            _tailIpressXML :: ([PresentationNode])
             _tailIself :: (ConsList_Slide)
             _tailIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _tailOfocusD :: (FocusDoc)
@@ -4340,7 +4342,7 @@ sem_ConsList_Slide_Cons_Slide (head_) (tail_) =
                 (head_ (_headOfocusD) (_headOix) (_headOpIdC) (_headOpath) (_headOranges) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIpIdC,_tailIpress,_tailIpress2,_tailIpressTree,_tailIpressXML,_tailIself,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOfocusD) (_tailOix) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1387, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1389, column 16)
             (_lhsOpress2@_) =
                 _headIpres2 : _tailIpress2
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 745, column 18)
@@ -4417,13 +4419,13 @@ sem_ConsList_Slide_Nil_Slide  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
-            _lhsOpressTree :: ([Presentation])
-            _lhsOpressXML :: ([Presentation])
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
+            _lhsOpressTree :: ([PresentationNode])
+            _lhsOpressXML :: ([PresentationNode])
             _lhsOself :: (ConsList_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1388, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1390, column 16)
             (_lhsOpress2@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 746, column 20)
@@ -4473,10 +4475,10 @@ sem_ConsList_Slide_Nil_Slide  =
    synthesised attributes:
       dcl                  : Binding
       declaredVars         : [(String,(PathDoc,String))]
-      idsPres              : Presentation
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      idsPres              : PresentationNode
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
       typeStr              : Maybe String
 
@@ -4534,7 +4536,7 @@ type T_Decl = (Int) ->
               ([(PathDoc,String)]) ->
               (FiniteMap String (PathDoc, String)) ->
               (FiniteMap String (PathDoc, String)) ->
-              ( (Int),(Binding),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),(Presentation),(Presentation),(Presentation),(Decl),(Int),(Maybe String),(FiniteMap String (PathDoc, String)))
+              ( (Int),(Binding),([(String,(PathDoc,String))]),(PresentationNode),(LayoutMap),(Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Decl),(Int),(Maybe String),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Decl :: (Decl) ->
             (T_Decl)
@@ -4570,13 +4572,13 @@ data Inh_Decl = Inh_Decl {col_Inh_Decl :: Int
 data Syn_Decl = Syn_Decl {col_Syn_Decl :: Int
                          ,dcl_Syn_Decl :: Binding
                          ,declaredVars_Syn_Decl :: [(String,(PathDoc,String))]
-                         ,idsPres_Syn_Decl :: Presentation
+                         ,idsPres_Syn_Decl :: PresentationNode
                          ,layoutMap_Syn_Decl :: LayoutMap
                          ,newlines_Syn_Decl :: Int
                          ,pIdC_Syn_Decl :: Int
-                         ,pres_Syn_Decl :: Presentation
-                         ,presTree_Syn_Decl :: Presentation
-                         ,presXML_Syn_Decl :: Presentation
+                         ,pres_Syn_Decl :: PresentationNode
+                         ,presTree_Syn_Decl :: PresentationNode
+                         ,presXML_Syn_Decl :: PresentationNode
                          ,self_Syn_Decl :: Decl
                          ,spaces_Syn_Decl :: Int
                          ,typeStr_Syn_Decl :: Maybe String
@@ -4614,21 +4616,21 @@ sem_Decl_BoardDecl (idD_) (idP0_) (idP1_) (board_) =
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _boardIpIdC :: (Int)
-            _boardIpres :: (Presentation)
-            _boardIpresTree :: (Presentation)
-            _boardIpresXML :: (Presentation)
+            _boardIpres :: (PresentationNode)
+            _boardIpresTree :: (PresentationNode)
+            _boardIpresXML :: (PresentationNode)
             _boardIself :: (Board)
             _boardOfocusD :: (FocusDoc)
             _boardOix :: (Int)
@@ -4636,17 +4638,17 @@ sem_Decl_BoardDecl (idD_) (idP0_) (idP1_) (board_) =
             _boardOpath :: ([Int])
             ( _boardIpIdC,_boardIpres,_boardIpresTree,_boardIpresXML,_boardIself) =
                 (board_ (_boardOfocusD) (_boardOix) (_boardOpIdC) (_boardOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 738, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 740, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 925, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 927, column 19)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1008, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1010, column 7)
             (_lhsOpres@_) =
                 loc (DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text' (mkIDP idP0_ _lhsIpIdC 0) "Chess: ", _boardIpres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1095, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1097, column 24)
             (_lhsOidsPres@_) =
                 loc (BoardDeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "board;" ]
@@ -4729,22 +4731,22 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _expandedIbool :: (Bool)
             _expandedIpIdC :: (Int)
-            _expandedIpres :: (Presentation)
-            _expandedIpresTree :: (Presentation)
-            _expandedIpresXML :: (Presentation)
+            _expandedIpres :: (PresentationNode)
+            _expandedIpresTree :: (PresentationNode)
+            _expandedIpresXML :: (PresentationNode)
             _expandedIself :: (Bool_)
             _expandedOfocusD :: (FocusDoc)
             _expandedOix :: (Int)
@@ -4752,9 +4754,9 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
             _expandedOpath :: ([Int])
             _autoLayoutIbool :: (Bool)
             _autoLayoutIpIdC :: (Int)
-            _autoLayoutIpres :: (Presentation)
-            _autoLayoutIpresTree :: (Presentation)
-            _autoLayoutIpresXML :: (Presentation)
+            _autoLayoutIpres :: (PresentationNode)
+            _autoLayoutIpresTree :: (PresentationNode)
+            _autoLayoutIpresXML :: (PresentationNode)
             _autoLayoutIself :: (Bool_)
             _autoLayoutOfocusD :: (FocusDoc)
             _autoLayoutOix :: (Int)
@@ -4762,13 +4764,13 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
             _autoLayoutOpath :: ([Int])
             _identIcol :: (Int)
             _identIfirstToken :: (IDP)
-            _identIidsPres :: (Presentation)
+            _identIidsPres :: (PresentationNode)
             _identIlayoutMap :: (LayoutMap)
             _identInewlines :: (Int)
             _identIpIdC :: (Int)
-            _identIpres :: (Presentation)
-            _identIpresTree :: (Presentation)
-            _identIpresXML :: (Presentation)
+            _identIpres :: (PresentationNode)
+            _identIpresTree :: (PresentationNode)
+            _identIpresXML :: (PresentationNode)
             _identIself :: (Ident)
             _identIspaces :: (Int)
             _identIstr :: (String)
@@ -4790,9 +4792,9 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -4823,7 +4825,7 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 187, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 189, column 7)
             (_lhsOpres@_) =
                 loc (DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
@@ -4867,37 +4869,37 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                                                                       then ( "Disable Auto Layout", toggleAutoLayout _lhsIpath _self)
                                                                       else ( "Enable Auto Layout", toggleAutoLayout _lhsIpath _self) ]
                                                                else []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 563, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 565, column 13)
             (_lhsOspaces@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 562, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 564, column 13)
             (_lhsOnewlines@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 561, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 563, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 560, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 562, column 13)
             (_expOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 559, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 561, column 13)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 558, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 560, column 13)
             (_expOcol@_) =
                 _identIcol+2+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 557, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 559, column 13)
             (_identOspaces@_) =
                 _lhsIspaces
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 556, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 558, column 13)
             (_identOnewlines@_) =
                 _lhsInewlines
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 555, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 557, column 13)
             (_identOcol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 554, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 556, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap [(idP0_, (0,1)), (idP1_, (0,0))]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 545, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 547, column 13)
             (_lhsOlayoutMap@_) =
                 let lm = if _autoLayoutIbool || _lhsIlevel /= 0 then _expIlayoutMap else _lhsIlayoutMap
                 in if idP2_ /= NoIDP || _lhsIlevel /= 0 then lm
@@ -4905,21 +4907,21 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                           Just (nwln,sp) -> addListToFM lm [ (mkIDP idP2_ _lhsIpIdC 2,(nwln,sp))
                                                                        , (_identIfirstToken, (1,sp)) ]
                           _        -> addToFM lm (mkIDP idP2_ _lhsIpIdC 2) (1,0)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 735, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 737, column 18)
             (_typeStr@_) =
                 case lookup (strFromIdent _identIself) _lhsItopLevelEnv of
                   Nothing -> Nothing
                   Just tp -> Just $ strFromIdent _identIself ++ " :: "++ tp
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 768, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 770, column 7)
             (_lhsOdeclaredVars@_) =
                 [(strFromIdent _identIself, (PathD (_lhsIpath++[2]), _expItype))]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 779, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 781, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 924, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 926, column 18)
             (_lhsOdcl@_) =
                 (_identIstr, _expIval)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1093, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1095, column 24)
             (_lhsOidsPres@_) =
                 loc (DeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "'", _identIidsPres, text "';" ]
@@ -5050,24 +5052,24 @@ sem_Decl_HoleDecl  =
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 740, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 742, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 927, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 929, column 18)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1099, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1101, column 24)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Decl" (HoleDeclNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 283, column 18)
@@ -5135,21 +5137,21 @@ sem_Decl_InvDecl (idD_) (idP0_) (idP1_) (inv_) =
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _invIpIdC :: (Int)
-            _invIpres :: (Presentation)
-            _invIpresTree :: (Presentation)
-            _invIpresXML :: (Presentation)
+            _invIpres :: (PresentationNode)
+            _invIpresTree :: (PresentationNode)
+            _invIpresXML :: (PresentationNode)
             _invIself :: (Inv)
             _invOfocusD :: (FocusDoc)
             _invOix :: (Int)
@@ -5245,21 +5247,21 @@ sem_Decl_PPPresentationDecl (idD_) (idP0_) (idP1_) (pPPresentation_) =
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _pPPresentationIpIdC :: (Int)
-            _pPPresentationIpres :: (Presentation)
-            _pPPresentationIpresTree :: (Presentation)
-            _pPPresentationIpresXML :: (Presentation)
+            _pPPresentationIpres :: (PresentationNode)
+            _pPPresentationIpresTree :: (PresentationNode)
+            _pPPresentationIpresXML :: (PresentationNode)
             _pPPresentationIself :: (PPPresentation)
             _pPPresentationIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _pPPresentationOfocusD :: (FocusDoc)
@@ -5271,17 +5273,17 @@ sem_Decl_PPPresentationDecl (idD_) (idP0_) (idP1_) (pPPresentation_) =
             _pPPresentationOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _pPPresentationIpIdC,_pPPresentationIpres,_pPPresentationIpresTree,_pPPresentationIpresXML,_pPPresentationIself,_pPPresentationIvarsInScopeAtFocus) =
                 (pPPresentation_ (_pPPresentationOfocusD) (_pPPresentationOix) (_pPPresentationOpIdC) (_pPPresentationOpath) (_pPPresentationOranges) (_pPPresentationOvarsInScope) (_pPPresentationOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 739, column 27)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 741, column 27)
             (_typeStr@_) =
                 Nothing
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 926, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 928, column 24)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1097, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1099, column 24)
             (_lhsOidsPres@_) =
                 loc (PPPresentationDeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "slides;" ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1154, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1156, column 7)
             (_lhsOpres@_) =
                 loc (PPPresentationDeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text' (mkIDP idP0_ _lhsIpIdC 0) "Slides: ", _pPPresentationIpres ]
@@ -5344,7 +5346,7 @@ sem_Decl_PPPresentationDecl (idD_) (idP0_) (idP1_) (pPPresentation_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOcol,_lhsOdcl,_lhsOdeclaredVars,_lhsOidsPres,_lhsOlayoutMap,_lhsOnewlines,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOspaces,_lhsOtypeStr,_lhsOvarsInScopeAtFocus)
 sem_Decl_ParseErrDecl :: (Node) ->
-                         (Presentation) ->
+                         (PresentationNode) ->
                          (T_Decl)
 sem_Decl_ParseErrDecl (node_) (presentation_) =
     \ _lhsIcol
@@ -5366,24 +5368,24 @@ sem_Decl_ParseErrDecl (node_) (presentation_) =
         let _lhsOcol :: (Int)
             _lhsOdcl :: (Binding)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Decl)
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 741, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 743, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 928, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 930, column 18)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1100, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1102, column 24)
             (_lhsOidsPres@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 284, column 18)
@@ -5437,9 +5439,9 @@ sem_Decl_ParseErrDecl (node_) (presentation_) =
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -5468,7 +5470,7 @@ type T_EitherDocView = (FocusDoc) ->
                        (Int) ->
                        (Int) ->
                        ([Int]) ->
-                       ( (Int),(Presentation),(Presentation),(Presentation),(EitherDocView))
+                       ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(EitherDocView))
 -- cata
 sem_EitherDocView :: (EitherDocView) ->
                      (T_EitherDocView)
@@ -5481,7 +5483,7 @@ sem_EitherDocView ((ParseErrEitherDocView (_node) (_presentation))) =
 sem_EitherDocView ((RightDocView (_idd) (_doc))) =
     (sem_EitherDocView_RightDocView (_idd) ((sem_View (_doc))))
 data Inh_EitherDocView = Inh_EitherDocView {focusD_Inh_EitherDocView :: FocusDoc,ix_Inh_EitherDocView :: Int,pIdC_Inh_EitherDocView :: Int,path_Inh_EitherDocView :: [Int]}
-data Syn_EitherDocView = Syn_EitherDocView {pIdC_Syn_EitherDocView :: Int,pres_Syn_EitherDocView :: Presentation,presTree_Syn_EitherDocView :: Presentation,presXML_Syn_EitherDocView :: Presentation,self_Syn_EitherDocView :: EitherDocView}
+data Syn_EitherDocView = Syn_EitherDocView {pIdC_Syn_EitherDocView :: Int,pres_Syn_EitherDocView :: PresentationNode,presTree_Syn_EitherDocView :: PresentationNode,presXML_Syn_EitherDocView :: PresentationNode,self_Syn_EitherDocView :: EitherDocView}
 wrap_EitherDocView :: (T_EitherDocView) ->
                       (Inh_EitherDocView) ->
                       (Syn_EitherDocView)
@@ -5496,9 +5498,9 @@ sem_EitherDocView_HoleEitherDocView  =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EitherDocView)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 558, column 27)
             (_lhsOpres@_) =
@@ -5528,15 +5530,15 @@ sem_EitherDocView_LeftDocView (idd_) (error_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EitherDocView)
             _errorIlength :: (Int)
             _errorIpIdC :: (Int)
-            _errorIpres :: (Presentation)
-            _errorIpresTree :: (Presentation)
-            _errorIpresXML :: (Presentation)
+            _errorIpres :: (PresentationNode)
+            _errorIpresTree :: (PresentationNode)
+            _errorIpresXML :: (PresentationNode)
             _errorIself :: (String_)
             _errorIstr :: (String)
             _errorOfocusD :: (FocusDoc)
@@ -5578,7 +5580,7 @@ sem_EitherDocView_LeftDocView (idd_) (error_) =
                 _lhsIix
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_EitherDocView_ParseErrEitherDocView :: (Node) ->
-                                           (Presentation) ->
+                                           (PresentationNode) ->
                                            (T_EitherDocView)
 sem_EitherDocView_ParseErrEitherDocView (node_) (presentation_) =
     \ _lhsIfocusD
@@ -5586,9 +5588,9 @@ sem_EitherDocView_ParseErrEitherDocView (node_) (presentation_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EitherDocView)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 559, column 27)
             (_lhsOpres@_) =
@@ -5618,14 +5620,14 @@ sem_EitherDocView_RightDocView (idd_) (doc_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EitherDocView)
             _docIpIdC :: (Int)
-            _docIpres :: (Presentation)
-            _docIpresTree :: (Presentation)
-            _docIpresXML :: (Presentation)
+            _docIpres :: (PresentationNode)
+            _docIpresTree :: (PresentationNode)
+            _docIpresXML :: (PresentationNode)
             _docIself :: (View)
             _docOfocusD :: (FocusDoc)
             _docOix :: (Int)
@@ -5675,7 +5677,7 @@ sem_EitherDocView_RightDocView (idd_) (doc_) =
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
+      pres                 : PresentationNode
       self                 : SELF
 
 -}
@@ -5702,7 +5704,7 @@ sem_EitherDocView_RightDocView (idd_) (doc_) =
 type T_EnrichedDoc = (FocusDoc) ->
                      (LayoutMap) ->
                      (Int) ->
-                     ( (LayoutMap),(Int),(Presentation),(EnrichedDoc))
+                     ( (LayoutMap),(Int),(PresentationNode),(EnrichedDoc))
 -- cata
 sem_EnrichedDoc :: (EnrichedDoc) ->
                    (T_EnrichedDoc)
@@ -5713,7 +5715,7 @@ sem_EnrichedDoc ((ParseErrEnrichedDoc (_node) (_presentation))) =
 sem_EnrichedDoc ((RootEnr (_id) (_idP) (_idListDecls) (_decls) (_heliumTypeInfo) (_document))) =
     (sem_EnrichedDoc_RootEnr (_id) (_idP) ((sem_List_Decl (_idListDecls))) ((sem_List_Decl (_decls))) (_heliumTypeInfo) (_document))
 data Inh_EnrichedDoc = Inh_EnrichedDoc {focusD_Inh_EnrichedDoc :: FocusDoc,layoutMap_Inh_EnrichedDoc :: LayoutMap,pIdC_Inh_EnrichedDoc :: Int}
-data Syn_EnrichedDoc = Syn_EnrichedDoc {layoutMap_Syn_EnrichedDoc :: LayoutMap,pIdC_Syn_EnrichedDoc :: Int,pres_Syn_EnrichedDoc :: Presentation,self_Syn_EnrichedDoc :: EnrichedDoc}
+data Syn_EnrichedDoc = Syn_EnrichedDoc {layoutMap_Syn_EnrichedDoc :: LayoutMap,pIdC_Syn_EnrichedDoc :: Int,pres_Syn_EnrichedDoc :: PresentationNode,self_Syn_EnrichedDoc :: EnrichedDoc}
 wrap_EnrichedDoc :: (T_EnrichedDoc) ->
                     (Inh_EnrichedDoc) ->
                     (Syn_EnrichedDoc)
@@ -5728,7 +5730,7 @@ sem_EnrichedDoc_HoleEnrichedDoc  =
       _lhsIpIdC ->
         let _lhsOlayoutMap :: (LayoutMap)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
+            _lhsOpres :: (PresentationNode)
             _lhsOself :: (EnrichedDoc)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 22, column 25)
             (_lhsOpres@_) =
@@ -5747,7 +5749,7 @@ sem_EnrichedDoc_HoleEnrichedDoc  =
                 _lhsIpIdC
         in  ( _lhsOlayoutMap,_lhsOpIdC,_lhsOpres,_lhsOself)
 sem_EnrichedDoc_ParseErrEnrichedDoc :: (Node) ->
-                                       (Presentation) ->
+                                       (PresentationNode) ->
                                        (T_EnrichedDoc)
 sem_EnrichedDoc_ParseErrEnrichedDoc (node_) (presentation_) =
     \ _lhsIfocusD
@@ -5755,7 +5757,7 @@ sem_EnrichedDoc_ParseErrEnrichedDoc (node_) (presentation_) =
       _lhsIpIdC ->
         let _lhsOlayoutMap :: (LayoutMap)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
+            _lhsOpres :: (PresentationNode)
             _lhsOself :: (EnrichedDoc)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 23, column 25)
             (_lhsOpres@_) =
@@ -5786,20 +5788,20 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
       _lhsIpIdC ->
         let _lhsOlayoutMap :: (LayoutMap)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
+            _lhsOpres :: (PresentationNode)
             _lhsOself :: (EnrichedDoc)
             _idListDeclsIcol :: (Int)
             _idListDeclsIdcls :: (Bindings)
             _idListDeclsIdeclaredVars :: ([(String,(PathDoc,String))])
-            _idListDeclsIidsPres :: (Presentation)
+            _idListDeclsIidsPres :: (PresentationNode)
             _idListDeclsIlayoutMap :: (LayoutMap)
             _idListDeclsInewlines :: (Int)
             _idListDeclsIpIdC :: (Int)
             _idListDeclsIparseErrs :: ([String])
-            _idListDeclsIpres :: (Presentation)
-            _idListDeclsIpresTree :: (Presentation)
-            _idListDeclsIpresXML :: (Presentation)
-            _idListDeclsIpress :: ([Presentation])
+            _idListDeclsIpres :: (PresentationNode)
+            _idListDeclsIpresTree :: (PresentationNode)
+            _idListDeclsIpresXML :: (PresentationNode)
+            _idListDeclsIpress :: ([PresentationNode])
             _idListDeclsIself :: (List_Decl)
             _idListDeclsIspaces :: (Int)
             _idListDeclsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -5821,15 +5823,15 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
             _declsIcol :: (Int)
             _declsIdcls :: (Bindings)
             _declsIdeclaredVars :: ([(String,(PathDoc,String))])
-            _declsIidsPres :: (Presentation)
+            _declsIidsPres :: (PresentationNode)
             _declsIlayoutMap :: (LayoutMap)
             _declsInewlines :: (Int)
             _declsIpIdC :: (Int)
             _declsIparseErrs :: ([String])
-            _declsIpres :: (Presentation)
-            _declsIpresTree :: (Presentation)
-            _declsIpresXML :: (Presentation)
-            _declsIpress :: ([Presentation])
+            _declsIpres :: (PresentationNode)
+            _declsIpresTree :: (PresentationNode)
+            _declsIpresXML :: (PresentationNode)
+            _declsIpress :: ([PresentationNode])
             _declsIself :: (List_Decl)
             _declsIspaces :: (Int)
             _declsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -5852,23 +5854,23 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
                 (idListDecls_ (_idListDeclsOcol) (_idListDeclsOenv) (_idListDeclsOerrs) (_idListDeclsOfocusD) (_idListDeclsOlayoutMap) (_idListDeclsOlevel) (_idListDeclsOnewlines) (_idListDeclsOpIdC) (_idListDeclsOpath) (_idListDeclsOranges) (_idListDeclsOspaces) (_idListDeclsOtopLevelEnv) (_idListDeclsOtypeEnv) (_idListDeclsOvarsInScope) (_idListDeclsOvarsInScopeAtFocus))
             ( _declsIcol,_declsIdcls,_declsIdeclaredVars,_declsIidsPres,_declsIlayoutMap,_declsInewlines,_declsIpIdC,_declsIparseErrs,_declsIpres,_declsIpresTree,_declsIpresXML,_declsIpress,_declsIself,_declsIspaces,_declsIvarsInScopeAtFocus) =
                 (decls_ (_declsOcol) (_declsOenv) (_declsOerrs) (_declsOfocusD) (_declsOlayoutMap) (_declsOlevel) (_declsOnewlines) (_declsOpIdC) (_declsOpath) (_declsOranges) (_declsOspaces) (_declsOtopLevelEnv) (_declsOtypeEnv) (_declsOvarsInScope) (_declsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 94, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 96, column 7)
             (_topLevelEnv@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in typeEnv
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 93, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 95, column 7)
             (_typeEnv@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in topLevelEnv
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 92, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 94, column 7)
             (_errs@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in errs
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 91, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 93, column 7)
             (_declsOlevel@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 144, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 146, column 7)
             (_declsOranges@_) =
                 (\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
                 $ map pthFrmMsg _errs
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 103, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 105, column 7)
             (_lhsOpres@_) =
                 loc (RootDocNode document_ []) $
                 loc (RootEnrNode _self []) $ structural $
@@ -5900,52 +5902,52 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
                             | (var,(pth,tpStr)) <- fmToList _declsIvarsInScopeAtFocus ]
                       ]
                     `withFont'` ("Courier New",14)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 536, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 538, column 13)
             (_lhsOlayoutMap@_) =
                 _declsIlayoutMap
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 535, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 537, column 13)
             (_declsOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 534, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 536, column 13)
             (_declsOnewlines@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 533, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 535, column 13)
             (_declsOcol@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 532, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 534, column 13)
             (_declsOlayoutMap@_) =
                 _lhsIlayoutMap
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 755, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 757, column 7)
             (_varsInScope@_) =
                 listToFM _declsIdeclaredVars
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 775, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 777, column 7)
             (_declsOvarsInScopeAtFocus@_) =
                 emptyFM
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 911, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 913, column 7)
             (_declsOenv@_) =
                 _declsIdcls
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1122, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1124, column 13)
             (_idListDeclsOranges@_) =
                 ([],[],[])
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1120, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1122, column 13)
             (_idListDeclsOvarsInScopeAtFocus@_) =
                 emptyFM
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1119, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1121, column 13)
             (_idListDeclsOenv@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1118, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1120, column 13)
             (_idListDeclsOerrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1116, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1118, column 13)
             (_idListDeclsOlevel@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1114, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1116, column 13)
             (_idListDeclsOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1113, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1115, column 13)
             (_idListDeclsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1112, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1114, column 13)
             (_idListDeclsOcol@_) =
                 0
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 21, column 13)
@@ -6011,9 +6013,9 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -6047,7 +6049,7 @@ type T_EvalButton = (FocusDoc) ->
                     (Int) ->
                     (Int) ->
                     ([Int]) ->
-                    ( (Int),(Presentation),(Presentation),(Presentation),(EvalButton))
+                    ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(EvalButton))
 -- cata
 sem_EvalButton :: (EvalButton) ->
                   (T_EvalButton)
@@ -6062,7 +6064,7 @@ sem_EvalButton ((ReEvaluate2 (_idd))) =
 sem_EvalButton ((Skip (_idd))) =
     (sem_EvalButton_Skip (_idd))
 data Inh_EvalButton = Inh_EvalButton {focusD_Inh_EvalButton :: FocusDoc,ix_Inh_EvalButton :: Int,pIdC_Inh_EvalButton :: Int,path_Inh_EvalButton :: [Int]}
-data Syn_EvalButton = Syn_EvalButton {pIdC_Syn_EvalButton :: Int,pres_Syn_EvalButton :: Presentation,presTree_Syn_EvalButton :: Presentation,presXML_Syn_EvalButton :: Presentation,self_Syn_EvalButton :: EvalButton}
+data Syn_EvalButton = Syn_EvalButton {pIdC_Syn_EvalButton :: Int,pres_Syn_EvalButton :: PresentationNode,presTree_Syn_EvalButton :: PresentationNode,presXML_Syn_EvalButton :: PresentationNode,self_Syn_EvalButton :: EvalButton}
 wrap_EvalButton :: (T_EvalButton) ->
                    (Inh_EvalButton) ->
                    (Syn_EvalButton)
@@ -6077,9 +6079,9 @@ sem_EvalButton_HoleEvalButton  =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EvalButton)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 549, column 24)
             (_lhsOpres@_) =
@@ -6101,7 +6103,7 @@ sem_EvalButton_HoleEvalButton  =
                 _lhsIpIdC
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_EvalButton_ParseErrEvalButton :: (Node) ->
-                                     (Presentation) ->
+                                     (PresentationNode) ->
                                      (T_EvalButton)
 sem_EvalButton_ParseErrEvalButton (node_) (presentation_) =
     \ _lhsIfocusD
@@ -6109,9 +6111,9 @@ sem_EvalButton_ParseErrEvalButton (node_) (presentation_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EvalButton)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 550, column 24)
             (_lhsOpres@_) =
@@ -6140,9 +6142,9 @@ sem_EvalButton_ReEvaluate1 (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EvalButton)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 937, column 7)
             (_lhsOpresXML@_) =
@@ -6172,9 +6174,9 @@ sem_EvalButton_ReEvaluate2 (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EvalButton)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 939, column 7)
             (_lhsOpresXML@_) =
@@ -6204,9 +6206,9 @@ sem_EvalButton_Skip (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (EvalButton)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 941, column 7)
             (_lhsOpresXML@_) =
@@ -6252,9 +6254,9 @@ sem_EvalButton_Skip (idd_) =
 
    synthesised attributes:
       lamBody              : ([(String, Exp)] -> Exp)
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
       substitute           : ( [(String, Exp)] -> Exp )
       type                 : String
@@ -6413,7 +6415,7 @@ type T_Exp = (Int) ->
              ([(PathDoc,String)]) ->
              (FiniteMap String (PathDoc, String)) ->
              (FiniteMap String (PathDoc, String)) ->
-             ( (Int),(([(String, Exp)] -> Exp)),(LayoutMap),(Int),(Int),(Presentation),(Presentation),(Presentation),(Exp),(Int),(( [(String, Exp)] -> Exp )),(String),(Value),(FiniteMap String (PathDoc, String)))
+             ( (Int),(([(String, Exp)] -> Exp)),(LayoutMap),(Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Exp),(Int),(( [(String, Exp)] -> Exp )),(String),(Value),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Exp :: (Exp) ->
            (T_Exp)
@@ -6473,9 +6475,9 @@ data Syn_Exp = Syn_Exp {col_Syn_Exp :: Int
                        ,layoutMap_Syn_Exp :: LayoutMap
                        ,newlines_Syn_Exp :: Int
                        ,pIdC_Syn_Exp :: Int
-                       ,pres_Syn_Exp :: Presentation
-                       ,presTree_Syn_Exp :: Presentation
-                       ,presXML_Syn_Exp :: Presentation
+                       ,pres_Syn_Exp :: PresentationNode
+                       ,presTree_Syn_Exp :: PresentationNode
+                       ,presXML_Syn_Exp :: PresentationNode
                        ,self_Syn_Exp :: Exp
                        ,spaces_Syn_Exp :: Int
                        ,substitute_Syn_Exp :: ( [(String, Exp)] -> Exp )
@@ -6516,9 +6518,9 @@ sem_Exp_AppExp (idD_) (exp1_) (exp2_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6530,9 +6532,9 @@ sem_Exp_AppExp (idD_) (exp1_) (exp2_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6560,9 +6562,9 @@ sem_Exp_AppExp (idD_) (exp1_) (exp2_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6589,33 +6591,33 @@ sem_Exp_AppExp (idD_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 295, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 297, column 7)
             (_lhsOpres@_) =
                 loc (AppExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres, _exp2Ipres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 622, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 624, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 621, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 623, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 620, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 622, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 619, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 621, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 618, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 620, column 13)
             (_exp1OlayoutMap@_) =
                 _lhsIlayoutMap
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 803, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 805, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 844, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 846, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 953, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 955, column 17)
             (_lhsOval@_) =
                 case _exp1Ival of LamVal f -> f _exp2Ival
                                   _        -> ErrVal
@@ -6776,9 +6778,9 @@ sem_Exp_BoolExp (idD_) (idP0_) (bool__) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6787,9 +6789,9 @@ sem_Exp_BoolExp (idD_) (idP0_) (bool__) =
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _bool_Ibool :: (Bool)
             _bool_IpIdC :: (Int)
-            _bool_Ipres :: (Presentation)
-            _bool_IpresTree :: (Presentation)
-            _bool_IpresXML :: (Presentation)
+            _bool_Ipres :: (PresentationNode)
+            _bool_IpresTree :: (PresentationNode)
+            _bool_IpresXML :: (PresentationNode)
             _bool_Iself :: (Bool_)
             _bool_OfocusD :: (FocusDoc)
             _bool_Oix :: (Int)
@@ -6797,21 +6799,21 @@ sem_Exp_BoolExp (idD_) (idP0_) (bool__) =
             _bool_Opath :: ([Int])
             ( _bool_Ibool,_bool_IpIdC,_bool_Ipres,_bool_IpresTree,_bool_IpresXML,_bool_Iself) =
                 (bool__ (_bool_OfocusD) (_bool_Oix) (_bool_OpIdC) (_bool_Opath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 271, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 273, column 7)
             (_lhsOpres@_) =
                 loc (BoolExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [cons (mkIDP idP0_ _lhsIpIdC 0) "", _bool_Ipres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 607, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 609, column 13)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 797, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 799, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 838, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 840, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 946, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 948, column 17)
             (_lhsOval@_) =
                 BoolVal _bool_Ibool
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 322, column 13)
@@ -6894,9 +6896,9 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6908,9 +6910,9 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -6939,9 +6941,9 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
             _altsImaxLHSLength :: (Int)
             _altsInewlines :: (Int)
             _altsIpIdC :: (Int)
-            _altsIpresTree :: (Presentation)
-            _altsIpresXML :: (Presentation)
-            _altsIpress :: ([Presentation])
+            _altsIpresTree :: (PresentationNode)
+            _altsIpresXML :: (PresentationNode)
+            _altsIpress :: ([PresentationNode])
             _altsIself :: (List_Alt)
             _altsIspaces :: (Int)
             _altsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -6965,7 +6967,7 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
             ( _altsIalts,_altsIcol,_altsIlayoutMap,_altsImaxLHSLength,_altsInewlines,_altsIpIdC,_altsIpresTree,_altsIpresXML,_altsIpress,_altsIself,_altsIspaces,_altsIvarsInScopeAtFocus) =
                 (alts_ (_altsOcol) (_altsOenv) (_altsOerrs) (_altsOfocusD) (_altsOlayoutMap) (_altsOlevel) (_altsOnewlines) (_altsOpIdC) (_altsOpath) (_altsOranges) (_altsOspaces) (_altsOtopLevelEnv) (_altsOtotalMaxLHSLength) (_altsOtypeEnv) (_altsOvarsInScope) (_altsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 300, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 302, column 7)
             (_lhsOpres@_) =
                 loc (CaseExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -6974,42 +6976,42 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
                        , key (mkIDP idP1_ _lhsIpIdC 1) "of"
                        , loc (List_AltNode _altsIself []                ) $ parsing $ presentFocus _lhsIfocusD []                $ row _altsIpress
                        ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 633, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 635, column 13)
             (_altsOtotalMaxLHSLength@_) =
                 _altsImaxLHSLength
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 632, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 634, column 13)
             (_lhsOcol@_) =
                 _altsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 631, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 633, column 13)
             (_altsOspaces@_) =
                 _lhsIcol + 2
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 630, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 632, column 13)
             (_altsOnewlines@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 629, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 631, column 13)
             (_altsOcol@_) =
                 _lhsIcol + 2
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 628, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 630, column 13)
             (_expOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 627, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 629, column 13)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 626, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 628, column 13)
             (_expOcol@_) =
                 _lhsIcol + 5
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 623, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 625, column 13)
             (_expOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                     [ (idP0_, (_lhsInewlines,_lhsIspaces))
                     , (idP1_, (0,1)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 805, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 807, column 7)
             (_altsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 846, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 848, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 956, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 958, column 17)
             (_lhsOval@_) =
                 case lookup "a" _altsIalts of {Just v -> v; Nothing -> ErrVal}
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 333, column 13)
@@ -7151,9 +7153,9 @@ sem_Exp_DivExp (idD_) (idP0_) (exp1_) (exp2_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7165,9 +7167,9 @@ sem_Exp_DivExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7195,9 +7197,9 @@ sem_Exp_DivExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7224,42 +7226,42 @@ sem_Exp_DivExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 260, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 262, column 7)
             (_lhsOpres@_) =
                 loc (DivExpNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   frac _exp1Ipres _exp2Ipres
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 598, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 600, column 13)
             (_lhsOcol@_) =
                 _exp1Icol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 597, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 599, column 13)
             (_exp2Ospaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 596, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 598, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 595, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 597, column 13)
             (_exp2Ocol@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 594, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 596, column 13)
             (_exp1Ospaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 593, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 595, column 13)
             (_exp1Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 592, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 594, column 13)
             (_exp1Ocol@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 591, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 593, column 12)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,0)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 793, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 795, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 834, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 836, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 938, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 940, column 17)
             (_lhsOval@_) =
                 case _exp2Ival of
                   IntVal 0 -> ErrVal
@@ -7404,19 +7406,19 @@ sem_Exp_HoleExp  =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
             _lhsOtype :: (String)
             _lhsOval :: (Value)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 860, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 862, column 7)
             (_type@_) =
                 "<Hole>"
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 967, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 969, column 17)
             (_lhsOval@_) =
                 ErrVal
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 349, column 17)
@@ -7490,9 +7492,9 @@ sem_Exp_IdentExp (idd_) (ident_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7501,13 +7503,13 @@ sem_Exp_IdentExp (idd_) (ident_) =
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _identIcol :: (Int)
             _identIfirstToken :: (IDP)
-            _identIidsPres :: (Presentation)
+            _identIidsPres :: (PresentationNode)
             _identIlayoutMap :: (LayoutMap)
             _identInewlines :: (Int)
             _identIpIdC :: (Int)
-            _identIpres :: (Presentation)
-            _identIpresTree :: (Presentation)
-            _identIpresXML :: (Presentation)
+            _identIpres :: (PresentationNode)
+            _identIpresTree :: (PresentationNode)
+            _identIpresXML :: (PresentationNode)
             _identIself :: (Ident)
             _identIspaces :: (Int)
             _identIstr :: (String)
@@ -7526,7 +7528,7 @@ sem_Exp_IdentExp (idd_) (ident_) =
             _identOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _identIcol,_identIfirstToken,_identIidsPres,_identIlayoutMap,_identInewlines,_identIpIdC,_identIpres,_identIpresTree,_identIpresXML,_identIself,_identIspaces,_identIstr,_identIvarsInScopeAtFocus) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 316, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 318, column 7)
             (_lhsOpres@_) =
                 loc (IdentExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -7536,13 +7538,13 @@ sem_Exp_IdentExp (idd_) (ident_) =
                             navigateTo $ case lookupFM  _lhsIvarsInScope (strFromIdent _identIself) of
                                            Nothing      -> NoPathD
                                            Just (pth,_) -> pth)]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 809, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 811, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 850, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 852, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 961, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 963, column 20)
             (_lhsOval@_) =
                 case lookup _identIstr _lhsIenv of { Just v -> v; Nothing -> ErrVal }
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 338, column 14)
@@ -7668,9 +7670,9 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7682,9 +7684,9 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7712,9 +7714,9 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7742,9 +7744,9 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
             _exp3IlayoutMap :: (LayoutMap)
             _exp3Inewlines :: (Int)
             _exp3IpIdC :: (Int)
-            _exp3Ipres :: (Presentation)
-            _exp3IpresTree :: (Presentation)
-            _exp3IpresXML :: (Presentation)
+            _exp3Ipres :: (PresentationNode)
+            _exp3IpresTree :: (PresentationNode)
+            _exp3IpresXML :: (PresentationNode)
             _exp3Iself :: (Exp)
             _exp3Ispaces :: (Int)
             _exp3Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -7773,53 +7775,53 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
             ( _exp3Icol,_exp3IlamBody,_exp3IlayoutMap,_exp3Inewlines,_exp3IpIdC,_exp3Ipres,_exp3IpresTree,_exp3IpresXML,_exp3Iself,_exp3Ispaces,_exp3Isubstitute,_exp3Itype,_exp3Ival,_exp3IvarsInScopeAtFocus) =
                 (exp3_ (_exp3Ocol) (_exp3Oenv) (_exp3Oerrs) (_exp3OfocusD) (_exp3Oix) (_exp3OlayoutMap) (_exp3Olevel) (_exp3Onewlines) (_exp3OpIdC) (_exp3Opath) (_exp3Oranges) (_exp3Ospaces) (_exp3OtopLevelEnv) (_exp3OtypeEnv) (_exp3OvarsInScope) (_exp3OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 327, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 329, column 7)
             (_lhsOpres@_) =
                 loc (IfExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row'  $ [ key (mkIDP idP0_ _lhsIpIdC 0) "if",   _exp1Ipres
                           , key (mkIDP idP1_ _lhsIpIdC 1) "then", _exp2Ipres
                           , key (mkIDP idP2_ _lhsIpIdC 2) "else", _exp3Ipres ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 656, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 658, column 11)
             (_exp3Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 655, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 657, column 11)
             (_exp3Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 654, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 656, column 11)
             (_exp2Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 653, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 655, column 11)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 652, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 654, column 11)
             (_exp1Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 651, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 653, column 11)
             (_exp1Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 650, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 652, column 11)
             (_exp3Ocol@_) =
                 _lhsIcol + 4+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 649, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 651, column 11)
             (_exp2Ocol@_) =
                 _lhsIcol + 4+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 648, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 650, column 11)
             (_exp1Ocol@_) =
                 _lhsIcol + 2+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 644, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 646, column 12)
             (_exp1OlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (1,_lhsIcol))
                   , (idP2_, (1,_lhsIcol)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 811, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 813, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 852, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 854, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 962, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 964, column 17)
             (_lhsOval@_) =
                 case _exp1Ival of BoolVal b -> if b then _exp2Ival else _exp3Ival
                                   _         -> ErrVal
@@ -8010,9 +8012,9 @@ sem_Exp_IntExp (idD_) (idP0_) (int__) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8021,9 +8023,9 @@ sem_Exp_IntExp (idD_) (idP0_) (int__) =
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _int_Iint :: (Int)
             _int_IpIdC :: (Int)
-            _int_Ipres :: (Presentation)
-            _int_IpresTree :: (Presentation)
-            _int_IpresXML :: (Presentation)
+            _int_Ipres :: (PresentationNode)
+            _int_IpresTree :: (PresentationNode)
+            _int_IpresXML :: (PresentationNode)
             _int_Iself :: (Int_)
             _int_OfocusD :: (FocusDoc)
             _int_Oix :: (Int)
@@ -8031,24 +8033,24 @@ sem_Exp_IntExp (idD_) (idP0_) (int__) =
             _int_Opath :: ([Int])
             ( _int_Iint,_int_IpIdC,_int_Ipres,_int_IpresTree,_int_IpresXML,_int_Iself) =
                 (int__ (_int_OfocusD) (_int_Oix) (_int_OpIdC) (_int_Opath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 276, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 278, column 7)
             (_lhsOpres@_) =
                 loc (IntExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [cons (mkIDP idP0_ _lhsIpIdC 0) "", _int_Ipres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 606, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 608, column 12)
             (_lhsOcol@_) =
                 _lhsIcol+length (show _int_Iint)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 605, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 607, column 12)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 799, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 801, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 840, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 842, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 947, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 949, column 17)
             (_lhsOval@_) =
                 IntVal _int_Iint
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 324, column 12)
@@ -8128,9 +8130,9 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8139,13 +8141,13 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _identIcol :: (Int)
             _identIfirstToken :: (IDP)
-            _identIidsPres :: (Presentation)
+            _identIidsPres :: (PresentationNode)
             _identIlayoutMap :: (LayoutMap)
             _identInewlines :: (Int)
             _identIpIdC :: (Int)
-            _identIpres :: (Presentation)
-            _identIpresTree :: (Presentation)
-            _identIpresXML :: (Presentation)
+            _identIpres :: (PresentationNode)
+            _identIpresTree :: (PresentationNode)
+            _identIpresXML :: (PresentationNode)
             _identIself :: (Ident)
             _identIspaces :: (Int)
             _identIstr :: (String)
@@ -8167,9 +8169,9 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8196,7 +8198,7 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 281, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 283, column 7)
             (_lhsOpres@_) =
                 loc (LamExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -8206,43 +8208,43 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                        , text' (mkIDP idP1_ _lhsIpIdC 1) ""
                          , key NoIDP "®"    `withFontFam` "symbol"
                        , _expIpres ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 617, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 619, column 13)
             (_lhsOcol@_) =
                 _expIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 616, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 618, column 13)
             (_expOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 615, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 617, column 13)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 614, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 616, column 13)
             (_expOcol@_) =
                 _identIcol + 3
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 613, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 615, column 13)
             (_identOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 612, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 614, column 13)
             (_identOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 611, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 613, column 13)
             (_identOcol@_) =
                 _lhsIcol + 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 608, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 610, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 761, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 763, column 7)
             (_expOvarsInScope@_) =
                 addToFM _lhsIvarsInScope (strFromIdent _identIself)
                                          (PathD $ (_lhsIpath++[0]), _expItype)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 801, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 803, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 842, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 844, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 948, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 950, column 17)
             (_lhsOval@_) =
                 LamVal (\arg ->
                          let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
@@ -8378,9 +8380,9 @@ sem_Exp_LetExp (idD_) (idP0_) (idP1_) (decls_) (exp_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8390,15 +8392,15 @@ sem_Exp_LetExp (idD_) (idP0_) (idP1_) (decls_) (exp_) =
             _declsIcol :: (Int)
             _declsIdcls :: (Bindings)
             _declsIdeclaredVars :: ([(String,(PathDoc,String))])
-            _declsIidsPres :: (Presentation)
+            _declsIidsPres :: (PresentationNode)
             _declsIlayoutMap :: (LayoutMap)
             _declsInewlines :: (Int)
             _declsIpIdC :: (Int)
             _declsIparseErrs :: ([String])
-            _declsIpres :: (Presentation)
-            _declsIpresTree :: (Presentation)
-            _declsIpresXML :: (Presentation)
-            _declsIpress :: ([Presentation])
+            _declsIpres :: (PresentationNode)
+            _declsIpresTree :: (PresentationNode)
+            _declsIpresXML :: (PresentationNode)
+            _declsIpress :: ([PresentationNode])
             _declsIself :: (List_Decl)
             _declsIspaces :: (Int)
             _declsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -8422,9 +8424,9 @@ sem_Exp_LetExp (idD_) (idP0_) (idP1_) (decls_) (exp_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8451,49 +8453,49 @@ sem_Exp_LetExp (idD_) (idP0_) (idP1_) (decls_) (exp_) =
                 (decls_ (_declsOcol) (_declsOenv) (_declsOerrs) (_declsOfocusD) (_declsOlayoutMap) (_declsOlevel) (_declsOnewlines) (_declsOpIdC) (_declsOpath) (_declsOranges) (_declsOspaces) (_declsOtopLevelEnv) (_declsOtypeEnv) (_declsOvarsInScope) (_declsOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 98, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 100, column 7)
             (_declsOlevel@_) =
                 _lhsIlevel + 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 308, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 310, column 7)
             (_lhsOpres@_) =
                 loc (CaseExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [ key (mkIDP idP0_ _lhsIpIdC 0) "let"
                        , loc (List_DeclNode _declsIself []               ) $ parsing $ presentFocus _lhsIfocusD []                 $ row _declsIpress
                        , key (mkIDP idP1_ _lhsIpIdC 1) "in", _expIpres ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 642, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 644, column 11)
             (_expOspaces@_) =
                 2
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 641, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 643, column 11)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 640, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 642, column 11)
             (_declsOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 639, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 641, column 11)
             (_declsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 638, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 640, column 11)
             (_expOcol@_) =
                 _lhsIcol + 3+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 637, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 639, column 11)
             (_declsOcol@_) =
                 _lhsIcol + 3+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 634, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 636, column 13)
             (_declsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (1,_lhsIcol))]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 759, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 761, column 7)
             (_varsInScope@_) =
                 addListToFM _lhsIvarsInScope _declsIdeclaredVars
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 807, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 809, column 7)
             (_declsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 848, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 850, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 957, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 959, column 17)
             (_lhsOval@_) =
                 let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
                       exp_ undefined (_declsIdcls ++ _lhsIenv) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
@@ -8638,9 +8640,9 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8651,9 +8653,9 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsIlayoutMap :: (LayoutMap)
             _expsInewlines :: (Int)
             _expsIpIdC :: (Int)
-            _expsIpresTree :: (Presentation)
-            _expsIpresXML :: (Presentation)
-            _expsIpress :: ([Presentation])
+            _expsIpresTree :: (PresentationNode)
+            _expsIpresXML :: (PresentationNode)
+            _expsIpress :: ([PresentationNode])
             _expsIself :: (List_Exp)
             _expsIspaces :: (Int)
             _expsIvals :: ([Value])
@@ -8675,7 +8677,7 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expsIcol,_expsIlayoutMap,_expsInewlines,_expsIpIdC,_expsIpresTree,_expsIpresXML,_expsIpress,_expsIself,_expsIspaces,_expsIvals,_expsIvarsInScopeAtFocus) =
                 (exps_ (_expsOcol) (_expsOenv) (_expsOerrs) (_expsOfocusD) (_expsOlayoutMap) (_expsOlevel) (_expsOnewlines) (_expsOpIdC) (_expsOpath) (_expsOranges) (_expsOspaces) (_expsOtopLevelEnv) (_expsOtypeEnv) (_expsOvarsInScope) (_expsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 341, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 343, column 7)
             (_lhsOpres@_) =
                 loc (ListExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -8686,36 +8688,36 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
                                 then []
                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
                          ++ [sep (mkIDP idP1_ _lhsIpIdC 1) "]"]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 674, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 676, column 13)
             (_lhsOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 673, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 675, column 13)
             (_lhsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 672, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 674, column 13)
             (_lhsOcol@_) =
                 _expsIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 671, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 673, column 13)
             (_expsOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 670, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 672, column 13)
             (_expsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 669, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 671, column 13)
             (_expsOcol@_) =
                 _lhsIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 666, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 668, column 13)
             (_expsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 815, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 817, column 7)
             (_expsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 856, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 858, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 965, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 967, column 17)
             (_lhsOval@_) =
                 ListVal _expsIvals
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 346, column 13)
@@ -8812,9 +8814,9 @@ sem_Exp_ParenExp (idD_) (idP0_) (idP1_) (exp_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8826,9 +8828,9 @@ sem_Exp_ParenExp (idD_) (idP0_) (idP1_) (exp_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -8853,41 +8855,41 @@ sem_Exp_ParenExp (idD_) (idP0_) (idP1_) (exp_) =
             _expOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 335, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 337, column 7)
             (_lhsOpres@_) =
                 loc (ParenExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row'  [sep (mkIDP idP0_ _lhsIpIdC 0) "(", _expIpres , sep (mkIDP idP1_ _lhsIpIdC 1) ")"]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 665, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 667, column 14)
             (_lhsOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 664, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 666, column 14)
             (_lhsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 663, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 665, column 14)
             (_lhsOcol@_) =
                 _expIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 662, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 664, column 14)
             (_expOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 661, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 663, column 14)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 660, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 662, column 14)
             (_expOcol@_) =
                 _lhsIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 657, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 659, column 14)
             (_expOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 813, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 815, column 7)
             (_expOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 854, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 856, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 964, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 966, column 17)
             (_lhsOval@_) =
                 _expIval
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 344, column 14)
@@ -8961,7 +8963,7 @@ sem_Exp_ParenExp (idD_) (idP0_) (idP1_) (exp_) =
                 _lhsIvarsInScope
         in  ( _lhsOcol,_lhsOlamBody,_lhsOlayoutMap,_lhsOnewlines,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOspaces,_lhsOsubstitute,_lhsOtype,_lhsOval,_lhsOvarsInScopeAtFocus)
 sem_Exp_ParseErrExp :: (Node) ->
-                       (Presentation) ->
+                       (PresentationNode) ->
                        (T_Exp)
 sem_Exp_ParseErrExp (node_) (presentation_) =
     \ _lhsIcol
@@ -8985,19 +8987,19 @@ sem_Exp_ParseErrExp (node_) (presentation_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
             _lhsOtype :: (String)
             _lhsOval :: (Value)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 862, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 864, column 7)
             (_type@_) =
                 "<ParseErr>"
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 968, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 970, column 17)
             (_lhsOval@_) =
                 ErrVal
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 350, column 17)
@@ -9073,9 +9075,9 @@ sem_Exp_PlusExp (idD_) (idP0_) (exp1_) (exp2_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9087,9 +9089,9 @@ sem_Exp_PlusExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9117,9 +9119,9 @@ sem_Exp_PlusExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9146,36 +9148,36 @@ sem_Exp_PlusExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 250, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 252, column 7)
             (_lhsOpres@_) =
                 loc (PlusExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres , op (mkIDP idP0_ _lhsIpIdC 0) "+", _exp2Ipres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 584, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 586, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 583, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 585, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 582, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 584, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 581, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 583, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol + 3
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 580, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 582, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 579, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 581, column 13)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,1)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 789, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 791, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 830, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 832, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 936, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 938, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (+) _exp1Ival _exp2Ival
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 311, column 13)
@@ -9328,9 +9330,9 @@ sem_Exp_PowerExp (idD_) (idP0_) (exp1_) (exp2_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9342,9 +9344,9 @@ sem_Exp_PowerExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9372,9 +9374,9 @@ sem_Exp_PowerExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9401,36 +9403,36 @@ sem_Exp_PowerExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 265, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 267, column 7)
             (_lhsOpres@_) =
                 loc (PowerExpNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   power _exp1Ipres _exp2Ipres
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 604, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 606, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 603, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 605, column 13)
             (_exp2Ospaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 602, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 604, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 601, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 603, column 13)
             (_exp2Ocol@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 600, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 602, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 599, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 601, column 14)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,0)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 795, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 797, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 836, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 838, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 941, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 943, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (^) _exp1Ival _exp2Ival
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 320, column 14)
@@ -9584,9 +9586,9 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9597,9 +9599,9 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsIlayoutMap :: (LayoutMap)
             _expsInewlines :: (Int)
             _expsIpIdC :: (Int)
-            _expsIpresTree :: (Presentation)
-            _expsIpresXML :: (Presentation)
-            _expsIpress :: ([Presentation])
+            _expsIpresTree :: (PresentationNode)
+            _expsIpresXML :: (PresentationNode)
+            _expsIpress :: ([PresentationNode])
             _expsIself :: (List_Exp)
             _expsIspaces :: (Int)
             _expsIvals :: ([Value])
@@ -9621,7 +9623,7 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expsIcol,_expsIlayoutMap,_expsInewlines,_expsIpIdC,_expsIpresTree,_expsIpresXML,_expsIpress,_expsIself,_expsIspaces,_expsIvals,_expsIvarsInScopeAtFocus) =
                 (exps_ (_expsOcol) (_expsOenv) (_expsOerrs) (_expsOfocusD) (_expsOlayoutMap) (_expsOlevel) (_expsOnewlines) (_expsOpIdC) (_expsOpath) (_expsOranges) (_expsOspaces) (_expsOtopLevelEnv) (_expsOtypeEnv) (_expsOvarsInScope) (_expsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 351, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 353, column 7)
             (_lhsOpres@_) =
                 loc (ProductExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -9632,36 +9634,36 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
                                 then []
                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
                          ++ [sep (mkIDP idP1_ _lhsIpIdC 1) ")"]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 683, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 685, column 13)
             (_lhsOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 682, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 684, column 13)
             (_lhsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 681, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 683, column 13)
             (_lhsOcol@_) =
                 _expsIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 680, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 682, column 13)
             (_expsOspaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 679, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 681, column 13)
             (_expsOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 678, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 680, column 13)
             (_expsOcol@_) =
                 _lhsIcol + 1+1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 675, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 677, column 16)
             (_expsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 817, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 819, column 7)
             (_expsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 858, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 860, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 966, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 968, column 17)
             (_lhsOval@_) =
                 ProdVal _expsIvals
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 348, column 16)
@@ -9758,9 +9760,9 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Exp)
             _lhsOspaces :: (Int)
             _lhsOsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9772,9 +9774,9 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp1IlayoutMap :: (LayoutMap)
             _exp1Inewlines :: (Int)
             _exp1IpIdC :: (Int)
-            _exp1Ipres :: (Presentation)
-            _exp1IpresTree :: (Presentation)
-            _exp1IpresXML :: (Presentation)
+            _exp1Ipres :: (PresentationNode)
+            _exp1IpresTree :: (PresentationNode)
+            _exp1IpresXML :: (PresentationNode)
             _exp1Iself :: (Exp)
             _exp1Ispaces :: (Int)
             _exp1Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9802,9 +9804,9 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
             _exp2IlayoutMap :: (LayoutMap)
             _exp2Inewlines :: (Int)
             _exp2IpIdC :: (Int)
-            _exp2Ipres :: (Presentation)
-            _exp2IpresTree :: (Presentation)
-            _exp2IpresXML :: (Presentation)
+            _exp2Ipres :: (PresentationNode)
+            _exp2IpresTree :: (PresentationNode)
+            _exp2IpresXML :: (PresentationNode)
             _exp2Iself :: (Exp)
             _exp2Ispaces :: (Int)
             _exp2Isubstitute :: (( [(String, Exp)] -> Exp ))
@@ -9831,36 +9833,36 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 255, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 257, column 7)
             (_lhsOpres@_) =
                 loc (TimesExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres , op (mkIDP idP0_ _lhsIpIdC 0) "*", _exp2Ipres]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 590, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 592, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 589, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 591, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 588, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 590, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 587, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 589, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol + 3
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 586, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 588, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 585, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 587, column 14)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,1)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 791, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 793, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 832, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 834, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 937, column 17)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 939, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (*) _exp1Ival _exp2Ival
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 314, column 14)
@@ -10006,10 +10008,10 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
 
    synthesised attributes:
       firstToken           : IDP
-      idsPres              : Presentation
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      idsPres              : PresentationNode
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
       str                  : String
 
@@ -10042,7 +10044,7 @@ type T_Ident = (Int) ->
                (Int) ->
                (FiniteMap String (PathDoc, String)) ->
                (FiniteMap String (PathDoc, String)) ->
-               ( (Int),(IDP),(Presentation),(LayoutMap),(Int),(Int),(Presentation),(Presentation),(Presentation),(Ident),(Int),(String),(FiniteMap String (PathDoc, String)))
+               ( (Int),(IDP),(PresentationNode),(LayoutMap),(Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Ident),(Int),(String),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Ident :: (Ident) ->
              (T_Ident)
@@ -10053,7 +10055,7 @@ sem_Ident ((Ident (_idD) (_idP0) (_idP1) (_string_))) =
 sem_Ident ((ParseErrIdent (_node) (_presentation))) =
     (sem_Ident_ParseErrIdent (_node) (_presentation))
 data Inh_Ident = Inh_Ident {col_Inh_Ident :: Int,focusD_Inh_Ident :: FocusDoc,ix_Inh_Ident :: Int,layoutMap_Inh_Ident :: LayoutMap,level_Inh_Ident :: Int,newlines_Inh_Ident :: Int,pIdC_Inh_Ident :: Int,path_Inh_Ident :: [Int],ranges_Inh_Ident :: ([PathDoc],[PathDoc],[PathDoc]),spaces_Inh_Ident :: Int,varsInScope_Inh_Ident :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_Ident :: FiniteMap String (PathDoc, String)}
-data Syn_Ident = Syn_Ident {col_Syn_Ident :: Int,firstToken_Syn_Ident :: IDP,idsPres_Syn_Ident :: Presentation,layoutMap_Syn_Ident :: LayoutMap,newlines_Syn_Ident :: Int,pIdC_Syn_Ident :: Int,pres_Syn_Ident :: Presentation,presTree_Syn_Ident :: Presentation,presXML_Syn_Ident :: Presentation,self_Syn_Ident :: Ident,spaces_Syn_Ident :: Int,str_Syn_Ident :: String,varsInScopeAtFocus_Syn_Ident :: FiniteMap String (PathDoc, String)}
+data Syn_Ident = Syn_Ident {col_Syn_Ident :: Int,firstToken_Syn_Ident :: IDP,idsPres_Syn_Ident :: PresentationNode,layoutMap_Syn_Ident :: LayoutMap,newlines_Syn_Ident :: Int,pIdC_Syn_Ident :: Int,pres_Syn_Ident :: PresentationNode,presTree_Syn_Ident :: PresentationNode,presXML_Syn_Ident :: PresentationNode,self_Syn_Ident :: Ident,spaces_Syn_Ident :: Int,str_Syn_Ident :: String,varsInScopeAtFocus_Syn_Ident :: FiniteMap String (PathDoc, String)}
 wrap_Ident :: (T_Ident) ->
               (Inh_Ident) ->
               (Syn_Ident)
@@ -10077,24 +10079,24 @@ sem_Ident_HoleIdent  =
       _lhsIvarsInScopeAtFocus ->
         let _lhsOcol :: (Int)
             _lhsOfirstToken :: (IDP)
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Ident)
             _lhsOspaces :: (Int)
             _lhsOstr :: (String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 572, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 574, column 12)
             (_lhsOfirstToken@_) =
                 NoIDP
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 932, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 934, column 19)
             (_lhsOstr@_) =
                 ""
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1105, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1107, column 24)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Ident" (HoleIdentNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 300, column 19)
@@ -10151,22 +10153,22 @@ sem_Ident_Ident (idD_) (idP0_) (idP1_) (string__) =
       _lhsIvarsInScopeAtFocus ->
         let _lhsOcol :: (Int)
             _lhsOfirstToken :: (IDP)
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Ident)
             _lhsOspaces :: (Int)
             _lhsOstr :: (String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _string_Ilength :: (Int)
             _string_IpIdC :: (Int)
-            _string_Ipres :: (Presentation)
-            _string_IpresTree :: (Presentation)
-            _string_IpresXML :: (Presentation)
+            _string_Ipres :: (PresentationNode)
+            _string_IpresTree :: (PresentationNode)
+            _string_IpresXML :: (PresentationNode)
             _string_Iself :: (String_)
             _string_Istr :: (String)
             _string_OfocusD :: (FocusDoc)
@@ -10175,27 +10177,27 @@ sem_Ident_Ident (idD_) (idP0_) (idP1_) (string__) =
             _string_Opath :: ([Int])
             ( _string_Ilength,_string_IpIdC,_string_Ipres,_string_IpresTree,_string_IpresXML,_string_Iself,_string_Istr) =
                 (string__ (_string_OfocusD) (_string_Oix) (_string_OpIdC) (_string_Opath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 236, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 238, column 7)
             (_lhsOpres@_) =
                 loc (IdentNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
                   row' [ text' (mkIDP idP0_ _lhsIpIdC 0)  "", _string_Ipres, text ""]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 568, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 570, column 12)
             (_lhsOfirstToken@_) =
                 idP0_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 567, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 569, column 12)
             (_lhsOcol@_) =
                 _lhsIcol+ length _string_Istr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 566, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 568, column 12)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 783, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 785, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 931, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 933, column 19)
             (_lhsOstr@_) =
                 _string_Istr
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1103, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1105, column 24)
             (_lhsOidsPres@_) =
                 loc (IdentNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ _string_Ipres ]
@@ -10234,7 +10236,7 @@ sem_Ident_Ident (idD_) (idP0_) (idP1_) (string__) =
                 _lhsIix
         in  ( _lhsOcol,_lhsOfirstToken,_lhsOidsPres,_lhsOlayoutMap,_lhsOnewlines,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOspaces,_lhsOstr,_lhsOvarsInScopeAtFocus)
 sem_Ident_ParseErrIdent :: (Node) ->
-                           (Presentation) ->
+                           (PresentationNode) ->
                            (T_Ident)
 sem_Ident_ParseErrIdent (node_) (presentation_) =
     \ _lhsIcol
@@ -10251,24 +10253,24 @@ sem_Ident_ParseErrIdent (node_) (presentation_) =
       _lhsIvarsInScopeAtFocus ->
         let _lhsOcol :: (Int)
             _lhsOfirstToken :: (IDP)
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Ident)
             _lhsOspaces :: (Int)
             _lhsOstr :: (String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 570, column 12)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 572, column 12)
             (_lhsOfirstToken@_) =
                 NoIDP
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 933, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 935, column 19)
             (_lhsOstr@_) =
                 ""
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1106, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1108, column 24)
             (_lhsOidsPres@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 301, column 19)
@@ -10317,9 +10319,9 @@ sem_Ident_ParseErrIdent (node_) (presentation_) =
 
    synthesised attributes:
       int                  : Int
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -10343,7 +10345,7 @@ type T_Int_ = (FocusDoc) ->
               (Int) ->
               (Int) ->
               ([Int]) ->
-              ( (Int),(Int),(Presentation),(Presentation),(Presentation),(Int_))
+              ( (Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(Int_))
 -- cata
 sem_Int_ :: (Int_) ->
             (T_Int_)
@@ -10354,7 +10356,7 @@ sem_Int_ ((Int_ (_idd) (_int))) =
 sem_Int_ ((ParseErrInt_ (_node) (_presentation))) =
     (sem_Int__ParseErrInt_ (_node) (_presentation))
 data Inh_Int_ = Inh_Int_ {focusD_Inh_Int_ :: FocusDoc,ix_Inh_Int_ :: Int,pIdC_Inh_Int_ :: Int,path_Inh_Int_ :: [Int]}
-data Syn_Int_ = Syn_Int_ {int_Syn_Int_ :: Int,pIdC_Syn_Int_ :: Int,pres_Syn_Int_ :: Presentation,presTree_Syn_Int_ :: Presentation,presXML_Syn_Int_ :: Presentation,self_Syn_Int_ :: Int_}
+data Syn_Int_ = Syn_Int_ {int_Syn_Int_ :: Int,pIdC_Syn_Int_ :: Int,pres_Syn_Int_ :: PresentationNode,presTree_Syn_Int_ :: PresentationNode,presXML_Syn_Int_ :: PresentationNode,self_Syn_Int_ :: Int_}
 wrap_Int_ :: (T_Int_) ->
              (Inh_Int_) ->
              (Syn_Int_)
@@ -10370,11 +10372,11 @@ sem_Int__HoleInt_  =
       _lhsIpath ->
         let _lhsOint :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Int_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1466, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1468, column 13)
             (_lhsOint@_) =
                 0
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 645, column 18)
@@ -10406,15 +10408,15 @@ sem_Int__Int_ (idd_) (int_) =
       _lhsIpath ->
         let _lhsOint :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Int_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1460, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1462, column 7)
             (_lhsOpres@_) =
                 loc (Int_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text $ show int_, text ""]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1464, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1466, column 13)
             (_lhsOint@_) =
                 int_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 1003, column 7)
@@ -10434,7 +10436,7 @@ sem_Int__Int_ (idd_) (int_) =
                 _lhsIpIdC
         in  ( _lhsOint,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_Int__ParseErrInt_ :: (Node) ->
-                         (Presentation) ->
+                         (PresentationNode) ->
                          (T_Int_)
 sem_Int__ParseErrInt_ (node_) (presentation_) =
     \ _lhsIfocusD
@@ -10443,11 +10445,11 @@ sem_Int__ParseErrInt_ (node_) (presentation_) =
       _lhsIpath ->
         let _lhsOint :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Int_)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1466, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1468, column 13)
             (_lhsOint@_) =
                 0
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 646, column 18)
@@ -10480,9 +10482,9 @@ sem_Int__ParseErrInt_ (node_) (presentation_) =
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -10506,7 +10508,7 @@ type T_Inv = (FocusDoc) ->
              (Int) ->
              (Int) ->
              ([Int]) ->
-             ( (Int),(Presentation),(Presentation),(Presentation),(Inv))
+             ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(Inv))
 -- cata
 sem_Inv :: (Inv) ->
            (T_Inv)
@@ -10517,7 +10519,7 @@ sem_Inv ((Inv (_idd) (_doc) (_enr) (_eval) (_evalButton))) =
 sem_Inv ((ParseErrInv (_node) (_presentation))) =
     (sem_Inv_ParseErrInv (_node) (_presentation))
 data Inh_Inv = Inh_Inv {focusD_Inh_Inv :: FocusDoc,ix_Inh_Inv :: Int,pIdC_Inh_Inv :: Int,path_Inh_Inv :: [Int]}
-data Syn_Inv = Syn_Inv {pIdC_Syn_Inv :: Int,pres_Syn_Inv :: Presentation,presTree_Syn_Inv :: Presentation,presXML_Syn_Inv :: Presentation,self_Syn_Inv :: Inv}
+data Syn_Inv = Syn_Inv {pIdC_Syn_Inv :: Int,pres_Syn_Inv :: PresentationNode,presTree_Syn_Inv :: PresentationNode,presXML_Syn_Inv :: PresentationNode,self_Syn_Inv :: Inv}
 wrap_Inv :: (T_Inv) ->
             (Inh_Inv) ->
             (Syn_Inv)
@@ -10532,9 +10534,9 @@ sem_Inv_HoleInv  =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Inv)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 537, column 17)
             (_lhsOpres@_) =
@@ -10567,23 +10569,23 @@ sem_Inv_Inv (idd_) (doc_) (enr_) (eval_) (evalButton_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Inv)
             _docIpIdC :: (Int)
-            _docIpres :: (Presentation)
-            _docIpresTree :: (Presentation)
-            _docIpresXML :: (Presentation)
+            _docIpres :: (PresentationNode)
+            _docIpresTree :: (PresentationNode)
+            _docIpresXML :: (PresentationNode)
             _docIself :: (EitherDocView)
             _docOfocusD :: (FocusDoc)
             _docOix :: (Int)
             _docOpIdC :: (Int)
             _docOpath :: ([Int])
             _enrIpIdC :: (Int)
-            _enrIpres :: (Presentation)
-            _enrIpresTree :: (Presentation)
-            _enrIpresXML :: (Presentation)
+            _enrIpres :: (PresentationNode)
+            _enrIpresTree :: (PresentationNode)
+            _enrIpresXML :: (PresentationNode)
             _enrIself :: (View)
             _enrOfocusD :: (FocusDoc)
             _enrOix :: (Int)
@@ -10591,9 +10593,9 @@ sem_Inv_Inv (idd_) (doc_) (enr_) (eval_) (evalButton_) =
             _enrOpath :: ([Int])
             _evalIlength :: (Int)
             _evalIpIdC :: (Int)
-            _evalIpres :: (Presentation)
-            _evalIpresTree :: (Presentation)
-            _evalIpresXML :: (Presentation)
+            _evalIpres :: (PresentationNode)
+            _evalIpresTree :: (PresentationNode)
+            _evalIpresXML :: (PresentationNode)
             _evalIself :: (String_)
             _evalIstr :: (String)
             _evalOfocusD :: (FocusDoc)
@@ -10601,9 +10603,9 @@ sem_Inv_Inv (idd_) (doc_) (enr_) (eval_) (evalButton_) =
             _evalOpIdC :: (Int)
             _evalOpath :: ([Int])
             _evalButtonIpIdC :: (Int)
-            _evalButtonIpres :: (Presentation)
-            _evalButtonIpresTree :: (Presentation)
-            _evalButtonIpresXML :: (Presentation)
+            _evalButtonIpres :: (PresentationNode)
+            _evalButtonIpresTree :: (PresentationNode)
+            _evalButtonIpresXML :: (PresentationNode)
             _evalButtonIself :: (EvalButton)
             _evalButtonOfocusD :: (FocusDoc)
             _evalButtonOix :: (Int)
@@ -10689,7 +10691,7 @@ sem_Inv_Inv (idd_) (doc_) (enr_) (eval_) (evalButton_) =
                 _lhsIix
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_Inv_ParseErrInv :: (Node) ->
-                       (Presentation) ->
+                       (PresentationNode) ->
                        (T_Inv)
 sem_Inv_ParseErrInv (node_) (presentation_) =
     \ _lhsIfocusD
@@ -10697,9 +10699,9 @@ sem_Inv_ParseErrInv (node_) (presentation_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Inv)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 538, column 17)
             (_lhsOpres@_) =
@@ -10728,7 +10730,7 @@ sem_Inv_ParseErrInv (node_) (presentation_) =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      typeLoc              : Presentation -> Presentation
+      typeLoc              : PresentationNode -> PresentationNode
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -10736,10 +10738,10 @@ sem_Inv_ParseErrInv (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -10775,10 +10777,10 @@ type T_Item = (FocusDoc) ->
               (Int) ->
               ([Int]) ->
               (([PathDoc],[PathDoc],[PathDoc])) ->
-              (Presentation -> Presentation) ->
+              (PresentationNode -> PresentationNode) ->
               (FiniteMap String (PathDoc, String)) ->
               (FiniteMap String (PathDoc, String)) ->
-              ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(Item),(FiniteMap String (PathDoc, String)))
+              ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),(Item),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Item :: (Item) ->
             (T_Item)
@@ -10792,8 +10794,8 @@ sem_Item ((ParseErrItem (_node) (_presentation))) =
     (sem_Item_ParseErrItem (_node) (_presentation))
 sem_Item ((StringItem (_idd) (_string))) =
     (sem_Item_StringItem (_idd) ((sem_String_ (_string))))
-data Inh_Item = Inh_Item {focusD_Inh_Item :: FocusDoc,ix_Inh_Item :: Int,listType_Inh_Item :: ListType,pIdC_Inh_Item :: Int,path_Inh_Item :: [Int],ranges_Inh_Item :: ([PathDoc],[PathDoc],[PathDoc]),typeLoc_Inh_Item :: Presentation -> Presentation,varsInScope_Inh_Item :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_Item :: FiniteMap String (PathDoc, String)}
-data Syn_Item = Syn_Item {pIdC_Syn_Item :: Int,pres_Syn_Item :: Presentation,pres2_Syn_Item :: Presentation,presTree_Syn_Item :: Presentation,presXML_Syn_Item :: Presentation,self_Syn_Item :: Item,varsInScopeAtFocus_Syn_Item :: FiniteMap String (PathDoc, String)}
+data Inh_Item = Inh_Item {focusD_Inh_Item :: FocusDoc,ix_Inh_Item :: Int,listType_Inh_Item :: ListType,pIdC_Inh_Item :: Int,path_Inh_Item :: [Int],ranges_Inh_Item :: ([PathDoc],[PathDoc],[PathDoc]),typeLoc_Inh_Item :: PresentationNode -> PresentationNode,varsInScope_Inh_Item :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_Item :: FiniteMap String (PathDoc, String)}
+data Syn_Item = Syn_Item {pIdC_Syn_Item :: Int,pres_Syn_Item :: PresentationNode,pres2_Syn_Item :: PresentationNode,presTree_Syn_Item :: PresentationNode,presXML_Syn_Item :: PresentationNode,self_Syn_Item :: Item,varsInScopeAtFocus_Syn_Item :: FiniteMap String (PathDoc, String)}
 wrap_Item :: (T_Item) ->
              (Inh_Item) ->
              (Syn_Item)
@@ -10815,10 +10817,10 @@ sem_Item_HeliumItem (idd_) (exp_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _expIcol :: (Int)
@@ -10826,9 +10828,9 @@ sem_Item_HeliumItem (idd_) (exp_) =
             _expIlayoutMap :: (LayoutMap)
             _expInewlines :: (Int)
             _expIpIdC :: (Int)
-            _expIpres :: (Presentation)
-            _expIpresTree :: (Presentation)
-            _expIpresXML :: (Presentation)
+            _expIpres :: (PresentationNode)
+            _expIpresTree :: (PresentationNode)
+            _expIpresXML :: (PresentationNode)
             _expIself :: (Exp)
             _expIspaces :: (Int)
             _expIsubstitute :: (( [(String, Exp)] -> Exp ))
@@ -10853,41 +10855,41 @@ sem_Item_HeliumItem (idd_) (exp_) =
             _expOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1142, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1144, column 16)
             (_expOenv@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1141, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1143, column 16)
             (_expOtopLevelEnv@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1140, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1142, column 16)
             (_expOtypeEnv@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1139, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1141, column 16)
             (_expOerrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1137, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1139, column 16)
             (_expOlayoutMap@_) =
                 emptyFM
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1136, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1138, column 16)
             (_expOlevel@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1134, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1136, column 16)
             (_expOspaces@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1133, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1135, column 16)
             (_expOnewlines@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1132, column 16)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1134, column 16)
             (_expOcol@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1253, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1255, column 20)
             (_lhsOpres@_) =
                 loc (HeliumItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ text "<heliumItem>"
                        , row [text "  ", _expIpres]
                        , text "</heliumItem>"
                        ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1364, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1366, column 20)
             (_lhsOpres2@_) =
                 loc (HeliumItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [itemStart _lhsIix _lhsIlistType _lhsItypeLoc, _expIpres
@@ -10946,13 +10948,13 @@ sem_Item_HoleItem  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1418, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1420, column 18)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "Item" (HoleItemNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 521, column 18)
@@ -10991,17 +10993,17 @@ sem_Item_ListItem (idd_) (itemList_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _itemListIpIdC :: (Int)
-            _itemListIpres :: (Presentation)
-            _itemListIpres2 :: (Presentation)
-            _itemListIpresTree :: (Presentation)
-            _itemListIpresXML :: (Presentation)
+            _itemListIpres :: (PresentationNode)
+            _itemListIpres2 :: (PresentationNode)
+            _itemListIpresTree :: (PresentationNode)
+            _itemListIpresXML :: (PresentationNode)
             _itemListIself :: (ItemList)
             _itemListIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _itemListOfocusD :: (FocusDoc)
@@ -11013,14 +11015,14 @@ sem_Item_ListItem (idd_) (itemList_) =
             _itemListOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _itemListIpIdC,_itemListIpres,_itemListIpres2,_itemListIpresTree,_itemListIpresXML,_itemListIself,_itemListIvarsInScopeAtFocus) =
                 (itemList_ (_itemListOfocusD) (_itemListOix) (_itemListOpIdC) (_itemListOpath) (_itemListOranges) (_itemListOvarsInScope) (_itemListOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1258, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1260, column 20)
             (_lhsOpres@_) =
                 loc (ListItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ text "<listItem>"
                        , row [text "  ", _itemListIpres]
                        , text "</listItem>"
                        ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1369, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1371, column 20)
             (_lhsOpres2@_) =
                 loc (ListItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ hSpace 25,
@@ -11068,7 +11070,7 @@ sem_Item_ListItem (idd_) (itemList_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_Item_ParseErrItem :: (Node) ->
-                         (Presentation) ->
+                         (PresentationNode) ->
                          (T_Item)
 sem_Item_ParseErrItem (node_) (presentation_) =
     \ _lhsIfocusD
@@ -11081,13 +11083,13 @@ sem_Item_ParseErrItem (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1419, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1421, column 18)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 522, column 18)
@@ -11126,17 +11128,17 @@ sem_Item_StringItem (idd_) (string_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _stringIlength :: (Int)
             _stringIpIdC :: (Int)
-            _stringIpres :: (Presentation)
-            _stringIpresTree :: (Presentation)
-            _stringIpresXML :: (Presentation)
+            _stringIpres :: (PresentationNode)
+            _stringIpresTree :: (PresentationNode)
+            _stringIpresXML :: (PresentationNode)
             _stringIself :: (String_)
             _stringIstr :: (String)
             _stringOfocusD :: (FocusDoc)
@@ -11145,11 +11147,11 @@ sem_Item_StringItem (idd_) (string_) =
             _stringOpath :: ([Int])
             ( _stringIlength,_stringIpIdC,_stringIpres,_stringIpresTree,_stringIpresXML,_stringIself,_stringIstr) =
                 (string_ (_stringOfocusD) (_stringOix) (_stringOpIdC) (_stringOpath))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1251, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1253, column 20)
             (_lhsOpres@_) =
                 loc (StringItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    row' [ text "<stringItem>", _stringIpres `withColor` darkViolet, text "</stringItem>" ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1362, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1364, column 20)
             (_lhsOpres2@_) =
                 loc (StringItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [itemStart _lhsIix _lhsIlistType _lhsItypeLoc, _stringIpres]
@@ -11198,10 +11200,10 @@ sem_Item_StringItem (idd_) (string_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -11228,7 +11230,7 @@ type T_ItemList = (FocusDoc) ->
                   (([PathDoc],[PathDoc],[PathDoc])) ->
                   (FiniteMap String (PathDoc, String)) ->
                   (FiniteMap String (PathDoc, String)) ->
-                  ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(ItemList),(FiniteMap String (PathDoc, String)))
+                  ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),(ItemList),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ItemList :: (ItemList) ->
                 (T_ItemList)
@@ -11239,7 +11241,7 @@ sem_ItemList ((ItemList (_idd) (_listType) (_items))) =
 sem_ItemList ((ParseErrItemList (_node) (_presentation))) =
     (sem_ItemList_ParseErrItemList (_node) (_presentation))
 data Inh_ItemList = Inh_ItemList {focusD_Inh_ItemList :: FocusDoc,ix_Inh_ItemList :: Int,pIdC_Inh_ItemList :: Int,path_Inh_ItemList :: [Int],ranges_Inh_ItemList :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_ItemList :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_ItemList :: FiniteMap String (PathDoc, String)}
-data Syn_ItemList = Syn_ItemList {pIdC_Syn_ItemList :: Int,pres_Syn_ItemList :: Presentation,pres2_Syn_ItemList :: Presentation,presTree_Syn_ItemList :: Presentation,presXML_Syn_ItemList :: Presentation,self_Syn_ItemList :: ItemList,varsInScopeAtFocus_Syn_ItemList :: FiniteMap String (PathDoc, String)}
+data Syn_ItemList = Syn_ItemList {pIdC_Syn_ItemList :: Int,pres_Syn_ItemList :: PresentationNode,pres2_Syn_ItemList :: PresentationNode,presTree_Syn_ItemList :: PresentationNode,presXML_Syn_ItemList :: PresentationNode,self_Syn_ItemList :: ItemList,varsInScopeAtFocus_Syn_ItemList :: FiniteMap String (PathDoc, String)}
 wrap_ItemList :: (T_ItemList) ->
                  (Inh_ItemList) ->
                  (Syn_ItemList)
@@ -11257,13 +11259,13 @@ sem_ItemList_HoleItemList  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ItemList)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1406, column 22)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1408, column 22)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "ItemList" (HoleItemListNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 500, column 22)
@@ -11301,19 +11303,19 @@ sem_ItemList_ItemList (idd_) (listType_) (items_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ItemList)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _listTypeIpIdC :: (Int)
-            _listTypeIpres :: (Presentation)
-            _listTypeIpres2 :: (Presentation)
-            _listTypeIpresTree :: (Presentation)
-            _listTypeIpresXML :: (Presentation)
+            _listTypeIpres :: (PresentationNode)
+            _listTypeIpres2 :: (PresentationNode)
+            _listTypeIpresTree :: (PresentationNode)
+            _listTypeIpresXML :: (PresentationNode)
             _listTypeIself :: (ListType)
-            _listTypeItypeLoc :: (Presentation -> Presentation)
+            _listTypeItypeLoc :: (PresentationNode -> PresentationNode)
             _listTypeIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _listTypeOfocusD :: (FocusDoc)
             _listTypeOix :: (Int)
@@ -11323,12 +11325,12 @@ sem_ItemList_ItemList (idd_) (listType_) (items_) =
             _listTypeOvarsInScope :: (FiniteMap String (PathDoc, String))
             _listTypeOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _itemsIpIdC :: (Int)
-            _itemsIpres :: (Presentation)
-            _itemsIpres2 :: (Presentation)
-            _itemsIpresTree :: (Presentation)
-            _itemsIpresXML :: (Presentation)
-            _itemsIpress :: ([Presentation])
-            _itemsIpress2 :: ([Presentation])
+            _itemsIpres :: (PresentationNode)
+            _itemsIpres2 :: (PresentationNode)
+            _itemsIpresTree :: (PresentationNode)
+            _itemsIpresXML :: (PresentationNode)
+            _itemsIpress :: ([PresentationNode])
+            _itemsIpress2 :: ([PresentationNode])
             _itemsIself :: (List_Item)
             _itemsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _itemsOfocusD :: (FocusDoc)
@@ -11336,27 +11338,27 @@ sem_ItemList_ItemList (idd_) (listType_) (items_) =
             _itemsOpIdC :: (Int)
             _itemsOpath :: ([Int])
             _itemsOranges :: (([PathDoc],[PathDoc],[PathDoc]))
-            _itemsOtypeLoc :: (Presentation -> Presentation)
+            _itemsOtypeLoc :: (PresentationNode -> PresentationNode)
             _itemsOvarsInScope :: (FiniteMap String (PathDoc, String))
             _itemsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _listTypeIpIdC,_listTypeIpres,_listTypeIpres2,_listTypeIpresTree,_listTypeIpresXML,_listTypeIself,_listTypeItypeLoc,_listTypeIvarsInScopeAtFocus) =
                 (listType_ (_listTypeOfocusD) (_listTypeOix) (_listTypeOpIdC) (_listTypeOpath) (_listTypeOranges) (_listTypeOvarsInScope) (_listTypeOvarsInScopeAtFocus))
             ( _itemsIpIdC,_itemsIpres,_itemsIpres2,_itemsIpresTree,_itemsIpresXML,_itemsIpress,_itemsIpress2,_itemsIself,_itemsIvarsInScopeAtFocus) =
                 (items_ (_itemsOfocusD) (_itemsOlistType) (_itemsOpIdC) (_itemsOpath) (_itemsOranges) (_itemsOtypeLoc) (_itemsOvarsInScope) (_itemsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1220, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1222, column 14)
             (_lhsOpres@_) =
                 loc (ItemListNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ row' [ text "<itemList style=", row' [text "\"", _listTypeIpres, text "\""] `withColor` darkViolet, text ">"]
                        , _itemsIpres
                        , text "</itemList>"
                     ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1331, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1333, column 13)
             (_itemsOtypeLoc@_) =
                 _listTypeItypeLoc
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1330, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1332, column 13)
             (_itemsOlistType@_) =
                 _listTypeIself
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1325, column 14)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1327, column 14)
             (_lhsOpres2@_) =
                 loc (ItemListNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ _listTypeIpres2
@@ -11421,7 +11423,7 @@ sem_ItemList_ItemList (idd_) (listType_) (items_) =
                 _listTypeIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_ItemList_ParseErrItemList :: (Node) ->
-                                 (Presentation) ->
+                                 (PresentationNode) ->
                                  (T_ItemList)
 sem_ItemList_ParseErrItemList (node_) (presentation_) =
     \ _lhsIfocusD
@@ -11432,13 +11434,13 @@ sem_ItemList_ParseErrItemList (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ItemList)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1407, column 22)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1409, column 22)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 501, column 22)
@@ -11477,12 +11479,12 @@ sem_ItemList_ParseErrItemList (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
-      typeLoc              : Presentation -> Presentation
+      typeLoc              : PresentationNode -> PresentationNode
 
 -}
 {-
@@ -11518,7 +11520,7 @@ type T_ListType = (FocusDoc) ->
                   (([PathDoc],[PathDoc],[PathDoc])) ->
                   (FiniteMap String (PathDoc, String)) ->
                   (FiniteMap String (PathDoc, String)) ->
-                  ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(ListType),(Presentation -> Presentation),(FiniteMap String (PathDoc, String)))
+                  ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),(ListType),(PresentationNode -> PresentationNode),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_ListType :: (ListType) ->
                 (T_ListType)
@@ -11533,7 +11535,7 @@ sem_ListType ((Number (_idd))) =
 sem_ListType ((ParseErrListType (_node) (_presentation))) =
     (sem_ListType_ParseErrListType (_node) (_presentation))
 data Inh_ListType = Inh_ListType {focusD_Inh_ListType :: FocusDoc,ix_Inh_ListType :: Int,pIdC_Inh_ListType :: Int,path_Inh_ListType :: [Int],ranges_Inh_ListType :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_ListType :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_ListType :: FiniteMap String (PathDoc, String)}
-data Syn_ListType = Syn_ListType {pIdC_Syn_ListType :: Int,pres_Syn_ListType :: Presentation,pres2_Syn_ListType :: Presentation,presTree_Syn_ListType :: Presentation,presXML_Syn_ListType :: Presentation,self_Syn_ListType :: ListType,typeLoc_Syn_ListType :: Presentation -> Presentation,varsInScopeAtFocus_Syn_ListType :: FiniteMap String (PathDoc, String)}
+data Syn_ListType = Syn_ListType {pIdC_Syn_ListType :: Int,pres_Syn_ListType :: PresentationNode,pres2_Syn_ListType :: PresentationNode,presTree_Syn_ListType :: PresentationNode,presXML_Syn_ListType :: PresentationNode,self_Syn_ListType :: ListType,typeLoc_Syn_ListType :: PresentationNode -> PresentationNode,varsInScopeAtFocus_Syn_ListType :: FiniteMap String (PathDoc, String)}
 wrap_ListType :: (T_ListType) ->
                  (Inh_ListType) ->
                  (Syn_ListType)
@@ -11552,21 +11554,21 @@ sem_ListType_Alpha (idd_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ListType)
-            _lhsOtypeLoc :: (Presentation -> Presentation)
+            _lhsOtypeLoc :: (PresentationNode -> PresentationNode)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1247, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1249, column 20)
             (_lhsOpres@_) =
                 loc (AlphaNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Alpha"
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1342, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1344, column 20)
             (_lhsOtypeLoc@_) =
                 loc (AlphaNode _self _lhsIpath)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1340, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1342, column 20)
             (_lhsOpres2@_) =
                 loc (AlphaNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -11600,21 +11602,21 @@ sem_ListType_Bullet (idd_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ListType)
-            _lhsOtypeLoc :: (Presentation -> Presentation)
+            _lhsOtypeLoc :: (PresentationNode -> PresentationNode)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1243, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1245, column 20)
             (_lhsOpres@_) =
                 loc (BulletNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Bullet"
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1336, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1338, column 20)
             (_lhsOtypeLoc@_) =
                 loc (BulletNode _self _lhsIpath)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1334, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1336, column 20)
             (_lhsOpres2@_) =
                 loc (BulletNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -11647,17 +11649,17 @@ sem_ListType_HoleListType  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ListType)
-            _lhsOtypeLoc :: (Presentation -> Presentation)
+            _lhsOtypeLoc :: (PresentationNode -> PresentationNode)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1344, column 18)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1346, column 18)
             (_lhsOtypeLoc@_) =
                 id
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1410, column 22)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1412, column 22)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "ListType" (HoleListTypeNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 510, column 22)
@@ -11693,21 +11695,21 @@ sem_ListType_Number (idd_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ListType)
-            _lhsOtypeLoc :: (Presentation -> Presentation)
+            _lhsOtypeLoc :: (PresentationNode -> PresentationNode)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1245, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1247, column 20)
             (_lhsOpres@_) =
                 loc (NumberNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Number"
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1339, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1341, column 20)
             (_lhsOtypeLoc@_) =
                 loc (NumberNode _self _lhsIpath)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1337, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1339, column 20)
             (_lhsOpres2@_) =
                 loc (NumberNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -11731,7 +11733,7 @@ sem_ListType_Number (idd_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOtypeLoc,_lhsOvarsInScopeAtFocus)
 sem_ListType_ParseErrListType :: (Node) ->
-                                 (Presentation) ->
+                                 (PresentationNode) ->
                                  (T_ListType)
 sem_ListType_ParseErrListType (node_) (presentation_) =
     \ _lhsIfocusD
@@ -11742,17 +11744,17 @@ sem_ListType_ParseErrListType (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (ListType)
-            _lhsOtypeLoc :: (Presentation -> Presentation)
+            _lhsOtypeLoc :: (PresentationNode -> PresentationNode)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1343, column 22)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1345, column 22)
             (_lhsOtypeLoc@_) =
                 id
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1411, column 22)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1413, column 22)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 511, column 22)
@@ -11802,9 +11804,9 @@ sem_ListType_ParseErrListType (node_) (presentation_) =
    synthesised attributes:
       alts                 : Bindings
       maxLHSLength         : Int
-      presTree             : Presentation
-      presXML              : Presentation
-      press                : [Presentation]
+      presTree             : PresentationNode
+      presXML              : PresentationNode
+      press                : [PresentationNode]
       self                 : SELF
 
 -}
@@ -11840,7 +11842,7 @@ type T_List_Alt = (Int) ->
                   ([(PathDoc,String)]) ->
                   (FiniteMap String (PathDoc, String)) ->
                   (FiniteMap String (PathDoc, String)) ->
-                  ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),(Presentation),(Presentation),([Presentation]),(List_Alt),(Int),(FiniteMap String (PathDoc, String)))
+                  ( (Bindings),(Int),(LayoutMap),(Int),(Int),(Int),(PresentationNode),(PresentationNode),([PresentationNode]),(List_Alt),(Int),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_List_Alt :: (List_Alt) ->
                 (T_List_Alt)
@@ -11867,7 +11869,19 @@ data Inh_List_Alt = Inh_List_Alt {col_Inh_List_Alt :: Int
                                  ,varsInScope_Inh_List_Alt :: FiniteMap String (PathDoc, String)
                                  ,varsInScopeAtFocus_Inh_List_Alt :: FiniteMap String (PathDoc, String)
                                  }
-data Syn_List_Alt = Syn_List_Alt {alts_Syn_List_Alt :: Bindings,col_Syn_List_Alt :: Int,layoutMap_Syn_List_Alt :: LayoutMap,maxLHSLength_Syn_List_Alt :: Int,newlines_Syn_List_Alt :: Int,pIdC_Syn_List_Alt :: Int,presTree_Syn_List_Alt :: Presentation,presXML_Syn_List_Alt :: Presentation,press_Syn_List_Alt :: [Presentation],self_Syn_List_Alt :: List_Alt,spaces_Syn_List_Alt :: Int,varsInScopeAtFocus_Syn_List_Alt :: FiniteMap String (PathDoc, String)}
+data Syn_List_Alt = Syn_List_Alt {alts_Syn_List_Alt :: Bindings
+                                 ,col_Syn_List_Alt :: Int
+                                 ,layoutMap_Syn_List_Alt :: LayoutMap
+                                 ,maxLHSLength_Syn_List_Alt :: Int
+                                 ,newlines_Syn_List_Alt :: Int
+                                 ,pIdC_Syn_List_Alt :: Int
+                                 ,presTree_Syn_List_Alt :: PresentationNode
+                                 ,presXML_Syn_List_Alt :: PresentationNode
+                                 ,press_Syn_List_Alt :: [PresentationNode]
+                                 ,self_Syn_List_Alt :: List_Alt
+                                 ,spaces_Syn_List_Alt :: Int
+                                 ,varsInScopeAtFocus_Syn_List_Alt :: FiniteMap String (PathDoc, String)
+                                 }
 wrap_List_Alt :: (T_List_Alt) ->
                  (Inh_List_Alt) ->
                  (Syn_List_Alt)
@@ -11899,16 +11913,16 @@ sem_List_Alt_HoleList_Alt  =
             _lhsOmaxLHSLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 709, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 711, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 986, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 988, column 7)
             (_lhsOalts@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 684, column 22)
@@ -11973,9 +11987,9 @@ sem_List_Alt_List_Alt (idd_) (elts_) =
             _lhsOmaxLHSLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -11985,9 +11999,9 @@ sem_List_Alt_List_Alt (idd_) (elts_) =
             _eltsImaxLHSLength :: (Int)
             _eltsInewlines :: (Int)
             _eltsIpIdC :: (Int)
-            _eltsIpress :: ([Presentation])
-            _eltsIpressTree :: ([Presentation])
-            _eltsIpressXML :: ([Presentation])
+            _eltsIpress :: ([PresentationNode])
+            _eltsIpressTree :: ([PresentationNode])
+            _eltsIpressXML :: ([PresentationNode])
             _eltsIself :: (ConsList_Alt)
             _eltsIspaces :: (Int)
             _eltsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -12106,7 +12120,7 @@ sem_List_Alt_List_Alt (idd_) (elts_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOalts,_lhsOcol,_lhsOlayoutMap,_lhsOmaxLHSLength,_lhsOnewlines,_lhsOpIdC,_lhsOpresTree,_lhsOpresXML,_lhsOpress,_lhsOself,_lhsOspaces,_lhsOvarsInScopeAtFocus)
 sem_List_Alt_ParseErrList_Alt :: (Node) ->
-                                 (Presentation) ->
+                                 (PresentationNode) ->
                                  (T_List_Alt)
 sem_List_Alt_ParseErrList_Alt (node_) (presentation_) =
     \ _lhsIcol
@@ -12131,16 +12145,16 @@ sem_List_Alt_ParseErrList_Alt (node_) (presentation_) =
             _lhsOmaxLHSLength :: (Int)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 711, column 9)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 713, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 984, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 986, column 7)
             (_lhsOalts@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 685, column 22)
@@ -12203,12 +12217,12 @@ sem_List_Alt_ParseErrList_Alt (node_) (presentation_) =
    synthesised attributes:
       dcls                 : Bindings
       declaredVars         : [(String,(PathDoc,String))]
-      idsPres              : Presentation
+      idsPres              : PresentationNode
       parseErrs            : [String]
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
-      press                : [Presentation]
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
+      press                : [PresentationNode]
       self                 : SELF
 
 -}
@@ -12243,7 +12257,7 @@ type T_List_Decl = (Int) ->
                    ([(PathDoc,String)]) ->
                    (FiniteMap String (PathDoc, String)) ->
                    (FiniteMap String (PathDoc, String)) ->
-                   ( (Int),(Bindings),([(String,(PathDoc,String))]),(Presentation),(LayoutMap),(Int),(Int),([String]),(Presentation),(Presentation),(Presentation),([Presentation]),(List_Decl),(Int),(FiniteMap String (PathDoc, String)))
+                   ( (Int),(Bindings),([(String,(PathDoc,String))]),(PresentationNode),(LayoutMap),(Int),(Int),([String]),(PresentationNode),(PresentationNode),(PresentationNode),([PresentationNode]),(List_Decl),(Int),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_List_Decl :: (List_Decl) ->
                  (T_List_Decl)
@@ -12272,15 +12286,15 @@ data Inh_List_Decl = Inh_List_Decl {col_Inh_List_Decl :: Int
 data Syn_List_Decl = Syn_List_Decl {col_Syn_List_Decl :: Int
                                    ,dcls_Syn_List_Decl :: Bindings
                                    ,declaredVars_Syn_List_Decl :: [(String,(PathDoc,String))]
-                                   ,idsPres_Syn_List_Decl :: Presentation
+                                   ,idsPres_Syn_List_Decl :: PresentationNode
                                    ,layoutMap_Syn_List_Decl :: LayoutMap
                                    ,newlines_Syn_List_Decl :: Int
                                    ,pIdC_Syn_List_Decl :: Int
                                    ,parseErrs_Syn_List_Decl :: [String]
-                                   ,pres_Syn_List_Decl :: Presentation
-                                   ,presTree_Syn_List_Decl :: Presentation
-                                   ,presXML_Syn_List_Decl :: Presentation
-                                   ,press_Syn_List_Decl :: [Presentation]
+                                   ,pres_Syn_List_Decl :: PresentationNode
+                                   ,presTree_Syn_List_Decl :: PresentationNode
+                                   ,presXML_Syn_List_Decl :: PresentationNode
+                                   ,press_Syn_List_Decl :: [PresentationNode]
                                    ,self_Syn_List_Decl :: List_Decl
                                    ,spaces_Syn_List_Decl :: Int
                                    ,varsInScopeAtFocus_Syn_List_Decl :: FiniteMap String (PathDoc, String)
@@ -12312,29 +12326,29 @@ sem_List_Decl_HoleList_Decl  =
         let _lhsOcol :: (Int)
             _lhsOdcls :: (Bindings)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
             _lhsOparseErrs :: ([String])
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 66, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 68, column 7)
             (_lhsOparseErrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 173, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 175, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Decls" (HoleList_DeclNode _self _lhsIpath) _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 917, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 919, column 7)
             (_lhsOdcls@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1085, column 23)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1087, column 23)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Decls" (HoleList_DeclNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 658, column 23)
@@ -12398,29 +12412,29 @@ sem_List_Decl_List_Decl (idd_) (elts_) =
         let _lhsOcol :: (Int)
             _lhsOdcls :: (Bindings)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
             _lhsOparseErrs :: ([String])
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _eltsIcol :: (Int)
             _eltsIdcls :: (Bindings)
             _eltsIdeclaredVars :: ([(String,(PathDoc,String))])
-            _eltsIidsPres :: (Presentation)
+            _eltsIidsPres :: (PresentationNode)
             _eltsIlayoutMap :: (LayoutMap)
             _eltsInewlines :: (Int)
             _eltsIpIdC :: (Int)
             _eltsIparseErrs :: ([String])
-            _eltsIpress :: ([Presentation])
-            _eltsIpressTree :: ([Presentation])
-            _eltsIpressXML :: ([Presentation])
+            _eltsIpress :: ([PresentationNode])
+            _eltsIpressTree :: ([PresentationNode])
+            _eltsIpressXML :: ([PresentationNode])
             _eltsIself :: (ConsList_Decl)
             _eltsIspaces :: (Int)
             _eltsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
@@ -12442,11 +12456,11 @@ sem_List_Decl_List_Decl (idd_) (elts_) =
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIcol,_eltsIdcls,_eltsIdeclaredVars,_eltsIidsPres,_eltsIlayoutMap,_eltsInewlines,_eltsIpIdC,_eltsIparseErrs,_eltsIpress,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIspaces,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOcol) (_eltsOenv) (_eltsOerrs) (_eltsOfocusD) (_eltsOix) (_eltsOlayoutMap) (_eltsOlevel) (_eltsOnewlines) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOspaces) (_eltsOtopLevelEnv) (_eltsOtypeEnv) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 167, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 169, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row _eltsIpress
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1083, column 23)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1085, column 23)
             (_lhsOidsPres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                 _eltsIidsPres
@@ -12546,7 +12560,7 @@ sem_List_Decl_List_Decl (idd_) (elts_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOcol,_lhsOdcls,_lhsOdeclaredVars,_lhsOidsPres,_lhsOlayoutMap,_lhsOnewlines,_lhsOpIdC,_lhsOparseErrs,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOpress,_lhsOself,_lhsOspaces,_lhsOvarsInScopeAtFocus)
 sem_List_Decl_ParseErrList_Decl :: (Node) ->
-                                   (Presentation) ->
+                                   (PresentationNode) ->
                                    (T_List_Decl)
 sem_List_Decl_ParseErrList_Decl (node_) (presentation_) =
     \ _lhsIcol
@@ -12567,29 +12581,29 @@ sem_List_Decl_ParseErrList_Decl (node_) (presentation_) =
         let _lhsOcol :: (Int)
             _lhsOdcls :: (Bindings)
             _lhsOdeclaredVars :: ([(String,(PathDoc,String))])
-            _lhsOidsPres :: (Presentation)
+            _lhsOidsPres :: (PresentationNode)
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
             _lhsOparseErrs :: ([String])
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 64, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 66, column 7)
             (_lhsOparseErrs@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 170, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 172, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 915, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 917, column 7)
             (_lhsOdcls@_) =
                 []
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1086, column 23)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1088, column 23)
             (_lhsOidsPres@_) =
                 empty
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 659, column 23)
@@ -12653,9 +12667,9 @@ sem_List_Decl_ParseErrList_Decl (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      presTree             : Presentation
-      presXML              : Presentation
-      press                : [Presentation]
+      presTree             : PresentationNode
+      presXML              : PresentationNode
+      press                : [PresentationNode]
       self                 : SELF
       vals                 : [Value]
 
@@ -12691,7 +12705,7 @@ type T_List_Exp = (Int) ->
                   ([(PathDoc,String)]) ->
                   (FiniteMap String (PathDoc, String)) ->
                   (FiniteMap String (PathDoc, String)) ->
-                  ( (Int),(LayoutMap),(Int),(Int),(Presentation),(Presentation),([Presentation]),(List_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
+                  ( (Int),(LayoutMap),(Int),(Int),(PresentationNode),(PresentationNode),([PresentationNode]),(List_Exp),(Int),([Value]),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_List_Exp :: (List_Exp) ->
                 (T_List_Exp)
@@ -12717,7 +12731,7 @@ data Inh_List_Exp = Inh_List_Exp {col_Inh_List_Exp :: Int
                                  ,varsInScope_Inh_List_Exp :: FiniteMap String (PathDoc, String)
                                  ,varsInScopeAtFocus_Inh_List_Exp :: FiniteMap String (PathDoc, String)
                                  }
-data Syn_List_Exp = Syn_List_Exp {col_Syn_List_Exp :: Int,layoutMap_Syn_List_Exp :: LayoutMap,newlines_Syn_List_Exp :: Int,pIdC_Syn_List_Exp :: Int,presTree_Syn_List_Exp :: Presentation,presXML_Syn_List_Exp :: Presentation,press_Syn_List_Exp :: [Presentation],self_Syn_List_Exp :: List_Exp,spaces_Syn_List_Exp :: Int,vals_Syn_List_Exp :: [Value],varsInScopeAtFocus_Syn_List_Exp :: FiniteMap String (PathDoc, String)}
+data Syn_List_Exp = Syn_List_Exp {col_Syn_List_Exp :: Int,layoutMap_Syn_List_Exp :: LayoutMap,newlines_Syn_List_Exp :: Int,pIdC_Syn_List_Exp :: Int,presTree_Syn_List_Exp :: PresentationNode,presXML_Syn_List_Exp :: PresentationNode,press_Syn_List_Exp :: [PresentationNode],self_Syn_List_Exp :: List_Exp,spaces_Syn_List_Exp :: Int,vals_Syn_List_Exp :: [Value],varsInScopeAtFocus_Syn_List_Exp :: FiniteMap String (PathDoc, String)}
 wrap_List_Exp :: (T_List_Exp) ->
                  (Inh_List_Exp) ->
                  (Syn_List_Exp)
@@ -12746,14 +12760,14 @@ sem_List_Exp_HoleList_Exp  =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Exp)
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 976, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 978, column 7)
             (_lhsOvals@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 710, column 22)
@@ -12815,9 +12829,9 @@ sem_List_Exp_List_Exp (idd_) (elts_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Exp)
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
@@ -12826,9 +12840,9 @@ sem_List_Exp_List_Exp (idd_) (elts_) =
             _eltsIlayoutMap :: (LayoutMap)
             _eltsInewlines :: (Int)
             _eltsIpIdC :: (Int)
-            _eltsIpress :: ([Presentation])
-            _eltsIpressTree :: ([Presentation])
-            _eltsIpressXML :: ([Presentation])
+            _eltsIpress :: ([PresentationNode])
+            _eltsIpressTree :: ([PresentationNode])
+            _eltsIpressXML :: ([PresentationNode])
             _eltsIself :: (ConsList_Exp)
             _eltsIspaces :: (Int)
             _eltsIvals :: ([Value])
@@ -12941,7 +12955,7 @@ sem_List_Exp_List_Exp (idd_) (elts_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOcol,_lhsOlayoutMap,_lhsOnewlines,_lhsOpIdC,_lhsOpresTree,_lhsOpresXML,_lhsOpress,_lhsOself,_lhsOspaces,_lhsOvals,_lhsOvarsInScopeAtFocus)
 sem_List_Exp_ParseErrList_Exp :: (Node) ->
-                                 (Presentation) ->
+                                 (PresentationNode) ->
                                  (T_List_Exp)
 sem_List_Exp_ParseErrList_Exp (node_) (presentation_) =
     \ _lhsIcol
@@ -12963,14 +12977,14 @@ sem_List_Exp_ParseErrList_Exp (node_) (presentation_) =
             _lhsOlayoutMap :: (LayoutMap)
             _lhsOnewlines :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
             _lhsOself :: (List_Exp)
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 974, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 976, column 7)
             (_lhsOvals@_) =
                 []
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 711, column 22)
@@ -13016,7 +13030,7 @@ sem_List_Exp_ParseErrList_Exp (node_) (presentation_) =
       listType             : ListType
       path                 : [Int]
       ranges               : ([PathDoc],[PathDoc],[PathDoc])
-      typeLoc              : Presentation -> Presentation
+      typeLoc              : PresentationNode -> PresentationNode
       varsInScope          : FiniteMap String (PathDoc, String)
 
    chained attributes:
@@ -13024,12 +13038,12 @@ sem_List_Exp_ParseErrList_Exp (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
-      press                : [Presentation]
-      press2               : [Presentation]
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
+      press                : [PresentationNode]
+      press2               : [PresentationNode]
       self                 : SELF
 
 -}
@@ -13054,10 +13068,10 @@ type T_List_Item = (FocusDoc) ->
                    (Int) ->
                    ([Int]) ->
                    (([PathDoc],[PathDoc],[PathDoc])) ->
-                   (Presentation -> Presentation) ->
+                   (PresentationNode -> PresentationNode) ->
                    (FiniteMap String (PathDoc, String)) ->
                    (FiniteMap String (PathDoc, String)) ->
-                   ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),([Presentation]),([Presentation]),(List_Item),(FiniteMap String (PathDoc, String)))
+                   ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),([PresentationNode]),([PresentationNode]),(List_Item),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_List_Item :: (List_Item) ->
                  (T_List_Item)
@@ -13067,8 +13081,8 @@ sem_List_Item ((List_Item (_idd) (_elts))) =
     (sem_List_Item_List_Item (_idd) ((sem_ConsList_Item (_elts))))
 sem_List_Item ((ParseErrList_Item (_node) (_presentation))) =
     (sem_List_Item_ParseErrList_Item (_node) (_presentation))
-data Inh_List_Item = Inh_List_Item {focusD_Inh_List_Item :: FocusDoc,listType_Inh_List_Item :: ListType,pIdC_Inh_List_Item :: Int,path_Inh_List_Item :: [Int],ranges_Inh_List_Item :: ([PathDoc],[PathDoc],[PathDoc]),typeLoc_Inh_List_Item :: Presentation -> Presentation,varsInScope_Inh_List_Item :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_List_Item :: FiniteMap String (PathDoc, String)}
-data Syn_List_Item = Syn_List_Item {pIdC_Syn_List_Item :: Int,pres_Syn_List_Item :: Presentation,pres2_Syn_List_Item :: Presentation,presTree_Syn_List_Item :: Presentation,presXML_Syn_List_Item :: Presentation,press_Syn_List_Item :: [Presentation],press2_Syn_List_Item :: [Presentation],self_Syn_List_Item :: List_Item,varsInScopeAtFocus_Syn_List_Item :: FiniteMap String (PathDoc, String)}
+data Inh_List_Item = Inh_List_Item {focusD_Inh_List_Item :: FocusDoc,listType_Inh_List_Item :: ListType,pIdC_Inh_List_Item :: Int,path_Inh_List_Item :: [Int],ranges_Inh_List_Item :: ([PathDoc],[PathDoc],[PathDoc]),typeLoc_Inh_List_Item :: PresentationNode -> PresentationNode,varsInScope_Inh_List_Item :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_List_Item :: FiniteMap String (PathDoc, String)}
+data Syn_List_Item = Syn_List_Item {pIdC_Syn_List_Item :: Int,pres_Syn_List_Item :: PresentationNode,pres2_Syn_List_Item :: PresentationNode,presTree_Syn_List_Item :: PresentationNode,presXML_Syn_List_Item :: PresentationNode,press_Syn_List_Item :: [PresentationNode],press2_Syn_List_Item :: [PresentationNode],self_Syn_List_Item :: List_Item,varsInScopeAtFocus_Syn_List_Item :: FiniteMap String (PathDoc, String)}
 wrap_List_Item :: (T_List_Item) ->
                   (Inh_List_Item) ->
                   (Syn_List_Item)
@@ -13087,23 +13101,23 @@ sem_List_Item_HoleList_Item  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1238, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1240, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1356, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1358, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1414, column 23)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1416, column 23)
             (_lhsOpress2@_) =
                 [presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath]
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 762, column 23)
@@ -13143,19 +13157,19 @@ sem_List_Item_List_Item (idd_) (elts_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _eltsIpIdC :: (Int)
-            _eltsIpress :: ([Presentation])
-            _eltsIpress2 :: ([Presentation])
-            _eltsIpressTree :: ([Presentation])
-            _eltsIpressXML :: ([Presentation])
+            _eltsIpress :: ([PresentationNode])
+            _eltsIpress2 :: ([PresentationNode])
+            _eltsIpressTree :: ([PresentationNode])
+            _eltsIpressXML :: ([PresentationNode])
             _eltsIself :: (ConsList_Item)
             _eltsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _eltsOfocusD :: (FocusDoc)
@@ -13164,16 +13178,16 @@ sem_List_Item_List_Item (idd_) (elts_) =
             _eltsOpIdC :: (Int)
             _eltsOpath :: ([Int])
             _eltsOranges :: (([PathDoc],[PathDoc],[PathDoc]))
-            _eltsOtypeLoc :: (Presentation -> Presentation)
+            _eltsOtypeLoc :: (PresentationNode -> PresentationNode)
             _eltsOvarsInScope :: (FiniteMap String (PathDoc, String))
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIpIdC,_eltsIpress,_eltsIpress2,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOfocusD) (_eltsOix) (_eltsOlistType) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOtypeLoc) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1232, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1234, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presentList _eltsIpress
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1350, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1352, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  col' _eltsIpress2
@@ -13234,7 +13248,7 @@ sem_List_Item_List_Item (idd_) (elts_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOpress,_lhsOpress2,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_List_Item_ParseErrList_Item :: (Node) ->
-                                   (Presentation) ->
+                                   (PresentationNode) ->
                                    (T_List_Item)
 sem_List_Item_ParseErrList_Item (node_) (presentation_) =
     \ _lhsIfocusD
@@ -13246,23 +13260,23 @@ sem_List_Item_ParseErrList_Item (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1235, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1237, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1353, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1355, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presParseErr node_ presentation_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1415, column 23)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1417, column 23)
             (_lhsOpress2@_) =
                 [presParseErr node_ presentation_]
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 763, column 23)
@@ -13302,12 +13316,12 @@ sem_List_Item_ParseErrList_Item (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
-      press                : [Presentation]
-      press2               : [Presentation]
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
+      press                : [PresentationNode]
+      press2               : [PresentationNode]
       self                 : SELF
 
 -}
@@ -13333,7 +13347,7 @@ type T_List_Slide = (FocusDoc) ->
                     (([PathDoc],[PathDoc],[PathDoc])) ->
                     (FiniteMap String (PathDoc, String)) ->
                     (FiniteMap String (PathDoc, String)) ->
-                    ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),([Presentation]),([Presentation]),(List_Slide),(FiniteMap String (PathDoc, String)))
+                    ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),([PresentationNode]),([PresentationNode]),(List_Slide),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_List_Slide :: (List_Slide) ->
                   (T_List_Slide)
@@ -13344,7 +13358,7 @@ sem_List_Slide ((List_Slide (_idd) (_elts))) =
 sem_List_Slide ((ParseErrList_Slide (_node) (_presentation))) =
     (sem_List_Slide_ParseErrList_Slide (_node) (_presentation))
 data Inh_List_Slide = Inh_List_Slide {focusD_Inh_List_Slide :: FocusDoc,pIdC_Inh_List_Slide :: Int,path_Inh_List_Slide :: [Int],ranges_Inh_List_Slide :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_List_Slide :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_List_Slide :: FiniteMap String (PathDoc, String)}
-data Syn_List_Slide = Syn_List_Slide {pIdC_Syn_List_Slide :: Int,pres_Syn_List_Slide :: Presentation,pres2_Syn_List_Slide :: Presentation,presTree_Syn_List_Slide :: Presentation,presXML_Syn_List_Slide :: Presentation,press_Syn_List_Slide :: [Presentation],press2_Syn_List_Slide :: [Presentation],self_Syn_List_Slide :: List_Slide,varsInScopeAtFocus_Syn_List_Slide :: FiniteMap String (PathDoc, String)}
+data Syn_List_Slide = Syn_List_Slide {pIdC_Syn_List_Slide :: Int,pres_Syn_List_Slide :: PresentationNode,pres2_Syn_List_Slide :: PresentationNode,presTree_Syn_List_Slide :: PresentationNode,presXML_Syn_List_Slide :: PresentationNode,press_Syn_List_Slide :: [PresentationNode],press2_Syn_List_Slide :: [PresentationNode],self_Syn_List_Slide :: List_Slide,varsInScopeAtFocus_Syn_List_Slide :: FiniteMap String (PathDoc, String)}
 wrap_List_Slide :: (T_List_Slide) ->
                    (Inh_List_Slide) ->
                    (Syn_List_Slide)
@@ -13361,23 +13375,23 @@ sem_List_Slide_HoleList_Slide  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1192, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1194, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1312, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1314, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1398, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1400, column 24)
             (_lhsOpress2@_) =
                 [presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath]
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 736, column 24)
@@ -13415,19 +13429,19 @@ sem_List_Slide_List_Slide (idd_) (elts_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _eltsIpIdC :: (Int)
-            _eltsIpress :: ([Presentation])
-            _eltsIpress2 :: ([Presentation])
-            _eltsIpressTree :: ([Presentation])
-            _eltsIpressXML :: ([Presentation])
+            _eltsIpress :: ([PresentationNode])
+            _eltsIpress2 :: ([PresentationNode])
+            _eltsIpressTree :: ([PresentationNode])
+            _eltsIpressXML :: ([PresentationNode])
             _eltsIself :: (ConsList_Slide)
             _eltsIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _eltsOfocusD :: (FocusDoc)
@@ -13439,11 +13453,11 @@ sem_List_Slide_List_Slide (idd_) (elts_) =
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIpIdC,_eltsIpress,_eltsIpress2,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOfocusD) (_eltsOix) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1186, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1188, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presentList _eltsIpress
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1306, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1308, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) _eltsIpress2
@@ -13498,7 +13512,7 @@ sem_List_Slide_List_Slide (idd_) (elts_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOpress,_lhsOpress2,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_List_Slide_ParseErrList_Slide :: (Node) ->
-                                     (Presentation) ->
+                                     (PresentationNode) ->
                                      (T_List_Slide)
 sem_List_Slide_ParseErrList_Slide (node_) (presentation_) =
     \ _lhsIfocusD
@@ -13508,23 +13522,23 @@ sem_List_Slide_ParseErrList_Slide (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
-            _lhsOpress :: ([Presentation])
-            _lhsOpress2 :: ([Presentation])
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
+            _lhsOpress :: ([PresentationNode])
+            _lhsOpress2 :: ([PresentationNode])
             _lhsOself :: (List_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1189, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1191, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1309, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1311, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presParseErr node_ presentation_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1399, column 24)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1401, column 24)
             (_lhsOpress2@_) =
                 [presParseErr node_ presentation_]
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 737, column 24)
@@ -13565,9 +13579,9 @@ sem_List_Slide_ParseErrList_Slide (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -13594,7 +13608,7 @@ type T_PPPresentation = (FocusDoc) ->
                         (([PathDoc],[PathDoc],[PathDoc])) ->
                         (FiniteMap String (PathDoc, String)) ->
                         (FiniteMap String (PathDoc, String)) ->
-                        ( (Int),(Presentation),(Presentation),(Presentation),(PPPresentation),(FiniteMap String (PathDoc, String)))
+                        ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PPPresentation),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_PPPresentation :: (PPPresentation) ->
                       (T_PPPresentation)
@@ -13605,7 +13619,7 @@ sem_PPPresentation ((PPPresentation (_idd) (_viewType) (_slides))) =
 sem_PPPresentation ((ParseErrPPPresentation (_node) (_presentation))) =
     (sem_PPPresentation_ParseErrPPPresentation (_node) (_presentation))
 data Inh_PPPresentation = Inh_PPPresentation {focusD_Inh_PPPresentation :: FocusDoc,ix_Inh_PPPresentation :: Int,pIdC_Inh_PPPresentation :: Int,path_Inh_PPPresentation :: [Int],ranges_Inh_PPPresentation :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_PPPresentation :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_PPPresentation :: FiniteMap String (PathDoc, String)}
-data Syn_PPPresentation = Syn_PPPresentation {pIdC_Syn_PPPresentation :: Int,pres_Syn_PPPresentation :: Presentation,presTree_Syn_PPPresentation :: Presentation,presXML_Syn_PPPresentation :: Presentation,self_Syn_PPPresentation :: PPPresentation,varsInScopeAtFocus_Syn_PPPresentation :: FiniteMap String (PathDoc, String)}
+data Syn_PPPresentation = Syn_PPPresentation {pIdC_Syn_PPPresentation :: Int,pres_Syn_PPPresentation :: PresentationNode,presTree_Syn_PPPresentation :: PresentationNode,presXML_Syn_PPPresentation :: PresentationNode,self_Syn_PPPresentation :: PPPresentation,varsInScopeAtFocus_Syn_PPPresentation :: FiniteMap String (PathDoc, String)}
 wrap_PPPresentation :: (T_PPPresentation) ->
                        (Inh_PPPresentation) ->
                        (Syn_PPPresentation)
@@ -13623,9 +13637,9 @@ sem_PPPresentation_HolePPPresentation  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (PPPresentation)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 474, column 28)
@@ -13663,28 +13677,28 @@ sem_PPPresentation_PPPresentation (idd_) (viewType_) (slides_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (PPPresentation)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _viewTypeIbool :: (Bool)
             _viewTypeIpIdC :: (Int)
-            _viewTypeIpres :: (Presentation)
-            _viewTypeIpresTree :: (Presentation)
-            _viewTypeIpresXML :: (Presentation)
+            _viewTypeIpres :: (PresentationNode)
+            _viewTypeIpresTree :: (PresentationNode)
+            _viewTypeIpresXML :: (PresentationNode)
             _viewTypeIself :: (Bool_)
             _viewTypeOfocusD :: (FocusDoc)
             _viewTypeOix :: (Int)
             _viewTypeOpIdC :: (Int)
             _viewTypeOpath :: ([Int])
             _slidesIpIdC :: (Int)
-            _slidesIpres :: (Presentation)
-            _slidesIpres2 :: (Presentation)
-            _slidesIpresTree :: (Presentation)
-            _slidesIpresXML :: (Presentation)
-            _slidesIpress :: ([Presentation])
-            _slidesIpress2 :: ([Presentation])
+            _slidesIpres :: (PresentationNode)
+            _slidesIpres2 :: (PresentationNode)
+            _slidesIpresTree :: (PresentationNode)
+            _slidesIpresXML :: (PresentationNode)
+            _slidesIpress :: ([PresentationNode])
+            _slidesIpress2 :: ([PresentationNode])
             _slidesIself :: (List_Slide)
             _slidesIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _slidesOfocusD :: (FocusDoc)
@@ -13697,7 +13711,7 @@ sem_PPPresentation_PPPresentation (idd_) (viewType_) (slides_) =
                 (viewType_ (_viewTypeOfocusD) (_viewTypeOix) (_viewTypeOpIdC) (_viewTypeOpath))
             ( _slidesIpIdC,_slidesIpres,_slidesIpres2,_slidesIpresTree,_slidesIpresXML,_slidesIpress,_slidesIpress2,_slidesIself,_slidesIvarsInScopeAtFocus) =
                 (slides_ (_slidesOfocusD) (_slidesOpIdC) (_slidesOpath) (_slidesOranges) (_slidesOvarsInScope) (_slidesOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1159, column 20)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1161, column 20)
             (_lhsOpres@_) =
                 loc (PPPresentationNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    col' $ [ row' [
@@ -13766,7 +13780,7 @@ sem_PPPresentation_PPPresentation (idd_) (viewType_) (slides_) =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_PPPresentation_ParseErrPPPresentation :: (Node) ->
-                                             (Presentation) ->
+                                             (PresentationNode) ->
                                              (T_PPPresentation)
 sem_PPPresentation_ParseErrPPPresentation (node_) (presentation_) =
     \ _lhsIfocusD
@@ -13777,9 +13791,9 @@ sem_PPPresentation_ParseErrPPPresentation (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (PPPresentation)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 475, column 28)
@@ -13818,10 +13832,10 @@ sem_PPPresentation_ParseErrPPPresentation (node_) (presentation_) =
       varsInScopeAtFocus   : FiniteMap String (PathDoc, String)
 
    synthesised attributes:
-      pres                 : Presentation
-      pres2                : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      pres2                : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -13848,7 +13862,7 @@ type T_Slide = (FocusDoc) ->
                (([PathDoc],[PathDoc],[PathDoc])) ->
                (FiniteMap String (PathDoc, String)) ->
                (FiniteMap String (PathDoc, String)) ->
-               ( (Int),(Presentation),(Presentation),(Presentation),(Presentation),(Slide),(FiniteMap String (PathDoc, String)))
+               ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(PresentationNode),(Slide),(FiniteMap String (PathDoc, String)))
 -- cata
 sem_Slide :: (Slide) ->
              (T_Slide)
@@ -13859,7 +13873,7 @@ sem_Slide ((ParseErrSlide (_node) (_presentation))) =
 sem_Slide ((Slide (_idd) (_title) (_itemList))) =
     (sem_Slide_Slide (_idd) ((sem_String_ (_title))) ((sem_ItemList (_itemList))))
 data Inh_Slide = Inh_Slide {focusD_Inh_Slide :: FocusDoc,ix_Inh_Slide :: Int,pIdC_Inh_Slide :: Int,path_Inh_Slide :: [Int],ranges_Inh_Slide :: ([PathDoc],[PathDoc],[PathDoc]),varsInScope_Inh_Slide :: FiniteMap String (PathDoc, String),varsInScopeAtFocus_Inh_Slide :: FiniteMap String (PathDoc, String)}
-data Syn_Slide = Syn_Slide {pIdC_Syn_Slide :: Int,pres_Syn_Slide :: Presentation,pres2_Syn_Slide :: Presentation,presTree_Syn_Slide :: Presentation,presXML_Syn_Slide :: Presentation,self_Syn_Slide :: Slide,varsInScopeAtFocus_Syn_Slide :: FiniteMap String (PathDoc, String)}
+data Syn_Slide = Syn_Slide {pIdC_Syn_Slide :: Int,pres_Syn_Slide :: PresentationNode,pres2_Syn_Slide :: PresentationNode,presTree_Syn_Slide :: PresentationNode,presXML_Syn_Slide :: PresentationNode,self_Syn_Slide :: Slide,varsInScopeAtFocus_Syn_Slide :: FiniteMap String (PathDoc, String)}
 wrap_Slide :: (T_Slide) ->
               (Inh_Slide) ->
               (Syn_Slide)
@@ -13877,13 +13891,13 @@ sem_Slide_HoleSlide  =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1402, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1404, column 19)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "Slide" (HoleSlideNode _self _lhsIpath) _lhsIpath
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 487, column 19)
@@ -13909,7 +13923,7 @@ sem_Slide_HoleSlide  =
                 _lhsIvarsInScopeAtFocus
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpres2,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOvarsInScopeAtFocus)
 sem_Slide_ParseErrSlide :: (Node) ->
-                           (Presentation) ->
+                           (PresentationNode) ->
                            (T_Slide)
 sem_Slide_ParseErrSlide (node_) (presentation_) =
     \ _lhsIfocusD
@@ -13920,13 +13934,13 @@ sem_Slide_ParseErrSlide (node_) (presentation_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1403, column 19)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1405, column 19)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 488, column 19)
@@ -13964,17 +13978,17 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
       _lhsIvarsInScope
       _lhsIvarsInScopeAtFocus ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpres2 :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpres2 :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _titleIlength :: (Int)
             _titleIpIdC :: (Int)
-            _titleIpres :: (Presentation)
-            _titleIpresTree :: (Presentation)
-            _titleIpresXML :: (Presentation)
+            _titleIpres :: (PresentationNode)
+            _titleIpresTree :: (PresentationNode)
+            _titleIpresXML :: (PresentationNode)
             _titleIself :: (String_)
             _titleIstr :: (String)
             _titleOfocusD :: (FocusDoc)
@@ -13982,10 +13996,10 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
             _titleOpIdC :: (Int)
             _titleOpath :: ([Int])
             _itemListIpIdC :: (Int)
-            _itemListIpres :: (Presentation)
-            _itemListIpres2 :: (Presentation)
-            _itemListIpresTree :: (Presentation)
-            _itemListIpresXML :: (Presentation)
+            _itemListIpres :: (PresentationNode)
+            _itemListIpres2 :: (PresentationNode)
+            _itemListIpresTree :: (PresentationNode)
+            _itemListIpresXML :: (PresentationNode)
             _itemListIself :: (ItemList)
             _itemListIvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             _itemListOfocusD :: (FocusDoc)
@@ -13999,7 +14013,7 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
                 (title_ (_titleOfocusD) (_titleOix) (_titleOpIdC) (_titleOpath))
             ( _itemListIpIdC,_itemListIpres,_itemListIpres2,_itemListIpresTree,_itemListIpresXML,_itemListIself,_itemListIvarsInScopeAtFocus) =
                 (itemList_ (_itemListOfocusD) (_itemListOix) (_itemListOpIdC) (_itemListOpath) (_itemListOranges) (_itemListOvarsInScope) (_itemListOvarsInScopeAtFocus))
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1206, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1208, column 11)
             (_lhsOpres@_) =
                 loc (SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ row' [ text "<slide>", row' [ text "<title>", _titleIpres `withColor` darkViolet , text "</title>"
@@ -14007,7 +14021,7 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
                        , row' [ text "  ", _itemListIpres ]
                        , text "</slide>"
                        ]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1317, column 11)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1319, column 11)
             (_lhsOpres2@_) =
                 loc (SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    slide _titleIpres
@@ -14076,9 +14090,9 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
 
    synthesised attributes:
       length               : Int
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
       str                  : String
 
@@ -14103,7 +14117,7 @@ type T_String_ = (FocusDoc) ->
                  (Int) ->
                  (Int) ->
                  ([Int]) ->
-                 ( (Int),(Int),(Presentation),(Presentation),(Presentation),(String_),(String))
+                 ( (Int),(Int),(PresentationNode),(PresentationNode),(PresentationNode),(String_),(String))
 -- cata
 sem_String_ :: (String_) ->
                (T_String_)
@@ -14114,7 +14128,7 @@ sem_String_ ((ParseErrString_ (_node) (_presentation))) =
 sem_String_ ((String_ (_idd) (_string))) =
     (sem_String__String_ (_idd) (_string))
 data Inh_String_ = Inh_String_ {focusD_Inh_String_ :: FocusDoc,ix_Inh_String_ :: Int,pIdC_Inh_String_ :: Int,path_Inh_String_ :: [Int]}
-data Syn_String_ = Syn_String_ {length_Syn_String_ :: Int,pIdC_Syn_String_ :: Int,pres_Syn_String_ :: Presentation,presTree_Syn_String_ :: Presentation,presXML_Syn_String_ :: Presentation,self_Syn_String_ :: String_,str_Syn_String_ :: String}
+data Syn_String_ = Syn_String_ {length_Syn_String_ :: Int,pIdC_Syn_String_ :: Int,pres_Syn_String_ :: PresentationNode,presTree_Syn_String_ :: PresentationNode,presXML_Syn_String_ :: PresentationNode,self_Syn_String_ :: String_,str_Syn_String_ :: String}
 wrap_String_ :: (T_String_) ->
                 (Inh_String_) ->
                 (Syn_String_)
@@ -14130,15 +14144,15 @@ sem_String__HoleString_  =
       _lhsIpath ->
         let _lhsOlength :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1456, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1458, column 13)
             (_lhsOstr@_) =
                 ""
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1455, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1457, column 13)
             (_lhsOlength@_) =
                 0
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 635, column 21)
@@ -14161,7 +14175,7 @@ sem_String__HoleString_  =
                 _lhsIpIdC
         in  ( _lhsOlength,_lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOstr)
 sem_String__ParseErrString_ :: (Node) ->
-                               (Presentation) ->
+                               (PresentationNode) ->
                                (T_String_)
 sem_String__ParseErrString_ (node_) (presentation_) =
     \ _lhsIfocusD
@@ -14170,15 +14184,15 @@ sem_String__ParseErrString_ (node_) (presentation_) =
       _lhsIpath ->
         let _lhsOlength :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1456, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1458, column 13)
             (_lhsOstr@_) =
                 ""
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1455, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1457, column 13)
             (_lhsOlength@_) =
                 0
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 636, column 21)
@@ -14210,19 +14224,19 @@ sem_String__String_ (idd_) (string_) =
       _lhsIpath ->
         let _lhsOlength :: (Int)
             _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1448, column 7)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1450, column 7)
             (_lhsOpres@_) =
                 loc (String_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text string_, text ""]
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1453, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1455, column 13)
             (_lhsOstr@_) =
                 string_
-            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1452, column 13)
+            -- "../../proxima/src/presentation/PresentationAG.ag"(line 1454, column 13)
             (_lhsOlength@_) =
                 length string_
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 991, column 7)
@@ -14252,9 +14266,9 @@ sem_String__String_ (idd_) (string_) =
       pIdC                 : Int
 
    synthesised attributes:
-      pres                 : Presentation
-      presTree             : Presentation
-      presXML              : Presentation
+      pres                 : PresentationNode
+      presTree             : PresentationNode
+      presXML              : PresentationNode
       self                 : SELF
 
 -}
@@ -14353,7 +14367,7 @@ type T_View = (FocusDoc) ->
               (Int) ->
               (Int) ->
               ([Int]) ->
-              ( (Int),(Presentation),(Presentation),(Presentation),(View))
+              ( (Int),(PresentationNode),(PresentationNode),(PresentationNode),(View))
 -- cata
 sem_View :: (View) ->
             (T_View)
@@ -14394,7 +14408,7 @@ sem_View ((Undef (_idd))) =
 sem_View ((Unit (_idd))) =
     (sem_View_Unit (_idd))
 data Inh_View = Inh_View {focusD_Inh_View :: FocusDoc,ix_Inh_View :: Int,pIdC_Inh_View :: Int,path_Inh_View :: [Int]}
-data Syn_View = Syn_View {pIdC_Syn_View :: Int,pres_Syn_View :: Presentation,presTree_Syn_View :: Presentation,presXML_Syn_View :: Presentation,self_Syn_View :: View}
+data Syn_View = Syn_View {pIdC_Syn_View :: Int,pres_Syn_View :: PresentationNode,presTree_Syn_View :: PresentationNode,presXML_Syn_View :: PresentationNode,self_Syn_View :: View}
 wrap_View :: (T_View) ->
              (Inh_View) ->
              (Syn_View)
@@ -14411,15 +14425,15 @@ sem_View_AN (idd_) (int__) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _int_Iint :: (Int)
             _int_IpIdC :: (Int)
-            _int_Ipres :: (Presentation)
-            _int_IpresTree :: (Presentation)
-            _int_IpresXML :: (Presentation)
+            _int_Ipres :: (PresentationNode)
+            _int_IpresTree :: (PresentationNode)
+            _int_IpresXML :: (PresentationNode)
             _int_Iself :: (Int_)
             _int_OfocusD :: (FocusDoc)
             _int_Oix :: (Int)
@@ -14468,9 +14482,9 @@ sem_View_ANil (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 955, column 7)
             (_lhsOpresXML@_) =
@@ -14502,15 +14516,15 @@ sem_View_AS (idd_) (string__) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _string_Ilength :: (Int)
             _string_IpIdC :: (Int)
-            _string_Ipres :: (Presentation)
-            _string_IpresTree :: (Presentation)
-            _string_IpresXML :: (Presentation)
+            _string_Ipres :: (PresentationNode)
+            _string_IpresTree :: (PresentationNode)
+            _string_IpresXML :: (PresentationNode)
             _string_Iself :: (String_)
             _string_Istr :: (String)
             _string_OfocusD :: (FocusDoc)
@@ -14562,23 +14576,23 @@ sem_View_DelL (idd_) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -14646,33 +14660,33 @@ sem_View_FstP (idd_) (bool__) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _bool_Ibool :: (Bool)
             _bool_IpIdC :: (Int)
-            _bool_Ipres :: (Presentation)
-            _bool_IpresTree :: (Presentation)
-            _bool_IpresXML :: (Presentation)
+            _bool_Ipres :: (PresentationNode)
+            _bool_IpresTree :: (PresentationNode)
+            _bool_IpresXML :: (PresentationNode)
             _bool_Iself :: (Bool_)
             _bool_OfocusD :: (FocusDoc)
             _bool_Oix :: (Int)
             _bool_OpIdC :: (Int)
             _bool_Opath :: ([Int])
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -14748,9 +14762,9 @@ sem_View_HoleView  =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 604, column 18)
             (_lhsOpres@_) =
@@ -14781,24 +14795,24 @@ sem_View_IfNil (idd_) (bool__) (view_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _bool_Ibool :: (Bool)
             _bool_IpIdC :: (Int)
-            _bool_Ipres :: (Presentation)
-            _bool_IpresTree :: (Presentation)
-            _bool_IpresXML :: (Presentation)
+            _bool_Ipres :: (PresentationNode)
+            _bool_IpresTree :: (PresentationNode)
+            _bool_IpresXML :: (PresentationNode)
             _bool_Iself :: (Bool_)
             _bool_OfocusD :: (FocusDoc)
             _bool_Oix :: (Int)
             _bool_OpIdC :: (Int)
             _bool_Opath :: ([Int])
             _viewIpIdC :: (Int)
-            _viewIpres :: (Presentation)
-            _viewIpresTree :: (Presentation)
-            _viewIpresXML :: (Presentation)
+            _viewIpres :: (PresentationNode)
+            _viewIpresTree :: (PresentationNode)
+            _viewIpresXML :: (PresentationNode)
             _viewIself :: (View)
             _viewOfocusD :: (FocusDoc)
             _viewOix :: (Int)
@@ -14863,23 +14877,23 @@ sem_View_InsL (idd_) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -14945,14 +14959,14 @@ sem_View_L (idd_) (view_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _viewIpIdC :: (Int)
-            _viewIpres :: (Presentation)
-            _viewIpresTree :: (Presentation)
-            _viewIpresXML :: (Presentation)
+            _viewIpres :: (PresentationNode)
+            _viewIpresTree :: (PresentationNode)
+            _viewIpresXML :: (PresentationNode)
             _viewIself :: (View)
             _viewOfocusD :: (FocusDoc)
             _viewOix :: (Int)
@@ -15002,23 +15016,23 @@ sem_View_Ls (idd_) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -15083,14 +15097,14 @@ sem_View_Mark (idd_) (view_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _viewIpIdC :: (Int)
-            _viewIpres :: (Presentation)
-            _viewIpresTree :: (Presentation)
-            _viewIpresXML :: (Presentation)
+            _viewIpres :: (PresentationNode)
+            _viewIpresTree :: (PresentationNode)
+            _viewIpresXML :: (PresentationNode)
             _viewIself :: (View)
             _viewOfocusD :: (FocusDoc)
             _viewOix :: (Int)
@@ -15131,7 +15145,7 @@ sem_View_Mark (idd_) (view_) =
                 _lhsIix
         in  ( _lhsOpIdC,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself)
 sem_View_ParseErrView :: (Node) ->
-                         (Presentation) ->
+                         (PresentationNode) ->
                          (T_View)
 sem_View_ParseErrView (node_) (presentation_) =
     \ _lhsIfocusD
@@ -15139,9 +15153,9 @@ sem_View_ParseErrView (node_) (presentation_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 605, column 18)
             (_lhsOpres@_) =
@@ -15172,23 +15186,23 @@ sem_View_Pr (idd_) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -15251,14 +15265,14 @@ sem_View_R (idd_) (view_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _viewIpIdC :: (Int)
-            _viewIpres :: (Presentation)
-            _viewIpresTree :: (Presentation)
-            _viewIpresXML :: (Presentation)
+            _viewIpres :: (PresentationNode)
+            _viewIpresTree :: (PresentationNode)
+            _viewIpresXML :: (PresentationNode)
             _viewIself :: (View)
             _viewOfocusD :: (FocusDoc)
             _viewOix :: (Int)
@@ -15309,33 +15323,33 @@ sem_View_SndP (idd_) (bool__) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _bool_Ibool :: (Bool)
             _bool_IpIdC :: (Int)
-            _bool_Ipres :: (Presentation)
-            _bool_IpresTree :: (Presentation)
-            _bool_IpresXML :: (Presentation)
+            _bool_Ipres :: (PresentationNode)
+            _bool_IpresTree :: (PresentationNode)
+            _bool_IpresXML :: (PresentationNode)
             _bool_Iself :: (Bool_)
             _bool_OfocusD :: (FocusDoc)
             _bool_Oix :: (Int)
             _bool_OpIdC :: (Int)
             _bool_Opath :: ([Int])
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -15414,23 +15428,23 @@ sem_View_Tr (idd_) (view1_) (view2_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             _view1IpIdC :: (Int)
-            _view1Ipres :: (Presentation)
-            _view1IpresTree :: (Presentation)
-            _view1IpresXML :: (Presentation)
+            _view1Ipres :: (PresentationNode)
+            _view1IpresTree :: (PresentationNode)
+            _view1IpresXML :: (PresentationNode)
             _view1Iself :: (View)
             _view1OfocusD :: (FocusDoc)
             _view1Oix :: (Int)
             _view1OpIdC :: (Int)
             _view1Opath :: ([Int])
             _view2IpIdC :: (Int)
-            _view2Ipres :: (Presentation)
-            _view2IpresTree :: (Presentation)
-            _view2IpresXML :: (Presentation)
+            _view2Ipres :: (PresentationNode)
+            _view2IpresTree :: (PresentationNode)
+            _view2IpresXML :: (PresentationNode)
             _view2Iself :: (View)
             _view2OfocusD :: (FocusDoc)
             _view2Oix :: (Int)
@@ -15492,9 +15506,9 @@ sem_View_Undef (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 983, column 7)
             (_lhsOpresXML@_) =
@@ -15524,9 +15538,9 @@ sem_View_Unit (idd_) =
       _lhsIpIdC
       _lhsIpath ->
         let _lhsOpIdC :: (Int)
-            _lhsOpres :: (Presentation)
-            _lhsOpresTree :: (Presentation)
-            _lhsOpresXML :: (Presentation)
+            _lhsOpres :: (PresentationNode)
+            _lhsOpresTree :: (PresentationNode)
+            _lhsOpresXML :: (PresentationNode)
             _lhsOself :: (View)
             -- "../../proxima/src/presentation/PresentationAG_Generated.ag"(line 985, column 7)
             (_lhsOpresXML@_) =

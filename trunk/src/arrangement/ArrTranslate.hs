@@ -5,6 +5,7 @@ import ArrLayerTypes
 import ArrLayerUtils
 
 import DocTypes
+import DocTypes_Generated (Node)
 import DocUtils
 import qualified TreeEditPres -- for mouse handling stuff
 
@@ -16,7 +17,7 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
-unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel -> EditArrangement -> (EditLayout, LocalStateArr, ArrangementLevel node)
+unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel Node -> EditArrangement -> (EditLayout node, LocalStateArr, ArrangementLevel node)
 unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) editArr = 
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 

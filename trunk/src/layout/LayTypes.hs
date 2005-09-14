@@ -12,16 +12,16 @@ import DocTypes -- for UpdateDocLay
 -- cleaner, as Presentation specific definitions (eg. PresentationLevel) are visible at
 -- LayoutLevel. This is not really a problem, however.
 
-data LayoutLevel = LayoutLevel Presentation FocusPres DiffTree deriving Show
+data LayoutLevel node = LayoutLevel (Presentation node) FocusPres DiffTree deriving Show
                                                     -- DiffTree is experimental for incrementality
-data EditLayout' =
-    SetLay' LayoutLevel
+data EditLayout' node =
+    SetLay' (LayoutLevel node)
   | SkipLay' Int deriving Show
 
-data EditLayout =
+data EditLayout node =
     SkipLay Int
   | SetFocusLay FocusPres
-  | SetLay LayoutLevel
+  | SetLay (LayoutLevel node)
   | InitLay
   | CloseLay
   | InsertLay Char

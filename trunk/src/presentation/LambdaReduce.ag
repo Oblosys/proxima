@@ -2,7 +2,7 @@
 
 -- renaming is not supported yet
 {
---addReductionPopupItems :: [ PopupItem ] -> Presentation -> Presentation
+--addReductionPopupItems :: [ PopupItem ] -> Presentation node -> Presentation node
 addReductionPopupItems its pres = addPopupItems pres its
 
 pasteExp :: [Int] -> Exp -> UpdateDoc
@@ -43,7 +43,7 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
 showExpCode :: Exp -> PopupMenuItem
 showExpCode exp =
   ( "Show Expression code"
-  , trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id
+  , id -- trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id
   )
 
 

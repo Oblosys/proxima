@@ -49,13 +49,13 @@ recognizeRootEnr = pStr' $
       <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 -- ?remove pStr from this parser?
-parseIDListList_Decl :: ListParser List_Decl
+parseIDListList_Decl :: ListParser Node List_Decl
 parseIDListList_Decl = pStr $
           (\dcls -> reuseList_Decl [] Nothing (Just $ toConsList_Decl dcls)) 
       <$  pSym parsingTk
       <*> pList recognizeIDListDecl
              
-recognizeIDListDecl :: ListParser Decl
+recognizeIDListDecl :: ListParser Node Decl
 recognizeIDListDecl = pStr $
           (\str ident -> reuseDecl [tokenNode str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing (Just ident) Nothing)
       <$> pStructural DeclNode
@@ -72,7 +72,7 @@ recognizeIDListDecl = pStr $
 -}       
 
 -- ?remove pStr from this parser?
-parseIdListIdent :: ListParser Ident
+parseIdListIdent :: ListParser Node Ident
 parseIdListIdent =  pStr $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
       <$  pSym parsingTk
@@ -230,7 +230,7 @@ parseParenExp = -- maybe we don't want to build a list for (exp), because now we
 
 -- returns list of separator tokens and a List_Exp the List_Exp is not reused through its separator tokens
 -- because these do not belong to List_Exp, but to its parent
-parseList_Exp :: ListParser ([Token (Maybe Node)], List_Exp)
+parseList_Exp :: ListParser Node ([Token Node (Maybe Node)], List_Exp)
 parseList_Exp =
     (\toksElts -> let (toks, elts) = case toksElts of
                                        Nothing        -> ([], [])
@@ -313,10 +313,10 @@ parseIdent =
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Token (Maybe Node) -> String_
+mkString_ :: Token node (Maybe Node) -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
 
-mkInt_ :: Token (Maybe Node) -> Int_
+mkInt_ :: Token node (Maybe Node) -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different

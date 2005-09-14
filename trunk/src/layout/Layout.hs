@@ -11,7 +11,7 @@ import LayLayerUtils
 --                               detokenize' for adding whitespace until StructureP node
 
 -- Local State is layout, inserted and deleted state
-detokenize :: (LayoutMap, InsertedTokenList, DeletedTokenMap) -> Presentation -> Presentation
+detokenize :: (LayoutMap, InsertedTokenList, DeletedTokenMap node) -> Presentation node -> Presentation node
 detokenize lm (ParsingP id pres)         = let press = detokenize' lm pres
                                            in  if null press 
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
@@ -53,19 +53,19 @@ detokenize' lm (LocatorP l pres)          = let press = detokenize' lm pres
                                             in  map (LocatorP l) press
 detokenize' lm pr                         = debug Err ("TreeEditPres.detokenize': can't handle "++ show pr) [pr]
 
-detokenizeRow' :: (LayoutMap, InsertedTokenList, DeletedTokenMap) -> [Presentation] -> [Presentation]
+detokenizeRow' :: (LayoutMap, InsertedTokenList, DeletedTokenMap node) -> [Presentation node] -> [Presentation node]
 detokenizeRow' lm [] = []
 detokenizeRow' lm (pres:press) =
   let press' = detokenize' lm pres
       press'' = detokenizeRow' lm press                         
   in combine press' press''
 
-combine :: [Presentation] -> [Presentation] -> [Presentation]
+combine :: [Presentation node] -> [Presentation node] -> [Presentation node]
 combine [] l2 = l2
 combine l1 [] = l1 
 combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
 
-addWhitespace :: (LayoutMap, InsertedTokenList, DeletedTokenMap) -> IDP -> String -> [ Presentation ]
+addWhitespace :: (LayoutMap, InsertedTokenList, DeletedTokenMap node) -> IDP -> String -> [Presentation node]
 addWhitespace (lm,inss, dels) NoIDP str = [StringP NoIDP str]
 addWhitespace (lm,inss, dels) id str = 
   case lookupFM lm id of
@@ -73,7 +73,7 @@ addWhitespace (lm,inss, dels) id str =
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ StringP id (replicate spaces ' ' ++ str))
 
-addWhitespaceStruct :: (LayoutMap, InsertedTokenList, DeletedTokenMap) -> IDP -> Presentation -> [ Presentation ]
+addWhitespaceStruct :: (LayoutMap, InsertedTokenList, DeletedTokenMap node) -> IDP -> Presentation node -> [Presentation node]
 addWhitespaceStruct (lm,inss, dels) NoIDP struct = [struct]
 addWhitespaceStruct (lm,inss, dels) id struct = 
   case lookupFM lm id of
@@ -84,7 +84,7 @@ addWhitespaceStruct (lm,inss, dels) id struct =
                                                                                ])
                                 
 
-markInssDels :: (LayoutMap, InsertedTokenList, DeletedTokenMap) -> IDP -> Presentation -> [Presentation]
+markInssDels :: (LayoutMap, InsertedTokenList, DeletedTokenMap node) -> IDP -> Presentation node -> [Presentation node]
 markInssDels (lm,inss,dels) idp pres = 
   combine 
     (case lookupFM dels idp of

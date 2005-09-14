@@ -84,9 +84,9 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root = Root Presentation
+data Root node = Root (Presentation node)
 
-type PresentationList = [Presentation]
+type PresentationList node = [Presentation node]
                       
 -- We don't want AG to generate the Presentation data types, so data type generation is turned off.
 -- However, we do need Root and PresentationList

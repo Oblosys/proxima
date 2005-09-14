@@ -20,10 +20,10 @@ import Char
 
 -- Testing:
 {-
-presentDoc :: Document -> Presentation
+presentDoc :: Document -> Presentation node
 presentDoc doc = prez 
 
-parsePres :: Presentation -> Maybe Document
+parsePres :: Presentation node -> Maybe Document
 parsePres pr = Nothing
 
 parsePres' l pr = Just initDoc
@@ -31,13 +31,13 @@ parsePres' l pr = Just initDoc
 
 -- Presentation parser
 
-presentEnr :: PresentationSheet -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation, LayoutMap, IDPCounter)
+presentEnr :: PresentationSheet Node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation Node, LayoutMap, IDPCounter)
 presentEnr presentationSheet state enrlvl@(EnrichedDocLevel _ focusD) = -- debug Prs ("Doc Focus is "++show focusD) 
   presentEnr' presentationSheet state enrlvl
 
 
 
-presentEnr' :: PresentationSheet -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation, LayoutMap, IDPCounter)
+presentEnr' :: PresentationSheet Node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation Node, LayoutMap, IDPCounter)
 presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC =
       let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
       in  (pres', layM', idC')                                 

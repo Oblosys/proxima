@@ -57,7 +57,7 @@ an option.
 -}
 
 
-type ListParser a = AnaParser [] Pair  (Token (Maybe Node)) a 
+type ListParser node a = AnaParser [] Pair  (Token node (Maybe Node)) a 
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
@@ -68,7 +68,7 @@ pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr' :: ListParser a -> ListParser a
+pStr' :: ListParser node a -> ListParser node a
 pStr' p = unfoldStructure  
      <$> pSym (Structural Nothing empty [] NoIDP)
  where unfoldStructure structTk@(Structural nd _ children _) = 
@@ -76,7 +76,7 @@ pStr' p = unfoldStructure
          in  if null errs then res else debug Err (show errs) res
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
-pStr :: Editable a => ListParser a -> ListParser a
+pStr :: Editable a => ListParser Node a -> ListParser Node a
 pStr p = unfoldStructure  
      <$> pSym (Structural Nothing empty [] NoIDP)
  where unfoldStructure structTk@(Structural nd pr children _) = 
@@ -138,7 +138,7 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 -- TODO: switch pres & ctxt args, fix silly recursion
 
 
-postScanStr :: Presentation -> Maybe Node -> [Token (Maybe Node)]
+postScanStr :: Presentation Node -> Maybe Node -> [Token Node (Maybe Node)]
 postScanStr (EmptyP _)    ctxt = []
 postScanStr (StringP _ _) ctxt = []
 postScanStr (ImageP _ _)  ctxt = []
@@ -158,7 +158,7 @@ postScanStr pres _ = debug Err ("*** PresentationParser.postScanStr: unimplement
 
 -- Structural (Just NoNode) is used as a hack for representing a ParsingToken
 
-postScanPrs :: Presentation -> Maybe Node -> [Token (Maybe Node)]
+postScanPrs :: Presentation Node -> Maybe Node -> [Token Node (Maybe Node)]
 postScanPrs (EmptyP _)    ctxt = []
 postScanPrs (StringP _ "") ctxt = []
 postScanPrs (StringP i str) ctxt = [mkToken str ctxt i]
@@ -180,38 +180,20 @@ postScanPrs pres _ = debug Err ("*** PresentationParser.postScanPrs: unimplement
 
 
 
-{- Small program that causes GHC panic
 
-pInt :: TreeParser (Token (Maybe Node))
-pInt = pCSym 20 intTk
-intTk     = IntTk "0" Nothing (IDP (-1))
-pCSym c p = pCostSym c p p
-
-data Token a =  IntTk String a IDP deriving (Show,Ord,Eq)
-
-instance Ord (Node)
-instance Eq (Node)
-type TreeParser a = AnaParser (ParsePres Node String) Pair  (Token (Maybe Node)) a 
-newtype ParsePres a b c = ParsePres Presentation deriving Show
-instance InputState (ParsePres Node String) (Token (Maybe Node)) 
-instance (Show a,Ord a) => Symbol (Token (Maybe a)) where
-
--}
-
-
-pKey :: String -> ListParser (Token (Maybe Node))
+pKey :: String -> ListParser node (Token node (Maybe Node))
 pKey str = pSym  (strTk str)
 
-pKeyC :: Int -> String -> ListParser (Token (Maybe Node))
+pKeyC :: Int -> String -> ListParser node (Token node (Maybe Node))
 pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: ListParser (Token (Maybe Node))
+pLIdent :: ListParser node (Token node (Maybe Node))
 pLIdent = pCSym 20 (LIdentTk "ident" Nothing (IDP (-1)))
 --pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: ListParser (Token (Maybe Node))
+pInt :: ListParser node (Token node (Maybe Node))
 pInt = pCSym 20 (IntTk "0" Nothing (IDP (-1)))
 --pInt = pCSym 20 intTk
 
@@ -220,18 +202,18 @@ pInt = pCSym 20 (IntTk "0" Nothing (IDP (-1)))
 -- intTk and lIntTk calls are replaced by their bodies, otherwise GHC panics
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: ListParser (Token (Maybe Node))
+pStruct :: ListParser node (Token node (Maybe Node))
 pStruct = pCSym 4 (Structural Nothing empty [] NoIDP)
 
 
 -- pCostSym expects the parser twice
 pCSym c p = pCostSym c p p
 
-lIdentVal :: Token (Maybe Node) -> String
+lIdentVal :: Token node (Maybe Node) -> String
 lIdentVal (LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
-strValTk :: Token (Maybe Node) -> String
+strValTk :: Token node (Maybe Node) -> String
 strValTk (StrTk str _ _)    = str
 strValTk (IntTk str _ _)    = str
 strValTk (LIdentTk str _ _) = str
@@ -240,7 +222,7 @@ strValTk (OpTk str _ _)     = str
 strValTk (SymTk str _ _)    = str
 strValTk tk                 = debug Err ("PresentationParser.strValTk: StructuralToken " ++ show tk) $ show tk
   
-intVal :: Token (Maybe Node) -> Int
+intVal :: Token node (Maybe Node) -> Int
 intVal (IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
@@ -255,7 +237,7 @@ TODO: Find out what the effects of these Ord and Enum classes are and what the i
 
 
 
-newtype ParsePres a b c = ParsePres Presentation deriving Show
+newtype ParsePres node a b c = ParsePres (Presentation node) deriving Show
 
 -- parsing bits
 
@@ -267,19 +249,19 @@ StringP values and make a list of tokens. This is closely linked to the scanning
 process and should be done in the layout layer.
 -}
 
---data Token a = Tk Char a IDP | Structural a Presentation deriving Show
+--data Token a = Tk Char a IDP | Structural a (Presentation node) deriving Show
 
 -- use a type field? instead of multiple constructors?
 
-data Token a = StrTk String a IDP  -- StrTk is for keywords, so eq takes the string value into account
+data Token node a = StrTk String a IDP  -- StrTk is for keywords, so eq takes the string value into account
              | IntTk String a IDP
              | LIdentTk String a IDP
              | UIdentTk String a IDP
              | OpTk String a IDP
              | SymTk String a IDP
-             | Structural a Presentation [Token a] IDP -- deriving (Show)
+             | Structural a (Presentation node) [Token node a] IDP -- deriving (Show)
 
-instance Show a => Show (Token (Maybe a)) where
+instance Show a => Show (Token node (Maybe a)) where
   show (StrTk str _ _)    = show str
   show (IntTk str _ _)    = show str
   show (LIdentTk str _ _) = show str
@@ -289,7 +271,7 @@ instance Show a => Show (Token (Maybe a)) where
   show (Structural Nothing _ _ _) = "<structural:Nothing>" 
   show (Structural (Just nd) _ _ _) = "<structural:"++show nd++">" 
 
-instance Eq a => Eq (Token (Maybe a)) where
+instance Eq a => Eq (Token node (Maybe a)) where
   StrTk str1 _ _ == StrTk str2 _ _ = str1 == str2
   IntTk _ _ _    == IntTk _ _ _    = True
   LIdentTk _ _ _ == LIdentTk _ _ _ = True
@@ -302,7 +284,7 @@ instance Eq a => Eq (Token (Maybe a)) where
   Structural (Just nd1) _ _ _ == Structural (Just nd2) _ _ _ = nd1 == nd2
   _              == _              = False
 
-instance Ord a => Ord (Token (Maybe a)) where
+instance Ord a => Ord (Token node (Maybe a)) where
   compare x y | x==y      = EQ   --
 	          | x<=y      = LT   -- From Doaitse's scanner. Find out why is this necessary?
 	          | otherwise = GT   --
@@ -363,7 +345,7 @@ instance   Ord Token where
         || (ttypel == ttyper && stringl <= stringr)
 
 -}
-tokenString :: Token (Maybe Node) -> String                  
+tokenString :: Token node (Maybe Node) -> String                  
 tokenString (StrTk s n id)      = s
 tokenString (IntTk s n id)      = s
 tokenString (LIdentTk s n id)   = s
@@ -372,7 +354,7 @@ tokenString (OpTk s n id)       = s
 tokenString (SymTk s n id)      = s
 tokenString (Structural n _ _ id) = "<structural token>"
                              
-tokenNode :: Token (Maybe Node) -> Maybe Node                 
+tokenNode :: Token node (Maybe Node) -> Maybe Node                 
 tokenNode (StrTk s n id)      = n
 tokenNode (IntTk s n id)      = n
 tokenNode (LIdentTk s n id)   = n
@@ -381,7 +363,7 @@ tokenNode (OpTk s n id)       = n
 tokenNode (SymTk s n id)      = n
 tokenNode (Structural n _ _ id) = n
 
-tokenIDP :: Token (Maybe Node) -> IDP       
+tokenIDP :: Token node (Maybe Node) -> IDP       
 tokenIDP (StrTk s n id)    = id
 tokenIDP (IntTk s n id)    = id
 tokenIDP (LIdentTk s n id) = id
@@ -407,7 +389,7 @@ strucTk   = Structural Nothing empty [] (IDP (-1))
 
 
 
-mkToken :: String -> Maybe Node -> IDP -> Token (Maybe Node)
+mkToken :: String -> Maybe Node -> IDP -> Token node (Maybe Node)
 mkToken str@(c:_)   ctxt i | str `elem` keywords = StrTk str ctxt i
                            | isDigit c           = IntTk str ctxt i
                            | isLower c           = LIdentTk str ctxt i
@@ -473,7 +455,7 @@ keywords =
   ]
 
 
-instance (Show a, Eq a, Ord a) => Symbol (Token (Maybe a)) where
+instance (Show a, Eq a, Ord a) => Symbol (Token node (Maybe a)) where
 
 runParser (pp) inp =
       let res = UU_Parsing.parse pp inp
@@ -494,18 +476,18 @@ runParser (pp) inp =
 
 
 
---instance Enum (Token (Maybe a)) where            -- is this right?
+--instance Enum (Token node (Maybe a)) where            -- is this right?
 --  toEnum   i = Tk (chr i) Nothing NoIDP  
 --  fromEnum (Tk c _ _) = ord c
 --  fromEnum _          = 0
 
-instance (Show a) => Symbol (Token (Maybe a)) where
+instance (Show a) => Symbol (Token node (Maybe a)) where
 --  symBefore = pred
 --  symAfter = succ
 
 
 
-instance InputState (ParsePres Node String) (Token (Maybe Node)) where
+instance InputState (ParsePres Node String) (Token node (Maybe Node)) where
  splitStateE tree   = case walk tree of
                          Nothing         -> Right' tree
                          Just (tk,tree') -> Left' tk tree'

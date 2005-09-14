@@ -12,16 +12,16 @@ import Data.FiniteMap
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
-data PresentationLevel = PresentationLevel Presentation PresentationLS deriving Show
+data PresentationLevel node = PresentationLevel (Presentation node) (PresentationLS node) deriving Show
 
-type PresentationLS = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap)
+type PresentationLS node = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap node)
 
 type Layout = (Int, Int)
 
 type LayoutMap = FiniteMap IDP Layout   -- Layout information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
-type DeletedTokenMap = FiniteMap IDP Presentation    -- Not used now. Maps deleted tokens to their successors
+type DeletedTokenMap node = FiniteMap IDP (Presentation node)    -- Not used now. Maps deleted tokens to their successors
 
 instance (Show a, Show b) => Show (FiniteMap a b) where
  show fm = "{FiniteMap}" -- ++show (fmToList fm)
@@ -30,14 +30,14 @@ instance (Show a, Show b) => Show (FiniteMap a b) where
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
 
-data EditPresentation' =
-    SetPres' PresentationLevel
+data EditPresentation' node =
+    SetPres' (PresentationLevel node)
   | SkipPres' Int deriving Show
 
-data EditPresentation =
+data EditPresentation node =
     SkipPres Int
   | SetFocusPres FocusPres
-  | SetPres PresentationLevel
+  | SetPres (PresentationLevel node)
   | InitPres
   | ClosePres
 --  | MouseDownPres PathPres Modifiers Int
@@ -73,29 +73,29 @@ DTD specific document stuff (the Document type etc) could be put in a different 
 
 -- Presentation is Xprez with ID's
 
-data Presentation = EmptyP !IDP
+data Presentation node = EmptyP !IDP
            | StringP !IDP !String
            | ImageP !IDP !String
            | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
-           | RowP !IDP !Int ![ Presentation ]    -- vRefNr 
-           | ColP !IDP !Int ![ Presentation ]    -- hRefNr
-           | OverlayP !IDP ![ Presentation ] -- 1st elt is in front of 2nd, etc.
-           | WithP !AttrRule !Presentation         -- do these last two have ids?
-           | StructuralP !IDP !Presentation       -- IDP?
-           | ParsingP !IDP !Presentation         -- IDP?
-           | LocatorP Node !Presentation -- deriving Show -- do we want a ! for location  ? 
-{-         | Matrix [[ Presentation ]]       -- Stream is not a list because tree is easier in presentation.
-           | Formatter [ Presentation ]
-           | Alternative [ Presentation ]
+           | RowP !IDP !Int ![ (Presentation node) ]    -- vRefNr 
+           | ColP !IDP !Int ![ (Presentation node) ]    -- hRefNr
+           | OverlayP !IDP ![ (Presentation node) ] -- 1st elt is in front of 2nd, etc.
+           | WithP !AttrRule !(Presentation node)         -- do these last two have ids?
+           | StructuralP !IDP !(Presentation node)       -- IDP?
+           | ParsingP !IDP !(Presentation node)         -- IDP?
+           | LocatorP node !(Presentation node) -- deriving Show -- do we want a ! for location  ? 
+{-         | Matrix [[ (Presentation node) ]]       -- Stream is not a list because tree is easier in presentation.
+           | Formatter [ (Presentation node) ]
+           | Alternative [ (Presentation node) ]
 -} -- are the !'s in the right place like this?
-           | ArrangedP -- Presentation     -- experimental for incrementality.
+           | ArrangedP -- (Presentation node)     -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show Presentation where
+instance Show (Presentation node) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (ImageP id str)       = "{"++show id++":Image "++str++"}"

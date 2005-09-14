@@ -15,8 +15,10 @@ import Data.FiniteMap
 import IOExts
 
 import qualified Chess
-import EvaluateTypes                                   -- for OU demo
-import qualified UHA_Pretty       (sem_Expression) -- for OU demo
+--import EvaluateTypes                                   -- for OU demo
+--import qualified UHA_Pretty       (sem_Expression) -- for OU demo
+
+type PresentationNode = Presentation Node
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -151,7 +153,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage str = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation
+presMessage :: HeliumMessage -> Presentation Node
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text) lns) `withColor` errColor
                                                              rng:_   -> col' (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -162,7 +164,7 @@ errColor = red
 
 }
 
-SEM List_Decl [ || pres : Presentation ]
+SEM List_Decl [ || pres : PresentationNode ]
   | List_Decl
       lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row @elts.press
@@ -390,7 +392,7 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Xprez -> PathDoc -> Xprez
+link :: Xprez node -> PathDoc -> Xprez node
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
@@ -448,23 +450,23 @@ row'  = RowP (NoIDP) 0
 col'  = ColP (NoIDP) 0
 text' idc = StringP idc
 
-der:: IDP -> String -> Xprez
+der:: IDP -> String -> Xprez node
 der idc str = StringP idc str `withColor` derCol
 
 
-op :: IDP -> String -> Xprez
+op :: IDP -> String -> Xprez node
 op idc str = StringP idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez
+key :: IDP -> String -> Xprez node
 key idc str = StringP idc str `withColor` keyCol
 
-sep :: IDP -> String -> Xprez
+sep :: IDP -> String -> Xprez node
 sep idc str = StringP idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez
+cons :: IDP -> String -> Xprez node
 cons idc str = StringP idc str `withColor` consCol
 
-typeD :: IDP -> String -> Xprez
+typeD :: IDP -> String -> Xprez node
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 
@@ -1077,7 +1079,7 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ------------------------- Identifier list presentation
 --      can we mix pres with idsPres?
 
-ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation ]
+ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : PresentationNode ]
 
 SEM List_Decl
   | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -1181,7 +1183,7 @@ SEM PPPresentation
 --                                          , row' [ text "         ", @slides.pres]
 
 
-SEM List_Slide [ || pres : Presentation ]
+SEM List_Slide [ || pres : PresentationNode ]
   | List_Slide
       lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1227,7 +1229,7 @@ SEM ItemList
                                , @items.pres
                             ] -}
 
-SEM List_Item [ || pres : Presentation ]
+SEM List_Item [ || pres : PresentationNode ]
   | List_Item
       lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1298,10 +1300,10 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
 
 }
 
-ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation ]
-ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation]} ]
+ATTR Slide ItemList {- ListType -} Item [ || pres2 : PresentationNode ]
+ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[PresentationNode]} ]
 
-SEM List_Slide [ || pres2 : Presentation ]
+SEM List_Slide [ || pres2 : PresentationNode ]
   | List_Slide
       lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) @elts.press2
@@ -1330,7 +1332,7 @@ SEM ItemList
             items.listType = @listType.self
             items.typeLoc = @listType.typeLoc
 
-SEM ListType [ || pres2 : Presentation typeLoc :  {Presentation -> Presentation}]
+SEM ListType [ || pres2 : PresentationNode typeLoc :  {PresentationNode -> PresentationNode}]
   | Bullet         lhs.pres2 = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = loc (BulletNode @self @lhs.path)
@@ -1345,7 +1347,7 @@ SEM ListType [ || pres2 : Presentation typeLoc :  {Presentation -> Presentation}
 
 
 
-SEM List_Item [ || pres2 : Presentation ]
+SEM List_Item [ || pres2 : PresentationNode ]
   | List_Item
       lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col' @elts.press2
@@ -1358,7 +1360,7 @@ SEM List_Item [ || pres2 : Presentation ]
 
 
 
-SEM Item [ listType : ListType typeLoc :  {Presentation -> Presentation} ||  ]
+SEM Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} ||  ]
   | StringItem     lhs.pres2 = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row' [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @string.pres]
   | HeliumItem     lhs.pres2 = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1387,8 +1389,8 @@ SEM ConsList_Slide
   | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
   | Nil_Slide  lhs.press2 = []
 
-ATTR List_Item [ listType : ListType typeLoc :  {Presentation -> Presentation} || ]
-SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation -> Presentation} || ]
+ATTR List_Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} || ]
+SEM ConsList_Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} || ]
   | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
               head.listType = @lhs.listType
               head.typeLoc = @lhs.typeLoc
@@ -1540,9 +1542,9 @@ ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPrese
        [ focusD : FocusDoc | | ]
 
 List & ConsList
-ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation]} ]
+ATTR  Decls Alts Exps Slides Items [ | | press : {[PresentationNode]} ]
 
-ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation ]
+ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : PresentationNode ]
 
 
 ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ ix : Int || ]

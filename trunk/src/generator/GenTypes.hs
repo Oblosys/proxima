@@ -74,7 +74,7 @@ genDataTypes (File _ decls) = concatMap printDecl decls
 printDecl (Decl e prods decltp) =["\n\ndata "++e++" =" ++ (tail(printProd  (head prods))) ]
                                  ++ indent (6+(length e)) (map printProd (tail prods))
                                  ++ (if decltp /= DeclConsList then indent (6+(length e)) ["| Hole"++e] else [])
-                                 ++ (if decltp /= DeclConsList then indent (6+(length e)) ["| ParseErr"++e++" Node Presentation"] else [])
+                                 ++ (if decltp /= DeclConsList then indent (6+(length e)) ["| ParseErr"++e++" Node (Presentation Node)"] else [])
                                  ++ indent (8+(length e)) [" deriving Show"]                               
 
 ---

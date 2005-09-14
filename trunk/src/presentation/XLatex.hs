@@ -127,10 +127,10 @@ flChar = chr 176
 
 
 
-presType :: String -> Xprez
+presType :: String -> Xprez node
 presType tpStr = row $ intersperse rightArrow (map text (splitAtArrows "" tpStr))
 
-rightArrow :: Xprez
+rightArrow :: Xprez node
 rightArrow = text  "\174" `withFontFam` "symbol"
 
 
@@ -140,10 +140,10 @@ splitAtArrows seg [c]          = [seg++[c]]
 splitAtArrows seg ('-':'>':cs) = seg : splitAtArrows [] cs
 splitAtArrows seg (c:cs)       = splitAtArrows (seg++[c]) cs
 
-presMsg :: String -> Xprez
+presMsg :: String -> Xprez node
 presMsg tpStr = row $ intersperse wok (map text (splitAtWoks "" tpStr))
 
-wok :: Xprez
+wok :: Xprez node
 wok = move 0 (-6) $ (shrink . shrink) (text  "\200" `withFontFam` "mt symbol")
 
 
@@ -225,12 +225,12 @@ hLine' = hLine -- empty
 vLine' = vLine -- empty
 
 
-mkTreeLeaf :: Bool -> Xprez -> Xprez
+mkTreeLeaf :: Bool -> Xprez node -> Xprez node
 mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
       , hLine `withWidth` 5, refHalf label ]
 
-mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
+mkTreeNode :: Bool -> Bool -> Xprez node -> [ Xprez node ] -> Xprez node
 mkTreeNode isLast isExp label children =
   rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
@@ -262,12 +262,12 @@ minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
 hLine' = hLine -- empty
 vLine' = vLine -- empty
 
-mkTreeLeaf :: Bool -> Xprez -> Xprez
+mkTreeLeaf :: Bool -> Xprez node -> Xprez node
 mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
       , hLine `withWidth` 5, refHalf label ]
 
-mkTreeNode :: Bool -> Bool -> Xprez -> [ Xprez ] -> Xprez
+mkTreeNode :: Bool -> Bool -> Xprez node -> [ Xprez node ] -> Xprez node
 mkTreeNode isLast isExp label children =
   rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
