@@ -1,9 +1,7 @@
 module PresTypes where
 
 import CommonTypes
-import {-# SOURCE #-} DocTypes_Generated (Node)
 import {-# SOURCE #-} DocTypes (DocumentLevel)
---                    -- for Node
 
 import CommonUtils
 
@@ -60,16 +58,6 @@ data EditPresentation documentLevel node =
 
 
 
-
-
-{- problems
-
-node depends on document, but now all lower layers import document defs. Maybe parameterize lower layers in 
-Node type?
-
-
-DTD specific document stuff (the Document type etc) could be put in a different module for easy swapping
--}
 
 -- Presentation is Xprez with ID's
 

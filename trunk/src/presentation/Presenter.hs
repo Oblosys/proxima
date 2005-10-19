@@ -16,8 +16,6 @@ import IOExts
 import List
 import Char
 
-import DocTypes_Generated (Node)
-
 
 -- Testing:
 {-
@@ -32,14 +30,14 @@ parsePres' l pr = Just initDoc
 
 -- Presentation parser
 
-presentEnr :: PresentationSheet Node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation Node, LayoutMap, IDPCounter)
+presentEnr :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation node, LayoutMap, IDPCounter)
 presentEnr presentationSheet state enrlvl@(EnrichedDocLevel _ focusD) = -- debug Prs ("Doc Focus is "++show focusD) 
   presentEnr' presentationSheet state enrlvl
 
 
 
-presentEnr' :: PresentationSheet Node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation Node, LayoutMap, IDPCounter)
-presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC =
+presentEnr' :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation node, LayoutMap, IDPCounter)
+presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC = 
       let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
       in  (pres', layM', idC')                                 
       {-
@@ -53,6 +51,6 @@ presentEnr' _ state (EnrichedDocLevel d@(HoleEnrichedDoc) _) lay idc =
       (structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text "<HoleEnr>: something is very wrong"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
       , lay, idc)
 presentEnr' _ state (EnrichedDocLevel d@(ParseErrEnrichedDoc node pres) _) lay idc = 
-     (loc node $ parsing $ overlay [pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red ] `withbgColor` lightGrey
-     , lay, idc)
-
+      (structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text "<ParseErrEnrichedDoc>: something is very wrong"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
+      , lay, idc)
+-- TODO remove parseErr and Hole from rootEnr
