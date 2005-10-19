@@ -79,7 +79,7 @@ recognizeIDListDecl = pStr $
 -}       
 
 -- ?remove pStr from this parser?
-parseIdListIdent :: ListParser node Ident
+parseIdListIdent :: ListParser Node Ident
 parseIdListIdent =  pStr $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
       <$  pSym parsingTk
