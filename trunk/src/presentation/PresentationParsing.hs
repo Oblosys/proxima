@@ -69,20 +69,14 @@ pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr' :: (Ord node, Show node) => ListParser node a -> ListParser node a
-pStr' p = unfoldStructure  
-     <$> pSym (Structural Nothing empty [] NoIDP)
- where unfoldStructure structTk@(Structural nd _ children _) = 
-         let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-         in  if null errs then res else debug Err (show errs) res
-       unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
-
-pStr :: Editable a => ListParser Node a -> ListParser Node a
+-- in case of a parse error, the repaired result is used in the tree and an error message
+-- is sent to the prompt.
+pStr ::  (Ord node, Show node) => ListParser node a -> ListParser node a
 pStr p = unfoldStructure  
      <$> pSym (Structural Nothing empty [] NoIDP)
  where unfoldStructure structTk@(Structural nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) $ parseErr NoNode pr
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) res
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
@@ -523,6 +517,7 @@ evalStepsE (StRepair _ msg@(Msg (s1, s2, xp)) rest    ) = debug Prs ("Parse erro
 evalStepsE (Best _   rest _ _) =  evalStepsE rest
 evalStepsE (NoMoreSteps v    ) =  []
 
+{-
 prr = LocatorP (NoNode) 
        (LocatorP (NoNode) 
          (WithP id
@@ -530,7 +525,7 @@ prr = LocatorP (NoNode)
                         ,StringP (IDP 100) "+"
                         ,LocatorP NoNode (WithP id (StringP (IDP 300) "200"))])))
 
-
+-}
 
 
 

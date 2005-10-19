@@ -43,7 +43,7 @@ parsePres pres = let tokens = postScanStr pres Nothing
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeRootEnr = pStr' $ 
+recognizeRootEnr = pStr $ 
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (Structural (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
 
