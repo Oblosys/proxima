@@ -944,6 +944,7 @@ SEM Exp [ env : Bindings | | val : Value ]
   | DivExp      lhs.val   = case @exp2.val of
                               IntVal 0 -> ErrVal
                               IntVal _ -> evaluateIntOp div @exp1.val @exp2.val
+                              _        -> ErrVal
   | PowerExp    lhs.val   = evaluateIntOp (^) @exp1.val @exp2.val
                             --case (@exp1.val, @exp2.val) of
                             --  (IntVal i1, IntVal i2)   -> BoolVal $ i1 == i2
