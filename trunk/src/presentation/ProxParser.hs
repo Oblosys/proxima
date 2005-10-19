@@ -26,16 +26,21 @@ import DocTypes_Generated (Node)
 
 parsePres pres = let tokens = postScanStr pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in --  showDebug' Err ("Parsing:\n"++concatMap (deepShow 0) (tokens)++"\nhas result:") $
+                 in   showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"\nhas result:") $
                     if null errs then Just enr else Nothing
- where deepShow i tok@(Structural _ _ cs _) = indent i ++ show tok ++ "\n"
-                                           ++ indent (i+1)++"[\n"
-                                           ++ concatMap (deepShow (i+1)) cs 
-                                           ++ indent (i+1)++" ]\n"
-       deepShow i tok = indent i ++ show tok ++ "\n" 
-       indent i = take i (repeat ' ')
        
-
+deepShowTks i tok = case tok of
+                      (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
+                                               ++ indent (i+1)++"[\n"
+                                               ++ concatMap (deepShowTks (i+1)) cs 
+                                               ++ indent (i+1)++" ]\n"
+                      (ParsingTk _ cs _) -> indent i ++ show tok ++ "\n"
+                                               ++ indent (i+1)++"[\n"
+                                               ++ concatMap (deepShowTks (i+1)) cs 
+                                               ++ indent (i+1)++" ]\n"
+                      _                     -> indent i ++ show tok ++ "\n" 
+ where indent i = take i (repeat ' ')
+       
 
 
 
@@ -43,12 +48,13 @@ parsePres pres = let tokens = postScanStr pres Nothing
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
+recognizeRootEnr :: ListParser Node EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
-      <$> pSym (Structural (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
-
+      <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
+
 -- ?remove pStr from this parser?
 parseIDListList_Decl :: ListParser Node List_Decl
 parseIDListList_Decl = pStr $
@@ -73,7 +79,7 @@ recognizeIDListDecl = pStr $
 -}       
 
 -- ?remove pStr from this parser?
-parseIdListIdent :: ListParser Node Ident
+parseIdListIdent :: ListParser node Ident
 parseIdListIdent =  pStr $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
       <$  pSym parsingTk
@@ -158,7 +164,7 @@ recognizeExp = pStr $ -- div&power recognizers are copied here, separating is ha
 
 -- List_Decl, Decl
 
-recognizeList_Decl = pStr $
+recognizeList_Decl = pPrs $
           pSym parsingTk
        *> parseList_Decl
         
@@ -290,10 +296,10 @@ parseFactor'' =
 
 -- **  can recognizeExp and recognizeExp' be merged?
 recognizeExp' = pStr $ 
-         (\str e1 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) Nothing ) -- (Just e2))
+         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
      <$> pStructural PowerExpNode
      <*> recognizeExp
-   --  <*> recognizeExp
+     <*> recognizeExp
   <|>    (\str e1 e2 -> reusePowerExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
      <$> pStructural PowerExpNode
      <*> recognizeExp
@@ -415,24 +421,27 @@ clparsep p str  = let (prs,layoutmap,counter) = tokenize 0 Nothing . ParsingP No
 
 
 
-enrichedDocTk = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty [] NoIDP)
---boardDeclTk =  (Structural (Just $ BoardDeclNode hole []) [] NoIDP)
-parsingTk = (Structural (Just $ NoNode) empty [] NoIDP)
---enrichedDocTk = StrTk "+" Nothing NoIDP -- (Structural (Just $ EnrichedDocNode HoleEnrichedDoc []) [] NoIDP)
---declTk = StrTk "*" Nothing NoIDP -- (Structural (Just $ DeclNode hole []) [] NoIDP)
---parsingTk = StrTk "%" Nothing NoIDP -- (Structural (Just $ NoNode) [] NoIDP)
+enrichedDocTk = (StructuralTk (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty [] NoIDP)
+--boardDeclTk =  (StructuralTk (Just $ BoardDeclNode hole []) [] NoIDP)
 
-toks = [ mkEnrichedDocTk
-           [ mkParsingTk 
+
+--enrichedDocTk = StrTk "+" Nothing NoIDP -- (StructuralTk (Just $ EnrichedDocNode HoleEnrichedDoc []) [] NoIDP)
+--declTk = StrTk "*" Nothing NoIDP -- (StructuralTk (Just $ DeclNode hole []) [] NoIDP)
+--parsingTk = StrTk "%" Nothing NoIDP -- (ParsingTk [] NoIDP)
+
+
+toks = [ --mkEnrichedDocTk
+          -- [
+             {- mkParsingTk 
                [ mkDeclTk 
                     [ mkParsingTk 
                       [ LIdentTk "x" Nothing NoIDP
                       ]
                    ]
                ]
-           , mkParsingTk
-               [ mkDeclTk  [] 
-               , LIdentTk "x" Nothing NoIDP
+           , -} mkParsingTk
+               [
+                 LIdentTk "x" Nothing NoIDP
                , StrTk "=" Nothing NoIDP
                , IntTk "1" Nothing NoIDP
                , StrTk ";" Nothing NoIDP
@@ -442,11 +451,11 @@ toks = [ mkEnrichedDocTk
                , StrTk ";" Nothing NoIDP
                ]
                
-           ]
+         --  ]
        ]
- where mkEnrichedDocTk cs = (Structural (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) empty cs NoIDP)
-       mkDeclTk cs =  (Structural (Just $ DeclNode hole []) empty cs NoIDP)
-       mkParsingTk cs = (Structural (Just $ NoNode) empty cs NoIDP)
+ where mkEnrichedDocTk cs = (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty cs NoIDP)
+       mkDeclTk cs =  (StructuralTk (Just $ DeclNode hole []) empty cs NoIDP)
+       mkParsingTk cs = (ParsingTk empty cs NoIDP)
         
 
 
@@ -458,9 +467,6 @@ toks = [ mkEnrichedDocTk
 
 -- TODO: 
 
-
-
--- parsing token is now a Structural NoNode, this is a hack.
 
 -- put "tokenNode" application in generated code, now it appears everywhere
 -- put general extractFromNodes (rename to reuseFrom Tokens) in begin part of Parser_Generated (after new generater is used)

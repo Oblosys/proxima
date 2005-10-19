@@ -1,7 +1,6 @@
 module PresentationParsing where
 
 import CommonTypes
-import DocTypes_Generated (Node (..))
 import PresTypes
 
 import DocumentEdit
@@ -61,20 +60,17 @@ type ListParser node a = AnaParser [] Pair  (Token node (Maybe node)) a
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
-pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
+pStructural nd = pSym (StructuralTk (Just $ nd hole []) empty [] NoIDP)
 
 
 
--- TODO: Why is there a pStr' and a pStr??
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
--- in case of a parse error, the repaired result is used in the tree and an error message
--- is sent to the prompt.
 pStr ::  (Ord node, Show node) => ListParser node a -> ListParser node a
 pStr p = unfoldStructure  
-     <$> pSym (Structural Nothing empty [] NoIDP)
- where unfoldStructure structTk@(Structural nd pr children _) = 
+     <$> pSym (StructuralTk Nothing empty [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) res
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
@@ -84,6 +80,8 @@ pStr p = unfoldStructure
 -- pStr (pSym <DivExp> ...) <|> pStr (pSym <PowerExp> ...)  always takes the first alternative
 
 
+-- in case of a parse error, the repaired result is used in the tree and an error message
+-- is sent to the prompt.
 -- ? parse error is tricky, since the structural parent of the parsing subtree should know
 -- when an error occurred. Instead of Maybe, we need something like Reuse|(Set x)|(ParseErr [Err])
 -- for structurals, the presentation is lost on a parse error, but structural parse errors
@@ -97,15 +95,24 @@ pStr p = unfoldStructure
 -- maybe we do want the old value for that one? Right now the parse error presentation is presented
 -- so a tree can contain source text (which fails on parsing)
 
+pPrs ::  (Ord node, Show node) => ListParser node a -> ListParser node a
+pPrs p = unfoldStructure  
+     <$> pSym (ParsingTk empty [] NoIDP)
+ where unfoldStructure presTk@(ParsingTk pr children _) = 
+         let (res, errs) = runParser p (presTk : children) {- (p <|> hole/parseErr parser)-}
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) res
+       unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
+
+
 -- hole parser
 {-
        p
    <|>  (\_ -> DeclHole)
-        pSym (Structural (Just $ DeclHoleNode hole []) [] NoIDP)
+        pSym (StructuralTk (Just $ DeclHoleNode hole []) [] NoIDP)
  if we put holeNode and in Editable (maybe better in separate class Parseable)
  then
        (\_ -> hole) -- or reuse
-   <$> pSym (Structural (Just holeNode) [] NoIDP)
+   <$> pSym (StructuralTk (Just holeNode) [] NoIDP)
 
 
 maybe just one HoleNode?
@@ -114,7 +121,7 @@ maybe just one HoleNode?
 
 parseErrs are not in the presentation, so we won't need ParseErrNodes
 
-so Div (Parse Err (IntExp 1) "1_") (IntExp 2) is presented as  (Structural "1_" "2")
+so Div (Parse Err (IntExp 1) "1_") (IntExp 2) is presented as  (StructuralTk "1_" "2")
 and the node for the first child is (IntExp 1) There is never a ParseErrNode
 -}
 
@@ -133,7 +140,7 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 -- TODO: switch pres & ctxt args, fix silly recursion
 
 
-postScanStr :: Presentation Node -> Maybe Node -> [Token Node (Maybe Node)]
+postScanStr :: Presentation node -> Maybe node -> [Token node (Maybe node)]
 postScanStr (EmptyP _)    ctxt = []
 postScanStr (StringP _ _) ctxt = []
 postScanStr (ImageP _ _)  ctxt = []
@@ -147,13 +154,13 @@ postScanStr (ColP i _ (p:ps))  ctxt = postScanStr p ctxt ++ postScanStr (RowP i 
 postScanStr (RowP i _ [])      _    = []
 postScanStr (RowP i _ (p:ps))  ctxt = postScanStr p ctxt ++ postScanStr (RowP i 0 ps) ctxt
 postScanStr (LocatorP l p)     ctxt = postScanStr p (Just l)  
-postScanStr (ParsingP _ pres) ctxt    = [Structural (Just NoNode) pres (postScanPrs pres ctxt) NoIDP]   -- HACK! Need a Parsing Token (only for parsing in Structural)
-postScanStr (StructuralP i pres) ctxt = [Structural ctxt pres (postScanStr pres ctxt) i]
+postScanStr (ParsingP i pres) ctxt    = [ParsingTk pres (postScanPrs pres ctxt) i]
+--postScanStr (ParsingP i pres) ctxt    = [StructuralTk (Just NoNode) pres (postScanPrs pres ctxt) i]
+postScanStr (StructuralP i pres) ctxt = [StructuralTk ctxt pres (postScanStr pres ctxt) i]
 postScanStr pres _ = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
 
--- Structural (Just NoNode) is used as a hack for representing a ParsingToken
 
-postScanPrs :: Presentation Node -> Maybe Node -> [Token Node (Maybe Node)]
+postScanPrs :: Presentation node -> Maybe node -> [Token node (Maybe node)]
 postScanPrs (EmptyP _)    ctxt = []
 postScanPrs (StringP _ "") ctxt = []
 postScanPrs (StringP i str) ctxt = [mkToken str ctxt i]
@@ -169,7 +176,7 @@ postScanPrs (RowP i _ [])      _    = []
 postScanPrs (RowP i _ (p:ps))  ctxt = postScanPrs p ctxt ++ postScanPrs (RowP i 0 ps) ctxt
 postScanPrs (LocatorP l p)     ctxt = postScanPrs p (Just l)  
 postScanPrs (ParsingP _ pres) ctxt    = postScanPrs pres ctxt
-postScanPrs (StructuralP id pres) ctxt = [Structural ctxt pres (postScanStr pres ctxt) id ]
+postScanPrs (StructuralP id pres) ctxt = [StructuralTk ctxt pres (postScanStr pres ctxt) id ]
 postScanPrs pres _ = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
 
 
@@ -192,7 +199,7 @@ pInt = pCSym 20 intTk
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
 pStruct :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
-pStruct = pCSym 4 (Structural Nothing empty [] NoIDP)
+pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 
 
 -- pCostSym expects the parser twice
@@ -238,7 +245,7 @@ StringP values and make a list of tokens. This is closely linked to the scanning
 process and should be done in the layout layer.
 -}
 
---data Token a = Tk Char a IDP | Structural a (Presentation node) deriving Show
+--data Token a = Tk Char a IDP | StructuralTk a (Presentation node) deriving Show
 
 -- use a type field? instead of multiple constructors?
 
@@ -248,7 +255,10 @@ data Token node a = StrTk String a IDP  -- StrTk is for keywords, so eq takes th
              | UIdentTk String a IDP
              | OpTk String a IDP
              | SymTk String a IDP
-             | Structural a (Presentation node) [Token node a] IDP -- deriving (Show)
+             | StructuralTk a (Presentation node) [Token node a] IDP -- deriving (Show)
+             | ParsingTk (Presentation node) [Token node a] IDP -- deriving (Show)
+-- ParsingTk token does not need a node (at least it didn't when it was encoded as a
+-- (StructuralTk NoNode .. ) token)
 
 instance Show a => Show (Token node (Maybe a)) where
   show (StrTk str _ _)    = show str
@@ -257,8 +267,9 @@ instance Show a => Show (Token node (Maybe a)) where
   show (UIdentTk str _ _) = show str
   show (OpTk str _ _)     = show str
   show (SymTk str _ _)    = show str
-  show (Structural Nothing _ _ _) = "<structural:Nothing>" 
-  show (Structural (Just nd) _ _ _) = "<structural:"++show nd++">" 
+  show (StructuralTk Nothing _ _ _) = "<structural:Nothing>" 
+  show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
+  show (ParsingTk _ _ _) = "<presentation>" 
 
 instance Eq a => Eq (Token node (Maybe a)) where
   StrTk str1 _ _ == StrTk str2 _ _ = str1 == str2
@@ -267,10 +278,11 @@ instance Eq a => Eq (Token node (Maybe a)) where
   UIdentTk _ _ _ == UIdentTk _ _ _ = True
   OpTk _ _ _     == OpTk _ _ _     = True
   SymTk _ _ _    == SymTk _ _ _    = True
---  Structural _ _ _    == Structural _ _ _ = True       -- Structurals with no node always match
-  Structural Nothing _ _ _    == Structural _ _ _ _ = True       -- Structurals with no node always match
-  Structural _ _ _ _          == Structural Nothing _ _ _ = True -- Structurals with no node always match
-  Structural (Just nd1) _ _ _ == Structural (Just nd2) _ _ _ = nd1 == nd2
+--  StructuralTk _ _ _    == StructuralTk _ _ _ = True       -- StructuralTks with no node always match
+  StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
+  StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
+  StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
+  ParsingTk _ _ _    == ParsingTk _ _ _ = True   
   _              == _              = False
 
 instance Ord a => Ord (Token node (Maybe a)) where
@@ -304,16 +316,25 @@ instance Ord a => Ord (Token node (Maybe a)) where
   SymTk _ _ _    <= IntTk _ _ _      = True
   SymTk _ _ _    <= StrTk _ _ _      = True
 
---  Structural _ _ _ <= Structural _ _ _     = True
-  Structural Nothing _ _ _    <= Structural _ _ _ _ = True       -- ??
-  Structural _ _ _ _          <= Structural Nothing _ _ _ = True -- ??
-  Structural (Just nd1) _ _ _ <= Structural (Just nd2) _ _ _ = nd1 <= nd2
-  Structural _ _ _ _ <= SymTk _ _ _    = True
-  Structural _ _ _ _ <= OpTk _ _ _     = True
-  Structural _ _ _ _ <= UIdentTk _ _ _ = True
-  Structural _ _ _ _ <= LIdentTk _ _ _ = True
-  Structural _ _ _ _ <= IntTk _ _ _    = True
-  Structural _ _ _ _ <= StrTk _ _ _    = True
+--  StructuralTk _ _ _ <= StructuralTk _ _ _     = True
+  StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True       -- ??
+  StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True -- ??
+  StructuralTk (Just nd1) _ _ _ <= StructuralTk (Just nd2) _ _ _ = nd1 <= nd2
+  StructuralTk _ _ _ _ <= SymTk _ _ _    = True
+  StructuralTk _ _ _ _ <= OpTk _ _ _     = True
+  StructuralTk _ _ _ _ <= UIdentTk _ _ _ = True
+  StructuralTk _ _ _ _ <= LIdentTk _ _ _ = True
+  StructuralTk _ _ _ _ <= IntTk _ _ _    = True
+  StructuralTk _ _ _ _ <= StrTk _ _ _    = True
+
+  ParsingTk _ _ _  <= ParsingTk _ _ _ = True
+  ParsingTk _ _ _  <= StructuralTk _ _ _ _ = True
+  ParsingTk _ _ _ <= SymTk _ _ _    = True
+  ParsingTk _ _ _ <= OpTk _ _ _     = True
+  ParsingTk _ _ _ <= UIdentTk _ _ _ = True
+  ParsingTk _ _ _ <= LIdentTk _ _ _ = True
+  ParsingTk _ _ _ <= IntTk _ _ _    = True
+  ParsingTk _ _ _ <= StrTk _ _ _    = True
 
   _              <= _           = False
 
@@ -341,7 +362,7 @@ tokenString (LIdentTk s n id)   = s
 tokenString (UIdentTk s n id)   = s
 tokenString (OpTk s n id)       = s
 tokenString (SymTk s n id)      = s
-tokenString (Structural n _ _ id) = "<structural token>"
+tokenString (StructuralTk n _ _ id) = "<structural token>"
                              
 tokenNode :: Token node (Maybe node) -> Maybe node                 
 tokenNode (StrTk s n id)      = n
@@ -350,7 +371,7 @@ tokenNode (LIdentTk s n id)   = n
 tokenNode (UIdentTk s n id)   = n
 tokenNode (OpTk s n id)       = n
 tokenNode (SymTk s n id)      = n
-tokenNode (Structural n _ _ id) = n
+tokenNode (StructuralTk n _ _ id) = n
 
 tokenIDP :: Token node (Maybe node) -> IDP       
 tokenIDP (StrTk s n id)    = id
@@ -359,7 +380,7 @@ tokenIDP (LIdentTk s n id) = id
 tokenIDP (UIdentTk s n id) = id
 tokenIDP (OpTk s n id)     = id
 tokenIDP (SymTk s n id)    = id
-tokenIDP (Structural n _ _ id)  = id
+tokenIDP (StructuralTk n _ _ id)  = id
 
 
 -- probably have to split strTk in a symbol, an operator and a keyword variant.
@@ -374,8 +395,9 @@ lIdentTk  = LIdentTk "ident" Nothing (IDP (-1))
 uIdentTk  = UIdentTk "Ident" Nothing (IDP (-1))
 opTk      = OpTk "" Nothing (IDP (-1))
 symTk     = SymTk "" Nothing (IDP (-1))
-strucTk   = Structural Nothing empty [] (IDP (-1))
-
+strucTk   = StructuralTk Nothing empty [] (IDP (-1))
+parsingTk = (ParsingTk empty [] NoIDP)
+--parsingTk = StructuralTk (Just NoNode) empty [] NoIDP
 
 
 mkToken :: String -> Maybe node -> IDP -> Token node (Maybe node)
