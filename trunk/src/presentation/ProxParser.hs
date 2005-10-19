@@ -290,10 +290,10 @@ parseFactor'' =
 
 -- **  can recognizeExp and recognizeExp' be merged?
 recognizeExp' = pStr $ 
-         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
-     <$> pStructural DivExpNode
+         (\str e1 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) Nothing ) -- (Just e2))
+     <$> pStructural PowerExpNode
      <*> recognizeExp
-     <*> recognizeExp
+   --  <*> recognizeExp
   <|>    (\str e1 e2 -> reusePowerExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
      <$> pStructural PowerExpNode
      <*> recognizeExp

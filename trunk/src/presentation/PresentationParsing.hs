@@ -65,6 +65,7 @@ pStructural nd = pSym (Structural (Just $ nd hole []) empty [] NoIDP)
 
 
 
+-- TODO: Why is there a pStr' and a pStr??
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
@@ -81,7 +82,7 @@ pStr p = unfoldStructure
      <$> pSym (Structural Nothing empty [] NoIDP)
  where unfoldStructure structTk@(Structural nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-         in  if null errs then res else debug Err (show errs) $ parseErr NoNode pr
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) $ parseErr NoNode pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
@@ -189,17 +190,11 @@ pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
 pLIdent :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
-pLIdent = pCSym 20 (LIdentTk "ident" Nothing (IDP (-1)))
---pLIdent = pCSym 20 lIdentTk
+pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
 pInt :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
-pInt = pCSym 20 (IntTk "0" Nothing (IDP (-1)))
---pInt = pCSym 20 intTk
-
-
--- *********** BUG IN GHC 6.0
--- intTk and lIntTk calls are replaced by their bodies, otherwise GHC panics
+pInt = pCSym 20 intTk
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
 pStruct :: (Ord node, Show node) => ListParser node (Token node (Maybe node))
