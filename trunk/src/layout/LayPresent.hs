@@ -8,8 +8,9 @@ import Layout
 
 import TreeEditPres
 
-presentIO :: LayerStateLay node -> PresentationLevel node -> LayoutLevel node -> EditPresentation' node
-          -> IO (EditLayout' node, LayerStateLay node, PresentationLevel node)
+presentIO :: LayerStateLay doc node -> PresentationLevel doc node -> LayoutLevel doc node ->
+             EditPresentation' doc node ->
+             IO (EditLayout' doc node, LayerStateLay doc node, PresentationLevel doc node)
 presentIO  state high low@(LayoutLevel pres focus _) editHigh = 
   let (editLow, state', high') = present state high low editHigh
   in do { -- debugLnIO Prs ("editLay':"++show editLow);
@@ -27,7 +28,9 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 
 
 -- doc in pattern should be pres
-present :: LayerStateLay node -> PresentationLevel node -> LayoutLevel node -> EditPresentation' node -> (EditLayout' node, LayerStateLay node, PresentationLevel node)
+present :: LayerStateLay doc node -> PresentationLevel doc node -> LayoutLevel doc node ->
+           EditPresentation' doc node ->
+           (EditLayout' doc node, LayerStateLay doc node, PresentationLevel doc node)
 present state doc (LayoutLevel pres focus dt) (SkipPres' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   let (pres', focus') = (,) {-normalizePresentation -} pres focus -- Normalize does not work in chess board, find out why
       diffTree = DiffLeaf False  -- nonincremental
@@ -49,9 +52,9 @@ present state doc (LayoutLevel presL focus dt) (SetPres' hp@(PresentationLevel p
  
 
 -- goes wrong if focus is in empty string on left side of column
-saveFocus :: FocusPres -> Presentation node -> ((Int, Int, Bool), (Int, Int, Bool))
+saveFocus :: FocusPres -> Presentation doc node -> ((Int, Int, Bool), (Int, Int, Bool))
 saveFocus NoFocusP _  = ((1,0,True),(1,0,True))
 saveFocus focus pres = debug Err "AFOCUS" (xyFromPath (fromP focus) pres, xyFromPath (toP focus) pres)
 
-restoreFocus :: ((Int, Int, Bool), (Int, Int, Bool)) -> Presentation node -> FocusPres
+restoreFocus :: ((Int, Int, Bool), (Int, Int, Bool)) -> Presentation doc node -> FocusPres
 restoreFocus (fxy,txy) pres = FocusP (pathFromXY fxy pres) (pathFromXY fxy pres) 

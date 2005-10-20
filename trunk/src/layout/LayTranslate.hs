@@ -9,8 +9,8 @@ import TreeEditPres
 
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout documentLevel node
-            -> IO (EditPresentation documentLevel node, LayerStateLay node, LayoutLevel node)
+translateIO :: ScannerSheet doc node -> LayerStateLay doc node -> LayoutLevel doc node -> PresentationLevel doc node -> EditLayout documentLevel doc node
+            -> IO (EditPresentation documentLevel doc node, LayerStateLay doc node, LayoutLevel doc node)
 translateIO scannerSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO scannerSheet state low high editLow
      ; debugLnIO Prs $ "Edit Layout: "++show editLow
@@ -26,7 +26,7 @@ translateIO scannerSheet state low high editLow =
 
 
 -- split in monadic and non-monadic part
-parseIO :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout documentLevel node -> IO (EditPresentation documentLevel node, LayerStateLay node, LayoutLevel node)
+parseIO :: ScannerSheet doc node -> LayerStateLay doc node -> LayoutLevel doc node -> PresentationLevel doc node -> EditLayout documentLevel doc node -> IO (EditPresentation documentLevel doc node, LayerStateLay doc node, LayoutLevel doc node)
 --parseIO _ state layLvl prs (OpenFileLay str) = openFile str state layLvl prs
 --parseIO _ state layLvl prs (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prs str 
 --parseIO _ state layLvl prs (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prs
@@ -34,7 +34,7 @@ parseIO _ state layLvl prs (OpenFileLay str) = return (OpenFilePres str, state, 
 parseIO _ state layLvl prs (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
 parseIO scannerSheet state layLvl prs event = return $ parse scannerSheet state layLvl prs event
 
-parse :: ScannerSheet node -> LayerStateLay node -> LayoutLevel node -> PresentationLevel node -> EditLayout documentLevel node -> (EditPresentation documentLevel node, LayerStateLay node, LayoutLevel node)
+parse :: ScannerSheet doc node -> LayerStateLay doc node -> LayoutLevel doc node -> PresentationLevel doc node -> EditLayout documentLevel doc node -> (EditPresentation documentLevel doc node, LayerStateLay doc node, LayoutLevel doc node)
 parse _ state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
   setUpd NothingUpdated $ (SkipPres 0, state, LayoutLevel pres focus dt)
 parse _ state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
@@ -104,7 +104,7 @@ tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationL
 
 -- if focus is valid, apply editF to the presentation, and try to reparse the presentation 
 --editLay :: 
---            Presentation node -> Presentation node -> LayoutLevel node -> FocusPres -> (EditPresentation documentLevel node, Presentation node, Presentation node)
+--            Presentation doc node -> Presentation doc node -> LayoutLevel doc node -> FocusPres -> (EditPresentation documentLevel doc node, Presentation doc node, Presentation doc node)
 
 editLay editF state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = (SkipPres 0, state, layLvl)
 editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
@@ -129,10 +129,10 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
 
 
 -- replace the current layout by pres, focus is reset
-editSet :: Presentation node -> Presentation node -> LayoutLevel node -> (LayoutLevel node, Presentation node)
+editSet :: Presentation doc node -> Presentation doc node -> LayoutLevel doc node -> (LayoutLevel doc node, Presentation doc node)
 editSet pres' clip (LayoutLevel pres focus@(FocusP f t) dt) = (LayoutLevel pres' NoFocusP dt, clip)
 
-openFile :: String -> Presentation node -> LayoutLevel node -> PresentationLevel node -> IO (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+openFile :: String -> Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> IO (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 openFile filePath clip layLvl prs =
  do { debugLnIO Lay $ "Opening file: "++filePath
     ; str <- readFile filePath
@@ -140,19 +140,19 @@ openFile filePath clip layLvl prs =
     ; return $ editLay (editSet pres') clip layLvl prs
     }
     
-editInsert :: Char -> Presentation node -> LayoutLevel node -> (LayoutLevel node, Presentation node)
+editInsert :: Char -> Presentation doc node -> LayoutLevel doc node -> (LayoutLevel doc node, Presentation doc node)
 editInsert c clip (LayoutLevel pres focus@(FocusP f t) dt) = 
   let (pres', focus')  = if f==t then (pres,focus) else deleteTree focus pres
       (pres'',focus'') = pasteTree (fromP focus') (text [c]) pres'
   in  (LayoutLevel pres'' focus'' dt, clip)
 
-editCut :: Presentation node -> LayoutLevel node -> (LayoutLevel node, Presentation node)
+editCut :: Presentation doc node -> LayoutLevel doc node -> (LayoutLevel doc node, Presentation doc node)
 editCut clip (LayoutLevel pres focus dt) = 
   let clip' = copyTree focus clip pres                                                                                              
       (pres', focus') = deleteTree focus pres
   in  (LayoutLevel pres' focus' dt, clip')
 
-editCopy :: Presentation node -> LayoutLevel node -> PresentationLevel node -> (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+editCopy :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 editCopy clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 editCopy clip layLvl@(LayoutLevel pres focus dt)    doc = 
   let clip' = copyTree focus clip pres                                                                     
@@ -175,7 +175,7 @@ editSplit clip (LayoutLevel pres focus dt) =
 
 
 -- only for column of rows:
-editNormalize :: Presentation node -> LayoutLevel node -> (LayoutLevel node, Presentation node)
+editNormalize :: Presentation doc node -> LayoutLevel doc node -> (LayoutLevel doc node, Presentation doc node)
 editNormalize clip (LayoutLevel pres focus dt) = 
  let (pres', focus') = normalizePresentation pres focus
  in  (LayoutLevel pres' focus' dt, clip)
@@ -200,26 +200,26 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
 
 
 
-navigateLeft :: Presentation node -> LayoutLevel node -> PresentationLevel node -> (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+navigateLeft :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 navigateLeft clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 navigateLeft clip (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
   in  (SkipPres 0, clip, LayoutLevel pres focus' dt)
 
-navigateRight :: Presentation node -> LayoutLevel node -> PresentationLevel node -> (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+navigateRight :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 navigateRight clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 navigateRight clip (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres
   in  (SkipPres 0, clip, LayoutLevel pres focus' dt)
 
-enlargeLeft :: Presentation node -> LayoutLevel node -> PresentationLevel node -> (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+enlargeLeft :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 enlargeLeft clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 enlargeLeft clip (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
        focus'' = FocusP (fromP focus) (fromP focus')
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
-enlargeRight :: Presentation node -> LayoutLevel node -> PresentationLevel node -> (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+enlargeRight :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 enlargeRight clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 enlargeRight clip (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres
@@ -229,7 +229,7 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
 
 
 {-
-openFile :: Presentation node -> LayoutLevel node -> PresentationLevel node -> FilePath -> IO (EditPresentation documentLevel node, Presentation node, LayoutLevel node) 
+openFile :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> FilePath -> IO (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node) 
 openFile clip layLvl doc filePath =
  do { debugLnIO Prs "Opening file"
     ; str <- readFile filePath
@@ -237,7 +237,7 @@ openFile clip layLvl doc filePath =
     ; return (SetPres doc', clip', layLvl')
     }
 
-saveFile :: Presentation node -> LayoutLevel node -> PresentationLevel node -> FilePath -> IO (EditPresentation documentLevel node, Presentation node, LayoutLevel node)
+saveFile :: Presentation doc node -> LayoutLevel doc node -> PresentationLevel doc node -> FilePath -> IO (EditPresentation documentLevel doc node, Presentation doc node, LayoutLevel doc node)
 saveFile clip layLvl doc filePath =
  do { debugLnIO Prs "Saving file"
    -- ; let (src, errsStr) =  span (\l -> not (isPrefixOf "#######" l)) . lines . stringFromPres $ pres

@@ -31,7 +31,9 @@ top level Enr should be called EnrichedDoc (in node, makestructural, etc)
 
 -}
 
-presentIO :: LayerStateEval -> DocumentLevel -> EnrichedDocLevel -> EditDocument' DocumentLevel -> IO (EditEnrichedDoc', LayerStateEval, DocumentLevel)
+presentIO :: LayerStateEval -> DocumentLevel Document -> EnrichedDocLevel ->
+             EditDocument' (DocumentLevel Document) ->
+             IO (EditEnrichedDoc', LayerStateEval, DocumentLevel Document)
 presentIO  state high low@(EnrichedDocLevel enr focus) editHigh =
   let (editLow, state', high') = eval state high low editHigh
   in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
@@ -60,7 +62,8 @@ eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docE
 
 
 -- TODO: make sure that document is parsed before doing these:
-editDoc :: LayerStateEval -> DocumentLevel -> EditDocument' DocumentLevel -> (DocumentLevel, LayerStateEval)
+editDoc :: LayerStateEval -> DocumentLevel Document -> EditDocument' (DocumentLevel Document) ->
+           (DocumentLevel Document, LayerStateEval)
 editDoc state doclvl                        (UpdateDoc' upd) = (upd doclvl, state)
 editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavDownDoc'      = ((DocumentLevel doc (navigateDownD pth doc) clipD), state)
@@ -92,7 +95,7 @@ getOldTypeInfo (HoleEnrichedDoc)                    = ([],[],[])
 getOldTypeInfo (ParseErrEnrichedDoc _ _)            = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
-evalDoc :: LayerStateEval -> DocumentLevel -> EnrichedDoc -> EnrichedDoc
+evalDoc :: LayerStateEval -> DocumentLevel Document -> EnrichedDoc -> EnrichedDoc
 evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls@(ParseErrList_Decl _ _)) _ _) enr = RootEnr idd idp (List_Decl NoIDD Nil_Decl) dcls (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls) _ _) enr = RootEnr idd idp dcls dcls (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc

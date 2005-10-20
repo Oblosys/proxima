@@ -10,7 +10,10 @@ import List
 import Char
 
 
-data DocumentLevel = DocumentLevel Document FocusDoc ClipDoc
+data DocumentLevel document = DocumentLevel document FocusDoc ClipDoc
+
+--class HasPath node where
+--  pathNode :: node -> PathDoc
 
 {-
 data PathDoc = PathD [Int]
@@ -39,7 +42,7 @@ data EditDocument' documentLevel = -- Document in SetDoc' should be a DocumentLe
   | NavRightDoc'
   | CutDoc'
   | CopyDoc'
-  | PasteDoc'
+   | PasteDoc'
   | DeleteDoc'
   | EvaluateDoc' -- for type evaluation
   | SkipDoc' Int

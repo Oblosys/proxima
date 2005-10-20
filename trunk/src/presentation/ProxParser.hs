@@ -48,7 +48,7 @@ deepShowTks i tok = case tok of
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeRootEnr :: ListParser Node EnrichedDoc
+recognizeRootEnr :: ListParser doc Node EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
@@ -56,13 +56,13 @@ recognizeRootEnr = pStr $
                                 {- tree or xml view-}
 
 -- ?remove pStr from this parser?
-parseIDListList_Decl :: ListParser Node List_Decl
-parseIDListList_Decl = pStr $
+parseIDListList_Decl :: ListParser doc Node List_Decl
+parseIDListList_Decl = pPrs $
           (\dcls -> reuseList_Decl [] Nothing (Just $ toConsList_Decl dcls)) 
       <$  pSym parsingTk
       <*> pList recognizeIDListDecl
              
-recognizeIDListDecl :: ListParser Node Decl
+recognizeIDListDecl :: ListParser doc Node Decl
 recognizeIDListDecl = pStr $
           (\str ident -> reuseDecl [tokenNode str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing (Just ident) Nothing)
       <$> pStructural DeclNode
@@ -79,8 +79,8 @@ recognizeIDListDecl = pStr $
 -}       
 
 -- ?remove pStr from this parser?
-parseIdListIdent :: ListParser Node Ident
-parseIdListIdent =  pStr $
+parseIdListIdent :: ListParser doc Node Ident
+parseIdListIdent =  pPrs $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
       <$  pSym parsingTk
       <*> pLIdent 
@@ -145,6 +145,8 @@ recognizeItem = pStr $
      <$> pStructural ListItemNode
      <*> recognizeItemList
 
+
+-- TODO: problem, structural and parsing are now different tokens
 recognizeExp = pStr $ -- div&power recognizers are copied here, separating is hard because parse cannot fail on structural token
          pSym parsingTk
       *> parseExp
@@ -237,7 +239,7 @@ parseParenExp = -- maybe we don't want to build a list for (exp), because now we
 
 -- returns list of separator tokens and a List_Exp the List_Exp is not reused through its separator tokens
 -- because these do not belong to List_Exp, but to its parent
-parseList_Exp :: ListParser Node ([Token Node (Maybe Node)], List_Exp)
+parseList_Exp :: ListParser doc Node ([Token doc Node (Maybe Node)], List_Exp)
 parseList_Exp =
     (\toksElts -> let (toks, elts) = case toksElts of
                                        Nothing        -> ([], [])
@@ -320,10 +322,10 @@ parseIdent =
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Show node => Token node (Maybe node) -> String_
+mkString_ :: Show node => Token doc node (Maybe node) -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
 
-mkInt_ :: Show node => Token node (Maybe node) -> Int_
+mkInt_ :: Show node => Token doc node (Maybe node) -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different

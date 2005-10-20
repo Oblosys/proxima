@@ -17,7 +17,9 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
---unArrange :: Show node => LocalStateArr -> ArrangementLevel node -> LayoutLevel Node -> EditArrangement documentLevel -> (EditLayout documentLevel node, LocalStateArr, ArrangementLevel node)
+--unArrange :: (HasPath node, Show node) => LocalStateArr -> ArrangementLevel node -> LayoutLevel Node ->
+--             EditArrangement DocumentLevel ->
+--             (EditLayout DocumentLevel node, LocalStateArr, ArrangementLevel node)
 unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) editArr = 
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
@@ -62,9 +64,12 @@ unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) 
     _                     -> (SkipLay 0,             state, arrLvl) 
 
 
+  
+  
 -- mouseDownDocPres and \DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: state -> ArrangementLevel node -> Presentation Node -> PathArr ->
-                Int -> (EditLayout DocumentLevel node, state, ArrangementLevel node)  
+mouseDownDoc :: {- HasPath node  => -} state -> ArrangementLevel doc node ->
+                Presentation doc Node -> PathArr -> Int ->
+                (EditLayout (DocumentLevel doc) doc node, state, ArrangementLevel doc node)  
 mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = addWithSteps pthA layout
   in  case mouseDownDocPres pthP layout of

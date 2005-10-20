@@ -22,7 +22,6 @@ import DocTypes (DocumentLevel (..))
 import DocTypes_Generated (Node)
 
 
-type PresentationNode = Presentation Node
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -122,6 +121,7 @@ SEM EnrichedDoc
                               ] `withFontSize` 10
                        , row' [ hSpace 3
                               , row[ text "Top level identifiers: " `withFontFam` "verdana", @idListDecls.idsPres] `withFontSize` 10
+                       --       , row[ text "Top level identifiers disabled" `withFontFam` "verdana"] `withFontSize` 10
                               ]
                        , vSpace 4
                        --, myTree
@@ -157,7 +157,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage str = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation Node
+presMessage :: HeliumMessage -> Presentation doc Node
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col' (map (text) lns) `withColor` errColor
                                                              rng:_   -> col' (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -168,7 +168,7 @@ errColor = red
 
 }
 
-SEM List_Decl [ || pres : PresentationNode ]
+SEM List_Decl [ || pres : Presentation_Doc_Node ]
   | List_Decl
       lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row @elts.press
@@ -396,16 +396,16 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Xprez node -> PathDoc -> Xprez node
+link :: Xprez doc node -> PathDoc -> Xprez doc node
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
-navigateTo :: PathDoc -> UpdateDoc
+navigateTo :: PathDoc -> UpdateDoc doc
 navigateTo NoPathD = id
 navigateTo (PathD pth) = (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
 
 
-expand :: [Int] -> Decl -> UpdateDoc
+expand :: [Int] -> Decl -> UpdateDoc Document
 expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -413,7 +413,7 @@ expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
                                             )
     in  (DocumentLevel d' path cl)
 
-toggleExpanded :: [Int] -> Decl -> UpdateDoc
+toggleExpanded :: [Int] -> Decl -> UpdateDoc Document
 toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -422,7 +422,7 @@ toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) 
     in  (DocumentLevel d' path cl)
 
 
-toggleAutoLayout :: [Int] -> Decl -> UpdateDoc
+toggleAutoLayout :: [Int] -> Decl -> UpdateDoc Document
 toggleAutoLayout pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -454,23 +454,23 @@ row'  = RowP (NoIDP) 0
 col'  = ColP (NoIDP) 0
 text' idc = StringP idc
 
-der:: IDP -> String -> Xprez node
+der:: IDP -> String -> Xprez doc node
 der idc str = StringP idc str `withColor` derCol
 
 
-op :: IDP -> String -> Xprez node
+op :: IDP -> String -> Xprez doc node
 op idc str = StringP idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez node
+key :: IDP -> String -> Xprez doc node
 key idc str = StringP idc str `withColor` keyCol
 
-sep :: IDP -> String -> Xprez node
+sep :: IDP -> String -> Xprez doc node
 sep idc str = StringP idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez node
+cons :: IDP -> String -> Xprez doc node
 cons idc str = StringP idc str `withColor` consCol
 
-typeD :: IDP -> String -> Xprez node
+typeD :: IDP -> String -> Xprez doc node
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 
@@ -1084,7 +1084,7 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ------------------------- Identifier list presentation
 --      can we mix pres with idsPres?
 
-ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : PresentationNode ]
+ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node ]
 
 SEM List_Decl
   | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -1188,7 +1188,7 @@ SEM PPPresentation
 --                                          , row' [ text "         ", @slides.pres]
 
 
-SEM List_Slide [ || pres : PresentationNode ]
+SEM List_Slide [ || pres : Presentation_Doc_Node ]
   | List_Slide
       lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1234,7 +1234,7 @@ SEM ItemList
                                , @items.pres
                             ] -}
 
-SEM List_Item [ || pres : PresentationNode ]
+SEM List_Item [ || pres : Presentation_Doc_Node ]
   | List_Item
       lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1295,7 +1295,8 @@ SEM Item
 --                      ] `withColor` darkViolet
 
 {
-toggleViewType :: [Int] -> PPPresentation -> UpdateDoc
+-- many Document refs may be doc when editPasteD is fixed
+toggleViewType :: [Int] -> PPPresentation -> UpdateDoc Document
 toggleViewType pth (PPPresentation idD viewtp slides) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -1305,10 +1306,10 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
 
 }
 
-ATTR Slide ItemList {- ListType -} Item [ || pres2 : PresentationNode ]
-ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[PresentationNode]} ]
+ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_Doc_Node ]
+ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_Doc_Node]} ]
 
-SEM List_Slide [ || pres2 : PresentationNode ]
+SEM List_Slide [ || pres2 : Presentation_Doc_Node ]
   | List_Slide
       lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) @elts.press2
@@ -1337,7 +1338,7 @@ SEM ItemList
             items.listType = @listType.self
             items.typeLoc = @listType.typeLoc
 
-SEM ListType [ || pres2 : PresentationNode typeLoc :  {PresentationNode -> PresentationNode}]
+SEM ListType [ || pres2 : Presentation_Doc_Node typeLoc :  {Presentation_Doc_Node -> Presentation_Doc_Node}]
   | Bullet         lhs.pres2 = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = loc (BulletNode @self @lhs.path)
@@ -1352,7 +1353,7 @@ SEM ListType [ || pres2 : PresentationNode typeLoc :  {PresentationNode -> Prese
 
 
 
-SEM List_Item [ || pres2 : PresentationNode ]
+SEM List_Item [ || pres2 : Presentation_Doc_Node ]
   | List_Item
       lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col' @elts.press2
@@ -1365,7 +1366,7 @@ SEM List_Item [ || pres2 : PresentationNode ]
 
 
 
-SEM Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} ||  ]
+SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node -> Presentation_Doc_Node} ||  ]
   | StringItem     lhs.pres2 = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row' [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @string.pres]
   | HeliumItem     lhs.pres2 = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1394,8 +1395,8 @@ SEM ConsList_Slide
   | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
   | Nil_Slide  lhs.press2 = []
 
-ATTR List_Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} || ]
-SEM ConsList_Item [ listType : ListType typeLoc :  {PresentationNode -> PresentationNode} || ]
+ATTR List_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node -> Presentation_Doc_Node} || ]
+SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node -> Presentation_Doc_Node} || ]
   | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
               head.listType = @lhs.listType
               head.typeLoc = @lhs.typeLoc
@@ -1547,9 +1548,9 @@ ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPrese
        [ focusD : FocusDoc | | ]
 
 List & ConsList
-ATTR  Decls Alts Exps Slides Items [ | | press : {[PresentationNode]} ]
+ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation_Doc_Node]} ]
 
-ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : PresentationNode ]
+ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation_Doc_Node ]
 
 
 ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ ix : Int || ]

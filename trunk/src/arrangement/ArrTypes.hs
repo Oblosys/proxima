@@ -8,10 +8,10 @@ import PresTypes
 data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
-data ArrangementLevel node = ArrangementLevel (Arrangement node) FocusArr (Presentation node) deriving Show
+data ArrangementLevel doc node = ArrangementLevel (Arrangement node) FocusArr (Presentation doc node) deriving Show
 
-data (EditArrangement' node) =
-    SetArr' (ArrangementLevel node)
+data EditArrangement' doc node =
+    SetArr' (ArrangementLevel doc node)
   | SkipArr' Int deriving Show
 
 data EditArrangement documentLevel =

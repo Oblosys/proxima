@@ -7,8 +7,9 @@ import PresLayerUtils
 import Presenter
 
 
-presentIO :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> PresentationLevel node -> EditEnrichedDoc' ->
-             IO (EditPresentation' node, LayerStatePres, EnrichedDocLevel)
+presentIO :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel ->
+             PresentationLevel doc node -> EditEnrichedDoc' ->
+             IO (EditPresentation' doc node, LayerStatePres, EnrichedDocLevel)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
   let (editLow, state', high') = present presentationSheet state high low editHigh
   in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
@@ -22,8 +23,9 @@ presentIO presentationSheet state high low@(PresentationLevel pres layout) editH
 -- inserted and deleted are taken from setDoc' and put in PresentationLevelState
 -- on document edit, old inserted and deleted from level are reused
 
-present :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> PresentationLevel node -> EditEnrichedDoc' ->
-           (EditPresentation' node, LayerStatePres, EnrichedDocLevel)
+present :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel ->
+           PresentationLevel doc node -> EditEnrichedDoc' ->
+           (EditPresentation' doc node, LayerStatePres, EnrichedDocLevel)
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
 present _ state enrlvl pres                            (SkipEnr' i) = (SkipPres' (i-1), state, enrlvl)

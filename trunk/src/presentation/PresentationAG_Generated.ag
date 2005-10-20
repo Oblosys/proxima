@@ -13,8 +13,6 @@
 --type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 
 
-
-
 SEM EnrichedDoc
   | RootEnr idListDecls.pIdC = @lhs.pIdC + 4
             decls.pIdC = @idListDecls.pIdC
@@ -27,10 +25,10 @@ SEM EnrichedDoc
   | RootEnr idListDecls.path  = []
             decls.path  = []
 
-
 {
+type Presentation_Doc_Node = Presentation Document Node
 
-presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [PresentationNode] -> PresentationNode
+presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation_Doc_Node] -> Presentation_Doc_Node
 presentElementXML focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  
     if null children
@@ -39,30 +37,30 @@ presentElementXML focusD node path tag children =
              , row [ text "  ", col children ]
              , text $ "</"++tag++">" ]      
     
-presentPrimXMLBool :: Bool -> PresentationNode
+presentPrimXMLBool :: Bool -> Presentation_Doc_Node
 presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
 
-presentPrimXMLInt :: Int -> PresentationNode
+presentPrimXMLInt :: Int -> Presentation_Doc_Node
 presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
 
-presentPrimXMLString :: String -> PresentationNode
+presentPrimXMLString :: String -> Presentation_Doc_Node
 presentPrimXMLString x = text $ "<String>"++x++"<String>"
 
 
-presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [PresentationNode] -> PresentationNode
+presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [Presentation_Doc_Node] -> Presentation_Doc_Node
 presentElementTree focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  
     if null children
     then mkTreeLeaf False $ text $ tag
     else mkTreeNode False True (text tag) children
     
-presentPrimTreeBool :: Bool -> PresentationNode
+presentPrimTreeBool :: Bool -> Presentation_Doc_Node
 presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
 
-presentPrimTreeInt :: Int -> PresentationNode
+presentPrimTreeInt :: Int -> Presentation_Doc_Node
 presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
 
-presentPrimTreeString :: String -> PresentationNode
+presentPrimTreeString :: String -> Presentation_Doc_Node
 presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 --n2 = mkTreeNode False False (text "node 2" `withFontSize` 50) []
@@ -80,7 +78,7 @@ presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 DATA EnrichedDoc | RootEnr id:IDD idP:IDP idListDecls:List_Decl decls:List_Decl heliumTypeInfo:HeliumTypeInfo document:Document 
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc Node presentation:PresentationNode
+                 | ParseErrEnrichedDoc Node presentation:Presentation_Doc_Node
 
 
 DATA Decl | Decl idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool_ autoLayout:Bool_ ident:Ident exp:Exp 
@@ -88,12 +86,12 @@ DATA Decl | Decl idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool_ auto
           | PPPresentationDecl idD:IDD idP0:IDP idP1:IDP pPPresentation:PPPresentation 
           | InvDecl idD:IDD idP0:IDP idP1:IDP inv:Inv 
           | HoleDecl
-          | ParseErrDecl Node presentation:PresentationNode
+          | ParseErrDecl Node presentation:Presentation_Doc_Node
 
 
 DATA Ident | Ident idD:IDD idP0:IDP idP1:IDP string_:String_ 
            | HoleIdent
-           | ParseErrIdent Node presentation:PresentationNode
+           | ParseErrIdent Node presentation:Presentation_Doc_Node
 
 
 DATA Exp | PlusExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
@@ -112,22 +110,22 @@ DATA Exp | PlusExp idD:IDD idP0:IDP exp1:Exp exp2:Exp
          | ListExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
          | ProductExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
          | HoleExp
-         | ParseErrExp Node presentation:PresentationNode
+         | ParseErrExp Node presentation:Presentation_Doc_Node
 
 
 DATA Alt | Alt idD:IDD idP0:IDP idP1:IDP ident:Ident exp:Exp 
          | HoleAlt
-         | ParseErrAlt Node presentation:PresentationNode
+         | ParseErrAlt Node presentation:Presentation_Doc_Node
 
 
 DATA Board | Board idD:IDD r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow 
            | HoleBoard
-           | ParseErrBoard Node presentation:PresentationNode
+           | ParseErrBoard Node presentation:Presentation_Doc_Node
 
 
 DATA BoardRow | BoardRow idD:IDD ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare 
               | HoleBoardRow
-              | ParseErrBoardRow Node presentation:PresentationNode
+              | ParseErrBoardRow Node presentation:Presentation_Doc_Node
 
 
 DATA BoardSquare | Queen idD:IDD color:Bool_ 
@@ -138,54 +136,54 @@ DATA BoardSquare | Queen idD:IDD color:Bool_
                  | Pawn idD:IDD color:Bool_ 
                  | Empty 
                  | HoleBoardSquare
-                 | ParseErrBoardSquare Node presentation:PresentationNode
+                 | ParseErrBoardSquare Node presentation:Presentation_Doc_Node
 
 
 DATA PPPresentation | PPPresentation idd:IDD viewType:Bool_ slides:List_Slide 
                     | HolePPPresentation
-                    | ParseErrPPPresentation Node presentation:PresentationNode
+                    | ParseErrPPPresentation Node presentation:Presentation_Doc_Node
 
 
 DATA Slide | Slide idd:IDD title:String_ itemList:ItemList 
            | HoleSlide
-           | ParseErrSlide Node presentation:PresentationNode
+           | ParseErrSlide Node presentation:Presentation_Doc_Node
 
 
 DATA ItemList | ItemList idd:IDD listType:ListType items:List_Item 
               | HoleItemList
-              | ParseErrItemList Node presentation:PresentationNode
+              | ParseErrItemList Node presentation:Presentation_Doc_Node
 
 
 DATA ListType | Bullet idd:IDD 
               | Number idd:IDD 
               | Alpha idd:IDD 
               | HoleListType
-              | ParseErrListType Node presentation:PresentationNode
+              | ParseErrListType Node presentation:Presentation_Doc_Node
 
 
 DATA Item | StringItem idd:IDD string:String_ 
           | HeliumItem idd:IDD exp:Exp 
           | ListItem idd:IDD itemList:ItemList 
           | HoleItem
-          | ParseErrItem Node presentation:PresentationNode
+          | ParseErrItem Node presentation:Presentation_Doc_Node
 
 
 DATA Inv | Inv idd:IDD doc:EitherDocView enr:View eval:String_ evalButton:EvalButton 
          | HoleInv
-         | ParseErrInv Node presentation:PresentationNode
+         | ParseErrInv Node presentation:Presentation_Doc_Node
 
 
 DATA EvalButton | ReEvaluate1 idd:IDD 
                 | ReEvaluate2 idd:IDD 
                 | Skip idd:IDD 
                 | HoleEvalButton
-                | ParseErrEvalButton Node presentation:PresentationNode
+                | ParseErrEvalButton Node presentation:Presentation_Doc_Node
 
 
 DATA EitherDocView | LeftDocView idd:IDD error:String_ 
                    | RightDocView idd:IDD doc:View 
                    | HoleEitherDocView
-                   | ParseErrEitherDocView Node presentation:PresentationNode
+                   | ParseErrEitherDocView Node presentation:Presentation_Doc_Node
 
 
 DATA View | ANil idd:IDD 
@@ -205,27 +203,27 @@ DATA View | ANil idd:IDD
           | Undef idd:IDD 
           | Unit idd:IDD 
           | HoleView
-          | ParseErrView Node presentation:PresentationNode
+          | ParseErrView Node presentation:Presentation_Doc_Node
 
 
 DATA String_ | String_ idd:IDD string:String 
              | HoleString_
-             | ParseErrString_ Node presentation:PresentationNode
+             | ParseErrString_ Node presentation:Presentation_Doc_Node
 
 
 DATA Bool_ | Bool_ idd:IDD bool:Bool 
            | HoleBool_
-           | ParseErrBool_ Node presentation:PresentationNode
+           | ParseErrBool_ Node presentation:Presentation_Doc_Node
 
 
 DATA Int_ | Int_ idd:IDD int:Int 
           | HoleInt_
-          | ParseErrInt_ Node presentation:PresentationNode
+          | ParseErrInt_ Node presentation:Presentation_Doc_Node
 
 
 DATA List_Decl | List_Decl idd:IDD elts:ConsList_Decl 
                | HoleList_Decl
-               | ParseErrList_Decl Node presentation:PresentationNode
+               | ParseErrList_Decl Node presentation:Presentation_Doc_Node
 
 
 DATA ConsList_Decl | Cons_Decl head:Decl tail:ConsList_Decl 
@@ -234,7 +232,7 @@ DATA ConsList_Decl | Cons_Decl head:Decl tail:ConsList_Decl
 
 DATA List_Alt | List_Alt idd:IDD elts:ConsList_Alt 
               | HoleList_Alt
-              | ParseErrList_Alt Node presentation:PresentationNode
+              | ParseErrList_Alt Node presentation:Presentation_Doc_Node
 
 
 DATA ConsList_Alt | Cons_Alt head:Alt tail:ConsList_Alt 
@@ -243,7 +241,7 @@ DATA ConsList_Alt | Cons_Alt head:Alt tail:ConsList_Alt
 
 DATA List_Exp | List_Exp idd:IDD elts:ConsList_Exp 
               | HoleList_Exp
-              | ParseErrList_Exp Node presentation:PresentationNode
+              | ParseErrList_Exp Node presentation:Presentation_Doc_Node
 
 
 DATA ConsList_Exp | Cons_Exp head:Exp tail:ConsList_Exp 
@@ -252,7 +250,7 @@ DATA ConsList_Exp | Cons_Exp head:Exp tail:ConsList_Exp
 
 DATA List_Slide | List_Slide idd:IDD elts:ConsList_Slide 
                 | HoleList_Slide
-                | ParseErrList_Slide Node presentation:PresentationNode
+                | ParseErrList_Slide Node presentation:Presentation_Doc_Node
 
 
 DATA ConsList_Slide | Cons_Slide head:Slide tail:ConsList_Slide 
@@ -261,7 +259,7 @@ DATA ConsList_Slide | Cons_Slide head:Slide tail:ConsList_Slide
 
 DATA List_Item | List_Item idd:IDD elts:ConsList_Item 
                | HoleList_Item
-               | ParseErrList_Item Node presentation:PresentationNode
+               | ParseErrList_Item Node presentation:Presentation_Doc_Node
 
 
 DATA ConsList_Item | Cons_Item head:Item tail:ConsList_Item 
@@ -788,10 +786,10 @@ ATTR  Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemLis
        [ path : {[Int]}  | | ]
 
 
-ATTR  List_Decl ConsList_Decl List_Alt ConsList_Alt List_Exp ConsList_Exp List_Slide ConsList_Slide List_Item ConsList_Item [ | | press : {[PresentationNode]} ]
+ATTR  List_Decl ConsList_Decl List_Alt ConsList_Alt List_Exp ConsList_Exp List_Slide ConsList_Slide List_Item ConsList_Item [ | | press : {[Presentation_Doc_Node]} ]
 
 
-ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item Inv EvalButton EitherDocView View String_ Bool_ Int_ [ | | pres : PresentationNode ]
+ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item Inv EvalButton EitherDocView View String_ Bool_ Int_ [ | | pres : Presentation_Doc_Node ]
 
 
 ATTR  Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item Inv EvalButton EitherDocView View String_ Bool_ Int_ [ ix : Int || ]
@@ -800,7 +798,7 @@ ATTR  Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemLis
 
 -- Default XML presentation
 
-SEM Decl [ || presXML : PresentationNode ]
+SEM Decl [ || presXML : Presentation_Doc_Node ]
   | Decl
       lhs.presXML = presentElementXML @lhs.focusD (DeclNode @self @lhs.path) @lhs.path "Decl" [ @expanded.presXML, @autoLayout.presXML, @ident.presXML, @exp.presXML ] 
   | BoardDecl
@@ -812,13 +810,13 @@ SEM Decl [ || presXML : PresentationNode ]
   | HoleDecl     lhs.presXML = presHole @lhs.focusD "Decl" (HoleDeclNode @self @lhs.path) @lhs.path
   | ParseErrDecl lhs.presXML = presParseErr @node @presentation
 
-SEM Ident [ || presXML : PresentationNode ]
+SEM Ident [ || presXML : Presentation_Doc_Node ]
   | Ident
       lhs.presXML = presentElementXML @lhs.focusD (IdentNode @self @lhs.path) @lhs.path "Ident" [ @string_.presXML ] 
   | HoleIdent     lhs.presXML = presHole @lhs.focusD "Ident" (HoleIdentNode @self @lhs.path) @lhs.path
   | ParseErrIdent lhs.presXML = presParseErr @node @presentation
 
-SEM Exp [ || presXML : PresentationNode ]
+SEM Exp [ || presXML : Presentation_Doc_Node ]
   | PlusExp
       lhs.presXML = presentElementXML @lhs.focusD (PlusExpNode @self @lhs.path) @lhs.path "PlusExp" [ @exp1.presXML, @exp2.presXML ] 
   | TimesExp
@@ -852,25 +850,25 @@ SEM Exp [ || presXML : PresentationNode ]
   | HoleExp     lhs.presXML = presHole @lhs.focusD "Exp" (HoleExpNode @self @lhs.path) @lhs.path
   | ParseErrExp lhs.presXML = presParseErr @node @presentation
 
-SEM Alt [ || presXML : PresentationNode ]
+SEM Alt [ || presXML : Presentation_Doc_Node ]
   | Alt
       lhs.presXML = presentElementXML @lhs.focusD (AltNode @self @lhs.path) @lhs.path "Alt" [ @ident.presXML, @exp.presXML ] 
   | HoleAlt     lhs.presXML = presHole @lhs.focusD "Alt" (HoleAltNode @self @lhs.path) @lhs.path
   | ParseErrAlt lhs.presXML = presParseErr @node @presentation
 
-SEM Board [ || presXML : PresentationNode ]
+SEM Board [ || presXML : Presentation_Doc_Node ]
   | Board
       lhs.presXML = presentElementXML @lhs.focusD (BoardNode @self @lhs.path) @lhs.path "Board" [ @r1.presXML, @r2.presXML, @r3.presXML, @r4.presXML, @r5.presXML, @r6.presXML, @r7.presXML, @r8.presXML ] 
   | HoleBoard     lhs.presXML = presHole @lhs.focusD "Board" (HoleBoardNode @self @lhs.path) @lhs.path
   | ParseErrBoard lhs.presXML = presParseErr @node @presentation
 
-SEM BoardRow [ || presXML : PresentationNode ]
+SEM BoardRow [ || presXML : Presentation_Doc_Node ]
   | BoardRow
       lhs.presXML = presentElementXML @lhs.focusD (BoardRowNode @self @lhs.path) @lhs.path "BoardRow" [ @ca.presXML, @cb.presXML, @cc.presXML, @cd.presXML, @ce.presXML, @cf.presXML, @cg.presXML, @ch.presXML ] 
   | HoleBoardRow     lhs.presXML = presHole @lhs.focusD "BoardRow" (HoleBoardRowNode @self @lhs.path) @lhs.path
   | ParseErrBoardRow lhs.presXML = presParseErr @node @presentation
 
-SEM BoardSquare [ || presXML : PresentationNode ]
+SEM BoardSquare [ || presXML : Presentation_Doc_Node ]
   | Queen
       lhs.presXML = presentElementXML @lhs.focusD (QueenNode @self @lhs.path) @lhs.path "Queen" [ @color.presXML ] 
   | King
@@ -888,25 +886,25 @@ SEM BoardSquare [ || presXML : PresentationNode ]
   | HoleBoardSquare     lhs.presXML = presHole @lhs.focusD "BoardSquare" (HoleBoardSquareNode @self @lhs.path) @lhs.path
   | ParseErrBoardSquare lhs.presXML = presParseErr @node @presentation
 
-SEM PPPresentation [ || presXML : PresentationNode ]
+SEM PPPresentation [ || presXML : Presentation_Doc_Node ]
   | PPPresentation
       lhs.presXML = presentElementXML @lhs.focusD (PPPresentationNode @self @lhs.path) @lhs.path "PPPresentation" [ @viewType.presXML, @slides.presXML ] 
   | HolePPPresentation     lhs.presXML = presHole @lhs.focusD "PPPresentation" (HolePPPresentationNode @self @lhs.path) @lhs.path
   | ParseErrPPPresentation lhs.presXML = presParseErr @node @presentation
 
-SEM Slide [ || presXML : PresentationNode ]
+SEM Slide [ || presXML : Presentation_Doc_Node ]
   | Slide
       lhs.presXML = presentElementXML @lhs.focusD (SlideNode @self @lhs.path) @lhs.path "Slide" [ @title.presXML, @itemList.presXML ] 
   | HoleSlide     lhs.presXML = presHole @lhs.focusD "Slide" (HoleSlideNode @self @lhs.path) @lhs.path
   | ParseErrSlide lhs.presXML = presParseErr @node @presentation
 
-SEM ItemList [ || presXML : PresentationNode ]
+SEM ItemList [ || presXML : Presentation_Doc_Node ]
   | ItemList
       lhs.presXML = presentElementXML @lhs.focusD (ItemListNode @self @lhs.path) @lhs.path "ItemList" [ @listType.presXML, @items.presXML ] 
   | HoleItemList     lhs.presXML = presHole @lhs.focusD "ItemList" (HoleItemListNode @self @lhs.path) @lhs.path
   | ParseErrItemList lhs.presXML = presParseErr @node @presentation
 
-SEM ListType [ || presXML : PresentationNode ]
+SEM ListType [ || presXML : Presentation_Doc_Node ]
   | Bullet
       lhs.presXML = presentElementXML @lhs.focusD (BulletNode @self @lhs.path) @lhs.path "Bullet" [  ] 
   | Number
@@ -916,7 +914,7 @@ SEM ListType [ || presXML : PresentationNode ]
   | HoleListType     lhs.presXML = presHole @lhs.focusD "ListType" (HoleListTypeNode @self @lhs.path) @lhs.path
   | ParseErrListType lhs.presXML = presParseErr @node @presentation
 
-SEM Item [ || presXML : PresentationNode ]
+SEM Item [ || presXML : Presentation_Doc_Node ]
   | StringItem
       lhs.presXML = presentElementXML @lhs.focusD (StringItemNode @self @lhs.path) @lhs.path "StringItem" [ @string.presXML ] 
   | HeliumItem
@@ -926,13 +924,13 @@ SEM Item [ || presXML : PresentationNode ]
   | HoleItem     lhs.presXML = presHole @lhs.focusD "Item" (HoleItemNode @self @lhs.path) @lhs.path
   | ParseErrItem lhs.presXML = presParseErr @node @presentation
 
-SEM Inv [ || presXML : PresentationNode ]
+SEM Inv [ || presXML : Presentation_Doc_Node ]
   | Inv
       lhs.presXML = presentElementXML @lhs.focusD (InvNode @self @lhs.path) @lhs.path "Inv" [ @doc.presXML, @enr.presXML, @eval.presXML, @evalButton.presXML ] 
   | HoleInv     lhs.presXML = presHole @lhs.focusD "Inv" (HoleInvNode @self @lhs.path) @lhs.path
   | ParseErrInv lhs.presXML = presParseErr @node @presentation
 
-SEM EvalButton [ || presXML : PresentationNode ]
+SEM EvalButton [ || presXML : Presentation_Doc_Node ]
   | ReEvaluate1
       lhs.presXML = presentElementXML @lhs.focusD (ReEvaluate1Node @self @lhs.path) @lhs.path "ReEvaluate1" [  ] 
   | ReEvaluate2
@@ -942,7 +940,7 @@ SEM EvalButton [ || presXML : PresentationNode ]
   | HoleEvalButton     lhs.presXML = presHole @lhs.focusD "EvalButton" (HoleEvalButtonNode @self @lhs.path) @lhs.path
   | ParseErrEvalButton lhs.presXML = presParseErr @node @presentation
 
-SEM EitherDocView [ || presXML : PresentationNode ]
+SEM EitherDocView [ || presXML : Presentation_Doc_Node ]
   | LeftDocView
       lhs.presXML = presentElementXML @lhs.focusD (LeftDocViewNode @self @lhs.path) @lhs.path "LeftDocView" [ @error.presXML ] 
   | RightDocView
@@ -950,7 +948,7 @@ SEM EitherDocView [ || presXML : PresentationNode ]
   | HoleEitherDocView     lhs.presXML = presHole @lhs.focusD "EitherDocView" (HoleEitherDocViewNode @self @lhs.path) @lhs.path
   | ParseErrEitherDocView lhs.presXML = presParseErr @node @presentation
 
-SEM View [ || presXML : PresentationNode ]
+SEM View [ || presXML : Presentation_Doc_Node ]
   | ANil
       lhs.presXML = presentElementXML @lhs.focusD (ANilNode @self @lhs.path) @lhs.path "ANil" [  ] 
   | AN
@@ -986,25 +984,25 @@ SEM View [ || presXML : PresentationNode ]
   | HoleView     lhs.presXML = presHole @lhs.focusD "View" (HoleViewNode @self @lhs.path) @lhs.path
   | ParseErrView lhs.presXML = presParseErr @node @presentation
 
-SEM String_ [ || presXML : PresentationNode ]
+SEM String_ [ || presXML : Presentation_Doc_Node ]
   | String_
       lhs.presXML = presentElementXML @lhs.focusD (String_Node @self @lhs.path) @lhs.path "String_" [ presentPrimXMLString @string ] 
   | HoleString_     lhs.presXML = presHole @lhs.focusD "String_" (HoleString_Node @self @lhs.path) @lhs.path
   | ParseErrString_ lhs.presXML = presParseErr @node @presentation
 
-SEM Bool_ [ || presXML : PresentationNode ]
+SEM Bool_ [ || presXML : Presentation_Doc_Node ]
   | Bool_
       lhs.presXML = presentElementXML @lhs.focusD (Bool_Node @self @lhs.path) @lhs.path "Bool_" [ presentPrimXMLBool @bool ] 
   | HoleBool_     lhs.presXML = presHole @lhs.focusD "Bool_" (HoleBool_Node @self @lhs.path) @lhs.path
   | ParseErrBool_ lhs.presXML = presParseErr @node @presentation
 
-SEM Int_ [ || presXML : PresentationNode ]
+SEM Int_ [ || presXML : Presentation_Doc_Node ]
   | Int_
       lhs.presXML = presentElementXML @lhs.focusD (Int_Node @self @lhs.path) @lhs.path "Int_" [ presentPrimXMLInt @int ] 
   | HoleInt_     lhs.presXML = presHole @lhs.focusD "Int_" (HoleInt_Node @self @lhs.path) @lhs.path
   | ParseErrInt_ lhs.presXML = presParseErr @node @presentation
 
-SEM List_Decl [ || presXML : PresentationNode ]
+SEM List_Decl [ || presXML : Presentation_Doc_Node ]
   | List_Decl
       lhs.presXML = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
@@ -1015,11 +1013,11 @@ SEM List_Decl [ || presXML : PresentationNode ]
       lhs.presXML = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Decl" (HoleList_DeclNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Decl [ | | pressXML : {[PresentationNode]} ]
+SEM ConsList_Decl [ | | pressXML : {[Presentation_Doc_Node]} ]
   | Cons_Decl     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Decl      lhs.pressXML  = []
 
-SEM List_Alt [ || presXML : PresentationNode ]
+SEM List_Alt [ || presXML : Presentation_Doc_Node ]
   | List_Alt
       lhs.presXML = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
@@ -1030,11 +1028,11 @@ SEM List_Alt [ || presXML : PresentationNode ]
       lhs.presXML = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Alt" (HoleList_AltNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Alt [ | | pressXML : {[PresentationNode]} ]
+SEM ConsList_Alt [ | | pressXML : {[Presentation_Doc_Node]} ]
   | Cons_Alt     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Alt      lhs.pressXML  = []
 
-SEM List_Exp [ || presXML : PresentationNode ]
+SEM List_Exp [ || presXML : Presentation_Doc_Node ]
   | List_Exp
       lhs.presXML = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
@@ -1045,11 +1043,11 @@ SEM List_Exp [ || presXML : PresentationNode ]
       lhs.presXML = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Exp" (HoleList_ExpNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Exp [ | | pressXML : {[PresentationNode]} ]
+SEM ConsList_Exp [ | | pressXML : {[Presentation_Doc_Node]} ]
   | Cons_Exp     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Exp      lhs.pressXML  = []
 
-SEM List_Slide [ || presXML : PresentationNode ]
+SEM List_Slide [ || presXML : Presentation_Doc_Node ]
   | List_Slide
       lhs.presXML = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
@@ -1060,11 +1058,11 @@ SEM List_Slide [ || presXML : PresentationNode ]
       lhs.presXML = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Slide" (HoleList_SlideNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Slide [ | | pressXML : {[PresentationNode]} ]
+SEM ConsList_Slide [ | | pressXML : {[Presentation_Doc_Node]} ]
   | Cons_Slide     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Slide      lhs.pressXML  = []
 
-SEM List_Item [ || presXML : PresentationNode ]
+SEM List_Item [ || presXML : Presentation_Doc_Node ]
   | List_Item
       lhs.presXML = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
@@ -1075,7 +1073,7 @@ SEM List_Item [ || presXML : PresentationNode ]
       lhs.presXML = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Item" (HoleList_ItemNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Item [ | | pressXML : {[PresentationNode]} ]
+SEM ConsList_Item [ | | pressXML : {[Presentation_Doc_Node]} ]
   | Cons_Item     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Item      lhs.pressXML  = []
 
@@ -1084,7 +1082,7 @@ SEM ConsList_Item [ | | pressXML : {[PresentationNode]} ]
 
 -- Default Tree presentation
 
-SEM Decl [ || presTree : PresentationNode ]
+SEM Decl [ || presTree : Presentation_Doc_Node ]
   | Decl
       lhs.presTree = presentElementTree @lhs.focusD (DeclNode @self @lhs.path) @lhs.path "Decl" [ @expanded.presTree, @autoLayout.presTree, @ident.presTree, @exp.presTree ] 
   | BoardDecl
@@ -1096,13 +1094,13 @@ SEM Decl [ || presTree : PresentationNode ]
   | HoleDecl     lhs.presTree = presHole @lhs.focusD "Decl" (HoleDeclNode @self @lhs.path) @lhs.path
   | ParseErrDecl lhs.presTree = presParseErr @node @presentation
 
-SEM Ident [ || presTree : PresentationNode ]
+SEM Ident [ || presTree : Presentation_Doc_Node ]
   | Ident
       lhs.presTree = presentElementTree @lhs.focusD (IdentNode @self @lhs.path) @lhs.path "Ident" [ @string_.presTree ] 
   | HoleIdent     lhs.presTree = presHole @lhs.focusD "Ident" (HoleIdentNode @self @lhs.path) @lhs.path
   | ParseErrIdent lhs.presTree = presParseErr @node @presentation
 
-SEM Exp [ || presTree : PresentationNode ]
+SEM Exp [ || presTree : Presentation_Doc_Node ]
   | PlusExp
       lhs.presTree = presentElementTree @lhs.focusD (PlusExpNode @self @lhs.path) @lhs.path "PlusExp" [ @exp1.presTree, @exp2.presTree ] 
   | TimesExp
@@ -1136,25 +1134,25 @@ SEM Exp [ || presTree : PresentationNode ]
   | HoleExp     lhs.presTree = presHole @lhs.focusD "Exp" (HoleExpNode @self @lhs.path) @lhs.path
   | ParseErrExp lhs.presTree = presParseErr @node @presentation
 
-SEM Alt [ || presTree : PresentationNode ]
+SEM Alt [ || presTree : Presentation_Doc_Node ]
   | Alt
       lhs.presTree = presentElementTree @lhs.focusD (AltNode @self @lhs.path) @lhs.path "Alt" [ @ident.presTree, @exp.presTree ] 
   | HoleAlt     lhs.presTree = presHole @lhs.focusD "Alt" (HoleAltNode @self @lhs.path) @lhs.path
   | ParseErrAlt lhs.presTree = presParseErr @node @presentation
 
-SEM Board [ || presTree : PresentationNode ]
+SEM Board [ || presTree : Presentation_Doc_Node ]
   | Board
       lhs.presTree = presentElementTree @lhs.focusD (BoardNode @self @lhs.path) @lhs.path "Board" [ @r1.presTree, @r2.presTree, @r3.presTree, @r4.presTree, @r5.presTree, @r6.presTree, @r7.presTree, @r8.presTree ] 
   | HoleBoard     lhs.presTree = presHole @lhs.focusD "Board" (HoleBoardNode @self @lhs.path) @lhs.path
   | ParseErrBoard lhs.presTree = presParseErr @node @presentation
 
-SEM BoardRow [ || presTree : PresentationNode ]
+SEM BoardRow [ || presTree : Presentation_Doc_Node ]
   | BoardRow
       lhs.presTree = presentElementTree @lhs.focusD (BoardRowNode @self @lhs.path) @lhs.path "BoardRow" [ @ca.presTree, @cb.presTree, @cc.presTree, @cd.presTree, @ce.presTree, @cf.presTree, @cg.presTree, @ch.presTree ] 
   | HoleBoardRow     lhs.presTree = presHole @lhs.focusD "BoardRow" (HoleBoardRowNode @self @lhs.path) @lhs.path
   | ParseErrBoardRow lhs.presTree = presParseErr @node @presentation
 
-SEM BoardSquare [ || presTree : PresentationNode ]
+SEM BoardSquare [ || presTree : Presentation_Doc_Node ]
   | Queen
       lhs.presTree = presentElementTree @lhs.focusD (QueenNode @self @lhs.path) @lhs.path "Queen" [ @color.presTree ] 
   | King
@@ -1172,25 +1170,25 @@ SEM BoardSquare [ || presTree : PresentationNode ]
   | HoleBoardSquare     lhs.presTree = presHole @lhs.focusD "BoardSquare" (HoleBoardSquareNode @self @lhs.path) @lhs.path
   | ParseErrBoardSquare lhs.presTree = presParseErr @node @presentation
 
-SEM PPPresentation [ || presTree : PresentationNode ]
+SEM PPPresentation [ || presTree : Presentation_Doc_Node ]
   | PPPresentation
       lhs.presTree = presentElementTree @lhs.focusD (PPPresentationNode @self @lhs.path) @lhs.path "PPPresentation" [ @viewType.presTree, @slides.presTree ] 
   | HolePPPresentation     lhs.presTree = presHole @lhs.focusD "PPPresentation" (HolePPPresentationNode @self @lhs.path) @lhs.path
   | ParseErrPPPresentation lhs.presTree = presParseErr @node @presentation
 
-SEM Slide [ || presTree : PresentationNode ]
+SEM Slide [ || presTree : Presentation_Doc_Node ]
   | Slide
       lhs.presTree = presentElementTree @lhs.focusD (SlideNode @self @lhs.path) @lhs.path "Slide" [ @title.presTree, @itemList.presTree ] 
   | HoleSlide     lhs.presTree = presHole @lhs.focusD "Slide" (HoleSlideNode @self @lhs.path) @lhs.path
   | ParseErrSlide lhs.presTree = presParseErr @node @presentation
 
-SEM ItemList [ || presTree : PresentationNode ]
+SEM ItemList [ || presTree : Presentation_Doc_Node ]
   | ItemList
       lhs.presTree = presentElementTree @lhs.focusD (ItemListNode @self @lhs.path) @lhs.path "ItemList" [ @listType.presTree, @items.presTree ] 
   | HoleItemList     lhs.presTree = presHole @lhs.focusD "ItemList" (HoleItemListNode @self @lhs.path) @lhs.path
   | ParseErrItemList lhs.presTree = presParseErr @node @presentation
 
-SEM ListType [ || presTree : PresentationNode ]
+SEM ListType [ || presTree : Presentation_Doc_Node ]
   | Bullet
       lhs.presTree = presentElementTree @lhs.focusD (BulletNode @self @lhs.path) @lhs.path "Bullet" [  ] 
   | Number
@@ -1200,7 +1198,7 @@ SEM ListType [ || presTree : PresentationNode ]
   | HoleListType     lhs.presTree = presHole @lhs.focusD "ListType" (HoleListTypeNode @self @lhs.path) @lhs.path
   | ParseErrListType lhs.presTree = presParseErr @node @presentation
 
-SEM Item [ || presTree : PresentationNode ]
+SEM Item [ || presTree : Presentation_Doc_Node ]
   | StringItem
       lhs.presTree = presentElementTree @lhs.focusD (StringItemNode @self @lhs.path) @lhs.path "StringItem" [ @string.presTree ] 
   | HeliumItem
@@ -1210,13 +1208,13 @@ SEM Item [ || presTree : PresentationNode ]
   | HoleItem     lhs.presTree = presHole @lhs.focusD "Item" (HoleItemNode @self @lhs.path) @lhs.path
   | ParseErrItem lhs.presTree = presParseErr @node @presentation
 
-SEM Inv [ || presTree : PresentationNode ]
+SEM Inv [ || presTree : Presentation_Doc_Node ]
   | Inv
       lhs.presTree = presentElementTree @lhs.focusD (InvNode @self @lhs.path) @lhs.path "Inv" [ @doc.presTree, @enr.presTree, @eval.presTree, @evalButton.presTree ] 
   | HoleInv     lhs.presTree = presHole @lhs.focusD "Inv" (HoleInvNode @self @lhs.path) @lhs.path
   | ParseErrInv lhs.presTree = presParseErr @node @presentation
 
-SEM EvalButton [ || presTree : PresentationNode ]
+SEM EvalButton [ || presTree : Presentation_Doc_Node ]
   | ReEvaluate1
       lhs.presTree = presentElementTree @lhs.focusD (ReEvaluate1Node @self @lhs.path) @lhs.path "ReEvaluate1" [  ] 
   | ReEvaluate2
@@ -1226,7 +1224,7 @@ SEM EvalButton [ || presTree : PresentationNode ]
   | HoleEvalButton     lhs.presTree = presHole @lhs.focusD "EvalButton" (HoleEvalButtonNode @self @lhs.path) @lhs.path
   | ParseErrEvalButton lhs.presTree = presParseErr @node @presentation
 
-SEM EitherDocView [ || presTree : PresentationNode ]
+SEM EitherDocView [ || presTree : Presentation_Doc_Node ]
   | LeftDocView
       lhs.presTree = presentElementTree @lhs.focusD (LeftDocViewNode @self @lhs.path) @lhs.path "LeftDocView" [ @error.presTree ] 
   | RightDocView
@@ -1234,7 +1232,7 @@ SEM EitherDocView [ || presTree : PresentationNode ]
   | HoleEitherDocView     lhs.presTree = presHole @lhs.focusD "EitherDocView" (HoleEitherDocViewNode @self @lhs.path) @lhs.path
   | ParseErrEitherDocView lhs.presTree = presParseErr @node @presentation
 
-SEM View [ || presTree : PresentationNode ]
+SEM View [ || presTree : Presentation_Doc_Node ]
   | ANil
       lhs.presTree = presentElementTree @lhs.focusD (ANilNode @self @lhs.path) @lhs.path "ANil" [  ] 
   | AN
@@ -1270,25 +1268,25 @@ SEM View [ || presTree : PresentationNode ]
   | HoleView     lhs.presTree = presHole @lhs.focusD "View" (HoleViewNode @self @lhs.path) @lhs.path
   | ParseErrView lhs.presTree = presParseErr @node @presentation
 
-SEM String_ [ || presTree : PresentationNode ]
+SEM String_ [ || presTree : Presentation_Doc_Node ]
   | String_
       lhs.presTree = presentElementTree @lhs.focusD (String_Node @self @lhs.path) @lhs.path "String_" [ presentPrimTreeString @string ] 
   | HoleString_     lhs.presTree = presHole @lhs.focusD "String_" (HoleString_Node @self @lhs.path) @lhs.path
   | ParseErrString_ lhs.presTree = presParseErr @node @presentation
 
-SEM Bool_ [ || presTree : PresentationNode ]
+SEM Bool_ [ || presTree : Presentation_Doc_Node ]
   | Bool_
       lhs.presTree = presentElementTree @lhs.focusD (Bool_Node @self @lhs.path) @lhs.path "Bool_" [ presentPrimTreeBool @bool ] 
   | HoleBool_     lhs.presTree = presHole @lhs.focusD "Bool_" (HoleBool_Node @self @lhs.path) @lhs.path
   | ParseErrBool_ lhs.presTree = presParseErr @node @presentation
 
-SEM Int_ [ || presTree : PresentationNode ]
+SEM Int_ [ || presTree : Presentation_Doc_Node ]
   | Int_
       lhs.presTree = presentElementTree @lhs.focusD (Int_Node @self @lhs.path) @lhs.path "Int_" [ presentPrimTreeInt @int ] 
   | HoleInt_     lhs.presTree = presHole @lhs.focusD "Int_" (HoleInt_Node @self @lhs.path) @lhs.path
   | ParseErrInt_ lhs.presTree = presParseErr @node @presentation
 
-SEM List_Decl [ || presTree : PresentationNode ]
+SEM List_Decl [ || presTree : Presentation_Doc_Node ]
   | List_Decl
       lhs.presTree = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
@@ -1299,11 +1297,11 @@ SEM List_Decl [ || presTree : PresentationNode ]
       lhs.presTree = loc (List_DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Decl" (HoleList_DeclNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Decl [ | | pressTree : {[PresentationNode]} ]
+SEM ConsList_Decl [ | | pressTree : {[Presentation_Doc_Node]} ]
   | Cons_Decl     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Decl      lhs.pressTree  = []
 
-SEM List_Alt [ || presTree : PresentationNode ]
+SEM List_Alt [ || presTree : Presentation_Doc_Node ]
   | List_Alt
       lhs.presTree = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
@@ -1314,11 +1312,11 @@ SEM List_Alt [ || presTree : PresentationNode ]
       lhs.presTree = loc (List_AltNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Alt" (HoleList_AltNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Alt [ | | pressTree : {[PresentationNode]} ]
+SEM ConsList_Alt [ | | pressTree : {[Presentation_Doc_Node]} ]
   | Cons_Alt     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Alt      lhs.pressTree  = []
 
-SEM List_Exp [ || presTree : PresentationNode ]
+SEM List_Exp [ || presTree : Presentation_Doc_Node ]
   | List_Exp
       lhs.presTree = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
@@ -1329,11 +1327,11 @@ SEM List_Exp [ || presTree : PresentationNode ]
       lhs.presTree = loc (List_ExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Exp" (HoleList_ExpNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Exp [ | | pressTree : {[PresentationNode]} ]
+SEM ConsList_Exp [ | | pressTree : {[Presentation_Doc_Node]} ]
   | Cons_Exp     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Exp      lhs.pressTree  = []
 
-SEM List_Slide [ || presTree : PresentationNode ]
+SEM List_Slide [ || presTree : Presentation_Doc_Node ]
   | List_Slide
       lhs.presTree = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
@@ -1344,11 +1342,11 @@ SEM List_Slide [ || presTree : PresentationNode ]
       lhs.presTree = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Slide" (HoleList_SlideNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Slide [ | | pressTree : {[PresentationNode]} ]
+SEM ConsList_Slide [ | | pressTree : {[Presentation_Doc_Node]} ]
   | Cons_Slide     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Slide      lhs.pressTree  = []
 
-SEM List_Item [ || presTree : PresentationNode ]
+SEM List_Item [ || presTree : Presentation_Doc_Node ]
   | List_Item
       lhs.presTree = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
@@ -1359,7 +1357,7 @@ SEM List_Item [ || presTree : PresentationNode ]
       lhs.presTree = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Item" (HoleList_ItemNode @self @lhs.path) @lhs.path
 
-SEM ConsList_Item [ | | pressTree : {[PresentationNode]} ]
+SEM ConsList_Item [ | | pressTree : {[Presentation_Doc_Node]} ]
   | Cons_Item     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Item      lhs.pressTree  = []
 

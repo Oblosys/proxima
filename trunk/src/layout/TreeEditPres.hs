@@ -25,7 +25,7 @@ throw: *** Exception: Prelude.(!!): index too large
 
 -- cut = delete
 -- copy should not do anything when nofocus. 
-copyTree :: FocusPres -> Presentation node -> Presentation node -> Presentation node
+copyTree :: FocusPres -> Presentation doc node -> Presentation doc node -> Presentation doc node
 copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
 copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
@@ -70,23 +70,23 @@ splitRowTree path@(PathP pth ix) pres =
         Left (ps1, ps2) -> (ColP NoIDP 0 [ps1,ps2], focus')
         Right ps        -> (ps                   , focus')
 
-locateTree :: PathPres -> Presentation node -> Maybe node
+locateTree :: PathPres -> Presentation doc node -> Maybe node
 locateTree NoPathP        pres = Nothing
 locateTree (PathP path _) pres = locateTreePres Nothing path pres
 
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 
 
-normalizeTreePres :: Presentation node -> Presentation node
+normalizeTreePres :: Presentation doc node -> Presentation doc node
 normalizeTreePres pres = normalizePres pres
 
-navigateLeftTreePres :: PathPres -> Presentation node -> FocusPres
+navigateLeftTreePres :: PathPres -> Presentation doc node -> FocusPres
 navigateLeftTreePres NoPathP pres = NoFocusP
 navigateLeftTreePres path pres =
   let path' = leftNavigatePath path pres
   in  FocusP path' path'
   
-navigateRightTreePres :: PathPres -> Presentation node -> FocusPres
+navigateRightTreePres :: PathPres -> Presentation doc node -> FocusPres
 navigateRightTreePres NoPathP pres = NoFocusP
 navigateRightTreePres path pres =
   let path' = rightNavigatePath path pres

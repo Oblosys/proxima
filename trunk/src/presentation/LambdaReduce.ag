@@ -5,7 +5,7 @@
 --addReductionPopupItems :: [ PopupItem ] -> Presentation node -> Presentation node
 addReductionPopupItems its pres = addPopupItems pres its
 
-pasteExp :: [Int] -> Exp -> UpdateDoc
+pasteExp :: [Int] -> Exp -> UpdateDoc Document
 pasteExp pth exp =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -40,7 +40,7 @@ ensureParens exp = ParenExp NoIDD NoIDP NoIDP (removeParens exp)
 
 -- OU print exp function
 
-showExpCode :: Exp -> PopupMenuItem
+showExpCode :: Exp -> PopupMenuItem doc
 showExpCode exp =
   ( "Show Expression code"
   , id -- trace ("Expression:\n" ++ (show . UHA_Pretty.sem_Expression . uhaFromExp [] $ exp) ) id

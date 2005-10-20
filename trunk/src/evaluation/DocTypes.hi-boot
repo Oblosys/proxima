@@ -1,4 +1,4 @@
 module DocTypes where
 
-data DocumentLevel
+data DocumentLevel document
 

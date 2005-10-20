@@ -7,7 +7,8 @@ import LayLayerUtils
 import DocTypes_Generated (Node (..))
 
 
-tokenize :: Int -> Maybe Node -> Presentation Node -> (Presentation Node, LayoutMap, Int)
+tokenize :: Int -> Maybe Node -> Presentation doc Node ->
+            (Presentation doc Node, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
 tokenize i loc (ParsingP id pres)  = let (lc, layout, id, str, tokens, lm, i') = tokenize' i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
                                          (tok, lm', i'') = makeToken i' lc layout id str
@@ -76,9 +77,10 @@ identChars  = "_'"
 isIdentChar c = isAlphaNum c || elem c identChars
 isSymbolChar c = c `elem` symbolChars
  
-tokenizeStr :: Int -> (Maybe node,AttrRule) -> IDP -> (TokenType, Maybe node,AttrRule) -> Layout -> IDP -> String -> String 
-            -> ((TokenType, Maybe node,AttrRule), Layout, IDP, String, [Presentation node], LayoutMap, Int)
-
+tokenizeStr :: Int -> (Maybe node, AttrRule doc) -> IDP -> 
+               (TokenType, Maybe node, AttrRule doc) -> Layout -> IDP -> String -> String ->
+               ( (TokenType, Maybe node, AttrRule doc), Layout, IDP, String
+               , [Presentation doc node], LayoutMap, Int )
 -- end of string, not started scanning a token, so set the id (only if cid non-empty)
 tokenizeStr i loc cid lc layout id "" "" = (lc, layout, if cid == NoIDP then id else cid, "", [], emptyFM, i)
 
@@ -141,8 +143,10 @@ tokenizeCol' i loc lc layout id str (pres:press) =
 
  
 -- loc is threaded, lc is just inherited. 
-tokenize' :: Int -> (Maybe Node,AttrRule) -> (TokenType,Maybe Node,AttrRule) -> Layout -> IDP -> String -> Presentation Node 
-          -> ((TokenType,Maybe Node,AttrRule), Layout, IDP, String, [Presentation Node], LayoutMap, Int)
+tokenize' :: Int -> (Maybe Node, AttrRule doc) -> (TokenType,Maybe Node, AttrRule doc) ->
+             Layout -> IDP -> String -> Presentation doc Node ->
+             ( (TokenType,Maybe Node, AttrRule doc), Layout, IDP, String
+             , [Presentation doc Node], LayoutMap, Int)
 tokenize' i loc lc layout id str (EmptyP _) = (lc, layout, id, str, [], emptyFM, i)
 tokenize' i loc lc layout id str (StringP cid str') = tokenizeStr i loc cid lc layout id str str'
 tokenize' i loc lc layout id str pres@(ImageP _ _)         = let (tok, lm, i') = makeToken i lc layout id str
@@ -183,10 +187,12 @@ tokenize' i (Just loc,ar) lc layout id str (StructuralP id' pres) =
 tokenize' i loc lc layout id str pres        = debug Err ("*** PresentationParser.walk: unimplemented presentation: " ++ show pres) (lc, layout, id, str, [], emptyFM, i)
 
 undefTk = (debug Err "Undefined token used" IntToken,Nothing,Prelude.id)
+
 -- can't use tokentype here, for that we need a special Presentation element TokenP that can hold the information.
 -- for now the type is only used to scan correctly, which is impossible without keeping track of the token type
 -- (or we have to inspect the token every time we read a character)
-makeToken :: Int -> (TokenType, Maybe node,AttrRule) -> Layout -> IDP -> String -> (Presentation node, LayoutMap,Int)
+makeToken :: Int -> (TokenType, Maybe node,AttrRule doc) -> Layout -> IDP -> String ->
+             (Presentation doc node, LayoutMap,Int)
 makeToken i l             layout NoIDP str = makeToken (i+1) l layout (IDP i) str  -- make new ID
 makeToken i (_,Nothing,ar)  layout id str = (WithP ar $ StringP id (reverse str), unitFM id layout,i)
 makeToken i (_,Just loc,ar) layout id str = (LocatorP loc $ WithP ar $ StringP id (reverse str), unitFM id layout,i)

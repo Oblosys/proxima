@@ -10,7 +10,7 @@ import PresTypes
 
 type LayerStatePres = ()
 
-type PresentationSheet node = EnrichedDoc -> FocusDoc -> LayoutMap -> IDPCounter -> 
-                         (LayoutMap, IDPCounter, Presentation node, EnrichedDoc)
+type PresentationSheet doc node = EnrichedDoc -> FocusDoc -> LayoutMap -> IDPCounter -> 
+                         (LayoutMap, IDPCounter, Presentation doc node, EnrichedDoc)
                          
-type ParseSheet node = Presentation node -> Maybe EnrichedDoc
+type ParseSheet doc node = Presentation doc node -> Maybe EnrichedDoc

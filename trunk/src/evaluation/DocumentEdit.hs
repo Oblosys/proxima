@@ -108,7 +108,7 @@ data ClipDoc =
 -- Generic part
 
   
-navigateUpD :: FocusDoc -> Document -> FocusDoc
+navigateUpD :: FocusDoc -> document -> FocusDoc
 navigateUpD NoPathD         _  = NoPathD
 navigateUpD (PathD [])      _  = NoPathD
 navigateUpD (PathD p@(_:_)) _  = PathD $ init p
@@ -134,28 +134,29 @@ navigateRightD pd              _ = pd
 
 
 
-editCopyD :: DocumentLevel -> DocumentLevel
+editCopyD :: DocumentLevel Document -> DocumentLevel Document
 editCopyD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editCopyD (DocumentLevel doc pd@(PathD pth) clip) = DocumentLevel doc pd (selectD pth doc)
 
-editCutD :: DocumentLevel -> DocumentLevel
+editCutD :: DocumentLevel Document -> DocumentLevel Document
 editCutD  (DocumentLevel doc NoPathD clip)           = DocumentLevel doc NoPathD clip
 editCutD  (DocumentLevel doc pd@(PathD pth) clip)    = let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' (selectD pth doc)
 
-editDeleteD :: DocumentLevel -> DocumentLevel
+editDeleteD :: DocumentLevel Document -> DocumentLevel Document
 editDeleteD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editDeleteD (DocumentLevel doc pd@(PathD pth) clip) =  let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' clip
 
-editPasteD :: DocumentLevel -> DocumentLevel
+editPasteD :: DocumentLevel Document -> DocumentLevel Document
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
 -- menuD is probably not a good name
-menuD :: PathDoc -> Document -> [ (String, DocumentLevel -> DocumentLevel) ]
+menuD :: PathDoc -> Document -> [ (String, DocumentLevel doc -> DocumentLevel doc) ]
 menuD NoPathD _              = []
-menuD path@(PathD p) d@(RootDoc id1 id2  x) = 
+{-
+menuD path@(PathD p) d =
   let alts = alternativesD p d
       mkItem (s,c) = (s, \(DocumentLevel _ pth clip) -> DocumentLevel (pasteD p c d) pth clip)
   in  [ ("<cut>", \(DocumentLevel d _ clip) -> let (d',p') = deleteD p d 
@@ -174,7 +175,7 @@ menuD path@(PathD p) d@(RootDoc id1 id2  x) =
                     pasteAfter = ("<paste after>", \(DocumentLevel _ pth clip) -> 
                                                      DocumentLevel (pasteD (init p) (insertListClip (last p+1) clip parent) d) pth clip )
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
-
+-}
 
 
 selectD p (RootDoc id1 id2  x) = select p x
@@ -201,7 +202,7 @@ test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing Docume
           ; edit (DocumentLevel sample NoPathD Clip_Nothing)
           }
 
-edit :: DocumentLevel -> IO ()
+edit :: DocumentLevel Document -> IO ()
 edit doclvl@(DocumentLevel doc path clip) =
  do { putStrLn $ "\n\ndoc  "++ show doc
     ; putStrLn $ "\npath "++ show path ++ case path of NoPathD   -> ""
@@ -225,7 +226,7 @@ edit doclvl@(DocumentLevel doc path clip) =
     ; if c /= 'q' then edit doclvl' else return ()
     }
     
-insertElt :: DocumentLevel -> Int -> IO (DocumentLevel, String)
+insertElt :: DocumentLevel Document -> Int -> IO (DocumentLevel Document, String)
 insertElt doclvl@(DocumentLevel doc path clp) i =
  do { let menu = menuD path doc
     ; putStrLn $ concat $ intersperse " | " $

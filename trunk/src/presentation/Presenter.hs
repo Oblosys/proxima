@@ -30,13 +30,13 @@ parsePres' l pr = Just initDoc
 
 -- Presentation parser
 
-presentEnr :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation node, LayoutMap, IDPCounter)
+presentEnr :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation doc node, LayoutMap, IDPCounter)
 presentEnr presentationSheet state enrlvl@(EnrichedDocLevel _ focusD) = -- debug Prs ("Doc Focus is "++show focusD) 
   presentEnr' presentationSheet state enrlvl
 
 
 
-presentEnr' :: PresentationSheet node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation node, LayoutMap, IDPCounter)
+presentEnr' :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation doc node, LayoutMap, IDPCounter)
 presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC = 
       let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
       in  (pres', layM', idC')                                 

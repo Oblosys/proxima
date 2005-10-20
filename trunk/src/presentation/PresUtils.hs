@@ -6,7 +6,7 @@ import CommonUtils
  
 import XprezLib
 
-squiggly :: Color -> Xprez node -> Xprez node
+squiggly :: Color -> Xprez doc node -> Xprez doc node
 squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
 -- png is the red one, only temporary
 
@@ -44,17 +44,17 @@ orderFocusP NoFocusP         = NoFocusP
 markUnparsed p           =  p
 markUnparsedF _           f = f
 
-xyFromPath :: PathPres -> Presentation node -> (Int,Int, Bool)
+xyFromPath :: PathPres -> Presentation doc node -> (Int,Int, Bool)
 xyFromPath path pres = xyFromPathPres 0 0 path pres
 
-pathFromXY :: (Int,Int,Bool) -> Presentation node -> PathPres
+pathFromXY :: (Int,Int,Bool) -> Presentation doc node -> PathPres
 pathFromXY xy pres = pathFromXYPres xy pres
 
 
 -- experimental diff, only strings are checked.
 -- attributes are still ignored.
 -- skip WithP StructuralP ParsingP and LocatorP elts
-diffPres :: Presentation node -> Presentation node -> DiffTree
+diffPres :: Presentation doc node -> Presentation doc node -> DiffTree
 
 -- WithP is not handled yet.
 -- StructuralP ParsingP and LocatorP are ignored since they don't affect rendering
@@ -139,7 +139,7 @@ prunePres dt                 pr                  = debug Err ("PresUtils.prunePr
 
 
 -- getPres is probably not a good name
-getPres :: IDP -> Presentation node -> Maybe (Presentation node)
+getPres :: IDP -> Presentation doc node -> Maybe (Presentation doc node)
 getPres idp pres = 
   if idp == idP pres 
   then Just pres
@@ -161,7 +161,7 @@ getPres idp pres =
 
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
 -- anyway, the token tree will soon be replaced by a list, making this function easy
-deleteInsertedTokens :: InsertedTokenList -> Presentation node -> Presentation node
+deleteInsertedTokens :: InsertedTokenList -> Presentation doc node -> Presentation doc node
 deleteInsertedTokens inss (RowP i r press)     = let press' = map (deleteInsertedTokens inss) press
                                                      press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)) .idP) press'
                                                  in  RowP i r press''
@@ -200,7 +200,7 @@ normalizePres (ParsingP id pres)                       = ParsingP id $ normalize
 normalizePres (LocatorP l pres)                        = LocatorP l $ normalizePres pres
 normalizePres pr                                       = debug Err ("PresUtils.normalizePres: can't handle "++ show pr) pr
 
-normalizeRow :: [Presentation node] -> [Presentation node] -- not fixed for refs
+normalizeRow :: [Presentation doc node] -> [Presentation doc node] -- not fixed for refs
 normalizeRow []                      = []
 normalizeRow (RowP id rf press: row) = normalizeRow (press ++ row)
 -- normalizeRow (StringP id [] : row) = normalizeRow row        -- don't remove empty strings, because row[row []] presents wrongly 
@@ -209,7 +209,7 @@ normalizeRow (StringP id txt : row)  = case normalizeRow row of
                                         row'                  -> StringP id txt : row'
 normalizeRow (pres            : row) = normalizePres pres : normalizeRow row
 
-normalizeCol :: IDP -> Int -> Int -> [Presentation node] -> [Presentation node] -> Presentation node
+normalizeCol :: IDP -> Int -> Int -> [Presentation doc node] -> [Presentation doc node] -> Presentation doc node
 normalizeCol id p rf prs [] = ColP id rf (reverse prs) 
 normalizeCol id p rf prs (ColP _ rf' press: col) = 
   let rf'' = if p < rf then rf + length press - 1 -- -1 because the col (1) is replaced by length press children 
@@ -381,7 +381,7 @@ pathFromXYCol i (x,y,b) (pres:press) = let h = heightPres pres
 
 {-
 -- get rid of everything but alternating rows and columns with correct refs
-stripPres :: Presentation node -> Presentation node
+stripPres :: Presentation doc node -> Presentation doc node
 stripPres pres@(StringP _ str) = pres
 stripPres pres@(ImageP _ _) = pres
 stripPres pres@(PolyP _ _ _) = pres
@@ -394,7 +394,7 @@ stripPres (ParsingP id pres)    = stripPres pres
 stripPres (LocatorP l pres)     = stripPres pres
 stripPres pr = debug Err ("PresUtils.stripPres: can't handle "++ show pr) pr
 
---stripRow :: [Presentation node] -> [Presentation node]
+--stripRow :: [Presentation doc node] -> [Presentation doc node]
 stripRow p rf prs []                       = RowP NoIDP rf (reverse prs) 
 stripRow p rf prs (RowP id rf' press: row) = stripRow p (if p < rf then rf + length press -1 -- -1 because the row (1) is replaced by length press children 
                                                          else if p == rf then rf+rf'
@@ -430,7 +430,7 @@ stringFromPres' (LocatorP _ pres)         = stringFromPres' pres
 stringFromPres' pr                        = debug Err ("PresUtils.stringFromPres': can't handle "++ show pr) []
 
 -- this only works for simple column of rows with strings
-presFromString :: String -> Presentation node
+presFromString :: String -> Presentation doc node
 presFromString str = ColP NoIDP 0 . map (StringP NoIDP) $ lines str
 
 
@@ -558,7 +558,7 @@ leftNavigatePath  (PathP path offset) pres =
 -- passedColumn returns true if a column is present from the common prefix of fromPath and toPath to
 -- fromPath and toPath. Meaning that if a column is encountered if we move from fromPath to 
 -- toPath in the shortest way then True is returned.
-passedColumn :: [Int] -> [Int] -> Presentation node -> Bool
+passedColumn :: [Int] -> [Int] -> Presentation doc node -> Bool
 passedColumn fromPath toPath pres =
   let commonPath = commonPrefix fromPath toPath
       commonTree = selectTree commonPath pres
@@ -586,10 +586,10 @@ containsColPres pth      pr                         = debug Err ("*** PresUtils.
 
 
 -- VVV HACK VVV              will be handled more generally in the future
-mouseDownDocPres :: [Int] -> Presentation node -> Maybe UpdateDoc
+mouseDownDocPres :: [Int] -> Presentation doc node -> Maybe (UpdateDoc doc)
 mouseDownDocPres = mouseDownDocPres' Nothing
 
-mouseDownDocPres' :: Maybe UpdateDoc -> [Int] -> Presentation node -> Maybe UpdateDoc
+mouseDownDocPres' :: Maybe (UpdateDoc doc) -> [Int] -> Presentation doc node -> Maybe (UpdateDoc doc)
 mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
 mouseDownDocPres' upd (p:path) (ColP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
@@ -603,10 +603,10 @@ mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd
 mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes.mouseDownDocPres: can't handle "++show pth++" "++show pres) Nothing
 
 
-popupMenuItemsPres :: [Int] -> Presentation node -> [PopupMenuItem]
+popupMenuItemsPres :: [Int] -> Presentation doc node -> [PopupMenuItem doc]
 popupMenuItemsPres = popupMenuItemsPres' []
 
-popupMenuItemsPres' :: [PopupMenuItem] -> [Int] -> Presentation node -> [PopupMenuItem]
+popupMenuItemsPres' :: [PopupMenuItem doc] -> [Int] -> Presentation doc node -> [PopupMenuItem doc]
 popupMenuItemsPres' its []       tr                        = its
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
 popupMenuItemsPres' its (p:path) (ColP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
