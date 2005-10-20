@@ -10,7 +10,9 @@
 # TODO:
 # add platform dependent stuff (configure?)
 # add strip
+# TODO: on normal make, generator is not rebuilt after sources have been edited (only on make generate)
 # fix make clean
+
 # HC
 # moet er in de regel voor Proxima niet een ref naar de executable zitten?
 # generator is mixed with the rest, maybe should be in different makefile, but
