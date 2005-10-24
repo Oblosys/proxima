@@ -10,8 +10,8 @@
 
 > import IOExts
 
-> import qualified DocTypes as P
-> import DocTypes (IDD (..), String_ (..), Int_ (..), Bool_ (..) )
+> import qualified DocTypes_Generated as P
+> import DocTypes_Generated (IDD (..), String_ (..), Int_ (..), Bool_ (..) )
 > import CommonTypes
 
 

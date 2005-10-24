@@ -12,6 +12,7 @@ import DocUtils -- for redirect
 
 import PresPresent
 import DocTypes
+import DocTypes_Generated
 import EnrTypes
 import Graphics.UI.WX.Types hiding (Size)
 import PresTypes -- temporarily

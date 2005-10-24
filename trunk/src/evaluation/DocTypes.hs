@@ -1,7 +1,6 @@
-module DocTypes ( module DocTypes_Generated
-                , module DocTypes           ) where
+module DocTypes ( module DocTypes, FocusDoc, PathDoc (..)) where
 
-import DocTypes_Generated
+import DocTypes_Generated (PathDoc, FocusDoc, ClipDoc)
 
 import CommonTypes
 
@@ -33,8 +32,8 @@ data HeliumMessage =
 -- due to stupid acyclic module restriction. Recursive import support is incomprehensible
 -- and buggy
 
-data EditDocument' documentLevel = -- Document in SetDoc' should be a DocumentLevel!
-    SetDoc' Document -- (InsertedTokenList, DeletedTokenMap)
+data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
+    SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
   | UpdateDoc' (documentLevel -> documentLevel)
   | NavUpDoc'
   | NavDownDoc'
@@ -47,10 +46,10 @@ data EditDocument' documentLevel = -- Document in SetDoc' should be a DocumentLe
   | EvaluateDoc' -- for type evaluation
   | SkipDoc' Int
 
-data EditDocument documentLevel =
+data EditDocument documentLevel doc =
     InitDoc
   | CloseDoc
-  | SetDoc Document -- (InsertedTokenList, DeletedTokenMap)
+  | SetDoc doc -- (InsertedTokenList, DeletedTokenMap)
   | UpdateDoc (documentLevel -> documentLevel)
   | NavUpDoc
   | NavDownDoc
@@ -63,7 +62,7 @@ data EditDocument documentLevel =
   | EvaluateDoc -- for type evaluation
   | SkipDoc Int
 
-instance Show (EditDocument documentLevel) where
+instance Show (EditDocument documentLevel doc) where
   show InitDoc         = "InitDoc" 
   show CloseDoc        = "CloseDoc"
   show (SetDoc doc )    = "(SetDoc {Document} {inserted&deleted} )"
@@ -80,7 +79,7 @@ instance Show (EditDocument documentLevel) where
   show (SkipDoc i)     = "(SkipDoc " ++ show i ++ ")"   
 
 
-instance Show (EditDocument' documentLevel) where
+instance Show doc => Show (EditDocument' documentLevel doc) where
   show (SetDoc' doc )    = "(SetDoc' "++show doc++" {inserted&deleted} )"
   show (UpdateDoc' upd) = "(UpdateDoc' <function>)"
   show NavUpDoc'        = "NavUpDoc'"

@@ -5,7 +5,8 @@ import PresLayerTypes
 import PresLayerUtils
 
 import DocumentEdit
-import DocTypes_Generated (Node)
+import DocTypes
+import DocTypes_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 

@@ -7,12 +7,14 @@ import EvalLayerUtils
 
 import PresTypes -- for initDoc 
 
+import DocTypes_Generated
+
 import qualified EvaluateInv
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel Document ->
-               EditEnrichedDoc documentLevel -> 
-               IO (EditDocument documentLevel, LayerStateEval, EnrichedDocLevel)
+translateIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document ->
+               EditEnrichedDoc documentLevel EnrichedDoc -> 
+               IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 translateIO state low high editLow = 
   do { (editHigh, state', low') <- reduceIO state low high editLow
 --     ; debugLnIO Prs $ "Edit Enr:"++show editLow
@@ -20,9 +22,9 @@ translateIO state low high editLow =
      }
 
 
-reduceIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel Document ->
-            EditEnrichedDoc documentLevel ->
-            IO (EditDocument documentLevel, LayerStateEval, EnrichedDocLevel)
+reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document ->
+            EditEnrichedDoc documentLevel EnrichedDoc ->
+            IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 reduceIO state enrLvl docLvl                  (OpenFileEnr upd) =  setUpd NothingUpdated $ debug Err "EvalTranslate.reduce: OpenFile Not implemented yet" $ return (SkipDoc 0, state, enrLvl)
 
 reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = setUpd NothingUpdated $ do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
@@ -37,9 +39,9 @@ reduceIO state enrLvl docLvl (SetEnr enrLvl')  = setUpd AllUpdated $ reduceEnrIO
 reduceIO state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
 
 
-reduce :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel doc ->
-          EditEnrichedDoc documentLevel ->
-          (EditDocument documentLevel, LayerStateEval, EnrichedDocLevel)
+reduce :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document ->
+          EditEnrichedDoc documentLevel EnrichedDoc ->
+          (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
@@ -55,8 +57,8 @@ reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 
 
 -- just copy the enriched document
-reduceEnrIO :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel doc -> EnrichedDocLevel ->
-             IO (EditDocument documentLevel, LayerStateEval, EnrichedDocLevel)
+reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document -> EnrichedDocLevel EnrichedDoc ->
+             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 reduceEnrIO state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
  do { let dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
           -- dcls' = dcls -- ignore updates on id list
@@ -106,8 +108,8 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 
 
 
-reduceInvLevel :: LayerStateEval -> EnrichedDocLevel -> DocumentLevel doc ->
-                  IO (Document, LayerStateEval, EnrichedDocLevel)
+reduceInvLevel :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel doc ->
+                  IO (Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 reduceInvLevel state enrDocLvl@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) docLevel =
  do { dcls'' <- reduceList_Decl dcls
  --   ; dcls'' <- return $ evalList_Decl dcls'

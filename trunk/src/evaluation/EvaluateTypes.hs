@@ -1,6 +1,7 @@
 module EvaluateTypes where
 
 import DocTypes
+import DocTypes_Generated
 
 import DebugLevels
 import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary

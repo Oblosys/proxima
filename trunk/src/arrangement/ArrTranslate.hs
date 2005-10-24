@@ -5,7 +5,7 @@ import ArrLayerTypes
 import ArrLayerUtils
 
 import DocTypes
-import DocTypes_Generated (Node)
+import DocTypes_Generated (Node, PathDoc (..))
 import DocUtils
 import qualified TreeEditPres -- for mouse handling stuff
 

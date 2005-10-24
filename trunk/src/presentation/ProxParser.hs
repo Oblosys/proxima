@@ -20,7 +20,7 @@ import UU_Parsing hiding (Exp, parse, parseIO)
 import qualified UU_Parsing
 import Char
 
-import DocTypes_Generated (Node)
+import DocTypes_Generated
 
 
 

@@ -12,20 +12,20 @@ import PresTypes -- for inserted/deleted token hack
 -- cleaner, as Document specific definitions (eg. DocumentLevel) are visible at
 -- EnrichedDocLevel. This is not really a problem, however.
 
-data EnrichedDocLevel = EnrichedDocLevel EnrichedDoc FocusDoc deriving Show
+data EnrichedDocLevel enr = EnrichedDocLevel enr FocusDoc deriving Show
 
 
 -- data EnrichedDoc = ...
 -- EnrichedDoc is defined in DocumentTypes_Generated because of node datatype dependency. 
 -- TODO figure out where node should go, and clean up
 
-data EditEnrichedDoc' =
-    SetEnr' EnrichedDocLevel -- (InsertedTokenList, DeletedTokenMap)
+data EditEnrichedDoc' enr =
+    SetEnr' (EnrichedDocLevel enr) -- (InsertedTokenList, DeletedTokenMap)
   | SkipEnr' Int
 
-data EditEnrichedDoc documentLevel =
+data EditEnrichedDoc documentLevel enr =
      InitEnr
-   | SetEnr EnrichedDocLevel
+   | SetEnr (EnrichedDocLevel enr)
    | SkipEnr Int
    | OpenFileEnr String
    | SaveFileEnr String

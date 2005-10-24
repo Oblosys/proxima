@@ -20,7 +20,7 @@ import qualified Chess
 --import qualified UHA_Pretty       (sem_Expression) -- for OU demo
 
 import DocTypes (DocumentLevel (..))
-import DocTypes_Generated (Node)
+import DocTypes_Generated
 
 
 

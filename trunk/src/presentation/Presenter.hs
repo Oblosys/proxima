@@ -30,13 +30,17 @@ parsePres' l pr = Just initDoc
 
 -- Presentation parser
 
-presentEnr :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation doc node, LayoutMap, IDPCounter)
+presentEnr :: PresentationSheet doc enr node -> LayerStatePres -> EnrichedDocLevel enr ->
+              LayoutMap -> IDPCounter ->
+              (Presentation doc node, LayoutMap, IDPCounter)
 presentEnr presentationSheet state enrlvl@(EnrichedDocLevel _ focusD) = -- debug Prs ("Doc Focus is "++show focusD) 
   presentEnr' presentationSheet state enrlvl
 
 
 
-presentEnr' :: PresentationSheet doc node -> LayerStatePres -> EnrichedDocLevel -> LayoutMap -> IDPCounter -> (Presentation doc node, LayoutMap, IDPCounter)
+presentEnr' :: PresentationSheet doc enr node -> LayerStatePres -> EnrichedDocLevel enr ->
+               LayoutMap -> IDPCounter ->
+               (Presentation doc node, LayoutMap, IDPCounter)
 presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC = 
       let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
       in  (pres', layM', idC')                                 
@@ -46,11 +50,4 @@ presentEnr' presentationSheet state (EnrichedDocLevel d focusD ) layM idC =
  where result (f1,f2,valid) = if valid then [text "=", text (show f1)]
                                        else  [text "=", text (show f1) `withColor` red
                                              ,text ("  {"++show f2++"}") `withColor` grey]
--}                                             
-presentEnr' _ state (EnrichedDocLevel d@(HoleEnrichedDoc) _) lay idc =
-      (structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text "<HoleEnr>: something is very wrong"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
-      , lay, idc)
-presentEnr' _ state (EnrichedDocLevel d@(ParseErrEnrichedDoc node pres) _) lay idc = 
-      (structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text "<ParseErrEnrichedDoc>: something is very wrong"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
-      , lay, idc)
--- TODO remove parseErr and Hole from rootEnr
+-}

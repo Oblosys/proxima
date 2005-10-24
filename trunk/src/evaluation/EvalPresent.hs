@@ -6,8 +6,12 @@ import EvalLayerUtils
 
 import DocumentEdit
 
+import DocTypes_Generated
+
 --import EvaluateTypes
 import EvaluateTypesStubs
+-- After switching between these two, execute "make depend"
+
 
 import qualified EvaluateInv
 
@@ -31,9 +35,9 @@ top level Enr should be called EnrichedDoc (in node, makestructural, etc)
 
 -}
 
-presentIO :: LayerStateEval -> DocumentLevel Document -> EnrichedDocLevel ->
-             EditDocument' (DocumentLevel Document) ->
-             IO (EditEnrichedDoc', LayerStateEval, DocumentLevel Document)
+presentIO :: LayerStateEval -> DocumentLevel Document -> EnrichedDocLevel EnrichedDoc ->
+             EditDocument' (DocumentLevel Document) Document ->
+             IO (EditEnrichedDoc' EnrichedDoc, LayerStateEval, DocumentLevel Document)
 presentIO  state high low@(EnrichedDocLevel enr focus) editHigh =
   let (editLow, state', high') = eval state high low editHigh
   in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
@@ -62,7 +66,7 @@ eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docE
 
 
 -- TODO: make sure that document is parsed before doing these:
-editDoc :: LayerStateEval -> DocumentLevel Document -> EditDocument' (DocumentLevel Document) ->
+editDoc :: LayerStateEval -> DocumentLevel Document -> EditDocument' (DocumentLevel Document) Document ->
            (DocumentLevel Document, LayerStateEval)
 editDoc state doclvl                        (UpdateDoc' upd) = (upd doclvl, state)
 editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)

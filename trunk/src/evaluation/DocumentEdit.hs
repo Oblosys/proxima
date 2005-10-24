@@ -16,6 +16,7 @@ Basic values should probably be boxed in some way, so there are holes for them.
 
 import CommonTypes
 import DocTypes
+import DocTypes_Generated
 import DocUtils
 import PresTypes
 

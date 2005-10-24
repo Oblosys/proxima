@@ -3,6 +3,7 @@ module EvaluateTypesStubs where
 -- copy of EvaluateTypes that does not import the Helium modules
 
 import DocTypes
+import DocTypes_Generated
 
 import DebugLevels
 import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary

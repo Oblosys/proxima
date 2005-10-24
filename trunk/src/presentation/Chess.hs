@@ -2,7 +2,8 @@ module Chess where
 
 
 import CommonTypes
-import qualified DocTypes as Prox
+import qualified DocTypes_Generated as Prox
+import DocTypes
 import DocUtils
 import XprezLib
 import PresTypes
@@ -60,12 +61,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        backgroundColor False False = (160,80,0)--(117,58,0)
        backgroundColor False True  = blue -- (115,57,0)
        gr x = (x,x,x)
-moveHere tPath focus (Prox.DocumentLevel d path cl) =
+moveHere tPath focus (DocumentLevel d path cl) =
   let emptySquareClip = Prox.Clip_BoardSquare Prox.Empty
-      (Prox.DocumentLevel _  _ piece )  = editCopyD  (Prox.DocumentLevel d focus cl)
-      (Prox.DocumentLevel d' _ _)       = editPasteD (Prox.DocumentLevel d focus emptySquareClip)
-      (Prox.DocumentLevel d'' path'' _) = editPasteD (Prox.DocumentLevel d' (Prox.PathD tPath) piece)
-  in  (Prox.DocumentLevel d'' path'' cl)
+      (DocumentLevel _  _ piece )  = editCopyD  (DocumentLevel d focus cl)
+      (DocumentLevel d' _ _)       = editPasteD (DocumentLevel d focus emptySquareClip)
+      (DocumentLevel d'' path'' _) = editPasteD (DocumentLevel d' (Prox.PathD tPath) piece)
+  in  (DocumentLevel d'' path'' cl)
                
 
 -- talking to Prometheus

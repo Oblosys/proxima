@@ -7,7 +7,9 @@ import RenLayerUtils
 
 import ArrLayerUtils hiding (rect,text) -- for context menu hack
 import PresTypes hiding (font) -- For Locations
+
 import DocTypes -- For Locations
+import DocTypes_Generated (Node (..))
 import DocUtils
 import DocumentEdit -- Just for now
 import GUI

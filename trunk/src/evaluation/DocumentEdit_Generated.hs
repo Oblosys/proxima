@@ -2,6 +2,7 @@ module DocumentEdit_Generated where
 
 import CommonTypes
 import DocTypes
+import DocTypes_Generated
 import DocUtils
 import PresTypes
 
