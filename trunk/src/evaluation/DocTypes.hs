@@ -7,14 +7,20 @@ import PresTypes
 import List
 import Char
 
-import DocTypes_Generated
 
--- PathDoc FocusDoc ClipDoc
+data IDD = NoIDD | IDD Int deriving (Show, Read, Eq, Ord) -- don't want another module for this one
 
-data DocumentLevel document clip = DocumentLevel document FocusDoc clip
+data PathDoc = PathD [Int]
+             | NoPathD deriving (Show, Eq, Ord)
 
---class HasPath node where
---  pathNode :: node -> PathDoc
+type FocusDoc = PathDoc  -- just a simple path focus for now
+
+type PathD = [Int] -- we don't use PathDoc because NoPath makes algorithms unreadable
+
+data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
+
+class HasPath node where
+  pathNode :: node -> PathDoc
 
 {-
 data PathDoc = PathD [Int]

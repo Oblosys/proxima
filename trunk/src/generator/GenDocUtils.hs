@@ -44,12 +44,12 @@ genRankNode constrs = [ "rankNode :: Node -> Int"
  where makeNodeAlt ((_, cnstr, _, _),i) = "rankNode ("++ cnstr ++"Node _ _)  = "++show i
 
 {- Path Node -} 
-genPathNode constrs = [ "pathNode :: Node -> PathDoc"
-                      , "pathNode NoNode            = NoPathD"
-                      , "pathNode (RootDocNode _ pth) = PathD pth"
-                      , "pathNode (HoleDocumentNode _ pth) = PathD pth"]  -- RUI: added this line
+genPathNode constrs = [ "instance HasPath Node where"
+                      , "  pathNode NoNode            = NoPathD"
+                      , "  pathNode (RootDocNode _ pth) = PathD pth"
+                      , "  pathNode (HoleDocumentNode _ pth) = PathD pth"]  -- RUI: added this line
                       ++ (map makeNodeAlt constrs) 
- where makeNodeAlt (_, cnstr, _, _) = "pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
+ where makeNodeAlt (_, cnstr, _, _) = "  pathNode ("++ cnstr ++"Node _ pth)  = PathD pth"
 
 
 --- this one doesn't work for holes, but it will be obsolete soon anyway

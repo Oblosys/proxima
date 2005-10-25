@@ -9,7 +9,6 @@ import ArrLayerUtils hiding (rect,text) -- for context menu hack
 import PresTypes hiding (font) -- For Locations
 
 import DocTypes -- For Locations
-import DocTypes_Generated (Node (..))
 import DocUtils
 import DocumentEdit -- Just for now
 import GUI
@@ -18,6 +17,8 @@ import Graphics.UI.WX hiding (Color)
 import Graphics.UI.WXCore hiding (Color)
 import IOExts
 
+import DocTypes_Generated
+import DocUtils_Generated
 {-
 TODO:
 
@@ -69,19 +70,28 @@ arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]
 -}
 
 -- end of hack.
-      
---mkPopupMenuXY :: Presentation -> Scale -> Arrangement -> Id -> ((RenderingLevel documentLevel, EditRendering) -> IO (RenderingLevel documentLevel, EditRendering')) 
---              -> Int -> Int -> GUI (RenderingLevel documentLevel) ()
+
+{-
+mkPopupMenuXY :: (HasPath node, Show node) => Presentation doc node clip -> Scale -> Arrangement node ->
+                 ((RenderingLevel (DocumentLevel doc clip), EditRendering (DocumentLevel doc clip)) ->
+                 IO (RenderingLevel (DocumentLevel doc clip), EditRendering' (DocumentLevel doc clip))) ->
+                 Var (RenderingLevel (DocumentLevel doc clip)) ->
+                 ScrolledWindow a -> Int -> Int -> IO ()
+-}
+
+-- automatic popup items have been disabled
 mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
+--mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case pointOvlRev' x y [[]] arr of
                         (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs
                         []       -> []
               
-    ; case map pathNode (pointDoc' x y arr) of
+   ; return ()
+   ; case map pathNode (pointDoc' x y arr) of
         (pth:_) ->
          do { let alts = menuD pth doc
-            ; let items = ctxtItems++alts
+            ; let items = ctxtItems  ++alts
             --; putStrLn $ "popup"++show (map fst items)
             ; popupMenu <- menuPane []
             ; sequence_ (map (mkMenuItem popupMenu) items)
@@ -567,7 +577,7 @@ testArr filePath = unsafePerformIO $
 -- test stuff
 
 -- ref lines are only used in incremental arranging, so can be 0 here
-
+{-
 arr0 = ColA NoIDA 100 100 0 0 0 0  CommonTypes.blue -- offsets are not correct here
         [ StringA NoIDA 0 0 0 0 0 0 "Hello World!" (0,0,0) defaultFont []
         , StringA NoIDA 0 40 0 0 0 0  "Bla" (0,0,0) defaultFont []
@@ -577,7 +587,7 @@ arr0 = ColA NoIDA 100 100 0 0 0 0  CommonTypes.blue -- offsets are not correct h
                        , StringA NoIDA 80 0 0 0 0 0 "B" (0,0,0) defaultFont []
                        ]
         ]
-
+-}
 
 arr1 =  StringA NoIDA 0 0 124 50 0 0 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]--,
                                     --       StringA NoIDA 0 50 24 50 0 0 "x" (0,0,0) "Arial" 30 [0,24

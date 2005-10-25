@@ -1,7 +1,5 @@
-module DocUtils ( module DocUtils_Generated
-                , module DocUtils           ) where
+module DocUtils where
 
-import DocUtils_Generated
 
 import DocTypes
 import PresTypes

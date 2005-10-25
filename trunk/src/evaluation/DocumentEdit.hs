@@ -17,7 +17,7 @@ Basic values should probably be boxed in some way, so there are holes for them.
 
 import CommonTypes
 import DocTypes
-import DocTypes_Generated
+import DocTypes_Generated (ClipDoc)
 import DocUtils
 import PresTypes
 
@@ -116,17 +116,17 @@ navigateUpD (PathD [])      _  = NoPathD
 navigateUpD (PathD p@(_:_)) _  = PathD $ init p
 navigateUpD pd              _ = pd
 
-navigateDownD :: FocusDoc -> Document -> FocusDoc
+navigateDownD :: Editable doc => FocusDoc -> doc -> FocusDoc
 navigateDownD NoPathD   d = PathD []
 navigateDownD (PathD p) d = PathD $ if arityD p d > 0 then p++[0] else p
  
-navigateLeftD :: FocusDoc -> Document -> FocusDoc
+navigateLeftD :: Editable doc => FocusDoc -> doc -> FocusDoc
 navigateLeftD NoPathD         _ = NoPathD
 navigateLeftD (PathD p@(_:_)) d = PathD $ let i = last p
                                           in  if i > 0 then init p ++ [i-1] else p
 navigateLeftD pd              _ = pd
 
-navigateRightD :: FocusDoc -> Document -> FocusDoc
+navigateRightD :: Editable doc => FocusDoc -> doc -> FocusDoc
 navigateRightD NoPathD         _ = NoPathD
 navigateRightD (PathD p@(_:_)) d = PathD $ let i = last p
                                                a = arityD (init p) d
@@ -136,28 +136,27 @@ navigateRightD pd              _ = pd
 
 
 
-editCopyD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
+editCopyD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
 editCopyD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editCopyD (DocumentLevel doc pd@(PathD pth) clip) = DocumentLevel doc pd (selectD pth doc)
 
-editCutD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
+editCutD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
 editCutD  (DocumentLevel doc NoPathD clip)           = DocumentLevel doc NoPathD clip
 editCutD  (DocumentLevel doc pd@(PathD pth) clip)    = let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' (selectD pth doc)
 
-editDeleteD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
+editDeleteD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
 editDeleteD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editDeleteD (DocumentLevel doc pd@(PathD pth) clip) =  let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' clip
 
-editPasteD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
+editPasteD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
 -- menuD is probably not a good name
-menuD :: PathDoc -> Document -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
+menuD :: Editable doc => PathDoc -> doc -> [ (String, DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc) ]
 menuD NoPathD _              = []
-{-
 menuD path@(PathD p) d =
   let alts = alternativesD p d
       mkItem (s,c) = (s, \(DocumentLevel _ pth clip) -> DocumentLevel (pasteD p c d) pth clip)
@@ -177,34 +176,36 @@ menuD path@(PathD p) d =
                     pasteAfter = ("<paste after>", \(DocumentLevel _ pth clip) -> 
                                                      DocumentLevel (pasteD (init p) (insertListClip (last p+1) clip parent) d) pth clip )
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
--}
 
 
-selectD p (RootDoc id1 id2  x) = select p x
+selectD :: Editable doc => PathD -> doc -> ClipDoc
+selectD p doc = select p doc
 
-pasteD p c (RootDoc id1 id2  x) = RootDoc id1 id2 $ paste p c x
+pasteD :: Editable doc => PathD -> ClipDoc -> doc -> doc
+pasteD p c doc = paste p c doc
 
 -- ugly mix of levels, find out how to do it nicely
-deleteD :: PathD -> Document -> (Document, PathDoc)
+deleteD :: Editable doc => PathD -> doc -> (doc, PathDoc)
 deleteD p d = if not (null p) && isListClip (selectD (init p) d) -- if parent is list, then delete is remove from list
               then (pasteD (init p) (removeListClip (last p) (selectD (init p) d)) d, NoPathD)
               else let newhole = holeClip (selectD p d)
                    in  (pasteD p newhole d, PathD p) 
 
-arityD :: PathD -> Document -> Int
-arityD p (RootDoc id1 id2  x) = arityClip (select p x)
+arityD :: Editable doc => PathD -> doc -> Int
+arityD p d = arityClip (select p d)
 
-alternativesD :: PathD -> Document -> [ (String, ClipDoc) ]
-alternativesD p (RootDoc id1 id2  x) = alternativesClip (select p x)
+alternativesD :: Editable doc => PathD -> doc -> [ (String, ClipDoc) ]
+alternativesD p d = alternativesClip (select p d)
 
  
 -- a simple structure editor:
 
+{-
 test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing DocumentEdit module ******"
           ; edit (DocumentLevel sample NoPathD Clip_Nothing)
           }
 
-edit :: DocumentLevel Document ClipDoc -> IO ()
+edit :: (Editable doc, Show doc) => DocumentLevel doc ClipDoc -> IO ()
 edit doclvl@(DocumentLevel doc path clip) =
  do { putStrLn $ "\n\ndoc  "++ show doc
     ; putStrLn $ "\npath "++ show path ++ case path of NoPathD   -> ""
@@ -227,8 +228,9 @@ edit doclvl@(DocumentLevel doc path clip) =
     ; putStrLn str
     ; if c /= 'q' then edit doclvl' else return ()
     }
-    
-insertElt :: DocumentLevel Document ClipDoc -> Int -> IO (DocumentLevel Document ClipDoc, String)
+
+ 
+insertElt :: Editable doc => DocumentLevel doc ClipDoc -> Int -> IO (DocumentLevel doc ClipDoc, String)
 insertElt doclvl@(DocumentLevel doc path clp) i =
  do { let menu = menuD path doc
     ; putStrLn $ concat $ intersperse " | " $
@@ -243,10 +245,11 @@ insertElt doclvl@(DocumentLevel doc path clp) i =
     }
  where mark True  str = ">"++str++"<"
        mark False str = " "++str++" " 
+-}
 
 -- Document type specific part
 
-sample = HoleDocument {-RootDoc NoIDD NoIDP $
+sample = hole {- RootDoc NoIDD NoIDP $
            ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "tup") 
                                 (ProductExp NoIDD NoIDP NoIDP [] $ 
                                    ConsExps NoIDD (PlusExp NoIDD NoIDP (IntExp NoIDD NoIDP 2) (IntExp NoIDD NoIDP  3)) $

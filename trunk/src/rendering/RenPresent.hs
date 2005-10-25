@@ -6,8 +6,7 @@ import RenLayerUtils -- for context menu hack
 
 import Renderer
 
-import DocTypes_Generated (Node)
-import DocTypes (DocumentLevel)
+import DocTypes (DocumentLevel, HasPath)
 
 presentIO state high low editHigh = return $ present state high low editHigh
 
@@ -25,9 +24,12 @@ present state high low editHigh =
 
 
 -- debug & scaling is now done directly. This should be done with a setRendering
-render :: LocalStateRen -> ArrangementLevel doc Node clip -> RenderingLevel (DocumentLevel doc clip) ->
-          EditArrangement' doc Node clip ->
-          (EditRendering' (DocumentLevel doc clip), LocalStateRen, ArrangementLevel doc Node clip)
+{-
+render :: (HasPath node, Show node) =>
+          LocalStateRen -> ArrangementLevel doc node clip -> RenderingLevel (DocumentLevel doc clip) ->
+          EditArrangement' doc node clip ->
+          (EditRendering' (DocumentLevel doc clip), LocalStateRen, ArrangementLevel doc node clip)
+-}
 render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ debugging updRegions) (SkipArr' 0) = 
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = DiffLeaf False
