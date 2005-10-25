@@ -3,7 +3,6 @@ module DocTypes where
 
 import CommonTypes
 
-import PresTypes
 import List
 import Char
 

@@ -22,26 +22,3 @@ redirect PasteDoc        = PasteDoc'
 redirect DeleteDoc       = DeleteDoc'
 redirect EvaluateDoc     = EvaluateDoc'
 redirect _               = (SkipDoc' 0)
-
-
-
-
-{-
-
-class Editable a where
-  select :: PathD -> a -> ClipDoc
-  paste :: PathD -> ClipDoc -> a -> a
-  alternatives :: a -> [ (String, ClipDoc) ] -- a is dummy arg
-  arity :: a -> Int
-  hole :: a
-  isList :: a -> Bool
-  isList _ = False
-  
-  insertList :: Int -> ClipDoc -> a -> ClipDoc
-  insertList _ _ _ = Clip_Nothing
-  removeList :: Int -> a -> ClipDoc
-  removeList _ _ = Clip_Nothing
-
-
--}
-

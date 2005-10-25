@@ -14,11 +14,12 @@ import DocumentEdit -- Just for now
 import GUI
 
 import Graphics.UI.WX hiding (Color) 
-import Graphics.UI.WXCore hiding (Color)
+import Graphics.UI.WXCore hiding (Color, Document) 
 import IOExts
 
-import DocTypes_Generated
-import DocUtils_Generated
+-- import DocTypes_Generated -- RootDocNode
+-- import DocUtils_Generated -- hasPath Node
+-- import DocumentEdit_Generated -- Editable Document Document Node ClipDoc
 {-
 TODO:
 
@@ -72,26 +73,33 @@ arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]
 -- end of hack.
 
 {-
+mkPopupMenuXY :: (Editable doca doca node clip, Clip clip) => doca ->
+                 Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
+                 ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
+                 IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
+                 Var (RenderingLevel (DocumentLevel Document ClipDoc)) ->
+                 ScrolledWindow a -> Int -> Int -> IO ()
+-}
+
 mkPopupMenuXY :: (HasPath node, Show node) => Presentation doc node clip -> Scale -> Arrangement node ->
                  ((RenderingLevel (DocumentLevel doc clip), EditRendering (DocumentLevel doc clip)) ->
                  IO (RenderingLevel (DocumentLevel doc clip), EditRendering' (DocumentLevel doc clip))) ->
                  Var (RenderingLevel (DocumentLevel doc clip)) ->
                  ScrolledWindow a -> Int -> Int -> IO ()
--}
 
 -- automatic popup items have been disabled
-mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
---mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
+
+--mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
+mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case pointOvlRev' x y [[]] arr of
                         (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs
                         []       -> []
               
-   ; return ()
    ; case map pathNode (pointDoc' x y arr) of
         (pth:_) ->
-         do { let alts = menuD pth doc
-            ; let items = ctxtItems  ++alts
+         do {  -- let alts = menuD pth doc
+            ; let items = ctxtItems --  ++alts
             --; putStrLn $ "popup"++show (map fst items)
             ; popupMenu <- menuPane []
             ; sequence_ (map (mkMenuItem popupMenu) items)

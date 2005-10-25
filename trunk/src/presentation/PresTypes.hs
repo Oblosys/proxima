@@ -1,7 +1,7 @@
 module PresTypes where
 
 import CommonTypes
-import {-# SOURCE #-} DocTypes (DocumentLevel)
+import DocTypes (DocumentLevel)
 
 import CommonUtils
 

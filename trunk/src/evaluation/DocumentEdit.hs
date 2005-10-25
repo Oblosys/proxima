@@ -17,15 +17,33 @@ Basic values should probably be boxed in some way, so there are holes for them.
 
 import CommonTypes
 import DocTypes
-import DocTypes_Generated (ClipDoc)
 import DocUtils
 import PresTypes
 
 import List
 import IOExts
 
-import DocumentEdit_Generated 
+--import DocumentEdit_Generated
 
+class Editable a doc node clip | a -> doc node clip where
+  select :: PathD -> a -> clip
+  paste :: PathD -> clip -> a -> a
+  alternatives :: a -> [ (String, clip) ]
+  arity :: a -> Int
+  parseErr :: node -> Presentation doc node clip -> a
+  hole :: a
+  isList :: a -> Bool
+  insertList :: Int -> clip -> a -> clip
+  removeList :: Int -> a -> clip
+-- defaults for non-list types don't work because of ClipNothing constructor
+
+class Clip clip where
+  arityClip :: clip -> Int
+  alternativesClip :: clip -> [ (String, clip) ]
+  holeClip :: clip -> clip
+  isListClip :: clip -> Bool
+  insertListClip :: Int -> clip -> clip -> clip
+  removeListClip :: Int -> clip -> clip
 
 
 {-
@@ -116,17 +134,17 @@ navigateUpD (PathD [])      _  = NoPathD
 navigateUpD (PathD p@(_:_)) _  = PathD $ init p
 navigateUpD pd              _ = pd
 
-navigateDownD :: Editable doc => FocusDoc -> doc -> FocusDoc
+navigateDownD :: (Editable doc doc node clip, Clip clip) => FocusDoc -> doc -> FocusDoc
 navigateDownD NoPathD   d = PathD []
 navigateDownD (PathD p) d = PathD $ if arityD p d > 0 then p++[0] else p
  
-navigateLeftD :: Editable doc => FocusDoc -> doc -> FocusDoc
+navigateLeftD :: Editable doc doc node clip => FocusDoc -> doc -> FocusDoc
 navigateLeftD NoPathD         _ = NoPathD
 navigateLeftD (PathD p@(_:_)) d = PathD $ let i = last p
                                           in  if i > 0 then init p ++ [i-1] else p
 navigateLeftD pd              _ = pd
 
-navigateRightD :: Editable doc => FocusDoc -> doc -> FocusDoc
+navigateRightD :: (Editable doc doc node clip, Clip clip) => FocusDoc -> doc -> FocusDoc
 navigateRightD NoPathD         _ = NoPathD
 navigateRightD (PathD p@(_:_)) d = PathD $ let i = last p
                                                a = arityD (init p) d
@@ -136,26 +154,26 @@ navigateRightD pd              _ = pd
 
 
 
-editCopyD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
+editCopyD :: Editable doc doc node clip => DocumentLevel doc clip -> DocumentLevel doc clip
 editCopyD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editCopyD (DocumentLevel doc pd@(PathD pth) clip) = DocumentLevel doc pd (selectD pth doc)
 
-editCutD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
+editCutD :: (Editable doc doc node clip, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
 editCutD  (DocumentLevel doc NoPathD clip)           = DocumentLevel doc NoPathD clip
 editCutD  (DocumentLevel doc pd@(PathD pth) clip)    = let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' (selectD pth doc)
 
-editDeleteD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
+editDeleteD :: (Editable doc doc node clip, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
 editDeleteD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editDeleteD (DocumentLevel doc pd@(PathD pth) clip) =  let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' clip
 
-editPasteD :: Editable doc => DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc
+editPasteD :: Editable doc doc node clip => DocumentLevel doc clip -> DocumentLevel doc clip
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
 -- menuD is probably not a good name
-menuD :: Editable doc => PathDoc -> doc -> [ (String, DocumentLevel doc ClipDoc -> DocumentLevel doc ClipDoc) ]
+menuD :: (Editable doc doc node clip, Clip clip) => PathDoc -> doc -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
 menuD NoPathD _              = []
 menuD path@(PathD p) d =
   let alts = alternativesD p d
@@ -178,23 +196,23 @@ menuD path@(PathD p) d =
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
 
 
-selectD :: Editable doc => PathD -> doc -> ClipDoc
+selectD :: Editable doc doc node clip => PathD -> doc -> clip
 selectD p doc = select p doc
 
-pasteD :: Editable doc => PathD -> ClipDoc -> doc -> doc
+pasteD :: Editable doc doc node clip => PathD -> clip -> doc -> doc
 pasteD p c doc = paste p c doc
 
 -- ugly mix of levels, find out how to do it nicely
-deleteD :: Editable doc => PathD -> doc -> (doc, PathDoc)
+deleteD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> (doc, PathDoc)
 deleteD p d = if not (null p) && isListClip (selectD (init p) d) -- if parent is list, then delete is remove from list
               then (pasteD (init p) (removeListClip (last p) (selectD (init p) d)) d, NoPathD)
               else let newhole = holeClip (selectD p d)
                    in  (pasteD p newhole d, PathD p) 
 
-arityD :: Editable doc => PathD -> doc -> Int
+arityD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> Int
 arityD p d = arityClip (select p d)
 
-alternativesD :: Editable doc => PathD -> doc -> [ (String, ClipDoc) ]
+alternativesD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> [ (String, clip) ]
 alternativesD p d = alternativesClip (select p d)
 
  
@@ -205,7 +223,7 @@ test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing Docume
           ; edit (DocumentLevel sample NoPathD Clip_Nothing)
           }
 
-edit :: (Editable doc, Show doc) => DocumentLevel doc ClipDoc -> IO ()
+edit :: (Editable doc doc node clip, Show doc) => DocumentLevel doc clip -> IO ()
 edit doclvl@(DocumentLevel doc path clip) =
  do { putStrLn $ "\n\ndoc  "++ show doc
     ; putStrLn $ "\npath "++ show path ++ case path of NoPathD   -> ""
@@ -230,7 +248,7 @@ edit doclvl@(DocumentLevel doc path clip) =
     }
 
  
-insertElt :: Editable doc => DocumentLevel doc ClipDoc -> Int -> IO (DocumentLevel doc ClipDoc, String)
+insertElt :: Editable doc doc node clip => DocumentLevel doc clip -> Int -> IO (DocumentLevel doc clip, String)
 insertElt doclvl@(DocumentLevel doc path clp) i =
  do { let menu = menuD path doc
     ; putStrLn $ concat $ intersperse " | " $

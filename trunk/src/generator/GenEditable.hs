@@ -18,24 +18,21 @@ genDocumentEdit include parsedFile =
                  ++ clipfunctions (listFields extendedTypes)
                  ++ ["\n\n-- Editable Instances --\n"]
                  ++ genEditableInstances extendedTypes
-                 ++ concatMap primitiveEdit primTypes
-                 ++ ["\n\n\n\n\n\n-- ProxParser_Generated --\n"] ---
---                 ++ genProxParser        extendedTypes
                  where
                  extendedTypes = extendTypes parsedFile
                  extendTypes parsedFile@(File m d) = (File m (d++(genListTypes parsedFile)))
-                 primTypes = ["Int", "Bool", "String"]  --- This doesn't belong here!
 
 
 {- Clip Functions -}
 
 
 ---
-clipfunctions fields =  genArityClip        fields
-                     ++ genAlternativesClip fields
-                     ++ genHoleClip         fields
-                     ++ genIsListClip       fields
-                     ++ genInsertListClip   fields
+clipfunctions fields =  ["instance Clip ClipDoc where"]
+                     ++ genArityClip        fields
+                     ++ genAlternativesClip fields ++ [""]
+                     ++ genHoleClip         fields ++ [""]
+                     ++ genIsListClip       fields ++ [""]
+                     ++ genInsertListClip   fields ++ [""]
                      ++ genRemoveListClip   fields
                      
  --- no generation for conslists (unsafe, should be done in a different way)
@@ -43,35 +40,37 @@ listFields parsedFile = map fieldType . filter (\(Field _ tp _)-> not $ isPrefix
 --- getFields already does a removeRepeat
 
 {- arityClip -}
-genArityClip fields = genClip fields "\narityClip :: ClipDoc -> Int" "arity" "-1" 
+genArityClip fields = genClip fields "arity" "-1" 
 
 {- alternativesClip -}
-genAlternativesClip fields = genClip fields "\nalternativesClip :: ClipDoc -> [ (String, ClipDoc) ]" "alternatives"  "[]" 
+genAlternativesClip fields = genClip fields "alternatives"  "[]" 
+
+{- holeClip -}
+genHoleClip fields =
+           map (\e -> "  holeClip (Clip_"++e++" x) = Clip_"++e++" hole" ) fields
+        ++ ["  holeClip Clip_Nothing   = Clip_Nothing"]   --- hole also needs a Nothing case (was missing in my source)
 
 {- isListClip -}
-genIsListClip fields = genClip fields "\nisListClip :: ClipDoc -> Bool" "isList"  "False" 
+genIsListClip fields = genClip fields "isList"  "False" 
 
----
-{- holeClip -}
-genHoleClip fields = ["\nholeClip :: ClipDoc -> ClipDoc"] 
-        ++ map (\e->"holeClip (Clip_"++e++" x) = Clip_"++e++" hole" ) fields
-        ++ ["holeClip Clip_Nothing   = Clip_Nothing"]   --- hole also needs a Nothing case (was missing in my source)
 
 {- insertListClip -}
-genInsertListClip fields = ["\ninsertListClip :: Int -> ClipDoc -> ClipDoc -> ClipDoc"] 
-              ++ map (\e->"insertListClip i c (Clip_"++e++" x) = insertList i c x") fields
-              ++ ["insertListClip i c (Clip_Nothing)   = Clip_Nothing"]
+genInsertListClip fields =
+                 map (\e -> "  insertListClip i c (Clip_"++e++" x) = insertList i c x") fields
+              ++ ["  insertListClip i c (Clip_Nothing)   = Clip_Nothing"]
 
 {- removeListClip -}
-genRemoveListClip fields = ["\nremoveListClip :: Int -> ClipDoc -> ClipDoc"]
-              ++ map (\e->"removeListClip i (Clip_"++e++" x) = removeList i x") fields
-              ++ ["removeListClip i (Clip_Nothing)   = Clip_Nothing"]
+genRemoveListClip fields =
+                 map (\e -> "  removeListClip i (Clip_"++e++" x) = removeList i x") fields
+              ++ ["  removeListClip i (Clip_Nothing)   = Clip_Nothing"]
+
+
 
 {- Lib -}
-genClip fields sign name nothVal = 
-        sign:(map (genF name) fields) ++ [name++"Clip (Clip_Nothing)   = "++nothVal] 
+genClip fields name nothVal = 
+        (map (genF name) fields) ++ ["  "++name++"Clip (Clip_Nothing)   = "++nothVal] 
         where
-        genF name e = name++"Clip (Clip_"++e++" x) = "++name++" x"
+        genF name e = "  "++name++"Clip (Clip_"++e++" x) = "++name++" x"
 
 
 
@@ -88,13 +87,17 @@ instances d@(Decl e prods DeclConsList) =  []
 instances d@(Decl e prods DeclList) =  instanceList d ---
 
 {- NON Lists -}
-instances d@(Decl e prods DeclDef)  = ["\n\ninstance Editable " ++ e ++ " where"]
+instances d@(Decl e prods DeclDef)  = ["\n\ninstance Editable " ++ e ++ " Document Node ClipDoc where"]
                                     ++ select        d 
                                     ++ paste         d
                                     ++ alternatives  d 
                                     ++ arity (e,prods)
                                     ++ parseErr e
                                     ++ hole e
+                                    ++ ["\n  isList _ = False"]
+                                    ++ ["  insertList _ _ _ = Clip_Nothing"]
+                                    ++ ["  removeList _ _ = Clip_Nothing"]
+
 
 
 {- select -}
@@ -218,80 +221,6 @@ count f = (,) (length(filter isID f)) (length(filter (not.isID) f))
 ---------------------------------------------------------------------
 
 
-editableClass :: [String]
-editableClass = [""
-                ,"class Editable a where"
-                ,"  select :: PathD -> a -> ClipDoc"
-                ,"  paste :: PathD -> ClipDoc -> a -> a"
-                ,"  alternatives :: a -> [ (String, ClipDoc) ]"               
-                ,"  arity :: a -> Int"
-                ,"  hole :: a"
-                ,"  "
-                ,"  isList :: a -> Bool"
-                ,"  isList _ = False"
-                ,"  insertList :: Int -> ClipDoc -> a -> ClipDoc"
-                ,"  insertList _ _ _ = Clip_Nothing"
-                ,"  removeList :: Int -> a -> ClipDoc"
-                ,"  removeList _ _ = Clip_Nothing"
-               ]
-
-
-
-
-primitiveEdit f 
-        = case f of
-             "Bool" ->  [ "instance Editable Bool where                         "
-                        , "  select [] x = Clip_Bool x                            "
-                        , "  select _  _ = Clip_Nothing                           "
-                        , "  paste [] (Clip_Bool c) x = c                         "
-                        , "  paste [] c             x =  trace (\"Type error: pasting \"++show c++\" on Bool\") x"
-                        , "  paste _  _             x = x"  ---
-                        , "  alternatives _ = [ (\"True\", Clip_Bool True)        "
-                        , "                   , (\"False\", Clip_Bool False)      "
-                        , "                   , (\"{Bool}\", Clip_Bool hole) ]    "
-                        , "  arity _ = 0                                          "
-                        , "  parseErr _ _ = False\n"
-                        , "  hole = False\n" 
-                        ]
-
-             "Int"  ->  [ "instance Editable Int where"
-                        , "  select [] x = Clip_Int x"
-                        , "  select _  _ = Clip_Nothing"
-                        , "  paste [] (Clip_Int c) x = c"
-                        , "  paste [] c            x =  trace (\"Type error: pasting \"++show c++\" on Int\") x"
-                        , "  paste _  _             x = x"  ---
-                        , "  "
-                        , "  alternatives _ = [ (\"0\", Clip_Int 0)"
-                        , "                   , (\"1\", Clip_Int 1)"
-                        , "                   , (\"{Int}\", Clip_Int hole) ]"
-                        , "  "
-                        , "  arity _ = 0"
-                        , "  parseErr _ _ = 0\n"  
-                        , "  hole = 0\n" 
-                        ]
-
-             "String" -> [ "instance Editable String where"
-                         , "  select [] x = Clip_String x" 
-                         , "  select _  _ = Clip_Nothing"
-                         , "  paste [] (Clip_String c) x = c"
-                         , "  paste [] c             x =  trace (\"Type error: pasting \"++show c++\" on String\") x"
-                         , "  paste _  _             x = x"  ---
-                         , ""
-                         , "  alternatives _ = [ (\"a\", Clip_String \"a\")"
-                         , "                   , (\"ab\", Clip_String \"ab\")"
-                         , "                   , (\"{String}\", Clip_String hole) ] "
-                         , " "
-                         , "  arity _ = 0"
-                         , "  parseErr _ _= \"{ParseErr}\"\n"
-                         , "  hole = \"{String}\"\n"
-                         ]
-
-             x      -> [""] -- "--Error: no Editable instance of " ++ x ++"\n\n" 
-
-
-
-
-
 
 
 {-
@@ -334,7 +263,7 @@ instanceList (Decl e prods _) =
   , "removeList_"++listTp++" n (Cons_"++listTp++" cx cxs) = Cons_"++listTp++" cx (removeList_"++listTp++" (n-1) cxs)"
   , ""
 -- here's the actual instance declaration
-  , "instance Editable List_"++listTp++" where"
+  , "instance Editable List_"++listTp++" Document Node ClipDoc where"
   , "  select []    x                  = Clip_List_"++listTp++" x"
   , "  select (n:p) (List_"++listTp++" _ cxs) = let xs = fromConsList_"++listTp++" cxs"
   , "                                  in  if n < length xs "

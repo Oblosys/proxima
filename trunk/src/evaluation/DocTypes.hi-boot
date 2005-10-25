@@ -1,3 +1,0 @@
-module DocTypes where
-
-data DocumentLevel doc clip
