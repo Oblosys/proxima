@@ -1,7 +1,5 @@
 module Architecture where
 
-import PresentationAG
-
 import ArchitectureLibM
 
 import qualified EvalPresent
@@ -130,7 +128,9 @@ data ProximaLayer m state doc pres editDoc editPres editDoc' editPres' =
 
 
 
-evaluationLayer   = ProximaLayer EvalTranslate.translateIO EvalPresent.presentIO
+evaluationLayer evaluationSheet reductionSheet = ProximaLayer 
+                                                   (EvalTranslate.translateIO reductionSheet)
+                                                   (EvalPresent.presentIO evaluationSheet) 
 presentationLayer presentationSheet parseSheet = ProximaLayer 
                                                    (PresTranslate.translateIO parseSheet)
                                                    (PresPresent.presentIO presentationSheet)
@@ -140,9 +140,9 @@ arrangementLayer  = ProximaLayer ArrTranslate.translateIO ArrPresent.presentIO
 renderingLayer    = ProximaLayer RenTranslate.translateIO RenPresent.presentIO
 
 
-proximaLayers presentationSheet parseSheet scannerSheet
+proximaLayers evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
               evaluationLS presentationLS layoutLS arrangementLS rendererLS =
-            lift (wrap evaluationLayer)   evaluationLS
+            lift (wrap (evaluationLayer evaluationSheet reductionSheet))   evaluationLS
   `combine` lift (wrap (presentationLayer presentationSheet parseSheet)) presentationLS
   `combine` lift (wrap (layoutLayer scannerSheet))       layoutLS
   `combine` lift (wrap arrangementLayer)  arrangementLS

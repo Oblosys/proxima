@@ -39,15 +39,16 @@ main =
                            }
     }
 
+
 generateFiles srcPath fname  
      = do putStr $ "Parsing File: "++(show fname)++" ..."
           parsedFile <- parseDataTypesFile fname       -- What if the parser goes wrong?? 
           putStr $ " done\n"                           --- simply terminate with a parse error.
-          generate (srcPath++"/evaluation/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
-          generate (srcPath++"/evaluation/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
-          generate (srcPath++"/evaluation/DocUtils_Generated.hs")         genDocUtils        parsedFile
-          generate (srcPath++"/presentation/PresentationAG_Generated.ag") genPresentationAG  parsedFile
-          generate (srcPath++"/presentation/ProxParser_Generated.hs")     genProxParser      parsedFile
+          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
+          generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
+          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
+          generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
+          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
 
 -- make this function more clear
 generate filename func parsedFile

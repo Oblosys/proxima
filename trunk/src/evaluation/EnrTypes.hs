@@ -1,7 +1,8 @@
-module EnrTypes (module DocTypes, module EnrTypes) where
+module EnrTypes (module DocTypes, module EnrTypes, FocusDoc) where
 
 import CommonTypes
 import DocTypes 
+import DocTypes_Generated
 
 import CommonUtils
 

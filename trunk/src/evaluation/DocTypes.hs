@@ -1,6 +1,5 @@
-module DocTypes ( module DocTypes, FocusDoc, PathDoc (..)) where
+module DocTypes where
 
-import DocTypes_Generated (PathDoc, FocusDoc, ClipDoc)
 
 import CommonTypes
 
@@ -8,8 +7,11 @@ import PresTypes
 import List
 import Char
 
+import DocTypes_Generated
 
-data DocumentLevel document = DocumentLevel document FocusDoc ClipDoc
+-- PathDoc FocusDoc ClipDoc
+
+data DocumentLevel document clip = DocumentLevel document FocusDoc clip
 
 --class HasPath node where
 --  pathNode :: node -> PathDoc

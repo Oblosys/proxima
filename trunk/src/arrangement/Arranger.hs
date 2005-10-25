@@ -9,7 +9,7 @@ import FontLib
 import IOExts
 
 arrangePresentation :: Show node => FontMetricsRef -> FocusPres -> Arrangement node ->
-                       DiffTree -> Presentation doc node -> IO (Arrangement node)
+                       DiffTree -> Presentation doc node clip -> IO (Arrangement node)
 arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
 
  do { let screenSize = 1000      
@@ -35,10 +35,10 @@ arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ se
 -- non-pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
 -- unsafePerformDraw is not available     -- obsolete comment
 -- Monad is IO again so fixIO can be used
-fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node -> Int ->
-         Arrangement node -> IO (Arrangement node, Integer, Presentation doc node)
-fixed fontMetricsRef focus (pres :: Presentation doc node) screenSize oldArrangement = f --fixit
- where f :: IO (Arrangement node, Integer, Presentation doc node) -- doc and node are scoped type variables
+fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Int ->
+         Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
+fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldArrangement = f --fixit
+ where f :: IO (Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
        f = 
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (white, white, black, black)
             ; let defFont = defaultFont 
@@ -51,9 +51,9 @@ fixed fontMetricsRef focus (pres :: Presentation doc node) screenSize oldArrange
                                                defFont 
                                                (error "font computation depends on font metrics")
                                                defLineColor
-                                               Nothing  -- mouseDown : Maybe UpdateDoc
+                                               Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                oldArrangement
-                                               []       -- popupMenu : [String, UpdateDoc] 
+                                               []       -- popupMenu : [String, (UpdateDoc doc clip)] 
                                                screenSize 
                                                defTextColor
                                                

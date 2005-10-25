@@ -10,16 +10,16 @@ import Data.FiniteMap
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
-data PresentationLevel doc node = PresentationLevel (Presentation doc node) (PresentationLS doc node) deriving Show
+data PresentationLevel doc node clip = PresentationLevel (Presentation doc node clip) (PresentationLS doc node clip) deriving Show
 
-type PresentationLS doc node = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node)
+type PresentationLS doc node clip = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip)
 
 type Layout = (Int, Int)
 
 type LayoutMap = FiniteMap IDP Layout   -- Layout information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
-type DeletedTokenMap doc node = FiniteMap IDP (Presentation doc node)    -- Not used now. Maps deleted tokens to their successors
+type DeletedTokenMap doc node clip = FiniteMap IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
 
 instance (Show a, Show b) => Show (FiniteMap a b) where
  show fm = "{FiniteMap}" -- ++show (fmToList fm)
@@ -28,14 +28,14 @@ instance (Show a, Show b) => Show (FiniteMap a b) where
 initLayout :: LayoutMap
 initLayout = listToFM [(IDP (-1), (0,1))]
 
-data EditPresentation' doc node =
-    SetPres' (PresentationLevel doc node)
+data EditPresentation' doc node clip =
+    SetPres' (PresentationLevel doc node clip)
   | SkipPres' Int deriving Show
 
-data EditPresentation documentLevel doc node =
+data EditPresentation documentLevel doc node clip =
     SkipPres Int
   | SetFocusPres FocusPres
-  | SetPres (PresentationLevel doc node)
+  | SetPres (PresentationLevel doc node clip)
   | InitPres
   | ClosePres
 --  | MouseDownPres PathPres Modifiers Int
@@ -61,29 +61,29 @@ data EditPresentation documentLevel doc node =
 
 -- Presentation is Xprez with ID's
 
-data Presentation doc node = EmptyP !IDP
+data Presentation doc node clip = EmptyP !IDP
            | StringP !IDP !String
            | ImageP !IDP !String
            | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
-           | RowP !IDP !Int ![ (Presentation doc node) ]    -- vRefNr 
-           | ColP !IDP !Int ![ (Presentation doc node) ]    -- hRefNr
-           | OverlayP !IDP ![ (Presentation doc node) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc) !(Presentation doc node)         -- do these last two have ids?
-           | StructuralP !IDP !(Presentation doc node)       -- IDP?
-           | ParsingP !IDP !(Presentation doc node)         -- IDP?
-           | LocatorP node !(Presentation doc node) -- deriving Show -- do we want a ! for location  ? 
-{-         | Matrix [[ (Presentation doc node) ]]       -- Stream is not a list because tree is easier in presentation.
-           | Formatter [ (Presentation doc node) ]
-           | Alternative [ (Presentation doc node) ]
+           | RowP !IDP !Int ![ (Presentation doc node clip) ]    -- vRefNr 
+           | ColP !IDP !Int ![ (Presentation doc node clip) ]    -- hRefNr
+           | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
+           | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
+           | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
+           | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
+           | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
+{-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
+           | Formatter [ (Presentation doc node clip) ]
+           | Alternative [ (Presentation doc node clip) ]
 -} -- are the !'s in the right place like this?
-           | ArrangedP -- (Presentation doc node)     -- experimental for incrementality.
+           | ArrangedP -- (Presentation doc node clip)     -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show (Presentation doc node) where
+instance Show (Presentation doc node clip) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (ImageP id str)       = "{"++show id++":Image "++str++"}"
@@ -144,10 +144,10 @@ presentation is as big as the presentation, it will always get the focus in that
 
 
 -- lineWidth should be an attribute here
-data Inherited doc = Inh { font :: Font
+data Inherited doc clip = Inh { font :: Font
                      , textColor :: Color, lineColor :: Color, fillColor, backgroundColor :: Color
-                     , mouseDown :: Maybe (UpdateDoc doc)
-                     , popupMenuItems :: [ PopupMenuItem doc ]
+                     , mouseDown :: Maybe (UpdateDoc doc clip)
+                     , popupMenuItems :: [ PopupMenuItem doc clip ]
 		     , assignedWidth, assignedHeight :: Int
 		     , assignedHRef, assignedVRef :: Int} deriving Show
 data Synthesized = Syn { hRef, vRef, minWidth, minHeight :: Int
@@ -156,7 +156,7 @@ data Synthesized = Syn { hRef, vRef, minWidth, minHeight :: Int
 		       , finalHRef, finalVRef :: Int
 		       } deriving Show
 
-type AttrRule doc = (Inherited doc, Synthesized) -> (Inherited doc, Synthesized)
+type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc clip, Synthesized)
 
 {-
 (EmptyP id)           =
@@ -195,8 +195,8 @@ emptyAttrs = (Inh defaultFont black black black black Nothing [] 0 0 0 0, Syn 0 
 instance Show (a->b)  -- if a Show for Presentation is defined, this instance is no longer necessary
   where show f = "function"
 
-type UpdateDoc doc = DocumentLevel doc -> DocumentLevel doc
-type PopupMenuItem doc = (String, UpdateDoc doc)
+type UpdateDoc doc clip = DocumentLevel doc clip -> DocumentLevel doc clip
+type PopupMenuItem doc clip = (String, UpdateDoc doc clip)
 
 
 data PathPres = PathP [Int] Int 

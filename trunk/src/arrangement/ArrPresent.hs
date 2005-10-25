@@ -18,9 +18,9 @@ presentIO state high low editHigh =
 -- SkipLay' 0: layout has been edited dt contains the correct diffs
 
 -- on a skipLay, the local arr state may have changed, so rearrange
-arrange :: Show node => LocalStateArr -> LayoutLevel doc node -> ArrangementLevel doc node ->
-           EditLayout' doc node ->
-           IO (EditArrangement' doc node, LocalStateArr, LayoutLevel doc node)
+arrange :: Show node => LocalStateArr -> LayoutLevel doc node clip -> ArrangementLevel doc node clip ->
+           EditLayout' doc node clip ->
+           IO (EditArrangement' doc node clip, LocalStateArr, LayoutLevel doc node clip)
 arrange state layLvl@(LayoutLevel pres focus dt) arrLvl@(ArrangementLevel oldArrangement _ _) (SkipLay' 0) =
  do { arr' <- arrangePresentation state focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
     ; return (SetArr' (ArrangementLevel arr' (focusAFromFocusP focus pres) pres), state, layLvl)

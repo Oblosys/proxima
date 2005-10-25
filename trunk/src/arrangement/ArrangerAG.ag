@@ -84,9 +84,9 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root doc node = Root (Presentation doc node)
+data Root doc node clip = Root (Presentation doc node clip)
 
-type PresentationList doc node = [Presentation doc node]
+type PresentationList doc node clip = [Presentation doc node clip]
                       
 -- We don't want AG to generate the Presentation data types, so data type generation is turned off.
 -- However, we do need Root and PresentationList
@@ -130,7 +130,7 @@ TYPE PresentationList = [Presentation]
 
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
             focus : FocusPres
-            mouseDown : {Maybe UpdateDoc}
+            mouseDown : {Maybe (UpdateDoc doc clip)}
             popupMenuItems : {[ PopupMenuItem ]}
             screenWidth : Int  
           || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : {Arrangement node} ]
@@ -147,7 +147,7 @@ SEM Root
 -- Optimize: maybe we only want to update the attrs that are set by the with rule? Or won't that improve much?
 
 SEM Presentation [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
-            mouseDown : {Maybe UpdateDoc}
+            mouseDown : {Maybe (UpdateDoc doc clip)}
             popupMenuItems : {[ PopupMenuItem ]}
             | | ]
   | WithP
@@ -186,7 +186,7 @@ SEM Presentation [ font : Font textColor, lineColor, fillColor, backgroundColor 
 -- rest is taken care of by copy rule
 
 ATTR PresentationList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
-                 mouseDown : {Maybe UpdateDoc} popupMenuItems : {[ PopupMenuItem ]} | | ]
+                 mouseDown : {Maybe (UpdateDoc doc clip)} popupMenuItems : {[ PopupMenuItem ]} | | ]
 
 
 

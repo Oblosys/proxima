@@ -1,6 +1,7 @@
-module DocumentEdit (module DocumentEdit, module DocumentEdit_Generated) where
+module DocumentEdit where
 
 
+-- TODO: DocumentEdit_Generated was also exported
 {-
 
 Defines document edit (structure edit) functions
@@ -135,26 +136,26 @@ navigateRightD pd              _ = pd
 
 
 
-editCopyD :: DocumentLevel Document -> DocumentLevel Document
+editCopyD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
 editCopyD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editCopyD (DocumentLevel doc pd@(PathD pth) clip) = DocumentLevel doc pd (selectD pth doc)
 
-editCutD :: DocumentLevel Document -> DocumentLevel Document
+editCutD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
 editCutD  (DocumentLevel doc NoPathD clip)           = DocumentLevel doc NoPathD clip
 editCutD  (DocumentLevel doc pd@(PathD pth) clip)    = let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' (selectD pth doc)
 
-editDeleteD :: DocumentLevel Document -> DocumentLevel Document
+editDeleteD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
 editDeleteD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editDeleteD (DocumentLevel doc pd@(PathD pth) clip) =  let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' clip
 
-editPasteD :: DocumentLevel Document -> DocumentLevel Document
+editPasteD :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
 -- menuD is probably not a good name
-menuD :: PathDoc -> Document -> [ (String, DocumentLevel doc -> DocumentLevel doc) ]
+menuD :: PathDoc -> Document -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
 menuD NoPathD _              = []
 {-
 menuD path@(PathD p) d =
@@ -203,7 +204,7 @@ test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing Docume
           ; edit (DocumentLevel sample NoPathD Clip_Nothing)
           }
 
-edit :: DocumentLevel Document -> IO ()
+edit :: DocumentLevel Document ClipDoc -> IO ()
 edit doclvl@(DocumentLevel doc path clip) =
  do { putStrLn $ "\n\ndoc  "++ show doc
     ; putStrLn $ "\npath "++ show path ++ case path of NoPathD   -> ""
@@ -227,7 +228,7 @@ edit doclvl@(DocumentLevel doc path clip) =
     ; if c /= 'q' then edit doclvl' else return ()
     }
     
-insertElt :: DocumentLevel Document -> Int -> IO (DocumentLevel Document, String)
+insertElt :: DocumentLevel Document ClipDoc -> Int -> IO (DocumentLevel Document ClipDoc, String)
 insertElt doclvl@(DocumentLevel doc path clp) i =
  do { let menu = menuD path doc
     ; putStrLn $ concat $ intersperse " | " $

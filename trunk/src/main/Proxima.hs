@@ -1,4 +1,4 @@
-module Main where
+module Proxima where
 
 import IOExts
 import System
@@ -8,11 +8,10 @@ import Architecture
 import GUI
 
 import CommonTypes
+import DocTypes
 import DocUtils -- for redirect
 
 import PresPresent
-import DocTypes
-import DocTypes_Generated
 import EnrTypes
 import Graphics.UI.WX.Types hiding (Size)
 import PresTypes -- temporarily
@@ -22,18 +21,19 @@ import ArrTypes -- temporarily
 import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
-import ProxParser -- for debugging on command line and for initMap
-import PresentationAG
+
+import EvalLayerTypes (EvaluationSheet, ReductionSheet)
+import PresLayerTypes (PresentationSheet, ParseSheet)
+import LayLayerTypes (ScannerSheet)
 
 
 import PresentationParsing
 import Layout hiding (combine)
-import Scanner
 import ArrUtils
 import EvalLayerTypes (LayerStateEval (..))
 
-tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
-          in  ParsePres toks
+--tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
+--          in  ParsePres toks
 
 
 
@@ -47,32 +47,40 @@ tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . S
 
 -- for profiling: use main' instead of main, and use alternative 'queryFont' in FontLib
 
-gain = main -- when typing during compilation GHCI replaces the first command line char by 'g'
 
 
--- inital system local state in Main is not nice
-main =                         -- system (layer)local state,  initial higher level value
+-- initial system local state in Main is not nice
+
+{-
+proxima :: PresentationSheet doc enr node -> ParseSheet doc enr node ->
+           ScannerSheet doc node ->
+           DocumentLevel doc clip -> EnrichedDocLevel enr ->
+           IO ()
+-}
+proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
+        initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
     ; let layers = 
-            proximaLayers sem_EnrichedDoc parsePres tokenize -- sheet parameters
-
-                          (LayerStateEval, DocumentLevel HoleDocument NoPathD Clip_Nothing)   
-                          ((),     EnrichedDocLevel HoleEnrichedDoc NoPathD)   
+            proximaLayers evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
+                          (LayerStateEval, initDoc)   
+                          ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], emptyFM))   
                           (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
                           ((),             ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
-                               -- initial Rendering is given to startGUI.
+                          -- system (layer)local state,  initial higher level value
+                        
+                          -- initial Rendering is given to startGUI.
                                
                                -- maybe better to do init stuff at handling of Init.. edit command in translate modules
     ; let TransStep translate = layers
-                               
-                                    
+    ; let initEvent = InitRen
+{-                                    
     ; args <- getArgs
     ; let initEvent = case args of 
                         []      -> InitRen
                         [fName] -> OpenFileRen fName
                         _       -> InitRen -- putStrLn $ "Usage: Proxima [filename]"
-     
+-}     
     
     ; stepRf <- newIORef translate
     

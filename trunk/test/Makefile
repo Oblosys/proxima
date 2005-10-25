@@ -10,7 +10,8 @@
 # TODO:
 # add platform dependent stuff (configure?)
 # add strip
-# TODO: on normal make, generator is not rebuilt after sources have been edited (only on make generate)
+# TODO: on normal make, generator is not rebuilt after sources have been edited (only on make generate) May have something to do with fact that generation affects multiple files, whereas only one dependency (PresentationAG_Generated) is explicit in makeFile
+
 # fix make clean
 
 # HC
@@ -26,11 +27,14 @@
 # remove $proxima\proxima\src\presentation\PresTypes.hs:26-27 instance Show FiniteMap
 # remove $proxima\Top\src\Top\Solvers\SimpleSubst.hs:20-21 instance Show SimpleState
 
+# fix generation dir (refers to ../../editor now)
+# fix presentationAG dir  (refers to ../../editor/src now)
 default: all
 all: proxima
 
 .PHONY : default proxima
 
+PROXIMADIR = ../../proxima
 
 PROXIMATESTDIR = $(PROXIMADIR)/test
 EXE            = 
@@ -75,7 +79,6 @@ depend :
 
 # Proxima directories
 
-PROXIMADIR = ../../proxima
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
 ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
 COMMONDIR       = $(PROXIMADIR)/src/common
@@ -425,9 +428,13 @@ $(GEN): $(GENERATOROBJS)
 # Generation 
 generate : $(PRESENTATIONDIR)/PresentationAG_Generated.hs
 
-$(PRESENTATIONDIR)/PresentationAG_Generated.hs : $(GEN) $(GENERATORDIR)/DocumentType.hs
-	$(GEN) $(PROXIMADIR)/src $(GENERATORDIR)/DocumentType.hs
-	
+$(PRESENTATIONDIR)/PresentationAG_Generated.hs : $(GEN) ../../editor/src/DocumentType.hs
+	$(GEN) ../../editor/src ../../editor/src/DocumentType.hs
+
+#$(PRESENTATIONDIR)/PresentationAG_Generated.hs : $(GEN) $(GENERATORDIR)/DocumentType.hs
+#	$(GEN) $(PROXIMADIR)/src $(GENERATORDIR)/DocumentType.hs
+
+
 # The AG compiler
 # no dependencies, uuagc is assumed not to be modified
 $(AGC): 
@@ -437,20 +444,20 @@ $(AGC):
 # The presentation AG
 
 # target for only compiling presentationAG, useful when working with GHCi
-presenter: $(PRESENTATIONDIR)/PresentationAG.hs
+presenter: ../../editor/src/PresentationAG.hs
 	
 # TODO: make dependencies easy to see and to maintain (important for editor builder)
 
-$(PRESENTATIONDIR)/PresentationAG.hs : $(AGC) \
-	$(PRESENTATIONDIR)/PresentationAG.ag \
-	$(PRESENTATIONDIR)/PresentationAG_Generated.ag \
-	$(PRESENTATIONDIR)/InvPresentation.ag \
-	$(PRESENTATIONDIR)/LambdaReduce.ag \
+../../editor/src/PresentationAG.hs : $(AGC) \
+	../../editor/src/PresentationAG.ag \
+	../../editor/src/PresentationAG_Generated.ag \
+	../../editor/src/InvPresentation.ag \
+	../../editor/src/LambdaReduce.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	$(AGC) -o $(PRESENTATIONDIR)/PresentationAG.hs \
+	$(AGC) -o ../../editor/src/PresentationAG.hs \
 	-cfmspw --self --module=PresentationAG \
-	$(PRESENTATIONDIR)/PresentationAG.ag -P $(PRESENTATIONDIR)
+	../../editor/src/PresentationAG.ag -P ../../editor/src
 
 # -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 

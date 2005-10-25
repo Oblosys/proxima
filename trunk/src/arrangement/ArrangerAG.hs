@@ -81,9 +81,9 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root doc node = Root (Presentation doc node)
+data Root doc node clip = Root (Presentation doc node clip)
 
-type PresentationList doc node = [Presentation doc node]
+type PresentationList doc node clip = [Presentation doc node clip]
                       
 -- We don't want AG to generate the Presentation data types, so data type generation is turned off.
 -- However, we do need Root and PresentationList
@@ -99,7 +99,7 @@ type PresentationList doc node = [Presentation doc node]
       font                 : Font
       fontMetrics          : FontMetrics
       lineColor            : Color
-      mouseDown            : Maybe UpdateDoc
+      mouseDown            : Maybe (UpdateDoc doc clip)
       oldArr               : Arrangement node
       popupMenuItems       : [ PopupMenuItem ]
       textColor            : Color
@@ -1982,7 +1982,7 @@ sem_Presentation_WithP (attrRule_) (child_) =
       font                 : Font
       fontMetrics          : FontMetrics
       lineColor            : Color
-      mouseDown            : Maybe UpdateDoc
+      mouseDown            : Maybe (UpdateDoc doc clip)
       oldArrList           : [Arrangement node]
       popupMenuItems       : [ PopupMenuItem ]
       textColor            : Color
@@ -2248,7 +2248,7 @@ sem_PresentationList_Nil  =
       font                 : Font
       fontMetrics          : FontMetrics
       lineColor            : Color
-      mouseDown            : Maybe UpdateDoc
+      mouseDown            : Maybe (UpdateDoc doc clip)
       oldArr               : Arrangement node
       popupMenuItems       : [ PopupMenuItem ]
       screenWidth          : Int
