@@ -46,8 +46,6 @@ PROXIMADIR = ../../proxima
 # when changing this, also modify the path encoded in the sed script of the 'objects' target
 
 PROXIMABINDIR = $(PROXIMADIR)/bin
-EXE            = 
-MAIN           = proxima$(EXE)
 
 
 
