@@ -63,6 +63,7 @@ pMaybe parser = Just <$> parser `opt` Nothing
 pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
 
 
+-- TODO: handle parse error in parsing presentation correctly. (use parseErr?)
 
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
