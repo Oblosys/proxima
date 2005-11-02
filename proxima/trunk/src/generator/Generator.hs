@@ -53,6 +53,7 @@ generateFiles srcPath fname
 -- make this function more clear
 generate filename func parsedFile
      = do includeText <- readFile filename 
+          seq (length includeText) $ return ()
           putStr $ "Generating "++filename++"..."  
           let includeTextLines = lines includeText
           if  elem defaultLimit includeTextLines
