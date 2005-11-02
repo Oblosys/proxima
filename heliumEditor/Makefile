@@ -20,6 +20,7 @@ all: $(MAIN)
 
 
 PROXIMADIR = ../proxima
+PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 GENERATOR = $(PROXIMABINDIR)/generate
 
@@ -102,10 +103,11 @@ OBJS = $(PROXIMAOBJS) $(EDITOROBJS) $(HELIUMOBJS)
 
 # Generation 
 
-generate : src/DocTypes_Generated.hs
+generate : src/DocTypes_Generated.hs 
+	cd $(PROXIMASRCDIR); make generator
 
 src/DocTypes_Generated.hs : src/DocumentType.hs
-	cd $(PROXIMABINDIR); make generator
+	cd $(PROXIMASRCDIR); make generator
 	$(GENERATOR) src src/DocumentType.hs
 
 
@@ -122,7 +124,7 @@ $(MAIN): $(EDITOROBJS)
 	@echo "****************************************************"
 	@echo "  Proxima: the Proxima generic editor"
 	@echo "****************************************************"
-	cd $(PROXIMABINDIR); make proxima
+	cd $(PROXIMASRCDIR); make proxima
 	$(HC) -o $(MAIN) $(HC_OPTS) $(OBJS)
 
 	
