@@ -54,7 +54,7 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 PROXIMAOBJSFILE = $(PROXIMABINDIR)/proximaObjs.txt
 
 HC	= /usr/local/bin/ghc
-HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
+HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -package lang \
 		-package wx -package util -package net -package data -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
 #		-ignore-package network-1.0
@@ -168,7 +168,6 @@ RENDERINGSRCS = \
 # TODO: order is important???? moving BinaryTrees below CharParser causes error
 # also includes the uu lib sources
 GENERATORSRCS = \
-	../../uust/lib/util/UU/Util/BinaryTrees.hs \
 	../../uust/lib/scanner/UU/Scanner/Position.hs \
 	../../uust/lib/parsing/UU/Parsing/MachineInterface.hs \
 	../../uust/lib/parsing/UU/Parsing/Machine.hs \
@@ -176,6 +175,7 @@ GENERATORSRCS = \
 	../../uust/lib/parsing/UU/Parsing/Derived.hs \
 	../../uust/lib/parsing/UU/Parsing.hs \
 	../../uust/lib/parsing/UU/Parsing/CharParser.hs	\
+	../../uust/lib/util/UU/Util/BinaryTrees.hs \
 	$(GENERATORDIR)/GenCommon.hs \
 	$(GENERATORDIR)/GenParser.hs \
 	$(GENERATORDIR)/GenAG.hs \
@@ -198,18 +198,16 @@ $(PROXIMAOBJSFILE): Makefile
 # puts all objects in the text file $(PROXIMAOBJSFILE), while replacing
 # the path "../../proxima" by "$(PROXIMADIR)"
 
-# The main target
-proxima: $(OBJS)
-	@echo "****************************************************"
-	@echo "  Proxima: the Proxima generic editor"
-	@echo "****************************************************"
+
+# All proxima objects and the text file containing them
+proxima: $(OBJS) $(PROXIMAOBJSFILE)
 
 
 # The Generator
 generator : $(GEN)
 
 $(GEN): $(GENERATOROBJS)
-	ghc -package lang -fglasgow-exts \
+	$(HC) -fglasgow-exts \
 	-o $(PROXIMABINDIR)/generate -i$(GENERATORIFACES) $(GENERATOROBJS)
 
 
@@ -287,9 +285,8 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/generator/GenProxParser.o : ../../proxima/src/generator/GenCommon.hi
 ../../proxima/src/generator/GenDocUtils.o : ../../proxima/src/generator/GenDocUtils.hs
 ../../proxima/src/generator/GenDocUtils.o : ../../proxima/src/generator/GenCommon.hi
-../../uust/lib/parsing/UU/Parsing/MachineInterface.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hs
-../../uust/lib/scanner/UU/Scanner/Position.o : ../../uust/lib/scanner/UU/Scanner/Position.hs
 ../../uust/lib/util/UU/Util/BinaryTrees.o : ../../uust/lib/util/UU/Util/BinaryTrees.hs
+../../uust/lib/parsing/UU/Parsing/MachineInterface.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hs
 ../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/parsing/UU/Parsing/Machine.hs
 ../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/parsing/UU/Parsing/MachineInterface.hi
 ../../uust/lib/parsing/UU/Parsing/Machine.o : ../../uust/lib/util/UU/Util/BinaryTrees.hi
@@ -301,6 +298,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing.hs
 ../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing/Interface.hi
 ../../uust/lib/parsing/UU/Parsing.o : ../../uust/lib/parsing/UU/Parsing/Derived.hi
+../../uust/lib/scanner/UU/Scanner/Position.o : ../../uust/lib/scanner/UU/Scanner/Position.hs
 ../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/parsing/UU/Parsing/CharParser.hs
 ../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/scanner/UU/Scanner/Position.hi
 ../../uust/lib/parsing/UU/Parsing/CharParser.o : ../../uust/lib/parsing/UU/Parsing/Interface.hi
@@ -454,6 +452,8 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/rendering/RenUtils.o : ../../proxima/src/rendering/RenUtils.hs
 ../../proxima/src/rendering/RenUtils.o : ../../proxima/src/rendering/RenTypes.hi
 ../../proxima/src/rendering/RenUtils.o : ../../proxima/src/common/CommonTypes.hi
+../../proxima/src/arrangement/FontLib.o : ../../proxima/src/arrangement/FontLib.hs
+../../proxima/src/arrangement/FontLib.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/arrangement/ArrTypes.o : ../../proxima/src/arrangement/ArrTypes.hs
 ../../proxima/src/arrangement/ArrTypes.o : ../../proxima/src/presentation/PresTypes.hi
 ../../proxima/src/arrangement/ArrTypes.o : ../../proxima/src/evaluation/DocTypes.hi
@@ -475,8 +475,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/rendering/RenTranslate.o : ../../proxima/src/rendering/RenLayerUtils.hi
 ../../proxima/src/rendering/RenTranslate.o : ../../proxima/src/rendering/RenLayerTypes.hi
 ../../proxima/src/rendering/RenTranslate.o : ../../proxima/src/common/CommonTypes.hi
-../../proxima/src/arrangement/FontLib.o : ../../proxima/src/arrangement/FontLib.hs
-../../proxima/src/arrangement/FontLib.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/arrangement/ArrLayerTypes.o : ../../proxima/src/arrangement/ArrLayerTypes.hs
 ../../proxima/src/arrangement/ArrLayerTypes.o : ../../proxima/src/arrangement/FontLib.hi
 ../../proxima/src/arrangement/ArrLayerTypes.o : ../../proxima/src/arrangement/ArrTypes.hi
