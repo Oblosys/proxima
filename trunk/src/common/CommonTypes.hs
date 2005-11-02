@@ -14,7 +14,8 @@ import DebugLevels
 import Char
 import List
 import Data.FiniteMap
-import IOExts
+import Data.IORef
+import System.IO.Unsafe
 
 -- is not exported by all ...Types modules (like CommonUtils) because sometimes CommonTypes
 -- (and only CommonTypes) must be imported qualified due to name clashes with libraries.

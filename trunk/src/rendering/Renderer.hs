@@ -15,7 +15,7 @@ import GUI
 
 import Graphics.UI.WX hiding (Color) 
 import Graphics.UI.WXCore hiding (Color, Document) 
-import IOExts
+import System.IO.Unsafe
 
 -- import DocTypes_Generated -- RootDocNode
 -- import DocUtils_Generated -- hasPath Node

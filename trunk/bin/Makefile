@@ -55,7 +55,7 @@ PROXIMAOBJSFILE = $(PROXIMABINDIR)/proximaObjs.txt
 
 HC	= /usr/local/bin/ghc
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
-		-package lang -package wx -package util -package net -package data -package parsec\
+		-package wx -package util -package net -package data -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
 #		-ignore-package network-1.0
 

@@ -5,7 +5,7 @@ import CommonTypes
 import Array
 
 import Char
-import IOExts
+import Data.IORef
 
 import Graphics.UI.WX
 import Graphics.UI.WXCore hiding (Font)
@@ -129,3 +129,4 @@ baseLine fms f = let (h,b,ws) = metricsLookup f fms
 		       -- ,"required "++id++"_hRef =
 
                        -}
+                       

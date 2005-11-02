@@ -6,7 +6,7 @@ import ArrLayerUtils
 
 import ArrangerAG
 import FontLib
-import IOExts
+import Data.IORef
 
 arrangePresentation :: Show node => FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node)

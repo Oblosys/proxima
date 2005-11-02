@@ -1,6 +1,6 @@
 module Proxima where
-
-import IOExts
+ 
+import Data.IORef
 import System
 
 import Architecture

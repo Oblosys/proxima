@@ -10,7 +10,7 @@ import UU_Parsing hiding (Exp, parse, parseIO)
 import qualified UU_Parsing
 import Char
 
-import IOExts
+import Debug.Trace
 
 {-
 

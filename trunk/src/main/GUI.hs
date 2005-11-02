@@ -32,7 +32,6 @@ import CommonUtils
 
 import Char
 import IO
-import IOExts
 import Directory
 
 initialWindowSize :: Size

@@ -119,7 +119,8 @@ val
 where
 import Maybe
 --import PrelGHC
-import IOExts
+import System.IO.Unsafe
+import Debug.Trace
 
 btLookup :: BinSearchTree (a -> Ordering) (Maybe b) -> a -> Maybe b
 tab2tree :: Ord a => [(SymbolR a,b)] -> BinSearchTree (a -> Ordering) b

@@ -5,7 +5,7 @@ import RenLayerTypes
 import RenLayerUtils
 
 import Char
-import IOExts
+-- import IOExts
 
 translateIO state low high editLow = return $ interpret state low high editLow
 

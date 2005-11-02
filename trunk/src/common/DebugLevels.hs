@@ -6,7 +6,7 @@ module DebugLevels ( DebugLevel (..)
                    , debugLnIO
                    ) where
 
-import IOExts
+import Debug.Trace
 
 -- The debugLevels value is not exported, so a change on it does not lead to recompilation of all modules
 -- It doesn't work perfectly, GHC compiled modules are still recompiled when levels have changed.
