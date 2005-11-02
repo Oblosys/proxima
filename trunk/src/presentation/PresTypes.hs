@@ -21,8 +21,8 @@ type IDPCounter = Int                   -- Counter for generating new unique IDP
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
 type DeletedTokenMap doc node clip = FiniteMap IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
 
-instance (Show a, Show b) => Show (FiniteMap a b) where
- show fm = "{FiniteMap}" -- ++show (fmToList fm)
+--instance (Show a, Show b) => Show (FiniteMap a b) where
+-- show fm = "{FiniteMap}" -- ++show (fmToList fm)
  
 
 initLayout :: LayoutMap
