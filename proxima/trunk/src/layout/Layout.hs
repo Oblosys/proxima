@@ -104,8 +104,8 @@ onlyWhitespace lm id =
                              ++ [StringP NoIDP (replicate spaces ' ')]
 -}
 
---instance (Show a, Show b, Show c, Show d, Show e, Show f) => Show (a,b,c,d,e,f) where -- why isn't this a standard instance?
---  show (a,b,c,d,e,f) = "("++show a++","++show b++","++show c++","++show d++","++show e++","++show f++")"
+instance (Show a, Show b, Show c, Show d, Show e, Show f) => Show (a,b,c,d,e,f) where -- why isn't this a standard instance?
+  show (a,b,c,d,e,f) = "("++show a++","++show b++","++show c++","++show d++","++show e++","++show f++")"
 
 -- row and column mappings get lost in a parsing structure. What are the consequences? And can we do something
 -- about it?
