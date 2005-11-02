@@ -1,7 +1,5 @@
 imports
 {
-import IOExts
-
 import CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
