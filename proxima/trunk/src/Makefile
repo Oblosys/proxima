@@ -54,7 +54,7 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 PROXIMAOBJSFILE = $(PROXIMABINDIR)/proximaObjs.txt
 
 HC	= /c/apps/ghc/bin/ghc
-HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -package lang \
+HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
 		-package wx -package util -package net -package data -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
 #		-ignore-package network-1.0
@@ -218,25 +218,6 @@ $(AGC):
 	ghc --make -o $(AGC) ../../uust/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i../../uust/tools/ag:../../uust/lib/ddata:../../uust/lib/pretty:../../uust/lib/scanner:../../uust/lib/util:../../uust/lib/parsing
 
 
-# The presentation AG
-
-# target for only compiling presentationAG, useful when working with GHCi
-presenter: ../../editor/src/PresentationAG.hs
-	
-# TODO: make dependencies easy to see and to maintain (important for editor builder)
-
-../../editor/src/PresentationAG.hs : $(AGC) \
-	../../editor/src/PresentationAG.ag \
-	../../editor/src/PresentationAG_Generated.ag \
-	../../editor/src/InvPresentation.ag \
-	../../editor/src/LambdaReduce.ag \
-	
-	@echo "Compiling presentationAG.ag"
-	$(AGC) -o ../../editor/src/PresentationAG.hs \
-	-cfmspw --self --module=PresentationAG \
-	../../editor/src/PresentationAG.ag -P ../../editor/src
-
-# -m is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 
 
 arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
