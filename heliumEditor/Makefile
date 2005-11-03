@@ -62,7 +62,7 @@ IFACES = src:$(PROXIMAIFACES):$(HELIUMIFACES)
 	
 
 
-HC	= /usr/local/bin/ghc
+HC	= ghc
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
 		-package lang -package wx -package util -package net -package data -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
