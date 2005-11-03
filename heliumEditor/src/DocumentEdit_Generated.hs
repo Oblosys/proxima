@@ -7,8 +7,7 @@ import DocumentEdit
 import DocUtils
 import PresTypes
 
-import IOExts
-
+import Debug.Trace
 
 
 -- not entirely generated: hole is special for chessboard and pppresentation, because hole is initialized

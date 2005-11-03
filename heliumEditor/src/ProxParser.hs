@@ -10,7 +10,6 @@ import UU_Parsing hiding (Exp, parse, parseIO)
 
 import List hiding (delete)
 import Data.FiniteMap
-import IOExts
 
 
 import ProxParser_Generated

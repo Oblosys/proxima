@@ -12,7 +12,8 @@ import DocumentEdit
 import List
 import Data.FiniteMap
 
-import IOExts
+import Data.IORef
+import System.IO.Unsafe
 
 import qualified Chess
 --import EvaluateTypes                                   -- for OU demo

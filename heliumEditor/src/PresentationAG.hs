@@ -13,7 +13,8 @@ import DocumentEdit
 import List
 import Data.FiniteMap
 
-import IOExts
+import Data.IORef
+import System.IO.Unsafe
 
 import qualified Chess
 --import EvaluateTypes                                   -- for OU demo
@@ -508,7 +509,7 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 370, column 7)
+            -- "src/PresentationAG.ag"(line 371, column 7)
             (_lhsOpres@_) =
                 loc (AltNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
@@ -518,43 +519,43 @@ sem_Alt_Alt (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                           , _expIpres
                           , sep (mkIDP idP1_ _lhsIpIdC 1) ";"
                           ]
-            -- "src/PresentationAG.ag"(line 707, column 13)
+            -- "src/PresentationAG.ag"(line 708, column 13)
             (_lhsLength@_) =
                 length $ strFromIdent _identIself
-            -- "src/PresentationAG.ag"(line 706, column 13)
+            -- "src/PresentationAG.ag"(line 707, column 13)
             (_lhsOspaces@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 705, column 13)
+            -- "src/PresentationAG.ag"(line 706, column 13)
             (_lhsOnewlines@_) =
                 1
-            -- "src/PresentationAG.ag"(line 704, column 13)
+            -- "src/PresentationAG.ag"(line 705, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 703, column 13)
+            -- "src/PresentationAG.ag"(line 704, column 13)
             (_expOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 702, column 13)
+            -- "src/PresentationAG.ag"(line 703, column 13)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 701, column 13)
+            -- "src/PresentationAG.ag"(line 702, column 13)
             (_expOcol@_) =
                 _identIcol+ _lhsItotalMaxLHSLength - _lhsLength + 3
-            -- "src/PresentationAG.ag"(line 700, column 13)
+            -- "src/PresentationAG.ag"(line 701, column 13)
             (_identOspaces@_) =
                 _lhsIspaces
-            -- "src/PresentationAG.ag"(line 699, column 13)
+            -- "src/PresentationAG.ag"(line 700, column 13)
             (_identOnewlines@_) =
                 _lhsInewlines
-            -- "src/PresentationAG.ag"(line 698, column 13)
+            -- "src/PresentationAG.ag"(line 699, column 13)
             (_identOcol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 697, column 13)
+            -- "src/PresentationAG.ag"(line 698, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap [(idP0_, (0,_lhsItotalMaxLHSLength - _lhsLength+1)), (idP1_, (0,0))]
-            -- "src/PresentationAG.ag"(line 827, column 7)
+            -- "src/PresentationAG.ag"(line 828, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 1000, column 17)
+            -- "src/PresentationAG.ag"(line 1001, column 17)
             (_lhsOalt@_) =
                 (_identIstr, _expIval)
             -- "src/PresentationAG_Generated.ag"(line 340, column 9)
@@ -673,10 +674,10 @@ sem_Alt_HoleAlt  =
             _lhsOself :: (Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 709, column 9)
+            -- "src/PresentationAG.ag"(line 710, column 9)
             (_lhsOlhsLength@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1001, column 17)
+            -- "src/PresentationAG.ag"(line 1002, column 17)
             (_lhsOalt@_) =
                 ("XXXXXX", ErrVal)
             -- "src/PresentationAG_Generated.ag"(line 341, column 17)
@@ -746,10 +747,10 @@ sem_Alt_ParseErrAlt (node_) (presentation_) =
             _lhsOself :: (Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 711, column 9)
+            -- "src/PresentationAG.ag"(line 712, column 9)
             (_lhsOlhsLength@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1002, column 17)
+            -- "src/PresentationAG.ag"(line 1003, column 17)
             (_lhsOalt@_) =
                 ("XXXXXX", ErrVal)
             -- "src/PresentationAG_Generated.ag"(line 342, column 17)
@@ -1007,21 +1008,21 @@ sem_Board_Board (idD_) (r1_) (r2_) (r3_) (r4_) (r5_) (r6_) (r7_) (r8_) =
                 (r7_ (_r7OfocusD) (_r7OfocusedPiece) (_r7Oix) (_r7OpIdC) (_r7Opath) (_r7OpossibleMoves) (_r7OrowNr) (_r7OsqCol))
             ( _r8IfocusedPiece,_r8IpIdC,_r8Ipres,_r8IpresTree,_r8IpresXML,_r8IrowNr,_r8Iself,_r8IsqCol) =
                 (r8_ (_r8OfocusD) (_r8OfocusedPiece) (_r8Oix) (_r8OpIdC) (_r8Opath) (_r8OpossibleMoves) (_r8OrowNr) (_r8OsqCol))
-            -- "src/PresentationAG.ag"(line 1028, column 7)
+            -- "src/PresentationAG.ag"(line 1029, column 7)
             (_r1OfocusedPiece@_) =
                 Nothing
-            -- "src/PresentationAG.ag"(line 1025, column 7)
+            -- "src/PresentationAG.ag"(line 1026, column 7)
             (_possibleMoves@_) =
                 case _r8IfocusedPiece of
                   Just (square, (r,c)) -> Chess.computeMoves _self (r,c)
                   Nothing              -> []
-            -- "src/PresentationAG.ag"(line 1024, column 7)
+            -- "src/PresentationAG.ag"(line 1025, column 7)
             (_r1OsqCol@_) =
                 False
-            -- "src/PresentationAG.ag"(line 1023, column 7)
+            -- "src/PresentationAG.ag"(line 1024, column 7)
             (_r1OrowNr@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1021, column 7)
+            -- "src/PresentationAG.ag"(line 1022, column 7)
             (_lhsOpres@_) =
                 loc (BoardNode _self _lhsIpath) $ presentFocus _lhsIfocusD _lhsIpath $
                   structural $ colR 4 (reverse [_r1Ipres,_r2Ipres,_r3Ipres,_r4Ipres,_r5Ipres,_r6Ipres,_r7Ipres,_r8Ipres])
@@ -1529,16 +1530,16 @@ sem_BoardRow_BoardRow (idD_) (ca_) (cb_) (cc_) (cd_) (ce_) (cf_) (cg_) (ch_) =
                 (cg_ (_cgOcolNr) (_cgOfocusD) (_cgOfocusedPiece) (_cgOix) (_cgOpIdC) (_cgOpath) (_cgOpossibleMoves) (_cgOrowNr) (_cgOsqCol))
             ( _chIcolNr,_chIfocusedPiece,_chIpIdC,_chIpres,_chIpresTree,_chIpresXML,_chIself,_chIsqCol) =
                 (ch_ (_chOcolNr) (_chOfocusD) (_chOfocusedPiece) (_chOix) (_chOpIdC) (_chOpath) (_chOpossibleMoves) (_chOrowNr) (_chOsqCol))
-            -- "src/PresentationAG.ag"(line 1036, column 7)
+            -- "src/PresentationAG.ag"(line 1037, column 7)
             (_caOcolNr@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1035, column 7)
+            -- "src/PresentationAG.ag"(line 1036, column 7)
             (_lhsOrowNr@_) =
                 1 + _lhsIrowNr
-            -- "src/PresentationAG.ag"(line 1034, column 7)
+            -- "src/PresentationAG.ag"(line 1035, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1032, column 7)
+            -- "src/PresentationAG.ag"(line 1033, column 7)
             (_lhsOpres@_) =
                 loc (BoardRowNode _self _lhsIpath) $ presentFocus _lhsIfocusD _lhsIpath $
                 structural $  row' [_caIpres,_cbIpres,_ccIpres,_cdIpres,_ceIpres,_cfIpres,_cgIpres,_chIpres]
@@ -2009,16 +2010,16 @@ sem_BoardSquare_Bishop (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1056, column 7)
+            -- "src/PresentationAG.ag"(line 1057, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1055, column 7)
+            -- "src/PresentationAG.ag"(line 1056, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1054, column 7)
+            -- "src/PresentationAG.ag"(line 1055, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1052, column 7)
+            -- "src/PresentationAG.ag"(line 1053, column 7)
             (_lhsOpres@_) =
                 loc (BishopNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2069,13 +2070,13 @@ sem_BoardSquare_Empty  =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (BoardSquare)
             _lhsOsqCol :: (Bool)
-            -- "src/PresentationAG.ag"(line 1080, column 7)
+            -- "src/PresentationAG.ag"(line 1081, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1079, column 7)
+            -- "src/PresentationAG.ag"(line 1080, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1077, column 7)
+            -- "src/PresentationAG.ag"(line 1078, column 7)
             (_lhsOpres@_) =
                 loc (EmptyNode _self _lhsIpath) $
                   structural $ Chess.piece _self False _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2178,16 +2179,16 @@ sem_BoardSquare_King (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1044, column 7)
+            -- "src/PresentationAG.ag"(line 1045, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1043, column 7)
+            -- "src/PresentationAG.ag"(line 1044, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1042, column 7)
+            -- "src/PresentationAG.ag"(line 1043, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1040, column 7)
+            -- "src/PresentationAG.ag"(line 1041, column 7)
             (_lhsOpres@_) =
                 loc (KingNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2252,16 +2253,16 @@ sem_BoardSquare_Knight (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1062, column 7)
+            -- "src/PresentationAG.ag"(line 1063, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1061, column 7)
+            -- "src/PresentationAG.ag"(line 1062, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1060, column 7)
+            -- "src/PresentationAG.ag"(line 1061, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1058, column 7)
+            -- "src/PresentationAG.ag"(line 1059, column 7)
             (_lhsOpres@_) =
                 loc (KnightNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2375,16 +2376,16 @@ sem_BoardSquare_Pawn (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1075, column 7)
+            -- "src/PresentationAG.ag"(line 1076, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1074, column 7)
+            -- "src/PresentationAG.ag"(line 1075, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1073, column 7)
+            -- "src/PresentationAG.ag"(line 1074, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1071, column 7)
+            -- "src/PresentationAG.ag"(line 1072, column 7)
             (_lhsOpres@_) =
                 loc (PawnNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2449,16 +2450,16 @@ sem_BoardSquare_Queen (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1050, column 7)
+            -- "src/PresentationAG.ag"(line 1051, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1049, column 7)
+            -- "src/PresentationAG.ag"(line 1050, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1048, column 7)
+            -- "src/PresentationAG.ag"(line 1049, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1046, column 7)
+            -- "src/PresentationAG.ag"(line 1047, column 7)
             (_lhsOpres@_) =
                 loc (QueenNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2523,16 +2524,16 @@ sem_BoardSquare_Rook (idD_) (color_) =
             _colorOpath :: ([Int])
             ( _colorIbool,_colorIpIdC,_colorIpres,_colorIpresTree,_colorIpresXML,_colorIself) =
                 (color_ (_colorOfocusD) (_colorOix) (_colorOpIdC) (_colorOpath))
-            -- "src/PresentationAG.ag"(line 1068, column 7)
+            -- "src/PresentationAG.ag"(line 1069, column 7)
             (_lhsOfocusedPiece@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then Just (_self, (_lhsIcolNr,_lhsIrowNr)) else _lhsIfocusedPiece
-            -- "src/PresentationAG.ag"(line 1067, column 7)
+            -- "src/PresentationAG.ag"(line 1068, column 7)
             (_lhsOcolNr@_) =
                 1 + _lhsIcolNr
-            -- "src/PresentationAG.ag"(line 1066, column 7)
+            -- "src/PresentationAG.ag"(line 1067, column 7)
             (_lhsOsqCol@_) =
                 not _lhsIsqCol
-            -- "src/PresentationAG.ag"(line 1064, column 7)
+            -- "src/PresentationAG.ag"(line 1065, column 7)
             (_lhsOpres@_) =
                 loc (RookNode _self _lhsIpath) $
                   structural $ Chess.piece _self color_ _lhsIsqCol _lhsIrowNr _lhsIcolNr _lhsIpossibleMoves _lhsIfocusD _lhsIpath
@@ -2635,11 +2636,11 @@ sem_Bool__Bool_ (idd_) (bool_) =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Bool_)
-            -- "src/PresentationAG.ag"(line 1478, column 7)
+            -- "src/PresentationAG.ag"(line 1479, column 7)
             (_lhsOpres@_) =
                 loc (Bool_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text $ show bool_, text ""]
-            -- "src/PresentationAG.ag"(line 1482, column 14)
+            -- "src/PresentationAG.ag"(line 1483, column 14)
             (_lhsObool@_) =
                 bool_
             -- "src/PresentationAG_Generated.ag"(line 788, column 7)
@@ -2670,7 +2671,7 @@ sem_Bool__HoleBool_  =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Bool_)
-            -- "src/PresentationAG.ag"(line 1484, column 13)
+            -- "src/PresentationAG.ag"(line 1485, column 13)
             (_lhsObool@_) =
                 False
             -- "src/PresentationAG_Generated.ag"(line 493, column 19)
@@ -2706,7 +2707,7 @@ sem_Bool__ParseErrBool_ (node_) (presentation_) =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Bool_)
-            -- "src/PresentationAG.ag"(line 1484, column 13)
+            -- "src/PresentationAG.ag"(line 1485, column 13)
             (_lhsObool@_) =
                 False
             -- "src/PresentationAG_Generated.ag"(line 494, column 19)
@@ -2929,10 +2930,10 @@ sem_ConsList_Alt_Cons_Alt (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtotalMaxLHSLength) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIalts,_tailIcol,_tailIlayoutMap,_tailImaxLHSLength,_tailInewlines,_tailIpIdC,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtotalMaxLHSLength) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 721, column 9)
+            -- "src/PresentationAG.ag"(line 722, column 9)
             (_lhsOmaxLHSLength@_) =
                 _headIlhsLength `max` _tailImaxLHSLength
-            -- "src/PresentationAG.ag"(line 996, column 18)
+            -- "src/PresentationAG.ag"(line 997, column 18)
             (_lhsOalts@_) =
                 _headIalt : _tailIalts
             -- "src/PresentationAG_Generated.ag"(line 546, column 18)
@@ -3102,10 +3103,10 @@ sem_ConsList_Alt_Nil_Alt  =
             _lhsOself :: (ConsList_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 723, column 9)
+            -- "src/PresentationAG.ag"(line 724, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "src/PresentationAG.ag"(line 997, column 18)
+            -- "src/PresentationAG.ag"(line 998, column 18)
             (_lhsOalts@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 547, column 18)
@@ -3347,13 +3348,13 @@ sem_ConsList_Decl_Cons_Decl (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIcol,_tailIdcls,_tailIdeclaredVars,_tailIidsPres,_tailIlayoutMap,_tailInewlines,_tailIpIdC,_tailIparseErrs,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 74, column 19)
+            -- "src/PresentationAG.ag"(line 75, column 19)
             (_lhsOparseErrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 926, column 19)
+            -- "src/PresentationAG.ag"(line 927, column 19)
             (_lhsOdcls@_) =
                 _headIdcl : _tailIdcls
-            -- "src/PresentationAG.ag"(line 1096, column 19)
+            -- "src/PresentationAG.ag"(line 1097, column 19)
             (_lhsOidsPres@_) =
                 row' [ _headIidsPres, text " ", _tailIidsPres ]
             -- "src/PresentationAG_Generated.ag"(line 520, column 18)
@@ -3521,13 +3522,13 @@ sem_ConsList_Decl_Nil_Decl  =
             _lhsOself :: (ConsList_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 75, column 19)
+            -- "src/PresentationAG.ag"(line 76, column 19)
             (_lhsOparseErrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 927, column 19)
+            -- "src/PresentationAG.ag"(line 928, column 19)
             (_lhsOdcls@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1097, column 19)
+            -- "src/PresentationAG.ag"(line 1098, column 19)
             (_lhsOidsPres@_) =
                 empty
             -- "src/PresentationAG_Generated.ag"(line 521, column 19)
@@ -3760,10 +3761,10 @@ sem_ConsList_Exp_Cons_Exp (head_) (tail_) =
                 (head_ (_headOcol) (_headOenv) (_headOerrs) (_headOfocusD) (_headOix) (_headOlayoutMap) (_headOlevel) (_headOnewlines) (_headOpIdC) (_headOpath) (_headOranges) (_headOspaces) (_headOtopLevelEnv) (_headOtypeEnv) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIcol,_tailIlayoutMap,_tailInewlines,_tailIpIdC,_tailIpress,_tailIpressTree,_tailIpressXML,_tailIself,_tailIspaces,_tailIvals,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOcol) (_tailOenv) (_tailOerrs) (_tailOfocusD) (_tailOix) (_tailOlayoutMap) (_tailOlevel) (_tailOnewlines) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOspaces) (_tailOtopLevelEnv) (_tailOtypeEnv) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 693, column 7)
+            -- "src/PresentationAG.ag"(line 694, column 7)
             (_tailOcol@_) =
                 _headIcol + 2
-            -- "src/PresentationAG.ag"(line 986, column 18)
+            -- "src/PresentationAG.ag"(line 987, column 18)
             (_lhsOvals@_) =
                 _headIval : _tailIvals
             -- "src/PresentationAG_Generated.ag"(line 572, column 18)
@@ -3922,7 +3923,7 @@ sem_ConsList_Exp_Nil_Exp  =
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 987, column 18)
+            -- "src/PresentationAG.ag"(line 988, column 18)
             (_lhsOvals@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 573, column 18)
@@ -4084,13 +4085,13 @@ sem_ConsList_Item_Cons_Item (head_) (tail_) =
                 (head_ (_headOfocusD) (_headOix) (_headOlistType) (_headOpIdC) (_headOpath) (_headOranges) (_headOtypeLoc) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIpIdC,_tailIpress,_tailIpress2,_tailIpressTree,_tailIpressXML,_tailIself,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOfocusD) (_tailOix) (_tailOlistType) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOtypeLoc) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1402, column 15)
+            -- "src/PresentationAG.ag"(line 1403, column 15)
             (_headOtypeLoc@_) =
                 _lhsItypeLoc
-            -- "src/PresentationAG.ag"(line 1401, column 15)
+            -- "src/PresentationAG.ag"(line 1402, column 15)
             (_headOlistType@_) =
                 _lhsIlistType
-            -- "src/PresentationAG.ag"(line 1400, column 15)
+            -- "src/PresentationAG.ag"(line 1401, column 15)
             (_lhsOpress2@_) =
                 _headIpres2 : _tailIpress2
             -- "src/PresentationAG_Generated.ag"(line 624, column 18)
@@ -4181,7 +4182,7 @@ sem_ConsList_Item_Nil_Item  =
             _lhsOpressXML :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (ConsList_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1403, column 15)
+            -- "src/PresentationAG.ag"(line 1404, column 15)
             (_lhsOpress2@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 625, column 19)
@@ -4312,7 +4313,7 @@ sem_ConsList_Slide_Cons_Slide (head_) (tail_) =
                 (head_ (_headOfocusD) (_headOix) (_headOpIdC) (_headOpath) (_headOranges) (_headOvarsInScope) (_headOvarsInScopeAtFocus))
             ( _tailIpIdC,_tailIpress,_tailIpress2,_tailIpressTree,_tailIpressXML,_tailIself,_tailIvarsInScopeAtFocus) =
                 (tail_ (_tailOfocusD) (_tailOix) (_tailOpIdC) (_tailOpath) (_tailOranges) (_tailOvarsInScope) (_tailOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1395, column 16)
+            -- "src/PresentationAG.ag"(line 1396, column 16)
             (_lhsOpress2@_) =
                 _headIpres2 : _tailIpress2
             -- "src/PresentationAG_Generated.ag"(line 598, column 18)
@@ -4395,7 +4396,7 @@ sem_ConsList_Slide_Nil_Slide  =
             _lhsOpressXML :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (ConsList_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1396, column 16)
+            -- "src/PresentationAG.ag"(line 1397, column 16)
             (_lhsOpress2@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 599, column 20)
@@ -4600,17 +4601,17 @@ sem_Decl_BoardDecl (idD_) (idP0_) (idP1_) (board_) =
             _boardOpath :: ([Int])
             ( _boardIpIdC,_boardIpres,_boardIpresTree,_boardIpresXML,_boardIself) =
                 (board_ (_boardOfocusD) (_boardOix) (_boardOpIdC) (_boardOpath))
-            -- "src/PresentationAG.ag"(line 744, column 18)
+            -- "src/PresentationAG.ag"(line 745, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "src/PresentationAG.ag"(line 931, column 19)
+            -- "src/PresentationAG.ag"(line 932, column 19)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "src/PresentationAG.ag"(line 1015, column 7)
+            -- "src/PresentationAG.ag"(line 1016, column 7)
             (_lhsOpres@_) =
                 loc (DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text' (mkIDP idP0_ _lhsIpIdC 0) "Chess: ", _boardIpres]
-            -- "src/PresentationAG.ag"(line 1102, column 24)
+            -- "src/PresentationAG.ag"(line 1103, column 24)
             (_lhsOidsPres@_) =
                 loc (BoardDeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "board;" ]
@@ -4787,7 +4788,7 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 193, column 7)
+            -- "src/PresentationAG.ag"(line 194, column 7)
             (_lhsOpres@_) =
                 loc (DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
@@ -4831,37 +4832,37 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                                                                       then ( "Disable Auto Layout", toggleAutoLayout _lhsIpath _self)
                                                                       else ( "Enable Auto Layout", toggleAutoLayout _lhsIpath _self) ]
                                                                else []
-            -- "src/PresentationAG.ag"(line 569, column 13)
+            -- "src/PresentationAG.ag"(line 570, column 13)
             (_lhsOspaces@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 568, column 13)
+            -- "src/PresentationAG.ag"(line 569, column 13)
             (_lhsOnewlines@_) =
                 1
-            -- "src/PresentationAG.ag"(line 567, column 13)
+            -- "src/PresentationAG.ag"(line 568, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 566, column 13)
+            -- "src/PresentationAG.ag"(line 567, column 13)
             (_expOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 565, column 13)
+            -- "src/PresentationAG.ag"(line 566, column 13)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 564, column 13)
+            -- "src/PresentationAG.ag"(line 565, column 13)
             (_expOcol@_) =
                 _identIcol+2+1
-            -- "src/PresentationAG.ag"(line 563, column 13)
+            -- "src/PresentationAG.ag"(line 564, column 13)
             (_identOspaces@_) =
                 _lhsIspaces
-            -- "src/PresentationAG.ag"(line 562, column 13)
+            -- "src/PresentationAG.ag"(line 563, column 13)
             (_identOnewlines@_) =
                 _lhsInewlines
-            -- "src/PresentationAG.ag"(line 561, column 13)
+            -- "src/PresentationAG.ag"(line 562, column 13)
             (_identOcol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 560, column 13)
+            -- "src/PresentationAG.ag"(line 561, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap [(idP0_, (0,1)), (idP1_, (0,0))]
-            -- "src/PresentationAG.ag"(line 551, column 13)
+            -- "src/PresentationAG.ag"(line 552, column 13)
             (_lhsOlayoutMap@_) =
                 let lm = if _autoLayoutIbool || _lhsIlevel /= 0 then _expIlayoutMap else _lhsIlayoutMap
                 in if idP2_ /= NoIDP || _lhsIlevel /= 0 then lm
@@ -4869,21 +4870,21 @@ sem_Decl_Decl (idD_) (idP0_) (idP1_) (idP2_) (idP3_) (expanded_) (autoLayout_) (
                           Just (nwln,sp) -> addListToFM lm [ (mkIDP idP2_ _lhsIpIdC 2,(nwln,sp))
                                                                        , (_identIfirstToken, (1,sp)) ]
                           _        -> addToFM lm (mkIDP idP2_ _lhsIpIdC 2) (1,0)
-            -- "src/PresentationAG.ag"(line 741, column 18)
+            -- "src/PresentationAG.ag"(line 742, column 18)
             (_typeStr@_) =
                 case lookup (strFromIdent _identIself) _lhsItopLevelEnv of
                   Nothing -> Nothing
                   Just tp -> Just $ strFromIdent _identIself ++ " :: "++ tp
-            -- "src/PresentationAG.ag"(line 774, column 7)
+            -- "src/PresentationAG.ag"(line 775, column 7)
             (_lhsOdeclaredVars@_) =
                 [(strFromIdent _identIself, (PathD (_lhsIpath++[2]), _expItype))]
-            -- "src/PresentationAG.ag"(line 785, column 7)
+            -- "src/PresentationAG.ag"(line 786, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 930, column 18)
+            -- "src/PresentationAG.ag"(line 931, column 18)
             (_lhsOdcl@_) =
                 (_identIstr, _expIval)
-            -- "src/PresentationAG.ag"(line 1100, column 24)
+            -- "src/PresentationAG.ag"(line 1101, column 24)
             (_lhsOidsPres@_) =
                 loc (DeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "'", _identIidsPres, text "';" ]
@@ -5025,13 +5026,13 @@ sem_Decl_HoleDecl  =
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 746, column 18)
+            -- "src/PresentationAG.ag"(line 747, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "src/PresentationAG.ag"(line 933, column 18)
+            -- "src/PresentationAG.ag"(line 934, column 18)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "src/PresentationAG.ag"(line 1106, column 24)
+            -- "src/PresentationAG.ag"(line 1107, column 24)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Decl" (HoleDeclNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 240, column 18)
@@ -5125,17 +5126,17 @@ sem_Decl_PPPresentationDecl (idD_) (idP0_) (idP1_) (pPPresentation_) =
             _pPPresentationOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _pPPresentationIpIdC,_pPPresentationIpres,_pPPresentationIpresTree,_pPPresentationIpresXML,_pPPresentationIself,_pPPresentationIvarsInScopeAtFocus) =
                 (pPPresentation_ (_pPPresentationOfocusD) (_pPPresentationOix) (_pPPresentationOpIdC) (_pPPresentationOpath) (_pPPresentationOranges) (_pPPresentationOvarsInScope) (_pPPresentationOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 745, column 27)
+            -- "src/PresentationAG.ag"(line 746, column 27)
             (_typeStr@_) =
                 Nothing
-            -- "src/PresentationAG.ag"(line 932, column 24)
+            -- "src/PresentationAG.ag"(line 933, column 24)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "src/PresentationAG.ag"(line 1104, column 24)
+            -- "src/PresentationAG.ag"(line 1105, column 24)
             (_lhsOidsPres@_) =
                 loc (PPPresentationDeclNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text "slides;" ]
-            -- "src/PresentationAG.ag"(line 1161, column 7)
+            -- "src/PresentationAG.ag"(line 1162, column 7)
             (_lhsOpres@_) =
                 loc (PPPresentationDeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ text' (mkIDP idP0_ _lhsIpIdC 0) "Slides: ", _pPPresentationIpres ]
@@ -5231,13 +5232,13 @@ sem_Decl_ParseErrDecl (node_) (presentation_) =
             _lhsOspaces :: (Int)
             _lhsOtypeStr :: (Maybe String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 747, column 18)
+            -- "src/PresentationAG.ag"(line 748, column 18)
             (_typeStr@_) =
                 Nothing
-            -- "src/PresentationAG.ag"(line 934, column 18)
+            -- "src/PresentationAG.ag"(line 935, column 18)
             (_lhsOdcl@_) =
                 ("XXXXXX", ErrVal)
-            -- "src/PresentationAG.ag"(line 1107, column 24)
+            -- "src/PresentationAG.ag"(line 1108, column 24)
             (_lhsOidsPres@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 241, column 18)
@@ -5467,23 +5468,23 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
                 (idListDecls_ (_idListDeclsOcol) (_idListDeclsOenv) (_idListDeclsOerrs) (_idListDeclsOfocusD) (_idListDeclsOlayoutMap) (_idListDeclsOlevel) (_idListDeclsOnewlines) (_idListDeclsOpIdC) (_idListDeclsOpath) (_idListDeclsOranges) (_idListDeclsOspaces) (_idListDeclsOtopLevelEnv) (_idListDeclsOtypeEnv) (_idListDeclsOvarsInScope) (_idListDeclsOvarsInScopeAtFocus))
             ( _declsIcol,_declsIdcls,_declsIdeclaredVars,_declsIidsPres,_declsIlayoutMap,_declsInewlines,_declsIpIdC,_declsIparseErrs,_declsIpres,_declsIpresTree,_declsIpresXML,_declsIpress,_declsIself,_declsIspaces,_declsIvarsInScopeAtFocus) =
                 (decls_ (_declsOcol) (_declsOenv) (_declsOerrs) (_declsOfocusD) (_declsOlayoutMap) (_declsOlevel) (_declsOnewlines) (_declsOpIdC) (_declsOpath) (_declsOranges) (_declsOspaces) (_declsOtopLevelEnv) (_declsOtypeEnv) (_declsOvarsInScope) (_declsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 99, column 7)
+            -- "src/PresentationAG.ag"(line 100, column 7)
             (_topLevelEnv@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in typeEnv
-            -- "src/PresentationAG.ag"(line 98, column 7)
+            -- "src/PresentationAG.ag"(line 99, column 7)
             (_typeEnv@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in topLevelEnv
-            -- "src/PresentationAG.ag"(line 97, column 7)
+            -- "src/PresentationAG.ag"(line 98, column 7)
             (_errs@_) =
                 let (errs, typeEnv, topLevelEnv) = heliumTypeInfo_ in errs
-            -- "src/PresentationAG.ag"(line 96, column 7)
+            -- "src/PresentationAG.ag"(line 97, column 7)
             (_declsOlevel@_) =
                 0
-            -- "src/PresentationAG.ag"(line 150, column 7)
+            -- "src/PresentationAG.ag"(line 151, column 7)
             (_declsOranges@_) =
                 (\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
                 $ map pthFrmMsg _errs
-            -- "src/PresentationAG.ag"(line 108, column 7)
+            -- "src/PresentationAG.ag"(line 109, column 7)
             (_lhsOpres@_) =
                 loc (RootDocNode document_ []) $
                 loc (RootEnrNode _self []) $ structural $
@@ -5515,52 +5516,52 @@ sem_EnrichedDoc_RootEnr (id_) (idP_) (idListDecls_) (decls_) (heliumTypeInfo_) (
                             | (var,(pth,tpStr)) <- fmToList _declsIvarsInScopeAtFocus ]
                       ]
                     `withFont'` ("Courier New",14)
-            -- "src/PresentationAG.ag"(line 542, column 13)
+            -- "src/PresentationAG.ag"(line 543, column 13)
             (_lhsOlayoutMap@_) =
                 _declsIlayoutMap
-            -- "src/PresentationAG.ag"(line 541, column 13)
+            -- "src/PresentationAG.ag"(line 542, column 13)
             (_declsOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 540, column 13)
+            -- "src/PresentationAG.ag"(line 541, column 13)
             (_declsOnewlines@_) =
                 1
-            -- "src/PresentationAG.ag"(line 539, column 13)
+            -- "src/PresentationAG.ag"(line 540, column 13)
             (_declsOcol@_) =
                 0
-            -- "src/PresentationAG.ag"(line 538, column 13)
+            -- "src/PresentationAG.ag"(line 539, column 13)
             (_declsOlayoutMap@_) =
                 _lhsIlayoutMap
-            -- "src/PresentationAG.ag"(line 761, column 7)
+            -- "src/PresentationAG.ag"(line 762, column 7)
             (_varsInScope@_) =
                 listToFM _declsIdeclaredVars
-            -- "src/PresentationAG.ag"(line 781, column 7)
+            -- "src/PresentationAG.ag"(line 782, column 7)
             (_declsOvarsInScopeAtFocus@_) =
                 emptyFM
-            -- "src/PresentationAG.ag"(line 917, column 7)
+            -- "src/PresentationAG.ag"(line 918, column 7)
             (_declsOenv@_) =
                 _declsIdcls
-            -- "src/PresentationAG.ag"(line 1129, column 13)
+            -- "src/PresentationAG.ag"(line 1130, column 13)
             (_idListDeclsOranges@_) =
                 ([],[],[])
-            -- "src/PresentationAG.ag"(line 1127, column 13)
+            -- "src/PresentationAG.ag"(line 1128, column 13)
             (_idListDeclsOvarsInScopeAtFocus@_) =
                 emptyFM
-            -- "src/PresentationAG.ag"(line 1126, column 13)
+            -- "src/PresentationAG.ag"(line 1127, column 13)
             (_idListDeclsOenv@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1125, column 13)
+            -- "src/PresentationAG.ag"(line 1126, column 13)
             (_idListDeclsOerrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1123, column 13)
+            -- "src/PresentationAG.ag"(line 1124, column 13)
             (_idListDeclsOlevel@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1121, column 13)
+            -- "src/PresentationAG.ag"(line 1122, column 13)
             (_idListDeclsOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1120, column 13)
+            -- "src/PresentationAG.ag"(line 1121, column 13)
             (_idListDeclsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1119, column 13)
+            -- "src/PresentationAG.ag"(line 1120, column 13)
             (_idListDeclsOcol@_) =
                 0
             -- "src/PresentationAG_Generated.ag"(line 19, column 13)
@@ -5976,33 +5977,33 @@ sem_Exp_AppExp (idD_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 301, column 7)
+            -- "src/PresentationAG.ag"(line 302, column 7)
             (_lhsOpres@_) =
                 loc (AppExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres, _exp2Ipres]
-            -- "src/PresentationAG.ag"(line 628, column 13)
+            -- "src/PresentationAG.ag"(line 629, column 13)
             (_lhsOcol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 627, column 13)
+            -- "src/PresentationAG.ag"(line 628, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 626, column 13)
+            -- "src/PresentationAG.ag"(line 627, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 625, column 13)
+            -- "src/PresentationAG.ag"(line 626, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol+1
-            -- "src/PresentationAG.ag"(line 624, column 13)
+            -- "src/PresentationAG.ag"(line 625, column 13)
             (_exp1OlayoutMap@_) =
                 _lhsIlayoutMap
-            -- "src/PresentationAG.ag"(line 809, column 7)
+            -- "src/PresentationAG.ag"(line 810, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 850, column 7)
+            -- "src/PresentationAG.ag"(line 851, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 960, column 17)
+            -- "src/PresentationAG.ag"(line 961, column 17)
             (_lhsOval@_) =
                 case _exp1Ival of LamVal f -> f _exp2Ival
                                   _        -> ErrVal
@@ -6184,21 +6185,21 @@ sem_Exp_BoolExp (idD_) (idP0_) (bool__) =
             _bool_Opath :: ([Int])
             ( _bool_Ibool,_bool_IpIdC,_bool_Ipres,_bool_IpresTree,_bool_IpresXML,_bool_Iself) =
                 (bool__ (_bool_OfocusD) (_bool_Oix) (_bool_OpIdC) (_bool_Opath))
-            -- "src/PresentationAG.ag"(line 277, column 7)
+            -- "src/PresentationAG.ag"(line 278, column 7)
             (_lhsOpres@_) =
                 loc (BoolExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [cons (mkIDP idP0_ _lhsIpIdC 0) "", _bool_Ipres]
-            -- "src/PresentationAG.ag"(line 613, column 13)
+            -- "src/PresentationAG.ag"(line 614, column 13)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "src/PresentationAG.ag"(line 803, column 7)
+            -- "src/PresentationAG.ag"(line 804, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 844, column 7)
+            -- "src/PresentationAG.ag"(line 845, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 953, column 17)
+            -- "src/PresentationAG.ag"(line 954, column 17)
             (_lhsOval@_) =
                 BoolVal _bool_Ibool
             -- "src/PresentationAG_Generated.ag"(line 278, column 13)
@@ -6352,7 +6353,7 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
             ( _altsIalts,_altsIcol,_altsIlayoutMap,_altsImaxLHSLength,_altsInewlines,_altsIpIdC,_altsIpresTree,_altsIpresXML,_altsIpress,_altsIself,_altsIspaces,_altsIvarsInScopeAtFocus) =
                 (alts_ (_altsOcol) (_altsOenv) (_altsOerrs) (_altsOfocusD) (_altsOlayoutMap) (_altsOlevel) (_altsOnewlines) (_altsOpIdC) (_altsOpath) (_altsOranges) (_altsOspaces) (_altsOtopLevelEnv) (_altsOtotalMaxLHSLength) (_altsOtypeEnv) (_altsOvarsInScope) (_altsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 306, column 7)
+            -- "src/PresentationAG.ag"(line 307, column 7)
             (_lhsOpres@_) =
                 loc (CaseExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -6361,42 +6362,42 @@ sem_Exp_CaseExp (idD_) (idP0_) (idP1_) (exp_) (alts_) =
                        , key (mkIDP idP1_ _lhsIpIdC 1) "of"
                        , loc (List_AltNode _altsIself []                ) $ parsing $ presentFocus _lhsIfocusD []                $ row _altsIpress
                        ]
-            -- "src/PresentationAG.ag"(line 639, column 13)
+            -- "src/PresentationAG.ag"(line 640, column 13)
             (_altsOtotalMaxLHSLength@_) =
                 _altsImaxLHSLength
-            -- "src/PresentationAG.ag"(line 638, column 13)
+            -- "src/PresentationAG.ag"(line 639, column 13)
             (_lhsOcol@_) =
                 _altsIcol
-            -- "src/PresentationAG.ag"(line 637, column 13)
+            -- "src/PresentationAG.ag"(line 638, column 13)
             (_altsOspaces@_) =
                 _lhsIcol + 2
-            -- "src/PresentationAG.ag"(line 636, column 13)
+            -- "src/PresentationAG.ag"(line 637, column 13)
             (_altsOnewlines@_) =
                 1
-            -- "src/PresentationAG.ag"(line 635, column 13)
+            -- "src/PresentationAG.ag"(line 636, column 13)
             (_altsOcol@_) =
                 _lhsIcol + 2
-            -- "src/PresentationAG.ag"(line 634, column 13)
+            -- "src/PresentationAG.ag"(line 635, column 13)
             (_expOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 633, column 13)
+            -- "src/PresentationAG.ag"(line 634, column 13)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 632, column 13)
+            -- "src/PresentationAG.ag"(line 633, column 13)
             (_expOcol@_) =
                 _lhsIcol + 5
-            -- "src/PresentationAG.ag"(line 629, column 13)
+            -- "src/PresentationAG.ag"(line 630, column 13)
             (_expOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                     [ (idP0_, (_lhsInewlines,_lhsIspaces))
                     , (idP1_, (0,1)) ]
-            -- "src/PresentationAG.ag"(line 811, column 7)
+            -- "src/PresentationAG.ag"(line 812, column 7)
             (_altsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 852, column 7)
+            -- "src/PresentationAG.ag"(line 853, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 963, column 17)
+            -- "src/PresentationAG.ag"(line 964, column 17)
             (_lhsOval@_) =
                 case lookup "a" _altsIalts of {Just v -> v; Nothing -> ErrVal}
             -- "src/PresentationAG_Generated.ag"(line 289, column 13)
@@ -6611,42 +6612,42 @@ sem_Exp_DivExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 266, column 7)
+            -- "src/PresentationAG.ag"(line 267, column 7)
             (_lhsOpres@_) =
                 loc (DivExpNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   frac _exp1Ipres _exp2Ipres
-            -- "src/PresentationAG.ag"(line 604, column 13)
+            -- "src/PresentationAG.ag"(line 605, column 13)
             (_lhsOcol@_) =
                 _exp1Icol
-            -- "src/PresentationAG.ag"(line 603, column 13)
+            -- "src/PresentationAG.ag"(line 604, column 13)
             (_exp2Ospaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 602, column 13)
+            -- "src/PresentationAG.ag"(line 603, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 601, column 13)
+            -- "src/PresentationAG.ag"(line 602, column 13)
             (_exp2Ocol@_) =
                 0
-            -- "src/PresentationAG.ag"(line 600, column 13)
+            -- "src/PresentationAG.ag"(line 601, column 13)
             (_exp1Ospaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 599, column 13)
+            -- "src/PresentationAG.ag"(line 600, column 13)
             (_exp1Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 598, column 13)
+            -- "src/PresentationAG.ag"(line 599, column 13)
             (_exp1Ocol@_) =
                 0
-            -- "src/PresentationAG.ag"(line 597, column 12)
+            -- "src/PresentationAG.ag"(line 598, column 12)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,0)
-            -- "src/PresentationAG.ag"(line 799, column 7)
+            -- "src/PresentationAG.ag"(line 800, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 840, column 7)
+            -- "src/PresentationAG.ag"(line 841, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 944, column 17)
+            -- "src/PresentationAG.ag"(line 945, column 17)
             (_lhsOval@_) =
                 case _exp2Ival of
                   IntVal 0 -> ErrVal
@@ -6801,10 +6802,10 @@ sem_Exp_HoleExp  =
             _lhsOtype :: (String)
             _lhsOval :: (Value)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 866, column 7)
+            -- "src/PresentationAG.ag"(line 867, column 7)
             (_type@_) =
                 "<Hole>"
-            -- "src/PresentationAG.ag"(line 974, column 17)
+            -- "src/PresentationAG.ag"(line 975, column 17)
             (_lhsOval@_) =
                 ErrVal
             -- "src/PresentationAG_Generated.ag"(line 305, column 17)
@@ -6914,7 +6915,7 @@ sem_Exp_IdentExp (idd_) (ident_) =
             _identOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _identIcol,_identIfirstToken,_identIidsPres,_identIlayoutMap,_identInewlines,_identIpIdC,_identIpres,_identIpresTree,_identIpresXML,_identIself,_identIspaces,_identIstr,_identIvarsInScopeAtFocus) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 322, column 7)
+            -- "src/PresentationAG.ag"(line 323, column 7)
             (_lhsOpres@_) =
                 loc (IdentExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -6924,13 +6925,13 @@ sem_Exp_IdentExp (idd_) (ident_) =
                             navigateTo $ case lookupFM  _lhsIvarsInScope (strFromIdent _identIself) of
                                            Nothing      -> NoPathD
                                            Just (pth,_) -> pth)]
-            -- "src/PresentationAG.ag"(line 815, column 7)
+            -- "src/PresentationAG.ag"(line 816, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 856, column 7)
+            -- "src/PresentationAG.ag"(line 857, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 968, column 20)
+            -- "src/PresentationAG.ag"(line 969, column 20)
             (_lhsOval@_) =
                 case lookup _identIstr _lhsIenv of { Just v -> v; Nothing -> ErrVal }
             -- "src/PresentationAG_Generated.ag"(line 294, column 14)
@@ -7161,53 +7162,53 @@ sem_Exp_IfExp (idD_) (idP0_) (idP1_) (idP2_) (exp1_) (exp2_) (exp3_) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
             ( _exp3Icol,_exp3IlamBody,_exp3IlayoutMap,_exp3Inewlines,_exp3IpIdC,_exp3Ipres,_exp3IpresTree,_exp3IpresXML,_exp3Iself,_exp3Ispaces,_exp3Isubstitute,_exp3Itype,_exp3Ival,_exp3IvarsInScopeAtFocus) =
                 (exp3_ (_exp3Ocol) (_exp3Oenv) (_exp3Oerrs) (_exp3OfocusD) (_exp3Oix) (_exp3OlayoutMap) (_exp3Olevel) (_exp3Onewlines) (_exp3OpIdC) (_exp3Opath) (_exp3Oranges) (_exp3Ospaces) (_exp3OtopLevelEnv) (_exp3OtypeEnv) (_exp3OvarsInScope) (_exp3OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 333, column 7)
+            -- "src/PresentationAG.ag"(line 334, column 7)
             (_lhsOpres@_) =
                 loc (IfExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row'  $ [ key (mkIDP idP0_ _lhsIpIdC 0) "if",   _exp1Ipres
                           , key (mkIDP idP1_ _lhsIpIdC 1) "then", _exp2Ipres
                           , key (mkIDP idP2_ _lhsIpIdC 2) "else", _exp3Ipres ]
-            -- "src/PresentationAG.ag"(line 662, column 11)
+            -- "src/PresentationAG.ag"(line 663, column 11)
             (_exp3Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 661, column 11)
+            -- "src/PresentationAG.ag"(line 662, column 11)
             (_exp3Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 660, column 11)
+            -- "src/PresentationAG.ag"(line 661, column 11)
             (_exp2Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 659, column 11)
+            -- "src/PresentationAG.ag"(line 660, column 11)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 658, column 11)
+            -- "src/PresentationAG.ag"(line 659, column 11)
             (_exp1Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 657, column 11)
+            -- "src/PresentationAG.ag"(line 658, column 11)
             (_exp1Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 656, column 11)
+            -- "src/PresentationAG.ag"(line 657, column 11)
             (_exp3Ocol@_) =
                 _lhsIcol + 4+1
-            -- "src/PresentationAG.ag"(line 655, column 11)
+            -- "src/PresentationAG.ag"(line 656, column 11)
             (_exp2Ocol@_) =
                 _lhsIcol + 4+1
-            -- "src/PresentationAG.ag"(line 654, column 11)
+            -- "src/PresentationAG.ag"(line 655, column 11)
             (_exp1Ocol@_) =
                 _lhsIcol + 2+1
-            -- "src/PresentationAG.ag"(line 650, column 12)
+            -- "src/PresentationAG.ag"(line 651, column 12)
             (_exp1OlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (1,_lhsIcol))
                   , (idP2_, (1,_lhsIcol)) ]
-            -- "src/PresentationAG.ag"(line 817, column 7)
+            -- "src/PresentationAG.ag"(line 818, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 858, column 7)
+            -- "src/PresentationAG.ag"(line 859, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 969, column 17)
+            -- "src/PresentationAG.ag"(line 970, column 17)
             (_lhsOval@_) =
                 case _exp1Ival of BoolVal b -> if b then _exp2Ival else _exp3Ival
                                   _         -> ErrVal
@@ -7419,24 +7420,24 @@ sem_Exp_IntExp (idD_) (idP0_) (int__) =
             _int_Opath :: ([Int])
             ( _int_Iint,_int_IpIdC,_int_Ipres,_int_IpresTree,_int_IpresXML,_int_Iself) =
                 (int__ (_int_OfocusD) (_int_Oix) (_int_OpIdC) (_int_Opath))
-            -- "src/PresentationAG.ag"(line 282, column 7)
+            -- "src/PresentationAG.ag"(line 283, column 7)
             (_lhsOpres@_) =
                 loc (IntExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [cons (mkIDP idP0_ _lhsIpIdC 0) "", _int_Ipres]
-            -- "src/PresentationAG.ag"(line 612, column 12)
+            -- "src/PresentationAG.ag"(line 613, column 12)
             (_lhsOcol@_) =
                 _lhsIcol+length (show _int_Iint)
-            -- "src/PresentationAG.ag"(line 611, column 12)
+            -- "src/PresentationAG.ag"(line 612, column 12)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "src/PresentationAG.ag"(line 805, column 7)
+            -- "src/PresentationAG.ag"(line 806, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 846, column 7)
+            -- "src/PresentationAG.ag"(line 847, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 954, column 17)
+            -- "src/PresentationAG.ag"(line 955, column 17)
             (_lhsOval@_) =
                 IntVal _int_Iint
             -- "src/PresentationAG_Generated.ag"(line 280, column 12)
@@ -7584,7 +7585,7 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                 (ident_ (_identOcol) (_identOfocusD) (_identOix) (_identOlayoutMap) (_identOlevel) (_identOnewlines) (_identOpIdC) (_identOpath) (_identOranges) (_identOspaces) (_identOvarsInScope) (_identOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 287, column 7)
+            -- "src/PresentationAG.ag"(line 288, column 7)
             (_lhsOpres@_) =
                 loc (LamExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -7594,43 +7595,43 @@ sem_Exp_LamExp (idD_) (idP0_) (idP1_) (ident_) (exp_) =
                        , text' (mkIDP idP1_ _lhsIpIdC 1) ""
                          , key NoIDP "®"    `withFontFam` "symbol"
                        , _expIpres ]
-            -- "src/PresentationAG.ag"(line 623, column 13)
+            -- "src/PresentationAG.ag"(line 624, column 13)
             (_lhsOcol@_) =
                 _expIcol
-            -- "src/PresentationAG.ag"(line 622, column 13)
+            -- "src/PresentationAG.ag"(line 623, column 13)
             (_expOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 621, column 13)
+            -- "src/PresentationAG.ag"(line 622, column 13)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 620, column 13)
+            -- "src/PresentationAG.ag"(line 621, column 13)
             (_expOcol@_) =
                 _identIcol + 3
-            -- "src/PresentationAG.ag"(line 619, column 13)
+            -- "src/PresentationAG.ag"(line 620, column 13)
             (_identOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 618, column 13)
+            -- "src/PresentationAG.ag"(line 619, column 13)
             (_identOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 617, column 13)
+            -- "src/PresentationAG.ag"(line 618, column 13)
             (_identOcol@_) =
                 _lhsIcol + 1
-            -- "src/PresentationAG.ag"(line 614, column 13)
+            -- "src/PresentationAG.ag"(line 615, column 13)
             (_identOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "src/PresentationAG.ag"(line 767, column 7)
+            -- "src/PresentationAG.ag"(line 768, column 7)
             (_expOvarsInScope@_) =
                 addToFM _lhsIvarsInScope (strFromIdent _identIself)
                                          (PathD $ (_lhsIpath++[0]), _expItype)
-            -- "src/PresentationAG.ag"(line 807, column 7)
+            -- "src/PresentationAG.ag"(line 808, column 7)
             (_identOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 848, column 7)
+            -- "src/PresentationAG.ag"(line 849, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 955, column 17)
+            -- "src/PresentationAG.ag"(line 956, column 17)
             (_lhsOval@_) =
                 LamVal (\arg ->
                          let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
@@ -7839,49 +7840,49 @@ sem_Exp_LetExp (idD_) (idP0_) (idP1_) (decls_) (exp_) =
                 (decls_ (_declsOcol) (_declsOenv) (_declsOerrs) (_declsOfocusD) (_declsOlayoutMap) (_declsOlevel) (_declsOnewlines) (_declsOpIdC) (_declsOpath) (_declsOranges) (_declsOspaces) (_declsOtopLevelEnv) (_declsOtypeEnv) (_declsOvarsInScope) (_declsOvarsInScopeAtFocus))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 103, column 7)
+            -- "src/PresentationAG.ag"(line 104, column 7)
             (_declsOlevel@_) =
                 _lhsIlevel + 1
-            -- "src/PresentationAG.ag"(line 314, column 7)
+            -- "src/PresentationAG.ag"(line 315, column 7)
             (_lhsOpres@_) =
                 loc (CaseExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [ key (mkIDP idP0_ _lhsIpIdC 0) "let"
                        , loc (List_DeclNode _declsIself []               ) $ parsing $ presentFocus _lhsIfocusD []                 $ row _declsIpress
                        , key (mkIDP idP1_ _lhsIpIdC 1) "in", _expIpres ]
-            -- "src/PresentationAG.ag"(line 648, column 11)
+            -- "src/PresentationAG.ag"(line 649, column 11)
             (_expOspaces@_) =
                 2
-            -- "src/PresentationAG.ag"(line 647, column 11)
+            -- "src/PresentationAG.ag"(line 648, column 11)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 646, column 11)
+            -- "src/PresentationAG.ag"(line 647, column 11)
             (_declsOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 645, column 11)
+            -- "src/PresentationAG.ag"(line 646, column 11)
             (_declsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 644, column 11)
+            -- "src/PresentationAG.ag"(line 645, column 11)
             (_expOcol@_) =
                 _lhsIcol + 3+1
-            -- "src/PresentationAG.ag"(line 643, column 11)
+            -- "src/PresentationAG.ag"(line 644, column 11)
             (_declsOcol@_) =
                 _lhsIcol + 3+1
-            -- "src/PresentationAG.ag"(line 640, column 13)
+            -- "src/PresentationAG.ag"(line 641, column 13)
             (_declsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (1,_lhsIcol))]
-            -- "src/PresentationAG.ag"(line 765, column 7)
+            -- "src/PresentationAG.ag"(line 766, column 7)
             (_varsInScope@_) =
                 addListToFM _lhsIvarsInScope _declsIdeclaredVars
-            -- "src/PresentationAG.ag"(line 813, column 7)
+            -- "src/PresentationAG.ag"(line 814, column 7)
             (_declsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 854, column 7)
+            -- "src/PresentationAG.ag"(line 855, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 964, column 17)
+            -- "src/PresentationAG.ag"(line 965, column 17)
             (_lhsOval@_) =
                 let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
                       exp_ undefined (_declsIdcls ++ _lhsIenv) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
@@ -8063,7 +8064,7 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expsIcol,_expsIlayoutMap,_expsInewlines,_expsIpIdC,_expsIpresTree,_expsIpresXML,_expsIpress,_expsIself,_expsIspaces,_expsIvals,_expsIvarsInScopeAtFocus) =
                 (exps_ (_expsOcol) (_expsOenv) (_expsOerrs) (_expsOfocusD) (_expsOlayoutMap) (_expsOlevel) (_expsOnewlines) (_expsOpIdC) (_expsOpath) (_expsOranges) (_expsOspaces) (_expsOtopLevelEnv) (_expsOtypeEnv) (_expsOvarsInScope) (_expsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 347, column 7)
+            -- "src/PresentationAG.ag"(line 348, column 7)
             (_lhsOpres@_) =
                 loc (ListExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -8074,36 +8075,36 @@ sem_Exp_ListExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
                                 then []
                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
                          ++ [sep (mkIDP idP1_ _lhsIpIdC 1) "]"]
-            -- "src/PresentationAG.ag"(line 680, column 13)
+            -- "src/PresentationAG.ag"(line 681, column 13)
             (_lhsOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 679, column 13)
+            -- "src/PresentationAG.ag"(line 680, column 13)
             (_lhsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 678, column 13)
+            -- "src/PresentationAG.ag"(line 679, column 13)
             (_lhsOcol@_) =
                 _expsIcol + 1+1
-            -- "src/PresentationAG.ag"(line 677, column 13)
+            -- "src/PresentationAG.ag"(line 678, column 13)
             (_expsOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 676, column 13)
+            -- "src/PresentationAG.ag"(line 677, column 13)
             (_expsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 675, column 13)
+            -- "src/PresentationAG.ag"(line 676, column 13)
             (_expsOcol@_) =
                 _lhsIcol + 1+1
-            -- "src/PresentationAG.ag"(line 672, column 13)
+            -- "src/PresentationAG.ag"(line 673, column 13)
             (_expsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "src/PresentationAG.ag"(line 821, column 7)
+            -- "src/PresentationAG.ag"(line 822, column 7)
             (_expsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 862, column 7)
+            -- "src/PresentationAG.ag"(line 863, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 972, column 17)
+            -- "src/PresentationAG.ag"(line 973, column 17)
             (_lhsOval@_) =
                 ListVal _expsIvals
             -- "src/PresentationAG_Generated.ag"(line 302, column 13)
@@ -8241,41 +8242,41 @@ sem_Exp_ParenExp (idD_) (idP0_) (idP1_) (exp_) =
             _expOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 341, column 7)
+            -- "src/PresentationAG.ag"(line 342, column 7)
             (_lhsOpres@_) =
                 loc (ParenExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row'  [sep (mkIDP idP0_ _lhsIpIdC 0) "(", _expIpres , sep (mkIDP idP1_ _lhsIpIdC 1) ")"]
-            -- "src/PresentationAG.ag"(line 671, column 14)
+            -- "src/PresentationAG.ag"(line 672, column 14)
             (_lhsOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 670, column 14)
+            -- "src/PresentationAG.ag"(line 671, column 14)
             (_lhsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 669, column 14)
+            -- "src/PresentationAG.ag"(line 670, column 14)
             (_lhsOcol@_) =
                 _expIcol + 1+1
-            -- "src/PresentationAG.ag"(line 668, column 14)
+            -- "src/PresentationAG.ag"(line 669, column 14)
             (_expOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 667, column 14)
+            -- "src/PresentationAG.ag"(line 668, column 14)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 666, column 14)
+            -- "src/PresentationAG.ag"(line 667, column 14)
             (_expOcol@_) =
                 _lhsIcol + 1+1
-            -- "src/PresentationAG.ag"(line 663, column 14)
+            -- "src/PresentationAG.ag"(line 664, column 14)
             (_expOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "src/PresentationAG.ag"(line 819, column 7)
+            -- "src/PresentationAG.ag"(line 820, column 7)
             (_expOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 860, column 7)
+            -- "src/PresentationAG.ag"(line 861, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 971, column 17)
+            -- "src/PresentationAG.ag"(line 972, column 17)
             (_lhsOval@_) =
                 _expIval
             -- "src/PresentationAG_Generated.ag"(line 300, column 14)
@@ -8382,10 +8383,10 @@ sem_Exp_ParseErrExp (node_) (presentation_) =
             _lhsOtype :: (String)
             _lhsOval :: (Value)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 868, column 7)
+            -- "src/PresentationAG.ag"(line 869, column 7)
             (_type@_) =
                 "<ParseErr>"
-            -- "src/PresentationAG.ag"(line 975, column 17)
+            -- "src/PresentationAG.ag"(line 976, column 17)
             (_lhsOval@_) =
                 ErrVal
             -- "src/PresentationAG_Generated.ag"(line 306, column 17)
@@ -8534,36 +8535,36 @@ sem_Exp_PlusExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 256, column 7)
+            -- "src/PresentationAG.ag"(line 257, column 7)
             (_lhsOpres@_) =
                 loc (PlusExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres , op (mkIDP idP0_ _lhsIpIdC 0) "+", _exp2Ipres]
-            -- "src/PresentationAG.ag"(line 590, column 13)
+            -- "src/PresentationAG.ag"(line 591, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "src/PresentationAG.ag"(line 589, column 13)
+            -- "src/PresentationAG.ag"(line 590, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 588, column 13)
+            -- "src/PresentationAG.ag"(line 589, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 587, column 13)
+            -- "src/PresentationAG.ag"(line 588, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol + 3
-            -- "src/PresentationAG.ag"(line 586, column 13)
+            -- "src/PresentationAG.ag"(line 587, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 585, column 13)
+            -- "src/PresentationAG.ag"(line 586, column 13)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,1)
-            -- "src/PresentationAG.ag"(line 795, column 7)
+            -- "src/PresentationAG.ag"(line 796, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 836, column 7)
+            -- "src/PresentationAG.ag"(line 837, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 942, column 17)
+            -- "src/PresentationAG.ag"(line 943, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (+) _exp1Ival _exp2Ival
             -- "src/PresentationAG_Generated.ag"(line 267, column 13)
@@ -8789,36 +8790,36 @@ sem_Exp_PowerExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 271, column 7)
+            -- "src/PresentationAG.ag"(line 272, column 7)
             (_lhsOpres@_) =
                 loc (PowerExpNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   power _exp1Ipres _exp2Ipres
-            -- "src/PresentationAG.ag"(line 610, column 13)
+            -- "src/PresentationAG.ag"(line 611, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "src/PresentationAG.ag"(line 609, column 13)
+            -- "src/PresentationAG.ag"(line 610, column 13)
             (_exp2Ospaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 608, column 13)
+            -- "src/PresentationAG.ag"(line 609, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 607, column 13)
+            -- "src/PresentationAG.ag"(line 608, column 13)
             (_exp2Ocol@_) =
                 0
-            -- "src/PresentationAG.ag"(line 606, column 13)
+            -- "src/PresentationAG.ag"(line 607, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 605, column 14)
+            -- "src/PresentationAG.ag"(line 606, column 14)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,0)
-            -- "src/PresentationAG.ag"(line 801, column 7)
+            -- "src/PresentationAG.ag"(line 802, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 842, column 7)
+            -- "src/PresentationAG.ag"(line 843, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 948, column 17)
+            -- "src/PresentationAG.ag"(line 949, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (^) _exp1Ival _exp2Ival
             -- "src/PresentationAG_Generated.ag"(line 276, column 14)
@@ -9009,7 +9010,7 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
             _expsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expsIcol,_expsIlayoutMap,_expsInewlines,_expsIpIdC,_expsIpresTree,_expsIpresXML,_expsIpress,_expsIself,_expsIspaces,_expsIvals,_expsIvarsInScopeAtFocus) =
                 (exps_ (_expsOcol) (_expsOenv) (_expsOerrs) (_expsOfocusD) (_expsOlayoutMap) (_expsOlevel) (_expsOnewlines) (_expsOpIdC) (_expsOpath) (_expsOranges) (_expsOspaces) (_expsOtopLevelEnv) (_expsOtypeEnv) (_expsOvarsInScope) (_expsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 357, column 7)
+            -- "src/PresentationAG.ag"(line 358, column 7)
             (_lhsOpres@_) =
                 loc (ProductExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
@@ -9020,36 +9021,36 @@ sem_Exp_ProductExp (idD_) (idP0_) (idP1_) (ids_) (exps_) =
                                 then []
                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
                          ++ [sep (mkIDP idP1_ _lhsIpIdC 1) ")"]
-            -- "src/PresentationAG.ag"(line 689, column 13)
+            -- "src/PresentationAG.ag"(line 690, column 13)
             (_lhsOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 688, column 13)
+            -- "src/PresentationAG.ag"(line 689, column 13)
             (_lhsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 687, column 13)
+            -- "src/PresentationAG.ag"(line 688, column 13)
             (_lhsOcol@_) =
                 _expsIcol + 1+1
-            -- "src/PresentationAG.ag"(line 686, column 13)
+            -- "src/PresentationAG.ag"(line 687, column 13)
             (_expsOspaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 685, column 13)
+            -- "src/PresentationAG.ag"(line 686, column 13)
             (_expsOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 684, column 13)
+            -- "src/PresentationAG.ag"(line 685, column 13)
             (_expsOcol@_) =
                 _lhsIcol + 1+1
-            -- "src/PresentationAG.ag"(line 681, column 16)
+            -- "src/PresentationAG.ag"(line 682, column 16)
             (_expsOlayoutMap@_) =
                 addListToFM _lhsIlayoutMap
                   [ (idP0_, (_lhsInewlines,_lhsIspaces))
                   , (idP1_, (0,1)) ]
-            -- "src/PresentationAG.ag"(line 823, column 7)
+            -- "src/PresentationAG.ag"(line 824, column 7)
             (_expsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 864, column 7)
+            -- "src/PresentationAG.ag"(line 865, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 973, column 17)
+            -- "src/PresentationAG.ag"(line 974, column 17)
             (_lhsOval@_) =
                 ProdVal _expsIvals
             -- "src/PresentationAG_Generated.ag"(line 304, column 16)
@@ -9219,36 +9220,36 @@ sem_Exp_TimesExp (idD_) (idP0_) (exp1_) (exp2_) =
                 (exp1_ (_exp1Ocol) (_exp1Oenv) (_exp1Oerrs) (_exp1OfocusD) (_exp1Oix) (_exp1OlayoutMap) (_exp1Olevel) (_exp1Onewlines) (_exp1OpIdC) (_exp1Opath) (_exp1Oranges) (_exp1Ospaces) (_exp1OtopLevelEnv) (_exp1OtypeEnv) (_exp1OvarsInScope) (_exp1OvarsInScopeAtFocus))
             ( _exp2Icol,_exp2IlamBody,_exp2IlayoutMap,_exp2Inewlines,_exp2IpIdC,_exp2Ipres,_exp2IpresTree,_exp2IpresXML,_exp2Iself,_exp2Ispaces,_exp2Isubstitute,_exp2Itype,_exp2Ival,_exp2IvarsInScopeAtFocus) =
                 (exp2_ (_exp2Ocol) (_exp2Oenv) (_exp2Oerrs) (_exp2OfocusD) (_exp2Oix) (_exp2OlayoutMap) (_exp2Olevel) (_exp2Onewlines) (_exp2OpIdC) (_exp2Opath) (_exp2Oranges) (_exp2Ospaces) (_exp2OtopLevelEnv) (_exp2OtypeEnv) (_exp2OvarsInScope) (_exp2OvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 261, column 7)
+            -- "src/PresentationAG.ag"(line 262, column 7)
             (_lhsOpres@_) =
                 loc (TimesExpNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $ addReductionPopupItems _reductionEdit $
                   row' [_exp1Ipres , op (mkIDP idP0_ _lhsIpIdC 0) "*", _exp2Ipres]
-            -- "src/PresentationAG.ag"(line 596, column 13)
+            -- "src/PresentationAG.ag"(line 597, column 13)
             (_lhsOcol@_) =
                 _exp2Icol
-            -- "src/PresentationAG.ag"(line 595, column 13)
+            -- "src/PresentationAG.ag"(line 596, column 13)
             (_exp2Ospaces@_) =
                 1
-            -- "src/PresentationAG.ag"(line 594, column 13)
+            -- "src/PresentationAG.ag"(line 595, column 13)
             (_exp2Onewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 593, column 13)
+            -- "src/PresentationAG.ag"(line 594, column 13)
             (_exp2Ocol@_) =
                 _exp1Icol + 3
-            -- "src/PresentationAG.ag"(line 592, column 13)
+            -- "src/PresentationAG.ag"(line 593, column 13)
             (_exp1Ocol@_) =
                 _lhsIcol
-            -- "src/PresentationAG.ag"(line 591, column 14)
+            -- "src/PresentationAG.ag"(line 592, column 14)
             (_exp1OlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (0,1)
-            -- "src/PresentationAG.ag"(line 797, column 7)
+            -- "src/PresentationAG.ag"(line 798, column 7)
             (_exp1OvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 838, column 7)
+            -- "src/PresentationAG.ag"(line 839, column 7)
             (_type@_) =
                 lookupType _lhsItypeEnv _lhsIpath
-            -- "src/PresentationAG.ag"(line 943, column 17)
+            -- "src/PresentationAG.ag"(line 944, column 17)
             (_lhsOval@_) =
                 evaluateIntOp (*) _exp1Ival _exp2Ival
             -- "src/PresentationAG_Generated.ag"(line 270, column 14)
@@ -9489,13 +9490,13 @@ sem_Ident_HoleIdent  =
             _lhsOspaces :: (Int)
             _lhsOstr :: (String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 578, column 12)
+            -- "src/PresentationAG.ag"(line 579, column 12)
             (_lhsOfirstToken@_) =
                 NoIDP
-            -- "src/PresentationAG.ag"(line 938, column 19)
+            -- "src/PresentationAG.ag"(line 939, column 19)
             (_lhsOstr@_) =
                 ""
-            -- "src/PresentationAG.ag"(line 1112, column 24)
+            -- "src/PresentationAG.ag"(line 1113, column 24)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Ident" (HoleIdentNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 256, column 19)
@@ -9576,27 +9577,27 @@ sem_Ident_Ident (idD_) (idP0_) (idP1_) (string__) =
             _string_Opath :: ([Int])
             ( _string_Ilength,_string_IpIdC,_string_Ipres,_string_IpresTree,_string_IpresXML,_string_Iself,_string_Istr) =
                 (string__ (_string_OfocusD) (_string_Oix) (_string_OpIdC) (_string_Opath))
-            -- "src/PresentationAG.ag"(line 242, column 7)
+            -- "src/PresentationAG.ag"(line 243, column 7)
             (_lhsOpres@_) =
                 loc (IdentNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   squiggleRanges _lhsIranges _lhsIpath $
                   row' [ text' (mkIDP idP0_ _lhsIpIdC 0)  "", _string_Ipres, text ""]
-            -- "src/PresentationAG.ag"(line 574, column 12)
+            -- "src/PresentationAG.ag"(line 575, column 12)
             (_lhsOfirstToken@_) =
                 idP0_
-            -- "src/PresentationAG.ag"(line 573, column 12)
+            -- "src/PresentationAG.ag"(line 574, column 12)
             (_lhsOcol@_) =
                 _lhsIcol+ length _string_Istr
-            -- "src/PresentationAG.ag"(line 572, column 12)
+            -- "src/PresentationAG.ag"(line 573, column 12)
             (_lhsOlayoutMap@_) =
                 addToFM _lhsIlayoutMap idP0_ (_lhsInewlines,_lhsIspaces)
-            -- "src/PresentationAG.ag"(line 789, column 7)
+            -- "src/PresentationAG.ag"(line 790, column 7)
             (_lhsOvarsInScopeAtFocus@_) =
                 if (PathD _lhsIpath) == _lhsIfocusD then _lhsIvarsInScope else _lhsIvarsInScopeAtFocus
-            -- "src/PresentationAG.ag"(line 937, column 19)
+            -- "src/PresentationAG.ag"(line 938, column 19)
             (_lhsOstr@_) =
                 _string_Istr
-            -- "src/PresentationAG.ag"(line 1110, column 24)
+            -- "src/PresentationAG.ag"(line 1111, column 24)
             (_lhsOidsPres@_) =
                 loc (IdentNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ _string_Ipres ]
@@ -9663,13 +9664,13 @@ sem_Ident_ParseErrIdent (node_) (presentation_) =
             _lhsOspaces :: (Int)
             _lhsOstr :: (String)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 576, column 12)
+            -- "src/PresentationAG.ag"(line 577, column 12)
             (_lhsOfirstToken@_) =
                 NoIDP
-            -- "src/PresentationAG.ag"(line 939, column 19)
+            -- "src/PresentationAG.ag"(line 940, column 19)
             (_lhsOstr@_) =
                 ""
-            -- "src/PresentationAG.ag"(line 1113, column 24)
+            -- "src/PresentationAG.ag"(line 1114, column 24)
             (_lhsOidsPres@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 257, column 19)
@@ -9775,7 +9776,7 @@ sem_Int__HoleInt_  =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Int_)
-            -- "src/PresentationAG.ag"(line 1474, column 13)
+            -- "src/PresentationAG.ag"(line 1475, column 13)
             (_lhsOint@_) =
                 0
             -- "src/PresentationAG_Generated.ag"(line 498, column 18)
@@ -9811,11 +9812,11 @@ sem_Int__Int_ (idd_) (int_) =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Int_)
-            -- "src/PresentationAG.ag"(line 1468, column 7)
+            -- "src/PresentationAG.ag"(line 1469, column 7)
             (_lhsOpres@_) =
                 loc (Int_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text $ show int_, text ""]
-            -- "src/PresentationAG.ag"(line 1472, column 13)
+            -- "src/PresentationAG.ag"(line 1473, column 13)
             (_lhsOint@_) =
                 int_
             -- "src/PresentationAG_Generated.ag"(line 794, column 7)
@@ -9848,7 +9849,7 @@ sem_Int__ParseErrInt_ (node_) (presentation_) =
             _lhsOpresTree :: (Presentation_Doc_Node_Clip)
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Int_)
-            -- "src/PresentationAG.ag"(line 1474, column 13)
+            -- "src/PresentationAG.ag"(line 1475, column 13)
             (_lhsOint@_) =
                 0
             -- "src/PresentationAG_Generated.ag"(line 499, column 18)
@@ -10003,41 +10004,41 @@ sem_Item_HeliumItem (idd_) (exp_) =
             _expOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _expIcol,_expIlamBody,_expIlayoutMap,_expInewlines,_expIpIdC,_expIpres,_expIpresTree,_expIpresXML,_expIself,_expIspaces,_expIsubstitute,_expItype,_expIval,_expIvarsInScopeAtFocus) =
                 (exp_ (_expOcol) (_expOenv) (_expOerrs) (_expOfocusD) (_expOix) (_expOlayoutMap) (_expOlevel) (_expOnewlines) (_expOpIdC) (_expOpath) (_expOranges) (_expOspaces) (_expOtopLevelEnv) (_expOtypeEnv) (_expOvarsInScope) (_expOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1149, column 16)
+            -- "src/PresentationAG.ag"(line 1150, column 16)
             (_expOenv@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1148, column 16)
+            -- "src/PresentationAG.ag"(line 1149, column 16)
             (_expOtopLevelEnv@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1147, column 16)
+            -- "src/PresentationAG.ag"(line 1148, column 16)
             (_expOtypeEnv@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1146, column 16)
+            -- "src/PresentationAG.ag"(line 1147, column 16)
             (_expOerrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1144, column 16)
+            -- "src/PresentationAG.ag"(line 1145, column 16)
             (_expOlayoutMap@_) =
                 emptyFM
-            -- "src/PresentationAG.ag"(line 1143, column 16)
+            -- "src/PresentationAG.ag"(line 1144, column 16)
             (_expOlevel@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1141, column 16)
+            -- "src/PresentationAG.ag"(line 1142, column 16)
             (_expOspaces@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1140, column 16)
+            -- "src/PresentationAG.ag"(line 1141, column 16)
             (_expOnewlines@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1139, column 16)
+            -- "src/PresentationAG.ag"(line 1140, column 16)
             (_expOcol@_) =
                 0
-            -- "src/PresentationAG.ag"(line 1260, column 20)
+            -- "src/PresentationAG.ag"(line 1261, column 20)
             (_lhsOpres@_) =
                 loc (HeliumItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ text "<heliumItem>"
                        , row [text "  ", _expIpres]
                        , text "</heliumItem>"
                        ]
-            -- "src/PresentationAG.ag"(line 1372, column 20)
+            -- "src/PresentationAG.ag"(line 1373, column 20)
             (_lhsOpres2@_) =
                 loc (HeliumItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [itemStart _lhsIix _lhsIlistType _lhsItypeLoc, _expIpres
@@ -10102,7 +10103,7 @@ sem_Item_HoleItem  =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1426, column 18)
+            -- "src/PresentationAG.ag"(line 1427, column 18)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "Item" (HoleItemNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 477, column 18)
@@ -10163,14 +10164,14 @@ sem_Item_ListItem (idd_) (itemList_) =
             _itemListOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _itemListIpIdC,_itemListIpres,_itemListIpres2,_itemListIpresTree,_itemListIpresXML,_itemListIself,_itemListIvarsInScopeAtFocus) =
                 (itemList_ (_itemListOfocusD) (_itemListOix) (_itemListOpIdC) (_itemListOpath) (_itemListOranges) (_itemListOvarsInScope) (_itemListOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1265, column 20)
+            -- "src/PresentationAG.ag"(line 1266, column 20)
             (_lhsOpres@_) =
                 loc (ListItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ text "<listItem>"
                        , row [text "  ", _itemListIpres]
                        , text "</listItem>"
                        ]
-            -- "src/PresentationAG.ag"(line 1377, column 20)
+            -- "src/PresentationAG.ag"(line 1378, column 20)
             (_lhsOpres2@_) =
                 loc (ListItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ hSpace 25,
@@ -10237,7 +10238,7 @@ sem_Item_ParseErrItem (node_) (presentation_) =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1427, column 18)
+            -- "src/PresentationAG.ag"(line 1428, column 18)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 478, column 18)
@@ -10295,11 +10296,11 @@ sem_Item_StringItem (idd_) (string_) =
             _stringOpath :: ([Int])
             ( _stringIlength,_stringIpIdC,_stringIpres,_stringIpresTree,_stringIpresXML,_stringIself,_stringIstr) =
                 (string_ (_stringOfocusD) (_stringOix) (_stringOpIdC) (_stringOpath))
-            -- "src/PresentationAG.ag"(line 1258, column 20)
+            -- "src/PresentationAG.ag"(line 1259, column 20)
             (_lhsOpres@_) =
                 loc (StringItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    row' [ text "<stringItem>", _stringIpres `withColor` darkViolet, text "</stringItem>" ]
-            -- "src/PresentationAG.ag"(line 1370, column 20)
+            -- "src/PresentationAG.ag"(line 1371, column 20)
             (_lhsOpres2@_) =
                 loc (StringItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [itemStart _lhsIix _lhsIlistType _lhsItypeLoc, _stringIpres]
@@ -10413,7 +10414,7 @@ sem_ItemList_HoleItemList  =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (ItemList)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1414, column 22)
+            -- "src/PresentationAG.ag"(line 1415, column 22)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "ItemList" (HoleItemListNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 456, column 22)
@@ -10493,20 +10494,20 @@ sem_ItemList_ItemList (idd_) (listType_) (items_) =
                 (listType_ (_listTypeOfocusD) (_listTypeOix) (_listTypeOpIdC) (_listTypeOpath) (_listTypeOranges) (_listTypeOvarsInScope) (_listTypeOvarsInScopeAtFocus))
             ( _itemsIpIdC,_itemsIpres,_itemsIpres2,_itemsIpresTree,_itemsIpresXML,_itemsIpress,_itemsIpress2,_itemsIself,_itemsIvarsInScopeAtFocus) =
                 (items_ (_itemsOfocusD) (_itemsOlistType) (_itemsOpIdC) (_itemsOpath) (_itemsOranges) (_itemsOtypeLoc) (_itemsOvarsInScope) (_itemsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1227, column 14)
+            -- "src/PresentationAG.ag"(line 1228, column 14)
             (_lhsOpres@_) =
                 loc (ItemListNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ row' [ text "<itemList style=", row' [text "\"", _listTypeIpres, text "\""] `withColor` darkViolet, text ">"]
                        , _itemsIpres
                        , text "</itemList>"
                     ]
-            -- "src/PresentationAG.ag"(line 1339, column 13)
+            -- "src/PresentationAG.ag"(line 1340, column 13)
             (_itemsOtypeLoc@_) =
                 _listTypeItypeLoc
-            -- "src/PresentationAG.ag"(line 1338, column 13)
+            -- "src/PresentationAG.ag"(line 1339, column 13)
             (_itemsOlistType@_) =
                 _listTypeIself
-            -- "src/PresentationAG.ag"(line 1333, column 14)
+            -- "src/PresentationAG.ag"(line 1334, column 14)
             (_lhsOpres2@_) =
                 loc (ItemListNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [ _listTypeIpres2
@@ -10588,7 +10589,7 @@ sem_ItemList_ParseErrItemList (node_) (presentation_) =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (ItemList)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1415, column 22)
+            -- "src/PresentationAG.ag"(line 1416, column 22)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 457, column 22)
@@ -10709,14 +10710,14 @@ sem_ListType_Alpha (idd_) =
             _lhsOself :: (ListType)
             _lhsOtypeLoc :: (Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1254, column 20)
+            -- "src/PresentationAG.ag"(line 1255, column 20)
             (_lhsOpres@_) =
                 loc (AlphaNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Alpha"
-            -- "src/PresentationAG.ag"(line 1350, column 20)
+            -- "src/PresentationAG.ag"(line 1351, column 20)
             (_lhsOtypeLoc@_) =
                 loc (AlphaNode _self _lhsIpath)
-            -- "src/PresentationAG.ag"(line 1348, column 20)
+            -- "src/PresentationAG.ag"(line 1349, column 20)
             (_lhsOpres2@_) =
                 loc (AlphaNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -10757,14 +10758,14 @@ sem_ListType_Bullet (idd_) =
             _lhsOself :: (ListType)
             _lhsOtypeLoc :: (Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1250, column 20)
+            -- "src/PresentationAG.ag"(line 1251, column 20)
             (_lhsOpres@_) =
                 loc (BulletNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Bullet"
-            -- "src/PresentationAG.ag"(line 1344, column 20)
+            -- "src/PresentationAG.ag"(line 1345, column 20)
             (_lhsOtypeLoc@_) =
                 loc (BulletNode _self _lhsIpath)
-            -- "src/PresentationAG.ag"(line 1342, column 20)
+            -- "src/PresentationAG.ag"(line 1343, column 20)
             (_lhsOpres2@_) =
                 loc (BulletNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -10804,10 +10805,10 @@ sem_ListType_HoleListType  =
             _lhsOself :: (ListType)
             _lhsOtypeLoc :: (Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1352, column 18)
+            -- "src/PresentationAG.ag"(line 1353, column 18)
             (_lhsOtypeLoc@_) =
                 id
-            -- "src/PresentationAG.ag"(line 1418, column 22)
+            -- "src/PresentationAG.ag"(line 1419, column 22)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "ListType" (HoleListTypeNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 466, column 22)
@@ -10850,14 +10851,14 @@ sem_ListType_Number (idd_) =
             _lhsOself :: (ListType)
             _lhsOtypeLoc :: (Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1252, column 20)
+            -- "src/PresentationAG.ag"(line 1253, column 20)
             (_lhsOpres@_) =
                 loc (NumberNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   text "Number"
-            -- "src/PresentationAG.ag"(line 1347, column 20)
+            -- "src/PresentationAG.ag"(line 1348, column 20)
             (_lhsOtypeLoc@_) =
                 loc (NumberNode _self _lhsIpath)
-            -- "src/PresentationAG.ag"(line 1345, column 20)
+            -- "src/PresentationAG.ag"(line 1346, column 20)
             (_lhsOpres2@_) =
                 loc (NumberNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  empty
@@ -10899,10 +10900,10 @@ sem_ListType_ParseErrListType (node_) (presentation_) =
             _lhsOself :: (ListType)
             _lhsOtypeLoc :: (Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1351, column 22)
+            -- "src/PresentationAG.ag"(line 1352, column 22)
             (_lhsOtypeLoc@_) =
                 id
-            -- "src/PresentationAG.ag"(line 1419, column 22)
+            -- "src/PresentationAG.ag"(line 1420, column 22)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 467, column 22)
@@ -11067,10 +11068,10 @@ sem_List_Alt_HoleList_Alt  =
             _lhsOself :: (List_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 715, column 9)
+            -- "src/PresentationAG.ag"(line 716, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "src/PresentationAG.ag"(line 993, column 7)
+            -- "src/PresentationAG.ag"(line 994, column 7)
             (_lhsOalts@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 537, column 22)
@@ -11299,10 +11300,10 @@ sem_List_Alt_ParseErrList_Alt (node_) (presentation_) =
             _lhsOself :: (List_Alt)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 717, column 9)
+            -- "src/PresentationAG.ag"(line 718, column 9)
             (_lhsOmaxLHSLength@_) =
                 0
-            -- "src/PresentationAG.ag"(line 991, column 7)
+            -- "src/PresentationAG.ag"(line 992, column 7)
             (_lhsOalts@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 538, column 22)
@@ -11486,17 +11487,17 @@ sem_List_Decl_HoleList_Decl  =
             _lhsOself :: (List_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 71, column 7)
+            -- "src/PresentationAG.ag"(line 72, column 7)
             (_lhsOparseErrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 179, column 7)
+            -- "src/PresentationAG.ag"(line 180, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Decls" (HoleList_DeclNode _self _lhsIpath) _lhsIpath
-            -- "src/PresentationAG.ag"(line 923, column 7)
+            -- "src/PresentationAG.ag"(line 924, column 7)
             (_lhsOdcls@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1092, column 23)
+            -- "src/PresentationAG.ag"(line 1093, column 23)
             (_lhsOidsPres@_) =
                 presHole _lhsIfocusD "Decls" (HoleList_DeclNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 511, column 23)
@@ -11604,11 +11605,11 @@ sem_List_Decl_List_Decl (idd_) (elts_) =
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIcol,_eltsIdcls,_eltsIdeclaredVars,_eltsIidsPres,_eltsIlayoutMap,_eltsInewlines,_eltsIpIdC,_eltsIparseErrs,_eltsIpress,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIspaces,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOcol) (_eltsOenv) (_eltsOerrs) (_eltsOfocusD) (_eltsOix) (_eltsOlayoutMap) (_eltsOlevel) (_eltsOnewlines) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOspaces) (_eltsOtopLevelEnv) (_eltsOtypeEnv) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 173, column 7)
+            -- "src/PresentationAG.ag"(line 174, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row _eltsIpress
-            -- "src/PresentationAG.ag"(line 1090, column 23)
+            -- "src/PresentationAG.ag"(line 1091, column 23)
             (_lhsOidsPres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                 _eltsIidsPres
@@ -11741,17 +11742,17 @@ sem_List_Decl_ParseErrList_Decl (node_) (presentation_) =
             _lhsOself :: (List_Decl)
             _lhsOspaces :: (Int)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 69, column 7)
+            -- "src/PresentationAG.ag"(line 70, column 7)
             (_lhsOparseErrs@_) =
                 []
-            -- "src/PresentationAG.ag"(line 176, column 7)
+            -- "src/PresentationAG.ag"(line 177, column 7)
             (_lhsOpres@_) =
                 loc (List_DeclNode _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "src/PresentationAG.ag"(line 921, column 7)
+            -- "src/PresentationAG.ag"(line 922, column 7)
             (_lhsOdcls@_) =
                 []
-            -- "src/PresentationAG.ag"(line 1093, column 23)
+            -- "src/PresentationAG.ag"(line 1094, column 23)
             (_lhsOidsPres@_) =
                 empty
             -- "src/PresentationAG_Generated.ag"(line 512, column 23)
@@ -11926,7 +11927,7 @@ sem_List_Exp_HoleList_Exp  =
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 983, column 7)
+            -- "src/PresentationAG.ag"(line 984, column 7)
             (_lhsOvals@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 563, column 22)
@@ -12143,7 +12144,7 @@ sem_List_Exp_ParseErrList_Exp (node_) (presentation_) =
             _lhsOspaces :: (Int)
             _lhsOvals :: ([Value])
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 981, column 7)
+            -- "src/PresentationAG.ag"(line 982, column 7)
             (_lhsOvals@_) =
                 []
             -- "src/PresentationAG_Generated.ag"(line 564, column 22)
@@ -12277,15 +12278,15 @@ sem_List_Item_HoleList_Item  =
             _lhsOpress2 :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (List_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1245, column 7)
+            -- "src/PresentationAG.ag"(line 1246, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath
-            -- "src/PresentationAG.ag"(line 1364, column 7)
+            -- "src/PresentationAG.ag"(line 1365, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath
-            -- "src/PresentationAG.ag"(line 1422, column 23)
+            -- "src/PresentationAG.ag"(line 1423, column 23)
             (_lhsOpress2@_) =
                 [presHole _lhsIfocusD "Items" (HoleList_ItemNode _self _lhsIpath) _lhsIpath]
             -- "src/PresentationAG_Generated.ag"(line 615, column 23)
@@ -12351,11 +12352,11 @@ sem_List_Item_List_Item (idd_) (elts_) =
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIpIdC,_eltsIpress,_eltsIpress2,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOfocusD) (_eltsOix) (_eltsOlistType) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOtypeLoc) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1239, column 7)
+            -- "src/PresentationAG.ag"(line 1240, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presentList _eltsIpress
-            -- "src/PresentationAG.ag"(line 1358, column 7)
+            -- "src/PresentationAG.ag"(line 1359, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  col' _eltsIpress2
@@ -12436,15 +12437,15 @@ sem_List_Item_ParseErrList_Item (node_) (presentation_) =
             _lhsOpress2 :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (List_Item)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1242, column 7)
+            -- "src/PresentationAG.ag"(line 1243, column 7)
             (_lhsOpres@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "src/PresentationAG.ag"(line 1361, column 7)
+            -- "src/PresentationAG.ag"(line 1362, column 7)
             (_lhsOpres2@_) =
                 loc (List_ItemNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presParseErr node_ presentation_
-            -- "src/PresentationAG.ag"(line 1423, column 23)
+            -- "src/PresentationAG.ag"(line 1424, column 23)
             (_lhsOpress2@_) =
                 [presParseErr node_ presentation_]
             -- "src/PresentationAG_Generated.ag"(line 616, column 23)
@@ -12560,15 +12561,15 @@ sem_List_Slide_HoleList_Slide  =
             _lhsOpress2 :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (List_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1199, column 7)
+            -- "src/PresentationAG.ag"(line 1200, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath
-            -- "src/PresentationAG.ag"(line 1320, column 7)
+            -- "src/PresentationAG.ag"(line 1321, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath
-            -- "src/PresentationAG.ag"(line 1406, column 24)
+            -- "src/PresentationAG.ag"(line 1407, column 24)
             (_lhsOpress2@_) =
                 [presHole _lhsIfocusD "Slides" (HoleList_SlideNode _self _lhsIpath) _lhsIpath]
             -- "src/PresentationAG_Generated.ag"(line 589, column 24)
@@ -12630,11 +12631,11 @@ sem_List_Slide_List_Slide (idd_) (elts_) =
             _eltsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
             ( _eltsIpIdC,_eltsIpress,_eltsIpress2,_eltsIpressTree,_eltsIpressXML,_eltsIself,_eltsIvarsInScopeAtFocus) =
                 (elts_ (_eltsOfocusD) (_eltsOix) (_eltsOpIdC) (_eltsOpath) (_eltsOranges) (_eltsOvarsInScope) (_eltsOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1193, column 7)
+            -- "src/PresentationAG.ag"(line 1194, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presentList _eltsIpress
-            -- "src/PresentationAG.ag"(line 1314, column 7)
+            -- "src/PresentationAG.ag"(line 1315, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) _eltsIpress2
@@ -12707,15 +12708,15 @@ sem_List_Slide_ParseErrList_Slide (node_) (presentation_) =
             _lhsOpress2 :: ([Presentation_Doc_Node_Clip])
             _lhsOself :: (List_Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1196, column 7)
+            -- "src/PresentationAG.ag"(line 1197, column 7)
             (_lhsOpres@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   presParseErr node_ presentation_
-            -- "src/PresentationAG.ag"(line 1317, column 7)
+            -- "src/PresentationAG.ag"(line 1318, column 7)
             (_lhsOpres2@_) =
                 loc (List_SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                  presParseErr node_ presentation_
-            -- "src/PresentationAG.ag"(line 1407, column 24)
+            -- "src/PresentationAG.ag"(line 1408, column 24)
             (_lhsOpress2@_) =
                 [presParseErr node_ presentation_]
             -- "src/PresentationAG_Generated.ag"(line 590, column 24)
@@ -12888,7 +12889,7 @@ sem_PPPresentation_PPPresentation (idd_) (viewType_) (slides_) =
                 (viewType_ (_viewTypeOfocusD) (_viewTypeOix) (_viewTypeOpIdC) (_viewTypeOpath))
             ( _slidesIpIdC,_slidesIpres,_slidesIpres2,_slidesIpresTree,_slidesIpresXML,_slidesIpress,_slidesIpress2,_slidesIself,_slidesIvarsInScopeAtFocus) =
                 (slides_ (_slidesOfocusD) (_slidesOpIdC) (_slidesOpath) (_slidesOranges) (_slidesOvarsInScope) (_slidesOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1166, column 20)
+            -- "src/PresentationAG.ag"(line 1167, column 20)
             (_lhsOpres@_) =
                 loc (PPPresentationNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    col' $ [ row' [
@@ -13074,7 +13075,7 @@ sem_Slide_HoleSlide  =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1410, column 19)
+            -- "src/PresentationAG.ag"(line 1411, column 19)
             (_lhsOpres2@_) =
                 presHole _lhsIfocusD "Slide" (HoleSlideNode _self _lhsIpath) _lhsIpath
             -- "src/PresentationAG_Generated.ag"(line 443, column 19)
@@ -13117,7 +13118,7 @@ sem_Slide_ParseErrSlide (node_) (presentation_) =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (Slide)
             _lhsOvarsInScopeAtFocus :: (FiniteMap String (PathDoc, String))
-            -- "src/PresentationAG.ag"(line 1411, column 19)
+            -- "src/PresentationAG.ag"(line 1412, column 19)
             (_lhsOpres2@_) =
                 presParseErr node_ presentation_
             -- "src/PresentationAG_Generated.ag"(line 444, column 19)
@@ -13190,7 +13191,7 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
                 (title_ (_titleOfocusD) (_titleOix) (_titleOpIdC) (_titleOpath))
             ( _itemListIpIdC,_itemListIpres,_itemListIpres2,_itemListIpresTree,_itemListIpresXML,_itemListIself,_itemListIvarsInScopeAtFocus) =
                 (itemList_ (_itemListOfocusD) (_itemListOix) (_itemListOpIdC) (_itemListOpath) (_itemListOranges) (_itemListOvarsInScope) (_itemListOvarsInScopeAtFocus))
-            -- "src/PresentationAG.ag"(line 1213, column 11)
+            -- "src/PresentationAG.ag"(line 1214, column 11)
             (_lhsOpres@_) =
                 loc (SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                   col' [ row' [ text "<slide>", row' [ text "<title>", _titleIpres `withColor` darkViolet , text "</title>"
@@ -13198,7 +13199,7 @@ sem_Slide_Slide (idd_) (title_) (itemList_) =
                        , row' [ text "  ", _itemListIpres ]
                        , text "</slide>"
                        ]
-            -- "src/PresentationAG.ag"(line 1325, column 11)
+            -- "src/PresentationAG.ag"(line 1326, column 11)
             (_lhsOpres2@_) =
                 loc (SlideNode _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                    slide _titleIpres
@@ -13326,10 +13327,10 @@ sem_String__HoleString_  =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "src/PresentationAG.ag"(line 1464, column 13)
+            -- "src/PresentationAG.ag"(line 1465, column 13)
             (_lhsOstr@_) =
                 ""
-            -- "src/PresentationAG.ag"(line 1463, column 13)
+            -- "src/PresentationAG.ag"(line 1464, column 13)
             (_lhsOlength@_) =
                 0
             -- "src/PresentationAG_Generated.ag"(line 488, column 21)
@@ -13366,10 +13367,10 @@ sem_String__ParseErrString_ (node_) (presentation_) =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "src/PresentationAG.ag"(line 1464, column 13)
+            -- "src/PresentationAG.ag"(line 1465, column 13)
             (_lhsOstr@_) =
                 ""
-            -- "src/PresentationAG.ag"(line 1463, column 13)
+            -- "src/PresentationAG.ag"(line 1464, column 13)
             (_lhsOlength@_) =
                 0
             -- "src/PresentationAG_Generated.ag"(line 489, column 21)
@@ -13406,14 +13407,14 @@ sem_String__String_ (idd_) (string_) =
             _lhsOpresXML :: (Presentation_Doc_Node_Clip)
             _lhsOself :: (String_)
             _lhsOstr :: (String)
-            -- "src/PresentationAG.ag"(line 1456, column 7)
+            -- "src/PresentationAG.ag"(line 1457, column 7)
             (_lhsOpres@_) =
                 loc (String_Node _self _lhsIpath) $ parsing $ presentFocus _lhsIfocusD _lhsIpath $
                   row' [text string_, text ""]
-            -- "src/PresentationAG.ag"(line 1461, column 13)
+            -- "src/PresentationAG.ag"(line 1462, column 13)
             (_lhsOstr@_) =
                 string_
-            -- "src/PresentationAG.ag"(line 1460, column 13)
+            -- "src/PresentationAG.ag"(line 1461, column 13)
             (_lhsOlength@_) =
                 length string_
             -- "src/PresentationAG_Generated.ag"(line 782, column 7)
