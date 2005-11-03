@@ -27,7 +27,6 @@ import DocumentEdit_Generated
 
 INCLUDE "PresentationAG_Generated.ag"
 INCLUDE "LambdaReduce.ag"
-INCLUDE "InvPresentation.ag"
 
 {-
 

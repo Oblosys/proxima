@@ -22,6 +22,8 @@ all: $(MAIN)
 PROXIMADIR = ../proxima
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
+
+AGC       = $(PROXIMABINDIR)/uuagc$(EXE)
 GENERATOR = $(PROXIMABINDIR)/generate
 
 
@@ -74,14 +76,7 @@ EDITORSRCS = \
 	src/DocTypes_Generated.hs \
 	src/DocUtils_Generated.hs \
 	src/DocumentEdit_Generated.hs \
-	src/EvaluateInv.lhs \
 	src/EvaluateTypesStubs.hs \
-	src/GetPut.lhs \
-	src/View.lhs \
-	src/X.lhs \
-	src/XParse.lhs \
-	src/XPrelude.lhs \
-	src/Error.lhs \
 	src/Evaluator.hs \
 	src/Reducer.hs \
 	src/Scanner.hs \
@@ -110,6 +105,25 @@ src/DocTypes_Generated.hs : src/DocumentType.hs
 	cd $(PROXIMASRCDIR); make generator
 	$(GENERATOR) src src/DocumentType.hs
 
+
+# The presentation AG
+
+# target for only compiling presentationAG, useful when working with GHCi
+presenter: src/PresentationAG.hs
+	
+# TODO: make dependencies easy to see and to maintain (important for editor builder)
+
+src/PresentationAG.hs : $(AGC) \
+	src/PresentationAG.ag \
+	src/PresentationAG_Generated.ag \
+	src/LambdaReduce.ag \
+	
+	@echo "Compiling presentationAG.ag"
+	$(AGC) -o src/PresentationAG.hs \
+	-cfmspw --self --module=PresentationAG \
+	src/PresentationAG.ag -P src
+
+# --module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 
 # The main target
 
@@ -1304,20 +1318,6 @@ src/CompileHelium.o : ../heliumNT/src/staticanalysis/inferencers/TypeInferencing
 src/CompileHelium.o : ../heliumNT/src/main/PhaseTypingStrategies.hi
 src/CompileHelium.o : ../heliumNT/src/main/PhaseStaticChecks.hi
 src/CompileHelium.o : ../heliumNT/src/main/PhaseImport.hi
-src/X.o : src/X.lhs
-src/Error.o : src/Error.lhs
-src/Error.o : src/X.hi
-src/View.o : src/View.lhs
-src/XParse.o : src/XParse.lhs
-src/XParse.o : src/View.hi
-src/XParse.o : src/X.hi
-src/XPrelude.o : src/XPrelude.lhs
-src/XPrelude.o : src/X.hi
-src/XPrelude.o : src/View.hi
-src/GetPut.o : src/GetPut.lhs
-src/GetPut.o : src/Error.hi
-src/GetPut.o : src/X.hi
-src/GetPut.o : src/View.hi
 src/DocTypes_Generated.o : src/DocTypes_Generated.hs
 src/DocTypes_Generated.o : ../proxima/src/presentation/PresTypes.hi
 src/DocTypes_Generated.o : ../proxima/src/evaluation/DocTypes.hi
@@ -1333,22 +1333,11 @@ src/DocumentEdit_Generated.o : ../proxima/src/evaluation/DocumentEdit.hi
 src/DocumentEdit_Generated.o : src/DocTypes_Generated.hi
 src/DocumentEdit_Generated.o : ../proxima/src/evaluation/DocTypes.hi
 src/DocumentEdit_Generated.o : ../proxima/src/common/CommonTypes.hi
-src/EvaluateInv.o : src/EvaluateInv.lhs
-src/EvaluateInv.o : ../proxima/src/common/CommonTypes.hi
-src/EvaluateInv.o : src/DocTypes_Generated.hi
-src/EvaluateInv.o : ../proxima/src/evaluation/DocTypes.hi
-src/EvaluateInv.o : src/DocTypes_Generated.hi
-src/EvaluateInv.o : src/GetPut.hi
-src/EvaluateInv.o : src/XPrelude.hi
-src/EvaluateInv.o : src/XParse.hi
-src/EvaluateInv.o : src/X.hi
-src/EvaluateInv.o : src/View.hi
 src/EvaluateTypesStubs.o : src/EvaluateTypesStubs.hs
 src/EvaluateTypesStubs.o : ../proxima/src/common/DebugLevels.hi
 src/EvaluateTypesStubs.o : src/DocTypes_Generated.hi
 src/EvaluateTypesStubs.o : ../proxima/src/evaluation/DocTypes.hi
 src/Evaluator.o : src/Evaluator.hs
-src/Evaluator.o : src/EvaluateInv.hi
 src/Evaluator.o : src/EvaluateTypesStubs.hi
 src/Evaluator.o : src/DocTypes_Generated.hi
 src/Evaluator.o : src/DocumentEdit_Generated.hi
@@ -1357,7 +1346,6 @@ src/Evaluator.o : ../proxima/src/evaluation/EvalLayerUtils.hi
 src/Evaluator.o : ../proxima/src/evaluation/EvalLayerTypes.hi
 src/Evaluator.o : ../proxima/src/common/CommonTypes.hi
 src/Reducer.o : src/Reducer.hs
-src/Reducer.o : src/EvaluateInv.hi
 src/Reducer.o : src/DocUtils_Generated.hi
 src/Reducer.o : src/DocTypes_Generated.hi
 src/Reducer.o : ../proxima/src/presentation/PresTypes.hi

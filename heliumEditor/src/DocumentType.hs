@@ -7,7 +7,6 @@ data EnrichedDoc = RootEnr idListDecls:[Decl] decls:[Decl] HeliumTypeInfo Docume
 data Decl = Decl expanded:Bool_ autoLayout:Bool_ Ident Exp { idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP }
           | BoardDecl Board                              { idD: IDD idP0:IDP idP1:IDP }
           | PPPresentationDecl PPPresentation            { idD: IDD idP0:IDP idP1:IDP }
-          | InvDecl inv:Inv                              { idD: IDD idP0:IDP idP1:IDP }
 
 -- one pres elt for in program source, other for in list
 -- however, only the one for source is used, the other has no layout
@@ -60,33 +59,6 @@ data Item = StringItem string : String_                  { idd : IDD }
           | HeliumItem Exp                               { idd : IDD }
           | ListItem ItemList                            { idd : IDD }
 
-data Inv = Inv doc:EitherDocView enr:View eval:String_ EvalButton { idd : IDD }
-
-data EvalButton = ReEvaluate1                            { idd: IDD }
-                | ReEvaluate2                            { idd: IDD }
-                | Skip                                   { idd: IDD }
-
--- incorrect name, should be EitherStringView
-data EitherDocView = LeftDocView error:String_           { idd : IDD }
-                   | RightDocView doc:View               { idd : IDD }
-
-
-data View = ANil                                         { idd : IDD }
-          | AN Int_                                      { idd : IDD }
-          | AS String_                                   { idd : IDD }
-          | Pr view1:View view2:View                     { idd : IDD }
-          | Ls view1:View view2:View                     { idd : IDD }
-          | Tr view1:View view2:View                     { idd : IDD }
-          | L View                                       { idd : IDD }
-          | R View                                       { idd : IDD }
-          | Mark View                                    { idd : IDD }
-          | DelL view1:View view2:View                   { idd : IDD }
-          | InsL view1:View view2:View                   { idd : IDD }
-          | SndP Bool_ view1:View view2:View             { idd : IDD }
-          | FstP Bool_ view1:View view2:View             { idd : IDD }
-          | IfNil Bool_ View                             { idd : IDD }
-          | Undef                                        { idd : IDD }
-          | Unit                                         { idd : IDD }
           
 -- Primitive boxed string
 -- use same name for field?

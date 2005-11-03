@@ -10,7 +10,6 @@ import PresTypes -- for initDoc
 import DocTypes_Generated
 import DocUtils_Generated
 
-import qualified EvaluateInv
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 reductionSheet :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
@@ -63,8 +62,7 @@ reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel D
 reduceEnrIO state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
  do { let dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
           -- dcls' = dcls -- ignore updates on id list
-    ; dcls'' <- reduceList_Decl dcls'
-    ; return (SetDoc (RootDoc idd idp dcls''),state, enrDoc )
+    ; return (SetDoc (RootDoc idd idp dcls'),state, enrDoc )
     }
 --
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = return $ -- other cases, just copy from decls
@@ -104,57 +102,6 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 -- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"?
 
 
-
-
-
-
-
-reduceInvLevel :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel doc clip ->
-                  IO (Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceInvLevel state enrDocLvl@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) docLevel =
- do { dcls'' <- reduceList_Decl dcls
- --   ; dcls'' <- return $ evalList_Decl dcls'
-    ; return ((RootDoc idd idp dcls''),state, enrDocLvl )
-    }
-
-reduceList_Decl :: List_Decl -> IO List_Decl
-reduceList_Decl (List_Decl idd clst) =
-  do { clst' <- reduceInvConsList_Decl clst
-     ; return $ List_Decl idd clst'
-     }
-reduceList_Decl lst = return $ lst -- Hole or parseErr
-
-reduceInvConsList_Decl :: ConsList_Decl -> IO ConsList_Decl
-reduceInvConsList_Decl Nil_Decl             = return $ Nil_Decl
-reduceInvConsList_Decl (Cons_Decl dcl clst) =
-  do { dcl'  <- reduceInvDecl dcl
-     ; clst' <- reduceInvConsList_Decl clst
-     ; return $ Cons_Decl dcl' clst'
-     }
-
-reduceInvDecl :: Decl -> IO Decl
-reduceInvDecl (InvDecl idd idp0 idp1 inv) =
-  do { inv' <- reduceInv inv
-     ; return $ InvDecl idd idp0 idp1 inv'
-     }
-reduceInvDecl dcl = return dcl
-
-
-
-reduceInv :: Inv -> IO Inv
-reduceInv inv@(Inv idd errDoc enr eval button) = 
-  do { errDoc' <- reduceInvView eval enr
-     ; enr'    <- evalErrDoc eval errDoc' enr
-     ; return $ Inv idd errDoc' enr' eval (Skip NoIDD) 
-     }
-reduceInv inv = return inv
-
-reduceInvView :: String_ -> View -> IO EitherDocView
-reduceInvView eval view = EvaluateInv.reduce (string_ eval) view
-
-
-evalErrDoc :: String_ -> EitherDocView -> View -> IO View
-evalErrDoc eval errDoc oldEnr = EvaluateInv.evaluate (string_ eval) errDoc oldEnr
 
 
 

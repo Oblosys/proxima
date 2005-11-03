@@ -186,7 +186,6 @@ instance Clip ClipDoc where
   arityClip (Clip_Exp x) = arity x
   arityClip (Clip_Board x) = arity x
   arityClip (Clip_PPPresentation x) = arity x
-  arityClip (Clip_Inv x) = arity x
   arityClip (Clip_String_ x) = arity x
   arityClip (Clip_Int_ x) = arity x
   arityClip (Clip_List_Alt x) = arity x
@@ -197,9 +196,6 @@ instance Clip ClipDoc where
   arityClip (Clip_ItemList x) = arity x
   arityClip (Clip_ListType x) = arity x
   arityClip (Clip_List_Item x) = arity x
-  arityClip (Clip_EitherDocView x) = arity x
-  arityClip (Clip_View x) = arity x
-  arityClip (Clip_EvalButton x) = arity x
   arityClip (Clip_String x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
@@ -216,7 +212,6 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Exp x) = alternatives x
   alternativesClip (Clip_Board x) = alternatives x
   alternativesClip (Clip_PPPresentation x) = alternatives x
-  alternativesClip (Clip_Inv x) = alternatives x
   alternativesClip (Clip_String_ x) = alternatives x
   alternativesClip (Clip_Int_ x) = alternatives x
   alternativesClip (Clip_List_Alt x) = alternatives x
@@ -227,9 +222,6 @@ instance Clip ClipDoc where
   alternativesClip (Clip_ItemList x) = alternatives x
   alternativesClip (Clip_ListType x) = alternatives x
   alternativesClip (Clip_List_Item x) = alternatives x
-  alternativesClip (Clip_EitherDocView x) = alternatives x
-  alternativesClip (Clip_View x) = alternatives x
-  alternativesClip (Clip_EvalButton x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
@@ -247,7 +239,6 @@ instance Clip ClipDoc where
   holeClip (Clip_Exp x) = Clip_Exp hole
   holeClip (Clip_Board x) = Clip_Board hole
   holeClip (Clip_PPPresentation x) = Clip_PPPresentation hole
-  holeClip (Clip_Inv x) = Clip_Inv hole
   holeClip (Clip_String_ x) = Clip_String_ hole
   holeClip (Clip_Int_ x) = Clip_Int_ hole
   holeClip (Clip_List_Alt x) = Clip_List_Alt hole
@@ -258,9 +249,6 @@ instance Clip ClipDoc where
   holeClip (Clip_ItemList x) = Clip_ItemList hole
   holeClip (Clip_ListType x) = Clip_ListType hole
   holeClip (Clip_List_Item x) = Clip_List_Item hole
-  holeClip (Clip_EitherDocView x) = Clip_EitherDocView hole
-  holeClip (Clip_View x) = Clip_View hole
-  holeClip (Clip_EvalButton x) = Clip_EvalButton hole
   holeClip (Clip_String x) = Clip_String hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
@@ -278,7 +266,6 @@ instance Clip ClipDoc where
   isListClip (Clip_Exp x) = isList x
   isListClip (Clip_Board x) = isList x
   isListClip (Clip_PPPresentation x) = isList x
-  isListClip (Clip_Inv x) = isList x
   isListClip (Clip_String_ x) = isList x
   isListClip (Clip_Int_ x) = isList x
   isListClip (Clip_List_Alt x) = isList x
@@ -289,9 +276,6 @@ instance Clip ClipDoc where
   isListClip (Clip_ItemList x) = isList x
   isListClip (Clip_ListType x) = isList x
   isListClip (Clip_List_Item x) = isList x
-  isListClip (Clip_EitherDocView x) = isList x
-  isListClip (Clip_View x) = isList x
-  isListClip (Clip_EvalButton x) = isList x
   isListClip (Clip_String x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
@@ -309,7 +293,6 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Exp x) = insertList i c x
   insertListClip i c (Clip_Board x) = insertList i c x
   insertListClip i c (Clip_PPPresentation x) = insertList i c x
-  insertListClip i c (Clip_Inv x) = insertList i c x
   insertListClip i c (Clip_String_ x) = insertList i c x
   insertListClip i c (Clip_Int_ x) = insertList i c x
   insertListClip i c (Clip_List_Alt x) = insertList i c x
@@ -320,9 +303,6 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_ItemList x) = insertList i c x
   insertListClip i c (Clip_ListType x) = insertList i c x
   insertListClip i c (Clip_List_Item x) = insertList i c x
-  insertListClip i c (Clip_EitherDocView x) = insertList i c x
-  insertListClip i c (Clip_View x) = insertList i c x
-  insertListClip i c (Clip_EvalButton x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
@@ -340,7 +320,6 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Exp x) = removeList i x
   removeListClip i (Clip_Board x) = removeList i x
   removeListClip i (Clip_PPPresentation x) = removeList i x
-  removeListClip i (Clip_Inv x) = removeList i x
   removeListClip i (Clip_String_ x) = removeList i x
   removeListClip i (Clip_Int_ x) = removeList i x
   removeListClip i (Clip_List_Alt x) = removeList i x
@@ -351,9 +330,6 @@ instance Clip ClipDoc where
   removeListClip i (Clip_ItemList x) = removeList i x
   removeListClip i (Clip_ListType x) = removeList i x
   removeListClip i (Clip_List_Item x) = removeList i x
-  removeListClip i (Clip_EitherDocView x) = removeList i x
-  removeListClip i (Clip_View x) = removeList i x
-  removeListClip i (Clip_EvalButton x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
@@ -376,7 +352,6 @@ instance Editable Decl Document Node ClipDoc where
   select (3:p) (Decl _ _ _ _ _ x1 x2 x3 x4) = select p x4
   select (0:p) (BoardDecl _ _ _ x1) = select p x1
   select (0:p) (PPPresentationDecl _ _ _ x1) = select p x1
-  select (0:p) (InvDecl _ _ _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Decl c) _      = c
@@ -387,20 +362,17 @@ instance Editable Decl Document Node ClipDoc where
   paste (3:p) c (Decl i1 i2 i3 i4 i5 x1 x2 x3 x4) = Decl i1 i2 i3 i4 i5 x1 x2 x3 (paste p c x4)
   paste (0:p) c (BoardDecl i1 i2 i3 x1) = BoardDecl i1 i2 i3 (paste p c x1)
   paste (0:p) c (PPPresentationDecl i1 i2 i3 x1) = PPPresentationDecl i1 i2 i3 (paste p c x1)
-  paste (0:p) c (InvDecl i1 i2 i3 x1) = InvDecl i1 i2 i3 (paste p c x1)
   paste _  _  x                    = x
 
   alternatives _ = [("Decl {Bool_} {Bool_} {Ident} {Exp} "  , Clip_Decl $ Decl NoIDD NoIDP NoIDP NoIDP NoIDP hole hole hole hole)
                    ,("BoardDecl {Board} "  , Clip_Decl $ BoardDecl NoIDD NoIDP NoIDP hole)
                    ,("PPPresentationDecl {PPPresentation} "  , Clip_Decl $ PPPresentationDecl NoIDD NoIDP NoIDP hole)
-                   ,("InvDecl {Inv} "  , Clip_Decl $ InvDecl NoIDD NoIDP NoIDP hole)
                    ,("{Decl}", Clip_Decl hole)
                    ]
 
   arity (Decl _ _ _ _ _ x1 x2 x3 x4) = 4
   arity (BoardDecl _ _ _ x1) = 1
   arity (PPPresentationDecl _ _ _ x1) = 1
-  arity (InvDecl _ _ _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrDecl
@@ -847,200 +819,6 @@ instance Editable Item Document Node ClipDoc where
   parseErr = ParseErrItem
 
   hole = HoleItem
-
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-
-instance Editable Inv Document Node ClipDoc where
-  select []    x                  = Clip_Inv x
-  select (0:p) (Inv _ x1 x2 x3 x4) = select p x1
-  select (1:p) (Inv _ x1 x2 x3 x4) = select p x2
-  select (2:p) (Inv _ x1 x2 x3 x4) = select p x3
-  select (3:p) (Inv _ x1 x2 x3 x4) = select p x4
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_Inv c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Inv")   x
-  paste (0:p) c (Inv i1 x1 x2 x3 x4) = Inv i1 (paste p c x1) x2 x3 x4
-  paste (1:p) c (Inv i1 x1 x2 x3 x4) = Inv i1 x1 (paste p c x2) x3 x4
-  paste (2:p) c (Inv i1 x1 x2 x3 x4) = Inv i1 x1 x2 (paste p c x3) x4
-  paste (3:p) c (Inv i1 x1 x2 x3 x4) = Inv i1 x1 x2 x3 (paste p c x4)
-  paste _  _  x                    = x
-
-  alternatives _ = [("Inv {EitherDocView} {View} {String_} {EvalButton} "  , Clip_Inv $ Inv NoIDD hole hole hole hole)
-                   ,("{Inv}", Clip_Inv hole)
-                   ]
-
-  arity (Inv _ x1 x2 x3 x4) = 4
-  arity _                        = 0
-
-  parseErr = ParseErrInv
-
-  hole = HoleInv
-
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-
-instance Editable EvalButton Document Node ClipDoc where
-  select []    x                  = Clip_EvalButton x
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_EvalButton c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on EvalButton")   x
-  paste _  _  x                    = x
-
-  alternatives _ = [("ReEvaluate1 "  , Clip_EvalButton $ ReEvaluate1 NoIDD)
-                   ,("ReEvaluate2 "  , Clip_EvalButton $ ReEvaluate2 NoIDD)
-                   ,("Skip "  , Clip_EvalButton $ Skip NoIDD)
-                   ,("{EvalButton}", Clip_EvalButton hole)
-                   ]
-
-  arity (ReEvaluate1 _) = 0
-  arity (ReEvaluate2 _) = 0
-  arity (Skip _) = 0
-  arity _                        = 0
-
-  parseErr = ParseErrEvalButton
-
-  hole = HoleEvalButton
-
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-
-instance Editable EitherDocView Document Node ClipDoc where
-  select []    x                  = Clip_EitherDocView x
-  select (0:p) (LeftDocView _ x1) = select p x1
-  select (0:p) (RightDocView _ x1) = select p x1
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_EitherDocView c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on EitherDocView")   x
-  paste (0:p) c (LeftDocView i1 x1) = LeftDocView i1 (paste p c x1)
-  paste (0:p) c (RightDocView i1 x1) = RightDocView i1 (paste p c x1)
-  paste _  _  x                    = x
-
-  alternatives _ = [("LeftDocView {String_} "  , Clip_EitherDocView $ LeftDocView NoIDD hole)
-                   ,("RightDocView {View} "  , Clip_EitherDocView $ RightDocView NoIDD hole)
-                   ,("{EitherDocView}", Clip_EitherDocView hole)
-                   ]
-
-  arity (LeftDocView _ x1) = 1
-  arity (RightDocView _ x1) = 1
-  arity _                        = 0
-
-  parseErr = ParseErrEitherDocView
-
-  hole = HoleEitherDocView
-
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-
-instance Editable View Document Node ClipDoc where
-  select []    x                  = Clip_View x
-  select (0:p) (AN _ x1) = select p x1
-  select (0:p) (AS _ x1) = select p x1
-  select (0:p) (Pr _ x1 x2) = select p x1
-  select (1:p) (Pr _ x1 x2) = select p x2
-  select (0:p) (Ls _ x1 x2) = select p x1
-  select (1:p) (Ls _ x1 x2) = select p x2
-  select (0:p) (Tr _ x1 x2) = select p x1
-  select (1:p) (Tr _ x1 x2) = select p x2
-  select (0:p) (L _ x1) = select p x1
-  select (0:p) (R _ x1) = select p x1
-  select (0:p) (Mark _ x1) = select p x1
-  select (0:p) (DelL _ x1 x2) = select p x1
-  select (1:p) (DelL _ x1 x2) = select p x2
-  select (0:p) (InsL _ x1 x2) = select p x1
-  select (1:p) (InsL _ x1 x2) = select p x2
-  select (0:p) (SndP _ x1 x2 x3) = select p x1
-  select (1:p) (SndP _ x1 x2 x3) = select p x2
-  select (2:p) (SndP _ x1 x2 x3) = select p x3
-  select (0:p) (FstP _ x1 x2 x3) = select p x1
-  select (1:p) (FstP _ x1 x2 x3) = select p x2
-  select (2:p) (FstP _ x1 x2 x3) = select p x3
-  select (0:p) (IfNil _ x1 x2) = select p x1
-  select (1:p) (IfNil _ x1 x2) = select p x2
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_View c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on View")   x
-  paste (0:p) c (AN i1 x1) = AN i1 (paste p c x1)
-  paste (0:p) c (AS i1 x1) = AS i1 (paste p c x1)
-  paste (0:p) c (Pr i1 x1 x2) = Pr i1 (paste p c x1) x2
-  paste (1:p) c (Pr i1 x1 x2) = Pr i1 x1 (paste p c x2)
-  paste (0:p) c (Ls i1 x1 x2) = Ls i1 (paste p c x1) x2
-  paste (1:p) c (Ls i1 x1 x2) = Ls i1 x1 (paste p c x2)
-  paste (0:p) c (Tr i1 x1 x2) = Tr i1 (paste p c x1) x2
-  paste (1:p) c (Tr i1 x1 x2) = Tr i1 x1 (paste p c x2)
-  paste (0:p) c (L i1 x1) = L i1 (paste p c x1)
-  paste (0:p) c (R i1 x1) = R i1 (paste p c x1)
-  paste (0:p) c (Mark i1 x1) = Mark i1 (paste p c x1)
-  paste (0:p) c (DelL i1 x1 x2) = DelL i1 (paste p c x1) x2
-  paste (1:p) c (DelL i1 x1 x2) = DelL i1 x1 (paste p c x2)
-  paste (0:p) c (InsL i1 x1 x2) = InsL i1 (paste p c x1) x2
-  paste (1:p) c (InsL i1 x1 x2) = InsL i1 x1 (paste p c x2)
-  paste (0:p) c (SndP i1 x1 x2 x3) = SndP i1 (paste p c x1) x2 x3
-  paste (1:p) c (SndP i1 x1 x2 x3) = SndP i1 x1 (paste p c x2) x3
-  paste (2:p) c (SndP i1 x1 x2 x3) = SndP i1 x1 x2 (paste p c x3)
-  paste (0:p) c (FstP i1 x1 x2 x3) = FstP i1 (paste p c x1) x2 x3
-  paste (1:p) c (FstP i1 x1 x2 x3) = FstP i1 x1 (paste p c x2) x3
-  paste (2:p) c (FstP i1 x1 x2 x3) = FstP i1 x1 x2 (paste p c x3)
-  paste (0:p) c (IfNil i1 x1 x2) = IfNil i1 (paste p c x1) x2
-  paste (1:p) c (IfNil i1 x1 x2) = IfNil i1 x1 (paste p c x2)
-  paste _  _  x                    = x
-
-  alternatives _ = [("ANil "  , Clip_View $ ANil NoIDD)
-                   ,("AN {Int_} "  , Clip_View $ AN NoIDD hole)
-                   ,("AS {String_} "  , Clip_View $ AS NoIDD hole)
-                   ,("Pr {View} {View} "  , Clip_View $ Pr NoIDD hole hole)
-                   ,("Ls {View} {View} "  , Clip_View $ Ls NoIDD hole hole)
-                   ,("Tr {View} {View} "  , Clip_View $ Tr NoIDD hole hole)
-                   ,("L {View} "  , Clip_View $ L NoIDD hole)
-                   ,("R {View} "  , Clip_View $ R NoIDD hole)
-                   ,("Mark {View} "  , Clip_View $ Mark NoIDD hole)
-                   ,("DelL {View} {View} "  , Clip_View $ DelL NoIDD hole hole)
-                   ,("InsL {View} {View} "  , Clip_View $ InsL NoIDD hole hole)
-                   ,("SndP {Bool_} {View} {View} "  , Clip_View $ SndP NoIDD hole hole hole)
-                   ,("FstP {Bool_} {View} {View} "  , Clip_View $ FstP NoIDD hole hole hole)
-                   ,("IfNil {Bool_} {View} "  , Clip_View $ IfNil NoIDD hole hole)
-                   ,("Undef "  , Clip_View $ Undef NoIDD)
-                   ,("Unit "  , Clip_View $ Unit NoIDD)
-                   ,("{View}", Clip_View hole)
-                   ]
-
-  arity (ANil _) = 0
-  arity (AN _ x1) = 1
-  arity (AS _ x1) = 1
-  arity (Pr _ x1 x2) = 2
-  arity (Ls _ x1 x2) = 2
-  arity (Tr _ x1 x2) = 2
-  arity (L _ x1) = 1
-  arity (R _ x1) = 1
-  arity (Mark _ x1) = 1
-  arity (DelL _ x1 x2) = 2
-  arity (InsL _ x1 x2) = 2
-  arity (SndP _ x1 x2 x3) = 3
-  arity (FstP _ x1 x2 x3) = 3
-  arity (IfNil _ x1 x2) = 2
-  arity (Undef _) = 0
-  arity (Unit _) = 0
-  arity _                        = 0
-
-  parseErr = ParseErrView
-
-  hole = HoleView
 
 
   isList _ = False
