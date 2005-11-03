@@ -53,7 +53,7 @@ AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 PROXIMAOBJSFILE = $(PROXIMABINDIR)/proximaObjs.txt
 
-HC	= /usr/local/bin/ghc
+HC	= /c/apps/ghc/bin/ghc
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -package lang \
 		-package wx -package util -package net -package data -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
