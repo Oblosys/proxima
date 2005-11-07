@@ -130,6 +130,9 @@ presenter: src/PresentationAG.hs
 	
 # TODO: make dependencies easy to see and to maintain (important for editor builder)
 
+$(AGC):
+	cd $(PROXIMASRCDIR); make agc
+
 src/PresentationAG.hs : $(AGC) \
 	src/PresentationAG.ag \
 	src/PresentationAG_Generated.ag \
