@@ -4,7 +4,7 @@ import DocTypes
 import DocTypes_Generated
 
 import DebugLevels
-import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary
+import System.IO.Unsafe -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
 import Data.FiniteMap
 
