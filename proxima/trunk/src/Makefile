@@ -221,6 +221,9 @@ $(GEN): $(GENERATOROBJS)
 
 # The AG compiler
 # no dependencies, uuagc is assumed not to be modified
+
+agc: $(AGC)
+
 $(AGC): 
 	ghc --make -o $(AGC) ../../uust/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i../../uust/tools/ag:../../uust/lib/ddata:../../uust/lib/pretty:../../uust/lib/scanner:../../uust/lib/util:../../uust/lib/parsing
 
