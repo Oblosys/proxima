@@ -1,1 +1,0 @@
-..\..\..\uust\tools\ag\uuagc -cfmspw --self PresentationAG.ag
