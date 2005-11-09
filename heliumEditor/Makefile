@@ -93,7 +93,7 @@ IFACES = src:$(PROXIMAIFACES):$(HELIUMIFACES)
 
 
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
-		-package wx -package util -package net -package data -package parsec\
+		-package wx -package parsec\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
 
 
