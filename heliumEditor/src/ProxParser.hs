@@ -31,7 +31,7 @@ set = Just
 
 parsePres pres = let tokens = postScanStr pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in   showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"\nhas result:") $
+                 in --  showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"\nhas result:") $
                     if null errs then Just enr else Nothing
        
 deepShowTks i tok = case tok of
@@ -149,11 +149,13 @@ recognizeItem = pStr $
      <*> recognizeItemList
 
 
--- TODO: problem, structural and parsing are now different tokens
-recognizeExp = pStr $ -- div&power recognizers are copied here, separating is hard because parse cannot fail on structural token
-         pSym parsingTk
-      *> parseExp
-  <|>    (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
+recognizeExp =
+         recognizeExp'
+  <|>    pPrs parseExp
+         
+
+recognizeExp' = pStr $
+         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
      <$> pStructural DivExpNode
      <*> recognizeExp
      <*> recognizeExp
@@ -297,19 +299,6 @@ parseFactor'' =
   <|> parseCaseExp
   <|> parseLetExp
   <|> recognizeExp'
-
--- **  can recognizeExp and recognizeExp' be merged?
-recognizeExp' = pStr $ 
-         (\str e1 e2 -> reuseDivExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
-     <$> pStructural PowerExpNode
-     <*> recognizeExp
-     <*> recognizeExp
-  <|>    (\str e1 e2 -> reusePowerExp [tokenNode str] Nothing Nothing (Just e1) (Just e2))
-     <$> pStructural PowerExpNode
-     <*> recognizeExp
-     <*> recognizeExp
-  <|>    HoleExp
-     <$ pStructural HoleExpNode
      
 parseIdent = 
          (\strTk -> reuseIdent [tokenNode strTk] Nothing (Just $ tokenIDP strTk) Nothing (Just $ mkString_ strTk))
@@ -371,7 +360,7 @@ pFalse  = pKey "False"
 -------------------- more or less primitive parsers: (because int & bool are unboxed) -- not anymore
 
 -- parseString needs to parse the ParseToken, rewrite, so it doesn't use reuseString
-parseString_ = pStr $
+parseString_ = pPrs $
 --           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
           mkString_
      <$   pSym parsingTk
