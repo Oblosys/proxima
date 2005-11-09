@@ -31,7 +31,7 @@ data EditDocument' documentLevel doc = -- Document in SetDoc' should be a Docume
   | NavRightDoc'
   | CutDoc'
   | CopyDoc'
-   | PasteDoc'
+  | PasteDoc'
   | DeleteDoc'
   | EvaluateDoc' -- for type evaluation
   | SkipDoc' Int
