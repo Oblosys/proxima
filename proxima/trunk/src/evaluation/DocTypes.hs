@@ -18,26 +18,9 @@ type PathD = [Int] -- we don't use PathDoc because NoPath makes algorithms unrea
 
 data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
 
+
 class HasPath node where
   pathNode :: node -> PathDoc
-
-{-
-data PathDoc = PathD [Int]
-             | NoPathD deriving (Show, Eq, Ord)
-
-type FocusDoc = PathDoc  -- just a simple path focus for now
-
-type PathD = [Int] -- we don't use PathDoc because NoPath makes algorithms unreadable
-
-
-
-data HeliumMessage =
-         HMessage [String] 
-       | HError [String] [PathDoc] [PathDoc] [PathDoc] deriving Show
--}
--- PathDoc FocusDoc PathD and HeliumMessage need to be in DocumentTypes_Generated
--- due to stupid acyclic module restriction. Recursive import support is incomprehensible
--- and buggy
 
 data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
     SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
