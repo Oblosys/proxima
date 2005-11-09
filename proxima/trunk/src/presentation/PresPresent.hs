@@ -4,8 +4,6 @@ import CommonTypes
 import PresLayerTypes
 import PresLayerUtils
 
-import Presenter
-
 
 presentIO :: PresentationSheet doc enr node clip -> LayerStatePres -> EnrichedDocLevel enr ->
              PresentationLevel doc node clip -> EditEnrichedDoc' enr ->
@@ -39,3 +37,10 @@ present presentationSheet state (EnrichedDocLevel enr _) (PresentationLevel pres
   in  (SetPres' (PresentationLevel pres' (layoutMap', idC' , [] , emptyFM {-, inss, dels -} {- [(IDP 2, StringP (IDP (-1)) "deleted")
                                                                                      ,(IDP (-1), StringP (IDP (-2)) "both")
                                                                                      ] -} )), state, enrlvl)
+
+presentEnr :: PresentationSheet doc enr node clip -> LayerStatePres -> EnrichedDocLevel enr ->
+              LayoutMap -> IDPCounter ->
+              (Presentation doc node clip, LayoutMap, IDPCounter)
+presentEnr presentationSheet state (EnrichedDocLevel d focusD ) layM idC = 
+      let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
+      in  (pres', layM', idC')                      

@@ -1,5 +1,4 @@
-module PresLayerUtils ( module CommonUtils
-                      , module EnrUtils
+module PresLayerUtils ( module EnrUtils
                       , module PresUtils
                       , module PresLayerUtils    ) where
 
