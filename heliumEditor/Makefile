@@ -5,7 +5,15 @@
 
 # make trekt aan helium objecten als ze in $(OBJS) staan en evaluateTypes/compileHelium 
 # in EDITORSRCS zitten. Dit kan ervoor zorgen dat deze makefile helium sources gaat
-# compileren 
+# compileren. Zodra er geen cpp dingen meer in lvm zitten kan Helium waarschijnlijk 
+# gecompileerd worden vanuit de Proxima makefile. Tot die tijd misschien even make 
+# op Helium aanroepen wanneer de executable niet bestaat (Helium wordt dan geacht niet te 
+# veranderen.)
+
+# Dit zou ook de oorzaak kunnen zijn van de problemen bij het compileren van Set, nl. dat
+# het vanuit de Proxima makefile gebeurde.
+
+# recursive make depend?
 
 HC   = ghc
 FIND = /usr/bin/find
@@ -142,17 +150,18 @@ src/PresentationAG.hs : $(AGC) \
 	$(AGC) -o src/PresentationAG.hs \
 	-cfmspw --self --module=PresentationAG \
 	src/PresentationAG.ag -P src
-
 # --module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 
 # The main target
 
-# Inter-module dependencies
 depend :
 	echo $(EDITORSRCS)
 	# Checking dependencies
-	$(HC) -M $(HC_OPTS) $(EDITORSRCS)
-
+	$(HC) -M -cpp $(HC_OPTS) $(EDITORSRCS)
+# -cpp is necessary because the Helium modules are parsed.
+# It would be nice if we could only pass the Proxima interface directories, but 
+# unfortunately GHC -M requires all directories, and thus generates rules also for
+# sources outside the project (making the -cpp necessary).
 
 $(MAIN): $(EDITOROBJS) $(HELIUMOBJSFILE)
 	@echo "****************************************************"
@@ -204,16 +213,17 @@ clean-all: clean-proxima
 ../Top/src/Top/../Top/ComposedSolvers/Tree.o : ../Top/src/Top/../Top/ComposedSolvers/TreeWalk.hi
 ../Top/src/Top/../Top/States/States.o : ../Top/src/Top/../Top/States/States.hs
 ../proxima/../heliumNT/src/utils/OneLiner.o : ../proxima/../heliumNT/src/utils/OneLiner.hs
+../lvm/src/lib/common/IntMap.o : ../lvm/src/lib/common/IntMap.hs
 ../lvm/src/lib/common/ghc/Special.o : ../lvm/src/lib/common/ghc/Special.hs
-../lvm/src/lib/common/TopSort.o : ../lvm/src/lib/common/TopSort.hs
-../lvm/src/lib/common/TopSort.o : ../lvm/src/lib/common/ghc/Special.hi
 ../lvm/src/lib/common/Standard.o : ../lvm/src/lib/common/Standard.hs
 ../lvm/src/lib/common/Standard.o : ../lvm/src/lib/common/ghc/Special.hi
+../lvm/src/lib/common/TopSort.o : ../lvm/src/lib/common/TopSort.hs
+../lvm/src/lib/common/TopSort.o : ../lvm/src/lib/common/ghc/Special.hi
 ../lvm/src/lib/common/Byte.o : ../lvm/src/lib/common/Byte.hs
 ../lvm/src/lib/common/Byte.o : ../lvm/src/lib/common/Standard.hi
 ../lvm/src/lib/common/Byte.o : ../lvm/src/lib/common/ghc/Special.hi
-../lvm/src/lib/common/IntMap.o : ../lvm/src/lib/common/IntMap.hs
 ../lvm/src/lib/common/Id.o : ../lvm/src/lib/common/Id.hs
+../lvm/src/lib/common/Id.o : ../lvm/src/lib/common/ghc/Special.hi
 ../lvm/src/lib/common/Id.o : ../lvm/src/lib/common/IntMap.hi
 ../lvm/src/lib/common/Id.o : ../lvm/src/lib/common/Standard.hi
 ../lvm/src/lib/common/IdMap.o : ../lvm/src/lib/common/IdMap.hs
@@ -975,6 +985,10 @@ clean-all: clean-proxima
 ../proxima/src/presentation/PresLayerUtils.o : ../proxima/src/common/CommonUtils.hi
 ../proxima/src/presentation/PresLayerUtils.o : ../proxima/src/presentation/PresLayerTypes.hi
 ../proxima/src/presentation/PresLayerUtils.o : ../proxima/src/common/CommonTypes.hi
+../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresPresent.hs
+../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresLayerUtils.hi
+../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresLayerTypes.hi
+../proxima/src/presentation/PresPresent.o : ../proxima/src/common/CommonTypes.hi
 ../proxima/src/presentation/PresTranslate.o : ../proxima/src/presentation/PresTranslate.hs
 ../proxima/src/presentation/PresTranslate.o : ../proxima/src/presentation/PresLayerUtils.hi
 ../proxima/src/presentation/PresTranslate.o : ../proxima/src/presentation/PresLayerTypes.hi
@@ -1031,23 +1045,29 @@ clean-all: clean-proxima
 ../proxima/src/arrangement/ArrPresent.o : ../proxima/src/arrangement/ArrLayerUtils.hi
 ../proxima/src/arrangement/ArrPresent.o : ../proxima/src/arrangement/ArrLayerTypes.hi
 ../proxima/src/arrangement/ArrPresent.o : ../proxima/src/common/CommonTypes.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/Renderer.hs
+../proxima/src/rendering/Renderer.o : ../proxima/src/main/GUI.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocumentEdit.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocUtils.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocTypes.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/presentation/PresTypes.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/arrangement/ArrLayerUtils.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/RenLayerUtils.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/RenLayerTypes.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/common/CommonTypes.hi
+../proxima/src/rendering/Renderer.o : ../proxima/src/common/CommonTypes.hi
+../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenPresent.hs
+../proxima/src/rendering/RenPresent.o : ../proxima/src/evaluation/DocTypes.hi
+../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/Renderer.hi
+../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenLayerUtils.hi
+../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenLayerTypes.hi
+../proxima/src/rendering/RenPresent.o : ../proxima/src/common/CommonTypes.hi
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/layout/TreeEditPres.hs
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/presentation/XprezLib.hi
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/presentation/PresUtils.hi
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/presentation/PresTypes.hi
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/evaluation/DocTypes.hi
 ../proxima/src/layout/TreeEditPres.o : ../proxima/src/common/CommonTypes.hi
-../proxima/src/presentation/Presenter.o : ../proxima/src/presentation/Presenter.hs
-../proxima/src/presentation/Presenter.o : ../proxima/src/layout/TreeEditPres.hi
-../proxima/src/presentation/Presenter.o : ../proxima/src/presentation/XprezLib.hi
-../proxima/src/presentation/Presenter.o : ../proxima/src/presentation/PresLayerUtils.hi
-../proxima/src/presentation/Presenter.o : ../proxima/src/presentation/PresLayerTypes.hi
-../proxima/src/presentation/Presenter.o : ../proxima/src/common/CommonTypes.hi
-../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresPresent.hs
-../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/Presenter.hi
-../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresLayerUtils.hi
-../proxima/src/presentation/PresPresent.o : ../proxima/src/presentation/PresLayerTypes.hi
-../proxima/src/presentation/PresPresent.o : ../proxima/src/common/CommonTypes.hi
 ../proxima/src/arrangement/ArrTranslate.o : ../proxima/src/arrangement/ArrTranslate.hs
 ../proxima/src/arrangement/ArrTranslate.o : ../proxima/src/layout/TreeEditPres.hi
 ../proxima/src/arrangement/ArrTranslate.o : ../proxima/src/evaluation/DocUtils.hi
@@ -1066,23 +1086,6 @@ clean-all: clean-proxima
 ../proxima/src/layout/LayPresent.o : ../proxima/src/layout/LayLayerUtils.hi
 ../proxima/src/layout/LayPresent.o : ../proxima/src/layout/LayLayerTypes.hi
 ../proxima/src/layout/LayPresent.o : ../proxima/src/common/CommonTypes.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/Renderer.hs
-../proxima/src/rendering/Renderer.o : ../proxima/src/main/GUI.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocumentEdit.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocUtils.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/evaluation/DocTypes.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/presentation/PresTypes.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/arrangement/ArrLayerUtils.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/RenLayerUtils.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/rendering/RenLayerTypes.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/common/CommonTypes.hi
-../proxima/src/rendering/Renderer.o : ../proxima/src/common/CommonTypes.hi
-../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenPresent.hs
-../proxima/src/rendering/RenPresent.o : ../proxima/src/evaluation/DocTypes.hi
-../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/Renderer.hi
-../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenLayerUtils.hi
-../proxima/src/rendering/RenPresent.o : ../proxima/src/rendering/RenLayerTypes.hi
-../proxima/src/rendering/RenPresent.o : ../proxima/src/common/CommonTypes.hi
 ../proxima/src/main/Architecture.o : ../proxima/src/main/Architecture.hs
 ../proxima/src/main/Architecture.o : ../proxima/src/rendering/RenTranslate.hi
 ../proxima/src/main/Architecture.o : ../proxima/src/rendering/RenPresent.hi
@@ -1465,185 +1468,3 @@ src/Main.o : src/Reducer.hi
 src/Main.o : src/Evaluator.hi
 src/Main.o : ../proxima/src/main/Proxima.hi
 # DO NOT DELETE: End of Haskell dependencies
-
-
-
-######### HELIUM CRAP
-
-######################### HELIUM
-
-# Helium sources
-
-PARSER	= \
-	$(HELIUMSRCDIR)/parser/CollectFunctionBindings.hs $(HELIUMSRCDIR)/parser/OperatorTable.hs \
-	$(HELIUMSRCDIR)/parser/Parser.hs $(HELIUMSRCDIR)/parser/ResolveOperators.hs $(HELIUMSRCDIR)/parser/Lexer.hs \
-	$(HELIUMSRCDIR)/parser/ParseLibrary.hs $(HELIUMSRCDIR)/parser/ParseMessage.hs \
-	$(HELIUMSRCDIR)/parser/LexerMonad.hs $(HELIUMSRCDIR)/parser/LexerMessage.hs $(HELIUMSRCDIR)/parser/LayoutRule.hs \
-	$(HELIUMSRCDIR)/parser/LexerToken.hs
-
-MODULESYSTEM = \
-	$(HELIUMSRCDIR)/modulesystem/ImportEnvironment.hs \
-	$(HELIUMSRCDIR)/modulesystem/DictionaryEnvironment.hs \
-	$(HELIUMSRCDIR)/modulesystem/CoreToImportEnv.hs $(HELIUMSRCDIR)/modulesystem/ExtractImportDecls.hs
-
-STATICANALYSIS = \
-	$(HELIUMSRCDIR)/staticanalysis/messages/Messages.hs \
-	$(HELIUMSRCDIR)/staticanalysis/messages/HeliumMessages.hs \
-	$(HELIUMSRCDIR)/staticanalysis/messages/StaticErrors.hs \
-	$(HELIUMSRCDIR)/staticanalysis/messages/TypeErrors.hs \
-	$(HELIUMSRCDIR)/staticanalysis/messages/KindErrors.hs \
-	$(HELIUMSRCDIR)/staticanalysis/messages/Warnings.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/HeuristicsInfo.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/ListOfHeuristics.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/OnlyResultHeuristics.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/RepairHeuristics.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/TieBreakerHeuristics.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/UnifierHeuristics.hs \
-	$(HELIUMSRCDIR)/staticanalysis/heuristics/RepairSystem.hs \
-	$(HELIUMSRCDIR)/staticanalysis/staticchecks/StaticChecks.hs \
-	$(HELIUMSRCDIR)/staticanalysis/inferencers/TypeInferencing.hs \
-	$(HELIUMSRCDIR)/staticanalysis/inferencers/KindInferencing.hs \
-	$(HELIUMSRCDIR)/staticanalysis/inferencers/ExpressionTypeInferencer.hs \
-	$(HELIUMSRCDIR)/staticanalysis/inferencers/SelectConstraintSolver.hs \
-	$(HELIUMSRCDIR)/staticanalysis/inferencers/BindingGroupAnalysis.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Parser.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Syntax.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/Matchers.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Apply.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Messages.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Analyse.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_CoreSyntax.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_ToCore.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Compile.hs \
-	$(HELIUMSRCDIR)/staticanalysis/directives/TS_Attributes.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/ConstraintInfo.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/DoublyLinkedTree.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/TypeConstraints.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/TypesToAlignedDocs.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/TypeConversion.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/UHA_Source.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/TypeDebugInfo.hs \
-	$(HELIUMSRCDIR)/staticanalysis/miscellaneous/TypeDebugInfoWriter.hs \
-	$(TOPDIR)/Types/Basics.hs \
-	$(TOPDIR)/Types/Quantification.hs \
-	$(TOPDIR)/Types/Qualification.hs \
-	$(TOPDIR)/Types/Schemes.hs \
-	$(TOPDIR)/Types/Classes.hs \
-	$(TOPDIR)/Types/Substitution.hs \
-	$(TOPDIR)/Types/Kinds.hs \
-	$(TOPDIR)/Types/Synonyms.hs \
-	$(TOPDIR)/Types/Unification.hs \
-	$(TOPDIR)/Types.hs \
-	$(TOPDIR)/../Graph.hs \
-	$(TOPDIR)/Constraints/Constraints.hs \
-	$(TOPDIR)/Constraints/ExtraConstraints.hs \
-	$(TOPDIR)/Constraints/TypeConstraintInfo.hs \
-	$(TOPDIR)/Constraints/Equality.hs \
-	$(TOPDIR)/Constraints/Polymorphism.hs \
-	$(TOPDIR)/States/States.hs \
-	$(TOPDIR)/States/BasicState.hs \
-	$(TOPDIR)/States/SubstState.hs \
-	$(TOPDIR)/States/TIState.hs \
-	$(TOPDIR)/States/QualifierState.hs \
-	$(TOPDIR)/Qualifiers/Qualifiers.hs \
-	$(TOPDIR)/Qualifiers/QualifierMap.hs \
-	$(TOPDIR)/Qualifiers/TypeClasses.hs \
-	$(TOPDIR)/Solvers/BasicMonad.hs \
-	$(TOPDIR)/Solvers/GreedySolver.hs \
-	$(TOPDIR)/Solvers/GreedySubst.hs \
-	$(TOPDIR)/Solvers/SimpleSolver.hs \
-	$(TOPDIR)/Solvers/SimpleSubst.hs \
-	$(TOPDIR)/Solvers/SolveConstraints.hs \
-	$(TOPDIR)/ComposedSolvers/CombinationSolver.hs \
-	$(TOPDIR)/ComposedSolvers/ChunkySolver.hs \
-	$(TOPDIR)/ComposedSolvers/Tree.hs \
-	$(TOPDIR)/ComposedSolvers/TreeWalk.hs \
-	$(TOPDIR)/TypeGraph/ApplyHeuristics.hs \
-	$(TOPDIR)/TypeGraph/Basics.hs \
-	$(TOPDIR)/TypeGraph/DefaultHeuristics.hs \
-	$(TOPDIR)/TypeGraph/EquivalenceGroup.hs \
-	$(TOPDIR)/TypeGraph/Heuristics.hs \
-	$(TOPDIR)/TypeGraph/Paths.hs \
-	$(TOPDIR)/TypeGraph/TypeGraphMonad.hs \
-	$(TOPDIR)/TypeGraph/TypeGraphSolver.hs \
-	$(TOPDIR)/TypeGraph/TypeGraphState.hs \
-	$(TOPDIR)/TypeGraph/Implementation.hs \
-	$(TOPDIR)/TypeGraph/TypeGraphSubst.hs \
-	$(TOPDIR)/Repair/AExpr.hs \
-	$(TOPDIR)/Repair/Transformations.hs \
-	$(TOPDIR)/Repair/Repair.hs \
-	
-UHA = \
-	$(HELIUMSRCDIR)/syntax/UHA_Syntax.hs $(HELIUMSRCDIR)/syntax/UHA_Utils.hs $(HELIUMSRCDIR)/syntax/UHA_Range.hs \
-	$(HELIUMSRCDIR)/syntax/UHA_Pretty.hs $(HELIUMSRCDIR)/syntax/UHA_OneLine.hs
-
-
-CODEGENERATION = \
-	$(HELIUMSRCDIR)/codegeneration/CoreToLvm.hs $(HELIUMSRCDIR)/codegeneration/PatternMatch.hs \
-	$(HELIUMSRCDIR)/codegeneration/DerivingShow.hs $(HELIUMSRCDIR)/codegeneration/DerivingEq.hs $(HELIUMSRCDIR)/codegeneration/CoreUtils.hs \
-	$(HELIUMSRCDIR)/codegeneration/CodeGeneration.hs
-
-UTILS = \
-	$(HELIUMSRCDIR)/utils/Utils.hs $(HELIUMSRCDIR)/utils/Logger.hs $(HELIUMSRCDIR)/utils/OSSpecific.hs $(HELIUMSRCDIR)/utils/OneLiner.hs \
-	$(HELIUMSRCDIR)/utils/Similarity.hs $(HELIUMSRCDIR)/utils/Texts.hs
-
-MAINFILES = \
-	$(HELIUMSRCDIR)/main/Version.hs $(HELIUMSRCDIR)/main/Args.hs $(HELIUMSRCDIR)/main/Compile.hs \
-	$(HELIUMSRCDIR)/main/PhaseLexer.hs $(HELIUMSRCDIR)/main/PhaseParser.hs $(HELIUMSRCDIR)/main/PhaseImport.hs $(HELIUMSRCDIR)/main/PhaseResolveOperators.hs \
-	$(HELIUMSRCDIR)/main/PhaseStaticChecks.hs $(HELIUMSRCDIR)/main/PhaseTypingStrategies.hs $(HELIUMSRCDIR)/main/PhaseTypeInferencer.hs \
-	$(HELIUMSRCDIR)/main/PhaseDesugarer.hs $(HELIUMSRCDIR)/main/PhaseCodeGenerator.hs $(HELIUMSRCDIR)/main/CompileUtils.hs \
-	$(HELIUMSRCDIR)/main/PhaseKindInferencer.hs	
-# Parsec sources
-
-PARSEC = \
-	$(PARSECIMPDIR)/ParsecSpecial.hs $(PARSECIMPDIR)/ParsecSpecial/Char.hs $(PARSECIMPDIR)/ParsecSpecial/Combinator.hs $(PARSECIMPDIR)/ParsecSpecial/Error.hs $(PARSECIMPDIR)/ParsecSpecial/Expr.hs \
-	$(PARSECIMPDIR)/ParsecSpecial/Language.hs $(PARSECIMPDIR)/ParsecSpecial/Perm.hs $(PARSECIMPDIR)/ParsecSpecial/Pos.hs $(PARSECIMPDIR)/ParsecSpecial/Prim.hs $(PARSECIMPDIR)/ParsecSpecial/Token.hs
-
-
-# LVM sources
-
-LVMCOMMON = \
-	  $(LVMLIBDIR)/common/Id.hs $(LVMLIBDIR)/common/IdMap.hs $(LVMLIBDIR)/common/IdSet.hs $(LVMLIBDIR)/common/IntMap.hs \
-	  $(LVMLIBDIR)/common/Byte.hs $(LVMLIBDIR)/common/Standard.hs \
-	  $(LVMLIBDIR)/common/TopSort.hs $(LVMLIBDIR)/common/Set.hs \
-	  $(LVMLIBDIR)/common/ghc/Special.hs $(LVMLIBDIR)/common/PPrint.hs
-
-LVM	= $(LVMLIBDIR)/lvm/Lvm.hs $(LVMLIBDIR)/lvm/LvmPretty.hs $(LVMLIBDIR)/lvm/LvmWrite.hs $(LVMLIBDIR)/lvm/LvmRead.hs \
-	  $(LVMLIBDIR)/lvm/LvmImport.hs $(LVMLIBDIR)/lvm/Module.hs $(LVMLIBDIR)/lvm/ModulePretty.hs \
-	  $(LVMLIBDIR)/lvm/Instr.hs $(LVMLIBDIR)/lvm/InstrPretty.hs $(LVMLIBDIR)/lvm/InstrResolve.hs $(LVMLIBDIR)/lvm/InstrRewrite.hs
-
-ASM	= $(LVMLIBDIR)/asm/AsmOptimize.hs $(LVMLIBDIR)/asm/AsmInline.hs $(LVMLIBDIR)/asm/AsmOccur.hs \
-	  $(LVMLIBDIR)/asm/Asm.hs $(LVMLIBDIR)/asm/AsmPretty.hs $(LVMLIBDIR)/asm/AsmToLvm.hs
-
-CORE	= $(LVMLIBDIR)/core/Core.hs $(LVMLIBDIR)/core/CorePretty.hs $(LVMLIBDIR)/core/CoreToAsm.hs \
-	  $(LVMLIBDIR)/core/CoreParse.hs $(LVMLIBDIR)/core/CoreLexer.hs \
-	  $(LVMLIBDIR)/core/CoreNormalize.hs $(LVMLIBDIR)/core/CoreRemoveDead.hs \
-	  $(LVMLIBDIR)/core/CoreNoShadow.hs $(LVMLIBDIR)/core/CoreFreeVar.hs $(LVMLIBDIR)/core/CoreLetSort.hs \
-	  $(LVMLIBDIR)/core/CoreLift.hs $(LVMLIBDIR)/core/CoreSaturate.hs
-
-
-# AG sources
-AGSOURCES = \
-     syntax/UHA_Pretty.hs syntax/UHA_OneLine.hs \
-     $(HELIUMSRCDIR)/staticanalysis/staticchecks/StaticChecks.hs $(HELIUMSRCDIR)/staticanalysis/inferencers/TypeInferencing.hs \
-     $(HELIUMSRCDIR)/staticanalysis/inferencers/KindInferencing.hs \
-     $(HELIUMSRCDIR)/codegeneration/CodeGeneration.hs \
-     $(HELIUMSRCDIR)/syntax/UHA_Syntax.hs $(HELIUMSRCDIR)/modulesystem/ExtractImportDecls.hs $(HELIUMSRCDIR)/staticanalysis/directives/TS_Syntax.hs \
-     $(HELIUMSRCDIR)/staticanalysis/directives/TS_Apply.hs $(HELIUMSRCDIR)/staticanalysis/directives/TS_Analyse.hs \
-     $(HELIUMSRCDIR)/staticanalysis/directives/TS_CoreSyntax.hs \
-     $(HELIUMSRCDIR)/staticanalysis/directives/TS_ToCore.hs $(HELIUMSRCDIR)/parser/ResolveOperators.hs
-
-
-
-#Helium Sources and object files
-HELIUMSRCS = $(PARSER) $(STATICANALYSIS) $(UHA) $(CODEGENERATION) $(UTILS) $(LVMCOMMON) \
-	     $(LVM) $(ASM) $(CORE) $(MAINFILES) $(PARSEC) $(MODULESYSTEM)
-
-# deze moet met -cpp gecompileerd worden
-$(LVMLIBDIR)/common/ghc/Special.hi: $(LVMLIBDIR)/common/ghc/Special.hs
-	# GHC Special.hs
-	$(HC) -c $< -cpp -fglasgow-exts $(HC_OPTS) 
-
-
-
-###################################
