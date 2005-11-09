@@ -15,7 +15,8 @@
 
 # recursive make depend?
 
-HC   = ghc
+HC    = ghc
+#HC    = /c/Program\ Files/Visual\ Haskell/bin/ghc
 FIND = /usr/bin/find
 
 
@@ -28,7 +29,7 @@ SHELL = /bin/sh
 
 
 
-EXE            = 
+EXE            = .exe
 MAIN           = proxima$(EXE)
 
 default: all
@@ -164,11 +165,9 @@ depend :
 # sources outside the project (making the -cpp necessary).
 
 $(MAIN): $(EDITOROBJS) $(HELIUMOBJSFILE)
-	@echo "****************************************************"
-	@echo "  Proxima: the Proxima generic editor"
-	@echo "****************************************************"
 	cd $(PROXIMASRCDIR); make proxima
-	$(HC) -o $(MAIN) $(HC_OPTS) $(OBJS)
+	@echo GHC: Linking Proxima.exe
+	@$(HC) -o $(MAIN) $(HC_OPTS) $(OBJS)
 
 
 clean:
@@ -192,19 +191,25 @@ clean-all: clean-proxima
 	@:
 
 .lhs.o:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .hs.o:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .hs.hi:
-	$(HC) -c $< $(HC_OPTS) 
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS) 
 
 .lhs.hi:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .ag.hs:
-	$(AGC) -a $<
+	@echo AGC: compiling $<
+	@$(AGC) -a $<
+
 # DO NOT DELETE: Beginning of Haskell dependencies
 ../proxima/../heliumNT/src/utils/Texts.o : ../proxima/../heliumNT/src/utils/Texts.hs
 ../proxima/../heliumNT/src/main/Version.o : ../proxima/../heliumNT/src/main/Version.hs
