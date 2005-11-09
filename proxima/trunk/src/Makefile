@@ -154,7 +154,6 @@ PRESENTATIONSRCS = \
 	$(PRESENTATIONDIR)/PresTypes.hs \
 	$(PRESENTATIONDIR)/PresUtils.hs \
 	$(PRESENTATIONDIR)/PresentationParsing.hs \
-	$(PRESENTATIONDIR)/Presenter.hs \
 	$(PRESENTATIONDIR)/XprezLib.hs \
 	$(PRESENTATIONDIR)/XLatex.hs
 
@@ -170,6 +169,7 @@ RENDERINGSRCS = \
 
 
 # TODO: order is important???? moving BinaryTrees below CharParser causes error
+
 # also includes the uu lib sources
 GENERATORSRCS = \
 	../../uust/lib/scanner/UU/Scanner/Position.hs \
@@ -405,6 +405,10 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/presentation/PresLayerUtils.o : ../../proxima/src/common/CommonUtils.hi
 ../../proxima/src/presentation/PresLayerUtils.o : ../../proxima/src/presentation/PresLayerTypes.hi
 ../../proxima/src/presentation/PresLayerUtils.o : ../../proxima/src/common/CommonTypes.hi
+../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresPresent.hs
+../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresLayerUtils.hi
+../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresLayerTypes.hi
+../../proxima/src/presentation/PresPresent.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresTranslate.hs
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresLayerUtils.hi
 ../../proxima/src/presentation/PresTranslate.o : ../../proxima/src/presentation/PresLayerTypes.hi
@@ -416,17 +420,6 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 ../../proxima/src/presentation/PresentationParsing.o : ../../proxima/src/evaluation/DocumentEdit.hi
 ../../proxima/src/presentation/PresentationParsing.o : ../../proxima/src/presentation/PresTypes.hi
 ../../proxima/src/presentation/PresentationParsing.o : ../../proxima/src/common/CommonTypes.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/Presenter.hs
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/layout/TreeEditPres.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/XprezLib.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/PresLayerUtils.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/presentation/PresLayerTypes.hi
-../../proxima/src/presentation/Presenter.o : ../../proxima/src/common/CommonTypes.hi
-../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresPresent.hs
-../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/Presenter.hi
-../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresLayerUtils.hi
-../../proxima/src/presentation/PresPresent.o : ../../proxima/src/presentation/PresLayerTypes.hi
-../../proxima/src/presentation/PresPresent.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/presentation/XLatex.o : ../../proxima/src/presentation/XLatex.hs
 ../../proxima/src/presentation/XLatex.o : ../../proxima/src/common/CommonTypes.hi
 ../../proxima/src/presentation/XLatex.o : ../../proxima/src/presentation/PresTypes.hi
