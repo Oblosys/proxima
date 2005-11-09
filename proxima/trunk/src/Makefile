@@ -30,8 +30,8 @@
 # fix generation dir (refers to ../../editor now)
 # fix presentationAG dir  (refers to ../../editor/src now)
 
-
 HC    = ghc
+#HC    = /c/Program\ Files/Visual\ Haskell/bin/ghc
 FIND  = /usr/bin/find
 
 
@@ -61,7 +61,7 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 PROXIMAOBJSFILE = $(PROXIMABINDIR)/PROXIMAOBJS.txt
 
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction\
-		-package wx -package util -package net -package data -package parsec\
+		-package wx -package parsec\
 		 -i$(IFACES) $(EXTRA_OPTS)
 
 IFACES = $(PROXIMAIFACES):$(HELIUMIFACES):$(GENERATORIFACES)
@@ -198,7 +198,7 @@ objectsfile: $(PROXIMAOBJSFILE)
 
 $(PROXIMAOBJSFILE): Makefile
 	@echo Creating object list in $(PROXIMAOBJSFILE)
-	echo $(OBJS) | sed -e s/\.\.\\/\.\.\\/proxima/$$\(PROXIMADIR\)/g > $(PROXIMAOBJSFILE)
+	@echo $(OBJS) | sed -e s/\.\.\\/\.\.\\/proxima/$$\(PROXIMADIR\)/g > $(PROXIMAOBJSFILE)
 #	echo $(OBJS) | sed -e s/\.\./$$\(PROXIMADIR\)/g > $(PROXIMAOBJSFILE)
 # puts all objects in the text file $(PROXIMAOBJSFILE), while replacing
 # the path "../../proxima" by "$(PROXIMADIR)"
@@ -208,8 +208,8 @@ $(PROXIMAOBJSFILE): Makefile
 proxima: $(OBJS) $(PROXIMAOBJSFILE)
 
 clean:
-	$(FIND) $(UUSTDIR) -name "*.hi" -delete
-	$(FIND) $(UUSTDIR) -name "*.o" -delete
+	$(FIND) $(PROXIMASRCDIR) -name "*.hi" -delete
+	$(FIND) $(PROXIMASRCDIR) -name "*.o" -delete
 	
 
 clean-agc:
@@ -223,7 +223,8 @@ clean-all: clean clean-agc
 generator : $(GEN)
 
 $(GEN): $(GENERATOROBJS)
-	$(HC) -fglasgow-exts \
+	@echo GHC: compiling Generator
+	@$(HC) -fglasgow-exts \
 	-o $(PROXIMABINDIR)/generate -i$(GENERATORIFACES) $(GENERATOROBJS)
 
 
@@ -234,7 +235,8 @@ $(GEN): $(GENERATOROBJS)
 agc: $(AGC)
 
 $(AGC): 
-	ghc --make -o $(AGC) $(UUSTDIR)/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i$(UUSTDIR)/tools/ag:$(UUSTDIR)/lib/ddata:$(UUSTDIR)/lib/pretty:$(UUSTDIR)/lib/scanner:$(UUSTDIR)/lib/util:$(UUSTDIR)/lib/parsing
+	@echo GHC: compiling uuagc compiler with -O2
+	@ghc --make -o $(AGC) $(UUSTDIR)/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i$(UUSTDIR)/tools/ag:$(UUSTDIR)/lib/ddata:$(UUSTDIR)/lib/pretty:$(UUSTDIR)/lib/scanner:$(UUSTDIR)/lib/util:$(UUSTDIR)/lib/parsing
 
 
 
@@ -246,7 +248,7 @@ arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo "Compiling arrangerAG.ag"
-	$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
+	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
 	-cfmp --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
@@ -257,19 +259,24 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	@:
 
 .lhs.o:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .hs.o:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .hs.hi:
-	$(HC) -c $< $(HC_OPTS) 
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS) 
 
 .lhs.hi:
-	$(HC) -c $< $(HC_OPTS)
+	@echo GHC: compiling $<
+	@$(HC) -c $< $(HC_OPTS)
 
 .ag.hs:
-	$(AGC) -a $<
+	@echo AGC: compiling $<
+	@$(AGC) -a $<
 
 
 
