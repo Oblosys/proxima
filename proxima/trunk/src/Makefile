@@ -52,6 +52,7 @@ PROXIMADIR = ../../proxima
 
 PROXIMABINDIR = $(PROXIMADIR)/bin
 PROXIMASRCDIR = $(PROXIMADIR)/src
+UUSTDIR = $(PROXIMADIR)/../uust
 
 
 
@@ -172,6 +173,7 @@ RENDERINGSRCS = \
 
 # also includes the uu lib sources
 GENERATORSRCS = \
+	../../uust/lib/util/UU/Util/BinaryTrees.hs \
 	../../uust/lib/scanner/UU/Scanner/Position.hs \
 	../../uust/lib/parsing/UU/Parsing/MachineInterface.hs \
 	../../uust/lib/parsing/UU/Parsing/Machine.hs \
@@ -179,7 +181,6 @@ GENERATORSRCS = \
 	../../uust/lib/parsing/UU/Parsing/Derived.hs \
 	../../uust/lib/parsing/UU/Parsing.hs \
 	../../uust/lib/parsing/UU/Parsing/CharParser.hs	\
-	../../uust/lib/util/UU/Util/BinaryTrees.hs \
 	$(GENERATORDIR)/GenCommon.hs \
 	$(GENERATORDIR)/GenParser.hs \
 	$(GENERATORDIR)/GenAG.hs \
@@ -207,8 +208,16 @@ $(PROXIMAOBJSFILE): Makefile
 proxima: $(OBJS) $(PROXIMAOBJSFILE)
 
 clean:
-	$(FIND) $(PROXIMASRCDIR) -name "*.hi" -delete
-	$(FIND) $(PROXIMASRCDIR) -name "*.o" -delete
+	$(FIND) $(UUSTDIR) -name "*.hi" -delete
+	$(FIND) $(UUSTDIR) -name "*.o" -delete
+	
+
+clean-agc:
+	$(FIND) $(UUSTDIR) -name "*.hi" -delete
+	$(FIND) $(UUSTDIR) -name "*.o" -delete
+	$(FIND) $(PROXIMABINDIR) -name "uuagc.*" -delete
+
+clean-all: clean clean-agc
 
 # The Generator
 generator : $(GEN)
@@ -225,7 +234,7 @@ $(GEN): $(GENERATOROBJS)
 agc: $(AGC)
 
 $(AGC): 
-	ghc --make -o $(AGC) ../../uust/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i../../uust/tools/ag:../../uust/lib/ddata:../../uust/lib/pretty:../../uust/lib/scanner:../../uust/lib/util:../../uust/lib/parsing
+	ghc --make -o $(AGC) $(UUSTDIR)/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i$(UUSTDIR)/tools/ag:$(UUSTDIR)/lib/ddata:$(UUSTDIR)/lib/pretty:$(UUSTDIR)/lib/scanner:$(UUSTDIR)/lib/util:$(UUSTDIR)/lib/parsing
 
 
 
