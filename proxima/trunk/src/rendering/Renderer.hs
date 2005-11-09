@@ -17,9 +17,14 @@ import Graphics.UI.WX hiding (Color)
 import Graphics.UI.WXCore hiding (Color, Document) 
 import System.IO.Unsafe
 
--- import DocTypes_Generated -- RootDocNode
--- import DocUtils_Generated -- hasPath Node
--- import DocumentEdit_Generated -- Editable Document Document Node ClipDoc
+
+-- for automatic popup menus, allow these imports
+import DocTypes_Generated (Document, ClipDoc, Node (..))
+import DocUtils_Generated ()  -- instance HasPath Node
+import DocumentEdit (menuD)
+import DocumentEdit_Generated -- instance Editable Document Document Node ClipDoc
+-----
+
 {-
 TODO:
 
@@ -72,24 +77,46 @@ arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]
 
 -- end of hack.
 
-{-
-mkPopupMenuXY :: (Editable doca doca node clip, Clip clip) => doca ->
-                 Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
+-- Automatic popups turned on: enable imports from editor
+
+mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  Var (RenderingLevel (DocumentLevel Document ClipDoc)) ->
                  ScrolledWindow a -> Int -> Int -> IO ()
--}
+mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
+ do { let (x,y) = (descaleInt scale x',descaleInt scale y')
+    ; let ctxtItems = case pointOvlRev' x y [[]] arr of
+                        (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs
+                        []       -> []
+              
+   ; case map pathNode (pointDoc' x y arr) of
+        (pth:_) ->
+         do { let alts = DocumentEdit.menuD pth doc
+            ; let items = ctxtItems ++ alts
+            --; putStrLn $ "popup"++show (map fst items)
+            ; popupMenu <- menuPane []
+            ; sequence_ (map (mkMenuItem popupMenu) items)
+            
+            ; (Point scrX scrY) <- scrolledWindowCalcScrolledPosition window (pt x y)
 
+            ; menuPopup popupMenu (pt scrX scrY) window
+            }
+        _ -> return ()  
+    }                         -- This stuff belongs in GUI, renderer should only export names + edit ops
+  where mkMenuItem popupMenu (str, upd) =
+         do { item <- menuItem popupMenu [ text := str ]
+            ; set window [on (menu item) := popupMenuHandler handler renderingLvlVar window upd ]
+            ; return item
+            }
+
+{-
+-- no automatic popups, document specific part separated from generic Proxima
 mkPopupMenuXY :: (HasPath node, Show node) => Presentation doc node clip -> Scale -> Arrangement node ->
                  ((RenderingLevel (DocumentLevel doc clip), EditRendering (DocumentLevel doc clip)) ->
                  IO (RenderingLevel (DocumentLevel doc clip), EditRendering' (DocumentLevel doc clip))) ->
                  Var (RenderingLevel (DocumentLevel doc clip)) ->
                  ScrolledWindow a -> Int -> Int -> IO ()
-
--- automatic popup items have been disabled
-
---mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
 mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case pointOvlRev' x y [[]] arr of
@@ -98,8 +125,7 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
               
    ; case map pathNode (pointDoc' x y arr) of
         (pth:_) ->
-         do {  -- let alts = menuD pth doc
-            ; let items = ctxtItems --  ++alts
+         do { let items = ctxtItems
             --; putStrLn $ "popup"++show (map fst items)
             ; popupMenu <- menuPane []
             ; sequence_ (map (mkMenuItem popupMenu) items)
@@ -119,7 +145,7 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window x' y'  =
 mkPopupMenuXY _ _ _ _ _ _ x y = 
  do { debugLnIO Err "Arrangement root is no document locator"
     }
-
+-}
 
 {-
 
