@@ -35,11 +35,11 @@ import IO
 import Directory
 
 initialWindowSize :: Size
-initialWindowSize = sz 1260 900
+initialWindowSize = sz 991 900
 
 startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> (RenderingLevel documentLevel, EditRendering documentLevel) -> IO ()
 startGUI handler (initRenderingLvl, initEvent) = run $
- do { frame <- frameCreateTopFrame "Proxima v0.2"
+ do { frame <- frameCreateTopFrame "Proxima v0.3"
 
        -- for good measure: put a scrolled window inside the frame
        -- note that 'wxNO_FULL_REPAINT_ON_RESIZE'  is needed to prevent flicker on resize.
