@@ -32,7 +32,7 @@ SHELL = /bin/sh
 
 
 
-EXE            = 
+EXE            = .exe
 MAIN           = proxima$(EXE)
 
 default: all
@@ -44,7 +44,7 @@ PROXIMADIR = ../proxima
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
-AGC  = $(PROXIMABINDIR)/uuagc$(EXE)
+AGC  = $(PROXIMABINDIR)/uuagc
 GEN  = $(PROXIMABINDIR)/generate
 
 PROXIMAOBJSFILE = $(PROXIMABINDIR)/PROXIMAOBJS.txt
@@ -142,6 +142,7 @@ presenter: src/PresentationAG.hs
 	
 # TODO: make dependencies easy to see and to maintain (important for editor builder)
 
+	
 $(AGC):
 	cd $(PROXIMASRCDIR); make agc
 
@@ -208,10 +209,6 @@ clean-all: clean-proxima
 .lhs.hi:
 	@echo GHC: compiling $<
 	@$(HC) -c $< $(HC_OPTS)
-
-.ag.hs:
-	@echo AGC: compiling $<
-	@$(AGC) -a $<
 
 # DO NOT DELETE: Beginning of Haskell dependencies
 ../proxima/../heliumNT/src/utils/Texts.o : ../proxima/../heliumNT/src/utils/Texts.hs
