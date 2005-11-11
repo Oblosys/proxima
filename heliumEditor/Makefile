@@ -1,5 +1,8 @@
 # doesn't know when proxima.exe is up to date
 # maybe has to do with proxima and proxima.exe targets
+# problem: when only sources in proxima dir have been changed, this makefile will not
+# detect it. somehow, the proxima/src/Makefile must always be called even when nothing 
+# needs to be done in editor.
 
 # no make when documenttype is modified
 
@@ -29,7 +32,7 @@ SHELL = /bin/sh
 
 
 
-EXE            = .exe
+EXE            = 
 MAIN           = proxima$(EXE)
 
 default: all
