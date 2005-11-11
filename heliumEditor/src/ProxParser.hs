@@ -6,7 +6,7 @@ import PresLayerUtils
 import PresentationParsing
 import XprezLib
 
-import UU_Parsing hiding (Exp, parse, parseIO)
+import UU_Parsing hiding (Exp, parse)
 
 import List hiding (delete)
 import Data.FiniteMap
@@ -16,7 +16,6 @@ import ProxParser_Generated
 import DocumentEdit
 import DocumentEdit_Generated
 
-import UU_Parsing hiding (Exp, parse, parseIO)
 import qualified UU_Parsing
 import Char
 
