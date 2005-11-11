@@ -272,7 +272,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	@echo GHC: compiling $<
 	@$(HC) -c $< $(HC_OPTS)
 
-.ag.hs:
+%.hs: %.ag $(AGC)
 	@echo AGC: compiling $<
 	@$(AGC) -a $<
 
