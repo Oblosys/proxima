@@ -1,5 +1,4 @@
-module LayLayerUtils ( module CommonUtils
-                     , module LayUtils
+module LayLayerUtils ( module LayUtils
                      , module LayLayerUtils    ) where
 
 

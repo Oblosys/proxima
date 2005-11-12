@@ -5,8 +5,8 @@ import DocTypes (DocumentLevel)
 
 import CommonUtils
 
-import Data.FiniteMap
-
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
@@ -16,17 +16,17 @@ type PresentationLS doc node clip = (LayoutMap, IDPCounter, InsertedTokenList, D
 
 type Layout = (Int, Int)
 
-type LayoutMap = FiniteMap IDP Layout   -- Layout information for each element in Presentation
+type LayoutMap = Map IDP Layout   -- Layout information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
-type DeletedTokenMap doc node clip = FiniteMap IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
+type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
 
 --instance (Show a, Show b) => Show (FiniteMap a b) where
 -- show fm = "{FiniteMap}" -- ++show (fmToList fm)
  
 
 initLayout :: LayoutMap
-initLayout = listToFM [(IDP (-1), (0,1))]
+initLayout = Map.fromList [(IDP (-1), (0,1))]
 
 data EditPresentation' doc node clip =
     SetPres' (PresentationLevel doc node clip)

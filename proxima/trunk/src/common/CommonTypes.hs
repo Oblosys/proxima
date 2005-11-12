@@ -1,6 +1,5 @@
 module CommonTypes ( module Char 
                    , module List
-                   , module Data.FiniteMap
                    , module DebugLevels
                    , module CommonTypes ) where
 
@@ -13,7 +12,6 @@ import DebugLevels
 
 import Char
 import List
-import Data.FiniteMap
 import Data.IORef
 import System.IO.Unsafe
 

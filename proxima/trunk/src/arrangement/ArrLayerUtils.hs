@@ -1,5 +1,4 @@
-module ArrLayerUtils ( module CommonUtils
-                     , module LayUtils
+module ArrLayerUtils ( module LayUtils
                      , module ArrUtils
                      , module ArrLayerUtils     ) where
 

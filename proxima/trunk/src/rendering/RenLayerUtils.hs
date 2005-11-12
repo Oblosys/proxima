@@ -1,4 +1,5 @@
-module RenLayerUtils ( module ArrUtils
+module RenLayerUtils ( module CommonUtils
+                     , module ArrUtils
                      , module RenUtils
                      , module RenLayerUtils    ) where
 
@@ -6,5 +7,6 @@ module RenLayerUtils ( module ArrUtils
 import CommonTypes
 import RenLayerTypes
 
+import CommonUtils
 import ArrUtils
 import RenUtils

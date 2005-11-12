@@ -1,4 +1,4 @@
-module ArrUtils (module CommonUtils, module ArrUtils) where
+module ArrUtils where
 
 import CommonTypes
 import ArrTypes
