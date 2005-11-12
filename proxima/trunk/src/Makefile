@@ -12,7 +12,8 @@
 # add strip
 # TODO: on normal make, generator is not rebuilt after sources have been edited (only on make generate) May have something to do with fact that generation affects multiple files, whereas only one dependency (PresentationAG_Generated) is explicit in makeFile
 
-# fix make clean
+# it would be nice if the document specific makefile could always execute this makefile 
+# first. Is this possible?
 
 # HC
 # moet er in de regel voor Proxima niet een ref naar de executable zitten?
