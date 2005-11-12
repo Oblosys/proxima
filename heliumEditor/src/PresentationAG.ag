@@ -445,8 +445,9 @@ presHole focus typeStr nd pth = loc nd $
 
 --  structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
 
+-- TODO: wat voor location willen we hier?
 presParseErr node pres =
-  loc node $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -}
+  loc NoNode $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -}
                                                                                      -- empty trick
                           `withbgColor` whiteSmoke
 
