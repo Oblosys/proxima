@@ -63,7 +63,7 @@ printProdIDD d (Prod s fields)
           = let name = decapitalize s
             in  if null fields then [name++"IDD _                                   = Nothing\n"]
                 else    [ name++"IDD :: Node -> Maybe IDD"
-                        , name++"IDD ("++s++"Node ("++s++ " iDP"++concat(replicate ((length fields)-1) " _")++") _) = Just iDP"
+                        , name++"IDD ("++s++"Node ("++s++ " iDD"++concat(replicate ((length fields)-1) " _")++") _) = Just iDD"
                         , name++"IDD _                                   = Nothing\n"]
 
 
