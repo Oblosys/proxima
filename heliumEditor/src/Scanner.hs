@@ -13,7 +13,7 @@ tokenize :: Int -> Maybe Node -> Presentation doc Node clip ->
 -- tokenize _ pres = (pres, [])       -- skip tokenize
 tokenize i loc (ParsingP id pres)  = let (lc, layout, id, str, tokens, lm, i') = tokenize' i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
                                          (tok, lm', i'') = makeToken i' lc layout id str
-                                     in  (ParsingP id $ RowP NoIDP 0 $ (tokens++[tok]), lm' `Map.union` lm, i'')
+                                     in  (ParsingP id $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
 tokenize i loc pres@(EmptyP _)           = (pres, Map.empty, i)
 tokenize i loc pres@(StringP _ str)      = (pres, Map.empty, i)
 tokenize i loc pres@(ImageP _ _)         = (pres, Map.empty, i)
@@ -36,7 +36,7 @@ tokenize i loc pr = debug Err ("TreeEditPres.tokenize: can't handle "++ show pr)
 tokenizeLst i loc []           = ([], Map.empty, i)
 tokenizeLst i loc (pres:press) = let (pres', lm0, i') = tokenize i loc pres
                                      (press', lm1, i'') = tokenizeLst i' loc press
-                                 in  (pres':press', lm0 `Map.union` lm1, i'')
+                                 in  (pres':press', lm1 `Map.union` lm0, i'')
 -- tokenize is tricky. The information for the token that is being built is threaded through the computation
 -- (lc layout id str), but also the current location (/= the location of the first char of the current token) 
 -- and for tokenizeStr, the id of the string (/= the id of the first character of the token) have to be passed
@@ -95,7 +95,7 @@ tokenizeStr i loc cid lc (brks,spcs) id ""  (' ':cs) = tokenizeStr i loc cid und
 tokenizeStr i loc cid lc layout id str (' ':cs) =            -- do we want this? See **
   let (lc', layout', id', str', tokens', lm, i') = tokenizeStr i loc cid undefTk (0,1) cid "" cs   -- 2nd loc is not used
       (tok, lm', i'') = makeToken i' lc layout id str           
-  in  (lc', layout', id', str', tok : tokens', lm' `Map.union` lm, i'')
+  in  (lc', layout', id', str', tok : tokens', lm `Map.union` lm', i'')
 
 -- first character of token. if there is no Id, use the one from the whitespace, also clear this strings id because it is used now
 tokenizeStr i loc@(l,ar) cid lc layout id ""  (c:cs)   = tokenizeStr i loc NoIDP (tokenType c, l,ar) layout (if cid == NoIDP then id else cid) [c] cs
@@ -116,14 +116,14 @@ tokenizeStr i loc@(l,ar) cid lc@(tt,_,_) layout id (tc:tcs) (c:cs) =
   where startNewToken =
           let (loc', layout', id', str', tokens', lm, i') = tokenizeStr i loc NoIDP (tokenType c,l,ar) (0,0) cid [c] cs
               (tok, lm', i'') = makeToken i' lc layout id (tc:tcs)
-          in  (loc', layout', id', str', tok : tokens', lm' `Map.union` lm, i'')
+          in  (loc', layout', id', str', tok : tokens', lm `Map.union` lm', i'')
 
 --(isAlpha tc && isAlpha c) || (isNum tc && isNum c) || 
 
 tokenizeRow' i loc lc layout id str []     = (lc, layout, id, str, [], Map.empty, i)
 tokenizeRow' i loc lc layout id str (pres:press) = let (lc', layout', id', str', tokens0, lm0, i') = tokenize' i loc lc layout id str pres
                                                        (lc'', layout'', id'', str'', tokens1, lm1, i'') = tokenizeRow' i' loc lc' layout' id' str' press
-                                                   in  (lc'', layout'', id'', str'', tokens0++tokens1, lm0 `Map.union` lm1, i'')
+                                                   in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
 
 
 -- add case for [pres]
@@ -136,11 +136,11 @@ tokenizeCol' i loc lc layout id str (pres:press) =
   let (lc', (brks,spcs), id', str', tokens0, lm0,i') = tokenize' i loc lc layout id str pres
   in  if null str' then -- still collecting whitespace
         let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' i' loc lc' (brks+1,0) id' str' press
-        in  (lc'', layout'', id'', str'', tokens0++tokens1, lm0 `Map.union` lm1, i'')
+        in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
       else
         let (tok, lm, i'') = makeToken i' lc' (brks,spcs) id' str'
             (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' i'' loc undefTk (1,0) NoIDP "" press
-        in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm0 `Map.union` lm `Map.union` lm1, i''')
+        in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
 
  
 -- loc is threaded, lc is just inherited. 
@@ -172,19 +172,19 @@ tokenize' i loc lc layout id str (ParsingP _ pres)    = tokenize' i loc lc layou
 tokenize' i (Nothing,ar) lc layout id "" (StructuralP id' pres)    =
   let (pres', lm1, i'') = tokenize i Nothing pres
   in  (undefTk, (0,0), NoIDP, "", [StructuralP id' $ pres'], 
-       (if id' == NoIDP then Map.empty else Map.singleton id' layout) `Map.union` lm1,i'')
+       lm1 `Map.union` (if id' == NoIDP then Map.empty else Map.singleton id' layout),i'')
 tokenize' i (Just loc,ar) lc layout id "" (StructuralP id' pres) =
   let (pres', lm1, i'') = tokenize i (Just loc) pres
   in  (undefTk, (0,0), NoIDP, "", [LocatorP loc $ StructuralP id' $ pres'],
-       (if id' == NoIDP then Map.empty else Map.singleton id' layout) `Map.union` lm1,i'')
+       lm1 `Map.union` (if id' == NoIDP then Map.empty else Map.singleton id' layout),i'')
 tokenize' i (Nothing,ar) lc layout id str (StructuralP id' pres)    =
   let (tok, lm0, i') = makeToken i lc layout id str
       (pres', lm1, i'') = tokenize i' Nothing pres
-  in  (undefTk, (0,0), NoIDP, "", [tok, StructuralP id' $ pres'], lm0 `Map.union` lm1,i'')
+  in  (undefTk, (0,0), NoIDP, "", [tok, StructuralP id' $ pres'], lm1 `Map.union` lm0,i'')
 tokenize' i (Just loc,ar) lc layout id str (StructuralP id' pres) =
   let (tok, lm0, i') = makeToken i lc layout id str
       (pres', lm1, i'') = tokenize i' (Just loc) pres
-  in  (undefTk, (0,0), NoIDP, "", [tok, LocatorP loc $ StructuralP id' $ pres'], lm0 `Map.union` lm1,i'')
+  in  (undefTk, (0,0), NoIDP, "", [tok, LocatorP loc $ StructuralP id' $ pres'], lm1 `Map.union` lm0,i'')
 tokenize' i loc lc layout id str pres        = debug Err ("*** PresentationParser.walk: unimplemented presentation: " ++ show pres) (lc, layout, id, str, [], Map.empty, i)
 
 undefTk = (debug Err "Undefined token used" IntToken,Nothing,Prelude.id)

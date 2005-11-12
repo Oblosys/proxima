@@ -9,7 +9,6 @@ import XprezLib
 import UU_Parsing hiding (Exp, parse)
 
 import List hiding (delete)
-import Data.FiniteMap
 
 
 import ProxParser_Generated
