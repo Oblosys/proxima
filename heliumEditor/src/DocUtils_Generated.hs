@@ -322,169 +322,169 @@ instance HasPath Node where
 
 
 rootEnrIDD :: Node -> Maybe IDD
-rootEnrIDD (RootEnrNode (RootEnr iDP _ _ _ _ _) _) = Just iDP
+rootEnrIDD (RootEnrNode (RootEnr iDD _ _ _ _ _) _) = Just iDD
 rootEnrIDD _                                   = Nothing
 
 declIDD :: Node -> Maybe IDD
-declIDD (DeclNode (Decl iDP _ _ _ _ _ _ _ _) _) = Just iDP
+declIDD (DeclNode (Decl iDD _ _ _ _ _ _ _ _) _) = Just iDD
 declIDD _                                   = Nothing
 
 boardDeclIDD :: Node -> Maybe IDD
-boardDeclIDD (BoardDeclNode (BoardDecl iDP _ _ _) _) = Just iDP
+boardDeclIDD (BoardDeclNode (BoardDecl iDD _ _ _) _) = Just iDD
 boardDeclIDD _                                   = Nothing
 
 pPPresentationDeclIDD :: Node -> Maybe IDD
-pPPresentationDeclIDD (PPPresentationDeclNode (PPPresentationDecl iDP _ _ _) _) = Just iDP
+pPPresentationDeclIDD (PPPresentationDeclNode (PPPresentationDecl iDD _ _ _) _) = Just iDD
 pPPresentationDeclIDD _                                   = Nothing
 
 identIDD :: Node -> Maybe IDD
-identIDD (IdentNode (Ident iDP _ _ _) _) = Just iDP
+identIDD (IdentNode (Ident iDD _ _ _) _) = Just iDD
 identIDD _                                   = Nothing
 
 plusExpIDD :: Node -> Maybe IDD
-plusExpIDD (PlusExpNode (PlusExp iDP _ _ _) _) = Just iDP
+plusExpIDD (PlusExpNode (PlusExp iDD _ _ _) _) = Just iDD
 plusExpIDD _                                   = Nothing
 
 timesExpIDD :: Node -> Maybe IDD
-timesExpIDD (TimesExpNode (TimesExp iDP _ _ _) _) = Just iDP
+timesExpIDD (TimesExpNode (TimesExp iDD _ _ _) _) = Just iDD
 timesExpIDD _                                   = Nothing
 
 divExpIDD :: Node -> Maybe IDD
-divExpIDD (DivExpNode (DivExp iDP _ _ _) _) = Just iDP
+divExpIDD (DivExpNode (DivExp iDD _ _ _) _) = Just iDD
 divExpIDD _                                   = Nothing
 
 powerExpIDD :: Node -> Maybe IDD
-powerExpIDD (PowerExpNode (PowerExp iDP _ _ _) _) = Just iDP
+powerExpIDD (PowerExpNode (PowerExp iDD _ _ _) _) = Just iDD
 powerExpIDD _                                   = Nothing
 
 boolExpIDD :: Node -> Maybe IDD
-boolExpIDD (BoolExpNode (BoolExp iDP _ _) _) = Just iDP
+boolExpIDD (BoolExpNode (BoolExp iDD _ _) _) = Just iDD
 boolExpIDD _                                   = Nothing
 
 intExpIDD :: Node -> Maybe IDD
-intExpIDD (IntExpNode (IntExp iDP _ _) _) = Just iDP
+intExpIDD (IntExpNode (IntExp iDD _ _) _) = Just iDD
 intExpIDD _                                   = Nothing
 
 lamExpIDD :: Node -> Maybe IDD
-lamExpIDD (LamExpNode (LamExp iDP _ _ _ _) _) = Just iDP
+lamExpIDD (LamExpNode (LamExp iDD _ _ _ _) _) = Just iDD
 lamExpIDD _                                   = Nothing
 
 appExpIDD :: Node -> Maybe IDD
-appExpIDD (AppExpNode (AppExp iDP _ _) _) = Just iDP
+appExpIDD (AppExpNode (AppExp iDD _ _) _) = Just iDD
 appExpIDD _                                   = Nothing
 
 caseExpIDD :: Node -> Maybe IDD
-caseExpIDD (CaseExpNode (CaseExp iDP _ _ _ _) _) = Just iDP
+caseExpIDD (CaseExpNode (CaseExp iDD _ _ _ _) _) = Just iDD
 caseExpIDD _                                   = Nothing
 
 letExpIDD :: Node -> Maybe IDD
-letExpIDD (LetExpNode (LetExp iDP _ _ _ _) _) = Just iDP
+letExpIDD (LetExpNode (LetExp iDD _ _ _ _) _) = Just iDD
 letExpIDD _                                   = Nothing
 
 identExpIDD :: Node -> Maybe IDD
-identExpIDD (IdentExpNode (IdentExp iDP _) _) = Just iDP
+identExpIDD (IdentExpNode (IdentExp iDD _) _) = Just iDD
 identExpIDD _                                   = Nothing
 
 ifExpIDD :: Node -> Maybe IDD
-ifExpIDD (IfExpNode (IfExp iDP _ _ _ _ _ _) _) = Just iDP
+ifExpIDD (IfExpNode (IfExp iDD _ _ _ _ _ _) _) = Just iDD
 ifExpIDD _                                   = Nothing
 
 parenExpIDD :: Node -> Maybe IDD
-parenExpIDD (ParenExpNode (ParenExp iDP _ _ _) _) = Just iDP
+parenExpIDD (ParenExpNode (ParenExp iDD _ _ _) _) = Just iDD
 parenExpIDD _                                   = Nothing
 
 listExpIDD :: Node -> Maybe IDD
-listExpIDD (ListExpNode (ListExp iDP _ _ _ _) _) = Just iDP
+listExpIDD (ListExpNode (ListExp iDD _ _ _ _) _) = Just iDD
 listExpIDD _                                   = Nothing
 
 productExpIDD :: Node -> Maybe IDD
-productExpIDD (ProductExpNode (ProductExp iDP _ _ _ _) _) = Just iDP
+productExpIDD (ProductExpNode (ProductExp iDD _ _ _ _) _) = Just iDD
 productExpIDD _                                   = Nothing
 
 altIDD :: Node -> Maybe IDD
-altIDD (AltNode (Alt iDP _ _ _ _) _) = Just iDP
+altIDD (AltNode (Alt iDD _ _ _ _) _) = Just iDD
 altIDD _                                   = Nothing
 
 boardIDD :: Node -> Maybe IDD
-boardIDD (BoardNode (Board iDP _ _ _ _ _ _ _ _) _) = Just iDP
+boardIDD (BoardNode (Board iDD _ _ _ _ _ _ _ _) _) = Just iDD
 boardIDD _                                   = Nothing
 
 boardRowIDD :: Node -> Maybe IDD
-boardRowIDD (BoardRowNode (BoardRow iDP _ _ _ _ _ _ _ _) _) = Just iDP
+boardRowIDD (BoardRowNode (BoardRow iDD _ _ _ _ _ _ _ _) _) = Just iDD
 boardRowIDD _                                   = Nothing
 
 queenIDD :: Node -> Maybe IDD
-queenIDD (QueenNode (Queen iDP _) _) = Just iDP
+queenIDD (QueenNode (Queen iDD _) _) = Just iDD
 queenIDD _                                   = Nothing
 
 kingIDD :: Node -> Maybe IDD
-kingIDD (KingNode (King iDP _) _) = Just iDP
+kingIDD (KingNode (King iDD _) _) = Just iDD
 kingIDD _                                   = Nothing
 
 bishopIDD :: Node -> Maybe IDD
-bishopIDD (BishopNode (Bishop iDP _) _) = Just iDP
+bishopIDD (BishopNode (Bishop iDD _) _) = Just iDD
 bishopIDD _                                   = Nothing
 
 knightIDD :: Node -> Maybe IDD
-knightIDD (KnightNode (Knight iDP _) _) = Just iDP
+knightIDD (KnightNode (Knight iDD _) _) = Just iDD
 knightIDD _                                   = Nothing
 
 rookIDD :: Node -> Maybe IDD
-rookIDD (RookNode (Rook iDP _) _) = Just iDP
+rookIDD (RookNode (Rook iDD _) _) = Just iDD
 rookIDD _                                   = Nothing
 
 pawnIDD :: Node -> Maybe IDD
-pawnIDD (PawnNode (Pawn iDP _) _) = Just iDP
+pawnIDD (PawnNode (Pawn iDD _) _) = Just iDD
 pawnIDD _                                   = Nothing
 
 emptyIDD _                                   = Nothing
 
 pPPresentationIDD :: Node -> Maybe IDD
-pPPresentationIDD (PPPresentationNode (PPPresentation iDP _ _) _) = Just iDP
+pPPresentationIDD (PPPresentationNode (PPPresentation iDD _ _) _) = Just iDD
 pPPresentationIDD _                                   = Nothing
 
 slideIDD :: Node -> Maybe IDD
-slideIDD (SlideNode (Slide iDP _ _) _) = Just iDP
+slideIDD (SlideNode (Slide iDD _ _) _) = Just iDD
 slideIDD _                                   = Nothing
 
 itemListIDD :: Node -> Maybe IDD
-itemListIDD (ItemListNode (ItemList iDP _ _) _) = Just iDP
+itemListIDD (ItemListNode (ItemList iDD _ _) _) = Just iDD
 itemListIDD _                                   = Nothing
 
 bulletIDD :: Node -> Maybe IDD
-bulletIDD (BulletNode (Bullet iDP) _) = Just iDP
+bulletIDD (BulletNode (Bullet iDD) _) = Just iDD
 bulletIDD _                                   = Nothing
 
 numberIDD :: Node -> Maybe IDD
-numberIDD (NumberNode (Number iDP) _) = Just iDP
+numberIDD (NumberNode (Number iDD) _) = Just iDD
 numberIDD _                                   = Nothing
 
 alphaIDD :: Node -> Maybe IDD
-alphaIDD (AlphaNode (Alpha iDP) _) = Just iDP
+alphaIDD (AlphaNode (Alpha iDD) _) = Just iDD
 alphaIDD _                                   = Nothing
 
 stringItemIDD :: Node -> Maybe IDD
-stringItemIDD (StringItemNode (StringItem iDP _) _) = Just iDP
+stringItemIDD (StringItemNode (StringItem iDD _) _) = Just iDD
 stringItemIDD _                                   = Nothing
 
 heliumItemIDD :: Node -> Maybe IDD
-heliumItemIDD (HeliumItemNode (HeliumItem iDP _) _) = Just iDP
+heliumItemIDD (HeliumItemNode (HeliumItem iDD _) _) = Just iDD
 heliumItemIDD _                                   = Nothing
 
 listItemIDD :: Node -> Maybe IDD
-listItemIDD (ListItemNode (ListItem iDP _) _) = Just iDP
+listItemIDD (ListItemNode (ListItem iDD _) _) = Just iDD
 listItemIDD _                                   = Nothing
 
 string_IDD :: Node -> Maybe IDD
-string_IDD (String_Node (String_ iDP _) _) = Just iDP
+string_IDD (String_Node (String_ iDD _) _) = Just iDD
 string_IDD _                                   = Nothing
 
 bool_IDD :: Node -> Maybe IDD
-bool_IDD (Bool_Node (Bool_ iDP _) _) = Just iDP
+bool_IDD (Bool_Node (Bool_ iDD _) _) = Just iDD
 bool_IDD _                                   = Nothing
 
 int_IDD :: Node -> Maybe IDD
-int_IDD (Int_Node (Int_ iDP _) _) = Just iDP
+int_IDD (Int_Node (Int_ iDD _) _) = Just iDD
 int_IDD _                                   = Nothing
 
 

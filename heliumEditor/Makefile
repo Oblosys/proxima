@@ -128,9 +128,11 @@ OBJS = $(PROXIMAOBJS) $(EDITOROBJS) $(HELIUMOBJS)
 # Generation 
 
 generate : src/DocTypes_Generated.hs 
+
+$(GEN):
 	cd $(PROXIMASRCDIR); make generator
 
-src/DocTypes_Generated.hs : src/DocumentType.hs
+src/DocTypes_Generated.hs : src/DocumentType.hs $(GEN)
 	cd $(PROXIMASRCDIR); make generator
 	$(GEN) src src/DocumentType.hs
 
@@ -152,7 +154,7 @@ src/PresentationAG.hs : $(AGC) \
 	src/LambdaReduce.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	$(AGC) -o src/PresentationAG.hs \
+	@$(AGC) -o src/PresentationAG.hs \
 	-cfmspw --self --module=PresentationAG \
 	src/PresentationAG.ag -P src
 # --module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
