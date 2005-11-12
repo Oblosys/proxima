@@ -10,7 +10,8 @@ import XLatex hiding (bold)
 import DocumentEdit
 
 import List
-import Data.FiniteMap
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 import Data.IORef
 import System.IO.Unsafe
@@ -24,6 +25,9 @@ import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
 
+-- inserts the elements from the list, overwriting existing old values
+mapInsertList :: Ord k => [(k,a)] -> Map k a -> Map k a
+mapInsertList lst m = Map.union (Map.fromList lst) m 
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -144,7 +148,7 @@ SEM EnrichedDoc
                        , vSpace 4
                        , text "Variables in scope:" `withFont'` ("verdana",10)
                        , col [ typeD NoIDP (var++" :: "++tpStr) `link` pth
-                             | (var,(pth,tpStr)) <- fmToList @decls.varsInScopeAtFocus ]
+                             | (var,(pth,tpStr)) <- Map.toList @decls.varsInScopeAtFocus ]
 
                        ]
                      `withFont'` ("Courier New",14)
@@ -325,7 +329,7 @@ SEM Exp
                      @ident.pres
                        `addPopupItems`
                        [( "Jump to declaration of "++show (strFromIdent @ident.self),
-                             navigateTo $ case lookupFM  @lhs.varsInScope (strFromIdent @ident.self) of
+                             navigateTo $ case Map.lookup (strFromIdent @ident.self) @lhs.varsInScope of
                                             Nothing      -> NoPathD
                                             Just (pth,_) -> pth)]
 
@@ -552,14 +556,14 @@ SEM EnrichedDoc
 SEM Decl -- nested decls do produce auto layout, so top level decl can determine whether to use it.
   | Decl    lhs.layoutMap   = let lm = if @autoLayout.bool || @lhs.level /= 0 then @exp.layoutMap else @lhs.layoutMap
                               in if @idP2 /= NoIDP || @lhs.level /= 0 then lm
-                                 else case lookupFM lm (@ident.firstToken) of
-                                        Just (nwln,sp) -> addListToFM lm [ (mkIDP @idP2 @lhs.pIdC 2,(nwln,sp))
-                                                                                     , (@ident.firstToken, (1,sp)) ]
-                                        _        -> addToFM lm (mkIDP @idP2 @lhs.pIdC 2) (1,0)
+                                 else case Map.lookup (@ident.firstToken) lm of
+                                        Just (nwln,sp) -> mapInsertList [ (mkIDP @idP2 @lhs.pIdC 2,(nwln,sp))
+                                                                        , (@ident.firstToken, (1,sp)) ] lm
+                                        _        -> Map.insert (mkIDP @idP2 @lhs.pIdC 2) (1,0) lm
 
                -- the whitespace from the first token is used to create whitespace for the type sig
 
-            ident.layoutMap = addListToFM @lhs.layoutMap [(@idP0, (0,1)), (@idP1, (0,0))]
+            ident.layoutMap = mapInsertList [(@idP0, (0,1)), (@idP1, (0,0))] @lhs.layoutMap
             ident.col       = @lhs.col
             ident.newlines  = @lhs.newlines
             ident.spaces    = @lhs.spaces
@@ -571,7 +575,7 @@ SEM Decl -- nested decls do produce auto layout, so top level decl can determine
             lhs.spaces = @lhs.col
 
 SEM Ident [ | | firstToken : IDP ]
-  | Ident  lhs.layoutMap = addToFM @lhs.layoutMap @idP0 (@lhs.newlines,@lhs.spaces)
+  | Ident  lhs.layoutMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.layoutMap
            lhs.col = @lhs.col+ length @string_.str
            lhs.firstToken = @idP0
   | ParseErrIdent
@@ -584,19 +588,19 @@ SEM Ident [ | | firstToken : IDP ]
 -- assign (or add) whitespace to newlines and spaces attrs, which will be set to first token in chain
 
 SEM Exp
-  | PlusExp exp1.layoutMap = addToFM @lhs.layoutMap @idP0 (0,1)
+  | PlusExp exp1.layoutMap = Map.insert @idP0 (0,1) @lhs.layoutMap
             exp1.col = @lhs.col
             exp2.col = @exp1.col + 3
             exp2.newlines = 0
             exp2.spaces = 1
             lhs.col = @exp2.col
-  | TimesExp exp1.layoutMap = addToFM @lhs.layoutMap @idP0 (0,1)
+  | TimesExp exp1.layoutMap = Map.insert @idP0 (0,1) @lhs.layoutMap
             exp1.col = @lhs.col
             exp2.col = @exp1.col + 3
             exp2.newlines = 0
             exp2.spaces = 1
             lhs.col = @exp2.col
-  | DivExp exp1.layoutMap = addToFM @lhs.layoutMap @idP0 (0,0)
+  | DivExp exp1.layoutMap = Map.insert @idP0 (0,0) @lhs.layoutMap
             exp1.col = 0
             exp1.newlines = 0
             exp1.spaces = 0
@@ -604,18 +608,18 @@ SEM Exp
             exp2.newlines = 0
             exp2.spaces = 0
             lhs.col = @exp1.col
-  | PowerExp exp1.layoutMap = addToFM @lhs.layoutMap @idP0 (0,0)
+  | PowerExp exp1.layoutMap = Map.insert @idP0 (0,0) @lhs.layoutMap
             exp1.col = @lhs.col
             exp2.col = 0
             exp2.newlines = 0
             exp2.spaces = 0
             lhs.col = @exp2.col
-  | IntExp lhs.layoutMap = addToFM @lhs.layoutMap @idP0 (@lhs.newlines,@lhs.spaces)
+  | IntExp lhs.layoutMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.layoutMap
            lhs.col = @lhs.col+length (show @int_.int)
-  | BoolExp lhs.layoutMap = addToFM @lhs.layoutMap @idP0 (@lhs.newlines,@lhs.spaces)
-  | LamExp  ident.layoutMap = addListToFM @lhs.layoutMap
-                                [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                , (@idP1, (0,1)) ]
+  | BoolExp lhs.layoutMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.layoutMap
+  | LamExp  ident.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                            , (@idP1, (0,1)) ]
+                                            @lhs.layoutMap
             ident.col = @lhs.col + 1 -- "\"
             ident.newlines = 0
             ident.spaces = 0
@@ -628,9 +632,9 @@ SEM Exp
             exp2.newlines = 0
             exp2.spaces = 1
             lhs.col = @lhs.col
-  | CaseExp exp.layoutMap = addListToFM @lhs.layoutMap
-                                [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                , (@idP1, (0,1)) ]
+  | CaseExp exp.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                          , (@idP1, (0,1)) ]
+                                          @lhs.layoutMap
             exp.col = @lhs.col + 5 -- "case "
             exp.newlines = 0
             exp.spaces = 1
@@ -639,9 +643,9 @@ SEM Exp
             alts.spaces = @lhs.col + 2
             lhs.col = @alts.col
             alts.totalMaxLHSLength = @alts.maxLHSLength
-  | LetExp  decls.layoutMap = addListToFM @lhs.layoutMap
-                                [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                , (@idP1, (1,@lhs.col))]
+  | LetExp  decls.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                            , (@idP1, (1,@lhs.col))]
+                                            @lhs.layoutMap
           decls.col = @lhs.col + 3+1 -- "let "
           exp.col = @lhs.col + 3+1 --   "in   "
           decls.newlines = 0
@@ -649,10 +653,10 @@ SEM Exp
           exp.newlines = 0
           exp.spaces = 2
  -- | IdentExp                    Chained
-  | IfExp  exp1.layoutMap = addListToFM @lhs.layoutMap
-                              [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                              , (@idP1, (1,@lhs.col))
-                              , (@idP2, (1,@lhs.col)) ]
+  | IfExp  exp1.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                          , (@idP1, (1,@lhs.col))
+                                          , (@idP2, (1,@lhs.col)) ]
+                                          @lhs.layoutMap
           exp1.col = @lhs.col + 2+1 -- "if "
           exp2.col = @lhs.col + 4+1 -- "then "
           exp3.col = @lhs.col + 4+1 -- "else "
@@ -662,27 +666,27 @@ SEM Exp
           exp2.spaces = 1
           exp3.newlines = 0
           exp3.spaces = 1
-  | ParenExp exp.layoutMap = addListToFM @lhs.layoutMap
-                               [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                               , (@idP1, (0,1)) ]
+  | ParenExp exp.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                           , (@idP1, (0,1)) ]
+                                           @lhs.layoutMap
              exp.col = @lhs.col + 1+1 -- "( "
              exp.newlines = 0
              exp.spaces = 1
              lhs.col = @exp.col + 1+1 --" )"
              lhs.newlines = 0
              lhs.spaces = 0
-  | ListExp exps.layoutMap = addListToFM @lhs.layoutMap
-                               [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                               , (@idP1, (0,1)) ]
+  | ListExp exps.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                           , (@idP1, (0,1)) ]
+                                           @lhs.layoutMap
             exps.col = @lhs.col + 1+1 -- "[ "
             exps.newlines = 0
             exps.spaces = 1
             lhs.col = @exps.col + 1+1 --" ]"
             lhs.newlines = 0
             lhs.spaces = 0
-  | ProductExp exps.layoutMap = addListToFM @lhs.layoutMap
-                                  [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                  , (@idP1, (0,1)) ]
+  | ProductExp exps.layoutMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+                                              , (@idP1, (0,1)) ]
+                                              @lhs.layoutMap
             exps.col = @lhs.col + 1+1 -- "( "
             exps.newlines = 0
             exps.spaces = 1
@@ -696,7 +700,7 @@ SEM ConsList_Exp -- all exps get same (newlines, spaces)
 
 -- alts compute a maximum lefthand side length, that is sent back down at the case node.
 SEM Alt [ totalMaxLHSLength : Int | | lhsLength : Int ]
-  | Alt     ident.layoutMap = addListToFM @lhs.layoutMap [(@idP0, (0,@lhs.totalMaxLHSLength - @lhsLength+1)), (@idP1, (0,0))]
+  | Alt     ident.layoutMap = mapInsertList [(@idP0, (0,@lhs.totalMaxLHSLength - @lhsLength+1)), (@idP1, (0,0))] @lhs.layoutMap
             ident.col       = @lhs.col
             ident.newlines  = @lhs.newlines
             ident.spaces    = @lhs.spaces
@@ -750,8 +754,8 @@ SEM Decl
 
 -- variables in scope
 
-ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ varsInScope : {FiniteMap String (PathDoc, String)}
-                                        | varsInScopeAtFocus : {FiniteMap String (PathDoc, String)}
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ varsInScope : {Map String (PathDoc, String)}
+                                        | varsInScopeAtFocus : {Map String (PathDoc, String)}
                                         |
                                         ]
 
@@ -759,15 +763,16 @@ ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsL
 
 SEM EnrichedDoc
   | RootEnr
-      --loc.varsInScope = addListToFM (unitFM "<Prelude>" (NoPathD, "")) @decls.declaredVars
-      loc.varsInScope = listToFM @decls.declaredVars
+      --loc.varsInScope = mapInsertList @decls.declaredVars (unitFM "<Prelude>" (NoPathD, ""))
+      loc.varsInScope = Map.fromList @decls.declaredVars
 
 SEM Exp
   | LetExp
-      loc.varsInScope = addListToFM @lhs.varsInScope @decls.declaredVars
+      loc.varsInScope = mapInsertList @decls.declaredVars @lhs.varsInScope
   | LamExp
-      exp.varsInScope = addToFM @lhs.varsInScope (strFromIdent @ident.self)
-                                                 (PathD $ (@lhs.path++[0]), @exp.type)
+      exp.varsInScope = Map.insert (strFromIdent @ident.self)
+                                   (PathD $ (@lhs.path++[0]), @exp.type)
+                                   @lhs.varsInScope
 
 ATTR List_Decl ConsList_Decl Decl [ | | declaredVars USE {++} {[]} : {[(String,(PathDoc,String))]} ]
 
@@ -780,7 +785,7 @@ SEM Decl
 
 SEM EnrichedDoc
   | RootEnr
-      decls.varsInScopeAtFocus = emptyFM -- a maybe is better
+      decls.varsInScopeAtFocus = Map.empty -- a maybe is better
 
 SEM Decl
   | Decl
@@ -1126,7 +1131,7 @@ SEM EnrichedDoc -- don't understand why this is necessary, it should not be used
 
             idListDecls.errs = []
             idListDecls.env = []
-            idListDecls.varsInScopeAtFocus = emptyFM
+            idListDecls.varsInScopeAtFocus = Map.empty
 
             idListDecls.ranges = ([],[],[])
 --            idListDecls.ix = 0
@@ -1143,7 +1148,7 @@ SEM Item
                exp.spaces = 0      --
 
                exp.level = 0 -- not right
-               exp.layoutMap = emptyFM
+               exp.layoutMap = Map.empty
 
                exp.errs = []
                exp.typeEnv = []
@@ -1151,8 +1156,8 @@ SEM Item
                exp.env = []
 
 ATTR PPPresentation List_Slide ConsList_Slide Slide ItemList ListType List_Item ConsList_Item Item
-                                        [ varsInScope : {FiniteMap String (PathDoc, String)}
-                                        | varsInScopeAtFocus : {FiniteMap String (PathDoc, String)}
+                                        [ varsInScope : {Map String (PathDoc, String)}
+                                        | varsInScopeAtFocus : {Map String (PathDoc, String)}
                                         |
                                         ]
 

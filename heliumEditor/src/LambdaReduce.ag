@@ -81,7 +81,7 @@ SEM Exp
                                                             ]
                                   _                      -> [showExpCode @self]
   | IdentExp  -- only for top level, until it is clear how to do let expressions
-      loc.reductionEdit =  case lookupFM  @lhs.varsInScope (strFromIdent @ident.self) of
+      loc.reductionEdit =  case Map.lookup (strFromIdent @ident.self) @lhs.varsInScope of
                              Nothing      -> [showExpCode @self]
                              Just (PathD pth@(_:_),_) ->
                                [ showExpCode @self
