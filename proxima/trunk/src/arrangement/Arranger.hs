@@ -8,6 +8,9 @@ import ArrangerAG
 import FontLib
 import Data.IORef
 
+import qualified Data.Map as Map
+import Data.Map (Map)
+
 arrangePresentation :: Show node => FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node)
 arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
@@ -64,7 +67,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldAr
            -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
             ; queriedMetrics <- readIORef fontMetricsRef
             
-            ; let queriedFonts = keysFM queriedMetrics
+            ; let queriedFonts = Map.keys queriedMetrics
             ; let newFonts =  deleteFirstsBy (==) usedFonts queriedFonts -- usedFonts was nubbed
 {-
             ; debugLnIO Arr $ "used: "           ++ show usedFonts
@@ -73,7 +76,8 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldAr
 -}
             -- filter the ones that are already present
             ; metrics <- mapM queryFont newFonts
-            ; let updatedMetrics = queriedMetrics `plusFM` mkFontMetrics metrics
+
+            ; let updatedMetrics = mkFontMetrics metrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics
             
             ; let (_, arrangement,  maxFDepth, unfoldedTree) =

@@ -4,6 +4,8 @@ import CommonTypes
 import PresLayerTypes
 import PresLayerUtils
 
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 presentIO :: PresentationSheet doc enr node clip -> LayerStatePres -> EnrichedDocLevel enr ->
              PresentationLevel doc node clip -> EditEnrichedDoc' enr ->
@@ -34,7 +36,7 @@ present presentationSheet state (EnrichedDocLevel enr _) (PresentationLevel pres
       --focus'              = restoreFocus focusXY pres'
 
       --  (pres'', focus'') = (pres',focus')--normalizePresentation pres focus
-  in  (SetPres' (PresentationLevel pres' (layoutMap', idC' , [] , emptyFM {-, inss, dels -} {- [(IDP 2, StringP (IDP (-1)) "deleted")
+  in  (SetPres' (PresentationLevel pres' (layoutMap', idC' , [] , Map.empty {-, inss, dels -} {- [(IDP 2, StringP (IDP (-1)) "deleted")
                                                                                      ,(IDP (-1), StringP (IDP (-2)) "both")
                                                                                      ] -} )), state, enrlvl)
 

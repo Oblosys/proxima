@@ -32,6 +32,10 @@ import Layout hiding (combine)
 import ArrUtils
 import EvalLayerTypes (LayerStateEval (..))
 
+import qualified Data.Map as Map
+import Data.Map (Map)
+
+
 --tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
 --          in  ParsePres toks
 
@@ -64,7 +68,7 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
             proximaLayers evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
                           (LayerStateEval, initDoc)   
                           ((),     initEnr)
-                          (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], emptyFM))   
+                          (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], Map.empty))   
                           (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
                           ((),             ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
                           -- system (layer)local state,  initial higher level value

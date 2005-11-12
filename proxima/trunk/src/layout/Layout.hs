@@ -4,6 +4,9 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
+import qualified Data.Map as Map
+import Data.Map (Map)
+
 
 -- add layout from local state to all descendents of ParsingP node, until StructureP node is encountered
 
@@ -68,7 +71,7 @@ combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
 addWhitespace :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Presentation doc node clip]
 addWhitespace (lm,inss, dels) NoIDP str = [StringP NoIDP str]
 addWhitespace (lm,inss, dels) id str = 
-  case lookupFM lm id of
+  case Map.lookup id lm of
     Nothing -> markInssDels (lm,inss,dels) id $ StringP id str
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ StringP id (replicate spaces ' ' ++ str))
@@ -76,7 +79,7 @@ addWhitespace (lm,inss, dels) id str =
 addWhitespaceStruct :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
 addWhitespaceStruct (lm,inss, dels) NoIDP struct = [struct]
 addWhitespaceStruct (lm,inss, dels) id struct = 
-  case lookupFM lm id of
+  case Map.lookup id lm of
     Nothing -> markInssDels (lm,inss,dels) id $ struct
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ RowP NoIDP 0 [ StringP NoIDP (replicate spaces ' ')
@@ -87,7 +90,7 @@ addWhitespaceStruct (lm,inss, dels) id struct =
 markInssDels :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
 markInssDels (lm,inss,dels) idp pres = 
   combine 
-    (case lookupFM dels idp of
+    (case Map.lookup idp dels of
       Just deletedTk -> detokenize' (lm,inss,dels) (squiggly red deletedTk)
       Nothing        -> [])
     (if {-idp `elem` inss-} idp ==IDP (-1)
@@ -98,7 +101,7 @@ markInssDels (lm,inss,dels) idp pres =
 onlyWhitespace :: LayoutMap -> IDP -> [ Presentation ]
 onlyWhitespace lm NoIDP = []
 onlyWhitespace lm id = 
-  case lookupFM lm id of
+  case Map.lookup lm id of
     Nothing -> []
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ [StringP NoIDP (replicate spaces ' ')]

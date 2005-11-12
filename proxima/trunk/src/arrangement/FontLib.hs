@@ -2,6 +2,9 @@ module FontLib where
 
 import CommonTypes
 
+import qualified Data.Map as Map
+import Data.Map (Map)
+
 import Array
 
 import Char
@@ -11,18 +14,18 @@ import Graphics.UI.WX
 import Graphics.UI.WXCore hiding (Font)
 
 -- use different structure to make lookup more efficient? Or is this a waste of time
-type FontMetrics = FiniteMap Font (Int, Int, Array Int Int)
+type FontMetrics = Map Font (Int, Int, Array Int Int)
 
 type FontMetricsRef = IORef FontMetrics
 
 newFontMetricsRef :: IO FontMetricsRef
-newFontMetricsRef = newIORef emptyFM 
+newFontMetricsRef = newIORef Map.empty 
 
 initFontMetrics :: IO FontMetricsRef
 initFontMetrics = newFontMetricsRef
    
 mkFontMetrics :: [(Font,(Int, Int, [Int]))] -> FontMetrics
-mkFontMetrics ms = listToFM $ map (\(f,(h, b, ws)) -> (f, (h, b,  listArray (0,223) ws))) ms
+mkFontMetrics ms = Map.fromList $ map (\(f,(h, b, ws)) -> (f, (h, b,  listArray (0,223) ws))) ms
 
 {-
 lookup (fs, ff) fms
@@ -44,9 +47,9 @@ metricsLookup font fms =
                                              -- atomic.
 -}
 metricsLookup :: Font -> FontMetrics -> (Int, Int, Array Int Int)
-metricsLookup font metrics = 
+metricsLookup font fontMetrics = 
   -- debug Err ("looking up: " ++ show (fSize font) ++ " " ++ (fFamily font)) $
-  case lookupFM metrics font  of
+  case Map.lookup font fontMetrics  of
             Just metrics -> metrics
             Nothing      -> debug Err "metrics for font not queried" $ (0,0, listArray (0,223) (repeat 0))
     
