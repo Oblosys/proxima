@@ -8,8 +8,8 @@ import DocumentEdit
 import DocumentEdit_Generated
 import DocTypes_Generated
 
-import EvaluateTypes
---import EvaluateTypesStubs
+--import EvaluateTypes
+import EvaluateTypesStubs
 -- After switching between these two, execute "make depend"
 
 

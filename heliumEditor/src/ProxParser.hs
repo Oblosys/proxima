@@ -52,7 +52,7 @@ deepShowTks i tok = case tok of
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeRootEnr :: ListParser doc Node clip EnrichedDoc
+recognizeRootEnr :: ListParser Document Node ClipDoc EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
@@ -60,13 +60,13 @@ recognizeRootEnr = pStr $
                                 {- tree or xml view-}
 
 -- ?remove pStr from this parser?
-parseIDListList_Decl :: ListParser doc Node clip List_Decl
+parseIDListList_Decl :: ListParser Document Node ClipDoc List_Decl
 parseIDListList_Decl = pPrs $
           (\dcls -> reuseList_Decl [] Nothing (Just $ toConsList_Decl dcls)) 
       <$  pSym parsingTk
       <*> pList recognizeIDListDecl
              
-recognizeIDListDecl :: ListParser doc Node clip Decl
+recognizeIDListDecl :: ListParser Document Node ClipDoc Decl
 recognizeIDListDecl = pStr $
           (\str ident -> reuseDecl [tokenNode str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing (Just ident) Nothing)
       <$> pStructural DeclNode
@@ -81,7 +81,7 @@ recognizeIDListDecl = pStr $
 -}       
 
 -- ?remove pStr from this parser?
-parseIdListIdent :: ListParser doc Node clip Ident
+parseIdListIdent :: ListParser Document Node ClipDoc Ident
 parseIdListIdent =  pPrs $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
       <$  pSym parsingTk
@@ -242,7 +242,7 @@ parseParenExp = -- maybe we don't want to build a list for (exp), because now we
 
 -- returns list of separator tokens and a List_Exp the List_Exp is not reused through its separator tokens
 -- because these do not belong to List_Exp, but to its parent
-parseList_Exp :: ListParser doc Node clip ([Token doc Node clip (Maybe Node)], List_Exp)
+parseList_Exp :: ListParser Document Node ClipDoc ([Token Document Node ClipDoc (Maybe Node)], List_Exp)
 parseList_Exp =
     (\toksElts -> let (toks, elts) = case toksElts of
                                        Nothing        -> ([], [])
