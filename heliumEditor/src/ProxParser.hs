@@ -29,7 +29,8 @@ set = Just
 
 parsePres pres = let tokens = postScanStr pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in --  showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"\nhas result:") $
+                 in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $
+                                 --   ++"\nhas result:") $
                     if null errs then Just enr else Nothing
        
 deepShowTks i tok = case tok of
@@ -62,8 +63,7 @@ recognizeRootEnr = pStr $
 parseIDListList_Decl :: ListParser Document Node ClipDoc List_Decl
 parseIDListList_Decl = pPrs $
           (\dcls -> reuseList_Decl [] Nothing (Just $ toConsList_Decl dcls)) 
-      <$  pSym parsingTk
-      <*> pList recognizeIDListDecl
+      <$> pList recognizeIDListDecl
              
 recognizeIDListDecl :: ListParser Document Node ClipDoc Decl
 recognizeIDListDecl = pStr $
@@ -83,8 +83,7 @@ recognizeIDListDecl = pStr $
 parseIdListIdent :: ListParser Document Node ClipDoc Ident
 parseIdListIdent =  pPrs $
           (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
-      <$  pSym parsingTk
-      <*> pLIdent 
+      <$> pLIdent 
 
 -------------------- Chess board parser:
 
@@ -170,8 +169,7 @@ recognizeExp' = pStr $
 -- List_Decl, Decl
 
 recognizeList_Decl = pPrs $
-          pSym parsingTk
-       *> parseList_Decl
+          parseList_Decl
         
 parseList_Decl = 
           (\decls -> reuseList_Decl [] Nothing (Just $ toConsList_Decl decls))
@@ -361,16 +359,14 @@ pFalse  = pKey "False"
 parseString_ = pPrs $
 --           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
           mkString_
-     <$   pSym parsingTk
-     <*>  pLIdent     
+     <$>  pLIdent     
      <|> (HoleString_ <$ pStructural HoleString_Node)
 
 
 parseInt_ = pStr $
 --           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
           mkInt_
-     <$   pSym parsingTk
-     <*>  pInt
+     <$>  pInt
      <|> (HoleInt_ <$ pStructural HoleInt_Node)
 -- bit hacky
 
@@ -378,8 +374,7 @@ parseInt_ = pStr $
 parseBool_ = pStr $
 --           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
          mkBool_
-     <$  pSym parsingTk
-     <*> (True <$ pTrue <|> False <$ pFalse)
+     <$> (True <$ pTrue <|> False <$ pFalse)
      <|> (HoleBool_ <$ pStructural HoleBool_Node)
 
 
