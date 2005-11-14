@@ -101,8 +101,8 @@ pPrs ::  (Editable a doc node clip, Ord node, Show node) => ListParser doc node 
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk empty [] NoIDP)
  where unfoldStructure presTk@(ParsingTk pr children _) = 
-         let (res, errs) = runParser p (presTk : children) {- (p <|> hole/parseErr parser)-}
-         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr undefined pr
+         let (res, errs) = runParser p children
+         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (error "Parse Error node was accessed") pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- Does parseErr need a location? It used to be NoNode anyway.
