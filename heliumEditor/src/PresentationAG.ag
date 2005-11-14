@@ -17,8 +17,6 @@ import Data.IORef
 import System.IO.Unsafe
 
 import qualified Chess
---import EvaluateTypes                                   -- for OU demo
---import qualified UHA_Pretty       (sem_Expression) -- for OU demo
 
 import DocTypes (DocumentLevel (..))
 import DocTypes_Generated
