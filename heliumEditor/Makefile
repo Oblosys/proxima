@@ -33,7 +33,7 @@ SHELL = /bin/sh
 
 
 
-EXE            = .exe
+EXE            = 
 MAIN           = proxima$(EXE)
 
 default: all
@@ -173,7 +173,7 @@ depend :
 
 $(MAIN): $(EDITOROBJS) $(HELIUMOBJSFILE)
 	cd $(PROXIMASRCDIR); make proxima
-	@echo GHC: Linking Proxima.exe
+	@echo GHC: Linking Proxima
 	@$(HC) -o $(MAIN) $(HC_OPTS) $(OBJS)
 
 
@@ -182,7 +182,7 @@ clean:
 	$(FIND) src -name "*.o" -delete
 	$(FIND) src -name "presentationAG.hs" -delete
 	touch src/DocumentType.hs
-	$(FIND) . -name "proxima.exe" -delete
+	$(FIND) . -name "proxima.*" -delete
 
 # cannot delete .._Generated sources, so we touch src/DocumentType.hs, causing them to be
 # recompiled on the next make
