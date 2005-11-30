@@ -1,17 +1,11 @@
+inc = \x -> x+1;
 
+h = [(1,False),(2,True),(3,False)];
 
-list = [ 1+2, 27, 3*5 ];
+x = let local = 1+2+3+4; h = 1; in if True then local + h else 0;
 
-large = \ x -> \ y -> \ z -> x+y+z+1;
+g = case 5*7 of aaa -> 2+4; b -> 10;;
 
-x = f 3;
+test = f 3;
 
-s = \ f -> \ g -> \ x -> f x (g x);
-
-
-
-
-
-increase = \ x -> x+1;
-
-Slides: pres
+f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
