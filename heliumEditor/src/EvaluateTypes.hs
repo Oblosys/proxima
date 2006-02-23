@@ -6,7 +6,7 @@ import DocTypes_Generated
 import DebugLevels
 import System.IO.Unsafe -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
-import Data.FiniteMap
+import qualified Data.Map as Map
 
 import DocumentEdit
 import DocumentEdit_Generated
@@ -216,7 +216,7 @@ henk2 mod =
     Left errs -> debug Prs (show (map showMessage errs)) (map hErrFromErr errs, [], [])
     Right (types,typeEnv) ->
       let typeEnv'  =[ (pathFromRange r, show t) | (r,t)<- typeEnv ]
-          toplvlEnv = [ (getNameName nm,show tp) | (nm,tp) <- fmToList types ]
+          toplvlEnv = [ (getNameName nm,show tp) | (nm,tp) <- Map.toList types ]
       in  ( [], typeEnv', toplvlEnv )
 
 
