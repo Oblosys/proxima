@@ -9,6 +9,7 @@ import PresTypes -- for initDoc
 
 import DocTypes_Generated
 import DocUtils_Generated
+import System.Directory
 
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
@@ -85,7 +86,8 @@ saveFile filePath doc =
 initDoc :: IO Document
 initDoc = 
  do { let filePath = "Heliumfile.hs"
-    ; debugLnIO Prs $ "Opening file: "++"Proxima.hs"
+    ; dir <- getCurrentDirectory
+    ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
     ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (List_DeclNode (List_Decl NoIDD Nil_Decl) []) (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
