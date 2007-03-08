@@ -100,7 +100,7 @@ IFACES = src:$(PROXIMAIFACES):$(HELIUMIFACES)
 
 
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances \
-		-package wx -package parsec\
+		-package wx -package parsec -package mtl\
 		-fno-monomorphism-restriction -i$(IFACES) $(EXTRA_OPTS)
 
 
@@ -199,7 +199,8 @@ clean-proxima: clean
 clean-proxima-all: clean
 	cd $(PROXIMASRCDIR); make clean-all
 
-# also clean Helium
+# also clean Helium       Make sure that a bash with the right PATH is used, otherwise 
+#                         Helium does not clean well (use bash from start menu)
 clean-all: clean-proxima-all
 	cd $(HELIUMSRCDIR); make clean
 	
