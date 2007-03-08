@@ -235,7 +235,7 @@ agc: $(AGC)
 
 $(AGC): 
 	@echo GHC: compiling uuagc compiler with -O2
-	@ghc --make -o $(AGC) $(UUSTDIR)/tools/ag/Ag.hs -package util -fglasgow-exts -O2 -i$(UUSTDIR)/tools/ag:$(UUSTDIR)/lib/ddata:$(UUSTDIR)/lib/pretty:$(UUSTDIR)/lib/scanner:$(UUSTDIR)/lib/util:$(UUSTDIR)/lib/parsing
+	@ghc --make -o $(AGC) $(UUSTDIR)/tools/ag/Ag.hs -fglasgow-exts -O2 -i$(UUSTDIR)/tools/ag:$(UUSTDIR)/lib/ddata:$(UUSTDIR)/lib/pretty:$(UUSTDIR)/lib/scanner:$(UUSTDIR)/lib/util:$(UUSTDIR)/lib/parsing
 
 
 
