@@ -295,7 +295,7 @@ SEM Exp
                        -- , key NoIDP "l" `withFontFam` "symbol"  -- **Screenshot**
                         , @ident.pres  -- **Screenshot**
                         , text' (mkIDP @idP1 @lhs.pIdC 1) "" -- trick because "symbol" spaces have wrong width
-                          , key NoIDP "\174" `withFontFam` "symbol"
+                          , key NoIDP [chr 174] `withFontFam` "symbol"
                        -- , key (mkIDP @idP1 @lhs.pIdC 1) "->"
                         , @exp.pres ]
 
@@ -381,7 +381,7 @@ SEM Alt
                    row'  $ [ @ident.pres
                          --  , key (mkIDP @idP0 @lhs.pIdC 0) "->"
                            , text' (mkIDP @idP0 @lhs.pIdC 0) "",
-                                    key NoIDP "\174" `withFontFam` "symbol"
+                                    key NoIDP [chr 174] `withFontFam` "symbol"
                            , @exp.pres
                            , sep (mkIDP @idP1 @lhs.pIdC 1) ";"
                            ]
