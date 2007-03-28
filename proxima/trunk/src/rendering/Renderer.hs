@@ -19,6 +19,7 @@ import System.IO.Unsafe
 
 
 -- for automatic popup menus, allow these imports
+-- comment out the _Generated imports when doing "make depend" (very nasty)
 import DocTypes_Generated (Document, ClipDoc, Node (..))
 import DocUtils_Generated ()  -- instance HasPath Node
 import DocumentEdit (menuD)
