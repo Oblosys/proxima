@@ -191,10 +191,6 @@ idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++sho
 
 emptyAttrs = (Inh defaultFont black black black black Nothing [] 0 0 0 0, Syn 0 0 0 0 False False 0 0 0 0)
 
-
-instance Show (a->b)  -- if a Show for Presentation is defined, this instance is no longer necessary
-  where show f = "function"
-
 type UpdateDoc doc clip = DocumentLevel doc clip -> DocumentLevel doc clip
 type PopupMenuItem doc clip = (String, UpdateDoc doc clip)
 
