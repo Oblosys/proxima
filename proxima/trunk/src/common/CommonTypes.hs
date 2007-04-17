@@ -18,6 +18,9 @@ import System.IO.Unsafe
 -- is not exported by all ...Types modules (like CommonUtils) because sometimes CommonTypes
 -- (and only CommonTypes) must be imported qualified due to name clashes with libraries.
 
+instance Show (a -> b) where
+  show _ = "function: (a -> b)"
+
 
 type Path = [Int]
 
