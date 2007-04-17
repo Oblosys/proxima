@@ -8,6 +8,7 @@ module DebugLevels ( DebugLevel (..)
 
 import Debug.Trace
 
+
 -- The debugLevels value is not exported, so a change on it does not lead to recompilation of all modules
 -- It doesn't work perfectly, GHC compiled modules are still recompiled when levels have changed.
 
@@ -19,8 +20,8 @@ data DebugLevel = Err | Main | GUI | Ren | Arr | Lay | Prs | Eva | Rdcr | Par | 
 
 
 debugLevels :: [DebugLevel]
-debugLevels = [Err]                     -- for no Debugging
---debugLevels = levels                 -- for debugging on levels
+--debugLevels = [Err]                     -- for no Debugging
+debugLevels = allLevels                 -- for debugging on levels
 
 levels =      [ Err 
               , Main
@@ -37,6 +38,20 @@ levels =      [ Err
 --             , Cmn
               ]
 
+allLevels =   [ Err 
+              , Main
+              , GUI
+              , Ren
+              , Arr
+              , Lay
+              , Prs
+              , Eva
+              , Rdcr
+              , Par
+              , UnA
+              , GI
+             , Cmn
+              ]
 -- maybe use a global IORef for levels, so change of level does not lead to recompilation
 -- This will probably affect performance, but when performance is required, all debugs can be removed anyway.
 -- However, it might be a bit tricky in GHCi: when the levels value is updated it might hold on to the old one
