@@ -1,0 +1,65 @@
+imports
+{
+import CommonTypes
+import PresLayerTypes
+import PresLayerUtils
+
+import XprezLib
+import XLatex hiding (bold)
+
+import DocumentEdit
+
+import List
+import qualified Data.Map as Map
+import Data.Map (Map)
+
+
+import DocTypes (DocumentLevel (..))
+import DocTypes_Generated
+import DocUtils_Generated
+import DocumentEdit_Generated
+
+presHole focus typeStr nd pth = loc nd $
+  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
+
+presParseErr node pres =
+  loc NoNode $ parsing $ pres `withbgColor` whiteSmoke
+
+presentFocus NoPathD     path pres = pres
+presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
+
+focusCol = lightBlue
+
+}
+
+INCLUDE "PresentationAG_Generated.ag"
+
+
+
+ATTR EnrichedDoc [ | layoutMap : LayoutMap | ]
+
+SEM EnrichedDoc
+  | RootEnr
+      lhs.pres = loc (RootDocNode @document []) $  --HACK!! top level loc needs to be a ref to the document
+                                                        -- it is used by mkPopupMenuXY in Renderer.
+                                                        -- A better implementation of popups will create the menu in
+                                                        -- the higher layers. Although it is still a bit unclear where
+                 loc (RootEnrNode @self []) $ structural $
+                   @root.pres
+
+SEM Root
+  | Root
+      lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     col [ text "Root", @tree.pres ] 
+                     
+SEM Tree
+  | Bin
+      lhs.pres = loc (BinNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     row [ text $ "(", @left.pres, text " Bin ", @right.pres, text ")" ]
+  | Leaf
+      lhs.pres = loc (LeafNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     row [text $ "Leaf"]
+                     
+                     
+                     
+                     
