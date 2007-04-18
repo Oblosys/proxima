@@ -25,11 +25,9 @@ import DocUtils_Generated
 reuse = Nothing
 set = Just
 
-
-
 parsePres pres = let tokens = postScanStr pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"\nhas result:") $
+                 in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"++show errs++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
        
 deepShowTks i tok = case tok of
@@ -65,10 +63,10 @@ recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
           (\str tree -> reuseRoot [tokenNode str] Nothing (Just tree))
       <$> pStructural RootNode
-      <*> parseTree -- recognizeTree
+      <*> pPrs parseTree {- recognizeTree -}
 
 parseTree :: ListParser Document Node ClipDoc Tree
-parseTree = pStr $
+parseTree = 
           (\po t1 b t2 pc -> reuseBin [tokenNode po, tokenNode b, tokenNode pc] Nothing (Just t1) (Just t2))
       <$> pKey "("
       <*> parseTree
@@ -77,7 +75,7 @@ parseTree = pStr $
       <*> pKey ")"
   <|>     (\l -> reuseLeaf [tokenNode l] Nothing)
       <$> pKey "Leaf"
-{-
+
 recognizeTree :: ListParser Document Node ClipDoc Tree
 recognizeTree = pStr $
           (\str t1 t2 -> reuseBin [tokenNode str] Nothing (Just t1) (Just t2))
@@ -86,7 +84,7 @@ recognizeTree = pStr $
       <*> recognizeTree
   <|>     (\str -> reuseLeaf [tokenNode str] Nothing)
       <$> pStructural LeafNode
--}
+
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
 mkString_ :: Show node => Token doc node clip (Maybe node) -> String_
