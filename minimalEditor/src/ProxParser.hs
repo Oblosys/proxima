@@ -25,7 +25,7 @@ import DocUtils_Generated
 reuse = Nothing
 set = Just
 
-parsePres pres = let tokens = postScanStr keywords pres Nothing
+parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
                  in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"++show errs++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
