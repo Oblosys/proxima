@@ -134,5 +134,5 @@ proxima: generate presenter
 	cd $(PROXIMASRCDIR); make
 
 	
-$(MAIN): proxima presenter generate
+$(MAIN): proxima generate presenter
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
