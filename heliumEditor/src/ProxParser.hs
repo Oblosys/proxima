@@ -27,7 +27,7 @@ set = Just
 
 
 
-parsePres pres = let tokens = postScanStr pres Nothing
+parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
                  in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $
                                  --   ++"\nhas result:") $
@@ -49,6 +49,61 @@ deepShowTks i tok = case tok of
 
 
 
+keywords :: [String]
+keywords = 
+  [ ":-"
+  , ":+"
+  , "_|_"
+  , "#"
+  , "<"
+  , ">"
+  , "L"
+  , "R"
+  , "<-"
+  , "->"
+  , "<+"
+  , "+>"
+  , "\""
+  , "</"
+  , "/>"
+  , "," --
+  , "(" --
+  , ")" --
+  , "{" --
+  , "}" --
+  , ";" --
+  , "[" --
+  , "]" --
+  , "="
+  , "%"
+  , "+"
+  , "-"
+  , "*"
+  , "/"
+  , "^"
+  , "\174"
+  , "\\" 
+--  , "l"      -- not very nice, just for demonstrating lambdas
+  , "False"
+  , "True"
+  , "if"
+  , "then"
+  , "else"
+  , "let"
+  , "in"
+  , "case"
+  , "of"
+  , "Chess"
+  , "board"
+  , "Slides"
+  , "pres"
+  , "Inv"
+  , "inv"
+  , ":"
+  , "..."
+  , "Form"
+  , "what"
+  ]
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
@@ -329,7 +384,7 @@ mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool))
 --     <$> pLIdent
 
 
--------------------- Keyword parsers, remember to keep these consistent with keywords in PresentationParsing.hs
+-------------------- Keyword parsers, remember to keep these consistent with keywords
 
 pIf     = pKey "if"
 
