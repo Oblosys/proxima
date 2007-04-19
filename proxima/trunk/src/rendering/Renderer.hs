@@ -54,29 +54,6 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
 
 
 
-myArr' = arr00
-myArr = ColA NoIDA 0 0 0 0 0 0 CommonTypes.blue
-         [ RectangleA NoIDA 0 0 10 10 0 0 1 Solid (0,0,0) (255,0,0)
-         ,strr 40 80 "bla"
-        
-         ]
-strr x y str = StringA NoIDA x y 0 0 0 0 str (0,0,0) defaultFont [0,28,40,68,96,124]--,
-
-arr00 = ColA NoIDA 10 10 0 0 0 0 CommonTypes.blue -- offsets are not correct here
-        [ RectangleA NoIDA 0 0 80 50 0 0 1 Solid (0,0,0) (255,0,0)
-        , StringA NoIDA 80 0 0 0 0 0 "Hello World!" (0,0,0) defaultFont []
-        , StringA NoIDA 0 40 0 0  0 0 "Bla" (0,0,0) defaultFont []
-        , StringA NoIDA 80 0 0 0 0 0 "B" (0,0,0) defaultFont []
-        ]
-
-{-
-arr1 =  StringA NoIDA 0 0 124 50 "blaaa" (0,0,0) defaultFont [0,28,40,68,96,124]--,
-                                    --       StringA NoIDA 0 50 24 50 "x" (0,0,0) "Arial" 30 [0,24
-
--}
-
--- end of hack.
-
 -- Automatic popups turned on: enable imports from editor
 
 mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
