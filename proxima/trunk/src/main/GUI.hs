@@ -72,12 +72,11 @@ startGUI handler (initRenderingLvl, initEvent) = run $
     ; windowRaise frame
 
     ; genericHandler handler renderingLvlVar window initEvent
-    ; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    ; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    -- why parse twice?
+    --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    -- parse twice, so expressions in slides are also parsed
 
     --; windowRefresh window False {- erase background -}  
-    -- somehow initial repaint goes wrong. A mouse click does what we want for now.
 
     ; return ()
     }    
@@ -308,86 +307,8 @@ translateKey _      _ = SkipRen 0
 translateModifiers :: Modifiers -> CommonTypes.Modifiers
 translateModifiers m = CommonTypes.Modifiers (shiftDown m) (controlDown m) (altDown m)
 
-
 downCast :: ScrolledWindow a -> Window () 
 downCast a = objectCast a
-
-
-
--------------------- OLD OBJECTIO RENDERER
-
-{-
- do { ids <- openIds 4
-    ; startGUI' handler (initRenderingLvl, initEvent) ids -- trick to get the id's in local definition scope
-    ; return ()
-    }
-    
--}
-
-{-
-startGUI' :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> 
-             (RenderingLevel documentLevel, EditRendering documentLevel) -> [Id] -> IO () 
-startGUI' handler (initRendering, initEvent) [windowID, editorControlID, id0, id1] =
- do {
-    ; startIO SDI initRendering initialize [ProcessClose closeProcess]
-    }
- where                           -- do all of these need to be local?
-   initialize renderingLvl =
-    do { ps <- openMenu  () fileMenu renderingLvl
-       --; size <- getProcessWindowSize
-       
-       ; ps      <- openWindow () (window (Size 800 700){-size-}) renderingLvl
-       
-       -- initialize all layers by giving an initEvent to the handler
-
-       ; renderingLvlM' <- genericHandler windowID handler renderingLvl initEvent
-       ; renderingLvl' <- case renderingLvlM' of
-                            Nothing            -> debug Err "Gui.startGUI: initEvent failed" $ return renderingLvl
-                            Just renderingLvl' -> return renderingLvl'
-                            
-                            
-                            -- just for now, an F1 event to parse the initial presentation
-       ; renderingLvlM'' <- genericHandler windowID handler renderingLvl' ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-       ; renderingLvl''  <- case renderingLvlM'' of
-                              Nothing             -> debug Err "Gui.startGUI: initEvent failed" $ return renderingLvl'
-                              Just renderingLvl'' -> return renderingLvl''
-  
-
-                            -- and one more, to get whitespace right
-       ; renderingLvlM''' <- genericHandler windowID handler renderingLvl'' ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-       ; renderingLvl'''  <- case renderingLvlM''' of
-                              Nothing             -> debug Err "Gui.startGUI: initEvent failed" $ return renderingLvl''
-                              Just renderingLvl''' -> return renderingLvl'''
-       
- --      ; setActiveWindow windowID -- does not work in GHCI, window does not go to front
-       ; return renderingLvl'''
-       }
-    
-   window size =                
-     Window ("Proxima v1.0") NilLS
-       [ WindowId      windowID
-       , WindowClose       (noLS closeProcess)
-            
-       , WindowViewSize    size
-       , WindowOrigin      zero
-       , WindowPen     [PenBack white]
-       , WindowVScroll     vscroll
-       , WindowHScroll     vscroll
-       , WindowViewDomain (Rectangle (Point2 0 0) (Point2 2000 4000))  -- this should be the arrangement size
-       
-       , WindowMouse    (const True) Able (noLS1 (mouseHandler id0 windowID handler))
-       , WindowKeyboard (const True) Able (noLS1 (keyboardHandler windowID handler))
-     --   , WindowDoubleBuffered
- 
-       ]
-
-
-
--}
-
--- menuHandler, buttonHandler, ...
-
-
 
 
 -------------- Experiments with dynamic tooltip support:

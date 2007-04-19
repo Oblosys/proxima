@@ -4,10 +4,6 @@ module DocUtils where
 import DocTypes
 import PresTypes
 
--- mapping info is directly in Document, so doc depends on presentation. Only for now.
--- First ID is document-level ID for node. The rest are presentation ID's
-
-
 redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})
 --redirect InitDoc         = (SetDoc' initDoc) -- is done in translate

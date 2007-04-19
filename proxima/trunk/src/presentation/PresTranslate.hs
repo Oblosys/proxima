@@ -7,12 +7,13 @@ import PresLayerUtils
 
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
+translateIO :: Show enr =>
+               ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
                EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip ->
                IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
 translateIO parseSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO parseSheet state low high editLow
---     ; debugLnIO Prs $ "Edit Pres:"++show editLow
+     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
      ; return (editHigh, state', low')
      }
 

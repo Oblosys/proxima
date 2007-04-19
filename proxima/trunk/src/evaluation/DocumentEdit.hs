@@ -1,7 +1,5 @@
 module DocumentEdit where
 
-
--- TODO: DocumentEdit_Generated was also exported
 {-
 
 Defines document edit (structure edit) functions
@@ -23,8 +21,6 @@ import PresTypes
 import List
 import Debug.Trace
 
---import DocumentEdit_Generated
-
 class Editable a doc node clip | a -> doc node clip where
   select :: PathD -> a -> clip
   paste :: PathD -> clip -> a -> a
@@ -44,85 +40,6 @@ class Clip clip where
   isListClip :: clip -> Bool
   insertListClip :: Int -> clip -> clip -> clip
   removeListClip :: Int -> clip -> clip
-
-
-{-
-
-instance Show Document where
-  show (RootDoc _ _ decls) = "Document\n"++show decls
-
-instance Show Decls where
-  show (ConsDecls _ d ds) = show d ++ show ds
-  show (NilDecls _)      = ""
-  show HoleDecls           = "{Decls}"
-  show (ParseErrDecls _ _) = "<<PARSE ERROR DECLS>>"
-
-instance Show Decl where
- show (Decl _ _ _ ident exp)     = show ident ++ " = " ++ show exp ++ ";\n"
- show HoleDecl           = "{Decl}"
- show (ParseErrDecl _ _) = "<<PARSE ERROR DECL>>"
-
-instance Show Ident where
- show (Ident _ _ str)     = str
- show HoleIdent           = "{Ident}"
- show (ParseErrIdent _ _) = "<<PARSE ERROR IDENT>>"
- 
-instance Show Exp where
-  show (PlusExp _ _ exp1 exp2)       = show exp1 ++ "+" ++ show exp2
-  show (TimesExp _ _ exp1 exp2)      = show exp1 ++ "*" ++ show exp2
-  show (DivExp _ _ exp1 exp2)        = show exp1 ++ "/" ++ show exp2
-  show (PowerExp _ _ exp1 exp2)      = show exp1 ++ "^" ++ show exp2
-  show (BoolExp _ _ bool)          = show bool
-  show (IntExp _ _ int)            = show int
-  show (CaseExp _ _ _ exp alts)    = "case" ++ show exp ++ " of " ++ show alts
-  show (LetExp _ _ _ decls exp)    = "let" ++ show decls ++ " in " ++ show exp
-  show (LamExp _ _ _ ident exp)    = "\\" ++ show ident ++ " -> " ++ show exp
-  show (AppExp _ exp1 exp2)          = show exp1 ++ " " ++ show exp2
-  show (IdentExp _ ident)          = show ident
-  show (IfExp _ _ _ _ exp1 exp2 exp3) = "if " ++ show exp1 ++ " then " ++ show exp2  ++ " else " ++ show exp3
-  show (ParenExp _ _ _ exp)        = "(" ++ show exp ++ ")"
-  show (ProductExp _ _ _ _ exps)   = "(" ++ concat (intersperse ", " (map show (lstFromExps exps))) ++ ")"
-  show HoleExp                     = "{Exp}"
-  show (ParseErrExp _ _)           = "<<PARSE ERROR EXP>>"
-  
-lstFromExps :: Exps -> [Exp]
-lstFromExps (ConsExps _ e es) = e:lstFromExps es
-lstFromExps (NilExps _)      = []
-lstFromExps HoleExps           = []
-lstFromExps (ParseErrExps _ _) = []
-
-data Exps = ConsExps ID Exp Exps
-           | NilExps ID
-           | HoleExps
-           | ParseErrExps node Presentation
-
-instance Show Exps where
-  show (ConsExps _ d ds) = show d ++ show ds
-  show (NilExps _)      = ""
-  show HoleExps           = "{Exps}"
-  show (ParseErrExps _ _) = "<<PARSE ERROR EXPS>>"
-
-
-
-
-
--- clip is not a good name, since nothing is clipped, maybe node is ok after all
-data ClipDoc = 
-            Clip_Int Int
-          | Clip_String String
-          | Clip_Bool Bool
-          
-          | Clip_Decls Decls
-          | Clip_Decl Decl
-          | Clip_Ident Ident
-          | Clip_Exp Exp
-          | Clip_Exps Exps
-          | Clip_Alts Alts
-          | Clip_Alt Alt
-          
-          | Clip_Nothing deriving Show
--}
-
 
 
 -- Generic part
@@ -216,71 +133,3 @@ alternativesD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> [ (S
 alternativesD p d = alternativesClip (select p d)
 
  
--- a simple structure editor:
-
-{-
-test = do { putStrLn "\n\n\n\n****** Simple structural editor for testing DocumentEdit module ******"
-          ; edit (DocumentLevel sample NoPathD Clip_Nothing)
-          }
-
-edit :: (Editable doc doc node clip, Show doc) => DocumentLevel doc clip -> IO ()
-edit doclvl@(DocumentLevel doc path clip) =
- do { putStrLn $ "\n\ndoc  "++ show doc
-    ; putStrLn $ "\npath "++ show path ++ case path of NoPathD   -> ""
-                                                       PathD pth -> " = " ++ show (selectD pth doc) 
-    ; putStrLn $ "\nclip "++ show clip
-    
-    ; c <- getChar
-    ; putStrLn ""
-    
-    ; (doclvl', str) <- case c of '\'' -> return (DocumentLevel doc (navigateUpD path doc) clip, "Up")
-                                  '/' -> return (DocumentLevel doc (navigateDownD path doc) clip, "Down")
-                                  ',' -> return (DocumentLevel doc (navigateLeftD path doc) clip, "Left")
-                                  '.' -> return (DocumentLevel doc (navigateRightD path doc) clip, "Right")
-                                  'c' -> return (editCopyD doclvl, "Copy")
-                                  'v' -> return (editPasteD doclvl, "Paste")
-                                  'x' -> return (editCutD doclvl, "Cut")
-                                  'i' -> insertElt doclvl 0
-                                  'q' -> return (doclvl, "Quit")
-                                  _   -> return (doclvl, "Unknown command")
-    ; putStrLn str
-    ; if c /= 'q' then edit doclvl' else return ()
-    }
-
- 
-insertElt :: Editable doc doc node clip => DocumentLevel doc clip -> Int -> IO (DocumentLevel doc clip, String)
-insertElt doclvl@(DocumentLevel doc path clp) i =
- do { let menu = menuD path doc
-    ; putStrLn $ concat $ intersperse " | " $
-                   [ mark (i==ix) str | ((str, clp),ix) <- zip menu [0..] ]
-    ; c <- getChar
-    ; case c of '\'' -> insertElt doclvl (if i > 0 then (i-1) else i)
-                '/'  -> insertElt doclvl (if i < length menu - 1 then (i+1) else i)
-                ','  -> insertElt doclvl (if i > 0 then (i-1) else i)
-                '.'  -> insertElt doclvl (if i < length menu - 1 then (i+1) else i)
-                '\n' -> let (itemStr, upd) = menu !! i in return (upd doclvl, "paste: "++itemStr)
-                _    -> insertElt doclvl i
-    }
- where mark True  str = ">"++str++"<"
-       mark False str = " "++str++" " 
--}
-
--- Document type specific part
-
-sample = hole {- RootDoc NoIDD NoIDP $
-           ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "tup") 
-                                (ProductExp NoIDD NoIDP NoIDP [] $ 
-                                   ConsExps NoIDD (PlusExp NoIDD NoIDP (IntExp NoIDD NoIDP 2) (IntExp NoIDD NoIDP  3)) $
-                                   ConsExps NoIDD (IntExp NoIDD NoIDP 2) $
-                                   NilExps NoIDD) 
-                          ) $
-           ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "f") (PlusExp NoIDD NoIDP (IntExp NoIDD NoIDP 2) (IntExp NoIDD NoIDP  3))
-                          ) $
-           ConsDecls NoIDD (Decl NoIDD NoIDP NoIDP NoIDP NoIDP True True (Ident NoIDD NoIDP NoIDP "g") (IntExp NoIDD NoIDP 1) 
-                          ) $
-           NilDecls NoIDD
--}
-
--- functions that work with select need a ..Clip definition. Maybe this can be eliminated by using
--- some type trickery
-
