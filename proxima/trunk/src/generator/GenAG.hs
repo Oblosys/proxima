@@ -44,7 +44,7 @@ genAgTypes (File _ decls) = concatMap printAgDecl decls where
                                      ++ indent (6+(length e)) ((map printAgProd prods)
                                      ++ (if decltp /= DeclConsList --- no hole/parseErrs for consLists
                                          then ["| Hole"++e
-                                              ,"| ParseErr"++e++" Node presentation:Presentation_Doc_Node_Clip"] 
+                                              ,"| ParseErr"++e++" presentation:Presentation_Doc_Node_Clip"] 
                                          else [])
                                      )
     printAgProd (Prod s fields)= "| "++s++" "++ concatMap printField fields 
@@ -67,7 +67,7 @@ genSem' d@(Decl e l DeclConsList) = semConsList e
 genSem' d@(Decl e l DeclList) = semList e 
 genSem' d@(Decl e l _)   = [("\n\nSEM "++e)] ++ indent 2 (concatMap doIdC  l) ++ --- SEM
                            [ "  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" (Hole"++e++"Node @self @lhs.path) @lhs.path"
-                            ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"]++
+                            ,"  | ParseErr"++e++" lhs.pres = presParseErr @presentation"]++
                          --- quick dirty fix so no SEM is generated if no path rules are generated
                          let pathRules = concatMap doPath l  ---
                          in (if null pathRules then [] else [("\n\nSEM "++e)])    ---
@@ -124,7 +124,7 @@ semList e =  [ "\nSEM "++e
              , "      elts.path = @lhs.path"
              , "      elts.ix = 0"
              , "  | Hole"++e++"     lhs.press = []"
-             , "  | ParseErr"++e++" lhs.press = [ presParseErr @node @presentation ]" ------ ??? ok?
+             , "  | ParseErr"++e++" lhs.press = [ presParseErr @presentation ]" ------ ??? ok?
              ]
  where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
 
@@ -206,7 +206,7 @@ enumRepData l = c l l
 {-
 genHoles e DeclDef  = 
     ["  | Hole"++e++"     lhs.pres = presHole @lhs.focusD \""++e++"\" ("++e++"Node @self @lhs.path) @lhs.path"
-    ,"  | ParseErr"++e++" lhs.pres = presParseErr @node @presentation"
+    ,"  | ParseErr"++e++" lhs.pres = presParseErr @presentation"
     ]
 genHoles e DeclList =
     [
@@ -241,7 +241,7 @@ genPresentXMLDecl (Decl e _ DeclList) =
   , "                    col @elts.pressXML"
   , "  | ParseErrList_"++listTp++""
   , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presParseErr @node @presentation"
+  , "                    presParseErr @presentation"
   , "  | HoleList_"++listTp++""
   , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
@@ -253,7 +253,7 @@ genPresentXMLDecl (Decl tp prods _) =
   [ "SEM "++tp++" [ || presXML : Presentation_Doc_Node_Clip ]" ]
   ++ concatMap genPresentXMLProd prods ++
   [ "  | Hole"++tp++"     lhs.presXML = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
-  , "  | ParseErr"++tp++" lhs.presXML = presParseErr @node @presentation"
+  , "  | ParseErr"++tp++" lhs.presXML = presParseErr @presentation"
   , ""
   ]
    
@@ -289,7 +289,7 @@ genPresentTreeDecl (Decl e _ DeclList) =
   , "                       col @elts.pressTree"
   , "  | ParseErrList_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                       presParseErr @node @presentation"
+  , "                       presParseErr @presentation"
   , "  | HoleList_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       presHole @lhs.focusD \"List_"++listTp++"\" (HoleList_"++listTp++"Node @self @lhs.path) @lhs.path"
@@ -301,7 +301,7 @@ genPresentTreeDecl (Decl tp prods _) =
   [ "SEM "++tp++" [ || presTree : Presentation_Doc_Node_Clip ]" ]
   ++ concatMap genPresentTreeProd prods ++
   [ "  | Hole"++tp++"     lhs.presTree = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
-  , "  | ParseErr"++tp++" lhs.presTree = presParseErr @node @presentation"
+  , "  | ParseErr"++tp++" lhs.presTree = presParseErr @presentation"
   , ""
   ]
    
