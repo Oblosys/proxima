@@ -26,7 +26,7 @@ class Editable a doc node clip | a -> doc node clip where
   paste :: PathD -> clip -> a -> a
   alternatives :: a -> [ (String, clip) ]
   arity :: a -> Int
-  parseErr :: node -> Presentation doc node clip -> a
+  parseErr :: Presentation doc node clip -> a
   hole :: a
   isList :: a -> Bool
   insertList :: Int -> clip -> a -> clip
