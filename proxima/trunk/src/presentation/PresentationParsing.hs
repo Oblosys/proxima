@@ -140,47 +140,47 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 
 -- put all tokens in one big list
 -- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
--- TODO: switch pres & ctxt args, fix silly recursion
+-- old TODO: fix silly recursion (what did I mean by that?)
+-- TODO put keyword stuff in Scanner layer
+
+postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
+postScanStr kwrds ctxt (EmptyP _)           = []
+postScanStr kwrds ctxt (StringP _ _)        = []
+postScanStr kwrds ctxt (ImageP _ _)         = []
+postScanStr kwrds ctxt (PolyP _ _ _)        = []
+postScanStr kwrds ctxt (RectangleP _ _ _ _) = []
+postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
+postScanStr kwrds ctxt (OverlayP _ [])      = []
+postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
+postScanStr kwrds ctxt (ColP i _ [])         = []
+postScanStr kwrds ctxt (ColP i _ (p:ps))     = postScanStr kwrds ctxt p ++ postScanStr kwrds ctxt (RowP i 0 ps)
+postScanStr kwrds ctxt (RowP i _ [])         = []
+postScanStr kwrds ctxt (RowP i _ (p:ps))     = postScanStr kwrds ctxt p ++ postScanStr kwrds ctxt (RowP i 0 ps)
+postScanStr kwrds ctxt (LocatorP l p)        = postScanStr kwrds (Just l) p  
+postScanStr kwrds ctxt (ParsingP i pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
+--postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
+postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
+postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
 
 
-postScanStr :: Presentation doc node clip -> Maybe node -> [Token doc node clip (Maybe node)]
-postScanStr (EmptyP _)    ctxt = []
-postScanStr (StringP _ _) ctxt = []
-postScanStr (ImageP _ _)  ctxt = []
-postScanStr (PolyP _ _ _) ctxt = []
-postScanStr (RectangleP _ _ _ _) ctxt = []
-postScanStr (WithP _ pres)    ctxt = postScanStr pres ctxt
-postScanStr (OverlayP _ []) ctxt = []
-postScanStr (OverlayP _ (pres:press)) ctxt = postScanStr pres ctxt
-postScanStr (ColP i _ [])      _    = []
-postScanStr (ColP i _ (p:ps))  ctxt = postScanStr p ctxt ++ postScanStr (RowP i 0 ps) ctxt
-postScanStr (RowP i _ [])      _    = []
-postScanStr (RowP i _ (p:ps))  ctxt = postScanStr p ctxt ++ postScanStr (RowP i 0 ps) ctxt
-postScanStr (LocatorP l p)     ctxt = postScanStr p (Just l)  
-postScanStr (ParsingP i pres) ctxt    = [ParsingTk pres (postScanPrs pres ctxt) i]
---postScanStr (ParsingP i pres) ctxt    = [StructuralTk (Just NoNode) pres (postScanPrs pres ctxt) i]
-postScanStr (StructuralP i pres) ctxt = [StructuralTk ctxt pres (postScanStr pres ctxt) i]
-postScanStr pres _ = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
-
-
-postScanPrs :: Presentation doc node clip -> Maybe node -> [Token doc node clip (Maybe node)]
-postScanPrs (EmptyP _)    ctxt = []
-postScanPrs (StringP _ "") ctxt = []
-postScanPrs (StringP i str) ctxt = [mkToken str ctxt i]
-postScanPrs (ImageP _ _)  ctxt = []
-postScanPrs (PolyP _ _ _) ctxt = []
-postScanPrs (RectangleP _ _ _ _) ctxt = []
-postScanPrs (WithP _ pres)    ctxt = postScanPrs pres ctxt
-postScanPrs (OverlayP _ []) ctxt = []
-postScanPrs (OverlayP _ (pres:press)) ctxt = postScanPrs pres ctxt
-postScanPrs (ColP i _ [])      _    = []
-postScanPrs (ColP i _ (p:ps))  ctxt = postScanPrs p ctxt ++ postScanPrs (RowP i 0 ps) ctxt
-postScanPrs (RowP i _ [])      _    = []
-postScanPrs (RowP i _ (p:ps))  ctxt = postScanPrs p ctxt ++ postScanPrs (RowP i 0 ps) ctxt
-postScanPrs (LocatorP l p)     ctxt = postScanPrs p (Just l)  
-postScanPrs (ParsingP _ pres) ctxt    = postScanPrs pres ctxt
-postScanPrs (StructuralP id pres) ctxt = [StructuralTk ctxt pres (postScanStr pres ctxt) id ]
-postScanPrs pres _ = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
+postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
+postScanPrs kwrds ctxt (EmptyP _)           = []
+postScanPrs kwrds ctxt (StringP _ "")       = []
+postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
+postScanPrs kwrds ctxt (ImageP _ _)         = []
+postScanPrs kwrds ctxt (PolyP _ _ _)        = []
+postScanPrs kwrds ctxt (RectangleP _ _ _ _) = []
+postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (OverlayP _ [])      = []
+postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (ColP i _ [])        = []
+postScanPrs kwrds ctxt (ColP i _ (p:ps))    = postScanPrs kwrds ctxt p ++ postScanPrs kwrds ctxt (RowP i 0 ps)
+postScanPrs kwrds ctxt (RowP i _ [])        = []
+postScanPrs kwrds ctxt (RowP i _ (p:ps))    = postScanPrs kwrds ctxt p ++ postScanPrs kwrds ctxt (RowP i 0 ps)
+postScanPrs kwrds ctxt (LocatorP l p)       = postScanPrs kwrds (Just l) p   
+postScanPrs kwrds ctxt (ParsingP _ pres)    = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
+postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
 
 
 
@@ -403,72 +403,17 @@ parsingTk = (ParsingTk empty [] NoIDP)
 --parsingTk = StructuralTk (Just NoNode) empty [] NoIDP
 
 
-mkToken :: String -> Maybe node -> IDP -> Token doc node clip (Maybe node)
-mkToken str@(c:_)   ctxt i | str `elem` keywords = StrTk str ctxt i
-                           | isDigit c           = IntTk str ctxt i
-                           | isLower c           = LIdentTk str ctxt i
-                           | isUpper c           = UIdentTk str ctxt i
-                           | otherwise           = OpTk str ctxt i
+mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip (Maybe node)
+mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = StrTk str ctxt i
+                                    | isDigit c           = IntTk str ctxt i
+                                    | isLower c           = LIdentTk str ctxt i
+                                    | isUpper c           = UIdentTk str ctxt i
+                                    | otherwise           = OpTk str ctxt i
 
 --makeToken str ctxt i = Tk str ctxt i
 
 isSymbolChar c = c `elem` ";,(){}#_|"
 
-keywords :: [String]
-keywords = 
-  [ ":-"
-  , ":+"
-  , "_|_"
-  , "#"
-  , "<"
-  , ">"
-  , "L"
-  , "R"
-  , "<-"
-  , "->"
-  , "<+"
-  , "+>"
-  , "\""
-  , "</"
-  , "/>"
-  , "," --
-  , "(" --
-  , ")" --
-  , "{" --
-  , "}" --
-  , ";" --
-  , "[" --
-  , "]" --
-  , "="
-  , "%"
-  , "+"
-  , "-"
-  , "*"
-  , "/"
-  , "^"
-  , "\174"
-  , "\\" 
---  , "l"      -- not very nice, just for demonstrating lambdas
-  , "False"
-  , "True"
-  , "if"
-  , "then"
-  , "else"
-  , "let"
-  , "in"
-  , "case"
-  , "of"
-  , "Chess"
-  , "board"
-  , "Slides"
-  , "pres"
-  , "Inv"
-  , "inv"
-  , ":"
-  , "..."
-  , "Form"
-  , "what"
-  ]
 
 
 instance (Show a, Eq a, Ord a) => Symbol (Token doc node clip (Maybe a)) where
