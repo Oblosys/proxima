@@ -25,7 +25,7 @@ import DocUtils_Generated
 reuse = Nothing
 set = Just
 
-parsePres pres = let tokens = postScanStr pres Nothing
+parsePres pres = let tokens = postScanStr keywords pres Nothing
                      (enr,errs) = runParser recognizeRootEnr tokens
                  in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"++show errs++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
@@ -86,6 +86,69 @@ recognizeTree = pStr $
       <$> pStructural LeafNode
 
 
+
+keywords :: [String]
+keywords = 
+  [ ":-"
+  , ":+"
+  , "_|_"
+  , "#"
+  , "<"
+  , ">"
+  , "L"
+  , "R"
+  , "<-"
+  , "->"
+  , "<+"
+  , "+>"
+  , "\""
+  , "</"
+  , "/>"
+  , "," --
+  , "(" --
+  , ")" --
+  , "{" --
+  , "}" --
+  , ";" --
+  , "[" --
+  , "]" --
+  , "="
+  , "%"
+  , "+"
+  , "-"
+  , "*"
+  , "/"
+  , "^"
+  , "\174"
+  , "\\" 
+--  , "l"      -- not very nice, just for demonstrating lambdas
+  , "False"
+  , "True"
+  , "if"
+  , "then"
+  , "else"
+  , "let"
+  , "in"
+  , "case"
+  , "of"
+  , "Chess"
+  , "board"
+  , "Slides"
+  , "pres"
+  , "Inv"
+  , "inv"
+  , ":"
+  , "..."
+  , "Form"
+  , "what"
+  , "Leaf"
+  , "Bin"
+  ]
+
+
+
+
+
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
 mkString_ :: Show node => Token doc node clip (Maybe node) -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
@@ -97,3 +160,5 @@ mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk))
 -- parsers, which can give the value as an argument
 mkBool_ :: Bool -> Bool_
 mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool)) 
+
+
