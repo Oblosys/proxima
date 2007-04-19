@@ -16,7 +16,8 @@ category:
 author: Martijn Schrage
 tested-with: GHC -any
 data-files:
-extra-source-files: src/PresentationAG.ag
+extra-source-files: src/proxima/arrangement/ArrangerAG.ag
+                    src/PresentationAG.ag
 extra-tmp-files:
  
 executable: Proxima
@@ -45,8 +46,8 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                PresTypes PresUtils PresentationParsing XLatex XprezLib
                RenLayerTypes RenLayerUtils RenPresent RenTranslate RenTypes
                RenUtils Renderer DocTypes_Generated DocUtils_Generated
-               DocumentEdit_Generated Evaluator Main PresentationAG
-               ProxParser ProxParser_Generated Reducer Scanner
+               DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
+               ProxParser_Generated Reducer Scanner
 ghc-prof-options: -auto-all
 ghc-options: -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
