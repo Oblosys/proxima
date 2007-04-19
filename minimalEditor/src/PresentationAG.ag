@@ -58,7 +58,7 @@ SEM Tree
                      row [ text $ "(", @left.pres, text " Bin ", @right.pres, text ")" ]
   | Leaf
       lhs.pres = loc (LeafNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     row [text $ "Leaf"]
+                     row [text $ "Leaf", text ""]
                      
                      
                      
