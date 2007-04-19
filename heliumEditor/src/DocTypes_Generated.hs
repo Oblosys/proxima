@@ -37,7 +37,7 @@ data HeliumMessage =
 -- this one cannot be generated, but needs to be here for now
 data Document = RootDoc IDD IDP List_Decl
               | HoleDocument
-              | ParseErrDocument Node (Presentation Document Node ClipDoc) deriving Show
+              | ParseErrDocument (Presentation Document Node ClipDoc) deriving Show
 
 
 type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
@@ -77,7 +77,7 @@ instance Read Node where
 
 data EnrichedDoc = RootEnr IDD IDP List_Decl List_Decl HeliumTypeInfo Document 
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc Node (Presentation Document Node ClipDoc)
+                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc)
                     deriving Show
 
 
@@ -85,13 +85,13 @@ data Decl = Decl IDD IDP IDP IDP IDP Bool_ Bool_ Ident Exp
           | BoardDecl IDD IDP IDP Board 
           | PPPresentationDecl IDD IDP IDP PPPresentation 
           | HoleDecl
-          | ParseErrDecl Node (Presentation Document Node ClipDoc)
+          | ParseErrDecl (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data Ident = Ident IDD IDP IDP String_ 
            | HoleIdent
-           | ParseErrIdent Node (Presentation Document Node ClipDoc)
+           | ParseErrIdent (Presentation Document Node ClipDoc)
               deriving Show
 
 
@@ -111,25 +111,25 @@ data Exp = PlusExp IDD IDP Exp Exp
          | ListExp IDD IDP IDP [IDP] List_Exp 
          | ProductExp IDD IDP IDP [IDP] List_Exp 
          | HoleExp
-         | ParseErrExp Node (Presentation Document Node ClipDoc)
+         | ParseErrExp (Presentation Document Node ClipDoc)
             deriving Show
 
 
 data Alt = Alt IDD IDP IDP Ident Exp 
          | HoleAlt
-         | ParseErrAlt Node (Presentation Document Node ClipDoc)
+         | ParseErrAlt (Presentation Document Node ClipDoc)
             deriving Show
 
 
 data Board = Board IDD BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow 
            | HoleBoard
-           | ParseErrBoard Node (Presentation Document Node ClipDoc)
+           | ParseErrBoard (Presentation Document Node ClipDoc)
               deriving Show
 
 
 data BoardRow = BoardRow IDD BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare 
               | HoleBoardRow
-              | ParseErrBoardRow Node (Presentation Document Node ClipDoc)
+              | ParseErrBoardRow (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -141,25 +141,25 @@ data BoardSquare = Queen IDD Bool_
                  | Pawn IDD Bool_ 
                  | Empty 
                  | HoleBoardSquare
-                 | ParseErrBoardSquare Node (Presentation Document Node ClipDoc)
+                 | ParseErrBoardSquare (Presentation Document Node ClipDoc)
                     deriving Show
 
 
 data PPPresentation = PPPresentation IDD Bool_ List_Slide 
                     | HolePPPresentation
-                    | ParseErrPPPresentation Node (Presentation Document Node ClipDoc)
+                    | ParseErrPPPresentation (Presentation Document Node ClipDoc)
                        deriving Show
 
 
 data Slide = Slide IDD String_ ItemList 
            | HoleSlide
-           | ParseErrSlide Node (Presentation Document Node ClipDoc)
+           | ParseErrSlide (Presentation Document Node ClipDoc)
               deriving Show
 
 
 data ItemList = ItemList IDD ListType List_Item 
               | HoleItemList
-              | ParseErrItemList Node (Presentation Document Node ClipDoc)
+              | ParseErrItemList (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -167,7 +167,7 @@ data ListType = Bullet IDD
               | Number IDD 
               | Alpha IDD 
               | HoleListType
-              | ParseErrListType Node (Presentation Document Node ClipDoc)
+              | ParseErrListType (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -175,31 +175,31 @@ data Item = StringItem IDD String_
           | HeliumItem IDD Exp 
           | ListItem IDD ItemList 
           | HoleItem
-          | ParseErrItem Node (Presentation Document Node ClipDoc)
+          | ParseErrItem (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data String_ = String_ IDD String 
              | HoleString_
-             | ParseErrString_ Node (Presentation Document Node ClipDoc)
+             | ParseErrString_ (Presentation Document Node ClipDoc)
                 deriving Show
 
 
 data Bool_ = Bool_ IDD Bool 
            | HoleBool_
-           | ParseErrBool_ Node (Presentation Document Node ClipDoc)
+           | ParseErrBool_ (Presentation Document Node ClipDoc)
               deriving Show
 
 
 data Int_ = Int_ IDD Int 
           | HoleInt_
-          | ParseErrInt_ Node (Presentation Document Node ClipDoc)
+          | ParseErrInt_ (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data List_Decl = List_Decl IDD ConsList_Decl 
                | HoleList_Decl
-               | ParseErrList_Decl Node (Presentation Document Node ClipDoc)
+               | ParseErrList_Decl (Presentation Document Node ClipDoc)
                   deriving Show
 
 
@@ -210,7 +210,7 @@ data ConsList_Decl = Cons_Decl Decl ConsList_Decl
 
 data List_Alt = List_Alt IDD ConsList_Alt 
               | HoleList_Alt
-              | ParseErrList_Alt Node (Presentation Document Node ClipDoc)
+              | ParseErrList_Alt (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -221,7 +221,7 @@ data ConsList_Alt = Cons_Alt Alt ConsList_Alt
 
 data List_Exp = List_Exp IDD ConsList_Exp 
               | HoleList_Exp
-              | ParseErrList_Exp Node (Presentation Document Node ClipDoc)
+              | ParseErrList_Exp (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -232,7 +232,7 @@ data ConsList_Exp = Cons_Exp Exp ConsList_Exp
 
 data List_Slide = List_Slide IDD ConsList_Slide 
                 | HoleList_Slide
-                | ParseErrList_Slide Node (Presentation Document Node ClipDoc)
+                | ParseErrList_Slide (Presentation Document Node ClipDoc)
                    deriving Show
 
 
@@ -243,7 +243,7 @@ data ConsList_Slide = Cons_Slide Slide ConsList_Slide
 
 data List_Item = List_Item IDD ConsList_Item 
                | HoleList_Item
-               | ParseErrList_Item Node (Presentation Document Node ClipDoc)
+               | ParseErrList_Item (Presentation Document Node ClipDoc)
                   deriving Show
 
 

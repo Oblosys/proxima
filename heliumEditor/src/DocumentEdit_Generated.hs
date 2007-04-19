@@ -48,7 +48,7 @@ instance Editable Int Document Node ClipDoc where
                    , ("{Int}", Clip_Int hole) ]
   
   arity _ = 0
-  parseErr _ _ = 0
+  parseErr _ = 0
 
   hole = 0
 
@@ -66,7 +66,7 @@ instance Editable Bool Document Node ClipDoc where
                    , ("False", Clip_Bool False)      
                    , ("{Bool}", Clip_Bool hole) ]    
   arity _ = 0                                          
-  parseErr _ _ = False
+  parseErr _ = False
 
   hole = False
 
@@ -86,7 +86,7 @@ instance Editable String Document Node ClipDoc where
                    , ("{String}", Clip_String hole) ] 
  
   arity _ = 0
-  parseErr _ _= "{ParseErr}"
+  parseErr _ = "{ParseErr}"
 
   hole = "{String}"
 

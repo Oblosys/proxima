@@ -177,7 +177,7 @@ SEM List_Decl [ || pres : Presentation_Doc_Node_Clip ]
                    row @elts.press
   | ParseErrList_Decl
       lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr @node @presentation
+                   presParseErr @presentation
   | HoleList_Decl
       lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Decls" (HoleList_DeclNode @self @lhs.path) @lhs.path
@@ -454,8 +454,7 @@ presHole focus typeStr nd pth = loc nd $
 
 --  structural $ overlay [poly [(0,0),(1,0),(1,1),(0,1),(0,0)], text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFont'` ("Courier New", 10)
 
--- TODO: wat voor location willen we hier?
-presParseErr node pres =
+presParseErr pres =
   loc NoNode $ parsing $ pres {- $ overlay [ pres, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] `withColor` red, empty ] -}
                                                                                      -- empty trick
                           `withbgColor` whiteSmoke
@@ -1118,13 +1117,13 @@ SEM Decl
   | PPPresentationDecl lhs.idsPres = loc (PPPresentationDeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                        row' [ text "slides;" ]
   | HoleDecl           lhs.idsPres = presHole @lhs.focusD "Decl" (HoleDeclNode @self @lhs.path) @lhs.path
-  | ParseErrDecl       lhs.idsPres = presParseErr @node @presentation
+  | ParseErrDecl       lhs.idsPres = presParseErr @presentation
 
 SEM Ident
   | Ident              lhs.idsPres = loc (IdentNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                                        row' [ @string_.pres ]
   | HoleIdent          lhs.idsPres = presHole @lhs.focusD "Ident" (HoleIdentNode @self @lhs.path) @lhs.path
-  | ParseErrIdent      lhs.idsPres = presParseErr @node @presentation
+  | ParseErrIdent      lhs.idsPres = presParseErr @presentation
 
 
 
@@ -1208,7 +1207,7 @@ SEM List_Slide [ || pres : Presentation_Doc_Node_Clip ]
                    presentList @elts.press
   | ParseErrList_Slide
       lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr @node @presentation
+                   presParseErr @presentation
   | HoleList_Slide -- remove this line?
       lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path
@@ -1254,7 +1253,7 @@ SEM List_Item [ || pres : Presentation_Doc_Node_Clip ]
                    presentList @elts.press
   | ParseErrList_Item
       lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr @node @presentation
+                   presParseErr @presentation
   | HoleList_Item
       lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path
@@ -1329,7 +1328,7 @@ SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip ]
                    col' $ intersperse (col' [vSpace 4, hLine, vSpace 4]) @elts.press2
   | ParseErrList_Slide
       lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr @node @presentation
+                   presParseErr @presentation
   | HoleList_Slide
       lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path
@@ -1373,7 +1372,7 @@ SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip ]
                    col' @elts.press2
   | ParseErrList_Item
       lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr @node @presentation
+                   presParseErr @presentation
   | HoleList_Item
       lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path
@@ -1418,27 +1417,27 @@ SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip -
 
 SEM List_Slide
   | HoleList_Slide     lhs.press2 = [presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path]
-  | ParseErrList_Slide lhs.press2 = [presParseErr @node @presentation]
+  | ParseErrList_Slide lhs.press2 = [presParseErr @presentation]
 
 SEM Slide
   | HoleSlide     lhs.pres2 = presHole @lhs.focusD "Slide" (HoleSlideNode @self @lhs.path) @lhs.path
-  | ParseErrSlide lhs.pres2 = presParseErr @node @presentation
+  | ParseErrSlide lhs.pres2 = presParseErr @presentation
 
 SEM ItemList
   | HoleItemList     lhs.pres2 = presHole @lhs.focusD "ItemList" (HoleItemListNode @self @lhs.path) @lhs.path
-  | ParseErrItemList lhs.pres2 = presParseErr @node @presentation
+  | ParseErrItemList lhs.pres2 = presParseErr @presentation
 
 SEM ListType
   | HoleListType     lhs.pres2 = presHole @lhs.focusD "ListType" (HoleListTypeNode @self @lhs.path) @lhs.path
-  | ParseErrListType lhs.pres2 = presParseErr @node @presentation
+  | ParseErrListType lhs.pres2 = presParseErr @presentation
 
 SEM List_Item
   | HoleList_Item     lhs.press2 = [presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path]
-  | ParseErrList_Item lhs.press2 = [presParseErr @node @presentation]
+  | ParseErrList_Item lhs.press2 = [presParseErr @presentation]
 
 SEM Item
   | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (HoleItemNode @self @lhs.path) @lhs.path
-  | ParseErrItem lhs.pres2 = presParseErr @node @presentation
+  | ParseErrItem lhs.pres2 = presParseErr @presentation
 
 
 

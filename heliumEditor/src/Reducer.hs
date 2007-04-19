@@ -70,8 +70,8 @@ reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _
   (SetDoc (RootDoc idd idp dcls),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) = return $
-  (SetDoc (ParseErrDocument nd prs),state, enrDoc )  -- nd is not right
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
+  (SetDoc (ParseErrDocument prs),state, enrDoc )
 
 
 
@@ -89,7 +89,7 @@ initDoc =
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
-    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (List_DeclNode (List_Decl NoIDD Nil_Decl) []) (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) {- [] -}
+    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
     
 -- lines' works for Unix, Mac, and Dos format
@@ -121,11 +121,11 @@ instance Eq String_ where
 
 -- in case of parse error, return true so other pres is used
 instance Eq List_Decl where
-  (List_Decl _ decls1) == (List_Decl _ decls2)          = decls1 == decls2
-  HoleList_Decl              == HoleList_Decl           = True
-  (ParseErrList_Decl _ _)    == _                       = True
-  _                          == (ParseErrList_Decl _ _) = True
-  _                          == _                       = False
+  (List_Decl _ decls1) == (List_Decl _ decls2)        = decls1 == decls2
+  HoleList_Decl              == HoleList_Decl         = True
+  (ParseErrList_Decl _)      == _                     = True
+  _                          == (ParseErrList_Decl _) = True
+  _                          == _                     = False
 
 
 instance Eq ConsList_Decl where
@@ -139,15 +139,15 @@ instance Eq Decl where
   (BoardDecl id1 _ _ _)           == (BoardDecl id2 _ _ _)           = True
   (PPPresentationDecl id1 _ _ _)  == (PPPresentationDecl id2 _ _ _)  = True
   HoleDecl                        == HoleDecl                      = True
-  (ParseErrDecl _ _)            == _                             = True
-  _                               == (ParseErrDecl _ _)          = True
+  (ParseErrDecl _)                == _                             = True
+  _                               == (ParseErrDecl _)              = True
   _                               == _                             = False        
 
 instance Eq Ident where
   (Ident id1 _ _ str1)  == (Ident id2 _ _ str2)  = id1 == id2 && str1 == str2
   HoleIdent             == HoleIdent             = True
-  (ParseErrIdent _ _) == _                     = True
-  _                     == (ParseErrIdent _ _) = True
+  (ParseErrIdent _)     == _                     = True
+  _                     == (ParseErrIdent _)     = True
   _                     == _                     = False        
 
  {-
