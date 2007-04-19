@@ -57,4 +57,4 @@ evalDoc :: LayerStateEval -> DocumentLevel Document clip -> EnrichedDoc -> Enric
 evalDoc state (DocumentLevel doc@(RootDoc idd root) _ _) enr = RootEnr idd root doc
 evalDoc state (DocumentLevel doc@(RootDoc idd root) _ _) enr = RootEnr idd root doc
 evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc
-evalDoc state (DocumentLevel (ParseErrDocument nd pr) _ _) _ = ParseErrEnrichedDoc nd pr -- not the right node type
+evalDoc state (DocumentLevel (ParseErrDocument pr) _ _) _ = ParseErrEnrichedDoc pr -- not the right node type

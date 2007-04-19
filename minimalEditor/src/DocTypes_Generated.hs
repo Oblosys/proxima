@@ -10,7 +10,7 @@ import Char
 
 data Document = RootDoc IDD Root 
               | HoleDocument
-              | ParseErrDocument Node (Presentation Document Node ClipDoc)
+              | ParseErrDocument (Presentation Document Node ClipDoc)
                  deriving Show
 
 
@@ -30,50 +30,50 @@ data Document = RootDoc IDD Root
 
 data EnrichedDoc = RootEnr IDD Root Document 
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc Node (Presentation Document Node ClipDoc)
+                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc)
                     deriving Show
 
 
 data String_ = String_ IDD String 
              | HoleString_
-             | ParseErrString_ Node (Presentation Document Node ClipDoc)
+             | ParseErrString_ (Presentation Document Node ClipDoc)
                 deriving Show
 
 
 data Bool_ = Bool_ IDD Bool 
            | HoleBool_
-           | ParseErrBool_ Node (Presentation Document Node ClipDoc)
+           | ParseErrBool_ (Presentation Document Node ClipDoc)
               deriving Show
 
 
 data Int_ = Int_ IDD Int 
           | HoleInt_
-          | ParseErrInt_ Node (Presentation Document Node ClipDoc)
+          | ParseErrInt_ (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_ 
            | HoleDummy
-           | ParseErrDummy Node (Presentation Document Node ClipDoc)
+           | ParseErrDummy (Presentation Document Node ClipDoc)
               deriving Show
 
 
 data Root = Root IDD Tree 
           | HoleRoot
-          | ParseErrRoot Node (Presentation Document Node ClipDoc)
+          | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data Tree = Bin IDD Tree Tree 
           | Leaf IDD 
           | HoleTree
-          | ParseErrTree Node (Presentation Document Node ClipDoc)
+          | ParseErrTree (Presentation Document Node ClipDoc)
              deriving Show
 
 
 data List_Dummy = List_Dummy IDD ConsList_Dummy 
                 | HoleList_Dummy
-                | ParseErrList_Dummy Node (Presentation Document Node ClipDoc)
+                | ParseErrList_Dummy (Presentation Document Node ClipDoc)
                    deriving Show
 
 

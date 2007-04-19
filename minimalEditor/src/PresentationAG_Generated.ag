@@ -47,7 +47,7 @@ presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 SEM EnrichedDoc
   | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (HoleEnrichedDocNode @self []) []
-  | ParseErrEnrichedDoc lhs.pres = presParseErr @node @presentation
+  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation
 
 
 
@@ -96,43 +96,43 @@ SEM Bool_ [ | | bool : Bool ]
 
 DATA EnrichedDoc | RootEnr id:IDD root:Root document:Document 
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc Node presentation:Presentation_Doc_Node_Clip
+                 | ParseErrEnrichedDoc presentation:Presentation_Doc_Node_Clip
 
 
 DATA String_ | String_ idd:IDD string:String 
              | HoleString_
-             | ParseErrString_ Node presentation:Presentation_Doc_Node_Clip
+             | ParseErrString_ presentation:Presentation_Doc_Node_Clip
 
 
 DATA Bool_ | Bool_ idd:IDD bool:Bool 
            | HoleBool_
-           | ParseErrBool_ Node presentation:Presentation_Doc_Node_Clip
+           | ParseErrBool_ presentation:Presentation_Doc_Node_Clip
 
 
 DATA Int_ | Int_ idd:IDD int:Int 
           | HoleInt_
-          | ParseErrInt_ Node presentation:Presentation_Doc_Node_Clip
+          | ParseErrInt_ presentation:Presentation_Doc_Node_Clip
 
 
 DATA Dummy | Dummy idd:IDD dummys:List_Dummy string_:String_ bool_:Bool_ int_:Int_ 
            | HoleDummy
-           | ParseErrDummy Node presentation:Presentation_Doc_Node_Clip
+           | ParseErrDummy presentation:Presentation_Doc_Node_Clip
 
 
 DATA Root | Root idd:IDD tree:Tree 
           | HoleRoot
-          | ParseErrRoot Node presentation:Presentation_Doc_Node_Clip
+          | ParseErrRoot presentation:Presentation_Doc_Node_Clip
 
 
 DATA Tree | Bin idd:IDD left:Tree right:Tree 
           | Leaf idd:IDD 
           | HoleTree
-          | ParseErrTree Node presentation:Presentation_Doc_Node_Clip
+          | ParseErrTree presentation:Presentation_Doc_Node_Clip
 
 
 DATA List_Dummy | List_Dummy idd:IDD elts:ConsList_Dummy 
                 | HoleList_Dummy
-                | ParseErrList_Dummy Node presentation:Presentation_Doc_Node_Clip
+                | ParseErrList_Dummy presentation:Presentation_Doc_Node_Clip
 
 
 DATA ConsList_Dummy | Cons_Dummy head:Dummy tail:ConsList_Dummy 
@@ -141,17 +141,17 @@ DATA ConsList_Dummy | Cons_Dummy head:Dummy tail:ConsList_Dummy
 
 SEM String_
   | HoleString_     lhs.pres = presHole @lhs.focusD "String_" (HoleString_Node @self @lhs.path) @lhs.path
-  | ParseErrString_ lhs.pres = presParseErr @node @presentation
+  | ParseErrString_ lhs.pres = presParseErr @presentation
 
 
 SEM Bool_
   | HoleBool_     lhs.pres = presHole @lhs.focusD "Bool_" (HoleBool_Node @self @lhs.path) @lhs.path
-  | ParseErrBool_ lhs.pres = presParseErr @node @presentation
+  | ParseErrBool_ lhs.pres = presParseErr @presentation
 
 
 SEM Int_
   | HoleInt_     lhs.pres = presHole @lhs.focusD "Int_" (HoleInt_Node @self @lhs.path) @lhs.path
-  | ParseErrInt_ lhs.pres = presParseErr @node @presentation
+  | ParseErrInt_ lhs.pres = presParseErr @presentation
 
 
 SEM Dummy
@@ -161,7 +161,7 @@ SEM Dummy
           string_.pIdC = @dummys.pIdC
           lhs.pIdC = @int_.pIdC
   | HoleDummy     lhs.pres = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.pres = presParseErr @node @presentation
+  | ParseErrDummy lhs.pres = presParseErr @presentation
 
 
 SEM Dummy
@@ -175,7 +175,7 @@ SEM Root
   | Root tree.pIdC = @lhs.pIdC + 0
          lhs.pIdC = @tree.pIdC
   | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.pres = presParseErr @node @presentation
+  | ParseErrRoot lhs.pres = presParseErr @presentation
 
 
 SEM Root
@@ -187,7 +187,7 @@ SEM Tree
         right.pIdC = @left.pIdC
         lhs.pIdC = @right.pIdC
   | HoleTree     lhs.pres = presHole @lhs.focusD "Tree" (HoleTreeNode @self @lhs.path) @lhs.path
-  | ParseErrTree lhs.pres = presParseErr @node @presentation
+  | ParseErrTree lhs.pres = presParseErr @presentation
 
 
 SEM Tree
@@ -205,7 +205,7 @@ SEM List_Dummy
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Dummy     lhs.press = []
-  | ParseErrList_Dummy lhs.press = [ presParseErr @node @presentation ]
+  | ParseErrList_Dummy lhs.press = [ presParseErr @presentation ]
 
 SEM ConsList_Dummy
   | Cons_Dummy head.path  = @lhs.path++[@lhs.ix]
@@ -249,31 +249,31 @@ SEM String_ [ || presXML : Presentation_Doc_Node_Clip ]
   | String_
       lhs.presXML = presentElementXML @lhs.focusD (String_Node @self @lhs.path) @lhs.path "String_" [ presentPrimXMLString @string ] 
   | HoleString_     lhs.presXML = presHole @lhs.focusD "String_" (HoleString_Node @self @lhs.path) @lhs.path
-  | ParseErrString_ lhs.presXML = presParseErr @node @presentation
+  | ParseErrString_ lhs.presXML = presParseErr @presentation
 
 SEM Bool_ [ || presXML : Presentation_Doc_Node_Clip ]
   | Bool_
       lhs.presXML = presentElementXML @lhs.focusD (Bool_Node @self @lhs.path) @lhs.path "Bool_" [ presentPrimXMLBool @bool ] 
   | HoleBool_     lhs.presXML = presHole @lhs.focusD "Bool_" (HoleBool_Node @self @lhs.path) @lhs.path
-  | ParseErrBool_ lhs.presXML = presParseErr @node @presentation
+  | ParseErrBool_ lhs.presXML = presParseErr @presentation
 
 SEM Int_ [ || presXML : Presentation_Doc_Node_Clip ]
   | Int_
       lhs.presXML = presentElementXML @lhs.focusD (Int_Node @self @lhs.path) @lhs.path "Int_" [ presentPrimXMLInt @int ] 
   | HoleInt_     lhs.presXML = presHole @lhs.focusD "Int_" (HoleInt_Node @self @lhs.path) @lhs.path
-  | ParseErrInt_ lhs.presXML = presParseErr @node @presentation
+  | ParseErrInt_ lhs.presXML = presParseErr @presentation
 
 SEM Dummy [ || presXML : Presentation_Doc_Node_Clip ]
   | Dummy
       lhs.presXML = presentElementXML @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [ @dummys.presXML, @string_.presXML, @bool_.presXML, @int_.presXML ] 
   | HoleDummy     lhs.presXML = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presXML = presParseErr @node @presentation
+  | ParseErrDummy lhs.presXML = presParseErr @presentation
 
 SEM Root [ || presXML : Presentation_Doc_Node_Clip ]
   | Root
       lhs.presXML = presentElementXML @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presXML ] 
   | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.presXML = presParseErr @node @presentation
+  | ParseErrRoot lhs.presXML = presParseErr @presentation
 
 SEM Tree [ || presXML : Presentation_Doc_Node_Clip ]
   | Bin
@@ -281,7 +281,7 @@ SEM Tree [ || presXML : Presentation_Doc_Node_Clip ]
   | Leaf
       lhs.presXML = presentElementXML @lhs.focusD (LeafNode @self @lhs.path) @lhs.path "Leaf" [  ] 
   | HoleTree     lhs.presXML = presHole @lhs.focusD "Tree" (HoleTreeNode @self @lhs.path) @lhs.path
-  | ParseErrTree lhs.presXML = presParseErr @node @presentation
+  | ParseErrTree lhs.presXML = presParseErr @presentation
 
 SEM List_Dummy [ || presXML : Presentation_Doc_Node_Clip ]
   | List_Dummy
@@ -289,7 +289,7 @@ SEM List_Dummy [ || presXML : Presentation_Doc_Node_Clip ]
                     col @elts.pressXML
   | ParseErrList_Dummy
       lhs.presXML = loc (List_DummyNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @node @presentation
+                    presParseErr @presentation
   | HoleList_Dummy
       lhs.presXML = loc (List_DummyNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Dummy" (HoleList_DummyNode @self @lhs.path) @lhs.path
@@ -307,31 +307,31 @@ SEM String_ [ || presTree : Presentation_Doc_Node_Clip ]
   | String_
       lhs.presTree = presentElementTree @lhs.focusD (String_Node @self @lhs.path) @lhs.path "String_" [ presentPrimTreeString @string ] 
   | HoleString_     lhs.presTree = presHole @lhs.focusD "String_" (HoleString_Node @self @lhs.path) @lhs.path
-  | ParseErrString_ lhs.presTree = presParseErr @node @presentation
+  | ParseErrString_ lhs.presTree = presParseErr @presentation
 
 SEM Bool_ [ || presTree : Presentation_Doc_Node_Clip ]
   | Bool_
       lhs.presTree = presentElementTree @lhs.focusD (Bool_Node @self @lhs.path) @lhs.path "Bool_" [ presentPrimTreeBool @bool ] 
   | HoleBool_     lhs.presTree = presHole @lhs.focusD "Bool_" (HoleBool_Node @self @lhs.path) @lhs.path
-  | ParseErrBool_ lhs.presTree = presParseErr @node @presentation
+  | ParseErrBool_ lhs.presTree = presParseErr @presentation
 
 SEM Int_ [ || presTree : Presentation_Doc_Node_Clip ]
   | Int_
       lhs.presTree = presentElementTree @lhs.focusD (Int_Node @self @lhs.path) @lhs.path "Int_" [ presentPrimTreeInt @int ] 
   | HoleInt_     lhs.presTree = presHole @lhs.focusD "Int_" (HoleInt_Node @self @lhs.path) @lhs.path
-  | ParseErrInt_ lhs.presTree = presParseErr @node @presentation
+  | ParseErrInt_ lhs.presTree = presParseErr @presentation
 
 SEM Dummy [ || presTree : Presentation_Doc_Node_Clip ]
   | Dummy
       lhs.presTree = presentElementTree @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [ @dummys.presTree, @string_.presTree, @bool_.presTree, @int_.presTree ] 
   | HoleDummy     lhs.presTree = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presTree = presParseErr @node @presentation
+  | ParseErrDummy lhs.presTree = presParseErr @presentation
 
 SEM Root [ || presTree : Presentation_Doc_Node_Clip ]
   | Root
       lhs.presTree = presentElementTree @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presTree ] 
   | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.presTree = presParseErr @node @presentation
+  | ParseErrRoot lhs.presTree = presParseErr @presentation
 
 SEM Tree [ || presTree : Presentation_Doc_Node_Clip ]
   | Bin
@@ -339,7 +339,7 @@ SEM Tree [ || presTree : Presentation_Doc_Node_Clip ]
   | Leaf
       lhs.presTree = presentElementTree @lhs.focusD (LeafNode @self @lhs.path) @lhs.path "Leaf" [  ] 
   | HoleTree     lhs.presTree = presHole @lhs.focusD "Tree" (HoleTreeNode @self @lhs.path) @lhs.path
-  | ParseErrTree lhs.presTree = presParseErr @node @presentation
+  | ParseErrTree lhs.presTree = presParseErr @presentation
 
 SEM List_Dummy [ || presTree : Presentation_Doc_Node_Clip ]
   | List_Dummy
@@ -347,7 +347,7 @@ SEM List_Dummy [ || presTree : Presentation_Doc_Node_Clip ]
                        col @elts.pressTree
   | ParseErrList_Dummy
       lhs.presTree = loc (List_DummyNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @node @presentation
+                       presParseErr @presentation
   | HoleList_Dummy
       lhs.presTree = loc (List_DummyNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Dummy" (HoleList_DummyNode @self @lhs.path) @lhs.path

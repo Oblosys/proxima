@@ -22,7 +22,7 @@ import DocumentEdit_Generated
 presHole focus typeStr nd pth = loc nd $
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
 
-presParseErr node pres =
+presParseErr pres =
   loc NoNode $ parsing $ pres `withbgColor` whiteSmoke
 
 presentFocus NoPathD     path pres = pres

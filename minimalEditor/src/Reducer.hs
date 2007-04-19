@@ -66,8 +66,8 @@ reduceEnrIO state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel
   (SetDoc (RootDoc idd root),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc nd prs) oldfocus) = return $
-  (SetDoc (ParseErrDocument nd prs),state, enrDoc )  -- nd is not right
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
+  (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
 
 
