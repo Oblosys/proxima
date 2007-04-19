@@ -4,10 +4,6 @@ import CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
 import FontLib
-
--- Uedit, transforming AG to new syntax: Find   ^([a-z][a-z,A-Z]++^)_     Replace  @^1.
-
-
 }
 
 
