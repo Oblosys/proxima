@@ -54,14 +54,14 @@ recognizeRootEnr = pStr $
           (\str decls-> reuseRootEnr [tokenNode str] Nothing (Just decls) Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> recognizeRoot
-  <|>    RootEnr NoIDD (Root NoIDD (Leaf NoIDD)) (RootDoc NoIDD (Root NoIDD (Leaf NoIDD)))
+  <|>    RootEnr NoIDD (error "doc hole was parsed") (error "doc hole was parsed")
      <$ pStructural HoleEnrichedDocNode
 -- TODO: Why do we need this hole parser here?
 
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str tree -> reuseRoot [tokenNode str] Nothing (Just tree))
+          (\str tree -> reuseRoot [tokenNode str] Nothing (Just tree) Nothing)
       <$> pStructural RootNode
       <*> pPrs parseTree {- recognizeTree -}
 

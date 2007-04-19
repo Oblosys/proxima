@@ -50,7 +50,7 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col [ text "Root", @tree.pres ] 
+                     col [ text "Root", @tree.pres, @graph.pres ]
                      
 SEM Tree
   | Bin
@@ -61,5 +61,28 @@ SEM Tree
                      row [text $ "Leaf", text ""]
                      
                      
-                     
-                     
+SEM Graph
+  | Graph
+      lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     overlay @vertices.press      
+
+{-
+SEM List_GraphNode
+  | Cons_GraphNode
+      lhs.pres = text "cons"
+  | Nil_GraphNode
+      lhs.pres = text "nil"
+-}      
+SEM Vertex
+  | Vertex
+      lhs.pres = col [ empty `withHeight` @y.int
+                     , row [ empty `withWidth` @x.int 
+                           , text $ "vertex" ++ show @x.int ++ "," ++ show @y.int
+                           ]
+                     ]
+
+SEM Edge
+  | Edge
+      lhs.pres = text "edge"
+      
+                   

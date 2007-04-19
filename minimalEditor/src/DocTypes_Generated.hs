@@ -58,7 +58,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree 
+data Root = Root IDD Tree Graph 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -68,6 +68,24 @@ data Tree = Bin IDD Tree Tree
           | Leaf IDD 
           | HoleTree
           | ParseErrTree (Presentation Document Node ClipDoc)
+             deriving Show
+
+
+data Graph = Graph IDD List_Vertex List_Edge 
+           | HoleGraph
+           | ParseErrGraph (Presentation Document Node ClipDoc)
+              deriving Show
+
+
+data Vertex = Vertex IDD Int_ Int_ Int_ 
+            | HoleVertex
+            | ParseErrVertex (Presentation Document Node ClipDoc)
+               deriving Show
+
+
+data Edge = Edge IDD Int_ Int_ 
+          | HoleEdge
+          | ParseErrEdge (Presentation Document Node ClipDoc)
              deriving Show
 
 
@@ -82,6 +100,28 @@ data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy
                        deriving Show
 
 
+data List_Vertex = List_Vertex IDD ConsList_Vertex 
+                 | HoleList_Vertex
+                 | ParseErrList_Vertex (Presentation Document Node ClipDoc)
+                    deriving Show
+
+
+data ConsList_Vertex = Cons_Vertex Vertex ConsList_Vertex 
+                     | Nil_Vertex 
+                        deriving Show
+
+
+data List_Edge = List_Edge IDD ConsList_Edge 
+               | HoleList_Edge
+               | ParseErrList_Edge (Presentation Document Node ClipDoc)
+                  deriving Show
+
+
+data ConsList_Edge = Cons_Edge Edge ConsList_Edge 
+                   | Nil_Edge 
+                      deriving Show
+
+
 -- Generated Types --
 
 data ClipDoc = Clip_Root Root
@@ -94,7 +134,14 @@ data ClipDoc = Clip_Root Root
              | Clip_Bool_ Bool_
              | Clip_Int_ Int_
              | Clip_Tree Tree
+             | Clip_Graph Graph
+             | Clip_List_Vertex List_Vertex
+             | Clip_List_Edge List_Edge
              | Clip_Dummy Dummy
+             
+             | Clip_Vertex Vertex
+             
+             | Clip_Edge Edge
              
              | Clip_Nothing deriving Show
 
@@ -119,8 +166,18 @@ data Node = NoNode
           | BinNode Tree Path 
           | LeafNode Tree Path 
           | HoleTreeNode Tree Path 
+          | GraphNode Graph Path 
+          | HoleGraphNode Graph Path 
+          | VertexNode Vertex Path 
+          | HoleVertexNode Vertex Path 
+          | EdgeNode Edge Path 
+          | HoleEdgeNode Edge Path 
           | List_DummyNode List_Dummy Path 
           | HoleList_DummyNode List_Dummy Path 
+          | List_VertexNode List_Vertex Path 
+          | HoleList_VertexNode List_Vertex Path 
+          | List_EdgeNode List_Edge Path 
+          | HoleList_EdgeNode List_Edge Path 
 
 
 
@@ -143,5 +200,15 @@ instance Show Node where
   show (BinNode _ _)  = "BinNode"
   show (LeafNode _ _)  = "LeafNode"
   show (HoleTreeNode _ _)  = "HoleTreeNode"
+  show (GraphNode _ _)  = "GraphNode"
+  show (HoleGraphNode _ _)  = "HoleGraphNode"
+  show (VertexNode _ _)  = "VertexNode"
+  show (HoleVertexNode _ _)  = "HoleVertexNode"
+  show (EdgeNode _ _)  = "EdgeNode"
+  show (HoleEdgeNode _ _)  = "HoleEdgeNode"
   show (List_DummyNode _ _)  = "List_DummyNode"
   show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
+  show (List_VertexNode _ _)  = "List_VertexNode"
+  show (HoleList_VertexNode _ _)  = "HoleList_VertexNode"
+  show (List_EdgeNode _ _)  = "List_EdgeNode"
+  show (HoleList_EdgeNode _ _)  = "HoleList_EdgeNode"

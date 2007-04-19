@@ -9,7 +9,13 @@ data Dummy = Dummy [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because
 -- Don't remove the declarations above
 
 
-data Root = Root Tree { idd : IDD }
+data Root = Root Tree Graph { idd : IDD }
 
 data Tree = Bin left:Tree right:Tree { idd : IDD }
           | Leaf                     { idd : IDD }
+          
+data Graph = Graph vertices:[Vertex] edges:[Edge] { idd : IDD }
+
+data Vertex = Vertex id:Int_ x:Int_ y:Int_     { idd : IDD }
+
+data Edge = Edge from:Int_ to:Int_       { idd : IDD }

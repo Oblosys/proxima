@@ -95,8 +95,18 @@ rankNode (HoleRootNode _ _)  = 14
 rankNode (BinNode _ _)  = 15
 rankNode (LeafNode _ _)  = 16
 rankNode (HoleTreeNode _ _)  = 17
-rankNode (List_DummyNode _ _)  = 18
-rankNode (HoleList_DummyNode _ _)  = 19
+rankNode (GraphNode _ _)  = 18
+rankNode (HoleGraphNode _ _)  = 19
+rankNode (VertexNode _ _)  = 20
+rankNode (HoleVertexNode _ _)  = 21
+rankNode (EdgeNode _ _)  = 22
+rankNode (HoleEdgeNode _ _)  = 23
+rankNode (List_DummyNode _ _)  = 24
+rankNode (HoleList_DummyNode _ _)  = 25
+rankNode (List_VertexNode _ _)  = 26
+rankNode (HoleList_VertexNode _ _)  = 27
+rankNode (List_EdgeNode _ _)  = 28
+rankNode (HoleList_EdgeNode _ _)  = 29
 
 
 
@@ -119,8 +129,18 @@ instance HasPath Node where
   pathNode (BinNode _ pth)  = PathD pth
   pathNode (LeafNode _ pth)  = PathD pth
   pathNode (HoleTreeNode _ pth)  = PathD pth
+  pathNode (GraphNode _ pth)  = PathD pth
+  pathNode (HoleGraphNode _ pth)  = PathD pth
+  pathNode (VertexNode _ pth)  = PathD pth
+  pathNode (HoleVertexNode _ pth)  = PathD pth
+  pathNode (EdgeNode _ pth)  = PathD pth
+  pathNode (HoleEdgeNode _ pth)  = PathD pth
   pathNode (List_DummyNode _ pth)  = PathD pth
   pathNode (HoleList_DummyNode _ pth)  = PathD pth
+  pathNode (List_VertexNode _ pth)  = PathD pth
+  pathNode (HoleList_VertexNode _ pth)  = PathD pth
+  pathNode (List_EdgeNode _ pth)  = PathD pth
+  pathNode (HoleList_EdgeNode _ pth)  = PathD pth
 
 
 
@@ -145,7 +165,7 @@ dummyIDD (DummyNode (Dummy iDD _ _ _ _) _) = Just iDD
 dummyIDD _                                   = Nothing
 
 rootIDD :: Node -> Maybe IDD
-rootIDD (RootNode (Root iDD _) _) = Just iDD
+rootIDD (RootNode (Root iDD _ _) _) = Just iDD
 rootIDD _                                   = Nothing
 
 binIDD :: Node -> Maybe IDD
@@ -156,6 +176,18 @@ leafIDD :: Node -> Maybe IDD
 leafIDD (LeafNode (Leaf iDD) _) = Just iDD
 leafIDD _                                   = Nothing
 
+graphIDD :: Node -> Maybe IDD
+graphIDD (GraphNode (Graph iDD _ _) _) = Just iDD
+graphIDD _                                   = Nothing
+
+vertexIDD :: Node -> Maybe IDD
+vertexIDD (VertexNode (Vertex iDD _ _ _) _) = Just iDD
+vertexIDD _                                   = Nothing
+
+edgeIDD :: Node -> Maybe IDD
+edgeIDD (EdgeNode (Edge iDD _ _) _) = Just iDD
+edgeIDD _                                   = Nothing
+
 
 
 
@@ -164,12 +196,21 @@ shallowShowString_1 (String_  _ _) = "String_"
 shallowShowBool_1 (Bool_  _ _) = "Bool_"
 shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowDummy1 (Dummy  _ _ _ _ _) = "Dummy"
-shallowShowRoot1 (Root  _ _) = "Root"
+shallowShowRoot1 (Root  _ _ _) = "Root"
 shallowShowTree1 (Bin  _ _ _) = "Bin"
 shallowShowTree1 (Leaf  _) = "Leaf"
+shallowShowGraph1 (Graph  _ _ _) = "Graph"
+shallowShowVertex1 (Vertex  _ _ _ _) = "Vertex"
+shallowShowEdge1 (Edge  _ _ _) = "Edge"
 shallowShowList_Dummy1 (List_Dummy  _ _) = "List_Dummy"
 shallowShowConsList_Dummy1 (Cons_Dummy  _ _) = "Cons_Dummy"
 shallowShowConsList_Dummy1 (Nil_Dummy ) = "Nil_Dummy"
+shallowShowList_Vertex1 (List_Vertex  _ _) = "List_Vertex"
+shallowShowConsList_Vertex1 (Cons_Vertex  _ _) = "Cons_Vertex"
+shallowShowConsList_Vertex1 (Nil_Vertex ) = "Nil_Vertex"
+shallowShowList_Edge1 (List_Edge  _ _) = "List_Edge"
+shallowShowConsList_Edge1 (Cons_Edge  _ _) = "Cons_Edge"
+shallowShowConsList_Edge1 (Nil_Edge ) = "Nil_Edge"
 
 
 
@@ -178,10 +219,21 @@ toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
 toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
 toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
 toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLDummys dummys
-toXMLRoot (Root _ tree) = Elt "Root" [] $ [toXMLTree tree] ++ []
+toXMLRoot (Root _ tree graph) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph] ++ []
 toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
 toXMLTree (Leaf _) = Elt "Leaf" [] $ []
+toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLVertexs vertices
+toXMLVertex (Vertex _ id x y) = Elt "Vertex" [] $ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
 toXMLList_Dummy (List_Dummy _ dummys) = toXMLConsList_Dummy dummys
 toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLDummys dummys
 toXMLConsList_Dummy Nil_Dummy             = []
 toXMLDummys _                           = []
+toXMLList_Vertex (List_Vertex _ vertexs) = toXMLConsList_Vertex vertexs
+toXMLConsList_Vertex (Cons_Vertex vertex vertexs) = toXMLVertex vertex : toXMLVertexs vertexs
+toXMLConsList_Vertex Nil_Vertex             = []
+toXMLVertexs _                           = []
+toXMLList_Edge (List_Edge _ edges) = toXMLConsList_Edge edges
+toXMLConsList_Edge (Cons_Edge edge edges) = toXMLEdge edge : toXMLEdges edges
+toXMLConsList_Edge Nil_Edge             = []
+toXMLEdges _                           = []
