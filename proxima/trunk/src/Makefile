@@ -48,6 +48,7 @@ PROXIMADIR = ../../proxima
 PROXIMABINDIR = $(PROXIMADIR)/bin
 PROXIMASRCDIR = $(PROXIMADIR)/src
 UUAGCDIR = $(PROXIMADIR)/../uuagc/src
+GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
 AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
@@ -64,15 +65,14 @@ PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
 ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
 COMMONDIR       = $(PROXIMADIR)/src/common
 EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-GENERATORDIR    = $(PROXIMADIR)/src/generator
 LAYOUTDIR       = $(PROXIMADIR)/src/layout
 MAINDIR         = $(PROXIMADIR)/src/main
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
 RENDERINGDIR    = $(PROXIMADIR)/src/rendering
-PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
+PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
 
-GENERATORDIRS = $(GENERATORDIR):$(UUAGCDIR)
+GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
 
 
 # The Generator
@@ -80,7 +80,7 @@ generator : $(GEN)
 
 $(GEN): always
 	@echo ghc: compiling Generator
-	@$(HC) --make -o $(GEN) $(GENERATORDIR)/Generator.hs -i$(GENERATORDIRS) -fglasgow-exts -O2
+	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts -O2
 
 # The AG compiler
 
