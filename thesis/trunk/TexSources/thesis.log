@@ -1,0 +1,49 @@
+This is TeX, Version 3.141592 (MiKTeX 2.4) (preloaded format=latex 2000.11.28)  4 NOV 2004 13:45
+**thesis.tex
+(thesis.tex
+LaTeX2e <2001/06/01>
+Babel <v3.7m> and hyphenation patterns for english, french, german, ngerman, du
+tch, dumylang, nohyphenation, loaded.
+(C:\apps\texmf\tex\latex\base\report.cls
+Document Class: report 2001/04/21 v1.4e Standard LaTeX document class
+(C:\apps\texmf\tex\latex\base\size10.clo
+File: size10.clo 2001/04/21 v1.4e Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(C:\apps\texmf\tex\latex\thesis\thesis.sty
+
+LaTeX Warning: inputting `thesis.cls' instead of obsolete `thesis.sty'.
+
+
+! LaTeX Error: Two \LoadClass commands.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+\GenericError  ...                                
+                                                  \endgroup 
+l.20 \LoadClass
+               {thesis} 
+Here is how much of TeX's memory you used:
+ 232 strings out of 95993
+ 2364 string characters out of 1196220
+ 46290 words of memory out of 1050218
+ 3258 multiletter control sequences out of 35000
+ 3640 words of font info for 14 fonts, out of 500000 for 1000
+ 54 hyphenation exceptions out of 607
+ 23i,0n,19p,114b,40s stack positions out of 300i,500n,5000p,200000b,32768s
+
+No pages of output.
