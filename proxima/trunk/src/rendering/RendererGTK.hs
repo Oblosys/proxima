@@ -27,6 +27,8 @@ import DocumentEdit_Generated -- instance Editable Document Document Node ClipDo
 -----
 
 {-
+TODO specific for GTK: add ellipse
+
 TODO:
 
 - images: fix load exception and garbage collect. + use clipping 

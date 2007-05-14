@@ -290,6 +290,16 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                                                                 (colorRGB fr fg fb)]                     
 
         }
+    (EllipseA id x' y' w' h' _ _ lw' style (lr,lg,lb) (fr,fg,fb)) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+       
+----        ; setPenSize $ let ls = scaleInt scale lw' in if ls < 1 then 1 else ls
+-- also do pensize for other line drawings
+        ; Graphics.UI.WX.ellipse dc (Rect x y w h) [ color := (colorRGB lr lg lb)
+                                        , brush := BrushStyle (if style == Solid then BrushSolid else BrushTransparent)
+                                                              (colorRGB fr fg fb)]                     
+
+        }
 
 
     (LineA id lux' luy' rlx' rly' _ _ lw' (lr,lg,lb)) ->
@@ -472,6 +482,7 @@ debugColor (StringA id x y w h _ _ _ _ _ _)    = colorRGB 0 255 255
 debugColor (ImageA id x y w h _ _ _ _ _ _)     = colorRGB 92 64 0
 debugColor (PolyA id x y w h _ _ _ _ _ _)      = red
 debugColor (RectangleA id x y w h _ _ _ _ _ _) = red
+debugColor (EllipseA id x y w h _ _ _ _ _ _)   = red
 debugColor (LineA id x y x' y' _ _ _ _)        = red
 debugColor (RowA id x y w h _ _ _ _)           = colorRGB 255 0 0
 debugColor (ColA id x y w h _ _ _ _)           = colorRGB 0 0 200  
@@ -512,14 +523,15 @@ picobToCaretC path p color = picobToCaret 0 0 path p
        picobToCaret x' y'  (_,o)       (StringA _  x y w h _ _ _ _ _ cxs')  = let cxs = init cxs' ++ [last cxs'-1]
                                                                               in  mkCaret (x'+x) (y'+y) h (cxs!!o)
        picobToCaret x' y'  _           (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
+       picobToCaret x' y'  _           (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
        picobToCaret x' y'  _           (LineA _ x y w h _ _ _ _)            = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (RowA _ x y w h _ _ _ arrs)           = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (RowA _ x y w h _ _ _ arrs)           = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (ColA _ x y w h _ _ _ arrs)           = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (ColA _ x y w h _ _ _ arrs)           = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (OverlayA _ x y w h _ _ _ arrs)       = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (OverlayA _ x y w h _ _ _ arrs)       = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret _ _ _           po                               = debug Err ("picobToCaret: unhandled case:"++show po) (EmptyA NoIDA 0 0 0 0 0 0)
+       picobToCaret x' y'  (p:path, o) (RowA _ x y w h _ _ _ arrs)          = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
+       picobToCaret x' y'  ([], o)     (RowA _ x y w h _ _ _ arrs)          = mkBoxCaret (x'+x) (y'+y) w h 
+       picobToCaret x' y'  (p:path, o) (ColA _ x y w h _ _ _ arrs)          = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
+       picobToCaret x' y'  ([], o)     (ColA _ x y w h _ _ _ arrs)          = mkBoxCaret (x'+x) (y'+y) w h 
+       picobToCaret x' y'  (p:path, o) (OverlayA _ x y w h _ _ _ arrs)      = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
+       picobToCaret x' y'  ([], o)     (OverlayA _ x y w h _ _ _ arrs)      = mkBoxCaret (x'+x) (y'+y) w h 
+       picobToCaret _ _ _           po                                      = debug Err ("picobToCaret: unhandled case:"++show po) (EmptyA NoIDA 0 0 0 0 0 0)
 
        mkBoxCaret x y w h = --RectangleA 0 x y w h 0 Solid color color
                               RowA NoIDA 0 0 0 0 0 0 CommonTypes.white [ LineA NoIDA x y x (y+h) 0 0 2 color, LineA NoIDA x (y+h) (x+w) (y+h) 0 0 2 color
@@ -542,7 +554,8 @@ mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ 
   in  mkBoxCaret (x'+x+st) (y'+y) (en-st + 1) h
 mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _) = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (LineA _ x y x'' y'' _ _ _ _)          = mkBoxCaret (x'+x) (y'+y) (x''-x) (y''-y)
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs

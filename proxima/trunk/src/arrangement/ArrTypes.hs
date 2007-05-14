@@ -60,6 +60,7 @@ data Arrangement node =
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !Color !Color
   | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Color !Color
   | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
   | LineA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
   | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
@@ -114,7 +115,7 @@ data Style = Solid | Transparent deriving (Show, Eq, Read)
 
 -- last argument of StringA is a list of offsets of the characters in the string. 
 -- TODO: don't want cumulative character widths           (? why not?)
--- TODO: background for StringA and RectangleA
+-- TODO: background for StringA, RectangleA, and EllipseA
 
 
 
@@ -152,6 +153,7 @@ xA (StringA _ x y w h _ _ _ _ _ _)    = x
 xA (ImageA _ x y w h _ _ _ _ _ _)     = x
 xA (PolyA _ x y w h _ _ _ _ _ _)      = x
 xA (RectangleA _ x y w h _ _ _ _ _ _) = x
+xA (EllipseA _ x y w h _ _ _ _ _ _)   = x
 xA (LineA _ x y x' y' _ _ _ _)        = x
 xA (RowA _ x y w h _ _ _ _)           = x
 xA (ColA _ x y w h _ _ _ _)           = x
@@ -166,6 +168,7 @@ yA (StringA _ x y w h _ _ _ _ _ _)    = y
 yA (ImageA _ x y w h _ _ _ _ _ _)     = y
 yA (PolyA _ x y w h _ _ _ _ _ _)      = y
 yA (RectangleA _ x y w h _ _ _ _ _ _) = y
+yA (EllipseA _ x y w h _ _ _ _ _ _)   = y
 yA (LineA _ x y x' y' _ _ _ _)        = y
 yA (RowA _ x y w h _ _ _ _)           = y
 yA (ColA _ x y w h _ _ _ _)           = y
@@ -180,6 +183,7 @@ widthA (StringA _ x y w h _ _ _ _ _ _)    = w
 widthA (ImageA _ x y w h _ _ _ _ _ _)     = w
 widthA (PolyA _ x y w h _ _ _ _ _ _)      = w
 widthA (RectangleA _ x y w h _ _ _ _ _ _) = w
+widthA (EllipseA _ x y w h _ _ _ _ _ _)   = w
 widthA (LineA _ x y x' y' _ _ _ _)        = x'-x
 widthA (RowA _ x y w h _ _ _ _)           = w
 widthA (ColA _ x y w h _ _ _ _)           = w
@@ -194,6 +198,7 @@ heightA (StringA _ x y w h _ _ _ _ _ _)    = h
 heightA (ImageA _ x y w h _ _ _ _ _ _)     = h
 heightA (PolyA _ x y w h _ _ _ _ _ _)      = h
 heightA (RectangleA _ x y w h _ _ _ _ _ _) = h
+heightA (EllipseA _ x y w h _ _ _ _ _ _)   = h
 heightA (LineA _ x y x' y' _ _ _ _)        = y'-y
 heightA (RowA _ x y w h _ _ _ _)           = h
 heightA (ColA _ x y w h _ _ _ _)           = h
@@ -208,6 +213,7 @@ hRefA (StringA _ x y w h hr vr _ _ _ _)    = hr
 hRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
 hRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
 hRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
+hRefA (EllipseA _ x y w h hr vr _ _ _ _)   = hr
 hRefA (LineA _ x y x' y' hr vr _ _)        = hr
 hRefA (RowA _ x y w h hr vr _ _)           = hr
 hRefA (ColA _ x y w h hr vr _ _)           = hr
@@ -222,6 +228,7 @@ vRefA (StringA _ x y w h hr vr _ _ _ _)    = vr
 vRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
 vRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
 vRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
+vRefA (EllipseA _ x y w h hr vr _ _ _ _)   = vr
 vRefA (LineA _ x y x' y' hr vr _ _)        = vr
 vRefA (RowA _ x y w h hr vr _ _)           = vr
 vRefA (ColA _ x y w h hr vr _ _)           = vr
@@ -240,6 +247,7 @@ idA (StringA id x y w h _ _ _ _ _ _)    = id
 idA (ImageA id x y w h _ _ _ _ _ _)     = id
 idA (PolyA id x y w h _ _ _ _ _ _)      = id
 idA (RectangleA id x y w h _ _ _ _ _ _) = id
+idA (EllipseA id x y w h _ _ _ _ _ _)   = id
 idA (LineA id x y x' y' _ _ _ _)        = id
 idA (RowA id x y w h _ _ _ _)           = id
 idA (ColA id x y w h _ _ _ _)           = id
@@ -257,6 +265,7 @@ setXYWHA x y w h (StringA id _ _ _ _ hr vr str c f cxs)          = StringA id x 
 setXYWHA x y w h (ImageA id _ _ _ _ hr vr src style lc bc)    = ImageA id x y w h hr vr src style lc bc        
 setXYWHA x y w h (PolyA id _ _ _ _ hr vr  pts lw lc bc)        = PolyA id x y w h hr vr pts lw lc bc            
 setXYWHA x y w h (RectangleA id _ _ _ _ hr vr  lw style lc fc) = RectangleA id x y w h hr vr lw style lc fc     
+setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc)   = EllipseA id x y w h hr vr lw style lc fc     
 setXYWHA x y w h (RowA id _ _ _ _ hr vr  c arrs)               = RowA id x y w h hr vr c arrs                   
 setXYWHA x y w h (ColA id _ _ _ _ hr vr  c arrs)               = ColA id x y w h hr vr c arrs                   
 setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c arrs)           = OverlayA id x y w h hr vr c arrs               

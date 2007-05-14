@@ -23,6 +23,7 @@ shallowShowArr (StringA _ x y w h _ _ str _ _ _)  = "{StringA \""++str++"\": x="
 shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (LineA _ x y x' y' _ _ _ _)        = "{LineA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
 shallowShowArr (RowA _ x y w h _ _ _ _)           = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (ColA _ x y w h _ _ _ _)           = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
@@ -55,6 +56,7 @@ walk (StringA _ x y w h hr vr str c f _)    = x+y+w+h+hr+vr+length str+ walkC c+
 walk (ImageA _ x y w h hr vr _ _ c1 c2)     = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (PolyA _ x y w h hr vr _ _ c1 c2)      = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (RectangleA _ x y w h hr vr _ _ c1 c2) = x+y+w+h+hr+vr + walkC c1 + walkC c2
+walk (EllipseA _ x y w h hr vr _ _ c1 c2)   = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (LineA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
 walk (RowA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 +  walkList arrs
 walk (ColA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 + walkList arrs
@@ -76,6 +78,7 @@ data Arrangement =
   | ImageA      !IDA !XCoord !YCoord !Width !Height !String !ImgStyle !RColor !RColor
   | PolyA       !IDA !XCoord !YCoord !Width !Height ![(XCoord, YCoord)] !Int !RColor !RColor
   | RectangleA  !IDA !XCoord !YCoord !Width !Height !Int !Style !RColor !RColor
+  | EllipseA    !IDA !XCoord !YCoord !Width !Height !Int !Style !RColor !RColor
   | LineA       !IDA !XCoord !YCoord !XCoord !YCoord !Int !RColor
   | RowA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | ColA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
@@ -113,6 +116,8 @@ diffArr (PolyA   id  _ _)      (PolyA   _  _ _) = Clean
 diffArr (PolyA   id _ _)       _                = Dirty
 diffArr (RectangleA id  _ _ _) (RectangleA _  _ _ _)  = Clean 
 diffArr (RectangleA id  _ _ _) _                 = Dirty 
+diffArr (EllipseA id  _ _ _) (EllipseA _  _ _ _)  = Clean 
+diffArr (EllipseA id  _ _ _) _                 = Dirty 
 -}
 diffArr (RowA id x y w h hr vr bc arrs) (RowA id' x' y' w' h' hr' vr' bc' arrs') =  
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
@@ -205,6 +210,7 @@ point' :: Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
 point' x' y' loc p@(EmptyA _)                     = [] -- ?? strange case, does empty have size?
 point' x' y' loc p@(StringA _ x y w h _ _ _ _)    = if inside x' y' x y w h then loc else [] 
 point' x' y' loc p@(RectangleA _ x y w h _ _ _ _) = if inside x' y' x y w h then loc else [] 
+point' x' y' loc p@(EllipseA _ x y w h _ _ _ _)   = if inside x' y' x y w h then loc else [] 
 point' x' y' loc p@(LineA _ x y w h _ _)          = if inside x' y' x y w h then loc else [] 
 point' x' y' loc p@(RowA _ x y w h _ arrs)        = if inside x' y' x y w h 
                                                    then let locs = concat [point' (x'-x) (y'-y) (map (++[i]) loc) p | (i,p) <- zip [0..] arrs] 
@@ -228,6 +234,7 @@ point :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
 --point x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
 point x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
 point x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
+point x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
 --point x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
 point x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointRowList 0 (x') (y') loc arrs
 point x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointColList 0 (x') (y') loc arrs
@@ -265,6 +272,7 @@ pointOvlRev :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
 --pointOvlRev x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
 pointOvlRev x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
 --pointOvlRev x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
+--pointOvlRev x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
 --pointOvlRev x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
 pointOvlRev x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointOvlRevRowList 0 (x') (y') loc arrs
 pointOvlRev x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointOvlRevColList 0 (x') (y') loc arrs
@@ -310,6 +318,7 @@ pointDoc :: Show node => Int -> Int -> [node] -> Arrangement node -> [node]
 --pointDoc x' y' loc p@(EmptyA _ _ _ _ _ _)                     = [] -- does not occur at the moment
 pointDoc x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = loc
 --pointDoc x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
+--pointDoc x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
 --pointDoc x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
 pointDoc x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointDocRowList 0 (x') (y') loc arrs
 pointDoc x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointDocColList 0 (x') (y') loc arrs
@@ -392,6 +401,8 @@ debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw lc bc) =
   ( PolyA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr pts lw lc bc, pd, pd)
 debugArrangement' xOffset yOffset (RectangleA id x y w h hr vr lw style lc fc) = 
   ( RectangleA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc, pd, pd)
+debugArrangement' xOffset yOffset (EllipseA id x y w h hr vr lw style lc fc) = 
+  ( EllipseA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc, pd, pd)
 debugArrangement' xOffset yOffset (RowA id x y w h hr vr c arrs)             = 
 --  let (arrs', wOffsets, hOffsets) = unzip3 [ debugArrangement' (hpd+wo) hpd arr |  -- pd-1 and not 2pd-1 because child does its own left padding
 --                                             (arr,wo) <- zip arrs (scanl (\n1 n2 -> n1 +(pd-1)+n2 ) 0 wOffsets) ]
