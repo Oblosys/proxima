@@ -66,6 +66,7 @@ data Presentation doc node clip = EmptyP !IDP
            | ImageP !IDP !String
            | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
+           | EllipseP !IDP !Int !Int !Int      -- width height lineWidth
            | RowP !IDP !Int ![ (Presentation doc node clip) ]    -- vRefNr 
            | ColP !IDP !Int ![ (Presentation doc node clip) ]    -- hRefNr
            | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
