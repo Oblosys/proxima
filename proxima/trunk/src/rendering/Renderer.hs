@@ -343,8 +343,10 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
               }
           else 
-           do { let bgColor = colorRGB br bg bb -- if isClean diffTree then colorRGB br bg bb else red
-              ; drawFilledRect dc (Rect x y w h) bgColor
+           do { when (not (isTransparent (br, bg, bb))) $
+                 do { let bgColor = colorRGB br bg bb -- if isClean diffTree then colorRGB br bg bb else red
+                    ; drawFilledRect dc (Rect x y w h) bgColor
+                    }
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
               }
         }
@@ -373,8 +375,10 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
               }
           else 
-           do { let bgColor = colorRGB br bg bb --  if isClean diffTree then colorRGB br bg bb else red
-              ; drawFilledRect dc (Rect x y w h) bgColor
+           do { when (not (isTransparent (br, bg, bb))) $
+                 do { let bgColor = colorRGB br bg bb --  if isClean diffTree then colorRGB br bg bb else red
+                    ; drawFilledRect dc (Rect x y w h) bgColor
+                    }
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
               }
         }
@@ -399,7 +403,10 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y))  cdts' arrs'
               }
           else 
-           do { -- drawFilledRect dc (Rect x y w h) (colorRGB br bg bb)  
+           do { when (not (isTransparent (br, bg, bb))) $
+                 do { let bgColor = colorRGB br bg bb -- if isClean diffTree then colorRGB br bg bb else red
+                    ; drawFilledRect dc (Rect x y w h) bgColor
+                    }
                -- nasty workaround hack for overlay problem: if last elt of overlay is EmptyA,
                -- the children are reversed. Squigglies are the only presentations for now that
                -- need to be put in front of the overlay, but that should not get parsed.
@@ -460,7 +467,8 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
 drawFilledRect dc rect c =
   drawRect dc rect [ color := c, brush:= BrushStyle BrushSolid c ]     
                           
-
+isTransparent (-1, -1, -1) = True
+isTransparent _            = False
 
 -- usage: for basic Arrangements, render after image so id is visible
 --        for composites,         render before, so stacking order of arrangement is represented correctly

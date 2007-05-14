@@ -212,3 +212,6 @@ refHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedHeight i `div` 
 percent :: Int -> Int -> Int
 percent a x = a * x `div` 100
 
+-- transparent only works for background color
+transparent :: Color
+transparent = (-1, -1, -1)

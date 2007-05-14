@@ -43,7 +43,7 @@ fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip 
 fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldArrangement = f --fixit
  where f :: IO (Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
        f = 
-         do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (white, white, black, black)
+         do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (transparent, white, black, black)
             ; let defFont = defaultFont 
          
             ; -- debugLnIO Arr ("Start collecting fonts")
