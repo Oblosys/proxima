@@ -19,6 +19,7 @@ tokenize i loc pres@(StringP _ str)      = (pres, Map.empty, i)
 tokenize i loc pres@(ImageP _ _)         = (pres, Map.empty, i)
 tokenize i loc pres@(PolyP _ _ _)        = (pres, Map.empty, i)
 tokenize i loc pres@(RectangleP _ _ _ _) = (pres, Map.empty, i)
+tokenize i loc pres@(EllipseP _ _ _ _) = (pres, Map.empty, i)
 tokenize i loc (RowP id rf press) = let (press', lm, i') = tokenizeLst i loc press
                                     in  (RowP id rf press', lm, i')
 tokenize i loc (ColP id rf press) = let (press', lm, i') = tokenizeLst i loc press
@@ -155,6 +156,8 @@ tokenize' i loc lc layout id str pres@(ImageP _ _)         = let (tok, lm, i') =
 tokenize' i loc lc layout id str pres@(PolyP _ _ _)        = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i loc lc layout id str pres@(RectangleP _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+                                                             in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
+tokenize' i loc lc layout id str pres@(EllipseP _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' i (loc,ar'.ar) lc layout id str pres
 tokenize' i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
