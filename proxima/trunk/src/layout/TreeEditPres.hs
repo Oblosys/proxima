@@ -122,6 +122,7 @@ deleteTreePres editable p focus pr@(EmptyP id)          = pr -- ?
 deleteTreePres editable p focus pr@(ImageP _ _)         = pr --
 deleteTreePres editable p focus pr@(PolyP _ _ _)        = pr -- 
 deleteTreePres editable p focus pr@(RectangleP _ _ _ _) = pr --
+deleteTreePres editable p focus pr@(EllipseP _ _ _ _) = pr --
 
 deleteTreePres editable p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   if editable then let st = if  stp < p then 0 else sti

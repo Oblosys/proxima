@@ -76,7 +76,9 @@ diffPres (ImageP  id src)       _                = DiffLeaf False
 diffPres (PolyP   id  lw pts)      (PolyP   _ lw' pts') = DiffLeaf $ lw==lw' && pts==pts'
 diffPres (PolyP   id _ _)       _                       = DiffLeaf False
 diffPres (RectangleP id  w h lw) (RectangleP _ w' h' lw')  = DiffLeaf $ w==w' && h==h' && lw==lw'
-diffPres (RectangleP id  _ _ _) _                 = DiffLeaf False
+diffPres (RectangleP id  _ _ _) _                          = DiffLeaf False
+diffPres (EllipseP id  w h lw) (EllipseP _ w' h' lw')  = DiffLeaf $ w==w' && h==h' && lw==lw'
+diffPres (EllipseP id  _ _ _) _                        = DiffLeaf False
 diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
 diffPres (ColP id rf press) (ColP id' rf' press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
@@ -115,6 +117,7 @@ prunePres (DiffLeaf c) p@(StringP id str)       = if c then ArrangedP  else p
 prunePres (DiffLeaf c) p@(ImageP  id src)       = if c then ArrangedP  else p   
 prunePres (DiffLeaf c) p@(PolyP   id _ _)       = if c then ArrangedP  else p
 prunePres (DiffLeaf c) p@(RectangleP id  _ _ _) = if c then ArrangedP  else p
+prunePres (DiffLeaf c) p@(EllipseP id  _ _ _)   = if c then ArrangedP  else p
 
 prunePres (DiffNode c _ dts) p@(RowP id rf press) = --debug Err ("ROW is "++show c) $
                                                     let pruned = zipWith prunePres dts press

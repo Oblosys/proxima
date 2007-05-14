@@ -17,6 +17,7 @@ data Xprez = Empty
            | Overlay [ Xprez ]
            | Matrix [[ Xprez ]]
            | Rectangle Int Int Int
+           | Ellipse Int Int Int
            | Image String
            | Poly [ (Float, Float) ] Int
            | Formatter [ Xprez ]
@@ -36,6 +37,7 @@ colR r = ColP NoIDP r
 overlay = OverlayP NoIDP 
 --matrix = Matrix 
 rect w h = RectangleP NoIDP w h 1
+ellipse w h = EllipseP NoIDP w h 1
 img src = ImageP NoIDP src
 poly pts = PolyP NoIDP pts 1
 polyW w pts = PolyP NoIDP pts w

@@ -26,6 +26,7 @@ detokenize lm pres@(StringP _ str)       = pres
 detokenize lm pres@(ImageP _ _)          = pres
 detokenize lm pres@(PolyP _ _ _)         = pres
 detokenize lm pres@(RectangleP _ _ _ _)  = pres
+detokenize lm pres@(EllipseP _ _ _ _)  = pres
 detokenize lm (RowP id rf press)         = RowP id rf $ map (detokenize lm) press
 detokenize lm (ColP id rf press)         = ColP id rf $ map (detokenize lm) press
 detokenize lm (OverlayP id (pres:press)) = OverlayP id (detokenize lm pres : press)
@@ -44,6 +45,7 @@ detokenize' lm pres@(StringP id str)      = addWhitespace lm id str
 detokenize' lm pres@(ImageP id _)         = [pres]
 detokenize' lm pres@(PolyP id _ _)        = [pres]
 detokenize' lm pres@(RectangleP _ _ _ _)  = [pres]
+detokenize' lm pres@(EllipseP _ _ _ _)    = [pres]
 detokenize' lm (RowP id rf press)         = detokenizeRow' lm press -- ref gets lost
 detokenize' lm (ColP id rf press)         = [ColP id rf $ concat (map (detokenize' lm) press) ]
 detokenize' lm (OverlayP id (pres:press)) = let press' = detokenize' lm pres
