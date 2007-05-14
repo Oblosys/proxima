@@ -517,29 +517,6 @@ arrangeFocus (NoFocusA) _ = []
 -- caret at end rendered 1 pixel to the left because of poor man's incrementality algorithm
 
 -- ref lines not used, because caret is not incrementally rendered
-picobToCaretC :: Show node => ([Int], Int) -> Arrangement node -> Color -> Arrangement node
-picobToCaretC path p color = picobToCaret 0 0 path p
- where picobToCaret x' y' _            (EmptyA _ _ _ _ _ _ _)               = debug Err "picobToCaret: empty Arrangement" (EmptyA NoIDA 0 0 0 0 0 0)
-       picobToCaret x' y'  (_,o)       (StringA _  x y w h _ _ _ _ _ cxs')  = let cxs = init cxs' ++ [last cxs'-1]
-                                                                              in  mkCaret (x'+x) (y'+y) h (cxs!!o)
-       picobToCaret x' y'  _           (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
-       picobToCaret x' y'  _           (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
-       picobToCaret x' y'  _           (LineA _ x y w h _ _ _ _)            = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (RowA _ x y w h _ _ _ arrs)          = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (RowA _ x y w h _ _ _ arrs)          = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (ColA _ x y w h _ _ _ arrs)          = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (ColA _ x y w h _ _ _ arrs)          = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret x' y'  (p:path, o) (OverlayA _ x y w h _ _ _ arrs)      = picobToCaret (x'+x) (y'+y) (path,o) (arrs!!p)
-       picobToCaret x' y'  ([], o)     (OverlayA _ x y w h _ _ _ arrs)      = mkBoxCaret (x'+x) (y'+y) w h 
-       picobToCaret _ _ _           po                                      = debug Err ("picobToCaret: unhandled case:"++show po) (EmptyA NoIDA 0 0 0 0 0 0)
-
-       mkBoxCaret x y w h = --RectangleA 0 x y w h 0 Solid color color
-                              RowA NoIDA 0 0 0 0 0 0 CommonTypes.white [ LineA NoIDA x y x (y+h) 0 0 2 color, LineA NoIDA x (y+h) (x+w) (y+h) 0 0 2 color
-                                                      , LineA NoIDA (x+w) (y+h) (x+w) y 0 0 2 color, LineA NoIDA (x+w) y x y 0 0 2 color ]
-       mkCaret x y h offset = RowA NoIDA 0 0 0 0 0 0 CommonTypes.white [LineA NoIDA (x+offset) y (x+offset) (y+h) 0 0 2 color]
-
-
-
 mkFocus :: Show node => FocusArr -> Arrangement node -> [Arrangement node]
 mkFocus focus arr = mkFocus' [] 0 0 (orderFocusA focus) arr
 
