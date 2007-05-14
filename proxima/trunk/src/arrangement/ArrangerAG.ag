@@ -96,6 +96,7 @@ DATA Presentation
   | ImageP      id : IDP src : String
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int
   | RectangleP  id : IDP w,h : Int lineWidth : Int
+  | EllipseP	id : IDP w, h : Int lineWidth : Int
   | RowP        id : IDP vRefNr : Int presentationList : PresentationList
   | ColP        id : IDP hRefNr : Int presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
@@ -230,6 +231,8 @@ SEM Presentation
       lhs.maxFormatterDepth = 0
   | RectangleP
       lhs.maxFormatterDepth = 0
+  | EllipseP
+      lhs.maxFormatterDepth = 0
   | ImageP
       lhs.maxFormatterDepth = 0
   | PolyP
@@ -275,6 +278,8 @@ SEM Presentation
       lhs.unfoldedTree = StringP @id @text 
   | RectangleP    
       lhs.unfoldedTree = RectangleP @id @w @h @lineWidth
+  | EllipseP    
+      lhs.unfoldedTree = EllipseP @id @w @h @lineWidth
   | ImageP    
       lhs.unfoldedTree = ImageP @id @src
   | PolyP
@@ -345,6 +350,13 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRf, v
       loc.hRf = baseLine @lhs.fontMetrics @lhs.font
       loc.vRf = 0       
   | RectangleP 
+      loc.minWidth = @w
+      loc.minHeight = @h
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = 0
+      loc.vRf = 0
+  | EllipseP 
       loc.minWidth = @w
       loc.minHeight = @h
       loc.hStretch = False
@@ -656,6 +668,11 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
       loc.finalHeight = @minHeight
       loc.finalHRef   = @lhs.assignedHRef
       loc.finalVRef   = @lhs.assignedVRef
+  | EllipseP  
+      loc.finalWidth  = @minWidth
+      loc.finalHeight = @minHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
   | ImageP  
       loc.finalWidth  = @lhs.assignedWidth
       loc.finalHeight = @lhs.assignedHeight
@@ -808,6 +825,8 @@ SEM Presentation
   | StringP 
       lhs.arrangement = StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
+      lhs.arrangement = RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+  | EllipseP
       lhs.arrangement = RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
   | ImageP
       lhs.arrangement = ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
