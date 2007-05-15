@@ -1,20 +1,20 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Proxima", "Proxima.cabal", "{7D657FCD-E689-4291-9655-179996FCE888}"
-EndProject
-Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Generator", "..\generator\Generator.cabal", "{2A399BE1-4C84-4168-81EA-F16860654FDB}"
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Proxima", "Proxima.cabal", "{7796955C-789D-4723-A84A-A905EDFA694A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Default = Debug|Default
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7D657FCD-E689-4291-9655-179996FCE888}.Debug|Default.ActiveCfg = Debug
-		{7D657FCD-E689-4291-9655-179996FCE888}.Debug|Default.Build.0 = Debug
-		{2A399BE1-4C84-4168-81EA-F16860654FDB}.Debug|Default.ActiveCfg = Debug
-		{2A399BE1-4C84-4168-81EA-F16860654FDB}.Debug|Default.Build.0 = Debug
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+	GlobalSection(ProjectConfiguration) = postSolution
+		{7796955C-789D-4723-A84A-A905EDFA694A}.Debug.ActiveCfg = Debug
+		{7796955C-789D-4723-A84A-A905EDFA694A}.Debug.Build.0 = Debug
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection
 EndGlobal
