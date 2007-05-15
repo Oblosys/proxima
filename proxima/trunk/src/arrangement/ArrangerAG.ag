@@ -9,6 +9,12 @@ import FontLib
 
 
 {
+{-
+TODO: 
+bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
+bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive
+-}
+
 
 {- for AlternativeP
 selectFirstFit :: Int -> [ Int ] -> Int       
