@@ -13,7 +13,7 @@ MAIN           = proxima$(EXE)
 
 SHELL = /bin/sh
 
-.PHONY : default proxima generate presenter agc always
+.PHONY : default proxima generate generator presenter agc always
 
 default: $(MAIN)
 
@@ -32,8 +32,11 @@ PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAI
 
 # Generation 
 
-generate : src/DocTypes_Generated.hs 
+generator :
+	cd $(PROXIMASRCDIR); make generator
 
+generate : src/DocTypes_Generated.hs
+	
 $(GEN):
 	cd $(PROXIMASRCDIR); make generator
 
