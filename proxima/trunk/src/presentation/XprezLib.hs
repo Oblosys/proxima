@@ -170,10 +170,14 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-y, v-x))
 
 
 hLine :: Xprez doc node clip
-hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
+--hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
+hLine = row [empty `withHStretch` True `withHeight` 1] `withInh` (\i -> i {backgroundColor = lineColor i})
+-- workaround for incorrect poly rendering.
 
 vLine :: Xprez doc node clip
-vLine = poly [(0,0),(0,1.0)] `withWidth` 1
+--vLine = poly [(0,0),(0,1.0)] `withWidth` 1
+vLine = row [empty `withVStretch` True `withWidth` 1] `withInh` (\i -> i {backgroundColor = lineColor i})
+-- workaround for incorrect poly rendering.
 
 -- lineWidth should be an attribute, so we can use a with here
 hLineW :: Int -> Xprez doc node clip
@@ -207,6 +211,11 @@ refHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedHeight i `div` 
                                                  
                                     in (newI,newS))
 
+glue :: Xprez doc node clip
+glue = empty `withHStretch` True `withVStretch` True
+
+boxed :: Xprez doc node clip -> Xprez doc node clip
+boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 
 -- multiply x with a percentage
 percent :: Int -> Int -> Int
