@@ -77,7 +77,7 @@ data Graph = Graph IDD List_Vertex List_Edge
               deriving Show
 
 
-data Vertex = Vertex IDD Int_ Int_ Int_ 
+data Vertex = Vertex IDD String_ Int_ Int_ Int_ 
             | HoleVertex
             | ParseErrVertex (Presentation Document Node ClipDoc)
                deriving Show

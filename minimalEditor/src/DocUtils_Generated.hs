@@ -181,7 +181,7 @@ graphIDD (GraphNode (Graph iDD _ _) _) = Just iDD
 graphIDD _                                   = Nothing
 
 vertexIDD :: Node -> Maybe IDD
-vertexIDD (VertexNode (Vertex iDD _ _ _) _) = Just iDD
+vertexIDD (VertexNode (Vertex iDD _ _ _ _) _) = Just iDD
 vertexIDD _                                   = Nothing
 
 edgeIDD :: Node -> Maybe IDD
@@ -200,7 +200,7 @@ shallowShowRoot1 (Root  _ _ _) = "Root"
 shallowShowTree1 (Bin  _ _ _) = "Bin"
 shallowShowTree1 (Leaf  _) = "Leaf"
 shallowShowGraph1 (Graph  _ _ _) = "Graph"
-shallowShowVertex1 (Vertex  _ _ _ _) = "Vertex"
+shallowShowVertex1 (Vertex  _ _ _ _ _) = "Vertex"
 shallowShowEdge1 (Edge  _ _ _) = "Edge"
 shallowShowList_Dummy1 (List_Dummy  _ _) = "List_Dummy"
 shallowShowConsList_Dummy1 (Cons_Dummy  _ _) = "Cons_Dummy"
@@ -223,7 +223,7 @@ toXMLRoot (Root _ tree graph) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph 
 toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
 toXMLTree (Leaf _) = Elt "Leaf" [] $ []
 toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLVertexs vertices
-toXMLVertex (Vertex _ id x y) = Elt "Vertex" [] $ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLVertex (Vertex _ name id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
 toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
 toXMLList_Dummy (List_Dummy _ dummys) = toXMLConsList_Dummy dummys
 toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLDummys dummys

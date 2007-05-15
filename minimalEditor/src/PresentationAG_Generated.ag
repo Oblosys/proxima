@@ -135,7 +135,7 @@ DATA Graph | Graph idd:IDD vertices:List_Vertex edges:List_Edge
            | ParseErrGraph presentation:Presentation_Doc_Node_Clip
 
 
-DATA Vertex | Vertex idd:IDD id:Int_ x:Int_ y:Int_ 
+DATA Vertex | Vertex idd:IDD name:String_ id:Int_ x:Int_ y:Int_ 
             | HoleVertex
             | ParseErrVertex presentation:Presentation_Doc_Node_Clip
 
@@ -244,18 +244,20 @@ SEM Graph
 
 
 SEM Vertex
-  | Vertex id.pIdC = @lhs.pIdC + 0
+  | Vertex name.pIdC = @lhs.pIdC + 0
            y.pIdC = @x.pIdC
            x.pIdC = @id.pIdC
+           id.pIdC = @name.pIdC
            lhs.pIdC = @y.pIdC
   | HoleVertex     lhs.pres = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.pres = presParseErr @presentation
 
 
 SEM Vertex
-  | Vertex id.path  = @lhs.path++[0]
-           x.path  = @lhs.path++[1]
-           y.path  = @lhs.path++[2]
+  | Vertex name.path  = @lhs.path++[0]
+           id.path  = @lhs.path++[1]
+           x.path  = @lhs.path++[2]
+           y.path  = @lhs.path++[3]
 
 
 SEM Edge
@@ -419,7 +421,7 @@ SEM Graph [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM Vertex [ || presXML : Presentation_Doc_Node_Clip ]
   | Vertex
-      lhs.presXML = presentElementXML @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @id.presXML, @x.presXML, @y.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presXML, @id.presXML, @x.presXML, @y.presXML ] 
   | HoleVertex     lhs.presXML = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.presXML = presParseErr @presentation
 
@@ -525,7 +527,7 @@ SEM Graph [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM Vertex [ || presTree : Presentation_Doc_Node_Clip ]
   | Vertex
-      lhs.presTree = presentElementTree @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @id.presTree, @x.presTree, @y.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presTree, @id.presTree, @x.presTree, @y.presTree ] 
   | HoleVertex     lhs.presTree = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.presTree = presParseErr @presentation
 

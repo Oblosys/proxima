@@ -79,10 +79,10 @@ reuseGraph nodes  ma0 ma1 ma2
            (Graph a0 a1 a2) -> reuse3 Graph a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseGraph"
 
-reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
-reuseVertex nodes  ma0 ma1 ma2 ma3
+reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
+reuseVertex nodes  ma0 ma1 ma2 ma3 ma4
   = case extractFromNodes extractVertex defaultVertex nodes of
-           (Vertex a0 a1 a2 a3) -> reuse4 Vertex a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Vertex a0 a1 a2 a3 a4) -> reuse5 Vertex a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseVertex"
 
 reuseEdge :: [Maybe Node] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Edge
@@ -146,7 +146,7 @@ extractGraph (Just (GraphNode x@(Graph _ _ _) _)) = Just x
 extractGraph _ = Nothing
 
 extractVertex :: Maybe Node -> Maybe Vertex
-extractVertex (Just (VertexNode x@(Vertex _ _ _ _) _)) = Just x
+extractVertex (Just (VertexNode x@(Vertex _ _ _ _ _) _)) = Just x
 extractVertex _ = Nothing
 
 extractEdge :: Maybe Node -> Maybe Edge
@@ -193,7 +193,7 @@ defaultGraph :: Graph
 defaultGraph = Graph NoIDD hole hole
 
 defaultVertex :: Vertex
-defaultVertex = Vertex NoIDD hole hole hole
+defaultVertex = Vertex NoIDD hole hole hole hole
 
 defaultEdge :: Edge
 defaultEdge = Edge NoIDD hole hole
@@ -236,12 +236,6 @@ reuse1 :: (a0 -> r) ->
           Maybe a0 -> r
 reuse1 f  a0 ma0 =
   f (maybe a0 id ma0) 
-
-reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
-          a0 -> a1 -> a2 -> a3 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
-reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
 reuse0 :: r -> r
 reuse0 f = f

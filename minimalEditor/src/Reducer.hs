@@ -82,9 +82,11 @@ saveFile filePath doc =
 initDoc :: IO Document
 initDoc = 
  do { return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
-                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (Int_ NoIDD 1) (Int_ NoIDD 80) (Int_ NoIDD 40)) 
-                                                                          Nil_Vertex)))
+                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
+                                                                          Nil_Vertex)))))
                                                        (List_Edge NoIDD Nil_Edge))
     }
 {- do { let filePath = "Proxima.txt"

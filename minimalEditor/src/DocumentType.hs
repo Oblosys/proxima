@@ -16,6 +16,6 @@ data Tree = Bin left:Tree right:Tree { idd : IDD }
           
 data Graph = Graph vertices:[Vertex] edges:[Edge] { idd : IDD }
 
-data Vertex = Vertex id:Int_ x:Int_ y:Int_     { idd : IDD }
+data Vertex = Vertex name:String_ id:Int_ x:Int_ y:Int_     { idd : IDD }
 
 data Edge = Edge from:Int_ to:Int_       { idd : IDD }

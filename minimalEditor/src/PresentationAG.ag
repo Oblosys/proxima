@@ -76,8 +76,14 @@ SEM List_GraphNode
 SEM Vertex
   | Vertex
       lhs.pres = col [ empty `withHeight` @y.int
-                     , row [ empty `withWidth` @x.int 
-                           , text $ "vertex" ++ show @x.int ++ "," ++ show @y.int
+                     , row [ empty `withWidth` @x.int
+                           , col [ row [glue, ellipse 35 35 `withfColor` (200, 255, 255), glue]
+                                 , vSpace 4 `withHStretch` True
+                                 , row [glue, boxed 
+                                                (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
+                                                `withbgColor` (236, 236, 169)
+                                       , glue] 
+                                 ]
                            ]
                      ]
 

@@ -416,23 +416,25 @@ instance Editable Graph Document Node ClipDoc where
 
 instance Editable Vertex Document Node ClipDoc where
   select []    x                  = Clip_Vertex x
-  select (0:p) (Vertex _ x1 x2 x3) = select p x1
-  select (1:p) (Vertex _ x1 x2 x3) = select p x2
-  select (2:p) (Vertex _ x1 x2 x3) = select p x3
+  select (0:p) (Vertex _ x1 x2 x3 x4) = select p x1
+  select (1:p) (Vertex _ x1 x2 x3 x4) = select p x2
+  select (2:p) (Vertex _ x1 x2 x3 x4) = select p x3
+  select (3:p) (Vertex _ x1 x2 x3 x4) = select p x4
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Vertex c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Vertex")   x
-  paste (0:p) c (Vertex i1 x1 x2 x3) = Vertex i1 (paste p c x1) x2 x3
-  paste (1:p) c (Vertex i1 x1 x2 x3) = Vertex i1 x1 (paste p c x2) x3
-  paste (2:p) c (Vertex i1 x1 x2 x3) = Vertex i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 (paste p c x1) x2 x3 x4
+  paste (1:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 (paste p c x2) x3 x4
+  paste (2:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 x2 (paste p c x3) x4
+  paste (3:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 x2 x3 (paste p c x4)
   paste _  _  x                    = x
 
-  alternatives _ = [("Vertex {Int_} {Int_} {Int_} "  , Clip_Vertex $ Vertex NoIDD hole hole hole)
+  alternatives _ = [("Vertex {String_} {Int_} {Int_} {Int_} "  , Clip_Vertex $ Vertex NoIDD hole hole hole hole)
                    ,("{Vertex}", Clip_Vertex hole)
                    ]
 
-  arity (Vertex _ x1 x2 x3) = 3
+  arity (Vertex _ x1 x2 x3 x4) = 4
   arity _                        = 0
 
   parseErr = ParseErrVertex
