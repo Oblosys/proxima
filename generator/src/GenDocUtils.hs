@@ -92,24 +92,21 @@ printDeclXML (Decl d prods DeclDef)      =  map (printProdXML d) prods
 printDeclXML (Decl d prods DeclConsList) =  
           let   decl =  drop 9 d
           in    [ "toXMLList_"++decl++" (List_"++decl++" _ "++(decapitalize decl)++"s) = toXMLConsList_"++decl++" "++(decapitalize decl)++"s"
-                , "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXML"++ decl++"s "++(decapitalize decl)++"s"
+                , "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXMLConsList_"++ decl++" "++(decapitalize decl)++"s"
                 , "toXMLConsList_"++decl++" Nil_"++decl++"             = []"
-                , "toXML"++decl++"s _                           = []"
                 ]
 
 
+-- toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLList_Vertex vertices
+
+  
 
 
-
+-- incomprehensible Rui function 
 printProdXML d (Prod p fields) =
-             let fieldsNotListNotIDs = filter isNotListNotIDs  fields
-                 fieldsList = (filter (isList) fields)
-                 listXML =  if   null fieldsList
-                            then []
-                            else typeList (head fieldsList)                    
-                 argsXML = foldr  (\a b ->a++" ++ "++b) "[]" (map singleArg fieldsNotListNotIDs)
-                 finalXML = if (null listXML) then argsXML else (if null argsXML then listXML ++" ++ "++argsXML else listXML)
-             in  "toXML"++d++" ("++ p ++ (concatMap printVar fields)++") = Elt " ++ (show p)++" [] $ " ++ finalXML
+             let fieldsNotIDs = filter (not. isID) fields
+                 argsXML = foldr  (\a b ->a++" ++ "++b) "[]" (map singleArg fieldsNotIDs)
+             in  "toXML"++d++" ("++ p ++ (concatMap printVar fields)++") = Elt " ++ (show p)++" [] $ " ++ argsXML
 
 
 
@@ -122,6 +119,7 @@ typeList (Field varName varType _) = "toXML"++varType++" "++varName
 listArg  d fields   = "map toXML"++d++" "++concat(showAsList(getVar fields))  
 
 singleArg :: Field -> String
+singleArg (Field varName varType List)= "toXMLList_"++init varType++" "++varName
 singleArg (Field varName varType _)= "[toXML"++varType++" "++varName++"]"
 
 
