@@ -1,5 +1,6 @@
 module GenDocUtils where
 
+import List
 import GenCommon
 
 -- Doesn't generate for hole or ParseErr
@@ -25,7 +26,9 @@ genDocUtils include parsedFile@(File m d) =
                  ++ ["\n\n"]
                  ++ genShallowShow extendedTypes 
                  ++ ["\n\n"]
-                 ++ genToXML       extendedTypes 
+                 ++ genToXML       extendedTypes
+                 ++ ["\n\n"]
+                 ++ genParser	   extendedTypes
  where extendedTypes@(File m d') = (File m (d++(genListTypes parsedFile)))
        allConstructors = [ (tp, cnstr, map fieldType cs, decltp) 
                          | Decl tp prods decltp <- d'
@@ -96,19 +99,13 @@ printDeclXML (Decl d prods DeclConsList) =
                 , "toXMLConsList_"++decl++" Nil_"++decl++"             = []"
                 ]
 
-
 -- toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLList_Vertex vertices
-
   
-
-
 -- incomprehensible Rui function 
 printProdXML d (Prod p fields) =
              let fieldsNotIDs = filter (not. isID) fields
                  argsXML = foldr  (\a b ->a++" ++ "++b) "[]" (map singleArg fieldsNotIDs)
              in  "toXML"++d++" ("++ p ++ (concatMap printVar fields)++") = Elt " ++ (show p)++" [] $ " ++ argsXML
-
-
 
 printVar f@(Field var _ varType) =if (isID f) then " _" else " "++var
 
@@ -123,7 +120,46 @@ singleArg (Field varName varType List)= "toXMLList_"++init varType++" "++varName
 singleArg (Field varName varType _)= "[toXML"++varType++" "++varName++"]"
 
 
+genParser :: File -> [String]
+genParser (File _ decls) = concatMap genParserDecl decls
 
+genParserDecl :: Decl -> [String]
+genParserDecl (Decl listTypeName _     DeclConsList) = 
+  let typeName = drop 9 listTypeName -- nasty
+  in  [ "parseXML_List_"++typeName++" = mkList List_"++typeName++" Cons_"++typeName++
+        " Nil_"++typeName++" <$> many (try parseXML_"++typeName++")" ]
+genParserDecl (Decl typeName prods DeclList) = [] -- no generation necessary, taken care of by List type
+genParserDecl (Decl typeName prods DeclDef)  = 
+  let constrs = map getConstr prods
+  in  [ "parseXML_"++typeName++" = " ++ prependAndSepBy "parseXMLCns_" " <?|> " constrs ] ++
+      map genParserProd prods
+
+genParserProd :: Prod -> String
+genParserProd (Prod cnstr allFields) = "parseXMLCns_"++cnstr++" = "++cnstr++" NoIDD <$ " ++
+  case filter (not. isID) allFields of 
+    []      -> "emptyTag \""++cnstr++"\""
+    fields  -> "startTag \""++cnstr++"\" <*> " ++ prependAndSepBy "parseXML_" " <*> " (map showField fields)++" <* endTag \""++cnstr++"\""
+ where showField (Field _ typeName List) = "List_"++init typeName -- for some reason, this type has an extra s at the end
+       showField (Field _ typeName _) = typeName
+ 
+-- <PREF>item1<SEP><PREF>item2<SEP>..<SEP><PREF>itemN
+prependAndSepBy :: String -> String -> [String] -> String
+prependAndSepBy pref sep items = concat . intersperse sep . map (pref++) $ items
+
+{- examples:
+parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many (try parseXML_Vertex)
+parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf
+parseXMLCns_Bin = Bin NoIDD <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree <* endTag "Bin"
+parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"
+
+-}
+
+
+{- Generation
+make sure it is easy to generate for:
+types, types with generated list stuff, types without Document and EnrichedDoc
+
+-}
 
 --            [ "toXML"++d++" (Cons"++d++" _ x xs) = toXML"++(init d)++" x : toXML"++d++" xs" --not so nice
 --            , "toXML"++d++" (Nil"++d++" _)       = []"

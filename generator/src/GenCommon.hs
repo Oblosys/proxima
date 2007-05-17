@@ -35,6 +35,9 @@ data DeclType = DeclList
 
 {- L I B -}
 
+getConstr :: Prod -> String
+getConstr (Prod constr _) = constr
+
 getLists (File _ decls) = removeRepeat (concatMap getF decls) where
          getF (Decl _ l _) = concatMap f l
          f (Prod _ l) = map (\(Field _ f _)->f) (filter (isListNotIDs) l)
