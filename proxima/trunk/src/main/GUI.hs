@@ -202,14 +202,14 @@ fileMenuHandler handler renderingLvlVar window menuItem =
           "open" ->
            do { debugLnIO Err "Open"
 
-              ; filePathM <- fileOpenDialog window False True "Open" [("Helium Files",["*.hs"]),("Any Files",["*.*"])] "" ""
+              ; filePathM <- fileOpenDialog window False True "Open" [("XML Files",["*.xml"]),("Any Files",["*.*"])] "" ""
               ; debugLnIO Err $ show filePathM
               ; let editRendering = maybe (SkipRen 0) OpenFileRen filePathM
               ; return editRendering
               }
           "save" -> 
            do { debugLnIO Err "Save"
-              ; filePathM <- fileSaveDialog window False True "Save" [] "" "doc.xml"
+              ; filePathM <- fileSaveDialog window False True "Save" [] "" "Document.xml"
  
               
               --; filePathM <- fileSaveDialog window False True "Select" "." "doc.xml"
