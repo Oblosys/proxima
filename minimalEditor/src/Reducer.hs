@@ -25,7 +25,12 @@ reductionSheet state low high editLow =
 reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
             EditEnrichedDoc documentLevel EnrichedDoc ->
             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceIO state enrLvl docLvl                  (OpenFileEnr upd) =  setUpd NothingUpdated $ debug Err "EvalTranslate.reduce: OpenFile Not implemented yet" $ return (SkipDoc 0, state, enrLvl)
+reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =  setUpd AllUpdated $
+								                                     do { mDoc' <- openFile fpth 
+																	    ; case mDoc' of
+																	        Just doc' -> return (SetDoc doc', state, enrLvl)
+																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
+																	    }
 
 reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = setUpd NothingUpdated $ do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
 -- on save, save xmlrep of previous doc. 
@@ -81,31 +86,34 @@ saveFile filePath doc =
 
 initDoc :: IO Document
 initDoc = 
- {- do {  return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
-                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
-                                                                          Nil_Vertex)))))
-                                                       (List_Edge NoIDD Nil_Edge))
-    }-}
- do { let filePath = "Document.xml"
-    ; debugLnIO Prs $ "Opening file: "++filePath
-    ; result <- parseFromFile parseXML_Root filePath
-    ; case result of
-        Right res -> return $ RootDoc NoIDD $ res
-        Left err -> do { debugLnIO Err $ show err
-                       ; return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
-                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
-                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
-                                                                          Nil_Vertex)))))
-                                                       (List_Edge NoIDD Nil_Edge))
+ do { mDoc <- openFile "Document.xml"
+    ; case mDoc of
+        Just doc -> return doc
+        Nothing  -> do { debugLnIO Err "Using default initial document instead"
+                       ; return defaultInitDoc
                        }
     }
 
+
+openFile :: String -> IO (Maybe Document)
+openFile fileName =
+ do { debugLnIO Prs $ "Opening file: "++fileName
+    ; result <- parseFromFile parseXML_Root fileName
+    ; case result of
+        Right res -> return $ Just $ RootDoc NoIDD $ res
+        Left err -> do { debugLnIO Err "Parse error"
+                       ; debugLnIO Err $ show err
+                       ; return $ Nothing
+                       }
+    }
   
+defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
+                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
+                                                                          Nil_Vertex)))))
+                                                       (List_Edge NoIDD Nil_Edge))
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
 lines' ""   = []
