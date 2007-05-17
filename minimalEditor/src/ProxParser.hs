@@ -19,7 +19,7 @@ import qualified UU_Parsing
 import Char
 
 import DocTypes_Generated
-import DocUtils_Generated
+import DocUtils_Generated hiding ((<$>),(<*>),(<$),(<*))
 
 -- TODO: move to PresentationParsing
 reuse = Nothing

@@ -3,6 +3,7 @@ module DocUtils_Generated where
 import DocTypes
 import DocTypes_Generated
 import PresTypes
+import Text.ParserCombinators.Parsec
 
 --instance Show Node where
 --  show NoNode = "<>"
@@ -21,10 +22,10 @@ data XML = Elt String [(String, String)] [XML] | PCData String | EmptyElt
 
 
 showXML xml = 
-     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+{-     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
   ++ case xml of (Elt tg _ _) -> "<!DOCTYPE "++tg++" SYSTEM \""++tg++".dtd\" >\n"
                  _            -> ""
-  ++ showXML' 0 xml
+  ++ -} showXML' 0 xml
  where showXML' i (Elt tag ps []) = replicate i ' ' ++"<"++tag++showProperties ps++"/>\n"
        showXML' i (Elt tag ps [PCData str]) = replicate i ' ' ++"<"++tag++showProperties ps++">"++str++"</"++tag++">\n" 
        showXML' i (Elt tag ps cs) = replicate i ' ' ++"<"++tag++showProperties ps++">\n"
@@ -47,6 +48,9 @@ toXMLString str = Elt "String" [] [PCData str]
 toXMLRootDoc (RootDoc _ root)  = toXMLRoot root
 
 
+  
+
+
 ---- deconstructors for boxed primitive types
 
 string_ :: String_ -> String
@@ -66,6 +70,64 @@ int_ _ = 0
 -- completely unclear why this one is not necessary in heliumEditor
 -- somehow the generator generates different code there.
 toXMLDocument document = Elt "Document" [] []
+
+
+
+-- Parsing
+
+parseXML_Document = RootDoc NoIDD <$ startTag "RootEnr" <*> parseXML_Root  <* endTag "RootEnr"
+
+mkList listCns consCns nilCns lst = listCns NoIDD $ foldr consCns nilCns lst
+
+parseXML_String :: Parser String
+parseXML_String =
+ do { spaces
+    ; string "<String>"
+    ; str <- many (satisfy (/='<')) 
+    ; string "</String>"
+    ; return str
+    } 
+
+parseXML_Int :: Parser Int
+parseXML_Int  =
+ do { spaces
+    ; string "<Integer val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Bool :: Parser Bool
+parseXML_Bool =
+ do { spaces
+    ; string "<Bool val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    }
+     
+infixl 4 <*>, <$>, <$, <*
+
+(<*>) :: Parser (a -> b) -> Parser a -> Parser b
+p1 <*> p2 = do { f <- p1; a <- p2; return $ f a }
+
+(<*) :: Parser a -> Parser b -> Parser a
+p1 <* p2 = do { a <- p1; p2; return a }
+
+(<$>) :: (a -> b) -> Parser a -> Parser b
+(<$>) = fmap
+    
+(<$) :: b -> Parser a -> Parser b
+b <$ p = do { p; return b } 
+
+-- binary choice with try
+(<?|>) :: Parser a -> Parser a -> Parser a
+p1 <?|> p2 = choice [try p1, p2] 
+
+startTag eltName = do { spaces; string $ "<"++eltName++">"}
+endTag   eltName = do { spaces; string $ "</"++eltName++">"}
+emptyTag eltName = do { spaces; string $ "<"++eltName++"/>"}
+
 
 
 
@@ -234,3 +296,30 @@ toXMLConsList_Vertex Nil_Vertex             = []
 toXMLList_Edge (List_Edge _ edges) = toXMLConsList_Edge edges
 toXMLConsList_Edge (Cons_Edge edge edges) = toXMLEdge edge : toXMLConsList_Edge edges
 toXMLConsList_Edge Nil_Edge             = []
+
+
+
+parseXML_EnrichedDoc = parseXMLCns_RootEnr
+parseXMLCns_RootEnr = RootEnr NoIDD <$ startTag "RootEnr" <*> parseXML_Root <*> parseXML_Document <* endTag "RootEnr"
+parseXML_String_ = parseXMLCns_String_
+parseXMLCns_String_ = String_ NoIDD <$ startTag "String_" <*> parseXML_String <* endTag "String_"
+parseXML_Bool_ = parseXMLCns_Bool_
+parseXMLCns_Bool_ = Bool_ NoIDD <$ startTag "Bool_" <*> parseXML_Bool <* endTag "Bool_"
+parseXML_Int_ = parseXMLCns_Int_
+parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int_"
+parseXML_Dummy = parseXMLCns_Dummy
+parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
+parseXML_Root = parseXMLCns_Root
+parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <* endTag "Root"
+parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf
+parseXMLCns_Bin = Bin NoIDD <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree <* endTag "Bin"
+parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"
+parseXML_Graph = parseXMLCns_Graph
+parseXMLCns_Graph = Graph NoIDD <$ startTag "Graph" <*> parseXML_List_Vertex <*> parseXML_List_Edge <* endTag "Graph"
+parseXML_Vertex = parseXMLCns_Vertex
+parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String_ <*> parseXML_Int_ <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Vertex"
+parseXML_Edge = parseXMLCns_Edge
+parseXMLCns_Edge = Edge NoIDD <$ startTag "Edge" <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Edge"
+parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many (try parseXML_Dummy)
+parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many (try parseXML_Vertex)
+parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> many (try parseXML_Edge)

@@ -9,7 +9,7 @@ import PresTypes -- for initDoc
 
 import DocTypes_Generated
 import DocUtils_Generated
-
+import Text.ParserCombinators.Parsec
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 reductionSheet :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
@@ -81,20 +81,30 @@ saveFile filePath doc =
 
 initDoc :: IO Document
 initDoc = 
- do { return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
+ {- do {  return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
                                           (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
                                                                           (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
                                                                           (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
                                                                           (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
                                                                           Nil_Vertex)))))
                                                        (List_Edge NoIDD Nil_Edge))
+    }-}
+ do { let filePath = "Document.xml"
+    ; debugLnIO Prs $ "Opening file: "++filePath
+    ; result <- parseFromFile parseXML_Root filePath
+    ; case result of
+        Right res -> return $ RootDoc NoIDD $ res
+        Left err -> do { debugLnIO Err $ show err
+                       ; return $ RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
+                                          (Graph NoIDD (List_Vertex NoIDD (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Oeleboele")(Int_ NoIDD 1) (Int_ NoIDD 20) (Int_ NoIDD 20)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Een") (Int_ NoIDD 1) (Int_ NoIDD 10) (Int_ NoIDD 30)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Twee") (Int_ NoIDD 1) (Int_ NoIDD 70) (Int_ NoIDD 40)) 
+                                                                          (Cons_Vertex (Vertex NoIDD (String_ NoIDD "Drie") (Int_ NoIDD 1) (Int_ NoIDD 120) (Int_ NoIDD 30)) 
+                                                                          Nil_Vertex)))))
+                                                       (List_Edge NoIDD Nil_Edge))
+                       }
     }
-{- do { let filePath = "Proxima.txt"
-    ; debugLnIO Prs $ "Opening file: "++"Proxima.txt"
-    ; fileContents <- readFile filePath
-    ; return $ RootDoc NoIDD $ ParseErrRoot (RootNode (Root NoIDD) []) (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents)
-    }
--}
+
   
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
