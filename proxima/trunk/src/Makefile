@@ -80,7 +80,7 @@ generator : $(GEN)
 
 $(GEN): always
 	@echo ghc: compiling Generator
-	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts -O2
+	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts
 
 # The AG compiler
 
