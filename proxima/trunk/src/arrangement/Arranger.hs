@@ -13,7 +13,7 @@ import Data.Map (Map)
 
 arrangePresentation :: Show node => FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node)
-arrangePresentation fontMetricsRef focus oldArrangement dt pres = -- return $ sel $ dummyArr  undefined undefined undefined undefined undefined undefined undefined undefined pres
+arrangePresentation fontMetricsRef focus oldArrangement dt pres =
 
  do { let screenSize = 1000      
     ; let pres' = prunePres dt pres
@@ -96,30 +96,4 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldAr
             ; return (arrangement, maxFDepth, unfoldedTree)
             }
             
-            
--- just generating an arrangement from the presentation takes almost no time, so the expenses
--- in the arrangementAG must come from somewhere else
-dummyArr _ _ _ _ _ _ _ _ (EmptyP id)            = tup $ EmptyA (idAFromP id) 0 0 0 0 0 0
-dummyArr _ _ _ _ _ _ _ _ (StringP id str)       = tup $ StringA (idAFromP id) 0 0 20 20 0 0 str black defaultFont []
-dummyArr _ _ _ _ _ _ _ _ (RectangleP id _ _ lw) = tup $ RectangleA (idAFromP id) 0 0 20 20 0 0 lw Solid black white
-dummyArr _ _ _ _ _ _ _ _ (ImageP id src)        = tup $ ImageA (idAFromP id) 0 0 20 20 0 0 src Tile black white
-dummyArr _ _ _ _ _ _ _ _ (PolyP id pl lw)       = let mkPoint (rx, ry) = ( round (rx * fromIntegral 10)
-			                                   , round (ry * fromIntegral 10) )
-		                          in tup $   PolyA (idAFromP id) 0 0 20 20 0 0 (map mkPoint pl) lw black white
-		      
-dummyArr _ _ _ _ _ _ _ _ (RowP id rf prs)       = tup $ RowA (idAFromP id) 0 0 20 20 0 0 white (sel $ dummyArrs undefined undefined undefined undefined undefined undefined undefined undefined prs)
-dummyArr _ _ _ _ _ _ _ _ (ColP id rf prs)       = tup $ ColA (idAFromP id) 0 0 20 20 0 0 white (sel $ dummyArrs undefined undefined undefined undefined undefined undefined undefined undefined prs)
-dummyArr _ _ _ _ _ _ _ _ (OverlayP id prs)      = tup $ OverlayA (idAFromP id) 0 0 20 20 0 0 white (sel $ dummyArrs undefined undefined undefined undefined undefined undefined undefined undefined prs)
-dummyArr _ _ _ _ _ _ _ _ (StructuralP id child) = tup $ StructuralA (idAFromP id) (sel $ dummyArr undefined undefined undefined undefined undefined undefined undefined undefined child)
-dummyArr _ _ _ _ _ _ _ _ (ParsingP id child)    = tup $ ParsingA (idAFromP id) (sel $ dummyArr undefined undefined undefined undefined undefined undefined undefined undefined child)
-dummyArr _ _ _ _ _ _ _ _ (LocatorP loc child)   = tup $ LocatorA loc (sel $ dummyArr undefined undefined undefined undefined undefined undefined undefined undefined child)
-dummyArr _ _ _ _ _ _ _ _ (WithP _ child)        = tup $ sel $ dummyArr undefined undefined undefined undefined undefined undefined undefined undefined child
-
-
-dummyArrs _ _ _ _ _ _ _ _ [] = tup []
-dummyArrs _ _ _ _ _ _ _ _ (prs:prss) = let arr  = sel $ dummyArr undefined undefined undefined undefined undefined undefined undefined undefined prs
-                                           arrs = sel $ dummyArrs undefined undefined undefined undefined undefined undefined undefined undefined prss
-                                       in tup $ arr:arrs 
-                       
-tup x = (undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,x )
-sel (_,_,_,_,_,_,_,_,x) = x 
+     
