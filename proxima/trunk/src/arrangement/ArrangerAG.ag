@@ -106,6 +106,8 @@ DATA Presentation
   | RowP        id : IDP vRefNr : Int presentationList : PresentationList
   | ColP        id : IDP hRefNr : Int presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
+  | GraphP      id : IDP w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
+  | VertexP     id : IDP outline : Outline child : Presentation
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
