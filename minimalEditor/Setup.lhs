@@ -9,7 +9,11 @@
 
 > insertCurrentVersion args buildflags = 
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
->      output <- runCommand "make" ["generator", "generate", "presenter"]
+>      output <- runCommand "make" ["generator"]
+>      putStrLn output
+>      output <- runCommand "make" ["generate"]
+>      putStrLn output
+>      output <- runCommand "make" ["presenter"]
 >      putStrLn output
 >      putStrLn "end of pre-build hook"
 >      return emptyHookedBuildInfo
