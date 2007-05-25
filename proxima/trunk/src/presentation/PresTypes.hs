@@ -107,7 +107,7 @@ instance Show (Presentation doc node clip) where
   show (ParsingP id pres)    = "ParsingP "++show id++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (GraphP id _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
-  show (VertexP id _ _ ol pres)  = "Vertex "++show pres
+  show (VertexP id x y ol pres)  = "Vertex ("++show x++","++show y++")"++show pres
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
 

@@ -430,6 +430,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
                     }        
               }
         ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
+        ; putStrLn $ "The graph is "++show arrangement 
         }
     (VertexA id x' y' w' h' _ _ (br,bg,bb) arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
@@ -439,7 +440,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
         ; when arrDb $
             drawRect dc (Rect x y w h) [ color := vertexColor, brush:= BrushStyle BrushTransparent black ]
                 
-        ; renderArr dc arrDb scale (lux, luy) (head childDiffTrees) arr
+        ; renderArr dc arrDb scale (x, y) (head childDiffTrees) arr
         }
 
     (StructuralA id arr) -> 
