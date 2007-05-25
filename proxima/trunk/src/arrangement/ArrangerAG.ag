@@ -13,6 +13,9 @@ import FontLib
 TODO: 
 bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
 bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive
+
+- why does Empty.arrangement have 0 for x and y?
+
 -}
 
 
@@ -107,7 +110,7 @@ DATA Presentation
   | ColP        id : IDP hRefNr : Int presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
   | GraphP      id : IDP w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
-  | VertexP     id : IDP outline : Outline child : Presentation
+  | VertexP     id : IDP x,y: Int outline : Outline child : Presentation
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
@@ -251,6 +254,8 @@ SEM Presentation
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
   | OverlayP
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | GraphP
+      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
 {-
   | TestPresentation 
       lhs.maxFormatterDepth = 0
@@ -264,6 +269,7 @@ SEM Presentation
   | AlternativePresentation 
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
 -}
+-- | VertexP       copy
 -- | WithP       copy
 -- | StructuralP copy
 -- | ParsingP    copy
@@ -298,6 +304,10 @@ SEM Presentation
       lhs.unfoldedTree = ColP @id @hRefNr @presentationList.unfoldedTreeList
   | OverlayP 
       lhs.unfoldedTree = OverlayP @id @presentationList.unfoldedTreeList
+  | GraphP 
+      lhs.unfoldedTree = GraphP @id @w @h @edges @presentationList.unfoldedTreeList
+  | VertexP
+      lhs.unfoldedTree = VertexP @id @x @y @outline @child.unfoldedTree
 {-
   | TestPresentation             
       lhs.unfoldedTree = TestPresentation @id @area @color
@@ -385,6 +395,14 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRf, v
       loc.vStretch = True
       loc.hRf = 0
       loc.vRf = 0
+  | GraphP
+      loc.minWidth = @w
+      loc.minHeight = @h
+      loc.hStretch = False
+      loc.vStretch = False
+      loc.hRf = 0
+      loc.vRf = 0   
+--  | VertexP copy all
   | RowP 
       loc.minTopHeight = if null @presentationList.hRfList then 0
                             else maximum @presentationList.hRfList
@@ -600,7 +618,7 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : I
       loc.topChildSpace = round (fromIntegral @topTotalSpace / fromIntegral @topVStretches )
       loc.bottomChildSpace = round (fromIntegral @bottomTotalSpace / fromIntegral @bottomVStretches )
   | OverlayP
-      presentationList.assignedHeightList    =assign @presentationList.vStretchList
+      presentationList.assignedHeightList   = assign @presentationList.vStretchList
                                               (repeat @lhs.assignedHeight) @presentationList.minHeightList 
       presentationList.assignedHRefList     = assign @presentationList.vStretchList
                                               (repeat @lhs.assignedHRef) @presentationList.hRfList 
@@ -608,6 +626,11 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : I
                                               (repeat @lhs.assignedWidth) @presentationList.minWidthList 
       presentationList.assignedVRefList     = assign @presentationList.hStretchList
                                               (repeat @lhs.assignedVRef) @presentationList.vRfList 
+  | GraphP -- just use minSize and h/vRef for assigned Size and Ref. Stretching does not make sense in a GraphP
+      presentationList.assignedHeightList = @presentationList.minHeightList 
+      presentationList.assignedHRefList   = @presentationList.hRfList 
+      presentationList.assignedWidthList  = @presentationList.minWidthList 
+      presentationList.assignedVRefList   = @presentationList.vRfList 
 {-
   | MatrixPresentation
 -- is a lot more complicated than this
@@ -691,7 +714,7 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
       loc.finalHeight = @lhs.assignedHeight
       loc.finalHRef   = @lhs.assignedHRef
       loc.finalVRef   = @lhs.assignedVRef
-  | RowP -- asymmetric??
+  | RowP
       loc.finalWidth  =  sum @presentationList.finalWidthList
       loc.finalHeight = @lhs.assignedHeight
       loc.finalHRef   = @lhs.assignedHRef
@@ -700,7 +723,7 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
 		                else sum (take @vRefNr @assignedWidths) + (@presentationList.vRfList !! @vRefNr)
   | ColP
       loc.finalWidth = @lhs.assignedWidth
-      loc.finalHeight =  sum @presentationList.finalHeightList--@lhs.assignedHeight
+      loc.finalHeight =  sum @presentationList.finalHeightList --@lhs.assignedHeight
       loc.finalHRef = if null @presentationList.hRfList then 0
                       else if @presentationList.vStretchList!! @hRefNr then @lhs.assignedHRef
 		              else sum (take @hRefNr @assignedHeights) + (@presentationList.hRfList !! @hRefNr)
@@ -710,6 +733,16 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
       loc.finalHeight = @lhs.assignedHeight
       loc.finalHRef = @lhs.assignedHRef
       loc.finalVRef = @lhs.assignedVRef
+  | GraphP
+      loc.finalWidth  = @minWidth
+      loc.finalHeight = @minHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+  | VertexP
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = @lhs.assignedHeight
+      loc.finalHRef   = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
 {-
   | TestPresentation 
       loc.finalWidth = error "not implemented"
@@ -752,15 +785,15 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
 ATTR PresentationList [  | |  finalWidthList, finalHeightList, finalHRefList, finalVRefList : {[Int]} ]
 SEM PresentationList
   | Nil
-      lhs.finalWidthList = []
+      lhs.finalWidthList  = []
       lhs.finalHeightList = []
-      lhs.finalHRefList = []
-      lhs.finalVRefList = []
+      lhs.finalHRefList   = []
+      lhs.finalVRefList   = []
   | Cons 
-      lhs.finalWidthList = @hd.finalWidth : @tl.finalWidthList
+      lhs.finalWidthList  = @hd.finalWidth  : @tl.finalWidthList
       lhs.finalHeightList = @hd.finalHeight : @tl.finalHeightList
-      lhs.finalHRefList = @hd.finalHRef : @tl.finalHRefList
-      lhs.finalVRefList = @hd.finalVRef : @tl.finalVRefList
+      lhs.finalHRefList   = @hd.finalHRef   : @tl.finalHRefList
+      lhs.finalVRefList   = @hd.finalVRef   : @tl.finalVRefList
 
 
 
@@ -784,6 +817,13 @@ SEM Presentation
   | OverlayP
       presentationList.xList    = [ @finalVRef - cvRf | cvRf <- @presentationList.finalVRefList ]
       presentationList.yList    = [ @finalHRef - chRf | chRf <- @presentationList.finalHRefList ]
+  | GraphP -- we could collect x and y's from vertices and send these back, but sending 0 down and letting
+           -- the vertices add their own x and y to it is easier. (we use finalWidthList only for the nr of children)
+      presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
+      presentationList.yList    = replicate (length @presentationList.finalWidthList) 0
+  | VertexP
+      child.x                   = 0
+      child.y                   = 0
 {-
   | MatrixPresentation -- x and y are added to cumulative heights and widths
       loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
@@ -826,6 +866,8 @@ SEM PresentationList
 -- bit unclear what to do when href and vref are changed in with nodes  @finalHRef @finalVRef
 -- for a child in a composite are not the same as the  @finalHRef @finalVRef at the with nodes
 -- however in such a case we probably can't do it incrementally anyway
+
+-- for the position of VertexP we add the Vertex's own coordinates and subtract the refs
 ATTR Presentation [  | | arrangement : {Arrangement node} ]
 SEM Presentation
   | EmptyP
@@ -871,6 +913,11 @@ SEM Presentation
 						  ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
   | OverlayP 
       lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+  | GraphP 
+      lhs.arrangement = GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+  | VertexP
+      lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalHRef) (@lhs.y + @y - @finalVRef)
+                                @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @child.arrangement
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
@@ -919,41 +966,32 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
                                                         _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
---      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
---                                                            _                -> repeat $ DiffLeaf False
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
                                                         _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
---      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
---                                                            _                -> repeat $ DiffLeaf False
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
                                                         _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
---      presentationList.diffTreeList = case @lhs.diffTree of DiffNode _ _ dts -> dts
---                                                            _                -> repeat $ DiffLeaf False
+  | GraphP 
+      presentationList.oldArrList = case @lhs.oldArr of GraphA _ _ _ _ _ _ _ _ arrs -> arrs
+  | VertexP 
+      child.oldArr = case @lhs.oldArr of VertexA _ _ _ _ _ _ _ _ arr -> arr
+                                         _                           -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
   | StructuralP 
       child.oldArr = case @lhs.oldArr of StructuralA _ arr -> arr
                                          _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
---      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
---                                             _                   -> DiffLeaf False
   | ParsingP 
       child.oldArr = case @lhs.oldArr of ParsingA _ arr -> arr
                                          _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
---      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
---                                             _                   -> DiffLeaf False
   | LocatorP 
       child.oldArr = case @lhs.oldArr of LocatorA _ arr -> arr
                                          _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
---      child.diffTree = case @lhs.diffTree of DiffNode _ _ (dt:_) -> dt
---                                             _                   -> DiffLeaf False
 
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 
       hd.oldArr     = head @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
---      hd.diffTree     = head @lhs.diffTreeList
---      tl.diffTreeList = tail @lhs.diffTreeList
  
  
 ATTR PresentationList [  | |  arrangementList : {[Arrangement node]} ]
@@ -962,90 +1000,3 @@ SEM PresentationList
       lhs.arrangementList = []
   | Cons 
       lhs.arrangementList = @hd.arrangement : @tl.arrangementList
-{-
--- dummy arrangement, does not require any other attribute computations
-
-
-ATTR Presentation [  | | arrangement : {Arrangement node} ]
-SEM Presentation
-  | EmptyP
-      lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
-  | StringP 
-      lhs.arrangement = StringA (idAFromP @id) 0 0 20 20 0 0 @text black defaultFont []
-  | RectangleP
-      lhs.arrangement = RectangleA (idAFromP @id) 0 0 20 20 0 0 @lineWidth Solid black white
-  | ImageP
-      lhs.arrangement = ImageA (idAFromP @id) 0 0 20 20 0 0 @src Tile black white
-  | PolyP      
-      lhs.arrangement = let mkPoint (rx, ry) = ( round (rx * fromIntegral 10)
-			                                   , round (ry * fromIntegral 10) )
-		        in   PolyA (idAFromP @id) 0 0 20 20 0 0 (map mkPoint @pointList) @lineWidth black white
-		      
-  | RowP 
-      lhs.arrangement = RowA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList
-  | ColP 
-      lhs.arrangement = ColA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList 
-  | OverlayP 
-      lhs.arrangement = OverlayA (idAFromP @id) 0 0 20 20 0 0 white @presentationList.arrangementList
-  | StructuralP 
-      lhs.arrangement = StructuralA (idAFromP @id) @child.arrangement
-  | ParsingP 
-      lhs.arrangement = ParsingA (idAFromP @id) @child.arrangement
-  | LocatorP 
-      lhs.arrangement = LocatorA @location @child.arrangement
--}
-
-
--- dummy final attrs, require only little other attribute computations (eg x&y)
-
--- PROF, 15X ->: arrange             ArrPresent          64.7   88.0
--- same profile for full computation                     76.3   89.1
--- seems that most of the time in arranging is spent on administrative stuff, like building tuples    
-{-
-SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
-  | EmptyP
-      loc.finalWidth  = 30 -- @lhs.assignedWidth
-      loc.finalHeight = 40 --@lhs.assignedHeight
-      loc.finalHRef   = 10 --@lhs.assignedHRef
-      loc.finalVRef   = 0  --@lhs.assignedVRef
-  | StringP 
-      loc.finalWidth  = 30 -- @minWidth
-      loc.finalHeight = 40 --@minHeight
-      loc.finalHRef   = 10 -- @lhs.assignedHRef
-      loc.finalVRef   = 0 --@lhs.assignedVRef
-  | RectangleP  
-      loc.finalWidth  =  30 --@minWidth
-      loc.finalHeight =  40 --@minHeight
-      loc.finalHRef   = 10 -- @lhs.assignedHRef
-      loc.finalVRef   =  0 --@lhs.assignedVRef
-  | ImageP  
-      loc.finalWidth  = 30 --@lhs.assignedWidth
-      loc.finalHeight = 40 --@lhs.assignedHeight
-      loc.finalHRef   = 10 --@lhs.assignedHRef
-      loc.finalVRef   = 0 --@lhs.assignedVRef
-  | PolyP 
-      loc.finalWidth  = 30 --@lhs.assignedWidth
-      loc.finalHeight = 40 --@lhs.assignedHeight
-      loc.finalHRef   = 10 --@lhs.assignedHRef
-      loc.finalVRef   = 0 --@lhs.assignedVRef
-  | RowP -- asymmetric??
-      loc.finalWidth  = 30 --  sum @presentationList.finalWidthList
-      loc.finalHeight = 30 --  @lhs.assignedHeight
-      loc.finalHRef   = 10 --  @lhs.assignedHRef
-      loc.finalVRef   = 0 --  if null @presentationList.vRfList then 0
-                      -- else if @presentationList.hStretchList!! @vRefNr then @lhs.assignedVRef
-		              -- else sum (take @vRefNr @assignedWidths) + (@presentationList.vRfList !! @vRefNr)
-  | ColP
-      loc.finalWidth = 100 --@lhs.assignedWidth
-      loc.finalHeight = 300 -- sum @presentationList.finalHeightList--@lhs.assignedHeight
-      loc.finalHRef = 50 --if null @presentationList.hRfList then 0
-                      -- else if @presentationList.vStretchList!! @hRefNr then @lhs.assignedHRef
-		              -- else sum (take @hRefNr @assignedHeights) + (@presentationList.hRfList !! @hRefNr)
-      loc.finalVRef = 0 -- @lhs.assignedVRef
-  | OverlayP 
-      loc.finalWidth = 300 --@lhs.assignedWidth
-      loc.finalHeight = 300 --@lhs.assignedHeight
-      loc.finalHRef = 100 --@lhs.assignedHRef
-      loc.finalVRef = 100 --@lhs.assignedVRef
-
--}

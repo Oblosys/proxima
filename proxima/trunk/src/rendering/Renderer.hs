@@ -138,10 +138,9 @@ mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of foc
 -- however, we don't want to debug the focus
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
 render' scale arrDb focus diffTree arrangement dc =
- do {  -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
---    ; debugLnIO Ren ("Arrangement is "++show arrangement)
+ do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
+    --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
-    --; debugLnIO Err ("The updated rectangle is: "++show (
     ; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
     ; drawRect dc (Rect 0 0 2000 1000) [color := white, brush := BrushStyle BrushSolid white]
@@ -184,13 +183,10 @@ computeRenderedArea (lux, luy) diffTree arr =
                     _ -> debug Err "Renderer.computeRenderedArea: dirty children for node without children" []
      else [(xA arr,yA arr, xA arr + widthA arr,  yA arr + widthA arr)]
         
-{-renderArr dc _ _ _ _ _ = 
-  drawText dc "Rendering display is turned off" (pt 20 20) [ color := red ]
--}
-
-renderArr dc arrDb scale (lux, luy) diffTree arr =
+renderArr dc arrDb scale (lux, luy) diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arr ++":"++ show (isClean diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
+
 
      if (isSelfClean diffTree)  -- if self is clean, only render its children (if present)
      then if (isClean diffTree)
@@ -202,7 +198,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
                        ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs 
                        }
-               in case arr of
+               in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
@@ -213,7 +209,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
      else
-  case arr of 
+  case arrangement of 
 
     (EmptyA _ _ _ _ _ _ _) ->
       return ()
@@ -435,7 +431,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
               }
         ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
         }
-    (VertexA id x' y' w' h' _ _ (br,bg,bb) arrs) ->
+    (VertexA id x' y' w' h' _ _ (br,bg,bb) arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -478,12 +474,12 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
         ; renderArr dc arrDb scale (lux, luy) (head childDiffTrees) arr
         }
 
-    _ ->  dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arr) (pt lux luy)
+    _ ->  dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
         
 
   ; when arrDb $
        do { -- drawRect dc (Rect (lux+ y w h) [ color := stringColor, brush:= BrushStyle BrushTransparent black ]
-           renderID dc scale (lux+xA arr) (luy+yA arr) (idA arr)
+           renderID dc scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)
           }
 
     }
