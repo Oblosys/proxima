@@ -64,31 +64,49 @@ SEM Tree
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     overlay @vertices.press      
-
-{-
-SEM List_GraphNode
-  | Cons_GraphNode
-      lhs.pres = text "cons"
-  | Nil_GraphNode
-      lhs.pres = text "nil"
--}      
-SEM Vertex
-  | Vertex
-      lhs.pres = col [ empty `withHeight` @y.int
-                     , row [ empty `withWidth` @x.int
-                           , col [ row [glue, ellipse 35 35 `withfColor` (200, 255, 255), glue]
-                                 , vSpace 4 `withHStretch` True
-                                 , row [glue, boxed 
-                                                (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
-                                                `withbgColor` (236, 236, 169)
-                                       , glue] 
-                                 ]
-                           ]
-                     ]
-
-SEM Edge
-  | Edge
-      lhs.pres = text "edge"
+                     GraphP NoIDP 400 200 [] @vertices.press
+      edges.vertices = @vertices.vertices
       
+SEM Vertex [ || vertex : {(Int, Int, Int)} ] 
+  | Vertex
+      lhs.pres = VertexP NoIDP (\a -> (0,0)) $
+                   colR 1 [ rowR 1 [glue, ellipse 35 35 `withfColor` (200, 255, 255), glue]
+                          , vSpace 4 `withHStretch` True
+                          , row [glue, boxed 
+                                          (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
+                                            `withbgColor` (236, 236, 169)
+                                , glue] 
+                          ]
+      lhs.vertex = (@id.int, @x.int, @y.int)
+  | HoleVertex
+      lhs.vertex = (-1,0,0)
+  | ParseErrVertex
+      lhs.vertex = (-1,0,0)
+
+SEM List_Vertex [ || vertices : {Map Int (Int,Int)} ] 
+  | HoleList_Vertex
+      lhs.vertices = Map.empty
+  | ParseErrList_Vertex
+      lhs.vertices = Map.empty
+SEM ConsList_Vertex [ || vertices : {Map Int (Int,Int)} ] 
+  | Cons_Vertex
+      lhs.vertices = let (i,x,y) = @head.vertex in Map.insert i (x, y) @tail.vertices
+  | Nil_Vertex
+      lhs.vertices = Map.empty
+
+SEM List_Edge [ vertices : {Map Int (Int,Int)} || ]
+SEM ConsList_Edge [ vertices : {Map Int (Int,Int)} || ]
+SEM Edge [ vertices : {Map Int (Int,Int)} || ]
+  | Edge
+      lhs.pres = let (x1,y1) = maybe (0,0) id  (Map.lookup @from.int @lhs.vertices)
+                     (x2,y2) = maybe (0,0) id  (Map.lookup @to.int @lhs.vertices)
+                     [(leftx,lefty),(rightx,righty)] = sort [(x1,y1),(x2,y2)]
+                 in  if lefty < righty then
+                       offset (x1+17) (y1+17) $ poly [(0.0,0.0), (1.0,1.0)] `withSize` (rightx-leftx,righty-lefty)
+                     else
+                       offset (x1+17) (y2+17) $ poly [(0.0,1.0), (1.0,0.0)] `withSize` (rightx-leftx,lefty-righty)
+{
+offset :: Int -> Int -> Xprez doc node clip -> Xprez doc node clip
+offset x y pres = col [ empty `withHeight` y, row [ empty `withWidth` x, pres ]]
+}                            
                    
