@@ -64,15 +64,16 @@ SEM Tree
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     GraphP NoIDP 400 200 [] @vertices.press
+                     overlay [ text "bla", ellipse 35 35 ]
+                     --GraphP NoIDP 400 200 [] @vertices.press `withbgColor` red
       edges.vertices = @vertices.vertices
       
 SEM Vertex [ || vertex : {(Int, Int, Int)} ] 
   | Vertex
       lhs.pres = VertexP NoIDP @x.int @y.int (\a -> (0,0)) $
-                   colR 1 [ rowR 1 [glue, ellipse 35 35 `withfColor` (200, 255, 255), glue]
-                          , vSpace 4 `withHStretch` True
-                          , row [glue, boxed 
+                   col [ rowR 1 [glue, ellipse 35 35 `withRef` (17,17) `withfColor` (200, 255, 255), glue]
+                       , vSpace 4 `withHStretch` True
+                       , row [glue, boxed 
                                           (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
                                             `withbgColor` (236, 236, 169)
                                 , glue] 
