@@ -75,7 +75,7 @@ data Presentation doc node clip = EmptyP !IDP
            | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
            | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
            | GraphP !IDP !Int !Int [(Int,Int)] ![(Presentation doc node clip)] -- width height edges 
-           | VertexP !IDP Outline !(Presentation doc node clip) -- see note below
+           | VertexP !IDP !Int !Int Outline !(Presentation doc node clip) -- x y outline       see note below
 {-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (Presentation doc node clip) ]
            | Alternative [ (Presentation doc node clip) ]
@@ -107,7 +107,7 @@ instance Show (Presentation doc node clip) where
   show (ParsingP id pres)    = "ParsingP "++show id++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (GraphP id _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
-  show (VertexP id ol pres)  = "Vertex "++show pres
+  show (VertexP id _ _ ol pres)  = "Vertex "++show pres
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
 
@@ -202,7 +202,7 @@ idP (StructuralP id pres) = id
 idP (ParsingP id pres)    = id
 idP (LocatorP loc pres)   = idP pres
 idP (GraphP id _ _ _ _)   = id
-idP (VertexP id _ _)      = id
+idP (VertexP id _ _ _ _)      = id
 idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++show pres) NoIDP
 
 

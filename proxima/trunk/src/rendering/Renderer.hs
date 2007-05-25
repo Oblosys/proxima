@@ -336,7 +336,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
         ; if arrDb
           then
            do { let childCnt = length arrs 
-    --          ; drawFilledRect dc (Rect x y w h) (colorRGB br bg bb)  
               ; drawRect dc (Rect x y w h) [ color := rowColor, brush:= BrushStyle BrushTransparent black ]
          
               ; sequence_ $ [ line dc (pt (x+i) y) (pt (x+i) (y+h)) [ color := rowColor ]
@@ -364,7 +363,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
         ; if arrDb
           then
            do { let childCnt = length arrs 
-    --          ; drawFilledRect dc (Rect x y w h) (colorRGB br bg bb)  
               ; drawRect dc (Rect x y w h) [ color := colColor, brush:= BrushStyle BrushTransparent black ]
          
               ; sequence_ $ [ line dc (pt x (y+i)) (pt (x+w) (y+i)) [ color := colColor ]
@@ -372,10 +370,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                                                else showDebug Ren $ tail.init $
                                                     scanl (\n1 n2 -> n1+(scaleInt scale (pd-1))+n2 ) 0 
                                                           (map (scaleInt scale . heightA) arrs)]
-              
- 
-
-
+        
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
               }
           else 
@@ -396,7 +391,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
         ; if arrDb
           then
            do { let childCnt = length arrs 
-    --          ; drawFilledRect dc (Rect x y w h) (colorRGB br bg bb)  
               ; drawRect dc (Rect x y w h) [ color := overlayColor, brush:= BrushStyle BrushTransparent black ]
          
               
@@ -419,11 +413,38 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                                                                           _                -> unzip . reverse $ zip arrs childDiffTrees
               -- until ovl is properly reversed
               ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) cdts' arrs'
-              ; return ()
               }
         }
 
---- weird stuff, 255 255 255 is transparent? + line colors of images are no right. is this a bug in ObjectIO?
+    (GraphA id x' y' w' h' _ _ (br,bg,bb) arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        ; if arrDb
+          then
+           do { let childCnt = length arrs 
+              ; drawRect dc (Rect x y w h) [ color := graphColor, brush:= BrushStyle BrushTransparent black ]
+              }
+          else 
+           do { when (not (isTransparent (br, bg, bb))) $
+                 do { let bgColor = colorRGB br bg bb -- if isClean diffTree then colorRGB br bg bb else red
+                    ; drawFilledRect dc (Rect x y w h) bgColor
+                    }        
+              }
+        ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
+        }
+    (VertexA id x' y' w' h' _ _ (br,bg,bb) arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        ; when arrDb $
+            drawRect dc (Rect x y w h) [ color := vertexColor, brush:= BrushStyle BrushTransparent black ]
+                
+        ; renderArr dc arrDb scale (lux, luy) (head childDiffTrees) arr
+        }
 
     (StructuralA id arr) -> 
      do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
@@ -489,24 +510,6 @@ renderID dc scale x y id =
                   , color := black ]
     }
 
-debugColor (EmptyA id x y w h _ _)             = red
-debugColor (StringA id x y w h _ _ _ _ _ _)    = colorRGB 0 255 255
-debugColor (ImageA id x y w h _ _ _ _ _ _)     = colorRGB 92 64 0
-debugColor (PolyA id x y w h _ _ _ _ _ _)      = red
-debugColor (RectangleA id x y w h _ _ _ _ _ _) = red
-debugColor (EllipseA id x y w h _ _ _ _ _ _)   = red
-debugColor (LineA id x y x' y' _ _ _ _)        = red
-debugColor (RowA id x y w h _ _ _ _)           = colorRGB 255 0 0
-debugColor (ColA id x y w h _ _ _ _)           = colorRGB 0 0 200  
-debugColor (OverlayA id x y w h _ _ _ _)       = colorRGB 0 0 200  
-debugColor (GraphA id x y w h _ _ _ _)         = yellow
-debugColor (VertexA id x y w h _ _ _ _)        = black  
-debugColor (StructuralA _ child)           = colorRGB 230 230 255
-debugColor (ParsingA _ child)              = colorRGB 255 230 230
---debugColor (LocatorA location child)     = debugColor child
-debugColor arr                            = debug Err ("Renderer.debugColor: unhandled arrangement "++show arr) red
-
-
 
 -- debug colors
 stringColor       = colorRGB 0 255 255
@@ -514,6 +517,8 @@ imageColor        = colorRGB 92 64 0
 rowColor          = colorRGB 255 0 0
 colColor          = colorRGB 0 0 200  
 overlayColor      = colorRGB 0 0 200  
+graphColor        = yellow
+vertexColor       = black
 structuralBGColor = colorRGB 230 230 255
 parsingBGColor    = colorRGB 255 230 230
 
