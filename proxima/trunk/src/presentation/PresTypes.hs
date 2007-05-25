@@ -74,6 +74,8 @@ data Presentation doc node clip = EmptyP !IDP
            | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
            | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
            | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
+           | GraphP !IDP !Int !Int [(Int,Int)] ![(Presentation doc node clip)] -- width height edges 
+           | VertexP !IDP Outline !(Presentation doc node clip) -- see note below
 {-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (Presentation doc node clip) ]
            | Alternative [ (Presentation doc node clip) ]
@@ -81,6 +83,12 @@ data Presentation doc node clip = EmptyP !IDP
            | ArrangedP -- (Presentation doc node clip)     -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
+
+type Outline = Int -> (Int, Int)
+
+-- Note: An alternative and safer definition for GraphP is GraphP [Vertex], but this requires all functions that
+-- traverse Presentation to have a separate function for traversing the Vertex type. This is too much of a hassle.
+
 
 -- slightly less verbose show for presentation, without doc refs
 
@@ -98,6 +106,8 @@ instance Show (Presentation doc node clip) where
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
   show (ParsingP id pres)    = "ParsingP "++show id++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
+  show (GraphP id _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
+  show (VertexP id ol pres)  = "Vertex "++show pres
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
 
@@ -191,6 +201,8 @@ idP (WithP ar pres)       = idP pres
 idP (StructuralP id pres) = id
 idP (ParsingP id pres)    = id
 idP (LocatorP loc pres)   = idP pres
+idP (GraphP id _ _ _ _)   = id
+idP (VertexP id _ _)      = id
 idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++show pres) NoIDP
 
 

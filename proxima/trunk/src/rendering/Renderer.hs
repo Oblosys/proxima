@@ -176,6 +176,8 @@ computeRenderedArea (lux, luy) diffTree arr =
                     RowA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
+                    GraphA   _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
+                    VertexA  _ x' y' _ _ _ _ _ arr  -> computeChildrenRenderedArea x' y' [arr]
                     StructuralA _ arr               -> computeChildrenRenderedArea 0 0 [arr]
                     ParsingA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
                     LocatorA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
@@ -204,6 +206,8 @@ renderArr dc arrDb scale (lux, luy) diffTree arr =
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    GraphA   _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    VertexA  _ x' y' _ _ _ _ _ arr  -> renderChildren x' y' [arr]
                     StructuralA _ arr           -> renderChildren 0 0 [arr]
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
@@ -495,6 +499,8 @@ debugColor (LineA id x y x' y' _ _ _ _)        = red
 debugColor (RowA id x y w h _ _ _ _)           = colorRGB 255 0 0
 debugColor (ColA id x y w h _ _ _ _)           = colorRGB 0 0 200  
 debugColor (OverlayA id x y w h _ _ _ _)       = colorRGB 0 0 200  
+debugColor (GraphA id x y w h _ _ _ _)         = yellow
+debugColor (VertexA id x y w h _ _ _ _)        = black  
 debugColor (StructuralA _ child)           = colorRGB 230 230 255
 debugColor (ParsingA _ child)              = colorRGB 255 230 230
 --debugColor (LocatorA location child)     = debugColor child
@@ -541,10 +547,12 @@ mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCare
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (LineA _ x y x'' y'' _ _ _ _)          = mkBoxCaret (x'+x) (y'+y) (x''-x) (y''-y)
+mkFocus' p x' y' focus          (LineA _ x y x'' y'' _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) (x''-x) (y''-y)
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
+mkFocus' p x' y' (FocusA st en) (GraphA _ x y w h _ _ _ arrs)         =  mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
+mkFocus' p x' y' (FocusA st en) (VertexA _ x y w h _ _ _ _)           = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (StructuralA l arr)      = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (ParsingA l arr)         = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (LocatorA l arr)         = mkFocus' (p++[0]) x' y' focus arr

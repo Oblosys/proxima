@@ -71,13 +71,14 @@ data Modifiers = Modifiers
 
 
 data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
+--                                       children self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
 -- True is Clean, False is Dirty       --selfandChildren self
 -- True True: all clean
 -- False True: children dirty self clean
 -- False False: all dirty
--- True False: not possible
+-- True False: not possible          (does not seem to make sense)
 -- self dirty, children clean cannot be expressed possible.
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)

@@ -28,6 +28,8 @@ shallowShowArr (LineA _ x y x' y' _ _ _ _)        = "{LineA: x="++show x++", y="
 shallowShowArr (RowA _ x y w h _ _ _ _)           = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (ColA _ x y w h _ _ _ _)           = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (OverlayA _ x y w h _ _ _ _)       = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (GraphA _ x y w h _ _ _ _)         = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (VertexA _ x y w h _ _ _ _)        = "{VertexA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (StructuralA _ child)          = "{StructuralA}"
 shallowShowArr (ParsingA _ child)             = "{ParsingA}"
 shallowShowArr (LocatorA location child)      = "{LocatorA}"
@@ -42,6 +44,8 @@ sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ cxs)     = (x' + x + (cxs!!!p
 sizeA' x' y' (p:path) (RowA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (arrs!!!p)
 sizeA' x' y' (p:path) (ColA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (arrs!!!p)
 sizeA' x' y' (0:path) (OverlayA _ x y w h _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path arr
+sizeA' x' y' (p:path) (GraphA _ x y w h _ _ _ (arr:arrs))   = sizeA' (x'+x) (y'+y) path (arrs!!!p)
+sizeA' x' y' (0:path) (VertexA _ x y w h _ _ _ arr)         = sizeA' (x'+x) (y'+y) path arr
 sizeA' x' y' (0:path) (StructuralA _ arr)               = sizeA' x' y' path arr
 sizeA' x' y' (0:path) (ParsingA _ arr)                  = sizeA' x' y' path arr
 sizeA' x' y' (0:path) (LocatorA location arr)           = sizeA' x' y' path arr
@@ -61,6 +65,8 @@ walk (LineA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
 walk (RowA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 +  walkList arrs
 walk (ColA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (OverlayA _ x y w h hr vr c1 arrs)     = x+y+w+h+hr+vr + walkC c1 + walkList arrs
+walk (GraphA _ x y w h hr vr c1 arrs)       = x+y+w+h+hr+vr + walkC c1 + walkList arrs
+walk (VertexA _ x y w h hr vr c1 arr)       = x+y+w+h+hr+vr + walkC c1 + walk arr
 walk (StructuralA _ arr)              = walk arr
 walk (ParsingA _ arr)                 = walk arr
 walk (LocatorA _ arr)                 = walk arr
@@ -83,7 +89,8 @@ data Arrangement =
   | RowA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | ColA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | OverlayA    !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
-  -- make some choices here: lower right/or width height, w h/(w,h)
+  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !(Arrangement node)
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
 -}
@@ -125,9 +132,15 @@ diffArr (ColA id x y w h hr vr bc arrs) (ColA id' x' y' w' h' hr' vr' bc' arrs')
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (OverlayA id x y w h hr vr bc arrs) (OverlayA id' x' y' w' h' hr' vr' bc' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+diffArr (GraphA id x y w h hr vr bc arrs) (GraphA id' x' y' w' h' hr' vr' bc' arrs') =
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
 diffArr arr@(ColA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
 diffArr arr@(OverlayA id x y w h hr vr bc arrs) _                        = DiffLeaf False 
+diffArr arr@(GraphA id x y w h hr vr bc arrs) _                          = DiffLeaf False 
+diffArr (VertexA id x y w h hr vr bc arr) (VertexA id' x' y' w' h' hr' vr' bc' arr') =
+ let childDT = diffArr arr arr'
+ in  DiffNode (isClean childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
 diffArr _                             _                                = DiffLeaf True -- all others are unchanged
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 
@@ -166,6 +179,9 @@ updatedRectArr' x' y' dt arr =
       (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
       (RowA id x y w h hr vr bc arrs)     -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (ColA id x y w h hr vr bc arrs)     -> updatedRectArrs (x'+x) (y'+y) dts arrs 
+      (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
+      (GraphA id x y w h hr vr bc arrs)   -> updatedRectArrs (x'+x) (y'+y) dts arrs
+      (VertexA id x y w h hr vr bc arr)   -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head dts) arr else problem
       (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       _                             -> problem
  where updatedRectArrs x' y' dts arrs = let (luxs,luys,rlxs,rlys) = unzip4 . concat .  map (maybe [] (:[])) $ zipWith (updatedRectArr' x' y') dts arrs
@@ -360,6 +376,8 @@ selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA'
 selectTreeA' x' y' (p:path) (ColA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
 --selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path (last arrs)
 selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path arr
+selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
+selectTreeA' x' y' (0:path) (VertexA _ x y _ _ _ _ _ arr)     = selectTreeA' (x'+x) (y'+y) path arr
 selectTreeA' x' y' (p:path) (StructuralA _ child)             = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (ParsingA _ child)                = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (LocatorA _ child)                = selectTreeA' x' y' path child
@@ -436,6 +454,16 @@ debugArrangement' xOffset yOffset (OverlayA id x y w h hr vr c arrs)            
       wOffset = maximum (0:wOffsets) + pd 
       hOffset = maximum (0:hOffsets) + pd 
   in  ( OverlayA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c arrs'
+      , wOffset ,hOffset )
+debugArrangement' xOffset yOffset (GraphA id x y w h hr vr c arrs)              =
+  let (arrs', wOffsets, hOffsets) = unzip3 [ debugArrangement' (hpd {-+wo-}) (hpd {-+ho-}) arr | 
+                                             (arr,wo,ho) <- zip3' arrs 
+                                                                  wOffsets --(map (\o -> (maximum wOffsets-o) `div`2) wOffsets)
+                                                                  hOffsets -- (map (\o -> (maximum hOffsets-o) `div`2) hOffsets)
+                                           ]
+      wOffset = maximum (0:wOffsets) + pd 
+      hOffset = maximum (0:hOffsets) + pd 
+  in  ( GraphA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c arrs'
       , wOffset ,hOffset )
 
 --debugArrangement' xOffset yOffset (OverlayA id x y w h c (arr:arrs))              =
