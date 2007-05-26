@@ -25,6 +25,12 @@ import DocumentEdit (menuD)
 import DocumentEdit_Generated -- instance Editable Document Document Node ClipDoc
 -----
 
+arrowHeadSize :: Double
+arrowHeadSize = 10
+
+arrowHeadHalfAngle :: Double
+arrowHeadHalfAngle = pi /6
+
 {-
 TODO:
 
@@ -139,7 +145,7 @@ mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of foc
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
 render' scale arrDb focus diffTree arrangement dc =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
-    --; debugLnIO Ren ("Arrangement is "++show arrangement)
+    -- ; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
     ; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
@@ -303,8 +309,18 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
 
 
     (LineA id lux' luy' rlx' rly' _ _ lw' (lr,lg,lb)) ->
-     do { let (lnlux,lnluy, lnrlx, lnrly)=(lux+scaleInt scale lux', luy+scaleInt scale luy', scaleInt scale rlx', scaleInt scale rly')
-        ; line dc (pt lnlux lnluy) (pt lnrlx lnrly) [color := colorRGB lr lg lb]
+     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
+        ; putStr $ "Line coords"++show (fromx,fromy, tox, toy)
+        ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
+                             + if fromy > toy then pi  else 0
+              
+              pt1 = pt (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)) ) (toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              pt2 = pt (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)) ) (toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+        
+        
+        ; line dc (pt fromx fromy) (pt tox toy) [color := colorRGB lr lg lb]
+        -- draw arrow head
+        ; polygon dc [pt1, pt2, pt tox toy] [color := colorRGB lr lg lb, brushKind := BrushSolid, brushColor := colorRGB lr lg lb ]
         }
 -- Poly seems to be rendered incorrectly (bottom/right line is blank)
     (PolyA id x' y' w' h' _ _ pts' lw' (lr,lg,lb) (br,bg,bb)) ->
@@ -430,7 +446,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
                     }        
               }
         ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
-        ; putStrLn $ "The graph is "++show arrangement 
         }
     (VertexA id x' y' w' h' _ _ (br,bg,bb) arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')

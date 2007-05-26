@@ -95,6 +95,13 @@ data Arrangement =
 
 -}
 
+-- for creating edge arrangements during graph arranging
+mkEdges :: Show node => [(Int,Int)] -> [(Int,Int, Outline)] -> Color -> [Arrangement node]
+mkEdges edges vertices lineColor = showDebug' Err ("mkEdges"++show edges ++ show vertices) $ map mkEdge edges 
+ where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = vertices !! fromV
+                                 (toVx,toVy,toVol) = vertices !! toV
+                                 (offsetTox, offsetToy) = toVol (computeAngle fromVx fromVy toVx toVy)
+                             in  LineA NoIDA  fromVx fromVy (toVx+offsetTox) (toVy+offsetToy) 0 0 1 lineColor 
 
 
 -- for now, ignore ref's in diff. Even if ref changes but nothing else, no need to redraw.
@@ -489,6 +496,7 @@ zipWith3'                 :: (a->b->c->d) -> [a]->[b]->[c]->[d]
 zipWith3' z (a:as) ~(b:bs) ~(c:cs)
 	  		   = z a b c : zipWith3' z as bs cs
 zipWith3' _ _ _ _          = []
+
 
 
 -- to get this view completely right, ref objects have to be taken into account.

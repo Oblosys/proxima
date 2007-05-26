@@ -125,6 +125,7 @@ type PresentationList doc node clip = [Presentation doc node clip]
          unfoldedTree         : Presentation
          vRf                  : Int
          vStretch             : Bool
+         vertex               : (x,y,Outline)
    alternatives:
       alternative ArrangedP:
          local minWidth       : _
@@ -382,45 +383,48 @@ sem_Presentation_ArrangedP  =
        _lhsItextColor
        _lhsIx
        _lhsIy ->
-         (let -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 940, column 7)
+         (let -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 942, column 7)
               _lhsOarrangement =
                   setXYWHA _lhsIx _lhsIy _finalWidth _finalHeight _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 946, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 948, column 7)
               _minWidth =
                   _finalWidth
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 947, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 949, column 7)
               _minHeight =
                   _finalHeight
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 948, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 950, column 7)
               _hStretch =
                   False
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 949, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 951, column 7)
               _vStretch =
                   False
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 950, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 952, column 7)
               _hRf =
                   hRefA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 951, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 953, column 7)
               _vRf =
                   vRefA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 952, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 954, column 7)
               _finalWidth =
                   widthA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 953, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 955, column 7)
               _finalHeight =
                   heightA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 954, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 956, column 7)
               _finalHRef =
                   hRefA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 955, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 957, column 7)
               _finalVRef =
                   vRefA _lhsIoldArr
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 956, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 958, column 7)
               _unfoldedTree =
                   ArrangedP
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 957, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 959, column 7)
               _maxFormatterDepth =
                   0
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 987, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -460,7 +464,7 @@ sem_Presentation_ArrangedP  =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ColP id_ hRefNr_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -590,7 +594,10 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 905, column 7)
               _lhsOarrangement =
                   ColA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 970, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 981, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1004, column 7)
               _presentationListOoldArrList =
                   case _lhsIoldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
                                       _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
@@ -668,6 +675,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                ,_presentationListIunfoldedTreeList
                ,_presentationListIvRfList
                ,_presentationListIvStretchList
+               ,_presentationListIvertices
                ) =
                   (presentationList_ _presentationListOallFonts
                                      _presentationListOassignedHRefList
@@ -685,7 +693,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -742,6 +750,9 @@ sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 880, column 7)
               _lhsOarrangement =
                   EllipseA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef lineWidth_ Solid _lhsIlineColor _lhsIfillColor
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 973, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -775,7 +786,7 @@ sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_EmptyP id_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -832,6 +843,9 @@ sem_Presentation_EmptyP id_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 874, column 7)
               _lhsOarrangement =
                   EmptyA (idAFromP id_) 0 0 0 0 0 0
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 967, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -865,7 +879,7 @@ sem_Presentation_EmptyP id_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -939,8 +953,13 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
                   replicate (length _presentationListIfinalWidthList) 0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 917, column 7)
               _lhsOarrangement =
-                  GraphA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 976, column 7)
+                  GraphA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor
+                         ( mkEdges edges_ _presentationListIvertices _lhsIlineColor ++
+                           _presentationListIarrangementList )
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 985, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1010, column 7)
               _presentationListOoldArrList =
                   case _lhsIoldArr of GraphA _ _ _ _ _ _ _ _ arrs -> arrs
               -- copy rule (up)
@@ -1017,6 +1036,7 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
                ,_presentationListIunfoldedTreeList
                ,_presentationListIvRfList
                ,_presentationListIvStretchList
+               ,_presentationListIvertices
                ) =
                   (presentationList_ _presentationListOallFonts
                                      _presentationListOassignedHRefList
@@ -1034,7 +1054,7 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ImageP id_ src_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1091,6 +1111,9 @@ sem_Presentation_ImageP id_ src_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 882, column 7)
               _lhsOarrangement =
                   ImageA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef src_ Tile _lhsIlineColor _lhsIbackgroundColor
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 975, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -1124,7 +1147,7 @@ sem_Presentation_ImageP id_ src_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_LocatorP location_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1145,10 +1168,10 @@ sem_Presentation_LocatorP location_ child_ =
          (let -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 330, column 7)
               _lhsOunfoldedTree =
                   LocatorP location_ _childIunfoldedTree
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 938, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 940, column 7)
               _lhsOarrangement =
                   LocatorA location_ _childIarrangement
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 987, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1021, column 7)
               _childOoldArr =
                   case _lhsIoldArr of LocatorA _ arr -> arr
                                       _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
@@ -1188,6 +1211,9 @@ sem_Presentation_LocatorP location_ child_ =
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
+              -- copy rule (up)
+              _lhsOvertex =
+                  _childIvertex
               -- copy rule (down)
               _childOallFonts =
                   _lhsIallFonts
@@ -1233,9 +1259,9 @@ sem_Presentation_LocatorP location_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_OverlayP id_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1326,7 +1352,10 @@ sem_Presentation_OverlayP id_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 915, column 7)
               _lhsOarrangement =
                   OverlayA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 973, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 983, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1007, column 7)
               _presentationListOoldArrList =
                   case _lhsIoldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
                                       _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
@@ -1404,6 +1433,7 @@ sem_Presentation_OverlayP id_ presentationList_ =
                ,_presentationListIunfoldedTreeList
                ,_presentationListIvRfList
                ,_presentationListIvStretchList
+               ,_presentationListIvertices
                ) =
                   (presentationList_ _presentationListOallFonts
                                      _presentationListOassignedHRefList
@@ -1421,7 +1451,7 @@ sem_Presentation_OverlayP id_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ParsingP id_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1442,10 +1472,10 @@ sem_Presentation_ParsingP id_ child_ =
          (let -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 328, column 7)
               _lhsOunfoldedTree =
                   ParsingP id_  _childIunfoldedTree
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 936, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 938, column 7)
               _lhsOarrangement =
                   ParsingA (idAFromP id_) _childIarrangement
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 984, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1018, column 7)
               _childOoldArr =
                   case _lhsIoldArr of ParsingA _ arr -> arr
                                       _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
@@ -1485,6 +1515,9 @@ sem_Presentation_ParsingP id_ child_ =
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
+              -- copy rule (up)
+              _lhsOvertex =
+                  _childIvertex
               -- copy rule (down)
               _childOallFonts =
                   _lhsIallFonts
@@ -1530,9 +1563,9 @@ sem_Presentation_ParsingP id_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_PolyP id_ pointList_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1591,6 +1624,9 @@ sem_Presentation_PolyP id_ pointList_ lineWidth_ =
                   let mkPoint (rx, ry) = ( round (rx * fromIntegral (_finalWidth-1))
                                                      , round (ry * fromIntegral (_finalHeight-1)) )
                   in  PolyA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef (map mkPoint pointList_) lineWidth_ _lhsIlineColor _lhsIbackgroundColor
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 977, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -1624,7 +1660,7 @@ sem_Presentation_PolyP id_ pointList_ lineWidth_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1681,6 +1717,9 @@ sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 878, column 7)
               _lhsOarrangement =
                   RectangleA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef lineWidth_ Solid _lhsIlineColor _lhsIfillColor
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 971, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -1714,7 +1753,7 @@ sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_RowP id_ vRefNr_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1844,7 +1883,10 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 893, column 7)
               _lhsOarrangement =
                   RowA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 967, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 979, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1001, column 7)
               _presentationListOoldArrList =
                   case _lhsIoldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
                                       _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
@@ -1922,6 +1964,7 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                ,_presentationListIunfoldedTreeList
                ,_presentationListIvRfList
                ,_presentationListIvStretchList
+               ,_presentationListIvertices
                ) =
                   (presentationList_ _presentationListOallFonts
                                      _presentationListOassignedHRefList
@@ -1939,7 +1982,7 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_StringP id_ text_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1996,6 +2039,9 @@ sem_Presentation_StringP id_ text_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 876, column 7)
               _lhsOarrangement =
                   StringA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef text_ _lhsItextColor _lhsIfont (cumulativeCharWidths _lhsIfontMetrics _lhsIfont text_)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 969, column 7)
+              _lhsOvertex =
+                  (0,0,\_->(0,0))
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
@@ -2029,7 +2075,7 @@ sem_Presentation_StringP id_ text_ =
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_StructuralP id_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2050,10 +2096,10 @@ sem_Presentation_StructuralP id_ child_ =
          (let -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 326, column 7)
               _lhsOunfoldedTree =
                   StructuralP id_  _childIunfoldedTree
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 934, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 936, column 7)
               _lhsOarrangement =
                   StructuralA (idAFromP id_) _childIarrangement
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 981, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1015, column 7)
               _childOoldArr =
                   case _lhsIoldArr of StructuralA _ arr -> arr
                                       _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
@@ -2093,6 +2139,9 @@ sem_Presentation_StructuralP id_ child_ =
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
+              -- copy rule (up)
+              _lhsOvertex =
+                  _childIvertex
               -- copy rule (down)
               _childOallFonts =
                   _lhsIallFonts
@@ -2138,9 +2187,9 @@ sem_Presentation_StructuralP id_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2179,11 +2228,14 @@ sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 826, column 7)
               _childOy =
                   0
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 919, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 921, column 7)
               _lhsOarrangement =
                   VertexA (idAFromP id_) (_lhsIx + x_ - _finalHRef) (_lhsIy + y_ - _finalVRef)
                           _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _childIarrangement
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 978, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 965, column 7)
+              _lhsOvertex =
+                  (x_,y_,outline_)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1012, column 7)
               _childOoldArr =
                   case _lhsIoldArr of VertexA _ _ _ _ _ _ _ _ arr -> arr
                                       _                           -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
@@ -2262,9 +2314,9 @@ sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
               -- copy rule (down)
               _childOtextColor =
                   _lhsItextColor
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_WithP attrRule_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2376,6 +2428,9 @@ sem_Presentation_WithP attrRule_ child_ =
               -- copy rule (up)
               _lhsOmaxFormatterDepth =
                   _childImaxFormatterDepth
+              -- copy rule (up)
+              _lhsOvertex =
+                  _childIvertex
               -- copy rule (down)
               _childOfontMetrics =
                   _lhsIfontMetrics
@@ -2388,9 +2443,9 @@ sem_Presentation_WithP attrRule_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
 -- PresentationList --------------------------------------------
 {-
    visit 0:
@@ -2426,6 +2481,7 @@ sem_Presentation_WithP attrRule_ child_ =
          unfoldedTreeList     : [Presentation]
          vRfList              : [Int]
          vStretchList         : [Bool]
+         vertices             : [(x,y,Outline)]
    alternatives:
       alternative Cons:
          child hd             : Presentation
@@ -2524,13 +2580,16 @@ sem_PresentationList_Cons hd_ tl_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 852, column 7)
               _tlOyList =
                   tail _lhsIyList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 993, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 994, column 7)
+              _lhsOvertices =
+                  _hdIvertex : _tlIvertices
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1027, column 7)
               _hdOoldArr =
                   head _lhsIoldArrList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 994, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1028, column 7)
               _tlOoldArrList =
                   tail _lhsIoldArrList
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1002, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1036, column 7)
               _lhsOarrangementList =
                   _hdIarrangement : _tlIarrangementList
               -- copy rule (up)
@@ -2590,11 +2649,11 @@ sem_PresentationList_Cons hd_ tl_ =
               -- copy rule (down)
               _tlOtextColor =
                   _lhsItextColor
-              ( _hdIallFonts,_hdIarrangement,_hdIfinalHRef,_hdIfinalHeight,_hdIfinalVRef,_hdIfinalWidth,_hdIhRf,_hdIhStretch,_hdImaxFormatterDepth,_hdIminHeight,_hdIminWidth,_hdIunfoldedTree,_hdIvRf,_hdIvStretch) =
+              ( _hdIallFonts,_hdIarrangement,_hdIfinalHRef,_hdIfinalHeight,_hdIfinalVRef,_hdIfinalWidth,_hdIhRf,_hdIhStretch,_hdImaxFormatterDepth,_hdIminHeight,_hdIminWidth,_hdIunfoldedTree,_hdIvRf,_hdIvStretch,_hdIvertex) =
                   (hd_ _hdOallFonts _hdOassignedHRef _hdOassignedHeight _hdOassignedVRef _hdOassignedWidth _hdObackgroundColor _hdOfillColor _hdOfont _hdOfontMetrics _hdOlineColor _hdOmouseDown _hdOoldArr _hdOpopupMenuItems _hdOtextColor _hdOx _hdOy)
-              ( _tlIallFonts,_tlIarrangementList,_tlIfinalHRefList,_tlIfinalHeightList,_tlIfinalVRefList,_tlIfinalWidthList,_tlIhRfList,_tlIhStretchList,_tlImaxFormatterDepthList,_tlIminHeightList,_tlIminWidthList,_tlIunfoldedTreeList,_tlIvRfList,_tlIvStretchList) =
+              ( _tlIallFonts,_tlIarrangementList,_tlIfinalHRefList,_tlIfinalHeightList,_tlIfinalVRefList,_tlIfinalWidthList,_tlIhRfList,_tlIhStretchList,_tlImaxFormatterDepthList,_tlIminHeightList,_tlIminWidthList,_tlIunfoldedTreeList,_tlIvRfList,_tlIvStretchList,_tlIvertices) =
                   (tl_ _tlOallFonts _tlOassignedHRefList _tlOassignedHeightList _tlOassignedVRefList _tlOassignedWidthList _tlObackgroundColor _tlOfillColor _tlOfont _tlOfontMetrics _tlOlineColor _tlOmouseDown _tlOoldArrList _tlOpopupMenuItems _tlOtextColor _tlOxList _tlOyList)
-          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList)))
+          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList,_lhsOvertices)))
 sem_PresentationList_Nil  =
     (\ _lhsIallFonts
        _lhsIassignedHRefList
@@ -2648,13 +2707,16 @@ sem_PresentationList_Nil  =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 791, column 7)
               _lhsOfinalVRefList =
                   []
-              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1000, column 7)
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 992, column 7)
+              _lhsOvertices =
+                  []
+              -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 1034, column 7)
               _lhsOarrangementList =
                   []
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
-          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList)))
+          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList,_lhsOvertices)))
 -- Root --------------------------------------------------------
 {-
    visit 0:
@@ -2756,6 +2818,6 @@ sem_Root_Root presentation_ =
               -- copy rule (down)
               _presentationOtextColor =
                   _lhsItextColor
-              ( _presentationIallFonts,_presentationIarrangement,_presentationIfinalHRef,_presentationIfinalHeight,_presentationIfinalVRef,_presentationIfinalWidth,_presentationIhRf,_presentationIhStretch,_presentationImaxFormatterDepth,_presentationIminHeight,_presentationIminWidth,_presentationIunfoldedTree,_presentationIvRf,_presentationIvStretch) =
+              ( _presentationIallFonts,_presentationIarrangement,_presentationIfinalHRef,_presentationIfinalHeight,_presentationIfinalVRef,_presentationIfinalWidth,_presentationIhRf,_presentationIhStretch,_presentationImaxFormatterDepth,_presentationIminHeight,_presentationIminWidth,_presentationIunfoldedTree,_presentationIvRf,_presentationIvStretch,_presentationIvertex) =
                   (presentation_ _presentationOallFonts _presentationOassignedHRef _presentationOassignedHeight _presentationOassignedVRef _presentationOassignedWidth _presentationObackgroundColor _presentationOfillColor _presentationOfont _presentationOfontMetrics _presentationOlineColor _presentationOmouseDown _presentationOoldArr _presentationOpopupMenuItems _presentationOtextColor _presentationOx _presentationOy)
           in  ( _lhsOallFonts,_lhsOarrangement,_lhsOmaxFormatterDepth,_lhsOunfoldedTree)))

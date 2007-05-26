@@ -915,8 +915,8 @@ SEM Presentation
       lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | GraphP 
       lhs.arrangement = GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
-                               ( @presentationList.arrangementList ++ 
-                                 [ LineA NoIDA  0 0 50 100 0 0 1 @lhs.lineColor ])
+                               ( mkEdges @edges @presentationList.vertices @lhs.lineColor ++
+                                 @presentationList.arrangementList )
   | VertexP
       lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalHRef) (@lhs.y + @y - @finalVRef)
                                 @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @child.arrangement
@@ -959,8 +959,40 @@ SEM Presentation
       loc.maxFormatterDepth = 0     -- ?
 
 
+ATTR Presentation [ || vertex : {(x,y,Outline)} ]
+SEM Presentation
+  | VertexP
+      lhs.vertex = (@x,@y,@outline)
+  | EmptyP
+      lhs.vertex = (0,0,\_->(0,0))
+  | StringP
+      lhs.vertex = (0,0,\_->(0,0))
+  | RectangleP
+      lhs.vertex = (0,0,\_->(0,0))
+  | EllipseP
+      lhs.vertex = (0,0,\_->(0,0))
+  | ImageP
+      lhs.vertex = (0,0,\_->(0,0))
+  | PolyP
+      lhs.vertex = (0,0,\_->(0,0))
+  | RowP
+      lhs.vertex = (0,0,\_->(0,0))
+  | ColP
+      lhs.vertex = (0,0,\_->(0,0))
+  | OverlayP
+      lhs.vertex = (0,0,\_->(0,0))
+  | GraphP
+      lhs.vertex = (0,0,\_->(0,0))
+  | ArrangedP
+      lhs.vertex = (0,0,\_->(0,0))
 
 
+SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
+  | Nil
+      lhs.vertices = []
+  | Cons 
+      lhs.vertices = @hd.vertex : @tl.vertices
+      
 -- why the repeat Empties?
 ATTR Root         [ oldArr : {Arrangement node}  | | ]
 

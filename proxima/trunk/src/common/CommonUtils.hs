@@ -36,3 +36,9 @@ scaleInt scale x = x -- round (fromIntegral x * scale)
 descaleInt :: Double -> Int -> Int
 descaleInt scale x = x -- round (fromIntegral x / scale)
 
+-- Compute angle of the line (fromx,fromy) (tox,toy)
+computeAngle :: Int -> Int -> Int -> Int -> Double
+computeAngle fromx fromy tox toy = atan (fromIntegral (toy-fromy)/fromIntegral (fromx-tox)) +
+                                   if fromx < tox then if fromy <= toy then pi else -pi else 0
+-- toy and fromy switched because tan uses mathematical coordinate system (positive is up)
+-- in upper left quadrant, add pi, and in lower left quadrant, subtract pi, so the resulting angle is between -pi and pi

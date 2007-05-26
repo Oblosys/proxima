@@ -26,7 +26,9 @@ type Path = [Int]
 
 type Color = (Int,Int,Int)
 
-
+-- to determine the outline of a graph node (for drawing the arrows correctly)
+type Outline = Double -> (Int, Int)
+            -- incoming angle -> (x, y)
 -- fileds have f, so names can be used for combinators. Otherwise, CommonTypes must export these qualified
 -- or module structure has to change. Too much of a hassle right now.
 

@@ -84,7 +84,6 @@ data Presentation doc node clip = EmptyP !IDP
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
-type Outline = Int -> (Int, Int)
 
 -- Note: An alternative and safer definition for GraphP is GraphP [Vertex], but this requires all functions that
 -- traverse Presentation to have a separate function for traversing the Vertex type. This is too much of a hassle.
