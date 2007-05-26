@@ -1,7 +1,7 @@
 HC   = /c/Progra~1/Visual~2/bin/ghc
 FIND = /usr/bin/find
 
-PROXIMADIR = ../proxima
+PROXIMADIR = src/proxima
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
