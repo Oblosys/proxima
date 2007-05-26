@@ -16,7 +16,7 @@ category:
 author: Martijn Schrage
 tested-with: GHC -any
 data-files:
-extra-source-files: src/proxima/arrangement/ArrangerAG.ag
+extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
                     src/PresentationAG.ag
 extra-tmp-files:
  
@@ -33,9 +33,10 @@ extra-lib-dirs: .
 includes:
 install-includes:
 include-dirs:
-hs-source-dirs: src/proxima/rendering src/proxima/presentation
-                src/proxima/main src/proxima/layout src/proxima/evaluation
-                src/proxima/common src/proxima/arrangement src
+hs-source-dirs: src/proxima/src/rendering
+                src/proxima/src/presentation src/proxima/src/main
+                src/proxima/src/layout src/proxima/src/evaluation
+                src/proxima/src/common src/proxima/src/arrangement src
 other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                ArrTypes ArrUtils Arranger ArrangerAG FontLib CommonTypes
                CommonUtils DebugLevels UU_Parsing DocTypes DocUtils DocumentEdit
