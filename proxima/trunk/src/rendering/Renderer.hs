@@ -589,8 +589,7 @@ mkFocusList' p i x' y' focus arr = debug Err ("Renderer.mkFocusList': unimplemen
 -- just decreasing w and h does not work
 mkBoxCaret x y w h = 
   let color = CommonTypes.blue in
-    [ LineA NoIDA x y x (y+h-1) 0 0 1 color, LineA NoIDA x (y+h-1) (x+w-1) (y+h-1) 0 0 1 color
-    , LineA NoIDA (x+w-1) (y+h-1) (x+w-1) y 0 0 1 color, LineA NoIDA (x+w-1) y x y 0 0 1 color ]
+    [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 color transparent ]
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
 arrangedFocusArea fArrList = -- compute the region that is covered by the focus
