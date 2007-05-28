@@ -69,7 +69,7 @@ mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node
                  ScrolledWindow a -> Int -> Int -> IO ()
 mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
-    ; let ctxtItems = case pointOvlRev' x y [[]] arr of
+    ; let ctxtItems = case point' x y [[]] arr of
                         (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs
                         []       -> []
               
@@ -310,7 +310,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
 
     (LineA id lux' luy' rlx' rly' _ _ lw' (lr,lg,lb)) ->
      do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
-        ; putStr $ "Line coords"++show (fromx,fromy, tox, toy)
         ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
                              + if fromy > toy then pi  else 0
               
@@ -445,7 +444,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
                     ; drawFilledRect dc (Rect x y w h) bgColor
                     }        
               }
-        ; sequence_ $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs
+        ; sequence_ $ reverse $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs -- reverse so first is drawn in front
         }
     (VertexA id x' y' w' h' _ _ (br,bg,bb) arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')

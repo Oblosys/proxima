@@ -423,6 +423,8 @@ debugArrangement' xOffset yOffset (StringA id x y w h hr vr str c f cxs) =
   ( StringA id (x+xOffset) (y+yOffset) (w+1) h hr vr str c f cxs, 1, 0) -- widen with 1, so focus is inside or on box
 debugArrangement' xOffset yOffset (ImageA id x y w h hr vr src style lc bc) = 
   ( ImageA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr src style lc bc, pd, pd)
+debugArrangement' xOffset yOffset (LineA id x y x' y' hr vr lw lc) = 
+  ( LineA id (x+xOffset) (y+yOffset) (x'+xOffset) (y'+yOffset) hr vr lw lc, pd, pd)
 debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw lc bc) = 
   ( PolyA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr pts lw lc bc, pd, pd)
 debugArrangement' xOffset yOffset (RectangleA id x y w h hr vr lw style lc fc) = 
@@ -473,10 +475,9 @@ debugArrangement' xOffset yOffset (GraphA id x y w h hr vr c arrs)              
       hOffset = maximum (0:hOffsets) + pd 
   in  ( GraphA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c arrs'
       , wOffset ,hOffset )
-
---debugArrangement' xOffset yOffset (OverlayA id x y w h c (arr:arrs))              =
---  let (arr', wOffset, hOffset) = debugArrangement' (xOffset+pd) (yOffset+pd) arr
---  in  (OverlayA id (x+xOffset) (y+yOffset) (w+wOffset+pd) (h+hOffset+pd) c (arr':arrs), wOffset+pd, hOffset+pd)
+debugArrangement' xOffset yOffset (VertexA id x y w h hr vr c arr)     =
+  let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
+  in  (VertexA id (x+xOffset) (y+yOffset) (w+wOffset+pd) (h+hOffset+pd) hr vr c arr', wOffset+pd, hOffset+pd)
 debugArrangement' xOffset yOffset (LocatorA location arr)              =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (LocatorA location arr', wOffset, hOffset)
