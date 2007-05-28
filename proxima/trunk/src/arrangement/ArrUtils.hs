@@ -96,10 +96,11 @@ data Arrangement =
 -}
 
 -- for creating edge arrangements during graph arranging
+-- PRECONDITION: if edges is non-empty, then vertices is non-empty as well.
 mkEdges :: Show node => [(Int,Int)] -> [(Int,Int, Outline)] -> Color -> [Arrangement node]
 mkEdges edges vertices lineColor = showDebug' Err ("mkEdges"++show edges ++ show vertices) $ map mkEdge edges 
- where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = vertices !! fromV
-                                 (toVx,toVy,toVol) = vertices !! toV
+ where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = index "mkEdges" fromV vertices
+                                 (toVx,toVy,toVol)       = index "mkEdges"  toV vertices
                                  (offsetTox, offsetToy) = toVol (computeAngle fromVx fromVy toVx toVy)
                              in  LineA NoIDA  fromVx fromVy (toVx+offsetTox) (toVy+offsetToy) 0 0 1 lineColor 
 
