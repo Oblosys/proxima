@@ -117,13 +117,13 @@ type PresentationList doc node clip = [Presentation doc node clip]
          finalHeight          : Int
          finalVRef            : Int
          finalWidth           : Int
-         hRf                  : Int
+         hRef                 : Int
          hStretch             : Bool
          maxFormatterDepth    : Int
          minHeight            : Int
          minWidth             : Int
          unfoldedTree         : Presentation
-         vRf                  : Int
+         vRef                 : Int
          vStretch             : Bool
          vertex               : (x,y,Outline)
    alternatives:
@@ -132,8 +132,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -150,8 +150,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local assignedHeights : _
          local stretchMinHeights : _
          local topCorrection  : _
@@ -175,8 +175,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -187,8 +187,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -203,8 +203,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -216,8 +216,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -236,8 +236,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -253,8 +253,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -268,8 +268,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -284,8 +284,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local assignedWidths : _
          local stretchMinWidths : _
          local leftCorrection : _
@@ -307,8 +307,8 @@ type PresentationList doc node clip = [Presentation doc node clip]
          local minHeight      : _
          local hStretch       : _
          local vStretch       : _
-         local hRf            : _
-         local vRf            : _
+         local hRef           : _
+         local vRef           : _
          local finalWidth     : _
          local finalHeight    : _
          local finalHRef      : _
@@ -399,10 +399,10 @@ sem_Presentation_ArrangedP  =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 952, column 7)
-              _hRf =
+              _hRef =
                   hRefA _lhsIoldArr
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 953, column 7)
-              _vRf =
+              _vRef =
                   vRefA _lhsIoldArr
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 954, column 7)
               _finalWidth =
@@ -441,8 +441,8 @@ sem_Presentation_ArrangedP  =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -459,12 +459,12 @@ sem_Presentation_ArrangedP  =
               _lhsOunfoldedTree =
                   _unfoldedTree
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ColP id_ hRefNr_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -490,12 +490,12 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                   ColP id_ hRefNr_ _presentationListIunfoldedTreeList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 419, column 7)
               _minLeftWidth =
-                  if null _presentationListIvRfList then 0
-                  else maximum _presentationListIvRfList
+                  if null _presentationListIvRefList then 0
+                  else maximum _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 421, column 7)
               _minRightWidth =
-                  if null _presentationListIvRfList then 0
-                  else maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationListIminWidthList _presentationListIvRfList ]
+                  if null _presentationListIvRefList then 0
+                  else maximum [ minWidth - vRef | (minWidth, vRef) <- zip _presentationListIminWidthList _presentationListIvRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 423, column 7)
               _minWidth =
                   _minLeftWidth + _minRightWidth
@@ -509,11 +509,11 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
               _vStretch =
                   or _presentationListIvStretchList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 427, column 7)
-              _hRf =
-                  if null _presentationListIhRfList then 0
-                  else sum (take hRefNr_ _presentationListIminHeightList) + _presentationListIhRfList !! hRefNr_
+              _hRef =
+                  if null _presentationListIhRefList then 0
+                  else sum (take hRefNr_ _presentationListIminHeightList) + _presentationListIhRefList !! hRefNr_
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 429, column 7)
-              _vRf =
+              _vRef =
                   _minLeftWidth
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 575, column 7)
               _presentationListOassignedWidthList =
@@ -523,7 +523,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
               _presentationListOassignedVRefList =
                   assign _presentationListIhStretchList
                   (repeat _lhsIassignedVRef)
-                  _presentationListIvRfList
+                  _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 581, column 7)
               _assignedHeights =
                   if _presentationListIvStretchList!! hRefNr_
@@ -542,7 +542,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                   _assignedHeights
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 594, column 7)
               _presentationListOassignedHRefList =
-                  _presentationListIhRfList
+                  _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 604, column 7)
               _stretchMinHeights =
                   assign _presentationListIvStretchList _presentationListIminHeightList (repeat 0)
@@ -555,7 +555,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                   sum (drop (hRefNr_+1) _stretchMinHeights)
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 614, column 7)
               _topTotalSpace =
-                  _lhsIassignedHRef - _hRf  + _topCorrection
+                  _lhsIassignedHRef - _hRef  + _topCorrection
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 615, column 7)
               _bottomTotalSpace =
                   _lhsIassignedHeight - _minHeight - _topTotalSpace   + _bottomCorrection
@@ -579,15 +579,15 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                   sum _presentationListIfinalHeightList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 727, column 7)
               _finalHRef =
-                  if null _presentationListIhRfList then 0
+                  if null _presentationListIhRefList then 0
                   else if _presentationListIvStretchList!! hRefNr_ then _lhsIassignedHRef
-                          else sum (take hRefNr_ _assignedHeights) + (_presentationListIhRfList !! hRefNr_)
+                          else sum (take hRefNr_ _assignedHeights) + (_presentationListIhRefList !! hRefNr_)
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 730, column 7)
               _finalVRef =
                   _lhsIassignedVRef
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 815, column 7)
               _presentationListOxList =
-                  [ _finalVRef - cvRf | cvRf <- _presentationListIfinalVRefList ]
+                  [ _finalVRef - cvRef | cvRef <- _presentationListIfinalVRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 816, column 7)
               _presentationListOyList =
                   init.scanl (+) 0 $ _presentationListIfinalHeightList
@@ -617,8 +617,8 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -629,8 +629,8 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
@@ -667,13 +667,13 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                ,_presentationListIfinalHeightList
                ,_presentationListIfinalVRefList
                ,_presentationListIfinalWidthList
-               ,_presentationListIhRfList
+               ,_presentationListIhRefList
                ,_presentationListIhStretchList
                ,_presentationListImaxFormatterDepthList
                ,_presentationListIminHeightList
                ,_presentationListIminWidthList
                ,_presentationListIunfoldedTreeList
-               ,_presentationListIvRfList
+               ,_presentationListIvRefList
                ,_presentationListIvStretchList
                ,_presentationListIvertices
                ) =
@@ -693,7 +693,7 @@ sem_Presentation_ColP id_ hRefNr_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -730,10 +730,10 @@ sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 382, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 383, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 703, column 7)
               _finalWidth =
@@ -769,8 +769,8 @@ sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -781,12 +781,12 @@ sem_Presentation_EllipseP id_ w_ h_ lineWidth_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_EmptyP id_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -823,10 +823,10 @@ sem_Presentation_EmptyP id_ =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 361, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 362, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 688, column 7)
               _finalWidth =
@@ -862,8 +862,8 @@ sem_Presentation_EmptyP id_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -874,12 +874,12 @@ sem_Presentation_EmptyP id_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -916,23 +916,23 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 403, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 404, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 630, column 7)
               _presentationListOassignedHeightList =
                   _presentationListIminHeightList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 631, column 7)
               _presentationListOassignedHRefList =
-                  _presentationListIhRfList
+                  _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 632, column 7)
               _presentationListOassignedWidthList =
                   _presentationListIminWidthList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 633, column 7)
               _presentationListOassignedVRefList =
-                  _presentationListIvRfList
+                  _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 737, column 7)
               _finalWidth =
                   _minWidth
@@ -978,8 +978,8 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -990,8 +990,8 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
@@ -1028,13 +1028,13 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
                ,_presentationListIfinalHeightList
                ,_presentationListIfinalVRefList
                ,_presentationListIfinalWidthList
-               ,_presentationListIhRfList
+               ,_presentationListIhRefList
                ,_presentationListIhStretchList
                ,_presentationListImaxFormatterDepthList
                ,_presentationListIminHeightList
                ,_presentationListIminWidthList
                ,_presentationListIunfoldedTreeList
-               ,_presentationListIvRfList
+               ,_presentationListIvRefList
                ,_presentationListIvStretchList
                ,_presentationListIvertices
                ) =
@@ -1054,7 +1054,7 @@ sem_Presentation_GraphP id_ w_ h_ edges_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ImageP id_ src_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1091,10 +1091,10 @@ sem_Presentation_ImageP id_ src_ =
               _vStretch =
                   True
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 389, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 390, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 708, column 7)
               _finalWidth =
@@ -1130,8 +1130,8 @@ sem_Presentation_ImageP id_ src_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -1142,12 +1142,12 @@ sem_Presentation_ImageP id_ src_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_LocatorP location_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1191,8 +1191,8 @@ sem_Presentation_LocatorP location_ child_ =
               _lhsOfinalWidth =
                   _childIfinalWidth
               -- copy rule (up)
-              _lhsOhRf =
-                  _childIhRf
+              _lhsOhRef =
+                  _childIhRef
               -- copy rule (up)
               _lhsOhStretch =
                   _childIhStretch
@@ -1206,8 +1206,8 @@ sem_Presentation_LocatorP location_ child_ =
               _lhsOminWidth =
                   _childIminWidth
               -- copy rule (up)
-              _lhsOvRf =
-                  _childIvRf
+              _lhsOvRef =
+                  _childIvRef
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
@@ -1259,9 +1259,9 @@ sem_Presentation_LocatorP location_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRef,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRef,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_OverlayP id_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1287,19 +1287,19 @@ sem_Presentation_OverlayP id_ presentationList_ =
                   OverlayP id_ _presentationListIunfoldedTreeList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 431, column 7)
               _minLeftWidth =
-                  maximum _presentationListIvRfList
+                  maximum _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 432, column 7)
               _minRightWidth =
-                  maximum [ minWidth - vRf | (minWidth, vRf) <- zip _presentationListIminWidthList _presentationListIvRfList ]
+                  maximum [ minWidth - vRef | (minWidth, vRef) <- zip _presentationListIminWidthList _presentationListIvRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 433, column 7)
               _minWidth =
                   _minLeftWidth + _minRightWidth
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 434, column 7)
               _minTopHeight =
-                  maximum _presentationListIhRfList
+                  maximum _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 435, column 7)
               _minBottomHeight =
-                  maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationListIminHeightList _presentationListIhRfList ]
+                  maximum [ minHeight - hRef | (minHeight, hRef) <- zip _presentationListIminHeightList _presentationListIhRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 436, column 7)
               _minHeight =
                   _minTopHeight + _minBottomHeight
@@ -1310,10 +1310,10 @@ sem_Presentation_OverlayP id_ presentationList_ =
               _vStretch =
                   and _presentationListIvStretchList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 439, column 7)
-              _hRf =
+              _hRef =
                   _minTopHeight
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 440, column 7)
-              _vRf =
+              _vRef =
                   _minLeftWidth
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 621, column 7)
               _presentationListOassignedHeightList =
@@ -1322,7 +1322,7 @@ sem_Presentation_OverlayP id_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 623, column 7)
               _presentationListOassignedHRefList =
                   assign _presentationListIvStretchList
-                  (repeat _lhsIassignedHRef) _presentationListIhRfList
+                  (repeat _lhsIassignedHRef) _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 625, column 7)
               _presentationListOassignedWidthList =
                   assign _presentationListIhStretchList
@@ -1330,7 +1330,7 @@ sem_Presentation_OverlayP id_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 627, column 7)
               _presentationListOassignedVRefList =
                   assign _presentationListIhStretchList
-                  (repeat _lhsIassignedVRef) _presentationListIvRfList
+                  (repeat _lhsIassignedVRef) _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 732, column 7)
               _finalWidth =
                   _lhsIassignedWidth
@@ -1345,10 +1345,10 @@ sem_Presentation_OverlayP id_ presentationList_ =
                   _lhsIassignedVRef
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 818, column 7)
               _presentationListOxList =
-                  [ _finalVRef - cvRf | cvRf <- _presentationListIfinalVRefList ]
+                  [ _finalVRef - cvRef | cvRef <- _presentationListIfinalVRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 819, column 7)
               _presentationListOyList =
-                  [ _finalHRef - chRf | chRf <- _presentationListIfinalHRefList ]
+                  [ _finalHRef - chRef | chRef <- _presentationListIfinalHRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 915, column 7)
               _lhsOarrangement =
                   OverlayA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
@@ -1375,8 +1375,8 @@ sem_Presentation_OverlayP id_ presentationList_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -1387,8 +1387,8 @@ sem_Presentation_OverlayP id_ presentationList_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
@@ -1425,13 +1425,13 @@ sem_Presentation_OverlayP id_ presentationList_ =
                ,_presentationListIfinalHeightList
                ,_presentationListIfinalVRefList
                ,_presentationListIfinalWidthList
-               ,_presentationListIhRfList
+               ,_presentationListIhRefList
                ,_presentationListIhStretchList
                ,_presentationListImaxFormatterDepthList
                ,_presentationListIminHeightList
                ,_presentationListIminWidthList
                ,_presentationListIunfoldedTreeList
-               ,_presentationListIvRfList
+               ,_presentationListIvRefList
                ,_presentationListIvStretchList
                ,_presentationListIvertices
                ) =
@@ -1451,7 +1451,7 @@ sem_Presentation_OverlayP id_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_ParsingP id_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1495,8 +1495,8 @@ sem_Presentation_ParsingP id_ child_ =
               _lhsOfinalWidth =
                   _childIfinalWidth
               -- copy rule (up)
-              _lhsOhRf =
-                  _childIhRf
+              _lhsOhRef =
+                  _childIhRef
               -- copy rule (up)
               _lhsOhStretch =
                   _childIhStretch
@@ -1510,8 +1510,8 @@ sem_Presentation_ParsingP id_ child_ =
               _lhsOminWidth =
                   _childIminWidth
               -- copy rule (up)
-              _lhsOvRf =
-                  _childIvRf
+              _lhsOvRef =
+                  _childIvRef
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
@@ -1563,9 +1563,9 @@ sem_Presentation_ParsingP id_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRef,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRef,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_PolyP id_ pointList_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1602,10 +1602,10 @@ sem_Presentation_PolyP id_ pointList_ lineWidth_ =
               _vStretch =
                   True
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 396, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 397, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 713, column 7)
               _finalWidth =
@@ -1643,8 +1643,8 @@ sem_Presentation_PolyP id_ pointList_ lineWidth_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -1655,12 +1655,12 @@ sem_Presentation_PolyP id_ pointList_ lineWidth_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1697,10 +1697,10 @@ sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 375, column 7)
-              _hRf =
+              _hRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 376, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 698, column 7)
               _finalWidth =
@@ -1736,8 +1736,8 @@ sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -1748,12 +1748,12 @@ sem_Presentation_RectangleP id_ w_ h_ lineWidth_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_RowP id_ vRefNr_ presentationList_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -1779,12 +1779,12 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                   RowP id_ vRefNr_ _presentationListIunfoldedTreeList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 407, column 7)
               _minTopHeight =
-                  if null _presentationListIhRfList then 0
-                     else maximum _presentationListIhRfList
+                  if null _presentationListIhRefList then 0
+                     else maximum _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 409, column 7)
               _minBottomHeight =
-                  if null _presentationListIhRfList then 0
-                  else maximum [ minHeight - hRf | (minHeight, hRf) <- zip _presentationListIminHeightList _presentationListIhRfList ]
+                  if null _presentationListIhRefList then 0
+                  else maximum [ minHeight - hRef | (minHeight, hRef) <- zip _presentationListIminHeightList _presentationListIhRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 411, column 7)
               _minWidth =
                   sum _presentationListIminWidthList
@@ -1798,12 +1798,12 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
               _vStretch =
                   and _presentationListIvStretchList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 415, column 7)
-              _hRf =
+              _hRef =
                   _minTopHeight
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 416, column 7)
-              _vRf =
-                  if null _presentationListIvRfList then 0
-                  else sum (take vRefNr_ _presentationListIminWidthList) + _presentationListIvRfList !! vRefNr_
+              _vRef =
+                  if null _presentationListIvRefList then 0
+                  else sum (take vRefNr_ _presentationListIminWidthList) + _presentationListIvRefList !! vRefNr_
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 535, column 7)
               _assignedWidths =
                   if _presentationListIhStretchList!! vRefNr_
@@ -1822,7 +1822,7 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                   _assignedWidths
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 548, column 7)
               _presentationListOassignedVRefList =
-                  _presentationListIvRfList
+                  _presentationListIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 550, column 7)
               _presentationListOassignedHeightList =
                   assign _presentationListIvStretchList
@@ -1830,8 +1830,8 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 552, column 7)
               _presentationListOassignedHRefList =
                   assign _presentationListIvStretchList
-                  (repeat _hRf)
-                                       _presentationListIhRfList
+                  (repeat _hRef)
+                                       _presentationListIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 558, column 7)
               _stretchMinWidths =
                   assign _presentationListIhStretchList _presentationListIminWidthList (repeat 0)
@@ -1844,7 +1844,7 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                   sum (drop (vRefNr_+1) _stretchMinWidths)
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 565, column 7)
               _leftTotalSpace =
-                  _lhsIassignedVRef - _vRf    + _leftCorrection
+                  _lhsIassignedVRef - _vRef    + _leftCorrection
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 566, column 7)
               _rightTotalSpace =
                   _lhsIassignedWidth - _minWidth - _leftTotalSpace  + _rightCorrection
@@ -1871,15 +1871,15 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                   _lhsIassignedHRef
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 721, column 7)
               _finalVRef =
-                  if null _presentationListIvRfList then 0
+                  if null _presentationListIvRefList then 0
                   else if _presentationListIhStretchList!! vRefNr_ then _lhsIassignedVRef
-                          else sum (take vRefNr_ _assignedWidths) + (_presentationListIvRfList !! vRefNr_)
+                          else sum (take vRefNr_ _assignedWidths) + (_presentationListIvRefList !! vRefNr_)
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 812, column 7)
               _presentationListOxList =
                   init.scanl (+) 0 $ _presentationListIfinalWidthList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 813, column 7)
               _presentationListOyList =
-                  [ _finalHRef - chRf | chRf <- _presentationListIfinalHRefList ]
+                  [ _finalHRef - chRef | chRef <- _presentationListIfinalHRefList ]
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 893, column 7)
               _lhsOarrangement =
                   RowA (idAFromP id_) _lhsIx _lhsIy _finalWidth _finalHeight _finalHRef _finalVRef _lhsIbackgroundColor _presentationListIarrangementList
@@ -1906,8 +1906,8 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -1918,8 +1918,8 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
@@ -1956,13 +1956,13 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                ,_presentationListIfinalHeightList
                ,_presentationListIfinalVRefList
                ,_presentationListIfinalWidthList
-               ,_presentationListIhRfList
+               ,_presentationListIhRefList
                ,_presentationListIhStretchList
                ,_presentationListImaxFormatterDepthList
                ,_presentationListIminHeightList
                ,_presentationListIminWidthList
                ,_presentationListIunfoldedTreeList
-               ,_presentationListIvRfList
+               ,_presentationListIvRefList
                ,_presentationListIvStretchList
                ,_presentationListIvertices
                ) =
@@ -1982,7 +1982,7 @@ sem_Presentation_RowP id_ vRefNr_ presentationList_ =
                                      _presentationListOtextColor
                                      _presentationListOxList
                                      _presentationListOyList)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_StringP id_ text_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2019,10 +2019,10 @@ sem_Presentation_StringP id_ text_ =
               _vStretch =
                   False
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 368, column 7)
-              _hRf =
+              _hRef =
                   baseLine _lhsIfontMetrics _lhsIfont
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 369, column 7)
-              _vRf =
+              _vRef =
                   0
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 693, column 7)
               _finalWidth =
@@ -2058,8 +2058,8 @@ sem_Presentation_StringP id_ text_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (from local)
-              _lhsOhRf =
-                  _hRf
+              _lhsOhRef =
+                  _hRef
               -- copy rule (from local)
               _lhsOhStretch =
                   _hStretch
@@ -2070,12 +2070,12 @@ sem_Presentation_StringP id_ text_ =
               _lhsOminWidth =
                   _minWidth
               -- copy rule (from local)
-              _lhsOvRf =
-                  _vRf
+              _lhsOvRef =
+                  _vRef
               -- copy rule (from local)
               _lhsOvStretch =
                   _vStretch
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_StructuralP id_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2119,8 +2119,8 @@ sem_Presentation_StructuralP id_ child_ =
               _lhsOfinalWidth =
                   _childIfinalWidth
               -- copy rule (up)
-              _lhsOhRf =
-                  _childIhRf
+              _lhsOhRef =
+                  _childIhRef
               -- copy rule (up)
               _lhsOhStretch =
                   _childIhStretch
@@ -2134,8 +2134,8 @@ sem_Presentation_StructuralP id_ child_ =
               _lhsOminWidth =
                   _childIminWidth
               -- copy rule (up)
-              _lhsOvRf =
-                  _childIvRf
+              _lhsOvRef =
+                  _childIvRef
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
@@ -2187,9 +2187,9 @@ sem_Presentation_StructuralP id_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRef,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRef,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2255,8 +2255,8 @@ sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
               _lhsOfinalWidth =
                   _finalWidth
               -- copy rule (up)
-              _lhsOhRf =
-                  _childIhRf
+              _lhsOhRef =
+                  _childIhRef
               -- copy rule (up)
               _lhsOhStretch =
                   _childIhStretch
@@ -2270,8 +2270,8 @@ sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
               _lhsOminWidth =
                   _childIminWidth
               -- copy rule (up)
-              _lhsOvRf =
-                  _childIvRf
+              _lhsOvRef =
+                  _childIvRef
               -- copy rule (up)
               _lhsOvStretch =
                   _childIvStretch
@@ -2314,9 +2314,9 @@ sem_Presentation_VertexP id_ x_ y_ outline_ child_ =
               -- copy rule (down)
               _childOtextColor =
                   _lhsItextColor
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRef,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRef,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 sem_Presentation_WithP attrRule_ child_ =
     (\ _lhsIallFonts
        _lhsIassignedHRef
@@ -2340,7 +2340,7 @@ sem_Presentation_WithP attrRule_ child_ =
                                  _lhsItextColor _lhsIlineColor _lhsIfillColor _lhsIbackgroundColor
                                  _lhsImouseDown _lhsIpopupMenuItems
                                  _lhsIassignedWidth _lhsIassignedHeight _lhsIassignedHRef _lhsIassignedVRef
-                           , Syn _childIhRf _childIvRf _childIminWidth _childIminHeight
+                           , Syn _childIhRef _childIvRef _childIminWidth _childIminHeight
                                  _childIhStretch _childIvStretch
                                  _childIfinalWidth _childIfinalHeight _childIfinalHRef _childIfinalVRef)
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 168, column 7)
@@ -2383,10 +2383,10 @@ sem_Presentation_WithP attrRule_ child_ =
               _childOassignedVRef =
                   assignedVRef _newSyn
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 181, column 7)
-              _lhsOhRf =
+              _lhsOhRef =
                   hRef _newInh
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 182, column 7)
-              _lhsOvRf =
+              _lhsOvRef =
                   vRef _newInh
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 183, column 7)
               _lhsOminWidth =
@@ -2443,9 +2443,9 @@ sem_Presentation_WithP attrRule_ child_ =
               -- copy rule (down)
               _childOy =
                   _lhsIy
-              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRf,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRf,_childIvStretch,_childIvertex) =
+              ( _childIallFonts,_childIarrangement,_childIfinalHRef,_childIfinalHeight,_childIfinalVRef,_childIfinalWidth,_childIhRef,_childIhStretch,_childImaxFormatterDepth,_childIminHeight,_childIminWidth,_childIunfoldedTree,_childIvRef,_childIvStretch,_childIvertex) =
                   (child_ _childOallFonts _childOassignedHRef _childOassignedHeight _childOassignedVRef _childOassignedWidth _childObackgroundColor _childOfillColor _childOfont _childOfontMetrics _childOlineColor _childOmouseDown _childOoldArr _childOpopupMenuItems _childOtextColor _childOx _childOy)
-          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRf,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRf,_lhsOvStretch,_lhsOvertex)))
+          in  ( _lhsOallFonts,_lhsOarrangement,_lhsOfinalHRef,_lhsOfinalHeight,_lhsOfinalVRef,_lhsOfinalWidth,_lhsOhRef,_lhsOhStretch,_lhsOmaxFormatterDepth,_lhsOminHeight,_lhsOminWidth,_lhsOunfoldedTree,_lhsOvRef,_lhsOvStretch,_lhsOvertex)))
 -- PresentationList --------------------------------------------
 {-
    visit 0:
@@ -2473,13 +2473,13 @@ sem_Presentation_WithP attrRule_ child_ =
          finalHeightList      : [Int]
          finalVRefList        : [Int]
          finalWidthList       : [Int]
-         hRfList              : [Int]
+         hRefList             : [Int]
          hStretchList         : [Bool]
          maxFormatterDepthList : [Int]
          minHeightList        : [Int]
          minWidthList         : [Int]
          unfoldedTreeList     : [Presentation]
-         vRfList              : [Int]
+         vRefList             : [Int]
          vStretchList         : [Bool]
          vertices             : [(x,y,Outline)]
    alternatives:
@@ -2527,11 +2527,11 @@ sem_PresentationList_Cons hd_ tl_ =
               _lhsOvStretchList =
                   _hdIvStretch : _tlIvStretchList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 520, column 7)
-              _lhsOhRfList =
-                  _hdIhRf : _tlIhRfList
+              _lhsOhRefList =
+                  _hdIhRef : _tlIhRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 521, column 7)
-              _lhsOvRfList =
-                  _hdIvRf : _tlIvRfList
+              _lhsOvRefList =
+                  _hdIvRef : _tlIvRefList
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 673, column 7)
               _hdOassignedWidth =
                   head _lhsIassignedWidthList
@@ -2649,11 +2649,11 @@ sem_PresentationList_Cons hd_ tl_ =
               -- copy rule (down)
               _tlOtextColor =
                   _lhsItextColor
-              ( _hdIallFonts,_hdIarrangement,_hdIfinalHRef,_hdIfinalHeight,_hdIfinalVRef,_hdIfinalWidth,_hdIhRf,_hdIhStretch,_hdImaxFormatterDepth,_hdIminHeight,_hdIminWidth,_hdIunfoldedTree,_hdIvRf,_hdIvStretch,_hdIvertex) =
+              ( _hdIallFonts,_hdIarrangement,_hdIfinalHRef,_hdIfinalHeight,_hdIfinalVRef,_hdIfinalWidth,_hdIhRef,_hdIhStretch,_hdImaxFormatterDepth,_hdIminHeight,_hdIminWidth,_hdIunfoldedTree,_hdIvRef,_hdIvStretch,_hdIvertex) =
                   (hd_ _hdOallFonts _hdOassignedHRef _hdOassignedHeight _hdOassignedVRef _hdOassignedWidth _hdObackgroundColor _hdOfillColor _hdOfont _hdOfontMetrics _hdOlineColor _hdOmouseDown _hdOoldArr _hdOpopupMenuItems _hdOtextColor _hdOx _hdOy)
-              ( _tlIallFonts,_tlIarrangementList,_tlIfinalHRefList,_tlIfinalHeightList,_tlIfinalVRefList,_tlIfinalWidthList,_tlIhRfList,_tlIhStretchList,_tlImaxFormatterDepthList,_tlIminHeightList,_tlIminWidthList,_tlIunfoldedTreeList,_tlIvRfList,_tlIvStretchList,_tlIvertices) =
+              ( _tlIallFonts,_tlIarrangementList,_tlIfinalHRefList,_tlIfinalHeightList,_tlIfinalVRefList,_tlIfinalWidthList,_tlIhRefList,_tlIhStretchList,_tlImaxFormatterDepthList,_tlIminHeightList,_tlIminWidthList,_tlIunfoldedTreeList,_tlIvRefList,_tlIvStretchList,_tlIvertices) =
                   (tl_ _tlOallFonts _tlOassignedHRefList _tlOassignedHeightList _tlOassignedVRefList _tlOassignedWidthList _tlObackgroundColor _tlOfillColor _tlOfont _tlOfontMetrics _tlOlineColor _tlOmouseDown _tlOoldArrList _tlOpopupMenuItems _tlOtextColor _tlOxList _tlOyList)
-          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList,_lhsOvertices)))
+          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRefList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRefList,_lhsOvStretchList,_lhsOvertices)))
 sem_PresentationList_Nil  =
     (\ _lhsIallFonts
        _lhsIassignedHRefList
@@ -2690,10 +2690,10 @@ sem_PresentationList_Nil  =
               _lhsOvStretchList =
                   []
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 513, column 7)
-              _lhsOhRfList =
+              _lhsOhRefList =
                   []
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 514, column 7)
-              _lhsOvRfList =
+              _lhsOvRefList =
                   []
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 788, column 7)
               _lhsOfinalWidthList =
@@ -2716,7 +2716,7 @@ sem_PresentationList_Nil  =
               -- copy rule (chain)
               _lhsOallFonts =
                   _lhsIallFonts
-          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRfList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRfList,_lhsOvStretchList,_lhsOvertices)))
+          in  ( _lhsOallFonts,_lhsOarrangementList,_lhsOfinalHRefList,_lhsOfinalHeightList,_lhsOfinalVRefList,_lhsOfinalWidthList,_lhsOhRefList,_lhsOhStretchList,_lhsOmaxFormatterDepthList,_lhsOminHeightList,_lhsOminWidthList,_lhsOunfoldedTreeList,_lhsOvRefList,_lhsOvStretchList,_lhsOvertices)))
 -- Root --------------------------------------------------------
 {-
    visit 0:
@@ -2775,10 +2775,10 @@ sem_Root_Root presentation_ =
                   if _presentationIvStretch then 300 else _presentationIminHeight
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 530, column 7)
               _presentationOassignedHRef =
-                  _presentationIhRf
+                  _presentationIhRef
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 531, column 7)
               _presentationOassignedVRef =
-                  _presentationIvRf
+                  _presentationIvRef
               -- "../../proxima/src/arrangement/ArrangerAG.ag"(line 806, column 7)
               _presentationOx =
                   0
@@ -2818,6 +2818,6 @@ sem_Root_Root presentation_ =
               -- copy rule (down)
               _presentationOtextColor =
                   _lhsItextColor
-              ( _presentationIallFonts,_presentationIarrangement,_presentationIfinalHRef,_presentationIfinalHeight,_presentationIfinalVRef,_presentationIfinalWidth,_presentationIhRf,_presentationIhStretch,_presentationImaxFormatterDepth,_presentationIminHeight,_presentationIminWidth,_presentationIunfoldedTree,_presentationIvRf,_presentationIvStretch,_presentationIvertex) =
+              ( _presentationIallFonts,_presentationIarrangement,_presentationIfinalHRef,_presentationIfinalHeight,_presentationIfinalVRef,_presentationIfinalWidth,_presentationIhRef,_presentationIhStretch,_presentationImaxFormatterDepth,_presentationIminHeight,_presentationIminWidth,_presentationIunfoldedTree,_presentationIvRef,_presentationIvStretch,_presentationIvertex) =
                   (presentation_ _presentationOallFonts _presentationOassignedHRef _presentationOassignedHeight _presentationOassignedVRef _presentationOassignedWidth _presentationObackgroundColor _presentationOfillColor _presentationOfont _presentationOfontMetrics _presentationOlineColor _presentationOmouseDown _presentationOoldArr _presentationOpopupMenuItems _presentationOtextColor _presentationOx _presentationOy)
           in  ( _lhsOallFonts,_lhsOarrangement,_lhsOmaxFormatterDepth,_lhsOunfoldedTree)))
