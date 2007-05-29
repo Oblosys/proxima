@@ -239,28 +239,21 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
     (ImageA id x' y' w' h' _ _ src style (lr,lg,lb) (br,bg,bb)) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
 
---        ; setPenSize 1
         
         ; (x,y,w,h) <- if arrDb
                        then
-                        do { ----setPenColour imageColor
-                         ----  ; drawAt (Point2 x y) (Box w h)
-           do { drawRect dc (Rect x y w h) [ color := imageColor, brush:= BrushStyle BrushTransparent black ]
-              ; renderID dc scale x y id
-              }
+                        do { drawRect dc (Rect x y w h) [ color := imageColor, brush:= BrushStyle BrushTransparent black ]
+                           ; renderID dc scale x y id
                            ; return (x+(scaleInt scale hpd), y+(scaleInt scale hpd), w-(scaleInt scale pd), h-(scaleInt scale pd))
                            }
                        else 
                              return (x,y,w,h)
         
-        ; bm <- bitmapCreateFromFile src  -- can fail with exception
-                     
+        ; withBitmapFromFile src $ \bm-> -- TODO: can fail, but it is unclear how the exception can be caught
+               --      `catch` \err -> do {putStrLn "blaa"; return undefined})
         
-        
-        -- This is from ObjectIO, WX can clip, but we don't do it yet:
-        -- can't clip! For squiggly rendering, we center and tile, if image is too large it is not shown
-        -- TODO: make this the Tile case and make a Resize case 
-       
+     do {        
+        -- TODO: make this the Tile case and make a Resize case, and add clipping
         --  debugLnIO Err $ "Renderer.renderArr: could not open bitmap "++show src
         
         
@@ -270,13 +263,14 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
         
        -- ; let (iw, ih) = (scaleInt scale iw', scaleInt scale (ih'+id'))
        -- ; let bitmap = resizeBitmap (Size iw ih) bitmap' 
-        ; let (hrepeats, hrest) = w `divMod` iw 
-        ; let (vrepeats, vrest) = h `divMod` ih 
-        ; let cx = hrest `div` 2
-        ; let cy = vrest `div` 2
-        ; sequence_ [ drawBitmap dc bm (pt (x+i*iw+cx) (y+j*ih+cy)) True [brush := BrushStyle BrushSolid (colorRGB lr lg lb)] 
-                    | i<-[0..hrepeats-1], j<-[0..vrepeats-1] ]
-    
+        ; when (iw /= 0 && ih /= 0) $
+           do { let (hrepeats, hrest) = w `divMod` iw 
+              ; let (vrepeats, vrest) = h `divMod` ih 
+              ; let cx = hrest `div` 2
+              ; let cy = vrest `div` 2
+              ; sequence_ [ drawBitmap dc bm (pt (x+i*iw+cx) (y+j*ih+cy)) True [brush := BrushStyle BrushSolid (colorRGB lr lg lb)] 
+                          | i<-[0..hrepeats-1], j<-[0..vrepeats-1] ]
+              }
         
        -- use this one to do tiling and clipping automatically. move 1 left and 1 up and use transparent pen
        -- ; drawRect dc (Rect 10 10 50 50) [ color := green
@@ -284,7 +278,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
        --                                                        color doesn't seem to work
         
        
-        }
+        }}
 
     (RectangleA id x' y' w' h' _ _ lw' style (lr,lg,lb) (fr,fg,fb)) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
@@ -317,7 +311,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
               pt2 = pt (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)) ) (toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
         
-        ; line dc (pt fromx fromy) (pt tox toy) [color := colorRGB lr lg lb]
+        ; line dc (pt fromx fromy) (pt tox toy) [color := colorRGB lr lg lb, penWidth := lw' ]
         -- draw arrow head
         ; polygon dc [pt1, pt2, pt tox toy] [color := colorRGB lr lg lb, brushKind := BrushSolid, brushColor := colorRGB lr lg lb ]
         }
@@ -325,7 +319,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
     (PolyA id x' y' w' h' _ _ pts' lw' (lr,lg,lb) (br,bg,bb)) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> pt (x+scaleInt scale x') (y+scaleInt scale y')) pts'
-        ; polyline dc pts [ color := colorRGB lr lg lb ]
+        ; polyline dc pts [ color := colorRGB lr lg lb, penWidth := lw' ]
     
 
      
@@ -591,7 +585,7 @@ layoutFocusColor = CommonTypes.blue
 mkBoxCaret x y w h = 
   [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 layoutFocusColor transparent ]
 mkLineCaret x1 y1 x2 y2 =
-  [ LineA NoIDA x1 y1 x2 y2 0 0 1 layoutFocusColor ]
+  [ LineA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
  
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
