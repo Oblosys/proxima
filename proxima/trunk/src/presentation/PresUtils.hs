@@ -110,6 +110,7 @@ prunePres dt (WithP wr pres)       = WithP wr       $ prunePres dt pres
 prunePres dt (StructuralP id pres) = StructuralP id $ prunePres dt pres
 prunePres dt (ParsingP id pres)    = ParsingP id    $ prunePres dt pres
 prunePres dt (LocatorP l pres)     = LocatorP l     $ prunePres dt pres
+prunePres dt (VertexP id x y ol pres) = VertexP id x y ol $ prunePres dt pres
 
 -- maybe not useful for leafs.
 prunePres (DiffLeaf c) p@(EmptyP id)            = if c then ArrangedP  else p
@@ -138,6 +139,11 @@ prunePres (DiffNode c _ dts) p@(OverlayP id press)   = let pruned = zipWith prun
                                                                 else OverlayP id pruned 
 prunePres (DiffLeaf c) p@(OverlayP id press)       = if c then ArrangedP --p 
                                                           else OverlayP id (map (prunePres (DiffLeaf False)) press)
+prunePres (DiffNode c _ dts) p@(GraphP id w h es press) = let pruned = zipWith prunePres dts press
+                                                          in  if c then ArrangedP
+                                                                else GraphP id w h es pruned 
+prunePres (DiffLeaf c) p@(GraphP id w h es press)       = if c then ArrangedP
+                                                               else GraphP id w h es (map (prunePres (DiffLeaf False)) press)
 prunePres dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
 

@@ -98,11 +98,13 @@ data Arrangement =
 -- for creating edge arrangements during graph arranging
 -- PRECONDITION: if edges is non-empty, then vertices is non-empty as well.
 mkEdges :: Show node => [(Int,Int)] -> [(Int,Int, Outline)] -> Color -> [Arrangement node]
-mkEdges edges vertices lineColor = showDebug' Err ("mkEdges"++show edges ++ show vertices) $ map mkEdge edges 
+mkEdges edges vertices lineColor = map mkEdge edges 
  where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = index "mkEdges" fromV vertices
                                  (toVx,toVy,toVol)       = index "mkEdges"  toV vertices
+                                 (offsetFromx, offsetFromy) = fromVol (computeAngle toVx toVy fromVx fromVy)
                                  (offsetTox, offsetToy) = toVol (computeAngle fromVx fromVy toVx toVy)
-                             in  LineA NoIDA  fromVx fromVy (toVx+offsetTox) (toVy+offsetToy) 0 0 1 lineColor 
+                             in  LineA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
+                                              (toVx+offsetTox)     (toVy+offsetToy)     0 0 1 lineColor 
 
 
 -- for now, ignore ref's in diff. Even if ref changes but nothing else, no need to redraw.
@@ -224,49 +226,37 @@ markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self
                                             ++ drop (p+1) dts
 
 
+edgeClickDistance = 4.0
 
-{-
---quite inefficient at the moment
--- function is a bit weird anyway, accumulating parameter is list of paths
-
--- result is list of paths because pointing can be ambiguous (overlays)
-point' :: Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
-point' x' y' loc p@(EmptyA _)                     = [] -- ?? strange case, does empty have size?
-point' x' y' loc p@(StringA _ x y w h _ _ _ _)    = if inside x' y' x y w h then loc else [] 
-point' x' y' loc p@(RectangleA _ x y w h _ _ _ _) = if inside x' y' x y w h then loc else [] 
-point' x' y' loc p@(EllipseA _ x y w h _ _ _ _)   = if inside x' y' x y w h then loc else [] 
-point' x' y' loc p@(LineA _ x y w h _ _)          = if inside x' y' x y w h then loc else [] 
-point' x' y' loc p@(RowA _ x y w h _ arrs)        = if inside x' y' x y w h 
-                                                   then let locs = concat [point' (x'-x) (y'-y) (map (++[i]) loc) p | (i,p) <- zip [0..] arrs] 
-                                                        in  if null locs then loc else locs
-                                                   else [] 
-point' x' y' loc p@(ColA _ x y w h _ arrs)        = if inside x' y' x y w h 
-                                                   then let locs = concat [point' (x'-x) (y'-y) (map (++[i]) loc) p | (i,p) <- zip [0..] arrs] 
-                                                        in  if null locs then loc else locs
-                                                   else [] 
-point' x' y' loc p@(LocatorA location child)      = point' x' y' (map (++[0]) loc) child
-
-inside x' y' x y w h = x' >= x && x' <= x+w && y' >= y && y'<= y+h
--}
+-- new point, which only recurses in children that may have the focus
 -- Stretching rows do not lead to correct pointing.
 point' :: Show node => Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
-point' x' y' _ arr = showDebug Ren $ point (clip 0 (widthA arr-1) (x'-xA arr)) 
-                                       (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
+point' x' y' _ arr = point (clip 0 (widthA arr-1) x') (clip 0 (heightA arr-1) y') [] arr
 
--- precondition: x' y' falls inside the arrangement
+-- precondition: x' y' falls inside the arrangement. (Except for GraphA and LineA)
 point :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
 --point x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
 point x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
 point x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
 point x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
---point x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
-point x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointRowList 0 (x') (y') loc arrs
-point x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointColList 0 (x') (y') loc arrs
-point x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point (clip 0 (widthA arr-1) x')  
-                                                            (clip 0 (heightA arr-1) y') (loc++[0]) arr
+point x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointRowList 0 (x'-x) (y'-y) loc arrs
+point x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointColList 0 (x'-x) (y'-y) loc arrs
+point x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
+                                                            (clip 0 (heightA arr-1) (y'-y)) (loc++[0]) arr
 point x' y' loc p@(StructuralA _ child)             = point x' y' (loc++[0]) child
 point x' y' loc p@(ParsingA _ child)                = point x' y' (loc++[0]) child
 point x' y' loc p@(LocatorA location child)         = point x' y' (loc++[0]) child
+point x' y' loc p@(GraphA _ x y w h _ _ _ arrs)     =
+  pointGraphList (x'-x) (y'-y) loc arrs
+point x' y' loc p@(VertexA _ x y w h _ _ _ arr)   =
+  if (x' >= x) && (x' < x+w) &&
+     (y' >= y) && (y' < y+h)
+  then [loc]
+  else []
+point x' y' loc p@(LineA _ x1 y1 x2 y2 _ _ _ _)          =
+  if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
+  then [loc]
+  else []
 point x' y' _   arr                                 = debug Err ("ArrTypes.point': unhandled arrangement: "++show x'++show y'++show arr) [[]]
 
 -- precondition: x' y' falls inside the arrangement width
@@ -274,56 +264,22 @@ pointRowList :: Show node => Int -> Int -> Int -> [Int] -> [Arrangement node] ->
 pointRowList i x' y' loc []         = debug Err "ArrTypes.pointRowList: empty Row list" $ []
 pointRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
                                       then pointRowList (i+1) x' y' loc arrs
-                                      else point (x'-xA arr) (clip 0 (heightA arr-1) (y'- yA arr)) 
+                                      else point x' (clip 0 (heightA arr-1) y') 
                                                  (loc++[i]) arr
 
 pointColList i x' y' loc [] = debug Err "ArrTypes.pointRowList: empty Row list" $ []
 pointColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr 
                                       then pointColList (i+1) x' y' loc arrs
-                                      else point (clip 0 (widthA arr-1) (x'-xA arr)) (y'-yA arr) 
+                                      else point (clip 0 (widthA arr-1) x') y' 
                                                  (loc++[i]) arr
 
-
----pointOvlRef is just for now, until overlays are adjusted to have last arr in front
--- this point is called from popupMenu handler 
-
-pointOvlRev' :: Show node => Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
-pointOvlRev' x' y' _ arr = showDebug Ren $ pointOvlRev (clip 0 (widthA arr-1) (x'-xA arr)) 
-                                       (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
-
--- precondition: x' y' falls inside the arrangement
-pointOvlRev :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
---pointOvlRev x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
-pointOvlRev x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
---pointOvlRev x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
---pointOvlRev x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
---pointOvlRev x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
-pointOvlRev x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointOvlRevRowList 0 (x') (y') loc arrs
-pointOvlRev x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointOvlRevColList 0 (x') (y') loc arrs
---pointOvlRev x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = pointOvlRev (clip 0 (widthA arr-1) x') -- last arr is pointOvlReved one
---                                                            (clip 0 (heightA arr-1) y') (loc++[0]) (last arrs)
-pointOvlRev x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = pointOvlRev (clip 0 (widthA arr-1) x')  
-                                                            (clip 0 (heightA arr-1) y') (loc++[0]) arr
-pointOvlRev x' y' loc p@(StructuralA _ child)             = pointOvlRev x' y' (loc++[0]) child
-pointOvlRev x' y' loc p@(ParsingA _ child)                = pointOvlRev x' y' (loc++[0]) child
-pointOvlRev x' y' loc p@(LocatorA location child)         = pointOvlRev x' y' (loc++[0]) child
-pointOvlRev x' y' _   arr                                 = debug Err ("ArrTypes.pointOvlRev': unhandled arrangement: "++show x'++show y'++show arr) [[]]
-
--- precondition: x' y' falls inside the arrangement width
-pointOvlRevRowList :: Show node => Int -> Int -> Int -> [Int] -> [Arrangement node] -> [[Int]]
-pointOvlRevRowList i x' y' loc []         = debug Err "ArrTypes.pointOvlRevRowList: empty Row list" $ []
-pointOvlRevRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
-                                      then pointOvlRevRowList (i+1) x' y' loc arrs
-                                      else pointOvlRev (x'-xA arr) (clip 0 (heightA arr-1) (y'- yA arr)) 
-                                                 (loc++[i]) arr
-
-pointOvlRevColList i x' y' loc [] = debug Err "ArrTypes.pointOvlRevRowList: empty Row list" $ []
-pointOvlRevColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr 
-                                      then pointOvlRevColList (i+1) x' y' loc arrs
-                                      else pointOvlRev (clip 0 (widthA arr-1) (x'-xA arr)) (y'-yA arr) 
-                                                 (loc++[i]) arr
-
-
+-- Graphs let the pointing be handled by child arrangements. This is safe, because they must be
+-- VertexA's or LineA's
+pointGraphList x' y' loc arrs =
+  case concat [ point x' y' (loc++[i]) arr | (i,arr) <- zip [0..] arrs ] of
+    []      -> []
+    (loc:_) -> [loc]
+                                          
 
 
 -- Temporary pointing stuff for hacked popups
@@ -521,5 +477,52 @@ docFocusArr
 
 leftDocPathsA :: PathArr -> Arrangement node -> [PathDoc]
 leftDocPathsA 
-
 -}
+
+
+-- some code from Dazzle's Math.hs
+data DoublePoint = DoublePoint
+    { doublePointX :: !Double
+    , doublePointY :: !Double
+    }
+    deriving (Show, Eq, Read)
+
+data Vector = Vector !Double !Double
+
+square :: Double -> Double
+square d = d*d
+
+-- | Compute distance from a segment (as opposed to a line) to a point
+--   Formulas taken from
+--   <http://geometryalgorithms.com/Archive/algorithm_0102/algorithm_0102.htm>
+distanceSegmentPoint :: (Int,Int) -> (Int,Int) -> (Int,Int) -> Double
+distanceSegmentPoint (x0,y0) (x1,y1) (x,y) =
+    let p0 = DoublePoint (fromIntegral x0) (fromIntegral y0)
+        p1 = DoublePoint (fromIntegral x1) (fromIntegral y1)
+        p  = DoublePoint (fromIntegral x)  (fromIntegral y)
+        v  = p1 `subtractDoublePointVector` p0
+        w  = p  `subtractDoublePointVector` p0
+        c1 = dotProduct w v
+        c2 = dotProduct v v
+    in if c1 <= 0 then distancePointPoint p p0
+       else if c2 <= c1 then distancePointPoint p p1
+       else distanceLinePoint p0 p1 p
+
+-- | Compute distance between two points
+distancePointPoint :: DoublePoint -> DoublePoint -> Double
+distancePointPoint (DoublePoint x0 y0) (DoublePoint x1 y1) =
+    sqrt (square (x0 - x1)  + square (y0 - y1))
+
+-- | Compute distance from a line to a point
+distanceLinePoint :: DoublePoint -> DoublePoint -> DoublePoint -> Double
+distanceLinePoint (DoublePoint x0 y0) (DoublePoint x1 y1) (DoublePoint x y) =
+    abs ( ( (y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0) ) /
+          sqrt (square (x1 - x0) + square (y1 - y0))
+        )
+
+subtractDoublePointVector :: DoublePoint -> DoublePoint -> Vector
+subtractDoublePointVector (DoublePoint x0 y0) (DoublePoint x1 y1) =
+    Vector (x0 - x1) (y0 - y1)
+
+dotProduct :: Vector -> Vector -> Double
+dotProduct (Vector v1 v2) (Vector w1 w2) = v1 * w1 + v2 * w2

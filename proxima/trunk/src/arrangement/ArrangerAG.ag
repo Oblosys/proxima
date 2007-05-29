@@ -915,8 +915,8 @@ SEM Presentation
       lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | GraphP 
       lhs.arrangement = GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
-                               ( mkEdges @edges @presentationList.vertices @lhs.lineColor ++
-                                 @presentationList.arrangementList )
+                               ( @presentationList.arrangementList  ++
+                                 mkEdges @edges @presentationList.vertices @lhs.lineColor )
   | VertexP
       lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalHRef) (@lhs.y + @y - @finalVRef)
                                 @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @child.arrangement

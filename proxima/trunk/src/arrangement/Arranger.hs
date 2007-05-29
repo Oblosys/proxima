@@ -18,7 +18,7 @@ arrangePresentation fontMetricsRef focus oldArrangement dt pres =
  do { let screenSize = 1000      
     ; let pres' = prunePres dt pres
   --  ; debugLnIO Err ("Diff tree"++show dt)
-    ; debugLnIO Err ("pruned presentation"++show pres')
+  --  ; debugLnIO Err ("pruned presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' screenSize oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
     ; if maxFDepth == 0 then

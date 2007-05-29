@@ -563,7 +563,7 @@ mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCare
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (LineA _ x y x'' y'' _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) (x''-x) (y''-y)
+mkFocus' p x' y' focus          (LineA _ x1 y1 x2 y2 _ _ _ _)        = mkLineCaret (x'+x1) (y'+y1) (x'+x2) (y'+y2)
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
@@ -583,12 +583,16 @@ mkFocusList' p i x' y' focus@(FocusA (PathA stp sti) (PathA enp eni))(a:as) =
 mkFocusList' p i x' y' focus arr = debug Err ("Renderer.mkFocusList': unimplemented arrangement: "++show focus++" "++show arr) []
 
 
+layoutFocusColor = CommonTypes.blue
+
 -- ref lines not used, because caret is not incrementally rendered
 -- because of line/box difference (line x y (x+w) y) is wider than (box x y w h) all to points are decreased
 -- just decreasing w and h does not work
 mkBoxCaret x y w h = 
-  let color = CommonTypes.blue in
-    [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 color transparent ]
+  [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 layoutFocusColor transparent ]
+mkLineCaret x1 y1 x2 y2 =
+  [ LineA NoIDA x1 y1 x2 y2 0 0 1 layoutFocusColor ]
+ 
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
 arrangedFocusArea fArrList = -- compute the region that is covered by the focus
