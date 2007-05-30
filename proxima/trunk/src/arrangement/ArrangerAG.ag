@@ -918,7 +918,7 @@ SEM Presentation
                                ( @presentationList.arrangementList  ++
                                  mkEdges @edges @presentationList.vertices @lhs.lineColor )
   | VertexP
-      lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalHRef) (@lhs.y + @y - @finalVRef)
+      lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
                                 @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @child.arrangement
 {-
   | LayedOutRowP 
