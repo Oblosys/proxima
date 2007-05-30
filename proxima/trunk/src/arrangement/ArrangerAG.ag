@@ -11,10 +11,15 @@ import FontLib
 {
 {-
 TODO: 
+- add check that graph only has vertex children
+- SWITH href and vref!!! (also in presentation)
+
 bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
 bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive
 bug: boxed pres `withHRef` x  does not work for top and bottom line and background
 - why does Empty.arrangement have 0 for x and y?
+
+
 
 -}
 
@@ -915,11 +920,13 @@ SEM Presentation
       lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | GraphP 
       lhs.arrangement = GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
+                               (length @presentationList.vertices)
                                ( @presentationList.arrangementList  ++
                                  mkEdges @edges @presentationList.vertices @lhs.lineColor )
   | VertexP
       lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
-                                @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @child.arrangement
+                                @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
+                                (\a -> let (x,y) = @outline a in (x+ @finalVRef,y+ @finalHRef)) @child.arrangement
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
@@ -1007,10 +1014,10 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
       presentationList.oldArrList = case @lhs.oldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
                                                         _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | GraphP 
-      presentationList.oldArrList = case @lhs.oldArr of GraphA _ _ _ _ _ _ _ _ arrs -> arrs
+      presentationList.oldArrList = case @lhs.oldArr of GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
   | VertexP 
-      child.oldArr = case @lhs.oldArr of VertexA _ _ _ _ _ _ _ _ arr -> arr
-                                         _                           -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+      child.oldArr = case @lhs.oldArr of VertexA _ _ _ _ _ _ _ _ _ arr -> arr
+                                         _                             -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
   | StructuralP 
       child.oldArr = case @lhs.oldArr of StructuralA _ arr -> arr
                                          _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0

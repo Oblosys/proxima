@@ -183,8 +183,8 @@ computeRenderedArea (lux, luy) diffTree arr =
                     RowA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    GraphA   _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    VertexA  _ x' y' _ _ _ _ _ arr  -> computeChildrenRenderedArea x' y' [arr]
+                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
+                    VertexA  _ x' y' _ _ _ _ _ _ arr  -> computeChildrenRenderedArea x' y' [arr]
                     StructuralA _ arr               -> computeChildrenRenderedArea 0 0 [arr]
                     ParsingA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
                     LocatorA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
@@ -210,8 +210,8 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
-                    GraphA   _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
-                    VertexA  _ x' y' _ _ _ _ _ arr  -> renderChildren x' y' [arr]
+                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    VertexA  _ x' y' _ _ _ _ _ _ arr  -> renderChildren x' y' [arr]
                     StructuralA _ arr           -> renderChildren 0 0 [arr]
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
@@ -423,7 +423,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
               }
         }
 
-    (GraphA id x' y' w' h' _ _ (br,bg,bb) arrs) ->
+    (GraphA id x' y' w' h' _ _ (br,bg,bb) _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -442,7 +442,7 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
               }
         ; sequence_ $ reverse $ zipWith (renderArr dc arrDb scale (x, y)) childDiffTrees arrs -- reverse so first is drawn in front
         }
-    (VertexA id x' y' w' h' _ _ (br,bg,bb) arr) ->
+    (VertexA id x' y' w' h' _ _ (br,bg,bb) _ arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -563,8 +563,8 @@ mkFocus' p x' y' focus          (LineA _ x1 y1 x2 y2 _ _ _ _)        = mkLineCar
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
-mkFocus' p x' y' (FocusA st en) (GraphA _ x y w h _ _ _ arrs)         =  mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
-mkFocus' p x' y' (FocusA st en) (VertexA _ x y w h _ _ _ _)           = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' (FocusA st en) (GraphA _ x y w h _ _ _ _ arrs)     =  mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
+mkFocus' p x' y' (FocusA st en) (VertexA _ x y w h _ _ _ outline _) = mkOutlineCaret (x'+x) (y'+y) w h outline
 mkFocus' p x' y' focus          (StructuralA l arr)      = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (ParsingA l arr)         = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (LocatorA l arr)         = mkFocus' (p++[0]) x' y' focus arr
@@ -588,7 +588,9 @@ mkBoxCaret x y w h =
   [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 layoutFocusColor transparent ]
 mkLineCaret x1 y1 x2 y2 =
   [ LineA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
- 
+mkOutlineCaret x y w h outline = 
+  [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 layoutFocusColor transparent ]
+
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
 arrangedFocusArea fArrList = -- compute the region that is covered by the focus
@@ -597,14 +599,6 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 
 -- do we need draw the focus with appWindowPicture or accWindowPicture?
-
-testArr :: Read node => String -> Arrangement node
-testArr filePath = unsafePerformIO $
- do { putStrLn $ "Opening Arrangement file " ++ filePath
-    ; str <- readFile filePath
-    ; return $ read str
-    }      
-
 
 -- test stuff
 

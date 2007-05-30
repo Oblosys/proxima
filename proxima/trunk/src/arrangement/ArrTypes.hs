@@ -67,9 +67,9 @@ data Arrangement node =
   | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
-  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
-  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !(Arrangement node)
-  | LocatorA    node !(Arrangement node) deriving (Show, Read) -- do we want a ! for location  ?  
+  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
+  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
+  | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
 
@@ -81,6 +81,7 @@ type Width = Int
 type Height = Int
 type HRef = Int
 type VRef = Int
+type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
 data Style = Solid | Transparent deriving (Show, Eq, Read)
 
 
@@ -159,8 +160,8 @@ xA (LineA _ x y x' y' _ _ _ _)        = x
 xA (RowA _ x y w h _ _ _ _)           = x
 xA (ColA _ x y w h _ _ _ _)           = x
 xA (OverlayA _ x y w h _ _ _ _)       = x
-xA (GraphA _ x y w h _ _ _ _)         = x
-xA (VertexA _ x y w h _ _ _ _)        = x
+xA (GraphA _ x y w h _ _ _ _ _)         = x
+xA (VertexA _ x y w h _ _ _ _ _)        = x
 xA (StructuralA _ child)          = xA child
 xA (ParsingA _ child)             = xA child
 xA (LocatorA location child)      = xA child
@@ -176,8 +177,8 @@ yA (LineA _ x y x' y' _ _ _ _)        = y
 yA (RowA _ x y w h _ _ _ _)           = y
 yA (ColA _ x y w h _ _ _ _)           = y
 yA (OverlayA _ x y w h _ _ _ _)       = y
-yA (GraphA _ x y w h _ _ _ _)         = y
-yA (VertexA _ x y w h _ _ _ _)        = y
+yA (GraphA _ x y w h _ _ _ _ _)         = y
+yA (VertexA _ x y w h _ _ _ _ _)        = y
 yA (StructuralA _ child)          = yA child
 yA (ParsingA _ child)             = yA child
 yA (LocatorA location child)      = yA child
@@ -193,8 +194,8 @@ widthA (LineA _ x y x' y' _ _ _ _)        = x'-x
 widthA (RowA _ x y w h _ _ _ _)           = w
 widthA (ColA _ x y w h _ _ _ _)           = w
 widthA (OverlayA _ x y w h _ _ _ _)       = w
-widthA (GraphA _ x y w h _ _ _ _)         = w
-widthA (VertexA _ x y w h _ _ _ _)        = w
+widthA (GraphA _ x y w h _ _ _ _ _)         = w
+widthA (VertexA _ x y w h _ _ _ _ _)        = w
 widthA (StructuralA _ child)          = widthA child
 widthA (ParsingA _ child)             = widthA child
 widthA (LocatorA location child)      = widthA child
@@ -210,8 +211,8 @@ heightA (LineA _ x y x' y' _ _ _ _)        = y'-y
 heightA (RowA _ x y w h _ _ _ _)           = h
 heightA (ColA _ x y w h _ _ _ _)           = h
 heightA (OverlayA _ x y w h _ _ _ _)       = h
-heightA (GraphA _ x y w h _ _ _ _)         = h
-heightA (VertexA _ x y w h _ _ _ _)        = h
+heightA (GraphA _ x y w h _ _ _ _ _)         = h
+heightA (VertexA _ x y w h _ _ _ _ _)        = h
 heightA (StructuralA _ child)          = heightA child
 heightA (ParsingA _ child)             = heightA child
 heightA (LocatorA location child)      = heightA child
@@ -227,8 +228,8 @@ hRefA (LineA _ x y x' y' hr vr _ _)        = hr
 hRefA (RowA _ x y w h hr vr _ _)           = hr
 hRefA (ColA _ x y w h hr vr _ _)           = hr
 hRefA (OverlayA _ x y w h hr vr _ _)       = hr
-hRefA (GraphA _ x y w h hr vr _ _)         = hr
-hRefA (VertexA _ x y w h hr vr _ _)        = hr
+hRefA (GraphA _ x y w h hr vr _ _ _)         = hr
+hRefA (VertexA _ x y w h hr vr _ _ _)        = hr
 hRefA (StructuralA _ child)          = hRefA child
 hRefA (ParsingA _ child)             = hRefA child
 hRefA (LocatorA location child)      = hRefA child
@@ -244,8 +245,8 @@ vRefA (LineA _ x y x' y' hr vr _ _)        = vr
 vRefA (RowA _ x y w h hr vr _ _)           = vr
 vRefA (ColA _ x y w h hr vr _ _)           = vr
 vRefA (OverlayA _ x y w h hr vr _ _)       = vr
-vRefA (GraphA _ x y w h hr vr _ _)         = vr
-vRefA (VertexA _ x y w h hr vr _ _)        = vr
+vRefA (GraphA _ x y w h hr vr _ _ _)         = vr
+vRefA (VertexA _ x y w h hr vr _ _ _)        = vr
 vRefA (StructuralA _ child)          = vRefA child
 vRefA (ParsingA _ child)             = vRefA child
 vRefA (LocatorA location child)      = vRefA child
@@ -265,8 +266,8 @@ idA (LineA id x y x' y' _ _ _ _)        = id
 idA (RowA id x y w h _ _ _ _)           = id
 idA (ColA id x y w h _ _ _ _)           = id
 idA (OverlayA id x y w h _ _ _ _)       = id
-idA (GraphA id x y w h hr vr _ _)       = id
-idA (VertexA id x y w h hr vr _ _)      = id
+idA (GraphA id x y w h hr vr _ _ _)       = id
+idA (VertexA id x y w h hr vr _ _ _)      = id
 idA (StructuralA _ child)          = idA child
 idA (ParsingA _ child)             = idA child
 idA (LocatorA location child)      = idA child
@@ -284,8 +285,8 @@ setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc)   = EllipseA id x y
 setXYWHA x y w h (RowA id _ _ _ _ hr vr  c arrs)               = RowA id x y w h hr vr c arrs                   
 setXYWHA x y w h (ColA id _ _ _ _ hr vr  c arrs)               = ColA id x y w h hr vr c arrs                   
 setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c arrs)           = OverlayA id x y w h hr vr c arrs               
-setXYWHA x y w h (GraphA id  _ _ _ _ hr vr  c arrs)            = GraphA id x y w h hr vr  c arrs
-setXYWHA x y w h (VertexA id _ _ _ _ hr vr c arr)              = VertexA id x y w h hr vr  c arr
+setXYWHA x y w h (GraphA id  _ _ _ _ hr vr c nvs arrs)            = GraphA id x y w h hr vr  c nvs arrs
+setXYWHA x y w h (VertexA id _ _ _ _ hr vr c ol arr)              = VertexA id x y w h hr vr  c ol arr
 setXYWHA x y w h (LocatorA location arr)                = LocatorA location $ setXYWHA x y w h arr
 setXYWHA x y w h (StructuralA id arr)                   = StructuralA id $ setXYWHA x y w h arr
 setXYWHA x y w h (ParsingA id arr)                      = ParsingA id    $ setXYWHA x y w h arr                         
