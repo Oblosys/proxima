@@ -52,7 +52,7 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col [ text "Root", @tree.pres, @graph.pres ]
-                     
+
 SEM Tree
   | Bin
       lhs.pres = loc (BinNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -66,27 +66,32 @@ SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      GraphP NoIDP 1000 700 @edges.edges @vertices.press
+      edges.vertexIDs = @vertices.vertexIDs
       
 SEM Vertex [ || ] 
   | Vertex
       lhs.pres = VertexP NoIDP @x.int @y.int (\a -> (round $ 18*cos a, round $ -18*sin a)) $
-                   col [ rowR 1 [glue, ellipse 35 35 `withRef` (17,17) `withfColor` (200, 255, 255), glue]
+                   text "oeleboele"
+                   {-col [ rowR 1 [glue, ellipse 35 35 `withRef` (17,17) `withfColor` (200, 255, 255), glue]
                        , vSpace 4 `withHStretch` True
-                       , row [glue, boxed 
+                       , rowR 1 [glue, boxed 
                                           (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
                                             `withbgColor` (236, 236, 169)
                                 , glue]
-                       ]
+                       ]-}
 
-SEM Edge [ | | edge : {Maybe (Int,Int)} ]    
+
+SEM Edge [ vertexIDs : {[Int]} || edge : {Maybe (Int,Int)} ]    
   | Edge
-      lhs.edge = Just (@from.int, @to.int)
+      lhs.edge = case (elemIndex @from.int @lhs.vertexIDs,elemIndex @to.int @lhs.vertexIDs) of
+                   (Just f, Just t) -> Just (f,t)
+                   _                -> Nothing
   | HoleEdge
       lhs.edge = Nothing
   | ParseErrEdge
       lhs.edge = Nothing
 
-SEM List_Edge [ || edges : {[(Int,Int)]} ] 
+SEM List_Edge [ vertexIDs : {[Int]} || edges : {[(Int,Int)]} ] 
   | List_Edge
       lhs.edges = catMaybes @elts.edges
   | HoleList_Edge
@@ -94,8 +99,30 @@ SEM List_Edge [ || edges : {[(Int,Int)]} ]
   | ParseErrList_Edge
       lhs.edges = []
       
-SEM ConsList_Edge [ || edges : {[Maybe (Int,Int)]} ] 
+SEM ConsList_Edge [ vertexIDs : {[Int]}  || edges : {[Maybe (Int,Int)]} ] 
   | Cons_Edge
       lhs.edges = @head.edge : @tail.edges
   | Nil_Edge
       lhs.edges = []
+
+SEM Vertex [ | | vertexID : {Maybe Int} ]    
+  | Vertex
+      lhs.vertexID = Just @id.int
+  | HoleVertex
+      lhs.vertexID = Nothing
+  | ParseErrVertex
+      lhs.vertexID = Nothing
+
+SEM List_Vertex [ || vertexIDs : {[Int]} ] 
+  | List_Vertex
+      lhs.vertexIDs = catMaybes @elts.vertexIDs
+  | HoleList_Vertex
+      lhs.vertexIDs = []
+  | ParseErrList_Vertex
+      lhs.vertexIDs = []
+      
+SEM ConsList_Vertex [ || vertexIDs : {[Maybe Int]} ] 
+  | Cons_Vertex
+      lhs.vertexIDs = @head.vertexID : @tail.vertexIDs
+  | Nil_Vertex
+      lhs.vertexIDs = []
