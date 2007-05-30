@@ -175,7 +175,7 @@ trleaf2 = mkTreeLeaf False (text "spinach")
 trnode4 = mkTreeNode True  True  (row[text "citrus"] `withbgColor` lightGrey) [trleaf3,trleaf4]
 trleaf3 = mkTreeLeaf False (text "orange")
 trleaf4 = mkTreeLeaf True  (text "lemon")
-trleaf6 = mkTreeLeaf       True  (text "snack")
+trleaf6 = mkTreeLeaf True  (text "snack")
 
 trrroot  = mkTreeNode True  True  (text "food") [trrnode1, trrnode2, trrleaf6]
 trrnode1 = mkTreeNode False True  (text "fruit") [trrnode4, trrleaf1]
@@ -191,32 +191,32 @@ trrleaf6 = mkTreeLeaf True  (text "snack")
 modroot  = mkTreeNode True  True  (text "Proxima") [commonNd,evalNd,presentNd,layoutNd,modNd1,modNd2,mainNd]
 commonNd = mkTreeNode False False  (text "Common") []
 evalNd = mkTreeNode False False  (text "Evaluation") []
-modLf2   = mkTreeLeaf       True  (text "EvaluateTypes")
+modLf2   = mkTreeLeaf True        (text "EvaluateTypes")
 presentNd = mkTreeNode False True  (text "Presentation") [typesLf, utilsLf, presentLf, interpretLf, modLf1,modLf3]
-typesLf = mkTreeLeaf       False  (text "Types")
-utilsLf = mkTreeLeaf       False  (text "Utils")
-interpretLf = mkTreeLeaf       False  (text "Interpret")
-presentLf   = mkTreeLeaf       False  (text "Present")
-modLf1   = mkTreeLeaf       False  (row[text "XprezLib"] `withbgColor` lightGrey)
-modLf3   = mkTreeLeaf       True  (text "Parser")
+typesLf = mkTreeLeaf False        (text "Types")
+utilsLf = mkTreeLeaf False        (text "Utils")
+interpretLf = mkTreeLeaf False        (text "Interpret")
+presentLf   = mkTreeLeaf False        (text "Present")
+modLf1   = mkTreeLeaf False        (row[text "XprezLib"] `withbgColor` lightGrey)
+modLf3   = mkTreeLeaf True        (text "Parser")
 layoutNd = mkTreeNode False False  (text "Layout") [presentLf, interpretLf]
 modNd1 = mkTreeNode False False  (text "Arrangement") []
 modNd2 = mkTreeNode False False  (text "Rendering") []
 mainNd =  mkTreeNode True True  (text "Main") [modLf4,modLf5,modLf6]
-modLf4   = mkTreeLeaf       False  (text "Architecture")
-modLf5   = mkTreeLeaf       False  (text "Gui")
-modLf6   = mkTreeLeaf       True  (text "Main")
+modLf4   = mkTreeLeaf False        (text "Architecture")
+modLf5   = mkTreeLeaf False        (text "Gui")
+modLf6   = mkTreeLeaf True        (text "Main")
 -- tree:
 --               isLast isExp
-l1 = mkTreeLeaf        False (text "leaf 1")
-n2 = mkTreeNode True False (text "leafnode 2") [] --  `withFontSize` 50) []
-n3 = mkTreeNode False False (text "node 3") []
-l3 = mkTreeLeaf        True  (text "leaf 3")
-tr1 = mkTreeNode False True (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n3, l3]
-l4 = mkTreeLeaf        False (text "leaf 4")
-l5 = mkTreeLeaf        False (text "leaf 5")
-l6 = mkTreeLeaf        False  (text "leaf 6")
-                           -- (boxed testcase `withFontSize_` (`div` 2))
+l1  = mkTreeLeaf False       (text "leaf 1")
+n2  = mkTreeNode True  False (text "leafnode 2") [] --  `withFontSize` 50) []
+n3  = mkTreeNode False False (text "node 3") []
+l3  = mkTreeLeaf True        (text "leaf 3")
+tr1 = mkTreeNode False True  (img "img/yahoo.bmp" `withSize` (134,38)) [l1, n3, l3]
+l4  = mkTreeLeaf False       (text "leaf 4")
+l5  = mkTreeLeaf False       (text "leaf 5")
+l6  = mkTreeLeaf False       (text "leaf 6")
+                          -- (boxed testcase `withFontSize_` (`div` 2))
 myTree = row [ trroot, hSpace 10, trrroot, hSpace 10, modroot ] -- mkTreeNode True True (text "root") [l4, tr1, l6, n2]
 
 -------------------------------------------------------------------------
@@ -228,13 +228,13 @@ vLine' = vLine -- empty
 mkTreeLeaf :: Bool -> Xprez doc node clip -> Xprez doc node clip
 mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
-      , hLine `withWidth` 5, refHalf label ]
+      , hLine `withWidth` 5, refvHalf label ]
 
 mkTreeNode :: Bool -> Bool -> Xprez doc node clip -> [ Xprez doc node clip ] -> Xprez doc node clip
 mkTreeNode isLast isExp label children =
   rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
-                       , hLine `withWidth` 5,refHalf label
+                       , hLine `withWidth` 5,refvHalf label
                        ]
                  ] ++ (if isExp then children else [] )
          ]

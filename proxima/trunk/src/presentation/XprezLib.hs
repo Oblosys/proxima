@@ -147,6 +147,9 @@ withHStretch xp hs = withSyn xp (\s -> s { hStretch = hs })
 withVStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
 withVStretch xp vs = withSyn xp (\s -> s { vStretch = vs })
 
+withStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
+withStretch xp str = withSyn xp (\s -> s { hStretch = str, vStretch = str })
+
 withWidth :: Xprez doc node clip -> Int -> Xprez doc node clip
 withWidth xp w = withSyn xp (\s -> s { minWidth = w, hStretch = False })
 
@@ -202,14 +205,23 @@ vAlignTop xp = colR  1 [ xp,  hvStretch]
 vAlignBottom xp = col [ hvStretch, xp]
 
 
-refHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedHeight i `div` 2
-                                       newI = i { assignedHRef = assignedHRef i + refdif
-                                                }
-                                       newS = s {hRef = hRef s - refdif -- assignedHeight i `div` 2
-                                                , finalHRef = finalHRef s - refdif
-                                                }
-                                                 
-                                    in (newI,newS))
+refvHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedHeight i `div` 2
+                                        newI = i { assignedVRef = assignedVRef i + refdif
+                                                 }
+                                        newS = s {hRef = vRef s - refdif -- assignedHeight i `div` 2
+                                                 , finalVRef = finalVRef s - refdif
+                                                 }
+                                                  
+                                     in (newI,newS))
+
+refhHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedWidth i `div` 2
+                                        newI = i { assignedHRef = assignedHRef i + refdif
+                                                 }
+                                        newS = s {hRef = hRef s - refdif -- assignedHeight i `div` 2
+                                                 , finalHRef = finalHRef s - refdif
+                                                 }
+                                                  
+                                     in (newI,newS))
 
 glue :: Xprez doc node clip
 glue = empty `withHStretch` True `withVStretch` True
