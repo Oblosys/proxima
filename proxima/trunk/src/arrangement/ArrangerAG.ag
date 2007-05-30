@@ -13,7 +13,7 @@ import FontLib
 TODO: 
 bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
 bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive
-
+bug: boxed pres `withHRef` x  does not work for top and bottom line and background
 - why does Empty.arrangement have 0 for x and y?
 
 -}
