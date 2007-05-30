@@ -38,6 +38,7 @@ TODO:
 - line sizes
 - scaling
 - set view size and title
+- putting a tree beneath the graph leads to drawing problems.
 
 -- why does mouse click lead to entire redraw??
 
@@ -69,14 +70,15 @@ mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node
                  ScrolledWindow a -> Int -> Int -> IO ()
 mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
-    ; let ctxtItems = case point' x y [[]] arr of
-                        (pthA:_) -> popupMenuItemsPres (addWithSteps pthA prs) prs
-                        []       -> []
+    ; let ctxtItems = case ArrLayerUtils.point x y arr of
+                        Nothing -> []
+                        Just pthA -> popupMenuItemsPres (addWithSteps pthA prs) prs
               
-   ; case map pathNode (pointDoc' x y arr) of
-        (pth:_) ->
-         do { let alts = DocumentEdit.menuD pth doc
-            ; let items = ctxtItems ++ alts
+   ; case pointDoc x y arr of
+        Just node ->
+         do { let pathDoc = pathNode node
+                  alts = DocumentEdit.menuD pathDoc doc
+                  items = ctxtItems ++ alts
             --; putStrLn $ "popup"++show (map fst items)
             ; popupMenu <- menuPane []
             ; sequence_ (map (mkMenuItem popupMenu) items)
@@ -85,7 +87,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
 
             ; menuPopup popupMenu (pt scrX scrY) window
             }
-        _ -> return ()  
+        Nothing -> return ()  
     }                         -- This stuff belongs in GUI, renderer should only export names + edit ops
   where mkMenuItem popupMenu (str, upd) =
          do { item <- menuItem popupMenu [ text := str ]

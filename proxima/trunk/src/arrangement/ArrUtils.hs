@@ -2,8 +2,9 @@ module ArrUtils where
 
 import CommonTypes
 import ArrTypes
-
 import CommonUtils
+
+import Maybe 
 
 -- utils
 
@@ -228,108 +229,70 @@ markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self
 
 edgeClickDistance = 4.0
 
--- new point, which only recurses in children that may have the focus
+-- | point returns a path to the element at (x,y) in the arrangement
+point :: Show node => Int -> Int -> Arrangement node -> Maybe [Int]
+point x' y' arr = fmap fst $ point' (clip 0 (widthA arr-1) x') (clip 0 (heightA arr-1) y') [] (error "point: no root locator") arr
+
+-- Temporary point function for hacked popups
+pointDoc :: Show node => Int -> Int -> Arrangement node -> Maybe node
+pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heightA arr-1) y') [] (error "point: no root locator") arr
+
+-- point only recurses in children that may have the focus
 -- Stretching rows do not lead to correct pointing.
-point' :: Show node => Int -> Int -> [[Int]] -> Arrangement node -> [[Int]]
-point' x' y' _ arr = point (clip 0 (widthA arr-1) x') (clip 0 (heightA arr-1) y') [] arr
 
 -- precondition: x' y' falls inside the arrangement. (Except for GraphA and LineA)
-point :: Show node => Int -> Int -> [Int] -> Arrangement node -> [[Int]]
---point x' y' loc p@(EmptyA _)                     = [] -- does not occur at the moment
-point x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = [loc]
-point x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
-point x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
-point x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointRowList 0 (x'-x) (y'-y) loc arrs
-point x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointColList 0 (x'-x) (y'-y) loc arrs
-point x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
-                                                            (clip 0 (heightA arr-1) (y'-y)) (loc++[0]) arr
-point x' y' loc p@(StructuralA _ child)             = point x' y' (loc++[0]) child
-point x' y' loc p@(ParsingA _ child)                = point x' y' (loc++[0]) child
-point x' y' loc p@(LocatorA location child)         = point x' y' (loc++[0]) child
-point x' y' loc p@(GraphA _ x y w h _ _ _ arrs)     =
-  pointGraphList (x'-x) (y'-y) loc arrs
-point x' y' loc p@(VertexA _ x y w h _ _ _ arr)   =
+point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
+--point' x' y' pth loc p@(EmptyA _)                     = Nothing -- does not occur at the moment
+point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _)    = Just (pth, loc)
+point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ _ _ _) = Just (pth, loc)
+point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = Just (pth, loc)
+point' x' y' pth loc p@(RowA _ x y w h _ _ _ arrs)        = pointRowList 0 (x'-x) (y'-y) pth loc arrs
+point' x' y' pth loc p@(ColA _ x y w h _ _ _ arrs)        = pointColList 0 (x'-x) (y'-y) pth loc arrs
+point' x' y' pth loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point' (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
+                                                            (clip 0 (heightA arr-1) (y'-y)) (pth++[0]) loc arr
+point' x' y' pth loc p@(StructuralA _ child)              = point' x' y' (pth++[0]) loc child
+point' x' y' pth loc p@(ParsingA _ child)                 = point' x' y' (pth++[0]) loc child
+point' x' y' pth _   p@(LocatorA location child)          = point' x' y' (pth++[0]) location child
+point' x' y' pth loc p@(GraphA _ x y w h _ _ _ arrs) =
+  pointGraphList (x'-x) (y'-y) pth loc arrs
+point' x' y' pth loc p@(VertexA _ x y w h _ _ _ arr) =
   if (x' >= x) && (x' < x+w) &&
      (y' >= y) && (y' < y+h)
-  then [loc]
-  else []
-point x' y' loc p@(LineA _ x1 y1 x2 y2 _ _ _ _)          =
+  then Just (pth, loc)
+  else Nothing
+point' x' y' pth loc p@(LineA _ x1 y1 x2 y2 _ _ _ _) =
   if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
-  then [loc]
-  else []
-point x' y' _   arr                                 = debug Err ("ArrTypes.point': unhandled arrangement: "++show x'++show y'++show arr) [[]]
+  then Just (pth, loc)
+  else Nothing
+point' x' y' _ _   arr                                 = debug Err ("ArrTypes.point': unhandled arrangement: "++show x'++show y'++show arr) Nothing
 
 -- precondition: x' y' falls inside the arrangement width
-pointRowList :: Show node => Int -> Int -> Int -> [Int] -> [Arrangement node] -> [[Int]]
-pointRowList i x' y' loc []         = debug Err "ArrTypes.pointRowList: empty Row list" $ []
-pointRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
-                                      then pointRowList (i+1) x' y' loc arrs
-                                      else point x' (clip 0 (heightA arr-1) y') 
-                                                 (loc++[i]) arr
+pointRowList :: Show node => Int -> Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
+pointRowList i x' y' pth loc []         = debug Err "ArrTypes.pointRowList: empty Row list" $ Nothing
+pointRowList i x' y' pth loc (arr:arrs) = if x' >= xA arr + widthA arr 
+                                      then pointRowList (i+1) x' y' pth loc arrs
+                                      else point' x' (clip 0 (heightA arr-1) y') 
+                                                  (pth++[i]) loc arr
 
-pointColList i x' y' loc [] = debug Err "ArrTypes.pointRowList: empty Row list" $ []
-pointColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr 
-                                      then pointColList (i+1) x' y' loc arrs
-                                      else point (clip 0 (widthA arr-1) x') y' 
-                                                 (loc++[i]) arr
+pointColList :: Show node => Int -> Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
+pointColList i x' y' pth loc [] = debug Err "ArrTypes.pointRowList: empty Row list" $ Nothing
+pointColList i x' y' pth loc (arr:arrs) = if y' >= yA arr + heightA arr 
+                                      then pointColList (i+1) x' y' pth loc arrs
+                                      else point' (clip 0 (widthA arr-1) x') y' 
+                                                  (pth++[i]) loc arr
 
 -- Graphs let the pointing be handled by child arrangements. This is safe, because they must be
 -- VertexA's or LineA's
-pointGraphList x' y' loc arrs =
-  case concat [ point x' y' (loc++[i]) arr | (i,arr) <- zip [0..] arrs ] of
-    []      -> []
-    (loc:_) -> [loc]
+pointGraphList :: Show node => Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
+pointGraphList x' y' pth loc arrs =
+  case catMaybes [ point' x' y' (pth++[i]) loc arr | (i,arr) <- zip [0..] arrs ] of
+    []      -> Nothing
+    ((pth, loc):_) -> Just (pth, loc)
                                           
 
 
--- Temporary pointing stuff for hacked popups
-
---getDoc :: Arrangement node -> () -- Document
---getDoc arr = debug err (show rr) $ 
-
-pointDoc' :: Show node =>  Int -> Int -> Arrangement node -> [node]
-pointDoc' x' y' arr = showDebug Ren $ pointDoc (clip 0 (widthA arr-1) (x'-xA arr)) 
-                                       (clip 0 (heightA arr-1) (y'-yA arr)) [] arr
-
--- loc is now list of nodes, but should be a (Maybe node).
-
--- precondition: x' y' falls inside the arrangement
-pointDoc :: Show node => Int -> Int -> [node] -> Arrangement node -> [node]
---pointDoc x' y' loc p@(EmptyA _ _ _ _ _ _)                     = [] -- does not occur at the moment
-pointDoc x' y' loc p@(StringA _ x y w h _ _ _ _ _ _)       = loc
---pointDoc x' y' loc p@(RectangleA _ x y w h _ _ _ _ _ _) = [loc]
---pointDoc x' y' loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = [loc]
---pointDoc x' y' loc p@(LineA _ x y w h _ _ _ _)          = [loc]
-pointDoc x' y' loc p@(RowA _ x y w h _ _ _ arrs)           = pointDocRowList 0 (x') (y') loc arrs
-pointDoc x' y' loc p@(ColA _ x y w h _ _ _ arrs)           = pointDocColList 0 (x') (y') loc arrs
-pointDoc x' y' loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = pointDoc (clip 0 (widthA arr-1) x') 
-                                                            (clip 0 (heightA arr-1) y') loc arr -- (last arrs)
-pointDoc x' y' loc p@(StructuralA _ child)             = pointDoc x' y' loc child
-pointDoc x' y' loc p@(ParsingA _ child)                = pointDoc x' y' loc child
-pointDoc x' y' loc p@(LocatorA location child)         = pointDoc x' y' [location] child
-pointDoc x' y' loc arr                                 = debug Err ("ArrTypes.pointDoc': unhandled arrangement: "++show x'++show y'++show arr) loc
-
--- precondition: x' y' falls inside the arrangement width
-pointDocRowList :: Show node => Int -> Int -> Int -> [node] -> [Arrangement node] -> [node]
-pointDocRowList i x' y' loc []         = debug Err "ArrTypes.pointDocRowList: empty Row list" $ loc
-pointDocRowList i x' y' loc (arr:arrs) = if x' >= xA arr + widthA arr 
-                                      then pointDocRowList (i+1) x' y' loc arrs
-                                      else pointDoc (x'-xA arr) (clip 0 (heightA arr-1) (y'- yA arr)) 
-                                                 loc arr
-                                                 
-pointDocColList :: Show node => Int -> Int -> Int -> [node] -> [Arrangement node] -> [node]
-pointDocColList i x' y' loc [] = debug Err "ArrTypes.pointDocRowList: empty Row list" $ loc
-pointDocColList i x' y' loc (arr:arrs) = if y' >= yA arr + heightA arr 
-                                      then pointDocColList (i+1) x' y' loc arrs
-                                      else pointDoc (clip 0 (widthA arr-1) (x'-xA arr)) (y'-yA arr) 
-                                                 loc arr
-                                                                   
 
 
-
-
-
----
  
                                                                    
 selectTreeA :: Show node => [Int] -> Arrangement node -> (Int, Int, Arrangement node)

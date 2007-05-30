@@ -203,8 +203,9 @@ downPath _             _   = NoPathA
 
 -- focus path stuff is reused and combined with index.
 
-navigateFocus x y constrainedPicob = let ps = point' x y [[]] constrainedPicob
-                                     in  if null ps then (PathA [] 0) else (PathA (head ps) (getOffset (head ps) x constrainedPicob))
+navigateFocus x y constrainedPicob = case point x y constrainedPicob of
+                                       Nothing -> (PathA [] 0) 
+                                       Just p -> (PathA p (getOffset p x constrainedPicob))
  where getOffset ps mx constrainedPicob =
          case selectTreeA ps constrainedPicob of 
            (x',y', StringA _ x y w h _ _ _ _ _ cxs) ->
