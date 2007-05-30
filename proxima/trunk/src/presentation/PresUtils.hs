@@ -82,9 +82,13 @@ diffPres (EllipseP id  _ _ _) _                        = DiffLeaf False
 diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
 diffPres (ColP id rf press) (ColP id' rf' press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
+diffPres (GraphP id _ _ _ press) (GraphP id' _ _ _ press') = diffPress 0  press 0   press'
+diffPres (VertexP id _ _ _ pres) (VertexP id' _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf press) _                      = DiffLeaf False
 diffPres (OverlayP id press) _                     = DiffLeaf False 
+diffPres (GraphP id _ _ _ press) _                 = DiffLeaf False
+diffPres (VertexP id _ _ _ pres) _                 = DiffLeaf False
 diffPres pr                  _                     = debug Err ("PresUtils.diffPres: can't handle "++ show pr) DiffLeaf False
 
 
@@ -147,26 +151,7 @@ prunePres (DiffLeaf c) p@(GraphP id w h es press)       = if c then ArrangedP
 prunePres dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
 
--- getPres is probably not a good name
-getPres :: IDP -> Presentation doc node clip -> Maybe (Presentation doc node clip)
-getPres idp pres = 
-  if idp == idP pres 
-  then Just pres
-  else case pres of
-         RowP _ _ press     -> getPresLst idp press 
-         ColP _ _ press     -> getPresLst idp press 
-         OverlayP _ press   -> getPresLst idp press 
-         WithP _ pres       -> getPres idp pres
-         StructuralP _ pres -> getPres idp pres 
-         ParsingP _ pres    -> getPres idp pres 
-         LocatorP _ pres    -> getPres idp pres 
-         _                  -> Nothing
- where getPresLst idp []           = Nothing
-       getPresLst idp (pres:press) = case getPres idp pres of
-                                       Just pres -> Just pres
-                                       Nothing   -> getPresLst idp press
-                    
-
+                   
 
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
 -- anyway, the token tree will soon be replaced by a list, making this function easy
@@ -180,6 +165,10 @@ deleteInsertedTokens inss (ColP i r press)     = let press' = map (deleteInserte
 deleteInsertedTokens inss (OverlayP i press)     = let press' = map (deleteInsertedTokens inss) press
                                                        press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
                                                    in  OverlayP i press''
+deleteInsertedTokens inss (GraphP i w h es press) = let press' = map (deleteInsertedTokens inss) press
+                                                        press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
+                                                    in  GraphP i w h es press''
+deleteInsertedTokens inss (VertexP i x y pl pres)   = VertexP i x y pl $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (WithP ar pres)       = WithP ar $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (StructuralP id pres) = StructuralP id $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (ParsingP id pres)    = ParsingP id $ deleteInsertedTokens inss pres
@@ -207,6 +196,8 @@ normalizePres (WithP ar pres)                          = WithP ar $ normalizePre
 normalizePres (StructuralP id pres)                    = StructuralP id $ normalizePres pres
 normalizePres (ParsingP id pres)                       = ParsingP id $ normalizePres pres
 normalizePres (LocatorP l pres)                        = LocatorP l $ normalizePres pres
+normalizePres (GraphP id w h es press)                 = GraphP id w h es $ map normalizePres press
+normalizePres (VertexP id x y ol pres)                 = VertexP id x y ol $ normalizePres pres
 normalizePres pr                                       = debug Err ("PresUtils.normalizePres: can't handle "++ show pr) pr
 
 normalizeRow :: [Presentation doc node clip] -> [Presentation doc node clip] -- not fixed for refs
