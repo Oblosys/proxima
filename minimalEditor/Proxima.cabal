@@ -50,7 +50,8 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
                ProxParser_Generated Reducer Scanner
 ghc-prof-options: -auto-all
-ghc-options: -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+-- -w only for Visual Haskell, since warnings fill up the task list
 hugs-options:
 nhc-options:
 jhc-options:
