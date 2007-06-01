@@ -80,34 +80,11 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
       ( SetFocusArr (downFocus focus (if debugging then debugArrangement arr else arr))
       , state, renLvl )
 
-    KeyCharRen c        -> (keyRemapChar c, state, renLvl)
-    KeySpecialRen c ms  -> (KeySpecialArr c ms, state, renLvl)
-
-    MouseDownRen x' y' (Modifiers True False False) i ->  -- shift down
-      let (x,y) = (descaleInt scale x',descaleInt scale y')
-      in  ( SetFocusArr (enlargeFocusXY focus x y (if debugging then debugArrangement arr else arr))
-          , state, renLvl)
-
-
-    MouseDownRen x' y' ms@(Modifiers False False True) i ->  -- alt down
-      let (x,y) = (descaleInt scale x',descaleInt scale y') -- hack, alt mouse is mouseclick for doc
-      in  ( MouseDownDocArr (navigateFocus x y arr) ms i
-          , state, renLvl)
-    MouseDownRen x' y' ms i -> 
-      let (x,y) = (descaleInt scale x',descaleInt scale y')
---    in  (MouseDownArr (navigateFocus x y arrLvl) ms i, setFocus x y arrLvl, renLvl)  
-      in  ( SetFocusArr (setFocus x y (if debugging then debugArrangement arr else arr))
-          , state, renLvl )
--- non shift MouseDown either here or passed on. Doing both is not possible. If we pass it on, the higher layers are 
--- responsible for the focus update
-    MouseDragRen x' y' ms@(Modifiers False False False)  ->
-      let (x,y) = (descaleInt scale x',descaleInt scale y')
-      in  ( SetFocusArr (enlargeFocusXY focus x y (if debugging then debugArrangement arr else arr))
-          , state, renLvl )
-    MouseUpRen x' y' ms    -> 
-      let (x,y) = (descaleInt scale x',descaleInt scale y')
-      in  ( SkipArr 0, state, renLvl ) 
-    
+    KeyCharRen c          -> (keyRemapChar c, state, renLvl)
+    KeySpecialRen c ms    -> (KeySpecialArr c ms, state, renLvl)
+    MouseDownRen x y ms i -> debug Err "Mouze down" $ (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, renLvl)
+    MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
+    MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
     
     UpdateDocRen upd      -> (UpdateDocArr upd,      state, renLvl) 
     DocumentLoadedRen str -> (DocumentLoadedArr str, state, renLvl) 
@@ -161,62 +138,4 @@ keyRemapChar c    = if ord c <= 26 then KeySpecialArr (CharKey (chr (ord c+96)))
 
   
 
--- At this time, Focus path is always in a leaf string
-
--- focus is not perfect yet. Selection halfway a letter should include the letter (or element). This makes
--- enlargement dependent on drag origin. Furthermore, pointing in empty space should lead to some path. 
--- E.g. first thing on the left in a column and first thing above in a column.
-
--- pointing in stretched rows might lead to a focus which is not a leaf path, a next version of the
--- rendering level must handle this correctly. For now, non stretching rows are assumed
-
-setFocus x y arr     = showDebug' GI "focus set to " $
-                       let f = navigateFocus x y arr in showDebug GI (FocusA f f)
-
-enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
-
-enlargeFocus (FocusA f@(PathA _ _) t) pth = showDebug Ren $ (FocusA f pth)
-enlargeFocus f                        pth = debug Err "GestureInterpreter.enlargeFocus: selection without focus set" $ (FocusA pth pth)
-
--- this works but is it a general solution? No, can't go up from:                 col
---                                                                        bla|bla col
--- probably we should get out of enclosing rows and into preceding/following elt of column
-
-upFocus (FocusA f  t) arr = let pth' = upPath f arr in FocusA pth' pth'
-upFocus _             _   = NoFocusA
-
-upPath (PathA pth i) arr = let (x,y,w,h) = showDebug Ren $ sizeA (pth++[i]) arr
-                               focused   = selectTreeA pth arr
-                           in  navigateFocus x (y-2) arr
-upPath _             _   = NoPathA
-
-
-downFocus (FocusA f t) arr = let pth' = downPath f arr in FocusA pth' pth'
-downFocus _            _   = NoFocusA
-
-downPath (PathA pth i) arr = let (x,y,w,h) = showDebug Ren $ sizeA (pth++[i]) arr
-                                 focused   = selectTreeA pth arr
-                             in  navigateFocus x (y+h) arr
-downPath _             _   = NoPathA
-
-
-
--- focus path stuff is reused and combined with index.
-
-navigateFocus x y constrainedPicob = case point x y constrainedPicob of
-                                       Nothing -> (PathA [] 0) 
-                                       Just p -> (PathA p (getOffset p x constrainedPicob))
- where getOffset ps mx constrainedPicob =
-         case selectTreeA ps constrainedPicob of 
-           (x',y', StringA _ x y w h _ _ _ _ _ cxs) ->
-             let pos = mx - (clip 0 x x) - x'        -- in case x is negative (point' takes care of clipping itself)
-             in  (length (takeWhile (<=pos) (centerXCoords cxs)))-1
-           _                                                            -> 0
-
--- for pointing after a character when to the right of its center
-centerXCoords []      = [] -- this never occurs
-centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
-                            halfwidths = map (`div` 2) widths
-                        in  head xcoords : zipWith (+) xcoords halfwidths
--- don't want cumulative character widths
 

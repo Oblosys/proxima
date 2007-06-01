@@ -22,10 +22,10 @@ data EditRendering documentLevel =
   | CloseRen
   | KeyCharRen Char 
   | KeySpecialRen SpecialKey Modifiers
-  | MouseDownRen Int Int Modifiers Int
+  | MouseDownRen Int Int Modifiers Int -- x y modifiers nrOfClicks
   | MouseDragRen Int Int Modifiers
   | MouseUpRen Int Int Modifiers
-  | UpdateDocRen (documentLevel -> documentLevel)   -- don't really want this doc ref in rendering level
+  | UpdateDocRen (documentLevel -> documentLevel)   -- TODO: don't really want this doc ref in rendering level
   | OpenFileRen String
   | SaveFileRen String
   | DocumentLoadedRen String deriving Show

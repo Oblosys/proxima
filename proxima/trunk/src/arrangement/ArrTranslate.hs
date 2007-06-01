@@ -19,7 +19,8 @@ translate state low high editLow =
 unArrange :: (HasPath node, Show node) => LocalStateArr -> ArrangementLevel doc node clip -> LayoutLevel doc node clip ->
              EditArrangement (DocumentLevel doc clip) ->
              (EditLayout (DocumentLevel doc clip) doc node clip, LocalStateArr, ArrangementLevel doc node clip)
-unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) editArr = 
+unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
+--  debug Err ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
     SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus pres)
@@ -43,11 +44,18 @@ unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) 
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
 -- shift mouseDown is handled here
-    MouseDownDocArr fA (Modifiers False False True) i -> mouseDownDoc state arrLvl pres fA i
-    MouseDownArr fA ms i  -> ( MouseDownLay (pathPFromPathA fA pres) ms i
-                             , state, arrLvl)--setFocus arrLvl state x y, arrLvl)
-    MouseDragArr fA ms    -> (SkipLay 0,             state, arrLvl)--enlargeFocus arrLvl state x y, arrLvl)
-    MouseUpArr fA ms      -> (SkipLay 0,             state, arrLvl) 
+    MouseDownArr x y (Modifiers False False False) i ->  -- shift down 
+          ( SetFocusLay (focusPFromFocusA (focusAFromXY x y arr) pres)
+          , state, arrLvl)
+    MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
+          ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+          , state, arrLvl)
+    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
+          mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
+    MouseDragArr x y ms@(Modifiers False False False)  ->
+          ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+          , state, arrLvl )
+    MouseUpArr x y ms      -> (SkipLay 0,             state, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     UpdateDocArr upd      -> (UpdateDocLay upd,      state, arrLvl) 
@@ -63,6 +71,8 @@ unArrange state arrLvl@(ArrangementLevel arr _ p) laylvl@(LayoutLevel pres _ _) 
     _                     -> (SkipLay 0,             state, arrLvl) 
 
 
+{-
+  -}  
   
   
 -- mouseDownDocPres and \DocumentLevel cause dependency on type DocumentLevel

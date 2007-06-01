@@ -35,9 +35,9 @@ data EditArrangement documentLevel =
   | Test2Arr
   | KeyCharArr Char
   | KeySpecialArr SpecialKey Modifiers
-  | MouseDownArr PathArr Modifiers Int
-  | MouseDragArr PathArr Modifiers 
-  | MouseUpArr PathArr Modifiers
+  | MouseDownArr Int Int Modifiers Int
+  | MouseDragArr Int Int Modifiers 
+  | MouseUpArr Int Int Modifiers
   | OpenFileArr String
   | SaveFileArr String
   | UpdateDocArr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
@@ -133,6 +133,15 @@ data PathArr = PathA [Int] Int
 
 data FocusArr = FocusA PathArr PathArr
               | NoFocusA deriving Show 
+
+-- At this time, Focus path is always in a leaf string
+
+-- focus is not perfect yet. Selection halfway a letter should include the letter (or element). This makes
+-- enlargement dependent on drag origin. Furthermore, pointing in empty space should lead to some path. 
+-- E.g. first thing on the left in a column and first thing above in a column.
+
+-- pointing in stretched rows might lead to a focus which is not a leaf path, a next version of the
+-- rendering level must handle this correctly. For now, non stretching rows are assumed
 
 -- smart constructor
 
