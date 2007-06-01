@@ -5,7 +5,7 @@ import qualified CommonTypes
 import RenLayerTypes
 import RenLayerUtils
 
-import ArrLayerUtils hiding (rect,text) -- for context menu hack
+import ArrLayerUtils (point, popupMenuItemsPres, pathAFromPathP')  -- for context menu hack
 import PresTypes hiding (font) -- For Locations
 
 import DocTypes -- For Locations
@@ -72,7 +72,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
-                        Just pthA -> popupMenuItemsPres (addWithSteps pthA prs) prs
+                        Just pthA -> popupMenuItemsPres (pathAFromPathP' pthA prs) prs
               
    ; case pointDoc x y arr of
         Just node ->
@@ -499,8 +499,6 @@ renderArr dc arrDb scale (lux, luy) diffTree arrangement =
 drawFilledRect dc rect c =
   drawRect dc rect [ color := c, brush:= BrushStyle BrushSolid c ]     
                           
-isTransparent (-1, -1, -1) = True
-isTransparent _            = False
 
 -- usage: for basic Arrangements, render after image so id is visible
 --        for composites,         render before, so stacking order of arrangement is represented correctly

@@ -26,6 +26,13 @@ type Path = [Int]
 
 type Color = (Int,Int,Int)
 
+-- transparent only works for background color
+transparent :: Color
+transparent = (-1, -1, -1)
+
+isTransparent :: Color -> Bool
+isTransparent c  = c == transparent
+
 -- to determine the outline of a graph node (for drawing the arrows correctly)
 type Outline = Double -> (Int, Int)
             -- incoming angle -> (x, y)

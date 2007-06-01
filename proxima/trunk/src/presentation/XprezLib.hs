@@ -1,4 +1,4 @@
-module XprezLib where
+module XprezLib (module CommonTypes, module XprezLib) where
 
 import CommonTypes
 import DocTypes
@@ -243,6 +243,3 @@ boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 percent :: Int -> Int -> Int
 percent a x = a * x `div` 100
 
--- transparent only works for background color
-transparent :: Color
-transparent = (-1, -1, -1)
