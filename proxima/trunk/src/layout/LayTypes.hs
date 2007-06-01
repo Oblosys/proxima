@@ -37,6 +37,7 @@ data EditLayout documentLevel doc node clip =
   | EnlargeLeftLay
   | EnlargeRightLay
   | MouseDownLay PathPres Modifiers Int
+  | MoveVertexLay [Int] (Int,Int)
   | NormalizeLay
   | DocumentLoadedLay String 
   | OpenFileLay String

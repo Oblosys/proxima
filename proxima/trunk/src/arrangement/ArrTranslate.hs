@@ -44,18 +44,29 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
 -- shift mouseDown is handled here
-    MouseDownArr x y (Modifiers False False False) i ->  -- shift down 
+    MouseDownArr x y (Modifiers False False False) i ->
           ( SetFocusLay (focusPFromFocusA (focusAFromXY x y arr) pres)
-          , state, arrLvl)
+          , state { getLastMousePress = Just (x,y)}, arrLvl)
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
           ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
           , state, arrLvl)
     MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-          ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
-          , state, arrLvl )
-    MouseUpArr x y ms      -> (SkipLay 0,             state, arrLvl) 
+      case getLastMousePress state of
+        Just (x',y') -> 
+          case navigateFocus x' y' arr of
+            PathA pth _ ->
+              case selectTreeA pth arr of
+                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay pth (x-x',y-y'), state, arrLvl) 
+                _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+                                    , state, arrLvl )
+            _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+                               , state, arrLvl )
+        Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+                   , state, arrLvl )
+                            
+    MouseUpArr x y ms     -> (SkipLay 0,             state { getLastMousePress = Nothing }, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     UpdateDocArr upd      -> (UpdateDocLay upd,      state, arrLvl) 

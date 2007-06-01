@@ -22,11 +22,11 @@ arrange :: Show node => LocalStateArr -> LayoutLevel doc node clip -> Arrangemen
            EditLayout' doc node clip ->
            IO (EditArrangement' doc node clip, LocalStateArr, LayoutLevel doc node clip)
 arrange state layLvl@(LayoutLevel pres focus dt) arrLvl@(ArrangementLevel oldArrangement _ _) (SkipLay' 0) =
- do { arr' <- arrangePresentation state focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
+ do { arr' <- arrangePresentation (getFontMetricsRef state) focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
     ; return (SetArr' (ArrangementLevel arr' (focusAFromFocusP focus pres) pres), state, layLvl)
     }
 arrange state layLvl arrLvl (SkipLay' i) = return (SkipArr' (i-1), state, layLvl)
 arrange state layLvl arrLvl@(ArrangementLevel oldArrangement _ _) (SetLay' (LayoutLevel pres' focus' dt)) = 
- do { arrangement' <- arrangePresentation state focus' oldArrangement dt pres'
+ do { arrangement' <- arrangePresentation (getFontMetricsRef state) focus' oldArrangement dt pres'
     ; return (SetArr' (ArrangementLevel arrangement' (focusAFromFocusP focus' pres') pres'), state, LayoutLevel pres' focus' dt)
     }

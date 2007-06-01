@@ -170,6 +170,7 @@ deleteGraphPres' (p:ps) (GraphP id w h es press)   =
 deleteGraphPres' []     (VertexP id x y ol pres)   = Nothing
 deleteGraphPres' _      pr                         = debug Err ("TreeEditPres.deleteGraphPres': can't handle "++ show pr) Nothing
 
+
 {-
 algorithms are tricky.
 

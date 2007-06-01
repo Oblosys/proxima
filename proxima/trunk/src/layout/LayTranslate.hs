@@ -53,9 +53,10 @@ parse _ state layLvl prs RightLay  = setUpd NothingUpdated $ navigateRight state
 parse _ state layLvl prs EnlargeLeftLay   = setUpd NothingUpdated $ enlargeLeft state layLvl prs
 parse _ state layLvl prs EnlargeRightLay  = setUpd NothingUpdated $ enlargeRight state layLvl prs
 
+parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pt) = moveVertex pth pt state layLvl
 parse _ state layLvl prs NormalizeLay       = setUpd NothingUpdated $ editLay editNormalize state layLvl prs  
 
-parse scannerSheet state layLvl prs TestLay            = tokenizeLay scannerSheet state layLvl prs
+parse scannerSheet state layLvl prs TestLay = tokenizeLay scannerSheet state layLvl prs
 parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
 
 
@@ -234,6 +235,23 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
 
+moveVertex pth pt state layLvl@(LayoutLevel pres focus dt) =
+  let pres' = moveVertex' pth pt pres
+  in  (SkipPres 0, state, LayoutLevel pres' focus dt)
+
+moveVertex' :: [Int] -> (Int,Int) -> Presentation doc node clip -> Presentation doc node clip                                      
+moveVertex' (p:ps) pt (RowP id rf press)         = RowP id rf $ replace p press (moveVertex' ps pt (press!!!p))
+moveVertex' (p:ps) pt (ColP id rf press)         = ColP id rf $ replace p press (moveVertex' ps pt (press!!!p))
+moveVertex' (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace p press (moveVertex' ps pt (press!!!p))
+moveVertex' (0:ps) pt (WithP ar pres)            = WithP ar (moveVertex' ps pt pres)
+moveVertex' (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertex' ps pt pres)
+moveVertex' (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertex' ps pt pres)
+moveVertex' (p:ps) pt (GraphP id w h es press)   = 
+  if p < length press 
+  then GraphP id w h es $ replace p press (moveVertex' ps pt (press!!!p))
+  else debug Err ("TreeEditPres.moveVertex'': can't handle "++ show pr) $ GraphP id w h es press
+moveVertex' []     (dx,dy) (VertexP id x y ol pres)  = VertexP id (x+dx) (y+dy) ol pres
+moveVertex' _      pt pr                      = debug Err ("TreeEditPres.moveVertex': can't handle "++ show pr) pr
 
 {-
 openFile :: Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> FilePath -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip) 

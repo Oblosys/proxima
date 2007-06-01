@@ -9,4 +9,6 @@ import ArrTypes
 
 import FontLib
 
-type LocalStateArr = FontMetricsRef
+data LocalStateArr = LocalStateArr { getFontMetricsRef :: FontMetricsRef
+                                   , getLastMousePress :: Maybe (Int,Int)
+                                   }

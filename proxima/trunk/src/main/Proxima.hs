@@ -18,6 +18,7 @@ import PresTypes -- temporarily
 import PresUtils -- temporarily
 import LayTypes
 import ArrTypes -- temporarily
+import ArrLayerTypes -- for initial extra state
 import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
@@ -69,7 +70,7 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
                           (LayerStateEval, initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], Map.empty))   
-                          (fontMetricsRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
+                          (LocalStateArr fontMetricsRef Nothing, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
                           ((),             ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
                           -- system (layer)local state,  initial higher level value
                         
