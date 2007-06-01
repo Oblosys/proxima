@@ -70,10 +70,6 @@ splitRowTree path@(PathP pth ix) pres =
         Left (ps1, ps2) -> (ColP NoIDP 0 [ps1,ps2], focus')
         Right ps        -> (ps                   , focus')
 
-locateTree :: PathPres -> Presentation doc node clip -> Maybe node
-locateTree NoPathP        pres = Nothing
-locateTree (PathP path _) pres = locateTreePres Nothing path pres
-
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 
 
@@ -122,7 +118,7 @@ deleteTreePres editable p focus pr@(EmptyP id)          = pr -- ?
 deleteTreePres editable p focus pr@(ImageP _ _)         = pr --
 deleteTreePres editable p focus pr@(PolyP _ _ _)        = pr -- 
 deleteTreePres editable p focus pr@(RectangleP _ _ _ _) = pr --
-deleteTreePres editable p focus pr@(EllipseP _ _ _ _) = pr --
+deleteTreePres editable p focus pr@(EllipseP _ _ _ _)   = pr --
 
 deleteTreePres editable p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   if editable then let st = if  stp < p then 0 else sti
@@ -140,6 +136,39 @@ deleteTreePres editable p focus          (ParsingP id pres)  = ParsingP id (dele
 deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p f pr = debug Err ("TreeEditPres.deleteTreePres: can't handle "++show f++" "++ show pr) $ pr
 
+
+deleteGraphPres NoPathP pres      = pres
+deleteGraphPres (PathP ps _) pres = case deleteGraphPres' ps pres of
+                                      Just pres' -> pres'
+                                      Nothing    -> debug Err ("TreeEditPres.deleteGraphPres: delete went wrong, incorrect presentation structure") pres
+                                      
+deleteGraphPres' (p:ps) (RowP id rf press)         = case deleteGraphPres' ps (press!!!p) of
+                                                       Just pres -> Just $ RowP id rf $ replace p press pres
+                                                       Nothing    -> Nothing
+deleteGraphPres' (p:ps) (ColP id rf press)         = case deleteGraphPres' ps (press!!!p) of
+                                                       Just pres -> Just $ ColP id rf $ replace p press pres
+                                                       Nothing    -> Nothing
+deleteGraphPres' (p:ps) (OverlayP id (pres:press)) = case deleteGraphPres' ps (press!!!p) of
+                                                       Just pres -> Just $ OverlayP id $ replace p press pres
+                                                       Nothing    -> Nothing
+deleteGraphPres' (0:ps) (WithP ar pres)            = case deleteGraphPres' ps pres of
+                                                       Just pres' -> Just $ WithP ar pres'
+                                                       Nothing    -> Nothing
+deleteGraphPres' (0:ps) (StructuralP id pres)      = case deleteGraphPres' ps pres of
+                                                       Just pres' -> Just $ StructuralP id pres'
+                                                       Nothing    -> Nothing
+deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pres of
+                                                       Just pres' -> Just $ LocatorP l pres'
+                                                       Nothing    -> Nothing
+deleteGraphPres' (p:ps) (GraphP id w h es press)   = 
+  if p < length press 
+  then  case deleteGraphPres' ps (press!!!p) of
+          Just pres -> Just $ GraphP id w h es $ replace p press pres
+          Nothing   -> Just $ GraphP id w h (removeVertexFromEdges p es) $ (take p press ++ drop (p+1) press)
+  else let edgeNr = p - length press
+       in  Just $ GraphP id w h (take edgeNr es ++ drop (edgeNr+1) es) press
+deleteGraphPres' []     (VertexP id x y ol pres)   = Nothing
+deleteGraphPres' _      pr                         = debug Err ("TreeEditPres.deleteGraphPres': can't handle "++ show pr) Nothing
 
 {-
 algorithms are tricky.

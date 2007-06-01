@@ -20,38 +20,39 @@ focusAFromFocusP NoFocusP     pres = NoFocusA
 focusPFromFocusA (FocusA f t) pres = focusP (pathPFromPathA f pres) (pathPFromPathA t pres)
 focusPFromFocusA NoFocusA     pres = NoFocusP
 
-pathAFromPathP (PathP pth ix) pres = PathA (removeWithSteps pth pres) ix
+pathAFromPathP (PathP pth ix) pres = PathA (pathAFromPathP' pth pres) ix
 pathAFromPathP NoPathP        pres = NoPathA
 
-pathPFromPathA (PathA pth ix) pres = PathP (addWithSteps pth pres) ix
+pathPFromPathA (PathA pth ix) pres = PathP (pathPFromPathA' pth pres) ix
 pathPFromPathA NoPathA        pres = NoPathP
 
 
-removeWithSteps []       _                      = []
-removeWithSteps (p:path) (RowP id rf press)     = p:removeWithSteps path (press!!!p)
-removeWithSteps (p:path) (ColP id rf press)     = p:removeWithSteps path (press!!!p)                                            
-removeWithSteps (p:path) (OverlayP id press)    = p:removeWithSteps path (press!!!p)                                            
-removeWithSteps (p:path) (GraphP _ _ _ _ press) = p:removeWithSteps path (press!!!p)                                            
-removeWithSteps (p:path) (VertexP _ _ _ _ pres) = p:removeWithSteps path pres                                            
-removeWithSteps (p:path) (WithP ar pres)        = removeWithSteps path pres -- ignore with path step 
-removeWithSteps (p:path) (StructuralP id pres)  = p:removeWithSteps path pres
-removeWithSteps (p:path) (ParsingP id pres)     = p:removeWithSteps path pres
-removeWithSteps (p:path) (LocatorP l pres)      = p:removeWithSteps path pres
-removeWithSteps pth      pr                     = debug Err ("*** Arranger.removeWithSteps: can't handle "++show pth++" "++ show pr++"***") []
+pathAFromPathP' []       _                      = []
+pathAFromPathP' (p:path) (RowP id rf press)     = p:pathAFromPathP' path (press!!!p)
+pathAFromPathP' (p:path) (ColP id rf press)     = p:pathAFromPathP' path (press!!!p)                                            
+pathAFromPathP' (p:path) (OverlayP id press)    = p:pathAFromPathP' path (press!!!p)                                            
+pathAFromPathP' (p:path) (GraphP _ _ _ _ press) = p:pathAFromPathP' path (press!!!p) -- edges are put after vertices, so selection is ok
+pathAFromPathP' (p:path) (VertexP _ _ _ _ pres) = p:pathAFromPathP' path pres                                            
+pathAFromPathP' (p:path) (WithP ar pres)        = pathAFromPathP' path pres -- ignore with path step 
+pathAFromPathP' (p:path) (StructuralP id pres)  = p:pathAFromPathP' path pres
+pathAFromPathP' (p:path) (ParsingP id pres)     = p:pathAFromPathP' path pres
+pathAFromPathP' (p:path) (LocatorP l pres)      = p:pathAFromPathP' path pres
+pathAFromPathP' pth      pr                     = debug Err ("*** Arranger.pathAFromPathP: can't handle "++show pth++" "++ show pr++"***") []
 -- should return NoPath
 
-addWithSteps []       (WithP ar pres)            = 0:addWithSteps [] pres -- add step for with node 
-addWithSteps []       _                          = []
-addWithSteps (p:path) (RowP id rf press)         = p:addWithSteps path (press!!!p)
-addWithSteps (p:path) (ColP id rf press)         = p:addWithSteps path (press!!!p)                                            
-addWithSteps (p:path) (GraphP _ _ _ _ press)     = p:addWithSteps path (press!!!p)                                            
-addWithSteps (p:path) (VertexP _ _ _ _ pres)     = p:addWithSteps path pres
-addWithSteps (0:path) (OverlayP id (pres:press)) = 0:addWithSteps path pres
-addWithSteps (path)   (WithP id pres)            = 0:addWithSteps path pres -- add step for with node 
-addWithSteps (p:path) (StructuralP l pres)       = p:addWithSteps path pres
-addWithSteps (p:path) (ParsingP id pres)         = p:addWithSteps path pres
-addWithSteps (p:path) (LocatorP id pres)         = p:addWithSteps path pres
-addWithSteps pth      pr                         = debug Err ("*** Unarranger.addWithSteps: can't handle "++show pth++" "++ show pr++"***") []
+pathPFromPathA' []       (WithP ar pres)            = 0:pathPFromPathA' [] pres -- add step for with node 
+pathPFromPathA' []       _                          = []
+pathPFromPathA' (p:path) (RowP id rf press)         = p:pathPFromPathA' path (press!!!p)
+pathPFromPathA' (p:path) (ColP id rf press)         = p:pathPFromPathA' path (press!!!p)                                            
+pathPFromPathA' (p:path) (GraphP _ _ _ _ press)     = if p >= length press then [p] -- selection is on edge
+                                                      else p:pathPFromPathA' path (press!!!p)                                            
+pathPFromPathA' (p:path) (VertexP _ _ _ _ pres)     = p:pathPFromPathA' path pres
+pathPFromPathA' (0:path) (OverlayP id (pres:press)) = 0:pathPFromPathA' path pres
+pathPFromPathA' (path)   (WithP id pres)            = 0:pathPFromPathA' path pres -- add step for with node 
+pathPFromPathA' (p:path) (StructuralP l pres)       = p:pathPFromPathA' path pres
+pathPFromPathA' (p:path) (ParsingP id pres)         = p:pathPFromPathA' path pres
+pathPFromPathA' (p:path) (LocatorP id pres)         = p:pathPFromPathA' path pres
+pathPFromPathA' pth      pr                         = debug Err ("*** Unarranger.pathPFromPathA': can't handle "++show pth++" "++ show pr++"***") []
 
 -- focus remains the same, except for With nodes, what to do about these?
 -- Translation is not that difficult, just follow the path and add steps for with nodes.

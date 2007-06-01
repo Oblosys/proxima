@@ -70,11 +70,11 @@ mouseDownDoc :: HasPath node  => state -> ArrangementLevel doc node clip ->
                 Presentation doc node clip -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip, state, ArrangementLevel doc node clip)  
 mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
-  let pthP = addWithSteps pthA layout
+  let pthP = pathPFromPathA' pthA layout
   in  case mouseDownDocPres pthP layout of
         Just upd -> debug UnA ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
         Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)   
-                    $ case TreeEditPres.locateTree (PathP pthP 0) layout of
+                    $ case locateTreePres (PathP pthP 0) layout of
                         Just node -> case pathNode node of
                                        (PathD pth) -> ( UpdateDocLay (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
                                                       , state, arrLvl)

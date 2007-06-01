@@ -185,18 +185,25 @@ editNormalize clip (LayoutLevel pres focus dt) =
 -- unlike paste split and insert, left and right delete do not perform their edit command when the focus was non-empty
 -- ie. in that case, they are interpreted as a regular delete
 editLeftDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
-  if f /= t then editDelete clip layLvl else
-    let focus'          = navigateLeftTreePres (toP focus) pres
-        focus''         = FocusP (toP focus) (toP focus')
-        (pres', focus''') = deleteTree focus'' pres
-    in (LayoutLevel pres' focus''' dt, clip)
+  if focusIsOnGraph f pres then
+    (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
+  else   
+    if f /= t then editDelete clip layLvl else
+      let focus'          = navigateLeftTreePres (toP focus) pres
+          focus''         = FocusP (toP focus) (toP focus')
+          (pres', focus''') = deleteTree focus'' pres
+      in (LayoutLevel pres' focus''' dt, clip)
 
-editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) = 
-  if f /= t then editDelete clip layLvl else
-    let focus'          = navigateRightTreePres (toP focus) pres
-        focus''         = FocusP (toP focus) (toP focus')
-        (pres', focus''') = deleteTree focus'' pres
-    in  (LayoutLevel pres' focus''' dt, clip)
+-- if the from path is in a graph, this is a graph edit
+editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
+  if focusIsOnGraph f pres then
+    (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
+  else   
+    if f /= t then editDelete clip layLvl else
+      let focus'          = navigateRightTreePres (toP focus) pres
+          focus''         = FocusP (toP focus) (toP focus')
+          (pres', focus''') = deleteTree focus'' pres
+      in  (LayoutLevel pres' focus''' dt, clip)
 
 
 

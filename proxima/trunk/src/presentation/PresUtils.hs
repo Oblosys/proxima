@@ -5,6 +5,7 @@ import PresTypes
 import CommonUtils
  
 import XprezLib
+import Maybe
 
 squiggly :: Color -> Xprez doc node clip -> Xprez doc node clip
 squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
@@ -218,22 +219,33 @@ normalizeCol id p rf prs (ColP _ rf' press: col) =
   in  normalizeCol id p rf''  prs (press ++ col)
 normalizeCol id p rf prs (pres            : col) = normalizeCol id (p+1) rf (normalizePres pres:prs) col
 
---for debugging, rename function to function'
---locateTreePres location path pres = debug Err ("::locate"++show (path,pres)++"\n") $ locateTreePres' location path pres
 
+-- | Delete all edges to and from deleted vertex, and adjust vertexNrs in the remaining edges.
+removeVertexFromEdges :: Int -> [(Int,Int)] -> [(Int,Int)]
+removeVertexFromEdges vertexNr edges = catMaybes . map fixEdge $ edges
+  where fixEdge (f,t) | f == vertexNr || t == vertexNr = Nothing
+        fixEdge (f,t) | otherwise                      = 
+          Just $ (if f > vertexNr then f-1 else f, if t > vertexNr then t-1 else t)
 
--- return innermost enclosing locator for path
-locateTreePres location _        (StringP id str)           = location
-locateTreePres location _        (ImageP _ _)               = location
-locateTreePres location _        (PolyP _ _ _)              = location
-locateTreePres location (p:path) (RowP id rf press)         = locateTreePres location path (press!!!p)
-locateTreePres location (p:path) (ColP id rf press)         = locateTreePres location path (press!!!p)                                            
-locateTreePres location (0:path) (OverlayP id press@(pres:_)) = locateTreePres location path (press!!!0)                                            
-locateTreePres location (p:path) (WithP ar pres)            = locateTreePres location path pres
-locateTreePres location (p:path) (StructuralP id pres)      = locateTreePres location path pres
-locateTreePres location (p:path) (ParsingP id pres)         = locateTreePres location path pres
-locateTreePres location (p:path) (LocatorP l pres)          = locateTreePres (Just l) path pres
-locateTreePres location pth      pr                         = debug Err ("*** PresUtils.locateTreePres: can't handle "++show pth++" "++ show pr++"***") Nothing
+-- | Return innermost enclosing locator for path in pres
+locateTreePres :: PathPres -> Presentation doc node clip -> Maybe node
+locateTreePres NoPathP        pres = Nothing
+locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
+
+locateTreePres' location _        (StringP id str)           = location
+locateTreePres' location _        (ImageP _ _)               = location
+locateTreePres' location _        (PolyP _ _ _)              = location
+locateTreePres' location []       (VertexP id _ _ _ pres)    = location
+locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (press!!!p)
+locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (press!!!p)                                            
+locateTreePres' location (0:path) (OverlayP id press@(pres:_)) = locateTreePres' location path (press!!!0)                                            
+locateTreePres' location (p:path) (GraphP id rf _ _ press)   = locateTreePres' location path (press!!!p)                                            
+locateTreePres' location (0:path) (VertexP id _ _ _ pres)    = locateTreePres' location path pres
+locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' location path pres
+locateTreePres' location (0:path) (StructuralP id pres)      = locateTreePres' location path pres
+locateTreePres' location (0:path) (ParsingP id pres)         = locateTreePres' location path pres
+locateTreePres' location (0:path) (LocatorP l pres)          = locateTreePres' (Just l) path pres
+locateTreePres' location pth      pr                         = debug Err ("*** PresUtils.locateTreePres: can't handle "++show pth++" "++ show pr++"***") Nothing
 
 isEditableTreePres path pres = isEditableTreePres' True path pres
 
@@ -468,10 +480,12 @@ selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (press!!!p)
 selectTree (p:path) (ColP _ _ press)          = selectTree path (press!!!p)
 selectTree (0:path) (OverlayP _ (pres:press)) = selectTree path pres
-selectTree (p:path) (WithP _ pres)            = selectTree path pres
-selectTree (p:path) (StructuralP _ pres)      = selectTree path pres
-selectTree (p:path) (ParsingP _ pres)         = selectTree path pres
-selectTree (p:path) (LocatorP _ pres)         = selectTree path pres
+selectTree (p:path) (GraphP _ _ _ _ press)    = selectTree path (press!!!p)
+selectTree (0:path) (VertexP _ _ _ _ pres)    = selectTree path pres
+selectTree (0:path) (WithP _ pres)            = selectTree path pres
+selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
+selectTree (0:path) (ParsingP _ pres)         = selectTree path pres
+selectTree (0:path) (LocatorP _ pres)         = selectTree path pres
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
 
 
@@ -583,9 +597,30 @@ containsColPres (p:path) (ParsingP id pres)         = containsColPres path pres
 containsColPres (p:path) (LocatorP _ pres)          = containsColPres path pres
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
+-- | Return True if the focus is on either a vertex, or an edge (focus on graph, index larger than nr of vertices)
+focusIsOnGraph :: PathPres -> Presentation doc node clip -> Bool
+focusIsOnGraph NoPathP _         = False
+focusIsOnGraph (PathP path _) pres = focusIsOnGraphPres path pres
+
+focusIsOnGraphPres :: [Int] -> Presentation doc node clip -> Bool
+focusIsOnGraphPres []       (VertexP _ _ _ _ _)       = debug Err ("verteks") True 
+focusIsOnGraphPres [p]      (GraphP _ _ _ _ press)    = if p >= length press then debug Err ("edzj") True else False
+focusIsOnGraphPres []        tr                       = False
+focusIsOnGraphPres (p:path) (RowP _ _ press)          = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (p:path) (ColP _ _ press)          = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (0:path) (OverlayP _ (pres:press)) = focusIsOnGraphPres path pres
+focusIsOnGraphPres (p:path) (GraphP _ _ _ _ press)    = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (0:path) (VertexP _ _ _ _ pres)    = focusIsOnGraphPres path pres
+focusIsOnGraphPres (0:path) (WithP _ pres)            = focusIsOnGraphPres path pres
+focusIsOnGraphPres (0:path) (StructuralP _ pres)      = focusIsOnGraphPres path pres
+focusIsOnGraphPres (0:path) (ParsingP _ pres)         = focusIsOnGraphPres path pres
+focusIsOnGraphPres (0:path) (LocatorP _ pres)         = focusIsOnGraphPres path pres
+focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.focusIsOnGraph: can't handle "++show pth++" "++show pres) False
+
 
 
 -- VVV HACK VVV              will be handled more generally in the future
+-- | Collect the bottom-most mouseDown update function that is added by WithP nodes on path in pres 
 mouseDownDocPres :: [Int] -> Presentation doc node clip -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres = mouseDownDocPres' Nothing
 
@@ -594,6 +629,8 @@ mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
 mouseDownDocPres' upd (p:path) (ColP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
 mouseDownDocPres' upd (0:path) (OverlayP _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
+mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ press)    = mouseDownDocPres' upd path (press!!!p)
+mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ pres)    = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = ((fst emptyAttrs) {mouseDown = upd}, snd emptyAttrs)
                                                                                   (inh',syn') = w (inh,syn)
                                                                               in mouseDown inh') path pres
@@ -603,14 +640,17 @@ mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd
 mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes.mouseDownDocPres: can't handle "++show pth++" "++show pres) Nothing
 
 
+-- | Collect all popupMenuItems that are added by WithP nodes on path in pres 
 popupMenuItemsPres :: [Int] -> Presentation doc node clip -> [PopupMenuItem doc clip]
-popupMenuItemsPres = popupMenuItemsPres' []
+popupMenuItemsPres path pres = popupMenuItemsPres' [] path pres
 
 popupMenuItemsPres' :: [PopupMenuItem doc clip] -> [Int] -> Presentation doc node clip -> [PopupMenuItem doc clip]
 popupMenuItemsPres' its []       tr                        = its
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
 popupMenuItemsPres' its (p:path) (ColP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
 popupMenuItemsPres' its (0:path) (OverlayP _ press@(pres:_)) = popupMenuItemsPres' its path pres --(last press)
+popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ press)   = popupMenuItemsPres' its path (press!!!p)
+popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ pres)    = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres' (let (inh,syn)   = ((fst emptyAttrs) {popupMenuItems = its}, snd emptyAttrs)
                                                                                       (inh',syn') = w (inh,syn)
                                                                                   in popupMenuItems inh') path pres

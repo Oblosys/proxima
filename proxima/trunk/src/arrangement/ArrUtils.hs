@@ -102,8 +102,8 @@ mkEdges :: Show node => [(Int,Int)] -> [(Int,Int, Outline)] -> Color -> [Arrange
 mkEdges edges vertices lineColor = map mkEdge edges 
  where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = index "mkEdges" fromV vertices
                                  (toVx,toVy,toVol)       = index "mkEdges"  toV vertices
-                                 (offsetFromx, offsetFromy) = fromVol (computeAngle toVx toVy fromVx fromVy)
-                                 (offsetTox, offsetToy) = toVol (computeAngle fromVx fromVy toVx toVy)
+                                 (offsetFromx, offsetFromy) = fromVol (computeAngle fromVx fromVy toVx toVy)
+                                 (offsetTox, offsetToy)     = toVol   (computeAngle toVx toVy fromVx fromVy)
                              in  LineA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
                                               (toVx+offsetTox)     (toVy+offsetToy)     0 0 1 lineColor 
 

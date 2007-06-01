@@ -28,6 +28,11 @@ clip lo hi x = if x<lo then lo else if x>hi then hi else x
 commonPrefix :: Eq a => [a] -> [a] -> [a]
 commonPrefix xs ys = map fst . takeWhile (uncurry (==)) $ zip xs ys
 
+-- | Replace the i'the element in xs by x.
+replace :: Int -> [a] -> a -> [a]
+replace i xs x = case splitAt i xs of
+                   (left, _: right) -> left ++ [x] ++ right
+                   _                -> error "*** replace: index out of bounds"
 
 -- scaling seems to be rather expensive. For now it is turned off.
 scaleInt :: Double -> Int -> Int
