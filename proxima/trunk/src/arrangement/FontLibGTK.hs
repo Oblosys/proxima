@@ -110,4 +110,50 @@ baseLine fms f = let (h,b,ws) = metricsLookup f fms
 		       -- ,"required "++id++"_hRef =
 
                        -}
-                       
+
+{-
+
+-- The way to get character widths under GTK
+
+import Graphics.UI.Gtk
+import Char
+
+main :: IO ()
+main = do
+ do { initGUI
+    ; window <- windowNew
+    ; onDestroy window mainQuit
+    ; set window [ containerBorderWidth := 10, windowTitle := "Font test" ]
+    ; set window []
+    ; widgetShowAll window
+    
+    ; context <- widgetCreatePangoContext window
+    ; language <- contextGetLanguage context
+
+    ; fontDescription <- fontDescriptionNew    
+    ; fontDescriptionSetFamily fontDescription "Arial"
+    ; fontDescriptionSetStyle fontDescription StyleNormal
+    ; fontDescriptionSetVariant fontDescription VariantNormal
+    ; fontDescriptionSetWeight fontDescription WeightNormal
+    ; fontDescriptionSetStretch fontDescription StretchNormal
+    ; fontDescriptionSetSize fontDescription 10
+
+    ; let allChars = map chr [32..255]
+    ; glyphItems <- mapM (\c -> do { pangoItems <- pangoItemize context [c] [ AttrFontDescription 0 255 fontDescription]
+                                   ; glyphItem <- pangoShape (head pangoItems)
+                                   ; widths <- glyphItemGetLogicalWidths glyphItem (Just False)
+                                   ; return (head widths)
+                                   })
+                          allChars
+    ; 
+   -- ; glyphItem <- pangoShape (head pangoItem)
+    
+    ; metrics <- contextGetMetrics context fontDescription language
+    
+    
+    ; putStrLn $ "Metrics: " ++ show metrics ++ "\n" ++ show glyphItems ++ "\n" ++
+                 show (glyphItems !! (ord 'm')) ++ "\n" ++
+                 show (glyphItems !! (ord 'i')) ++ "\n"                 
+    ; mainGUI
+    }
+-}                       
