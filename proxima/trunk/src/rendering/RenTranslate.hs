@@ -45,9 +45,9 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
     KeyCharRen '\EOT'   -> (CutDocArr,     state, renLvl) -- Ctrl-d
     KeyCharRen '\DC4'   -> (TestArr,       state, renLvl) -- Ctrl-t
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
-    KeySpecialRen UpKey   (Modifiers False False True) -> setUpd AllUpdated $ (SkipArr 0, state, RenderingLevel (scale*2) c r sz debugging ur)
-    KeySpecialRen DownKey (Modifiers False False True) -> setUpd AllUpdated $ (SkipArr 0, state, RenderingLevel (scale/2) c r sz debugging ur)
-    KeySpecialRen F9Key ms                             -> setUpd AllUpdated $ (SkipArr 0, state, RenderingLevel scale c r sz (not debugging) ur)
+    KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r sz debugging ur)
+    KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r sz debugging ur)
+    KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r sz (not debugging) ur)
 
     KeySpecialRen UpKey (Modifiers False True False)    -> (NavUpDocArr, state, renLvl) -- Ctrl
     KeySpecialRen DownKey (Modifiers False True False)  -> (NavDownDocArr, state, renLvl) -- Ctrl
@@ -67,16 +67,16 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur)
 
 
 -- partial redraw hack
-    KeySpecialRen UpKey (Modifiers True False False)   -> setUpd NothingUpdated $ -- shift down
+    KeySpecialRen UpKey (Modifiers True False False)   -> -- shift down
       ( SetFocusArr (enlargeFocus focus (upPath (toA focus) (if debugging then debugArrangement arr else arr)))
       , state, renLvl )
-    KeySpecialRen DownKey (Modifiers True False False) -> setUpd NothingUpdated $ -- shift down
+    KeySpecialRen DownKey (Modifiers True False False) -> -- shift down
       ( SetFocusArr  (enlargeFocus focus (downPath (toA focus) (if debugging then debugArrangement arr else arr)))
       , state, renLvl )
-    KeySpecialRen UpKey ms        -> setUpd NothingUpdated $ 
+    KeySpecialRen UpKey ms        ->
       ( SetFocusArr (upFocus focus (if debugging then debugArrangement arr else arr))
       , state, renLvl )
-    KeySpecialRen DownKey ms      -> setUpd NothingUpdated $ 
+    KeySpecialRen DownKey ms      ->
       ( SetFocusArr (downFocus focus (if debugging then debugArrangement arr else arr))
       , state, renLvl )
 

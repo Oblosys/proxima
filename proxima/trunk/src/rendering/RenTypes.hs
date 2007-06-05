@@ -36,24 +36,23 @@ instance Show (RenderingLevel documentLevel) where
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}"
 
--- GUICommand is to specify GUI commands like menu creation etc. This cannot be done in the repaint draw monad.
 
+-- GUICommand is to specify GUI commands like menu creation etc. This cannot be done in the repaint draw monad.
 type Scale = Double
 type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
                   Var (RenderingLevel documentLevel) -> ScrolledWindow () -> 
                                 Int -> Int -> IO ()
---type GUICommand = Id -> ((RenderingLevel, EditRendering) -> IO (RenderingLevel, EditRendering')) ->
---                  Int -> Int -> GUI RenderingLevel ()
+
 type Rendering = DC () -> IO ()
---type Rendering = Draw ()
 type Debugging = Bool
-type UpdatedRegions = (Rect    , Rect, Rect    )
 type Size = (Int, Int)
---                    (current focus, old focus, edited region)
--- only for flickering reduction, until we have double buffering
 
 emptyR :: Rendering
 emptyR dc = return ()
 
 origin :: (Int, Int)
 origin = (0,0)
+
+type UpdatedRegions = (Rect    , Rect, Rect    )
+--                    (current focus, old focus, edited region)
+-- only for flickering reduction, until we have double buffering

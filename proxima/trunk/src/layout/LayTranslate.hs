@@ -13,7 +13,7 @@ translateIO :: ScannerSheet doc node clip -> LayerStateLay doc node clip -> Layo
             -> IO (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 translateIO scannerSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO scannerSheet state low high editLow
-     ; debugLnIO Prs $ "Edit Layout: "++show editLow
+     ; debugLnIO Err $ "Edit Layout: "++show editLow
      ; return (editHigh, state', low')
      }
 
@@ -36,25 +36,25 @@ parseIO scannerSheet state layLvl prs event = return $ parse scannerSheet state 
 
 parse :: ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 parse _ state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
-  setUpd NothingUpdated $ (SkipPres 0, state, LayoutLevel pres focus dt)
+  (SkipPres 0, state, LayoutLevel pres focus dt)
 parse _ state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
 parse _ state layLvl prs InitLay       = (InitPres, state, layLvl)
 parse _ state layLvl prs (InsertLay c) = editLay (editInsert c) state layLvl prs
 parse _ state layLvl prs CutLay   = editLay editCut state layLvl prs
-parse _ state layLvl prs CopyLay   = setUpd NothingUpdated $ editCopy state layLvl prs
+parse _ state layLvl prs CopyLay   = editCopy state layLvl prs
 parse _ state layLvl prs PasteLay  = editLay editPaste state layLvl prs
 parse _ state layLvl prs DeleteLay = editLay editDelete state layLvl prs 
 parse _ state layLvl prs SplitLay  = editLay editSplit state layLvl prs
 parse _ state layLvl prs LeftDeleteLay = editLay editLeftDelete state layLvl prs
 parse _ state layLvl prs RightDeleteLay = editLay editRightDelete state layLvl prs
-parse _ state layLvl prs LeftLay   = setUpd NothingUpdated $ navigateLeft state layLvl prs 
-parse _ state layLvl prs RightLay  = setUpd NothingUpdated $ navigateRight state layLvl prs
+parse _ state layLvl prs LeftLay   = navigateLeft state layLvl prs 
+parse _ state layLvl prs RightLay  = navigateRight state layLvl prs
 
-parse _ state layLvl prs EnlargeLeftLay   = setUpd NothingUpdated $ enlargeLeft state layLvl prs
-parse _ state layLvl prs EnlargeRightLay  = setUpd NothingUpdated $ enlargeRight state layLvl prs
+parse _ state layLvl prs EnlargeLeftLay   = enlargeLeft state layLvl prs
+parse _ state layLvl prs EnlargeRightLay  = enlargeRight state layLvl prs
 
 parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pt) = moveVertex pth pt state layLvl
-parse _ state layLvl prs NormalizeLay       = setUpd NothingUpdated $ editLay editNormalize state layLvl prs  
+parse _ state layLvl prs NormalizeLay       = editLay editNormalize state layLvl prs  
 
 parse scannerSheet state layLvl prs TestLay = tokenizeLay scannerSheet state layLvl prs
 parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
@@ -98,7 +98,7 @@ tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationL
  let (pres', layout', idCounter') = scannerSheet idCounter Nothing pres
      pres''                       = deleteInsertedTokens inserted pres'
      presLvl'                     = debug Err ("layTranslate: inss="++show inserted) $ PresentationLevel pres'' (layout',idCounter', inserted, deleted)
- in  setUpd AllUpdated $ (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
+ in  (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
 
 
 
@@ -117,7 +117,7 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
 -- in  setUpd AllUpdated $ (SetPres presLvl', state', ll)
      diffTree = diffPres pres'' pres
  in --        _                                    -> return ()  -- where did this line come from?
-     setUpd AllUpdated $ (SkipPres 0, state', LayoutLevel pres'' focus'' diffTree)
+    (SkipPres 0, state', LayoutLevel pres'' focus'' diffTree)
 
 
 -- should we make a similar function for edit ops that do not alter the presentation? This function would not do

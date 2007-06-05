@@ -100,29 +100,6 @@ isSelfClean :: DiffTree -> Bool
 isSelfClean (DiffLeaf c) = c
 isSelfClean (DiffNode c c' _) = c'
 
--- hack: only partial window updates for flickering reduce, see RenTypes.hs      
-data UpdatedRegionPres = AllUpdated | BlockUpdated | LineUpdated | NothingUpdated
-
-updatedRegionPresRf = unsafePerformIO $ newIORef NothingUpdated
-
-{-
--- for column of text rows, this reduces flickering by only partially updating
-setUpd ur x = unsafePerformIO $ do { writeIORef updatedRegionPresRf ur
-                                   ; return x
-                                   }
--}
-
--- NothingUpdated is for focus only moves (focus is always updated)
--- The rest is ignored because in general Presentation case, the partial updates are too complex to compute
-setUpd ur x = unsafePerformIO $ do { writeIORef updatedRegionPresRf (case ur of NothingUpdated -> NothingUpdated
-                                                                                _              -> AllUpdated)
-                                   ; return x
-                                   }
-readUpdRegionPres x =  unsafePerformIO $ do {readIORef updatedRegionPresRf}
-
-
-
-
 {-
 black = (0,0,0) :: (Int,Int,Int)
 blue = (0,0,255) :: (Int,Int,Int)

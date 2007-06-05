@@ -35,14 +35,14 @@ parse :: ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc
          (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
 
 parse parseSheet state _       enrLvl (SetPres presLvl@(PresentationLevel pres layout))  = 
-  setUpd AllUpdated $ editParse parseSheet state presLvl enrLvl
+  editParse parseSheet state presLvl enrLvl
 --  ( SkipDoc 0, state
 --  , PresentationLevel (markUnparsed pres) layout)  -- this goes wrong, presentation focus is not used
 
 parse _ state presLvl enrLvl (SkipPres i) = (SkipEnr (i+1), state, presLvl)
 --can't normalize here because there is no focus. Maybe normalize without focus. 
 --parse state presLvl enrLvl NormalizePres = setUpd AllUpdated $ editNormalize state presLvl enr 
-parse parseSheet state presLvl enrLvl TestPres      = setUpd AllUpdated $ editParse parseSheet state presLvl enrLvl
+parse parseSheet state presLvl enrLvl TestPres      = editParse parseSheet state presLvl enrLvl
 {-parse state presLvl enrLvl Test2Pres   = setUpd AllUpdated $editReadFile state presLvl enr focus 
 --parse state presLvl enrLvl (MouseDownPres path ms i) = setUpd AllUpdated $ editMouseDown state presLvl enr path -- Helium
 parse state presLvl enr (DocumentLoadedPres str) =  setUpd AllUpdated $ setDocument state presLvl enr str

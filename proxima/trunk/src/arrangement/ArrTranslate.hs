@@ -20,7 +20,7 @@ unArrange :: (HasPath node, Show node) => LocalStateArr -> ArrangementLevel doc 
              EditArrangement (DocumentLevel doc clip) ->
              (EditLayout (DocumentLevel doc clip) doc node clip, LocalStateArr, ArrangementLevel doc node clip)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
---  debug Err ("Edit arr is "++show editArr) $
+  debug Err ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
     SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus pres)
@@ -58,7 +58,8 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
           case navigateFocus x' y' arr of
             PathA pth _ ->
               case selectTreeA pth arr of
-                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay pth (x-x',y-y'), state, arrLvl) 
+                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay pth (x-x',y-y')
+                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
                 _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
                                     , state, arrLvl )
             _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
