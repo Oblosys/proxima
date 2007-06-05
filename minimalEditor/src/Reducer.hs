@@ -25,20 +25,19 @@ reductionSheet state low high editLow =
 reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
             EditEnrichedDoc documentLevel EnrichedDoc ->
             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =  setUpd AllUpdated $
-								                                     do { mDoc' <- openFile fpth 
+reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
 																	    ; case mDoc' of
 																	        Just doc' -> return (SetDoc doc', state, enrLvl)
 																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
 																	    }
 
-reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = setUpd NothingUpdated $ do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
+reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
 -- on save, save xmlrep of previous doc. 
 reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
                                               ; return (SetDoc doc', state, enrLvl) }
 
 reduceIO state enrLvl docLvl EvaluateDocEnr = return (EvaluateDoc, state, enrLvl) 
-reduceIO state enrLvl docLvl (SetEnr enrLvl')  = setUpd AllUpdated $ reduceEnrIO state enrLvl docLvl enrLvl'
+reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reduceEnrIO state enrLvl docLvl enrLvl'
 reduceIO state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
 
 
