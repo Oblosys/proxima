@@ -1,4 +1,4 @@
-HC   = /c/Progra~1/Visual~2/bin/ghc
+HC   = /c/Progra~1/Visual~1/bin/ghc
 FIND = /usr/bin/find
 
 PROXIMADIR = src/proxima
