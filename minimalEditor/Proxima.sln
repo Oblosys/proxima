@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Proxima", "Proxima.cabal", "{7796955C-789D-4723-A84A-A905EDFA694A}"
+Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Proxima", "Proxima.cabal", "{0BFEFFE0-E9CC-48EC-B33D-DEC9C2EFD1F2}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -7,11 +7,9 @@ Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
-	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{7796955C-789D-4723-A84A-A905EDFA694A}.Debug.ActiveCfg = Debug
-		{7796955C-789D-4723-A84A-A905EDFA694A}.Debug.Build.0 = Debug
+		{0BFEFFE0-E9CC-48EC-B33D-DEC9C2EFD1F2}.Debug.ActiveCfg = Debug
+		{0BFEFFE0-E9CC-48EC-B33D-DEC9C2EFD1F2}.Debug.Build.0 = Debug
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
