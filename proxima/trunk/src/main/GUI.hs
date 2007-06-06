@@ -84,62 +84,8 @@ startGUI handler (initRenderingLvl, initEvent) = run $
 onPaint :: Var (RenderingLevel documentLevel) -> DC () -> Rect -> IO ()          
 onPaint renderingLvlVar dc viewRect =
  do { dcClear dc
-    ; putStrLn "\n\n\n\n\nPainting"
     ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions <- varGet renderingLvlVar
-    ; dcSetUserScale dc 5.0 5.0
-    
     ; rendering dc
-    
- {-
- when switching from POINTS to TEXT, all fonts switch as well, so this can't be 
- used to determine pixel sizes for fonts
-
-
-Even when mapmode is points, an  x point rectangle is smaller than an x point letter
-furthermore, 10pt has height 20m and 100pt has height 181
-
-
- MAC: dcSetMapMode has no effect
-      somehow fonts are smaller than on windows
-
-from http://www.wxwindows.org/manuals/2.4.2/wx482.htm#wxfontoverview :
-> Note: There is currently a difference between the appearance of fonts on the two platforms, if the mapping
-> mode is anything other than wxMM_TEXT. Under X, font size is always specified in points. Under MS Windows,
-> the unit for text is points but the text is scaled according to the current mapping mode. However, user scaling
-> on a device context will also scale fonts under both environments.
--}
-{-
-    ; dcSetMapMode dc wxMM_TEXT
-    ; w <- dcLogicalToDeviceXRel dc 10
-    ; dcSetFontStyle dc $ fontDefault { _fontFace = "Courier New", _fontSize = 10 }
-    ; size <- dcGetCharHeight dc
-    ; debugLnIO Arr $ "1!!!!!!!!!!!!!!!!!!!!!!size of 100 is"++show size
-    ; dcSetFontStyle dc $ fontDefault { _fontFace = "Courier New", _fontSize = 10 }
-    ; size <- getTextExtent dc "x"
-    ; debugLnIO Arr $ "1!!!!!!!!!!!!!!!!!!!!!!size of 10 is"++show size
-    ; drawText dc "x" (pt 0 0) []
-    ; drawRect dc (rect (pt 0 0) (sz 10 10)) []
-    
-    ; dcSetMapMode dc wxMM_TEXT
-    
-    ; size <- getTextExtent dc "x"
-    ; debugLnIO Arr $ "2!!!!!!!!!!!!!!!!!!!!!!size of 100 is"++show size
-    ; dcSetFontStyle dc $ fontDefault { _fontFace = "Courier New", _fontSize = 100 }
-    
-    ; size <- getTextExtent dc "x"
-    ; debugLnIO Arr $ "3!!!!!!!!!!!!!!!!!!!!!!size of 100 is"++show size
-    
-    
-    ; drawRect dc (rect (pt 200 0) (sz 100 100)) []
-    ; drawText dc "x" (pt 200 0) []
-
-    ; dcSetMapMode dc wxMM_POINTS
-    ; w <- dcLogicalToDeviceXRel dc 100
-    ; debugLnIO Arr $ "logical 100 is "++show w
-    ; dcSetMapMode dc wxMM_TEXT
-    ; w <- dcLogicalToDeviceXRel dc 100
-    ; debugLnIO Arr $ "logical 100 is "++show w
--}    
     }
 
 onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
@@ -278,7 +224,6 @@ genericHandler handler renderingLvlVar window evt =
             --; windowRefresh window False {- erase background -}
             
             ; windowRefreshRect window False scrolledUpdR
-            ; repaint window
             }
     }
 
@@ -311,106 +256,6 @@ translateModifiers m = CommonTypes.Modifiers (shiftDown m) (controlDown m) (altD
 
 downCast :: ScrolledWindow a -> Window () 
 downCast a = objectCast a
-
-
--------------- Experiments with dynamic tooltip support:
-{-
-
-tooltipLook str _ _ = 
- do { setPenColour (RGB 255 255 0)
-    ; fillAt (Point2 0 0) (Box 100 100)
-    ; setPenColour (RGB 0 0 0)
-    ; drawAt (Point2 0 15) str
-    }
--}
-
-{-in mouse handler:
-
-     ; case mstate of
-        MouseDown (Point2 x y) ms _ -> 
-          do { hideControl cID
-             }
-        _                           -> 
-               return ()
-   
-    
-    -- handle event
-
-
-    ; case mstate of
-        MouseDown (Point2 x y) ms _ -> 
-          do { debugLnGUI GUI $ "moving control"++show ms
-             ; p <- setControlPos windowID [(cID, (Fix, Vector2 x y))]
-             ; setControlLook cID True (True, tooltipLook (show x))
-             ; showControl cID
-             
-             ; debugLnGUI GUI $ ""
-             }
-        _ ->
-               return ()
-    
-
-
--- local startGUI decls
--- experiments with moving and transparent tooltip controls. Failed, because controls can't be transparent and moving causes
--- massive repainting of underlying control. Also can't manage to let mouse events be handled by an underlying control
- 
-  in window def:
-   ... Window ("Proxima v1.0") () tooltipControl:+: tooltipControl2)
-   ...                         -- need to give both, otherwise tooltipControl does not work!?!? Controls are buggy in this version
-
-   tooltipControl =
-     CustomControl (Size 50 20) (tooltipLook "hallo!")
-       [ ControlId  id0
-       , ControlPos (Fix, (Vector2 1000 1000))
-     --  , ControlMouse  (const True) Able (noLS1 (mouseH)) -- Mouse handler for these controls crashes at first mouse over
-       ]
-
-   tooltipControl2 = 
-     CustomControl (Size 0 0) (\_ _ -> drawAt (Point2 10 10) "hahkjhkjfhkjhllo")
-       [ ControlId  id1
-       , ControlPos (Fix, (Vector2 1000 1000))
-       ]
-
-
-   mouseH :: MouseState -> state -> GUI state state
-   mouseH mevent state = 
-    do { debugLnGUI GUI "yes"
-       ; return state
-       }
-
-
-   editorControl =
-     CustomControl (Size 5000 1500) (\_ _ -> return ())
-       [ ControlId editorControlID
-       , ControlPos (Fix, zero)
-       , ControlTip ""
-       ] 
-
-   controlTester state =
-     do { -- disableControl id0 
-          
-        ; return state
-        }
-
-
-
--}
-
-
-
-
-
-
--- If mouse is on window outside control, drawInWindow returns Nothing
-
--- Aargh. lot of work to use a custom control instead of the window, so a tooltip can be shown. However, the 
--- tooltip text can't be changed... Using separate controls for all tooltips will be far too heavy weight, and
--- also the background should be transparent then. Probably better to let Proxima create the tooltip. 
--- Proxima tooltips may only show inside the window, but they can use full Xprez instead of only text
--- anyhow, the control refresh seems to flicker even more than the window refresh.
-
-
 
 -- file dialogues change current directory and do not start in the current directory
 -- no mouse exit events
