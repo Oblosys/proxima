@@ -19,9 +19,11 @@ import PresTypes -- temporarily
 import PresUtils -- temporarily
 import LayTypes
 import ArrTypes -- temporarily
-import RenTypesGTK -- temporarily
+--import RenTypesGTK -- temporarily
+import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
-import FontLibGTK  -- for initial FontMetrics, the Init should take care of this.
+--import FontLibGTK  -- for initial FontMetrics, the Init should take care of this.
+import FontLib  -- for initial FontMetrics, the Init should take care of this.
 
 import EvalLayerTypes (EvaluationSheet, ReductionSheet)
 import PresLayerTypes (PresentationSheet, ParseSheet)

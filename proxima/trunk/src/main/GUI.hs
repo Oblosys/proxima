@@ -84,8 +84,9 @@ startGUI handler (initRenderingLvl, initEvent) = run $
 onPaint :: Var (RenderingLevel documentLevel) -> DC () -> Rect -> IO ()          
 onPaint renderingLvlVar dc viewRect =
  do { dcClear dc
+    ; putStrLn "\n\n\n\n\nPainting"
     ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions <- varGet renderingLvlVar
-    --; dcSetUserScale dc 2.0 2.0
+    ; dcSetUserScale dc 5.0 5.0
     
     ; rendering dc
     
@@ -277,6 +278,7 @@ genericHandler handler renderingLvlVar window evt =
             --; windowRefresh window False {- erase background -}
             
             ; windowRefreshRect window False scrolledUpdR
+            ; repaint window
             }
     }
 

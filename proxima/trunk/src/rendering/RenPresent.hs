@@ -4,6 +4,7 @@ import CommonTypes
 import RenLayerTypes
 import RenLayerUtils -- for context menu hack
 
+--import RendererGTK
 import Renderer
 
 import DocTypes (DocumentLevel, HasPath)

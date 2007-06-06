@@ -7,6 +7,7 @@ import CommonTypes
 import LayTypes
 import ArrTypes
 
+--import FontLibGTK
 import FontLib
 
 data LocalStateArr = LocalStateArr { getFontMetricsRef :: FontMetricsRef

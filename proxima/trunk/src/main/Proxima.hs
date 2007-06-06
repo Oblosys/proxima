@@ -5,6 +5,7 @@ import System
 
 import Architecture
 
+--import GUIGTK
 import GUI
 
 import CommonTypes
@@ -14,13 +15,17 @@ import DocUtils -- for redirect
 import PresPresent
 import EnrTypes
 import Graphics.UI.WX.Types hiding (Size)
+--import Graphics.UI.Gtk
+
 import PresTypes -- temporarily
 import PresUtils -- temporarily
 import LayTypes
 import ArrTypes -- temporarily
 import ArrLayerTypes -- for initial extra state
+--import RenTypesGTK -- temporarily
 import RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
+--import FontLibGTK  -- for initial FontMetrics, the Init should take care of this.
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
 
 import EvalLayerTypes (EvaluationSheet, ReductionSheet)
@@ -112,6 +117,7 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
                                             ( rectBetween (Point 0 0) (Point 0 0)
                                             , rectBetween (Point 0 0) (Point 0 0)
                                             , rectBetween (Point 0 0) (Point 0 0) )
+--                                            (Rectangle 0 0 0 0,Rectangle 0 0 0 0,Rectangle 0 0 0 0)
                        , initEvent)
 
 

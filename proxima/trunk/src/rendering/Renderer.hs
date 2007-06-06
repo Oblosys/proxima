@@ -149,7 +149,7 @@ render' scale arrDb focus diffTree arrangement dc =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     -- ; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
-    ; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
+    --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
     ; drawRect dc (Rect 0 0 2000 1000) [color := white, brush := BrushStyle BrushSolid white]
 
