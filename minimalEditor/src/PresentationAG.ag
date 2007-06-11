@@ -52,8 +52,8 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col [ bold $ text "Root", 
-                           @tree.pres,
-                           @graph.pres 
+                           @graph.pres, 
+                           @tree.pres
                          ]
 
 SEM Tree
@@ -68,12 +68,14 @@ SEM Tree
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     graph 1100 750 @edges.edges @vertices.vertexIDs @vertices.press
+                     row [ hSpace 5,
+                           boxed $ graph 1100 750 @edges.edges @vertices.vertexIDs @vertices.press
+                         ]
       
 SEM Vertex [ || ] 
   | Vertex
       lhs.pres = loc (VertexNode @self @lhs.path) $
-                   vertex @x.int @y.int (\a -> (round $ 18*cos a, round $ -18*sin a)) $
+                   vertex @x.int @y.int (\a -> (round $ 17*cos a -1, round $ -17*sin a -1)) $
                      col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
                          , rowR 1 [glue, boxed 
