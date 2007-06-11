@@ -430,7 +430,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-
+        ; gcSetClipRectangle gc (Rectangle x y w h)
         ; if arrDb then
             drawFilledRectangle dw gc (Rectangle x y w h) graphColor graphColor
           else 
