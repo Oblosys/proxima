@@ -172,7 +172,7 @@ computeRenderedArea (lux, luy) diffTree arr =
                     _ -> debug Err "Renderer.computeRenderedArea: dirty children for node without children" []
      else [(xA arr,yA arr, xA arr + widthA arr,  yA arr + widthA arr)]
     
-renderArr :: (Window, DrawWindow, GC) -> Bool -> Scale -> (Int,Int) -> DiffTree -> Arrangement Node -> IO ()    
+renderArr :: DrawableClass drawWindow => (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) -> DiffTree -> Arrangement Node -> IO ()    
 renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isClean diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
@@ -440,6 +440,8 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                     }        
               }
         ; sequence_ $ reverse $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs -- reverse so first is drawn in front
+        ; gcSetClipRectangle gc (Rectangle 0 0 10000 10000) 
+        -- seems to be the only way to clear clip area. Setting clipMask to Nothing does not work
         }
 
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
@@ -494,7 +496,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
 
   }
 
-drawFilledRectangle :: DrawWindow -> GC -> Rectangle -> Graphics.UI.Gtk.Color -> Graphics.UI.Gtk.Color -> IO ()
+drawFilledRectangle :: DrawableClass drawWindow => drawWindow -> GC -> Rectangle -> Graphics.UI.Gtk.Color -> Graphics.UI.Gtk.Color -> IO ()
 drawFilledRectangle dw gc (Rectangle x y w h) lineColor fillColor =
  do { gcSetValues gc $ newGCValues { foreground = fillColor }
     ; drawRectangle dw gc True x y w h 

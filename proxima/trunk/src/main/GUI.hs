@@ -92,10 +92,15 @@ startGUI handler (initRenderingLvl, initEvent) =
 
 onPaint :: Window -> IORef (RenderingLevel documentLevel) -> DrawingArea -> Event -> IO Bool
 onPaint wi renderingLvlVar  canvas (Expose { eventArea=rect }) =
- do { dw <- drawingAreaGetDrawWindow canvas
+ do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+    
+    ; dw <- drawingAreaGetDrawWindow canvas
     ; gc <- gcNew dw
-    ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+--    ; pm <- pixmapNew (Just dw) 1000 1000 Nothing
+    
     ; rendering (wi, dw, gc)
+    
+--    ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
     ; return True
     }
  

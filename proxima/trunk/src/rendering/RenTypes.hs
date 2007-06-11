@@ -43,7 +43,7 @@ type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering do
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 
-type Rendering = (Window, DrawWindow, GC) -> IO ()
+type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> IO ()
 type Debugging = Bool
 type Size = (Int, Int)
 
