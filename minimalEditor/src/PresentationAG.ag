@@ -51,7 +51,10 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col [ text "Root", @tree.pres, @graph.pres ]
+                     col [ bold $ text "Root", 
+                           @tree.pres,
+                           @graph.pres 
+                         ]
 
 SEM Tree
   | Bin
@@ -65,13 +68,13 @@ SEM Tree
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     graph 1000 700 @edges.edges @vertices.vertexIDs @vertices.press
+                     graph 1100 750 @edges.edges @vertices.vertexIDs @vertices.press
       
 SEM Vertex [ || ] 
   | Vertex
       lhs.pres = loc (VertexNode @self @lhs.path) $
                    vertex @x.int @y.int (\a -> (round $ 18*cos a, round $ -18*sin a)) $
-                     col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255), glue]
+                     col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
                          , rowR 1 [glue, boxed 
                                             (row [ hSpace 3, text @name.str `withFont'` ("Arial", 10), hSpace 3])
