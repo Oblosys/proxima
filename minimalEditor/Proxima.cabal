@@ -5,8 +5,8 @@ license: AllRightsReserved
 license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
-build-depends: Cabal -any, base -any, haskell98 -any, parsec ==2.0,
-               wx >=0.9.4, wxcore >=0.9.4
+build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
+               parsec ==2.0
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -51,7 +51,6 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                ProxParser_Generated Reducer Scanner
 ghc-prof-options: -auto-all
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
--- -w only for Visual Haskell, since warnings fill up the task list
 hugs-options:
 nhc-options:
 jhc-options:
