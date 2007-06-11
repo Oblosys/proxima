@@ -1,14 +1,14 @@
 module RenTypes where
 
-import Graphics.UI.WX hiding (Size, Modifiers)
-import Graphics.UI.WXCore (DC)
+import Graphics.UI.Gtk hiding (Scale, Size)
+import Data.IORef
 
 import CommonTypes
 import CommonUtils
 
 import DocTypes
 
-data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions
+data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions LeftButtonDown
 
 type LocalStateRen = ()
 
@@ -32,18 +32,18 @@ data EditRendering documentLevel =
 
 
 instance Show (RenderingLevel documentLevel) where
-  show (RenderingLevel scale _ _ size debugging updRegions) =
+  show (RenderingLevel scale _ _ size debugging updRegions leftButtonDown) =
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
-    ++ "               {updated regions:"++show updRegions++"}"
+    ++ "               {updated regions:"++show updRegions++"}{leftButtonDown:"++show leftButtonDown++"}\n"
 
 
--- GUICommand is to specify GUI commands like menu creation etc. This cannot be done in the repaint draw monad.
 type Scale = Double
 type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                  Var (RenderingLevel documentLevel) -> ScrolledWindow () -> 
-                                Int -> Int -> IO ()
+                  IORef (RenderingLevel documentLevel) -> Window -> DrawingArea -> 
+                                Int -> Int -> IO (Maybe Menu)
+-- GUICommand is currently only used for popup menus
 
-type Rendering = DC () -> IO ()
+type Rendering = (Window, DrawWindow, GC) -> IO ()
 type Debugging = Bool
 type Size = (Int, Int)
 
@@ -53,6 +53,13 @@ emptyR dc = return ()
 origin :: (Int, Int)
 origin = (0,0)
 
-type UpdatedRegions = (Rect    , Rect, Rect    )
+type UpdatedRegions = (Rectangle    , Rectangle, Rectangle    )
 --                    (current focus, old focus, edited region)
 -- only for flickering reduction, until we have double buffering
+
+type LeftButtonDown = Bool 
+-- For distinguishing between mouse move and mouse drag events. It is updated by RenTranslate.
+-- Currently, Proxima only handles left dragging.
+
+instance Show Rectangle where
+  show (Rectangle x y w h) = "{Rectangle ("++show x ++"," ++ show y ++"),("++ show w ++ "x" ++ show h ++ ")}" 

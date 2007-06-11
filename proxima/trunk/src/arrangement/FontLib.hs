@@ -1,6 +1,7 @@
 module FontLib where
 
 import CommonTypes
+import Graphics.UI.Gtk hiding (FontMetrics)
 
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -10,8 +11,8 @@ import Array
 import Char
 import Data.IORef
 
-import Graphics.UI.WX
-import Graphics.UI.WXCore hiding (Font)
+--import Graphics.UI.WX
+--import Graphics.UI.WXCore hiding (Font)
 
 -- use different structure to make lookup more efficient? Or is this a waste of time
 type FontMetrics = Map Font (Int, Int, Array Int Int)
@@ -24,84 +25,71 @@ newFontMetricsRef = newIORef Map.empty
 initFontMetrics :: IO FontMetricsRef
 initFontMetrics = newFontMetricsRef
    
-mkFontMetrics :: [(Font,(Int, Int, [Int]))] -> FontMetrics
-mkFontMetrics ms = Map.fromList $ map (\(f,(h, b, ws)) -> (f, (h, b,  listArray (0,223) ws))) ms
-
-{-
-lookup (fs, ff) fms
- unsafePerformIO 
-  fms <- var fms
-  r = lookup fms
- case r of Just -> return
-   Nothing 
-  do
-    queryfont
--} 
-{-
-metricsLookup :: (Int, String) -> FontMetrics -> (Int, Int, Array Int Int)
-metricsLookup font fms = 
-  unsafePerformIO $ metricsLookup' font fms  -- is this safe??
-                                             -- the metrics don't change so the function is pure
-                                             -- but won't the communication with the renderer
-                                             -- cause problems? Maybe not because the comm. is 
-                                             -- atomic.
--}
+-- Because Underline and strikeOut have no influence on the metrics, all
+-- fonts are stored in the Map with these attributes set to False.
+mkFontMetrics :: [Font] -> IO FontMetrics
+mkFontMetrics fonts = fmap Map.fromList $ mapM mkFontMetric fonts
+ where mkFontMetric font = 
+        do { (f,(h, b, ws)) <- queryFont font
+           ; return $ (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) ws)) 
+           }
+           
+-- | Lookup the metrics for font. Because Underline and strikeOut have no influence on the metrics, all 
+-- fonts are stored in the Map with these attributes set to False.
 metricsLookup :: Font -> FontMetrics -> (Int, Int, Array Int Int)
 metricsLookup font fontMetrics = 
   -- debug Err ("looking up: " ++ show (fSize font) ++ " " ++ (fFamily font)) $
-  case Map.lookup font fontMetrics  of
+  case Map.lookup (font {fUnderline = False, fStrikeOut = False}) fontMetrics  of
             Just metrics -> metrics
             Nothing      -> debug Err "metrics for font not queried" $ (0,0, listArray (0,223) (repeat 0))
-    
 
-
+--- query the metrics for font. 
 queryFont :: Font -> IO (Font,(Int, Int, [Int]))
-queryFont font@(Font fFam fSiz fBld fUnderln fItlc fStrkt) =
+queryFont font =
  do { debugLnIO Arr $ "Querying: " ++ show (fSize font) ++ " " ++ (fFamily font)
-
-    ; dc <- screenDCCreate
+    ; context <- cairoCreateContext Nothing
+    ; language <- contextGetLanguage context
+    ; fontDescription <- fontDescriptionFromProximaFont font
     
-    ; dcSetFontStyle dc $ fontDefault { _fontFace = fFamily font
-                              , _fontSize = fSize font
-                              , _fontWeight = if fBold font then WeightBold else WeightNormal
-                              , _fontShape  = if fItalic font then ShapeItalic else ShapeNormal
-                              , _fontUnderline = fUnderline font }
-    ; (_, descent,leading) <- getFullTextExtent dc "m"
- -- from 32 because of QT legacy. If QT renderer is dumped, maybe switch to 0
-    ; sizes <- sequence [ getTextExtent dc [chr c] | c <-[32..255]]
-    ; let widths = map ((\x -> x).sizeW) sizes
-    ; let height = maximum $ map sizeH sizes
-    ; let ascent = height - descent
-
-
+    ; let allChars = map chr [32..255]
+    ; widths <- mapM (\c -> do { pangoItems <- pangoItemize context [c] [ AttrFontDescription 0 255 fontDescription]
+                               ; glyphItem <- pangoShape (head pangoItems)
+                               ; widths <- glyphItemGetLogicalWidths glyphItem (Just False)
+                               ; return (round $ head widths)
+                               })
+                     allChars
+    
+    ; metrics <- contextGetMetrics context fontDescription language
+  
+    
+    ; let ascnt = round $ ascent metrics    
+          dscnt = round $ descent metrics
+          hght = ascnt + dscnt
 {-    
-    ; debugLnIO Arr $    "ascent:   " ++ show ascent
-                        ++ "\ndescent:  " ++ show descent
-                        ++ "\nleading:  " ++ show leading
-                        ++ "\nheight: " ++ show height
+    ; debugLnIO Arr $    "ascent:   " ++ show ascnt
+                        ++ "\ndescent:  " ++ show dscnt
+                        ++ "\nheight: " ++ show hght
     ; debugLnIO Arr $    "\nwidths:   " ++ show widths  
 -}   
-    
-    -- WX only has ascent and leading. take height as max char height. or is char height always the same?
-    -- then why not just let getFullTextExtent return ascent or height?
-    
-    ; return (font, (height,ascent,widths))
-    ;-- return (font, (fAscent fontMetrics+fDescent fontMetrics,fAscent fontMetrics,widths))
-    }
 
-{-
-  -- for profiling without objectio
-queryFont :: Font -> IO (Font,(Int, Int, [Int]))
-queryFont font@(Font fFam fSiz fBld fUnderln fItlc fStrkt)  = 
- do { return (font, (fSiz,fSiz `div` 2, [fSiz `div` 2 |i <- [32..255]]))
+    ; return (font, (hght,ascnt,widths))
     }
--}
+    
+fontDescriptionFromProximaFont :: Font -> IO FontDescription
+fontDescriptionFromProximaFont (Font fFam fSiz fBld fUnderln fItlc fStrkt) =
+ do { fontDescription <- fontDescriptionNew    
+    ; fontDescriptionSetFamily fontDescription fFam
+    ; fontDescriptionSetStyle fontDescription (if fItlc then StyleItalic else StyleNormal) -- check if the font has italic or oblique?
+    ; fontDescriptionSetVariant fontDescription VariantNormal
+    ; fontDescriptionSetWeight fontDescription (if fBld then WeightBold else WeightNormal)
+    ; fontDescriptionSetStretch fontDescription StretchNormal
+    ; fontDescriptionSetSize fontDescription (fromIntegral fSiz)
+    ; return fontDescription
+    }
 
 forceEval :: Show a => a -> IO ()
 forceEval a = seq (last (show a)) (return ())
 
--- QT gives incorrect metrics for characters under 32. They have a width > 1, but when rendered as part
--- a QString, they have no appearance and no width on the screen "b\1la" is rendered as bla.
 
 textWidth :: FontMetrics -> Font -> String -> Int
 textWidth fms f str = let (h,b,ws) = metricsLookup f fms
@@ -126,10 +114,3 @@ charHeight fms f  = let (h,b,ws) = metricsLookup f fms
 baseLine :: FontMetrics -> Font -> Int
 baseLine fms f = let (h,b,ws) = metricsLookup f fms
                  in  (b)
- {---
-                       ,"required "++id++"_height = "++ show (charHeight lhs_fontSize 32)
-                       ,"required "++id++"_hRef = "++show (baseLine lhs_fontSize) ]
-		       -- ,"required "++id++"_hRef =
-
-                       -}
-                       

@@ -55,3 +55,7 @@ Therefore, we add   pi 0   , based on the quadrant the line is pointing in.
 
 Note, remember that screen y is flipped wrt. mathematical y
 -}
+
+-- | Perform an action if condition c holds
+when :: Bool -> IO () -> IO ()
+when c act = if c then act else return ()

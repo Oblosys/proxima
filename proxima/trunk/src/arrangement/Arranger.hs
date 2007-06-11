@@ -76,9 +76,9 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize oldAr
             ; debugLnIO Arr $ "new:             "++ show newFonts
 -}
             -- filter the ones that are already present
-            ; metrics <- mapM queryFont newFonts
 
-            ; let updatedMetrics = mkFontMetrics metrics `Map.union` queriedMetrics
+            ; newMetrics <- mkFontMetrics newFonts
+            ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics
             
             ; let (_, arrangement,  maxFDepth, unfoldedTree) =

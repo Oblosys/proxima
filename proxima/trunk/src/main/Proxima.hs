@@ -14,8 +14,8 @@ import DocUtils -- for redirect
 
 import PresPresent
 import EnrTypes
-import Graphics.UI.WX.Types hiding (Size)
---import Graphics.UI.Gtk
+--import Graphics.UI.WX.Types hiding (Size)
+import Graphics.UI.Gtk
 
 import PresTypes -- temporarily
 import PresUtils -- temporarily
@@ -113,11 +113,12 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
               ; return $ (renderingLvl', renderingEdit')
               }
                       -- initial RenderingLevel 
-    ; startGUI handler ( RenderingLevel 1.0 (\_ _ _ x y -> return ()) (\_ -> return ()) (0,0) False  
-                                            ( rectBetween (Point 0 0) (Point 0 0)
-                                            , rectBetween (Point 0 0) (Point 0 0)
-                                            , rectBetween (Point 0 0) (Point 0 0) )
---                                            (Rectangle 0 0 0 0,Rectangle 0 0 0 0,Rectangle 0 0 0 0)
+    ; startGUI handler ( RenderingLevel 1.0 (\_ _ _ _ x y -> return Nothing) (\_ -> return ()) (0,0) False  
+--                                            ( rectBetween (Point 0 0) (Point 0 0)
+--                                            , rectBetween (Point 0 0) (Point 0 0)
+--                                            , rectBetween (Point 0 0) (Point 0 0) )
+                                            (Rectangle 0 0 0 0,Rectangle 0 0 0 0,Rectangle 0 0 0 0)
+                                            False
                        , initEvent)
 
 

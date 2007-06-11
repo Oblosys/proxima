@@ -12,7 +12,8 @@ import FontLib
 {-
 TODO: 
 - add check that graph only has vertex children
-- SWITH href and vref!!! (also in presentation)
+- SWITCH href and vref!!! (also in presentation)
+- check that using ref in StringA to retrieve the baseline during rendering does not cause any problems (when ref is changed by with nodes)
 
 bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
 bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive

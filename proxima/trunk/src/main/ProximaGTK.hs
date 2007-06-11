@@ -5,7 +5,7 @@ import System
 
 import Architecture
 
-import GUIGTK
+import GUI
 
 import CommonTypes
 import DocTypes

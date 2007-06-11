@@ -31,16 +31,16 @@ render :: (HasPath node, Show node) =>
           EditArrangement' doc node clip ->
           (EditRendering' (DocumentLevel doc clip), LocalStateRen, ArrangementLevel doc node clip)
 -}
-render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ debugging updRegions) (SkipArr' 0) = 
+render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ debugging updRegions lmd) (SkipArr' 0) = 
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = DiffLeaf False
        rendering   = render' scale debugging focus diffTree arr' 
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arr arr'
        size        = (widthA arr', heightA arr')
-   in  ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions')
+   in  ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
 render state arrLvl ren (SkipArr' i) = (SkipRen' (i-1), state, arrLvl)
-render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ debugging updRegions) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
+render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ debugging updRegions lmd) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = DiffLeaf False -- nonincremental
 --       diffTree    = markFocusArr focus (markFocusArr focusOld (diffArr arr' arrOld)) -- incremental
@@ -48,6 +48,6 @@ render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ 
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arrOld arr'
        size        = (widthA arr', heightA arr')
    in  -- debug Arr ("Arr Diffs: "++show (diffArr arr' arrOld)) $
-       ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions')
+       ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
 
