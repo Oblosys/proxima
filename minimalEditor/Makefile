@@ -62,13 +62,13 @@ src/PresentationAG.hs : $(AGC) \
 
 
 clean:
-	$(FIND) src -name "*.hi" -delete
-	$(FIND) src -name "*.o" -delete
-	$(FIND) src -name "presentationAG.hs" -delete
+	$(FIND) src -maxdepth 1 -name "*.hi" -delete
+	$(FIND) src -maxdepth 1 -name "*.o" -delete
+	$(FIND) src -maxdepth 1 -name "presentationAG.hs" -delete
 	touch src/DocumentType.hs
-	$(FIND) . -name "proxima.*" -delete
+	$(FIND) . -maxdepth 1 -name "proxima.*" -delete
 
-# cannot delete .._Generated sources, so we touch src/DocumentType.hs, causing them to be
+# cannot delete *_Generated.hs sources, so we touch src/DocumentType.hs, causing them to be
 # recompiled on the next make
 	
 
