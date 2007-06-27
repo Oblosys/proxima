@@ -43,15 +43,15 @@ startGUI handler (initRenderingLvl, initEvent) =
     ; window <- windowNew
     ; onDestroy window mainQuit
     ; set window [ windowTitle := "Proxima v0.3" ]
+    ; windowSetDefaultSize window (fst initialWindowSize) (snd initialWindowSize)
+
     ; canvas <- drawingAreaNew 
     ; widgetSetCanFocus canvas True
-    ; windowSetDefaultSize window (fst initialWindowSize) (snd initialWindowSize)
   
     ; buffer <- newIORef Nothing
-    
     ; renderingLvlVar <- newIORef initRenderingLvl
+
     ; onExpose canvas $ onPaint buffer window renderingLvlVar canvas
-  
     ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer window canvas
     ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer window canvas
     ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer window canvas
@@ -180,10 +180,10 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
           "open" ->
            do { debugLnIO Err "Open"
               ; dialog <- fileChooserDialogNew
-                            (Just $ "Open")  --dialog title
-                            (Just window)                      --the parent window
-	                    FileChooserActionOpen            --the kind of dialog we want
-	                    [("Open"      --The buttons to display
+                            (Just "Open")      -- dialog title
+                            (Just window)      -- the parent window
+	                    FileChooserActionOpen  -- the kind of dialog we want
+	                    [("Open"               -- The buttons to display
 	                    , ResponseAccept)
 	                    ,("Cancel"
 	                    ,ResponseCancel)]
@@ -204,12 +204,11 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
           "save" -> 
            do { debugLnIO Err "Save"
               ;   dialog <- fileChooserDialogNew
-                             (Just $ "Demo of the standard dialog to select "
-	                                 ++ "a new file")                   --dialog title
-                             (Just window)                     --the parent window
-	                     FileChooserActionSave                         --the kind of dialog we want
-	                     [("gtk-cancel"                                --The buttons to display
-	                     ,ResponseCancel)                             --you can use stock buttons
+                             (Just "Save")     -- dialog title
+                             (Just window)     --the parent window
+	                     FileChooserActionSave --the kind of dialog we want
+	                     [("gtk-cancel"        --The buttons to display
+	                     ,ResponseCancel)
 	                     ,("gtk-save"
 	                    , ResponseAccept)]
               ;  widgetShow dialog
