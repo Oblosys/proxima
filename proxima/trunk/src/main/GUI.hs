@@ -182,11 +182,9 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
               ; dialog <- fileChooserDialogNew
                             (Just "Open")      -- dialog title
                             (Just window)      -- the parent window
-	                    FileChooserActionOpen  -- the kind of dialog we want
-	                    [("Open"               -- The buttons to display
-	                    , ResponseAccept)
-	                    ,("Cancel"
-	                    ,ResponseCancel)]
+	                        FileChooserActionOpen  -- the kind of dialog we want
+	                        [ ("Open", ResponseAccept)
+	                        , ("Cancel", ResponseCancel) ]-- The buttons to display
               
               ; widgetShow dialog
               ; response <- dialogRun dialog
@@ -206,11 +204,9 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
               ;   dialog <- fileChooserDialogNew
                              (Just "Save")     -- dialog title
                              (Just window)     --the parent window
-	                     FileChooserActionSave --the kind of dialog we want
-	                     [("gtk-cancel"        --The buttons to display
-	                     ,ResponseCancel)
-	                     ,("gtk-save"
-	                    , ResponseAccept)]
+	                         FileChooserActionSave --the kind of dialog we want
+	                         [ ("Save", ResponseAccept) 
+	                         , ("Cancel", ResponseCancel) ] --The buttons to display
               ;  widgetShow dialog
               ;  response <- dialogRun dialog
               ;  filePathM <- case response of 
