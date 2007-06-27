@@ -113,7 +113,7 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
               ; return $ (renderingLvl', renderingEdit')
               }
                       -- initial RenderingLevel 
-    ; startGUI handler ( RenderingLevel 1.0 (\_ _ _ _ x y -> return Nothing) (\_ -> return ()) (0,0) False  
+    ; startGUI handler ( RenderingLevel 1.0 (\_ _ _ _ _ x y -> return Nothing) (\_ -> return ()) (0,0) False  
 --                                            ( rectBetween (Point 0 0) (Point 0 0)
 --                                            , rectBetween (Point 0 0) (Point 0 0)
 --                                            , rectBetween (Point 0 0) (Point 0 0) )

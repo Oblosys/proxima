@@ -39,7 +39,7 @@ instance Show (RenderingLevel documentLevel) where
 
 type Scale = Double
 type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                  IORef (RenderingLevel documentLevel) -> Window -> DrawingArea -> 
+                  IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea -> 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 

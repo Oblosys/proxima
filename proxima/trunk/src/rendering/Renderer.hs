@@ -72,8 +72,8 @@ mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
-                 Window -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar window canvas x' y'  =
+                 IORef (Maybe Pixmap) -> Window -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
+mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar buffer window canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
@@ -84,13 +84,13 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
          do { let pathDoc = pathNode node
                   alts = DocumentEdit.menuD pathDoc doc
                   items = ctxtItems ++ alts
-            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar window canvas upd)
+            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer window canvas upd)
                                     | (str, upd) <- items]
             ; return $ Just contextMenu                                          
             }            
         Nothing -> return Nothing  
     }
-mkPopupMenuXY _ _ _ _ _ _ _ x y = 
+mkPopupMenuXY _ _ _ _ _ _ _ _ x y = 
  do { debugLnIO Err "Arrangement root is no document locator" 
     ; return Nothing
     }
