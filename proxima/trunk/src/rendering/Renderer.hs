@@ -297,21 +297,6 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; drawArc dw gc False x y w h (0*64) (360*64)
         }
 
-
-    (LineA id lux' luy' rlx' rly' _ _ lw' lColor) ->
-     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
-        ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
-                             + if fromy > toy then pi  else 0
-              
-              pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
-              pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
-        
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
-        ; drawLine dw gc (fromx,fromy) (tox,toy) 
-        -- draw arrow head
-        ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
-        }
-
 -- Poly seems to be rendered incorrectly (bottom/right line is blank)
     (PolyA id x' y' w' h' _ _ pts' lw' lColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
@@ -455,6 +440,20 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; renderArr (wi,dw,gc) arrDb scale (x, y) (head childDiffTrees) arr
         }
 
+    (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
+     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
+        ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
+                             + if fromy > toy then pi  else 0
+              
+              pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+        
+        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; drawLine dw gc (fromx,fromy) (tox,toy) 
+        -- draw arrow head
+        ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
+        }
+
     (StructuralA id arr) -> 
      do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
                         , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
@@ -574,12 +573,12 @@ mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCare
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (LineA _ x1 y1 x2 y2 _ _ _ _)        = mkLineCaret (x'+x1) (y'+y1) (x'+x2) (y'+y2)
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
 mkFocus' p x' y' (FocusA st en) (GraphA _ x y w h _ _ _ _ arrs)     =  mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (VertexA _ x y w h _ _ _ outline _) = mkOutlineCaret (x'+x) (y'+y) w h outline
+mkFocus' p x' y' focus          (EdgeA _ x1 y1 x2 y2 _ _ _ _)        = mkEdgeCaret (x'+x1) (y'+y1) (x'+x2) (y'+y2)
 mkFocus' p x' y' focus          (StructuralA l arr)      = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (ParsingA l arr)         = mkFocus' (p++[0]) x' y' focus arr
 mkFocus' p x' y' focus          (LocatorA l arr)         = mkFocus' (p++[0]) x' y' focus arr
@@ -601,8 +600,8 @@ layoutFocusColor = CommonTypes.blue
 -- just decreasing w and h does not work
 mkBoxCaret x y w h = 
   [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 layoutFocusColor transparent ]
-mkLineCaret x1 y1 x2 y2 =
-  [ LineA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
+mkEdgeCaret x1 y1 x2 y2 =
+  [ EdgeA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
 mkOutlineCaret x y w h outline = 
   [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 layoutFocusColor transparent ]
 

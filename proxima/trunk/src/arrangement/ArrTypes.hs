@@ -61,7 +61,6 @@ data Arrangement node =
   | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Color !Color
   | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
   | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
-  | LineA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
   | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
   | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
@@ -69,6 +68,7 @@ data Arrangement node =
   | ParsingA    !IDA  !(Arrangement node)
   | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
   | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
+  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
@@ -165,12 +165,12 @@ xA (ImageA _ x y w h _ _ _ _ _ _)     = x
 xA (PolyA _ x y w h _ _ _ _ _ _)      = x
 xA (RectangleA _ x y w h _ _ _ _ _ _) = x
 xA (EllipseA _ x y w h _ _ _ _ _ _)   = x
-xA (LineA _ x y x' y' _ _ _ _)        = x
 xA (RowA _ x y w h _ _ _ _)           = x
 xA (ColA _ x y w h _ _ _ _)           = x
 xA (OverlayA _ x y w h _ _ _ _)       = x
 xA (GraphA _ x y w h _ _ _ _ _)         = x
 xA (VertexA _ x y w h _ _ _ _ _)        = x
+xA (EdgeA _ x y x' y' _ _ _ _)        = x
 xA (StructuralA _ child)          = xA child
 xA (ParsingA _ child)             = xA child
 xA (LocatorA location child)      = xA child
@@ -182,12 +182,12 @@ yA (ImageA _ x y w h _ _ _ _ _ _)     = y
 yA (PolyA _ x y w h _ _ _ _ _ _)      = y
 yA (RectangleA _ x y w h _ _ _ _ _ _) = y
 yA (EllipseA _ x y w h _ _ _ _ _ _)   = y
-yA (LineA _ x y x' y' _ _ _ _)        = y
 yA (RowA _ x y w h _ _ _ _)           = y
 yA (ColA _ x y w h _ _ _ _)           = y
 yA (OverlayA _ x y w h _ _ _ _)       = y
 yA (GraphA _ x y w h _ _ _ _ _)         = y
 yA (VertexA _ x y w h _ _ _ _ _)        = y
+yA (EdgeA _ x y x' y' _ _ _ _)        = y
 yA (StructuralA _ child)          = yA child
 yA (ParsingA _ child)             = yA child
 yA (LocatorA location child)      = yA child
@@ -199,12 +199,12 @@ widthA (ImageA _ x y w h _ _ _ _ _ _)     = w
 widthA (PolyA _ x y w h _ _ _ _ _ _)      = w
 widthA (RectangleA _ x y w h _ _ _ _ _ _) = w
 widthA (EllipseA _ x y w h _ _ _ _ _ _)   = w
-widthA (LineA _ x y x' y' _ _ _ _)        = x'-x
 widthA (RowA _ x y w h _ _ _ _)           = w
 widthA (ColA _ x y w h _ _ _ _)           = w
 widthA (OverlayA _ x y w h _ _ _ _)       = w
 widthA (GraphA _ x y w h _ _ _ _ _)         = w
 widthA (VertexA _ x y w h _ _ _ _ _)        = w
+widthA (EdgeA _ x y x' y' _ _ _ _)        = x'-x
 widthA (StructuralA _ child)          = widthA child
 widthA (ParsingA _ child)             = widthA child
 widthA (LocatorA location child)      = widthA child
@@ -216,12 +216,12 @@ heightA (ImageA _ x y w h _ _ _ _ _ _)     = h
 heightA (PolyA _ x y w h _ _ _ _ _ _)      = h
 heightA (RectangleA _ x y w h _ _ _ _ _ _) = h
 heightA (EllipseA _ x y w h _ _ _ _ _ _)   = h
-heightA (LineA _ x y x' y' _ _ _ _)        = y'-y
 heightA (RowA _ x y w h _ _ _ _)           = h
 heightA (ColA _ x y w h _ _ _ _)           = h
 heightA (OverlayA _ x y w h _ _ _ _)       = h
 heightA (GraphA _ x y w h _ _ _ _ _)         = h
 heightA (VertexA _ x y w h _ _ _ _ _)        = h
+heightA (EdgeA _ x y x' y' _ _ _ _)        = y'-y
 heightA (StructuralA _ child)          = heightA child
 heightA (ParsingA _ child)             = heightA child
 heightA (LocatorA location child)      = heightA child
@@ -233,12 +233,12 @@ hRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
 hRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
 hRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
 hRefA (EllipseA _ x y w h hr vr _ _ _ _)   = hr
-hRefA (LineA _ x y x' y' hr vr _ _)        = hr
 hRefA (RowA _ x y w h hr vr _ _)           = hr
 hRefA (ColA _ x y w h hr vr _ _)           = hr
 hRefA (OverlayA _ x y w h hr vr _ _)       = hr
 hRefA (GraphA _ x y w h hr vr _ _ _)         = hr
 hRefA (VertexA _ x y w h hr vr _ _ _)        = hr
+hRefA (EdgeA _ x y x' y' hr vr _ _)        = hr
 hRefA (StructuralA _ child)          = hRefA child
 hRefA (ParsingA _ child)             = hRefA child
 hRefA (LocatorA location child)      = hRefA child
@@ -250,12 +250,12 @@ vRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
 vRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
 vRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
 vRefA (EllipseA _ x y w h hr vr _ _ _ _)   = vr
-vRefA (LineA _ x y x' y' hr vr _ _)        = vr
 vRefA (RowA _ x y w h hr vr _ _)           = vr
 vRefA (ColA _ x y w h hr vr _ _)           = vr
 vRefA (OverlayA _ x y w h hr vr _ _)       = vr
 vRefA (GraphA _ x y w h hr vr _ _ _)         = vr
 vRefA (VertexA _ x y w h hr vr _ _ _)        = vr
+vRefA (EdgeA _ x y x' y' hr vr _ _)        = vr
 vRefA (StructuralA _ child)          = vRefA child
 vRefA (ParsingA _ child)             = vRefA child
 vRefA (LocatorA location child)      = vRefA child
@@ -271,12 +271,12 @@ idA (ImageA id x y w h _ _ _ _ _ _)     = id
 idA (PolyA id x y w h _ _ _ _ _ _)      = id
 idA (RectangleA id x y w h _ _ _ _ _ _) = id
 idA (EllipseA id x y w h _ _ _ _ _ _)   = id
-idA (LineA id x y x' y' _ _ _ _)        = id
 idA (RowA id x y w h _ _ _ _)           = id
 idA (ColA id x y w h _ _ _ _)           = id
 idA (OverlayA id x y w h _ _ _ _)       = id
 idA (GraphA id x y w h hr vr _ _ _)       = id
 idA (VertexA id x y w h hr vr _ _ _)      = id
+idA (EdgeA id x y x' y' _ _ _ _)        = id
 idA (StructuralA _ child)          = idA child
 idA (ParsingA _ child)             = idA child
 idA (LocatorA location child)      = idA child

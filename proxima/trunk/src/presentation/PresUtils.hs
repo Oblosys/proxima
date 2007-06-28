@@ -239,6 +239,7 @@ locateTreePres' location []       (VertexP id _ _ _ pres)    = location
 locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (press!!!p)
 locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (press!!!p)                                            
 locateTreePres' location (0:path) (OverlayP id press@(pres:_)) = locateTreePres' location path (press!!!0)                                            
+locateTreePres' location []       (GraphP id rf _ _ press)   = location
 locateTreePres' location (p:path) (GraphP id rf _ _ press)   = locateTreePres' location path (press!!!p)                                            
 locateTreePres' location (0:path) (VertexP id _ _ _ pres)    = locateTreePres' location path pres
 locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' location path pres
@@ -249,12 +250,12 @@ locateTreePres' location pth      pr                         = debug Err ("*** P
 
 isEditableTreePres path pres = isEditableTreePres' True path pres
 
-isEditableTreePres' editable _        (StringP id str)           = editable
-isEditableTreePres' editable _        (ImageP _ _)               = editable
-isEditableTreePres' editable _        (PolyP _ _ _)              = editable
+isEditableTreePres' editable []       _                          = editable
 isEditableTreePres' editable (p:path) (RowP id rf press)         = isEditableTreePres' editable path (press!!!p)
 isEditableTreePres' editable (p:path) (ColP id rf press)         = isEditableTreePres' editable path (press!!!p)                                            
 isEditableTreePres' editable (0:path) (OverlayP id press@(pres:_)) = isEditableTreePres' editable path (press!!!0)                                            
+isEditableTreePres' editable (p:path) (GraphP id rf _ _ press)   = isEditableTreePres' editable path (press!!!p)
+isEditableTreePres' editable (0:path) (VertexP id _ _ _ pres)    = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (WithP ar pres)            = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (StructuralP id pres)      = isEditableTreePres' False path pres
 isEditableTreePres' editable (p:path) (ParsingP id pres)         = isEditableTreePres' True path pres

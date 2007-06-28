@@ -48,6 +48,7 @@ parse parseSheet state presLvl enrLvl TestPres      = editParse parseSheet state
 parse state presLvl enr (DocumentLoadedPres str) =  setUpd AllUpdated $ setDocument state presLvl enr str
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
+
 parse _ state presLvl enrLvl NavUpDocPres = (NavUpDocEnr, state, presLvl)
 parse _ state presLvl enrLvl NavDownDocPres = (NavDownDocEnr, state, presLvl)
 parse _ state presLvl enrLvl NavLeftDocPres = (NavLeftDocEnr, state, presLvl)

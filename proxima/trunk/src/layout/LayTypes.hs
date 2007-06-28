@@ -37,7 +37,9 @@ data EditLayout documentLevel doc node clip =
   | EnlargeLeftLay
   | EnlargeRightLay
   | MouseDownLay PathPres Modifiers Int
-  | MoveVertexLay [Int] (Int,Int)
+  | AddVertexLay [Int] (Int,Int) -- path to the graph and destination position for new vertex
+  | AddEdgeLay   [Int] -- path to to-vertex for new edge (from-vertex is assumed to be in focus)
+  | MoveVertexLay [Int] (Int,Int) -- presentation path to the vertex
   | NormalizeLay
   | DocumentLoadedLay String 
   | OpenFileLay String

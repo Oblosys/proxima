@@ -43,29 +43,31 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     Test2Arr              -> (Test2Lay,              state, arrLvl)
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
--- shift mouseDown is handled here
     MouseDownArr x y (Modifiers False False False) i ->
           ( SetFocusLay (focusPFromFocusA (focusAFromXY x y arr) pres)
           , state { getLastMousePress = Just (x,y)}, arrLvl)
+-- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
-          ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
-          , state, arrLvl)
+      case isGraphEdit x y arr pres of
+        Just addVertex    -> ( addVertex, state, arrLvl )
+        Nothing           -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+                       , state, arrLvl )
     MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-      case getLastMousePress state of
+      case getLastMousePress state of -- should not be Nothing, since a mouseDrag is preceeded by a mouseDown
         Just (x',y') -> 
           case navigateFocus x' y' arr of
             PathA pth _ ->
               case selectTreeA pth arr of
-                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay pth (x-x',y-y')
+                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay (pathPFromPathA' pth pres) (x-x',y-y')
                                                      , state { getLastMousePress = Just (x, y)}, arrLvl) 
                 _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
                                     , state, arrLvl )
             _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
                                , state, arrLvl )
         Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
-                   , state, arrLvl )
+                   , state, arrLvl ) -- does not occur
                             
     MouseUpArr x y ms     -> (SkipLay 0,             state { getLastMousePress = Nothing }, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
@@ -81,13 +83,9 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     DeleteDocArr          -> (DeleteDocLay,          state, arrLvl) 
     DocumentLoadedArr str -> (DocumentLoadedLay str, state, arrLvl) 
     _                     -> (SkipLay 0,             state, arrLvl) 
-
-
-{-
-  -}  
   
   
--- mouseDownDocPres and \DocumentLevel cause dependency on type DocumentLevel
+-- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: HasPath node  => state -> ArrangementLevel doc node clip ->
                 Presentation doc node clip -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip, state, ArrangementLevel doc node clip)  
@@ -104,3 +102,15 @@ mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of foc
                         _         -> (SkipLay 0, state, arrLvl) -- no locator
 mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
+
+isGraphEdit :: Show node => Int -> Int -> Arrangement node -> Presentation doc node clip ->
+               Maybe (EditLayout docLvl doc node clip)
+isGraphEdit x y arr pres =
+      case navigateFocus x y arr of 
+        PathA pth _ -> case selectTreeA pth arr of
+                         (xGraph,yGraph, GraphA _ _ _ _ _ _ _ _ _ _) ->
+                           Just $ AddVertexLay (pathPFromPathA' pth pres) (x-xGraph, y-yGraph)
+                         (_,_, VertexA _ _ _ _ _ _ _ _ _ _) ->
+                           Just $ AddEdgeLay (pathPFromPathA' pth pres)
+                         _                                             -> Nothing
+        _ -> Nothing

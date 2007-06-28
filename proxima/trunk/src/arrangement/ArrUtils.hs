@@ -25,12 +25,12 @@ shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="
 shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (LineA _ x y x' y' _ _ _ _)        = "{LineA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
 shallowShowArr (RowA _ x y w h _ _ _ _)           = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (ColA _ x y w h _ _ _ _)           = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (OverlayA _ x y w h _ _ _ _)       = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (GraphA _ x y w h _ _ _ _ _)       = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (VertexA _ x y w h _ _ _ _ _)      = "{VertexA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EdgeA _ x y x' y' _ _ _ _)        = "{EdgeA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
 shallowShowArr (StructuralA _ child)          = "{StructuralA}"
 shallowShowArr (ParsingA _ child)             = "{ParsingA}"
 shallowShowArr (LocatorA location child)      = "{LocatorA}"
@@ -62,12 +62,12 @@ walk (ImageA _ x y w h hr vr _ _ c1 c2)     = x+y+w+h+hr+vr + walkC c1 + walkC c
 walk (PolyA _ x y w h hr vr _ _ c1 c2)      = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (RectangleA _ x y w h hr vr _ _ c1 c2) = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (EllipseA _ x y w h hr vr _ _ c1 c2)   = x+y+w+h+hr+vr + walkC c1 + walkC c2
-walk (LineA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
 walk (RowA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 +  walkList arrs
 walk (ColA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (OverlayA _ x y w h hr vr c1 arrs)     = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (GraphA _ x y w h hr vr c1 nvs arrs)   = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (VertexA _ x y w h hr vr c1 ol arr)    = x+y+w+h+hr+vr + walkC c1 + walk arr
+walk (EdgeA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
 walk (StructuralA _ arr)              = walk arr
 walk (ParsingA _ arr)                 = walk arr
 walk (LocatorA _ arr)                 = walk arr
@@ -86,12 +86,12 @@ data Arrangement =
   | PolyA       !IDA !XCoord !YCoord !Width !Height ![(XCoord, YCoord)] !Int !RColor !RColor
   | RectangleA  !IDA !XCoord !YCoord !Width !Height !Int !Style !RColor !RColor
   | EllipseA    !IDA !XCoord !YCoord !Width !Height !Int !Style !RColor !RColor
-  | LineA       !IDA !XCoord !YCoord !XCoord !YCoord !Int !RColor
   | RowA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | ColA        !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | OverlayA    !IDA !XCoord !YCoord !Width !Height !RColor ![Arrangement]
   | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
   | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
+  | EdgeA       !IDA !XCoord !YCoord !XCoord !YCoord !Int !RColor
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
 -}
@@ -104,7 +104,7 @@ mkEdges edges vertices lineColor = map mkEdge edges
                                  (toVx,toVy,toVol)       = index "mkEdges"  toV vertices
                                  (offsetFromx, offsetFromy) = fromVol (computeAngle fromVx fromVy toVx toVy)
                                  (offsetTox, offsetToy)     = toVol   (computeAngle toVx toVy fromVx fromVy)
-                             in  LineA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
+                             in  EdgeA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
                                               (toVx+offsetTox)     (toVy+offsetToy)     0 0 1 lineColor 
 
 
@@ -241,7 +241,7 @@ pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heigh
 -- point only recurses in children that may have the focus
 -- Stretching rows do not lead to correct pointing.
 
--- precondition: x' y' falls inside the arrangement. (Except for GraphA and LineA)
+-- precondition: x' y' falls inside the arrangement. (Except for GraphA and EdgeA)
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
 --point' x' y' pth loc p@(EmptyA _)                     = Nothing -- does not occur at the moment
 point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _)    = Just (pth, loc)
@@ -261,7 +261,7 @@ point' x' y' pth loc p@(VertexA _ x y w h _ _ _ _ arr) =
      (y' >= y) && (y' < y+h)
   then Just (pth, loc)
   else Nothing
-point' x' y' pth loc p@(LineA _ x1 y1 x2 y2 _ _ _ _) =
+point' x' y' pth loc p@(EdgeA _ x1 y1 x2 y2 _ _ _ _) =
   if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
   then Just (pth, loc)
   else Nothing
@@ -283,21 +283,21 @@ pointColList i x' y' pth loc (arr:arrs) = if y' >= yA arr + heightA arr
                                                   (pth++[i]) loc arr
 
 -- Graphs let the pointing be handled by child arrangements. This is safe, because they must be
--- VertexA's or LineA's
+-- VertexA's or EdgeA's
 pointGraphList :: Show node => Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
 pointGraphList x' y' pth loc arrs =
   case catMaybes [ point' x' y' (pth++[i]) loc arr | (i,arr) <- zip [0..] arrs ] of
-    []      -> Nothing
-    ((pth, loc):_) -> Just (pth, loc)
+    []      -> Just (pth, loc) -- not focused on a child, so the focus is on the graph itself
+    ((pth', loc'):_) -> Just (pth', loc')
                                           
 
 
 
 
  
-                                                                   
+-- Returns the subtree rooted at path, together with the coordinates of its upper left corner                                                        
 selectTreeA :: Show node => [Int] -> Arrangement node -> (Int, Int, Arrangement node)
-selectTreeA = selectTreeA' 0 0
+selectTreeA path arr = selectTreeA' 0 0 path arr
 
 selectTreeA' x' y' []       tr                                = (x', y', tr)
 selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
@@ -397,8 +397,6 @@ debugArrangement' xOffset yOffset (StringA id x y w h hr vr str c f cxs) =
   ( StringA id (x+xOffset) (y+yOffset) (w+1) h hr vr str c f cxs, 1, 0) -- widen with 1, so focus is inside or on box
 debugArrangement' xOffset yOffset (ImageA id x y w h hr vr src style lc bc) = 
   ( ImageA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr src style lc bc, pd, pd)
-debugArrangement' xOffset yOffset (LineA id x y x' y' hr vr lw lc) = 
-  ( LineA id (x+xOffset) (y+yOffset) (x'+xOffset) (y'+yOffset) hr vr lw lc, pd, pd)
 debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw lc bc) = 
   ( PolyA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr pts lw lc bc, pd, pd)
 debugArrangement' xOffset yOffset (RectangleA id x y w h hr vr lw style lc fc) = 
@@ -452,6 +450,8 @@ debugArrangement' xOffset yOffset (GraphA id x y w h hr vr c nvs arrs)          
 debugArrangement' xOffset yOffset (VertexA id x y w h hr vr c ol arr)     =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (VertexA id (x+xOffset) (y+yOffset) (w+wOffset+pd) (h+hOffset+pd) hr vr c ol arr', wOffset+pd, hOffset+pd)
+debugArrangement' xOffset yOffset (EdgeA id x y x' y' hr vr lw lc) = 
+  ( EdgeA id (x+xOffset) (y+yOffset) (x'+xOffset) (y'+yOffset) hr vr lw lc, pd, pd)
 debugArrangement' xOffset yOffset (LocatorA location arr)              =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (LocatorA location arr', wOffset, hOffset)

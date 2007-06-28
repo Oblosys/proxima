@@ -53,7 +53,9 @@ parse _ state layLvl prs RightLay  = navigateRight state layLvl prs
 parse _ state layLvl prs EnlargeLeftLay   = enlargeLeft state layLvl prs
 parse _ state layLvl prs EnlargeRightLay  = enlargeRight state layLvl prs
 
-parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pt) = moveVertex pth pt state layLvl
+parse _ state layLvl@(LayoutLevel pres _ _) prs (AddVertexLay pth pos)  = addVertex pth pos state layLvl
+parse _ state layLvl@(LayoutLevel pres _ _) prs (AddEdgeLay pth)        = addEdge pth state layLvl
+parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pos) = moveVertex pth pos state layLvl
 parse _ state layLvl prs NormalizeLay       = editLay editNormalize state layLvl prs  
 
 parse scannerSheet state layLvl prs TestLay = tokenizeLay scannerSheet state layLvl prs
@@ -186,7 +188,7 @@ editNormalize clip (LayoutLevel pres focus dt) =
 -- unlike paste split and insert, left and right delete do not perform their edit command when the focus was non-empty
 -- ie. in that case, they are interpreted as a regular delete
 editLeftDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
-  if focusIsOnGraph f pres then
+  if focusIsOnGraph f pres then -- if the from path is in a graph, this is a graph edit
     (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
   else   
     if f /= t then editDelete clip layLvl else
@@ -197,7 +199,7 @@ editLeftDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
 
 -- if the from path is in a graph, this is a graph edit
 editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
-  if focusIsOnGraph f pres then
+  if focusIsOnGraph f pres then -- if the from path is in a graph, this is a graph edit
     (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
   else   
     if f /= t then editDelete clip layLvl else
@@ -234,7 +236,25 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
        focus'' = FocusP (fromP focus) (fromP focus')
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
+addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
+  let pres' = addVertexPres (PathP pth 0) (VertexP NoIDP x y outline vanillaVertex) pres
+  in  (SkipPres 0, state, LayoutLevel pres' focus dt)                  -- 0 in path is ignored
+ where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
+                         , vSpace 4 `withHStretch` True
+                         , rowR 1 [glue, boxed 
+                                            (row [ hSpace 3, text "<new>" `withFont'` ("Arial", 10), hSpace 3])
+                                              `withbgColor` (236, 236, 169)
+                                  , glue]
+                         ]
+       outline = \a -> (round $ 17*cos a -1, round $ -17*sin a -1)
 
+addEdge toPth state layLvl@(LayoutLevel pres focus@(FocusP (PathP fromPth _) _) dt) =
+  let pres' = case selectTree fromPth pres of
+                (VertexP _ _ _ _ _) -> addEdgePres (PathP fromPth 0) (PathP toPth 0) pres -- 0 in path is ignored
+                _                   -> pres
+  in  (SkipPres 0, state, LayoutLevel pres' focus dt)
+addEdge _ state layLvl = (SkipPres 0, state, layLvl)
+ 
 moveVertex pth pt state layLvl@(LayoutLevel pres focus dt) =
   let pres' = moveVertex' pth pt pres
   in  (SkipPres 0, state, LayoutLevel pres' focus dt)
