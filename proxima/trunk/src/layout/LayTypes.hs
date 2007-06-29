@@ -44,7 +44,7 @@ data EditLayout documentLevel doc node clip =
   | DocumentLoadedLay String 
   | OpenFileLay String
   | SaveFileLay String
-  | TestLay
+  | ParseLay
   | Test2Lay
   
   | UpdateDocLay (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level

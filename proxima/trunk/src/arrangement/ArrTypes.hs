@@ -31,7 +31,7 @@ data EditArrangement documentLevel =
   | EnlargeLeftArr
   | EnlargeRightArr
   | NormalizeArr
-  | TestArr
+  | ParseArr
   | Test2Arr
   | KeyCharArr Char
   | KeySpecialArr SpecialKey Modifiers

@@ -58,7 +58,7 @@ parse _ state layLvl@(LayoutLevel pres _ _) prs (AddEdgeLay pth)        = addEdg
 parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pos) = moveVertex pth pos state layLvl
 parse _ state layLvl prs NormalizeLay       = editLay editNormalize state layLvl prs  
 
-parse scannerSheet state layLvl prs TestLay = tokenizeLay scannerSheet state layLvl prs
+parse scannerSheet state layLvl prs ParseLay = tokenizeLay scannerSheet state layLvl prs
 parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
 
 

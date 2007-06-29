@@ -43,7 +43,7 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
     KeyCharRen '\ACK'   -> (CopyDocArr,    state, renLvl) -- Ctrl-f
     KeyCharRen '\a'     -> (PasteDocArr,   state, renLvl) -- Ctrl-g
     KeyCharRen '\EOT'   -> (CutDocArr,     state, renLvl) -- Ctrl-d
-    KeyCharRen '\DC4'   -> (TestArr,       state, renLvl) -- Ctrl-t
+    KeyCharRen '\DC4'   -> (ParseArr,       state, renLvl) -- Ctrl-t
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
     KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r sz debugging ur lmd)
@@ -61,7 +61,7 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
     KeySpecialRen DeleteKey ms    -> (RightDeleteArr, state, renLvl)
     KeySpecialRen LeftKey ms      -> (LeftArr, state, renLvl)
     KeySpecialRen RightKey ms     -> (RightArr, state, renLvl)
-    KeySpecialRen F1Key ms        -> (TestArr, state, renLvl)
+    KeySpecialRen F1Key ms        -> (ParseArr, state, renLvl)
     KeySpecialRen F2Key ms        -> (Test2Arr, state, renLvl)
     KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
 
