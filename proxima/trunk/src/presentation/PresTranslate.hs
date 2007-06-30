@@ -13,7 +13,7 @@ translateIO :: Show enr =>
                IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
 translateIO parseSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO parseSheet state low high editLow
-     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
+--     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
      ; return (editHigh, state', low')
      }
 

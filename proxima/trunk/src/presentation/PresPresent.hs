@@ -12,7 +12,7 @@ presentIO :: PresentationSheet doc enr node clip -> LayerStatePres -> EnrichedDo
              IO (EditPresentation' doc node clip, LayerStatePres, EnrichedDocLevel enr)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
   let (editLow, state', high') = present presentationSheet state high low editHigh
-  in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
+  in do { -- debugLnIO Prs ("editEnr':"++show editHigh)
         --; debugLnIO Prs ("editPres':"++show editLow)
         ; return $ (editLow, state', high')
         }

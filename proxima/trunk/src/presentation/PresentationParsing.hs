@@ -153,11 +153,11 @@ postScanStr kwrds ctxt (EllipseP _ _ _ _)   = []
 postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
 postScanStr kwrds ctxt (OverlayP _ [])      = []
 postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
-postScanStr kwrds ctxt (ColP i _ [])         = []
-postScanStr kwrds ctxt (ColP i _ (p:ps))     = postScanStr kwrds ctxt p ++ postScanStr kwrds ctxt (RowP i 0 ps)
-postScanStr kwrds ctxt (RowP i _ [])         = []
-postScanStr kwrds ctxt (RowP i _ (p:ps))     = postScanStr kwrds ctxt p ++ postScanStr kwrds ctxt (RowP i 0 ps)
-postScanStr kwrds ctxt (LocatorP l p)        = postScanStr kwrds (Just l) p  
+postScanStr kwrds ctxt (ColP i _ press)     = concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (RowP i _ press)     = concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (LocatorP l pres)    = postScanStr kwrds (Just l) pres  
+postScanStr kwrds ctxt (GraphP i _ _ es press) = GraphTk es ctxt i : concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (VertexP i x y _ pres)  = VertexTk (x,y) ctxt i : postScanStr kwrds ctxt pres  
 postScanStr kwrds ctxt (ParsingP i pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
 --postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
 postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
@@ -175,11 +175,11 @@ postScanPrs kwrds ctxt (EllipseP _ _ _ _)   = []
 postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (OverlayP _ [])      = []
 postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (ColP i _ [])        = []
-postScanPrs kwrds ctxt (ColP i _ (p:ps))    = postScanPrs kwrds ctxt p ++ postScanPrs kwrds ctxt (RowP i 0 ps)
-postScanPrs kwrds ctxt (RowP i _ [])        = []
-postScanPrs kwrds ctxt (RowP i _ (p:ps))    = postScanPrs kwrds ctxt p ++ postScanPrs kwrds ctxt (RowP i 0 ps)
-postScanPrs kwrds ctxt (LocatorP l p)       = postScanPrs kwrds (Just l) p   
+postScanPrs kwrds ctxt (ColP i _ press)     = concatMap (postScanPrs kwrds ctxt) press
+postScanPrs kwrds ctxt (RowP i _ press)     = concatMap (postScanPrs kwrds ctxt) press
+postScanPrs kwrds ctxt (LocatorP l pres)    = postScanPrs kwrds (Just l) pres
+postScanPrs kwrds ctxt (GraphP i _ _ _ press) = debug Err ("WARNING: presentation contains Graph that is not part of a structural presentation") []
+postScanPrs kwrds ctxt (VertexP _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
 postScanPrs kwrds ctxt (ParsingP _ pres)    = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
 postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
@@ -262,6 +262,8 @@ data Token doc node clip a = StrTk String a IDP  -- StrTk is for keywords, so eq
              | SymTk String a IDP
              | StructuralTk a (Presentation doc node clip) [Token doc node clip a] IDP
              | ParsingTk (Presentation doc node clip) [Token doc node clip a] IDP -- deriving (Show)
+             | GraphTk [(Int, Int)] a IDP
+             | VertexTk (Int, Int) a IDP
 -- ParsingTk token does not need a node (at least it didn't when it was encoded as a
 -- (StructuralTk NoNode .. ) token)
 
@@ -275,7 +277,9 @@ instance Show a => Show (Token doc node clip (Maybe a)) where
   show (StructuralTk Nothing _ _ _) = "<structural:Nothing>" 
   show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
   show (ParsingTk _ _ _) = "<presentation>" 
-
+  show (GraphTk edges _ _)   = "<graph:"++show edges++">"
+  show (VertexTk pos _ _)  = "<vertex:"++show pos++">"
+  
 instance Eq a => Eq (Token doc node clip (Maybe a)) where
   StrTk str1 _ _ == StrTk str2 _ _ = str1 == str2
   IntTk _ _ _    == IntTk _ _ _    = True
@@ -288,7 +292,9 @@ instance Eq a => Eq (Token doc node clip (Maybe a)) where
   StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
   StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
   ParsingTk _ _ _    == ParsingTk _ _ _ = True   
-  _              == _              = False
+  GraphTk _ _ _  == GraphTk _ _ _  = True
+  VertexTk _ _ _ == VertexTk _ _ _ = True -- if we want to recognize specific vertices, maybe some
+  _              == _              = False -- identifier will be added, which will be involved in eq. check
 
 instance Ord a => Ord (Token doc node clip (Maybe a)) where
   compare x y | x==y      = EQ   --
@@ -314,12 +320,12 @@ instance Ord a => Ord (Token doc node clip (Maybe a)) where
   OpTk _ _ _     <= IntTk _ _ _     = True
   OpTk _ _ _     <= StrTk _ _ _     = True
  
-  SymTk _ _ _    <= SymTk _ _ _ = True
+  SymTk _ _ _    <= SymTk _ _ _     = True
   SymTk _ _ _    <= OpTk _ _ _      = True
-  SymTk _ _ _    <= UIdentTk _ _ _      = True
-  SymTk _ _ _    <= LIdentTk _ _ _      = True
-  SymTk _ _ _    <= IntTk _ _ _      = True
-  SymTk _ _ _    <= StrTk _ _ _      = True
+  SymTk _ _ _    <= UIdentTk _ _ _  = True
+  SymTk _ _ _    <= LIdentTk _ _ _  = True
+  SymTk _ _ _    <= IntTk _ _ _     = True
+  SymTk _ _ _    <= StrTk _ _ _     = True
 
 --  StructuralTk _ _ _ <= StructuralTk _ _ _     = True
   StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True       -- ??
@@ -332,14 +338,35 @@ instance Ord a => Ord (Token doc node clip (Maybe a)) where
   StructuralTk _ _ _ _ <= IntTk _ _ _    = True
   StructuralTk _ _ _ _ <= StrTk _ _ _    = True
 
-  ParsingTk _ _ _  <= ParsingTk _ _ _ = True
-  ParsingTk _ _ _  <= StructuralTk _ _ _ _ = True
-  ParsingTk _ _ _ <= SymTk _ _ _    = True
-  ParsingTk _ _ _ <= OpTk _ _ _     = True
-  ParsingTk _ _ _ <= UIdentTk _ _ _ = True
-  ParsingTk _ _ _ <= LIdentTk _ _ _ = True
-  ParsingTk _ _ _ <= IntTk _ _ _    = True
-  ParsingTk _ _ _ <= StrTk _ _ _    = True
+  ParsingTk _ _ _ <= ParsingTk _ _ _      = True
+  ParsingTk _ _ _ <= StructuralTk _ _ _ _ = True
+  ParsingTk _ _ _ <= SymTk _ _ _          = True
+  ParsingTk _ _ _ <= OpTk _ _ _           = True
+  ParsingTk _ _ _ <= UIdentTk _ _ _       = True
+  ParsingTk _ _ _ <= LIdentTk _ _ _       = True
+  ParsingTk _ _ _ <= IntTk _ _ _          = True
+  ParsingTk _ _ _ <= StrTk _ _ _          = True
+
+  GraphTk _ _ _ <= GraphTk _ _ _        = True
+  GraphTk _ _ _ <= ParsingTk _ _ _      = True
+  GraphTk _ _ _ <= StructuralTk _ _ _ _ = True
+  GraphTk _ _ _ <= SymTk _ _ _          = True
+  GraphTk _ _ _ <= OpTk _ _ _           = True
+  GraphTk _ _ _ <= UIdentTk _ _ _       = True
+  GraphTk _ _ _ <= LIdentTk _ _ _       = True
+  GraphTk _ _ _ <= IntTk _ _ _          = True
+  GraphTk _ _ _ <= StrTk _ _ _          = True
+
+  VertexTk _ _ _ <= VertexTk _ _ _       = True
+  VertexTk _ _ _ <= GraphTk _ _ _        = True
+  VertexTk _ _ _ <= ParsingTk _ _ _      = True
+  VertexTk _ _ _ <= StructuralTk _ _ _ _ = True
+  VertexTk _ _ _ <= SymTk _ _ _          = True
+  VertexTk _ _ _ <= OpTk _ _ _           = True
+  VertexTk _ _ _ <= UIdentTk _ _ _       = True
+  VertexTk _ _ _ <= LIdentTk _ _ _       = True
+  VertexTk _ _ _ <= IntTk _ _ _          = True
+  VertexTk _ _ _ <= StrTk _ _ _          = True
 
   _              <= _           = False
 
@@ -368,6 +395,8 @@ tokenString (UIdentTk s n id)   = s
 tokenString (OpTk s n id)       = s
 tokenString (SymTk s n id)      = s
 tokenString (StructuralTk n _ _ id) = "<structural token>"
+tokenString (GraphTk s n id)    = "<graph token>"
+tokenString (VertexTk s n id)   = "<vertex token>"
                              
 tokenNode :: Token doc node clip (Maybe node) -> Maybe node                 
 tokenNode (StrTk s n id)      = n
@@ -377,6 +406,8 @@ tokenNode (UIdentTk s n id)   = n
 tokenNode (OpTk s n id)       = n
 tokenNode (SymTk s n id)      = n
 tokenNode (StructuralTk n _ _ id) = n
+tokenNode (GraphTk s n id)    = n
+tokenNode (VertexTk s n id)   = n
 
 tokenIDP :: Token doc node clip (Maybe node) -> IDP       
 tokenIDP (StrTk s n id)    = id
@@ -386,6 +417,8 @@ tokenIDP (UIdentTk s n id) = id
 tokenIDP (OpTk s n id)     = id
 tokenIDP (SymTk s n id)    = id
 tokenIDP (StructuralTk n _ _ id)  = id
+tokenIDP (GraphTk s n id)  = id
+tokenIDP (VertexTk s n id) = id
 
 
 -- probably have to split strTk in a symbol, an operator and a keyword variant.
@@ -402,6 +435,8 @@ opTk      = OpTk "" Nothing (IDP (-1))
 symTk     = SymTk "" Nothing (IDP (-1))
 strucTk   = StructuralTk Nothing empty [] (IDP (-1))
 parsingTk = (ParsingTk empty [] NoIDP)
+graphTk   = GraphTk [] Nothing (IDP (-1))
+vertexTk  = VertexTk (0,0) Nothing  (IDP (-1))
 --parsingTk = StructuralTk (Just NoNode) empty [] NoIDP
 
 
