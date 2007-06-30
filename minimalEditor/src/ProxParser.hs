@@ -61,8 +61,9 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str tree -> reuseRoot [tokenNode str] Nothing (Just tree) Nothing)
+          (\str graph tree -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph))
       <$> pStructural RootNode
+      <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
 
 parseTree :: ListParser Document Node ClipDoc Tree
@@ -86,6 +87,40 @@ recognizeTree = pStr $
       <$> pStructural LeafNode
 
 
+
+-- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
+--       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
+--         does not have to do this)
+recognizeGraph :: ListParser Document Node ClipDoc Graph
+recognizeGraph = pStr $
+          (\str gt vertices -> reuseGraph [tokenNode str] Nothing 
+                                          (Just $ List_Vertex NoIDD $ toConsList_Vertex vertices)
+                                          (Just $ List_Edge NoIDD $ toConsList_Edge $ 
+                                             [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
+                                          
+      <$> pStructural GraphNode
+      <*> pSym graphTk
+      <*> pList recognizeVertex
+      
+-- labels in vertex? Or just in presentation?      
+recognizeVertex :: ListParser Document Node ClipDoc Vertex
+recognizeVertex = pStr $
+          (\str vt -> reuseVertex [tokenNode str] Nothing Nothing Nothing 
+                                  (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
+      <$> pStructural VertexNode
+      <*> pSym vertexTk
+
+getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
+getGraphTkEdges (GraphTk edges _ _) = edges
+getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
+
+getVertexTkX :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkX (VertexTk (x,y) _ _) = Int_ NoIDD x
+getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
+
+getVertexTkY :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkY (VertexTk (x,y) _ _) = Int_ NoIDD y
+getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
 keywords :: [String]
 keywords = 

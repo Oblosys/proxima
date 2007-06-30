@@ -17,7 +17,7 @@ reductionSheet :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLeve
                IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
 reductionSheet state low high editLow = 
   do { (editHigh, state', low') <- reduceIO state low high editLow
-     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
+--     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
      ; return (editHigh, state', low')
      }
 

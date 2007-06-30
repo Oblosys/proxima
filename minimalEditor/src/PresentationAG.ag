@@ -74,7 +74,7 @@ SEM Graph
       
 SEM Vertex [ || ] 
   | Vertex
-      lhs.pres = loc (VertexNode @self @lhs.path) $
+      lhs.pres = loc (VertexNode @self @lhs.path) $ structural $
                    vertex @x.int @y.int (\a -> (round $ 17*cos a -1, round $ -17*sin a -1)) $
                      col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
