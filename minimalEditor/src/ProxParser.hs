@@ -61,11 +61,12 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str graph tree -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph))
+          (\str graph1 tree graph2 -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph1) (Just graph2))
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-
+      <*> recognizeGraph
+      
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 
           (\po t1 b t2 pc -> reuseBin [tokenNode po, tokenNode b, tokenNode pc] Nothing (Just t1) (Just t2))

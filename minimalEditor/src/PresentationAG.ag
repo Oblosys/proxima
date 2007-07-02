@@ -51,9 +51,10 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col [ bold $ text "Root", 
-                           @graph.pres, 
-                           @tree.pres
+                     col [ bold $ text "Root"
+                         , @graph1.pres 
+                         , @tree.pres
+                         , @graph2.pres
                          ]
 
 SEM Tree

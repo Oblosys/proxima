@@ -227,7 +227,7 @@ dummyIDD (DummyNode (Dummy iDD _ _ _ _) _) = Just iDD
 dummyIDD _                                   = Nothing
 
 rootIDD :: Node -> Maybe IDD
-rootIDD (RootNode (Root iDD _ _) _) = Just iDD
+rootIDD (RootNode (Root iDD _ _ _) _) = Just iDD
 rootIDD _                                   = Nothing
 
 binIDD :: Node -> Maybe IDD
@@ -258,7 +258,7 @@ shallowShowString_1 (String_  _ _) = "String_"
 shallowShowBool_1 (Bool_  _ _) = "Bool_"
 shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowDummy1 (Dummy  _ _ _ _ _) = "Dummy"
-shallowShowRoot1 (Root  _ _ _) = "Root"
+shallowShowRoot1 (Root  _ _ _ _) = "Root"
 shallowShowTree1 (Bin  _ _ _) = "Bin"
 shallowShowTree1 (Leaf  _) = "Leaf"
 shallowShowGraph1 (Graph  _ _ _) = "Graph"
@@ -281,7 +281,7 @@ toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
 toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
 toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
 toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
-toXMLRoot (Root _ tree graph) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph] ++ []
+toXMLRoot (Root _ tree graph1 graph2) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph1] ++ [toXMLGraph graph2] ++ []
 toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
 toXMLTree (Leaf _) = Elt "Leaf" [] $ []
 toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
@@ -310,7 +310,7 @@ parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int
 parseXML_Dummy = parseXMLCns_Dummy
 parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
 parseXML_Root = parseXMLCns_Root
-parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <* endTag "Root"
+parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <*> parseXML_Graph <* endTag "Root"
 parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf
 parseXMLCns_Bin = Bin NoIDD <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree <* endTag "Bin"
 parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"

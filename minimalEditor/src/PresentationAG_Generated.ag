@@ -119,7 +119,7 @@ DATA Dummy | Dummy idd:IDD dummys:List_Dummy string_:String_ bool_:Bool_ int_:In
            | ParseErrDummy presentation:Presentation_Doc_Node_Clip
 
 
-DATA Root | Root idd:IDD tree:Tree graph:Graph 
+DATA Root | Root idd:IDD tree:Tree graph1:Graph graph2:Graph 
           | HoleRoot
           | ParseErrRoot presentation:Presentation_Doc_Node_Clip
 
@@ -206,15 +206,17 @@ SEM Dummy
 
 SEM Root
   | Root tree.pIdC = @lhs.pIdC + 0
-         graph.pIdC = @tree.pIdC
-         lhs.pIdC = @graph.pIdC
+         graph2.pIdC = @graph1.pIdC
+         graph1.pIdC = @tree.pIdC
+         lhs.pIdC = @graph2.pIdC
   | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.pres = presParseErr @presentation
 
 
 SEM Root
   | Root tree.path  = @lhs.path++[0]
-         graph.path  = @lhs.path++[1]
+         graph1.path  = @lhs.path++[1]
+         graph2.path  = @lhs.path++[2]
 
 
 SEM Tree
@@ -401,7 +403,7 @@ SEM Dummy [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM Root [ || presXML : Presentation_Doc_Node_Clip ]
   | Root
-      lhs.presXML = presentElementXML @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presXML, @graph.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presXML, @graph1.presXML, @graph2.presXML ] 
   | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presXML = presParseErr @presentation
 
@@ -507,7 +509,7 @@ SEM Dummy [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM Root [ || presTree : Presentation_Doc_Node_Clip ]
   | Root
-      lhs.presTree = presentElementTree @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presTree, @graph.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presTree, @graph1.presTree, @graph2.presTree ] 
   | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presTree = presParseErr @presentation
 

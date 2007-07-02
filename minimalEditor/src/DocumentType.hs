@@ -9,7 +9,7 @@ data Dummy = Dummy [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because
 -- Don't remove the declarations above
 
 
-data Root = Root Tree Graph { idd : IDD }
+data Root = Root Tree graph1:Graph graph2:Graph { idd : IDD }
 
 data Tree = Bin left:Tree right:Tree { idd : IDD }
           | Leaf                     { idd : IDD }
