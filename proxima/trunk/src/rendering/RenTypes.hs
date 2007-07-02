@@ -43,12 +43,13 @@ type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering do
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 
-type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> IO ()
+type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> IO ()
+                                                                      -- viewd area ((x,y),(w,h))
 type Debugging = Bool
 type Size = (Int, Int)
 
 emptyR :: Rendering
-emptyR dc = return ()
+emptyR dc va = return ()
 
 origin :: (Int, Int)
 origin = (0,0)

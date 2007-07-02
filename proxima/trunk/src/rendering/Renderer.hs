@@ -16,7 +16,7 @@ import DocumentEdit -- Just for now
 import GUI
 import FontLib
 
-import Graphics.UI.Gtk hiding (Scale, Solid)
+import Graphics.UI.Gtk hiding (Scale, Solid, Size)
 import System.IO.Unsafe
 import Data.IORef
 
@@ -126,23 +126,18 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
 -- this makes it tricky to move the debuggedArrangement, since the Gest.Int. will not know about it
 -- however, we don't want to debug the focus
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
-render' scale arrDb focus diffTree arrangement (wi,dw,gc) =
+render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
    -- ; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
-    ; gcSetValues gc $ newGCValues { foreground = Color 65535 65535 65535 }
-    ; drawRectangle dw gc True 0 0 (2000-1) (1000-1)
-
-    ; renderArr (wi,dw,gc) arrDb scale origin 
+    
+    ; renderArr (wi,dw,gc) arrDb scale origin viewedArea
                          (DiffNode False False $ replicate (length focusArrList) (DiffLeaf False)++[diffTree])
                          
-                         (OverlayA NoIDA 0 0 2000 1000 0 0 (255,255,255)
-                              --(xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement)
--- using arrangement size goes wrong when arrangement shrinks
--- TODO fix viewsize/windowsize/arrangementSize, etc.
---                         ( arrangement : focusArrList)) -- ++ [arrangement]))
+                         (OverlayA NoIDA (xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement) 0 0 (255,255,255)
+-- todo: check what happens when arrangement shrinks beyond window size
                               (focusArrList ++ [arrangement])) 
   
     }
@@ -172,8 +167,9 @@ computeRenderedArea (lux, luy) diffTree arr =
                     _ -> debug Err "Renderer.computeRenderedArea: dirty children for node without children" []
      else [(xA arr,yA arr, xA arr + widthA arr,  yA arr + widthA arr)]
     
-renderArr :: DrawableClass drawWindow => (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) -> DiffTree -> Arrangement Node -> IO ()    
-renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
+renderArr :: DrawableClass drawWindow => (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
+                                         (Point, Size) -> DiffTree -> Arrangement Node -> IO ()    
+renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isClean diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
 
@@ -186,7 +182,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs 
+                       ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
                        }
                in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
@@ -198,7 +194,12 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else
+     else let ((viewedLeftX, viewedUpperY),(viewedWidth,viewedHeight)) = viewedArea
+              viewedRightX = viewedLeftX + viewedWidth
+              viewedLowerY = viewedUpperY + viewedHeight
+          in when (not (xA arrangement + lux > viewedRightX || xA arrangement + lux + widthA arrangement < viewedLeftX ||
+                        yA arrangement + luy > viewedLowerY || yA arrangement + luy + heightA arrangement < viewedUpperY)) $
+          -- only render when the arrangement is in the viewed area   
   case arrangement of 
 
     (EmptyA _ _ _ _ _ _ _) ->
@@ -333,14 +334,14 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                                                  else showDebug Ren $ tail.init $
                                                       scanl (\n1 n2 -> n1 + (scaleInt scale (pd-1))+n2 ) 0 
                                                             (map (scaleInt scale . widthA) arrs)]
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
              }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = colorRGB bColor -- if isClean diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
 
@@ -364,14 +365,14 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                                                      scanl (\n1 n2 -> n1+(scaleInt scale (pd-1))+n2 ) 0 
                                                            (map (scaleInt scale . heightA) arrs)]
         
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = colorRGB bColor --  if isClean diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
 
@@ -392,7 +393,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                                                  else case (last arrs) of EmptyA _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
                                                                           _                -> unzip . reverse $ zip arrs childDiffTrees
               
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y))  cdts' arrs'
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea)  cdts' arrs'
               }
           else 
            do { when (not (isTransparent bColor)) $
@@ -406,7 +407,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                                                  else case (last arrs) of EmptyA _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
                                                                           _                -> unzip . reverse $ zip arrs childDiffTrees
               -- until ovl is properly reversed
-              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) cdts' arrs'
+              ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) cdts' arrs'
               }
         }
 
@@ -424,7 +425,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }
-        ; sequence_ $ reverse $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y)) childDiffTrees arrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
         ; gcSetClipRectangle gc (Rectangle 0 0 10000 10000) 
         -- seems to be the only way to clear clip area. Setting clipMask to Nothing does not work
         }
@@ -437,7 +438,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
 
-        ; renderArr (wi,dw,gc) arrDb scale (x, y) (head childDiffTrees) arr
+        ; renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea (head childDiffTrees) arr
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
@@ -463,7 +464,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
        
-        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) (head childDiffTrees) arr
+        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -475,7 +476,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
        
-        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) (head childDiffTrees) arr
+        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
@@ -483,7 +484,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) (head childDiffTrees) arr
+        ; renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)

@@ -19,12 +19,12 @@ optimization?
 
 Unclear: if edit is skip, update renderingLevel? Maybe it was changed by renderer? (popup etc.)
 -}
-import Graphics.UI.Gtk
+import Graphics.UI.Gtk hiding (Size)
 import Data.IORef
 
 import CommonTypes (DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO)
 import qualified CommonTypes
-import RenTypes hiding (Size)
+import RenTypes
 import RenUtils
 import CommonUtils
 
@@ -48,20 +48,25 @@ startGUI handler (initRenderingLvl, initEvent) =
     ; canvas <- drawingAreaNew 
     ; widgetSetCanFocus canvas True
   
+    ; sw <- scrolledWindowNew Nothing Nothing
+    ; hAdj <- scrolledWindowGetHAdjustment sw
+    ; vAdj <- scrolledWindowGetVAdjustment sw
+    ; vp <- viewportNew hAdj vAdj
+    ; containerAdd vp canvas
+    ; containerAdd sw vp
+    --; sw `scrolledWindowAddWithViewport` canvas
+    ; scrolledWindowSetPolicy sw PolicyAutomatic PolicyAutomatic
+    ; scrolledWindowSetShadowType sw ShadowNone
+
     ; buffer <- newIORef Nothing
     ; renderingLvlVar <- newIORef initRenderingLvl
 
-    ; onExpose canvas $ onPaint buffer window renderingLvlVar canvas
+    ; onExpose canvas $ onPaint buffer window vp renderingLvlVar canvas
     ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer window canvas
     ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer window canvas
     ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer window canvas
     ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer window canvas
-
   
-    ; sw <- scrolledWindowNew Nothing Nothing
-    ; sw `scrolledWindowAddWithViewport` canvas
-    ; scrolledWindowSetPolicy sw PolicyAutomatic PolicyAutomatic
-    ; sw `scrolledWindowSetShadowType` ShadowNone
 
     ; fileMenu <- mkMenu
         [ ("_Open", fileMenuHandler handler renderingLvlVar buffer window canvas "open")
@@ -94,25 +99,38 @@ startGUI handler (initRenderingLvl, initEvent) =
     ; mainGUI
     }    
 
-onPaint :: IORef (Maybe Pixmap) -> Window -> IORef (RenderingLevel documentLevel) -> DrawingArea -> Event -> IO Bool
-onPaint buffer wi renderingLvlVar  canvas (Expose { eventArea=rect }) =
+onPaint :: IORef (Maybe Pixmap) -> Window -> Viewport -> IORef (RenderingLevel documentLevel) -> DrawingArea -> Event -> IO Bool
+onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
     ; case maybePm of 
         Nothing -> return True
         Just pm ->
          do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     
-            ; dw <- drawingAreaGetDrawWindow canvas
+            ; viewedArea <- getViewedArea vp
             
+            ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
-            ; rendering (wi, pm, gc) 
+            ; rendering (wi, pm, gc) viewedArea
             -- paint events are less frequent than generic handler events, so we render here
             -- a possible optimization is to only render on the pixmap once. 
             
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
+            ; drawRectangle dw gc False 100 100 100 100
+            
             ; return True
             }
     }
+    
+getViewedArea :: Viewport -> IO (Point,Size)
+getViewedArea vp =
+ do { vA <- viewportGetVAdjustment vp
+    ; y <- adjustmentGetValue vA
+    ; hA <- viewportGetHAdjustment vp
+    ; x <- adjustmentGetValue hA
+    ; (w,h) <- widgetGetSize vp
+    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+    }         
     
 onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
@@ -151,8 +169,7 @@ onKeyboard :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO
               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
               Event -> IO Bool
 onKeyboard handler renderingLvlVar buffer window canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
- do { putStrLn $ "key:" ++ show keyName ++ ", "++ show (translateModifiers mods)
-    ; let editRendering = translateKey keyName mKeyChar (translateModifiers mods)
+ do { let editRendering = translateKey keyName mKeyChar (translateModifiers mods)
 
     ; case editRendering of -- TODO: put this in genericHandler?
         SkipRen _ -> return False
