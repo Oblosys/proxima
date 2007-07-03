@@ -2,7 +2,7 @@ module ProxParser (parsePres) where
 
 import CommonTypes
 import PresLayerTypes
-import PresLayerUtils
+import PresLayerUtils hiding ((<*>),(<$),(<$>))
 import PresentationParsing
 import XprezLib
 
@@ -19,7 +19,7 @@ import qualified UU_Parsing
 import Char
 
 import DocTypes_Generated
-import DocUtils_Generated hiding ((<$>),(<*>),(<$),(<*))
+import DocUtils_Generated
 
 -- TODO: move to PresentationParsing
 reuse = Nothing
