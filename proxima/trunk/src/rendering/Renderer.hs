@@ -7,7 +7,7 @@ import CommonUtils
 import RenLayerTypes
 import RenLayerUtils
 
-import ArrLayerUtils (point, popupMenuItemsPres, pathAFromPathP')  -- for context menu hack
+import ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
 import PresTypes hiding (font) -- For Locations
 
 import DocTypes -- For Locations
@@ -77,7 +77,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
-                        Just pthA -> popupMenuItemsPres (pathAFromPathP' pthA prs) prs
+                        Just pthA -> popupMenuItemsPres (pathPFromPathA' pthA prs) prs
               
    ; case pointDoc x y arr of
         Just node ->
