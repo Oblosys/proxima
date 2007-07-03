@@ -3,7 +3,8 @@ module RenTypes where
 import Graphics.UI.Gtk hiding (Scale, Size)
 import Data.IORef
 
-import CommonTypes
+import CommonTypes hiding (Rectangle)
+import qualified CommonTypes
 import CommonUtils
 
 import DocTypes
@@ -11,6 +12,7 @@ import DocTypes
 data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions LeftButtonDown
 
 type LocalStateRen = ()
+                                   
 
 data EditRendering' documentLevel =
     SetRen' (RenderingLevel documentLevel)
@@ -39,7 +41,7 @@ instance Show (RenderingLevel documentLevel) where
 
 type Scale = Double
 type GUICommand documentLevel = ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                  IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea -> 
+                  IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 

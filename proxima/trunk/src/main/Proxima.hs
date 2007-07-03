@@ -70,14 +70,15 @@ proxima :: PresentationSheet doc enr node -> ParseSheet doc enr node ->
 proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
         initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
+    ; viewedAreaRef <- newIORef ((0,0),(0,0)) -- shared by GUI and extra state on Arrangement layer
     ; let layers = 
             proximaLayers evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
                           (LayerStateEval, initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0, [IDP 1, IDP 2], Map.empty))   
-                          (LocalStateArr fontMetricsRef Nothing, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
-                          ((),             ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
-                          -- system (layer)local state,  initial higher level value
+                          (LocalStateArr fontMetricsRef Nothing viewedAreaRef, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
+                          ((), ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0) NoFocusA (EmptyP NoIDP)) 
+                          -- (system (layer)local state,  initial higher level value)
                         
                           -- initial Rendering is given to startGUI.
                                
@@ -113,10 +114,8 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
               ; return $ (renderingLvl', renderingEdit')
               }
                       -- initial RenderingLevel 
-    ; startGUI handler ( RenderingLevel 1.0 (\_ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (0,0) False  
---                                            ( rectBetween (Point 0 0) (Point 0 0)
---                                            , rectBetween (Point 0 0) (Point 0 0)
---                                            , rectBetween (Point 0 0) (Point 0 0) )
+    ; startGUI handler viewedAreaRef
+                       ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (0,0) False  
                                             (Rectangle 0 0 0 0,Rectangle 0 0 0 0,Rectangle 0 0 0 0)
                                             False
                        , initEvent)

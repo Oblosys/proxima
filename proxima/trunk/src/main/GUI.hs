@@ -37,8 +37,10 @@ import Directory
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
 
-startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> (RenderingLevel documentLevel, EditRendering documentLevel) -> IO ()
-startGUI handler (initRenderingLvl, initEvent) = 
+startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+            IORef CommonTypes.Rectangle ->
+            (RenderingLevel documentLevel, EditRendering documentLevel) -> IO ()
+startGUI handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { initGUI
     ; window <- windowNew
     ; onDestroy window mainQuit
@@ -62,15 +64,15 @@ startGUI handler (initRenderingLvl, initEvent) =
     ; renderingLvlVar <- newIORef initRenderingLvl
 
     ; onExpose canvas $ onPaint buffer window vp renderingLvlVar canvas
-    ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer window canvas
-    ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer window canvas
-    ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer window canvas
-    ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer window canvas
+    ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
   
 
     ; fileMenu <- mkMenu
-        [ ("_Open", fileMenuHandler handler renderingLvlVar buffer window canvas "open")
-        , ("_Save", fileMenuHandler handler renderingLvlVar buffer window canvas "save")
+        [ ("_Open", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
+        , ("_Save", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
         , ("_Quit", mainQuit)
         ]
     
@@ -90,7 +92,7 @@ startGUI handler (initRenderingLvl, initEvent) =
     
     ; widgetShowAll window
       
-    ; genericHandler handler renderingLvlVar buffer window canvas initEvent
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     -- interpret twice, so helium code in strings is also parsed
@@ -107,7 +109,7 @@ onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
         Just pm ->
          do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     
-            ; viewedArea <- getViewedArea vp
+            ; viewedArea <- return ((0,0),(10000,10000)) -- getViewedArea vp
             
             ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
@@ -116,8 +118,6 @@ onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
             -- a possible optimization is to only render on the pixmap once. 
             
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
-            ; drawRectangle dw gc False 100 100 100 100
-            
             ; return True
             }
     }
@@ -133,11 +133,11 @@ getViewedArea vp =
     }         
     
 onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
+              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
-onMouse handler renderingLvlVar buffer window canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
+onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
  do { (RenderingLevel _ makePopupMenu _ _ _ _ _)  <- readIORef renderingLvlVar
-    ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer window canvas (round x) (round y)
+    ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer viewedAreaRef window vp canvas (round x) (round y)
     ; case mContextMenu of
        Just contextMenu ->
         do { widgetShowAll contextMenu
@@ -146,7 +146,7 @@ onMouse handler renderingLvlVar buffer window canvas evt@(Button _ ReleaseClick 
            }
        Nothing -> return False
     }
-onMouse handler renderingLvlVar buffer window canvas mouseEvt =
+onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
  do { (RenderingLevel _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
     ; let editRendering = 
             case mouseEvt of 
@@ -160,38 +160,38 @@ onMouse handler renderingLvlVar buffer window canvas mouseEvt =
     ; case editRendering of 
         SkipRen _ -> return False
         _         ->
-          do { genericHandler handler renderingLvlVar buffer window canvas editRendering
+          do { genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
              ; return True
              }
     }
   
 onKeyboard :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
+              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
-onKeyboard handler renderingLvlVar buffer window canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
+onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
  do { let editRendering = translateKey keyName mKeyChar (translateModifiers mods)
 
     ; case editRendering of -- TODO: put this in genericHandler?
         SkipRen _ -> return False
         _         ->
-          do { genericHandler handler renderingLvlVar buffer window canvas editRendering
+          do { genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
              ; return True
              }
     }
 
 popupMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                    IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
+                    IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
                     (documentLevel -> documentLevel) -> IO ()
-popupMenuHandler handler renderingLvlVar buffer window canvas editDoc =
+popupMenuHandler handler renderingLvlVar buffer viewedArea window vp canvas editDoc =
  do { let editRendering = (UpdateDocRen editDoc)
                                 
-    ; genericHandler handler renderingLvlVar buffer window canvas editRendering
+    ; genericHandler handler renderingLvlVar buffer viewedArea window vp canvas editRendering
     }
 
 fileMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                       IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea ->
+                       IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
                        String -> IO ()
-fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
+fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas menuItem =
  do { editRendering <- 
         case menuItem of
           "open" ->
@@ -238,7 +238,7 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
               ; return editRendering
               }
           _      -> return $ SkipRen 0
-    ; genericHandler handler renderingLvlVar buffer window canvas editRendering
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
     }
 
 
@@ -248,10 +248,14 @@ fileMenuHandler handler renderingLvlVar buffer window canvas menuItem =
 -- current EditLevel to genericHandler.
 -- If successful, the updated RenderingLevel is returned.
 
-genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) 
-               -> IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> Window -> DrawingArea -> EditRendering documentLevel -> IO ()
-genericHandler handler renderingLvlVar buffer window canvas evt =   
+genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
+               Window -> Viewport -> DrawingArea -> EditRendering documentLevel -> IO ()
+genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+    ; viewedArea <- getViewedArea vp
+    ; writeIORef viewedAreaRef viewedArea
+   
     ; (renderingLvl', editRendering) <- handler (renderingLvl,evt)
     ; case editRendering of
         SkipRen' _ -> return () -- set the renderingLvlVar ??

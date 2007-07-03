@@ -26,6 +26,8 @@ type Path = [Int]
 
 type Color = (Int,Int,Int)
 
+type Rectangle = ((Int,Int),(Int,Int))
+
 -- transparent only works for background color
 transparent :: Color
 transparent = (-1, -1, -1)

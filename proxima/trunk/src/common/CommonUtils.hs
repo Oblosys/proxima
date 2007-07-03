@@ -59,3 +59,8 @@ Note, remember that screen y is flipped wrt. mathematical y
 -- | Perform an action if condition c holds
 when :: Bool -> IO () -> IO ()
 when c act = if c then act else return ()
+
+-- | Return True iff the two rectangles overlap.
+overlap :: Rectangle -> Rectangle -> Bool
+overlap ((x, y), (w, h)) ((x', y'),(w',h')) =
+  not (x > x' + w' || x + w < x' || y > y' + h' || y + h < y')

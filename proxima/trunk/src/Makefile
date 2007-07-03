@@ -98,7 +98,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfpm --module=ArrangerAG \
+	-cfpm --Werrors --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
 # -module is because otherwise uuagc uses ../../presentation/PresentationAG as module name

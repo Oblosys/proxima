@@ -1,6 +1,6 @@
 module Renderer where
 
-import CommonTypes
+import CommonTypes hiding (Rectangle)
 import qualified CommonTypes
 import CommonUtils
 
@@ -72,8 +72,8 @@ mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
-                 IORef (Maybe Pixmap) -> Window -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar buffer window canvas x' y'  =
+                 IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
+mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
@@ -84,13 +84,13 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
          do { let pathDoc = pathNode node
                   alts = DocumentEdit.menuD pathDoc doc
                   items = ctxtItems ++ alts
-            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer window canvas upd)
+            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
                                     | (str, upd) <- items]
             ; return $ Just contextMenu                                          
             }            
         Nothing -> return Nothing  
     }
-mkPopupMenuXY _ _ _ _ _ _ _ _ x y = 
+mkPopupMenuXY _ _ _ _ _ _ _ _ _ _ x y = 
  do { debugLnIO Err "Arrangement root is no document locator" 
     ; return Nothing
     }
@@ -128,7 +128,7 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
 render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
-   -- ; debugLnIO Ren ("Arrangement is "++show arrangement)
+    --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
@@ -194,11 +194,8 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else let ((viewedLeftX, viewedUpperY),(viewedWidth,viewedHeight)) = viewedArea
-              viewedRightX = viewedLeftX + viewedWidth
-              viewedLowerY = viewedUpperY + viewedHeight
-          in when (not (xA arrangement + lux > viewedRightX || xA arrangement + lux + widthA arrangement < viewedLeftX ||
-                        yA arrangement + luy > viewedLowerY || yA arrangement + luy + heightA arrangement < viewedUpperY)) $
+     else when (overlap ((lux+xA arrangement, luy+yA arrangement),
+                         (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
   case arrangement of 
 

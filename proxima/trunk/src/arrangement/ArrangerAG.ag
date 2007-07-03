@@ -802,8 +802,26 @@ SEM PresentationList
       lhs.finalVRefList   = @hd.finalVRef   : @tl.finalVRefList
 
 
+-- Viewed Area
+
+-- propagated with copy rules
+ATTR Root Presentation PresentationList [ viewedArea : Rectangle | | ]
 
 
+-- Upper left corner of the arrangement. Used for determining whether arrangement is in view.
+
+ATTR Presentation PresentationList [ lux, luy : Int | | ]
+SEM Root
+  | Root 
+      presentation.lux = 0
+      presentation.luy = 0
+      
+SEM PresentationList
+  | Cons 
+      hd.lux = head @lhs.xList + @lhs.lux
+      hd.luy = head @lhs.yList + @lhs.luy
+
+-- lu attributes for all the other situations are handled by copy rules
 
 -- Position calculation
 
@@ -879,17 +897,22 @@ SEM Presentation
   | EmptyP
       lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
   | StringP 
-      lhs.arrangement = StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
-      lhs.arrangement = RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
   | EllipseP
-      lhs.arrangement = EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
   | ImageP
-      lhs.arrangement = ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
   | PolyP      
-      lhs.arrangement = let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
-			                                   , round (ry * fromIntegral (@finalHeight-1)) )
-		        in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @lhs.lineColor @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
+			                                     , round (ry * fromIntegral (@finalHeight-1)) )
+		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @lhs.lineColor @lhs.backgroundColor
 		      
 {-
   | TestPresentation
@@ -906,7 +929,8 @@ SEM Presentation
 						  , rightCorrection
 						  , assignedWidths 
 						  ))$ -}
-						  RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+					    arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | ColP 
       lhs.arrangement = {- debug Arr ( "colattrs:"++show 
                                                   ( (@presentationList.minWidthList
@@ -916,18 +940,22 @@ SEM Presentation
                                                   , @lhs.assignedWidth
 						  , assign @presentationList.hStretchList (repeat @lhs.assignedWidth) @presentationList.minWidthList 
 					          ))$ -}
-						  ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
+						arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
   | OverlayP 
-      lhs.arrangement = OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | GraphP 
-      lhs.arrangement = GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
-                               (length @presentationList.vertices)
-                               ( @presentationList.arrangementList  ++
-                                 mkEdges @edges @presentationList.vertices @lhs.lineColor )
+      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
+                                 (length @presentationList.vertices)
+                                 ( @presentationList.arrangementList  ++
+                                   mkEdges @edges @presentationList.vertices @lhs.lineColor )
   | VertexP
-      lhs.arrangement = VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
-                                @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
-                                (\a -> let (x,y) = @outline a in (x+ @finalVRef,y+ @finalHRef)) @child.arrangement
+      lhs.arrangement = arrangeWhenViewed (@lhs.lux - @finalVRef) (@lhs.luy - @finalHRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
+                                  @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
+                                  (\a -> let (x,y) = @outline a in (x+ @finalVRef,y+ @finalHRef)) @child.arrangement
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
@@ -1006,28 +1034,37 @@ ATTR Root         [ oldArr : {Arrangement node}  | | ]
 
 SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
-      presentationList.oldArrList = case @lhs.oldArr of RowA _ _ _ _ _ _ _ _ arrs -> arrs
-                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+      presentationList.oldArrList = case @lhs.oldArr of 
+                                      RowA _ _ _ _ _ _ _ _ arrs -> arrs
+                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | ColP 
-      presentationList.oldArrList = case @lhs.oldArr of ColA _ _ _ _ _ _ _ _ arrs -> arrs
-                                                        _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+      presentationList.oldArrList = case @lhs.oldArr of 
+                                      ColA _ _ _ _ _ _ _ _ arrs -> arrs
+                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | OverlayP 
-      presentationList.oldArrList = case @lhs.oldArr of OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
-                                                        _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+      presentationList.oldArrList = case @lhs.oldArr of 
+                                      OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
+                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | GraphP 
-      presentationList.oldArrList = case @lhs.oldArr of GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
+      presentationList.oldArrList = case @lhs.oldArr of
+                                      GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
+                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | VertexP 
-      child.oldArr = case @lhs.oldArr of VertexA _ _ _ _ _ _ _ _ _ arr -> arr
-                                         _                             -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+      child.oldArr = case @lhs.oldArr of 
+                       VertexA _ _ _ _ _ _ _ _ _ arr -> arr
+                       _                             -> EmptyA NoIDA 0 0 0 0 0 0
   | StructuralP 
-      child.oldArr = case @lhs.oldArr of StructuralA _ arr -> arr
-                                         _                 -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+      child.oldArr = case @lhs.oldArr of
+                       StructuralA _ arr -> arr
+                       _                 -> EmptyA NoIDA 0 0 0 0 0 0
   | ParsingP 
-      child.oldArr = case @lhs.oldArr of ParsingA _ arr -> arr
-                                         _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+      child.oldArr = case @lhs.oldArr of
+                       ParsingA _ arr -> arr
+                       _              -> EmptyA NoIDA 0 0 0 0 0 0
   | LocatorP 
-      child.oldArr = case @lhs.oldArr of LocatorA _ arr -> arr
-                                         _              -> debug Arr "" EmptyA NoIDA 0 0 0 0 0 0
+      child.oldArr = case @lhs.oldArr of
+                       LocatorA _ arr -> arr
+                       _              -> EmptyA NoIDA 0 0 0 0 0 0
 
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
