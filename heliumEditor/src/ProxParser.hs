@@ -2,7 +2,7 @@ module ProxParser (parsePres) where
 
 import CommonTypes
 import PresLayerTypes
-import PresLayerUtils
+import PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
 import PresentationParsing
 import XprezLib
 

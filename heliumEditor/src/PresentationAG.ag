@@ -292,11 +292,11 @@ SEM Exp
                    row' [
                           key (mkIDP @idP0 @lhs.pIdC 0) "\\"
                        --   text' (mkIDP @idP0 @lhs.pIdC 0) "" -- trick because "symbol" spaces have wrong width -- **Screenshot**
-                       -- , key NoIDP "l" `withFontFam` "symbol"  -- **Screenshot**
+                       -- , key NoIDP "l" `withFontFam` "Symbol"  -- **Screenshot**
                         , @ident.pres  -- **Screenshot**
-                        , text' (mkIDP @idP1 @lhs.pIdC 1) "" -- trick because "symbol" spaces have wrong width
-                          , key NoIDP [chr 174] `withFontFam` "symbol"
-                       -- , key (mkIDP @idP1 @lhs.pIdC 1) "->"
+                       -- , text' (mkIDP @idP1 @lhs.pIdC 1) "" -- trick because "symbol" spaces have wrong width
+                       -- , key NoIDP [chr 174] `withFontFam` "Symbol"
+                        , key (mkIDP @idP1 @lhs.pIdC 1) "->"
                         , @exp.pres ]
 
 
@@ -379,9 +379,9 @@ SEM Alt
       lhs.pres = loc (AltNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                    row'  $ [ @ident.pres
-                         --  , key (mkIDP @idP0 @lhs.pIdC 0) "->"
-                           , text' (mkIDP @idP0 @lhs.pIdC 0) "",
-                                    key NoIDP [chr 174] `withFontFam` "symbol"
+                           , key (mkIDP @idP0 @lhs.pIdC 0) "->"
+                        --  , text' (mkIDP @idP0 @lhs.pIdC 0) "",
+                        --          key NoIDP [chr 174] `withFontFam` "symbol"
                            , @exp.pres
                            , sep (mkIDP @idP1 @lhs.pIdC 1) ";"
                            ]
@@ -427,7 +427,7 @@ toggleExpanded :: [Int] -> Decl -> UpdateDoc Document clip
 toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD (not $ boolVal expanded)) autoLayout ident exp))
+                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (Bool_ NoIDD (not $ bool_ expanded)) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -436,7 +436,7 @@ toggleAutoLayout :: [Int] -> Decl -> UpdateDoc Document clip
 toggleAutoLayout pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (Bool_ NoIDD (not $ boolVal autoLayout)) ident exp))
+                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (Bool_ NoIDD (not $ bool_ autoLayout)) ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -965,22 +965,22 @@ SEM Exp [ env : Bindings | | val : Value ]
   | IntExp      lhs.val   = IntVal @int_.int
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg ->
-                                     let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
-                                           @exp undefined ((@ident.str, arg): @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                                     let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = @exp undefined ((@ident.str, arg): @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                                      in  v)  -- dirty hack because AG does not allow this easily
 
-  | AppExp      lhs.val   = case @exp1.val of LamVal f -> f @exp2.val
-                                              _        -> ErrVal
+  | AppExp      lhs.val   = case @exp1.val of
+                              LamVal f -> f @exp2.val
+                              _        -> ErrVal
 
   | CaseExp     lhs.val   = case lookup "a" @alts.alts of {Just v -> v; Nothing -> ErrVal}
   | LetExp      lhs.val   = -- @exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
-                            let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) =
-                                  @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
+                            let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
                             in  v  -- dirty hack because AG does not allow this easily
 
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }
-  | IfExp       lhs.val   = case @exp1.val of BoolVal b -> if b then @exp2.val else @exp3.val
-                                              _         -> ErrVal
+  | IfExp       lhs.val   = case @exp1.val of
+                              BoolVal b -> if b then @exp2.val else @exp3.val
+                              _         -> ErrVal
   | ParenExp    lhs.val   = @exp.val
   | ListExp     lhs.val   = ListVal @exps.vals
   | ProductExp  lhs.val   = ProdVal @exps.vals
@@ -1313,7 +1313,7 @@ toggleViewType :: [Int] -> PPPresentation -> UpdateDoc Document clip
 toggleViewType pth (PPPresentation idD viewtp slides) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_PPPresentation (PPPresentation idD (Bool_ NoIDD (not $ boolVal viewtp)) slides))
+                                              (Clip_PPPresentation (PPPresentation idD (Bool_ NoIDD (not $ bool_ viewtp)) slides))
                                             )
     in  (DocumentLevel d' path cl)
 

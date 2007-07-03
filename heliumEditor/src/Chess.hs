@@ -25,12 +25,12 @@ piece pc color sqColor rowNr colNr moves focus path =
        pieceXp Prox.Empty          sqc f  = if isReachable 
                                        then markReachable `withMouseDown` moveHere path focus 
                                        else empty
-       pieceXp (Prox.King _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'k'
-       pieceXp (Prox.Queen _ c)    sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'q'
-       pieceXp (Prox.Bishop _ c)   sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'b'
-       pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'n'
-       pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'r'
-       pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if boolVal c then toUpper else id) 'p'
+       pieceXp (Prox.King _ c)     sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'k'
+       pieceXp (Prox.Queen _ c)    sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'q'
+       pieceXp (Prox.Bishop _ c)   sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'b'
+       pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'n'
+       pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'r'
+       pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if bool_ c then toUpper else id) 'p'
       -- pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
       -- pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
       -- pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)

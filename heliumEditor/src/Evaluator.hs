@@ -56,7 +56,7 @@ eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) (Eva
       (enr'')                 = evalTypes enr'
   in  (SetEnr' (EnrichedDocLevel enr'' focusD), state, doclvl)
 eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docEdit = debug Eva ("DocNavigate"++show focusD) $
-  let (DocumentLevel doc' focusD' clipD',state') = setUpd AllUpdated $ editDoc state doclvl docEdit
+  let (DocumentLevel doc' focusD' clipD',state') = editDoc state doclvl docEdit
       (enr')                  = evalDoc state' (DocumentLevel doc' focusD' clipD') enr
   in  (SetEnr' (EnrichedDocLevel enr' focusD'), state', DocumentLevel doc' focusD' clipD')
 

@@ -26,9 +26,9 @@ reductionSheet state low high editLow =
 reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
             EditEnrichedDoc documentLevel EnrichedDoc ->
             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceIO state enrLvl docLvl                  (OpenFileEnr upd) =  setUpd NothingUpdated $ debug Err "EvalTranslate.reduce: OpenFile Not implemented yet" $ return (SkipDoc 0, state, enrLvl)
+reduceIO state enrLvl docLvl                  (OpenFileEnr upd) = debug Err "EvalTranslate.reduce: OpenFile Not implemented yet" $ return (SkipDoc 0, state, enrLvl)
 
-reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = setUpd NothingUpdated $ do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
+reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
 -- on save, save xmlrep of previous doc. 
 reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
                                               ; return (SetDoc doc' {-([], emptyFM) -}, state, enrLvl) }
@@ -36,7 +36,7 @@ reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc
 reduceIO state enrLvl docLvl EvaluateDocEnr = return (EvaluateDoc, state, enrLvl) -- uncomment for Helium type checker
 --reduceIO state enrLvl docLvl EvaluateDocEnr = do { (doc', state', enrLvl') <- reduceInvLevel state enrLvl docLvl 
 --                                                   ; return (SetDoc doc', state', enrLvl') } -- uncomment for Inv interpreter
-reduceIO state enrLvl docLvl (SetEnr enrLvl')  = setUpd AllUpdated $ reduceEnrIO state enrLvl docLvl enrLvl'
+reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reduceEnrIO state enrLvl docLvl enrLvl'
 reduceIO state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
 
 

@@ -3,6 +3,8 @@ module DocUtils_Generated where
 import DocTypes
 import DocTypes_Generated
 import PresTypes
+import Text.ParserCombinators.Parsec
+import DocUtils
 
 --instance Show Node where
 --  show NoNode = "<>"
@@ -16,47 +18,29 @@ instance Eq Node where
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
+-- XML
 
-data XML = Elt String [(String, String)] [XML] | PCData String | EmptyElt
+toXMLRoot (RootDoc _ _ dcls)  = Elt "Module" [] [] -- $ toXMLList_Decl dcls
+toXMLRoot _                    = Elt "ErrRoot" [] []
 
-
-showXML xml = 
-     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-  ++ case xml of (Elt tg _ _) -> "<!DOCTYPE "++tg++" SYSTEM \""++tg++".dtd\" >\n"
-                 _            -> ""
-  ++ showXML' 0 xml
- where showXML' i (Elt tag ps []) = replicate i ' ' ++"<"++tag++showProperties ps++"/>\n"
-       showXML' i (Elt tag ps [PCData str]) = replicate i ' ' ++"<"++tag++showProperties ps++">"++str++"</"++tag++">\n" 
-       showXML' i (Elt tag ps cs) = replicate i ' ' ++"<"++tag++showProperties ps++">\n"
-                              ++ concatMap (showXML' (i+2)) cs
-                              ++ replicate i ' ' ++"</"++tag++">\n" 
-       showXML' i (EmptyElt)     = replicate i ' ' ++"Empty\n"
-       showXML' i (PCData str)   = replicate i ' ' ++str++"\n"
-       showProperties [] = ""
-       showProperties ((p,v):ps) = " "++p++"="++show v++ showProperties ps
--- element with one child PCDATA is displayed on one line. For more than one child it's too much of a hassle
--- because this function is only temporary
-
-toXMLBool True = Elt "True" [] [] 
-toXMLBool False = Elt "False" [] [] 
-
-toXMLInt i = Elt "Integer" [("val", show i)] []
-
-toXMLString str = Elt "String" [] [PCData str] 
-
-toXMLRoot (RootDoc _ _ dcls)  = Elt "Module" [] $ toXMLList_Decl dcls
-toXMLRoot _                   = Elt "ErrRoot" [] []
+toXMLDocument document = Elt "Document" [] []
 
 
 
--- id functions: return (Just id) if node is the appropriate production, otherwise Nothing
+toXMLHeliumTypeInfo = Elt "HeliumTypeInfo" [] []
 
--- obsolete, use bool_
-boolVal :: Bool_ -> Bool -- unbox, for non-AG functions (AG functions use @<child>.boolVal)
-boolVal (Bool_ _ bool) = bool
-boolVal _              = False
 
----- deconstructors for boxed primitive types
+
+---- constructors for boxed primitive types
+-- fix name clash in ProxParser 
+--mkString_ :: String -> String_
+--mkString_ str = String_ NoIDD str
+
+--mkBool_ :: Bool -> Bool_
+--mkBool_ b = Bool_ NoIDD b
+
+--mkInt_ :: Int -> Int_
+--mkInt_ i = Int_ NoIDD i
 
 string_ :: String_ -> String
 string_ (String_ _ str) = str
@@ -69,17 +53,6 @@ bool_ _ = False
 int_ :: Int_ -> Int
 int_ (Int_ _ i) = i
 int_ _ = 0
-
----- constructors for boxed primitive types
--- fix name clash in ProxParser 
---mkString_ :: String -> String_
---mkString_ str = String_ NoIDD str
-
---mkBool_ :: Bool -> Bool_
---mkBool_ b = Bool_ NoIDD b
-
---mkInt_ :: Int -> Int_
---mkInt_ i = Int_ NoIDD i
 
 ----
 
@@ -549,66 +522,3 @@ shallowShowConsList_Item1 (Cons_Item  _ _) = "Cons_Item"
 shallowShowConsList_Item1 (Nil_Item ) = "Nil_Item"
 
 
-
-toXMLEnrichedDoc (RootEnr _ _ idListDecls decls heliumTypeInfo document) = Elt "RootEnr" [] $ toXMLDecls idListDecls
-toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool_ expanded] ++ [toXMLBool_ autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
-toXMLDecl (BoardDecl _ _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board] ++ []
-toXMLDecl (PPPresentationDecl _ _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation] ++ []
-toXMLIdent (Ident _ _ _ string_) = Elt "Ident" [] $ [toXMLString_ string_] ++ []
-toXMLExp (PlusExp _ _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (TimesExp _ _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (DivExp _ _ exp1 exp2) = Elt "DivExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (PowerExp _ _ exp1 exp2) = Elt "PowerExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (BoolExp _ _ bool_) = Elt "BoolExp" [] $ [toXMLBool_ bool_] ++ []
-toXMLExp (IntExp _ _ int_) = Elt "IntExp" [] $ [toXMLInt_ int_] ++ []
-toXMLExp (LamExp _ _ _ ident exp) = Elt "LamExp" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
-toXMLExp (AppExp _ exp1 exp2) = Elt "AppExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (CaseExp _ _ _ exp alts) = Elt "CaseExp" [] $ toXMLAlts alts
-toXMLExp (LetExp _ _ _ decls exp) = Elt "LetExp" [] $ toXMLDecls decls
-toXMLExp (IdentExp _ ident) = Elt "IdentExp" [] $ [toXMLIdent ident] ++ []
-toXMLExp (IfExp _ _ _ _ exp1 exp2 exp3) = Elt "IfExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ [toXMLExp exp3] ++ []
-toXMLExp (ParenExp _ _ _ exp) = Elt "ParenExp" [] $ [toXMLExp exp] ++ []
-toXMLExp (ListExp _ _ _ _ exps) = Elt "ListExp" [] $ toXMLExps exps
-toXMLExp (ProductExp _ _ _ _ exps) = Elt "ProductExp" [] $ toXMLExps exps
-toXMLAlt (Alt _ _ _ ident exp) = Elt "Alt" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
-toXMLBoard (Board _ r1 r2 r3 r4 r5 r6 r7 r8) = Elt "Board" [] $ [toXMLBoardRow r1] ++ [toXMLBoardRow r2] ++ [toXMLBoardRow r3] ++ [toXMLBoardRow r4] ++ [toXMLBoardRow r5] ++ [toXMLBoardRow r6] ++ [toXMLBoardRow r7] ++ [toXMLBoardRow r8] ++ []
-toXMLBoardRow (BoardRow _ ca cb cc cd ce cf cg ch) = Elt "BoardRow" [] $ [toXMLBoardSquare ca] ++ [toXMLBoardSquare cb] ++ [toXMLBoardSquare cc] ++ [toXMLBoardSquare cd] ++ [toXMLBoardSquare ce] ++ [toXMLBoardSquare cf] ++ [toXMLBoardSquare cg] ++ [toXMLBoardSquare ch] ++ []
-toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Empty) = Elt "Empty" [] $ []
-toXMLPPPresentation (PPPresentation _ viewType slides) = Elt "PPPresentation" [] $ toXMLSlides slides
-toXMLSlide (Slide _ title itemList) = Elt "Slide" [] $ [toXMLString_ title] ++ [toXMLItemList itemList] ++ []
-toXMLItemList (ItemList _ listType items) = Elt "ItemList" [] $ toXMLItems items
-toXMLListType (Bullet _) = Elt "Bullet" [] $ []
-toXMLListType (Number _) = Elt "Number" [] $ []
-toXMLListType (Alpha _) = Elt "Alpha" [] $ []
-toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString_ string] ++ []
-toXMLItem (HeliumItem _ exp) = Elt "HeliumItem" [] $ [toXMLExp exp] ++ []
-toXMLItem (ListItem _ itemList) = Elt "ListItem" [] $ [toXMLItemList itemList] ++ []
-toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
-toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
-toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
-toXMLList_Decl (List_Decl _ decls) = toXMLConsList_Decl decls
-toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLDecls decls
-toXMLConsList_Decl Nil_Decl             = []
-toXMLDecls _                           = []
-toXMLList_Alt (List_Alt _ alts) = toXMLConsList_Alt alts
-toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLAlts alts
-toXMLConsList_Alt Nil_Alt             = []
-toXMLAlts _                           = []
-toXMLList_Exp (List_Exp _ exps) = toXMLConsList_Exp exps
-toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLExps exps
-toXMLConsList_Exp Nil_Exp             = []
-toXMLExps _                           = []
-toXMLList_Slide (List_Slide _ slides) = toXMLConsList_Slide slides
-toXMLConsList_Slide (Cons_Slide slide slides) = toXMLSlide slide : toXMLSlides slides
-toXMLConsList_Slide Nil_Slide             = []
-toXMLSlides _                           = []
-toXMLList_Item (List_Item _ items) = toXMLConsList_Item items
-toXMLConsList_Item (Cons_Item item items) = toXMLItem item : toXMLItems items
-toXMLConsList_Item Nil_Item             = []
-toXMLItems _                           = []
