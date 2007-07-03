@@ -500,7 +500,7 @@ leftDocPathsA
 
 
 arrangeWhenViewed x y w h viewedArea idA arrangement =
-  debug Err ("\n\n\n"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) $
+  -- debug Err ("\n\n\n"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) $
   if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
           
 -- some code from Dazzle's Math.hs
