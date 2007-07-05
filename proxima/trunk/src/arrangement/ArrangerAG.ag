@@ -213,8 +213,9 @@ ATTR Root [ | allFonts : {[Font]} | ]
 
 SEM Presentation [ | allFonts : {[Font]} | ]
   | WithP
-      child.allFonts = let inhs = @newSyn
-                       in  font inhs : @lhs.allFonts
+      child.allFonts = let syn = @newSyn
+                       in  font syn : @lhs.allFonts
+
 -- these are nubbed later. Maybe they should only be added if not present?
 
 ATTR PresentationList [ | allFonts : {[Font]} | ] 
@@ -359,6 +360,14 @@ SEM PresentationList
 -- ref and size as ag aspects:
 
 SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, vRef : Int ]
+  | *
+      loc.minWidth : Int
+      loc.minHeight : Int
+      loc.hStretch : Bool
+      loc.vStretch : Bool
+      loc.hRef : Int
+      loc.vRef : Int
+      
   | EmptyP
       loc.minWidth = 0
       loc.minHeight = 0
@@ -690,6 +699,11 @@ SEM PresentationList [ assignedWidthList, assignedHeightList, assignedHRefList, 
 -- instead of sending back, maybe row and col can keep a local copy? or will this interfere
 -- with top/bottom/etc-aligning? 
 SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
+  | *
+      loc.finalWidth  : Int
+      loc.finalHeight : Int
+      loc.finalHRef   : Int
+      loc.finalVRef   : Int
   | EmptyP
       loc.finalWidth  = @lhs.assignedWidth
       loc.finalHeight = @lhs.assignedHeight
@@ -1000,27 +1014,27 @@ SEM Presentation
   | VertexP
       lhs.vertex = (@x,@y,@outline)
   | EmptyP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {- showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | StringP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | RectangleP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | EllipseP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | ImageP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | PolyP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | RowP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | ColP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | OverlayP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | GraphP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
   | ArrangedP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
 
 
 SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
@@ -1034,7 +1048,7 @@ ATTR Root         [ oldArr : {Arrangement node}  | | ]
 
 SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
-      presentationList.oldArrList = case @lhs.oldArr of 
+      presentationList.oldArrList = case @lhs.oldArr of
                                       RowA _ _ _ _ _ _ _ _ arrs -> arrs
                                       _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
   | ColP 
