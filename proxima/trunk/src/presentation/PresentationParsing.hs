@@ -63,17 +63,16 @@ pMaybe parser = Just <$> parser `opt` Nothing
 pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
 
 
--- TODO: handle parse error in parsing presentation correctly. (use parseErr?)
-
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr ::  (Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
+pStr ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
 pStr p = unfoldStructure  
      <$> pSym (StructuralTk Nothing empty [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) res
+             x = parseErr
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
@@ -142,7 +141,8 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 -- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
 -- old TODO: fix silly recursion (what did I mean by that?)
 -- TODO put keyword stuff in Scanner layer
-
+--      check what happens with tokens without context info. It seems they get it from higher up
+--      in the tree now, which seems wrong. 
 postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []

@@ -101,6 +101,9 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	-cfpm --Werrors --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
+#	-cfpm --Werrors --module=ArrangerAG \
+#	-cfpm --visit --case --strictdata --strictwrap --unbox --Werrors --module=ArrangerAG \
+
 # -module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 	
 

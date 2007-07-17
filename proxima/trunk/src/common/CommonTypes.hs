@@ -22,6 +22,11 @@ instance Show (a -> b) where
   show _ = "function: (a -> b)"
 
 
+-- Necessary to create Locators with NoNode, without importing DocTypes.
+-- Putting Node in a Maybe would also work, but causes more pattern matching.
+class DocNode node where
+  noNode :: node
+  
 type Path = [Int]
 
 type Color = (Int,Int,Int)

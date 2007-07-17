@@ -49,12 +49,12 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize viewe
             ; let defFont = defaultFont 
             
             ; -- debugLnIO Arr ("Start collecting fonts")
-            ; let (allFonts, _, _, _) =
+            ; let (allFonts, _, _, _ ) =
                     sem_Root (Root pres) [defFont]
                                                defBackColor defFillColor
                                                focus
                                                defFont 
-                                               (error "font computation depends on font metrics")
+                                               Map.empty --(error "font computation depends on font metrics")
                                                defLineColor
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                oldArrangement
@@ -62,7 +62,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize viewe
                                                screenSize 
                                                defTextColor
                                                viewedArea
-                                               
+               
             ; let usedFonts = nub allFonts
             ; seq (length allFonts) $ return ()
            -- ; debugLnIO Arr ("Done collecting fonts")

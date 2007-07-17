@@ -28,7 +28,6 @@ import RenTypes
 import RenUtils
 import CommonUtils
 
-
 import Char
 import Maybe
 import IO
@@ -93,8 +92,12 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; widgetShowAll window
       
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
-    --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    --; genericHandler handler renderingLvlVar window ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+
+    --; sequence_ $ replicate 100 $  -- for profiling
+    --    genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    
+    --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     -- interpret twice, so helium code in strings is also parsed
 
        
@@ -109,7 +112,7 @@ onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
         Just pm ->
          do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     
-            ; viewedArea <- return ((0,0),(10000,10000)) -- getViewedArea vp
+            ; viewedArea <- getViewedArea vp
             
             ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
@@ -118,6 +121,7 @@ onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
             -- a possible optimization is to only render on the pixmap once. 
             
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
+            
             ; return True
             }
     }

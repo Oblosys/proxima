@@ -32,7 +32,7 @@ interpret :: Show node => LocalStateRen -> RenderingLevel documentLevel ->
              ArrangementLevel doc node clip -> EditRendering documentLevel ->
              (EditArrangement documentLevel, LocalStateRen, RenderingLevel documentLevel)
 interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
-                arrLvl@(ArrangementLevel arr focus _) editRen = debug Err ("Rendering edit:"++show editRen) $
+                arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     InitRen             -> (InitArr,       state, renLvl) 
     CloseRen            -> (CloseArr,      state, renLvl)

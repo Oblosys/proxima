@@ -256,11 +256,15 @@ point' x' y' pth loc p@(ParsingA _ child)                 = point' x' y' (pth++[
 point' x' y' pth _   p@(LocatorA location child)          = point' x' y' (pth++[0]) location child
 point' x' y' pth loc p@(GraphA _ x y w h _ _ _ _ arrs) =
   pointGraphList (x'-x) (y'-y) pth loc arrs
-point' x' y' pth loc p@(VertexA _ x y w h _ _ _ _ arr) =
-  if (x' >= x) && (x' < x+w) &&
-     (y' >= y) && (y' < y+h)
-  then Just (pth, loc)
-  else Nothing
+point' x' y' pth loc p@(VertexA _ x y w h _ _ _ outline arr) =
+  let dragAreaPoly = map outline [0, pi/10 ..2*pi]
+  in if dragAreaPoly `contains` (x'-x, y'-y) -- inside the outline means point is on Vertex
+     then Just (pth, loc)
+     else Nothing
+     {- if (x' > x) && (x' < x+w) &&       -- otherwise, if it is inside the Vertex, we continue on its children
+             (y' >= y) && (y' < y+h) 
+          then point' (x'-x) (y'-y) (pth) loc arr 
+          else Nothing -}
 point' x' y' pth loc p@(EdgeA _ x1 y1 x2 y2 _ _ _ _) =
   if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
   then Just (pth, loc)
@@ -501,7 +505,7 @@ leftDocPathsA
 
 arrangeWhenViewed x y w h viewedArea idA arrangement =
   -- debug Err ("\n\n\n"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) $
-  if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
+  arrangement -- if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
           
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
@@ -549,3 +553,65 @@ subtractDoublePointVector (DoublePoint x0 y0) (DoublePoint x1 y1) =
 
 dotProduct :: Vector -> Vector -> Double
 dotProduct (Vector v1 v2) (Vector w1 w2) = v1 * w1 + v2 * w2
+
+
+{-
+---- algorithms 
+type Point p = (p,p)
+
+data (Point p, Num a)         => Polygon p a 
+			      = PolygonCW [p a] 
+			      | PolygonCCW [p a]
+
+type Polygon2 a		      = Polygon Point2 a
+
+--polygon			      :: (Ord a, Num a) => [P2 a] -> Polygon p a
+--polygon			      = PolygonCW . deleteCollinear
+
+mapPolygon		      :: (Point p, Num a, Num b) => (p a -> p b) 
+			      -> Polygon p a -> Polygon p b
+mapPolygon f (PolygonCW xs)   = PolygonCW (map f xs)
+mapPolygon f (PolygonCCW xs)  = PolygonCCW (map f xs)
+
+vertices                      :: (Point p, Num a) => Polygon p a -> [p a]
+vertices (PolygonCW ps)       = reverse ps
+vertices (PolygonCCW ps)      = ps
+
+edges                         :: [a] -> [(a,a)]
+edges xs                      = zip xs (rotateL xs)
+
+angles                        :: [a] -> [(a,a,a)]
+angles xs                     = zip3 (rotateR xs) xs (rotateL xs)
+
+instance (Eq a, Num a, Point p) => Eq (Polygon p a) where
+-- x == y                     = ys == rotateTo (head ys) xs
+   x == y                     = and (zipWith (<==>) ys (rotateToBy (<==>) (head ys) xs))
+     where xs                 = vertices x 
+	   ys		      = vertices y
+-}
+edges vs = (head vs, last vs) : edges' vs
+ where edges' (e1:rest@(e2:_)) = (e1,e2) : edges' rest
+       edges' _                = []
+       
+contains                      :: (Num a, Ord a) => [(a,a)] -> (a, a) -> Bool
+contains poly p               = eq>0 || odd pos || odd neg
+    where (pos, eq, neg)      = countCrossings (edges qs) 0 0 0 
+--          qs                  = map ((-)p) (last ps : init ps)
+          qs                  = map (\(x,y) -> (x-fst p, y - snd p)) (last ps : init ps)
+          ps		          = poly
+
+countCrossings                :: (Ord a, Num a) => [((a,a),(a, a))] 
+                                 -> Int -> Int -> Int -> (Int, Int, Int)  
+countCrossings [] cp ce cn    = (cp, ce, cn)
+countCrossings ((p@(x',y'), q@(x,y)):ps) cp ce cn
+  | straddlesXaxis            = incr
+  | straddlesFromBelow || p==(0,0) || q==(0,0)
+                              = countCrossings ps cp (ce+1) cn
+  | otherwise                 = countCrossings ps cp ce cn
+  where straddlesXaxis        = (y>0 && y'<=0) || (y'>0 && y<=0) 
+        straddlesFromBelow    = (y<=0 && y'==0) && (y==0 && y'<=0) 
+                                && ((x<=0 && x'>=0) || (x>=0 && x'<=0))
+        incr | sgn>0          = countCrossings ps (cp+1) ce cn 
+             | sgn==0         = countCrossings ps cp (ce+1) cn
+             | sgn<0          = countCrossings ps cp ce (cn+1)
+             where sgn        = signum (x*y' - x'*y) * signum (y' - y)

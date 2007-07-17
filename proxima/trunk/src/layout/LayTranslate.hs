@@ -9,11 +9,11 @@ import TreeEditPres
 
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip
+translateIO :: DocNode node => ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip
             -> IO (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 translateIO scannerSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO scannerSheet state low high editLow
-     ; debugLnIO Err $ "Edit Layout: "++show editLow
+     ; debugLnIO Lay $ "Edit Layout: "++show editLow
      ; return (editHigh, state', low')
      }
 
@@ -26,7 +26,7 @@ translateIO scannerSheet state low high editLow =
 
 
 -- split in monadic and non-monadic part
-parseIO :: ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
+parseIO :: DocNode node => ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 --parseIO _ state layLvl prs (OpenFileLay str) = openFile str state layLvl prs
 --parseIO _ state layLvl prs (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prs str 
 --parseIO _ state layLvl prs (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prs
@@ -34,7 +34,7 @@ parseIO _ state layLvl prs (OpenFileLay str) = return (OpenFilePres str, state, 
 parseIO _ state layLvl prs (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
 parseIO scannerSheet state layLvl prs event = return $ parse scannerSheet state layLvl prs event
 
-parse :: ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
+parse :: DocNode node => ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 parse _ state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
   (SkipPres 0, state, LayoutLevel pres focus dt)
 parse _ state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
@@ -236,16 +236,21 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
        focus'' = FocusP (fromP focus) (fromP focus')
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
+
+-- Graph editing
+
+addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip -> LayoutLevel doc node clip ->
+             (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
-  let pres' = addVertexPres (PathP pth 0) (VertexP NoIDP x y outline vanillaVertex) pres
+  let pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP x y outline vanillaVertex) pres
   in  (SkipPres 0, state, LayoutLevel pres' focus dt)                  -- 0 in path is ignored
  where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
-                         , vSpace 4 `withHStretch` True
-                         , rowR 1 [glue, boxed 
+                           , vSpace 4 `withHStretch` True
+                           , rowR 1 [glue, boxed 
                                             (row [ hSpace 3, text "<new>" `withFont'` ("Arial", 10), hSpace 3])
-                                              `withbgColor` (236, 236, 169)
-                                  , glue]
-                         ]
+                                            `withbgColor` (236, 236, 169)
+                                    , glue]
+                           ]
        outline = \a -> (round $ 17*cos a -1, round $ -17*sin a -1)
 
 addEdge toPth state layLvl@(LayoutLevel pres focus@(FocusP (PathP fromPth _) _) dt) =

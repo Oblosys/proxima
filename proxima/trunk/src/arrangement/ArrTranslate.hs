@@ -20,7 +20,7 @@ unArrange :: (HasPath node, Show node) => LocalStateArr -> ArrangementLevel doc 
              EditArrangement (DocumentLevel doc clip) ->
              (EditLayout (DocumentLevel doc clip) doc node clip, LocalStateArr, ArrangementLevel doc node clip)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
-  debug Err ("Edit arr is "++show editArr) $
+  debug Arr ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
     SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus pres)
