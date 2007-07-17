@@ -242,7 +242,9 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
 addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip -> LayoutLevel doc node clip ->
              (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
-  let pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP (-1) x y outline vanillaVertex) pres
+  let vertexIDs = getVertexIDs pth pres
+      freshID = showDebug' Err "id is"$ head $ dropWhile (`elem` vertexIDs) [0..]
+      pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vanillaVertex) pres
   in  (SkipPres 0, state, LayoutLevel pres' focus dt)                  -- 0 in path is ignored
  where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                            , vSpace 4 `withHStretch` True

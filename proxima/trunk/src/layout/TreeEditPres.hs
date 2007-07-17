@@ -227,6 +227,17 @@ getVertexGraphPath' graphPath pth (0:ps) (LocatorP l pres)          = getVertexG
 getVertexGraphPath' graphPath pth (p:ps) (GraphP id d w h es press) = getVertexGraphPath' (Just pth) (pth++[p]) ps (press!!!p)
 getVertexGraphPath' graphPath pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth _      pr                         = debug Err ("TreeEditPres.getVertexGraphPath': can't handle "++ show pr) Nothing
+
+getVertexIDs pth pres = 
+  case selectTree pth pres of
+    (GraphP _ _ _ _ _ press) -> map getVertexID press
+    _                        -> debug Err "TreeEditPres.getVertexIDs called on non-graph presentation" []
+
+getVertexID (LocatorP _ pres)     = getVertexID pres
+getVertexID (StructuralP _ pres)  = getVertexID pres
+getVertexID (WithP _ pres)        = getVertexID pres
+getVertexID (VertexP _ i _ _ _ _) = i
+getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
 {-
 algorithms are tricky.
 
