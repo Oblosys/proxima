@@ -196,9 +196,10 @@ addVertexPres' _      vertex pr                         = debug Err ("TreeEditPr
 
 -- PRECONDITION: fromPs and toPs are correct paths to Vertices
 addEdgePres (PathP fromPs _) (PathP toPs _) pres =
- case (getVertexGraphAndIndex fromPs pres, getVertexGraphAndIndex toPs pres) of
-   (Just (graphFrom, indexFrom), Just (graphTo, indexTo)) ->
-     if graphFrom == graphTo then addEdgePres' graphFrom (indexFrom, indexTo) pres else pres
+ case ( selectTree fromPs pres, selectTree toPs pres, 
+        getVertexGraphPath fromPs pres, getVertexGraphPath toPs pres) of
+   ( VertexP _ fromId _ _ _ _, VertexP _ toId _ _ _ _, Just graphFrom, Just graphTo) ->
+     if graphFrom == graphTo then addEdgePres' graphFrom (fromId, toId) pres else pres
    _ -> pres
 addEdgePres _                _              pres = pres
 
@@ -214,18 +215,18 @@ addEdgePres' _      edge pr                         = debug Err ("TreeEditPres.a
 
 -- PRECONDITION: path points to a vertex
 -- return the path to the graph that the vertex is part of, together with its index in the graph
-getVertexGraphAndIndex path pres = getVertexGraphAndIndex' Nothing [] path pres
+getVertexGraphPath path pres = getVertexGraphPath' Nothing [] path pres
 
-getVertexGraphAndIndex' grAndIx pth [] pres                           = grAndIx
-getVertexGraphAndIndex' grAndIx pth (p:ps) (RowP id rf press)         = getVertexGraphAndIndex' grAndIx (pth++[p]) ps (press!!!p)
-getVertexGraphAndIndex' grAndIx pth (p:ps) (ColP id rf press)         = getVertexGraphAndIndex' grAndIx (pth++[p]) ps (press!!!p)
-getVertexGraphAndIndex' grAndIx pth (p:ps) (OverlayP id (pres:press)) = getVertexGraphAndIndex' grAndIx (pth++[p]) ps (press!!!p)
-getVertexGraphAndIndex' grAndIx pth (0:ps) (WithP ar pres)            = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
-getVertexGraphAndIndex' grAndIx pth (0:ps) (StructuralP id pres)      = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
-getVertexGraphAndIndex' grAndIx pth (0:ps) (LocatorP l pres)          = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
-getVertexGraphAndIndex' grAndIx pth (p:ps) (GraphP id d w h es press) = getVertexGraphAndIndex' (Just (pth,p)) (pth++[p]) ps (press!!!p)
-getVertexGraphAndIndex' grAndIx pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
-getVertexGraphAndIndex' grAndIx pth _      pr                         = debug Err ("TreeEditPres.getVertexGraphAndIndex': can't handle "++ show pr) Nothing
+getVertexGraphPath' graphPath pth [] pres                           = graphPath
+getVertexGraphPath' graphPath pth (p:ps) (RowP id rf press)         = getVertexGraphPath' graphPath (pth++[p]) ps (press!!!p)
+getVertexGraphPath' graphPath pth (p:ps) (ColP id rf press)         = getVertexGraphPath' graphPath (pth++[p]) ps (press!!!p)
+getVertexGraphPath' graphPath pth (p:ps) (OverlayP id (pres:press)) = getVertexGraphPath' graphPath (pth++[p]) ps (press!!!p)
+getVertexGraphPath' graphPath pth (0:ps) (WithP ar pres)            = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth (0:ps) (StructuralP id pres)      = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth (0:ps) (LocatorP l pres)          = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth (p:ps) (GraphP id d w h es press) = getVertexGraphPath' (Just pth) (pth++[p]) ps (press!!!p)
+getVertexGraphPath' graphPath pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth _      pr                         = debug Err ("TreeEditPres.getVertexGraphPath': can't handle "++ show pr) Nothing
 {-
 algorithms are tricky.
 
