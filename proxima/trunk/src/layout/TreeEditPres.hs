@@ -165,17 +165,17 @@ deleteGraphPres' (0:ps) (StructuralP id pres)      = case deleteGraphPres' ps pr
 deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ LocatorP l pres'
                                                        Nothing    -> Nothing
-deleteGraphPres' (p:ps) (GraphP id w h es press)   = 
+deleteGraphPres' (p:ps) (GraphP id d w h es press)   = 
   if p < length press 
   then  case deleteGraphPres' ps (press!!!p) of
-          Just pres -> Just $ GraphP id w h es $ replace p press pres
-          Nothing   -> Just $ GraphP id w h (removeVertexFromEdges p es) $ (take p press ++ drop (p+1) press)
+          Just pres -> Just $ GraphP id d w h es $ replace p press pres
+          Nothing   -> Just $ GraphP id d w h (removeVertexFromEdges p es) $ (take p press ++ drop (p+1) press)
   else let edgeNr = p - length press
-       in  Just $ GraphP id w h (take edgeNr es ++ drop (edgeNr+1) es) press
-deleteGraphPres' []     (VertexP id x y ol pres)   = Nothing
-deleteGraphPres' (0:ps) (VertexP id x y ol pres)   = case deleteGraphPres' ps pres of
-                                                       Just pres' -> Just $ VertexP id x y ol pres'
-                                                       Nothing    -> Nothing
+       in  Just $ GraphP id d w h (take edgeNr es ++ drop (edgeNr+1) es) press
+deleteGraphPres' []     (VertexP id _ x y ol pres)   = Nothing
+deleteGraphPres' (0:ps) (VertexP id v x y ol pres)   = case deleteGraphPres' ps pres of
+                                                         Just pres' -> Just $ VertexP id v x y ol pres'
+                                                         Nothing    -> Nothing
 deleteGraphPres' _      pr                         = debug Err ("TreeEditPres.deleteGraphPres': can't handle "++ show pr) Nothing
 
 
@@ -189,9 +189,9 @@ addVertexPres' (p:ps) vertex (OverlayP id (pres:press)) = OverlayP id $ replace 
 addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (LocatorP l pres)          = LocatorP l (addVertexPres' ps vertex pres)
-addVertexPres' []     vertex (GraphP id w h es press)   = 
-  GraphP id w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
-addVertexPres' (0:ps) vertex (VertexP id x y ol pres)   = VertexP id x y ol (addVertexPres' ps vertex pres)
+addVertexPres' []     vertex (GraphP id d w h es press) = 
+  GraphP id d w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
+addVertexPres' (0:ps) vertex (VertexP id v x y ol pres) = VertexP id v x y ol (addVertexPres' ps vertex pres)
 addVertexPres' _      vertex pr                         = debug Err ("TreeEditPres.addVertexPres': can't handle "++ show pr) pr
 
 -- PRECONDITION: fromPs and toPs are correct paths to Vertices
@@ -208,8 +208,8 @@ addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace p pr
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (LocatorP l pres)          = LocatorP l (addEdgePres' ps edge pres)
-addEdgePres' []     edge (GraphP id w h es press)   = GraphP id w h (edge:es) press
-addEdgePres' (0:ps) edge (VertexP id x y ol pres)   = VertexP id x y ol (addEdgePres' ps edge pres)
+addEdgePres' []     edge (GraphP id d w h es press) = GraphP id d w h (edge:es) press
+addEdgePres' (0:ps) edge (VertexP id v x y ol pres) = VertexP id v x y ol (addEdgePres' ps edge pres)
 addEdgePres' _      edge pr                         = debug Err ("TreeEditPres.addEdgePres': can't handle "++ show pr) pr
 
 -- PRECONDITION: path points to a vertex
@@ -223,8 +223,8 @@ getVertexGraphAndIndex' grAndIx pth (p:ps) (OverlayP id (pres:press)) = getVerte
 getVertexGraphAndIndex' grAndIx pth (0:ps) (WithP ar pres)            = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
 getVertexGraphAndIndex' grAndIx pth (0:ps) (StructuralP id pres)      = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
 getVertexGraphAndIndex' grAndIx pth (0:ps) (LocatorP l pres)          = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
-getVertexGraphAndIndex' grAndIx pth (p:ps) (GraphP id w h es press)   = getVertexGraphAndIndex' (Just (pth,p)) (pth++[p]) ps (press!!!p)
-getVertexGraphAndIndex' grAndIx pth (0:ps) (VertexP id x y ol pres)   = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
+getVertexGraphAndIndex' grAndIx pth (p:ps) (GraphP id d w h es press) = getVertexGraphAndIndex' (Just (pth,p)) (pth++[p]) ps (press!!!p)
+getVertexGraphAndIndex' grAndIx pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphAndIndex' grAndIx (pth++[0]) ps pres
 getVertexGraphAndIndex' grAndIx pth _      pr                         = debug Err ("TreeEditPres.getVertexGraphAndIndex': can't handle "++ show pr) Nothing
 {-
 algorithms are tricky.

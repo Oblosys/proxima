@@ -115,8 +115,8 @@ DATA Presentation
   | RowP        id : IDP vRefNr : Int presentationList : PresentationList
   | ColP        id : IDP hRefNr : Int presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
-  | GraphP      id : IDP w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
-  | VertexP     id : IDP x,y: Int outline : Outline child : Presentation
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : Presentation
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
@@ -312,9 +312,9 @@ SEM Presentation
   | OverlayP 
       lhs.unfoldedTree = OverlayP @id @presentationList.unfoldedTreeList
   | GraphP 
-      lhs.unfoldedTree = GraphP @id @w @h @edges @presentationList.unfoldedTreeList
+      lhs.unfoldedTree = GraphP @id @d @w @h @edges @presentationList.unfoldedTreeList
   | VertexP
-      lhs.unfoldedTree = VertexP @id @x @y @outline @child.unfoldedTree
+      lhs.unfoldedTree = VertexP @id @i @x @y @outline @child.unfoldedTree
 {-
   | TestPresentation             
       lhs.unfoldedTree = TestPresentation @id @area @color
@@ -1009,32 +1009,32 @@ SEM Presentation
       loc.maxFormatterDepth = 0     -- ?
 
 
-ATTR Presentation [ || vertex : {(x,y,Outline)} ]
+ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
 SEM Presentation
   | VertexP
-      lhs.vertex = (@x,@y,@outline)
+      lhs.vertex = (@i,@x,@y,@outline)
   | EmptyP
-      lhs.vertex = {- showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {- showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | StringP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | RectangleP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | EllipseP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | ImageP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | PolyP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | RowP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | ColP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | OverlayP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | GraphP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | ArrangedP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,\_->(0,0))
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
 
 
 SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]

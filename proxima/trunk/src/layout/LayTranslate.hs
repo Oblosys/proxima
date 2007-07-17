@@ -237,12 +237,12 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
 
--- Graph editing
+-- Graph editing (deletion is in editLeft/RightDelete functions)
 
 addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip -> LayoutLevel doc node clip ->
              (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
 addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
-  let pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP x y outline vanillaVertex) pres
+  let pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP (-1) x y outline vanillaVertex) pres
   in  (SkipPres 0, state, LayoutLevel pres' focus dt)                  -- 0 in path is ignored
  where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                            , vSpace 4 `withHStretch` True
@@ -255,8 +255,8 @@ addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
 
 addEdge toPth state layLvl@(LayoutLevel pres focus@(FocusP (PathP fromPth _) _) dt) =
   let pres' = case selectTree fromPth pres of
-                (VertexP _ _ _ _ _) -> addEdgePres (PathP fromPth 0) (PathP toPth 0) pres -- 0 in path is ignored
-                _                   -> pres
+                (VertexP _ _ _ _ _ _) -> addEdgePres (PathP fromPth 0) (PathP toPth 0) pres -- 0 in path is ignored
+                _                     -> pres
   in  (SkipPres 0, state, LayoutLevel pres' focus dt)
 addEdge _ state layLvl = (SkipPres 0, state, layLvl)
  
@@ -271,11 +271,11 @@ moveVertex' (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace p press
 moveVertex' (0:ps) pt (WithP ar pres)            = WithP ar (moveVertex' ps pt pres)
 moveVertex' (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertex' ps pt pres)
 moveVertex' (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertex' ps pt pres)
-moveVertex' (p:ps) pt (GraphP id w h es press)   = 
+moveVertex' (p:ps) pt (GraphP id d w h es press)   = 
   if p < length press 
-  then GraphP id w h es $ replace p press (moveVertex' ps pt (press!!!p))
-  else debug Err ("TreeEditPres.moveVertex'': can't handle "++ show pr) $ GraphP id w h es press
-moveVertex' []     (dx,dy) (VertexP id x y ol pres)  = VertexP id (x+dx) (y+dy) ol pres
+  then GraphP id d w h es $ replace p press (moveVertex' ps pt (press!!!p))
+  else debug Err ("TreeEditPres.moveVertex'': can't handle "++ show pr) $ GraphP id d w h es press
+moveVertex' []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
 moveVertex' _      pt pr                      = debug Err ("TreeEditPres.moveVertex': can't handle "++ show pr) pr
 
 {-

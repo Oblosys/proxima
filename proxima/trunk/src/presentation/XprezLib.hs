@@ -48,16 +48,12 @@ structural xp = StructuralP NoIDP xp
 parsing xp = ParsingP NoIDP xp
 loc l xp  = LocatorP l xp
 
-graph :: Int -> Int -> [(Int,Int)] -> [Int] -> [Xprez doc node clip] -> Xprez doc node clip
-graph width height idEdges vertexIDs vertexPress = 
-  GraphP NoIDP width height edges vertexPress
- where edges = catMaybes $ map mkEdge idEdges
-       mkEdge (fromID, toID) = case (elemIndex fromID vertexIDs, elemIndex toID vertexIDs) of
-                                 (Just fromIx, Just toIx) -> Just (fromIx, toIx)
-                                 _                        -> Nothing
-
-vertex :: Int -> Int -> Outline -> Xprez doc node clip -> Xprez doc node clip
-vertex x y outline pres = VertexP NoIDP x y outline pres
+graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip] -> Xprez doc node clip
+graph width height edges vertexPress = 
+  GraphP NoIDP Clean width height edges vertexPress
+ 
+vertex :: Int -> Int -> Int -> Outline -> Xprez doc node clip -> Xprez doc node clip
+vertex id x y outline pres = VertexP NoIDP id x y outline pres
 
 leftXp `beside` rightXp = row [leftXp, rightXp]
 

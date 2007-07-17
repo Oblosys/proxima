@@ -143,8 +143,8 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
     }
 
 computeRenderedArea (lux, luy) diffTree arr =
-      if (isSelfClean diffTree)  -- if self is clean, only render its children (if present)
-      then if (isClean diffTree)
+      if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
+      then if (isCleanDT diffTree)
            then []
            else let computeChildrenRenderedArea x' y' []   = [] 
                     computeChildrenRenderedArea x' y' arrs =
@@ -170,12 +170,12 @@ computeRenderedArea (lux, luy) diffTree arr =
 renderArr :: DrawableClass drawWindow => (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement Node -> IO ()    
 renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
- do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isClean diffTree));
+ do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
 
 
-     if (isSelfClean diffTree)  -- if self is clean, only render its children (if present)
-     then if (isClean diffTree)
+     if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
+     then if (isCleanDT diffTree)
           then return ()
           else let renderChildren x' y' arrs =
                     do { let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
@@ -335,7 +335,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
              }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isClean diffTree then colorRGB bColor else red
+                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
@@ -366,7 +366,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor --  if isClean diffTree then colorRGB bColor else red
+                 do { let bgColor = colorRGB bColor --  if isCleanDT diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
@@ -394,7 +394,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isClean diffTree then colorRGB bColor else red
+                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
                -- nasty workaround hack for overlay problem: if last elt of overlay is EmptyA,
@@ -418,7 +418,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
             drawFilledRectangle dw gc (Rectangle x y w h) graphColor graphColor
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isClean diffTree then colorRGB bColor else red
+                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }

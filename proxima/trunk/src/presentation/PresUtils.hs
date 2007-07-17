@@ -83,13 +83,13 @@ diffPres (EllipseP id  _ _ _) _                        = DiffLeaf False
 diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
 diffPres (ColP id rf press) (ColP id' rf' press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
-diffPres (GraphP id _ _ _ press) (GraphP id' _ _ _ press') = diffPress 0  press 0   press'
-diffPres (VertexP id _ _ _ pres) (VertexP id' _ _ _ pres') = diffPres pres pres'
+diffPres (GraphP id _ _ _ _ press) (GraphP id' _ _ _ _ press') = diffPress 0  press 0   press'
+diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf press) _                      = DiffLeaf False
 diffPres (OverlayP id press) _                     = DiffLeaf False 
-diffPres (GraphP id _ _ _ press) _                 = DiffLeaf False
-diffPres (VertexP id _ _ _ pres) _                 = DiffLeaf False
+diffPres (GraphP id _ _ _ _ press) _               = DiffLeaf False
+diffPres (VertexP id _ _ _ _ pres) _                 = DiffLeaf False
 diffPres pr                  _                     = debug Err ("PresUtils.diffPres: can't handle "++ show pr) DiffLeaf False
 
 
@@ -99,7 +99,7 @@ diffPress rf press rf' press' =
       childDiffs  = zipWith diffPres press press'
       childDiffs' = take nrOfPress $ childDiffs ++ repeat (DiffLeaf False)
       selfClean   = rf==rf' && nrOfPress==nrOfPress'
-  in  DiffNode (selfClean && all isClean childDiffs') 
+  in  DiffNode (selfClean && all isCleanDT childDiffs') 
                selfClean
                childDiffs'
 
@@ -115,7 +115,7 @@ prunePres dt (WithP wr pres)       = WithP wr       $ prunePres dt pres
 prunePres dt (StructuralP id pres) = StructuralP id $ prunePres dt pres
 prunePres dt (ParsingP id pres)    = ParsingP id    $ prunePres dt pres
 prunePres dt (LocatorP l pres)     = LocatorP l     $ prunePres dt pres
-prunePres dt (VertexP id x y ol pres) = VertexP id x y ol $ prunePres dt pres
+prunePres dt (VertexP id v x y ol pres) = VertexP id v x y ol $ prunePres dt pres
 
 -- maybe not useful for leafs.
 prunePres (DiffLeaf c) p@(EmptyP id)            = if c then ArrangedP  else p
@@ -144,11 +144,11 @@ prunePres (DiffNode c _ dts) p@(OverlayP id press)   = let pruned = zipWith prun
                                                                 else OverlayP id pruned 
 prunePres (DiffLeaf c) p@(OverlayP id press)       = if c then ArrangedP --p 
                                                           else OverlayP id (map (prunePres (DiffLeaf False)) press)
-prunePres (DiffNode c _ dts) p@(GraphP id w h es press) = let pruned = zipWith prunePres dts press
+prunePres (DiffNode c _ dts) p@(GraphP id d w h es press) = let pruned = zipWith prunePres dts press
                                                           in  if c then ArrangedP
-                                                                else GraphP id w h es pruned 
-prunePres (DiffLeaf c) p@(GraphP id w h es press)       = if c then ArrangedP
-                                                               else GraphP id w h es (map (prunePres (DiffLeaf False)) press)
+                                                                else GraphP id d w h es pruned 
+prunePres (DiffLeaf c) p@(GraphP id d w h es press)       = if c then ArrangedP
+                                                               else GraphP id d w h es (map (prunePres (DiffLeaf False)) press)
 prunePres dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
 
@@ -166,10 +166,10 @@ deleteInsertedTokens inss (ColP i r press)     = let press' = map (deleteInserte
 deleteInsertedTokens inss (OverlayP i press)     = let press' = map (deleteInsertedTokens inss) press
                                                        press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
                                                    in  OverlayP i press''
-deleteInsertedTokens inss (GraphP i w h es press) = let press' = map (deleteInsertedTokens inss) press
-                                                        press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
-                                                    in  GraphP i w h es press''
-deleteInsertedTokens inss (VertexP i x y pl pres)   = VertexP i x y pl $ deleteInsertedTokens inss pres
+deleteInsertedTokens inss (GraphP i d w h es press) = let press' = map (deleteInsertedTokens inss) press
+                                                          press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
+                                                      in  GraphP i d w h es press''
+deleteInsertedTokens inss (VertexP i v x y pl pres) = VertexP i v x y pl $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (WithP ar pres)       = WithP ar $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (StructuralP id pres) = StructuralP id $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (ParsingP id pres)    = ParsingP id $ deleteInsertedTokens inss pres
@@ -197,8 +197,8 @@ normalizePres (WithP ar pres)                          = WithP ar $ normalizePre
 normalizePres (StructuralP id pres)                    = StructuralP id $ normalizePres pres
 normalizePres (ParsingP id pres)                       = ParsingP id $ normalizePres pres
 normalizePres (LocatorP l pres)                        = LocatorP l $ normalizePres pres
-normalizePres (GraphP id w h es press)                 = GraphP id w h es $ map normalizePres press
-normalizePres (VertexP id x y ol pres)                 = VertexP id x y ol $ normalizePres pres
+normalizePres (GraphP id d w h es press)               = GraphP id d w h es $ map normalizePres press
+normalizePres (VertexP id v x y ol pres)               = VertexP id v x y ol $ normalizePres pres
 normalizePres pr                                       = debug Err ("PresUtils.normalizePres: can't handle "++ show pr) pr
 
 normalizeRow :: [Presentation doc node clip] -> [Presentation doc node clip] -- not fixed for refs
@@ -235,13 +235,13 @@ locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
 locateTreePres' location _        (StringP id str)           = location
 locateTreePres' location _        (ImageP _ _)               = location
 locateTreePres' location _        (PolyP _ _ _)              = location
-locateTreePres' location []       (VertexP id _ _ _ pres)    = location
+locateTreePres' location []       (VertexP id _ _ _ _ pres)  = location
 locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (press!!!p)
 locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (press!!!p)                                            
 locateTreePres' location (0:path) (OverlayP id press@(pres:_)) = locateTreePres' location path (press!!!0)                                            
-locateTreePres' location []       (GraphP id rf _ _ press)   = location
-locateTreePres' location (p:path) (GraphP id rf _ _ press)   = locateTreePres' location path (press!!!p)                                            
-locateTreePres' location (0:path) (VertexP id _ _ _ pres)    = locateTreePres' location path pres
+locateTreePres' location []       (GraphP id _ _ _ _ press)  = location
+locateTreePres' location (p:path) (GraphP id _ _ _ _ press)  = locateTreePres' location path (press!!!p)                                            
+locateTreePres' location (0:path) (VertexP id _ _ _ _ pres)  = locateTreePres' location path pres
 locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' location path pres
 locateTreePres' location (0:path) (StructuralP id pres)      = locateTreePres' location path pres
 locateTreePres' location (0:path) (ParsingP id pres)         = locateTreePres' location path pres
@@ -254,8 +254,8 @@ isEditableTreePres' editable []       _                          = editable
 isEditableTreePres' editable (p:path) (RowP id rf press)         = isEditableTreePres' editable path (press!!!p)
 isEditableTreePres' editable (p:path) (ColP id rf press)         = isEditableTreePres' editable path (press!!!p)                                            
 isEditableTreePres' editable (0:path) (OverlayP id press@(pres:_)) = isEditableTreePres' editable path (press!!!0)                                            
-isEditableTreePres' editable (p:path) (GraphP id rf _ _ press)   = isEditableTreePres' editable path (press!!!p)
-isEditableTreePres' editable (0:path) (VertexP id _ _ _ pres)    = isEditableTreePres' editable path pres
+isEditableTreePres' editable (p:path) (GraphP id _ _ _ _ press) = isEditableTreePres' editable path (press!!!p)
+isEditableTreePres' editable (0:path) (VertexP id _ _ _ _ pres)  = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (WithP ar pres)            = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (StructuralP id pres)      = isEditableTreePres' False path pres
 isEditableTreePres' editable (p:path) (ParsingP id pres)         = isEditableTreePres' True path pres
@@ -481,8 +481,8 @@ selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (press!!!p)
 selectTree (p:path) (ColP _ _ press)          = selectTree path (press!!!p)
 selectTree (0:path) (OverlayP _ (pres:press)) = selectTree path pres
-selectTree (p:path) (GraphP _ _ _ _ press)    = selectTree path (press!!!p)
-selectTree (0:path) (VertexP _ _ _ _ pres)    = selectTree path pres
+selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (press!!!p)
+selectTree (0:path) (VertexP _ _ _ _ _ pres)  = selectTree path pres
 selectTree (0:path) (WithP _ pres)            = selectTree path pres
 selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
 selectTree (0:path) (ParsingP _ pres)         = selectTree path pres
@@ -604,14 +604,14 @@ focusIsOnGraph NoPathP _         = False
 focusIsOnGraph (PathP path _) pres = focusIsOnGraphPres path pres
 
 focusIsOnGraphPres :: [Int] -> Presentation doc node clip -> Bool
-focusIsOnGraphPres []       (VertexP _ _ _ _ _)       = debug Err ("verteks") True 
-focusIsOnGraphPres [p]      (GraphP _ _ _ _ press)    = if p >= length press then debug Err ("edzj") True else False
+focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = debug Err ("verteks") True 
+focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then debug Err ("edzj") True else False
 focusIsOnGraphPres []        tr                       = False
 focusIsOnGraphPres (p:path) (RowP _ _ press)          = focusIsOnGraphPres path (press!!!p)
 focusIsOnGraphPres (p:path) (ColP _ _ press)          = focusIsOnGraphPres path (press!!!p)
 focusIsOnGraphPres (0:path) (OverlayP _ (pres:press)) = focusIsOnGraphPres path pres
-focusIsOnGraphPres (p:path) (GraphP _ _ _ _ press)    = focusIsOnGraphPres path (press!!!p)
-focusIsOnGraphPres (0:path) (VertexP _ _ _ _ pres)    = focusIsOnGraphPres path pres
+focusIsOnGraphPres (p:path) (GraphP _ _ _ _ _ press)  = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (0:path) (VertexP _ _ _ _ _ pres)  = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (WithP _ pres)            = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (StructuralP _ pres)      = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (ParsingP _ pres)         = focusIsOnGraphPres path pres
@@ -630,8 +630,8 @@ mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
 mouseDownDocPres' upd (p:path) (ColP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
 mouseDownDocPres' upd (0:path) (OverlayP _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
-mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ press)    = mouseDownDocPres' upd path (press!!!p)
-mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ pres)    = mouseDownDocPres' upd path pres
+mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (press!!!p)
+mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ _ pres)  = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = ((fst emptyAttrs) {mouseDown = upd}, snd emptyAttrs)
                                                                                   (inh',syn') = w (inh,syn)
                                                                               in mouseDown inh') path pres
@@ -650,8 +650,8 @@ popupMenuItemsPres' its []       tr                        = its
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
 popupMenuItemsPres' its (p:path) (ColP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
 popupMenuItemsPres' its (0:path) (OverlayP _ press@(pres:_)) = popupMenuItemsPres' its path pres --(last press)
-popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ press)   = popupMenuItemsPres' its path (press!!!p)
-popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ pres)    = popupMenuItemsPres' its path pres
+popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ _ press)  = popupMenuItemsPres' its path (press!!!p)
+popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ _ pres)  = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres' (let (inh,syn)   = ((fst emptyAttrs) {popupMenuItems = its}, snd emptyAttrs)
                                                                                       (inh',syn') = w (inh,syn)
                                                                                   in popupMenuItems inh') path pres

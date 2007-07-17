@@ -33,8 +33,8 @@ detokenize lm (OverlayP id (pres:press)) = OverlayP id (detokenize lm pres : pre
 detokenize lm (WithP ar pres)            = WithP ar $ detokenize lm pres
 detokenize lm (StructuralP id pres)      = StructuralP id $ detokenize lm pres
 detokenize lm (LocatorP l pres)          = LocatorP l $ detokenize lm pres
-detokenize lm (GraphP id w h es press)   = GraphP id w h es $ map (detokenize lm) press
-detokenize lm (VertexP id x y o pres)    = VertexP id x y o $ detokenize lm pres
+detokenize lm (GraphP id d w h es press) = GraphP id d w h es $ map (detokenize lm) press
+detokenize lm (VertexP id v x y o pres)  = VertexP id v x y o $ detokenize lm pres
 detokenize lm pr                         = debug Err ("TreeEditPres.detokenize: can't handle "++ show pr) pr
 
 
@@ -58,9 +58,9 @@ detokenize' lm (ParsingP id pres)         = let press = detokenize' lm pres
                                             in  map (ParsingP id) press
 detokenize' lm (LocatorP l pres)          = let press = detokenize' lm pres 
                                             in  map (LocatorP l) press
-detokenize' lm (GraphP id w h es press)   = let press' = map (singleton . detokenize' lm) press
-                                            in  [GraphP id w h es press']
-detokenize' lm (VertexP id x y ol pres)   = [VertexP id x y ol (singleton $ detokenize' lm pres)]
+detokenize' lm (GraphP id d w h es press) = let press' = map (singleton . detokenize' lm) press
+                                            in  [GraphP id d w h es press']
+detokenize' lm (VertexP id v x y ol pres) = [VertexP id v x y ol (singleton $ detokenize' lm pres)]
 detokenize' lm pr                         = debug Err ("TreeEditPres.detokenize': can't handle "++ show pr) [pr]
 
 singleton []       = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ EmptyP NoIDP

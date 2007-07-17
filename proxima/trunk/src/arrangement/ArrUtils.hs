@@ -98,28 +98,32 @@ data Arrangement =
 
 -- for creating edge arrangements during graph arranging
 -- PRECONDITION: if edges is non-empty, then vertices is non-empty as well.
-mkEdges :: Show node => [(Int,Int)] -> [(Int,Int, Outline)] -> Color -> [Arrangement node]
-mkEdges edges vertices lineColor = map mkEdge edges 
- where mkEdge (fromV, toV) = let (fromVx,fromVy,fromVol) = index "mkEdges" fromV vertices
-                                 (toVx,toVy,toVol)       = index "mkEdges"  toV vertices
-                                 (offsetFromx, offsetFromy) = fromVol (computeAngle fromVx fromVy toVx toVy)
-                                 (offsetTox, offsetToy)     = toVol   (computeAngle toVx toVy fromVx fromVy)
-                             in  EdgeA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
-                                              (toVx+offsetTox)     (toVy+offsetToy)     0 0 1 lineColor 
-
+mkEdges :: Show node => [(Int,Int)] -> [(Int,Int,Int, Outline)] -> Color -> [Arrangement node]
+mkEdges edges vertices lineColor = concatMap mkEdge edges 
+ where mkEdge (fromV, toV) = 
+        case (lookupVertex fromV vertices, lookupVertex toV vertices) of
+            (Just (fromVx,fromVy,fromVol), Just (toVx,toVy,toVol)) ->
+              let (offsetFromx, offsetFromy) = fromVol (computeAngle fromVx fromVy toVx toVy)
+                  (offsetTox, offsetToy)     = toVol   (computeAngle toVx toVy fromVx fromVy)
+              in [EdgeA NoIDA  (fromVx+offsetFromx) (fromVy+offsetFromy)
+                            (toVx+offsetTox)     (toVy+offsetToy)     0 0 1 lineColor]
+            _ -> []
+       lookupVertex vid [] = debug Err ("ArrUtils.mkEdges: edge refers to non-existing vertex: " ++ show vid) Nothing
+       lookupVertex vid ((i,x,y,ol):vs) | vid == i = Just (x,y,ol)
+                                        | otherwise = lookupVertex vid vs
 
 -- for now, ignore ref's in diff. Even if ref changes but nothing else, no need to redraw.
 
 -- experimental diff, only strings are checked.
 -- skip StructuralA ParsingA and LocatorA elts
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isClean childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (StructuralA id arr')  = diffArr arr arr'
 diffArr (ParsingA id arr)    arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isClean childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (ParsingA id arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isClean childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 
 diffArr (EmptyA id x y w h hr vr)     (EmptyA _  x' y' w' h' hr' vr') = DiffLeaf $ x==x' && y==y' && w==w' && h==h'                                                          
@@ -151,7 +155,7 @@ diffArr arr@(OverlayA id x y w h hr vr bc arrs) _                        = DiffL
 diffArr arr@(GraphA id x y w h hr vr bc nvs arrs) _                      = DiffLeaf False 
 diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
- in  DiffNode (isClean childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
+ in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
 diffArr _                             _                                = DiffLeaf True -- all others are unchanged
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 -- At the moment, we ignore outline and nrOfVertices
@@ -165,7 +169,7 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
       childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeaf False)
       selfClean   =    x==x' && y==y' && w==w' && h==h' && bc==bc' 
                     && nrOfArrs == nrOfArrs'
-  in  DiffNode ( selfClean && all isClean childDiffs) selfClean
+  in  DiffNode ( selfClean && all isCleanDT childDiffs) selfClean
                (if not selfClean
                 then repeat (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
                 else childDiffs)

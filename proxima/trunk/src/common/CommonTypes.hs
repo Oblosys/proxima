@@ -84,7 +84,7 @@ data Modifiers = Modifiers
                    , alt   :: Bool
                    } deriving Show
 
-
+data Dirty = Dirty | Clean
 
 data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 --                                       children self 
@@ -99,13 +99,13 @@ data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
 
-isClean :: DiffTree -> Bool
-isClean (DiffLeaf c) = c
-isClean (DiffNode c c' _) = c  -- shallow check
+isCleanDT :: DiffTree -> Bool
+isCleanDT (DiffLeaf c) = c
+isCleanDT (DiffNode c c' _) = c  -- shallow check
 
-isSelfClean :: DiffTree -> Bool
-isSelfClean (DiffLeaf c) = c
-isSelfClean (DiffNode c c' _) = c'
+isSelfCleanDT :: DiffTree -> Bool
+isSelfCleanDT (DiffLeaf c) = c
+isSelfCleanDT (DiffNode c c' _) = c'
 
 {-
 black = (0,0,0) :: (Int,Int,Int)
