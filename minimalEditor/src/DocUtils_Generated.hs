@@ -83,12 +83,14 @@ rankNode (VertexNode _ _)  = 20
 rankNode (HoleVertexNode _ _)  = 21
 rankNode (EdgeNode _ _)  = 22
 rankNode (HoleEdgeNode _ _)  = 23
-rankNode (List_DummyNode _ _)  = 24
-rankNode (HoleList_DummyNode _ _)  = 25
-rankNode (List_VertexNode _ _)  = 26
-rankNode (HoleList_VertexNode _ _)  = 27
-rankNode (List_EdgeNode _ _)  = 28
-rankNode (HoleList_EdgeNode _ _)  = 29
+rankNode (SubGraphNode _ _)  = 24
+rankNode (HoleSubGraphNode _ _)  = 25
+rankNode (List_DummyNode _ _)  = 26
+rankNode (HoleList_DummyNode _ _)  = 27
+rankNode (List_VertexNode _ _)  = 28
+rankNode (HoleList_VertexNode _ _)  = 29
+rankNode (List_EdgeNode _ _)  = 30
+rankNode (HoleList_EdgeNode _ _)  = 31
 
 
 
@@ -117,6 +119,8 @@ instance HasPath Node where
   pathNode (HoleVertexNode _ pth)  = PathD pth
   pathNode (EdgeNode _ pth)  = PathD pth
   pathNode (HoleEdgeNode _ pth)  = PathD pth
+  pathNode (SubGraphNode _ pth)  = PathD pth
+  pathNode (HoleSubGraphNode _ pth)  = PathD pth
   pathNode (List_DummyNode _ pth)  = PathD pth
   pathNode (HoleList_DummyNode _ pth)  = PathD pth
   pathNode (List_VertexNode _ pth)  = PathD pth
@@ -147,7 +151,7 @@ dummyIDD (DummyNode (Dummy iDD _ _ _ _) _) = Just iDD
 dummyIDD _                                   = Nothing
 
 rootIDD :: Node -> Maybe IDD
-rootIDD (RootNode (Root iDD _ _ _) _) = Just iDD
+rootIDD (RootNode (Root iDD _ _ _ _) _) = Just iDD
 rootIDD _                                   = Nothing
 
 binIDD :: Node -> Maybe IDD
@@ -170,6 +174,10 @@ edgeIDD :: Node -> Maybe IDD
 edgeIDD (EdgeNode (Edge iDD _ _) _) = Just iDD
 edgeIDD _                                   = Nothing
 
+subGraphIDD :: Node -> Maybe IDD
+subGraphIDD (SubGraphNode (SubGraph iDD _) _) = Just iDD
+subGraphIDD _                                   = Nothing
+
 
 
 
@@ -178,12 +186,13 @@ shallowShowString_1 (String_  _ _) = "String_"
 shallowShowBool_1 (Bool_  _ _) = "Bool_"
 shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowDummy1 (Dummy  _ _ _ _ _) = "Dummy"
-shallowShowRoot1 (Root  _ _ _ _) = "Root"
+shallowShowRoot1 (Root  _ _ _ _ _) = "Root"
 shallowShowTree1 (Bin  _ _ _) = "Bin"
 shallowShowTree1 (Leaf  _) = "Leaf"
 shallowShowGraph1 (Graph  _ _ _) = "Graph"
 shallowShowVertex1 (Vertex  _ _ _ _ _) = "Vertex"
 shallowShowEdge1 (Edge  _ _ _) = "Edge"
+shallowShowSubGraph1 (SubGraph  _ _) = "SubGraph"
 shallowShowList_Dummy1 (List_Dummy  _ _) = "List_Dummy"
 shallowShowConsList_Dummy1 (Cons_Dummy  _ _) = "Cons_Dummy"
 shallowShowConsList_Dummy1 (Nil_Dummy ) = "Nil_Dummy"
@@ -201,12 +210,13 @@ toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
 toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
 toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
 toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
-toXMLRoot (Root _ tree graph1 graph2) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph1] ++ [toXMLGraph graph2] ++ []
+toXMLRoot (Root _ tree graph subGraph1 subGraph2) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph] ++ [toXMLSubGraph subGraph1] ++ [toXMLSubGraph subGraph2] ++ []
 toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
 toXMLTree (Leaf _) = Elt "Leaf" [] $ []
 toXMLGraph (Graph _ vertices edges) = Elt "Graph" [] $ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
 toXMLVertex (Vertex _ name id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
 toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
+toXMLSubGraph (SubGraph _ vertices) = Elt "SubGraph" [] $ toXMLList_Vertex vertices ++ []
 toXMLList_Dummy (List_Dummy _ dummys) = toXMLConsList_Dummy dummys
 toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLConsList_Dummy dummys
 toXMLConsList_Dummy Nil_Dummy             = []
@@ -230,7 +240,7 @@ parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int
 parseXML_Dummy = parseXMLCns_Dummy
 parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
 parseXML_Root = parseXMLCns_Root
-parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <*> parseXML_Graph <* endTag "Root"
+parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <*> parseXML_SubGraph <*> parseXML_SubGraph <* endTag "Root"
 parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf
 parseXMLCns_Bin = Bin NoIDD <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree <* endTag "Bin"
 parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"
@@ -240,6 +250,8 @@ parseXML_Vertex = parseXMLCns_Vertex
 parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String_ <*> parseXML_Int_ <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Vertex"
 parseXML_Edge = parseXMLCns_Edge
 parseXMLCns_Edge = Edge NoIDD <$ startTag "Edge" <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Edge"
+parseXML_SubGraph = parseXMLCns_SubGraph
+parseXMLCns_SubGraph = SubGraph NoIDD <$ startTag "SubGraph" <*> parseXML_List_Vertex <* endTag "SubGraph"
 parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many (try parseXML_Dummy)
 parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many (try parseXML_Vertex)
 parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> many (try parseXML_Edge)

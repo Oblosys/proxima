@@ -23,9 +23,15 @@ instance Editable Document Document Node ClipDoc where
   select p (RootDoc id x) = select p x
   paste p c (RootDoc id  x) = RootDoc id $ paste p c x
   hole = HoleDocument
+  parseErr = ParseErrDocument
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+
+-- from Editable, only the member parseErr is used for EnrichedDoc
+instance Editable EnrichedDoc Document Node ClipDoc where
+--  hole = HoleEnrichedDoc
+  parseErr = ParseErrEnrichedDoc
   
 instance Editable Int Document Node ClipDoc where
   select [] x = Clip_Int x
@@ -110,6 +116,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Int_ x) = arity x
   arityClip (Clip_Tree x) = arity x
   arityClip (Clip_Graph x) = arity x
+  arityClip (Clip_SubGraph x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
   arityClip (Clip_Dummy x) = arity x
@@ -127,6 +134,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Int_ x) = alternatives x
   alternativesClip (Clip_Tree x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
+  alternativesClip (Clip_SubGraph x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
   alternativesClip (Clip_Dummy x) = alternatives x
@@ -145,6 +153,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Int_ x) = Clip_Int_ hole
   holeClip (Clip_Tree x) = Clip_Tree hole
   holeClip (Clip_Graph x) = Clip_Graph hole
+  holeClip (Clip_SubGraph x) = Clip_SubGraph hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
   holeClip (Clip_Dummy x) = Clip_Dummy hole
@@ -163,6 +172,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Int_ x) = isList x
   isListClip (Clip_Tree x) = isList x
   isListClip (Clip_Graph x) = isList x
+  isListClip (Clip_SubGraph x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
   isListClip (Clip_Dummy x) = isList x
@@ -181,6 +191,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Int_ x) = insertList i c x
   insertListClip i c (Clip_Tree x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
+  insertListClip i c (Clip_SubGraph x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
   insertListClip i c (Clip_Dummy x) = insertList i c x
@@ -199,6 +210,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Int_ x) = removeList i x
   removeListClip i (Clip_Tree x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
+  removeListClip i (Clip_SubGraph x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
   removeListClip i (Clip_Dummy x) = removeList i x
@@ -327,23 +339,25 @@ instance Editable Dummy Document Node ClipDoc where
 
 instance Editable Root Document Node ClipDoc where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ x1 x2 x3) = select p x1
-  select (1:p) (Root _ x1 x2 x3) = select p x2
-  select (2:p) (Root _ x1 x2 x3) = select p x3
+  select (0:p) (Root _ x1 x2 x3 x4) = select p x1
+  select (1:p) (Root _ x1 x2 x3 x4) = select p x2
+  select (2:p) (Root _ x1 x2 x3 x4) = select p x3
+  select (3:p) (Root _ x1 x2 x3 x4) = select p x4
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 x1 x2 x3) = Root i1 (paste p c x1) x2 x3
-  paste (1:p) c (Root i1 x1 x2 x3) = Root i1 x1 (paste p c x2) x3
-  paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Root i1 x1 x2 x3 x4) = Root i1 (paste p c x1) x2 x3 x4
+  paste (1:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 (paste p c x2) x3 x4
+  paste (2:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 (paste p c x3) x4
+  paste (3:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 x3 (paste p c x4)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Tree} {Graph} {Graph} "  , Clip_Root $ Root NoIDD hole hole hole)
+  alternatives _ = [("Root {Tree} {Graph} {SubGraph} {SubGraph} "  , Clip_Root $ Root NoIDD hole hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ x1 x2 x3) = 3
+  arity (Root _ x1 x2 x3 x4) = 4
   arity _                        = 0
 
   parseErr = ParseErrRoot
@@ -471,6 +485,33 @@ instance Editable Edge Document Node ClipDoc where
   parseErr = ParseErrEdge
 
   hole = HoleEdge
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable SubGraph Document Node ClipDoc where
+  select []    x                  = Clip_SubGraph x
+  select (0:p) (SubGraph _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_SubGraph c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on SubGraph")   x
+  paste (0:p) c (SubGraph i1 x1) = SubGraph i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("SubGraph {Vertexs} "  , Clip_SubGraph $ SubGraph NoIDD hole)
+                   ,("{SubGraph}", Clip_SubGraph hole)
+                   ]
+
+  arity (SubGraph _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrSubGraph
+
+  hole = HoleSubGraph
 
 
   isList _ = False

@@ -52,9 +52,9 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col [ bold $ text "Root"
-                         , @graph1.pres 
+                         , @graph.pres 
                          , @tree.pres
-                         , @graph2.pres
+                         , row [ @subGraph1.pres, @subGraph2.pres ]
                          ]
 
 SEM Tree
@@ -70,12 +70,12 @@ SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ hSpace 5,
-                           boxed $ graph 1100 750 @edges.edges @vertices.vertexIDs @vertices.press
+                           boxed $ graph 1100 400 @edges.edges @vertices.vertexIDs @vertices.press
                          ]
       
 SEM Vertex [ || ] 
   | Vertex
-      lhs.pres = loc (VertexNode @self @lhs.path) $ structural $
+      loc.pres = loc (VertexNode @self @lhs.path) $ structural $
                    vertex @x.int @y.int (\a -> (round $ 17*cos a -1, round $ -17*sin a -1)) $
                      col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
@@ -85,6 +85,20 @@ SEM Vertex [ || ]
                                   , glue]
                          ]
 
+SEM Root
+  | Root
+      subGraph1.vertexIDs = @graph.vertexIDs
+      subGraph2.vertexIDs = @graph.vertexIDs
+      subGraph1.edges = @graph.edges
+      subGraph2.edges = @graph.edges
+
+ATTR Graph [ || vertexIDs : {[Int]} edges : {[(Int, Int)]} ]
+ 
+SEM SubGraph [ vertexIDs : {[Int]} edges : {[(Int, Int)]} || ] 
+  | SubGraph
+      lhs.pres = let subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` @vertices.vertexIDs && toV `elem` @vertices.vertexIDs ]
+                 in  loc (SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       boxed $ graph 300 300 subEdges @vertices.vertexIDs @vertices.press
 
 SEM Edge [ || edge : {Maybe (Int,Int)} ]    
   | Edge
@@ -129,3 +143,4 @@ SEM ConsList_Vertex [ || vertexIDs : {[Maybe Int]} ]
       lhs.vertexIDs = @head.vertexID : @tail.vertexIDs
   | Nil_Vertex
       lhs.vertexIDs = []
+

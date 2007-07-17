@@ -13,7 +13,8 @@ data Document = RootDoc IDD Root
               | ParseErrDocument (Presentation Document Node ClipDoc)
                  deriving Show
 
-
+instance DocNode Node where
+  noNode = NoNode
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -58,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph Graph 
+data Root = Root IDD Tree Graph SubGraph SubGraph 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -87,6 +88,12 @@ data Edge = Edge IDD Int_ Int_
           | HoleEdge
           | ParseErrEdge (Presentation Document Node ClipDoc)
              deriving Show
+
+
+data SubGraph = SubGraph IDD List_Vertex 
+              | HoleSubGraph
+              | ParseErrSubGraph (Presentation Document Node ClipDoc)
+                 deriving Show
 
 
 data List_Dummy = List_Dummy IDD ConsList_Dummy 
@@ -135,6 +142,7 @@ data ClipDoc = Clip_Root Root
              | Clip_Int_ Int_
              | Clip_Tree Tree
              | Clip_Graph Graph
+             | Clip_SubGraph SubGraph
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
              | Clip_Dummy Dummy
@@ -172,6 +180,8 @@ data Node = NoNode
           | HoleVertexNode Vertex Path 
           | EdgeNode Edge Path 
           | HoleEdgeNode Edge Path 
+          | SubGraphNode SubGraph Path 
+          | HoleSubGraphNode SubGraph Path 
           | List_DummyNode List_Dummy Path 
           | HoleList_DummyNode List_Dummy Path 
           | List_VertexNode List_Vertex Path 
@@ -206,6 +216,8 @@ instance Show Node where
   show (HoleVertexNode _ _)  = "HoleVertexNode"
   show (EdgeNode _ _)  = "EdgeNode"
   show (HoleEdgeNode _ _)  = "HoleEdgeNode"
+  show (SubGraphNode _ _)  = "SubGraphNode"
+  show (HoleSubGraphNode _ _)  = "HoleSubGraphNode"
   show (List_DummyNode _ _)  = "List_DummyNode"
   show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
   show (List_VertexNode _ _)  = "List_VertexNode"

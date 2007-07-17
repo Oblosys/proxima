@@ -208,6 +208,7 @@ makeToken :: Int -> (TokenType, Maybe node,AttrRule doc clip) -> Layout -> IDP -
 makeToken i l             layout NoIDP str = makeToken (i+1) l layout (IDP i) str  -- make new ID
 makeToken i (_,Nothing,ar)  layout id str = (WithP ar $ StringP id (reverse str), Map.singleton id layout,i)
 makeToken i (_,Just loc,ar) layout id str = (LocatorP loc $ WithP ar $ StringP id (reverse str), Map.singleton id layout,i)
+-- TODO: For no location, maybe a NoNode should be used as locator? Now postScanPres
 
 -- all makeTokens must update lm
 -- noids in img etc are wrong

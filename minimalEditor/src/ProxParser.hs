@@ -2,7 +2,7 @@ module ProxParser (parsePres) where
 
 import CommonTypes
 import PresLayerTypes
-import PresLayerUtils hiding ((<*>),(<$),(<$>))
+import PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
 import PresentationParsing
 import XprezLib
 
@@ -27,7 +27,7 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in -- showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
+                 in  --showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
        
 deepShowTks i tok = case tok of
@@ -61,11 +61,12 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str graph1 tree graph2 -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph1) (Just graph2))
+          (\str graph1 tree subGraph1 subGraph2 -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph1) (Just subGraph1)(Just subGraph2))
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-      <*> recognizeGraph
+      <*> recognizeSubGraph
+      <*> recognizeSubGraph
       
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 
@@ -94,10 +95,10 @@ recognizeTree = pStr $
 --         does not have to do this)
 recognizeGraph :: ListParser Document Node ClipDoc Graph
 recognizeGraph = pStr $
-          (\str gt vertices -> reuseGraph [tokenNode str] Nothing 
-                                          (Just $ List_Vertex NoIDD $ toConsList_Vertex vertices)
-                                          (Just $ List_Edge NoIDD $ toConsList_Edge $ 
-                                             [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
+          (\str gt vs -> reuseGraph [tokenNode str] Nothing 
+                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
+                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
+                                    [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
                                           
       <$> pStructural GraphNode
       <*> pSym graphTk
@@ -110,6 +111,20 @@ recognizeVertex = pStr $
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
+ {- <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") Nothing 
+                                  (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
+      <$> pStructural (\_ _ -> NoNode)
+      <*> pSym vertexTk
+-}
+
+recognizeSubGraph :: ListParser Document Node ClipDoc SubGraph
+recognizeSubGraph = pStr $
+          (\str vs -> reuseSubGraph [tokenNode str] Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs))
+      <$> pStructural SubGraphNode
+      <*  pSym graphTk
+      <*> pList recognizeVertex
+
+
 
 getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
 getGraphTkEdges (GraphTk edges _ _) = edges
