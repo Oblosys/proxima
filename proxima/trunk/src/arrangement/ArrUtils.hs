@@ -260,11 +260,11 @@ point' x' y' pth loc p@(VertexA _ x y w h _ _ _ outline arr) =
   let dragAreaPoly = map outline [0, pi/10 ..2*pi]
   in if dragAreaPoly `contains` (x'-x, y'-y) -- inside the outline means point is on Vertex
      then Just (pth, loc)
-     else Nothing
-     {- if (x' > x) && (x' < x+w) &&       -- otherwise, if it is inside the Vertex, we continue on its children
+     else
+       if (x' > x) && (x' < x+w) &&       -- otherwise, if it is inside the Vertex, we continue on its children
              (y' >= y) && (y' < y+h) 
-          then point' (x'-x) (y'-y) (pth) loc arr 
-          else Nothing -}
+          then debug Arr "inside Vertex pres" $ point' (x'-x) (y'-y) (pth++[0]) loc arr 
+          else Nothing
 point' x' y' pth loc p@(EdgeA _ x1 y1 x2 y2 _ _ _ _) =
   if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
   then Just (pth, loc)
