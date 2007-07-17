@@ -1,1 +1,2 @@
-d:\bin\uuagc -cfspm        ArrangerAG
+..\..\bin\uuagc -cfpm --Werrors ArrangerAG
+pause
