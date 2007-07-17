@@ -169,7 +169,7 @@ deleteGraphPres' (p:ps) (GraphP id d w h es press)   =
   if p < length press 
   then  case deleteGraphPres' ps (press!!!p) of
           Just pres -> Just $ GraphP id d w h es $ replace p press pres
-          Nothing   -> Just $ GraphP id d w h (removeVertexFromEdges p es) $ (take p press ++ drop (p+1) press)
+          Nothing   -> Just $ GraphP id d w h es $ (take p press ++ drop (p+1) press)
   else let edgeNr = p - length press
        in  Just $ GraphP id d w h (take edgeNr es ++ drop (edgeNr+1) es) press
 deleteGraphPres' []     (VertexP id _ x y ol pres)   = Nothing

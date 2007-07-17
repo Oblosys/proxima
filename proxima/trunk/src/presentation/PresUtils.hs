@@ -219,14 +219,6 @@ normalizeCol id p rf prs (ColP _ rf' press: col) =
   in  normalizeCol id p rf''  prs (press ++ col)
 normalizeCol id p rf prs (pres            : col) = normalizeCol id (p+1) rf (normalizePres pres:prs) col
 
-
--- | Delete all edges to and from deleted vertex, and adjust vertexNrs in the remaining edges.
-removeVertexFromEdges :: Int -> [(Int,Int)] -> [(Int,Int)]
-removeVertexFromEdges vertexNr edges = catMaybes . map fixEdge $ edges
-  where fixEdge (f,t) | f == vertexNr || t == vertexNr = Nothing
-        fixEdge (f,t) | otherwise                      = 
-          Just $ (if f > vertexNr then f-1 else f, if t > vertexNr then t-1 else t)
-
 -- | Return innermost enclosing locator for path in pres
 locateTreePres :: PathPres -> Presentation doc node clip -> Maybe node
 locateTreePres NoPathP        pres = Nothing
