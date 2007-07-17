@@ -20,8 +20,8 @@ data DebugLevel = Err | Main | GUI | Ren | Arr | Lay | Prs | Eva | Rdcr | Par | 
 
 
 debugLevels :: [DebugLevel]
-debugLevels = [Err]                     -- for no Debugging
---debugLevels = allLevels                 -- for debugging on levels
+--debugLevels = [Err]                     -- for no Debugging
+debugLevels = allLevels                 -- for debugging on levels
 
 levels =      [ Err 
               , Main
