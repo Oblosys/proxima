@@ -103,7 +103,7 @@ recognizeGraph = pStr $
       <$> pStructural GraphNode
       <*> pSym graphTk
       <*> pList recognizeVertex
-      
+
 -- labels in vertex? Or just in presentation?      
 recognizeVertex :: ListParser Document Node ClipDoc Vertex
 recognizeVertex = pStr $
@@ -111,11 +111,11 @@ recognizeVertex = pStr $
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
- {- <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") Nothing 
+  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") Nothing 
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
--}
+
 
 recognizeSubGraph :: ListParser Document Node ClipDoc SubGraph
 recognizeSubGraph = pStr $
@@ -123,8 +123,6 @@ recognizeSubGraph = pStr $
       <$> pStructural SubGraphNode
       <*  pSym graphTk
       <*> pList recognizeVertex
-
-
 
 getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
 getGraphTkEdges (GraphTk edges _ _) = edges
