@@ -111,11 +111,10 @@ recognizeVertex = pStr $
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
-  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") Nothing 
-                                  (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
+  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>")
+                                  (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
-
 
 recognizeSubGraph :: ListParser Document Node ClipDoc SubGraph
 recognizeSubGraph = pStr $
@@ -128,12 +127,16 @@ getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
 getGraphTkEdges (GraphTk edges _ _) = edges
 getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
 
+getVertexTkId :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkId (VertexTk i (x,y) _ _) = Int_ NoIDD i
+getVertexTkId tk = debug Err ("ERROR: getVertexTkId: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
+
 getVertexTkX :: Show node => Token doc node clip (Maybe node)-> Int_
-getVertexTkX (VertexTk (x,y) _ _) = Int_ NoIDD x
+getVertexTkX (VertexTk _ (x,y) _ _) = Int_ NoIDD x
 getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
 getVertexTkY :: Show node => Token doc node clip (Maybe node)-> Int_
-getVertexTkY (VertexTk (x,y) _ _) = Int_ NoIDD y
+getVertexTkY (VertexTk _ (x,y) _ _) = Int_ NoIDD y
 getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
 keywords :: [String]
