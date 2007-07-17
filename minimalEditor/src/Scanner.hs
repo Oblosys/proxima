@@ -32,10 +32,10 @@ tokenize i loc (StructuralP id pres)      = let (pres', lm, i') = tokenize i loc
                                             in  (StructuralP id pres', lm, i')
 tokenize i _   (LocatorP loc pres)        = let (pres', lm, i') = tokenize i (Just loc) pres
                                             in  (LocatorP loc pres', lm, i')
-tokenize i loc (GraphP id w h edges press) = let (press', lm, i') = tokenizeLst i loc press
-                                             in  (GraphP id w h edges press', lm, i')
-tokenize i loc (VertexP id x y o pres)     = let (pres', lm, i') = tokenize i loc pres
-                                            in  (VertexP id x y o pres', lm, i')              
+tokenize i loc (GraphP id d w h edges press) = let (press', lm, i') = tokenizeLst i loc press
+                                               in  (GraphP id d w h edges press', lm, i')
+tokenize i loc (VertexP id v x y o pres)     = let (pres', lm, i') = tokenize i loc pres
+                                               in  (VertexP id v x y o pres', lm, i')              
 tokenize i loc pr = debug Err ("TreeEditPres.tokenize: can't handle "++ show pr) (pr, Map.empty, i)
 
 tokenizeLst i loc []           = ([], Map.empty, i)
@@ -163,10 +163,10 @@ tokenize' i loc lc layout id str pres@(RectangleP _ _ _ _) = let (tok, lm, i') =
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i loc lc layout id str pres@(EllipseP _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(GraphP _ _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(VertexP _ _ _ _ _)  = let (tok, lm, i') = makeToken i lc layout id str
-                                                             in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
+tokenize' i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' i (loc,ar'.ar) lc layout id str pres
 tokenize' i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
 tokenize' i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' i loc lc layout id str pres
