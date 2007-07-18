@@ -27,62 +27,68 @@ translateIO scannerSheet state low high editLow =
 
 -- split in monadic and non-monadic part
 parseIO :: DocNode node => ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
---parseIO _ state layLvl prs (OpenFileLay str) = openFile str state layLvl prs
---parseIO _ state layLvl prs (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prs str 
---parseIO _ state layLvl prs (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prs
-parseIO _ state layLvl prs (OpenFileLay str) = return (OpenFilePres str, state, layLvl)
-parseIO _ state layLvl prs (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
-parseIO scannerSheet state layLvl prs event = return $ parse scannerSheet state layLvl prs event
+--parseIO _ state layLvl prsLvl (OpenFileLay str) = openFile str state layLvl prsLvl
+--parseIO _ state layLvl prsLvl (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prsLvl str 
+--parseIO _ state layLvl prsLvl (DocumentLoadedLay str) =  return $ editLay (editInsert 'X') state layLvl prsLvl
+parseIO _ state layLvl prsLvl (OpenFileLay str) = return (OpenFilePres str, state, layLvl)
+parseIO _ state layLvl prsLvl (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
+parseIO scannerSheet state layLvl prsLvl event = return $ parse scannerSheet state layLvl prsLvl event
 
 parse :: DocNode node => ScannerSheet doc node clip -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> EditLayout documentLevel doc node clip -> (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
-parse _ state layLvl@(LayoutLevel pres _ dt) prs (SetFocusLay focus) = 
+parse _ state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay focus) = 
   (SkipPres 0, state, LayoutLevel pres focus dt)
-parse _ state layLvl prs (SkipLay i)   = (SkipPres (i+1), state, layLvl)
-parse _ state layLvl prs InitLay       = (InitPres, state, layLvl)
-parse _ state layLvl prs (InsertLay c) = editLay (editInsert c) state layLvl prs
-parse _ state layLvl prs CutLay   = editLay editCut state layLvl prs
-parse _ state layLvl prs CopyLay   = editCopy state layLvl prs
-parse _ state layLvl prs PasteLay  = editLay editPaste state layLvl prs
-parse _ state layLvl prs DeleteLay = editLay editDelete state layLvl prs 
-parse _ state layLvl prs SplitLay  = editLay editSplit state layLvl prs
-parse _ state layLvl prs LeftDeleteLay = editLay editLeftDelete state layLvl prs
-parse _ state layLvl prs RightDeleteLay = editLay editRightDelete state layLvl prs
-parse _ state layLvl prs LeftLay   = navigateLeft state layLvl prs 
-parse _ state layLvl prs RightLay  = navigateRight state layLvl prs
+parse _ state layLvl prsLvl (SkipLay i)   = (SkipPres (i+1), state, layLvl)
+parse _ state layLvl prsLvl InitLay       = (InitPres, state, layLvl)
+parse _ state layLvl prsLvl (InsertLay c) = editLay (editInsert c) state layLvl prsLvl
+parse _ state layLvl prsLvl CutLay   = editLay editCut state layLvl prsLvl
+parse _ state layLvl prsLvl CopyLay   = editCopy state layLvl prsLvl
+parse _ state layLvl prsLvl PasteLay  = editLay editPaste state layLvl prsLvl
+parse _ state layLvl prsLvl DeleteLay = editLay editDelete state layLvl prsLvl 
+parse _ state layLvl prsLvl SplitLay  = editLay editSplit state layLvl prsLvl
+parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl LeftDeleteLay = 
+  if focusIsOnGraph f pres -- if the from path is in a graph, this is a graph edit
+  then graphEdit scannerSheet state layLvl prsLvl deleteInGraph
+  else editLay editLeftDelete state layLvl prsLvl
+parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl RightDeleteLay =
+  if focusIsOnGraph f pres -- if the from path is in a graph, this is a graph edit
+  then graphEdit scannerSheet state layLvl prsLvl deleteInGraph
+  else editLay editRightDelete state layLvl prsLvl
+parse _ state layLvl prsLvl LeftLay   = navigateLeft state layLvl prsLvl 
+parse _ state layLvl prsLvl RightLay  = navigateRight state layLvl prsLvl
 
-parse _ state layLvl prs EnlargeLeftLay   = enlargeLeft state layLvl prs
-parse _ state layLvl prs EnlargeRightLay  = enlargeRight state layLvl prs
+parse _ state layLvl prsLvl EnlargeLeftLay   = enlargeLeft state layLvl prsLvl
+parse _ state layLvl prsLvl EnlargeRightLay  = enlargeRight state layLvl prsLvl
 
-parse _ state layLvl@(LayoutLevel pres _ _) prs (AddVertexLay pth pos)  = addVertex pth pos state layLvl
-parse _ state layLvl@(LayoutLevel pres _ _) prs (AddEdgeLay pth)        = addEdge pth state layLvl
-parse _ state layLvl@(LayoutLevel pres _ _) prs (MoveVertexLay pth pos) = moveVertex pth pos state layLvl
-parse _ state layLvl prs NormalizeLay       = editLay editNormalize state layLvl prs  
+parse scannerSheet state layLvl prsLvl (AddVertexLay pth pos)  = graphEdit scannerSheet state layLvl prsLvl (addVertex pth pos) 
+parse scannerSheet state layLvl prsLvl (AddEdgeLay pth)        = graphEdit scannerSheet state layLvl prsLvl (addEdge pth)
+parse scannerSheet state layLvl prsLvl (MoveVertexLay pth pos) = graphEdit scannerSheet state layLvl prsLvl (moveVertex pth pos)
+parse scannerSheet state layLvl prsLvl NormalizeLay       = editLay editNormalize state layLvl prsLvl
 
-parse scannerSheet state layLvl prs ParseLay = tokenizeLay scannerSheet state layLvl prs
-parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
+parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state layLvl prsLvl
+parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)
 
 
-parse _ state layLvl prs (UpdateDocLay upd) = (UpdateDocPres upd, state, layLvl)
-parse _ state layLvl prs NavUpDocLay        = (NavUpDocPres, state, layLvl)
-parse _ state layLvl prs NavDownDocLay      = (NavDownDocPres, state, layLvl)
-parse _ state layLvl prs NavLeftDocLay      = (NavLeftDocPres, state, layLvl)
-parse _ state layLvl prs NavRightDocLay     = (NavRightDocPres, state, layLvl)
-parse _ state layLvl prs CutDocLay          = (CutDocPres, state, layLvl)
-parse _ state layLvl prs CopyDocLay         = (CopyDocPres, state, layLvl)
-parse _ state layLvl prs PasteDocLay        = (PasteDocPres, state, layLvl)
-parse _ state layLvl prs DeleteDocLay       = (DeleteDocPres, state, layLvl)
-parse _ state layLvl prs Test2Lay           = (Test2Pres, state, layLvl)
+parse _ state layLvl prsLvl (UpdateDocLay upd) = (UpdateDocPres upd, state, layLvl)
+parse _ state layLvl prsLvl NavUpDocLay        = (NavUpDocPres, state, layLvl)
+parse _ state layLvl prsLvl NavDownDocLay      = (NavDownDocPres, state, layLvl)
+parse _ state layLvl prsLvl NavLeftDocLay      = (NavLeftDocPres, state, layLvl)
+parse _ state layLvl prsLvl NavRightDocLay     = (NavRightDocPres, state, layLvl)
+parse _ state layLvl prsLvl CutDocLay          = (CutDocPres, state, layLvl)
+parse _ state layLvl prsLvl CopyDocLay         = (CopyDocPres, state, layLvl)
+parse _ state layLvl prsLvl PasteDocLay        = (PasteDocPres, state, layLvl)
+parse _ state layLvl prsLvl DeleteDocLay       = (DeleteDocPres, state, layLvl)
+parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)
 -- We want to be able to set the presentation here and probably do a Layout to Presentation mapping.
 -- Not possible with just single edit commands. The problem is that the parser must not always be called. This
 -- does not readily fit in the current model.
 -- We can fix it by not setting the higher pres level if we don't want a parse.
 
 
-{-parse _ state layLvl prs Test2Lay   = setUpd AllUpdated $editReadFile state layLvl prs focus 
---parse _ state layLvl prs (MouseDownLay path ms i) = setUpd AllUpdated $ editMouseDown state layLvl prs path -- Helium
+{-parse _ state layLvl prsLvl Test2Lay   = setUpd AllUpdated $editReadFile state layLvl prsLvl focus 
+--parse _ state layLvl prsLvl (MouseDownLay path ms i) = setUpd AllUpdated $ editMouseDown state layLvl prsLvl path -- Helium
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
-parse _ state layLvl prs _            = (SkipPres 0, state, layLvl)
+parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 
 
 -- edit ops need to be consistent, when navigating with non-empty focus, collapse focus
@@ -136,11 +142,11 @@ editSet :: Presentation doc node clip -> Presentation doc node clip -> LayoutLev
 editSet pres' clip (LayoutLevel pres focus@(FocusP f t) dt) = (LayoutLevel pres' NoFocusP dt, clip)
 
 openFile :: String -> Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip)
-openFile filePath clip layLvl prs =
+openFile filePath clip layLvl prsLvl =
  do { debugLnIO Lay $ "Opening file: "++filePath
     ; str <- readFile filePath
     ; let pres' = StringP NoIDP filePath
-    ; return $ editLay (editSet pres') clip layLvl prs
+    ; return $ editLay (editSet pres') clip layLvl prsLvl
     }
     
 editInsert :: Char -> Presentation doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Presentation doc node clip)
@@ -188,25 +194,18 @@ editNormalize clip (LayoutLevel pres focus dt) =
 -- unlike paste split and insert, left and right delete do not perform their edit command when the focus was non-empty
 -- ie. in that case, they are interpreted as a regular delete
 editLeftDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
-  if focusIsOnGraph f pres then -- if the from path is in a graph, this is a graph edit
-    (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
-  else   
-    if f /= t then editDelete clip layLvl else
-      let focus'          = navigateLeftTreePres (toP focus) pres
-          focus''         = FocusP (toP focus) (toP focus')
-          (pres', focus''') = deleteTree focus'' pres
-      in (LayoutLevel pres' focus''' dt, clip)
+  if f /= t then editDelete clip layLvl else
+    let focus'          = navigateLeftTreePres (toP focus) pres
+        focus''         = FocusP (toP focus) (toP focus')
+        (pres', focus''') = deleteTree focus'' pres
+    in (LayoutLevel pres' focus''' dt, clip)
 
--- if the from path is in a graph, this is a graph edit
 editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
-  if focusIsOnGraph f pres then -- if the from path is in a graph, this is a graph edit
-    (LayoutLevel (deleteGraphPres f pres) NoFocusP dt, clip)
-  else   
-    if f /= t then editDelete clip layLvl else
-      let focus'          = navigateRightTreePres (toP focus) pres
-          focus''         = FocusP (toP focus) (toP focus')
-          (pres', focus''') = deleteTree focus'' pres
-      in  (LayoutLevel pres' focus''' dt, clip)
+  if f /= t then editDelete clip layLvl else
+    let focus'          = navigateRightTreePres (toP focus) pres
+        focus''         = FocusP (toP focus) (toP focus')
+        (pres', focus''') = deleteTree focus'' pres
+    in  (LayoutLevel pres' focus''' dt, clip)
 
 
 
@@ -238,14 +237,31 @@ enlargeRight clip (LayoutLevel pres focus dt) doc =
 
 
 -- Graph editing (deletion is in editLeft/RightDelete functions)
+-- Move vertex does not make the graph dirty
+--continueWithParse (_, state, LayoutLevel pres focus ) = tokenizeLay
+
+
+-- | graphEdit performs a graph edit operation on the layout level and continues by parsing
+--   the layout
+graphEdit :: DocNode node => ScannerSheet doc node clip ->
+             LayerStateLay doc node clip -> LayoutLevel doc node clip ->
+             PresentationLevel doc node clip ->
+             (LayerStateLay doc node clip -> LayoutLevel doc node clip -> (LayerStateLay doc node clip, LayoutLevel doc node clip))->
+             (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip) 
+graphEdit scannerSheet state layLvl presLvl editFn =
+  let (state', layLvl') = editFn state layLvl 
+      
+  in tokenizeLay scannerSheet state' layLvl' presLvl
+
+
 
 addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip -> LayoutLevel doc node clip ->
-             (EditPresentation documentLevel doc node clip, LayerStateLay doc node clip, LayoutLevel doc node clip)
-addVertex pth (x,y) state layLvl@(LayoutLevel pres focus dt) =
+             (LayerStateLay doc node clip, LayoutLevel doc node clip)
+addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
   let vertexIDs = getVertexIDs pth pres
       freshID = showDebug' Err "id is"$ head $ dropWhile (`elem` vertexIDs) [0..]
       pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vanillaVertex) pres
-  in  (SkipPres 0, state, LayoutLevel pres' focus dt)                  -- 0 in path is ignored
+  in  (state, LayoutLevel pres' focus dt)     -- 0 in path is ignored
  where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                            , vSpace 4 `withHStretch` True
                            , rowR 1 [glue, boxed 
@@ -259,27 +275,16 @@ addEdge toPth state layLvl@(LayoutLevel pres focus@(FocusP (PathP fromPth _) _) 
   let pres' = case selectTree fromPth pres of
                 (VertexP _ _ _ _ _ _) -> addEdgePres (PathP fromPth 0) (PathP toPth 0) pres -- 0 in path is ignored
                 _                     -> pres
-  in  (SkipPres 0, state, LayoutLevel pres' focus dt)
-addEdge _ state layLvl = (SkipPres 0, state, layLvl)
+  in  (state, LayoutLevel pres' focus dt)
+addEdge _ state layLvl = (state, layLvl)
  
 moveVertex pth pt state layLvl@(LayoutLevel pres focus dt) =
-  let pres' = moveVertex' pth pt pres
-  in  (SkipPres 0, state, LayoutLevel pres' focus dt)
+  let pres' = moveVertexPres pth pt pres
+  in  (state, LayoutLevel pres' focus dt)
 
-moveVertex' :: [Int] -> (Int,Int) -> Presentation doc node clip -> Presentation doc node clip                                      
-moveVertex' (p:ps) pt (RowP id rf press)         = RowP id rf $ replace p press (moveVertex' ps pt (press!!!p))
-moveVertex' (p:ps) pt (ColP id rf press)         = ColP id rf $ replace p press (moveVertex' ps pt (press!!!p))
-moveVertex' (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace p press (moveVertex' ps pt (press!!!p))
-moveVertex' (0:ps) pt (WithP ar pres)            = WithP ar (moveVertex' ps pt pres)
-moveVertex' (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertex' ps pt pres)
-moveVertex' (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertex' ps pt pres)
-moveVertex' (p:ps) pt (GraphP id d w h es press)   = 
-  if p < length press 
-  then GraphP id d w h es $ replace p press (moveVertex' ps pt (press!!!p))
-  else debug Err ("TreeEditPres.moveVertex'': can't handle "++ show pr) $ GraphP id d w h es press
-moveVertex' []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
-moveVertex' _      pt pr                      = debug Err ("TreeEditPres.moveVertex': can't handle "++ show pr) pr
-
+deleteInGraph state layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
+  let pres' = deleteGraphPres f pres
+  in  (state, LayoutLevel pres' focus dt)
 {-
 openFile :: Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> FilePath -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip) 
 openFile clip layLvl doc filePath =

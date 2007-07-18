@@ -84,7 +84,7 @@ data Modifiers = Modifiers
                    , alt   :: Bool
                    } deriving Show
 
-data Dirty = Dirty | Clean
+data Dirty = Dirty | Clean deriving Show
 
 data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 --                                       children self 

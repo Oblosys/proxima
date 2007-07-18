@@ -591,9 +591,9 @@ containsColPres (p:path) (LocatorP _ pres)          = containsColPres path pres
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
 -- | Return True if the focus is on either a vertex, or an edge (focus on graph, index larger than nr of vertices)
-focusIsOnGraph :: PathPres -> Presentation doc node clip -> Bool
-focusIsOnGraph NoPathP _         = False
-focusIsOnGraph (PathP path _) pres = focusIsOnGraphPres path pres
+focusIsOnGraph :: FocusPres -> Presentation doc node clip -> Bool
+focusIsOnGraph (FocusP (PathP path _) _) pres = focusIsOnGraphPres path pres
+focusIsOnGraph _ _         = False
 
 focusIsOnGraphPres :: [Int] -> Presentation doc node clip -> Bool
 focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = debug Err ("verteks") True 

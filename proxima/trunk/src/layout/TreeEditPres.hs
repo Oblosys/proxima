@@ -137,6 +137,9 @@ deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (delete
 deleteTreePres editable p f pr = debug Err ("TreeEditPres.deleteTreePres: can't handle "++show f++" "++ show pr) $ pr
 
 
+
+
+
 {- perform a delete in a graph:
     - if the path is on or inside an edge, it is removed
     - if the path is exactly on a vertex, it is removed
@@ -168,10 +171,10 @@ deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pr
 deleteGraphPres' (p:ps) (GraphP id d w h es press)   = 
   if p < length press 
   then  case deleteGraphPres' ps (press!!!p) of
-          Just pres -> Just $ GraphP id d w h es $ replace p press pres
-          Nothing   -> Just $ GraphP id d w h es $ (take p press ++ drop (p+1) press)
+          Just pres -> Just $ GraphP id Dirty w h es $ replace p press pres
+          Nothing   -> Just $ GraphP id Dirty w h es $ (take p press ++ drop (p+1) press)
   else let edgeNr = p - length press
-       in  Just $ GraphP id d w h (take edgeNr es ++ drop (edgeNr+1) es) press
+       in  Just $ GraphP id Dirty w h (take edgeNr es ++ drop (edgeNr+1) es) press
 deleteGraphPres' []     (VertexP id _ x y ol pres)   = Nothing
 deleteGraphPres' (0:ps) (VertexP id v x y ol pres)   = case deleteGraphPres' ps pres of
                                                          Just pres' -> Just $ VertexP id v x y ol pres'
@@ -190,7 +193,7 @@ addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPre
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (LocatorP l pres)          = LocatorP l (addVertexPres' ps vertex pres)
 addVertexPres' []     vertex (GraphP id d w h es press) = 
-  GraphP id d w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
+  GraphP id Dirty w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
 addVertexPres' (0:ps) vertex (VertexP id v x y ol pres) = VertexP id v x y ol (addVertexPres' ps vertex pres)
 addVertexPres' _      vertex pr                         = debug Err ("TreeEditPres.addVertexPres': can't handle "++ show pr) pr
 
@@ -209,7 +212,7 @@ addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace p pr
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (LocatorP l pres)          = LocatorP l (addEdgePres' ps edge pres)
-addEdgePres' []     edge (GraphP id d w h es press) = GraphP id d w h (edge:es) press
+addEdgePres' []     edge (GraphP id d w h es press) = GraphP id Dirty w h (edge:es) press
 addEdgePres' (0:ps) edge (VertexP id v x y ol pres) = VertexP id v x y ol (addEdgePres' ps edge pres)
 addEdgePres' _      edge pr                         = debug Err ("TreeEditPres.addEdgePres': can't handle "++ show pr) pr
 
@@ -238,6 +241,24 @@ getVertexID (StructuralP _ pres)  = getVertexID pres
 getVertexID (WithP _ pres)        = getVertexID pres
 getVertexID (VertexP _ i _ _ _ _) = i
 getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
+
+
+moveVertexPres :: [Int] -> (Int,Int) -> Presentation doc node clip -> Presentation doc node clip                                      
+moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace p press (moveVertexPres ps pt (press!!!p))
+moveVertexPres (p:ps) pt (ColP id rf press)         = ColP id rf $ replace p press (moveVertexPres ps pt (press!!!p))
+moveVertexPres (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace p press (moveVertexPres ps pt (press!!!p))
+moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres ps pt pres)
+moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
+moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
+moveVertexPres (p:ps) pt (GraphP id d w h es press)   = 
+  if p < length press 
+  then GraphP id d w h es $ replace p press (moveVertexPres ps pt (press!!!p))
+  else debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) $ GraphP id d w h es press
+moveVertexPres []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
+moveVertexPres _      pt pr                      = debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) pr
+
+
+
 {-
 algorithms are tricky.
 
