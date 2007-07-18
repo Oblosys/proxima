@@ -61,13 +61,22 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str graph1 tree subGraph1 subGraph2 -> reuseRoot [tokenNode str] Nothing (Just tree) (Just graph1) (Just subGraph1)(Just subGraph2))
+          (\str (d,graph1) tree (d1,subGraph1) (d2,subGraph2) ->
+              debug Prs ("\n\nparsedGraph: "++show (d,d1,d2)) $ 
+              reuseRoot [tokenNode str] Nothing (Just tree) (Just (resolve (d,graph1) (d1,subGraph1) (d2,subGraph2)))
+                                        (Just subGraph1) (Just subGraph2))
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
       <*> recognizeSubGraph
       <*> recognizeSubGraph
-      
+ where resolve (Dirty,g1) _ _ = g1      
+       resolve (Clean,Graph id (List_Vertex _ vs) es) (Dirty,SubGraph _ (List_Vertex _ vs')) _ = 
+         Graph id (List_Vertex NoIDD (toConsList_Vertex (fromConsList_Vertex vs ++ fromConsList_Vertex vs'))) es
+       resolve (Clean,Graph id (List_Vertex _ vs) es) _ (Dirty,SubGraph _ (List_Vertex _ vs')) = 
+         Graph id (List_Vertex NoIDD (toConsList_Vertex (fromConsList_Vertex vs ++ fromConsList_Vertex vs'))) es
+       resolve (_,g1) _ _ = g1      
+       
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 
           (\po t1 b t2 pc -> reuseBin [tokenNode po, tokenNode b, tokenNode pc] Nothing (Just t1) (Just t2))
@@ -93,12 +102,14 @@ recognizeTree = pStr $
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
-recognizeGraph :: ListParser Document Node ClipDoc Graph
-recognizeGraph = pStr $
-          (\str gt vs -> reuseGraph [tokenNode str] Nothing 
-                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
-                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
-                                    [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
+recognizeGraph :: ListParser Document Node ClipDoc (Dirty, Graph)
+recognizeGraph = pStrDirty $
+          (\str gt vs ->(getGraphTkDirty gt
+                        ,reuseGraph [tokenNode str] Nothing 
+                                   (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
+                                   (Just $ List_Edge NoIDD $ toConsList_Edge $ 
+                                   [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
+                        )
                                           
       <$> pStructural GraphNode
       <*> pSym graphTk
@@ -116,15 +127,21 @@ recognizeVertex = pStr $
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
 
-recognizeSubGraph :: ListParser Document Node ClipDoc SubGraph
-recognizeSubGraph = pStr $
-          (\str vs -> reuseSubGraph [tokenNode str] Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs))
+recognizeSubGraph :: ListParser Document Node ClipDoc (Dirty,SubGraph)
+recognizeSubGraph = pStrDirty $
+          (\str gt vs -> (getGraphTkDirty gt
+                      ,reuseSubGraph [tokenNode str] Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs))
+                      )
       <$> pStructural SubGraphNode
-      <*  pSym graphTk
+      <*> pSym graphTk
       <*> pList recognizeVertex
 
+getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> Dirty
+getGraphTkDirty (GraphTk dirty _ _ _) = dirty
+getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ Dirty
+
 getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
-getGraphTkEdges (GraphTk edges _ _) = edges
+getGraphTkEdges (GraphTk _ edges _ _) = edges
 getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
 
 getVertexTkId :: Show node => Token doc node clip (Maybe node)-> Int_
