@@ -252,7 +252,7 @@ moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertex
 moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
 moveVertexPres (p:ps) pt (GraphP id d w h es press)   = 
   if p < length press 
-  then GraphP id d w h es $ replace p press (moveVertexPres ps pt (press!!!p))
+  then GraphP id Dirty w h es $ replace p press (moveVertexPres ps pt (press!!!p))
   else debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) $ GraphP id d w h es press
 moveVertexPres []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
 moveVertexPres _      pt pr                      = debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) pr
