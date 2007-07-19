@@ -61,7 +61,9 @@ parse _ state layLvl prsLvl EnlargeRightLay  = enlargeRight state layLvl prsLvl
 
 parse scannerSheet state layLvl prsLvl (AddVertexLay pth pos)  = graphEdit scannerSheet state layLvl prsLvl (addVertex pth pos) 
 parse scannerSheet state layLvl prsLvl (AddEdgeLay pth)        = graphEdit scannerSheet state layLvl prsLvl (addEdge pth)
-parse scannerSheet state layLvl prsLvl (MoveVertexLay pth pos) = graphEdit scannerSheet state layLvl prsLvl (moveVertex pth pos)
+parse scannerSheet state layLvl@(LayoutLevel pres f dt) prsLvl (MoveVertexLay pth pos) = 
+  let (state', layLvl') = moveVertex pth pos state layLvl
+  in  (SkipPres 0, state', layLvl')
 parse scannerSheet state layLvl prsLvl NormalizeLay       = editLay editNormalize state layLvl prsLvl
 
 parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state layLvl prsLvl

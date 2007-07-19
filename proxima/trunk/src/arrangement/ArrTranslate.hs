@@ -69,7 +69,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
         Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
                    , state, arrLvl ) -- does not occur
                             
-    MouseUpArr x y ms     -> (SkipLay 0,             state { getLastMousePress = Nothing }, arrLvl) 
+    MouseUpArr x y ms     -> (ParseLay,            state { getLastMousePress = Nothing }, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     UpdateDocArr upd      -> (UpdateDocLay upd,      state, arrLvl) 
