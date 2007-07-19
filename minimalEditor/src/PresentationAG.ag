@@ -52,9 +52,9 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col [ bold $ text "Root"
-                         , @graph.pres 
+                         , row [ @graph.pres, @graph.pres ]
                          , @tree.pres
-                         , row [ @subGraph1.pres, @subGraph2.pres ]
+                         , @subGraph.pres
                          ]
 
 SEM Tree
@@ -70,7 +70,7 @@ SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ hSpace 5,
-                           boxed $ graph 1100 400 @edges.edges @vertices.press
+                           boxed $ graph 400 400 @edges.edges @vertices.press
                          ]
       
 SEM Vertex [ || ] 
@@ -87,18 +87,22 @@ SEM Vertex [ || ]
 
 SEM Root
   | Root
-      subGraph1.vertexIDs = @graph.vertexIDs
-      subGraph2.vertexIDs = @graph.vertexIDs
-      subGraph1.edges = @graph.edges
-      subGraph2.edges = @graph.edges
-
-ATTR Graph [ || vertexIDs : {[Int]} edges : {[(Int, Int)]} ]
+      (subGraph.vertexIDs, subGraph.vertexNames) = unzip @graph.vertexIDNames
+      subGraph.edges = @graph.edges
+      
+ATTR Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
  
-SEM SubGraph [ vertexIDs : {[Int]} edges : {[(Int, Int)]} || ] 
+SEM SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
   | SubGraph
-      lhs.pres = let subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` @vertices.vertexIDs && toV `elem` @vertices.vertexIDs ]
+      lhs.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
+                     -- only present vertices that are in the supergraph
+                     subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
                  in  loc (SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       boxed $ graph 300 300 subEdges @vertices.press
+                       (boxed $ graph 300 300 subEdges @vertices.press
+                     `addPopupItems` [ ("Add node " ++ show name, pasteSubGraph @lhs.path id name @self)
+                                     | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
+                                     , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
+                                     ])
 
 SEM Edge [ || edge : {Maybe (Int,Int)} ]    
   | Edge
@@ -122,25 +126,44 @@ SEM ConsList_Edge [ || edges : {[Maybe (Int,Int)]} ]
   | Nil_Edge
       lhs.edges = []
 
-SEM Vertex [ || vertexID : {Maybe Int} ]    
+SEM Vertex [ || vertexIDName : {Maybe (Int,String)} ]    
   | Vertex
-      lhs.vertexID = Just @id.int
+      lhs.vertexIDName = Just (@id.int, @name.str)
   | HoleVertex
-      lhs.vertexID = Nothing
+      lhs.vertexIDName = Nothing
   | ParseErrVertex
-      lhs.vertexID = Nothing
+      lhs.vertexIDName = Nothing
 
-SEM List_Vertex [ || vertexIDs : {[Int]} ] 
+SEM List_Vertex [ || vertexIDNames : {[(Int,String)]} ] 
   | List_Vertex
-      lhs.vertexIDs = catMaybes @elts.vertexIDs
+      lhs.vertexIDNames = catMaybes @elts.vertexIDNames
   | HoleList_Vertex
-      lhs.vertexIDs = []
+      lhs.vertexIDNames = []
   | ParseErrList_Vertex
-      lhs.vertexIDs = []
+      lhs.vertexIDNames = []
       
-SEM ConsList_Vertex [ || vertexIDs : {[Maybe Int]} ] 
+SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ] 
   | Cons_Vertex
-      lhs.vertexIDs = @head.vertexID : @tail.vertexIDs
+      lhs.vertexIDNames = @head.vertexIDName : @tail.vertexIDNames
   | Nil_Vertex
-      lhs.vertexIDs = []
+      lhs.vertexIDNames = []
 
+{
+pasteSubGraph :: [Int] -> Int -> String -> SubGraph -> UpdateDoc Document clip
+pasteSubGraph pth id name subgraph =
+  let subgraph' = 
+        case subgraph of
+        SubGraph idd vs es -> SubGraph idd (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
+        _                  -> subgraph
+  in \(DocumentLevel d path cl) ->
+        let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
+                                                (Clip_SubGraph subgraph')
+                                                )
+        in  (DocumentLevel d' path cl)
+
+toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
+
+fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
+fromList_Vertex _                  = []
+
+}

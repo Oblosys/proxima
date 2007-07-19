@@ -339,25 +339,23 @@ instance Editable Dummy Document Node ClipDoc where
 
 instance Editable Root Document Node ClipDoc where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ x1 x2 x3 x4) = select p x1
-  select (1:p) (Root _ x1 x2 x3 x4) = select p x2
-  select (2:p) (Root _ x1 x2 x3 x4) = select p x3
-  select (3:p) (Root _ x1 x2 x3 x4) = select p x4
+  select (0:p) (Root _ x1 x2 x3) = select p x1
+  select (1:p) (Root _ x1 x2 x3) = select p x2
+  select (2:p) (Root _ x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 x1 x2 x3 x4) = Root i1 (paste p c x1) x2 x3 x4
-  paste (1:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 (paste p c x2) x3 x4
-  paste (2:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 (paste p c x3) x4
-  paste (3:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 x3 (paste p c x4)
+  paste (0:p) c (Root i1 x1 x2 x3) = Root i1 (paste p c x1) x2 x3
+  paste (1:p) c (Root i1 x1 x2 x3) = Root i1 x1 (paste p c x2) x3
+  paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Tree} {Graph} {SubGraph} {SubGraph} "  , Clip_Root $ Root NoIDD hole hole hole hole)
+  alternatives _ = [("Root {Tree} {Graph} {SubGraph} "  , Clip_Root $ Root NoIDD hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ x1 x2 x3 x4) = 4
+  arity (Root _ x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrRoot
@@ -494,19 +492,21 @@ instance Editable Edge Document Node ClipDoc where
 
 instance Editable SubGraph Document Node ClipDoc where
   select []    x                  = Clip_SubGraph x
-  select (0:p) (SubGraph _ x1) = select p x1
+  select (0:p) (SubGraph _ x1 x2) = select p x1
+  select (1:p) (SubGraph _ x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_SubGraph c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on SubGraph")   x
-  paste (0:p) c (SubGraph i1 x1) = SubGraph i1 (paste p c x1)
+  paste (0:p) c (SubGraph i1 x1 x2) = SubGraph i1 (paste p c x1) x2
+  paste (1:p) c (SubGraph i1 x1 x2) = SubGraph i1 x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("SubGraph {Vertexs} "  , Clip_SubGraph $ SubGraph NoIDD hole)
+  alternatives _ = [("SubGraph {Vertexs} {Edges} "  , Clip_SubGraph $ SubGraph NoIDD hole hole)
                    ,("{SubGraph}", Clip_SubGraph hole)
                    ]
 
-  arity (SubGraph _ x1) = 1
+  arity (SubGraph _ x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrSubGraph

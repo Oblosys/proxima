@@ -59,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph SubGraph SubGraph 
+data Root = Root IDD Tree Graph SubGraph 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -90,7 +90,7 @@ data Edge = Edge IDD Int_ Int_
              deriving Show
 
 
-data SubGraph = SubGraph IDD List_Vertex 
+data SubGraph = SubGraph IDD List_Vertex List_Edge 
               | HoleSubGraph
               | ParseErrSubGraph (Presentation Document Node ClipDoc)
                  deriving Show

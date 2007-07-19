@@ -9,7 +9,7 @@ data Dummy = Dummy [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because
 -- Don't remove the declarations above
 
 
-data Root = Root Tree graph:Graph subGraph1:SubGraph subGraph2:SubGraph { idd : IDD }
+data Root = Root Tree graph:Graph subGraph:SubGraph { idd : IDD }
 
 data Tree = Bin left:Tree right:Tree { idd : IDD }
           | Leaf                     { idd : IDD }
@@ -20,4 +20,4 @@ data Vertex = Vertex name:String_ id:Int_ x:Int_ y:Int_     { idd : IDD }
 
 data Edge = Edge from:Int_ to:Int_       { idd : IDD }
 
-data SubGraph = SubGraph vertices:[Vertex] { idd : IDD }
+data SubGraph = SubGraph vertices:[Vertex] edges:[Edge] { idd : IDD }

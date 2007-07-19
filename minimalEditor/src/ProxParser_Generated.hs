@@ -55,10 +55,10 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe SubGraph -> Maybe SubGraph -> Root
-reuseRoot nodes  ma0 ma1 ma2 ma3 ma4
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe SubGraph -> Root
+reuseRoot nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractRoot defaultRoot nodes of
-           (Root a0 a1 a2 a3 a4) -> reuse5 Root a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
+           (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRoot"
 
 reuseBin :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Tree -> Tree
@@ -91,10 +91,10 @@ reuseEdge nodes  ma0 ma1 ma2
            (Edge a0 a1 a2) -> reuse3 Edge a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseEdge"
 
-reuseSubGraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Vertex -> SubGraph
-reuseSubGraph nodes  ma0 ma1
+reuseSubGraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Vertex -> Maybe List_Edge -> SubGraph
+reuseSubGraph nodes  ma0 ma1 ma2
   = case extractFromNodes extractSubGraph defaultSubGraph nodes of
-           (SubGraph a0 a1) -> reuse2 SubGraph a0 a1 ma0 ma1
+           (SubGraph a0 a1 a2) -> reuse3 SubGraph a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseSubGraph"
 
 reuseList_Dummy :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
@@ -136,7 +136,7 @@ extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _ _ _ _) _)) = Just x
+extractRoot (Just (RootNode x@(Root _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractBin :: Maybe Node -> Maybe Tree
@@ -160,7 +160,7 @@ extractEdge (Just (EdgeNode x@(Edge _ _ _) _)) = Just x
 extractEdge _ = Nothing
 
 extractSubGraph :: Maybe Node -> Maybe SubGraph
-extractSubGraph (Just (SubGraphNode x@(SubGraph _ _) _)) = Just x
+extractSubGraph (Just (SubGraphNode x@(SubGraph _ _ _) _)) = Just x
 extractSubGraph _ = Nothing
 
 extractList_Dummy :: Maybe Node -> Maybe List_Dummy
@@ -191,7 +191,7 @@ defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
 defaultRoot :: Root
-defaultRoot = Root NoIDD hole hole hole hole
+defaultRoot = Root NoIDD hole hole hole
 
 defaultBin :: Tree
 defaultBin = Bin NoIDD hole hole
@@ -209,7 +209,7 @@ defaultEdge :: Edge
 defaultEdge = Edge NoIDD hole hole
 
 defaultSubGraph :: SubGraph
-defaultSubGraph = SubGraph NoIDD hole
+defaultSubGraph = SubGraph NoIDD hole hole
 
 defaultList_Dummy :: List_Dummy
 defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
@@ -243,6 +243,12 @@ reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
+
+reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
+          a0 -> a1 -> a2 -> a3 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
+reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
 reuse1 :: (a0 -> r) -> 
           a0 -> 
