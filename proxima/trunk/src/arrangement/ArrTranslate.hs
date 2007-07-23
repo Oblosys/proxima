@@ -55,12 +55,16 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-      case getLastMousePress state of -- should not be Nothing, since a mouseDrag is preceeded by a mouseDown
+      case getLastMousePress state of -- should not be Nothing, since a mouseDrag is preceded by a mouseDown
         Just (x',y') -> 
           case navigateFocus x' y' arr of
             PathA pth _ ->
-              case selectTreeA pth arr of
+              case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
                 (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay (pathPFromPathA' pth pres) (x-x',y-y')
+                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
+                (_,_,GraphA _ _ _ _ _ _ _ _ _ _) -> (SkipLay 0
+                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
+                (_,_,EdgeA _ _ _ _ _ _ _ _ _) -> (SkipLay 0
                                                      , state { getLastMousePress = Just (x, y)}, arrLvl) 
                 _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
                                     , state, arrLvl )
