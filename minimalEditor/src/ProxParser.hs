@@ -150,17 +150,24 @@ recognizeGraph = pStrDirty $
       <*> pSym graphTk
       <*> pList recognizeVertex
 
--- labels in vertex? Or just in presentation?      
+-- labels in vertex? Or just in presentation?
+-- before we can parse them, the scanner needs to be modified to handle free text
 recognizeVertex :: ListParser Document Node ClipDoc Vertex
 recognizeVertex = pStr $
-          (\str vt -> reuseVertex [tokenNode str] Nothing Nothing Nothing 
+          (\str vt lab -> reuseVertex [tokenNode str] Nothing Nothing Nothing 
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
+      <*> parseLabel
   <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>")
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
+
+parseLabel :: ListParser Document Node ClipDoc String_
+parseLabel = pPrs $
+          (\strTk -> mkString_ strTk)
+      <$> pLIdent 
 
 recognizeSubGraph :: ListParser Document Node ClipDoc (Dirty, SubGraph)
 recognizeSubGraph = pStrDirty $
