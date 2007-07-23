@@ -51,11 +51,16 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col [ bold $ text "Root"
-                         , row [ @graph.pres, @graph.pres ]
-                         , @tree.pres
-                         , @subGraph.pres
-                         ]
+                     col $ [ bold $ text "Root"
+                           , row [ @graph.pres, @graph.pres ]
+                           , @tree.pres
+                           ] ++ @subGraphs.press
+                             ++ [ row [ text "Add view" `withMouseDown` insertNewSubgraph @lhs.path
+                                      , text " "
+                                      , text "Remove view" `withMouseDown` removeLastSubgraph @lhs.path 
+                                      ]
+                                ]
+                         
 
 SEM Tree
   | Bin
@@ -70,7 +75,7 @@ SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ hSpace 5,
-                           boxed $ graph 400 400 @edges.edges @vertices.press
+                           boxed $ graph 400 300 @edges.edges @vertices.press
                          ]
       
 SEM Vertex [ || ] 
@@ -90,8 +95,8 @@ SEM Vertex [ || ]
 
 SEM Root
   | Root
-      (subGraph.vertexIDs, subGraph.vertexNames) = unzip @graph.vertexIDNames
-      subGraph.edges = @graph.edges
+      (subGraphs.vertexIDs, subGraphs.vertexNames) = unzip @graph.vertexIDNames
+      subGraphs.edges = @graph.edges
       
 ATTR Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
  
@@ -151,6 +156,9 @@ SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ]
   | Nil_Vertex
       lhs.vertexIDNames = []
 
+ATTR List_SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+ATTR ConsList_SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+
 {
 pasteSubGraph :: [Int] -> Int -> String -> SubGraph -> UpdateDoc Document clip
 pasteSubGraph pth id name subgraph =
@@ -164,9 +172,33 @@ pasteSubGraph pth id name subgraph =
                                                 )
         in  (DocumentLevel d' path cl)
 
+insertNewSubgraph :: [Int] -> UpdateDoc Document clip
+insertNewSubgraph pth =
+  let subgraph = SubGraph NoIDD (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge))
+  in  \(DocumentLevel d path cl) ->
+        let (Clip_List_SubGraph subgraphlist) = select (pth++[2]) d -- nasty
+            clipsubgraphlist' = insertList (length $ fromList_SubGraph subgraphlist) (Clip_SubGraph subgraph) subgraphlist
+            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
+                                                (clipsubgraphlist')
+                                                )
+        in  (DocumentLevel d' path cl)
+
+removeLastSubgraph :: [Int] -> UpdateDoc Document clip
+removeLastSubgraph pth =
+   \(DocumentLevel d path cl) ->
+      let (Clip_List_SubGraph subgraphlist) = select (pth++[2]) d -- nasty
+          clipsubgraphlist' = removeList (length (fromList_SubGraph subgraphlist) - 1) subgraphlist
+          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
+                                              (clipsubgraphlist')
+                                              )
+      in  (DocumentLevel d' path cl)
+
 toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
 
 fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
 fromList_Vertex _                  = []
+
+fromList_SubGraph (List_SubGraph _ vs) = fromConsList_SubGraph vs
+fromList_SubGraph _                  = []
 
 }

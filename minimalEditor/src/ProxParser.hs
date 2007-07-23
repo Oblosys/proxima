@@ -27,7 +27,7 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in  --showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
+                 in  --debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
        
 deepShowTks i tok = case tok of
@@ -61,56 +61,50 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str (d1,graph1) (d2,graph2) tree (ds,subGraph)  ->
-              let (dsup, superGraph) = resolveCopies (d1,graph1) (d2,graph2)
-                  (superGraph',subGraph') = resolveSubgraph (dsup,superGraph) (ds, subGraph)
+          (\str (d1,graph1) (d2,graph2) tree dssubGraphs  ->
+              let (ds,subGraphs) = unzip dssubGraphs
+                  (dsup, superGraph) = resolveCopies (d1,graph1) (d2,graph2)
+                  (superGraph',subgraphs') = resolveSubgraphs (dsup,superGraph) (ds, subGraphs)
               in debug Prs ("\n\nparsedGraph: "++show (d1,d2,ds)) $ 
                  reuseRoot [tokenNode str] Nothing (Just tree) (Just superGraph')
-                                           (Just subGraph') )
+                                           (Just (toList_SubGraph subgraphs')) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-      <*> recognizeSubGraph
+      <*> pList recognizeSubGraph
  where resolveCopies (Dirty,g1) (_,g2) = (Dirty,g1)
        resolveCopies (Clean,g1) (Dirty,g2) = (Dirty, g2)
        resolveCopies (Clean,g1) (Clean,g2) = (Clean, g1)
-       
-       resolveSubgraph (Dirty, super@(Graph _ vs _)) (_, SubGraph id' vs' es') =
-         let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
-             subGraphVertices = toList_Vertex $ filter (\v -> getID_Vertex v `elem` superGraphIDs) $
-                                                       fromList_Vertex vs'
-         in  (super, SubGraph id' subGraphVertices es') -- es' is ignored in presentation, so we don't have to remove edges to non-existing nodes
-       resolveSubgraph (Clean, super) (Clean, sub) = (super, sub)
-       resolveSubgraph (Clean, Graph id vs es) (Dirty, SubGraph id' vs' es') =
-         let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
-             subGraphIDs = filter (`elem` superGraphIDs) $ map getID_Vertex $ fromList_Vertex vs'
-             edgesWithoutSubgraphNodes = filter (\e -> getFrom_Edge e `notElem` subGraphIDs || getTo_Edge e `notElem` subGraphIDs) 
-                                                (fromList_Edge es)
-             graphEdges = toList_Edge $ edgesWithoutSubgraphNodes ++ fromList_Edge es'
-         in (Graph id vs graphEdges, SubGraph id' vs' es') 
-       {- resolve (Dirty,g1) _ _ = g1      
-       resolve (Clean,Graph id (List_Vertex _ vs) es) (Dirty,SubGraph _ (List_Vertex _ vs')) _ = 
-         Graph id (List_Vertex NoIDD (toConsList_Vertex (fromConsList_Vertex vs ++ fromConsList_Vertex vs'))) es
-       resolve (Clean,Graph id (List_Vertex _ vs) es) _ (Dirty,SubGraph _ (List_Vertex _ vs')) = 
-         Graph id (List_Vertex NoIDD (toConsList_Vertex (fromConsList_Vertex vs ++ fromConsList_Vertex vs'))) es
-       resolve (_,g1) _ _ = g1      
-       -}
+              
+resolveSubgraphs :: (Dirty, Graph) -> ([Dirty], [SubGraph]) -> (Graph, [SubGraph])
+resolveSubgraphs (graphDirty, graph@(Graph _ vs _)) (subgraphsDirties,subgraphs) = 
+  if isClean graphDirty 
+  then case filter (\(d,_) -> not $ isClean d) $ zip subgraphsDirties subgraphs of
+         [] -> (graph, subgraphs) -- all are clean
+         ((_,dirtySubgraph):_) -> -- at least one subgraph dirty
+            (addEdgesFromSubgraph dirtySubgraph graph, subgraphs)
+  else -- graph is dirty    remove deleted nodes from subgraphs
+    let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
+    in (graph, map (removeOldVertices superGraphIDs) subgraphs)
+
+removeOldVertices vertexIDs (SubGraph id vs es) = 
+  let subgraphVertices' = toList_Vertex $ filter (\v -> getID_Vertex v `elem` vertexIDs) $
+                                                 fromList_Vertex vs
+  in  SubGraph id subgraphVertices' es
+
+addEdgesFromSubgraph (SubGraph id' vs' es') (Graph id vs es) =
+  let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
+      subGraphIDs = filter (`elem` superGraphIDs) $ map getID_Vertex $ fromList_Vertex vs'
+      edgesWithoutSubgraphNodes = filter (\e -> getFrom_Edge e `notElem` subGraphIDs || getTo_Edge e `notElem` subGraphIDs) 
+                                      (fromList_Edge es)
+      graphEdges = toList_Edge $ edgesWithoutSubgraphNodes ++ fromList_Edge es'
+  in Graph id vs graphEdges
 
 getFrom_Edge (Edge _ (Int_ _ fromV) _) = fromV
 getTo_Edge (Edge _ _ (Int_ _ toV)) = toV
 
 getID_Vertex (Vertex _ _ (Int_ _ id) _ _) = id
-
-toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
-
-fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
-fromList_Vertex _                  = []
-
-toList_Edge vs = List_Edge NoIDD (toConsList_Edge vs)
-
-fromList_Edge (List_Edge _ vs) = fromConsList_Edge vs
-fromList_Edge _                  = []
 
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 

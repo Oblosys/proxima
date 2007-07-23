@@ -55,7 +55,7 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe SubGraph -> Root
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_SubGraph -> Root
 reuseRoot nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractRoot defaultRoot nodes of
            (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
@@ -102,6 +102,12 @@ reuseList_Dummy nodes  ma0 ma1
   = case extractFromNodes extractList_Dummy defaultList_Dummy nodes of
            (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Dummy"
+
+reuseList_SubGraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_SubGraph -> List_SubGraph
+reuseList_SubGraph nodes  ma0 ma1
+  = case extractFromNodes extractList_SubGraph defaultList_SubGraph nodes of
+           (List_SubGraph a0 a1) -> reuse2 List_SubGraph a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_SubGraph"
 
 reuseList_Vertex :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Vertex -> List_Vertex
 reuseList_Vertex nodes  ma0 ma1
@@ -167,6 +173,10 @@ extractList_Dummy :: Maybe Node -> Maybe List_Dummy
 extractList_Dummy (Just (List_DummyNode x@(List_Dummy _ _) _)) = Just x
 extractList_Dummy _ = Nothing
 
+extractList_SubGraph :: Maybe Node -> Maybe List_SubGraph
+extractList_SubGraph (Just (List_SubGraphNode x@(List_SubGraph _ _) _)) = Just x
+extractList_SubGraph _ = Nothing
+
 extractList_Vertex :: Maybe Node -> Maybe List_Vertex
 extractList_Vertex (Just (List_VertexNode x@(List_Vertex _ _) _)) = Just x
 extractList_Vertex _ = Nothing
@@ -213,6 +223,9 @@ defaultSubGraph = SubGraph NoIDD hole hole
 
 defaultList_Dummy :: List_Dummy
 defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
+
+defaultList_SubGraph :: List_SubGraph
+defaultList_SubGraph = List_SubGraph NoIDD Nil_SubGraph
 
 defaultList_Vertex :: List_Vertex
 defaultList_Vertex = List_Vertex NoIDD Nil_Vertex

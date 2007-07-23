@@ -116,10 +116,11 @@ instance Clip ClipDoc where
   arityClip (Clip_Int_ x) = arity x
   arityClip (Clip_Tree x) = arity x
   arityClip (Clip_Graph x) = arity x
-  arityClip (Clip_SubGraph x) = arity x
+  arityClip (Clip_List_SubGraph x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
   arityClip (Clip_Dummy x) = arity x
+  arityClip (Clip_SubGraph x) = arity x
   arityClip (Clip_Vertex x) = arity x
   arityClip (Clip_Edge x) = arity x
   arityClip (Clip_Nothing)   = -1
@@ -134,10 +135,11 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Int_ x) = alternatives x
   alternativesClip (Clip_Tree x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
-  alternativesClip (Clip_SubGraph x) = alternatives x
+  alternativesClip (Clip_List_SubGraph x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
   alternativesClip (Clip_Dummy x) = alternatives x
+  alternativesClip (Clip_SubGraph x) = alternatives x
   alternativesClip (Clip_Vertex x) = alternatives x
   alternativesClip (Clip_Edge x) = alternatives x
   alternativesClip (Clip_Nothing)   = []
@@ -153,10 +155,11 @@ instance Clip ClipDoc where
   holeClip (Clip_Int_ x) = Clip_Int_ hole
   holeClip (Clip_Tree x) = Clip_Tree hole
   holeClip (Clip_Graph x) = Clip_Graph hole
-  holeClip (Clip_SubGraph x) = Clip_SubGraph hole
+  holeClip (Clip_List_SubGraph x) = Clip_List_SubGraph hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
   holeClip (Clip_Dummy x) = Clip_Dummy hole
+  holeClip (Clip_SubGraph x) = Clip_SubGraph hole
   holeClip (Clip_Vertex x) = Clip_Vertex hole
   holeClip (Clip_Edge x) = Clip_Edge hole
   holeClip Clip_Nothing   = Clip_Nothing
@@ -172,10 +175,11 @@ instance Clip ClipDoc where
   isListClip (Clip_Int_ x) = isList x
   isListClip (Clip_Tree x) = isList x
   isListClip (Clip_Graph x) = isList x
-  isListClip (Clip_SubGraph x) = isList x
+  isListClip (Clip_List_SubGraph x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
   isListClip (Clip_Dummy x) = isList x
+  isListClip (Clip_SubGraph x) = isList x
   isListClip (Clip_Vertex x) = isList x
   isListClip (Clip_Edge x) = isList x
   isListClip (Clip_Nothing)   = False
@@ -191,10 +195,11 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Int_ x) = insertList i c x
   insertListClip i c (Clip_Tree x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
-  insertListClip i c (Clip_SubGraph x) = insertList i c x
+  insertListClip i c (Clip_List_SubGraph x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
   insertListClip i c (Clip_Dummy x) = insertList i c x
+  insertListClip i c (Clip_SubGraph x) = insertList i c x
   insertListClip i c (Clip_Vertex x) = insertList i c x
   insertListClip i c (Clip_Edge x) = insertList i c x
   insertListClip i c (Clip_Nothing)   = Clip_Nothing
@@ -210,10 +215,11 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Int_ x) = removeList i x
   removeListClip i (Clip_Tree x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
-  removeListClip i (Clip_SubGraph x) = removeList i x
+  removeListClip i (Clip_List_SubGraph x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
   removeListClip i (Clip_Dummy x) = removeList i x
+  removeListClip i (Clip_SubGraph x) = removeList i x
   removeListClip i (Clip_Vertex x) = removeList i x
   removeListClip i (Clip_Edge x) = removeList i x
   removeListClip i (Clip_Nothing)   = Clip_Nothing
@@ -351,7 +357,7 @@ instance Editable Root Document Node ClipDoc where
   paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Tree} {Graph} {SubGraph} "  , Clip_Root $ Root NoIDD hole hole hole)
+  alternatives _ = [("Root {Tree} {Graph} {SubGraphs} "  , Clip_Root $ Root NoIDD hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
@@ -517,6 +523,11 @@ instance Editable SubGraph Document Node ClipDoc where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+toList_Dummy vs = List_Dummy NoIDD (toConsList_Dummy vs)
+
+fromList_Dummy (List_Dummy _ vs) = fromConsList_Dummy vs
+fromList_Dummy _                  = []
+
 toConsList_Dummy [] = Nil_Dummy
 toConsList_Dummy (x:xs) = Cons_Dummy x (toConsList_Dummy xs)
 
@@ -572,6 +583,71 @@ instance Editable List_Dummy Document Node ClipDoc where
   removeList n (List_Dummy idd cxs) = Clip_List_Dummy $ List_Dummy idd (removeList_Dummy n cxs)
   removeList _ xs                        = Clip_List_Dummy $ xs
 
+toList_SubGraph vs = List_SubGraph NoIDD (toConsList_SubGraph vs)
+
+fromList_SubGraph (List_SubGraph _ vs) = fromConsList_SubGraph vs
+fromList_SubGraph _                  = []
+
+toConsList_SubGraph [] = Nil_SubGraph
+toConsList_SubGraph (x:xs) = Cons_SubGraph x (toConsList_SubGraph xs)
+
+fromConsList_SubGraph Nil_SubGraph = []
+fromConsList_SubGraph (Cons_SubGraph x xs) = x: fromConsList_SubGraph xs
+
+replaceList_SubGraph _ x Nil_SubGraph = Nil_SubGraph -- replace beyond end of list
+replaceList_SubGraph 0 x (Cons_SubGraph cx cxs) = Cons_SubGraph x cxs
+replaceList_SubGraph n x (Cons_SubGraph cx cxs) = Cons_SubGraph cx (replaceList_SubGraph (n-1) x cxs)
+
+insertList_SubGraph 0 x cxs = Cons_SubGraph x cxs
+insertList_SubGraph _ x Nil_SubGraph  = Nil_SubGraph   -- insert beyond end of list
+insertList_SubGraph n x (Cons_SubGraph cx cxs) = Cons_SubGraph cx (insertList_SubGraph (n-1) x cxs)
+
+removeList_SubGraph _ Nil_SubGraph  = Nil_SubGraph -- remove beyond end of list
+removeList_SubGraph 0 (Cons_SubGraph cx cxs) = cxs
+removeList_SubGraph n (Cons_SubGraph cx cxs) = Cons_SubGraph cx (removeList_SubGraph (n-1) cxs)
+
+instance Editable List_SubGraph Document Node ClipDoc where
+  select []    x                  = Clip_List_SubGraph x
+  select (n:p) (List_SubGraph _ cxs) = let xs = fromConsList_SubGraph cxs
+                                  in  if n < length xs 
+                                      then select p (xs !! n)
+                                      else Clip_Nothing
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_List_SubGraph c) _   = c
+  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_SubGraph")   x
+  paste (n:p) c (List_SubGraph i1 cxs) = let xs = fromConsList_SubGraph cxs
+                                    in  if n < length xs
+                                        then let x  = xs!!n
+                                                 x' = paste p c x
+                                             in  List_SubGraph i1 (replaceList_SubGraph n x' cxs)
+                                        else List_SubGraph i1 cxs -- paste beyond end of list
+  paste _  _  x                  = x
+
+  alternatives _ = [("{List_SubGraph}", Clip_List_SubGraph hole)
+                   ]
+
+  arity (List_SubGraph _ x1) = length (fromConsList_SubGraph x1)
+  arity _                        = 0
+
+  parseErr = ParseErrList_SubGraph
+
+  hole = List_SubGraph NoIDD Nil_SubGraph
+
+  isList _ = True
+
+  insertList n (Clip_SubGraph c) (List_SubGraph idd cxs) = Clip_List_SubGraph $ List_SubGraph idd (insertList_SubGraph n c cxs)
+  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_SubGraph xs
+  insertList _ c xs                 = Clip_List_SubGraph xs
+
+  removeList n (List_SubGraph idd cxs) = Clip_List_SubGraph $ List_SubGraph idd (removeList_SubGraph n cxs)
+  removeList _ xs                        = Clip_List_SubGraph $ xs
+
+toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
+
+fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
+fromList_Vertex _                  = []
+
 toConsList_Vertex [] = Nil_Vertex
 toConsList_Vertex (x:xs) = Cons_Vertex x (toConsList_Vertex xs)
 
@@ -626,6 +702,11 @@ instance Editable List_Vertex Document Node ClipDoc where
 
   removeList n (List_Vertex idd cxs) = Clip_List_Vertex $ List_Vertex idd (removeList_Vertex n cxs)
   removeList _ xs                        = Clip_List_Vertex $ xs
+
+toList_Edge vs = List_Edge NoIDD (toConsList_Edge vs)
+
+fromList_Edge (List_Edge _ vs) = fromConsList_Edge vs
+fromList_Edge _                  = []
 
 toConsList_Edge [] = Nil_Edge
 toConsList_Edge (x:xs) = Cons_Edge x (toConsList_Edge xs)

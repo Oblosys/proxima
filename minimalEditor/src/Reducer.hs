@@ -109,8 +109,7 @@ openFile fileName =
 defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
                                           (Graph NoIDD (List_Vertex NoIDD Nil_Vertex)
                                                        (List_Edge NoIDD Nil_Edge))
-                                          (SubGraph NoIDD (List_Vertex NoIDD Nil_Vertex)
-                                                       (List_Edge NoIDD Nil_Edge))
+                                          (List_SubGraph NoIDD Nil_SubGraph)
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
 lines' ""   = []
