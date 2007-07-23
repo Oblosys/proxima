@@ -596,8 +596,8 @@ focusIsOnGraph (FocusP (PathP path _) _) pres = focusIsOnGraphPres path pres
 focusIsOnGraph _ _         = False
 
 focusIsOnGraphPres :: [Int] -> Presentation doc node clip -> Bool
-focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = debug Err ("verteks") True 
-focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then debug Err ("edzj") True else False
+focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = True 
+focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then True else False
 focusIsOnGraphPres []        tr                       = False
 focusIsOnGraphPres (p:path) (RowP _ _ press)          = focusIsOnGraphPres path (press!!!p)
 focusIsOnGraphPres (p:path) (ColP _ _ press)          = focusIsOnGraphPres path (press!!!p)
