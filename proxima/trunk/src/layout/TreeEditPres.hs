@@ -88,58 +88,6 @@ navigateRightTreePres path pres =
   let path' = rightNavigatePath path pres
   in  FocusP path' path'
 
-
--- what to do with reference index? Ideally, it points to its original element, if possible. For
--- now, it stays the same, unless the number of elements is less, in which case it points to the last 
-
--- delete is complex if nested rows and columns exist, what is the exact semantics?
-
--- cut+paste is not always identity
--- no normalization yet! Be careful when and where because paths will be invalidated
-
-
--- some edit ops may invalidate focus, so an updated focus is computed by <edit>TreePresF
--- this function is closely related to the edit function, and it could be tupled for efficiency,
--- however, this will make the edit functions even harder to understand, so for now, they are separated.
-
--- precondition for all: paths are correct.
--- precondition: current node is at least partially in focus
-
-
--- [] case of list functions will never occur in paste or split due to 2nd precondition
--- however, for the others, the list might be called when it is not in focus (not entirely clear).
--- maybe split in more if branches, so precondition is met
-
--- what about non composite presentations (ImageP, PolyP, EmptyP etc.)?
--- they should be deleted from their parent list if selected entirely
--- current focus model probably doesn't handle this well
-
-deleteTreePres editable p focus pr@(EmptyP id)          = pr -- ?
-deleteTreePres editable p focus pr@(ImageP _ _)         = pr --
-deleteTreePres editable p focus pr@(PolyP _ _ _)        = pr -- 
-deleteTreePres editable p focus pr@(RectangleP _ _ _ _) = pr --
-deleteTreePres editable p focus pr@(EllipseP _ _ _ _)   = pr --
-
-deleteTreePres editable p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
-  if editable then let st = if  stp < p then 0 else sti
-                       en = if  enp > p then length str else eni               
-                   in  StringP id (take st str ++ drop en str)
-              else StringP id str
-deleteTreePres editable p (FocusP st en) (RowP id rf press) = let press' = deleteTreeRow editable p 0 (FocusP st en) press
-                                                     in  RowP id (if rf < length press' then rf else length press' -1) press'
-deleteTreePres editable p (FocusP st en) (ColP id rf press) = let press' = deleteTreeCol editable p 0 (FocusP st en) press
-                                                     in  ColP id (if rf < length press' then rf else length press' -1) press'
-deleteTreePres editable p focus  (OverlayP id (pres:press)) = OverlayP id (deleteTreePres editable (p++[0]) focus pres:press)
-deleteTreePres editable p focus          (WithP ar pres)    = WithP ar (deleteTreePres editable (p++[0]) focus pres)
-deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id (deleteTreePres False (p++[0]) focus pres)
-deleteTreePres editable p focus          (ParsingP id pres)  = ParsingP id (deleteTreePres True (p++[0]) focus pres)
-deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
-deleteTreePres editable p f pr = debug Err ("TreeEditPres.deleteTreePres: can't handle "++show f++" "++ show pr) $ pr
-
-
-
-
-
 {- perform a delete in a graph:
     - if the path is on or inside an edge, it is removed
     - if the path is exactly on a vertex, it is removed
@@ -256,6 +204,65 @@ moveVertexPres (p:ps) pt (GraphP id d w h es press)   =
   else debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) $ GraphP id d w h es press
 moveVertexPres []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
 moveVertexPres _      pt pr                      = debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) pr
+
+
+
+
+
+-- delete:
+-- what to do with reference index? Ideally, it points to its original element, if possible. For
+-- now, it stays the same, unless the number of elements is less, in which case it points to the last 
+
+-- delete is complex if nested rows and columns exist, what are the exact semantics?
+
+-- cut+paste is not always identity
+-- no normalization yet! Be careful when and where because paths will be invalidated
+
+
+-- some edit ops may invalidate focus, so an updated focus is computed by <edit>TreePresF
+-- this function is closely related to the edit function, and it could be tupled for efficiency,
+-- however, this will make the edit functions even harder to understand, so for now, they are separated.
+
+-- precondition for all: paths are correct.
+-- precondition: current node is at least partially in focus
+
+
+-- [] case of list functions will never occur in paste or split due to 2nd precondition
+-- however, for the others, the list might be called when it is not in focus (not entirely clear).
+-- maybe split in more if branches, so precondition is met
+
+-- what about non composite presentations (ImageP, PolyP, EmptyP etc.)?
+-- they should be deleted from their parent list if selected entirely
+-- current focus model probably doesn't handle this well
+
+deleteTreePres editable p focus pr@(EmptyP id)          = pr -- ?
+deleteTreePres editable p focus pr@(ImageP _ _)         = pr --
+deleteTreePres editable p focus pr@(PolyP _ _ _)        = pr -- 
+deleteTreePres editable p focus pr@(RectangleP _ _ _ _) = pr --
+deleteTreePres editable p focus pr@(EllipseP _ _ _ _)   = pr --
+
+deleteTreePres editable p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
+  if editable then let st = if  stp < p then 0 else sti
+                       en = if  enp > p then length str else eni               
+                   in  StringP id (take st str ++ drop en str)
+              else StringP id str
+deleteTreePres editable p (FocusP st en) (RowP id rf press) = let press' = deleteTreeRow editable p 0 (FocusP st en) press
+                                                     in  RowP id (if rf < length press' then rf else length press' -1) press'
+deleteTreePres editable p (FocusP st en) (ColP id rf press) = let press' = deleteTreeCol editable p 0 (FocusP st en) press
+                                                     in  ColP id (if rf < length press' then rf else length press' -1) press'
+deleteTreePres editable p focus  (OverlayP id (pres:press)) = OverlayP id (deleteTreePres editable (p++[0]) focus pres:press)
+deleteTreePres editable p focus          (WithP ar pres)    = WithP ar (deleteTreePres editable (p++[0]) focus pres)
+deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id (deleteTreePres False (p++[0]) focus pres)
+deleteTreePres editable p focus          (ParsingP id pres)  = ParsingP id (deleteTreePres True (p++[0]) focus pres)
+deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
+--deleteTreePres editable p focus          (GraphP id d w h es pres) = GraphP id d w h es (deleteTreePres editable (p++[0]) focus pres)
+deleteTreePres editable p focus          (VertexP id vid x y ol pres) = VertexP id vid x y ol (deleteTreePres editable (p++[0]) focus pres)
+deleteTreePres editable p f pr = debug Err ("TreeEditPres.deleteTreePres: can't handle "++show f++" "++ show pr) $ pr
+
+--pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
+--pasteTreePres editable p path clip (VertexP id vid x y ol pres) = VertexP id vid x y ol (pasteTreePres editable (p++[0]) path clip pres)
+
+
 
 
 
@@ -402,7 +409,7 @@ deleteTreeColF editable updp p i focus@(FocusP (PathP stp sti) (PathP enp eni)) 
                            else deleteTreeColF editable updp p (i+1) focus press
 
  
-
+-- for graphs, editing is only implemented for children, not the graph itself
 pasteTreePres editable p (PathP stp sti) clip (StringP id str) = 
   if editable 
   then let st = if stp < p then 0 else sti
@@ -415,6 +422,8 @@ pasteTreePres editable p path clip (WithP ar pres) = WithP ar (pasteTreePres edi
 pasteTreePres editable p path clip (StructuralP id pres) = StructuralP  id (pasteTreePres False (p++[0]) path clip pres)
 pasteTreePres editable p path clip (ParsingP id pres) = ParsingP  id (pasteTreePres True (p++[0]) path clip pres)
 pasteTreePres editable p path clip (LocatorP l pres) = LocatorP  l (pasteTreePres editable (p++[0]) path clip pres)
+pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
+pasteTreePres editable p path clip (VertexP id vid x y ol pres) = VertexP id vid x y ol (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p _ clip pr = text $ "TreeEditPres.pasteTreePres: can't handle "++ show pr
 
 
