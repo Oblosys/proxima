@@ -37,14 +37,13 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
     InitRen             -> (InitArr,       state, renLvl) 
     CloseRen            -> (CloseArr,      state, renLvl)
     SkipRen i           -> (SkipArr (i+1), state, renLvl)
-    KeyCharRen '\ETX'   -> (CopyArr,       state, renLvl) -- Ctrl-c
-    KeyCharRen '\SYN'   -> (PasteArr,      state, renLvl) -- Ctrl-v
-    KeyCharRen '\CAN'   -> (CutArr,        state, renLvl) -- Ctrl-x
-    KeyCharRen '\ACK'   -> (CopyDocArr,    state, renLvl) -- Ctrl-f
-    KeyCharRen '\a'     -> (PasteDocArr,   state, renLvl) -- Ctrl-g
-    KeyCharRen '\EOT'   -> (CutDocArr,     state, renLvl) -- Ctrl-d
-    KeyCharRen '\DC4'   -> (ParseArr,       state, renLvl) -- Ctrl-t
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
+    KeySpecialRen (CharKey 'c') (Modifiers False True False) -> (CopyArr,       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 'v') (Modifiers False True False) -> (PasteArr,      state, renLvl) -- Ctrl-v
+    KeySpecialRen (CharKey 'x') (Modifiers False True False) -> (CutArr,        state, renLvl) -- Ctrl-x
+    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (CopyDocArr,    state, renLvl) -- Ctrl-f
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (PasteDocArr,   state, renLvl) -- Ctrl-g
+    KeySpecialRen (CharKey 's') (Modifiers False True False) -> (CutDocArr,     state, renLvl) -- Ctrl-d
     KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r sz (not debugging) ur lmd)
@@ -66,7 +65,6 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
     KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
 
 
--- partial redraw hack
     KeySpecialRen UpKey (Modifiers True False False)   -> -- shift down
       ( SetFocusArr (enlargeFocus focus (upPath (toA focus) (if debugging then debugArrangement arr else arr)))
       , state, renLvl )
@@ -80,7 +78,7 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
       ( SetFocusArr (downFocus focus (if debugging then debugArrangement arr else arr))
       , state, renLvl )
 
-    KeyCharRen c          -> (keyRemapChar c, state, renLvl)
+    KeyCharRen c          -> (KeyCharArr c, state, renLvl)
     KeySpecialRen c ms    -> (KeySpecialArr c ms, state, renLvl)
     MouseDownRen x y ms i -> (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, RenderingLevel scale c r sz debugging ur True)
     MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
@@ -129,13 +127,3 @@ m = EnterKey
 
 tab is a special case, as it is a char key under 32 but not a ctrl+char key
 -}
-ctrlM :: Modifiers
-ctrlM = Modifiers False True False
-
-keyRemapChar '\t' = KeyCharArr '\t'
-keyRemapChar c    = if ord c <= 26 then KeySpecialArr (CharKey (chr (ord c+96))) ctrlM
-                                   else KeyCharArr c
-
-  
-
-

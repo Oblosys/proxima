@@ -284,7 +284,8 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
     }
 
 translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering documentLevel
-translateKey _ (Just ch) m  = KeyCharRen (if CommonTypes.shift m then ch else toLower ch)
+translateKey _ (Just ch) (CommonTypes.Modifiers False False False)  = KeyCharRen ch
+translateKey _ (Just ch) m  = KeySpecialRen (CommonTypes.CharKey ch) m
 translateKey "Return" _ m = KeySpecialRen CommonTypes.EnterKey m
 translateKey "BackSpace" _ m = KeySpecialRen CommonTypes.BackspaceKey m
 translateKey "Delete" _ m = KeySpecialRen CommonTypes.DeleteKey m
