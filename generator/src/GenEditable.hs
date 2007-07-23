@@ -242,8 +242,13 @@ isDeclList (Decl _ _ _) = False
 instanceList (Decl e prods _) =
   [
 --- some of this code still needs to be moved
---- these two belong in docUtils
-    "toConsList_"++listTp++" [] = Nil_"++listTp++""
+--- these three belong in docUtils
+    "toList_"++listTp++" vs = List_"++listTp++" NoIDD (toConsList_"++listTp++" vs)"
+  , ""
+  , "fromList_"++listTp++" (List_"++listTp++" _ vs) = fromConsList_"++listTp++" vs"
+  , "fromList_"++listTp++" _                  = []"
+  , ""
+  , "toConsList_"++listTp++" [] = Nil_"++listTp++""
   , "toConsList_"++listTp++" (x:xs) = Cons_"++listTp++" x (toConsList_"++listTp++" xs)"
   , ""
   , "fromConsList_"++listTp++" Nil_"++listTp++" = []"
