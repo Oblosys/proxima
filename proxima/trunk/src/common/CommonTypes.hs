@@ -86,6 +86,10 @@ data Modifiers = Modifiers
 
 data Dirty = Dirty | Clean deriving Show
 
+isClean :: Dirty -> Bool
+isClean Dirty = False
+isClean Clean = True
+
 data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 --                                       children self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
