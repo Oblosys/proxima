@@ -41,11 +41,11 @@ shallowShowArr arr                            = "{Arrangement not handled by sha
 
 sizeA path arr = sizeA' 0 0 path arr
 sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA arr, widthA arr, heightA arr)
-sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ cxs)     = (x' + x + (cxs!!!p), y'+y, (cxs!!!p+1)-(cxs!!!p+1), h)
-sizeA' x' y' (p:path) (RowA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (arrs!!!p)
-sizeA' x' y' (p:path) (ColA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (arrs!!!p)
+sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ cxs)     = (x' + x + (index "ArrUtils.sizeA'" cxs p), y'+y, (index "ArrUtils.sizeA'" cxs p+1)-(index "ArrUtils.sizeA'" cxs p+1), h)
+sizeA' x' y' (p:path) (RowA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
+sizeA' x' y' (p:path) (ColA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (0:path) (OverlayA _ x y w h _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path arr
-sizeA' x' y' (p:path) (GraphA _ x y w h _ _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path (arrs!!!p)
+sizeA' x' y' (p:path) (GraphA _ x y w h _ _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (0:path) (VertexA _ x y w h _ _ _ _ arr)       = sizeA' (x'+x) (y'+y) path arr
 sizeA' x' y' (0:path) (StructuralA _ arr)               = sizeA' x' y' path arr
 sizeA' x' y' (0:path) (ParsingA _ arr)                  = sizeA' x' y' path arr

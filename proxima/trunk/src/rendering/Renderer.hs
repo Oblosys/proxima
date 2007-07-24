@@ -564,8 +564,8 @@ mkFocus focus arr = mkFocus' [] 0 0 (orderFocusA focus) arr
 mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _) = []
 mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ cxs') = 
   let cxs = init cxs' ++ [last cxs'-1]
-      st = if length stp < length p || stp < p then 0 else cxs!!!sti
-      en = if  enp > p then last cxs else cxs!!!eni                        
+      st = if length stp < length p || stp < p then 0 else index "Renderer.mkFocus'" cxs sti
+      en = if  enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
   in  mkBoxCaret (x'+x+st) (y'+y) (en-st + 1) h
 mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h

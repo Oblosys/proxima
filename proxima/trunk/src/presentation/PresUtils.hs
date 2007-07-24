@@ -228,11 +228,11 @@ locateTreePres' location _        (StringP id str)           = location
 locateTreePres' location _        (ImageP _ _)               = location
 locateTreePres' location _        (PolyP _ _ _)              = location
 locateTreePres' location []       (VertexP id _ _ _ _ pres)  = location
-locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (press!!!p)
-locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (press!!!p)                                            
-locateTreePres' location (0:path) (OverlayP id press@(pres:_)) = locateTreePres' location path (press!!!0)                                            
+locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)
+locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)                            
+locateTreePres' location (0:path) (OverlayP id press@(pres:_)) = locateTreePres' location path (index "PresUtils.locateTreePres'" press 0)              
 locateTreePres' location []       (GraphP id _ _ _ _ press)  = location
-locateTreePres' location (p:path) (GraphP id _ _ _ _ press)  = locateTreePres' location path (press!!!p)                                            
+locateTreePres' location (p:path) (GraphP id _ _ _ _ press)  = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)
 locateTreePres' location (0:path) (VertexP id _ _ _ _ pres)  = locateTreePres' location path pres
 locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' location path pres
 locateTreePres' location (0:path) (StructuralP id pres)      = locateTreePres' location path pres
@@ -243,10 +243,10 @@ locateTreePres' location pth      pr                         = debug Err ("*** P
 isEditableTreePres path pres = isEditableTreePres' True path pres
 
 isEditableTreePres' editable []       _                          = editable
-isEditableTreePres' editable (p:path) (RowP id rf press)         = isEditableTreePres' editable path (press!!!p)
-isEditableTreePres' editable (p:path) (ColP id rf press)         = isEditableTreePres' editable path (press!!!p)                                            
-isEditableTreePres' editable (0:path) (OverlayP id press@(pres:_)) = isEditableTreePres' editable path (press!!!0)                                            
-isEditableTreePres' editable (p:path) (GraphP id _ _ _ _ press) = isEditableTreePres' editable path (press!!!p)
+isEditableTreePres' editable (p:path) (RowP id rf press)         = isEditableTreePres' editable path (index "PresUtils.isEditableTreePres'" press p)
+isEditableTreePres' editable (p:path) (ColP id rf press)         = isEditableTreePres' editable path (index "PresUtils.isEditableTreeTreePres'" press p)            
+isEditableTreePres' editable (0:path) (OverlayP id press@(pres:_)) = isEditableTreePres' editable path (index "PresUtils.isEditableTreeTreePres'" press 0)              
+isEditableTreePres' editable (p:path) (GraphP id _ _ _ _ press) = isEditableTreePres' editable path (index "PresUtils.isEditableTreeTreePres'" press p)
 isEditableTreePres' editable (0:path) (VertexP id _ _ _ _ pres)  = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (WithP ar pres)            = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (StructuralP id pres)      = isEditableTreePres' False path pres
@@ -273,16 +273,16 @@ xyFromPathPres x y (PathP (_:p) i) (LocatorP l pres)         = xyFromPathPres x 
 xyFromPathPres x y pth             pr                        = debug Err ("PresUtils.xyFromPathPres: can't handle "++show pth {-++" "++ show pr-}) (0,0, True)
 
 xyFromPathRow x y path@(PathP (s:p) i) press = xyFromPathPres (sum (map widthPres (take s press)) + x) 
-                                                              (y-topHeightPres (press!!!s))
-                                                              (PathP p i) (press!!!s)  
+                                                              (y-topHeightPres (index "PresUtils.xyFromPathRow" press s))
+                                                              (PathP p i) (index "PresUtils.xyFromPathRow" press s)  
 xyFromPathRow x y pth  pr = debug Err ("PresUtils.xyFromPathRow: incorrect path"++show pth) (0,0,True)
 
-xyFromPathCol x y path@(PathP (s:p) i) press = xyFromPathPres (x-leftWidthPres (press!!!s))
-                                                              (sum (map heightPres (take s press)) + y) (PathP p i) (press!!!s)  
+xyFromPathCol x y path@(PathP (s:p) i) press = xyFromPathPres (x-leftWidthPres (index "PresUtils.xyFromPathCol" press s))
+                                                              (sum (map heightPres (take s press)) + y) (PathP p i) (index "PresUtils.xyFromPathCol" press s)  
 xyFromPathCol x y pth  pr = debug Err  ("PresUtils.xyFromPathCol: incorrect path"++show pth) (0,0,True)
 
-leftWidthRow rf press = sum (map widthPres (take rf press)) + leftWidthPres (press!!!rf)
-topHeightRow rf press = sum (map heightPres (take rf press)) + topHeightPres (press!!!rf)
+leftWidthRow rf press = sum (map widthPres (take rf press)) + leftWidthPres (index "PresUtils.leftWidthRow" press rf)
+topHeightRow rf press = sum (map heightPres (take rf press)) + topHeightPres (index "PresUtils.topHeightRow" press rf)
 
 s = StringP NoIDP 
 r = RowP NoIDP
@@ -298,7 +298,7 @@ leftWidthPres (StringP _ str)           = 0
 leftWidthPres (ImageP _ _)              = 0
 leftWidthPres (PolyP _ _ _)             = 0
 leftWidthPres (RowP _ rf [])            = 0
-leftWidthPres (RowP _ rf press)         = sum (map widthPres (take rf press)) + leftWidthPres (index "leftWidthPres" rf press)
+leftWidthPres (RowP _ rf press)         = sum (map widthPres (take rf press)) + leftWidthPres (index "PresUtils.leftWidthPres" press rf)
 leftWidthPres (ColP _ _ press)          = maximum (0:(map leftWidthPres press))
 leftWidthPres (OverlayP _ (pres:press)) = leftWidthPres pres
 leftWidthPres (WithP _ pres)            = leftWidthPres pres
@@ -312,7 +312,7 @@ rightWidthPres (StringP _ str)           = length str
 rightWidthPres (ImageP _ _)              = 1
 rightWidthPres (PolyP _ _ _)             = 1
 rightWidthPres (RowP _ rf [])            = 0
-rightWidthPres (RowP _ rf press)         = rightWidthPres (index "leftWidthPres" rf press) + sum (map widthPres (drop (rf+1) press))
+rightWidthPres (RowP _ rf press)         = rightWidthPres (index "PresUtils.leftWidthPres" press rf) + sum (map widthPres (drop (rf+1) press))
 rightWidthPres (ColP _ _ press)          = maximum (0:(map rightWidthPres press))
 rightWidthPres (OverlayP _ (pres:press)) = rightWidthPres pres
 rightWidthPres (WithP _ pres)            = rightWidthPres pres
@@ -328,7 +328,7 @@ topHeightPres (ImageP _ _)              = 0
 topHeightPres (PolyP _ _ _)             = 0
 topHeightPres (RowP _ rf press)         = maximum (0:(map topHeightPres press))
 topHeightPres (ColP _ _ [])             = 0
-topHeightPres (ColP _ rf press)         = sum (map heightPres (take rf press)) + topHeightPres (index "topHeightPres" rf press)
+topHeightPres (ColP _ rf press)         = sum (map heightPres (take rf press)) + topHeightPres (index "PresUtils.topHeightPres" press rf)
 topHeightPres (OverlayP _ (pres:press)) = topHeightPres pres
 topHeightPres (WithP _ pres)            = topHeightPres pres
 topHeightPres (StructuralP _ pres)      = topHeightPres pres
@@ -344,7 +344,7 @@ bottomHeightPres (ImageP _ _)              = 1
 bottomHeightPres (PolyP _ _ _)             = 1
 bottomHeightPres (RowP _ rf press)         = maximum (0:(map bottomHeightPres press))
 bottomHeightPres (ColP _ rf [])            = 0
-bottomHeightPres (ColP _ rf press)         = bottomHeightPres (index "bottomHeightPres" rf press) + sum (map heightPres (drop (rf+1) press))
+bottomHeightPres (ColP _ rf press)         = bottomHeightPres (index "PresUtils.bottomHeightPres" press rf) + sum (map heightPres (drop (rf+1) press))
 bottomHeightPres (OverlayP _ (pres:press)) = bottomHeightPres pres
 bottomHeightPres (WithP _ pres)            = bottomHeightPres pres
 bottomHeightPres (StructuralP _ pres)      = bottomHeightPres pres
@@ -470,10 +470,10 @@ pathToRightmostLeaf (LocatorP _ pres)    = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf pres                 = debug Err ("PresUtils.pathToRightmostLeaf: can't handle "++show pres) []
 
 selectTree []       tr                        = tr
-selectTree (p:path) (RowP _ _ press)          = selectTree path (press!!!p)
-selectTree (p:path) (ColP _ _ press)          = selectTree path (press!!!p)
+selectTree (p:path) (RowP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
+selectTree (p:path) (ColP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (0:path) (OverlayP _ (pres:press)) = selectTree path pres
-selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (press!!!p)
+selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (0:path) (VertexP _ _ _ _ _ pres)  = selectTree path pres
 selectTree (0:path) (WithP _ pres)            = selectTree path pres
 selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
@@ -484,9 +484,9 @@ selectTree pth      pres                      = debug Err ("PresUtils.selectTree
 
 pathsToAncestorRightSiblings _    []       _                     = []
 pathsToAncestorRightSiblings _    (p:path) (StringP _ _)         = [] 
-pathsToAncestorRightSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (press!!!p)
+pathsToAncestorRightSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
-pathsToAncestorRightSiblings root (p:path) (ColP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (press!!!p)
+pathsToAncestorRightSiblings root (p:path) (ColP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
 pathsToAncestorRightSiblings root (0:path) (OverlayP _ (pres:_)) = pathsToAncestorRightSiblings (root++[0]) path pres
 pathsToAncestorRightSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorRightSiblings (root++[p]) path pres
@@ -498,9 +498,9 @@ pathsToAncestorRightSiblings root pth      pres                  = debug Err ("P
 
 pathsToAncestorLeftSiblings _    []       _                     = []
 pathsToAncestorLeftSiblings _    (p:path) (StringP _ _)         = [] 
-pathsToAncestorLeftSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (press!!!p)
+pathsToAncestorLeftSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
                                                              ++ (if p > 0 then [root++[p-1]] else [])
-pathsToAncestorLeftSiblings root (p:path) (ColP _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (press!!!p)
+pathsToAncestorLeftSiblings root (p:path) (ColP _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
                                                              ++ (if p > 0 then [root++[p-1]] else [])
 pathsToAncestorLeftSiblings root (0:path) (OverlayP _ (pres:_)) = pathsToAncestorLeftSiblings (root++[0]) path pres
 pathsToAncestorLeftSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorLeftSiblings (root++[p]) path pres 
@@ -581,9 +581,9 @@ passedColumn fromPath toPath pres =
 containsColPres _        (StringP id str)           = False
 containsColPres _        (ImageP _ _)               = False
 containsColPres _        (PolyP _ _ _)              = False
-containsColPres (p:path) (RowP id rf press)         = containsColPres path (press!!!p)
+containsColPres (p:path) (RowP id rf press)         = containsColPres path (index "PresUtils.containsColPres" press p)
 containsColPres (p:path) (ColP id rf press)         = True
-containsColPres (0:path) (OverlayP id press@(pres:_)) = containsColPres path (press!!!0)                                            
+containsColPres (0:path) (OverlayP id press@(pres:_)) = containsColPres path (index "PresUtils.containsColPres" press 0)     
 containsColPres (p:path) (WithP ar pres)            = containsColPres path pres
 containsColPres (p:path) (StructuralP id pres)      = containsColPres path pres
 containsColPres (p:path) (ParsingP id pres)         = containsColPres path pres
@@ -599,10 +599,10 @@ focusIsOnGraphPres :: [Int] -> Presentation doc node clip -> Bool
 focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = True 
 focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then True else False
 focusIsOnGraphPres []        tr                       = False
-focusIsOnGraphPres (p:path) (RowP _ _ press)          = focusIsOnGraphPres path (press!!!p)
-focusIsOnGraphPres (p:path) (ColP _ _ press)          = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (p:path) (RowP _ _ press)          = focusIsOnGraphPres path (index "PresUtils.focusIsOnGraphPres" press p)
+focusIsOnGraphPres (p:path) (ColP _ _ press)          = focusIsOnGraphPres path (index "PresUtils.focusIsOnGraphPres" press p)
 focusIsOnGraphPres (0:path) (OverlayP _ (pres:press)) = focusIsOnGraphPres path pres
-focusIsOnGraphPres (p:path) (GraphP _ _ _ _ _ press)  = focusIsOnGraphPres path (press!!!p)
+focusIsOnGraphPres (p:path) (GraphP _ _ _ _ _ press)  = focusIsOnGraphPres path (index "PresUtils.focusIsOnGraphPres" press p)
 focusIsOnGraphPres (0:path) (VertexP _ _ _ _ _ pres)  = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (WithP _ pres)            = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (StructuralP _ pres)      = focusIsOnGraphPres path pres
@@ -619,10 +619,10 @@ mouseDownDocPres = mouseDownDocPres' Nothing
 
 mouseDownDocPres' :: Maybe (UpdateDoc doc clip) -> [Int] -> Presentation doc node clip -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres' upd []       tr                        = upd
-mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
-mouseDownDocPres' upd (p:path) (ColP _ _ press)          = mouseDownDocPres' upd path (press!!!p)
+mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
+mouseDownDocPres' upd (p:path) (ColP _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (0:path) (OverlayP _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
-mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (press!!!p)
+mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ _ pres)  = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = ((fst emptyAttrs) {mouseDown = upd}, snd emptyAttrs)
                                                                                   (inh',syn') = w (inh,syn)
@@ -639,10 +639,10 @@ popupMenuItemsPres path pres = popupMenuItemsPres' [] path pres
 
 popupMenuItemsPres' :: [PopupMenuItem doc clip] -> [Int] -> Presentation doc node clip -> [PopupMenuItem doc clip]
 popupMenuItemsPres' its []       tr                        = its
-popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
-popupMenuItemsPres' its (p:path) (ColP _ _ press)          = popupMenuItemsPres' its path (press!!!p)
+popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
+popupMenuItemsPres' its (p:path) (ColP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (0:path) (OverlayP _ press@(pres:_)) = popupMenuItemsPres' its path pres --(last press)
-popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ _ press)  = popupMenuItemsPres' its path (press!!!p)
+popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ _ press)  = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ _ pres)  = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres' (let (inh,syn)   = ((fst emptyAttrs) {popupMenuItems = its}, snd emptyAttrs)
                                                                                       (inh',syn') = w (inh,syn)
