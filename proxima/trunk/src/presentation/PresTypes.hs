@@ -67,15 +67,17 @@ data Presentation doc node clip = EmptyP !IDP
            | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
            | EllipseP !IDP !Int !Int !Int      -- width height lineWidth
-           | RowP !IDP !Int ![ (Presentation doc node clip) ]    -- vRefNr 
-           | ColP !IDP !Int ![ (Presentation doc node clip) ]    -- hRefNr
+           | RowP !IDP !Int ![Presentation doc node clip]    -- vRefNr 
+           | ColP !IDP !Int ![Presentation doc node clip]    -- hRefNr
            | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
            | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
            | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
            | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
            | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![(Presentation doc node clip)] -- width height edges 
+           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation doc node clip] -- width height edges 
            | VertexP !IDP !Int !Int !Int Outline !(Presentation doc node clip) -- vertexID x y outline       see note below
+           | FormatterP !IDP ![Presentation doc node clip]
+
 {-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (Presentation doc node clip) ]
            | Alternative [ (Presentation doc node clip) ]
@@ -107,6 +109,7 @@ instance Show (Presentation doc node clip) where
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (GraphP id _ _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
   show (VertexP id vid x y ol pres)  = "Vertex (#"++show vid++":"++show x++","++show y++")"++show pres
+  show (FormatterP id press) = "FormatterP ["++concat (intersperse ", " (map show press))++"]"
   show (ArrangedP)           = "ArrangedP" -- ++show pres
   show _                     = "<<<presentation without show>>>"
 
@@ -170,22 +173,6 @@ data Synthesized = Syn { hRef, vRef, minWidth, minHeight :: Int
 
 type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc clip, Synthesized)
 
-{-
-(EmptyP id)           =
-(StringP id str)      =
-(ImageP id str)       =
-(PolyP id _ _)        =
-(RectangleP id _ _ _) =
-(EllipseP id _ _ _)   =
-(RowP id rf press)    =
-(ColP id rf press)    =
-(OverlayP  id press)  =
-(WithP ar pres)       =
-(StructuralP id pres) =
-(ParsingP id pres)    =
-(LocatorP loc pres)   =
---(ArrangedP)          
--}
 
 idP (EmptyP id)           = id
 idP (StringP id _)        = id
@@ -202,6 +189,7 @@ idP (ParsingP id pres)    = id
 idP (LocatorP loc pres)   = idP pres
 idP (GraphP id _ _ _ _ _)  = id
 idP (VertexP id _ _ _ _ _) = id
+idP (FormatterP id _)     = id
 idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++show pres) NoIDP
 
 

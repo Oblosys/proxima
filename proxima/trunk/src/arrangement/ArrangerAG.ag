@@ -52,13 +52,13 @@ getCols n xs = foldr (zipWith (:)) (repeat []) (getRows n xs)
 
 
 
-{- for FormatterP
-unfoldAGFormatter w ws presentations = 
+-- for FormatterP
+unfoldFormatter w ws presentations = 
  let breaks = firstFit w ws
      dividedPresentations = linesFromBreaks breaks presentations
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
-         map (RowP NoID 0) dividedPresentations
-     unfoldedList = ColP NoID 0 (rows)
+         map (RowP NoIDP 0) dividedPresentations
+     unfoldedList = ColP NoIDP 0 (rows)
  in  --debug Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
            unfoldedList
 
@@ -86,7 +86,7 @@ linesFromBreaks brks wrds = tolines' brks 0 wrds
    tolines' (brk:brks) lastbrk wrds = take (brk-lastbrk) wrds :
                                       tolines' brks brk (drop (brk-lastbrk) wrds)
 
--}
+
 
 
 assign [] _ _ = []
@@ -117,6 +117,7 @@ DATA Presentation
   | OverlayP    id : IDP              presentationList : PresentationList
   | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
   | VertexP     id : IDP i,x,y: Int outline : Outline child : Presentation
+  | FormatterP  id : IDP presentationList : PresentationList
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
@@ -126,7 +127,6 @@ DATA Presentation
 --  | TestPresentation id : IDP  area : Int color : Color
 --  | MatrixPresentation id : IDP  m, n : Int presentationList : PresentationList
 --  | LayedOutRowP id : IDP  presentationList : PresentationList w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
---  | FormatterPresentation id : IDP  presentationList : PresentationList
 --  | AlternativePresentation id : IDP  presentationList : PresentationList
 
 
@@ -263,6 +263,8 @@ SEM Presentation
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
   | GraphP
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
+  | FormatterP
+      lhs.maxFormatterDepth = 1 + maximum @presentationList.maxFormatterDepthList
 {-
   | TestPresentation 
       lhs.maxFormatterDepth = 0
@@ -271,8 +273,6 @@ SEM Presentation
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
   | LayedOutRowP
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
-  | FormatterPresentation 
-      lhs.maxFormatterDepth = 1 + maximum @presentationList.maxFormatterDepthList
   | AlternativePresentation 
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
 -}
@@ -285,7 +285,7 @@ SEM Presentation
 ATTR PresentationList [ | | maxFormatterDepthList : {[Int]} ]
 SEM PresentationList
   | Nil 
-      lhs.maxFormatterDepthList = [0]
+      lhs.maxFormatterDepthList = [0] -- so we get no maximum []
   | Cons 
       lhs.maxFormatterDepthList = @hd.maxFormatterDepth : @tl.maxFormatterDepthList
 
@@ -315,6 +315,8 @@ SEM Presentation
       lhs.unfoldedTree = GraphP @id @d @w @h @edges @presentationList.unfoldedTreeList
   | VertexP
       lhs.unfoldedTree = VertexP @id @i @x @y @outline @child.unfoldedTree
+  | FormatterP
+      lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
 {-
   | TestPresentation             
       lhs.unfoldedTree = TestPresentation @id @area @color
@@ -322,8 +324,6 @@ SEM Presentation
       lhs.unfoldedTree = MatrixPresentation @id @m @n @presentationList.unfoldedTreeList
   | LayedOutRowP 
       lhs.unfoldedTree = LayedOutRowP @id @presentationList.unfoldedTreeList @w @h @offsets
-  | FormatterPresentation 
-      lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
   | AlternativePresentation 
       lhs.unfoldedTree = AlternativePresentation @id @presentationList.unfoldedTreeList
 -}
@@ -453,6 +453,14 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
       loc.vStretch = and @presentationList.vStretchList
       loc.hRef = @minTopHeight
       loc.vRef = @minLeftWidth
+  | FormatterP
+      loc.minWidth = 0
+      loc.minHeight = 0
+      loc.hStretch = True
+      loc.vStretch = True
+      loc.hRef = 0
+      loc.vRef = 0
+
     {-  loc.topHeight = maximum @presentationList.hRefList
       loc.bottomHeight = maximum [ minHeight - hRef | (minHeight, hRef) <- zip @presentationList.minHeightList @presentationList.hRefList ]
       loc.leftWidth = maximum @presentationList.vRefList
@@ -495,13 +503,6 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
       loc.vStretch = error "not implemented" 
       loc.hRef = error "not implemented"
       loc.vRef = error "not implemented"
-  | FormatterPresentation 
-      loc.minWidth = 0
-      loc.minHeight = 0
-      loc.hStretch = True
-      loc.vStretch = True
-      loc.hRef = 0
-      loc.vRef = 0
   | AlternativePresentation 
       loc.minWidth = 0
       loc.minHeight = 0
@@ -646,6 +647,11 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : I
       presentationList.assignedHRefList   = @presentationList.hRefList 
       presentationList.assignedWidthList  = @presentationList.minWidthList 
       presentationList.assignedVRefList   = @presentationList.vRefList 
+  | FormatterP
+      presentationList.assignedWidthList    = debug Err "FormatterP must be unfolded first" []
+      presentationList.assignedHeightList   = debug Err "FormatterP must be unfolded first" []
+      presentationList.assignedHRefList     = debug Err "FormatterP must be unfolded first" []
+      presentationList.assignedVRefList     = debug Err "FormatterP must be unfolded first" []
 {-
   | MatrixPresentation
 -- is a lot more complicated than this
@@ -670,11 +676,6 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedHRef, assignedVRef : I
       presentationList.assignedHeightList    = error "LayedOut row not implemented yet."
       presentationList.assignedHRefList    = error "LayedOut row not implemented yet."
       presentationList.assignedVRefList    = error "LayedOut row not implemented yet."
-  | FormatterPresentation
-      presentationList.assignedWidthList    = error "FormatterPresentation must be unfolded first"
-      presentationList.assignedHeightList    = error "FormatterPresentation must be unfolded first"
-      presentationList.assignedHRefList     =  error "FormatterPresentation must be unfolded first"
-      presentationList.assignedVRefList     =  error "FormatterPresentation must be unfolded first"
   | AlternativePresentation
       presentationList.assignedWidthList    = repeat @lhs.assignedWidth
       presentationList.assignedHeightList    = repeat @lhs.assignedHeight
@@ -763,6 +764,11 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
       loc.finalHeight = @lhs.assignedHeight
       loc.finalHRef   = @lhs.assignedHRef
       loc.finalVRef   = @lhs.assignedVRef
+  | FormatterP
+      loc.finalWidth  = debug Err "FormatterP must be unfolded first" 0
+      loc.finalHeight = debug Err "FormatterP must be unfolded first" 0
+      loc.finalHRef   = debug Err "FormatterP must be unfolded first" 0
+      loc.finalVRef   = debug Err "FormatterP must be unfolded first" 0
 {-
   | TestPresentation 
       loc.finalWidth = error "not implemented"
@@ -781,11 +787,6 @@ SEM Presentation [ || finalHeight, finalWidth, finalHRef, finalVRef : Int ]
       loc.finalHeight = error "not implemented"
       loc.finalHRef = error "not implemented"
       loc.finalVRef = error "not implemented"
-  | FormatterPresentation 
-      loc.finalWidth =  error "FormatterPresentation must be unfolded first"
-      loc.finalHeight =  error "FormatterPresentation must be unfolded first"
-      loc.finalHRef =  error "FormatterPresentation must be unfolded first"
-      loc.finalVRef =  error "FormatterPresentation must be unfolded first"
   | AlternativePresentation 
       loc.finalWidth = @presentationList.finalWidthList !! @firstFit
       loc.finalHeight = @presentationList.finalHeightList !! @firstFit
@@ -867,6 +868,9 @@ SEM Presentation
   | VertexP
       child.x                   = 0
       child.y                   = 0
+  | FormatterP
+      presentationList.xList    = debug Err "FormatterP must be unfolded first" []
+      presentationList.yList    = debug Err "FormatterP must be unfolded first" []
 {-
   | MatrixPresentation -- x and y are added to cumulative heights and widths
       loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
@@ -878,9 +882,6 @@ SEM Presentation
   | LayedOutRowP
       presentationList.xList    = error "LayedOut row not implemented yet."
       presentationList.yList    = error "LayedOut row not implemented yet."
-  | FormatterPresentation
-      presentationList.xList    = error "FormatterPresentation must be unfolded first"
-      presentationList.yList    = error "FormatterPresentation must be unfolded first"
   | AlternativePresentation
       presentationList.xList    = repeat 0
       presentationList.yList    = repeat 0
@@ -975,14 +976,14 @@ SEM Presentation
                           VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalVRef,y+ @finalHRef)) @child.arrangement
+  | FormatterP
+      lhs.arrangement =  debug Err "FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | MatrixPresentation 
       lhs.arrangement = StringA NoID 0 40 0 0 0 0 ("unimplemented AttrPresentation MatrixPresentation") (0,0,0) defaultFont []
        -- MatrixPresentation (idAFromP @id) @presentationList.arrangementList @lhs.x @lhs.y finalWidth finalHeight @lhs.backgroundColor
-  | FormatterPresentation 
-      lhs.arrangement = error "FormatterPresentation must be unfolded first"
   | AlternativePresentation -- remove the alternative presentation
       lhs.arrangement = @presentationList.arrangementList !! @firstFit 
    -- with node is removed by copy rule
@@ -1040,6 +1041,8 @@ SEM Presentation
       lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
   | ArrangedP
       lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+  | FormatterP
+      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
 
 
 SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
@@ -1084,7 +1087,9 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
       child.oldArr = case @lhs.oldArr of
                        LocatorA _ arr -> arr
                        _              -> EmptyA NoIDA 0 0 0 0 0 0
-
+  | FormatterP
+      presentationList.oldArrList = debug Err "FormatterP must be unfolded first" $
+                                      repeat $ EmptyA NoIDA 0 0 0 0 0 0
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 
