@@ -505,13 +505,6 @@ leftDocPathsA :: PathArr -> Arrangement node -> [PathDoc]
 leftDocPathsA 
 -}
 
-
-arrangeWhenViewed x y w h viewedArea idA arrangement@(EllipseA _ xc yc wi he _ _ _ _ _ _) =
-  debug Err ("Ellipse"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )++show(xc,yc,wi,he)) $
-  if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
-arrangeWhenViewed x y w h viewedArea idA arrangement@(VertexA _ xc yc wi he _ _ _ _ _) =
-  debug Err ("Vertex"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )++show(xc,yc,wi,he)) $
-  if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
 arrangeWhenViewed x y w h viewedArea idA arrangement =
   -- debug Err ("\n\n\n"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) $
   if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
