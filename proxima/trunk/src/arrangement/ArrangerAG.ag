@@ -832,9 +832,14 @@ SEM Root
       
 SEM PresentationList
   | Cons 
-      hd.lux = head @lhs.xList + @lhs.lux
-      hd.luy = head @lhs.yList + @lhs.luy
+      hd.lux = @lhs.lux + head @lhs.xList
+      hd.luy = @lhs.luy + head @lhs.yList
 
+SEM Presentation
+  | VertexP
+      child.lux = @lhs.lux + @x - @finalVRef
+      child.luy = @lhs.luy + @y - @finalHRef
+      
 -- lu attributes for all the other situations are handled by copy rules
 
 -- Position calculation
@@ -966,7 +971,7 @@ SEM Presentation
                                  ( @presentationList.arrangementList  ++
                                    mkEdges @edges @presentationList.vertices @lhs.lineColor )
   | VertexP
-      lhs.arrangement = arrangeWhenViewed (@lhs.lux - @finalVRef) (@lhs.luy - @finalHRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed (@lhs.lux + @x - @finalVRef) (@lhs.luy + @y - @finalHRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           VertexA (idAFromP @id) (@lhs.x + @x - @finalVRef) (@lhs.y + @y - @finalHRef)
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalVRef,y+ @finalHRef)) @child.arrangement

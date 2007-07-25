@@ -62,12 +62,11 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; buffer <- newIORef Nothing
     ; renderingLvlVar <- newIORef initRenderingLvl
 
-    ; onExpose canvas $ onPaint buffer window vp renderingLvlVar canvas
+    ; onExpose canvas $ onPaint handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-  
 
     ; fileMenu <- mkMenu
         [ ("_Open", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
@@ -104,23 +103,34 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; mainGUI
     }    
 
-onPaint :: IORef (Maybe Pixmap) -> Window -> Viewport -> IORef (RenderingLevel documentLevel) -> DrawingArea -> Event -> IO Bool
-onPaint buffer wi vp renderingLvlVar canvas (Expose { eventArea=rect }) =
+onPaint :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> 
+           IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle ->
+           Window -> Viewport -> DrawingArea -> Event -> IO Bool
+onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
     ; case maybePm of 
         Nothing -> return True
         Just pm ->
          do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     
-            ; viewedArea <- getViewedArea vp
+            ; renderedViewedArea <- readIORef viewedAreaRef
+            ; viewedArea <- getViewedArea vp 
             
+            -- if renderedViewedArea is different from viewedArea, we need to re-arrange
+            -- SkipRen (-2) starts presenting at the arrangement layer
+            ; when (renderedViewedArea /= viewedArea) $ 
+               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-2))
+                 
             ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
-            ; rendering (wi, pm, gc) viewedArea
+            ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
+                                                -- since arranger already only arranges elements in view
+                                                -- currently, it only prevents rendering edges of partially viewed graphs
+
             -- paint events are less frequent than generic handler events, so we render here
             -- a possible optimization is to only render on the pixmap once. 
-            
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
+            ; drawRectangle dw gc False (fst.fst $ viewedArea) (snd.fst $ viewedArea) 100 100
             
             ; return True
             }
@@ -134,6 +144,7 @@ getViewedArea vp =
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
     ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+    --; return ((round x + 100,round y + 100),(100,100))
     }         
     
 onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
