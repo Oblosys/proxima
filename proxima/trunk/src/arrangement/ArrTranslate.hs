@@ -23,7 +23,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
-    SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus pres)
+    SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus arr pres)
                              , state, ArrangementLevel arr focus p)
     InitArr               -> (InitLay,               state, arrLvl) 
     CloseArr              -> (CloseLay,              state, arrLvl) 
@@ -44,13 +44,13 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
     MouseDownArr x y (Modifiers False False False) i ->
-          ( SetFocusLay (focusPFromFocusA (focusAFromXY x y arr) pres)
+          ( SetFocusLay (focusPFromFocusA (focusAFromXY x y arr) arr pres)
           , state { getLastMousePress = Just (x,y)}, arrLvl)
 -- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
       case isGraphEdit x y arr pres of
         Just addVertex    -> ( addVertex, state, arrLvl )
-        Nothing           -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+        Nothing           -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
                        , state, arrLvl )
     MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
@@ -60,17 +60,17 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
           case navigateFocus x' y' arr of
             PathA pth _ ->
               case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
-                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay (pathPFromPathA' pth pres) (x-x',y-y')
+                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
                                                      , state { getLastMousePress = Just (x, y)}, arrLvl) 
                 (_,_,GraphA _ _ _ _ _ _ _ _ _ _) -> (SkipLay 0
                                                      , state { getLastMousePress = Just (x, y)}, arrLvl) 
                 (_,_,EdgeA _ _ _ _ _ _ _ _ _) -> (SkipLay 0
                                                      , state { getLastMousePress = Just (x, y)}, arrLvl) 
-                _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+                _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
                                     , state, arrLvl )
-            _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+            _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
                                , state, arrLvl )
-        Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) pres)
+        Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
                    , state, arrLvl ) -- does not occur
                             
     MouseUpArr x y ms     -> (ParseLay,            state { getLastMousePress = Nothing }, arrLvl) 
@@ -90,11 +90,11 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   
   
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: HasPath node  => state -> ArrangementLevel doc node clip ->
+mouseDownDoc :: (Show node, HasPath node)  => state -> ArrangementLevel doc node clip ->
                 Presentation doc node clip -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip, state, ArrangementLevel doc node clip)  
-mouseDownDoc state arrLvl layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
-  let pthP = pathPFromPathA' pthA layout
+mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
+  let pthP = pathPFromPathA' arr layout pthA
   in  case mouseDownDocPres pthP layout of
         Just upd -> debug UnA ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
         Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)   
@@ -113,8 +113,8 @@ isGraphEdit x y arr pres =
       case navigateFocus x y arr of 
         PathA pth _ -> case selectTreeA pth arr of
                          (xGraph,yGraph, GraphA _ _ _ _ _ _ _ _ _ _) ->
-                           Just $ AddVertexLay (pathPFromPathA' pth pres) (x-xGraph, y-yGraph)
+                           Just $ AddVertexLay (pathPFromPathA' arr pres pth) (x-xGraph, y-yGraph)
                          (_,_, VertexA _ _ _ _ _ _ _ _ _ _) ->
-                           Just $ AddEdgeLay (pathPFromPathA' pth pres)
+                           Just $ AddEdgeLay (pathPFromPathA' arr pres pth)
                          _                                             -> Nothing
         _ -> Nothing

@@ -77,7 +77,7 @@ mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLv
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
-                        Just pthA -> popupMenuItemsPres (pathPFromPathA' pthA prs) prs
+                        Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
               
    ; case pointDoc x y arr of
         Just node ->

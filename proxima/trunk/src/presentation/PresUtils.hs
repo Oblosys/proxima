@@ -149,6 +149,11 @@ prunePres (DiffNode c _ dts) p@(GraphP id d w h es press) = let pruned = zipWith
                                                                 else GraphP id d w h es pruned 
 prunePres (DiffLeaf c) p@(GraphP id d w h es press)       = if c then ArrangedP
                                                                else GraphP id d w h es (map (prunePres (DiffLeaf False)) press)
+prunePres (DiffNode c _ dts) p@(FormatterP id press) = let pruned = zipWith prunePres dts press
+                                                    in  if c then ArrangedP 
+                                                             else FormatterP id pruned 
+prunePres (DiffLeaf c) p@(FormatterP id press)       = if c then ArrangedP -- p 
+                                                         else FormatterP id (map (prunePres (DiffLeaf False)) press)
 prunePres dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
 
