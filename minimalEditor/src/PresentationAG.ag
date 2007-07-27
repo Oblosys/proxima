@@ -52,8 +52,10 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col $ [ bold $ text "Root"
+                           
                            , row [ @graph.pres, @graph.pres ]
                            , @tree.pres
+                           , @paragraph.pres
                            ] ++ @subGraphs.press
                              ++ [ row [ text "Add view" `withMouseDown` insertNewSubgraph @lhs.path
                                       , text " "
@@ -61,7 +63,15 @@ SEM Root
                                       ]
                                 ]
                          
+SEM Paragraph
+  | Paragraph
+      lhs.pres = loc (ParagraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     formatter @words.press `withFontSize` 12
 
+SEM Word [ || ]
+  | Word
+      lhs.pres = loc (WordNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     row [ @word.pres, text " " ]
 SEM Tree
   | Bin
       lhs.pres = loc (BinNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -176,9 +186,9 @@ insertNewSubgraph :: [Int] -> UpdateDoc Document clip
 insertNewSubgraph pth =
   let subgraph = SubGraph NoIDD (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge))
   in  \(DocumentLevel d path cl) ->
-        let (Clip_List_SubGraph subgraphlist) = select (pth++[2]) d -- nasty
+        let (Clip_List_SubGraph subgraphlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
             clipsubgraphlist' = insertList (length $ fromList_SubGraph subgraphlist) (Clip_SubGraph subgraph) subgraphlist
-            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
+            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
                                                 (clipsubgraphlist')
                                                 )
         in  (DocumentLevel d' path cl)
@@ -186,19 +196,10 @@ insertNewSubgraph pth =
 removeLastSubgraph :: [Int] -> UpdateDoc Document clip
 removeLastSubgraph pth =
    \(DocumentLevel d path cl) ->
-      let (Clip_List_SubGraph subgraphlist) = select (pth++[2]) d -- nasty
+      let (Clip_List_SubGraph subgraphlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
           clipsubgraphlist' = removeList (length (fromList_SubGraph subgraphlist) - 1) subgraphlist
-          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
+          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
                                               (clipsubgraphlist')
                                               )
       in  (DocumentLevel d' path cl)
-
-toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
-
-fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
-fromList_Vertex _                  = []
-
-fromList_SubGraph (List_SubGraph _ vs) = fromConsList_SubGraph vs
-fromList_SubGraph _                  = []
-
 }

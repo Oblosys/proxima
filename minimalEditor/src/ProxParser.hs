@@ -67,11 +67,13 @@ recognizeRoot = pStr $
                   (superGraph',subgraphs') = resolveSubgraphs (dsup,superGraph) (ds, subGraphs)
               in debug Prs ("\n\nparsedGraph: "++show (d1,d2,ds)) $ 
                  reuseRoot [tokenNode str] Nothing (Just tree) (Just superGraph')
+                                           Nothing -- paragraph
                                            (Just (toList_SubGraph subgraphs')) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
+      <*  pStructural ParagraphNode
       <*> pList recognizeSubGraph
  where resolveCopies (Dirty,g1) (_,g2) = (Dirty,g1)
        resolveCopies (Clean,g1) (Dirty,g2) = (Dirty, g2)
@@ -148,7 +150,7 @@ recognizeGraph = pStrDirty $
 -- before we can parse them, the scanner needs to be modified to handle free text
 recognizeVertex :: ListParser Document Node ClipDoc Vertex
 recognizeVertex = pStr $
-          (\str vt lab -> reuseVertex [tokenNode str] Nothing Nothing Nothing 
+          (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing 
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
@@ -160,8 +162,18 @@ recognizeVertex = pStr $
 
 parseLabel :: ListParser Document Node ClipDoc String_
 parseLabel = pPrs $
-          (\strTk -> mkString_ strTk)
-      <$> pLIdent 
+          (\str -> String_ NoIDD str)
+      <$> pText
+
+-- simple free text parsing. Does not work for label, since space is tokenized away
+pText = concat <$> pList (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
+
+pUIdent = pCSym 20 uIdentTk
+pOp = pCSym 20 opTk
+pSymm = pCSym 20 symTk
+--
+
+
 
 recognizeSubGraph :: ListParser Document Node ClipDoc (Dirty, SubGraph)
 recognizeSubGraph = pStrDirty $
@@ -196,59 +208,7 @@ getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++sh
 
 keywords :: [String]
 keywords = 
-  [ ":-"
-  , ":+"
-  , "_|_"
-  , "#"
-  , "<"
-  , ">"
-  , "L"
-  , "R"
-  , "<-"
-  , "->"
-  , "<+"
-  , "+>"
-  , "\""
-  , "</"
-  , "/>"
-  , "," --
-  , "(" --
-  , ")" --
-  , "{" --
-  , "}" --
-  , ";" --
-  , "[" --
-  , "]" --
-  , "="
-  , "%"
-  , "+"
-  , "-"
-  , "*"
-  , "/"
-  , "^"
-  , "\174"
-  , "\\" 
---  , "l"      -- not very nice, just for demonstrating lambdas
-  , "False"
-  , "True"
-  , "if"
-  , "then"
-  , "else"
-  , "let"
-  , "in"
-  , "case"
-  , "of"
-  , "Chess"
-  , "board"
-  , "Slides"
-  , "pres"
-  , "Inv"
-  , "inv"
-  , ":"
-  , "..."
-  , "Form"
-  , "what"
-  , "Leaf"
+  [ "Leaf"
   , "Bin"
   ]
 

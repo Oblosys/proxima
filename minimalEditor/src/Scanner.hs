@@ -36,6 +36,8 @@ tokenize i loc (GraphP id d w h edges press) = let (press', lm, i') = tokenizeLs
                                                in  (GraphP id d w h edges press', lm, i')
 tokenize i loc (VertexP id v x y o pres)     = let (pres', lm, i') = tokenize i loc pres
                                                in  (VertexP id v x y o pres', lm, i')              
+tokenize i loc (FormatterP id press) = let (press', lm, i') = tokenizeLst i loc press
+                                    in  (FormatterP id press', lm, i')
 tokenize i loc pr = debug Err ("TreeEditPres.tokenize: can't handle "++ show pr) (pr, Map.empty, i)
 
 tokenizeLst i loc []           = ([], Map.empty, i)
@@ -74,7 +76,7 @@ data TokenType = IntToken | LowerIdentToken | UpperIdentToken | SymbolToken | Op
 --tokenType 'l'                = OperatorToken
 tokenType c | isDigit c      = IntToken
             | isLower c      = LowerIdentToken
-            | isUpper c      = LowerIdentToken
+            | isUpper c      = UpperIdentToken
             | isSymbolChar c = SymbolToken
             | otherwise      = OperatorToken
 
@@ -147,7 +149,7 @@ tokenizeCol' i loc lc layout id str (pres:press) =
             (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' i'' loc undefTk (1,0) NoIDP "" press
         in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
 
- 
+
 -- loc is threaded, lc is just inherited. 
 tokenize' :: Int -> (Maybe Node, AttrRule doc clip) -> (TokenType, Maybe Node, AttrRule doc clip) ->
              Layout -> IDP -> String -> Presentation doc Node clip ->
@@ -167,6 +169,8 @@ tokenize' i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i') =
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                               in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
+tokenize' i loc lc layout id str pres@(FormatterP _ _) = let (tok, lm, i') = makeToken i lc layout id str
+                                                         in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' i (loc,ar'.ar) lc layout id str pres
 tokenize' i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
 tokenize' i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' i loc lc layout id str pres

@@ -116,11 +116,14 @@ instance Clip ClipDoc where
   arityClip (Clip_Int_ x) = arity x
   arityClip (Clip_Tree x) = arity x
   arityClip (Clip_Graph x) = arity x
+  arityClip (Clip_Paragraph x) = arity x
   arityClip (Clip_List_SubGraph x) = arity x
+  arityClip (Clip_List_Word x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
   arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_SubGraph x) = arity x
+  arityClip (Clip_Word x) = arity x
   arityClip (Clip_Vertex x) = arity x
   arityClip (Clip_Edge x) = arity x
   arityClip (Clip_Nothing)   = -1
@@ -135,11 +138,14 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Int_ x) = alternatives x
   alternativesClip (Clip_Tree x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
+  alternativesClip (Clip_Paragraph x) = alternatives x
   alternativesClip (Clip_List_SubGraph x) = alternatives x
+  alternativesClip (Clip_List_Word x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
   alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_SubGraph x) = alternatives x
+  alternativesClip (Clip_Word x) = alternatives x
   alternativesClip (Clip_Vertex x) = alternatives x
   alternativesClip (Clip_Edge x) = alternatives x
   alternativesClip (Clip_Nothing)   = []
@@ -155,11 +161,14 @@ instance Clip ClipDoc where
   holeClip (Clip_Int_ x) = Clip_Int_ hole
   holeClip (Clip_Tree x) = Clip_Tree hole
   holeClip (Clip_Graph x) = Clip_Graph hole
+  holeClip (Clip_Paragraph x) = Clip_Paragraph hole
   holeClip (Clip_List_SubGraph x) = Clip_List_SubGraph hole
+  holeClip (Clip_List_Word x) = Clip_List_Word hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
   holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_SubGraph x) = Clip_SubGraph hole
+  holeClip (Clip_Word x) = Clip_Word hole
   holeClip (Clip_Vertex x) = Clip_Vertex hole
   holeClip (Clip_Edge x) = Clip_Edge hole
   holeClip Clip_Nothing   = Clip_Nothing
@@ -175,11 +184,14 @@ instance Clip ClipDoc where
   isListClip (Clip_Int_ x) = isList x
   isListClip (Clip_Tree x) = isList x
   isListClip (Clip_Graph x) = isList x
+  isListClip (Clip_Paragraph x) = isList x
   isListClip (Clip_List_SubGraph x) = isList x
+  isListClip (Clip_List_Word x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
   isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_SubGraph x) = isList x
+  isListClip (Clip_Word x) = isList x
   isListClip (Clip_Vertex x) = isList x
   isListClip (Clip_Edge x) = isList x
   isListClip (Clip_Nothing)   = False
@@ -195,11 +207,14 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Int_ x) = insertList i c x
   insertListClip i c (Clip_Tree x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
+  insertListClip i c (Clip_Paragraph x) = insertList i c x
   insertListClip i c (Clip_List_SubGraph x) = insertList i c x
+  insertListClip i c (Clip_List_Word x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
   insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_SubGraph x) = insertList i c x
+  insertListClip i c (Clip_Word x) = insertList i c x
   insertListClip i c (Clip_Vertex x) = insertList i c x
   insertListClip i c (Clip_Edge x) = insertList i c x
   insertListClip i c (Clip_Nothing)   = Clip_Nothing
@@ -215,11 +230,14 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Int_ x) = removeList i x
   removeListClip i (Clip_Tree x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
+  removeListClip i (Clip_Paragraph x) = removeList i x
   removeListClip i (Clip_List_SubGraph x) = removeList i x
+  removeListClip i (Clip_List_Word x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
   removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_SubGraph x) = removeList i x
+  removeListClip i (Clip_Word x) = removeList i x
   removeListClip i (Clip_Vertex x) = removeList i x
   removeListClip i (Clip_Edge x) = removeList i x
   removeListClip i (Clip_Nothing)   = Clip_Nothing
@@ -345,23 +363,25 @@ instance Editable Dummy Document Node ClipDoc where
 
 instance Editable Root Document Node ClipDoc where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ x1 x2 x3) = select p x1
-  select (1:p) (Root _ x1 x2 x3) = select p x2
-  select (2:p) (Root _ x1 x2 x3) = select p x3
+  select (0:p) (Root _ x1 x2 x3 x4) = select p x1
+  select (1:p) (Root _ x1 x2 x3 x4) = select p x2
+  select (2:p) (Root _ x1 x2 x3 x4) = select p x3
+  select (3:p) (Root _ x1 x2 x3 x4) = select p x4
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 x1 x2 x3) = Root i1 (paste p c x1) x2 x3
-  paste (1:p) c (Root i1 x1 x2 x3) = Root i1 x1 (paste p c x2) x3
-  paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Root i1 x1 x2 x3 x4) = Root i1 (paste p c x1) x2 x3 x4
+  paste (1:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 (paste p c x2) x3 x4
+  paste (2:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 (paste p c x3) x4
+  paste (3:p) c (Root i1 x1 x2 x3 x4) = Root i1 x1 x2 x3 (paste p c x4)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Tree} {Graph} {SubGraphs} "  , Clip_Root $ Root NoIDD hole hole hole)
+  alternatives _ = [("Root {Tree} {Graph} {Paragraph} {SubGraphs} "  , Clip_Root $ Root NoIDD hole hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ x1 x2 x3) = 3
+  arity (Root _ x1 x2 x3 x4) = 4
   arity _                        = 0
 
   parseErr = ParseErrRoot
@@ -398,6 +418,60 @@ instance Editable Tree Document Node ClipDoc where
   parseErr = ParseErrTree
 
   hole = HoleTree
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable Paragraph Document Node ClipDoc where
+  select []    x                  = Clip_Paragraph x
+  select (0:p) (Paragraph _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Paragraph c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Paragraph")   x
+  paste (0:p) c (Paragraph i1 x1) = Paragraph i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Paragraph {Words} "  , Clip_Paragraph $ Paragraph NoIDD hole)
+                   ,("{Paragraph}", Clip_Paragraph hole)
+                   ]
+
+  arity (Paragraph _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrParagraph
+
+  hole = HoleParagraph
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable Word Document Node ClipDoc where
+  select []    x                  = Clip_Word x
+  select (0:p) (Word _ x1) = select p x1
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Word c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Word")   x
+  paste (0:p) c (Word i1 x1) = Word i1 (paste p c x1)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Word {String_} "  , Clip_Word $ Word NoIDD hole)
+                   ,("{Word}", Clip_Word hole)
+                   ]
+
+  arity (Word _ x1) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrWord
+
+  hole = HoleWord
 
 
   isList _ = False
@@ -642,6 +716,66 @@ instance Editable List_SubGraph Document Node ClipDoc where
 
   removeList n (List_SubGraph idd cxs) = Clip_List_SubGraph $ List_SubGraph idd (removeList_SubGraph n cxs)
   removeList _ xs                        = Clip_List_SubGraph $ xs
+
+toList_Word vs = List_Word NoIDD (toConsList_Word vs)
+
+fromList_Word (List_Word _ vs) = fromConsList_Word vs
+fromList_Word _                  = []
+
+toConsList_Word [] = Nil_Word
+toConsList_Word (x:xs) = Cons_Word x (toConsList_Word xs)
+
+fromConsList_Word Nil_Word = []
+fromConsList_Word (Cons_Word x xs) = x: fromConsList_Word xs
+
+replaceList_Word _ x Nil_Word = Nil_Word -- replace beyond end of list
+replaceList_Word 0 x (Cons_Word cx cxs) = Cons_Word x cxs
+replaceList_Word n x (Cons_Word cx cxs) = Cons_Word cx (replaceList_Word (n-1) x cxs)
+
+insertList_Word 0 x cxs = Cons_Word x cxs
+insertList_Word _ x Nil_Word  = Nil_Word   -- insert beyond end of list
+insertList_Word n x (Cons_Word cx cxs) = Cons_Word cx (insertList_Word (n-1) x cxs)
+
+removeList_Word _ Nil_Word  = Nil_Word -- remove beyond end of list
+removeList_Word 0 (Cons_Word cx cxs) = cxs
+removeList_Word n (Cons_Word cx cxs) = Cons_Word cx (removeList_Word (n-1) cxs)
+
+instance Editable List_Word Document Node ClipDoc where
+  select []    x                  = Clip_List_Word x
+  select (n:p) (List_Word _ cxs) = let xs = fromConsList_Word cxs
+                                  in  if n < length xs 
+                                      then select p (xs !! n)
+                                      else Clip_Nothing
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_List_Word c) _   = c
+  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Word")   x
+  paste (n:p) c (List_Word i1 cxs) = let xs = fromConsList_Word cxs
+                                    in  if n < length xs
+                                        then let x  = xs!!n
+                                                 x' = paste p c x
+                                             in  List_Word i1 (replaceList_Word n x' cxs)
+                                        else List_Word i1 cxs -- paste beyond end of list
+  paste _  _  x                  = x
+
+  alternatives _ = [("{List_Word}", Clip_List_Word hole)
+                   ]
+
+  arity (List_Word _ x1) = length (fromConsList_Word x1)
+  arity _                        = 0
+
+  parseErr = ParseErrList_Word
+
+  hole = List_Word NoIDD Nil_Word
+
+  isList _ = True
+
+  insertList n (Clip_Word c) (List_Word idd cxs) = Clip_List_Word $ List_Word idd (insertList_Word n c cxs)
+  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Word xs
+  insertList _ c xs                 = Clip_List_Word xs
+
+  removeList n (List_Word idd cxs) = Clip_List_Word $ List_Word idd (removeList_Word n cxs)
+  removeList _ xs                        = Clip_List_Word $ xs
 
 toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
 

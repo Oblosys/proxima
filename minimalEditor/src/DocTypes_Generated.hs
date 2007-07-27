@@ -59,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph List_SubGraph 
+data Root = Root IDD Tree Graph Paragraph List_SubGraph 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -69,6 +69,18 @@ data Tree = Bin IDD Tree Tree
           | Leaf IDD 
           | HoleTree
           | ParseErrTree (Presentation Document Node ClipDoc)
+             deriving Show
+
+
+data Paragraph = Paragraph IDD List_Word 
+               | HoleParagraph
+               | ParseErrParagraph (Presentation Document Node ClipDoc)
+                  deriving Show
+
+
+data Word = Word IDD String_ 
+          | HoleWord
+          | ParseErrWord (Presentation Document Node ClipDoc)
              deriving Show
 
 
@@ -118,6 +130,17 @@ data ConsList_SubGraph = Cons_SubGraph SubGraph ConsList_SubGraph
                           deriving Show
 
 
+data List_Word = List_Word IDD ConsList_Word 
+               | HoleList_Word
+               | ParseErrList_Word (Presentation Document Node ClipDoc)
+                  deriving Show
+
+
+data ConsList_Word = Cons_Word Word ConsList_Word 
+                   | Nil_Word 
+                      deriving Show
+
+
 data List_Vertex = List_Vertex IDD ConsList_Vertex 
                  | HoleList_Vertex
                  | ParseErrList_Vertex (Presentation Document Node ClipDoc)
@@ -153,12 +176,16 @@ data ClipDoc = Clip_Root Root
              | Clip_Int_ Int_
              | Clip_Tree Tree
              | Clip_Graph Graph
+             | Clip_Paragraph Paragraph
              | Clip_List_SubGraph List_SubGraph
+             | Clip_List_Word List_Word
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
              | Clip_Dummy Dummy
              
              | Clip_SubGraph SubGraph
+             
+             | Clip_Word Word
              
              | Clip_Vertex Vertex
              
@@ -187,6 +214,10 @@ data Node = NoNode
           | BinNode Tree Path 
           | LeafNode Tree Path 
           | HoleTreeNode Tree Path 
+          | ParagraphNode Paragraph Path 
+          | HoleParagraphNode Paragraph Path 
+          | WordNode Word Path 
+          | HoleWordNode Word Path 
           | GraphNode Graph Path 
           | HoleGraphNode Graph Path 
           | VertexNode Vertex Path 
@@ -199,6 +230,8 @@ data Node = NoNode
           | HoleList_DummyNode List_Dummy Path 
           | List_SubGraphNode List_SubGraph Path 
           | HoleList_SubGraphNode List_SubGraph Path 
+          | List_WordNode List_Word Path 
+          | HoleList_WordNode List_Word Path 
           | List_VertexNode List_Vertex Path 
           | HoleList_VertexNode List_Vertex Path 
           | List_EdgeNode List_Edge Path 
@@ -225,6 +258,10 @@ instance Show Node where
   show (BinNode _ _)  = "BinNode"
   show (LeafNode _ _)  = "LeafNode"
   show (HoleTreeNode _ _)  = "HoleTreeNode"
+  show (ParagraphNode _ _)  = "ParagraphNode"
+  show (HoleParagraphNode _ _)  = "HoleParagraphNode"
+  show (WordNode _ _)  = "WordNode"
+  show (HoleWordNode _ _)  = "HoleWordNode"
   show (GraphNode _ _)  = "GraphNode"
   show (HoleGraphNode _ _)  = "HoleGraphNode"
   show (VertexNode _ _)  = "VertexNode"
@@ -237,6 +274,8 @@ instance Show Node where
   show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
   show (List_SubGraphNode _ _)  = "List_SubGraphNode"
   show (HoleList_SubGraphNode _ _)  = "HoleList_SubGraphNode"
+  show (List_WordNode _ _)  = "List_WordNode"
+  show (HoleList_WordNode _ _)  = "HoleList_WordNode"
   show (List_VertexNode _ _)  = "List_VertexNode"
   show (HoleList_VertexNode _ _)  = "HoleList_VertexNode"
   show (List_EdgeNode _ _)  = "List_EdgeNode"

@@ -55,10 +55,10 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_SubGraph -> Root
-reuseRoot nodes  ma0 ma1 ma2 ma3
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe Paragraph -> Maybe List_SubGraph -> Root
+reuseRoot nodes  ma0 ma1 ma2 ma3 ma4
   = case extractFromNodes extractRoot defaultRoot nodes of
-           (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Root a0 a1 a2 a3 a4) -> reuse5 Root a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseRoot"
 
 reuseBin :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Tree -> Tree
@@ -72,6 +72,18 @@ reuseLeaf nodes  ma0
   = case extractFromNodes extractLeaf defaultLeaf nodes of
            (Leaf a0) -> reuse1 Leaf a0 ma0
            _ -> error "System error:<module>.reuseLeaf"
+
+reuseParagraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Word -> Paragraph
+reuseParagraph nodes  ma0 ma1
+  = case extractFromNodes extractParagraph defaultParagraph nodes of
+           (Paragraph a0 a1) -> reuse2 Paragraph a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseParagraph"
+
+reuseWord :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Word
+reuseWord nodes  ma0 ma1
+  = case extractFromNodes extractWord defaultWord nodes of
+           (Word a0 a1) -> reuse2 Word a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseWord"
 
 reuseGraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes  ma0 ma1 ma2
@@ -109,6 +121,12 @@ reuseList_SubGraph nodes  ma0 ma1
            (List_SubGraph a0 a1) -> reuse2 List_SubGraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_SubGraph"
 
+reuseList_Word :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Word -> List_Word
+reuseList_Word nodes  ma0 ma1
+  = case extractFromNodes extractList_Word defaultList_Word nodes of
+           (List_Word a0 a1) -> reuse2 List_Word a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Word"
+
 reuseList_Vertex :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Vertex -> List_Vertex
 reuseList_Vertex nodes  ma0 ma1
   = case extractFromNodes extractList_Vertex defaultList_Vertex nodes of
@@ -142,7 +160,7 @@ extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _ _ _) _)) = Just x
+extractRoot (Just (RootNode x@(Root _ _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractBin :: Maybe Node -> Maybe Tree
@@ -152,6 +170,14 @@ extractBin _ = Nothing
 extractLeaf :: Maybe Node -> Maybe Tree
 extractLeaf (Just (LeafNode x@(Leaf _) _)) = Just x
 extractLeaf _ = Nothing
+
+extractParagraph :: Maybe Node -> Maybe Paragraph
+extractParagraph (Just (ParagraphNode x@(Paragraph _ _) _)) = Just x
+extractParagraph _ = Nothing
+
+extractWord :: Maybe Node -> Maybe Word
+extractWord (Just (WordNode x@(Word _ _) _)) = Just x
+extractWord _ = Nothing
 
 extractGraph :: Maybe Node -> Maybe Graph
 extractGraph (Just (GraphNode x@(Graph _ _ _) _)) = Just x
@@ -177,6 +203,10 @@ extractList_SubGraph :: Maybe Node -> Maybe List_SubGraph
 extractList_SubGraph (Just (List_SubGraphNode x@(List_SubGraph _ _) _)) = Just x
 extractList_SubGraph _ = Nothing
 
+extractList_Word :: Maybe Node -> Maybe List_Word
+extractList_Word (Just (List_WordNode x@(List_Word _ _) _)) = Just x
+extractList_Word _ = Nothing
+
 extractList_Vertex :: Maybe Node -> Maybe List_Vertex
 extractList_Vertex (Just (List_VertexNode x@(List_Vertex _ _) _)) = Just x
 extractList_Vertex _ = Nothing
@@ -201,13 +231,19 @@ defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
 defaultRoot :: Root
-defaultRoot = Root NoIDD hole hole hole
+defaultRoot = Root NoIDD hole hole hole hole
 
 defaultBin :: Tree
 defaultBin = Bin NoIDD hole hole
 
 defaultLeaf :: Tree
 defaultLeaf = Leaf NoIDD
+
+defaultParagraph :: Paragraph
+defaultParagraph = Paragraph NoIDD hole
+
+defaultWord :: Word
+defaultWord = Word NoIDD hole
 
 defaultGraph :: Graph
 defaultGraph = Graph NoIDD hole hole
@@ -226,6 +262,9 @@ defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
 
 defaultList_SubGraph :: List_SubGraph
 defaultList_SubGraph = List_SubGraph NoIDD Nil_SubGraph
+
+defaultList_Word :: List_Word
+defaultList_Word = List_Word NoIDD Nil_Word
 
 defaultList_Vertex :: List_Vertex
 defaultList_Vertex = List_Vertex NoIDD Nil_Vertex
@@ -256,12 +295,6 @@ reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
-
-reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
-          a0 -> a1 -> a2 -> a3 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
-reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
 reuse1 :: (a0 -> r) -> 
           a0 -> 
