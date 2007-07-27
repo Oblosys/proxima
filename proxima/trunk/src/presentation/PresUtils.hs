@@ -243,6 +243,7 @@ locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' l
 locateTreePres' location (0:path) (StructuralP id pres)      = locateTreePres' location path pres
 locateTreePres' location (0:path) (ParsingP id pres)         = locateTreePres' location path pres
 locateTreePres' location (0:path) (LocatorP l pres)          = locateTreePres' (Just l) path pres
+locateTreePres' location (p:path) (FormatterP id press)      = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)
 locateTreePres' location pth      pr                         = debug Err ("*** PresUtils.locateTreePres: can't handle "++show pth++" "++ show pr++"***") Nothing
 
 isEditableTreePres path pres = isEditableTreePres' True path pres
@@ -460,6 +461,7 @@ pathToLeftmostLeaf (WithP _ pres)       = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (StructuralP _ pres) = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (ParsingP _ pres)    = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (LocatorP _ pres)    = 0 : pathToLeftmostLeaf pres
+pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
 
 pathToRightmostLeaf (StringP _ _)        = []
@@ -472,18 +474,20 @@ pathToRightmostLeaf (WithP _ pres)       = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (StructuralP _ pres) = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (ParsingP _ pres)    = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (LocatorP _ pres)    = 0 : pathToRightmostLeaf pres
+pathToRightmostLeaf (FormatterP _ press) = length press - 1  : pathToLeftmostLeaf (last press)
 pathToRightmostLeaf pres                 = debug Err ("PresUtils.pathToRightmostLeaf: can't handle "++show pres) []
 
 selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (p:path) (ColP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
-selectTree (0:path) (OverlayP _ (pres:press)) = selectTree path pres
+selectTree (p:path) (OverlayP _ press)        = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (0:path) (VertexP _ _ _ _ _ pres)  = selectTree path pres
 selectTree (0:path) (WithP _ pres)            = selectTree path pres
 selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
 selectTree (0:path) (ParsingP _ pres)         = selectTree path pres
 selectTree (0:path) (LocatorP _ pres)         = selectTree path pres
+selectTree (p:path) (FormatterP _ press)      = selectTree path (index "PresUtils.selectTree" press p)
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
 
 
@@ -498,6 +502,8 @@ pathsToAncestorRightSiblings root (p:path) (StructuralP _ pres)  = pathsToAncest
 pathsToAncestorRightSiblings root (p:path) (ParsingP _ pres)     = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (LocatorP _ pres)     = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (WithP _ pres)        = pathsToAncestorRightSiblings (root++[p]) path pres
+pathsToAncestorRightSiblings root (p:path) (FormatterP _ press)  = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
+                                                              ++ (if p < length press - 1 then [root++[p+1]] else [])
 pathsToAncestorRightSiblings root pth      pres                  = debug Err ("PresUtils.pathsToAncestorRightSiblings: can't handle "++show root++" "++show pth++" "++show pres) []
 
 
@@ -512,6 +518,8 @@ pathsToAncestorLeftSiblings root (p:path) (StructuralP _ pres)  = pathsToAncesto
 pathsToAncestorLeftSiblings root (p:path) (ParsingP _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (LocatorP _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (WithP _ pres)        = pathsToAncestorLeftSiblings (root++[p]) path pres 
+pathsToAncestorLeftSiblings root (p:path) (FormatterP _ press)  = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
+                                                             ++ (if p > 0 then [root++[p-1]] else [])
 pathsToAncestorLeftSiblings root pth      pres                  = debug Err ("PresUtils.pathsToAncestorLeftSiblings: can't handle "++show root++" "++show pth++" "++show pres) []
 
 
@@ -635,6 +643,7 @@ mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (le
 mouseDownDocPres' upd (p:path) (StructuralP _ pres)      = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (ParsingP _ pres)         = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd path pres
+mouseDownDocPres' upd (p:path) (FormatterP _ press)      = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes.mouseDownDocPres: can't handle "++show pth++" "++show pres) Nothing
 
 
