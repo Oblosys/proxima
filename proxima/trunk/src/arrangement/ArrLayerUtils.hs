@@ -34,11 +34,11 @@ pathAFromPathP' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path
 pathAFromPathP' (ColA _ _ _ _ _ _ _ _ arrs)     (ColP _ _ press)         (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path                                            
 pathAFromPathP' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path
 pathAFromPathP' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path -- edges are put after vertices, so selection is ok
-pathAFromPathP' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (p:path) = p:pathAFromPathP' arr pres path
-pathAFromPathP' arr                             (WithP ar pres)          (p:path) = pathAFromPathP' arr pres path -- ignore with path step 
-pathAFromPathP' (StructuralA _ arr)             (StructuralP _ pres)     (p:path) = p:pathAFromPathP' arr pres path
-pathAFromPathP' (ParsingA _ arr)                (ParsingP _ pres)        (p:path) = p:pathAFromPathP' arr pres path
-pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (p:path) = p:pathAFromPathP' arr pres path
+pathAFromPathP' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathAFromPathP' arr pres path
+pathAFromPathP' arr                             (WithP ar pres)          (0:path) = pathAFromPathP' arr pres path -- ignore with path step 
+pathAFromPathP' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathAFromPathP' arr pres path
+pathAFromPathP' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
+pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (FormatterP _ press)     path     = pathAFromPathPFormatter arr press path
 pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ show pr++"***") []
 -- should return NoPath
@@ -61,14 +61,14 @@ colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wro
 pathPFromPathA' _                               _                        []       = []
 pathPFromPathA' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
 pathPFromPathA' (ColA _ _ _ _ _ _ _ _ arrs)     (ColP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                       
-pathPFromPathA' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path) = 0:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
+pathPFromPathA' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
 pathPFromPathA' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path) = if p >= length press then [p] -- selection is on edge
                                                                                     else p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                            
-pathPFromPathA' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (p:path) = p:pathPFromPathA' arr pres path
+pathPFromPathA' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' arr                             (WithP _ pres)           (path)   = 0:pathPFromPathA' arr pres path -- add step for with node 
-pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (p:path) = p:pathPFromPathA' arr pres path
-pathPFromPathA' (ParsingA _ arr)                (ParsingP _ pres)        (p:path) = p:pathPFromPathA' arr pres path
-pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (p:path) = p:pathPFromPathA' arr pres path
+pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathPFromPathA' arr pres path
+pathPFromPathA' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
+pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' arr                             (FormatterP _ press)     path     = pathPFromPathAFormatter arr press path
 pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ show pr++"***") []
 
