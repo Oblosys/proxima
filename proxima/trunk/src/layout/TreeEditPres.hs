@@ -424,6 +424,7 @@ pasteTreePres editable p path clip (ParsingP id pres) = ParsingP  id (pasteTreeP
 pasteTreePres editable p path clip (LocatorP l pres) = LocatorP  l (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p path clip (VertexP id vid x y ol pres) = VertexP id vid x y ol (pasteTreePres editable (p++[0]) path clip pres)
+pasteTreePres editable p path clip (FormatterP id press) = FormatterP id (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p _ clip pr = text $ "TreeEditPres.pasteTreePres: can't handle "++ show pr
 
 
