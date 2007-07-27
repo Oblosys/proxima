@@ -254,10 +254,11 @@ isEditableTreePres' editable (p:path) (ColP id rf press)         = isEditableTre
 isEditableTreePres' editable (0:path) (OverlayP id press@(pres:_)) = isEditableTreePres' editable path (index "PresUtils.isEditableTreeTreePres'" press 0)              
 isEditableTreePres' editable (p:path) (GraphP id _ _ _ _ press) = isEditableTreePres' editable path (index "PresUtils.isEditableTreeTreePres'" press p)
 isEditableTreePres' editable (0:path) (VertexP id _ _ _ _ pres)  = isEditableTreePres' editable path pres
-isEditableTreePres' editable (p:path) (WithP ar pres)            = isEditableTreePres' editable path pres
-isEditableTreePres' editable (p:path) (StructuralP id pres)      = isEditableTreePres' False path pres
-isEditableTreePres' editable (p:path) (ParsingP id pres)         = isEditableTreePres' True path pres
-isEditableTreePres' editable (p:path) (LocatorP l pres)          = isEditableTreePres' editable path pres
+isEditableTreePres' editable (0:path) (WithP ar pres)            = isEditableTreePres' editable path pres
+isEditableTreePres' editable (0:path) (StructuralP id pres)      = isEditableTreePres' False path pres
+isEditableTreePres' editable (0:path) (ParsingP id pres)         = isEditableTreePres' True path pres
+isEditableTreePres' editable (0:path) (LocatorP l pres)          = isEditableTreePres' editable path pres
+isEditableTreePres' editable (p:path) (FormatterP id press)      = isEditableTreePres' editable path (index "PresUtils.isEditableTreePres'" press p)
 isEditableTreePres' editable pth      pr                         = debug Err ("*** PresUtils.isEditableTreePres': can't handle "++show pth++" "++ show pr++"***") False
 
 
