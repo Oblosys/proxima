@@ -125,7 +125,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; gc <- gcNew pm
             ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                                 -- since arranger already only arranges elements in view
-                                                -- currently, it only prevents rendering edges of partially viewed graphs
+                                                -- currently, it only prevents rendering edges out of view
 
             -- paint events are less frequent than generic handler events, so we render here
             -- a possible optimization is to only render on the pixmap once. 
