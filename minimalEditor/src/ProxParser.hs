@@ -27,7 +27,7 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in  --debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
+                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
        
 deepShowTks i tok = case tok of
@@ -61,19 +61,19 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str (d1,graph1) (d2,graph2) tree dssubGraphs  ->
+          (\str (d1,graph1) (d2,graph2) tree para dssubGraphs  ->
               let (ds,subGraphs) = unzip dssubGraphs
                   (dsup, superGraph) = resolveCopies (d1,graph1) (d2,graph2)
                   (superGraph',subgraphs') = resolveSubgraphs (dsup,superGraph) (ds, subGraphs)
               in debug Prs ("\n\nparsedGraph: "++show (d1,d2,ds)) $ 
                  reuseRoot [tokenNode str] Nothing (Just tree) (Just superGraph')
-                                           Nothing -- paragraph
+                                           (Just para)
                                            (Just (toList_SubGraph subgraphs')) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-      <*  pStructural ParagraphNode
+      <*> pPrs parseParagraph
       <*> pList recognizeSubGraph
  where resolveCopies (Dirty,g1) (_,g2) = (Dirty,g1)
        resolveCopies (Clean,g1) (Dirty,g2) = (Dirty, g2)
@@ -165,16 +165,6 @@ parseLabel = pPrs $
           (\str -> String_ NoIDD str)
       <$> pText
 
--- simple free text parsing. Does not work for label, since space is tokenized away
-pText = concat <$> pList (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
-
-pUIdent = pCSym 20 uIdentTk
-pOp = pCSym 20 opTk
-pSymm = pCSym 20 symTk
---
-
-
-
 recognizeSubGraph :: ListParser Document Node ClipDoc (Dirty, SubGraph)
 recognizeSubGraph = pStrDirty $
           (\str gt vs -> (getGraphTkDirty gt
@@ -210,9 +200,29 @@ keywords :: [String]
 keywords = 
   [ "Leaf"
   , "Bin"
+  , " "  -- The formatter scanner now produces " " tokens which are handled as keywords
   ]
 
 
+parseParagraph =
+          (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))
+      <$> pList parseWord
+
+parseWord = 
+          (\str -> reuseWord [] Nothing (Just $ String_ NoIDD str))
+      <$> pText
+      <*  pKey " "  -- the Scanner produces " " tokens, which are converted to key tokens
+
+
+
+
+-- simple free text parsing. Spaces are tokenized away.
+pText = concat <$> pList (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
+
+pUIdent = pCSym 20 uIdentTk
+pOp = pCSym 20 opTk
+pSymm = pCSym 20 symTk
+--
 
 
 

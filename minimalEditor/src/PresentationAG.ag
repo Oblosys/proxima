@@ -65,12 +65,12 @@ SEM Root
                          
 SEM Paragraph
   | Paragraph
-      lhs.pres = loc (ParagraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      formatter @words.press `withFontSize` 12
 
 SEM Word [ || ]
   | Word
-      lhs.pres = loc (WordNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ @word.pres, text " " ]
 SEM Tree
   | Bin
