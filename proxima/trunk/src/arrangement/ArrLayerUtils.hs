@@ -44,7 +44,7 @@ pathAFromPathP' ar                              pr                       pth    
 -- should return NoPath
 
 -- p is the index in the formatter and is mapped on an index in the column of rows
-pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ rowArrs) press (p:path) = debug Err ("\n\n\nformatter index is:"++show p) $
+pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ rowArrs) press (p:path) =
   let (arr, (cIx, rIx)) = colRowIx rowArrs 0 p
   in  cIx : rIx : pathAFromPathP' arr (index "ArrLayerUtils.pathAFromPathP'" press p) path
 pathAFromPathPFormatter _                           press path = debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture") []
@@ -52,7 +52,7 @@ pathAFromPathPFormatter _                           press path = debug Err ("Arr
 
 colRowIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) cIx ix =
   if ix < length arrs 
-  then showDebug' Err "\n\n\n\nWe are onnn: " $ (index "ArrLayerUtils.colRowIx" arrs ix, (cIx, ix))
+  then (index "ArrLayerUtils.colRowIx" arrs ix, (cIx, ix))
   else colRowIx rowArrs (cIx+1) (ix-length arrs)
 colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0, (0,0))
 
@@ -82,7 +82,7 @@ pathPFromPathAFormatter _                           press path = debug Err ("Arr
 formatterIx :: Show node => [Arrangement node] -> Int -> (Int, Int) -> (Arrangement node, Int)
 formatterIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) ix (cIx, rIx) =
   if cIx == 0 
-  then showDebug' Err "\n\n\n\nWe are on: " $ (index "ArrLayerUtils.colRowIx" arrs rIx, ix+rIx)
+  then (index "ArrLayerUtils.colRowIx" arrs rIx, ix+rIx)
   else formatterIx rowArrs (ix+length arrs) (cIx-1,rIx) 
 formatterIx _ _ _ =  debug Err ("ArrLayerUtils.formatterIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0, 0)
 

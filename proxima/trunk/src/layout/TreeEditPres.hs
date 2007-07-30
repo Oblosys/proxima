@@ -257,6 +257,8 @@ deleteTreePres editable p focus          (ParsingP id pres)  = ParsingP id (dele
 deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
 --deleteTreePres editable p focus          (GraphP id d w h es pres) = GraphP id d w h es (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p focus          (VertexP id vid x y ol pres) = VertexP id vid x y ol (deleteTreePres editable (p++[0]) focus pres)
+deleteTreePres editable p (FocusP st en) (FormatterP id press) = let press' = deleteTreeRow editable p 0 (FocusP st en) press
+                                                     in  FormatterP id press'
 deleteTreePres editable p f pr = debug Err ("TreeEditPres.deleteTreePres: can't handle "++show f++" "++ show pr) $ pr
 
 --pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
@@ -365,6 +367,7 @@ deleteTreePresF editable updp p focus          (WithP ar pres)    = deleteTreePr
 deleteTreePresF editable updp p focus          (StructuralP id pres)  = deleteTreePresF False (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (ParsingP id pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (LocatorP l pres)  = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
+deleteTreePresF editable updp p (FocusP st en) (FormatterP id press) = deleteTreeRowF editable updp p 0 (FocusP st en) press
 deleteTreePresF editable updp p f pr = debug Err ("TreeEditPres.deleteTreePresF: can't handle "++show f++" "++ show pr) []
 
 deleteTreeRowF editable updp p i _ [] = debug Err "problem" updp
@@ -375,10 +378,10 @@ deleteTreeRowF editable updp p i focus@(FocusP (PathP stp sti) (PathP enp eni)) 
                            then -- editable is ignored, case does not occur
                                 debug Err "problem" deleteTreeRowF editable updp p (i+1) focus press
                            else if stp < (p++[i]) 
-                           then debug Err "a" $ deleteTreePresF editable (updp++[i]) (p++[i]) focus pres
+                           then deleteTreePresF editable (updp++[i]) (p++[i]) focus pres
                            else if stp < (p++[i+1])
-                           then debug Err "b" $ deleteTreePresF editable (updp++[i]) (p++[i]) focus pres
-                           else debug Err "c" $ deleteTreeRowF editable updp p (i+1) focus press
+                           then deleteTreePresF editable (updp++[i]) (p++[i]) focus pres
+                           else deleteTreeRowF editable updp p (i+1) focus press
 deleteTreeColF editable updp p i _ [] = debug Err "problem" updp
 {-
     pres : press
@@ -542,6 +545,13 @@ splitRowTreePres editable p path           (LocatorP l pres) =
                      then Left (LocatorP l p1, LocatorP l p2)
                      else Right $ LocatorP l pres
      Right p      -> Right $ LocatorP l p
+splitRowTreePres editable p path            (FormatterP id press) =
+  case splitRowTreePresList editable p 0 path press of
+    Left (ps1, ps2) -> if editable
+                       then let lenps1 = length ps1
+                            in  Left (FormatterP id ps1, FormatterP NoIDP ps2)
+                       else Right $ FormatterP id press
+    Right ps        -> Right $ FormatterP id ps
 splitRowTreePres editable p _ pr = Right $ text $ "TreeEditPres.splitRowTreePres: can't handle "++ show pr
 
 splitRowTreePresList editable p i _ [] = Right []  -- This will not occur.
@@ -594,6 +604,10 @@ splitRowTreePresPth editable (p:path) (LocatorP l pres) =
   case splitRowTreePresPth editable path pres of
     Left pth  -> if editable then  Left $ 0:pth else Right $ p:pth
     Right pth -> Right $ 0:pth
+splitRowTreePresPth editable (p:path) (FormatterP id press) = 
+  case splitRowTreePresPth editable path (index "TreeEditPres.splitRowTreePresPth" press p) of
+    Left pth -> if editable then Left $ 0:pth else Right $ p:pth
+    Right pth -> Right $ p:pth
 splitRowTreePresPth editable pth pr = debug Err ("*** TreeEditPres.splitRowTreePresPth: can't handle "++show pth++" "++ show pr++"***") Right []
 -- should return a NoFocusP here
 
