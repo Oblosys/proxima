@@ -7,7 +7,8 @@ import LayLayerUtils
 
 import DocTypes_Generated (Node (..))
 
-
+-- tokenize traverses the structural parts of the presentation tree. On the parsing branches,
+-- tokenize' is called.
 tokenize :: Int -> Maybe Node -> Presentation doc Node clip ->
             (Presentation doc Node clip, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize

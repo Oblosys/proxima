@@ -55,7 +55,7 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe Paragraph -> Maybe List_SubGraph -> Root
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_Paragraph -> Maybe List_SubGraph -> Root
 reuseRoot nodes  ma0 ma1 ma2 ma3 ma4
   = case extractFromNodes extractRoot defaultRoot nodes of
            (Root a0 a1 a2 a3 a4) -> reuse5 Root a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
@@ -114,6 +114,12 @@ reuseList_Dummy nodes  ma0 ma1
   = case extractFromNodes extractList_Dummy defaultList_Dummy nodes of
            (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Dummy"
+
+reuseList_Paragraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Paragraph -> List_Paragraph
+reuseList_Paragraph nodes  ma0 ma1
+  = case extractFromNodes extractList_Paragraph defaultList_Paragraph nodes of
+           (List_Paragraph a0 a1) -> reuse2 List_Paragraph a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Paragraph"
 
 reuseList_SubGraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_SubGraph -> List_SubGraph
 reuseList_SubGraph nodes  ma0 ma1
@@ -199,6 +205,10 @@ extractList_Dummy :: Maybe Node -> Maybe List_Dummy
 extractList_Dummy (Just (List_DummyNode x@(List_Dummy _ _) _)) = Just x
 extractList_Dummy _ = Nothing
 
+extractList_Paragraph :: Maybe Node -> Maybe List_Paragraph
+extractList_Paragraph (Just (List_ParagraphNode x@(List_Paragraph _ _) _)) = Just x
+extractList_Paragraph _ = Nothing
+
 extractList_SubGraph :: Maybe Node -> Maybe List_SubGraph
 extractList_SubGraph (Just (List_SubGraphNode x@(List_SubGraph _ _) _)) = Just x
 extractList_SubGraph _ = Nothing
@@ -259,6 +269,9 @@ defaultSubGraph = SubGraph NoIDD hole hole
 
 defaultList_Dummy :: List_Dummy
 defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
+
+defaultList_Paragraph :: List_Paragraph
+defaultList_Paragraph = List_Paragraph NoIDD Nil_Paragraph
 
 defaultList_SubGraph :: List_SubGraph
 defaultList_SubGraph = List_SubGraph NoIDD Nil_SubGraph

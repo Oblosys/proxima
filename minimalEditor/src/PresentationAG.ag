@@ -55,18 +55,21 @@ SEM Root
                            
                            , row [ @graph.pres, @graph.pres ]
                            , @tree.pres
-                           , @paragraph.pres
+                           , @paragraphs.pres
                            ] ++ @subGraphs.press
                              ++ [ row [ text "Add view" `withMouseDown` insertNewSubgraph @lhs.path
                                       , text " "
                                       , text "Remove view" `withMouseDown` removeLastSubgraph @lhs.path 
                                       ]
                                 ]
-                         
+SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
+  | List_Paragraph
+      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
+                     col $ @elts.press
 SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     formatter @words.press `withFontSize` 12
+                     col $ [ formatter @words.press `withFontSize` 12 ]
 
 SEM Word [ || ]
   | Word

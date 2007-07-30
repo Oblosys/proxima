@@ -9,7 +9,7 @@ data Dummy = Dummy [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because
 -- Don't remove the declarations above
 
 
-data Root = Root Tree graph:Graph paragraph:Paragraph subGraphs:[SubGraph] { idd : IDD }
+data Root = Root Tree graph:Graph paragraphs:[Paragraph] subGraphs:[SubGraph] { idd : IDD }
 
 -- Tree is here to keep testing parsing facilities during Proxima development
 data Tree = Bin left:Tree right:Tree { idd : IDD }

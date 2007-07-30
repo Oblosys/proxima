@@ -59,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph Paragraph List_SubGraph 
+data Root = Root IDD Tree Graph List_Paragraph List_SubGraph 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -119,6 +119,17 @@ data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy
                        deriving Show
 
 
+data List_Paragraph = List_Paragraph IDD ConsList_Paragraph 
+                    | HoleList_Paragraph
+                    | ParseErrList_Paragraph (Presentation Document Node ClipDoc)
+                       deriving Show
+
+
+data ConsList_Paragraph = Cons_Paragraph Paragraph ConsList_Paragraph 
+                        | Nil_Paragraph 
+                           deriving Show
+
+
 data List_SubGraph = List_SubGraph IDD ConsList_SubGraph 
                    | HoleList_SubGraph
                    | ParseErrList_SubGraph (Presentation Document Node ClipDoc)
@@ -176,12 +187,14 @@ data ClipDoc = Clip_Root Root
              | Clip_Int_ Int_
              | Clip_Tree Tree
              | Clip_Graph Graph
-             | Clip_Paragraph Paragraph
+             | Clip_List_Paragraph List_Paragraph
              | Clip_List_SubGraph List_SubGraph
              | Clip_List_Word List_Word
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
              | Clip_Dummy Dummy
+             
+             | Clip_Paragraph Paragraph
              
              | Clip_SubGraph SubGraph
              
@@ -228,6 +241,8 @@ data Node = NoNode
           | HoleSubGraphNode SubGraph Path 
           | List_DummyNode List_Dummy Path 
           | HoleList_DummyNode List_Dummy Path 
+          | List_ParagraphNode List_Paragraph Path 
+          | HoleList_ParagraphNode List_Paragraph Path 
           | List_SubGraphNode List_SubGraph Path 
           | HoleList_SubGraphNode List_SubGraph Path 
           | List_WordNode List_Word Path 
@@ -272,6 +287,8 @@ instance Show Node where
   show (HoleSubGraphNode _ _)  = "HoleSubGraphNode"
   show (List_DummyNode _ _)  = "List_DummyNode"
   show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
+  show (List_ParagraphNode _ _)  = "List_ParagraphNode"
+  show (HoleList_ParagraphNode _ _)  = "HoleList_ParagraphNode"
   show (List_SubGraphNode _ _)  = "List_SubGraphNode"
   show (HoleList_SubGraphNode _ _)  = "HoleList_SubGraphNode"
   show (List_WordNode _ _)  = "List_WordNode"

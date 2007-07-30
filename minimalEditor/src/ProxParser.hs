@@ -73,7 +73,7 @@ recognizeRoot = pStr $
       <*> recognizeGraph
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-      <*> pPrs parseParagraph
+      <*> pPrs parseParagraphs
       <*> pList recognizeSubGraph
  where resolveCopies (Dirty,g1) (_,g2) = (Dirty,g1)
        resolveCopies (Clean,g1) (Dirty,g2) = (Dirty, g2)
@@ -201,23 +201,30 @@ keywords =
   [ "Leaf"
   , "Bin"
   , " "  -- The formatter scanner now produces " " tokens which are handled as keywords
+  , "\n"
   ]
 
 
+parseParagraphs = toList_Paragraph 
+      <$> pList1 parseParagraph
+
 parseParagraph =
           (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))
-      <$> pList parseWord
+      <$  pList (pKey " ")
+      <*> pList parseWord
+      <*  pKey "\n"
 
 parseWord = 
           (\str -> reuseWord [] Nothing (Just $ String_ NoIDD str))
       <$> pText
-      <*  pKey " "  -- the Scanner produces " " tokens, which are converted to key tokens
-
+      <*  pList (pKey " ")  
+      -- the Scanner produces " " tokens, which are converted to key tokens
+      -- split adds a " \n", so maybe we encounter two spaces
 
 
 
 -- simple free text parsing. Spaces are tokenized away.
-pText = concat <$> pList (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
+pText = concat <$> pList1 (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
 
 pUIdent = pCSym 20 uIdentTk
 pOp = pCSym 20 opTk
