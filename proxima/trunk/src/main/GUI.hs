@@ -1,23 +1,15 @@
 module GUI where
 
-
-
-
 {-
+Initialization of the document is done with timer handler, because it may show a dialog (about the
+backup document), which is not possible before the GUI event loop is started. The initialization
+handler starts the backup handler, so this won't be called before initialization.
 
-fix item lists
-fix rectangle
-fix wrong hRef (hSpaces are the problem)
-
--}
-
-
-
-{-
-title set?
-optimization?
 
 Unclear: if edit is skip, update renderingLevel? Maybe it was changed by renderer? (popup etc.)
+
+TODO: fix wrong hRef (hSpaces are the problem)
+
 -}
 import Graphics.UI.Gtk hiding (Size)
 import Data.IORef
@@ -35,6 +27,9 @@ import Directory
 
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
+
+documentFilename = "Document.xml"
+backupFilename = "BackupDocument.xml"
 
 startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
             IORef CommonTypes.Rectangle ->
@@ -67,7 +62,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-
+    ; onDelete window $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; fileMenu <- mkMenu
         [ ("_Open", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
         , ("_Save", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
@@ -91,7 +86,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; widgetShowAll window
       
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
-
+    
     --; sequence_ $ replicate 100 $  -- for profiling
     --    genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     
@@ -99,7 +94,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     -- interpret twice, so helium code in strings is also parsed
 
-       
+    ; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; mainGUI
     }    
 
@@ -319,3 +314,51 @@ translateKey _    _ _ = SkipRen 0
 
 translateModifiers :: [Modifier] -> CommonTypes.Modifiers
 translateModifiers ms = CommonTypes.Modifiers (Shift `elem` ms) (Control `elem` ms) (Alt `elem` ms)
+
+
+
+initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+ do { backupExists <- doesFileExist backupFilename
+    ; filename <-
+        if backupExists 
+        then 
+         do { response <- okDialog "During the previous session, Proxima terminated unexpectedly. Do you wish to continue editing the document from that session?"
+            ; if response == ResponseOk
+              then return backupFilename -- we do not delete the backup, in case Proxima crashes again.
+              else do { removeFile backupFilename 
+                      ; return documentFilename
+                      }
+            }
+        else return documentFilename
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
+    
+    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas )
+                 30000 -- about every half minute, save a backup of the document
+    }
+
+backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+ do { let editRendering = SaveFileRen backupFilename 
+ 
+      -- Parse and save
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
+    ; return True
+    }
+         
+closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas _ =
+ do { removeFile backupFilename 
+    ; return False -- False means exit
+    }
+    
+okDialog txt =
+ do { dia <- dialogNew
+    ; dialogAddButton dia stockOk ResponseOk
+    ; dialogAddButton dia stockCancel ResponseCancel
+    ; contain <- dialogGetUpper dia
+    ; msg <- labelNew (Just txt)
+    ; contain `boxPackStartDefaults` msg
+    ; widgetShow msg
+    ; response <- dialogRun dia
+    ; widgetDestroy dia
+    ; return response
+    }
