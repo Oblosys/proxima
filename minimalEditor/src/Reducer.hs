@@ -84,15 +84,7 @@ saveFile filePath doc =
 
 
 initDoc :: IO Document
-initDoc = 
- do { mDoc <- openFile "Document.xml"
-    ; case mDoc of
-        Just doc -> return doc
-        Nothing  -> do { debugLnIO Err "Using default initial document instead"
-                       ; return defaultInitDoc
-                       }
-    }
-
+initDoc = return defaultInitDoc
 
 openFile :: String -> IO (Maybe Document)
 openFile fileName =
