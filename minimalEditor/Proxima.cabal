@@ -51,8 +51,6 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                ProxParser_Generated Reducer Scanner
 ghc-prof-options: -auto-all
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
--- -prof -auto-all
--- -w is disable warnings, which are annoying in Visual Haskell
 hugs-options:
 nhc-options:
 jhc-options:
