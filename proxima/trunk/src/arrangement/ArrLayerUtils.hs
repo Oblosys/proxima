@@ -56,8 +56,8 @@ colRowIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) cIx ix =
   else colRowIx rowArrs (cIx+1) (ix-length arrs)
 colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0, (0,0))
 
-
 -- Both levels are necessary because of formatters.
+pathPFromPathA' arr                             (WithP _ pres)           path     = 0:pathPFromPathA' arr pres path -- add step for with node 
 pathPFromPathA' _                               _                        []       = []
 pathPFromPathA' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
 pathPFromPathA' (ColA _ _ _ _ _ _ _ _ arrs)     (ColP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                       
@@ -65,7 +65,6 @@ pathPFromPathA' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path
 pathPFromPathA' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path) = if p >= length press then [p] -- selection is on edge
                                                                                     else p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                            
 pathPFromPathA' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathPFromPathA' arr pres path
-pathPFromPathA' arr                             (WithP _ pres)           (path)   = 0:pathPFromPathA' arr pres path -- add step for with node 
 pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
