@@ -556,41 +556,6 @@ subtractDoublePointVector (DoublePoint x0 y0) (DoublePoint x1 y1) =
 dotProduct :: Vector -> Vector -> Double
 dotProduct (Vector v1 v2) (Vector w1 w2) = v1 * w1 + v2 * w2
 
-
-{-
----- algorithms 
-type Point p = (p,p)
-
-data (Point p, Num a)         => Polygon p a 
-			      = PolygonCW [p a] 
-			      | PolygonCCW [p a]
-
-type Polygon2 a		      = Polygon Point2 a
-
---polygon			      :: (Ord a, Num a) => [P2 a] -> Polygon p a
---polygon			      = PolygonCW . deleteCollinear
-
-mapPolygon		      :: (Point p, Num a, Num b) => (p a -> p b) 
-			      -> Polygon p a -> Polygon p b
-mapPolygon f (PolygonCW xs)   = PolygonCW (map f xs)
-mapPolygon f (PolygonCCW xs)  = PolygonCCW (map f xs)
-
-vertices                      :: (Point p, Num a) => Polygon p a -> [p a]
-vertices (PolygonCW ps)       = reverse ps
-vertices (PolygonCCW ps)      = ps
-
-edges                         :: [a] -> [(a,a)]
-edges xs                      = zip xs (rotateL xs)
-
-angles                        :: [a] -> [(a,a,a)]
-angles xs                     = zip3 (rotateR xs) xs (rotateL xs)
-
-instance (Eq a, Num a, Point p) => Eq (Polygon p a) where
--- x == y                     = ys == rotateTo (head ys) xs
-   x == y                     = and (zipWith (<==>) ys (rotateToBy (<==>) (head ys) xs))
-     where xs                 = vertices x 
-	   ys		      = vertices y
--}
 edges vs = (head vs, last vs) : edges' vs
  where edges' (e1:rest@(e2:_)) = (e1,e2) : edges' rest
        edges' _                = []
