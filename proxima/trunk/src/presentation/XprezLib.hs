@@ -1,4 +1,4 @@
-module XprezLib (module CommonTypes, module XprezLib) where
+module XprezLib where
 
 import CommonTypes
 import DocTypes

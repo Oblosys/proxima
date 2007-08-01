@@ -3,6 +3,7 @@ module TreeEditPres where
 -- import IOExts
 
 import CommonTypes
+import CommonUtils
 import DocTypes
 import PresTypes
 

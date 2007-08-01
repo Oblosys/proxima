@@ -1,4 +1,4 @@
-module PresUtils (module CommonUtils, module XprezLib, module PresUtils) where
+module PresUtils (module XprezLib, module PresUtils) where
 
 import CommonTypes
 import PresTypes
