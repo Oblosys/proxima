@@ -320,7 +320,7 @@ translateModifiers ms = CommonTypes.Modifiers (Shift `elem` ms) (Control `elem` 
 initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas =
  do { backupExists <- doesFileExist backupFilename
     ; filename <-
-        if backupExists 
+        if False -- backupExists 
         then 
          do { response <- okDialog "During the previous session, Proxima terminated unexpectedly. Do you wish to continue editing the document from that session?"
             ; if response == ResponseOk
@@ -332,8 +332,8 @@ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
         else return documentFilename
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
     
-    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas )
-                 30000 -- about every half minute, save a backup of the document
+--    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas )
+--                 30000 -- about every half minute, save a backup of the document
     }
 
 backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
