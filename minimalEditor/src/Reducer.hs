@@ -135,16 +135,21 @@ replaceSubgraphs sections subgraphs =
 -- if the graph is clean, and one of the subgraphs dirty, resolveSubgraphs
 -- adds the edges from the dirty subgraph to the graph
 -- if the graph is dirty, any vertices not in the graph are removed from the subgraphs 
+-- and we also need to delete edges to or from non-existent nodes
 resolveSubgraphs :: Graph -> [Subgraph] -> (Graph, [Subgraph])
-resolveSubgraphs graph@(Graph _ graphDirty vs _) subgraphs = debug Err (show graph) $
+resolveSubgraphs graph@(Graph idd graphDirty vs es) subgraphs =
   if isCleanDoc graphDirty 
   then case filter (\(Subgraph _ d _ _) -> not $ isCleanDoc d) $ subgraphs of
          [] -> (graph, subgraphs) -- all are clean
          (dirtySubgraph:_) -> -- at least one subgraph dirty
             (addEdgesFromSubgraph dirtySubgraph graph, subgraphs)
   else -- graph is dirty    remove deleted nodes from subgraphs
-    let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
-    in (graph, map (removeOldVertices superGraphIDs) subgraphs)
+    let superGraphIDs = map getID_Vertex $ fromList_Vertex vs        
+        correctEdges = filter (\e -> getFrom_Edge e `elem` superGraphIDs &&
+                                     getTo_Edge e `elem` superGraphIDs ) 
+                              (fromList_Edge es) 
+    in ( Graph idd graphDirty vs (toList_Edge correctEdges)
+       , map (removeOldVertices superGraphIDs) subgraphs)
 
 removeOldVertices vertexIDs (Subgraph id d vs es) = 
   let subgraphVertices' = toList_Vertex $ filter (\v -> getID_Vertex v `elem` vertexIDs) $
