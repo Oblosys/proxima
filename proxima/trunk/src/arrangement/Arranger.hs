@@ -23,6 +23,8 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
   --  ; debugLnIO Err ("pruned presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' screenSize viewedArea oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
+    ; putStrLn $ show attrTree
+          
     ; if maxFDepth == 0 then
         return attrTree
       else if maxFDepth == 1 

@@ -59,7 +59,7 @@ unfoldFormatter w ws presentations =
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (rows)
- in  --debug Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
+ in  showDebug' Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
            unfoldedList
 
 
@@ -426,7 +426,7 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
       loc.minWidth = sum @presentationList.minWidthList
       loc.minHeight = @minTopHeight + @minBottomHeight
       loc.hStretch = or @presentationList.hStretchList
-      loc.vStretch = and @presentationList.vStretchList -- False  -- maybe true if there are only stretch children
+      loc.vStretch = not (null @presentationList.vStretchList) && and @presentationList.vStretchList
       loc.hRef = @minTopHeight
       loc.vRef = if null @presentationList.vRefList then 0
                  else sum (take @vRefNr @presentationList.minWidthList) + @presentationList.vRefList !! @vRefNr
@@ -437,7 +437,7 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
                           else maximum [ minWidth - vRef | (minWidth, vRef) <- zip @presentationList.minWidthList @presentationList.vRefList ]
       loc.minWidth = @minLeftWidth + @minRightWidth 
       loc.minHeight = sum @presentationList.minHeightList
-      loc.hStretch = and @presentationList.hStretchList -- False  -- maybe true if there are only stretch children
+      loc.hStretch = not (null @presentationList.hStretchList) && and @presentationList.hStretchList
       loc.vStretch = or @presentationList.vStretchList
       loc.hRef = if null @presentationList.hRefList then 0
                  else sum (take @hRefNr @presentationList.minHeightList) + @presentationList.hRefList !! @hRefNr
@@ -449,8 +449,8 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
       loc.minTopHeight = maximum @presentationList.hRefList 
       loc.minBottomHeight = maximum [ minHeight - hRef | (minHeight, hRef) <- zip @presentationList.minHeightList @presentationList.hRefList ]
       loc.minHeight = @minTopHeight + @minBottomHeight
-      loc.hStretch = and @presentationList.hStretchList
-      loc.vStretch = and @presentationList.vStretchList
+      loc.hStretch = not (null @presentationList.hStretchList) && and @presentationList.hStretchList
+      loc.vStretch = not (null @presentationList.vStretchList) && and @presentationList.vStretchList
       loc.hRef = @minTopHeight
       loc.vRef = @minLeftWidth
   | FormatterP
@@ -542,7 +542,7 @@ SEM PresentationList
 SEM Root
   | Root -- if scr < min, assign min
       presentation.assignedWidth = if @presentation.hStretch then @lhs.screenWidth else @presentation.minWidth
-      presentation.assignedHeight = if @presentation.vStretch then 300 else @presentation.minHeight -- should be screenHeight
+      presentation.assignedHeight = if @presentation.vStretch then 800 else @presentation.minHeight -- should be screenHeight
       presentation.assignedHRef = @presentation.hRef -- is ignored anyway 
       presentation.assignedVRef = @presentation.vRef 
 
