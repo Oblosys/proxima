@@ -103,7 +103,7 @@ recognizeSection = pStr $
 --         does not have to do this)
 recognizeGraph :: ListParser Document Node ClipDoc Graph
 recognizeGraph = pStr $
-          (\str gt vs -> reuseGraph [tokenNode str] Nothing Nothing 
+          (\str gt vs -> reuseGraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                    [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
@@ -134,7 +134,8 @@ parseLabel = pPrs $
 
 recognizeSubgraph :: ListParser Document Node ClipDoc Subgraph
 recognizeSubgraph = pStr $
-          (\str gt vs -> reuseSubgraph [tokenNode str] Nothing Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
+          (\str gt vs -> reuseSubgraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt)  
+                                     (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                      (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                      [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt])
                       )
@@ -142,9 +143,9 @@ recognizeSubgraph = pStr $
       <*> pSym graphTk
       <*> pList recognizeVertex
 
-getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> CommonTypes.Dirty
-getGraphTkDirty (GraphTk dirty _ _ _) = dirty
-getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ CommonTypes.Dirty
+getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> Dirty
+getGraphTkDirty (GraphTk dirty _ _ _) = if isClean dirty then Clean NoIDD else Dirty NoIDD
+getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ Dirty NoIDD
 
 getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
 getGraphTkEdges (GraphTk _ edges _ _) = edges
@@ -172,7 +173,7 @@ keywords =
 
 
 parseParagraphs = toList_Paragraph 
-      <$> pList1 parseParagraph
+      <$> pList parseParagraph
 
 parseParagraph =
           (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))

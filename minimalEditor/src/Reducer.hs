@@ -9,6 +9,7 @@ import PresTypes -- for initDoc
 
 import DocTypes_Generated
 import DocUtils_Generated
+import DocumentEdit_Generated
 import Text.ParserCombinators.Parsec
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
@@ -70,8 +71,6 @@ reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocu
   (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
 
-reduceRoot (Root idd g t ss) = Root idd g t ss
-
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
@@ -115,4 +114,53 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 
 
 
+isCleanDoc (Clean _) = True
+isCleanDoc _         = False
+
+reduceRoot (Root idd tree graph sections) =
+  let subgraphs = getSubgraphs sections
+      (graph', subgraphs') = resolveSubgraphs graph subgraphs
+  in  Root idd tree graph' (replaceSubgraphs sections subgraphs')
+
+getSubgraphs :: List_Section -> [Subgraph]
+getSubgraphs sections = map getSubgraph (fromList_Section sections)
+  where getSubgraph (Section _ _ subgraph) = subgraph
+
+-- replace each subgraph in sections with a subgraph from subgraphs
+replaceSubgraphs :: List_Section -> [Subgraph] -> List_Section
+replaceSubgraphs sections subgraphs = 
+  toList_Section $ zipWith replaceSubgraph (fromList_Section sections) subgraphs
+  where replaceSubgraph (Section idd paras _) subgraph = Section idd paras subgraph
+  
+-- if the graph is clean, and one of the subgraphs dirty, resolveSubgraphs
+-- adds the edges from the dirty subgraph to the graph
+-- if the graph is dirty, any vertices not in the graph are removed from the subgraphs 
+resolveSubgraphs :: Graph -> [Subgraph] -> (Graph, [Subgraph])
+resolveSubgraphs graph@(Graph _ graphDirty vs _) subgraphs = debug Err (show graph) $
+  if isCleanDoc graphDirty 
+  then case filter (\(Subgraph _ d _ _) -> not $ isCleanDoc d) $ subgraphs of
+         [] -> (graph, subgraphs) -- all are clean
+         (dirtySubgraph:_) -> -- at least one subgraph dirty
+            (addEdgesFromSubgraph dirtySubgraph graph, subgraphs)
+  else -- graph is dirty    remove deleted nodes from subgraphs
+    let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
+    in (graph, map (removeOldVertices superGraphIDs) subgraphs)
+
+removeOldVertices vertexIDs (Subgraph id d vs es) = 
+  let subgraphVertices' = toList_Vertex $ filter (\v -> getID_Vertex v `elem` vertexIDs) $
+                                                 fromList_Vertex vs
+  in  Subgraph id d subgraphVertices' es
+
+addEdgesFromSubgraph (Subgraph _ _ vs' es') (Graph id d vs es) =
+  let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
+      subgraphIDs = filter (`elem` superGraphIDs) $ map getID_Vertex $ fromList_Vertex vs'
+      edgesWithoutSubgraphNodes = filter (\e -> getFrom_Edge e `notElem` subgraphIDs || getTo_Edge e `notElem` subgraphIDs) 
+                                      (fromList_Edge es)
+      graphEdges = toList_Edge $ edgesWithoutSubgraphNodes ++ fromList_Edge es'
+  in Graph id d vs graphEdges
+
+getFrom_Edge (Edge _ (Int_ _ fromV) _) = fromV
+getTo_Edge (Edge _ _ (Int_ _ toV)) = toV
+
+getID_Vertex (Vertex _ _ (Int_ _ id) _ _) = id
 

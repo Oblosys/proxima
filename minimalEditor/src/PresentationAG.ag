@@ -56,20 +56,21 @@ SEM Root
                            , @graph.pres
                            , @tree.pres
                            ] ++ @sections.press ++
-                           [ text "Add view" `withMouseDown` insertNewSection @lhs.path
-                           , text " "
-                           , text "Remove view" `withMouseDown` removeLastSection @lhs.path 
+                           [ row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
+                                 , text " "
+                                 , (boxed $ text "Remove view") `withMouseDown` removeLastSection @lhs.path 
+                                 ]
                            ]
                            
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
   | List_Paragraph
       lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
-                     col $ @elts.press
-
+                     col $ if null @elts.press then [formatter [text " "]] else @elts.press
+                     -- formatter [text ""] prevents the column from getting height 0 when empty
 SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ formatter @words.press `withFontSize` 12 ]
+                     col $ [ formatter @words.press ]
 
 SEM Word [ || ]
   | Word
@@ -86,7 +87,7 @@ SEM Tree
 SEM Section
   | Section
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ @paragraphs.pres
+                     col $ [ @paragraphs.pres `withFontSize` 12
                            , @subgraph.pres
                            ]
 SEM Graph
@@ -199,9 +200,9 @@ insertNewSection pth =
                   (List_Paragraph NoIDD Nil_Paragraph) 
                   (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
   in  \(DocumentLevel d path cl) ->
-        let (Clip_List_Section sectionlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
+        let (Clip_List_Section sectionlist) = select (pth++[2]) d -- nasty: Root tr(0) gr(1) sections(2)
             clipsectionlist' = insertList (length $ fromList_Section sectionlist) (Clip_Section section) sectionlist
-            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
+            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
                                                 (clipsectionlist')
                                                 )
         in  (DocumentLevel d' path cl)
@@ -209,9 +210,9 @@ insertNewSection pth =
 removeLastSection :: [Int] -> UpdateDoc Document clip
 removeLastSection pth =
    \(DocumentLevel d path cl) ->
-      let (Clip_List_Section sectionlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
+      let (Clip_List_Section sectionlist) = select (pth++[2]) d -- nasty: Root tr(0) gr(1) sections(2)
           clipsectionlist' = removeList (length (fromList_Section sectionlist) - 1) sectionlist
-          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
+          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
                                               (clipsectionlist')
                                               )
       in  (DocumentLevel d' path cl)
