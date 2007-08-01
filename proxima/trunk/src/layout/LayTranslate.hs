@@ -286,7 +286,7 @@ moveVertex pth pt state layLvl@(LayoutLevel pres focus dt) =
 
 deleteInGraph state layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
   let pres' = deleteGraphPres f pres
-  in  (state, LayoutLevel pres' focus dt)
+  in  (state, LayoutLevel pres' NoFocusP dt)
 {-
 openFile :: Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> FilePath -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip) 
 openFile clip layLvl doc filePath =
