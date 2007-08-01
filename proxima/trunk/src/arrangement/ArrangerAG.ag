@@ -59,8 +59,7 @@ unfoldFormatter w ws presentations =
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (rows)
- in  showDebug' Arr ("formatter has width:"++show w++"\nkids have widths "++show ws) 
-           unfoldedList
+ in  unfoldedList
 
 
 
@@ -1020,29 +1019,29 @@ SEM Presentation
   | VertexP
       lhs.vertex = (@i,@x,@y,@outline)
   | EmptyP
-      lhs.vertex = {- showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | StringP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | RectangleP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | EllipseP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ImageP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | PolyP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | RowP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ColP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | OverlayP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | GraphP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ArrangedP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | FormatterP
-      lhs.vertex = {-showDebug' Err "Warning: graph presentation with non-vertex child:"-} (0,0,0,\_->(0,0))
+      lhs.vertex = Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
 
 
 SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
