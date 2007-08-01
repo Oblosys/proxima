@@ -97,8 +97,8 @@ mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -
   let pthP = pathPFromPathA' arr layout pthA
   in  case mouseDownDocPres pthP layout of
         Just upd -> debug UnA ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
-        Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)   
-                    $ case locateTreePres (PathP pthP 0) layout of
+        Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)
+                    $ case locateTreePres (PathP pthP 0) layout of -- set the document focus
                         Just node -> case pathNode node of
                                        (PathD pth) -> ( UpdateDocLay (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
                                                       , state, arrLvl)
