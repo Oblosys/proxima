@@ -115,25 +115,25 @@ instance Show (Presentation doc node clip) where
 
 
 -- shallow presentation, showing only toplevel presentation
-{-
-instance Show Presentation where
-  show (EmptyP id)           = "{"++show id++":Empty}"
-  show (StringP id str)      = "{"++show id++":StringP "++show str++"}"
-  show (ImageP id str)       = "{"++show id++":ImageP "++show str++"}"
-  show (PolyP id _ _)        = "{"++show id++":Poly}"
-  show (RectangleP id _ _ _) = "{"++show id++":Rectangle}"
-  show (EllipseP id _ _ _)   = "{"++show id++":Ellipse}"
-  show (RowP id rf press)    = "{"++show id++":RowP}"
-  show (ColP id rf press)    = "{"++show id++":ColP}"
-  show (OverlayP  id press)  = "{"++show id++":OverlayP}"
-  show (WithP ar pres)       = "{WithP}"
-  show (StructuralP id pres) = "{"++show id++":StructuralP}"
-  show (ParsingP id pres)    = "{"++show id++":ParsingP}"
-  show (LocatorP loc pres)   = "{"++show id++":LocatorP}"
-  show (ArrangedP)           = "ArrangedP" -- ++show pres
-  show _                     = "<<<presentation without show>>>"
 
--}
+
+shallowShowPres (EmptyP id)           = "{"++show id++":Empty}"
+shallowShowPres (StringP id str)      = "{"++show id++":StringP "++show str++"}"
+shallowShowPres (ImageP id str)       = "{"++show id++":ImageP "++show str++"}"
+shallowShowPres (PolyP id _ _)        = "{"++show id++":Poly}"
+shallowShowPres (RectangleP id _ _ _) = "{"++show id++":Rectangle}"
+shallowShowPres (EllipseP id _ _ _)   = "{"++show id++":Ellipse}"
+shallowShowPres (RowP id rf press)    = "{"++show id++":RowP}"
+shallowShowPres (ColP id rf press)    = "{"++show id++":ColP}"
+shallowShowPres (OverlayP  id press)  = "{"++show id++":OverlayP}"
+shallowShowPres (WithP ar pres)       = "{WithP}"
+shallowShowPres (StructuralP id pres) = "{"++show id++":StructuralP}"
+shallowShowPres (ParsingP id pres)    = "{"++show id++":ParsingP}"
+shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
+shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
+shallowShowPres _                     = "<<<presentation without show>>>"
+
+
 -- overlays: do they need a ref that says which element is the first, or in what order its elts should be parsed?
 -- or is this always the order in which they appear on the screen? (== order of child list)
 -- for now, the overlay can only have focus or be parsed in its head element.
