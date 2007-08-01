@@ -27,8 +27,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
         return attrTree
       else if maxFDepth == 1 
       then 
-       do { debugLnIO Arr "Unfolding formatters"
-          ; (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree screenSize viewedArea oldArrangement
+       do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree screenSize viewedArea oldArrangement
           ; return arrangement
           }
       else 
