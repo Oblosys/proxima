@@ -1,6 +1,6 @@
 imports
 {
-import CommonTypes
+import CommonTypes hiding (Dirty (..))
 import PresLayerTypes
 import PresLayerUtils
 
@@ -53,19 +53,19 @@ SEM Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col $ [ bold $ text "Root"
                            
-                           , row [ @graph.pres, @graph.pres ]
+                           , @graph.pres
                            , @tree.pres
-                           , @paragraphs.pres
-                           ] ++ @subGraphs.press
-                             ++ [ row [ text "Add view" `withMouseDown` insertNewSubgraph @lhs.path
-                                      , text " "
-                                      , text "Remove view" `withMouseDown` removeLastSubgraph @lhs.path 
-                                      ]
-                                ]
+                           ] ++ @sections.press ++
+                           [ text "Add view" `withMouseDown` insertNewSection @lhs.path
+                           , text " "
+                           , text "Remove view" `withMouseDown` removeLastSection @lhs.path 
+                           ]
+                           
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
   | List_Paragraph
       lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
                      col $ @elts.press
+
 SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -83,7 +83,12 @@ SEM Tree
       lhs.pres = loc (LeafNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [text $ "Leaf", text ""]
                      
-                     
+SEM Section
+  | Section
+      lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     col $ [ @paragraphs.pres
+                           , @subgraph.pres
+                           ]
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -106,24 +111,30 @@ SEM Vertex [ || ]
                                   , glue]
                          ]
 
-SEM Root
-  | Root
-      (subGraphs.vertexIDs, subGraphs.vertexNames) = unzip @graph.vertexIDNames
-      subGraphs.edges = @graph.edges
-      
-ATTR Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
- 
-SEM SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
-  | SubGraph
+
+SEM Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+  | Subgraph
       lhs.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
                      -- only present vertices that are in the supergraph
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
-                 in  loc (SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                 in  loc (SubgraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        (boxed $ graph 300 300 subEdges @vertices.press
-                     `addPopupItems` [ ("Add node " ++ show name, pasteSubGraph @lhs.path id name @self)
+                     `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                      , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
                                      ])
+
+SEM Root
+  | Root
+      (sections.vertexIDs, sections.vertexNames) = unzip @graph.vertexIDNames
+      sections.edges = @graph.edges
+      
+ATTR Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
+-- attributes come from vertices and edges by copy rule
+
+ATTR List_Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+ATTR ConsList_Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+ATTR Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
 
 SEM Edge [ || edge : {Maybe (Int,Int)} ]    
   | Edge
@@ -169,40 +180,39 @@ SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ]
   | Nil_Vertex
       lhs.vertexIDNames = []
 
-ATTR List_SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
-ATTR ConsList_SubGraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
-
 {
-pasteSubGraph :: [Int] -> Int -> String -> SubGraph -> UpdateDoc Document clip
-pasteSubGraph pth id name subgraph =
+pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
+pasteInSubgraph pth id name subgraph =
   let subgraph' = 
         case subgraph of
-        SubGraph idd vs es -> SubGraph idd (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
-        _                  -> subgraph
+        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
+        _                    -> subgraph
   in \(DocumentLevel d path cl) ->
         let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                                (Clip_SubGraph subgraph')
+                                                (Clip_Subgraph subgraph')
                                                 )
         in  (DocumentLevel d' path cl)
 
-insertNewSubgraph :: [Int] -> UpdateDoc Document clip
-insertNewSubgraph pth =
-  let subgraph = SubGraph NoIDD (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge))
+insertNewSection :: [Int] -> UpdateDoc Document clip
+insertNewSection pth =
+  let section = Section NoIDD
+                  (List_Paragraph NoIDD Nil_Paragraph) 
+                  (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
   in  \(DocumentLevel d path cl) ->
-        let (Clip_List_SubGraph subgraphlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
-            clipsubgraphlist' = insertList (length $ fromList_SubGraph subgraphlist) (Clip_SubGraph subgraph) subgraphlist
+        let (Clip_List_Section sectionlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
+            clipsectionlist' = insertList (length $ fromList_Section sectionlist) (Clip_Section section) sectionlist
             (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
-                                                (clipsubgraphlist')
+                                                (clipsectionlist')
                                                 )
         in  (DocumentLevel d' path cl)
 
-removeLastSubgraph :: [Int] -> UpdateDoc Document clip
-removeLastSubgraph pth =
+removeLastSection :: [Int] -> UpdateDoc Document clip
+removeLastSection pth =
    \(DocumentLevel d path cl) ->
-      let (Clip_List_SubGraph subgraphlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
-          clipsubgraphlist' = removeList (length (fromList_SubGraph subgraphlist) - 1) subgraphlist
+      let (Clip_List_Section sectionlist) = select (pth++[3]) d -- nasty: Root tr(0) gr(1) para(2) subgr(3)
+          clipsectionlist' = removeList (length (fromList_Section sectionlist) - 1) sectionlist
           (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[3]))
-                                              (clipsubgraphlist')
+                                              (clipsectionlist')
                                               )
       in  (DocumentLevel d' path cl)
 }

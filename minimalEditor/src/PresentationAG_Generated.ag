@@ -119,7 +119,7 @@ DATA Dummy | Dummy idd:IDD dummys:List_Dummy string_:String_ bool_:Bool_ int_:In
            | ParseErrDummy presentation:Presentation_Doc_Node_Clip
 
 
-DATA Root | Root idd:IDD tree:Tree graph:Graph paragraphs:List_Paragraph subGraphs:List_SubGraph 
+DATA Root | Root idd:IDD tree:Tree graph:Graph sections:List_Section 
           | HoleRoot
           | ParseErrRoot presentation:Presentation_Doc_Node_Clip
 
@@ -128,6 +128,11 @@ DATA Tree | Bin idd:IDD left:Tree right:Tree
           | Leaf idd:IDD 
           | HoleTree
           | ParseErrTree presentation:Presentation_Doc_Node_Clip
+
+
+DATA Section | Section idd:IDD paragraphs:List_Paragraph subgraph:Subgraph 
+             | HoleSection
+             | ParseErrSection presentation:Presentation_Doc_Node_Clip
 
 
 DATA Paragraph | Paragraph idd:IDD words:List_Word 
@@ -140,7 +145,7 @@ DATA Word | Word idd:IDD word:String_
           | ParseErrWord presentation:Presentation_Doc_Node_Clip
 
 
-DATA Graph | Graph idd:IDD vertices:List_Vertex edges:List_Edge 
+DATA Graph | Graph idd:IDD dirty:Dirty vertices:List_Vertex edges:List_Edge 
            | HoleGraph
            | ParseErrGraph presentation:Presentation_Doc_Node_Clip
 
@@ -155,9 +160,15 @@ DATA Edge | Edge idd:IDD from:Int_ to:Int_
           | ParseErrEdge presentation:Presentation_Doc_Node_Clip
 
 
-DATA SubGraph | SubGraph idd:IDD vertices:List_Vertex edges:List_Edge 
-              | HoleSubGraph
-              | ParseErrSubGraph presentation:Presentation_Doc_Node_Clip
+DATA Subgraph | Subgraph idd:IDD dirty:Dirty vertices:List_Vertex edges:List_Edge 
+              | HoleSubgraph
+              | ParseErrSubgraph presentation:Presentation_Doc_Node_Clip
+
+
+DATA Dirty | Dirty idd:IDD 
+           | Clean idd:IDD 
+           | HoleDirty
+           | ParseErrDirty presentation:Presentation_Doc_Node_Clip
 
 
 DATA List_Dummy | List_Dummy idd:IDD elts:ConsList_Dummy 
@@ -169,6 +180,15 @@ DATA ConsList_Dummy | Cons_Dummy head:Dummy tail:ConsList_Dummy
                     | Nil_Dummy 
 
 
+DATA List_Section | List_Section idd:IDD elts:ConsList_Section 
+                  | HoleList_Section
+                  | ParseErrList_Section presentation:Presentation_Doc_Node_Clip
+
+
+DATA ConsList_Section | Cons_Section head:Section tail:ConsList_Section 
+                      | Nil_Section 
+
+
 DATA List_Paragraph | List_Paragraph idd:IDD elts:ConsList_Paragraph 
                     | HoleList_Paragraph
                     | ParseErrList_Paragraph presentation:Presentation_Doc_Node_Clip
@@ -176,15 +196,6 @@ DATA List_Paragraph | List_Paragraph idd:IDD elts:ConsList_Paragraph
 
 DATA ConsList_Paragraph | Cons_Paragraph head:Paragraph tail:ConsList_Paragraph 
                         | Nil_Paragraph 
-
-
-DATA List_SubGraph | List_SubGraph idd:IDD elts:ConsList_SubGraph 
-                   | HoleList_SubGraph
-                   | ParseErrList_SubGraph presentation:Presentation_Doc_Node_Clip
-
-
-DATA ConsList_SubGraph | Cons_SubGraph head:SubGraph tail:ConsList_SubGraph 
-                       | Nil_SubGraph 
 
 
 DATA List_Word | List_Word idd:IDD elts:ConsList_Word 
@@ -248,10 +259,9 @@ SEM Dummy
 
 SEM Root
   | Root tree.pIdC = @lhs.pIdC + 0
-         subGraphs.pIdC = @paragraphs.pIdC
-         paragraphs.pIdC = @graph.pIdC
+         sections.pIdC = @graph.pIdC
          graph.pIdC = @tree.pIdC
-         lhs.pIdC = @subGraphs.pIdC
+         lhs.pIdC = @sections.pIdC
   | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.pres = presParseErr @presentation
 
@@ -259,8 +269,7 @@ SEM Root
 SEM Root
   | Root tree.path  = @lhs.path++[0]
          graph.path  = @lhs.path++[1]
-         paragraphs.path  = @lhs.path++[2]
-         subGraphs.path  = @lhs.path++[3]
+         sections.path  = @lhs.path++[2]
 
 
 SEM Tree
@@ -274,6 +283,19 @@ SEM Tree
 SEM Tree
   | Bin left.path  = @lhs.path++[0]
         right.path  = @lhs.path++[1]
+
+
+SEM Section
+  | Section paragraphs.pIdC = @lhs.pIdC + 0
+            subgraph.pIdC = @paragraphs.pIdC
+            lhs.pIdC = @subgraph.pIdC
+  | HoleSection     lhs.pres = presHole @lhs.focusD "Section" (HoleSectionNode @self @lhs.path) @lhs.path
+  | ParseErrSection lhs.pres = presParseErr @presentation
+
+
+SEM Section
+  | Section paragraphs.path  = @lhs.path++[0]
+            subgraph.path  = @lhs.path++[1]
 
 
 SEM Paragraph
@@ -299,16 +321,18 @@ SEM Word
 
 
 SEM Graph
-  | Graph vertices.pIdC = @lhs.pIdC + 0
+  | Graph dirty.pIdC = @lhs.pIdC + 0
           edges.pIdC = @vertices.pIdC
+          vertices.pIdC = @dirty.pIdC
           lhs.pIdC = @edges.pIdC
   | HoleGraph     lhs.pres = presHole @lhs.focusD "Graph" (HoleGraphNode @self @lhs.path) @lhs.path
   | ParseErrGraph lhs.pres = presParseErr @presentation
 
 
 SEM Graph
-  | Graph vertices.path  = @lhs.path++[0]
-          edges.path  = @lhs.path++[1]
+  | Graph dirty.path  = @lhs.path++[0]
+          vertices.path  = @lhs.path++[1]
+          edges.path  = @lhs.path++[2]
 
 
 SEM Vertex
@@ -341,17 +365,24 @@ SEM Edge
          to.path  = @lhs.path++[1]
 
 
-SEM SubGraph
-  | SubGraph vertices.pIdC = @lhs.pIdC + 0
+SEM Subgraph
+  | Subgraph dirty.pIdC = @lhs.pIdC + 0
              edges.pIdC = @vertices.pIdC
+             vertices.pIdC = @dirty.pIdC
              lhs.pIdC = @edges.pIdC
-  | HoleSubGraph     lhs.pres = presHole @lhs.focusD "SubGraph" (HoleSubGraphNode @self @lhs.path) @lhs.path
-  | ParseErrSubGraph lhs.pres = presParseErr @presentation
+  | HoleSubgraph     lhs.pres = presHole @lhs.focusD "Subgraph" (HoleSubgraphNode @self @lhs.path) @lhs.path
+  | ParseErrSubgraph lhs.pres = presParseErr @presentation
 
 
-SEM SubGraph
-  | SubGraph vertices.path  = @lhs.path++[0]
-             edges.path  = @lhs.path++[1]
+SEM Subgraph
+  | Subgraph dirty.path  = @lhs.path++[0]
+             vertices.path  = @lhs.path++[1]
+             edges.path  = @lhs.path++[2]
+
+
+SEM Dirty
+  | HoleDirty     lhs.pres = presHole @lhs.focusD "Dirty" (HoleDirtyNode @self @lhs.path) @lhs.path
+  | ParseErrDirty lhs.pres = presParseErr @presentation
 
 SEM List_Dummy
   | List_Dummy
@@ -379,6 +410,32 @@ SEM ConsList_Dummy
 SEM ConsList_Dummy [ ix : Int | | ]
   | Cons_Dummy     tail.ix  = @lhs.ix + 1
 
+SEM List_Section
+  | List_Section
+      lhs.press = map ( loc (List_SectionNode @self @lhs.path) 
+                      . presentFocus @lhs.focusD @lhs.path ) 
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Section     lhs.press = []
+  | ParseErrList_Section lhs.press = [ presParseErr @presentation ]
+
+SEM ConsList_Section
+  | Cons_Section head.path  = @lhs.path++[@lhs.ix]
+                tail.path = @lhs.path
+                 lhs.press = @head.pres : @tail.press
+                 head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+                 tail.pIdC = @head.pIdC
+                 lhs.pIdC = @tail.pIdC
+  | Nil_Section      lhs.press = []
+
+
+SEM ConsList_Section [ ix : Int | | ]
+  | Cons_Section     tail.ix  = @lhs.ix + 1
+
 SEM List_Paragraph
   | List_Paragraph
       lhs.press = map ( loc (List_ParagraphNode @self @lhs.path) 
@@ -404,32 +461,6 @@ SEM ConsList_Paragraph
 
 SEM ConsList_Paragraph [ ix : Int | | ]
   | Cons_Paragraph     tail.ix  = @lhs.ix + 1
-
-SEM List_SubGraph
-  | List_SubGraph
-      lhs.press = map ( loc (List_SubGraphNode @self @lhs.path) 
-                      . presentFocus @lhs.focusD @lhs.path ) 
-                      @elts.press
-                      -- parent is reponsible for setting parsing/structural
-      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
-      lhs.pIdC = @elts.pIdC
-      elts.path = @lhs.path
-      elts.ix = 0
-  | HoleList_SubGraph     lhs.press = []
-  | ParseErrList_SubGraph lhs.press = [ presParseErr @presentation ]
-
-SEM ConsList_SubGraph
-  | Cons_SubGraph head.path  = @lhs.path++[@lhs.ix]
-                 tail.path = @lhs.path
-                 lhs.press = @head.pres : @tail.press
-                 head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
-                 tail.pIdC = @head.pIdC
-                 lhs.pIdC = @tail.pIdC
-  | Nil_SubGraph      lhs.press = []
-
-
-SEM ConsList_SubGraph [ ix : Int | | ]
-  | Cons_SubGraph     tail.ix  = @lhs.ix + 1
 
 SEM List_Word
   | List_Word
@@ -510,25 +541,25 @@ SEM ConsList_Edge [ ix : Int | | ]
   | Cons_Edge     tail.ix  = @lhs.ix + 1
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Paragraph Word Graph Vertex Edge SubGraph List_Dummy ConsList_Dummy List_Paragraph ConsList_Paragraph List_SubGraph ConsList_SubGraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ |  pIdC : Int  | ]
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Paragraph Word Graph Vertex Edge SubGraph List_Dummy ConsList_Dummy List_Paragraph ConsList_Paragraph List_SubGraph ConsList_SubGraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ focusD : FocusDoc | | ]
 
 
-ATTR  String_ Bool_ Int_ Dummy Root Tree Paragraph Word Graph Vertex Edge SubGraph List_Dummy ConsList_Dummy List_Paragraph ConsList_Paragraph List_SubGraph ConsList_SubGraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ path : {[Int]}  | | ]
 
 
-ATTR  List_Dummy ConsList_Dummy List_Paragraph ConsList_Paragraph List_SubGraph ConsList_SubGraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge [ | | press : {[Presentation_Doc_Node_Clip]} ]
+ATTR  List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge [ | | press : {[Presentation_Doc_Node_Clip]} ]
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Paragraph Word Graph Vertex Edge SubGraph [ | | pres : Presentation_Doc_Node_Clip ]
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty [ | | pres : Presentation_Doc_Node_Clip ]
 
 
-ATTR  String_ Bool_ Int_ Dummy Root Tree Paragraph Word Graph Vertex Edge SubGraph [ ix : Int || ]
+ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty [ ix : Int || ]
 
 
 
@@ -560,7 +591,7 @@ SEM Dummy [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM Root [ || presXML : Presentation_Doc_Node_Clip ]
   | Root
-      lhs.presXML = presentElementXML @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presXML, @graph.presXML, @paragraphs.presXML, @subGraphs.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presXML, @graph.presXML, @sections.presXML ] 
   | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presXML = presParseErr @presentation
 
@@ -571,6 +602,12 @@ SEM Tree [ || presXML : Presentation_Doc_Node_Clip ]
       lhs.presXML = presentElementXML @lhs.focusD (LeafNode @self @lhs.path) @lhs.path "Leaf" [  ] 
   | HoleTree     lhs.presXML = presHole @lhs.focusD "Tree" (HoleTreeNode @self @lhs.path) @lhs.path
   | ParseErrTree lhs.presXML = presParseErr @presentation
+
+SEM Section [ || presXML : Presentation_Doc_Node_Clip ]
+  | Section
+      lhs.presXML = presentElementXML @lhs.focusD (SectionNode @self @lhs.path) @lhs.path "Section" [ @paragraphs.presXML, @subgraph.presXML ] 
+  | HoleSection     lhs.presXML = presHole @lhs.focusD "Section" (HoleSectionNode @self @lhs.path) @lhs.path
+  | ParseErrSection lhs.presXML = presParseErr @presentation
 
 SEM Paragraph [ || presXML : Presentation_Doc_Node_Clip ]
   | Paragraph
@@ -586,7 +623,7 @@ SEM Word [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM Graph [ || presXML : Presentation_Doc_Node_Clip ]
   | Graph
-      lhs.presXML = presentElementXML @lhs.focusD (GraphNode @self @lhs.path) @lhs.path "Graph" [ @vertices.presXML, @edges.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (GraphNode @self @lhs.path) @lhs.path "Graph" [ @dirty.presXML, @vertices.presXML, @edges.presXML ] 
   | HoleGraph     lhs.presXML = presHole @lhs.focusD "Graph" (HoleGraphNode @self @lhs.path) @lhs.path
   | ParseErrGraph lhs.presXML = presParseErr @presentation
 
@@ -602,11 +639,19 @@ SEM Edge [ || presXML : Presentation_Doc_Node_Clip ]
   | HoleEdge     lhs.presXML = presHole @lhs.focusD "Edge" (HoleEdgeNode @self @lhs.path) @lhs.path
   | ParseErrEdge lhs.presXML = presParseErr @presentation
 
-SEM SubGraph [ || presXML : Presentation_Doc_Node_Clip ]
-  | SubGraph
-      lhs.presXML = presentElementXML @lhs.focusD (SubGraphNode @self @lhs.path) @lhs.path "SubGraph" [ @vertices.presXML, @edges.presXML ] 
-  | HoleSubGraph     lhs.presXML = presHole @lhs.focusD "SubGraph" (HoleSubGraphNode @self @lhs.path) @lhs.path
-  | ParseErrSubGraph lhs.presXML = presParseErr @presentation
+SEM Subgraph [ || presXML : Presentation_Doc_Node_Clip ]
+  | Subgraph
+      lhs.presXML = presentElementXML @lhs.focusD (SubgraphNode @self @lhs.path) @lhs.path "Subgraph" [ @dirty.presXML, @vertices.presXML, @edges.presXML ] 
+  | HoleSubgraph     lhs.presXML = presHole @lhs.focusD "Subgraph" (HoleSubgraphNode @self @lhs.path) @lhs.path
+  | ParseErrSubgraph lhs.presXML = presParseErr @presentation
+
+SEM Dirty [ || presXML : Presentation_Doc_Node_Clip ]
+  | Dirty
+      lhs.presXML = presentElementXML @lhs.focusD (DirtyNode @self @lhs.path) @lhs.path "Dirty" [  ] 
+  | Clean
+      lhs.presXML = presentElementXML @lhs.focusD (CleanNode @self @lhs.path) @lhs.path "Clean" [  ] 
+  | HoleDirty     lhs.presXML = presHole @lhs.focusD "Dirty" (HoleDirtyNode @self @lhs.path) @lhs.path
+  | ParseErrDirty lhs.presXML = presParseErr @presentation
 
 SEM List_Dummy [ || presXML : Presentation_Doc_Node_Clip ]
   | List_Dummy
@@ -623,6 +668,21 @@ SEM ConsList_Dummy [ | | pressXML : {[Presentation_Doc_Node_Clip]} ]
   | Cons_Dummy     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Dummy      lhs.pressXML  = []
 
+SEM List_Section [ || presXML : Presentation_Doc_Node_Clip ]
+  | List_Section
+      lhs.presXML = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Section
+      lhs.presXML = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr @presentation
+  | HoleList_Section
+      lhs.presXML = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Section" (HoleList_SectionNode @self @lhs.path) @lhs.path
+
+SEM ConsList_Section [ | | pressXML : {[Presentation_Doc_Node_Clip]} ]
+  | Cons_Section     lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Section      lhs.pressXML  = []
+
 SEM List_Paragraph [ || presXML : Presentation_Doc_Node_Clip ]
   | List_Paragraph
       lhs.presXML = loc (List_ParagraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -637,21 +697,6 @@ SEM List_Paragraph [ || presXML : Presentation_Doc_Node_Clip ]
 SEM ConsList_Paragraph [ | | pressXML : {[Presentation_Doc_Node_Clip]} ]
   | Cons_Paragraph     lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Paragraph      lhs.pressXML  = []
-
-SEM List_SubGraph [ || presXML : Presentation_Doc_Node_Clip ]
-  | List_SubGraph
-      lhs.presXML = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    col @elts.pressXML
-  | ParseErrList_SubGraph
-      lhs.presXML = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
-  | HoleList_SubGraph
-      lhs.presXML = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_SubGraph" (HoleList_SubGraphNode @self @lhs.path) @lhs.path
-
-SEM ConsList_SubGraph [ | | pressXML : {[Presentation_Doc_Node_Clip]} ]
-  | Cons_SubGraph     lhs.pressXML  = @head.presXML : @tail.pressXML
-  | Nil_SubGraph      lhs.pressXML  = []
 
 SEM List_Word [ || presXML : Presentation_Doc_Node_Clip ]
   | List_Word
@@ -729,7 +774,7 @@ SEM Dummy [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM Root [ || presTree : Presentation_Doc_Node_Clip ]
   | Root
-      lhs.presTree = presentElementTree @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presTree, @graph.presTree, @paragraphs.presTree, @subGraphs.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (RootNode @self @lhs.path) @lhs.path "Root" [ @tree.presTree, @graph.presTree, @sections.presTree ] 
   | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (HoleRootNode @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presTree = presParseErr @presentation
 
@@ -740,6 +785,12 @@ SEM Tree [ || presTree : Presentation_Doc_Node_Clip ]
       lhs.presTree = presentElementTree @lhs.focusD (LeafNode @self @lhs.path) @lhs.path "Leaf" [  ] 
   | HoleTree     lhs.presTree = presHole @lhs.focusD "Tree" (HoleTreeNode @self @lhs.path) @lhs.path
   | ParseErrTree lhs.presTree = presParseErr @presentation
+
+SEM Section [ || presTree : Presentation_Doc_Node_Clip ]
+  | Section
+      lhs.presTree = presentElementTree @lhs.focusD (SectionNode @self @lhs.path) @lhs.path "Section" [ @paragraphs.presTree, @subgraph.presTree ] 
+  | HoleSection     lhs.presTree = presHole @lhs.focusD "Section" (HoleSectionNode @self @lhs.path) @lhs.path
+  | ParseErrSection lhs.presTree = presParseErr @presentation
 
 SEM Paragraph [ || presTree : Presentation_Doc_Node_Clip ]
   | Paragraph
@@ -755,7 +806,7 @@ SEM Word [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM Graph [ || presTree : Presentation_Doc_Node_Clip ]
   | Graph
-      lhs.presTree = presentElementTree @lhs.focusD (GraphNode @self @lhs.path) @lhs.path "Graph" [ @vertices.presTree, @edges.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (GraphNode @self @lhs.path) @lhs.path "Graph" [ @dirty.presTree, @vertices.presTree, @edges.presTree ] 
   | HoleGraph     lhs.presTree = presHole @lhs.focusD "Graph" (HoleGraphNode @self @lhs.path) @lhs.path
   | ParseErrGraph lhs.presTree = presParseErr @presentation
 
@@ -771,11 +822,19 @@ SEM Edge [ || presTree : Presentation_Doc_Node_Clip ]
   | HoleEdge     lhs.presTree = presHole @lhs.focusD "Edge" (HoleEdgeNode @self @lhs.path) @lhs.path
   | ParseErrEdge lhs.presTree = presParseErr @presentation
 
-SEM SubGraph [ || presTree : Presentation_Doc_Node_Clip ]
-  | SubGraph
-      lhs.presTree = presentElementTree @lhs.focusD (SubGraphNode @self @lhs.path) @lhs.path "SubGraph" [ @vertices.presTree, @edges.presTree ] 
-  | HoleSubGraph     lhs.presTree = presHole @lhs.focusD "SubGraph" (HoleSubGraphNode @self @lhs.path) @lhs.path
-  | ParseErrSubGraph lhs.presTree = presParseErr @presentation
+SEM Subgraph [ || presTree : Presentation_Doc_Node_Clip ]
+  | Subgraph
+      lhs.presTree = presentElementTree @lhs.focusD (SubgraphNode @self @lhs.path) @lhs.path "Subgraph" [ @dirty.presTree, @vertices.presTree, @edges.presTree ] 
+  | HoleSubgraph     lhs.presTree = presHole @lhs.focusD "Subgraph" (HoleSubgraphNode @self @lhs.path) @lhs.path
+  | ParseErrSubgraph lhs.presTree = presParseErr @presentation
+
+SEM Dirty [ || presTree : Presentation_Doc_Node_Clip ]
+  | Dirty
+      lhs.presTree = presentElementTree @lhs.focusD (DirtyNode @self @lhs.path) @lhs.path "Dirty" [  ] 
+  | Clean
+      lhs.presTree = presentElementTree @lhs.focusD (CleanNode @self @lhs.path) @lhs.path "Clean" [  ] 
+  | HoleDirty     lhs.presTree = presHole @lhs.focusD "Dirty" (HoleDirtyNode @self @lhs.path) @lhs.path
+  | ParseErrDirty lhs.presTree = presParseErr @presentation
 
 SEM List_Dummy [ || presTree : Presentation_Doc_Node_Clip ]
   | List_Dummy
@@ -792,6 +851,21 @@ SEM ConsList_Dummy [ | | pressTree : {[Presentation_Doc_Node_Clip]} ]
   | Cons_Dummy     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Dummy      lhs.pressTree  = []
 
+SEM List_Section [ || presTree : Presentation_Doc_Node_Clip ]
+  | List_Section
+      lhs.presTree = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Section
+      lhs.presTree = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr @presentation
+  | HoleList_Section
+      lhs.presTree = loc (List_SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Section" (HoleList_SectionNode @self @lhs.path) @lhs.path
+
+SEM ConsList_Section [ | | pressTree : {[Presentation_Doc_Node_Clip]} ]
+  | Cons_Section     lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Section      lhs.pressTree  = []
+
 SEM List_Paragraph [ || presTree : Presentation_Doc_Node_Clip ]
   | List_Paragraph
       lhs.presTree = loc (List_ParagraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -806,21 +880,6 @@ SEM List_Paragraph [ || presTree : Presentation_Doc_Node_Clip ]
 SEM ConsList_Paragraph [ | | pressTree : {[Presentation_Doc_Node_Clip]} ]
   | Cons_Paragraph     lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Paragraph      lhs.pressTree  = []
-
-SEM List_SubGraph [ || presTree : Presentation_Doc_Node_Clip ]
-  | List_SubGraph
-      lhs.presTree = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       col @elts.pressTree
-  | ParseErrList_SubGraph
-      lhs.presTree = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
-  | HoleList_SubGraph
-      lhs.presTree = loc (List_SubGraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presHole @lhs.focusD "List_SubGraph" (HoleList_SubGraphNode @self @lhs.path) @lhs.path
-
-SEM ConsList_SubGraph [ | | pressTree : {[Presentation_Doc_Node_Clip]} ]
-  | Cons_SubGraph     lhs.pressTree  = @head.presTree : @tail.pressTree
-  | Nil_SubGraph      lhs.pressTree  = []
 
 SEM List_Word [ || presTree : Presentation_Doc_Node_Clip ]
   | List_Word

@@ -1,6 +1,7 @@
 module ProxParser (parsePres) where
 
-import CommonTypes
+import CommonTypes hiding (Dirty (..))
+import qualified CommonTypes
 import PresLayerTypes
 import PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
 import PresentationParsing
@@ -27,7 +28,7 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
+                 in  -- debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
                      (if null errs then Just enr else Nothing)
        
 deepShowTks i tok = case tok of
@@ -61,52 +62,13 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-          (\str (d1,graph1) (d2,graph2) tree para dssubGraphs  ->
-              let (ds,subGraphs) = unzip dssubGraphs
-                  (dsup, superGraph) = resolveCopies (d1,graph1) (d2,graph2)
-                  (superGraph',subgraphs') = resolveSubgraphs (dsup,superGraph) (ds, subGraphs)
-              in debug Prs ("\n\nparsedGraph: "++show (d1,d2,ds)) $ 
-                 reuseRoot [tokenNode str] Nothing (Just tree) (Just superGraph')
-                                           (Just para)
-                                           (Just (toList_SubGraph subgraphs')) )
+          (\str graph tree sections  ->
+          reuseRoot [tokenNode str] Nothing (Just tree) (Just graph)
+                                           (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
-      <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
-      <*> pPrs parseParagraphs
-      <*> pList recognizeSubGraph
- where resolveCopies (Dirty,g1) (_,g2) = (Dirty,g1)
-       resolveCopies (Clean,g1) (Dirty,g2) = (Dirty, g2)
-       resolveCopies (Clean,g1) (Clean,g2) = (Clean, g1)
-              
-resolveSubgraphs :: (Dirty, Graph) -> ([Dirty], [SubGraph]) -> (Graph, [SubGraph])
-resolveSubgraphs (graphDirty, graph@(Graph _ vs _)) (subgraphsDirties,subgraphs) = 
-  if isClean graphDirty 
-  then case filter (\(d,_) -> not $ isClean d) $ zip subgraphsDirties subgraphs of
-         [] -> (graph, subgraphs) -- all are clean
-         ((_,dirtySubgraph):_) -> -- at least one subgraph dirty
-            (addEdgesFromSubgraph dirtySubgraph graph, subgraphs)
-  else -- graph is dirty    remove deleted nodes from subgraphs
-    let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
-    in (graph, map (removeOldVertices superGraphIDs) subgraphs)
-
-removeOldVertices vertexIDs (SubGraph id vs es) = 
-  let subgraphVertices' = toList_Vertex $ filter (\v -> getID_Vertex v `elem` vertexIDs) $
-                                                 fromList_Vertex vs
-  in  SubGraph id subgraphVertices' es
-
-addEdgesFromSubgraph (SubGraph id' vs' es') (Graph id vs es) =
-  let superGraphIDs = map getID_Vertex $ fromList_Vertex vs
-      subGraphIDs = filter (`elem` superGraphIDs) $ map getID_Vertex $ fromList_Vertex vs'
-      edgesWithoutSubgraphNodes = filter (\e -> getFrom_Edge e `notElem` subGraphIDs || getTo_Edge e `notElem` subGraphIDs) 
-                                      (fromList_Edge es)
-      graphEdges = toList_Edge $ edgesWithoutSubgraphNodes ++ fromList_Edge es'
-  in Graph id vs graphEdges
-
-getFrom_Edge (Edge _ (Int_ _ fromV) _) = fromV
-getTo_Edge (Edge _ _ (Int_ _ toV)) = toV
-
-getID_Vertex (Vertex _ _ (Int_ _ id) _ _) = id
+      <*> pList recognizeSection
 
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 
@@ -129,18 +91,23 @@ recognizeTree = pStr $
       <$> pStructural LeafNode
 
 
-
+recognizeSection :: ListParser Document Node ClipDoc Section
+recognizeSection = pStr $
+          (\str ps sg -> reuseSection [tokenNode str] Nothing (Just ps) (Just sg))
+      <$> pStructural SectionNode
+      <*> pPrs parseParagraphs
+      <*> recognizeSubgraph
+      
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
-recognizeGraph :: ListParser Document Node ClipDoc (Dirty, Graph)
-recognizeGraph = pStrDirty $
-          (\str gt vs ->(getGraphTkDirty gt
-                        ,reuseGraph [tokenNode str] Nothing 
+recognizeGraph :: ListParser Document Node ClipDoc Graph
+recognizeGraph = pStr $
+          (\str gt vs -> reuseGraph [tokenNode str] Nothing Nothing 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                    [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
-                        )
+                        
                                           
       <$> pStructural GraphNode
       <*> pSym graphTk
@@ -165,20 +132,19 @@ parseLabel = pPrs $
           (\str -> String_ NoIDD str)
       <$> pText
 
-recognizeSubGraph :: ListParser Document Node ClipDoc (Dirty, SubGraph)
-recognizeSubGraph = pStrDirty $
-          (\str gt vs -> (getGraphTkDirty gt
-                      ,reuseSubGraph [tokenNode str] Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
+recognizeSubgraph :: ListParser Document Node ClipDoc Subgraph
+recognizeSubgraph = pStr $
+          (\str gt vs -> reuseSubgraph [tokenNode str] Nothing Nothing (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                      (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                      [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt])
-                      ))
-      <$> pStructural SubGraphNode
+                      )
+      <$> pStructural SubgraphNode
       <*> pSym graphTk
       <*> pList recognizeVertex
 
-getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> Dirty
+getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> CommonTypes.Dirty
 getGraphTkDirty (GraphTk dirty _ _ _) = dirty
-getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ Dirty
+getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ CommonTypes.Dirty
 
 getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
 getGraphTkEdges (GraphTk _ edges _ _) = edges

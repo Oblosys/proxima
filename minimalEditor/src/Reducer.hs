@@ -1,6 +1,6 @@
 module Reducer (reductionSheet) where
 
-import CommonTypes
+import CommonTypes hiding (Dirty (..))
 import EvalLayerTypes
 
 import EvalLayerUtils
@@ -62,18 +62,15 @@ reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
                EnrichedDocLevel EnrichedDoc ->
                IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceEnrIO state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel (RootEnr _ root _) _) =
- do { return (SetDoc (RootDoc idd root),state, enrDoc )
-    }
---
 reduceEnrIO state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel (RootEnr _ root _) _) = return $ -- other cases, just copy from decls
-  (SetDoc (RootDoc idd root),state, enrDoc )
+  (SetDoc (RootDoc idd (reduceRoot root)),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
   (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
 
+reduceRoot (Root idd g t ss) = Root idd g t ss
 
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
@@ -99,10 +96,9 @@ openFile fileName =
     }
   
 defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
-                                          (Graph NoIDD (List_Vertex NoIDD Nil_Vertex)
-                                                       (List_Edge NoIDD Nil_Edge))
-                                          (List_Paragraph NoIDD Nil_Paragraph)
-                                          (List_SubGraph NoIDD Nil_SubGraph)
+                                          (Graph NoIDD (Clean NoIDD) (List_Vertex NoIDD Nil_Vertex)
+                                                                     (List_Edge NoIDD Nil_Edge))
+                                          (List_Section NoIDD Nil_Section)
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
 lines' ""   = []

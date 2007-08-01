@@ -1,6 +1,6 @@
 module DocTypes_Generated where
 
-import CommonTypes
+import CommonTypes hiding (Dirty (..))
 import DocTypes
 
 import PresTypes
@@ -59,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph List_Paragraph List_SubGraph 
+data Root = Root IDD Tree Graph List_Section 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
@@ -70,6 +70,12 @@ data Tree = Bin IDD Tree Tree
           | HoleTree
           | ParseErrTree (Presentation Document Node ClipDoc)
              deriving Show
+
+
+data Section = Section IDD List_Paragraph Subgraph 
+             | HoleSection
+             | ParseErrSection (Presentation Document Node ClipDoc)
+                deriving Show
 
 
 data Paragraph = Paragraph IDD List_Word 
@@ -84,7 +90,7 @@ data Word = Word IDD String_
              deriving Show
 
 
-data Graph = Graph IDD List_Vertex List_Edge 
+data Graph = Graph IDD Dirty List_Vertex List_Edge 
            | HoleGraph
            | ParseErrGraph (Presentation Document Node ClipDoc)
               deriving Show
@@ -102,10 +108,17 @@ data Edge = Edge IDD Int_ Int_
              deriving Show
 
 
-data SubGraph = SubGraph IDD List_Vertex List_Edge 
-              | HoleSubGraph
-              | ParseErrSubGraph (Presentation Document Node ClipDoc)
+data Subgraph = Subgraph IDD Dirty List_Vertex List_Edge 
+              | HoleSubgraph
+              | ParseErrSubgraph (Presentation Document Node ClipDoc)
                  deriving Show
+
+
+data Dirty = Dirty IDD 
+           | Clean IDD 
+           | HoleDirty
+           | ParseErrDirty (Presentation Document Node ClipDoc)
+              deriving Show
 
 
 data List_Dummy = List_Dummy IDD ConsList_Dummy 
@@ -119,6 +132,17 @@ data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy
                        deriving Show
 
 
+data List_Section = List_Section IDD ConsList_Section 
+                  | HoleList_Section
+                  | ParseErrList_Section (Presentation Document Node ClipDoc)
+                     deriving Show
+
+
+data ConsList_Section = Cons_Section Section ConsList_Section 
+                      | Nil_Section 
+                         deriving Show
+
+
 data List_Paragraph = List_Paragraph IDD ConsList_Paragraph 
                     | HoleList_Paragraph
                     | ParseErrList_Paragraph (Presentation Document Node ClipDoc)
@@ -128,17 +152,6 @@ data List_Paragraph = List_Paragraph IDD ConsList_Paragraph
 data ConsList_Paragraph = Cons_Paragraph Paragraph ConsList_Paragraph 
                         | Nil_Paragraph 
                            deriving Show
-
-
-data List_SubGraph = List_SubGraph IDD ConsList_SubGraph 
-                   | HoleList_SubGraph
-                   | ParseErrList_SubGraph (Presentation Document Node ClipDoc)
-                      deriving Show
-
-
-data ConsList_SubGraph = Cons_SubGraph SubGraph ConsList_SubGraph 
-                       | Nil_SubGraph 
-                          deriving Show
 
 
 data List_Word = List_Word IDD ConsList_Word 
@@ -187,16 +200,18 @@ data ClipDoc = Clip_Root Root
              | Clip_Int_ Int_
              | Clip_Tree Tree
              | Clip_Graph Graph
+             | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
-             | Clip_List_SubGraph List_SubGraph
+             | Clip_Subgraph Subgraph
              | Clip_List_Word List_Word
+             | Clip_Dirty Dirty
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
              | Clip_Dummy Dummy
              
-             | Clip_Paragraph Paragraph
+             | Clip_Section Section
              
-             | Clip_SubGraph SubGraph
+             | Clip_Paragraph Paragraph
              
              | Clip_Word Word
              
@@ -227,6 +242,8 @@ data Node = NoNode
           | BinNode Tree Path 
           | LeafNode Tree Path 
           | HoleTreeNode Tree Path 
+          | SectionNode Section Path 
+          | HoleSectionNode Section Path 
           | ParagraphNode Paragraph Path 
           | HoleParagraphNode Paragraph Path 
           | WordNode Word Path 
@@ -237,14 +254,17 @@ data Node = NoNode
           | HoleVertexNode Vertex Path 
           | EdgeNode Edge Path 
           | HoleEdgeNode Edge Path 
-          | SubGraphNode SubGraph Path 
-          | HoleSubGraphNode SubGraph Path 
+          | SubgraphNode Subgraph Path 
+          | HoleSubgraphNode Subgraph Path 
+          | DirtyNode Dirty Path 
+          | CleanNode Dirty Path 
+          | HoleDirtyNode Dirty Path 
           | List_DummyNode List_Dummy Path 
           | HoleList_DummyNode List_Dummy Path 
+          | List_SectionNode List_Section Path 
+          | HoleList_SectionNode List_Section Path 
           | List_ParagraphNode List_Paragraph Path 
           | HoleList_ParagraphNode List_Paragraph Path 
-          | List_SubGraphNode List_SubGraph Path 
-          | HoleList_SubGraphNode List_SubGraph Path 
           | List_WordNode List_Word Path 
           | HoleList_WordNode List_Word Path 
           | List_VertexNode List_Vertex Path 
@@ -273,6 +293,8 @@ instance Show Node where
   show (BinNode _ _)  = "BinNode"
   show (LeafNode _ _)  = "LeafNode"
   show (HoleTreeNode _ _)  = "HoleTreeNode"
+  show (SectionNode _ _)  = "SectionNode"
+  show (HoleSectionNode _ _)  = "HoleSectionNode"
   show (ParagraphNode _ _)  = "ParagraphNode"
   show (HoleParagraphNode _ _)  = "HoleParagraphNode"
   show (WordNode _ _)  = "WordNode"
@@ -283,14 +305,17 @@ instance Show Node where
   show (HoleVertexNode _ _)  = "HoleVertexNode"
   show (EdgeNode _ _)  = "EdgeNode"
   show (HoleEdgeNode _ _)  = "HoleEdgeNode"
-  show (SubGraphNode _ _)  = "SubGraphNode"
-  show (HoleSubGraphNode _ _)  = "HoleSubGraphNode"
+  show (SubgraphNode _ _)  = "SubgraphNode"
+  show (HoleSubgraphNode _ _)  = "HoleSubgraphNode"
+  show (DirtyNode _ _)  = "DirtyNode"
+  show (CleanNode _ _)  = "CleanNode"
+  show (HoleDirtyNode _ _)  = "HoleDirtyNode"
   show (List_DummyNode _ _)  = "List_DummyNode"
   show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
+  show (List_SectionNode _ _)  = "List_SectionNode"
+  show (HoleList_SectionNode _ _)  = "HoleList_SectionNode"
   show (List_ParagraphNode _ _)  = "List_ParagraphNode"
   show (HoleList_ParagraphNode _ _)  = "HoleList_ParagraphNode"
-  show (List_SubGraphNode _ _)  = "List_SubGraphNode"
-  show (HoleList_SubGraphNode _ _)  = "HoleList_SubGraphNode"
   show (List_WordNode _ _)  = "List_WordNode"
   show (HoleList_WordNode _ _)  = "HoleList_WordNode"
   show (List_VertexNode _ _)  = "List_VertexNode"

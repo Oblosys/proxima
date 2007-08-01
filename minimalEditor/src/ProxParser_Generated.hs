@@ -1,6 +1,6 @@
 module ProxParser_Generated where
 
-import CommonTypes
+import CommonTypes hiding (Dirty (..))
 import PresLayerTypes
 import PresLayerUtils
 
@@ -55,10 +55,10 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_Paragraph -> Maybe List_SubGraph -> Root
-reuseRoot nodes  ma0 ma1 ma2 ma3 ma4
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_Section -> Root
+reuseRoot nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractRoot defaultRoot nodes of
-           (Root a0 a1 a2 a3 a4) -> reuse5 Root a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
+           (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRoot"
 
 reuseBin :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Tree -> Tree
@@ -73,6 +73,12 @@ reuseLeaf nodes  ma0
            (Leaf a0) -> reuse1 Leaf a0 ma0
            _ -> error "System error:<module>.reuseLeaf"
 
+reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe List_Paragraph -> Maybe Subgraph -> Section
+reuseSection nodes  ma0 ma1 ma2
+  = case extractFromNodes extractSection defaultSection nodes of
+           (Section a0 a1 a2) -> reuse3 Section a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseSection"
+
 reuseParagraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Word -> Paragraph
 reuseParagraph nodes  ma0 ma1
   = case extractFromNodes extractParagraph defaultParagraph nodes of
@@ -85,10 +91,10 @@ reuseWord nodes  ma0 ma1
            (Word a0 a1) -> reuse2 Word a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseWord"
 
-reuseGraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Vertex -> Maybe List_Edge -> Graph
-reuseGraph nodes  ma0 ma1 ma2
+reuseGraph :: [Maybe Node] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
+reuseGraph nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractGraph defaultGraph nodes of
-           (Graph a0 a1 a2) -> reuse3 Graph a0 a1 a2 ma0 ma1 ma2
+           (Graph a0 a1 a2 a3) -> reuse4 Graph a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseGraph"
 
 reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
@@ -103,11 +109,23 @@ reuseEdge nodes  ma0 ma1 ma2
            (Edge a0 a1 a2) -> reuse3 Edge a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseEdge"
 
-reuseSubGraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Vertex -> Maybe List_Edge -> SubGraph
-reuseSubGraph nodes  ma0 ma1 ma2
-  = case extractFromNodes extractSubGraph defaultSubGraph nodes of
-           (SubGraph a0 a1 a2) -> reuse3 SubGraph a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseSubGraph"
+reuseSubgraph :: [Maybe Node] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
+reuseSubgraph nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractSubgraph defaultSubgraph nodes of
+           (Subgraph a0 a1 a2 a3) -> reuse4 Subgraph a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseSubgraph"
+
+reuseDirty :: [Maybe Node] -> Maybe IDD -> Dirty
+reuseDirty nodes  ma0
+  = case extractFromNodes extractDirty defaultDirty nodes of
+           (Dirty a0) -> reuse1 Dirty a0 ma0
+           _ -> error "System error:<module>.reuseDirty"
+
+reuseClean :: [Maybe Node] -> Maybe IDD -> Dirty
+reuseClean nodes  ma0
+  = case extractFromNodes extractClean defaultClean nodes of
+           (Clean a0) -> reuse1 Clean a0 ma0
+           _ -> error "System error:<module>.reuseClean"
 
 reuseList_Dummy :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
 reuseList_Dummy nodes  ma0 ma1
@@ -115,17 +133,17 @@ reuseList_Dummy nodes  ma0 ma1
            (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Dummy"
 
+reuseList_Section :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Section -> List_Section
+reuseList_Section nodes  ma0 ma1
+  = case extractFromNodes extractList_Section defaultList_Section nodes of
+           (List_Section a0 a1) -> reuse2 List_Section a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Section"
+
 reuseList_Paragraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Paragraph -> List_Paragraph
 reuseList_Paragraph nodes  ma0 ma1
   = case extractFromNodes extractList_Paragraph defaultList_Paragraph nodes of
            (List_Paragraph a0 a1) -> reuse2 List_Paragraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Paragraph"
-
-reuseList_SubGraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_SubGraph -> List_SubGraph
-reuseList_SubGraph nodes  ma0 ma1
-  = case extractFromNodes extractList_SubGraph defaultList_SubGraph nodes of
-           (List_SubGraph a0 a1) -> reuse2 List_SubGraph a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseList_SubGraph"
 
 reuseList_Word :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Word -> List_Word
 reuseList_Word nodes  ma0 ma1
@@ -166,7 +184,7 @@ extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _ _ _ _) _)) = Just x
+extractRoot (Just (RootNode x@(Root _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractBin :: Maybe Node -> Maybe Tree
@@ -177,6 +195,10 @@ extractLeaf :: Maybe Node -> Maybe Tree
 extractLeaf (Just (LeafNode x@(Leaf _) _)) = Just x
 extractLeaf _ = Nothing
 
+extractSection :: Maybe Node -> Maybe Section
+extractSection (Just (SectionNode x@(Section _ _ _) _)) = Just x
+extractSection _ = Nothing
+
 extractParagraph :: Maybe Node -> Maybe Paragraph
 extractParagraph (Just (ParagraphNode x@(Paragraph _ _) _)) = Just x
 extractParagraph _ = Nothing
@@ -186,7 +208,7 @@ extractWord (Just (WordNode x@(Word _ _) _)) = Just x
 extractWord _ = Nothing
 
 extractGraph :: Maybe Node -> Maybe Graph
-extractGraph (Just (GraphNode x@(Graph _ _ _) _)) = Just x
+extractGraph (Just (GraphNode x@(Graph _ _ _ _) _)) = Just x
 extractGraph _ = Nothing
 
 extractVertex :: Maybe Node -> Maybe Vertex
@@ -197,21 +219,29 @@ extractEdge :: Maybe Node -> Maybe Edge
 extractEdge (Just (EdgeNode x@(Edge _ _ _) _)) = Just x
 extractEdge _ = Nothing
 
-extractSubGraph :: Maybe Node -> Maybe SubGraph
-extractSubGraph (Just (SubGraphNode x@(SubGraph _ _ _) _)) = Just x
-extractSubGraph _ = Nothing
+extractSubgraph :: Maybe Node -> Maybe Subgraph
+extractSubgraph (Just (SubgraphNode x@(Subgraph _ _ _ _) _)) = Just x
+extractSubgraph _ = Nothing
+
+extractDirty :: Maybe Node -> Maybe Dirty
+extractDirty (Just (DirtyNode x@(Dirty _) _)) = Just x
+extractDirty _ = Nothing
+
+extractClean :: Maybe Node -> Maybe Dirty
+extractClean (Just (CleanNode x@(Clean _) _)) = Just x
+extractClean _ = Nothing
 
 extractList_Dummy :: Maybe Node -> Maybe List_Dummy
 extractList_Dummy (Just (List_DummyNode x@(List_Dummy _ _) _)) = Just x
 extractList_Dummy _ = Nothing
 
+extractList_Section :: Maybe Node -> Maybe List_Section
+extractList_Section (Just (List_SectionNode x@(List_Section _ _) _)) = Just x
+extractList_Section _ = Nothing
+
 extractList_Paragraph :: Maybe Node -> Maybe List_Paragraph
 extractList_Paragraph (Just (List_ParagraphNode x@(List_Paragraph _ _) _)) = Just x
 extractList_Paragraph _ = Nothing
-
-extractList_SubGraph :: Maybe Node -> Maybe List_SubGraph
-extractList_SubGraph (Just (List_SubGraphNode x@(List_SubGraph _ _) _)) = Just x
-extractList_SubGraph _ = Nothing
 
 extractList_Word :: Maybe Node -> Maybe List_Word
 extractList_Word (Just (List_WordNode x@(List_Word _ _) _)) = Just x
@@ -241,13 +271,16 @@ defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
 defaultRoot :: Root
-defaultRoot = Root NoIDD hole hole hole hole
+defaultRoot = Root NoIDD hole hole hole
 
 defaultBin :: Tree
 defaultBin = Bin NoIDD hole hole
 
 defaultLeaf :: Tree
 defaultLeaf = Leaf NoIDD
+
+defaultSection :: Section
+defaultSection = Section NoIDD hole hole
 
 defaultParagraph :: Paragraph
 defaultParagraph = Paragraph NoIDD hole
@@ -256,7 +289,7 @@ defaultWord :: Word
 defaultWord = Word NoIDD hole
 
 defaultGraph :: Graph
-defaultGraph = Graph NoIDD hole hole
+defaultGraph = Graph NoIDD hole hole hole
 
 defaultVertex :: Vertex
 defaultVertex = Vertex NoIDD hole hole hole hole
@@ -264,17 +297,23 @@ defaultVertex = Vertex NoIDD hole hole hole hole
 defaultEdge :: Edge
 defaultEdge = Edge NoIDD hole hole
 
-defaultSubGraph :: SubGraph
-defaultSubGraph = SubGraph NoIDD hole hole
+defaultSubgraph :: Subgraph
+defaultSubgraph = Subgraph NoIDD hole hole hole
+
+defaultDirty :: Dirty
+defaultDirty = Dirty NoIDD
+
+defaultClean :: Dirty
+defaultClean = Clean NoIDD
 
 defaultList_Dummy :: List_Dummy
 defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
 
+defaultList_Section :: List_Section
+defaultList_Section = List_Section NoIDD Nil_Section
+
 defaultList_Paragraph :: List_Paragraph
 defaultList_Paragraph = List_Paragraph NoIDD Nil_Paragraph
-
-defaultList_SubGraph :: List_SubGraph
-defaultList_SubGraph = List_SubGraph NoIDD Nil_SubGraph
 
 defaultList_Word :: List_Word
 defaultList_Word = List_Word NoIDD Nil_Word
@@ -308,6 +347,12 @@ reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
+
+reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
+          a0 -> a1 -> a2 -> a3 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
+reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
 reuse1 :: (a0 -> r) -> 
           a0 -> 
