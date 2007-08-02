@@ -228,13 +228,13 @@ vLine' = vLine -- empty
 mkTreeLeaf :: Bool -> Xprez doc node clip -> Xprez doc node clip
 mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
-      , hLine `withWidth` 5, refvHalf label ]
+      , hLine `withWidth` 5, refhHalf label ]
 
 mkTreeNode :: Bool -> Bool -> Xprez doc node clip -> [ Xprez doc node clip ] -> Xprez doc node clip
 mkTreeNode isLast isExp label children =
   rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
-                       , hLine `withWidth` 5,refvHalf label
+                       , hLine `withWidth` 5,refhHalf label
                        ]
                  ] ++ (if isExp then children else [] )
          ]
