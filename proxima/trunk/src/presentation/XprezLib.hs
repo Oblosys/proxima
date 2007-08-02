@@ -211,16 +211,16 @@ vAlignTop xp = colR  1 [ xp,  hvStretch]
 vAlignBottom xp = col [ hvStretch, xp]
 
 
-refvHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedHeight i `div` 2
+refvHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedWidth i `div` 2
                                         newI = i { assignedVRef = assignedVRef i + refdif
                                                  }
-                                        newS = s {hRef = vRef s - refdif -- assignedHeight i `div` 2
+                                        newS = s {vRef = vRef s - refdif -- assignedHeight i `div` 2
                                                  , finalVRef = finalVRef s - refdif
                                                  }
                                                   
                                      in (newI,newS))
 
-refhHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedWidth i `div` 2
+refhHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedHeight i `div` 2
                                         newI = i { assignedHRef = assignedHRef i + refdif
                                                  }
                                         newS = s {hRef = hRef s - refdif -- assignedHeight i `div` 2
