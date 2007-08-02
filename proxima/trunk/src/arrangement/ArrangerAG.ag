@@ -242,25 +242,9 @@ ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
 
 ATTR Presentation [ | | maxFormatterDepth : Int ]
 SEM Presentation
-  | EmptyP
+  | EmptyP StringP RectangleP EllipseP ImageP PolyP
       lhs.maxFormatterDepth = 0
-  | StringP
-      lhs.maxFormatterDepth = 0
-  | RectangleP
-      lhs.maxFormatterDepth = 0
-  | EllipseP
-      lhs.maxFormatterDepth = 0
-  | ImageP
-      lhs.maxFormatterDepth = 0
-  | PolyP
-      lhs.maxFormatterDepth = 0
-  | RowP
-      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
-  | ColP
-      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
-  | OverlayP
-      lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
-  | GraphP
+  | RowP ColP OverlayP GraphP
       lhs.maxFormatterDepth = maximum @presentationList.maxFormatterDepthList
   | FormatterP
       lhs.maxFormatterDepth = 1 + maximum @presentationList.maxFormatterDepthList
@@ -381,41 +365,20 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool hRef, 
       loc.vStretch = False
       loc.hRef = baseLine @lhs.fontMetrics @lhs.font
       loc.vRef = 0       
-  | RectangleP 
+  | RectangleP EllipseP GraphP
       loc.minWidth = @w
       loc.minHeight = @h
       loc.hStretch = False
       loc.vStretch = False
       loc.hRef = 0
       loc.vRef = 0
-  | EllipseP 
-      loc.minWidth = @w
-      loc.minHeight = @h
-      loc.hStretch = False
-      loc.vStretch = False
-      loc.hRef = 0
-      loc.vRef = 0
-  | ImageP 
+  | ImageP PolyP
       loc.minWidth = 0
       loc.minHeight = 0
       loc.hStretch = True
       loc.vStretch = True
       loc.hRef = 0
       loc.vRef = 0
-  | PolyP 
-      loc.minWidth = 0
-      loc.minHeight = 0
-      loc.hStretch = True
-      loc.vStretch = True
-      loc.hRef = 0
-      loc.vRef = 0
-  | GraphP
-      loc.minWidth = @w
-      loc.minHeight = @h
-      loc.hStretch = False
-      loc.vStretch = False
-      loc.hRef = 0
-      loc.vRef = 0   
 --  | VertexP copy all
   | RowP 
       loc.minTopHeight = if null @presentationList.hRefList then 0
