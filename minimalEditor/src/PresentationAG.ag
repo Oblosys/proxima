@@ -52,15 +52,20 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col $ [ bold $ text "Root"
-                           
+                           , mkTreeLeaf False (text "a")
                            , @graph.pres
                            , @tree.pres
-                           ] ++ @sections.press ++
-                           [ row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
+                           , col $ map row $ divide 3 @sections.press
+                           , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
                                  , (boxed $ text "Remove view") `withMouseDown` removeLastSection @lhs.path 
                                  ]
                            ]
+{
+divide n [] = []
+divide n xs = let (h,t) = splitAt n xs
+              in  h : divide n t
+}
                            
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
   | List_Paragraph
@@ -100,12 +105,12 @@ SEM Graph
 SEM Vertex [ || ] 
   | Vertex
       loc.pres = loc (VertexNode @self @lhs.path) $ structural $
-                   vertex @id.int @x.int @y.int (\a -> (round $ 17*cos a -1, round $ -17*sin a -1)) $
-                     col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
+                   vertex @id.int @x.int @y.int (\a -> (round $ 9*cos a , round $ -9*sin a )) $
+                     col [ rowR 1 [glue, refvHalf $ ellipse 18 18 `withRef` (9,9) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
-                         , rowR 1 [glue, boxed 
+                         , rowR 1 [glue, refvHalf $ boxed 
                                             (row [ hSpace 3
-                                                 , parsing $ text (@name.str) `withFont'` ("Arial", 10)
+                                                 , parsing $ text (@name.str) `withFont'` ("Arial", 6)
                                                  , hSpace 3
                                                  ])
                                               `withbgColor` (236, 236, 169)
@@ -119,7 +124,7 @@ SEM Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)
                      -- only present vertices that are in the supergraph
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
                  in  loc (SubgraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       (boxed $ graph 300 300 subEdges @vertices.press
+                       (boxed $ graph 100 100 subEdges @vertices.press
                      `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                      , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
