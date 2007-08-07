@@ -55,20 +55,20 @@ data EditArrangement documentLevel =
 
 -- node is parameter for Node type
 data Arrangement node =
-    EmptyA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef
-  | StringA     !IDA !XCoord !YCoord !Width !Height !HRef !VRef !String !Color !Font [Int]
-  | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !Color !Color
-  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Color !Color
-  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
-  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color
-  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
-  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+    EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef
+  | StringA     !IDA !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Font [Int]
+  | ImageA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !ImgStyle !Color !Color
+  | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Color !Color
+  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
+  | RowA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
+  | ColA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
-  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
-  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
-  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
+  | GraphA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color !NrOfVertices ![Arrangement node]
+  | VertexA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color !Outline !(Arrangement node)
+  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !VRef !HRef !Int !Color
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
@@ -79,8 +79,8 @@ type XCoord = Int
 type YCoord = Int
 type Width = Int
 type Height = Int
-type HRef = Int
 type VRef = Int
+type HRef = Int
 type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
 data Style = Solid | Transparent deriving (Show, Eq, Read)
 
@@ -227,22 +227,22 @@ heightA (ParsingA _ child)             = heightA child
 heightA (LocatorA location child)      = heightA child
 heightA arr                            = debug Err ("ArrTypes.heightA: unhandled arrangement "++show arr) 0
 
-hRefA (EmptyA _ x y w h hr vr)             = hr
-hRefA (StringA _ x y w h hr vr _ _ _ _)    = hr
-hRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
-hRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
-hRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
-hRefA (EllipseA _ x y w h hr vr _ _ _ _)   = hr
-hRefA (RowA _ x y w h hr vr _ _)           = hr
-hRefA (ColA _ x y w h hr vr _ _)           = hr
-hRefA (OverlayA _ x y w h hr vr _ _)       = hr
-hRefA (GraphA _ x y w h hr vr _ _ _)         = hr
-hRefA (VertexA _ x y w h hr vr _ _ _)        = hr
-hRefA (EdgeA _ x y x' y' hr vr _ _)        = hr
-hRefA (StructuralA _ child)          = hRefA child
-hRefA (ParsingA _ child)             = hRefA child
-hRefA (LocatorA location child)      = hRefA child
-hRefA arr                            = debug Err ("ArrTypes.hRefA: unhandled arrangement "++show arr) 0
+xRefA (EmptyA _ x y w h hr vr)             = hr
+xRefA (StringA _ x y w h hr vr _ _ _ _)    = hr
+xRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
+xRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
+xRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
+xRefA (EllipseA _ x y w h hr vr _ _ _ _)   = hr
+xRefA (RowA _ x y w h hr vr _ _)           = hr
+xRefA (ColA _ x y w h hr vr _ _)           = hr
+xRefA (OverlayA _ x y w h hr vr _ _)       = hr
+xRefA (GraphA _ x y w h hr vr _ _ _)         = hr
+xRefA (VertexA _ x y w h hr vr _ _ _)        = hr
+xRefA (EdgeA _ x y x' y' hr vr _ _)        = hr
+xRefA (StructuralA _ child)          = xRefA child
+xRefA (ParsingA _ child)             = xRefA child
+xRefA (LocatorA location child)      = xRefA child
+xRefA arr                            = debug Err ("ArrTypes.xRefA: unhandled arrangement "++show arr) 0
  
 vRefA (EmptyA _ x y w h hr vr)             = vr
 vRefA (StringA _ x y w h hr vr _ _ _ _)    = vr

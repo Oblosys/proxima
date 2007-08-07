@@ -89,10 +89,10 @@ subsuperscript exp sub sup = row [ exp, hSpace 1, overlay [ move 0 (-10) $ shrin
 --  where superHRef i = fontSize i * 1 `div` 3
 --        ex i = fontSize i `div` 3
 
-centerline xp = xp `with_` (\(i,s) -> let i' = i { assignedHRef = assignedHRef i - cmttex i
+centerline xp = xp `with_` (\(i,s) -> let i' = i { assignedXRef = assignedXRef i - cmttex i
                                                  }
-                                          s' = s { hRef = hRef s + cmttex i
-                                                 , finalHRef = finalHRef s + cmttex i
+                                          s' = s { xRef = xRef s + cmttex i
+                                                 , finalXRef = finalXRef s + cmttex i
                                                    -- , fontSize = fontSize s + 2
                                                  } -- great error when i field update is added, eg fontSize
 
@@ -228,13 +228,13 @@ vLine' = vLine -- empty
 mkTreeLeaf :: Bool -> Xprez doc node clip -> Xprez doc node clip
 mkTreeLeaf isLast label =
   row [ leafHandle isLast, hLine `withWidth` 12, leafImg
-      , hLine `withWidth` 5, refhHalf label ]
+      , hLine `withWidth` 5, xRefHalf label ]
 
 mkTreeNode :: Bool -> Bool -> Xprez doc node clip -> [ Xprez doc node clip ] -> Xprez doc node clip
 mkTreeNode isLast isExp label children =
   rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
          , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
-                       , hLine `withWidth` 5,refhHalf label
+                       , hLine `withWidth` 5, xRefHalf label
                        ]
                  ] ++ (if isExp then children else [] )
          ]
