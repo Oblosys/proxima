@@ -141,11 +141,11 @@ withVRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
 withVRef_ xp fv = withSyn xp (\s -> s { vRef = fv (vRef s) })
 
 withRef :: Xprez doc node clip -> (Int, Int) -> Xprez doc node clip
-withRef xp (v,h) = withSyn xp (\s -> s { vRef = v, hRef = h })
+withRef xp (h,v) = withSyn xp (\s -> s { hRef = h, vRef = v })
 
 withRef_ :: Xprez doc node clip -> ((Int, Int) -> (Int, Int)) -> Xprez doc node clip
-withRef_ xp fhw = withSyn xp (\s -> let (v,h) = fhw (vRef s, hRef s)
-                                     in  s { vRef = v, hRef = h })
+withRef_ xp fhv = withSyn xp (\s -> let (h,v) = fhv (hRef s, vRef s)
+                                    in  s { hRef = h, vRef = v })
 
 withHStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
 withHStretch xp hs = withSyn xp (\s -> s { hStretch = hs })
@@ -167,7 +167,7 @@ withSize xp (w,h) = withSyn xp (\s -> s { minWidth = w, hStretch = False
                                         , minHeight = h, vStretch = False  })
 
 
-move x y xp = xp `withRef_` (\(h,v)-> (h-y, v-x))
+move x y xp = xp `withRef_` (\(h,v)-> (h-x, v-y))
                  `with_` (\(i,s) -> let i' = i { assignedHRef = assignedHRef i + x
                                                , assignedVRef = assignedVRef i + y
                                                } 

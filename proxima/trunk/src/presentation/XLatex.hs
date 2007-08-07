@@ -249,7 +249,7 @@ handleImg isExp = if isExp then minusImg else plusImg
 
 nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
 
-leafImg = img "img/text.bmp" `withSize` (13,16) `withRef` (7,6)
+leafImg = img "img/text.bmp" `withSize` (13,16) `withRef` (6,7)
 
 plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
 
@@ -286,7 +286,7 @@ handleImg isExp = if isExp then minusImg else plusImg
 
 nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
 
-leafImg = img "img/help.bmp" `withSize` (16,16) `withRef` (7,6)
+leafImg = img "img/help.bmp" `withSize` (16,16) `withRef` (6,7)
 
 plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
 
