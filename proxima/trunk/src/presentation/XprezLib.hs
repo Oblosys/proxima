@@ -134,18 +134,18 @@ withXRef xp v = withSyn xp (\s -> s { xRef = v })
 withXRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
 withXRef_ xp fx = withSyn xp (\s -> s { xRef = fx (xRef s) })
 
-withVRef :: Xprez doc node clip -> Int -> Xprez doc node clip
-withVRef xp v = withSyn xp (\s -> s { vRef = v })
+withHRef :: Xprez doc node clip -> Int -> Xprez doc node clip
+withHRef xp h = withSyn xp (\s -> s { hRef = h })
 
-withVRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
-withVRef_ xp fw = withSyn xp (\s -> s { vRef = fw (vRef s) })
+withHRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
+withHRef_ xp fh = withSyn xp (\s -> s { hRef = fh (hRef s) })
 
 withRef :: Xprez doc node clip -> (Int, Int) -> Xprez doc node clip
-withRef xp (x,v) = withSyn xp (\s -> s { xRef = x, vRef = v })
+withRef xp (x,h) = withSyn xp (\s -> s { xRef = x, hRef = h })
 
 withRef_ :: Xprez doc node clip -> ((Int, Int) -> (Int, Int)) -> Xprez doc node clip
-withRef_ xp fhw = withSyn xp (\s -> let (h,v) = fhw (xRef s, vRef s)
-                                     in  s { xRef = h, vRef = v })
+withRef_ xp fhw = withSyn xp (\s -> let (v,h) = fhw (xRef s, hRef s)
+                                     in  s { xRef = v, hRef = h })
 
 withHStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
 withHStretch xp hs = withSyn xp (\s -> s { hStretch = hs })
@@ -168,11 +168,11 @@ withSize xp (w,h) = withSyn xp (\s -> s { minWidth = w, hStretch = False
 
 
 move x y xp = xp `withRef_` (\(h,v)-> (h-y, v-x))
-                 `with_` (\(i,s) -> let i' = i { assignedXRef = assignedXRef i + y
-                                               , assignedVRef = assignedVRef i + x
-                                               }
-                                        s' = s { finalXRef = finalXRef s-y
-                                               , finalVRef = finalVRef s -x
+                 `with_` (\(i,s) -> let i' = i { assignedHRef = assignedHRef i + x
+                                               , assignedXRef = assignedXRef i + y
+                                               } 
+                                        s' = s { finalHRef = finalHRef s -x
+                                               , finalXRef = finalXRef s-y
                                                }
                                     in (i',s'))
 
@@ -211,11 +211,11 @@ vAlignTop xp = colR  1 [ xp,  hvStretch]
 vAlignBottom xp = col [ hvStretch, xp]
 
 
-refvHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedWidth i `div` 2
-                                        newI = i { assignedVRef = assignedVRef i + refdif
+hRefHalf xp = xp `with_` (\(i,s) -> let refdif = hRef s - assignedWidth i `div` 2
+                                        newI = i { assignedHRef = assignedHRef i + refdif
                                                  }
-                                        newS = s {vRef = vRef s - refdif -- assignedHeight i `div` 2
-                                                 , finalVRef = finalVRef s - refdif
+                                        newS = s { hRef = hRef s - refdif -- assignedHeight i `div` 2
+                                                 , finalHRef = finalHRef s - refdif
                                                  }
                                                   
                                      in (newI,newS))

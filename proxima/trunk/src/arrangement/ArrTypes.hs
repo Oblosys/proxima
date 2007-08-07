@@ -244,22 +244,22 @@ xRefA (ParsingA _ child)             = xRefA child
 xRefA (LocatorA location child)      = xRefA child
 xRefA arr                            = debug Err ("ArrTypes.xRefA: unhandled arrangement "++show arr) 0
  
-vRefA (EmptyA _ x y w h hr vr)             = vr
-vRefA (StringA _ x y w h hr vr _ _ _ _)    = vr
-vRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
-vRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
-vRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
-vRefA (EllipseA _ x y w h hr vr _ _ _ _)   = vr
-vRefA (RowA _ x y w h hr vr _ _)           = vr
-vRefA (ColA _ x y w h hr vr _ _)           = vr
-vRefA (OverlayA _ x y w h hr vr _ _)       = vr
-vRefA (GraphA _ x y w h hr vr _ _ _)         = vr
-vRefA (VertexA _ x y w h hr vr _ _ _)        = vr
-vRefA (EdgeA _ x y x' y' hr vr _ _)        = vr
-vRefA (StructuralA _ child)          = vRefA child
-vRefA (ParsingA _ child)             = vRefA child
-vRefA (LocatorA location child)      = vRefA child
-vRefA arr                            = debug Err ("ArrTypes.vRefA: unhandled arrangement "++show arr) 0
+hRefA (EmptyA _ x y w h hr vr)             = vr
+hRefA (StringA _ x y w h hr vr _ _ _ _)    = vr
+hRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
+hRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
+hRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
+hRefA (EllipseA _ x y w h hr vr _ _ _ _)   = vr
+hRefA (RowA _ x y w h hr vr _ _)           = vr
+hRefA (ColA _ x y w h hr vr _ _)           = vr
+hRefA (OverlayA _ x y w h hr vr _ _)       = vr
+hRefA (GraphA _ x y w h hr vr _ _ _)         = vr
+hRefA (VertexA _ x y w h hr vr _ _ _)        = vr
+hRefA (EdgeA _ x y x' y' hr vr _ _)        = vr
+hRefA (StructuralA _ child)          = hRefA child
+hRefA (ParsingA _ child)             = hRefA child
+hRefA (LocatorA location child)      = hRefA child
+hRefA arr                            = debug Err ("ArrTypes.hRefA: unhandled arrangement "++show arr) 0
 
 -- use named fields?
 
