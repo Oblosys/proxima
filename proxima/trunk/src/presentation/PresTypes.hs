@@ -164,11 +164,11 @@ data Inherited doc clip = Inh { font :: Font
                      , mouseDown :: Maybe (UpdateDoc doc clip)
                      , popupMenuItems :: [ PopupMenuItem doc clip ]
 		     , assignedWidth, assignedHeight :: Int
-		     , assignedXRef, assignedHRef :: Int} deriving Show
-data Synthesized = Syn { xRef, hRef, minWidth, minHeight :: Int
+		     , assignedVRef, assignedHRef :: Int} deriving Show
+data Synthesized = Syn { vRef, hRef, minWidth, minHeight :: Int
                        , hStretch, vStretch :: Bool
 		       , finalWidth, finalHeight :: Int
-		       , finalXRef, finalHRef :: Int
+		       , finalVRef, finalHRef :: Int
 		       } deriving Show
 
 type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc clip, Synthesized)

@@ -202,8 +202,8 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
     (EmptyA _ _ _ _ _ _ _) ->
       return ()
       
-    (StringA id x' y' w' h' hRef' _ str fColor fnt _) ->
-     do { let (x,y,w,h, hRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale hRef')
+    (StringA id x' y' w' h' _ vRef' str fColor fnt _) ->
+     do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
         ; when (str /= "") $ 
            do { context <- widgetCreatePangoContext wi
               ; fontDescription <- fontDescriptionFromProximaFont fnt
@@ -218,7 +218,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                                 ] -- underline and strikeout don't seem to work
               ; case pangoItems of 
                   [pangoItem] -> do { glyphItem <- pangoShape (head pangoItems)
-                                    ; drawGlyphs dw gc x (y+hRef) glyphItem
+                                    ; drawGlyphs dw gc x (y+vRef) glyphItem
                                     }
                   pangoItem:_ -> do { glyphItem <- pangoShape (head pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
