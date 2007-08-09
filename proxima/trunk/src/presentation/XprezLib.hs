@@ -179,14 +179,10 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-x, v-y))
 
 
 hLine :: Xprez doc node clip
---hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
-hLine = row [empty `withHStretch` True `withHeight` 1] `withInh` (\i -> i {backgroundColor = lineColor i})
--- workaround for incorrect poly rendering.
+hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
 
 vLine :: Xprez doc node clip
---vLine = poly [(0,0),(0,1.0)] `withWidth` 1
-vLine = row [empty `withVStretch` True `withWidth` 1] `withInh` (\i -> i {backgroundColor = lineColor i})
--- workaround for incorrect poly rendering.
+vLine = poly [(0,0),(0,1.0)] `withWidth` 1
 
 -- lineWidth should be an attribute, so we can use a with here
 hLineW :: Int -> Xprez doc node clip
