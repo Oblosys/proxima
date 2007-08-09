@@ -207,6 +207,10 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
         ; when (str /= "") $ 
            do { context <- widgetCreatePangoContext wi
               ; fontDescription <- fontDescriptionFromProximaFont fnt
+              
+              ; language <- contextGetLanguage context
+              ; metrics <- contextGetMetrics context fontDescription language
+              ; let ascnt = round $ ascent metrics    
            
               ; gcSetValues gc $ newGCValues { foreground = colorRGB fColor }
                         
@@ -218,7 +222,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                                 ] -- underline and strikeout don't seem to work
               ; case pangoItems of 
                   [pangoItem] -> do { glyphItem <- pangoShape (head pangoItems)
-                                    ; drawGlyphs dw gc x (y+vRef) glyphItem
+                                    ; drawGlyphs dw gc x (y+ascnt) glyphItem
                                     }
                   pangoItem:_ -> do { glyphItem <- pangoShape (head pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
@@ -299,8 +303,6 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
     (PolyA id x' y' w' h' _ _ pts' lw' lColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
-        ; drawLines dw gc pts
   
 
         ; when (not arrDb) $
@@ -309,6 +311,10 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               } 
+
+        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; drawLines dw gc pts
+  
         }
 
 
