@@ -10,7 +10,7 @@ import Data.Map (Map)
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
-data PresentationLevel doc node clip = PresentationLevel (Presentation doc node clip) (PresentationLS doc node clip) deriving Show
+data PresentationLevel doc node clip = PresentationLevel (Presentation P doc node clip) (PresentationLS doc node clip) deriving Show
 
 type PresentationLS doc node clip = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip)
 
@@ -19,7 +19,7 @@ type Layout = (Int, Int)
 type LayoutMap = Map IDP Layout   -- Layout information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
-type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
+type DeletedTokenMap doc node clip = Map IDP (Presentation P doc node clip)    -- Not used now. Maps deleted tokens to their successors
 
 --instance (Show a, Show b) => Show (FiniteMap a b) where
 -- show fm = "{FiniteMap}" -- ++show (fmToList fm)
@@ -61,39 +61,45 @@ data EditPresentation documentLevel doc node clip =
 
 -- Presentation is Xprez with ID's
 
-data Presentation doc node clip = EmptyP !IDP
-           | StringP !IDP !String
-           | ImageP !IDP !String
-           | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
-           | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
-           | EllipseP !IDP !Int !Int !Int      -- width height lineWidth
-           | RowP !IDP !Int ![Presentation doc node clip]    -- vRefNr 
-           | ColP !IDP !Int ![Presentation doc node clip]    -- hRefNr
-           | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
-           | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
-           | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
-           | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation doc node clip] -- width height edges 
-           | VertexP !IDP !Int !Int !Int Outline !(Presentation doc node clip) -- vertexID x y outline       see note below
-           | FormatterP !IDP ![Presentation doc node clip]
+data Presentation t doc node clip where
+  EmptyP  :: !IDP -> Presentation t doc node clip
+  StringP :: !IDP -> !String -> Presentation t doc node clip
+  ImageP  :: !IDP -> !String -> Presentation t doc node clip
+  PolyP   :: !IDP -> ![ (Float, Float) ] -> !Int -> Presentation t doc node clip -- pointList (0.0-1.0) lineWidth
+  RectangleP :: !IDP -> !Int -> !Int -> !Int -> Presentation t doc node clip     -- width height lineWidth
+  EllipseP   :: !IDP -> !Int -> !Int -> !Int -> Presentation t doc node clip     -- width height lineWidth
+  RowP     :: !IDP -> !Int -> ![Presentation t doc node clip] -> Presentation t doc node clip   -- vRefNr 
+  ColP     :: !IDP -> !Int -> ![Presentation t doc node clip] -> Presentation t doc node clip   -- hRefNr
+  OverlayP :: !IDP         -> ![ (Presentation t doc node clip) ] -> Presentation t doc node clip -- 1st elt is in front of 2nd, etc.
+  WithP :: !(AttrRule doc clip) -> !(Presentation t doc node clip)  -> Presentation t doc node clip
+  StructuralP :: !IDP -> !(Presentation t doc node clip) -> Presentation t doc node clip       -- IDP?
+  ParsingP :: !IDP -> !(Presentation t doc node clip) -> Presentation t doc node clip        -- IDP?
+  LocatorP :: node -> !(Presentation t doc node clip) -> Presentation t doc node clip -- deriving Show -- do we want a ! for location  ? 
+  GraphP :: !IDP -> !Dirty -> !Int -> !Int -> ![(Int,Int)] -> ![Presentation t doc node clip] -> Presentation t doc node clip -- width height edges 
+  VertexP :: !IDP -> !Int -> !Int -> !Int -> Outline -> !(Presentation t doc node clip) -> Presentation t doc node clip -- vertexID x y outline       see note below
+  FormatterP :: !IDP -> ![Presentation t doc node clip] -> Presentation t doc node clip
+  ArrangedP :: (Presentation t doc node clip) -- experimental for incrementality.
+                -- arranger gets Presentation in which unchanged subtrees are replaced by
+                -- this node. For these subtrees, old arrangement is used
+ -- (Presentation t doc node clip)     -- experimental for incrementality.
+                -- arranger gets Presentation in which unchanged subtrees are replaced by
+                -- this node. For these subtrees, old arrangement is used
 
-{-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
-           | Formatter [ (Presentation doc node clip) ]
-           | Alternative [ (Presentation doc node clip) ]
+{-         | Matrix [[ (Presentation t doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
+| Formatter [ (Presentation t doc node clip) ]
+| Alternative [ (Presentation t doc node clip) ]
 -} -- are the !'s in the right place like this?
-           | ArrangedP -- (Presentation doc node clip)     -- experimental for incrementality.
-                           -- arranger gets Presentation in which unchanged subtrees are replaced by
-                           -- this node. For these subtrees, old arrangement is used
 
+data P
+data G
 
 -- Note: An alternative and safer definition for GraphP is GraphP [Vertex], but this requires all functions that
--- traverse Presentation to have a separate function for traversing the Vertex type. This is too much of a hassle.
+-- traverse Presentation t to have a separate function for traversing the Vertex type. This is too much of a hassle.
 
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show (Presentation doc node clip) where
+instance Show (Presentation t doc node clip) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (ImageP id str)       = "{"++show id++":Image "++str++"}"
