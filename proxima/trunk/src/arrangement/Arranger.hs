@@ -16,19 +16,18 @@ arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
- do { let screenSize = 1000      
-    ; let pres' = prunePres dt pres
+ do { let pres' = prunePres dt pres
     ; viewedArea <- readIORef $ getViewedAreaRef state
   --  ; debugLnIO Err ("Diff tree"++show dt)
   --  ; debugLnIO Err ("pruned presentation"++show pres')
-    ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' screenSize viewedArea oldArrangement
+    ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
           
     ; if maxFDepth == 0 then
         return attrTree
       else if maxFDepth == 1 
       then 
-       do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree screenSize viewedArea oldArrangement
+       do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree viewedArea oldArrangement
           ; return arrangement
           }
       else 
@@ -40,9 +39,9 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 -- non-pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
 -- unsafePerformDraw is not available     -- obsolete comment
 -- Monad is IO again so fixIO can be used
-fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Int -> Rectangle -> 
+fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
-fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize viewedArea oldArrangement = f --fixit
+fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = f --fixit
  where f :: IO (Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
        f = 
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (transparent, white, black, black)
@@ -59,7 +58,6 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize viewe
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                oldArrangement
                                                []       -- popupMenu : [String, (UpdateDoc doc clip)] 
-                                               screenSize 
                                                defTextColor
                                                viewedArea
                
@@ -93,7 +91,6 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) screenSize viewe
                                           Nothing
                                           oldArrangement
                                           []
-                                          screenSize 
                                           defTextColor
                                           viewedArea 
                                           

@@ -140,7 +140,6 @@ ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color ba
             focus : FocusPres
             mouseDown : {Maybe (UpdateDoc doc clip)}
             popupMenuItems : {[ PopupMenuItem ]}
-            screenWidth : Int  
           || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : {Arrangement node} ]
 SEM Root
   | Root
@@ -500,8 +499,10 @@ SEM PresentationList
 
 SEM Root
   | Root -- if scr < min, assign min
-      presentation.assignedWidth = if @presentation.hStretch then @lhs.screenWidth else @presentation.minWidth
-      presentation.assignedHeight = if @presentation.vStretch then 800 else @presentation.minHeight -- should be screenHeight
+      presentation.assignedWidth  = let (_,(screenWidth,_)) = @lhs.viewedArea
+                                    in  if @presentation.hStretch then screenWidth else @presentation.minWidth
+      presentation.assignedHeight = let (_,(_,screenHeight)) = @lhs.viewedArea
+                                    in  if @presentation.vStretch then screenHeight else @presentation.minHeight -- should be screenHeight
       presentation.assignedVRef = @presentation.vRef -- is ignored anyway 
       presentation.assignedHRef = @presentation.hRef 
 
