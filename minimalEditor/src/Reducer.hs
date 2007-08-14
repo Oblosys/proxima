@@ -150,6 +150,7 @@ resolveSubgraphs graph@(Graph idd graphDirty vs es) subgraphs =
                               (fromList_Edge es) 
     in ( Graph idd graphDirty vs (toList_Edge correctEdges)
        , map (removeOldVertices superGraphIDs) subgraphs)
+resolveSubgraphs graph subgraphs = (graph, subgraphs)
 
 removeOldVertices vertexIDs (Subgraph id d vs es) = 
   let subgraphVertices' = toList_Vertex $ filter (\v -> getID_Vertex v `elem` vertexIDs) $

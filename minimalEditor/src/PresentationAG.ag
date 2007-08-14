@@ -52,14 +52,30 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col $ [ bold $ text "Root"
-                           , mkTreeLeaf False (text "a")
+                             , mkTreeLeaf False $ text "Bla" ,
+                     {-      , boxed $ row [ text "blap" `withFontSize` 100, colR 1 [ poly [] `withbgColor` red
+                                                                               , text "blap"
+                                                                               , poly [] `withbgColor` blue
+                                                                               ] `withHRef` (10)
+                                         ] -}
+                            overlay [ row [rect 100 10] `withbgColor` red `withRef` (45,10) 
+                                                   , rect 10 100
+                                                   ] 
+                                {- , boxed $ overlay [ rect 100 10  `withRef` (45,10)
+                                                   , rect 10 100
+                                                   ]  -}  
+                         {-  , boxed $ overlay [ col [text "O" ]
+                                             , col[ text "+"]
+                                                `withRef` (20,40)
+                                             ] 
+                           -}      
                            , @graph.pres
-                           , @tree.pres
+                          {- , @tree.pres
                            , col $ map row $ divide 3 @sections.press
                            , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
                                  , (boxed $ text "Remove view") `withMouseDown` removeLastSection @lhs.path 
-                                 ]
+                                 ] -}
                            ]
 {
 divide n [] = []
@@ -97,18 +113,19 @@ SEM Section
                            ]
 SEM Graph
   | Graph
-      lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     row [ hSpace 5,
-                           boxed $ graph 400 300 @edges.edges @vertices.press
-                         ]
+      lhs.pres = let vs = [ (fromIntegral (int_ x_)/400, fromIntegral (int_ y_)/300)| (Vertex _ _ _ x_ y_  ) <- fromList_Vertex @vertices.self]
+                 in  loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       row [ hSpace 5,
+                             boxed $ graph 400 300 @edges.edges @vertices.press
+                           ]
       
 SEM Vertex [ || ] 
   | Vertex
       loc.pres = loc (VertexNode @self @lhs.path) $ structural $
                    vertex @id.int @x.int @y.int (\a -> (round $ 9*cos a , round $ -9*sin a )) $
-                     col [ rowR 1 [glue, refvHalf $ ellipse 18 18 `withRef` (9,9) `withfColor` (200, 255, 255) , glue]
+                     col [ rowR 1 [glue, hRefHalf $ ellipse 18 18 `withRef` (9,9) `withfColor` (200, 255, 255) , glue]
                          , vSpace 4 `withHStretch` True
-                         , rowR 1 [glue, refvHalf $ boxed 
+                         , rowR 1 [glue, hRefHalf $ boxed 
                                             (row [ hSpace 3
                                                  , parsing $ text (@name.str) `withFont'` ("Arial", 6)
                                                  , hSpace 3
