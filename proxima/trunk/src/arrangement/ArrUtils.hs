@@ -112,8 +112,7 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
        lookupVertex vid ((i,x,y,ol):vs) | vid == i = Just (x,y,ol)
                                         | otherwise = lookupVertex vid vs
 
--- for now, ignore ref's in diff. Even if ref changes but nothing else, no need to redraw.
-
+-- refs can be ignored, since they do not influence the rendering of the arrangement.
 -- experimental diff, only strings are checked.
 -- skip StructuralA ParsingA and LocatorA elts
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
