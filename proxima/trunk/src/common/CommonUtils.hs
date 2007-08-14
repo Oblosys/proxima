@@ -8,9 +8,9 @@ import CommonTypes
 -- safer version of !! that can report the origin of the index call
 -- non-crashing functions are desirable, because at a crash in a program with a GUI, ghci crashes as well
 -- WARNING:: this version does not work with infinite lists!!!!
-index callerName [] i = error ("**** "++callerName++": indexing in empty list **** ")
-index callerName l  i = let i' = if i < 0 then debug Err ("**** "++callerName++": indexing with index < 0 **** ") 0
-                                else if i >= length l then debug Err ("**** "++callerName++": indexing index >= length **** ") ((length l)-1)
+index callerName [] i = error ("*** CommonUtils.index (called by "++callerName++"): indexing in empty list **** ")
+index callerName l  i = let i' = if i < 0 then debug Err ("*** CommonUtils.index (called by " ++callerName++"): index < 0 **** ") 0
+                                else if i >= length l then debug Err ("*** CommonUtils.index (called by "++callerName++"): index >= length **** ") ((length l)-1)
                                 else i
                         in  l !! i'
 
@@ -21,10 +21,10 @@ commonPrefix :: Eq a => [a] -> [a] -> [a]
 commonPrefix xs ys = map fst . takeWhile (uncurry (==)) $ zip xs ys
 
 -- | Replace the i'the element in xs by x.
-replace :: Int -> [a] -> a -> [a]
-replace i xs x = case splitAt i xs of
+replace :: String -> Int -> [a] -> a -> [a]
+replace callerName i xs x = case splitAt i xs of
                    (left, _: right) -> left ++ [x] ++ right
-                   _                -> error "*** replace: index out of bounds"
+                   _                -> debug Err ("**** CommonUtils.replace (called by "++callerName++"): index out of bounds") xs
 
 -- scaling seems to be rather expensive. For now it is turned off.
 scaleInt :: Double -> Int -> Int

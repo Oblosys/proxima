@@ -100,13 +100,13 @@ deleteGraphPres (PathP ps _) pres = case deleteGraphPres' ps pres of
                                       Nothing    -> debug Err ("TreeEditPres.deleteGraphPres: delete went wrong, incorrect presentation structure") pres
                                       
 deleteGraphPres' (p:ps) (RowP id rf press)         = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
-                                                       Just pres -> Just $ RowP id rf $ replace p press pres
+                                                       Just pres -> Just $ RowP id rf $ replace "TreeEditPres.deleteGraphPres'" p press pres
                                                        Nothing    -> Nothing
 deleteGraphPres' (p:ps) (ColP id rf press)         = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
-                                                       Just pres -> Just $ ColP id rf $ replace p press pres
+                                                       Just pres -> Just $ ColP id rf $ replace "TreeEditPres.deleteGraphPres'" p press pres
                                                        Nothing    -> Nothing
 deleteGraphPres' (p:ps) (OverlayP id (pres:press)) = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
-                                                       Just pres -> Just $ OverlayP id $ replace p press pres
+                                                       Just pres -> Just $ OverlayP id $ replace "TreeEditPres.deleteGraphPres'" p press pres
                                                        Nothing    -> Nothing
 deleteGraphPres' (0:ps) (WithP ar pres)            = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ WithP ar pres'
@@ -120,7 +120,7 @@ deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pr
 deleteGraphPres' (p:ps) (GraphP id d w h es press)   = 
   if p < length press 
   then  case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
-          Just pres -> Just $ GraphP id Dirty w h es $ replace p press pres
+          Just pres -> Just $ GraphP id Dirty w h es $ replace "TreeEditPres.deleteGraphPres'" p press pres
           Nothing   -> Just $ GraphP id Dirty w h es $ (take p press ++ drop (p+1) press)
   else let edgeNr = p - length press
        in  Just $ GraphP id Dirty w h (take edgeNr es ++ drop (edgeNr+1) es) press
@@ -135,9 +135,9 @@ deleteGraphPres' _      pr                         = debug Err ("TreeEditPres.de
 addVertexPres NoPathP vertex pres      = pres
 addVertexPres (PathP ps _) vertex pres = addVertexPres' ps vertex pres
                                       
-addVertexPres' (p:ps) vertex (RowP id rf press)         = RowP id rf $ replace p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
-addVertexPres' (p:ps) vertex (ColP id rf press)         = ColP id rf $ replace p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
-addVertexPres' (p:ps) vertex (OverlayP id (pres:press)) = OverlayP id $ replace p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
+addVertexPres' (p:ps) vertex (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
+addVertexPres' (p:ps) vertex (ColP id rf press)         = ColP id rf $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
+addVertexPres' (p:ps) vertex (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
 addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (LocatorP l pres)          = LocatorP l (addVertexPres' ps vertex pres)
@@ -155,9 +155,9 @@ addEdgePres (PathP fromPs _) (PathP toPs _) pres =
    _ -> pres
 addEdgePres _                _              pres = pres
 
-addEdgePres' (p:ps) edge (RowP id rf press)         = RowP id rf $ replace p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
-addEdgePres' (p:ps) edge (ColP id rf press)         = ColP id rf $ replace p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
-addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
+addEdgePres' (p:ps) edge (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
+addEdgePres' (p:ps) edge (ColP id rf press)         = ColP id rf $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
+addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (LocatorP l pres)          = LocatorP l (addEdgePres' ps edge pres)
@@ -193,15 +193,15 @@ getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph p
 
 
 moveVertexPres :: [Int] -> (Int,Int) -> Presentation doc node clip -> Presentation doc node clip                                      
-moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
-moveVertexPres (p:ps) pt (ColP id rf press)         = ColP id rf $ replace p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
-moveVertexPres (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
+moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
+moveVertexPres (p:ps) pt (ColP id rf press)         = ColP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
+moveVertexPres (p:ps) pt (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
 moveVertexPres (p:ps) pt (GraphP id d w h es press)   = 
   if p < length press 
-  then GraphP id Dirty w h es $ replace p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
+  then GraphP id Dirty w h es $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
   else debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) $ GraphP id d w h es press
 moveVertexPres []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
 moveVertexPres _      pt pr                      = debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) pr
