@@ -519,15 +519,15 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 					       ++ repeat @rightChildSpace
 					       )
 					       @presentationList.minWidthList
-      presentationList.assignedWidthList    = -- debug Err ("R.widths"++ show (take 2 @assignedWidths)) $
-                                              @assignedWidths
-      presentationList.assignedHRefList     = showDebug' Err "R.hRefs" $ @presentationList.hRefList -- is not right, nested rows don't work now
+      presentationList.assignedWidthList    = @assignedWidths
+      presentationList.assignedHRefList     = @presentationList.hRefList -- is not right, nested rows don't work now
 
-      presentationList.assignedHeightList   = showDebug' Err "R.heights" $ assign @presentationList.vStretchList
-                                              (repeat @lhs.assignedHeight) @presentationList.minHeightList 
-      presentationList.assignedVRefList     = showDebug' Err "R.vRefs" $ assign @presentationList.vStretchList
-                                              (repeat @vRef)--@lhs.assignedVRef)
-					                           @presentationList.vRefList 
+      presentationList.assignedHeightList   = assign @presentationList.vStretchList
+                                                (repeat @lhs.assignedHeight)
+                                                @presentationList.minHeightList 
+      presentationList.assignedVRefList     = assign @presentationList.vStretchList
+                                                (repeat @vRef)--@lhs.assignedVRef)
+                                                @presentationList.vRefList 
 
        -- width of stretching children should not be subtracted from available width
        -- for the moment this amount is added back to it as left and right corrections
@@ -1055,7 +1055,7 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                        LocatorA _ arr -> arr
                        _              -> EmptyA NoIDA 0 0 0 0 0 0
   | FormatterP
-      presentationList.oldArrList = debug Err "FormatterP must be unfolded first" $
+      presentationLdst.oldArrList = debug Err "FormatterP must be unfolded first" $
                                       repeat $ EmptyA NoIDA 0 0 0 0 0 0
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
