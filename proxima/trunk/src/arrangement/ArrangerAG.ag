@@ -439,15 +439,15 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
 
   | MatrixPresentation
       loc.rowTopHeights = map maximum (getRows @n @presentationList.vRefList)
-      loc.rowBottomHeights = showDebug' Arr "rws:" $ map (\minHghtsVRefs ->
+      loc.rowBottomHeights = map (\minHghtsVRefs ->
                                    maximum [ minHeight - vRef | (minHeight, vRef) <- minHghtsVRefs ]
 				 ) (getRows @n (zip @presentationList.minHeightList @presentationList.vRefList))
       loc.colLeftWidths = map maximum (getCols @n @presentationList.hRefList)
-      loc.colRightWidths = showDebug' Arr  "rws:" $ map (\minWdthsHRefs ->
+      loc.colRightWidths = map (\minWdthsHRefs ->
                                    maximum [ minWidth - hRef | (minWidth, hRef) <- minWdthsHRefs ]
 				 ) (getCols @n (zip @presentationList.minWidthList @presentationList.hRefList))
-      loc.rowHeights = showDebug' Arr "rhgts:" $ zipWith (+) @rowTopHeights @rowBottomHeights
-      loc.colWidths = showDebug' Arr "cwdths:" $ zipWith (+) @colLeftWidths @colRightWidths
+      loc.rowHeights = zipWith (+) @rowTopHeights @rowBottomHeights
+      loc.colWidths = zipWith (+) @colLeftWidths @colRightWidths
       loc.minWidth = sum @colLeftWidths + sum @colRightWidths
       loc.minHeight = sum @rowTopHeights + sum @rowBottomHeights
       loc.hStretch = False
@@ -548,10 +548,10 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
        
       -- @lhs.assigned vs final????
   | ColP
-      presentationList.assignedWidthList    = {- showDebug' Err "C.widths" $ -} assign @presentationList.hStretchList
+      presentationList.assignedWidthList    = assign @presentationList.hStretchList
                                               (repeat @lhs.assignedWidth) @presentationList.minWidthList 
       -- in case of stretch, return composite's ref
-      presentationList.assignedHRefList     = {- showDebug' Err "C.hRefs" $ -} assign @presentationList.hStretchList
+      presentationList.assignedHRefList     = assign @presentationList.hStretchList
                                               (repeat @lhs.assignedHRef)
 					      @presentationList.hRefList 
       loc.assignedHeights = if @presentationList.vStretchList!! @vRefNr -- if Ref Object is stretch, all children get
@@ -566,14 +566,14 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 					       ++ repeat @bottomChildSpace
 					       )
 					       @presentationList.minHeightList
-      presentationList.assignedHeightList    = {- showDebug' Err "C.heights" $ -} @assignedHeights
+      presentationList.assignedHeightList    = @assignedHeights
       presentationList.assignedVRefList     = {-debug Arr (  "assVRef:"++show @lhs.assignedVRef
 						++ "VRef:"++ show @vRef
 						++ "minHeight:"++show minHeight
 						++ "assHeight:"++show @lhs.assignedHeight
 						++ "topTotal:"++ show topTotalSpace
 						++ "botTotal:"++ show bottomTotalSpace
-						)-} {- showDebug' Err "C.vRefs" $ -} @presentationList.vRefList -- is not right, nested cols don't work now
+						)-} @presentationList.vRefList -- is not right, nested cols don't work now
 
        -- width of stretching children should not be subtracted from available height
        -- for the moment this amount is added back to it as top and bottom corrections
@@ -594,13 +594,13 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       loc.topChildSpace = round (fromIntegral @topTotalSpace / fromIntegral @topVStretches )
       loc.bottomChildSpace = round (fromIntegral @bottomTotalSpace / fromIntegral @bottomVStretches )
   | OverlayP
-      presentationList.assignedHeightList   = showDebug' Err "O.heights" $ assign @presentationList.vStretchList
+      presentationList.assignedHeightList   = assign @presentationList.vStretchList
                                               (repeat @lhs.assignedHeight) @presentationList.minHeightList 
-      presentationList.assignedVRefList     = showDebug' Err "O.vrefs" $ assign @presentationList.vStretchList
+      presentationList.assignedVRefList     = assign @presentationList.vStretchList
                                               (repeat @lhs.assignedVRef) @presentationList.vRefList 
-      presentationList.assignedWidthList    = showDebug' Err "O.widths" $ assign @presentationList.hStretchList
+      presentationList.assignedWidthList    = assign @presentationList.hStretchList
                                               (repeat @lhs.assignedWidth) @presentationList.minWidthList 
-      presentationList.assignedHRefList     = showDebug' Err "O.hrefs" $ assign @presentationList.hStretchList
+      presentationList.assignedHRefList     = assign @presentationList.hStretchList
                                               (repeat @lhs.assignedHRef)  @presentationList.hRefList 
   | GraphP -- just use minSize and h/hRef for assigned Size and Ref. Stretching does not make sense in a GraphP
       presentationList.assignedHeightList = @presentationList.minHeightList 
@@ -820,14 +820,14 @@ SEM Root
 ATTR Presentation [ x, y : Int | | ]
 SEM Presentation
   | RowP
-      presentationList.xList    = showDebug' Err "R.xList" $ init.scanl (+) 0 $ @presentationList.finalWidthList
-      presentationList.yList    = showDebug' Err "R.yList" $ [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
+      presentationList.xList    = init.scanl (+) 0 $ @presentationList.finalWidthList
+      presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
   | ColP
       presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
       presentationList.yList    = init.scanl (+) 0 $ @presentationList.finalHeightList
   | OverlayP
-      presentationList.xList    = showDebug' Err ("O.HRef"++show @finalHRef++"\nO.xList") $ [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
-      presentationList.yList    = showDebug' Err "O.ylist" $ [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
+      presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
+      presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
   | GraphP -- we could collect x and y's from vertices and send these back, but sending 0 down and letting
            -- the vertices add their own x and y to it is easier. (we use finalWidthList only for the nr of children)
       presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
@@ -1055,7 +1055,7 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                        LocatorA _ arr -> arr
                        _              -> EmptyA NoIDA 0 0 0 0 0 0
   | FormatterP
-      presentationLdst.oldArrList = debug Err "FormatterP must be unfolded first" $
+      presentationList.oldArrList = debug Err "FormatterP must be unfolded first" $
                                       repeat $ EmptyA NoIDA 0 0 0 0 0 0
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
