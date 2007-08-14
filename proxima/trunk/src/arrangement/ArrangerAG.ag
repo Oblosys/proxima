@@ -13,11 +13,7 @@ import FontLib
 {-
 TODO: 
 - add check that graph only has vertex children
-- SWITCH href and vref!!! (also in presentation)
-- check that using ref in StringA to retrieve the baseline during rendering does not cause any problems (when ref is changed by with nodes)
 
-bug: in (rowR 1 [ glue, pres, glue ]) left glue gets width 0, even when put in an overlay. (apparent in Dazzle network view)
-bug: hline and vline implemented with polys are rendered with incorrect white space in boxed primitive
 bug: boxed pres `withHRef` x  does not work for top and bottom line and background
 - why does Empty.arrangement have 0 for x and y?
 
@@ -519,16 +515,17 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 					       @presentationList.minWidthList
 		                 else assign @presentationList.hStretchList
                                                (  replicate @hRefNr (@leftChildSpace) 
-					       ++ [0] -- not used
+					       ++ [0] -- not used, since stretch for child nr @hRefNr is False 
 					       ++ repeat @rightChildSpace
 					       )
 					       @presentationList.minWidthList
-      presentationList.assignedWidthList    = @assignedWidths
-      presentationList.assignedHRefList     = @presentationList.hRefList -- is not right, nested rows don't work now
+      presentationList.assignedWidthList    = -- debug Err ("R.widths"++ show (take 2 @assignedWidths)) $
+                                              @assignedWidths
+      presentationList.assignedHRefList     = showDebug' Err "R.hRefs" $ @presentationList.hRefList -- is not right, nested rows don't work now
 
-      presentationList.assignedHeightList   = assign @presentationList.vStretchList
+      presentationList.assignedHeightList   = showDebug' Err "R.heights" $ assign @presentationList.vStretchList
                                               (repeat @lhs.assignedHeight) @presentationList.minHeightList 
-      presentationList.assignedVRefList     = assign @presentationList.vStretchList
+      presentationList.assignedVRefList     = showDebug' Err "R.vRefs" $ assign @presentationList.vStretchList
                                               (repeat @vRef)--@lhs.assignedVRef)
 					                           @presentationList.vRefList 
 
@@ -551,10 +548,10 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
        
       -- @lhs.assigned vs final????
   | ColP
-      presentationList.assignedWidthList    = assign @presentationList.hStretchList
+      presentationList.assignedWidthList    = {- showDebug' Err "C.widths" $ -} assign @presentationList.hStretchList
                                               (repeat @lhs.assignedWidth) @presentationList.minWidthList 
       -- in case of stretch, return composite's ref
-      presentationList.assignedHRefList     = assign @presentationList.hStretchList
+      presentationList.assignedHRefList     = {- showDebug' Err "C.hRefs" $ -} assign @presentationList.hStretchList
                                               (repeat @lhs.assignedHRef)
 					      @presentationList.hRefList 
       loc.assignedHeights = if @presentationList.vStretchList!! @vRefNr -- if Ref Object is stretch, all children get
@@ -565,18 +562,18 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 					       @presentationList.minHeightList
 		            else assign @presentationList.vStretchList
                                                (  replicate @vRefNr (@topChildSpace) 
-					       ++ [0] -- not 0
+					       ++ [0] -- not used, since stretch for child nr @vRefNr is False 
 					       ++ repeat @bottomChildSpace
 					       )
 					       @presentationList.minHeightList
-      presentationList.assignedHeightList    = @assignedHeights
+      presentationList.assignedHeightList    = {- showDebug' Err "C.heights" $ -} @assignedHeights
       presentationList.assignedVRefList     = {-debug Arr (  "assVRef:"++show @lhs.assignedVRef
 						++ "VRef:"++ show @vRef
 						++ "minHeight:"++show minHeight
 						++ "assHeight:"++show @lhs.assignedHeight
 						++ "topTotal:"++ show topTotalSpace
 						++ "botTotal:"++ show bottomTotalSpace
-						)-}  @presentationList.vRefList -- is not right, nested cols don't work now
+						)-} {- showDebug' Err "C.vRefs" $ -} @presentationList.vRefList -- is not right, nested cols don't work now
 
        -- width of stretching children should not be subtracted from available height
        -- for the moment this amount is added back to it as top and bottom corrections
@@ -597,14 +594,14 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       loc.topChildSpace = round (fromIntegral @topTotalSpace / fromIntegral @topVStretches )
       loc.bottomChildSpace = round (fromIntegral @bottomTotalSpace / fromIntegral @bottomVStretches )
   | OverlayP
-      presentationList.assignedHeightList   = assign @presentationList.vStretchList
+      presentationList.assignedHeightList   = showDebug' Err "O.heights" $ assign @presentationList.vStretchList
                                               (repeat @lhs.assignedHeight) @presentationList.minHeightList 
-      presentationList.assignedVRefList     = assign @presentationList.vStretchList
+      presentationList.assignedVRefList     = showDebug' Err "O.vrefs" $ assign @presentationList.vStretchList
                                               (repeat @lhs.assignedVRef) @presentationList.vRefList 
-      presentationList.assignedWidthList    = assign @presentationList.hStretchList
+      presentationList.assignedWidthList    = showDebug' Err "O.widths" $ assign @presentationList.hStretchList
                                               (repeat @lhs.assignedWidth) @presentationList.minWidthList 
-      presentationList.assignedHRefList     = assign @presentationList.hStretchList
-                                              (repeat @lhs.assignedHRef) @presentationList.hRefList 
+      presentationList.assignedHRefList     = showDebug' Err "O.hrefs" $ assign @presentationList.hStretchList
+                                              (repeat @lhs.assignedHRef)  @presentationList.hRefList 
   | GraphP -- just use minSize and h/hRef for assigned Size and Ref. Stretching does not make sense in a GraphP
       presentationList.assignedHeightList = @presentationList.minHeightList 
       presentationList.assignedVRefList   = @presentationList.vRefList 
@@ -699,24 +696,31 @@ SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
       loc.finalVRef   = @lhs.assignedVRef
       loc.finalHRef   = @lhs.assignedHRef
   | RowP
-      loc.finalWidth  =  sum @presentationList.finalWidthList
+      loc.finalWidth  = sum @presentationList.finalWidthList
       loc.finalHeight = @lhs.assignedHeight
       loc.finalVRef   = @lhs.assignedVRef
-      loc.finalHRef   = if null @presentationList.hRefList then 0
+      loc.finalHRef   = @lhs.assignedHRef
+                        {- the sum below does not work when hRef is modified by a with. 
+                           It is as of yet unclear whether the simpler computation causes any problems
+                        if null @presentationList.hRefList then 0
                         else if @presentationList.hStretchList!! @hRefNr then @lhs.assignedHRef
 		                else sum (take @hRefNr @assignedWidths) + (@presentationList.hRefList !! @hRefNr)
+		        -}
   | ColP
-      loc.finalWidth = @lhs.assignedWidth
-      loc.finalHeight =  sum @presentationList.finalHeightList --@lhs.assignedHeight
-      loc.finalVRef = if null @presentationList.vRefList then 0
-                      else if @presentationList.vStretchList!! @vRefNr then @lhs.assignedVRef
-		              else sum (take @vRefNr @assignedHeights) + (@presentationList.vRefList !! @vRefNr)
-      loc.finalHRef = @lhs.assignedHRef
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = sum @presentationList.finalHeightList --@lhs.assignedHeight
+      loc.finalVRef   = @lhs.assignedVRef
+                        {-
+                        if null @presentationList.vRefList then 0
+                        else if @presentationList.vStretchList!! @vRefNr then @lhs.assignedVRef
+		             else sum (take @vRefNr @assignedHeights) + (@presentationList.vRefList !! @vRefNr)
+		        -}
+      loc.finalHRef   = @lhs.assignedHRef
   | OverlayP 
-      loc.finalWidth = @lhs.assignedWidth
+      loc.finalWidth  = @lhs.assignedWidth
       loc.finalHeight = @lhs.assignedHeight
-      loc.finalVRef = @lhs.assignedVRef
-      loc.finalHRef = @lhs.assignedHRef
+      loc.finalVRef   = @lhs.assignedVRef
+      loc.finalHRef   = @lhs.assignedHRef
   | GraphP
       loc.finalWidth  = @minWidth
       loc.finalHeight = @minHeight
@@ -816,14 +820,14 @@ SEM Root
 ATTR Presentation [ x, y : Int | | ]
 SEM Presentation
   | RowP
-      presentationList.xList    = init.scanl (+) 0 $ @presentationList.finalWidthList
-      presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
+      presentationList.xList    = showDebug' Err "R.xList" $ init.scanl (+) 0 $ @presentationList.finalWidthList
+      presentationList.yList    = showDebug' Err "R.yList" $ [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
   | ColP
       presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
       presentationList.yList    = init.scanl (+) 0 $ @presentationList.finalHeightList
   | OverlayP
-      presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
-      presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
+      presentationList.xList    = showDebug' Err ("O.HRef"++show @finalHRef++"\nO.xList") $ [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
+      presentationList.yList    = showDebug' Err "O.ylist" $ [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
   | GraphP -- we could collect x and y's from vertices and send these back, but sending 0 down and letting
            -- the vertices add their own x and y to it is easier. (we use finalWidthList only for the nr of children)
       presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
