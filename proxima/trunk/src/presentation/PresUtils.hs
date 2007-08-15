@@ -602,6 +602,7 @@ containsColPres (p:path) (WithP ar pres)            = containsColPres path pres
 containsColPres (p:path) (StructuralP id pres)      = containsColPres path pres
 containsColPres (p:path) (ParsingP id pres)         = containsColPres path pres
 containsColPres (p:path) (LocatorP _ pres)          = containsColPres path pres
+containsColPres (p:path) (FormatterP id press)      = containsColPres path (index "PresUtils.containsColPres" press p)
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
 -- | Return True if the focus is on either a vertex, or an edge (focus on graph, index larger than nr of vertices)
@@ -622,6 +623,7 @@ focusIsOnGraphPres (0:path) (WithP _ pres)            = focusIsOnGraphPres path 
 focusIsOnGraphPres (0:path) (StructuralP _ pres)      = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (ParsingP _ pres)         = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (LocatorP _ pres)         = focusIsOnGraphPres path pres
+focusIsOnGraphPres (p:path) (FormatterP _ press)      = focusIsOnGraphPres path (index "PresUtils.focusIsOnGraphPres" press p)
 focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.focusIsOnGraph: can't handle "++show pth++" "++show pres) False
 
 
@@ -665,6 +667,7 @@ popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres'
 popupMenuItemsPres' its (p:path) (StructuralP _ pres)      = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (ParsingP _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (LocatorP _ pres)         = popupMenuItemsPres' its path pres
+popupMenuItemsPres' its (p:path) (FormatterP _ press)      = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its pth      pres                      = debug Err ("PresTypes.popupMenuItemsPres: can't handle "++show pth++" "++show pres) []
 
 
