@@ -206,9 +206,9 @@ updatedRectArr' x' y' dt arr =
 
 -- mark the focus path as changed in the DiffTree
 -- should be done for old as well as new focus (in case of navigate without update)
-markFocusArr :: FocusArr -> DiffTree -> DiffTree
-markFocusArr (FocusA (PathA fromPth _) (PathA toPth _)) dt = markDirty (commonPrefix fromPth toPth) dt
-markFocusArr _ dt = dt
+markFocusDirtyArr :: FocusArr -> DiffTree -> DiffTree
+markFocusDirtyArr (FocusA (PathA fromPth _) (PathA toPth _)) dt = markDirty (commonPrefix fromPth toPth) dt
+markFocusDirtyArr _ dt = dt
 
 
 -- mark all nodes on path as children dirty, when descending beyond clean leaf, add new clean nodes around dirty path

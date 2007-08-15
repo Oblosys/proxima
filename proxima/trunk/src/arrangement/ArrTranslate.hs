@@ -23,8 +23,10 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
-    SetFocusArr focus     -> ( SetFocusLay (focusPFromFocusA focus arr pres)
-                             , state, ArrangementLevel arr focus p)
+    SetFocusArr focus'     -> ( SetFocusLay (focusPFromFocusA focus' arr pres)
+                             , state, ArrangementLevel arr focus p) -- new focus is not set on arr level
+                                                                    -- this is done on presentation, so we
+                                                                    -- still have the old focus for incrementality
     InitArr               -> (InitLay,               state, arrLvl) 
     CloseArr              -> (CloseLay,              state, arrLvl) 
     CutArr                -> (CutLay,                state, arrLvl)
