@@ -130,13 +130,8 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
-    ; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
-    
-    ; let showDiffTree (DiffLeaf d) = "DiffLeaf " ++ show d
-          showDiffTree (DiffNode d1 d2 _) = "DiffNode " ++ show d1 ++" "++ show d2
-    
-    ; putStrLn $ showDiffTree diffTree
-    
+    --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
+       
     ; renderArr (wi,dw,gc) arrDb scale origin viewedArea
                          (DiffNode False True $ replicate (length focusArrList) (DiffLeaf False)++[diffTree])
                          

@@ -294,7 +294,6 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
 
-            
             {-
               -- Mark the updated rectangles by surrounding them with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
