@@ -56,9 +56,7 @@ emptyR dc va = return ()
 origin :: (Int, Int)
 origin = (0,0)
 
-type UpdatedRegions = (Rectangle    , Rectangle, Rectangle    )
---                    (current focus, old focus, edited region)
--- only for flickering reduction, until we have double buffering
+type UpdatedRegions = [Rectangle]
 
 type LeftButtonDown = Bool 
 -- For distinguishing between mouse move and mouse drag events. It is updated by RenTranslate.

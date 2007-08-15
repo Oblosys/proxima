@@ -173,20 +173,21 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
                 then repeat (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
                 else childDiffs)
 
-updatedRectArr :: Show node => DiffTree -> Arrangement node -> Maybe (Int, Int, Int, Int)
+-- | Returns a list of all areas that are dirty according to the diffTree
+updatedRectArr :: Show node => DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
 
-updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> Maybe (Int, Int, Int, Int)
+updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr' x' y' dt arr = 
   case dt of
-    DiffLeaf True            -> Nothing                --
-    DiffNode True  _     _   -> Nothing                -- if selfAndChildren clean then no rect.
+    DiffLeaf True            -> []                --
+    DiffNode True  _     _   -> []
     DiffLeaf False           -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  Just (x, y, x+widthA arr, y+heightA arr)
+                                in  [((x, y), (widthA arr, heightA arr))]
     DiffNode False False dts -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  Just (x, y, x+widthA arr, y+heightA arr)
+                                in  [((x, y), (widthA arr, heightA arr))]
     DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
       case arr of
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
@@ -196,14 +197,11 @@ updatedRectArr' x' y' dt arr =
       (ColA id x y w h hr vr bc arrs)     -> updatedRectArrs (x'+x) (y'+y) dts arrs 
       (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (GraphA id x y w h hr vr bc nvs arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
-      (VertexA id x y w h hr vr bc ol arr)   -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head dts) arr else problem
-      (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
-      _                             -> problem
- where updatedRectArrs x' y' dts arrs = let (luxs,luys,rlxs,rlys) = unzip4 . concat .  map (maybe [] (:[])) $ zipWith (updatedRectArr' x' y') dts arrs
-                                        in  if null luxs
-                                            then problem
-                                            else Just (minimum luxs, minimum luys, maximum rlxs, maximum rlys)
-       problem = debug Err ("ArrUtils.updatedRectArr: problem with "++ shallowShowArr arr) $ Nothing -- show dt when we want to debug this
+      (VertexA id x y w h hr vr bc ol arr) -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head dts) arr else problem
+      (OverlayA id x y w h hr vr bc arrs)  -> updatedRectArrs (x'+x) (y'+y) dts arrs
+      _                                    -> problem
+ where updatedRectArrs x' y' dts arrs = concat $ zipWith (updatedRectArr' x' y') dts arrs
+       problem = debug Err ("ArrUtils.updatedRectArr: problem with "++ shallowShowArr arr) []
 
 
 -- mark the focus path as changed in the DiffTree

@@ -119,11 +119,12 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
             
-            ; let (r1,r2,((x3,y3),(w3,h3))) = updRegions
-         
+            ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
+                  drawOutlineRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc False x y (w-1) (h-1)
+                                                            -- outline rectangles are 1 px too large
+                  
             ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.white }
-
-            ; drawRectangle pm gc True x3 y3 w3 h3
+            ; mapM_ (drawFilledRectangle pm gc) updRegions -- clear background for updated regions
 
             ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                                 -- since arranger already only arranges elements in view
@@ -134,9 +135,9 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
             
             ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
---            ; drawRect r1
---            ; drawRect r2
-            ; drawRectangle dw gc False (x3-1) (y3-1) (w3+1) (h3+1) -- outline rectangles are 1 px too large
+
+            -- mark the updated rectangles by surrounding them with red rectangles
+            ; mapM_ (\((x,y),(w,h)) -> drawOutlineRectangle dw gc ((x-1,y-1),(w+2,h+2))) updRegions
             ; return True
             }
     }
@@ -292,10 +293,11 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
                       }
               else return ()                           
             -- The rendering itself is done on paint events
+            ; updatedRegion <- regionNew
             
-            --; let (fCur, fOld, editedRegion) = updRegions
-            --; mapM_ (\((x,y),(w,h))-> drawWindowInvalidateRect dw (Rectangle x y w h) False) [fCur, fOld, editedRegion]
-            ; drawWindowInvalidateRect dw (Rectangle 0 0 2000 2000)  False
+            ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
+            ; drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
+            --; drawWindowInvalidateRect dw (Rectangle 0 0 2000 2000)  False
             }
     }
 
