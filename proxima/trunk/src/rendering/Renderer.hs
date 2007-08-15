@@ -133,11 +133,11 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
        
     ; renderArr (wi,dw,gc) arrDb scale origin viewedArea
-                         (DiffNode False True $ replicate (length focusArrList) (DiffLeaf False)++[diffTree])
+                         (DiffNode False True $ diffTree : replicate (length focusArrList) (DiffLeaf False))
                          
                          (OverlayA NoIDA (xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement) 0 0 (255,255,255)
 -- todo: check what happens when arrangement shrinks beyond window size
-                              (focusArrList ++ [arrangement])) 
+                              (arrangement : focusArrList)) 
   
     }
     
