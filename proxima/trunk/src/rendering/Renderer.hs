@@ -60,11 +60,11 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   let (oldW,oldH) = (widthA oldArrangement, heightA oldArrangement)
       (newW,newH) = (widthA arrangement, heightA arrangement)
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
-     then (Rectangle 0 0 0 0, Rectangle 0 0 0 0, Rectangle 0 0 oldW oldH)
+     then (((0,0),(0,0)), ((0,0),(0,0)), ((0, 0),(oldW, oldH)))
      else let (regx, regy, regx', regy') = maybe (-1,0,0,0) id $ updatedRectArr diffTree arrangement
-          in  (Rectangle 0 0 0 0, Rectangle 0 0 0 0, rectBetween (regx,regy) (regx',regy') )
+          in  (((0,0),(0,0)), ((0,0),(0,0)), rectBetween (regx,regy) (regx',regy') )
         
-rectBetween (x,y) (x',y') = Rectangle (x `min` x') (y `min` y') (abs $ x-x') (abs $ y-y')
+rectBetween (x,y) (x',y') = ((x `min` x', y `min` y'), (abs $ x-x', abs $ y-y'))
   
 -- Automatic popups turned on: enable imports from editor
 
@@ -130,42 +130,21 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
-    --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
+    ; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     
+    ; let showDiffTree (DiffLeaf d) = "DiffLeaf " ++ show d
+          showDiffTree (DiffNode d1 d2 _) = "DiffNode " ++ show d1 ++" "++ show d2
+    
+    ; putStrLn $ showDiffTree diffTree
     
     ; renderArr (wi,dw,gc) arrDb scale origin viewedArea
-                         (DiffNode False False $ replicate (length focusArrList) (DiffLeaf False)++[diffTree])
+                         (DiffNode False True $ replicate (length focusArrList) (DiffLeaf False)++[diffTree])
                          
                          (OverlayA NoIDA (xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement) 0 0 (255,255,255)
 -- todo: check what happens when arrangement shrinks beyond window size
                               (focusArrList ++ [arrangement])) 
   
     }
-
-computeRenderedArea (lux, luy) diffTree arr =
-      if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
-      then if (isCleanDT diffTree)
-           then []
-           else let computeChildrenRenderedArea x' y' []   = [] 
-                    computeChildrenRenderedArea x' y' arrs =
-                      let (x,y)=(lux+x', luy+y')
-                          childDiffTrees = case diffTree of
-                                                DiffLeaf c     -> repeat $ DiffLeaf c
-                                                DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                          areas = zipWith (computeRenderedArea (x, y)) childDiffTrees arrs 
-                          (luxs, luys, rlxs, rlys) = unzip4 . concat $ areas
-                      in [(minimum luxs, minimum luys, maximum rlxs, maximum rlys)]
-               in case arr of
-                    RowA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    ColA     _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    OverlayA _ x' y' _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> computeChildrenRenderedArea x' y' arrs
-                    VertexA  _ x' y' _ _ _ _ _ _ arr  -> computeChildrenRenderedArea x' y' [arr]
-                    StructuralA _ arr               -> computeChildrenRenderedArea 0 0 [arr]
-                    ParsingA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
-                    LocatorA _ arr                  -> computeChildrenRenderedArea 0 0 [arr]
-                    _ -> debug Err "Renderer.computeRenderedArea: dirty children for node without children" []
-     else [(xA arr,yA arr, xA arr + widthA arr,  yA arr + widthA arr)]
     
 renderArr :: DrawableClass drawWindow => (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement Node -> IO ()    
@@ -212,7 +191,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               ; metrics <- contextGetMetrics context fontDescription language
               ; let ascnt = round $ ascent metrics    
            
-              ; gcSetValues gc $ newGCValues { foreground = colorRGB fColor }
+              ; gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
                         
                         
               ; pangoItems <- pangoItemize context str 
@@ -262,7 +241,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                 ; when (iw /= 0 && ih /= 0) $
              do { let (hrepeats, hrest) = w `divMod` iw 
                 ; let (vrepeats, vrest) = h `divMod` ih 
-                ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor }
+                ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor }
               
                 ; sequence_ [ drawPixbuf dw gc pb 0 0 (x+i*iw) (y+j*ih) iw ih RgbDitherNormal 0 0 
                             | i<-[0..hrepeats-1], j<-[0..vrepeats-1] ]
@@ -279,10 +258,10 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; when (style == Solid) $
-            do { gcSetValues gc $ newGCValues { foreground = colorRGB fColor }
+            do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
                ; drawRectangle dw gc True x y w h
                }
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         
         ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
         -- outlined gtk rectangles are 1 pixel larger than filled ones
@@ -291,11 +270,11 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
         ; when (style == Solid) $
-            do { gcSetValues gc $ newGCValues { foreground = colorRGB fColor }
+            do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
                ; drawArc dw gc True x y (w+1) (h+1) (0*64) (360*64)
                -- filled gtk arcs are 1 pixel smaller than outlined ones
                }
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawArc dw gc False x y w h (0*64) (360*64)
         }
 
@@ -307,12 +286,12 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
 
         ; when (not arrDb) $
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor
+                 do { let bgColor = gtkColor bColor
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               } 
 
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawLines dw gc pts
   
         }
@@ -341,7 +320,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
              }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
+                 do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
@@ -372,7 +351,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor --  if isCleanDT diffTree then colorRGB bColor else red
+                 do { let bgColor = gtkColor bColor --  if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               ; sequence_ $ zipWith (renderArr (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
@@ -400,7 +379,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               }
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
+                 do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
                -- nasty workaround hack for overlay problem: if last elt of overlay is EmptyA,
@@ -424,7 +403,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
             drawFilledRectangle dw gc (Rectangle x y w h) graphColor graphColor
           else 
            do { when (not (isTransparent bColor)) $
-                 do { let bgColor = colorRGB bColor -- if isCleanDT diffTree then colorRGB bColor else red
+                 do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }
@@ -452,7 +431,7 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
               pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
-        ; gcSetValues gc $ newGCValues { foreground = colorRGB lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawLine dw gc (fromx,fromy) (tox,toy) 
         -- draw arrow head
         ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
@@ -522,12 +501,12 @@ renderID (wi,dw,gc) scale x y id  =
     ; fontDescriptionSetFamily fontDescription "Courier New"
     ; fontDescriptionSetSize fontDescription 6
     
-    ; gcSetValues gc $ newGCValues { foreground = colorRGB black }
+    ; gcSetValues gc $ newGCValues { foreground = gtkColor black }
     ; pangoItems <- pangoItemize context idStr [ AttrFontDescription 0 (length idStr) fontDescription ] 
     ; case pangoItems of 
         [pangoItem] -> do { glyphItem <- pangoShape (head pangoItems)
                           ; (_, PangoRectangle x' y' w' h') <-glyphItemExtents glyphItem
-                          ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (colorRGB black) (colorRGB yellow)
+                          ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
                           ; drawGlyphs dw gc (x+1) (y+1 - round y') glyphItem
                           }
         pangoItem:_ -> debug Err ("Renderer.renderID: incorrect nr of pango items") $ return ()
@@ -535,17 +514,16 @@ renderID (wi,dw,gc) scale x y id  =
 
 
 -- debug colors
-stringColor       = colorRGB (0, 255, 255)
-imageColor        = colorRGB (92, 64, 0)
-rowColor          = colorRGB (255, 0, 0)
-colColor          = colorRGB (0, 0, 200) 
-overlayColor      = colorRGB (0, 0, 200) 
-graphColor        = colorRGB (255, 255, 0)
-vertexColor       = colorRGB (255, 0, 255)
-structuralBGColor = colorRGB (230, 230, 255)
-parsingBGColor    = colorRGB (255, 230, 230)
+stringColor       = gtkColor (0, 255, 255)
+imageColor        = gtkColor (92, 64, 0)
+rowColor          = gtkColor (255, 0, 0)
+colColor          = gtkColor (0, 0, 200) 
+overlayColor      = gtkColor (0, 0, 200) 
+graphColor        = gtkColor (255, 255, 0)
+vertexColor       = gtkColor (255, 0, 255)
+structuralBGColor = gtkColor (230, 230, 255)
+parsingBGColor    = gtkColor (255, 230, 230)
 
-colorRGB (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
 
 -- focus is not perfect, but this has to do with the selection algorithm as well.
 -- for now, it is a working solution

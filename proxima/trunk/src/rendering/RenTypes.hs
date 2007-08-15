@@ -1,9 +1,9 @@
 module RenTypes where
 
-import Graphics.UI.Gtk hiding (Scale, Size)
+import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
 import Data.IORef
 
-import CommonTypes hiding (Rectangle)
+import CommonTypes
 import qualified CommonTypes
 import CommonUtils
 
@@ -63,6 +63,3 @@ type UpdatedRegions = (Rectangle    , Rectangle, Rectangle    )
 type LeftButtonDown = Bool 
 -- For distinguishing between mouse move and mouse drag events. It is updated by RenTranslate.
 -- Currently, Proxima only handles left dragging.
-
-instance Show Rectangle where
-  show (Rectangle x y w h) = "{Rectangle ("++show x ++"," ++ show y ++"),("++ show w ++ "x" ++ show h ++ ")}" 

@@ -1,6 +1,7 @@
 module CommonUtils where
 
 import CommonTypes
+import Graphics.UI.Gtk hiding (Rectangle)
 
 -- is exported (and imported) by all ...Utils modules
 
@@ -56,3 +57,7 @@ when c act = if c then act else return ()
 overlap :: Rectangle -> Rectangle -> Bool
 overlap ((x, y), (w, h)) ((x', y'),(w',h')) =
   not (x > x' + w' || x + w < x' || y > y' + h' || y + h < y')
+
+-- | Convert an rgb 3-tuple to a GTK color
+gtkColor :: CommonTypes.Color -> Graphics.UI.Gtk.Color
+gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)

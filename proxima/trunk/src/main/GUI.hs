@@ -104,7 +104,7 @@ onPaint :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (R
 onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
     ; case maybePm of 
-        Nothing -> return True
+        Nothing -> return True -- buffer has not been initialized yet, so don't paint.
         Just pm ->
          do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     
@@ -118,14 +118,25 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
                  
             ; dw <- drawingAreaGetDrawWindow canvas
             ; gc <- gcNew pm
+            
+            ; let (r1,r2,((x3,y3),(w3,h3))) = updRegions
+         
+            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.white }
+
+            ; drawRectangle pm gc True x3 y3 w3 h3
+
             ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                                 -- since arranger already only arranges elements in view
                                                 -- currently, it only prevents rendering edges out of view
 
             -- paint events are less frequent than generic handler events, so we render here
             -- a possible optimization is to only render on the pixmap once. 
-            ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) 
+            ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
             
+            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
+--            ; drawRect r1
+--            ; drawRect r2
+            ; drawRectangle dw gc False (x3-1) (y3-1) (w3+1) (h3+1) -- outline rectangles are 1 px too large
             ; return True
             }
     }
@@ -282,8 +293,9 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
               else return ()                           
             -- The rendering itself is done on paint events
             
-            ; let (fCur, fOld, editedRegion) = updRegions
-            ; mapM_ (\region-> drawWindowInvalidateRect dw region False) [fCur, fOld, editedRegion]
+            --; let (fCur, fOld, editedRegion) = updRegions
+            --; mapM_ (\((x,y),(w,h))-> drawWindowInvalidateRect dw (Rectangle x y w h) False) [fCur, fOld, editedRegion]
+            ; drawWindowInvalidateRect dw (Rectangle 0 0 2000 2000)  False
             }
     }
 
