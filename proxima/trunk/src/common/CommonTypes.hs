@@ -105,7 +105,7 @@ data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 
 isCleanDT :: DiffTree -> Bool
 isCleanDT (DiffLeaf c) = c
-isCleanDT (DiffNode c c' _) = c  -- shallow check
+isCleanDT (DiffNode c c' _) = c && c'
 
 isSelfCleanDT :: DiffTree -> Bool
 isSelfCleanDT (DiffLeaf c) = c
