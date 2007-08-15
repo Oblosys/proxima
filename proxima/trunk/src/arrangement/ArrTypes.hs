@@ -282,7 +282,15 @@ idA (ParsingA _ child)             = idA child
 idA (LocatorA location child)      = idA child
 idA arr                            = debug Err ("ArrTypes.idA: unhandled arrangement "++show arr) NoIDA
 
-
+getChildrenA (RowA     _ _ _ _ _ _ _ _ arrs)   = arrs
+getChildrenA (ColA     _ _ _ _ _ _ _ _ arrs)   = arrs 
+getChildrenA (OverlayA _ _ _ _ _ _ _ _ arrs)   = arrs
+getChildrenA (GraphA   _ _ _ _ _ _ _ _ _ arrs) = arrs
+getChildrenA (VertexA  _ _ _ _ _ _ _ _ _ arr)  = [arr]
+getChildrenA (StructuralA _ arr)               = [arr]
+getChildrenA (ParsingA _ arr)                  = [arr]
+getChildrenA (LocatorA _ arr)                  = [arr]
+getChildrenA _                                 = []
 
 
 setXYWHA x y w h (EmptyA id _ _ _ _ hr vr)                        = EmptyA id x y w h  hr vr          

@@ -215,26 +215,24 @@ updatedRectArr' x' y' dt arr =
 
 -- mark the focus path as changed in the DiffTree
 -- should be done for old as well as new focus (in case of navigate without update)
-markFocusDirtyArr :: FocusArr -> DiffTree -> DiffTree
-markFocusDirtyArr (FocusA (PathA fromPth _) (PathA toPth _)) dt = markDirty (commonPrefix fromPth toPth) dt
-markFocusDirtyArr _ dt = dt
+markFocusDirtyArr :: Arrangement node -> FocusArr -> DiffTree -> DiffTree
+markFocusDirtyArr arr (FocusA (PathA fromPth _) (PathA toPth _)) dt = markDirty arr (commonPrefix fromPth toPth) dt
+markFocusDirtyArr _ arr dt = dt
 
 
 -- mark all nodes on path as children dirty, when descending beyond clean leaf, add new clean nodes around dirty path
-markDirty :: [Int] -> DiffTree -> DiffTree
-markDirty [] _ = DiffLeaf False               -- entire subtree is marked dirty
-markDirty _ (DiffLeaf False) = DiffLeaf False -- subtree already dirty
-markDirty (p:pth) (DiffLeaf True) = DiffNode False True $  -- make self clean node with one dirty child on the path
+markDirty :: Arrangement node -> [Int] -> DiffTree -> DiffTree
+markDirty _ [] _ = DiffLeaf False               -- entire subtree is marked dirty
+markDirty _ _ (DiffLeaf False) = DiffLeaf False -- subtree already dirty
+-- When focus is in a graph, the entire graph is marked dirty.
+markDirty (GraphA _ _ _ _ _ _ _ _ _ _) _ dt = DiffLeaf False
+markDirty arr (p:pth) (DiffLeaf True) = DiffNode False True $  -- make self clean node with one dirty child on the path
                                          replicate (p) (DiffLeaf True)
-                                      ++ [markDirty pth (DiffLeaf True)] -- do the same thing for the rest of the path
-                                      ++ replicate 100 (DiffLeaf True) -- aargh! This standalone diff tree is not a good solution
-                                                                                     -- can't repeat here, since renderer sometimes does a reverse
--- need to pass the arrangement along (which is a nasty pattern match), just for that case.
--- Otherwise, fix renderer hack with overlay order (so no reverse is needed)
--- or fix dirty bit in actual arrangement nodes.
-markDirty (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self 
+                                      ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (DiffLeaf True)] -- do the same thing for the rest of the path
+                                      ++ replicate (length (getChildrenA arr) - p - 1) (DiffLeaf True)
+markDirty arr (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self 
                                                take p dts
-                                            ++ [markDirty pth (dts !! p)]
+                                            ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (dts !! p)]
                                             ++ drop (p+1) dts
 
 
