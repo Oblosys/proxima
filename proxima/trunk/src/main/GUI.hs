@@ -302,7 +302,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
             ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False (x-1) (y-1) (w+1) (h+1)) updRegions
                                        -- outline rectangles are 1 px too large
-           -- when using mark, invalidate whole screen instead of updatedRegions (in genericHandler) 
+              -- when using mark, invalidate whole screen instead of updatedRegions (in genericHandler) 
             -}
             ; return True
             }
