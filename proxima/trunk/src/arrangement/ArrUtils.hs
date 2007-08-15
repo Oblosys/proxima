@@ -112,9 +112,14 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
        lookupVertex vid ((i,x,y,ol):vs) | vid == i = Just (x,y,ol)
                                         | otherwise = lookupVertex vid vs
 
+
+
+
+-- add cases for lines etc.  add correct case for graph
 -- refs can be ignored, since they do not influence the rendering of the arrangement.
 -- experimental diff, only strings are checked.
 -- skip StructuralA ParsingA and LocatorA elts
+--       new arrangement     old arrangement
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (StructuralA id arr')  = diffArr arr arr'
@@ -147,7 +152,10 @@ diffArr (ColA id x y w h hr vr bc arrs) (ColA id' x' y' w' h' hr' vr' bc' arrs')
 diffArr (OverlayA id x y w h hr vr bc arrs) (OverlayA id' x' y' w' h' hr' vr' bc' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc' nvs' arrs') =
-  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
+    DiffNode childrenClean selfClean _ -> DiffLeaf (selfClean && childrenClean)
+    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeaf False  
+    -- a graph is only clean when all children and the graph itself are clean
 diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
 diffArr arr@(ColA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
 diffArr arr@(OverlayA id x y w h hr vr bc arrs) _                        = DiffLeaf False 
@@ -155,12 +163,13 @@ diffArr arr@(GraphA id x y w h hr vr bc nvs arrs) _                      = DiffL
 diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
  in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
-diffArr _                             _                                = DiffLeaf True -- all others are unchanged
+diffArr _                             _                                = DiffLeaf True -- WRONG!
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 -- At the moment, we ignore outline and nrOfVertices
 
 -- pres is different when either self has changed or children
 
+-- first list (new) determines size of diffTree
 diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =  
   let nrOfArrs    = length arrs
       nrOfArrs'   = length arrs'
@@ -168,10 +177,10 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
       childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeaf False)
       selfClean   =    x==x' && y==y' && w==w' && h==h' && bc==bc' 
                     && nrOfArrs == nrOfArrs'
-  in  DiffNode ( selfClean && all isCleanDT childDiffs) selfClean
+  in  DiffNode ( selfClean && all isCleanDT childDiffs') selfClean
                (if not selfClean
                 then repeat (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
-                else childDiffs)
+                else childDiffs')
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 updatedRectArr :: Show node => DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
