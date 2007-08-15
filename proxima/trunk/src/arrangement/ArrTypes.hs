@@ -56,7 +56,7 @@ data EditArrangement documentLevel =
 -- node is parameter for Node type
 data Arrangement node =
     EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef
-  | StringA     !IDA !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Font [Int]
+  | StringA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Font [Int]
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !ImgStyle !Color !Color
   | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Color !Color
   | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
