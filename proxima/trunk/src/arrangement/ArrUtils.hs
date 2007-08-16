@@ -142,9 +142,19 @@ diffArr (PolyA   id  _ _)      (PolyA   _  _ _) = Clean
 diffArr (PolyA   id _ _)       _                = Dirty
 diffArr (RectangleA id  _ _ _) (RectangleA _  _ _ _)  = Clean 
 diffArr (RectangleA id  _ _ _) _                 = Dirty 
-diffArr (EllipseA id  _ _ _) (EllipseA _  _ _ _)  = Clean 
-diffArr (EllipseA id  _ _ _) _                 = Dirty 
 -}
+--  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
+
+diffArr (PolyA id x y w h hr vr pts lw lc fc) (PolyA id' x' y' w' h' hr' vr' pts' lw' lc' fc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw'  && lc == lc' && fc == fc'
+diffArr (PolyA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EllipseA id x y w h hr vr lw ls lc fc) (EllipseA id' x' y' w' h' hr' vr' lw' ls' lc' fc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && ls == ls' && lc == lc' && fc == fc'
+diffArr (EllipseA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EdgeA id x1 y1 x2 y2 hr vr lw lc) (EdgeA id' x1' y1' x2' y2' hr' vr' lw' lc') =
+  DiffLeaf $ x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc'
+diffArr (EdgeA id  _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+
 diffArr (RowA id x y w h hr vr bc arrs) (RowA id' x' y' w' h' hr' vr' bc' arrs') =  
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (ColA id x y w h hr vr bc arrs) (ColA id' x' y' w' h' hr' vr' bc' arrs') = 
@@ -153,7 +163,7 @@ diffArr (OverlayA id x y w h hr vr bc arrs) (OverlayA id' x' y' w' h' hr' vr' bc
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
-    DiffNode childrenClean selfClean _ -> DiffLeaf (selfClean && childrenClean)
+    DiffNode childrenClean selfClean _ -> showDebug' Err "The graph is " $ DiffLeaf (selfClean && childrenClean)
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeaf False  
     -- a graph is only clean when all children and the graph itself are clean
 diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
@@ -163,7 +173,8 @@ diffArr arr@(GraphA id x y w h hr vr bc nvs arrs) _                      = DiffL
 diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
  in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
-diffArr _                             _                                = DiffLeaf True -- WRONG!
+diffArr (VertexA id _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr arr                             _                                = debug Err ("diff cannot handle"++ shallowShowArr arr) $ DiffLeaf False -- WRONG!
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 -- At the moment, we ignore outline and nrOfVertices
 
@@ -510,8 +521,10 @@ leftDocPathsA
 -}
 
 arrangeWhenViewed x y w h viewedArea idA arrangement =
-  -- debug Err ("\n\n\n"++show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) $
-  if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA x y w h 0 0
+  case arrangement of EllipseA _ _ _ _ _ _ _ _ _ _ _ -> debug Err (show ((x,y),(w,h)) ++ show viewedArea ++ show (overlap ((x,y),(w,h)) viewedArea )) 
+                      _      -> id 
+                   $ 
+  if overlap ((x,y),(w,h)) viewedArea then arrangement else EmptyA idA 0 0 0 0 0 0
           
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
