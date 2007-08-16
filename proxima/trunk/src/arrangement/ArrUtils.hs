@@ -179,7 +179,7 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
                     && nrOfArrs == nrOfArrs'
   in  DiffNode ( selfClean && all isCleanDT childDiffs') selfClean
                (if not selfClean
-                then repeat (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
+                then replicate (length arrs) (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
 -- | Returns a list of all areas that are dirty according to the diffTree
