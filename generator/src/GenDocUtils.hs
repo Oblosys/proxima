@@ -127,7 +127,7 @@ genParserDecl :: Decl -> [String]
 genParserDecl (Decl listTypeName _     DeclConsList) = 
   let typeName = drop 9 listTypeName -- nasty
   in  [ "parseXML_List_"++typeName++" = mkList List_"++typeName++" Cons_"++typeName++
-        " Nil_"++typeName++" <$> many (try parseXML_"++typeName++")" ]
+        " Nil_"++typeName++" <$> many parseXML_"++typeName ]
 genParserDecl (Decl typeName prods DeclList) = [] -- no generation necessary, taken care of by List type
 genParserDecl (Decl typeName prods DeclDef)  = 
   let constrs = map getConstr prods
