@@ -98,10 +98,10 @@ b <$ p = do { p; return b }
 
 -- binary choice with try
 (<?|>) :: Parser a -> Parser a -> Parser a
-p1 <?|> p2 = choice [try p1, p2] 
+p1 <?|> p2 = choice [p1, p2] 
 
-startTag eltName = do { spaces; string $ "<"++eltName++">"}
+startTag eltName = try $ do { spaces; string $ "<"++eltName++">"}
 endTag   eltName = do { spaces; string $ "</"++eltName++">"}
-emptyTag eltName = do { spaces; string $ "<"++eltName++"/>"}
+emptyTag eltName = try $ do { spaces; string $ "<"++eltName++"/>"}
 
 
