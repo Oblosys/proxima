@@ -833,8 +833,8 @@ SEM Presentation
   | OverlayP
       presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
       presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
-  | GraphP -- we could collect x and y's from vertices and send these back, but sendinga dummy 0 down and
-           -- letting the vertices set their own x and y to it is easier. (we use finalWidthList only for the nr of children)
+  | GraphP -- we could collect x and y's from vertices and send these back, but sending a dummy 0 down and
+           -- letting the vertices set their own x and y is easier. (we use finalWidthList only for the nr of children)
            
       presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
       presentationList.yList    = replicate (length @presentationList.finalWidthList) 0
