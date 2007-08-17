@@ -375,7 +375,9 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.vStretch = True
       loc.vRef = 0
       loc.hRef = 0
---  | VertexP copy all
+  | VertexP -- other attributes are not important, because Graph ignores them anyway.
+      loc.hRef = @x
+      loc.vRef = @y
   | RowP 
       loc.minTopHeight = if null @presentationList.vRefList then 0
                             else maximum @presentationList.vRefList
@@ -498,11 +500,13 @@ SEM PresentationList
 
 
 SEM Root
-  | Root -- if scr < min, assign min
+  | Root
       presentation.assignedWidth  = let (_,(screenWidth,_)) = @lhs.viewedArea
-                                    in  if @presentation.hStretch then screenWidth else @presentation.minWidth
+                                    in  if @presentation.hStretch && screenWidth >= @presentation.minWidth 
+                                        then screenWidth else @presentation.minWidth
       presentation.assignedHeight = let (_,(_,screenHeight)) = @lhs.viewedArea
-                                    in  if @presentation.vStretch then screenHeight else @presentation.minHeight -- should be screenHeight
+                                    in  if @presentation.vStretch && screenHeight >= @presentation.minHeight
+                                    then screenHeight else @presentation.minHeight -- should be screenHeight
       presentation.assignedVRef = @presentation.vRef -- is ignored anyway 
       presentation.assignedHRef = @presentation.hRef 
 
@@ -608,6 +612,11 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       presentationList.assignedVRefList   = @presentationList.vRefList 
       presentationList.assignedWidthList  = @presentationList.minWidthList 
       presentationList.assignedHRefList   = @presentationList.hRefList 
+  | VertexP
+      child.assignedHeight                = @child.minHeight
+      child.assignedWidth                 = @child.minWidth
+      child.assignedHRef                  = @child.hRef
+      child.assignedVRef                  = @child.vRef
   | FormatterP
       presentationList.assignedWidthList    = debug Err "FormatterP must be unfolded first" []
       presentationList.assignedHeightList   = debug Err "FormatterP must be unfolded first" []
@@ -808,10 +817,6 @@ SEM PresentationList
       hd.absx = @lhs.absx + head @lhs.xList
       hd.absy = @lhs.absy + head @lhs.yList
 
-SEM Presentation
-  | VertexP
-      child.absx = @lhs.absx + @x - @finalHRef
-      child.absy = @lhs.absy + @y - @finalVRef
       
 -- lu attributes for all the other situations are handled by copy rules
 
@@ -836,8 +841,8 @@ SEM Presentation
   | GraphP -- we could collect x and y's from vertices and send these back, but sending a dummy 0 down and
            -- letting the vertices set their own x and y is easier. (we use finalWidthList only for the nr of children)
            
-      presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
-      presentationList.yList    = replicate (length @presentationList.finalWidthList) 0
+      presentationList.xList    = map (0-) @presentationList.finalHRefList
+      presentationList.yList    = map (0-) @presentationList.finalVRefList
   | VertexP
       child.x                   = 0
       child.y                   = 0
@@ -884,7 +889,6 @@ SEM PresentationList
 -- for a child in a composite are not the same as the  @finalVRef @finalHRef at the with nodes
 -- however in such a case we probably can't do it incrementally anyway
 
--- for the position of VertexP we add the Vertex's own coordinates and subtract the refs
 ATTR Presentation [  | | arrangement : {Arrangement node} ]
 SEM Presentation
   | EmptyP
@@ -946,13 +950,10 @@ SEM Presentation
                                    mkEdges @edges @presentationList.vertices @lhs.lineColor )
                         -- All edges are arranged, even if the graph is partially in view.
                         -- This could be optimized further, but is probably not worth the effort.
-  
-  -- Vertex sets its own x and y, rather than sending them up to the parent and using @lhs.x and @lhs.y.
-  -- Hence, we need to add the vertex coordinates to absx and absy.
-  | VertexP
-      lhs.arrangement = arrangeWhenViewed (@lhs.absx+(@x - @finalHRef)) (@lhs.absy + @y - @finalVRef) 
-                                          (@x - @finalHRef) (@y - @finalVRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
-                          VertexA (idAFromP @id) (@x - @finalHRef) (@y - @finalVRef)
+    | VertexP
+      lhs.arrangement = arrangeWhenViewed @lhs.absx @lhs.absy
+                                         @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          VertexA (idAFromP @id) @lhs.x @lhs.y 
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
   | FormatterP
