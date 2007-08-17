@@ -792,22 +792,26 @@ ATTR Root Presentation PresentationList [ viewedArea : Rectangle | | ]
 
 
 -- Upper left corner of the arrangement. Used for determining whether arrangement is in view.
-
-ATTR Presentation PresentationList [ lux, luy : Int | | ]
+-- Note!! This absx & absy is not the same as the lux and luy in the renderer, which denote the upper
+-- left corner of the parent arrangement. In the renderer, each presentation needs to add its own 
+-- width and height to (lux,luy) to get its own upper left corner.
+-- Also note that for vertices (absx,absy) is not position of the vertex, since for vertices
+-- xList and yList are lists of 0's. 
+ATTR Presentation PresentationList [ absx, absy : Int | | ]
 SEM Root
   | Root 
-      presentation.lux = 0
-      presentation.luy = 0
+      presentation.absx = 0
+      presentation.absy = 0
       
 SEM PresentationList
   | Cons 
-      hd.lux = @lhs.lux + head @lhs.xList
-      hd.luy = @lhs.luy + head @lhs.yList
+      hd.absx = @lhs.absx + head @lhs.xList
+      hd.absy = @lhs.absy + head @lhs.yList
 
 SEM Presentation
   | VertexP
-      child.lux = @lhs.lux + @x - @finalHRef
-      child.luy = @lhs.luy + @y - @finalVRef
+      child.absx = @lhs.absx + @x - @finalHRef
+      child.absy = @lhs.absy + @y - @finalVRef
       
 -- lu attributes for all the other situations are handled by copy rules
 
@@ -829,8 +833,9 @@ SEM Presentation
   | OverlayP
       presentationList.xList    = [ @finalHRef - chRef | chRef <- @presentationList.finalHRefList ]
       presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
-  | GraphP -- we could collect x and y's from vertices and send these back, but sending 0 down and letting
-           -- the vertices add their own x and y to it is easier. (we use finalWidthList only for the nr of children)
+  | GraphP -- we could collect x and y's from vertices and send these back, but sendinga dummy 0 down and
+           -- letting the vertices set their own x and y to it is easier. (we use finalWidthList only for the nr of children)
+           
       presentationList.xList    = replicate (length @presentationList.finalWidthList) 0
       presentationList.yList    = replicate (length @presentationList.finalWidthList) 0
   | VertexP
@@ -885,19 +890,19 @@ SEM Presentation
   | EmptyP
       lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
   | StringP 
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
   | EllipseP
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
   | ImageP
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
   | PolyP      
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
 			                                     , round (ry * fromIntegral (@finalHeight-1)) )
 		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @lhs.lineColor @lhs.backgroundColor
@@ -917,7 +922,7 @@ SEM Presentation
 						  , rightCorrection
 						  , assignedWidths 
 						  ))$ -}
-					    arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                        arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | ColP 
       lhs.arrangement = {- debug Arr ( "colattrs:"++show 
@@ -928,20 +933,26 @@ SEM Presentation
                                                   , @lhs.assignedWidth
 						  , assign @presentationList.hStretchList (repeat @lhs.assignedWidth) @presentationList.minWidthList 
 					          ))$ -}
-						arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+	                arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
   | OverlayP 
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | GraphP 
-      lhs.arrangement = arrangeWhenViewed @lhs.lux @lhs.luy @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
                           GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                  (length @presentationList.vertices)
                                  ( @presentationList.arrangementList  ++
                                    mkEdges @edges @presentationList.vertices @lhs.lineColor )
+                        -- All edges are arranged, even if the graph is partially in view.
+                        -- This could be optimized further, but is probably not worth the effort.
+  
+  -- Vertex sets its own x and y, rather than sending them up to the parent and using @lhs.x and @lhs.y.
+  -- Hence, we need to add the vertex coordinates to absx and absy.
   | VertexP
-      lhs.arrangement = arrangeWhenViewed (@lhs.lux + @x - @finalHRef) (@lhs.luy + @y - @finalVRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
-                          VertexA (idAFromP @id) (@lhs.x + @x - @finalHRef) (@lhs.y + @y - @finalVRef)
+      lhs.arrangement = arrangeWhenViewed (@lhs.absx+(@x - @finalHRef)) (@lhs.absy + @y - @finalVRef) 
+                                          (@x - @finalHRef) (@y - @finalVRef) @finalWidth @finalHeight @lhs.viewedArea (idAFromP @id) $
+                          VertexA (idAFromP @id) (@x - @finalHRef) (@y - @finalVRef)
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
   | FormatterP
@@ -963,7 +974,8 @@ SEM Presentation
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
-      lhs.arrangement = setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr --RectangleA NoIDA @lhs.x @lhs.y 10 10 1 Solid black yellow
+      lhs.arrangement = setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
+                        -- rectanglea NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef 1 Solid black yellow
  -- @finalVRef @finalHRef are taken from arrangedP
 
 
