@@ -128,6 +128,8 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
 render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
+    --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
+    --; putStrLn $ "DiffTree is " ++ show diffTree
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
@@ -136,7 +138,6 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
                          (DiffNode False True $ diffTree : replicate (length focusArrList) (DiffLeaf False))
                          
                          (OverlayA NoIDA (xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement) 0 0 (255,255,255)
--- todo: check what happens when arrangement shrinks beyond window size
                               (arrangement : focusArrList)) 
   
     }
@@ -168,8 +169,8 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else when (overlap ((lux+xA arrangement, luy+yA arrangement),
-                         (widthA arrangement, heightA arrangement)) viewedArea) $
+     else --when (overlap ((lux+xA arrangement, luy+yA arrangement),
+          --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
   case arrangement of 
 

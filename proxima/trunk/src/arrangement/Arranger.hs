@@ -13,25 +13,25 @@ import qualified Data.Map as Map
 import Data.Map (Map)
 
 arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
-                       DiffTree -> Presentation doc node clip -> IO (Arrangement node)
+                       DiffTree -> Presentation doc node clip -> IO (Arrangement node, LocalStateArr)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
  do { let pres' = prunePres dt pres
     ; viewedArea <- readIORef $ getViewedAreaRef state
-  --  ; debugLnIO Err ("Diff tree"++show dt)
-  --  ; debugLnIO Err ("pruned presentation"++show pres')
+ --   ; debugLnIO Err ("Diff tree"++show dt)
+ --   ; debugLnIO Err ("pruned presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
           
     ; if maxFDepth == 0 then
-        return attrTree
+        return (attrTree, state)
       else if maxFDepth == 1 
       then 
        do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree viewedArea oldArrangement
-          ; return arrangement
+          ; return (arrangement, state)
           }
       else 
-        debug Err "no nested formatters allowed yet" (return attrTree)
+        debug Err "no nested formatters allowed yet" (return (attrTree, state))
  
    
     }
@@ -47,7 +47,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
          do { let (defBackColor, defFillColor, defLineColor, defTextColor) = (transparent, white, black, black)
             ; let defFont = defaultFont 
             
-            ; -- debugLnIO Arr ("Start collecting fonts")
+            ; debugLnIO Arr ("Start collecting fonts")
             ; let (allFonts, _, _, _ ) =
                     sem_Root (Root pres) [defFont]
                                                defBackColor defFillColor

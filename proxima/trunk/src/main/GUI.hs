@@ -220,6 +220,8 @@ genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -
 genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea vp
+    
+    ; putStrLn $ "Writing viewed area"++show viewedArea
     ; writeIORef viewedAreaRef viewedArea
    
     ; (renderingLvl', editRendering) <- handler (renderingLvl,evt)
@@ -249,7 +251,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             
             ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
             ; drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
-            --; drawWindowInvalidateRect dw (Rectangle 0 0 2000 2000)  False
+            ; drawWindowInvalidateRect dw (Rectangle 0 0 2000 2000)  False
             }
     }
 
@@ -262,11 +264,12 @@ drawRendering renderingLvlVar wi vp pm =
     ; gc <- gcNew pm
         
     ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.white }
-     
+    ; mapM_ print updRegions
       -- clear background for updated regions
     ; mapM_ (\((x,y),(w,h)) -> drawRectangle pm gc True x y w h) updRegions
 
     ; viewedArea <- getViewedArea vp 
+    ; putStrLn $ "The viewed area is" ++ show viewedArea
     ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
@@ -294,15 +297,16 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
 
-            {-
+            
               -- Mark the updated rectangles by surrounding them with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
             ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
             ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
             ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False (x-1) (y-1) (w+1) (h+1)) updRegions
                                        -- outline rectangles are 1 px too large
-              -- when using mark, invalidate whole screen instead of updatedRegions (in genericHandler) 
-            -}
+              -- when using this marking, invalidate whole screen instead of updatedRegions (in genericHandler) 
+            ; let ((x,y),(w,h)) = viewedArea
+            ; drawRectangle dw gc False x y w h 
             ; return True
             }
     }
@@ -314,12 +318,14 @@ getViewedArea vp =
     ; hA <- viewportGetHAdjustment vp
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
-    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+--    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))  -- Unclear why this -5 is necessary. Maybe for relief?
     }         
     
 
 translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering documentLevel
 translateKey _ (Just ch) (CommonTypes.Modifiers False False False)  = KeyCharRen ch
+translateKey _ (Just ch) (CommonTypes.Modifiers True False False)  = KeyCharRen ch
 translateKey _ (Just ch) m  = KeySpecialRen (CommonTypes.CharKey ch) m
 translateKey "Return" _ m = KeySpecialRen CommonTypes.EnterKey m
 translateKey "BackSpace" _ m = KeySpecialRen CommonTypes.BackspaceKey m

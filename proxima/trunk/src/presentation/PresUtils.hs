@@ -83,6 +83,7 @@ diffPres (EllipseP id  _ _ _) _                        = DiffLeaf False
 diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
 diffPres (ColP id rf press) (ColP id' rf' press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
+diffPres (FormatterP id press) (FormatterP id' press')  = diffPress 0 press 0 press'
 diffPres (GraphP id _ _ _ _ press) (GraphP id' _ _ _ _ press') = diffPress 0  press 0   press'
 diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
