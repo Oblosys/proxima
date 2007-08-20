@@ -19,7 +19,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let lastViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
-          pres' = pres -- prunePres viewedArea lastViewedArea oldArrangement dt pres
+          pres' = prunePres viewedArea lastViewedArea oldArrangement dt pres
     ; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
  --   ; debugLnIO Err ("Diff tree"++show dt)
  --   ; debugLnIO Err ("pruned presentation"++show pres')

@@ -35,17 +35,16 @@ present :: LayerStateLay doc node clip -> PresentationLevel doc node clip -> Lay
            (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip)
 present state doc (LayoutLevel pres focus dt) (SkipPres' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   let (pres', focus') = (,) {-normalizePresentation -} pres focus -- Normalize does not work in chess board, find out why
-      diffTree = DiffLeaf False  -- nonincremental
---      diffTree = dt              -- incremental
+--      diffTree = DiffLeaf False  -- nonincremental
+      diffTree = dt              -- incremental
   in  (SetLay' (LayoutLevel pres' focus' diffTree), state, doc)  -- we should re present here because of local state
 present state doc pres (SkipPres' i) = (SkipLay' (i-1), state, doc)
 present state doc (LayoutLevel presL focus dt) (SetPres' hp@(PresentationLevel presH (layout,idCounter,inserted, deleted)))  = 
   let -- focusXY = saveFocus focus presL
       presL'  = {- normalizeTreePres $ -} detokenize (Map.insert (IDP (-1)) (0,1) layout, inserted, deleted) presH
       focus' = focus  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
-      diffTree = DiffLeaf False
---      diffTree = diffPres presL' presL
- --     (pres'', focus'') = (pres',focus')--normalizePresentation pres focus
+--      diffTree = DiffLeaf False
+      diffTree = diffPres presL' presL
   in  (SetLay' (LayoutLevel presL' focus' diffTree), state, hp) 
 
 
