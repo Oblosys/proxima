@@ -286,9 +286,10 @@ renderArr (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
               } 
-
+        ; gcSetClipRectangle gc (Rectangle x y w h)
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawLines dw gc pts
+        ; gcSetClipRectangle gc (Rectangle 0 0 10000 10000) 
   
         }
 
