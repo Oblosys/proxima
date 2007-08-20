@@ -973,8 +973,10 @@ SEM Presentation
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
-      lhs.arrangement = setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
-                        -- rectanglea NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef 1 Solid black yellow
+      lhs.arrangement = OverlayA NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef red
+                          [ setXYWHA 0 0 @finalWidth @finalHeight @lhs.oldArr 
+                          ]
+                      -- setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
  -- @finalVRef @finalHRef are taken from arrangedP
 
 
