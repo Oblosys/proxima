@@ -163,7 +163,7 @@ setchildren [pres'] (StructuralP id pres) = StructuralP id pres'
 setchildren [pres'] (ParsingP id pres)    = ParsingP id pres'
 setchildren [pres'] (LocatorP loc pres)   = LocatorP loc pres'
 setchildren []      (ArrangedP)           = ArrangedP
-setchildren press'  pres                  = debug Err ("PresTypes.getChildren: unhandled case " ++ length press' ++ ", " ++ shallowShowPres pres) []
+setchildren press'  pres                  = debug Err ("PresTypes.getChildren: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
 
 
 -- overlays: do they need a ref that says which element is the first, or in what order its elts should be parsed?
