@@ -16,22 +16,25 @@ arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node, LocalStateArr)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
- do { let pres' = prunePres dt pres
-    ; viewedArea <- readIORef $ getViewedAreaRef state
+ do { viewedArea <- readIORef $ getViewedAreaRef state
+    ; let lastViewedArea = getLastViewedArea state
+          state' = state { getLastViewedArea = viewedArea }
+          pres' = pres -- prunePres viewedArea lastViewedArea oldArrangement dt pres
+    ; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
  --   ; debugLnIO Err ("Diff tree"++show dt)
  --   ; debugLnIO Err ("pruned presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
           
     ; if maxFDepth == 0 then
-        return (attrTree, state)
+        return (attrTree, state')
       else if maxFDepth == 1 
       then 
        do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree viewedArea oldArrangement
-          ; return (arrangement, state)
+          ; return (arrangement, state')
           }
       else 
-        debug Err "no nested formatters allowed yet" (return (attrTree, state))
+        debug Err "no nested formatters allowed yet" (return (attrTree, state'))
  
    
     }
