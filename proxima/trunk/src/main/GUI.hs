@@ -235,7 +235,8 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             ; dw <- drawingAreaGetDrawWindow canvas
             
             ; maybePm <- readIORef buffer
-            ; if isNothing maybePm || (w,h) /= (w',h') -- if there was no pixmap, or if the size changed
+            ; if (isNothing maybePm || (w,h) /= (w',h')) -- if there was no pixmap, or if the size changed
+                 && (w /= 0 && h /= 0) -- gtk crashes if we create an empty pixmap
               then do { pm <- pixmapNew (Just dw) w' h' Nothing -- we create a new one
                       ; writeIORef buffer (Just pm)
                       }
