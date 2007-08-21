@@ -159,6 +159,23 @@ fromA NoFocusA        = NoPathA
 toA (FocusA _ to) = to
 toA NoFocusA        = NoPathA
 
+shallowShowArr (EmptyA _ x y w h _ _)             = "{EmptyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (StringA _ x y w h _ _ str _ _ _)  = "{StringA \""++str++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (RowA _ x y w h _ _ _ arrs)        = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (ColA _ x y w h _ _ _ arrs)        = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (OverlayA _ x y w h _ _ _ arrs)    = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (GraphA _ x y w h _ _ _ _ arrs)    = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (VertexA _ x y w h _ _ _ _ _)      = "{VertexA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EdgeA _ x y x' y' _ _ _ _)        = "{EdgeA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
+shallowShowArr (StructuralA _ child)              = "{StructuralA}"
+shallowShowArr (ParsingA _ child)                 = "{ParsingA}"
+shallowShowArr (LocatorA location child)          = "{LocatorA}"
+shallowShowArr arr                                = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
+
 xA (EmptyA _ x y w h _ _)             = x
 xA (StringA _ x y w h _ _ _ _ _ _)    = x
 xA (ImageA _ x y w h _ _ _ _ _ _)     = x

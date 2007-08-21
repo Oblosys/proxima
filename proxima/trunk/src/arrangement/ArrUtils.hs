@@ -25,19 +25,16 @@ shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="
 shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (RowA _ x y w h _ _ _ _)           = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (ColA _ x y w h _ _ _ _)           = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (OverlayA _ x y w h _ _ _ _)       = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (GraphA _ x y w h _ _ _ _ _)       = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (RowA _ x y w h _ _ _ arrs)        = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (ColA _ x y w h _ _ _ arrs)        = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (OverlayA _ x y w h _ _ _ arrs)    = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (GraphA _ x y w h _ _ _ _ arrs)    = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (VertexA _ x y w h _ _ _ _ _)      = "{VertexA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (EdgeA _ x y x' y' _ _ _ _)        = "{EdgeA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
-shallowShowArr (StructuralA _ child)          = "{StructuralA}"
-shallowShowArr (ParsingA _ child)             = "{ParsingA}"
-shallowShowArr (LocatorA location child)      = "{LocatorA}"
-shallowShowArr arr                            = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
-
--- Bug? why does: shallowShowArr (StringA NoIDA 1 2 3 4 "f" undefined undefined undefined)
--- return undefined?
+shallowShowArr (StructuralA _ child)              = "{StructuralA}"
+shallowShowArr (ParsingA _ child)                 = "{ParsingA}"
+shallowShowArr (LocatorA location child)          = "{LocatorA}"
+shallowShowArr arr                                = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
 
 sizeA path arr = sizeA' 0 0 path arr
 sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA arr, widthA arr, heightA arr)
