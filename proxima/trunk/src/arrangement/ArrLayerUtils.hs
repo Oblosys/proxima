@@ -40,7 +40,7 @@ pathAFromPathP' (StructuralA _ arr)             (StructuralP _ pres)     (0:path
 pathAFromPathP' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (FormatterP _ press)     path     = pathAFromPathPFormatter arr press path
-pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ show pr++"***") []
+pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 -- should return NoPath
 
 -- p is the index in the formatter and is mapped on an index in the column of rows
@@ -69,7 +69,7 @@ pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (0:path
 pathPFromPathA' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' arr                             (FormatterP _ press)     path     = pathPFromPathAFormatter arr press path
-pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ show pr++"***") []
+pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 
 -- p is the index in the formatter and is mapped on an index in the column of rows
 pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ rowArrs) press (cIx:rIx:path) = debug Err ("\n\n\ncol row index is:"++show (cIx,rIx)) $
