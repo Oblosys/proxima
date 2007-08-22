@@ -108,80 +108,69 @@ diffPress rf press rf' press' =
 
 
 -- we can prune safely whenever the arrangement is not in the newly uncovered area
-prune :: Show node => Rectangle -> Rectangle -> Arrangement node -> Bool
-prune va ova arr = True {-
-  let arrArea = getAreaA arr
-  in  not $ overlap arrArea va && overlap arrArea ova
--}
+-- (x',y') is the absolute offset of the arrangement
+uncovered :: Show node => (Int,Int) -> Rectangle -> Rectangle -> Arrangement node -> Bool
+uncovered (x',y') va ova arr =
+  let ((x,y),(w,h)) = getAreaA arr
+      arrAreaAbs = ((x'+x,y'+y),(w,h))
+  in  overlap arrAreaAbs va
 
--- belong in ArrLayerUtils, also remove import ArrTypes
-getChildA :: Arrangement node -> Arrangement node
-getChildA arr = arr -- head . getChildrenA
+-- getChildA :: Show node => Arrangement node -> Arrangement node
+getChildA caller arr = case getChildrenA arr of
+                  child : _ -> child
+                  []        -> debug Err ("ArrUtils.getChildA: no child " ++show arr++ caller)arr
 
 getAreaA :: Show node => Arrangement node -> Rectangle
 getAreaA a = ((xA a, yA a), (widthA a, heightA a))
 
-prunePres va ova arr dt (WithP wr pres)       = WithP wr       $ prunePres va ova arr dt pres
-prunePres va ova arr dt (StructuralP id pres) = StructuralP id $ prunePres va ova (getChildA arr) dt pres
-prunePres va ova arr dt (ParsingP id pres)    = ParsingP id    $ prunePres va ova (getChildA arr) dt pres
-prunePres va ova arr dt (LocatorP l pres)     = LocatorP l     $ prunePres va ova (getChildA arr) dt pres
-prunePres va ova arr dt (VertexP id v x y ol pres) = VertexP id v x y ol $ prunePres va ova (getChildA arr) dt pres
+addOffsetA :: Show node => (Int,Int) -> Arrangement node -> (Int,Int)
+addOffsetA (x,y) a = (x+xA a, y+yA a)
+addOffsetA (x,y) (ParsingA _ _) = debug Err "ArrUtils.addOffsetA called on ParsingA" (x,y)
+addOffsetA (x,y) (StructuralA _ _) = debug Err "ArrUtils.addOffsetA called on StructuralA" (x,y)
+addOffsetA (x,y) (LocatorA _ _) = debug Err "ArrUtils.addOffsetA called on LocatorA" (x,y)
+
+-- belong in ArrLayerUtils, also remove import ArrTypes
+prunePres  va ova (x,y) arr dt pres@(FormatterP _ _) = 
+  debug Err (shallowShowArr arr ++ "\n\n\n\n\n\n\n\n\n\n!!!!!!!!!          "++shallowShowPres pres) $
+  prunePres' va ova (x,y) arr dt pres
+prunePres  va ova (x,y) arr dt pres = 
+  debug Err (shallowShowArr arr ++ "          "++shallowShowPres pres) $
+  prunePres' va ova (x,y) arr dt pres
+
+prunePres' :: Show node => Rectangle -> Rectangle -> (Int,Int) -> Arrangement node -> DiffTree ->
+              Presentation doc node clip -> Presentation doc node clip
+prunePres' va ova (x,y) arr (DiffLeaf False) p = p
+prunePres' va ova (x,y) arr dt (WithP wr pres)       = WithP wr       $ prunePres va ova (x,y) arr dt pres
+prunePres' va ova (x,y) arr dt (StructuralP id pres) = StructuralP id $ prunePres va ova (x,y)  (getChildA "str" arr) dt pres
+prunePres' va ova (x,y) arr dt (ParsingP id pres)    = ParsingP id    $ prunePres va ova (x,y)  (getChildA "pars" arr) dt pres
+prunePres' va ova (x,y) arr dt (LocatorP l pres)     = LocatorP l     $ prunePres va ova (x,y)  (getChildA "loc" arr) dt pres
+prunePres' va ova (x,y) arr dt (VertexP id v x' y' ol pres) = VertexP id v x' y' ol $ prunePres va ova (addOffsetA (x,y) arr) (getChildA "vrt" arr) dt pres
 
 -- maybe not useful for leafs.
-prunePres va ova arr (DiffLeaf c) p@(EmptyP id)            = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffLeaf c) p@(StringP id str)       = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffLeaf c) p@(ImageP  id src)       = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffLeaf c) p@(PolyP   id _ _)       = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffLeaf c) p@(RectangleP id  _ _ _) = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffLeaf c) p@(EllipseP id  _ _ _)   = if c then if prune va ova arr
-                                                                       then ArrangedP
-                                                                       else p
-                                                                   else p
-prunePres va ova arr (DiffNode c _ dts) p@(RowP id rf press) = --debug Err ("ROW is "++show c) $
-                                                    let pruned = zipWith (prunePres va ova arr) dts press
-                                                    in  if c then ArrangedP  --(RowP id rf press)
-                                                             else RowP id rf pruned 
-prunePres va ova arr (DiffLeaf c) p@(RowP id rf press)       = --debug Err ("ROWL is "++show c) $
-                                                    if c then ArrangedP -- p 
-                                                         else RowP id rf (map (prunePres va ova arr (DiffLeaf False)) press)
-prunePres va ova arr (DiffNode c _ dts) p@(ColP id rf press)  = -- debug Err ("COL is "++show c) $
-                                                     let pruned = zipWith (prunePres va ova arr) dts press
-                                                      in  if c then ArrangedP -- (ColP id rf press)
-                                                               else ColP id rf pruned
-prunePres va ova arr (DiffLeaf c) p@(ColP id rf press)       = --debug Err ("COLL is "++show c) $
-                                                    if c then ArrangedP -- p 
-                                                         else ColP id rf (map (prunePres va ova arr (DiffLeaf False)) press) 
-prunePres va ova arr (DiffNode c _ dts) p@(OverlayP id press)   = let pruned = zipWith (prunePres va ova arr) dts press
-                                                       in  if c then ArrangedP --(OverlayP id press)
-                                                                else OverlayP id pruned 
-prunePres va ova arr (DiffLeaf c) p@(OverlayP id press)       = if c then ArrangedP --p 
-                                                          else OverlayP id (map (prunePres va ova arr (DiffLeaf False)) press)
-prunePres va ova arr (DiffNode c _ dts) p@(GraphP id d w h es press) = let pruned = zipWith (prunePres va ova arr) dts press
-                                                          in  if c then ArrangedP
-                                                                else GraphP id d w h es pruned 
-prunePres va ova arr (DiffLeaf c) p@(GraphP id d w h es press)       = p --if c then ArrangedP
-                                                               --else GraphP id d w h es (map (prunePres va ova arr (DiffLeaf False)) press)
-prunePres va ova arr (DiffNode c _ dts) p@(FormatterP id press) = let pruned = zipWith (prunePres va ova arr) dts press
-                                                    in  if c then ArrangedP 
-                                                             else FormatterP id pruned 
-prunePres va ova arr (DiffLeaf c) p@(FormatterP id press)       = if c then ArrangedP -- p 
-                                                         else FormatterP id (map (prunePres va ova arr (DiffLeaf False)) press)
-prunePres va ova arr dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
+--prunePres' va ova arr (DiffLeaf c) p@(FormatterP id _)      = p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(EmptyP id)            = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(StringP id str)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(ImageP  id src)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(PolyP   id _ _)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(RectangleP id  _ _ _) = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(EllipseP id  _ _ _)   = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) (PolyA _ _ _ _ _ _ _ _ _ _ _) _ p = p
+prunePres' va ova (x,y) arr (DiffNode c _ dts) p =
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0)) dts (getChildren p)
+  -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
+  -- what we extend arr with (pres is used anyway in the recursion)
+  in if c then if showDebug' Err ("unc1"++show (getAreaA arr)++show va) $ uncovered (x,y) va ova arr
+                then setChildren pruned p
+                else debug Err ("#############Arranged "++ show (getAreaA arr)) ArrangedP 
+      else setChildren pruned p
+prunePres' va ova (x,y) arr (DiffLeaf c) p       = 
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (getChildrenA arr) (repeat $ DiffLeaf True) (getChildren p)
+  in  if c
+      then if showDebug' Err ("unc"++show (getAreaA arr)++show va) $ uncovered (x,y) va ova arr
+           then setChildren pruned p
+           else debug Err ("#############Arranged "++ show (getAreaA arr)) ArrangedP
+      else p
+prunePres' va ova (x,y) arr dt                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
 
                    
