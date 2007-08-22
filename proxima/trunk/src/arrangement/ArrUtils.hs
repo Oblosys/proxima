@@ -502,10 +502,10 @@ leftDocPathsA
 
 -- refs are not passed, since they are not used in rendering.
 -- What happens if an empty is used as oldArrangement? Can this happen? And do we need the refs then?
-arrangeWhenViewed absx absy x y w h viewedArea idA arrangement =
+arrangeWhenViewed absx absy x y w h hrf vrf viewedArea idA arrangement =
   if overlap ((absx,absy),(w,h)) viewedArea then arrangement else -- EmptyA idA x y w h 0 0
     --arrangement 
-    PolyA idA x y w h 0 0 [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 black yellow
+    PolyA idA x y w h hrf vrf [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 black yellow
            
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
