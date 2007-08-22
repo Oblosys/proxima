@@ -125,8 +125,9 @@ shallowShowPres (RectangleP id _ _ _) = "{"++show id++":Rectangle}"
 shallowShowPres (EllipseP id _ _ _)   = "{"++show id++":Ellipse}"
 shallowShowPres (RowP id rf press)    = "{"++show id++":RowP, #children="++show (length press)++"}"
 shallowShowPres (ColP id rf press)    = "{"++show id++":ColP, #children="++show (length press)++"}"
-shallowShowPres (OverlayP  id press)  = "{"++show id++":Overlay, #children="++show (length press)++"P}"
-shallowShowPres (GraphP id _ _ _ _ press)  = "{"++show id++":Graph, #children="++show (length press)++"P}"
+shallowShowPres (OverlayP  id press)  = "{"++show id++":Overlay, #children="++show (length press)++"}"
+shallowShowPres (FormatterP  id press)  = "{"++show id++":Formatter, #children="++show (length press)++"}"
+shallowShowPres (GraphP id _ _ _ _ press)  = "{"++show id++":Graph, #children="++show (length press)++"}"
 shallowShowPres (VertexP _ _ x y _  pres)  = "{"++show id++":Vertex, x="++show x++",y="++show y++"}"
 shallowShowPres (WithP ar pres)       = "{WithP}"
 shallowShowPres (StructuralP id pres) = "{"++show id++":StructuralP}"
@@ -144,6 +145,9 @@ getChildren (EllipseP id _ _ _)   = []
 getChildren (RowP id rf press)    = press
 getChildren (ColP id rf press)    = press
 getChildren (OverlayP  id press)  = press
+getChildren (FormatterP  id press) = press
+getChildren (GraphP id _ _ _ _ press) = press
+getChildren (VertexP _ _ x y _  pres) = [pres]
 getChildren (WithP ar pres)       = [pres]
 getChildren (StructuralP id pres) = [pres]
 getChildren (ParsingP id pres)    = [pres]
@@ -157,13 +161,16 @@ setChildren [] pres@(ImageP id str)       = pres
 setChildren [] pres@(PolyP id _ _)        = pres
 setChildren [] pres@(RectangleP id _ _ _) = pres
 setChildren [] pres@(EllipseP id _ _ _)   = pres
-setChildren press' (RowP id rf press)     = RowP id rf press'
-setChildren press' (ColP id rf press)     = ColP id rf press'
-setChildren press' (OverlayP  id press)   = OverlayP  id press'
-setChildren [pres'] (WithP ar pres)       = WithP ar pres'
-setChildren [pres'] (StructuralP id pres) = StructuralP id pres'
-setChildren [pres'] (ParsingP id pres)    = ParsingP id pres'
-setChildren [pres'] (LocatorP loc pres)   = LocatorP loc pres'
+setChildren press' (RowP id rf _)     = RowP id rf press'
+setChildren press' (ColP id rf _)     = ColP id rf press'
+setChildren press' (OverlayP  id _)   = OverlayP id press'
+setChildren press' (FormatterP  id _) = FormatterP id press'
+setChildren press' (GraphP id d w h es _) = GraphP id d w h es press'
+setChildren [pres'] (VertexP id vid x y ol _) = VertexP id vid x y ol pres'
+setChildren [pres'] (WithP ar _)       = WithP ar pres'
+setChildren [pres'] (StructuralP id _) = StructuralP id pres'
+setChildren [pres'] (ParsingP id _)    = ParsingP id pres'
+setChildren [pres'] (LocatorP loc _)   = LocatorP loc pres'
 setChildren []      (ArrangedP)           = ArrangedP
 setChildren press'  pres                  = debug Err ("PresTypes.getChildren: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
 
