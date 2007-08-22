@@ -618,10 +618,10 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       child.assignedHRef                  = @child.hRef
       child.assignedVRef                  = @child.vRef
   | FormatterP
-      presentationList.assignedWidthList    = debug Err "FormatterP must be unfolded first" []
-      presentationList.assignedHeightList   = debug Err "FormatterP must be unfolded first" []
-      presentationList.assignedVRefList     = debug Err "FormatterP must be unfolded first" []
-      presentationList.assignedHRefList     = debug Err "FormatterP must be unfolded first" []
+      presentationList.assignedWidthList    = debug Err "ArrangerAG.assignedWidthList: FormatterP must be unfolded first" []
+      presentationList.assignedHeightList   = debug Err "ArrangerAG.assignedHeightList: FormatterP must be unfolded first" []
+      presentationList.assignedVRefList     = debug Err "ArrangerAG.assignedVRefList: FormatterP must be unfolded first" []
+      presentationList.assignedHRefList     = debug Err "ArrangerAG.assignedHRefList: FormatterP must be unfolded first" []
 {-
   | MatrixPresentation
 -- is a lot more complicated than this
@@ -742,10 +742,10 @@ SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
       loc.finalVRef   = @lhs.assignedVRef
       loc.finalHRef   = @lhs.assignedHRef
   | FormatterP
-      loc.finalWidth  = debug Err "FormatterP must be unfolded first" 0
-      loc.finalHeight = debug Err "FormatterP must be unfolded first" 0
-      loc.finalVRef   = debug Err "FormatterP must be unfolded first" 0
-      loc.finalHRef   = debug Err "FormatterP must be unfolded first" 0
+      loc.finalWidth  = debug Err "ArrangerAG.finalWidth: FormatterP must be unfolded first" 0
+      loc.finalHeight = debug Err "ArrangerAG.finalHeight: FormatterP must be unfolded first" 0
+      loc.finalVRef   = debug Err "ArrangerAG.finalVRef: FormatterP must be unfolded first" 0
+      loc.finalHRef   = debug Err "ArrangerAG.finalHRef: FormatterP must be unfolded first" 0
 {-
   | TestPresentation 
       loc.finalWidth = error "not implemented"
@@ -845,8 +845,8 @@ SEM Presentation
       child.x                   = 0
       child.y                   = 0
   | FormatterP
-      presentationList.xList    = debug Err "FormatterP must be unfolded first" []
-      presentationList.yList    = debug Err "FormatterP must be unfolded first" []
+      presentationList.xList    = debug Err "ArrangerAG.xList: FormatterP must be unfolded first" []
+      presentationList.yList    = debug Err "ArrangerAG.yList: FormatterP must be unfolded first" []
 {-
   | MatrixPresentation -- x and y are added to cumulative heights and widths
       loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
@@ -955,7 +955,7 @@ SEM Presentation
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
   | FormatterP
-      lhs.arrangement =  debug Err "FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0
+      lhs.arrangement =  debug Err "ArrangerAG.arrangement: FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalVRef @finalHRef @lhs.backgroundColor @presentationList.arrangementList
@@ -973,10 +973,12 @@ SEM Presentation
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
-      lhs.arrangement = OverlayA NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef red
-                          [ setXYWHA 0 0 @finalWidth @finalHeight @lhs.oldArr 
-                          ]
-                      -- setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
+      lhs.arrangement = --OverlayA NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef red
+                        --  [ setXYWHA 0 0 @finalWidth @finalHeight @lhs.oldArr 
+                        --  ]
+                        arrangeWhenViewed @lhs.absx @lhs.absy
+                                          @lhs.x @lhs.y @finalWidth @finalHeight @lhs.viewedArea NoIDA $
+                          setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
  -- @finalVRef @finalHRef are taken from arrangedP
 
 
@@ -1069,7 +1071,7 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                        LocatorA _ arr -> arr
                        _              -> EmptyA NoIDA 0 0 0 0 0 0
   | FormatterP
-      presentationList.oldArrList = debug Err "FormatterP must be unfolded first" $
+      presentationList.oldArrList = debug Err "ArrangerAG.oldArrList: FormatterP must be unfolded first" $
                                       repeat $ EmptyA NoIDA 0 0 0 0 0 0
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
