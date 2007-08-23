@@ -21,7 +21,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
           state' = state { getLastViewedArea = viewedArea }
           pres' = prunePres viewedArea lastViewedArea (0,0) oldArrangement dt pres
     ; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
-    ; debugLnIO Err ("Diff tree"++show dt)
+    --; debugLnIO Err ("Diff tree"++show dt)
  --   ; debugLnIO Err ("Pruned presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
  -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
