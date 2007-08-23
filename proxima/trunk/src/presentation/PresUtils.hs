@@ -113,7 +113,7 @@ uncovered :: Show node => (Int,Int) -> Rectangle -> Rectangle -> Arrangement nod
 uncovered (x',y') va ova arr =
   let ((x,y),(w,h)) = getAreaA arr
       arrAreaAbs = ((x'+x,y'+y),(w,h))
-  in  overlap arrAreaAbs va
+  in  or $ map (overlap arrAreaAbs) (difference va ova)
 
 -- getChildA :: Show node => Arrangement node -> Arrangement node
 getChildA caller arr = case getChildrenA arr of
