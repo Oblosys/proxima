@@ -265,7 +265,8 @@ drawRendering renderingLvlVar wi vp pm =
     ; gc <- gcNew pm
         
     ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.white }
-    ; mapM_ print updRegions
+    ; 
+    ; putStrLn $ "The updated regions are " ++ show updRegions
       -- clear background for updated regions
     ; mapM_ (\((x,y),(w,h)) -> drawRectangle pm gc True x y w h) updRegions
 
