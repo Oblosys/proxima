@@ -897,10 +897,10 @@ SEM Presentation
                           StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
       lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | EllipseP
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
+                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | ImageP
       lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
@@ -908,7 +908,7 @@ SEM Presentation
       lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
 			                                     , round (ry * fromIntegral (@finalHeight-1)) )
-		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @lhs.lineColor @lhs.backgroundColor
+		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
 		      
 {-
   | TestPresentation

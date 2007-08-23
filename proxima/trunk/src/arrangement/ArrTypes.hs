@@ -58,9 +58,9 @@ data Arrangement node =
     EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color
   | StringA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Color !Font [Int]
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !ImgStyle !Color !Color
-  | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Color !Color
-  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
-  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
+  | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Style !Color !Color !Color
+  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color !Color
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color !Color
   | RowA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
   | OverlayA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
@@ -162,9 +162,9 @@ toA NoFocusA        = NoPathA
 shallowShowArr (EmptyA _ x y w h _ _ _)           = "{EmptyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (StringA _ x y w h _ _ str _ _ _ _)= "{StringA \""++str++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (PolyA _ x y w h _ _ _ _ _ _ _ _)  = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RowA _ x y w h _ _ _ arrs)        = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (ColA _ x y w h _ _ _ arrs)        = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (OverlayA _ x y w h _ _ _ arrs)    = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
@@ -179,9 +179,9 @@ shallowShowArr arr                                = "{Arrangement not handled by
 xA (EmptyA _ x y w h _ _ _)           = x
 xA (StringA _ x y w h _ _ _ _ _ _ _)  = x
 xA (ImageA _ x y w h _ _ _ _ _ _)     = x
-xA (PolyA _ x y w h _ _ _ _ _ _)      = x
-xA (RectangleA _ x y w h _ _ _ _ _ _) = x
-xA (EllipseA _ x y w h _ _ _ _ _ _)   = x
+xA (PolyA _ x y w h _ _ _ _ _ _ _ _)  = x
+xA (RectangleA _ x y w h _ _ _ _ _ _ _) = x
+xA (EllipseA _ x y w h _ _ _ _ _ _ _)   = x
 xA (RowA _ x y w h _ _ _ _)           = x
 xA (ColA _ x y w h _ _ _ _)           = x
 xA (OverlayA _ x y w h _ _ _ _)       = x
@@ -196,9 +196,9 @@ xA arr                            = debug Err ("ArrTypes.xA: unhandled arrangeme
 yA (EmptyA _ x y w h _ _ _)           = y
 yA (StringA _ x y w h _ _ _ _ _ _ _)  = y
 yA (ImageA _ x y w h _ _ _ _ _ _)     = y
-yA (PolyA _ x y w h _ _ _ _ _ _)      = y
-yA (RectangleA _ x y w h _ _ _ _ _ _) = y
-yA (EllipseA _ x y w h _ _ _ _ _ _)   = y
+yA (PolyA _ x y w h _ _ _ _ _ _ _ _)  = y
+yA (RectangleA _ x y w h _ _ _ _ _ _ _) = y
+yA (EllipseA _ x y w h _ _ _ _ _ _ _)   = y
 yA (RowA _ x y w h _ _ _ _)           = y
 yA (ColA _ x y w h _ _ _ _)           = y
 yA (OverlayA _ x y w h _ _ _ _)       = y
@@ -213,9 +213,9 @@ yA arr                            = debug Err ("ArrTypes.yA: unhandled arrangeme
 widthA (EmptyA _ x y w h _ _ _)           = w
 widthA (StringA _ x y w h _ _ _ _ _ _ _)  = w
 widthA (ImageA _ x y w h _ _ _ _ _ _)     = w
-widthA (PolyA _ x y w h _ _ _ _ _ _)      = w
-widthA (RectangleA _ x y w h _ _ _ _ _ _) = w
-widthA (EllipseA _ x y w h _ _ _ _ _ _)   = w
+widthA (PolyA _ x y w h _ _ _ _ _ _ _ _)  = w
+widthA (RectangleA _ x y w h _ _ _ _ _ _ _) = w
+widthA (EllipseA _ x y w h _ _ _ _ _ _ _)   = w
 widthA (RowA _ x y w h _ _ _ _)           = w
 widthA (ColA _ x y w h _ _ _ _)           = w
 widthA (OverlayA _ x y w h _ _ _ _)       = w
@@ -230,9 +230,9 @@ widthA arr                            = debug Err ("ArrTypes.widthA: unhandled a
 heightA (EmptyA _ x y w h _ _ _)           = h
 heightA (StringA _ x y w h _ _ _ _ _ _ _)  = h
 heightA (ImageA _ x y w h _ _ _ _ _ _)     = h
-heightA (PolyA _ x y w h _ _ _ _ _ _)      = h
-heightA (RectangleA _ x y w h _ _ _ _ _ _) = h
-heightA (EllipseA _ x y w h _ _ _ _ _ _)   = h
+heightA (PolyA _ x y w h _ _ _ _ _ _ _ _)  = h
+heightA (RectangleA _ x y w h _ _ _ _ _ _ _) = h
+heightA (EllipseA _ x y w h _ _ _ _ _ _ _)   = h
 heightA (RowA _ x y w h _ _ _ _)           = h
 heightA (ColA _ x y w h _ _ _ _)           = h
 heightA (OverlayA _ x y w h _ _ _ _)       = h
@@ -247,9 +247,9 @@ heightA arr                            = debug Err ("ArrTypes.heightA: unhandled
 hRefA (EmptyA _ x y w h hr vr _)           = hr
 hRefA (StringA _ x y w h hr vr _ _ _ _ _)  = hr
 hRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
-hRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
-hRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
-hRefA (EllipseA _ x y w h hr vr _ _ _ _)   = hr
+hRefA (PolyA _ x y w h hr vr _ _ _ _ _ _)  = hr
+hRefA (RectangleA _ x y w h hr vr _ _ _ _ _) = hr
+hRefA (EllipseA _ x y w h hr vr _ _ _ _ _)   = hr
 hRefA (RowA _ x y w h hr vr _ _)           = hr
 hRefA (ColA _ x y w h hr vr _ _)           = hr
 hRefA (OverlayA _ x y w h hr vr _ _)       = hr
@@ -264,9 +264,9 @@ hRefA arr                                  = debug Err ("ArrTypes.hRefA: unhandl
 vRefA (EmptyA _ x y w h hr vr _)           = vr
 vRefA (StringA _ x y w h hr vr _ _ _ _ _)  = vr
 vRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
-vRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
-vRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
-vRefA (EllipseA _ x y w h hr vr _ _ _ _)   = vr
+vRefA (PolyA _ x y w h hr vr _ _ _ _ _ _)  = vr
+vRefA (RectangleA _ x y w h hr vr _ _ _ _ _) = vr
+vRefA (EllipseA _ x y w h hr vr _ _ _ _ _)   = vr
 vRefA (RowA _ x y w h hr vr _ _)           = vr
 vRefA (ColA _ x y w h hr vr _ _)           = vr
 vRefA (OverlayA _ x y w h hr vr _ _)       = vr
@@ -285,9 +285,9 @@ vRefA arr                                  = debug Err ("ArrTypes.vRefA: unhandl
 idA (EmptyA id x y w h _ _ _)           = id
 idA (StringA id x y w h _ _ _ _ _ _ _)  = id
 idA (ImageA id x y w h _ _ _ _ _ _)     = id
-idA (PolyA id x y w h _ _ _ _ _ _)      = id
-idA (RectangleA id x y w h _ _ _ _ _ _) = id
-idA (EllipseA id x y w h _ _ _ _ _ _)   = id
+idA (PolyA id x y w h _ _ _ _ _ _ _ _)  = id
+idA (RectangleA id x y w h _ _ _ _ _ _ _) = id
+idA (EllipseA id x y w h _ _ _ _ _ _ _)   = id
 idA (RowA id x y w h _ _ _ _)           = id
 idA (ColA id x y w h _ _ _ _)           = id
 idA (OverlayA id x y w h _ _ _ _)       = id
@@ -313,9 +313,9 @@ getChildrenA _                                 = []
 setXYWHA x y w h (EmptyA id _ _ _ _ hr vr bc)                  = EmptyA id x y w h  hr vr bc         
 setXYWHA x y w h (StringA id _ _ _ _ hr vr str c bc f cxs)     = StringA id x y w h hr vr str c bc f cxs
 setXYWHA x y w h (ImageA id _ _ _ _ hr vr src style lc bc)     = ImageA id x y w h hr vr src style lc bc        
-setXYWHA x y w h (PolyA id _ _ _ _ hr vr  pts lw lc bc)        = PolyA id x y w h hr vr pts lw lc bc            
-setXYWHA x y w h (RectangleA id _ _ _ _ hr vr  lw style lc fc) = RectangleA id x y w h hr vr lw style lc fc     
-setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc)   = EllipseA id x y w h hr vr lw style lc fc     
+setXYWHA x y w h (PolyA id _ _ _ _ hr vr  pts lw style lc fc bc)        = PolyA id x y w h hr vr pts lw style lc fc bc            
+setXYWHA x y w h (RectangleA id _ _ _ _ hr vr  lw style lc fc bc) = RectangleA id x y w h hr vr lw style lc fc bc    
+setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc bc)   = EllipseA id x y w h hr vr lw style lc fc bc
 setXYWHA x y w h (RowA id _ _ _ _ hr vr  c arrs)               = RowA id x y w h hr vr c arrs                   
 setXYWHA x y w h (ColA id _ _ _ _ hr vr  c arrs)               = ColA id x y w h hr vr c arrs                   
 setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c arrs)           = OverlayA id x y w h hr vr c arrs               

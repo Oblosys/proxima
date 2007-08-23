@@ -227,6 +227,12 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; when (not arrDb) $
+           do { when (not (isTransparent bColor)) $
+                 do { let bgColor = gtkColor bColor
+                    ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+                    }
+              } 
 
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) imageColor imageColor
@@ -262,8 +268,14 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                 }}               
         }
 
-    (RectangleA id x' y' w' h' _ _ lw' style lColor fColor) ->
+    (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; when (not arrDb) $
+           do { when (not (isTransparent bColor)) $
+                 do { let bgColor = gtkColor bColor
+                    ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+                    }
+              } 
         ; when (style == Solid) $
             do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
                ; drawRectangle dw gc True x y w h
@@ -274,8 +286,14 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         -- outlined gtk rectangles are 1 pixel larger than filled ones
         }
 
-    (EllipseA id x' y' w' h' _ _ lw' style lColor fColor) ->
+    (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
+        ; when (not arrDb) $
+           do { when (not (isTransparent bColor)) $
+                 do { let bgColor = gtkColor bColor
+                    ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+                    }
+              } 
         ; when (style == Solid) $
             do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
                ; drawArc dw gc True x y (w+1) (h+1) (0*64) (360*64)
@@ -285,7 +303,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; drawArc dw gc False x y w h (0*64) (360*64)
         }
 
-    (PolyA id x' y' w' h' _ _ pts' lw' lColor bColor) ->
+    (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
   
@@ -297,7 +315,6 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     }
               } 
         
-        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         
         -- the old clip region needs to be passed around, since gtk does not offer a getClip..
         ; newClipRegion <- regionRectangle $ Rectangle x y w h
@@ -305,7 +322,12 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         -- intersect, so we don't draw outside the old clip region
        
         ; gcSetClipRegion gc newClipRegion
-        ; drawLines dw gc pts
+        ; when (style == Solid) $
+            do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
+               ; drawPolygon dw gc True pts
+               }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
+        ; drawPolygon dw gc False pts
         ; gcSetClipRegion gc oldClipRegion
         
         }
@@ -432,6 +454,12 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        
+        ; when (not (isTransparent bColor)) $
+           do { let bgColor = gtkColor bColor
+              ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+              }
+        
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
@@ -570,9 +598,9 @@ mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ 
       en = if  enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
   in  mkBoxCaret (x'+x+st) (y'+y) (en-st + 1) h
 mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _)        = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
-mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _)     = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _ _ _)    = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _ _) = mkBoxCaret (x'+x) (y'+y) w h
+mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
@@ -601,11 +629,11 @@ layoutFocusColor = CommonTypes.blue
 -- because of line/box difference (line x y (x+w) y) is wider than (box x y w h) all to points are decreased
 -- just decreasing w and h does not work
 mkBoxCaret x y w h = 
-  [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 layoutFocusColor transparent ]
+  [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 Transparent layoutFocusColor white transparent ]
 mkEdgeCaret x1 y1 x2 y2 =
   [ EdgeA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
 mkOutlineCaret x y w h outline = 
-  [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 layoutFocusColor transparent ]
+  [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 Transparent layoutFocusColor white transparent ]
 
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)

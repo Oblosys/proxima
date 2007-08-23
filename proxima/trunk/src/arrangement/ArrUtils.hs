@@ -39,9 +39,9 @@ sizeA' _  _  pth      arr                               = debug Err ("ArrUtils.s
 walk (EmptyA _ x y w h hr vr c)             = x+y+w+h+hr+vr + walkC c
 walk (StringA _ x y w h hr vr str c bc f _) = x+y+w+h+hr+vr+length str+ walkC c+ walkC bc+ fSize f
 walk (ImageA _ x y w h hr vr _ _ c1 c2)     = x+y+w+h+hr+vr + walkC c1 + walkC c2
-walk (PolyA _ x y w h hr vr _ _ c1 c2)      = x+y+w+h+hr+vr + walkC c1 + walkC c2
-walk (RectangleA _ x y w h hr vr _ _ c1 c2) = x+y+w+h+hr+vr + walkC c1 + walkC c2
-walk (EllipseA _ x y w h hr vr _ _ c1 c2)   = x+y+w+h+hr+vr + walkC c1 + walkC c2
+walk (PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = x+y+w+h+hr+vr + walkC c1 + walkC c2 + walkC c3
+walk (RectangleA _ x y w h hr vr _ _ c1 c2 c3) = x+y+w+h+hr+vr + walkC c1 + walkC c2 + walkC c3
+walk (EllipseA _ x y w h hr vr _ _ c1 c2 c3)   = x+y+w+h+hr+vr + walkC c1 + walkC c2 + walkC c3
 walk (RowA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 +  walkList arrs
 walk (ColA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (OverlayA _ x y w h hr vr c1 arrs)     = x+y+w+h+hr+vr + walkC c1 + walkList arrs
@@ -125,12 +125,12 @@ diffArr (RectangleA id  _ _ _) _                 = Dirty
 -}
 --  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
 
-diffArr (PolyA id x y w h hr vr pts lw lc fc) (PolyA id' x' y' w' h' hr' vr' pts' lw' lc' fc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw'  && lc == lc' && fc == fc'
-diffArr (PolyA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (EllipseA id x y w h hr vr lw ls lc fc) (EllipseA id' x' y' w' h' hr' vr' lw' ls' lc' fc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && ls == ls' && lc == lc' && fc == fc'
-diffArr (EllipseA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (PolyA id x y w h hr vr pts lw style lc fc bc) (PolyA id' x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
+diffArr (PolyA id  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EllipseA id x y w h hr vr lw ls lc fc bc) (EllipseA id' x' y' w' h' hr' vr' lw' ls' lc' fc' bc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && ls == ls' && lc == lc' && fc == fc' && bc == bc'
+diffArr (EllipseA id  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
 diffArr (EdgeA id x1 y1 x2 y2 hr vr lw lc) (EdgeA id' x1' y1' x2' y2' hr' vr' lw' lc') =
   DiffLeaf $ x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc'
 diffArr (EdgeA id  _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
@@ -244,8 +244,8 @@ pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heigh
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
 --point' x' y' pth loc p@(EmptyA _)                     = Nothing -- does not occur at the moment
 point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _ _)  = Just (pth, loc)
-point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ _ _ _) = Just (pth, loc)
-point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = Just (pth, loc)
+point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ __ _ _ _) = Just (pth, loc)
+point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _ _)   = Just (pth, loc)
 point' x' y' pth loc p@(RowA _ x y w h _ _ _ arrs)        = pointRowList 0 (x'-x) (y'-y) pth loc arrs
 point' x' y' pth loc p@(ColA _ x y w h _ _ _ arrs)        = pointColList 0 (x'-x) (y'-y) pth loc arrs
 point' x' y' pth loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point' (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
@@ -400,12 +400,12 @@ debugArrangement' xOffset yOffset (StringA id x y w h hr vr str c bc f cxs) =
   ( StringA id (x+xOffset) (y+yOffset) (w+1) h hr vr str c bc f cxs, 1, 0) -- widen with 1, so focus is inside or on box
 debugArrangement' xOffset yOffset (ImageA id x y w h hr vr src style lc bc) = 
   ( ImageA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr src style lc bc, pd, pd)
-debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw lc bc) = 
-  ( PolyA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr pts lw lc bc, pd, pd)
-debugArrangement' xOffset yOffset (RectangleA id x y w h hr vr lw style lc fc) = 
-  ( RectangleA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc, pd, pd)
-debugArrangement' xOffset yOffset (EllipseA id x y w h hr vr lw style lc fc) = 
-  ( EllipseA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc, pd, pd)
+debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw style lc fc bc) = 
+  ( PolyA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr pts lw style lc bc fc, pd, pd)
+debugArrangement' xOffset yOffset (RectangleA id x y w h hr vr lw style lc fc bc) = 
+  ( RectangleA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc bc, pd, pd)
+debugArrangement' xOffset yOffset (EllipseA id x y w h hr vr lw style lc fc bc) = 
+  ( EllipseA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr lw style lc fc bc, pd, pd)
 debugArrangement' xOffset yOffset (RowA id x y w h hr vr c arrs)             = 
 --  let (arrs', wOffsets, hOffsets) = unzip3 [ debugArrangement' (hpd+wo) hpd arr |  -- pd-1 and not 2pd-1 because child does its own left padding
 --                                             (arr,wo) <- zip arrs (scanl (\n1 n2 -> n1 +(pd-1)+n2 ) 0 wOffsets) ]
@@ -505,7 +505,7 @@ leftDocPathsA
 arrangeWhenViewed absx absy x y w h hrf vrf viewedArea idA arrangement =
   if overlap ((absx,absy),(w,h)) viewedArea then arrangement else -- EmptyA idA x y w h 0 0
     --arrangement 
-    PolyA idA x y w h hrf vrf [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 black yellow
+    PolyA idA x y w h hrf vrf [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 Transparent black white yellow
            
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
