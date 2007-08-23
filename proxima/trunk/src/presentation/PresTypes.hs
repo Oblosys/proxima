@@ -63,10 +63,10 @@ data EditPresentation documentLevel doc node clip =
 
 data Presentation doc node clip = EmptyP !IDP
            | StringP !IDP !String
-           | ImageP !IDP !String
-           | PolyP !IDP ![ (Float, Float) ] !Int -- pointList (0.0-1.0) lineWidth
-           | RectangleP !IDP !Int !Int !Int      -- width height lineWidth
-           | EllipseP !IDP !Int !Int !Int      -- width height lineWidth
+           | ImageP !IDP !String !ImgStyle
+           | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
+           | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
+           | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | RowP !IDP !Int ![Presentation doc node clip]    -- vRefNr 
            | ColP !IDP !Int ![Presentation doc node clip]    -- hRefNr
            | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
@@ -96,10 +96,10 @@ data Presentation doc node clip = EmptyP !IDP
 instance Show (Presentation doc node clip) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
-  show (ImageP id str)       = "{"++show id++":Image "++str++"}"
-  show (PolyP id _ _)        = "{"++show id++":Poly}"
-  show (RectangleP id _ _ _) = "{"++show id++":Rectangle}"
-  show (EllipseP id _ _ _)   = "{"++show id++":Ellipse}"
+  show (ImageP id str _)     = "{"++show id++":Image "++str++"}"
+  show (PolyP id _ _ _)        = "{"++show id++":Poly}"
+  show (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
+  show (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
   show (RowP id rf press)    = "RowP "++show rf++" ["++concat (intersperse ", " (map show press))++"]"
   show (ColP id rf press)    = "ColP "++show rf++" ["++concat (intersperse ", " (map show press))++"]"
   show (OverlayP  id press)  = "OverlayP ["++concat (intersperse ", " (map show press))++"]"
@@ -119,10 +119,10 @@ instance Show (Presentation doc node clip) where
 
 shallowShowPres (EmptyP id)           = "{"++show id++":Empty}"
 shallowShowPres (StringP id str)      = "{"++show id++":StringP "++show str++"}"
-shallowShowPres (ImageP id str)       = "{"++show id++":ImageP "++show str++"}"
-shallowShowPres (PolyP id _ _)        = "{"++show id++":Poly}"
-shallowShowPres (RectangleP id _ _ _) = "{"++show id++":Rectangle}"
-shallowShowPres (EllipseP id _ _ _)   = "{"++show id++":Ellipse}"
+shallowShowPres (ImageP id str _)       = "{"++show id++":ImageP "++show str++"}"
+shallowShowPres (PolyP id _ _ _)        = "{"++show id++":Poly}"
+shallowShowPres (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
+shallowShowPres (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
 shallowShowPres (RowP id rf press)    = "{"++show id++":RowP, #children="++show (length press)++"}"
 shallowShowPres (ColP id rf press)    = "{"++show id++":ColP, #children="++show (length press)++"}"
 shallowShowPres (OverlayP  id press)  = "{"++show id++":Overlay, #children="++show (length press)++"}"
@@ -138,10 +138,10 @@ shallowShowPres _                     = "<<<presentation without show>>>"
 
 getChildren (EmptyP id)           = []
 getChildren (StringP id str)      = []
-getChildren (ImageP id str)       = []
-getChildren (PolyP id _ _)        = []
-getChildren (RectangleP id _ _ _) = []
-getChildren (EllipseP id _ _ _)   = []
+getChildren (ImageP id str _)       = []
+getChildren (PolyP id _ _ _)        = []
+getChildren (RectangleP id _ _ _ _) = []
+getChildren (EllipseP id _ _ _ _)   = []
 getChildren (RowP id rf press)    = press
 getChildren (ColP id rf press)    = press
 getChildren (OverlayP  id press)  = press
@@ -157,10 +157,10 @@ getChildren pres                  = debug Err ("PresTypes.getChildren: unhandled
 
 setChildren [] pres@(EmptyP id)           = pres
 setChildren [] pres@(StringP id str)      = pres
-setChildren [] pres@(ImageP id str)       = pres
-setChildren [] pres@(PolyP id _ _)        = pres
-setChildren [] pres@(RectangleP id _ _ _) = pres
-setChildren [] pres@(EllipseP id _ _ _)   = pres
+setChildren [] pres@(ImageP id str _)     = pres
+setChildren [] pres@(PolyP id _ _ _)      = pres
+setChildren [] pres@(RectangleP id _ _ _ _) = pres
+setChildren [] pres@(EllipseP id _ _ _ _)   = pres
 setChildren press' (RowP id rf _)     = RowP id rf press'
 setChildren press' (ColP id rf _)     = ColP id rf press'
 setChildren press' (OverlayP  id _)   = OverlayP id press'
@@ -217,10 +217,10 @@ type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc cli
 
 idP (EmptyP id)           = id
 idP (StringP id _)        = id
-idP (ImageP id str)       = id
-idP (PolyP id _ _)        = id
-idP (RectangleP id _ _ _) = id
-idP (EllipseP id _ _ _)   = id
+idP (ImageP id str _)       = id
+idP (PolyP id _ _ _)        = id
+idP (RectangleP id _ _ _ _) = id
+idP (EllipseP id _ _ _ _)   = id
 idP (RowP id _ _)         = id
 idP (ColP id _ _)         = id
 idP (OverlayP  id press)  = id

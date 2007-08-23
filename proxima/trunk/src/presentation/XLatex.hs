@@ -41,14 +41,14 @@ sigmaSym = move 0 7 $ text "\167"  `withFont'` ("CMR12", 120 `percent` fontsize)
 rSym = text "R" `withFontFam` "CMBX6" `withHeight` fontsize
 
 sigma =
-  polyW 2 [(0.9,0.1),(0.9,0),(0,0),(0.5,0.5),(0,1),(0.9,1),(0.9,0.9)]
+  polyW 2 [(0.9,0.1),(0.9,0),(0,0),(0.5,0.5),(0,1),(0.9,1),(0.9,0.9)] Transparent
   `with_` (\(i,s) -> let i' = i
                          s' = s { minWidth = (assignedHeight i*7`div`10), hStretch = True }
                      in  (i',s'))
 
 
 rootSym =
-  polyW 2 [(0.0,0.6),(0.1,0.6),(0.4,1.0),(1.0,0.0)]
+  polyW 2 [(0.0,0.6),(0.1,0.6),(0.4,1.0),(1.0,0.0)] Transparent
   `with_` (\(i,s) -> let i' = i
                          s' = s { minWidth = (assignedHeight i*5`div`10), hStretch = False }
                      in  (i',s'))
@@ -159,7 +159,7 @@ slide title body = overlay [
                       , row [ hSpace 20, body `withbgColor` myBlue ]
                       ] `withHStretch` True
 
-                , rect 500 300 `withfColor` myBlue `withColor` myBlue
+                , rect 500 300 Solid `withfColor` myBlue `withColor` myBlue
                 ] `withColor` yellow `withbgColor` myBlue `withFont'` ("Arial", 15)
   where myBlue = (0,0,192)
 

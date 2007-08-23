@@ -38,7 +38,7 @@ overlay = OverlayP NoIDP
 --matrix = Matrix 
 rect w h = RectangleP NoIDP w h 1
 ellipse w h = EllipseP NoIDP w h 1
-img src = ImageP NoIDP src
+img src = ImageP NoIDP src Tile
 poly pts = PolyP NoIDP pts 1
 polyW w pts = PolyP NoIDP pts w
 formatter xps = FormatterP NoIDP xps
@@ -179,17 +179,17 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-x, v-y))
 
 
 hLine :: Xprez doc node clip
-hLine = poly [(0,0),(1.0,0)] `withHeight` 1 
+hLine = poly [(0,0),(1.0,0)] Transparent `withHeight` 1 
 
 vLine :: Xprez doc node clip
-vLine = poly [(0,0),(0,1.0)] `withWidth` 1
+vLine = poly [(0,0),(0,1.0)] Transparent `withWidth` 1
 
 -- lineWidth should be an attribute, so we can use a with here
 hLineW :: Int -> Xprez doc node clip
-hLineW lw = polyW lw [(0,0),(1.0,0)] `withHeight` 1
+hLineW lw = polyW lw [(0,0),(1.0,0)] Transparent `withHeight` 1
 
 vLineW :: Int -> Xprez doc node clip
-vLineW lw = polyW lw [(0,0),(0,1.0)] `withWidth` 1
+vLineW lw = polyW lw [(0,0),(0,1.0)] Transparent `withWidth` 1
 
 hvStretch = empty `withHStretch` True `withVStretch` True
 

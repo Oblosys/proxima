@@ -264,7 +264,7 @@ addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
       freshID = showDebug' Err "id is"$ head $ dropWhile (`elem` vertexIDs) [0..]
       pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vanillaVertex) pres
   in  (state, LayoutLevel pres' focus dt)     -- 0 in path is ignored
- where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
+ where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 Transparent `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
                            , vSpace 4 `withHStretch` True
                            , rowR 1 [glue, boxed 
                                             (row [ hSpace 3, text "<new>" `withFont'` ("Arial", 10), hSpace 3])

@@ -53,8 +53,9 @@ data Font = Font { fFamily :: String, fSize :: Int
 
 defaultFont = Font "Times New Roman" 24 False False False False
 
+data Style = Solid | Transparent deriving (Show, Eq, Read)
 
-data ImgStyle = Tile | Stretch deriving (Show, Read) -- also Center?
+data ImgStyle = Tile | Stretch deriving (Show, Eq, Read) -- also Center?
 
 data SpecialKey =
     EnterKey

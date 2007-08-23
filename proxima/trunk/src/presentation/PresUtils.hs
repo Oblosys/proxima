@@ -74,14 +74,14 @@ diffPres (EmptyP id)            (EmptyP _)       = DiffLeaf True
 diffPres (EmptyP id)             _               = DiffLeaf False
 diffPres (StringP id str)       (StringP _ str') = DiffLeaf $ str == str'
 diffPres (StringP id str)       _                = DiffLeaf False
-diffPres (ImageP  id src)       (ImageP  _ src') = DiffLeaf $ src == src'
-diffPres (ImageP  id src)       _                = DiffLeaf False
-diffPres (PolyP   id  lw pts)      (PolyP   _ lw' pts') = DiffLeaf $ lw==lw' && pts==pts'
-diffPres (PolyP   id _ _)       _                       = DiffLeaf False
-diffPres (RectangleP id  w h lw) (RectangleP _ w' h' lw')  = DiffLeaf $ w==w' && h==h' && lw==lw'
-diffPres (RectangleP id  _ _ _) _                          = DiffLeaf False
-diffPres (EllipseP id  w h lw) (EllipseP _ w' h' lw')  = DiffLeaf $ w==w' && h==h' && lw==lw'
-diffPres (EllipseP id  _ _ _) _                        = DiffLeaf False
+diffPres (ImageP  id src style)       (ImageP  _ src' style') = DiffLeaf $ src == src' && style == style'
+diffPres (ImageP  id src _)       _                = DiffLeaf False
+diffPres (PolyP   id pts lw style)      (PolyP   _ pts' lw' style') = DiffLeaf $ lw==lw' && pts==pts' && style == style'
+diffPres (PolyP   id _ _ _)       _                       = DiffLeaf False
+diffPres (RectangleP id  w h lw style) (RectangleP _ w' h' lw' style')  = DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
+diffPres (RectangleP id  _ _ _ _) _                          = DiffLeaf False
+diffPres (EllipseP id  w h lw style) (EllipseP _ w' h' lw' style')  = DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
+diffPres (EllipseP id _ _ _ _) _                        = DiffLeaf False
 diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
 diffPres (ColP id rf press) (ColP id' rf' press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
@@ -150,10 +150,10 @@ prunePres' va ova (x,y) arr dt (VertexP id v x' y' ol pres) = VertexP id v x' y'
 --prunePres' va ova arr (DiffLeaf c) p@(FormatterP id _)      = p
 prunePres' va ova (x,y) arr (DiffLeaf c) p@(EmptyP id)            = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) arr (DiffLeaf c) p@(StringP id str)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
-prunePres' va ova (x,y) arr (DiffLeaf c) p@(ImageP  id src)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
-prunePres' va ova (x,y) arr (DiffLeaf c) p@(PolyP   id _ _)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
-prunePres' va ova (x,y) arr (DiffLeaf c) p@(RectangleP id  _ _ _) = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
-prunePres' va ova (x,y) arr (DiffLeaf c) p@(EllipseP id  _ _ _)   = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(ImageP  id src _)     = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(PolyP   id _ _ _)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(RectangleP id  _ _ _ _) = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+prunePres' va ova (x,y) arr (DiffLeaf c) p@(EllipseP id  _ _ _ _)   = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) _ p = p
 prunePres' va ova (x,y) arr (DiffNode c _ dts) p =
   let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0 transparent)) dts (getChildren p)
@@ -208,9 +208,9 @@ deleteInsertedTokens inss pres = pres
 
 normalizePres pres@(EmptyP               _)            = pres
 normalizePres pres@(StringP              _  str)       = pres
-normalizePres pres@(ImageP               _  _)         = pres
-normalizePres pres@(PolyP                _  _    _)    = pres
-normalizePres pres@(RectangleP           _  _    _  _) = pres
+normalizePres pres@(ImageP               _ _  _)       = pres
+normalizePres pres@(PolyP                _  _  _  _)    = pres
+normalizePres pres@(RectangleP           _  _  _  _  _) = pres
 normalizePres (RowP id rf press)                       = RowP id rf $ normalizeRow press
 normalizePres (ColP id rf press)                       = normalizeCol id 0 rf [] press
 normalizePres (OverlayP id (pres:press))               = OverlayP id (normalizePres pres : press)
@@ -246,8 +246,8 @@ locateTreePres NoPathP        pres = Nothing
 locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
 
 locateTreePres' location _        (StringP id str)           = location
-locateTreePres' location _        (ImageP _ _)               = location
-locateTreePres' location _        (PolyP _ _ _)              = location
+locateTreePres' location _        (ImageP _ _ _)             = location
+locateTreePres' location _        (PolyP _ _ _ _)            = location
 locateTreePres' location []       (VertexP id _ _ _ _ pres)  = location
 locateTreePres' location (p:path) (RowP id rf press)         = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)
 locateTreePres' location (p:path) (ColP id rf press)         = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)                            
@@ -284,8 +284,8 @@ isEditableTreePres' editable pth      pr                         = debug Err ("*
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 xyFromPathPres x y (PathP p i)     (EmptyP _)                = (x, y, i==0)  -- should not occur
 xyFromPathPres x y (PathP p i)     (StringP _ str)           = (x+i, y, i==0 && length str /= 0 )
-xyFromPathPres x y (PathP p i)     (ImageP _ _)              = (x, y, i==0)
-xyFromPathPres x y (PathP p i)     (PolyP _ _ _)             = (x, y, i==0)
+xyFromPathPres x y (PathP p i)     (ImageP _ _ _)            = (x, y, i==0)
+xyFromPathPres x y (PathP p i)     (PolyP _ _ _ _)           = (x, y, i==0)
 xyFromPathPres x y path           pr@(RowP id rf press)     = xyFromPathRow (x) (y+topHeightPres pr) path press
 xyFromPathPres x y path           pr@(ColP id rf press)     = xyFromPathCol (x+leftWidthPres pr) (y) path press
 xyFromPathPres x y (PathP (0:p) i) (OverlayP _ (pres:press)) = xyFromPathPres x y (PathP p i) pres
@@ -318,8 +318,8 @@ heightPres pres = topHeightPres pres + bottomHeightPres pres
 
 leftWidthPres (EmptyP _)                = 0
 leftWidthPres (StringP _ str)           = 0
-leftWidthPres (ImageP _ _)              = 0
-leftWidthPres (PolyP _ _ _)             = 0
+leftWidthPres (ImageP _ _ _)            = 0
+leftWidthPres (PolyP _ _ _ _)           = 0
 leftWidthPres (RowP _ rf [])            = 0
 leftWidthPres (RowP _ rf press)         = sum (map widthPres (take rf press)) + leftWidthPres (index "PresUtils.leftWidthPres" press rf)
 leftWidthPres (ColP _ _ press)          = maximum (0:(map leftWidthPres press))
@@ -332,8 +332,8 @@ leftWidthPres pr                        = debug Err ("PresUtils.leftWidthPres: c
 
 rightWidthPres (EmptyP _)                = 0
 rightWidthPres (StringP _ str)           = length str
-rightWidthPres (ImageP _ _)              = 1
-rightWidthPres (PolyP _ _ _)             = 1
+rightWidthPres (ImageP _ _ _)            = 1
+rightWidthPres (PolyP _ _ _ _)           = 1
 rightWidthPres (RowP _ rf [])            = 0
 rightWidthPres (RowP _ rf press)         = rightWidthPres (index "PresUtils.leftWidthPres" press rf) + sum (map widthPres (drop (rf+1) press))
 rightWidthPres (ColP _ _ press)          = maximum (0:(map rightWidthPres press))
@@ -347,8 +347,8 @@ rightWidthPres pr                        = debug Err ("PresUtils.rightWidthPres:
 
 topHeightPres (EmptyP _)                = 0
 topHeightPres (StringP _ str)           = 0
-topHeightPres (ImageP _ _)              = 0
-topHeightPres (PolyP _ _ _)             = 0
+topHeightPres (ImageP _ _ _)            = 0
+topHeightPres (PolyP _ _ _ _)           = 0
 topHeightPres (RowP _ rf press)         = maximum (0:(map topHeightPres press))
 topHeightPres (ColP _ _ [])             = 0
 topHeightPres (ColP _ rf press)         = sum (map heightPres (take rf press)) + topHeightPres (index "PresUtils.topHeightPres" press rf)
@@ -363,8 +363,8 @@ topHeightPres pr                        = debug Err ("PresUtils.topHeightPres: c
 -- call bottomHeight depth? but then topHeight will be height and we need totalHeight for height
 bottomHeightPres (EmptyP _)                = 0
 bottomHeightPres (StringP _ str)           = 1
-bottomHeightPres (ImageP _ _)              = 1
-bottomHeightPres (PolyP _ _ _)             = 1
+bottomHeightPres (ImageP _ _ _)            = 1
+bottomHeightPres (PolyP _ _ _ _)           = 1
 bottomHeightPres (RowP _ rf press)         = maximum (0:(map bottomHeightPres press))
 bottomHeightPres (ColP _ rf [])            = 0
 bottomHeightPres (ColP _ rf press)         = bottomHeightPres (index "PresUtils.bottomHeightPres" press rf) + sum (map heightPres (drop (rf+1) press))
@@ -380,8 +380,8 @@ pathFromXYPres (x,0,b) (EmptyP _)    = PathP [] x
 pathFromXYPres (x,0,b) (StringP _ txt)   = if x > length txt 
                                          then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
                                          else PathP [] x
-pathFromXYPres (x,0,b) (ImageP _ _)    = PathP [] x 
-pathFromXYPres (x,0,b) (PolyP _ _ _)   = PathP [] x 
+pathFromXYPres (x,0,b) (ImageP _ _ _)  = PathP [] x 
+pathFromXYPres (x,0,b) (PolyP _ _ _ _)   = PathP [] x 
 pathFromXYPres (x,y,b) pr@(RowP id rf press) = pathFromXYRow 0 (x,y-topHeightPres pr,b) press
 pathFromXYPres (x,y,b) pr@(ColP id rf press) = pathFromXYCol 0 (x-leftWidthPres pr,y,b) press
 pathFromXYPres (x,y,b) (OverlayP id (pres:press))  = 0 `consPathP` pathFromXYPres (x,y,b) pres
@@ -446,8 +446,8 @@ stripCol p rf prs (pres : press )          = stripCol (p+1) rf (pres:prs) press
 stringFromPres pres = concatMap (++"\n") (stringFromPres' pres)
 
 stringFromPres' (StringP _ str)           = [str]
-stringFromPres' (ImageP _ _)              = ["#"]
-stringFromPres' (PolyP _ _ _)             = ["@"]
+stringFromPres' (ImageP _ _ _)            = ["#"]
+stringFromPres' (PolyP _ _ _ _)             = ["@"]
 stringFromPres' (RowP _ rf press)         = [concat $ concatMap stringFromPres' press] -- will go wrong if row has cols higher than 2
 stringFromPres' (ColP _ rf press)         = concatMap stringFromPres' press
 stringFromPres' (OverlayP _ (pres:press)) = stringFromPres' pres
@@ -469,8 +469,8 @@ presFromString str = ColP NoIDP 0 . map (StringP NoIDP) $ lines str
 -- these functions are horrible, can't they be a bit simpler?
 
 pathToLeftmostLeaf (StringP _ _)        = []
-pathToLeftmostLeaf (ImageP _ _)         = []
-pathToLeftmostLeaf (PolyP _ _ _)        = []
+pathToLeftmostLeaf (ImageP _ _ _)       = []
+pathToLeftmostLeaf (PolyP _ _ _ _)      = []
 pathToLeftmostLeaf (RowP _ _ press)     = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf (ColP _ _ press)     = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf (OverlayP _ press)   = 0 : pathToLeftmostLeaf (head press)  -- only navigate in head of overlay
@@ -482,8 +482,8 @@ pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
 
 pathToRightmostLeaf (StringP _ _)        = []
-pathToRightmostLeaf (ImageP _ _)         = []
-pathToRightmostLeaf (PolyP _ _ _)        = []
+pathToRightmostLeaf (ImageP _ _ _)       = []
+pathToRightmostLeaf (PolyP _ _ _ _)        = []
 pathToRightmostLeaf (RowP _ _ press)     = length press - 1 : pathToRightmostLeaf (last press)
 pathToRightmostLeaf (ColP _ _ press)     = length press - 1 : pathToRightmostLeaf (last press)
 pathToRightmostLeaf (OverlayP _ press)   = 0 : pathToRightmostLeaf (head press)  -- only navigate in head of overlay
@@ -609,8 +609,8 @@ passedColumn fromPath toPath pres =
   
 -- return True if any node on the path, including the root, is a column
 containsColPres _        (StringP id str)           = False
-containsColPres _        (ImageP _ _)               = False
-containsColPres _        (PolyP _ _ _)              = False
+containsColPres _        (ImageP _ _ _)             = False
+containsColPres _        (PolyP _ _ _ _)            = False
 containsColPres (p:path) (RowP id rf press)         = containsColPres path (index "PresUtils.containsColPres" press p)
 containsColPres (p:path) (ColP id rf press)         = True
 containsColPres (0:path) (OverlayP id press@(pres:_)) = containsColPres path (index "PresUtils.containsColPres" press 0)     

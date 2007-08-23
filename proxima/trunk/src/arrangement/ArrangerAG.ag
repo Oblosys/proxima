@@ -104,10 +104,10 @@ DATA Root
 DATA Presentation
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
-  | ImageP      id : IDP src : String
-  | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int
-  | RectangleP  id : IDP w,h : Int lineWidth : Int
-  | EllipseP	id : IDP w, h : Int lineWidth : Int
+  | ImageP      id : IDP src : String style : ImgStyle
+  | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : Style
+  | RectangleP  id : IDP w,h : Int lineWidth : Int style : Style
+  | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
   | RowP        id : IDP hRefNr : Int presentationList : PresentationList
   | ColP        id : IDP vRefNr : Int presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
@@ -277,13 +277,13 @@ SEM Presentation
   | StringP 
       lhs.unfoldedTree = StringP @id @text 
   | RectangleP    
-      lhs.unfoldedTree = RectangleP @id @w @h @lineWidth
+      lhs.unfoldedTree = RectangleP @id @w @h @lineWidth @style
   | EllipseP    
-      lhs.unfoldedTree = EllipseP @id @w @h @lineWidth
+      lhs.unfoldedTree = EllipseP @id @w @h @lineWidth @style
   | ImageP    
-      lhs.unfoldedTree = ImageP @id @src
+      lhs.unfoldedTree = ImageP @id @src @style
   | PolyP
-      lhs.unfoldedTree = PolyP @id @pointList @lineWidth
+      lhs.unfoldedTree = PolyP @id @pointList @lineWidth @style
   | RowP 
       lhs.unfoldedTree = RowP @id @hRefNr @presentationList.unfoldedTreeList
   | ColP 
@@ -897,18 +897,18 @@ SEM Presentation
                           StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
       lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | EllipseP
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | ImageP
       lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src Tile @lhs.lineColor @lhs.backgroundColor
+                          ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src @style @lhs.lineColor @lhs.backgroundColor
   | PolyP      
       lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
 			                                     , round (ry * fromIntegral (@finalHeight-1)) )
-		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth Solid @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
 		      
 {-
   | TestPresentation

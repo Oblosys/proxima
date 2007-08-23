@@ -82,7 +82,6 @@ type Height = Int
 type VRef = Int
 type HRef = Int
 type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
-data Style = Solid | Transparent deriving (Show, Eq, Read)
 
 
 -- empty will have size when it is stretched. But maybe empty should be ignored in the arrangement,

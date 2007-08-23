@@ -157,10 +157,10 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
-postScanStr kwrds ctxt (ImageP _ _)         = []
-postScanStr kwrds ctxt (PolyP _ _ _)        = []
-postScanStr kwrds ctxt (RectangleP _ _ _ _) = []
-postScanStr kwrds ctxt (EllipseP _ _ _ _)   = []
+postScanStr kwrds ctxt (ImageP _ _ _)         = []
+postScanStr kwrds ctxt (PolyP _ _ _ _)        = []
+postScanStr kwrds ctxt (RectangleP _ _ _ _ _) = []
+postScanStr kwrds ctxt (EllipseP _ _ _ _ _)   = []
 postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
 postScanStr kwrds ctxt (OverlayP _ [])      = []
 postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
@@ -180,10 +180,10 @@ postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token do
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
-postScanPrs kwrds ctxt (ImageP _ _)         = []
-postScanPrs kwrds ctxt (PolyP _ _ _)        = []
-postScanPrs kwrds ctxt (RectangleP _ _ _ _) = []
-postScanPrs kwrds ctxt (EllipseP _ _ _ _)   = []
+postScanPrs kwrds ctxt (ImageP _ _ _)         = []
+postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
+postScanPrs kwrds ctxt (RectangleP _ _ _ _ _) = []
+postScanPrs kwrds ctxt (EllipseP _ _ _ _ _)   = []
 postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (OverlayP _ [])      = []
 postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
