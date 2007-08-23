@@ -56,8 +56,35 @@ when c act = if c then act else return ()
 -- | Return True iff the two rectangles overlap.
 overlap :: Rectangle -> Rectangle -> Bool
 overlap ((x, y), (w, h)) ((x', y'),(w',h')) =
-  not (x > x' + w' || x + w < x' || y > y' + h' || y + h < y')
+  not (x >= x' + w' || x + w <= x' || y >= y' + h' || y + h <= y')
 
 -- | Convert an rgb 3-tuple to a GTK color
 gtkColor :: CommonTypes.Color -> Graphics.UI.Gtk.Color
 gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
+
+-- | Compute the difference (rectangle - rectangle). The result is a list of a maximum of
+--   4 rectangles.
+-- First, four segments of the second rectangle's complement are computed, for each of which we
+-- take the intersection with the first rectangle.
+difference :: Rectangle -> Rectangle -> [Rectangle]
+difference ((x,y),(w,h)) ((x',y'),(w',h')) =
+  let lu@(lx,uy) = (x,y) -- switch to absolute coordinates to make computation easier
+      rl@(rx,ly) = (x+w,y+h)
+      (lx',uy') = (x',y')
+      (rx',ly') = (x'+w',y'+h')
+      left  = ((minBound,minBound),(lx',maxBound))
+      right = ((rx',minBound),(maxBound,maxBound))
+      upper = ((lx', minBound), (rx',uy'))
+      lower = ((lx', ly'), (rx',maxBound))
+  in  filter isNonEmptyRectangle $ map (toRelRect . intersectionAbs (lu,rl)) [ left, right, upper, lower ]
+ where toRelRect ((lx,uy),(rx,ly)) = ((lx,uy),(rx-lx,ly-uy))
+
+       intersectionAbs ((boundlx,bounduy),(boundrx,boundly)) ((lx,uy),(rx,ly)) =
+         ( (clip boundlx boundrx lx, clip bounduy boundly uy)  -- note that upper y < lower y
+         , (clip boundlx boundrx rx, clip bounduy boundly ly)
+         )
+           
+       isNonEmptyRectangle ((x,y),(w,h)) = w>0 && h>0
+
+
+
