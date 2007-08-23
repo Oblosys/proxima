@@ -505,7 +505,7 @@ leftDocPathsA
 arrangeWhenViewed absx absy x y w h hrf vrf viewedArea idA arrangement =
   if overlap ((absx,absy),(w,h)) viewedArea then arrangement else -- EmptyA idA x y w h 0 0
     --arrangement 
-    PolyA idA x y w h hrf vrf [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 Transparent black white yellow
+    PolyA idA x y w h hrf vrf [(0,0),(w-1,0),(w-1,h-1),(0,h-1),(0,0),(w-1,h-1),(w-1,0),(0,h-1)] 1 Transparent black white transparent
            
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
