@@ -156,7 +156,7 @@ prunePres' va ova (x,y) arr (DiffLeaf c) p@(RectangleP id  _ _ _) = if c && not 
 prunePres' va ova (x,y) arr (DiffLeaf c) p@(EllipseP id  _ _ _)   = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (PolyA _ _ _ _ _ _ _ _ _ _ _) _ p = p
 prunePres' va ova (x,y) arr (DiffNode c _ dts) p =
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0)) dts (getChildren p)
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0 transparent)) dts (getChildren p)
   -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
   -- what we extend arr with (pres is used anyway in the recursion)
   in if c then if showDebug' Err ("unc1"++show (getAreaA arr)++show va) $ uncovered (x,y) va ova arr

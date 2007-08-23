@@ -55,8 +55,8 @@ data EditArrangement documentLevel =
 
 -- node is parameter for Node type
 data Arrangement node =
-    EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef
-  | StringA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Font [Int]
+    EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color
+  | StringA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Color !Font [Int]
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !ImgStyle !Color !Color
   | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Color !Color
   | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
@@ -159,8 +159,8 @@ fromA NoFocusA        = NoPathA
 toA (FocusA _ to) = to
 toA NoFocusA        = NoPathA
 
-shallowShowArr (EmptyA _ x y w h _ _)             = "{EmptyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
-shallowShowArr (StringA _ x y w h _ _ str _ _ _)  = "{StringA \""++str++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (EmptyA _ x y w h _ _ _)           = "{EmptyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
+shallowShowArr (StringA _ x y w h _ _ str _ _ _ _)= "{StringA \""++str++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (ImageA _ x y w h _ _ src _ _ _)   = "{ImageA: \""++src++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (PolyA _ x y w h _ _ _ _ _ _)      = "{PolyA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _) = "{RectangleA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
@@ -176,8 +176,8 @@ shallowShowArr (ParsingA _ child)                 = "{ParsingA}"
 shallowShowArr (LocatorA location child)          = "{LocatorA}"
 shallowShowArr arr                                = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
 
-xA (EmptyA _ x y w h _ _)             = x
-xA (StringA _ x y w h _ _ _ _ _ _)    = x
+xA (EmptyA _ x y w h _ _ _)           = x
+xA (StringA _ x y w h _ _ _ _ _ _ _)  = x
 xA (ImageA _ x y w h _ _ _ _ _ _)     = x
 xA (PolyA _ x y w h _ _ _ _ _ _)      = x
 xA (RectangleA _ x y w h _ _ _ _ _ _) = x
@@ -193,8 +193,8 @@ xA (ParsingA _ child)             = xA child
 xA (LocatorA location child)      = xA child
 xA arr                            = debug Err ("ArrTypes.xA: unhandled arrangement "++show arr) 0
 
-yA (EmptyA _ x y w h _ _)             = y
-yA (StringA _ x y w h _ _ _ _ _ _)    = y
+yA (EmptyA _ x y w h _ _ _)           = y
+yA (StringA _ x y w h _ _ _ _ _ _ _)  = y
 yA (ImageA _ x y w h _ _ _ _ _ _)     = y
 yA (PolyA _ x y w h _ _ _ _ _ _)      = y
 yA (RectangleA _ x y w h _ _ _ _ _ _) = y
@@ -210,8 +210,8 @@ yA (ParsingA _ child)             = yA child
 yA (LocatorA location child)      = yA child
 yA arr                            = debug Err ("ArrTypes.yA: unhandled arrangement "++show arr) 0
 
-widthA (EmptyA _ x y w h _ _)             = w
-widthA (StringA _ x y w h _ _ _ _ _ _)    = w
+widthA (EmptyA _ x y w h _ _ _)           = w
+widthA (StringA _ x y w h _ _ _ _ _ _ _)  = w
 widthA (ImageA _ x y w h _ _ _ _ _ _)     = w
 widthA (PolyA _ x y w h _ _ _ _ _ _)      = w
 widthA (RectangleA _ x y w h _ _ _ _ _ _) = w
@@ -227,8 +227,8 @@ widthA (ParsingA _ child)             = widthA child
 widthA (LocatorA location child)      = widthA child
 widthA arr                            = debug Err ("ArrTypes.widthA: unhandled arrangement "++show arr) 0
 
-heightA (EmptyA _ x y w h _ _)             = h
-heightA (StringA _ x y w h _ _ _ _ _ _)    = h
+heightA (EmptyA _ x y w h _ _ _)           = h
+heightA (StringA _ x y w h _ _ _ _ _ _ _)  = h
 heightA (ImageA _ x y w h _ _ _ _ _ _)     = h
 heightA (PolyA _ x y w h _ _ _ _ _ _)      = h
 heightA (RectangleA _ x y w h _ _ _ _ _ _) = h
@@ -244,8 +244,8 @@ heightA (ParsingA _ child)             = heightA child
 heightA (LocatorA location child)      = heightA child
 heightA arr                            = debug Err ("ArrTypes.heightA: unhandled arrangement "++show arr) 0
  
-hRefA (EmptyA _ x y w h hr vr)             = hr
-hRefA (StringA _ x y w h hr vr _ _ _ _)    = hr
+hRefA (EmptyA _ x y w h hr vr _)           = hr
+hRefA (StringA _ x y w h hr vr _ _ _ _ _)  = hr
 hRefA (ImageA _ x y w h hr vr _ _ _ _)     = hr
 hRefA (PolyA _ x y w h hr vr _ _ _ _)      = hr
 hRefA (RectangleA _ x y w h hr vr _ _ _ _) = hr
@@ -261,8 +261,8 @@ hRefA (ParsingA _ child)                   = hRefA child
 hRefA (LocatorA location child)            = hRefA child
 hRefA arr                                  = debug Err ("ArrTypes.hRefA: unhandled arrangement "++show arr) 0
 
-vRefA (EmptyA _ x y w h hr vr)             = vr
-vRefA (StringA _ x y w h hr vr _ _ _ _)    = vr
+vRefA (EmptyA _ x y w h hr vr _)           = vr
+vRefA (StringA _ x y w h hr vr _ _ _ _ _)  = vr
 vRefA (ImageA _ x y w h hr vr _ _ _ _)     = vr
 vRefA (PolyA _ x y w h hr vr _ _ _ _)      = vr
 vRefA (RectangleA _ x y w h hr vr _ _ _ _) = vr
@@ -282,8 +282,8 @@ vRefA arr                                  = debug Err ("ArrTypes.vRefA: unhandl
 
 
 
-idA (EmptyA id x y w h _ _)             = id
-idA (StringA id x y w h _ _ _ _ _ _)    = id
+idA (EmptyA id x y w h _ _ _)           = id
+idA (StringA id x y w h _ _ _ _ _ _ _)  = id
 idA (ImageA id x y w h _ _ _ _ _ _)     = id
 idA (PolyA id x y w h _ _ _ _ _ _)      = id
 idA (RectangleA id x y w h _ _ _ _ _ _) = id
@@ -310,9 +310,9 @@ getChildrenA (LocatorA _ arr)                  = [arr]
 getChildrenA _                                 = []
 
 
-setXYWHA x y w h (EmptyA id _ _ _ _ hr vr)                        = EmptyA id x y w h  hr vr          
-setXYWHA x y w h (StringA id _ _ _ _ hr vr str c f cxs)          = StringA id x y w h hr vr str c f cxs
-setXYWHA x y w h (ImageA id _ _ _ _ hr vr src style lc bc)    = ImageA id x y w h hr vr src style lc bc        
+setXYWHA x y w h (EmptyA id _ _ _ _ hr vr bc)                  = EmptyA id x y w h  hr vr bc         
+setXYWHA x y w h (StringA id _ _ _ _ hr vr str c bc f cxs)     = StringA id x y w h hr vr str c bc f cxs
+setXYWHA x y w h (ImageA id _ _ _ _ hr vr src style lc bc)     = ImageA id x y w h hr vr src style lc bc        
 setXYWHA x y w h (PolyA id _ _ _ _ hr vr  pts lw lc bc)        = PolyA id x y w h hr vr pts lw lc bc            
 setXYWHA x y w h (RectangleA id _ _ _ _ hr vr  lw style lc fc) = RectangleA id x y w h hr vr lw style lc fc     
 setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc)   = EllipseA id x y w h hr vr lw style lc fc     

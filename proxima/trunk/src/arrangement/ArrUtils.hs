@@ -21,7 +21,7 @@ orderFocusA foc@(FocusA from to) = ifFocusA foc $ FocusA (min from to) (max from
 
 sizeA path arr = sizeA' 0 0 path arr
 sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA arr, widthA arr, heightA arr)
-sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ cxs)     = (x' + x + (index "ArrUtils.sizeA'" cxs p), y'+y, (index "ArrUtils.sizeA'" cxs p+1)-(index "ArrUtils.sizeA'" cxs p+1), h)
+sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ _ cxs)   = (x' + x + (index "ArrUtils.sizeA'" cxs p), y'+y, (index "ArrUtils.sizeA'" cxs p+1)-(index "ArrUtils.sizeA'" cxs p+1), h)
 sizeA' x' y' (p:path) (RowA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (p:path) (ColA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (0:path) (OverlayA _ x y w h _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path arr
@@ -36,8 +36,8 @@ sizeA' _  _  pth      arr                               = debug Err ("ArrUtils.s
 
 
 -- is this necessary? The data structure is strict already.
-walk (EmptyA _ x y w h hr vr)               = x+y+w+h+hr+vr
-walk (StringA _ x y w h hr vr str c f _)    = x+y+w+h+hr+vr+length str+ walkC c+ fSize f
+walk (EmptyA _ x y w h hr vr c)             = x+y+w+h+hr+vr + walkC c
+walk (StringA _ x y w h hr vr str c bc f _) = x+y+w+h+hr+vr+length str+ walkC c+ walkC bc+ fSize f
 walk (ImageA _ x y w h hr vr _ _ c1 c2)     = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (PolyA _ x y w h hr vr _ _ c1 c2)      = x+y+w+h+hr+vr + walkC c1 + walkC c2
 walk (RectangleA _ x y w h hr vr _ _ c1 c2) = x+y+w+h+hr+vr + walkC c1 + walkC c2
@@ -110,11 +110,11 @@ diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr 
                                                       in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 
-diffArr (EmptyA id x y w h hr vr)     (EmptyA _  x' y' w' h' hr' vr') = DiffLeaf $ x==x' && y==y' && w==w' && h==h'                                                          
-diffArr (EmptyA id x y w h hr vr)     _                       = DiffLeaf False
-diffArr (StringA id x y w h hr vr str lc f _) (StringA _ x' y' w' h' hr' vr' str' lc' f' _) = 
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && f==f'
-diffArr (StringA id x y w h hr vr str lc f _)  _                                    = DiffLeaf False
+diffArr (EmptyA id x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
+diffArr (EmptyA id x y w h hr vr bc)     _                       = DiffLeaf False
+diffArr (StringA id x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f'
+diffArr (StringA id x y w h hr vr str lc bc f _)  _                                    = DiffLeaf False
 {-
 diffArr (ImageA  id src)       (ImageA  _ src') = Clean 
 diffArr (ImageA  id src)       _                = Dirty
@@ -243,7 +243,7 @@ pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heigh
 -- precondition: x' y' falls inside the arrangement. (Except for GraphA and EdgeA)
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
 --point' x' y' pth loc p@(EmptyA _)                     = Nothing -- does not occur at the moment
-point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _)    = Just (pth, loc)
+point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _ _)  = Just (pth, loc)
 point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ _ _ _) = Just (pth, loc)
 point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _)   = Just (pth, loc)
 point' x' y' pth loc p@(RowA _ x y w h _ _ _ arrs)        = pointRowList 0 (x'-x) (y'-y) pth loc arrs
@@ -329,7 +329,7 @@ navigateFocus x y arr = case point x y arr of
                                        Just p  -> (PathA p (getOffset p x arr))
  where getOffset ps mx a =
          case selectTreeA ps a of 
-           (x',y', StringA _ x y w h _ _ _ _ _ cxs) ->
+           (x',y', StringA _ x y w h _ _ _ _ _ _ cxs) ->
              let pos = mx - (clip 0 x x) - x'        -- in case x is negative (point' takes care of clipping itself)
              in  (length (takeWhile (<=pos) (centerXCoords cxs)))-1
            _                                                            -> 0
@@ -394,10 +394,10 @@ debugArrangement arr = let (arr', wOffset, hOffset) = debugArrangement' 0 0 arr 
 -- now we also share pd and hpd with the rendering
 
 -- what to do with ref lines?? probably ignore
-debugArrangement' xOffset yOffset (EmptyA id x y w h hr vr) = 
-  ( EmptyA id (x+xOffset) (y+yOffset) w h hr vr, 0,0)
-debugArrangement' xOffset yOffset (StringA id x y w h hr vr str c f cxs) = 
-  ( StringA id (x+xOffset) (y+yOffset) (w+1) h hr vr str c f cxs, 1, 0) -- widen with 1, so focus is inside or on box
+debugArrangement' xOffset yOffset (EmptyA id x y w h hr vr bc) = 
+  ( EmptyA id (x+xOffset) (y+yOffset) w h hr vr bc, 0,0)
+debugArrangement' xOffset yOffset (StringA id x y w h hr vr str c bc f cxs) = 
+  ( StringA id (x+xOffset) (y+yOffset) (w+1) h hr vr str c bc f cxs, 1, 0) -- widen with 1, so focus is inside or on box
 debugArrangement' xOffset yOffset (ImageA id x y w h hr vr src style lc bc) = 
   ( ImageA id (x+xOffset) (y+yOffset) (w+pd) (h+pd) hr vr src style lc bc, pd, pd)
 debugArrangement' xOffset yOffset (PolyA id x y w h hr vr pts lw lc bc) = 
@@ -464,7 +464,7 @@ debugArrangement' xOffset yOffset (StructuralA id arr)              =
 debugArrangement' xOffset yOffset (ParsingA id arr)              =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (ParsingA id arr', wOffset, hOffset)
-debugArrangement' _ _ arr = debug Err ("Renderer.debugArrangement': unimplemented arrangement: "++show arr) (EmptyA NoIDA 0 0 0 0 0 0,0,0)
+debugArrangement' _ _ arr = debug Err ("Renderer.debugArrangement': unimplemented arrangement: "++show arr) (EmptyA NoIDA 0 0 0 0 0 0 transparent,0,0)
 
 -- we need to use a more lazy zip3, which only works when bs and cs are longer than as
 -- positions in row&col solve this. Maybe this is not necessary anymore without aligning

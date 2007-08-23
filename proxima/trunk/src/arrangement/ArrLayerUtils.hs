@@ -54,7 +54,7 @@ colRowIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) cIx ix =
   if ix < length arrs 
   then (index "ArrLayerUtils.colRowIx" arrs ix, (cIx, ix))
   else colRowIx rowArrs (cIx+1) (ix-length arrs)
-colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0, (0,0))
+colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0 transparent, (0,0))
 
 -- Both levels are necessary because of formatters.
 pathPFromPathA' arr                             (WithP _ pres)           path     = 0:pathPFromPathA' arr pres path -- add step for with node 
@@ -83,5 +83,5 @@ formatterIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) ix (cIx, rIx) =
   if cIx == 0 
   then (index "ArrLayerUtils.colRowIx" arrs rIx, ix+rIx)
   else formatterIx rowArrs (ix+length arrs) (cIx-1,rIx) 
-formatterIx _ _ _ =  debug Err ("ArrLayerUtils.formatterIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0, 0)
+formatterIx _ _ _ =  debug Err ("ArrLayerUtils.formatterIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0 transparent, 0)
 

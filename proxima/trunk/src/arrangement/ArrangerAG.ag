@@ -890,10 +890,10 @@ SEM PresentationList
 ATTR Presentation [  | | arrangement : {Arrangement node} ]
 SEM Presentation
   | EmptyP
-      lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0
+      lhs.arrangement = EmptyA (idAFromP @id) 0 0 0 0 0 0 transparent
   | StringP 
       lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
+                          StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
       lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth Solid @lhs.lineColor @lhs.fillColor
@@ -955,7 +955,7 @@ SEM Presentation
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
   | FormatterP
-      lhs.arrangement =  debug Err "ArrangerAG.arrangement: FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0
+      lhs.arrangement =  debug Err "ArrangerAG.arrangement: FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0 transparent
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalVRef @finalHRef @lhs.backgroundColor @presentationList.arrangementList
@@ -1041,38 +1041,38 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of
                                       RowA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       ColA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | GraphP 
       presentationList.oldArrList = case @lhs.oldArr of
                                       GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0
+                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | VertexP 
       child.oldArr = case @lhs.oldArr of 
                        VertexA _ _ _ _ _ _ _ _ _ arr -> arr
-                       _                             -> EmptyA NoIDA 0 0 0 0 0 0
+                       _                             -> EmptyA NoIDA 0 0 0 0 0 0 transparent
   | StructuralP 
       child.oldArr = case @lhs.oldArr of
                        StructuralA _ arr -> arr
-                       _                 -> EmptyA NoIDA 0 0 0 0 0 0
+                       _                 -> EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ParsingP 
       child.oldArr = case @lhs.oldArr of
                        ParsingA _ arr -> arr
-                       _              -> EmptyA NoIDA 0 0 0 0 0 0
+                       _              -> EmptyA NoIDA 0 0 0 0 0 0 transparent
   | LocatorP 
       child.oldArr = case @lhs.oldArr of
                        LocatorA _ arr -> arr
-                       _              -> EmptyA NoIDA 0 0 0 0 0 0
+                       _              -> EmptyA NoIDA 0 0 0 0 0 0 transparent
   | FormatterP
       presentationList.oldArrList = debug Err "ArrangerAG.oldArrList: FormatterP must be unfolded first" $
-                                      repeat $ EmptyA NoIDA 0 0 0 0 0 0
+                                      repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 

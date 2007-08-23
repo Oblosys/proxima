@@ -175,13 +175,23 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
           -- only render when the arrangement is in the viewed area   
   case arrangement of 
 
-    (EmptyA _ _ _ _ _ _ _) ->
-      return ()
+    (EmptyA  id x' y' w' h' _ _ bColor) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; when (not (isTransparent bColor)) $
+           do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
+              ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+              }
+        }
       
-    (StringA id x' y' w' h' _ vRef' str fColor fnt _) ->
+    (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
      do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
         ; when (str /= "") $ 
-           do { context <- widgetCreatePangoContext wi
+           do { when (not (isTransparent bColor)) $
+                 do { let bgColor = gtkColor bColor
+                    ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+                    }
+           
+              ; context <- widgetCreatePangoContext wi
               ; fontDescription <- fontDescriptionFromProximaFont fnt
               
               ; language <- contextGetLanguage context
@@ -376,7 +386,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
               -- outlined gtk rectangles are 1 pixel larger than filled ones
               ; let (arrs',cdts') = if null arrs then (arrs,childDiffTrees)
-                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
+                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
                                                                           _                -> unzip . reverse $ zip arrs childDiffTrees
               
               ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea)  cdts' arrs'
@@ -390,7 +400,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                -- the children are reversed. Squigglies are the only presentations for now that
                -- need to be put in front of the overlay, but that should not get parsed.
               ; let (arrs',cdts') = if null arrs then (arrs,childDiffTrees)
-                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
+                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
                                                                           _                -> unzip . reverse $ zip arrs childDiffTrees
               -- until ovl is properly reversed
               ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) cdts' arrs'
@@ -553,8 +563,8 @@ mkFocus focus arr = mkFocus' [] 0 0 (orderFocusA focus) arr
 
 
 -- precondition, node is only visited if it part of it is focused
-mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _) = []
-mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ cxs') = 
+mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _ _) = []
+mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ _ cxs') = 
   let cxs = init cxs' ++ [last cxs'-1]
       st = if length stp < length p || stp < p then 0 else index "Renderer.mkFocus'" cxs sti
       en = if  enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
