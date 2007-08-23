@@ -979,6 +979,7 @@ SEM Presentation
                         --  ]
                         arrangeWhenViewed @lhs.absx @lhs.absy
                                           @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                          setBGColor yellow $
                           setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
  -- @finalVRef @finalHRef are taken from arrangedP
 
