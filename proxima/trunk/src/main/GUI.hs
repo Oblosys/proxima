@@ -232,7 +232,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
          do { writeIORef renderingLvlVar renderingLvl''
             ; widgetSetSizeRequest canvas w' h'
             
-            ; dw <- drawingAreaGetDrawWindow canvas
+            ; dw <- widgetGetDrawWindow canvas
             
             ; maybePm <- readIORef buffer
             ; if (isNothing maybePm || (w,h) /= (w',h')) -- if there was no pixmap, or if the size changed
@@ -292,7 +292,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
               -- if renderedViewedArea is different from viewedArea, we need to re-arrange
               -- SkipRen (-2) starts presenting at the arrangement layer
             ; when (renderedViewedArea /= viewedArea) $ 
-               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-2))
+               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-3))
                  
             
             ; gc <- gcNew dw
