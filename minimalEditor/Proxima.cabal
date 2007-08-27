@@ -49,8 +49,11 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                RenUtils Renderer DocTypes_Generated DocUtils_Generated
                DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
                ProxParser_Generated Reducer Scanner
-ghc-prof-options: -auto-all
-ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+ghc-prof-options:
+ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+-- -w disables warnings, which are annoying in Visual Haskell
+--  For profiling: add to ghc-options: -prof -auto-all
+-- NOTE: ghc-prof-options does not seem to work for adding cost-centers
 hugs-options:
 nhc-options:
 jhc-options:
