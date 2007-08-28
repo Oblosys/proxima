@@ -161,7 +161,7 @@ prunePres' va ova (x,y) (DiffLeaf c) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = i
 prunePres' va ova (x,y) (DiffNode c _ dts) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 -- because PolyA is never in ova (otherwise it would not be a poly), uncovered might be replaced by overlap with va
 
-
+--NOTE make sure that no rows are reused for formatter!! Because in ArrangerAG.ag dummy rows are generated
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(FormatterP id _) = 
   let pruned = pruneFormatter va ova (addOffsetA (x,y) arr) (repeat (DiffLeaf True)) arr (getChildren p)
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
@@ -214,10 +214,15 @@ pruneFormatterRow va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _ : arrs) pres
 pruneFormatterRow va ova (x,y) dts (RowA _ _ _ _ _ _ _ _ arrs:rows) press =
    let (rowDts, restDts) = splitAt (length arrs) dts
        (rowPress, restPress) = splitAt (length arrs) press
-   in  zipWith3 (prunePres va ova (x,y)) rowDts arrs rowPress ++
+   in  zipWith3 (prunePresSpecial va ova (x,y)) rowDts arrs rowPress ++
        pruneFormatterRow va ova (x,y) restDts rows restPress
 
-
+prunePresSpecial va ova (x,y) dt arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) pres =
+  pres
+prunePresSpecial va ova (x,y) dt arr                                   pres =
+  prunePres va ova (x,y) dt arr pres
+  
+  
 -- this solves problem with incorrect nr of children in formatter unfolding
 -- we still have the problem with incorrect refs in col of rows in oldArr of Formatter
 -- old C R R  structure may not correspond to new one. In which case reuse is done wrong.

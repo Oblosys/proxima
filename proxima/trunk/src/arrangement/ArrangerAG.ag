@@ -1052,9 +1052,19 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                                       RowA _ _ _ _ _ _ _ _ arrs -> debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ arrs ++ (repeat $ EmptyA NoIDA 0 0 20 20 0 0 blue)
                                       arr                     -> debug Err ("ArrangerAG.oldArrList Row encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ColP 
-      presentationList.oldArrList = case @lhs.oldArr of 
-                                      ColA _ _ _ _ _ _ _ _ _ arrs -> arrs
-                                      arr                     -> debug Err ("ArrangerAG.oldArrList Col encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+      presentationList.oldArrList = case @formatted of
+                                      NF -> case @lhs.oldArr of 
+                                              ColA _ _ _ _ _ _ _ _ _ arrs -> arrs
+                                              arr                     -> debug Err ("ArrangerAG.oldArrList Col encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      F nrOfEltss ->
+                                        let rows = getChildrenA @lhs.oldArr
+                                            arrs = concatMap getChildrenA rows
+                                            breaks = tail (scanl (+) 0 nrOfEltss)
+                                            mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
+                                        in  map mkDummyRow $ linesFromBreaks breaks arrs 
+                                        
+-- If the ColP came from a formatter, we take the old arrangements of the child rows, and distribute
+-- them according to the new child distribution in new Rows.
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
