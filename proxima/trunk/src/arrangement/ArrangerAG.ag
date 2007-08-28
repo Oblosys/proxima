@@ -56,7 +56,7 @@ unfoldFormatter w ws presentations =
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (rows)
- in  debug Arr ("Unfolded formatter"++show ws) $ unfoldedList
+ in  debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ unfoldedList
 
 
 

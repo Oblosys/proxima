@@ -133,7 +133,8 @@ addOffsetA (x,y) (LocatorA _ _) = debug Err "ArrUtils.addOffsetA called on Locat
 prunePres  va ova (x,y) dt arr pres@(FormatterP _ press) = 
   case prunePres' va ova (x,y) dt arr pres of
     pruned@(FormatterP _ pruneds) -> debug Err ("\n\n\n\n\nFormatter: "++show (length press)++"and pruned"++show (length pruneds) ) $
-      pruned
+                                       pruned
+    pruned -> debug Err ("\n\n\n\n\nFormatter:"++shallowShowPres pruned) $ pruned
 prunePres  va ova (x,y) dt arr pres = 
 --  debug Err (shallowShowArr arr ++ "          "++shallowShowPres pres) $
   prunePres' va ova (x,y) dt arr pres
@@ -158,23 +159,30 @@ prunePres' va ova (x,y) (DiffLeaf c) arr p@(EllipseP id  _ _ _ _)   = if c && no
 prunePres' va ova (x,y) (DiffLeaf c) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 -- because PolyA is never in ova (otherwise it would not be a poly), uncovered might be replaced by overlap with va
+
+
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(FormatterP id _) = 
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getChildrenA arr) (getChildren p)
+  let pruned = pruneFormatter va ova (addOffsetA (x,y) arr) (repeat (DiffLeaf True)) arr (getChildren p)
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
       then if uncovered (x,y) va ova arr
            then setChildren pruned p
            else ArrangedP
       else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr p@(FormatterP id _) =
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) dts (getFormatterChildren arr++repeat (EmptyA NoIDA 0 0 0 0 0 0 transparent)) (getChildren p)
+  let pruned = pruneFormatter va ova (addOffsetA (x,y) arr) dts arr (getChildren p)
   -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
   -- what we extend arr with (pres is used anyway in the recursion)
   in if c then if uncovered (x,y) va ova arr
                 then setChildren pruned p
                 else ArrangedP 
       else setChildren pruned p
+     
+      
+      
+      
+      
 prunePres' va ova (x,y) (DiffLeaf c) arr p       = 
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getFormatterChildren arr) (getChildren p)
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getChildrenA arr) (getChildren p)
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
       then if uncovered (x,y) va ova arr
            then setChildren pruned p
@@ -194,7 +202,26 @@ prunePres' va ova (x,y) dt arr                 pr                  = debug Err (
 -- als poly niet in va ligt.
 
                    
-getFormatterChildren (ColA _ _ _ _ _ _ _ _ arrs) = []
+pruneFormatter va ova (x,y) dts (ColA _ _ _ _ _ _ _ _ arrs) press = pruneFormatterRow va ova (x,y) dts arrs press
+pruneFormatter va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) press = press
+-- whole column is not arranged before, so we reuse nothing
+
+pruneFormatterRow va ova (x,y) dts [] press = []
+pruneFormatterRow va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _ : arrs) press = press
+-- we encounter a row that was not arranged, so from hereon nothing is reused
+
+pruneFormatterRow va ova (x,y) dts (RowA _ _ _ _ _ _ _ _ arrs:rows) press =
+   let (rowDts, restDts) = splitAt (length arrs) dts
+       (rowPress, restPress) = splitAt (length arrs) press
+   in  zipWith3 (prunePres va ova (x,y)) rowDts arrs rowPress ++
+       pruneFormatterRow va ova (x,y) restDts rows restPress
+
+
+-- this solves problem with incorrect nr of children in formatter unfolding
+-- we still have the problem with incorrect refs in col of rows in oldArr of Formatter
+
+
+
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
 -- anyway, the token tree will soon be replaced by a list, making this function easy
 deleteInsertedTokens :: InsertedTokenList -> Presentation doc node clip -> Presentation doc node clip
