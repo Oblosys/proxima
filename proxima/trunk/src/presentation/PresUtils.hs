@@ -202,7 +202,7 @@ prunePres' va ova (x,y) dt arr                 pr                  = debug Err (
 -- als poly niet in va ligt.
 
                    
-pruneFormatter va ova (x,y) dts (ColA _ _ _ _ _ _ _ _ arrs) press = pruneFormatterRow va ova (x,y) dts arrs press
+pruneFormatter va ova (x,y) dts (ColA _ _ _ _ _ _ _ _ _ arrs) press = pruneFormatterRow va ova (x,y) dts arrs press
 pruneFormatter va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) press = press
 -- whole column is not arranged before, so we reuse nothing
 

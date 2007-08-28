@@ -943,7 +943,7 @@ SEM Presentation
 						  , assign @presentationList.hStretchList (repeat @lhs.assignedWidth) @presentationList.minWidthList 
 					          ))$ -}
 	                arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList 
+                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor NF @presentationList.arrangementList 
   | OverlayP 
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
@@ -1052,7 +1052,7 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                                       arr                     -> debug Err ("ArrangerAG.oldArrList Row encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      ColA _ _ _ _ _ _ _ _ arrs -> arrs
+                                      ColA _ _ _ _ _ _ _ _ _ arrs -> arrs
                                       arr                     -> debug Err ("ArrangerAG.oldArrList Col encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
