@@ -45,7 +45,7 @@ present state doc (LayoutLevel presL focus dt) (SetPres' hp@(PresentationLevel p
       focus' = focus  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
 --      diffTree = DiffLeaf False
       diffTree = diffPres presL' presL
-  in  (SetLay' (LayoutLevel presL' focus' diffTree), state, hp) 
+  in  {- debug Err ("PRESENTATION"++show presH ++"LAYOUT"++ show presL) $ -} (SetLay' (LayoutLevel presH focus' diffTree), state, hp) 
 
 
 

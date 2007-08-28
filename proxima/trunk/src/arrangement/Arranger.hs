@@ -19,12 +19,14 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let lastViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
-          pres' = prunePres viewedArea lastViewedArea (0,0) oldArrangement dt pres
+          pres' = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
     ; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
-    --; debugLnIO Err ("Diff tree"++show dt)
- --   ; debugLnIO Err ("Pruned presentation"++show pres')
+    ; debugLnIO Err ("Diff tree"++show dt)
+    ; debugLnIO Err ("Presentation"++show pres)
+    ; debugLnIO Err ("Pruned Presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
- -- ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
+    ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
+    ; debugLnIO Err ("Unfolded presentation"++show unfoldedTree)
           
     ; if maxFDepth == 0 then
         return (attrTree, state')
@@ -39,9 +41,6 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
    
     }
 
--- non-pure font queries mess up this computation. Using a fixIO does not work because we are in the IO monad, and
--- unsafePerformDraw is not available     -- obsolete comment
--- Monad is IO again so fixIO can be used
 fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
 fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = f --fixit
@@ -66,7 +65,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
                
             ; let usedFonts = nub allFonts
             ; seq (length allFonts) $ return ()
-           -- ; debugLnIO Arr ("Done collecting fonts")
+            ; debugLnIO Arr ("Done collecting fonts")
              
            -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
             ; queriedMetrics <- readIORef fontMetricsRef
