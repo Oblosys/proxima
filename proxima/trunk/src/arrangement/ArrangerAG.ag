@@ -930,7 +930,8 @@ SEM Presentation
 						  , rightCorrection
 						  , assignedWidths 
 						  ))$ -}
-                        arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
+                        debug Err ("Row in view with #children: "++ show @presentationList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @presentationList.finalWidthList) $
+                          arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | ColP 
       lhs.arrangement = {- debug Arr ( "colattrs:"++show 

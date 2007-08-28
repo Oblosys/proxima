@@ -219,7 +219,9 @@ pruneFormatterRow va ova (x,y) dts (RowA _ _ _ _ _ _ _ _ arrs:rows) press =
 
 -- this solves problem with incorrect nr of children in formatter unfolding
 -- we still have the problem with incorrect refs in col of rows in oldArr of Formatter
-
+-- old C R R  structure may not correspond to new one. In which case reuse is done wrong.
+-- Furthermore, arrangments moved into rows out of view will try to reuse from Poly.
+-- Storing the arrangement in ArrangedP solves this problem.
 
 
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
