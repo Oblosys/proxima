@@ -63,6 +63,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onDelete window $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onCheckResize window $ resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; fileMenu <- mkMenu
         [ ("_Open", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
         , ("_Save", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
@@ -293,7 +294,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
               -- if renderedViewedArea is different from viewedArea, we need to re-arrange
               -- SkipRen (-2) starts presenting at the arrangement layer
             ; when (renderedViewedArea /= viewedArea) $ 
-               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-3))
+               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-2))
                  
             
             ; gc <- gcNew dw
@@ -324,6 +325,13 @@ getViewedArea vp =
     ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))  -- Unclear why this -5 is necessary. Maybe for relief?
     }         
     
+resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+ do { maybePm <- readIORef buffer
+    ; case maybePm of 
+        Nothing -> return () -- buffer has not been initialized yet.
+        _       -> -- SkipRen (-2) starts presenting at the arrangement layer
+                   genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (SkipRen (-2))                  
+    }
 
 translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering documentLevel
 translateKey _ (Just ch) (CommonTypes.Modifiers False False False)  = KeyCharRen ch
