@@ -91,7 +91,7 @@ isClean :: Dirty -> Bool
 isClean Dirty = False
 isClean Clean = True
 
-data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
+data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree]
 --                                       children self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
@@ -103,6 +103,11 @@ data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree] deriving Show
 -- self dirty, children clean cannot be expressed possible.
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
+instance Show DiffTree where
+   show (DiffLeaf c) = "DiffLeaf "++show c
+   show (DiffNode c c' dts) = if c&&c' 
+                              then "<Clean>"
+                              else "DiffNode "++show c ++ " " ++ show c' ++ " " ++ show dts
 
 isCleanDT :: DiffTree -> Bool
 isCleanDT (DiffLeaf c) = c
