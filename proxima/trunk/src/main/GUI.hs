@@ -252,7 +252,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             
             ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
             ; drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
-            ; drawWindowInvalidateRect dw (Rectangle 0 0 w' h')  False -- invalidate entire rendering
+            ; drawWindowInvalidateRect dw (Rectangle 0 0 (max w w') (max h h'))  False -- invalidate entire rendering
             }
     }
 
