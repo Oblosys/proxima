@@ -56,7 +56,7 @@ unfoldFormatter w ws presentations =
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (rows)
- in  unfoldedList
+ in  debug Arr ("Unfolded formatter"++show ws) $ unfoldedList
 
 
 
@@ -135,6 +135,11 @@ DATA Presentation
 
 TYPE PresentationList = [Presentation]
 
+SEM PresentationList [ || nrOfChildren : Int ]
+  | Nil
+      lhs.nrOfChildren = 0
+  | Cons 
+      lhs.nrOfChildren = 1 + @tl.nrOfChildren
 
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
             focus : FocusPres
@@ -506,7 +511,7 @@ SEM Root
                                         then screenWidth else @presentation.minWidth
       presentation.assignedHeight = let (_,(_,screenHeight)) = @lhs.viewedArea
                                     in  if @presentation.vStretch && screenHeight >= @presentation.minHeight
-                                    then screenHeight else @presentation.minHeight -- should be screenHeight
+                                    then screenHeight else @presentation.minHeight
       presentation.assignedVRef = @presentation.vRef -- is ignored anyway 
       presentation.assignedHRef = @presentation.hRef 
 
@@ -618,10 +623,10 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       child.assignedHRef                  = @child.hRef
       child.assignedVRef                  = @child.vRef
   | FormatterP
-      presentationList.assignedWidthList    = debug Err "ArrangerAG.assignedWidthList: FormatterP must be unfolded first" []
-      presentationList.assignedHeightList   = debug Err "ArrangerAG.assignedHeightList: FormatterP must be unfolded first" []
-      presentationList.assignedVRefList     = debug Err "ArrangerAG.assignedVRefList: FormatterP must be unfolded first" []
-      presentationList.assignedHRefList     = debug Err "ArrangerAG.assignedHRefList: FormatterP must be unfolded first" []
+      presentationList.assignedWidthList    = debug Err "ArrangerAG.assignedWidthList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
+      presentationList.assignedHeightList   = debug Err "ArrangerAG.assignedHeightList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
+      presentationList.assignedVRefList     = debug Err "ArrangerAG.assignedVRefList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
+      presentationList.assignedHRefList     = debug Err "ArrangerAG.assignedHRefList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
 {-
   | MatrixPresentation
 -- is a lot more complicated than this
@@ -845,8 +850,8 @@ SEM Presentation
       child.x                   = 0
       child.y                   = 0
   | FormatterP
-      presentationList.xList    = debug Err "ArrangerAG.xList: FormatterP must be unfolded first" []
-      presentationList.yList    = debug Err "ArrangerAG.yList: FormatterP must be unfolded first" []
+      presentationList.xList    = debug Err "ArrangerAG.xList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
+      presentationList.yList    = debug Err "ArrangerAG.yList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
 {-
   | MatrixPresentation -- x and y are added to cumulative heights and widths
       loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
@@ -979,15 +984,15 @@ SEM Presentation
                         --  ]
                         arrangeWhenViewed @lhs.absx @lhs.absy
                                           @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                          setBGColor yellow $
+                          -- setBGColor yellow $
                           setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
  -- @finalVRef @finalHRef are taken from arrangedP
 
 
   | ArrangedP       -- not exactly clear how to assign these attributes using the old values
                           -- what if the AG computes a different value for the refs, reassign?
-      loc.minWidth = @finalWidth
-      loc.minHeight = @finalHeight
+      loc.minWidth = widthA @lhs.oldArr
+      loc.minHeight = heightA @lhs.oldArr
       loc.hStretch = False
       loc.vStretch = False
       loc.vRef = vRefA @lhs.oldArr
@@ -996,8 +1001,8 @@ SEM Presentation
       loc.finalHeight = heightA @lhs.oldArr
       loc.finalVRef   = vRefA @lhs.oldArr
       loc.finalHRef   = hRefA @lhs.oldArr
-      loc.unfoldedTree = ArrangedP  -- ?
-      loc.maxFormatterDepth = 0     -- ?
+      loc.unfoldedTree = ArrangedP
+      loc.maxFormatterDepth = 0 
 
 
 ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
@@ -1041,47 +1046,49 @@ ATTR Root         [ oldArr : {Arrangement node}  | | ]
 
 SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
-      presentationList.oldArrList = case @lhs.oldArr of
-                                      RowA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+      presentationList.oldArrList = case @lhs.oldArr of 
+                                      RowA _ _ _ _ _ _ _ _ arrs -> debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ arrs ++ (repeat $ EmptyA NoIDA 0 0 20 20 0 0 blue)
+                                      arr                     -> debug Err ("ArrangerAG.oldArrList Row encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       ColA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                     -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      arr                     -> debug Err ("ArrangerAG.oldArrList Col encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      arr                     -> debug Err ("ArrangerAG.oldArrList Overlay encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | GraphP 
       presentationList.oldArrList = case @lhs.oldArr of
                                       GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
-                                      _                         -> repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      arr                     -> debug Err ("ArrangerAG.oldArrList Graph encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | VertexP 
       child.oldArr = case @lhs.oldArr of 
                        VertexA _ _ _ _ _ _ _ _ _ arr -> arr
-                       _                             -> EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       arr            -> debug Err ("ArrangerAG.oldArrList Vertex encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | StructuralP 
       child.oldArr = case @lhs.oldArr of
                        StructuralA _ arr -> arr
-                       _                 -> EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       arr            -> debug Err ("ArrangerAG.oldArrList Structural encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ParsingP 
       child.oldArr = case @lhs.oldArr of
                        ParsingA _ arr -> arr
-                       _              -> EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       arr            -> debug Err ("ArrangerAG.oldArrList Parsing encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | LocatorP 
       child.oldArr = case @lhs.oldArr of
                        LocatorA _ arr -> arr
-                       _              -> EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       arr            -> debug Err ("ArrangerAG.oldArrList Locator encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | FormatterP
-      presentationList.oldArrList = debug Err "ArrangerAG.oldArrList: FormatterP must be unfolded first" $
-                                      repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+      presentationList.oldArrList = let rows = getChildrenA @lhs.oldArr
+                                        arrs = concatMap getChildrenA rows
+                                    in  debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
+                                          arrs ++ ( repeat $ EmptyA NoIDA 0 0 3 3 0 0 green)
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 
       hd.oldArr     = head @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
  
- 
+
 ATTR PresentationList [  | |  arrangementList : {[Arrangement node]} ]
 SEM PresentationList
   | Nil
