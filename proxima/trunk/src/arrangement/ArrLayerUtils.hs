@@ -31,7 +31,7 @@ pathPFromPathA NoPathA        arr pres = NoPathP
 -- Both levels are necessary because of formatters.
 pathAFromPathP' _                               _                        []       = []
 pathAFromPathP' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path
-pathAFromPathP' (ColA _ _ _ _ _ _ _ _ _ arrs)   (ColP _ _ press)         (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path                                            
+pathAFromPathP' (ColA _ _ _ _ _ _ _ _ _ arrs)   (ColP _ _ _ press)       (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path                                            
 pathAFromPathP' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path
 pathAFromPathP' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path -- edges are put after vertices, so selection is ok
 pathAFromPathP' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathAFromPathP' arr pres path
@@ -60,7 +60,7 @@ colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wro
 pathPFromPathA' arr                             (WithP _ pres)           path     = 0:pathPFromPathA' arr pres path -- add step for with node 
 pathPFromPathA' _                               _                        []       = []
 pathPFromPathA' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
-pathPFromPathA' (ColA _ _ _ _ _ _ _ _ _ arrs)   (ColP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                       
+pathPFromPathA' (ColA _ _ _ _ _ _ _ _ _ arrs)   (ColP _ _ _ press)       (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                       
 pathPFromPathA' (OverlayA _ _ _ _ _ _ _ _ arrs) (OverlayP _ press)       (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
 pathPFromPathA' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path) = if p >= length press then [p] -- selection is on edge
                                                                                     else p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                            

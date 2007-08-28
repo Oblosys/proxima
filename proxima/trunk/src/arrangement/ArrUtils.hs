@@ -96,7 +96,7 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 
 
 -- add cases for lines etc.  add correct case for graph
--- refs can be ignored, since they do not influence the rendering of the arrangement.
+-- refs & Formatted can be ignored, since they do not influence the rendering of the arrangement.
 -- experimental diff, only strings are checked.
 -- skip StructuralA ParsingA and LocatorA elts
 --       new arrangement     old arrangement

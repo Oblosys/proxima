@@ -68,7 +68,7 @@ data Presentation doc node clip = EmptyP !IDP
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | RowP !IDP !Int ![Presentation doc node clip]    -- vRefNr 
-           | ColP !IDP !Int ![Presentation doc node clip]    -- hRefNr
+           | ColP !IDP !Int !Formatted ![Presentation doc node clip]    -- hRefNr
            | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
            | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
            | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
@@ -101,7 +101,7 @@ instance Show (Presentation doc node clip) where
   show (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
   show (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
   show (RowP id rf press)    = "RowP "++show rf++" ["++concat (intersperse ", " (map show press))++"]"
-  show (ColP id rf press)    = "ColP "++show rf++" ["++concat (intersperse ", " (map show press))++"]"
+  show (ColP id rf f press)    = "ColP "++show rf++" "++show f++" ["++concat (intersperse ", " (map show press))++"]"
   show (OverlayP  id press)  = "OverlayP ["++concat (intersperse ", " (map show press))++"]"
   show (WithP ar pres)       = "WithP <fn> "++show pres
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
@@ -124,7 +124,7 @@ shallowShowPres (PolyP id _ _ _)        = "{"++show id++":Poly}"
 shallowShowPres (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
 shallowShowPres (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
 shallowShowPres (RowP id rf press)    = "{"++show id++":RowP, #children="++show (length press)++"}"
-shallowShowPres (ColP id rf press)    = "{"++show id++":ColP, #children="++show (length press)++"}"
+shallowShowPres (ColP id rf f press)    = "{"++show id++":ColP, f= "++show f++", #children="++show (length press)++"}"
 shallowShowPres (OverlayP  id press)  = "{"++show id++":Overlay, #children="++show (length press)++"}"
 shallowShowPres (FormatterP  id press)  = "{"++show id++":Formatter, #children="++show (length press)++"}"
 shallowShowPres (GraphP id _ _ _ _ press)  = "{"++show id++":Graph, #children="++show (length press)++"}"
@@ -143,7 +143,7 @@ getChildren (PolyP id _ _ _)        = []
 getChildren (RectangleP id _ _ _ _) = []
 getChildren (EllipseP id _ _ _ _)   = []
 getChildren (RowP id rf press)    = press
-getChildren (ColP id rf press)    = press
+getChildren (ColP id rf _ press)    = press
 getChildren (OverlayP  id press)  = press
 getChildren (FormatterP  id press) = press
 getChildren (GraphP id _ _ _ _ press) = press
@@ -162,7 +162,7 @@ setChildren [] pres@(PolyP id _ _ _)      = pres
 setChildren [] pres@(RectangleP id _ _ _ _) = pres
 setChildren [] pres@(EllipseP id _ _ _ _)   = pres
 setChildren press' (RowP id rf _)     = RowP id rf press'
-setChildren press' (ColP id rf _)     = ColP id rf press'
+setChildren press' (ColP id rf f _)     = ColP id rf f press'
 setChildren press' (OverlayP  id _)   = OverlayP id press'
 setChildren press' (FormatterP  id _) = FormatterP id press'
 setChildren press' (GraphP id d w h es _) = GraphP id d w h es press'
@@ -222,7 +222,7 @@ idP (PolyP id _ _ _)        = id
 idP (RectangleP id _ _ _ _) = id
 idP (EllipseP id _ _ _ _)   = id
 idP (RowP id _ _)         = id
-idP (ColP id _ _)         = id
+idP (ColP id _ _ _)       = id
 idP (OverlayP  id press)  = id
 idP (WithP ar pres)       = idP pres
 idP (StructuralP id pres) = id

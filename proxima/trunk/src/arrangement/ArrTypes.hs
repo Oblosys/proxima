@@ -72,9 +72,6 @@ data Arrangement node =
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
--- Formatted denotes whether the row is the arrangement of a formatter 
-data Formatted = NF | F [Int] deriving Show 
-
 -- TODO put dirty info in Id child
 --type Info = (Bool, Bool)   -- True is Clean, False is Dirty       --(selfandChildren, self)
 type XCoord = Int

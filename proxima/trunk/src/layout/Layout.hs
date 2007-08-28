@@ -20,7 +20,7 @@ detokenize lm (ParsingP id pres)         = let press = detokenize' lm pres
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
                                                else if length press == 1  -- this will usually be the case because breaks
                                                then ParsingP id $ head press -- are produced by col's so there will be one there
-                                               else ParsingP id $ ColP NoIDP 0 press 
+                                               else ParsingP id $ ColP NoIDP 0 NF press 
 detokenize lm pres@(EmptyP _)            = pres
 detokenize lm pres@(StringP _ str)       = pres
 detokenize lm pres@(ImageP _ _ _)        = pres
@@ -28,7 +28,7 @@ detokenize lm pres@(PolyP _ _ _ _)       = pres
 detokenize lm pres@(RectangleP _ _ _ _ _)  = pres
 detokenize lm pres@(EllipseP _ _ _ _ _)    = pres
 detokenize lm (RowP id rf press)         = RowP id rf $ map (detokenize lm) press
-detokenize lm (ColP id rf press)         = ColP id rf $ map (detokenize lm) press
+detokenize lm (ColP id rf f press)         = ColP id rf f $ map (detokenize lm) press
 detokenize lm (OverlayP id (pres:press)) = OverlayP id (detokenize lm pres : press)
 detokenize lm (WithP ar pres)            = WithP ar $ detokenize lm pres
 detokenize lm (StructuralP id pres)      = StructuralP id $ detokenize lm pres
@@ -50,7 +50,7 @@ detokenize' lm pres@(PolyP id _ _ _)        = [pres]
 detokenize' lm pres@(RectangleP _ _ _ _ _)  = [pres]
 detokenize' lm pres@(EllipseP _ _ _ _ _)    = [pres]
 detokenize' lm (RowP id rf press)         = detokenizeRow' lm press -- ref gets lost
-detokenize' lm (ColP id rf press)         = [ColP id rf $ concat (map (detokenize' lm) press) ]
+detokenize' lm (ColP id rf f press)       = [ColP id rf f $ concat (map (detokenize' lm) press) ]
 detokenize' lm (OverlayP id (pres:press)) = let press' = detokenize' lm pres
                                             in  [ OverlayP id (pres' : press) | pres' <- press' ]
 detokenize' lm (WithP ar pres)            = let press = detokenize' lm pres 

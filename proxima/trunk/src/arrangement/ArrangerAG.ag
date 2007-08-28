@@ -55,7 +55,7 @@ unfoldFormatter w ws presentations =
      dividedPresentations = linesFromBreaks breaks presentations
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
-     unfoldedList = ColP NoIDP 0 (rows)
+     unfoldedList = ColP NoIDP 0 (F (map length dividedPresentations)) rows
  in  debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ unfoldedList
 
 
@@ -109,7 +109,7 @@ DATA Presentation
   | RectangleP  id : IDP w,h : Int lineWidth : Int style : Style
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
   | RowP        id : IDP hRefNr : Int presentationList : PresentationList
-  | ColP        id : IDP vRefNr : Int presentationList : PresentationList
+  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : PresentationList
   | OverlayP    id : IDP              presentationList : PresentationList
   | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
   | VertexP     id : IDP i,x,y: Int outline : Outline child : Presentation
@@ -292,7 +292,8 @@ SEM Presentation
   | RowP 
       lhs.unfoldedTree = RowP @id @hRefNr @presentationList.unfoldedTreeList
   | ColP 
-      lhs.unfoldedTree = ColP @id @vRefNr @presentationList.unfoldedTreeList
+      lhs.unfoldedTree = ColP @id @vRefNr @formatted @presentationList.unfoldedTreeList
+                         -- formatted will always be NF
   | OverlayP 
       lhs.unfoldedTree = OverlayP @id @presentationList.unfoldedTreeList
   | GraphP 
@@ -943,7 +944,7 @@ SEM Presentation
 						  , assign @presentationList.hStretchList (repeat @lhs.assignedWidth) @presentationList.minWidthList 
 					          ))$ -}
 	                arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor NF @presentationList.arrangementList 
+                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @presentationList.arrangementList 
   | OverlayP 
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
