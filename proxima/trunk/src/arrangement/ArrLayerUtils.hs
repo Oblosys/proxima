@@ -43,7 +43,6 @@ pathAFromPathP' (ParsingA _ arr)                (ParsingP _ pres)        (0:path
 pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (FormatterP _ press)     path     = pathAFromPathPFormatter arr press path
 pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ shallowShowPres pr++"***") []
--- should return NoPath
 
 -- p is the index in the formatter and is mapped onto an index in the column of rows
 pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (p:path) =
