@@ -133,9 +133,10 @@ addOffsetA (x,y) (LocatorA _ _) = debug Err "ArrUtils.addOffsetA called on Locat
 -- belong in ArrLayerUtils, also remove import ArrTypes
 prunePres  va ova (x,y) dt arr pres@(FormatterP _ press) = 
   case prunePres' va ova (x,y) dt arr pres of
-    pruned@(FormatterP _ pruneds) -> debug Err ("\n\n\n\n\nFormatter: "++show (length press)++"and pruned"++show (length pruneds) ) $
+    pruned@(FormatterP _ pruneds) -> -- debug Err ("\n\n\n\n\nFormatter: "++show (length press)++"and pruned"++show (length pruneds) ) $
                                        pruned
-    pruned -> debug Err ("\n\n\n\n\nFormatter:"++shallowShowPres pruned) $ pruned
+    pruned -> -- debug Err ("\n\n\n\n\nFormatter:"++shallowShowPres pruned) $ 
+              pruned
 prunePres  va ova (x,y) dt arr pres = 
 --  debug Err (shallowShowArr arr ++ "          "++shallowShowPres pres) $
   prunePres' va ova (x,y) dt arr pres
@@ -149,7 +150,6 @@ prunePres' va ova (x,y) dt arr (ParsingP id pres)    = ParsingP id    $ prunePre
 prunePres' va ova (x,y) dt arr (LocatorP l pres)     = LocatorP l     $ prunePres va ova (x,y) dt (getChildA "loc" arr) pres
 prunePres' va ova (x,y) dt arr (VertexP id v x' y' ol pres) = VertexP id v x' y' ol $ prunePres va ova (addOffsetA (x,y) arr) dt (getChildA "vrt" arr) pres
 
--- maybe not useful for leafs.
 --prunePres' va ova (x,y) arr _            p@(FormatterP id _)      = p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(EmptyP id)            = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(StringP id str)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
@@ -221,7 +221,7 @@ prunePresSpecial va ova (x,y) dt arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) pres =
   pres
 prunePresSpecial va ova (x,y) dt arr                                   pres =
   prunePres va ova (x,y) dt arr pres
-  
+-- TODO: check this!!
   
 -- this solves problem with incorrect nr of children in formatter unfolding
 -- we still have the problem with incorrect refs in col of rows in oldArr of Formatter

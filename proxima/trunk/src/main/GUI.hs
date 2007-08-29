@@ -95,7 +95,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
     -- interpret twice, so helium code in strings is also parsed
 
-    ; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    --; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; mainGUI
     }    
 
