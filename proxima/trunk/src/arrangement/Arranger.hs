@@ -34,8 +34,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     --; debugLnIO Err ("Pruned Presentation"++show pres')
     ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
     ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
-    ; debugLnIO Err ("Unfolded presentation"++show unfoldedTree)
-    ; print attrTree      
+    --; debugLnIO Err ("Unfolded presentation"++show unfoldedTree)
     ; if maxFDepth == 0 then
         return (attrTree, state')
       else if maxFDepth == 1 
@@ -49,12 +48,58 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
    
     }
 
+
 fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
-fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = f
+fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = 
+ mdo { (fontMetrics,arrangement, maxFDepth, unfoldedTree) <- f (fontMetrics,arrangement, maxFDepth, unfoldedTree)
+    ; return (arrangement, maxFDepth, unfoldedTree)
+    }
  where --f :: [Font] -> IO ([Font], Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
-       f = 
-         do { debugLnIO Arr ("Start collecting fonts")
+       f (fontMetrics,_, _, _) = 
+         do { let (allFonts, arrangement, maxFDepth, unfoldedTree) =
+                    sem_Root (Root pres) [defaultFont]
+                                               defaultBackColor defaultFillColor
+                                               focus
+                                               defaultFont 
+                                               fontMetrics
+                                               defaultLineColor
+                                               Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
+                                               oldArrangement
+                                               []       -- popupMenu : [String, (UpdateDoc doc clip)] 
+                                               defaultTextColor
+                                               viewedArea
+               
+            ; let usedFonts = nub allFonts
+             
+           -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
+            ; queriedMetrics <- readIORef fontMetricsRef
+            
+            ; let queriedFonts = Map.keys queriedMetrics
+            ; let newFonts =  deleteFirstsBy (==) usedFonts queriedFonts -- usedFonts was nubbed
+{-
+            ; debugLnIO Arr $ "used: "           ++ show usedFonts
+            ; debugLnIO Arr $ "already queried: "++ show queriedFonts
+            ; debugLnIO Arr $ "new:             "++ show newFonts
+-}
+            ; newMetrics <- mkFontMetrics newFonts
+            ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
+            ; writeIORef fontMetricsRef updatedMetrics            
+            ; return (updatedMetrics, arrangement, maxFDepth, unfoldedTree)
+            }
+            
+
+{-
+fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
+         Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
+fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = 
+ f 
+ {- mdo { (arrangement, maxFDepth, unfoldedTree) <- f (arrangement, maxFDepth, unfoldedTree)
+    ; return (arrangement, maxFDepth, unfoldedTree)
+    } -}
+ where --f :: [Font] -> IO ([Font], Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
+       f  = 
+         do { putStr "Fonts"
             ; let (allFonts, arrangement, maxFDepth, unfoldedTree) =
                     sem_Root (Root pres) [defaultFont]
                                                defaultBackColor defaultFillColor
@@ -69,8 +114,6 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
                                                viewedArea
                
             ; let usedFonts = nub allFonts
-            ; seq (length allFonts) $ return ()
-            ; debugLnIO Arr ("Done collecting fonts")
              
            -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
             ; queriedMetrics <- readIORef fontMetricsRef
@@ -82,14 +125,12 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
             ; debugLnIO Arr $ "already queried: "++ show queriedFonts
             ; debugLnIO Arr $ "new:             "++ show newFonts
 -}
-            -- filter the ones that are already present
-
             ; newMetrics <- mkFontMetrics newFonts
             ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
-            ; writeIORef fontMetricsRef updatedMetrics
-            ; putStrLn "Done querying"
-            
-            ; let (allFonts, arrangement,  maxFDepth, unfoldedTree) =
+            ; writeIORef fontMetricsRef updatedMetrics            
+ ; putStr "Arranging"
+            ; 
+           ; let (allFonts, arrangement,  maxFDepth, unfoldedTree) =
                     sem_Root (Root pres) [defaultFont]
                                           defaultBackColor defaultFillColor
                                           focus
@@ -101,68 +142,8 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
                                           []
                                           defaultTextColor
                                           viewedArea 
-                                          
-            ; return (arrangement, maxFDepth, unfoldedTree)
-            }
-            
-{-
-fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
-         Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
-fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = 
- mdo { (fontMetrics,arrangement, maxFDepth, unfoldedTree) <- f (fontMetrics,arrangement, maxFDepth, unfoldedTree)
-    ; return (arrangement, maxFDepth, unfoldedTree)
-    }
- where --f :: [Font] -> IO ([Font], Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
-       f (fontMetrics,_, _, _) = 
-         do { debugLnIO Arr ("Start collecting fonts")
-            ; let (allFonts, arrangement, maxFDepth, unfoldedTree) =
-                    sem_Root (Root pres) [defaultFont]
-                                               defaultBackColor defaultFillColor
-                                               focus
-                                               defaultFont 
-                                               fontMetrics
-                                               defaultLineColor
-                                               Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
-                                               oldArrangement
-                                               []       -- popupMenu : [String, (UpdateDoc doc clip)] 
-                                               defaultTextColor
-                                               viewedArea
-               
-            ; let usedFonts = nub allFonts
-            ; seq (length allFonts) $ return ()
-            ; debugLnIO Arr ("Done collecting fonts")
-             
-           -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
-            ; queriedMetrics <- readIORef fontMetricsRef
-            
-            ; let queriedFonts = Map.keys queriedMetrics
-            ; let newFonts =  deleteFirstsBy (==) usedFonts queriedFonts -- usedFonts was nubbed
-{-
-            ; debugLnIO Arr $ "used: "           ++ show usedFonts
-            ; debugLnIO Arr $ "already queried: "++ show queriedFonts
-            ; debugLnIO Arr $ "new:             "++ show newFonts
--}
-            -- filter the ones that are already present
-
-            ; newMetrics <- mkFontMetrics newFonts
-            ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
-            ; writeIORef fontMetricsRef updatedMetrics
-            ; putStrLn "Done querying"
-            
-            ; let (allFonts, arrangement,  maxFDepth, unfoldedTree) =
-                    sem_Root (Root pres) [defaultFont]
-                                          defaultBackColor defaultFillColor
-                                          focus
-                                          defaultFont
-                                          updatedMetrics
-                                          defaultLineColor
-                                          Nothing
-                                          oldArrangement
-                                          []
-                                          defaultTextColor
-                                          viewedArea 
-                                          
-            ; return (fontMetrics, arrangement, maxFDepth, unfoldedTree)
+ 
+            ; return ( arrangement, maxFDepth, unfoldedTree)
             }
             
 
