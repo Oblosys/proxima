@@ -14,6 +14,10 @@ idAFromP :: IDP -> IDA
 idAFromP NoIDP    = NoIDA
 idAFromP (IDP id) = IDA id
 
+-- For both conversions, both the arrangement and the presentation is needed:
+--     the arrangement for information on the distribution of elements over rows
+-- and the prersentation for taking into account With nodes.
+
 focusAFromFocusP (FocusP f t) arr pres = focusA (pathAFromPathP f arr pres) (pathAFromPathP t arr pres)
 focusAFromFocusP NoFocusP     arr pres = NoFocusA
 
@@ -27,8 +31,6 @@ pathPFromPathA (PathA pth ix) arr pres = PathP (pathPFromPathA' arr pres pth) ix
 pathPFromPathA NoPathA        arr pres = NoPathP
 
 
-
--- Both levels are necessary because of formatters.
 pathAFromPathP' _                               _                        []       = []
 pathAFromPathP' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path
 pathAFromPathP' (ColA _ _ _ _ _ _ _ _ _ arrs)   (ColP _ _ _ press)       (p:path) = p:pathAFromPathP' (index "ArrLayerUtils.pathAFromPathP'" arrs p) (index "ArrLayerUtils.pathAFromPathP'" press p) path                                            
@@ -43,20 +45,17 @@ pathAFromPathP' arr                             (FormatterP _ press)     path   
 pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 -- should return NoPath
 
--- p is the index in the formatter and is mapped on an index in the column of rows
-pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ _ rowArrs) press (p:path) =
-  let (arr, (cIx, rIx)) = colRowIx rowArrs 0 p
-  in  cIx : rIx : pathAFromPathP' arr (index "ArrLayerUtils.pathAFromPathP'" press p) path
-pathAFromPathPFormatter _                           press path = debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture") []
+-- p is the index in the formatter and is mapped onto an index in the column of rows
+pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (p:path) =
+  let subtractedIndices = filter (>=0) $ scanl (-) p nrOfRowEltss
+      (cIx, rIx) = (length subtractedIndices -1 , last subtractedIndices) -- safe, since subtractedIndices always starts with p
+      arr = case rowArrs !! cIx of
+              (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathAFromPathPFormatter, arr index" arrs rIx
+              _                           -> debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
+  in  cIx : rIx : pathAFromPathP' arr (index "ArrLayerUtils.pathAFromPathPFormatter, pres index" press p) path
+pathAFromPathPFormatter _                           press path = debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture, no column") []
 
 
-colRowIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) cIx ix =
-  if ix < length arrs 
-  then (index "ArrLayerUtils.colRowIx" arrs ix, (cIx, ix))
-  else colRowIx rowArrs (cIx+1) (ix-length arrs)
-colRowIx _ _ _ =  debug Err ("ArrLayerUtils.colRowIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0 transparent, (0,0))
-
--- Both levels are necessary because of formatters.
 pathPFromPathA' arr                             (WithP _ pres)           path     = 0:pathPFromPathA' arr pres path -- add step for with node 
 pathPFromPathA' _                               _                        []       = []
 pathPFromPathA' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path
@@ -71,17 +70,11 @@ pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path
 pathPFromPathA' arr                             (FormatterP _ press)     path     = pathPFromPathAFormatter arr press path
 pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 
--- p is the index in the formatter and is mapped on an index in the column of rows
-pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ _ rowArrs) press (cIx:rIx:path) = debug Err ("\n\n\ncol row index is:"++show (cIx,rIx)) $
-  let (arr, fIx) = formatterIx rowArrs 0 (cIx, rIx)
-  in  fIx : pathAFromPathP' arr (index "ArrLayerUtils.pathPFromPathA'" press fIx) path
-pathPFromPathAFormatter _                           press path = debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture") []
-
-
-formatterIx :: Show node => [Arrangement node] -> Int -> (Int, Int) -> (Arrangement node, Int)
-formatterIx (RowA _ _ _ _ _ _ _ _ arrs : rowArrs) ix (cIx, rIx) =
-  if cIx == 0 
-  then (index "ArrLayerUtils.colRowIx" arrs rIx, ix+rIx)
-  else formatterIx rowArrs (ix+length arrs) (cIx-1,rIx) 
-formatterIx _ _ _ =  debug Err ("ArrLayerUtils.formatterIx: unfolded formatter has wrong stucture") (EmptyA NoIDA 0 0 0 0 0 0 transparent, 0)
-
+-- (cIx,rIx) are the indices in the column of rows and are mapped onto an index in the formatter
+pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (cIx:rIx:path) = debug Err ("\n\n\ncol row index is:"++show (cIx,rIx)) $
+  let fIx = sum (take cIx nrOfRowEltss) + rIx
+      arr = case rowArrs !! cIx of
+              (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathPFromPathAFormatter, arr index" arrs rIx
+              _                           -> debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
+  in  fIx : pathAFromPathP' arr (index "ArrLayerUtils.pathPFromPathAFormatter, pres index" press fIx) path
+pathPFromPathAFormatter _                           press path = debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no column") []
