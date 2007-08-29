@@ -56,7 +56,9 @@ unfoldFormatter w ws presentations =
      rows = -- map (\lst -> LayedOutRowP lst 100 32 (repeat (0,0))) presentationLists
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (F (map length dividedPresentations)) rows
- in  debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ unfoldedList
+ in  --debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ 
+     debug Arr "Unfolding formatter" $
+     unfoldedList
 
 
 
@@ -931,7 +933,7 @@ SEM Presentation
 						  , rightCorrection
 						  , assignedWidths 
 						  ))$ -}
-                        debug Err ("Row in view with #children: "++ show @presentationList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @presentationList.finalWidthList) $
+                        --debug Err ("Row in view with #children: "++ show @presentationList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @presentationList.finalWidthList) $
                           arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @presentationList.arrangementList
   | ColP 
@@ -986,7 +988,7 @@ SEM Presentation
                         --  ]
                         arrangeWhenViewed @lhs.absx @lhs.absy
                                           @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                          -- setBGColor yellow $
+                          setBGColor yellow $
                           setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
  -- @finalVRef @finalHRef are taken from arrangedP
 
@@ -1049,7 +1051,8 @@ ATTR Root         [ oldArr : {Arrangement node}  | | ]
 SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      RowA _ _ _ _ _ _ _ _ arrs -> debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ arrs ++ (repeat $ EmptyA NoIDA 0 0 20 20 0 0 blue)
+                                      RowA _ _ _ _ _ _ _ _ arrs -> --debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
+                                                                   arrs ++ (repeat $ EmptyA NoIDA 0 0 20 20 0 0 blue)
                                       arr                     -> debug Err ("ArrangerAG.oldArrList Row encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
   | ColP 
       presentationList.oldArrList = case @formatted of
@@ -1062,7 +1065,7 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
                                             breaks = tail (scanl (+) 0 nrOfEltss)
                                             mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
                                         in  map mkDummyRow $ linesFromBreaks breaks arrs 
-                                        
+--TODO!! Check that dummyrow is never used, and make annotation in source                                        
 -- If the ColP came from a formatter, we take the old arrangements of the child rows, and distribute
 -- them according to the new child distribution in new Rows.
   | OverlayP 
@@ -1092,8 +1095,8 @@ SEM Presentation  [ oldArr : {Arrangement node}   | | ]
   | FormatterP
       presentationList.oldArrList = let rows = getChildrenA @lhs.oldArr
                                         arrs = concatMap getChildrenA rows
-                                    in  debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
-                                          arrs ++ ( repeat $ EmptyA NoIDA 0 0 3 3 0 0 green)
+                                    in  --debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
+                                        arrs ++ ( repeat $ EmptyA NoIDA 0 0 3 3 0 0 green)
 
 SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
   | Cons 
