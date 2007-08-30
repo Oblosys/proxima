@@ -57,7 +57,7 @@ unfoldFormatter w ws presentations =
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (F (map length dividedPresentations)) rows
  in  --debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ 
-     debug Arr "Unfolding formatter" $
+     debug Arr ("Unfolding formatter: "++ show w++" "++show ws) $
      unfoldedList
 
 
@@ -217,7 +217,10 @@ SEM Presentation [ | allFonts : {[Font]} | ]
   | WithP
       child.allFonts = let syn = @newSyn
                        in  font syn : @lhs.allFonts
-
+  | FormatterP
+      presentationList.allFonts = @lhs.allFonts
+      lhs.allFonts = @presentationList.allFonts
+      
 -- these are nubbed later. Maybe they should only be added if not present?
 
 ATTR PresentationList [ | allFonts : {[Font]} | ] 
@@ -303,6 +306,9 @@ SEM Presentation
   | VertexP
       lhs.unfoldedTree = VertexP @id @i @x @y @outline @child.unfoldedTree
   | FormatterP
+      inst.unfoldedFormatter : Presentation
+      inst.unfoldedFormatter = debug Arr ("FormatterP debug info: "++ (show $ @presentationList.minWidthList)) $
+                                 unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
       lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
 {-
   | TestPresentation             
@@ -626,6 +632,7 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
       child.assignedHRef                  = @child.hRef
       child.assignedVRef                  = @child.vRef
   | FormatterP
+      -- width height href and vref are assigned to unfoldedFormatter by copy rules
       presentationList.assignedWidthList    = debug Err "ArrangerAG.assignedWidthList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
       presentationList.assignedHeightList   = debug Err "ArrangerAG.assignedHeightList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
       presentationList.assignedVRefList     = debug Err "ArrangerAG.assignedVRefList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
@@ -750,10 +757,10 @@ SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
       loc.finalVRef   = @lhs.assignedVRef
       loc.finalHRef   = @lhs.assignedHRef
   | FormatterP
-      loc.finalWidth  = debug Err "ArrangerAG.finalWidth: FormatterP must be unfolded first" 0
-      loc.finalHeight = debug Err "ArrangerAG.finalHeight: FormatterP must be unfolded first" 0
-      loc.finalVRef   = debug Err "ArrangerAG.finalVRef: FormatterP must be unfolded first" 0
-      loc.finalHRef   = debug Err "ArrangerAG.finalHRef: FormatterP must be unfolded first" 0
+      loc.finalWidth  = @lhs.assignedWidth
+      loc.finalHeight = @unfoldedFormatter.finalHeight
+      loc.finalVRef   = @lhs.assignedVRef
+      loc.finalHRef   = @lhs.assignedHRef
 {-
   | TestPresentation 
       loc.finalWidth = error "not implemented"
@@ -853,8 +860,10 @@ SEM Presentation
       child.x                   = 0
       child.y                   = 0
   | FormatterP
-      presentationList.xList    = debug Err "ArrangerAG.xList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
-      presentationList.yList    = debug Err "ArrangerAG.yList: FormatterP must be unfolded first" $ replicate @presentationList.nrOfChildren 0
+      presentationList.xList    = debug Err "ArrangerAG.xList: x should not be evaluated for FormatterP children" $ replicate @presentationList.nrOfChildren 0
+      presentationList.yList    = debug Err "ArrangerAG.yList: y should not be evaluated for FormatterP children" $ replicate @presentationList.nrOfChildren 0
+--     @unfoldedFormatter.x/y handled by copy rule
+
 {-
   | MatrixPresentation -- x and y are added to cumulative heights and widths
       loc.cumulativeColWidths = init. scanl (+) 0 $ @colWidths
@@ -965,7 +974,7 @@ SEM Presentation
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
   | FormatterP
-      lhs.arrangement =  debug Err "ArrangerAG.arrangement: FormatterP must be unfolded first" $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+      -- unfoldedFormatter.arrangement handled by copy rule
 {-
   | LayedOutRowP 
       lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalVRef @finalHRef @lhs.backgroundColor @presentationList.arrangementList

@@ -32,22 +32,12 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show pres')
-    ; (attrTree, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
-    ; debugLnIO Arr ("  maxFormatterDepth = "++ show maxFDepth)   
-    --; debugLnIO Err ("Unfolded presentation"++show unfoldedTree)
-    ; if maxFDepth == 0 then
-        return (attrTree, state')
-      else if maxFDepth == 1 
-      then 
-       do { (arrangement, maxFDepth, unfoldedTree) <- fixed fontMetricsRef focus unfoldedTree viewedArea oldArrangement
-          ; return (arrangement, state')
-          }
-      else 
-        debug Err "no nested formatters allowed yet" (return (attrTree, state'))
- 
-   
+    ; (attrTree, maxFDepth,_) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
+    ; if maxFDepth > 1 
+      then debugLnIO Err "Nested formatters may be arranged incorrectly"
+      else return ()
+    ; return (attrTree, state')
     }
-
 
 fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
@@ -55,7 +45,8 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
  mdo { (fontMetrics,arrangement, maxFDepth, unfoldedTree) <- f (fontMetrics,arrangement, maxFDepth, unfoldedTree)
     ; return (arrangement, maxFDepth, unfoldedTree)
     }
- where --f :: [Font] -> IO ([Font], Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
+ where f :: (FontMetrics, Arrangement node, Integer, Presentation doc node clip) ->
+            IO (FontMetrics, Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
        f (fontMetrics,_, _, _) = 
          do { let (allFonts, arrangement, maxFDepth, unfoldedTree) =
                     sem_Root (Root pres) [defaultFont]
