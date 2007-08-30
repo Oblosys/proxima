@@ -1,1 +1,1 @@
-..\..\bin\uuagc -cfpm --Werrors ArrangerAG
+..\..\bin\uuagc -cfpm --Wmax=3 --Werrors ArrangerAG
