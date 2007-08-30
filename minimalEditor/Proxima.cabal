@@ -6,7 +6,7 @@ license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               parsec ==2.0
+               parsec ==2.0, time ==1.0
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -51,9 +51,6 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                ProxParser_Generated Reducer Scanner
 ghc-prof-options:
 ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
--- -w disables warnings, which are annoying in Visual Haskell
---  For profiling: add to ghc-options: -prof -auto-all
--- NOTE: ghc-prof-options does not seem to work for adding cost-centers
 hugs-options:
 nhc-options:
 jhc-options:
