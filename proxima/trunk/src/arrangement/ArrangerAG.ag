@@ -57,7 +57,7 @@ unfoldFormatter w ws presentations =
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (F (map length dividedPresentations)) rows
  in  --debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ 
-     debug Arr ("Unfolding formatter: "++ show w++" "++show ws) $
+     debug Arr ("Unfolding formatter") $
      unfoldedList
 
 
@@ -307,8 +307,7 @@ SEM Presentation
       lhs.unfoldedTree = VertexP @id @i @x @y @outline @child.unfoldedTree
   | FormatterP
       inst.unfoldedFormatter : Presentation
-      inst.unfoldedFormatter = debug Arr ("FormatterP debug info: "++ (show $ @presentationList.minWidthList)) $
-                                 unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
+      inst.unfoldedFormatter = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
       lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
 {-
   | TestPresentation             
