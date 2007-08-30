@@ -170,8 +170,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else --when (overlap ((lux+xA arrangement, luy+yA arrangement),
-          --               (widthA arrangement, heightA arrangement)) viewedArea) $
+     else when (overlap ((lux+xA arrangement, luy+yA arrangement),
+                         (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
   case arrangement of 
 
