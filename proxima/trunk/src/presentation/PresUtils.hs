@@ -226,6 +226,7 @@ prunePresSpecial va ova (x,y) dt arr                                   pres =
 -- this solves problem with incorrect nr of children in formatter unfolding
 -- we still have the problem with incorrect refs in col of rows in oldArr of Formatter
 -- old C R R  structure may not correspond to new one. In which case reuse is done wrong.
+-- Solved by storing distribution in Formatted arg of ColP
 -- Furthermore, arrangments moved into rows out of view will try to reuse from Poly.
 -- Storing the arrangement in ArrangedP solves this problem.
 
