@@ -2,7 +2,8 @@ module CommonUtils where
 
 import CommonTypes
 import Graphics.UI.Gtk hiding (Rectangle)
-
+import Data.Time.Clock
+import Data.IORef
 -- is exported (and imported) by all ...Utils modules
 
 
@@ -86,5 +87,22 @@ difference ((x,y),(w,h)) ((x',y'),(w',h')) =
            
        isNonEmptyRectangle ((x,y),(w,h)) = w>0 && h>0
 
+-- Some basic timer functions for benchmarking
+
+startTimer = 
+ do { time <- getCurrentTime
+    ; newIORef time
+    }
+    
+resetTimer timer = 
+ do { time <- getCurrentTime
+    ; writeIORef timer time
+    }
+    
+getTimerValue timer =
+ do { startTime <- readIORef timer
+    ; time <- getCurrentTime
+    ; return $ diffUTCTime time startTime
+    }
 
 

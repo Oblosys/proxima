@@ -24,6 +24,7 @@ import Char
 import Maybe
 import IO
 import Directory
+import Data.Time.Clock
 
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
@@ -88,17 +89,32 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
       
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     
-    --; sequence_ $ replicate 100 $  -- for profiling
-    --    genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    
-    --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    --; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    -- interpret twice, so helium code in strings is also parsed
-
     ; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
+--    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ) 30000 
+    -- about every half minute, save a backup of the document
+
+    ; timeoutAdd (performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle
     ; mainGUI
     }    
 
+performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas = 
+ do { putStr "\n\n\n\n\nStarting test edit sequence"
+    ; timer <- startTimer 
+    ; performEditEvents [ MouseDownRen 300 300 (CommonTypes.Modifiers False False False) 1
+                        , MouseUpRen 300 300 (CommonTypes.Modifiers False False False)
+                        ] 
+    ; time1 <- getTimerValue timer
+    ; resetTimer timer
+    ; performEditEvents $ map KeyCharRen "Test edit sequence. Just typing a number of characters in a formatted paragraph"
+    ; time2 <- getTimerValue timer
+    ; putStrLn $ "Mouse click: " ++ show time1
+    ; putStrLn $ "Edit sequence: " ++ show time2
+    
+    ; mainQuit
+    ; return False
+    }
+ where performEditEvents = mapM_ (genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas)
+    
 onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
@@ -321,8 +337,8 @@ getViewedArea vp =
     ; hA <- viewportGetHAdjustment vp
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
---    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
-    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))  -- Unclear why this -5 is necessary. Maybe for relief?
+    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+--    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))  -- Unclear why this -5 is necessary. Maybe for relief?
     }         
     
 resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
@@ -378,9 +394,6 @@ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
             }
         else return documentFilename
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
-    
---    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas )
---                 30000 -- about every half minute, save a backup of the document
     }
 
 backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
