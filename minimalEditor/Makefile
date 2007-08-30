@@ -58,7 +58,7 @@ src/PresentationAG.hs : $(AGC) \
 	src/PresentationAG_Generated.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --module=PresentationAG src/PresentationAG.ag -P src
+	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=3 --module=PresentationAG src/PresentationAG.ag -P src
 
 
 clean:
