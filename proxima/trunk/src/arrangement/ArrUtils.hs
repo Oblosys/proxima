@@ -143,7 +143,7 @@ diffArr (OverlayA id x y w h hr vr bc arrs) (OverlayA id' x' y' w' h' hr' vr' bc
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
-    DiffNode childrenClean selfClean _ -> showDebug' Err "The graph is " $ DiffLeaf (selfClean && childrenClean)
+    DiffNode childrenClean selfClean _ -> DiffLeaf (selfClean && childrenClean)
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeaf False  
     -- a graph is only clean when all children and the graph itself are clean
 diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
