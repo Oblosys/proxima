@@ -19,7 +19,7 @@ defaultFillColor = white
 defaultLineColor = black
 defaultTextColor = black
 defaultFont = CommonTypes.defaultFont
-            
+
 arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Presentation doc node clip -> IO (Arrangement node, LocalStateArr)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
@@ -136,6 +136,5 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
  
             ; return ( arrangement, maxFDepth, unfoldedTree)
             }
-            
-
 -}
+
