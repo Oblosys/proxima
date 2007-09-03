@@ -338,8 +338,9 @@ getViewedArea vp =
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
     ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
---    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))  -- Unclear why this -5 is necessary. Maybe for relief?
-    }         
+--    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))
+        -- return a smaller viewed area, for testing incrementality algorithms.
+    }
     
 resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
  do { maybePm <- readIORef buffer
