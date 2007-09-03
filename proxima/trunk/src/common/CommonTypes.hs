@@ -95,7 +95,7 @@ isClean :: Dirty -> Bool
 isClean Dirty = False
 isClean Clean = True
 
-data DiffTree = DiffLeaf Bool | DiffNode Bool Bool [DiffTree]
+data DiffTree = DiffLeaf !Bool | DiffNode !Bool !Bool ![DiffTree]
 --                                       children self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
