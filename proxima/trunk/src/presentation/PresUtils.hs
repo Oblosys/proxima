@@ -6,6 +6,7 @@ import CommonUtils
  
 import XprezLib
 import Maybe
+import Data.List
 
 import ArrTypes
 
@@ -60,6 +61,7 @@ pathFromXY xy pres = pathFromXYPres xy pres
 diffPres :: Presentation doc node clip -> Presentation doc node clip -> DiffTree
 
 -- WithP is not handled yet.
+-- Graph is not handled right yet!
 -- StructuralP ParsingP and LocatorP are ignored since they don't affect rendering
 -- Formatted is ignored, since it does not affect rendering
 diffPres (WithP ar pres)       pres'                   = diffPres pres pres'
@@ -103,11 +105,12 @@ diffPress rf press rf' press' =
       childDiffs  = zipWith diffPres press press'
       childDiffs' = take nrOfPress $ childDiffs ++ repeat (DiffLeaf False)
       selfClean   = rf==rf' && nrOfPress==nrOfPress'
-  in  DiffNode (selfClean && all isCleanDT childDiffs') 
+  in  DiffNode (selfClean && all' (map isCleanDT childDiffs')) 
                selfClean
                childDiffs'
 
-
+all' = foldl' (&&) True
+       
 -- we can prune safely whenever the arrangement is not in the newly uncovered area
 -- (x',y') is the absolute offset of the arrangement
 uncovered :: Show node => (Int,Int) -> Rectangle -> Rectangle -> Arrangement node -> Bool
@@ -119,7 +122,7 @@ uncovered (x',y') va ova arr =
 -- getChildA :: Show node => Arrangement node -> Arrangement node
 getChildA caller arr = case getChildrenA arr of
                   child : _ -> child
-                  []        -> debug Err ("ArrUtils.getChildA: no child " ++show arr++ caller)arr
+                  []        -> debug Err ("ArrUtils.getChildA: no child " ++show arr++ caller) arr
 
 getAreaA :: Show node => Arrangement node -> Rectangle
 getAreaA a = ((xA a, yA a), (widthA a, heightA a))
@@ -178,7 +181,7 @@ prunePres' va ova (x,y) (DiffNode c _ dts) arr p@(FormatterP id _) =
                 else ArrangedP 
       else setChildren pruned p
      
-      
+    
       
       
       
