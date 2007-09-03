@@ -33,19 +33,19 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 present :: LayerStateLay doc node clip -> PresentationLevel doc node clip -> LayoutLevel doc node clip ->
            EditPresentation' doc node clip ->
            (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip)
-present state doc (LayoutLevel pres focus dt) (SkipPres' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
-  let (pres', focus') = (,) {-normalizePresentation -} pres focus -- Normalize does not work in chess board, find out why
+present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
+  let (lay', focus') = (,) {-normalizePresentation -} lay focus -- Normalize does not work in chess board, find out why
 --      diffTree = DiffLeaf False  -- nonincremental
-      diffTree = dt
-  in  (SetLay' (LayoutLevel pres' focus' diffTree), state, doc)  -- we should re present here because of local state
-present state doc pres (SkipPres' i) = (SkipLay' (i-1), state, doc)
-present state doc (LayoutLevel presL focus dt) (SetPres' hp@(PresentationLevel presH (layout,idCounter,inserted, deleted)))  = 
-  let -- focusXY = saveFocus focus presL
-      presL'  = {- normalizeTreePres $ -} detokenize (Map.insert (IDP (-1)) (0,1) layout, inserted, deleted) presH
+      diffTree = dt -- diffTree was created by translate
+  in  (SetLay' (LayoutLevel lay' focus' diffTree), state, pres)  -- we should re present here because of local state
+present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
+present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter,inserted, deleted)))  = 
+  let -- focusXY = saveFocus focus lay
+      presL'  = {- normalizeTreePres $ -} detokenize (Map.insert (IDP (-1)) (0,1) layout, inserted, deleted) pres
       focus' = focus  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
 --      diffTree = DiffLeaf False
-      diffTree = diffPres presL' presL
-  in  {- debug Err ("PRESENTATION"++show presH ++"LAYOUT"++ show presL) $ -} (SetLay' (LayoutLevel presH focus' diffTree), state, hp) 
+      diffTree = diffPres presL' lay
+  in  {- debug Err ("PRESENTATION"++show presH ++"LAYOUT"++ show presL) $ -} (SetLay' (LayoutLevel pres focus' diffTree), state, hp) 
 
 
 
