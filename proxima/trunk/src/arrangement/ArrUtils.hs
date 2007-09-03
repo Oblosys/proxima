@@ -98,6 +98,9 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- add cases for lines etc.  add correct case for graph
 -- refs & Formatted can be ignored, since they do not influence the rendering of the arrangement.
 -- experimental diff, only strings are checked.
+-- what about diff for overlays? Should diff always return False False when a child is different?
+-- or should the render have special behavior? (this is is tricky since focus is added with an
+-- overlay)
 -- skip StructuralA ParsingA and LocatorA elts
 --       new arrangement     old arrangement
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
