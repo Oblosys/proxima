@@ -41,7 +41,7 @@ metricsLookup font fontMetrics =
   -- debug Err ("looking up: " ++ show (fSize font) ++ " " ++ (fFamily font)) $
   case Map.lookup (font {fUnderline = False, fStrikeOut = False}) fontMetrics  of
             Just metrics -> metrics
-            Nothing      -> debug Err "metrics for font not queried" $ (0,0, listArray (0,223) (repeat 0))
+            Nothing      -> debug Err "metrics for font not queried" $ (20,15, listArray (0,223) (repeat 10))
 
 --- query the metrics for font. 
 queryFont :: Font -> IO (Font,(Int, Int, [Int]))
