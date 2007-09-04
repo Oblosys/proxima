@@ -55,20 +55,20 @@ data EditArrangement documentLevel =
 
 -- node is parameter for Node type
 data Arrangement node =
-    EmptyA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color
-  | StringA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !Color !Color !Font [Int]
-  | ImageA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !String !ImgStyle !Color !Color
-  | PolyA       !IDA  !XCoord !YCoord !Width !Height !VRef !HRef ![(XCoord, YCoord)] !Int !Style !Color !Color !Color
-  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color !Color
-  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color !Color
-  | RowA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
-  | ColA        !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color !Formatted ![Arrangement node]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color ![Arrangement node]
+    EmptyA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color
+  | StringA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !Color !Color !Font [Int]
+  | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !Color !Color
+  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Style !Color !Color !Color
+  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color !Color
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color !Color
+  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Formatted ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
-  | GraphA      !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color !NrOfVertices ![Arrangement node]
-  | VertexA     !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Color !Outline !(Arrangement node)
-  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !VRef !HRef !Int !Color
+  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
+  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
+  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
   -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
