@@ -46,17 +46,8 @@ type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 -}
 
-
--- does not work anymore
-instance Read Node where
-  readsPrec _ inp = case dropWhile isSpace inp of -- requires: import Char
-                      ('#':rest) -> [(NoNode, rest)]
-                      _          -> []
-
-
---instance Show Node where
---  show _ = "#"
-
+instance DocNode Node where
+  noNode = NoNode
 
 
 -- show Node needs to be here because ParseErr alternatives contain a Node and derive Show

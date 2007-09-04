@@ -17,7 +17,7 @@ import Maybe
 piece pc color sqColor rowNr colNr moves focus path =
        overlay [ pieceXp pc sqColor (focus==PathD path)
                    `withbgColor` backgroundColor sqColor (focus==PathD path)
-              , rect 80 84 
+              , rect 80 84 Solid 
                 `withfColor` backgroundColor sqColor (focus==PathD path)
                 `withColor` backgroundColor sqColor (focus==PathD path)
               ]
@@ -47,9 +47,9 @@ piece pc color sqColor rowNr colNr moves focus path =
                            then [markReachable]
                            else []
        markReachable = overlay 
-                        [ rect 56 60 `withfColor` backgroundColor sqColor (focus==PathD path)
+                        [ rect 56 60 Solid `withfColor` backgroundColor sqColor (focus==PathD path)
                             `withRef` (-12,-12)
-                        , rect 60 64 `withfColor` black
+                        , rect 60 64 Solid `withfColor` black
                             `withRef` (-10,-10)
                         ] -- moveHere cannot be added to markReachable, because it is not always the object in front.
                           -- should add it to the square itself

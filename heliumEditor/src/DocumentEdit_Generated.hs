@@ -34,7 +34,11 @@ instance Editable HeliumTypeInfo Document Node ClipDoc where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-  
+
+-- from Editable, only the member parseErr is used for EnrichedDoc
+instance Editable EnrichedDoc Document Node ClipDoc where
+--  hole = HoleEnrichedDoc
+  parseErr = ParseErrEnrichedDoc
 
 instance Editable Int Document Node ClipDoc where
   select [] x = Clip_Int x

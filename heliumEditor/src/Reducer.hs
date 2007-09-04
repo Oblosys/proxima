@@ -89,7 +89,7 @@ initDoc =
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
-    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 . map (StringP NoIDP). lines' $ fileContents) {- [] -}
+    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
     
 -- lines' works for Unix, Mac, and Dos format
