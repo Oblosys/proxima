@@ -100,8 +100,8 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
 performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas = 
  do { putStr "\n\n\n\n\nStarting test edit sequence"
     ; timer <- startTimer 
-    ; performEditEvents [ MouseDownRen 300 300 (CommonTypes.Modifiers False False False) 1
-                        , MouseUpRen 300 300 (CommonTypes.Modifiers False False False)
+    ; performEditEvents [ MouseDownRen 100 300 (CommonTypes.Modifiers False False False) 1
+                        , MouseUpRen 100 300 (CommonTypes.Modifiers False False False)
                         ] 
     ; time1 <- getTimerValue timer
     ; resetTimer timer
