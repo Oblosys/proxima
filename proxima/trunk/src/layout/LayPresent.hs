@@ -41,11 +41,11 @@ present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
 present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter,inserted, deleted)))  = 
   let -- focusXY = saveFocus focus lay
-      presL'  = {- normalizeTreePres $ -} detokenize (Map.insert (IDP (-1)) (0,1) layout, inserted, deleted) pres
+      lay'  = {- normalizeTreePres $ -} detokenize (Map.insert (IDP (-1)) (0,1) layout, inserted, deleted) pres
       focus' = focus  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
 --      diffTree = DiffLeaf False
-      diffTree = diffPres presL' lay
-  in  {- debug Err ("PRESENTATION"++show presH ++"LAYOUT"++ show presL) $ -} (SetLay' (LayoutLevel pres focus' diffTree), state, hp) 
+      diffTree = diffPres lay' lay
+  in  (SetLay' (LayoutLevel lay' focus' diffTree), state, hp) 
 
 
 
