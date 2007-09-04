@@ -17,14 +17,14 @@ tokenize i loc (ParsingP id pres)  = let (lc, layout, id, str, tokens, lm, i') =
                                      in  (ParsingP id $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
 tokenize i loc pres@(EmptyP _)           = (pres, Map.empty, i)
 tokenize i loc pres@(StringP _ str)      = (pres, Map.empty, i)
-tokenize i loc pres@(ImageP _ _)         = (pres, Map.empty, i)
-tokenize i loc pres@(PolyP _ _ _)        = (pres, Map.empty, i)
-tokenize i loc pres@(RectangleP _ _ _ _) = (pres, Map.empty, i)
-tokenize i loc pres@(EllipseP _ _ _ _) = (pres, Map.empty, i)
+tokenize i loc pres@(ImageP _ _ _)         = (pres, Map.empty, i)
+tokenize i loc pres@(PolyP _ _ _ _)        = (pres, Map.empty, i)
+tokenize i loc pres@(RectangleP _ _ _ _ _) = (pres, Map.empty, i)
+tokenize i loc pres@(EllipseP _ _ _ _ _) = (pres, Map.empty, i)
 tokenize i loc (RowP id rf press) = let (press', lm, i') = tokenizeLst i loc press
                                     in  (RowP id rf press', lm, i')
-tokenize i loc (ColP id rf press) = let (press', lm, i') = tokenizeLst i loc press
-                                    in  (ColP id rf press', lm, i')
+tokenize i loc (ColP id rf f press) = let (press', lm, i') = tokenizeLst i loc press
+                                      in  (ColP id rf f press', lm, i')
 tokenize i loc (OverlayP id (pres:press)) = let (pres', lm, i') = tokenize i loc pres
                                             in  (OverlayP id (pres' : press), lm, i')
 tokenize i loc (WithP ar pres)            = let (pres', lm, i') = tokenize i loc pres
@@ -158,13 +158,13 @@ tokenize' :: Int -> (Maybe Node, AttrRule doc clip) -> (TokenType, Maybe Node, A
              , [Presentation doc Node clip], LayoutMap, Int)
 tokenize' i loc lc layout id str (EmptyP _) = (lc, layout, id, str, [], Map.empty, i)
 tokenize' i loc lc layout id str (StringP cid str') = tokenizeStr i loc cid lc layout id str str'
-tokenize' i loc lc layout id str pres@(ImageP _ _)         = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' i loc lc layout id str pres@(ImageP _ _ _)       = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(PolyP _ _ _)        = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' i loc lc layout id str pres@(PolyP _ _ _ _)      = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(RectangleP _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' i loc lc layout id str pres@(RectangleP _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(EllipseP _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' i loc lc layout id str pres@(EllipseP _ _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
@@ -175,7 +175,7 @@ tokenize' i loc lc layout id str pres@(FormatterP _ _) = let (tok, lm, i') = mak
 tokenize' i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' i (loc,ar'.ar) lc layout id str pres
 tokenize' i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
 tokenize' i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' i loc lc layout id str pres
-tokenize' i loc lc layout id str (ColP _ _ press)     = tokenizeCol' i loc lc layout id str press
+tokenize' i loc lc layout id str (ColP _ _ _ press)   = tokenizeCol' i loc lc layout id str press
 tokenize' i loc lc layout id str (RowP _ _ press)     = tokenizeRow' i loc lc layout id str press
 tokenize' i loc lc layout id str (LocatorP (String_Node _ _) pres)  = tokenize' i loc lc layout id str pres
 tokenize' i loc lc layout id str (LocatorP (HoleString_Node _ _) pres)  = tokenize' i loc lc layout id str pres -- hole also necessary?
