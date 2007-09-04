@@ -95,13 +95,16 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 
 
 
--- add cases for lines etc.  add correct case for graph
--- refs & Formatted can be ignored, since they do not influence the rendering of the arrangement.
--- experimental diff, only strings are checked.
+-- add correct case for graph
 -- what about diff for overlays? Should diff always return False False when a child is different?
 -- or should the render have special behavior? (this is is tricky since focus is added with an
 -- overlay)
--- skip StructuralA ParsingA and LocatorA elts
+
+
+-- diffArr skips Structural, Parsing and Locator arrangements, since these do not
+-- influence the rendering. For the same reason, Formatter parameters to rows and
+-- h/vRefs are ignored
+
 --       new arrangement     old arrangement
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) True [childDT]
@@ -112,27 +115,24 @@ diffArr arr                  (ParsingA id arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) True [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
+-- StructuralA ParsingA and LocatorA elts
 
 diffArr (EmptyA id x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
 diffArr (EmptyA id x y w h hr vr bc)     _                       = DiffLeaf False
 diffArr (StringA id x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f'
 diffArr (StringA id x y w h hr vr str lc bc f _)  _                                    = DiffLeaf False
-{-
-diffArr (ImageA  id src)       (ImageA  _ src') = Clean 
-diffArr (ImageA  id src)       _                = Dirty
-diffArr (PolyA   id  _ _)      (PolyA   _  _ _) = Clean 
-diffArr (PolyA   id _ _)       _                = Dirty
-diffArr (RectangleA id  _ _ _) (RectangleA _  _ _ _)  = Clean 
-diffArr (RectangleA id  _ _ _) _                 = Dirty 
--}
---  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !VRef !HRef !Int !Style !Color !Color
-
+diffArr (ImageA id x y w h hr vr src style fc bc) (ImageA id' x' y' w' h' hr' vr' src' style' fc' bc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc'
+diffArr (ImageA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
 diffArr (PolyA id x y w h hr vr pts lw style lc fc bc) (PolyA id' x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
 diffArr (PolyA id  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (EllipseA id x y w h hr vr lw ls lc fc bc) (EllipseA id' x' y' w' h' hr' vr' lw' ls' lc' fc' bc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && ls == ls' && lc == lc' && fc == fc' && bc == bc'
+diffArr (RectangleA id x y w h hr vr lw style lc fc bc) (RectangleA id' x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
+diffArr (RectangleA id  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EllipseA id x y w h hr vr lw style lc fc bc) (EllipseA id' x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc'
 diffArr (EllipseA id  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
 diffArr (EdgeA id x1 y1 x2 y2 hr vr lw lc) (EdgeA id' x1' y1' x2' y2' hr' vr' lw' lc') =
   DiffLeaf $ x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc'
@@ -157,7 +157,6 @@ diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc
  let childDT = diffArr arr arr'
  in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
 diffArr (VertexA id _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr arr                             _                                = debug Err ("diff cannot handle"++ shallowShowArr arr) $ DiffLeaf False -- WRONG!
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 -- At the moment, we ignore outline and nrOfVertices
 
