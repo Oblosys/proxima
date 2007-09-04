@@ -93,7 +93,7 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
 --    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ) 30000 
     -- about every half minute, save a backup of the document
 
-    ; timeoutAdd (performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle
+--    ; timeoutAdd (performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle
     ; mainGUI
     }    
 
