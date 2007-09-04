@@ -56,30 +56,31 @@ data EditArrangement documentLevel =
 -- node is parameter for Node type
 data Arrangement node =
     EmptyA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color
-  | StringA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !Color !Color !Font [Int]
-  | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !Color !Color
-  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Style !Color !Color !Color
-  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color !Color
-  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !Color !Color !Color
-  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
-  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Formatted ![Arrangement node]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color ![Arrangement node]
+  | StringA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !FGColor !BGColor !Font [Int]
+  | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !FGColor !BGColor
+  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Style !LineColor !FillColor !BGColor
+  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
+  | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
+  | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Formatted ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
-  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !NrOfVertices ![Arrangement node]
-  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color !Outline !(Arrangement node)
-  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !Color
+  | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !NrOfVertices ![Arrangement node]
+  | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Outline !(Arrangement node)
+  | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !LineColor
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
-  -- | matrix is different from col of rows, even in arrangement (e.g. selection)
 
--- TODO put dirty info in Id child
---type Info = (Bool, Bool)   -- True is Clean, False is Dirty       --(selfandChildren, self)
 type XCoord = Int
 type YCoord = Int
 type Width = Int
 type Height = Int
 type VRef = Int
 type HRef = Int
+type LineColor = Color
+type FillColor = Color
+type FGColor = Color
+type BGColor = Color
 type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
 
 
