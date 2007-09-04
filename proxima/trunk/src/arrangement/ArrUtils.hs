@@ -191,12 +191,12 @@ updatedRectArr' x' y' dt arr =
                                     y = y' + yA arr
                                 in  [((x, y), (widthA arr, heightA arr))]
     DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
-      case arr of
+      case arr of                      -- NOTE for overlay and graph, this should not occur
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
       (ParsingA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
       (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
-      (RowA id x y w h hr vr bc arrs)     -> updatedRectArrs (x'+x) (y'+y) dts arrs
-      (ColA id x y w h hr vr bc f arrs)   -> updatedRectArrs (x'+x) (y'+y) dts arrs 
+      (RowA id x y w h hr vr bc arrs)     -> updatedRectRow (x'+x) (y'+y) h dts arrs
+      (ColA id x y w h hr vr bc f arrs)   -> updatedRectCol (x'+x) (y'+y) w dts arrs 
       (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (GraphA id x y w h hr vr bc nvs arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (VertexA id x y w h hr vr bc ol arr) -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head dts) arr else problem
@@ -205,6 +205,24 @@ updatedRectArr' x' y' dt arr =
  where updatedRectArrs x' y' dts arrs = concat $ zipWith (updatedRectArr' x' y') dts arrs
        problem = debug Err ("ArrUtils.updatedRectArr: problem with "++ shallowShowArr arr) []
 
+-- Special handling of rows and columns:
+--   for children that are self clean, just continue the recursion
+--   for self-dirty children, return the entire segment of the col/row where the child
+--   is positioned, in order to redraw the background if the child shrunk
+
+updatedRectRow x' y' h dts arrs = 
+  concat [ if isSelfCleanDT dt 
+           then updatedRectArr' x' y' dt arr 
+           else [((x'+xA arr, y'),(widthA arr, h))] 
+         | (dt, arr) <- zip dts arrs ]
+
+updatedRectCol x' y' w dts arrs = 
+  concat [ if isSelfCleanDT dt 
+           then updatedRectArr' x' y' dt arr 
+           else [((x', y'+yA arr),(w, heightA arr))] 
+         | (dt, arr) <- zip dts arrs ]
+         
+       
 
 -- mark the focus path as changed in the DiffTree
 -- should be done for old as well as new focus (in case of navigate without update)
