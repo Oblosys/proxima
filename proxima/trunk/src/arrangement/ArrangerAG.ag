@@ -971,7 +971,7 @@ SEM Presentation
                                          @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           VertexA (idAFromP @id) @lhs.x @lhs.y 
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
-                                  (\a -> let (x,y) = @outline a in (x+ @finalHRef,y+ @finalVRef)) @child.arrangement
+                                  (\a -> let (x,y) = @outline a in (x+ @child.hRef,y+ @child.vRef)) @child.arrangement
   | FormatterP
       -- unfoldedFormatter.arrangement handled by copy rule
 {-
