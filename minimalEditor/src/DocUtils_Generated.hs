@@ -87,25 +87,28 @@ rankNode (GraphNode _ _)  = 24
 rankNode (HoleGraphNode _ _)  = 25
 rankNode (VertexNode _ _)  = 26
 rankNode (HoleVertexNode _ _)  = 27
-rankNode (EdgeNode _ _)  = 28
-rankNode (HoleEdgeNode _ _)  = 29
-rankNode (SubgraphNode _ _)  = 30
-rankNode (HoleSubgraphNode _ _)  = 31
-rankNode (DirtyNode _ _)  = 32
-rankNode (CleanNode _ _)  = 33
-rankNode (HoleDirtyNode _ _)  = 34
-rankNode (List_DummyNode _ _)  = 35
-rankNode (HoleList_DummyNode _ _)  = 36
-rankNode (List_SectionNode _ _)  = 37
-rankNode (HoleList_SectionNode _ _)  = 38
-rankNode (List_ParagraphNode _ _)  = 39
-rankNode (HoleList_ParagraphNode _ _)  = 40
-rankNode (List_WordNode _ _)  = 41
-rankNode (HoleList_WordNode _ _)  = 42
-rankNode (List_VertexNode _ _)  = 43
-rankNode (HoleList_VertexNode _ _)  = 44
-rankNode (List_EdgeNode _ _)  = 45
-rankNode (HoleList_EdgeNode _ _)  = 46
+rankNode (CircleNode _ _)  = 28
+rankNode (SquareNode _ _)  = 29
+rankNode (HoleShapeNode _ _)  = 30
+rankNode (EdgeNode _ _)  = 31
+rankNode (HoleEdgeNode _ _)  = 32
+rankNode (SubgraphNode _ _)  = 33
+rankNode (HoleSubgraphNode _ _)  = 34
+rankNode (DirtyNode _ _)  = 35
+rankNode (CleanNode _ _)  = 36
+rankNode (HoleDirtyNode _ _)  = 37
+rankNode (List_DummyNode _ _)  = 38
+rankNode (HoleList_DummyNode _ _)  = 39
+rankNode (List_SectionNode _ _)  = 40
+rankNode (HoleList_SectionNode _ _)  = 41
+rankNode (List_ParagraphNode _ _)  = 42
+rankNode (HoleList_ParagraphNode _ _)  = 43
+rankNode (List_WordNode _ _)  = 44
+rankNode (HoleList_WordNode _ _)  = 45
+rankNode (List_VertexNode _ _)  = 46
+rankNode (HoleList_VertexNode _ _)  = 47
+rankNode (List_EdgeNode _ _)  = 48
+rankNode (HoleList_EdgeNode _ _)  = 49
 
 
 
@@ -138,6 +141,9 @@ instance HasPath Node where
   pathNode (HoleGraphNode _ pth)  = PathD pth
   pathNode (VertexNode _ pth)  = PathD pth
   pathNode (HoleVertexNode _ pth)  = PathD pth
+  pathNode (CircleNode _ pth)  = PathD pth
+  pathNode (SquareNode _ pth)  = PathD pth
+  pathNode (HoleShapeNode _ pth)  = PathD pth
   pathNode (EdgeNode _ pth)  = PathD pth
   pathNode (HoleEdgeNode _ pth)  = PathD pth
   pathNode (SubgraphNode _ pth)  = PathD pth
@@ -209,8 +215,16 @@ graphIDD (GraphNode (Graph iDD _ _ _) _) = Just iDD
 graphIDD _                                   = Nothing
 
 vertexIDD :: Node -> Maybe IDD
-vertexIDD (VertexNode (Vertex iDD _ _ _ _) _) = Just iDD
+vertexIDD (VertexNode (Vertex iDD _ _ _ _ _) _) = Just iDD
 vertexIDD _                                   = Nothing
+
+circleIDD :: Node -> Maybe IDD
+circleIDD (CircleNode (Circle iDD) _) = Just iDD
+circleIDD _                                   = Nothing
+
+squareIDD :: Node -> Maybe IDD
+squareIDD (SquareNode (Square iDD) _) = Just iDD
+squareIDD _                                   = Nothing
 
 edgeIDD :: Node -> Maybe IDD
 edgeIDD (EdgeNode (Edge iDD _ _) _) = Just iDD
@@ -243,7 +257,9 @@ shallowShowSection1 (Section  _ _ _) = "Section"
 shallowShowParagraph1 (Paragraph  _ _) = "Paragraph"
 shallowShowWord1 (Word  _ _) = "Word"
 shallowShowGraph1 (Graph  _ _ _ _) = "Graph"
-shallowShowVertex1 (Vertex  _ _ _ _ _) = "Vertex"
+shallowShowVertex1 (Vertex  _ _ _ _ _ _) = "Vertex"
+shallowShowShape1 (Circle  _) = "Circle"
+shallowShowShape1 (Square  _) = "Square"
 shallowShowEdge1 (Edge  _ _ _) = "Edge"
 shallowShowSubgraph1 (Subgraph  _ _ _ _) = "Subgraph"
 shallowShowDirty1 (Dirty  _) = "Dirty"
@@ -281,7 +297,9 @@ toXMLSection (Section _ paragraphs subgraph) = Elt "Section" [] $ toXMLList_Para
 toXMLParagraph (Paragraph _ words) = Elt "Paragraph" [] $ toXMLList_Word words ++ []
 toXMLWord (Word _ word) = Elt "Word" [] $ [toXMLString_ word] ++ []
 toXMLGraph (Graph _ dirty vertices edges) = Elt "Graph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
-toXMLVertex (Vertex _ name id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLVertex (Vertex _ name shape id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLShape shape] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLShape (Circle _) = Elt "Circle" [] $ []
+toXMLShape (Square _) = Elt "Square" [] $ []
 toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
 toXMLSubgraph (Subgraph _ dirty vertices edges) = Elt "Subgraph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
 toXMLDirty (Dirty _) = Elt "Dirty" [] $ []
@@ -331,7 +349,10 @@ parseXMLCns_Word = Word NoIDD <$ startTag "Word" <*> parseXML_String_ <* endTag 
 parseXML_Graph = parseXMLCns_Graph
 parseXMLCns_Graph = Graph NoIDD <$ startTag "Graph" <*> parseXML_Dirty <*> parseXML_List_Vertex <*> parseXML_List_Edge <* endTag "Graph"
 parseXML_Vertex = parseXMLCns_Vertex
-parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String_ <*> parseXML_Int_ <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Vertex"
+parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String_ <*> parseXML_Shape <*> parseXML_Int_ <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Vertex"
+parseXML_Shape = parseXMLCns_Circle <?|> parseXMLCns_Square
+parseXMLCns_Circle = Circle NoIDD <$ emptyTag "Circle"
+parseXMLCns_Square = Square NoIDD <$ emptyTag "Square"
 parseXML_Edge = parseXMLCns_Edge
 parseXMLCns_Edge = Edge NoIDD <$ startTag "Edge" <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Edge"
 parseXML_Subgraph = parseXMLCns_Subgraph
@@ -339,9 +360,9 @@ parseXMLCns_Subgraph = Subgraph NoIDD <$ startTag "Subgraph" <*> parseXML_Dirty 
 parseXML_Dirty = parseXMLCns_Dirty <?|> parseXMLCns_Clean
 parseXMLCns_Dirty = Dirty NoIDD <$ emptyTag "Dirty"
 parseXMLCns_Clean = Clean NoIDD <$ emptyTag "Clean"
-parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many (try parseXML_Dummy)
-parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> many (try parseXML_Section)
-parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> many (try parseXML_Paragraph)
-parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> many (try parseXML_Word)
-parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many (try parseXML_Vertex)
-parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> many (try parseXML_Edge)
+parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many parseXML_Dummy
+parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> many parseXML_Section
+parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> many parseXML_Paragraph
+parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> many parseXML_Word
+parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many parseXML_Vertex
+parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> many parseXML_Edge

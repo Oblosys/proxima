@@ -69,12 +69,23 @@ recognizeRoot = pStr $
       <*> recognizeGraph
       <*> pPrs parseTree {- recognizeTree -}
       <*> pList recognizeSection -}
-          (\str graph ->
+          (\str graph sections ->
           reuseRoot [tokenNode str] Nothing Nothing (Just graph)
-                                           Nothing )
+                                           (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
-      
+      <*> pList recognizeSection 
+{- -- for presentation that only contains a parsing formatter
+          (\str ->
+          reuseRoot [tokenNode str] Nothing Nothing Nothing 
+                                            Nothing )
+      <$> pStructural RootNode
+      <*  (pPrs $ Word NoIDD (String_ NoIDD "")
+      <$
+          pList (pKey " ")
+      <*  pList (pText <* pKey " "))
+-}    
+  
 
 parseTree :: ListParser Document Node ClipDoc Tree
 parseTree = 
@@ -123,12 +134,12 @@ recognizeGraph = pStr $
 -- before we can parse them, the scanner needs to be modified to handle free text
 recognizeVertex :: ListParser Document Node ClipDoc Vertex
 recognizeVertex = pStr $
-          (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing 
+          (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
       <*> parseLabel
-  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>")
+  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") (Just $ Circle NoIDD)
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk

@@ -97,11 +97,23 @@ reuseGraph nodes  ma0 ma1 ma2 ma3
            (Graph a0 a1 a2 a3) -> reuse4 Graph a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseGraph"
 
-reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
-reuseVertex nodes  ma0 ma1 ma2 ma3 ma4
+reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe Shape -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
+reuseVertex nodes  ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromNodes extractVertex defaultVertex nodes of
-           (Vertex a0 a1 a2 a3 a4) -> reuse5 Vertex a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
+           (Vertex a0 a1 a2 a3 a4 a5) -> reuse6 Vertex a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "System error:<module>.reuseVertex"
+
+reuseCircle :: [Maybe Node] -> Maybe IDD -> Shape
+reuseCircle nodes  ma0
+  = case extractFromNodes extractCircle defaultCircle nodes of
+           (Circle a0) -> reuse1 Circle a0 ma0
+           _ -> error "System error:<module>.reuseCircle"
+
+reuseSquare :: [Maybe Node] -> Maybe IDD -> Shape
+reuseSquare nodes  ma0
+  = case extractFromNodes extractSquare defaultSquare nodes of
+           (Square a0) -> reuse1 Square a0 ma0
+           _ -> error "System error:<module>.reuseSquare"
 
 reuseEdge :: [Maybe Node] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Edge
 reuseEdge nodes  ma0 ma1 ma2
@@ -212,8 +224,16 @@ extractGraph (Just (GraphNode x@(Graph _ _ _ _) _)) = Just x
 extractGraph _ = Nothing
 
 extractVertex :: Maybe Node -> Maybe Vertex
-extractVertex (Just (VertexNode x@(Vertex _ _ _ _ _) _)) = Just x
+extractVertex (Just (VertexNode x@(Vertex _ _ _ _ _ _) _)) = Just x
 extractVertex _ = Nothing
+
+extractCircle :: Maybe Node -> Maybe Shape
+extractCircle (Just (CircleNode x@(Circle _) _)) = Just x
+extractCircle _ = Nothing
+
+extractSquare :: Maybe Node -> Maybe Shape
+extractSquare (Just (SquareNode x@(Square _) _)) = Just x
+extractSquare _ = Nothing
 
 extractEdge :: Maybe Node -> Maybe Edge
 extractEdge (Just (EdgeNode x@(Edge _ _ _) _)) = Just x
@@ -292,7 +312,13 @@ defaultGraph :: Graph
 defaultGraph = Graph NoIDD hole hole hole
 
 defaultVertex :: Vertex
-defaultVertex = Vertex NoIDD hole hole hole hole
+defaultVertex = Vertex NoIDD hole hole hole hole hole
+
+defaultCircle :: Shape
+defaultCircle = Circle NoIDD
+
+defaultSquare :: Shape
+defaultSquare = Square NoIDD
 
 defaultEdge :: Edge
 defaultEdge = Edge NoIDD hole hole
@@ -359,6 +385,12 @@ reuse1 :: (a0 -> r) ->
           Maybe a0 -> r
 reuse1 f  a0 ma0 =
   f (maybe a0 id ma0) 
+
+reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) -> 
+          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
+reuse6 f  a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) 
 
 reuse0 :: r -> r
 reuse0 f = f

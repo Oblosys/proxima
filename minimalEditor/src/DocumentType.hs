@@ -23,7 +23,9 @@ data Word = Word word:String_                                { idd : IDD }
 
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
 
-data Vertex = Vertex name:String_ id:Int_ x:Int_ y:Int_     { idd : IDD }
+data Vertex = Vertex name:String_ shape:Shape id:Int_ x:Int_ y:Int_     { idd : IDD }
+
+data Shape = Circle { idd : IDD } | Square { idd : IDD }
 
 data Edge = Edge from:Int_ to:Int_       { idd : IDD }
 

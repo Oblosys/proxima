@@ -150,9 +150,15 @@ DATA Graph | Graph idd:IDD dirty:Dirty vertices:List_Vertex edges:List_Edge
            | ParseErrGraph presentation:Presentation_Doc_Node_Clip
 
 
-DATA Vertex | Vertex idd:IDD name:String_ id:Int_ x:Int_ y:Int_ 
+DATA Vertex | Vertex idd:IDD name:String_ shape:Shape id:Int_ x:Int_ y:Int_ 
             | HoleVertex
             | ParseErrVertex presentation:Presentation_Doc_Node_Clip
+
+
+DATA Shape | Circle idd:IDD 
+           | Square idd:IDD 
+           | HoleShape
+           | ParseErrShape presentation:Presentation_Doc_Node_Clip
 
 
 DATA Edge | Edge idd:IDD from:Int_ to:Int_ 
@@ -339,7 +345,8 @@ SEM Vertex
   | Vertex name.pIdC = @lhs.pIdC + 0
            y.pIdC = @x.pIdC
            x.pIdC = @id.pIdC
-           id.pIdC = @name.pIdC
+           id.pIdC = @shape.pIdC
+           shape.pIdC = @name.pIdC
            lhs.pIdC = @y.pIdC
   | HoleVertex     lhs.pres = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.pres = presParseErr @presentation
@@ -347,9 +354,15 @@ SEM Vertex
 
 SEM Vertex
   | Vertex name.path  = @lhs.path++[0]
-           id.path  = @lhs.path++[1]
-           x.path  = @lhs.path++[2]
-           y.path  = @lhs.path++[3]
+           shape.path  = @lhs.path++[1]
+           id.path  = @lhs.path++[2]
+           x.path  = @lhs.path++[3]
+           y.path  = @lhs.path++[4]
+
+
+SEM Shape
+  | HoleShape     lhs.pres = presHole @lhs.focusD "Shape" (HoleShapeNode @self @lhs.path) @lhs.path
+  | ParseErrShape lhs.pres = presParseErr @presentation
 
 
 SEM Edge
@@ -541,25 +554,25 @@ SEM ConsList_Edge [ ix : Int | | ]
   | Cons_Edge     tail.ix  = @lhs.ix + 1
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ |  pIdC : Int  | ]
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ focusD : FocusDoc | | ]
 
 
-ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
+ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge
        [ path : {[Int]}  | | ]
 
 
 ATTR  List_Dummy ConsList_Dummy List_Section ConsList_Section List_Paragraph ConsList_Paragraph List_Word ConsList_Word List_Vertex ConsList_Vertex List_Edge ConsList_Edge [ | | press : {[Presentation_Doc_Node_Clip]} ]
 
 
-ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty [ | | pres : Presentation_Doc_Node_Clip ]
+ATTR  EnrichedDoc String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Shape Edge Subgraph Dirty [ | | pres : Presentation_Doc_Node_Clip ]
 
 
-ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Edge Subgraph Dirty [ ix : Int || ]
+ATTR  String_ Bool_ Int_ Dummy Root Tree Section Paragraph Word Graph Vertex Shape Edge Subgraph Dirty [ ix : Int || ]
 
 
 
@@ -629,9 +642,17 @@ SEM Graph [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM Vertex [ || presXML : Presentation_Doc_Node_Clip ]
   | Vertex
-      lhs.presXML = presentElementXML @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presXML, @id.presXML, @x.presXML, @y.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presXML, @shape.presXML, @id.presXML, @x.presXML, @y.presXML ] 
   | HoleVertex     lhs.presXML = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.presXML = presParseErr @presentation
+
+SEM Shape [ || presXML : Presentation_Doc_Node_Clip ]
+  | Circle
+      lhs.presXML = presentElementXML @lhs.focusD (CircleNode @self @lhs.path) @lhs.path "Circle" [  ] 
+  | Square
+      lhs.presXML = presentElementXML @lhs.focusD (SquareNode @self @lhs.path) @lhs.path "Square" [  ] 
+  | HoleShape     lhs.presXML = presHole @lhs.focusD "Shape" (HoleShapeNode @self @lhs.path) @lhs.path
+  | ParseErrShape lhs.presXML = presParseErr @presentation
 
 SEM Edge [ || presXML : Presentation_Doc_Node_Clip ]
   | Edge
@@ -812,9 +833,17 @@ SEM Graph [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM Vertex [ || presTree : Presentation_Doc_Node_Clip ]
   | Vertex
-      lhs.presTree = presentElementTree @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presTree, @id.presTree, @x.presTree, @y.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (VertexNode @self @lhs.path) @lhs.path "Vertex" [ @name.presTree, @shape.presTree, @id.presTree, @x.presTree, @y.presTree ] 
   | HoleVertex     lhs.presTree = presHole @lhs.focusD "Vertex" (HoleVertexNode @self @lhs.path) @lhs.path
   | ParseErrVertex lhs.presTree = presParseErr @presentation
+
+SEM Shape [ || presTree : Presentation_Doc_Node_Clip ]
+  | Circle
+      lhs.presTree = presentElementTree @lhs.focusD (CircleNode @self @lhs.path) @lhs.path "Circle" [  ] 
+  | Square
+      lhs.presTree = presentElementTree @lhs.focusD (SquareNode @self @lhs.path) @lhs.path "Square" [  ] 
+  | HoleShape     lhs.presTree = presHole @lhs.focusD "Shape" (HoleShapeNode @self @lhs.path) @lhs.path
+  | ParseErrShape lhs.presTree = presParseErr @presentation
 
 SEM Edge [ || presTree : Presentation_Doc_Node_Clip ]
   | Edge

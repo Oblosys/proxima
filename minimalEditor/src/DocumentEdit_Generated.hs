@@ -123,6 +123,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Dirty x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
+  arityClip (Clip_Shape x) = arity x
   arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_Section x) = arity x
   arityClip (Clip_Paragraph x) = arity x
@@ -148,6 +149,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Dirty x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
+  alternativesClip (Clip_Shape x) = alternatives x
   alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_Section x) = alternatives x
   alternativesClip (Clip_Paragraph x) = alternatives x
@@ -174,6 +176,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Dirty x) = Clip_Dirty hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
+  holeClip (Clip_Shape x) = Clip_Shape hole
   holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_Section x) = Clip_Section hole
   holeClip (Clip_Paragraph x) = Clip_Paragraph hole
@@ -200,6 +203,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Dirty x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
+  isListClip (Clip_Shape x) = isList x
   isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_Section x) = isList x
   isListClip (Clip_Paragraph x) = isList x
@@ -226,6 +230,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Dirty x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
+  insertListClip i c (Clip_Shape x) = insertList i c x
   insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_Section x) = insertList i c x
   insertListClip i c (Clip_Paragraph x) = insertList i c x
@@ -252,6 +257,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Dirty x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
+  removeListClip i (Clip_Shape x) = removeList i x
   removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_Section x) = removeList i x
   removeListClip i (Clip_Paragraph x) = removeList i x
@@ -557,30 +563,59 @@ instance Editable Graph Document Node ClipDoc where
 
 instance Editable Vertex Document Node ClipDoc where
   select []    x                  = Clip_Vertex x
-  select (0:p) (Vertex _ x1 x2 x3 x4) = select p x1
-  select (1:p) (Vertex _ x1 x2 x3 x4) = select p x2
-  select (2:p) (Vertex _ x1 x2 x3 x4) = select p x3
-  select (3:p) (Vertex _ x1 x2 x3 x4) = select p x4
+  select (0:p) (Vertex _ x1 x2 x3 x4 x5) = select p x1
+  select (1:p) (Vertex _ x1 x2 x3 x4 x5) = select p x2
+  select (2:p) (Vertex _ x1 x2 x3 x4 x5) = select p x3
+  select (3:p) (Vertex _ x1 x2 x3 x4 x5) = select p x4
+  select (4:p) (Vertex _ x1 x2 x3 x4 x5) = select p x5
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Vertex c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Vertex")   x
-  paste (0:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 (paste p c x1) x2 x3 x4
-  paste (1:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 (paste p c x2) x3 x4
-  paste (2:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 x2 (paste p c x3) x4
-  paste (3:p) c (Vertex i1 x1 x2 x3 x4) = Vertex i1 x1 x2 x3 (paste p c x4)
+  paste (0:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 (paste p c x1) x2 x3 x4 x5
+  paste (1:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 (paste p c x2) x3 x4 x5
+  paste (2:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 (paste p c x3) x4 x5
+  paste (3:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 x3 (paste p c x4) x5
+  paste (4:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 x3 x4 (paste p c x5)
   paste _  _  x                    = x
 
-  alternatives _ = [("Vertex {String_} {Int_} {Int_} {Int_} "  , Clip_Vertex $ Vertex NoIDD hole hole hole hole)
+  alternatives _ = [("Vertex {String_} {Shape} {Int_} {Int_} {Int_} "  , Clip_Vertex $ Vertex NoIDD hole hole hole hole hole)
                    ,("{Vertex}", Clip_Vertex hole)
                    ]
 
-  arity (Vertex _ x1 x2 x3 x4) = 4
+  arity (Vertex _ x1 x2 x3 x4 x5) = 5
   arity _                        = 0
 
   parseErr = ParseErrVertex
 
   hole = HoleVertex
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable Shape Document Node ClipDoc where
+  select []    x                  = Clip_Shape x
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Shape c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Shape")   x
+  paste _  _  x                    = x
+
+  alternatives _ = [("Circle "  , Clip_Shape $ Circle NoIDD)
+                   ,("Square "  , Clip_Shape $ Square NoIDD)
+                   ,("{Shape}", Clip_Shape hole)
+                   ]
+
+  arity (Circle _) = 0
+  arity (Square _) = 0
+  arity _                        = 0
+
+  parseErr = ParseErrShape
+
+  hole = HoleShape
 
 
   isList _ = False

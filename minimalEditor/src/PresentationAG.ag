@@ -77,12 +77,12 @@ SEM Root
                            --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
                            
                           -- , col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
-                           --, col $ map row $ divide 3 @sections.press
-                           {-, row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
+                          --, col $ map row $ divide 3 @sections.press
+                           , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
                                  , (boxed $ text "Remove view") `withMouseDown` removeLastSection @lhs.path 
                                  ]
-                           -}
+                          
                            ] 
 {
 divide n [] = []
@@ -93,8 +93,9 @@ divide n xs = let (h,t) = splitAt n xs
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
   | List_Paragraph
       lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
-                     col $ if null @elts.press then [formatter [text " "]] else @elts.press
-                     -- formatter [text ""] prevents the column from getting height 0 when empty
+                     col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
+                     -- formatter [text "  "] prevents the column from getting height 0 when empty
+                    
 SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -122,24 +123,51 @@ SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ hSpace 5
-                         , boxed $ graph 400 300 @edges.edges @vertices.press
+                         , boxed $ graph 400 340 @edges.edges @vertices.press
                          ]
       
 SEM Vertex [ || ] 
   | Vertex
-      loc.pres = loc (VertexNode @self @lhs.path) $ structural $
-                   vertex @id.int @x.int @y.int (\a -> (round $ 9*cos a , round $ -9*sin a )) $
-                     col [ rowR 1 [glue, hRefHalf $ ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255) , glue]
-                         , vSpace 4 `withHStretch` True
-                         , rowR 1 [glue, hRefHalf $ boxed 
-                                            (row [ hSpace 3
-                                                 , parsing $ text (@name.str) `withFont'` ("Arial", 6)
-                                                 , hSpace 3
-                                                 ])
-                                              `withbgColor` (236, 236, 169)
-                                  , glue]
-                         ]
+      loc.pres = let (nodePres,nodeOutline) =
+                       case @shape.self of
+                         (Circle _) -> ( ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
+                                       , \a -> (round $ 9*cos a , round $ -9*sin a )
+                                       )
+                         _          -> ( rect 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
+                                       , squareOutline 9
+                                       )
+                      
+                 in  loc (VertexNode @self @lhs.path) $ structural $
+                     (vertex @id.int @x.int @y.int nodeOutline $
+                       col [ rowR 1 [glue, hRefHalf $ nodePres, glue]
+                           , vSpace 4 `withHStretch` True
+                           , rowR 1 [glue, hRefHalf $ boxed 
+                                              (row [ hSpace 3
+                                                   , parsing $ text (@name.str) `withFont'` ("Arial", 6)
+                                                   , hSpace 3
+                                                   ])
+                                                `withbgColor` (236, 236, 169)
+                                    , glue]
+                           ]) `addPopupItems` [ ("Circle", setShape @lhs.path (Circle NoIDD) @self)
+                                              , ("Square", setShape @lhs.path (Square NoIDD) @self)
+                                              ]
 
+{
+setShape :: [Int] -> Shape -> Vertex -> UpdateDoc Document clip
+setShape pth shape (Vertex idD name _ id x y) =
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
+                                              (Clip_Vertex (Vertex idD name shape id x y))
+                                            )
+    in  (DocumentLevel d' path cl)
+
+squareOutline :: Int -> Double -> (Int, Int)
+squareOutline r a | a < pi / 4  || a >= 7 * pi / 4    = (r-1, round $ - tan a * fromIntegral r)  
+                  | a >= pi / 4 && a < 3 * pi / 4     = (round $ - tan (a - pi/2) * fromIntegral r, -r+1)
+                  | a >= 3 * pi / 4 && a < 5 * pi / 4 = (-r+1, round $ tan a * fromIntegral r)
+                  | a >= 5 * pi / 4 && a < 7 * pi / 4 = (round $ tan (a - pi/2) * fromIntegral r, r-1)
+
+}
 
 SEM Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
   | Subgraph
@@ -214,7 +242,7 @@ pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
         case subgraph of
-        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
+        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Circle NoIDD) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
         _                    -> subgraph
   in \(DocumentLevel d path cl) ->
         let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)

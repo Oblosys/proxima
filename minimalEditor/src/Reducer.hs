@@ -168,5 +168,5 @@ addEdgesFromSubgraph (Subgraph _ _ vs' es') (Graph id d vs es) =
 getFrom_Edge (Edge _ (Int_ _ fromV) _) = fromV
 getTo_Edge (Edge _ _ (Int_ _ toV)) = toV
 
-getID_Vertex (Vertex _ _ (Int_ _ id) _ _) = id
+getID_Vertex (Vertex _ _ _ (Int_ _ id) _ _) = id
 

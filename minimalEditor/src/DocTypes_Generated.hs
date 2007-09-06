@@ -96,10 +96,17 @@ data Graph = Graph IDD Dirty List_Vertex List_Edge
               deriving Show
 
 
-data Vertex = Vertex IDD String_ Int_ Int_ Int_ 
+data Vertex = Vertex IDD String_ Shape Int_ Int_ Int_ 
             | HoleVertex
             | ParseErrVertex (Presentation Document Node ClipDoc)
                deriving Show
+
+
+data Shape = Circle IDD 
+           | Square IDD 
+           | HoleShape
+           | ParseErrShape (Presentation Document Node ClipDoc)
+              deriving Show
 
 
 data Edge = Edge IDD Int_ Int_ 
@@ -207,6 +214,7 @@ data ClipDoc = Clip_Root Root
              | Clip_Dirty Dirty
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
+             | Clip_Shape Shape
              | Clip_Dummy Dummy
              
              | Clip_Section Section
@@ -252,6 +260,9 @@ data Node = NoNode
           | HoleGraphNode Graph Path 
           | VertexNode Vertex Path 
           | HoleVertexNode Vertex Path 
+          | CircleNode Shape Path 
+          | SquareNode Shape Path 
+          | HoleShapeNode Shape Path 
           | EdgeNode Edge Path 
           | HoleEdgeNode Edge Path 
           | SubgraphNode Subgraph Path 
@@ -303,6 +314,9 @@ instance Show Node where
   show (HoleGraphNode _ _)  = "HoleGraphNode"
   show (VertexNode _ _)  = "VertexNode"
   show (HoleVertexNode _ _)  = "HoleVertexNode"
+  show (CircleNode _ _)  = "CircleNode"
+  show (SquareNode _ _)  = "SquareNode"
+  show (HoleShapeNode _ _)  = "HoleShapeNode"
   show (EdgeNode _ _)  = "EdgeNode"
   show (HoleEdgeNode _ _)  = "HoleEdgeNode"
   show (SubgraphNode _ _)  = "SubgraphNode"
