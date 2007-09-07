@@ -316,16 +316,17 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
 
-            
-              -- Mark the updated rectangles by surrounding them with red rectangles
+          
+              -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
             ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
             ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
-            ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False (x-1) (y-1) (w+1) (h+1)) updRegions
+            ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False x y (w-1) (h-1)) updRegions
                                        -- outline rectangles are 1 px too large
-              -- when using this marking, invalidate whole screen instead of updatedRegions (in genericHandler) 
+            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
             ; let ((x,y),(w,h)) = viewedArea
             ; drawRectangle dw gc False x y w h 
+
             ; return True
             }
     }
