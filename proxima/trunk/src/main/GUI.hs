@@ -252,18 +252,16 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             ; dw <- widgetGetDrawWindow canvas
             
             ; maybePm <- readIORef buffer
-            ; if (isNothing maybePm || (w,h) /= (w',h')) -- if there was no pixmap, or if the size changed
-                 && (w /= 0 && h /= 0) -- gtk crashes if we create an empty pixmap
-              then do { pm <- pixmapNew (Just dw) w' h' Nothing -- we create a new one
-                      ; writeIORef buffer (Just pm)
-                      }
-              else return ()                           
+            ; when ((isNothing maybePm || (w,h) /= (w',h')) -- if there was no pixmap, or if the size changed
+                    && (w /= 0 && h /= 0)) $ -- gtk crashes if we create an empty pixmap
+              do { pm <- pixmapNew (Just dw) w' h' Nothing -- we create a new one
+                 ; writeIORef buffer (Just pm)
+                 }
             
             ; maybePm <- readIORef buffer
             ; case maybePm of
                 Just pm -> drawRendering renderingLvlVar window vp pm
-                Nothing -> return () -- will not occur
-            
+                Nothing -> return () -- will not occur 
             
             ; updatedRegion <- regionNew
             
