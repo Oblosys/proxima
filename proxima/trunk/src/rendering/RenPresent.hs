@@ -42,10 +42,11 @@ render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ de
 render state arrLvl ren (SkipArr' i) = (SkipRen' (i-1), state, arrLvl)
 render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ debugging updRegions lmd) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
    let arr'        = if debugging then debugArrangement arr else arr
---       diffTree    = DiffLeaf False -- nonincremental
+       nonIncrementalDiffTree    = DiffLeaf False
        diffTree    = markFocusDirtyArr arr' focusOld (markFocusDirtyArr arr' focus (diffArr arr' arrOld)) -- incremental
-       rendering   = render' scale debugging focus diffTree arr'
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arrOld arr'
+       rendering   = render' scale debugging focus nonIncrementalDiffTree arr'
+--       rendering   = render' scale debugging focus diffTree arr'
        size        = (widthA arr', heightA arr')
    in  -- debug Arr ("Arr Diffs: "++show (diffArr arr' arrOld)) $
        ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
