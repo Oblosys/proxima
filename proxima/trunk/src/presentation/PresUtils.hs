@@ -89,7 +89,7 @@ diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' pres
 diffPres (ColP id rf _ press) (ColP id' rf' _ press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
 diffPres (FormatterP id press) (FormatterP id' press')  = diffPress 0 press 0 press'
-diffPres (GraphP id _ _ _ _ press) (GraphP id' _ _ _ _ press') = DiffLeaf False -- diffPress 0  press 0   press'
+diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = DiffLeaf False -- diffGraph g1 g2
 diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf _ press) _                    = DiffLeaf False
@@ -98,6 +98,8 @@ diffPres (GraphP id _ _ _ _ press) _               = DiffLeaf False
 diffPres (VertexP id _ _ _ _ pres) _                 = DiffLeaf False
 diffPres pr                  _                     = debug Err ("PresUtils.diffPres: can't handle "++ show pr) DiffLeaf False
 
+diffGraph (GraphP _ _ w h es vs) (GraphP _ _ w' h' es' vs') = -- Graph is all or nothing
+  DiffLeaf $ w == w' && h == h' && es == es' && isCleanDT (diffPress 0 vs 0 vs')
 
 diffPress rf press rf' press' =
   let nrOfPress   = length press
