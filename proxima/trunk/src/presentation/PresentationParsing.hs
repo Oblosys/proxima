@@ -194,7 +194,7 @@ postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentat
 postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
 postScanPrs kwrds ctxt (ParsingP _ pres)    = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
-postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [StrTk " " Nothing NoIDP,StrTk "\n" Nothing NoIDP]
+postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [StrTk "\n" Nothing NoIDP]
 postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
 
 
