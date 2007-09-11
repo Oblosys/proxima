@@ -277,7 +277,7 @@ point' x' y' pth loc p@(GraphA _ x y w h _ _ _ _ arrs) =
   pointGraphList (x'-x) (y'-y) pth loc arrs
 point' x' y' pth loc p@(VertexA _ x y w h _ _ _ outline arr) =
   let dragAreaPoly = map outline [0, pi/10 ..2*pi]
-  in if dragAreaPoly `contains` (x'-x, y'-y) -- inside the outline means point is on Vertex
+  in if dragAreaPoly `polyContains` (x'-x, y'-y) -- inside the outline means point is on Vertex
      then Just (pth, loc)
      else
        if (x' > x) && (x' < x+w) &&       -- otherwise, if it is inside the Vertex, we continue on its children
@@ -578,15 +578,14 @@ edges vs = (head vs, last vs) : edges' vs
  where edges' (e1:rest@(e2:_)) = (e1,e2) : edges' rest
        edges' _                = []
        
-contains                      :: (Num a, Ord a) => [(a,a)] -> (a, a) -> Bool
-contains poly p               = eq>0 || odd pos || odd neg
+polyContains :: (Num a, Ord a) => [(a,a)] -> (a, a) -> Bool
+polyContains poly p           = eq>0 || odd pos || odd neg
     where (pos, eq, neg)      = countCrossings (edges qs) 0 0 0 
 --          qs                  = map ((-)p) (last ps : init ps)
           qs                  = map (\(x,y) -> (x-fst p, y - snd p)) (last ps : init ps)
           ps		          = poly
 
-countCrossings                :: (Ord a, Num a) => [((a,a),(a, a))] 
-                                 -> Int -> Int -> Int -> (Int, Int, Int)  
+countCrossings :: (Ord a, Num a) => [((a,a),(a, a))] -> Int -> Int -> Int -> (Int, Int, Int)  
 countCrossings [] cp ce cn    = (cp, ce, cn)
 countCrossings ((p@(x',y'), q@(x,y)):ps) cp ce cn
   | straddlesXaxis            = incr
