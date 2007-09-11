@@ -191,7 +191,6 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
            
-              ; putStrLn $ show (x,y,w,h)
               ; context <- widgetCreatePangoContext wi
               ; fontDescription <- fontDescriptionFromProximaFont fnt
               
