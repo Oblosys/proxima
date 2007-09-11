@@ -27,21 +27,21 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let lastViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
-          pres' = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
+          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
     --; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show pres')
-    ; (attrTree, maxFDepth,_) <- fixed fontMetricsRef focus pres' viewedArea oldArrangement
+    ; (attrTree, maxFDepth,_) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldArrangement
     ; if maxFDepth > 1 
       then debugLnIO Err "Nested formatters may be arranged incorrectly"
       else return ()
     ; return (attrTree, state')
     }
 
-fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Rectangle -> 
+fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Presentation doc node clip -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
-fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldArrangement = 
+fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres :: Presentation doc node clip) viewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, maxFDepth, unfoldedTree) <- f (fontMetrics,arrangement, maxFDepth, unfoldedTree)
     ; return (arrangement, maxFDepth, unfoldedTree)
     }
@@ -59,6 +59,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) viewedArea oldAr
                                                oldArrangement
                                                []       -- popupMenu : [String, (UpdateDoc doc clip)] 
                                                defaultTextColor
+                                               unprunedPres
                                                viewedArea
                
             ; let usedFonts = nub allFonts

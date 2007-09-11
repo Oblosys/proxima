@@ -127,7 +127,13 @@ DATA Presentation
 --  | LayedOutRowP id : IDP  presentationList : PresentationList w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
 --  | AlternativePresentation id : IDP  presentationList : PresentationList
 
-
+{-
+  | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
+  | RowP ColP OverlayP GraphP FormatterP
+      @presentationList.
+  | VertexP WithP StructuralP ParsingP LocatorP 
+      @child.
+-}
 
 --  For each Nonterminal:
  -- add id propagation
@@ -1053,7 +1059,20 @@ SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
   | Cons 
       lhs.vertices = @hd.vertex : @tl.vertices
       
--- why the repeat Empties?
+ATTR Root [ unprunedPres : {Presentation doc node clip} | | ]
+
+SEM Presentation [ unprunedPres : {Presentation doc node clip} | | ]
+  | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
+  | RowP ColP OverlayP GraphP FormatterP
+      presentationList.unprunedPresList = getChildrenP @lhs.unprunedPres
+  | VertexP WithP StructuralP ParsingP LocatorP 
+      child.unprunedPres = getChildP @lhs.unprunedPres
+      
+SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
+  | Cons 
+      hd.unprunedPres     = head @lhs.unprunedPresList
+      tl.unprunedPresList = tail @lhs.unprunedPresList
+
 ATTR Root         [ oldArr : {Arrangement node}  | | ]
 
 SEM Presentation  [ oldArr : {Arrangement node}   | | ]
