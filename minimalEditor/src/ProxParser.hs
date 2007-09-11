@@ -110,11 +110,12 @@ recognizeTree = pStr $
 
 recognizeSection :: ListParser Document Node ClipDoc Section
 recognizeSection = pStr $
-          (\str ps sg -> reuseSection [tokenNode str] Nothing (Just ps) (Just sg))
+          (\str t ps sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing (Just sg))
       <$> pStructural SectionNode
+      <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> recognizeSubgraph
-      
+          
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
@@ -188,13 +189,18 @@ keywords =
   , "\n"
   ]
 
+{- Currently, the scanner does not touch anything inside a formatter, so all whitespace is
+   retained. Because " " and "\n" are keywords, postScanPrs returns tokens for these strings, 
+   so they can be handled by the parser here. postScanPrs also puts a " " and a "\n" at the end
+   of each formatter
+-}
 
 parseParagraphs = toList_Paragraph 
       <$> pList parseParagraph
 
 parseParagraph =
           (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))
-      <$  pList (pKey " ")
+      <$  pList (pKey " ") 
       <*> pList parseWord
       <*  pKey "\n"
 
@@ -205,9 +211,13 @@ parseWord =
       -- the Scanner produces " " tokens, which are converted to key tokens
       -- split adds a " \n", so maybe we encounter two spaces
 
+pLine = 
+      (\wrds -> concat wrds)
+  <$> pList ((++) <$> pText <*> pSpaces)
 
+pSpaces = concat <$> pList (const " " <$> pKey " " <|> const "" <$> pKey "\n") -- ignore linebreaks
 
--- simple free text parsing. Spaces are tokenized away.
+-- parse any consecutive piece of text (remember that spaces and "\n"'s are tokens)
 pText = concat <$> pList1 (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
 
 pUIdent = pCSym 20 uIdentTk

@@ -124,13 +124,13 @@ reduceRoot (Root idd tree graph sections) =
 
 getSubgraphs :: List_Section -> [Subgraph]
 getSubgraphs sections = map getSubgraph (fromList_Section sections)
-  where getSubgraph (Section _ _ subgraph) = subgraph
+  where getSubgraph (Section _ _ _ _ subgraph) = subgraph
 
 -- replace each subgraph in sections with a subgraph from subgraphs
 replaceSubgraphs :: List_Section -> [Subgraph] -> List_Section
 replaceSubgraphs sections subgraphs = 
   toList_Section $ zipWith replaceSubgraph (fromList_Section sections) subgraphs
-  where replaceSubgraph (Section idd paras _) subgraph = Section idd paras subgraph
+  where replaceSubgraph (Section title idd paras subsections _) subgraph = Section title idd paras subsections subgraph
   
 -- if the graph is clean, and one of the subgraphs dirty, resolveSubgraphs
 -- adds the edges from the dirty subgraph to the graph

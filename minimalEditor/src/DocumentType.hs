@@ -15,7 +15,12 @@ data Root = Root Tree graph:Graph sections:[Section] { idd : IDD }
 data Tree = Bin left:Tree right:Tree { idd : IDD }
           | Leaf                     { idd : IDD }
 
-data Section = Section paragraphs:[Paragraph] subgraph:Subgraph { idd : IDD }
+
+data Section = Section title:String_ paragraphs:[Paragraph] subsections:[Subsection] subgraph:Subgraph { idd : IDD }
+
+data Subsection = Subsection title:String_ paragraphs:[Paragraph] subsubsections:[Subsubsection] { idd : IDD }
+
+data Subsubsection = Subsubsection title:String_ paragraphs:[Paragraph] { idd : IDD }
 
 data Paragraph = Paragraph words:[Word]                  { idd : IDD }
 

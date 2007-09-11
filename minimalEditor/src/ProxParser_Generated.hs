@@ -73,11 +73,23 @@ reuseLeaf nodes  ma0
            (Leaf a0) -> reuse1 Leaf a0 ma0
            _ -> error "System error:<module>.reuseLeaf"
 
-reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe List_Paragraph -> Maybe Subgraph -> Section
-reuseSection nodes  ma0 ma1 ma2
+reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Maybe Subgraph -> Section
+reuseSection nodes  ma0 ma1 ma2 ma3 ma4
   = case extractFromNodes extractSection defaultSection nodes of
-           (Section a0 a1 a2) -> reuse3 Section a0 a1 a2 ma0 ma1 ma2
+           (Section a0 a1 a2 a3 a4) -> reuse5 Section a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseSection"
+
+reuseSubsection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
+reuseSubsection nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractSubsection defaultSubsection nodes of
+           (Subsection a0 a1 a2 a3) -> reuse4 Subsection a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseSubsection"
+
+reuseSubsubsection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Subsubsection
+reuseSubsubsection nodes  ma0 ma1 ma2
+  = case extractFromNodes extractSubsubsection defaultSubsubsection nodes of
+           (Subsubsection a0 a1 a2) -> reuse3 Subsubsection a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseSubsubsection"
 
 reuseParagraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Word -> Paragraph
 reuseParagraph nodes  ma0 ma1
@@ -157,6 +169,18 @@ reuseList_Paragraph nodes  ma0 ma1
            (List_Paragraph a0 a1) -> reuse2 List_Paragraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Paragraph"
 
+reuseList_Subsection :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Subsection -> List_Subsection
+reuseList_Subsection nodes  ma0 ma1
+  = case extractFromNodes extractList_Subsection defaultList_Subsection nodes of
+           (List_Subsection a0 a1) -> reuse2 List_Subsection a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Subsection"
+
+reuseList_Subsubsection :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Subsubsection -> List_Subsubsection
+reuseList_Subsubsection nodes  ma0 ma1
+  = case extractFromNodes extractList_Subsubsection defaultList_Subsubsection nodes of
+           (List_Subsubsection a0 a1) -> reuse2 List_Subsubsection a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Subsubsection"
+
 reuseList_Word :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Word -> List_Word
 reuseList_Word nodes  ma0 ma1
   = case extractFromNodes extractList_Word defaultList_Word nodes of
@@ -208,8 +232,16 @@ extractLeaf (Just (LeafNode x@(Leaf _) _)) = Just x
 extractLeaf _ = Nothing
 
 extractSection :: Maybe Node -> Maybe Section
-extractSection (Just (SectionNode x@(Section _ _ _) _)) = Just x
+extractSection (Just (SectionNode x@(Section _ _ _ _ _) _)) = Just x
 extractSection _ = Nothing
+
+extractSubsection :: Maybe Node -> Maybe Subsection
+extractSubsection (Just (SubsectionNode x@(Subsection _ _ _ _) _)) = Just x
+extractSubsection _ = Nothing
+
+extractSubsubsection :: Maybe Node -> Maybe Subsubsection
+extractSubsubsection (Just (SubsubsectionNode x@(Subsubsection _ _ _) _)) = Just x
+extractSubsubsection _ = Nothing
 
 extractParagraph :: Maybe Node -> Maybe Paragraph
 extractParagraph (Just (ParagraphNode x@(Paragraph _ _) _)) = Just x
@@ -263,6 +295,14 @@ extractList_Paragraph :: Maybe Node -> Maybe List_Paragraph
 extractList_Paragraph (Just (List_ParagraphNode x@(List_Paragraph _ _) _)) = Just x
 extractList_Paragraph _ = Nothing
 
+extractList_Subsection :: Maybe Node -> Maybe List_Subsection
+extractList_Subsection (Just (List_SubsectionNode x@(List_Subsection _ _) _)) = Just x
+extractList_Subsection _ = Nothing
+
+extractList_Subsubsection :: Maybe Node -> Maybe List_Subsubsection
+extractList_Subsubsection (Just (List_SubsubsectionNode x@(List_Subsubsection _ _) _)) = Just x
+extractList_Subsubsection _ = Nothing
+
 extractList_Word :: Maybe Node -> Maybe List_Word
 extractList_Word (Just (List_WordNode x@(List_Word _ _) _)) = Just x
 extractList_Word _ = Nothing
@@ -300,7 +340,13 @@ defaultLeaf :: Tree
 defaultLeaf = Leaf NoIDD
 
 defaultSection :: Section
-defaultSection = Section NoIDD hole hole
+defaultSection = Section NoIDD hole hole hole hole
+
+defaultSubsection :: Subsection
+defaultSubsection = Subsection NoIDD hole hole hole
+
+defaultSubsubsection :: Subsubsection
+defaultSubsubsection = Subsubsection NoIDD hole hole
 
 defaultParagraph :: Paragraph
 defaultParagraph = Paragraph NoIDD hole
@@ -340,6 +386,12 @@ defaultList_Section = List_Section NoIDD Nil_Section
 
 defaultList_Paragraph :: List_Paragraph
 defaultList_Paragraph = List_Paragraph NoIDD Nil_Paragraph
+
+defaultList_Subsection :: List_Subsection
+defaultList_Subsection = List_Subsection NoIDD Nil_Subsection
+
+defaultList_Subsubsection :: List_Subsubsection
+defaultList_Subsubsection = List_Subsubsection NoIDD Nil_Subsubsection
 
 defaultList_Word :: List_Word
 defaultList_Word = List_Word NoIDD Nil_Word

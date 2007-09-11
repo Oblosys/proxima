@@ -118,7 +118,9 @@ instance Clip ClipDoc where
   arityClip (Clip_Graph x) = arity x
   arityClip (Clip_List_Section x) = arity x
   arityClip (Clip_List_Paragraph x) = arity x
+  arityClip (Clip_List_Subsection x) = arity x
   arityClip (Clip_Subgraph x) = arity x
+  arityClip (Clip_List_Subsubsection x) = arity x
   arityClip (Clip_List_Word x) = arity x
   arityClip (Clip_Dirty x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
@@ -127,6 +129,8 @@ instance Clip ClipDoc where
   arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_Section x) = arity x
   arityClip (Clip_Paragraph x) = arity x
+  arityClip (Clip_Subsection x) = arity x
+  arityClip (Clip_Subsubsection x) = arity x
   arityClip (Clip_Word x) = arity x
   arityClip (Clip_Vertex x) = arity x
   arityClip (Clip_Edge x) = arity x
@@ -144,7 +148,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Graph x) = alternatives x
   alternativesClip (Clip_List_Section x) = alternatives x
   alternativesClip (Clip_List_Paragraph x) = alternatives x
+  alternativesClip (Clip_List_Subsection x) = alternatives x
   alternativesClip (Clip_Subgraph x) = alternatives x
+  alternativesClip (Clip_List_Subsubsection x) = alternatives x
   alternativesClip (Clip_List_Word x) = alternatives x
   alternativesClip (Clip_Dirty x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
@@ -153,6 +159,8 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_Section x) = alternatives x
   alternativesClip (Clip_Paragraph x) = alternatives x
+  alternativesClip (Clip_Subsection x) = alternatives x
+  alternativesClip (Clip_Subsubsection x) = alternatives x
   alternativesClip (Clip_Word x) = alternatives x
   alternativesClip (Clip_Vertex x) = alternatives x
   alternativesClip (Clip_Edge x) = alternatives x
@@ -171,7 +179,9 @@ instance Clip ClipDoc where
   holeClip (Clip_Graph x) = Clip_Graph hole
   holeClip (Clip_List_Section x) = Clip_List_Section hole
   holeClip (Clip_List_Paragraph x) = Clip_List_Paragraph hole
+  holeClip (Clip_List_Subsection x) = Clip_List_Subsection hole
   holeClip (Clip_Subgraph x) = Clip_Subgraph hole
+  holeClip (Clip_List_Subsubsection x) = Clip_List_Subsubsection hole
   holeClip (Clip_List_Word x) = Clip_List_Word hole
   holeClip (Clip_Dirty x) = Clip_Dirty hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
@@ -180,6 +190,8 @@ instance Clip ClipDoc where
   holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_Section x) = Clip_Section hole
   holeClip (Clip_Paragraph x) = Clip_Paragraph hole
+  holeClip (Clip_Subsection x) = Clip_Subsection hole
+  holeClip (Clip_Subsubsection x) = Clip_Subsubsection hole
   holeClip (Clip_Word x) = Clip_Word hole
   holeClip (Clip_Vertex x) = Clip_Vertex hole
   holeClip (Clip_Edge x) = Clip_Edge hole
@@ -198,7 +210,9 @@ instance Clip ClipDoc where
   isListClip (Clip_Graph x) = isList x
   isListClip (Clip_List_Section x) = isList x
   isListClip (Clip_List_Paragraph x) = isList x
+  isListClip (Clip_List_Subsection x) = isList x
   isListClip (Clip_Subgraph x) = isList x
+  isListClip (Clip_List_Subsubsection x) = isList x
   isListClip (Clip_List_Word x) = isList x
   isListClip (Clip_Dirty x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
@@ -207,6 +221,8 @@ instance Clip ClipDoc where
   isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_Section x) = isList x
   isListClip (Clip_Paragraph x) = isList x
+  isListClip (Clip_Subsection x) = isList x
+  isListClip (Clip_Subsubsection x) = isList x
   isListClip (Clip_Word x) = isList x
   isListClip (Clip_Vertex x) = isList x
   isListClip (Clip_Edge x) = isList x
@@ -225,7 +241,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Graph x) = insertList i c x
   insertListClip i c (Clip_List_Section x) = insertList i c x
   insertListClip i c (Clip_List_Paragraph x) = insertList i c x
+  insertListClip i c (Clip_List_Subsection x) = insertList i c x
   insertListClip i c (Clip_Subgraph x) = insertList i c x
+  insertListClip i c (Clip_List_Subsubsection x) = insertList i c x
   insertListClip i c (Clip_List_Word x) = insertList i c x
   insertListClip i c (Clip_Dirty x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
@@ -234,6 +252,8 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_Section x) = insertList i c x
   insertListClip i c (Clip_Paragraph x) = insertList i c x
+  insertListClip i c (Clip_Subsection x) = insertList i c x
+  insertListClip i c (Clip_Subsubsection x) = insertList i c x
   insertListClip i c (Clip_Word x) = insertList i c x
   insertListClip i c (Clip_Vertex x) = insertList i c x
   insertListClip i c (Clip_Edge x) = insertList i c x
@@ -252,7 +272,9 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Graph x) = removeList i x
   removeListClip i (Clip_List_Section x) = removeList i x
   removeListClip i (Clip_List_Paragraph x) = removeList i x
+  removeListClip i (Clip_List_Subsection x) = removeList i x
   removeListClip i (Clip_Subgraph x) = removeList i x
+  removeListClip i (Clip_List_Subsubsection x) = removeList i x
   removeListClip i (Clip_List_Word x) = removeList i x
   removeListClip i (Clip_Dirty x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
@@ -261,6 +283,8 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_Section x) = removeList i x
   removeListClip i (Clip_Paragraph x) = removeList i x
+  removeListClip i (Clip_Subsection x) = removeList i x
+  removeListClip i (Clip_Subsubsection x) = removeList i x
   removeListClip i (Clip_Word x) = removeList i x
   removeListClip i (Clip_Vertex x) = removeList i x
   removeListClip i (Clip_Edge x) = removeList i x
@@ -449,26 +473,90 @@ instance Editable Tree Document Node ClipDoc where
 
 instance Editable Section Document Node ClipDoc where
   select []    x                  = Clip_Section x
-  select (0:p) (Section _ x1 x2) = select p x1
-  select (1:p) (Section _ x1 x2) = select p x2
+  select (0:p) (Section _ x1 x2 x3 x4) = select p x1
+  select (1:p) (Section _ x1 x2 x3 x4) = select p x2
+  select (2:p) (Section _ x1 x2 x3 x4) = select p x3
+  select (3:p) (Section _ x1 x2 x3 x4) = select p x4
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Section c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Section")   x
-  paste (0:p) c (Section i1 x1 x2) = Section i1 (paste p c x1) x2
-  paste (1:p) c (Section i1 x1 x2) = Section i1 x1 (paste p c x2)
+  paste (0:p) c (Section i1 x1 x2 x3 x4) = Section i1 (paste p c x1) x2 x3 x4
+  paste (1:p) c (Section i1 x1 x2 x3 x4) = Section i1 x1 (paste p c x2) x3 x4
+  paste (2:p) c (Section i1 x1 x2 x3 x4) = Section i1 x1 x2 (paste p c x3) x4
+  paste (3:p) c (Section i1 x1 x2 x3 x4) = Section i1 x1 x2 x3 (paste p c x4)
   paste _  _  x                    = x
 
-  alternatives _ = [("Section {Paragraphs} {Subgraph} "  , Clip_Section $ Section NoIDD hole hole)
+  alternatives _ = [("Section {String_} {Paragraphs} {Subsections} {Subgraph} "  , Clip_Section $ Section NoIDD hole hole hole hole)
                    ,("{Section}", Clip_Section hole)
                    ]
 
-  arity (Section _ x1 x2) = 2
+  arity (Section _ x1 x2 x3 x4) = 4
   arity _                        = 0
 
   parseErr = ParseErrSection
 
   hole = HoleSection
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable Subsection Document Node ClipDoc where
+  select []    x                  = Clip_Subsection x
+  select (0:p) (Subsection _ x1 x2 x3) = select p x1
+  select (1:p) (Subsection _ x1 x2 x3) = select p x2
+  select (2:p) (Subsection _ x1 x2 x3) = select p x3
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Subsection c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Subsection")   x
+  paste (0:p) c (Subsection i1 x1 x2 x3) = Subsection i1 (paste p c x1) x2 x3
+  paste (1:p) c (Subsection i1 x1 x2 x3) = Subsection i1 x1 (paste p c x2) x3
+  paste (2:p) c (Subsection i1 x1 x2 x3) = Subsection i1 x1 x2 (paste p c x3)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Subsection {String_} {Paragraphs} {Subsubsections} "  , Clip_Subsection $ Subsection NoIDD hole hole hole)
+                   ,("{Subsection}", Clip_Subsection hole)
+                   ]
+
+  arity (Subsection _ x1 x2 x3) = 3
+  arity _                        = 0
+
+  parseErr = ParseErrSubsection
+
+  hole = HoleSubsection
+
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+
+instance Editable Subsubsection Document Node ClipDoc where
+  select []    x                  = Clip_Subsubsection x
+  select (0:p) (Subsubsection _ x1 x2) = select p x1
+  select (1:p) (Subsubsection _ x1 x2) = select p x2
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_Subsubsection c) _      = c
+  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Subsubsection")   x
+  paste (0:p) c (Subsubsection i1 x1 x2) = Subsubsection i1 (paste p c x1) x2
+  paste (1:p) c (Subsubsection i1 x1 x2) = Subsubsection i1 x1 (paste p c x2)
+  paste _  _  x                    = x
+
+  alternatives _ = [("Subsubsection {String_} {Paragraphs} "  , Clip_Subsubsection $ Subsubsection NoIDD hole hole)
+                   ,("{Subsubsection}", Clip_Subsubsection hole)
+                   ]
+
+  arity (Subsubsection _ x1 x2) = 2
+  arity _                        = 0
+
+  parseErr = ParseErrSubsubsection
+
+  hole = HoleSubsubsection
 
 
   isList _ = False
@@ -887,6 +975,126 @@ instance Editable List_Paragraph Document Node ClipDoc where
 
   removeList n (List_Paragraph idd cxs) = Clip_List_Paragraph $ List_Paragraph idd (removeList_Paragraph n cxs)
   removeList _ xs                        = Clip_List_Paragraph $ xs
+
+toList_Subsection vs = List_Subsection NoIDD (toConsList_Subsection vs)
+
+fromList_Subsection (List_Subsection _ vs) = fromConsList_Subsection vs
+fromList_Subsection _                  = []
+
+toConsList_Subsection [] = Nil_Subsection
+toConsList_Subsection (x:xs) = Cons_Subsection x (toConsList_Subsection xs)
+
+fromConsList_Subsection Nil_Subsection = []
+fromConsList_Subsection (Cons_Subsection x xs) = x: fromConsList_Subsection xs
+
+replaceList_Subsection _ x Nil_Subsection = Nil_Subsection -- replace beyond end of list
+replaceList_Subsection 0 x (Cons_Subsection cx cxs) = Cons_Subsection x cxs
+replaceList_Subsection n x (Cons_Subsection cx cxs) = Cons_Subsection cx (replaceList_Subsection (n-1) x cxs)
+
+insertList_Subsection 0 x cxs = Cons_Subsection x cxs
+insertList_Subsection _ x Nil_Subsection  = Nil_Subsection   -- insert beyond end of list
+insertList_Subsection n x (Cons_Subsection cx cxs) = Cons_Subsection cx (insertList_Subsection (n-1) x cxs)
+
+removeList_Subsection _ Nil_Subsection  = Nil_Subsection -- remove beyond end of list
+removeList_Subsection 0 (Cons_Subsection cx cxs) = cxs
+removeList_Subsection n (Cons_Subsection cx cxs) = Cons_Subsection cx (removeList_Subsection (n-1) cxs)
+
+instance Editable List_Subsection Document Node ClipDoc where
+  select []    x                  = Clip_List_Subsection x
+  select (n:p) (List_Subsection _ cxs) = let xs = fromConsList_Subsection cxs
+                                  in  if n < length xs 
+                                      then select p (xs !! n)
+                                      else Clip_Nothing
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_List_Subsection c) _   = c
+  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Subsection")   x
+  paste (n:p) c (List_Subsection i1 cxs) = let xs = fromConsList_Subsection cxs
+                                    in  if n < length xs
+                                        then let x  = xs!!n
+                                                 x' = paste p c x
+                                             in  List_Subsection i1 (replaceList_Subsection n x' cxs)
+                                        else List_Subsection i1 cxs -- paste beyond end of list
+  paste _  _  x                  = x
+
+  alternatives _ = [("{List_Subsection}", Clip_List_Subsection hole)
+                   ]
+
+  arity (List_Subsection _ x1) = length (fromConsList_Subsection x1)
+  arity _                        = 0
+
+  parseErr = ParseErrList_Subsection
+
+  hole = List_Subsection NoIDD Nil_Subsection
+
+  isList _ = True
+
+  insertList n (Clip_Subsection c) (List_Subsection idd cxs) = Clip_List_Subsection $ List_Subsection idd (insertList_Subsection n c cxs)
+  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Subsection xs
+  insertList _ c xs                 = Clip_List_Subsection xs
+
+  removeList n (List_Subsection idd cxs) = Clip_List_Subsection $ List_Subsection idd (removeList_Subsection n cxs)
+  removeList _ xs                        = Clip_List_Subsection $ xs
+
+toList_Subsubsection vs = List_Subsubsection NoIDD (toConsList_Subsubsection vs)
+
+fromList_Subsubsection (List_Subsubsection _ vs) = fromConsList_Subsubsection vs
+fromList_Subsubsection _                  = []
+
+toConsList_Subsubsection [] = Nil_Subsubsection
+toConsList_Subsubsection (x:xs) = Cons_Subsubsection x (toConsList_Subsubsection xs)
+
+fromConsList_Subsubsection Nil_Subsubsection = []
+fromConsList_Subsubsection (Cons_Subsubsection x xs) = x: fromConsList_Subsubsection xs
+
+replaceList_Subsubsection _ x Nil_Subsubsection = Nil_Subsubsection -- replace beyond end of list
+replaceList_Subsubsection 0 x (Cons_Subsubsection cx cxs) = Cons_Subsubsection x cxs
+replaceList_Subsubsection n x (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (replaceList_Subsubsection (n-1) x cxs)
+
+insertList_Subsubsection 0 x cxs = Cons_Subsubsection x cxs
+insertList_Subsubsection _ x Nil_Subsubsection  = Nil_Subsubsection   -- insert beyond end of list
+insertList_Subsubsection n x (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (insertList_Subsubsection (n-1) x cxs)
+
+removeList_Subsubsection _ Nil_Subsubsection  = Nil_Subsubsection -- remove beyond end of list
+removeList_Subsubsection 0 (Cons_Subsubsection cx cxs) = cxs
+removeList_Subsubsection n (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (removeList_Subsubsection (n-1) cxs)
+
+instance Editable List_Subsubsection Document Node ClipDoc where
+  select []    x                  = Clip_List_Subsubsection x
+  select (n:p) (List_Subsubsection _ cxs) = let xs = fromConsList_Subsubsection cxs
+                                  in  if n < length xs 
+                                      then select p (xs !! n)
+                                      else Clip_Nothing
+  select _     _                  = Clip_Nothing
+
+  paste [] (Clip_List_Subsubsection c) _   = c
+  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Subsubsection")   x
+  paste (n:p) c (List_Subsubsection i1 cxs) = let xs = fromConsList_Subsubsection cxs
+                                    in  if n < length xs
+                                        then let x  = xs!!n
+                                                 x' = paste p c x
+                                             in  List_Subsubsection i1 (replaceList_Subsubsection n x' cxs)
+                                        else List_Subsubsection i1 cxs -- paste beyond end of list
+  paste _  _  x                  = x
+
+  alternatives _ = [("{List_Subsubsection}", Clip_List_Subsubsection hole)
+                   ]
+
+  arity (List_Subsubsection _ x1) = length (fromConsList_Subsubsection x1)
+  arity _                        = 0
+
+  parseErr = ParseErrList_Subsubsection
+
+  hole = List_Subsubsection NoIDD Nil_Subsubsection
+
+  isList _ = True
+
+  insertList n (Clip_Subsubsection c) (List_Subsubsection idd cxs) = Clip_List_Subsubsection $ List_Subsubsection idd (insertList_Subsubsection n c cxs)
+  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Subsubsection xs
+  insertList _ c xs                 = Clip_List_Subsubsection xs
+
+  removeList n (List_Subsubsection idd cxs) = Clip_List_Subsubsection $ List_Subsubsection idd (removeList_Subsubsection n cxs)
+  removeList _ xs                        = Clip_List_Subsubsection $ xs
 
 toList_Word vs = List_Word NoIDD (toConsList_Word vs)
 

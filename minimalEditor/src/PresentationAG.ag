@@ -70,13 +70,15 @@ SEM Root
                                              ] 
                            -}      
                            -- , col $ replicate 15 $ row $ replicate 20 $ text "bla"
-                            @graph.pres
+                           --  text "Contents"
+                           --, col @sections.tocPress
+                             @graph.pres
                            --, @tree.pres
                            --, parsing $ formatter $ replicate 50 $ text "bla"
-                           , col @sections.press
+                           , col @sections.press `withFontSize` 12  `withWidth` 800 
                            --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
-                           
-                          -- , col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
+                           , text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
+                          --, col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
                           --, col $ map row $ divide 3 @sections.press
                            , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
@@ -112,13 +114,19 @@ SEM Tree
   | Leaf
       lhs.pres = loc (LeafNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [text $ "Leaf", text ""]
-                     
+
+           
+ATTR Section [||tocPres : Presentation_Doc_Node_Clip ]          
 SEM Section
   | Section
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ @paragraphs.pres `withFontSize` 12  `withWidth` 800 
-                           , @subgraph.pres
+                     col $ [ row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres], empty `withHStretch` True ] `withFontSize_` (percent 150)  
+                           , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                           , row [ @subgraph.pres, empty `withHStretch` True ]
                            ]
+      lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                      row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -253,7 +261,9 @@ pasteInSubgraph pth id name subgraph =
 insertNewSection :: [Int] -> UpdateDoc Document clip
 insertNewSection pth =
   let section = Section NoIDD
+                  (String_ NoIDD "")
                   (List_Paragraph NoIDD Nil_Paragraph) 
+                  (List_Subsection NoIDD Nil_Subsection) 
                   (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
   in  \(DocumentLevel d path cl) ->
         let (Clip_List_Section sectionlist) = select (pth++[2]) d -- nasty: Root tr(0) gr(1) sections(2)
@@ -273,3 +283,19 @@ removeLastSection pth =
                                               )
       in  (DocumentLevel d' path cl)
 }
+
+
+-- annoying bits, since we don't have any default behaviour for pres attributes:
+
+SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip]}]
+  | List_Section
+      lhs.tocPress = map ( loc (List_SectionNode @self @lhs.path) 
+                      . presentFocus @lhs.focusD @lhs.path ) 
+                      @elts.tocPress
+                      -- parent is reponsible for setting parsing/structural
+  | HoleList_Section     lhs.tocPress = []
+  | ParseErrList_Section lhs.tocPress = [ presParseErr @presentation ]
+
+SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip]}]
+  | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
+  | Nil_Section      lhs.tocPress = []

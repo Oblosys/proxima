@@ -72,10 +72,22 @@ data Tree = Bin IDD Tree Tree
              deriving Show
 
 
-data Section = Section IDD List_Paragraph Subgraph 
+data Section = Section IDD String_ List_Paragraph List_Subsection Subgraph 
              | HoleSection
              | ParseErrSection (Presentation Document Node ClipDoc)
                 deriving Show
+
+
+data Subsection = Subsection IDD String_ List_Paragraph List_Subsubsection 
+                | HoleSubsection
+                | ParseErrSubsection (Presentation Document Node ClipDoc)
+                   deriving Show
+
+
+data Subsubsection = Subsubsection IDD String_ List_Paragraph 
+                   | HoleSubsubsection
+                   | ParseErrSubsubsection (Presentation Document Node ClipDoc)
+                      deriving Show
 
 
 data Paragraph = Paragraph IDD List_Word 
@@ -161,6 +173,28 @@ data ConsList_Paragraph = Cons_Paragraph Paragraph ConsList_Paragraph
                            deriving Show
 
 
+data List_Subsection = List_Subsection IDD ConsList_Subsection 
+                     | HoleList_Subsection
+                     | ParseErrList_Subsection (Presentation Document Node ClipDoc)
+                        deriving Show
+
+
+data ConsList_Subsection = Cons_Subsection Subsection ConsList_Subsection 
+                         | Nil_Subsection 
+                            deriving Show
+
+
+data List_Subsubsection = List_Subsubsection IDD ConsList_Subsubsection 
+                        | HoleList_Subsubsection
+                        | ParseErrList_Subsubsection (Presentation Document Node ClipDoc)
+                           deriving Show
+
+
+data ConsList_Subsubsection = Cons_Subsubsection Subsubsection ConsList_Subsubsection 
+                            | Nil_Subsubsection 
+                               deriving Show
+
+
 data List_Word = List_Word IDD ConsList_Word 
                | HoleList_Word
                | ParseErrList_Word (Presentation Document Node ClipDoc)
@@ -209,7 +243,9 @@ data ClipDoc = Clip_Root Root
              | Clip_Graph Graph
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
+             | Clip_List_Subsection List_Subsection
              | Clip_Subgraph Subgraph
+             | Clip_List_Subsubsection List_Subsubsection
              | Clip_List_Word List_Word
              | Clip_Dirty Dirty
              | Clip_List_Vertex List_Vertex
@@ -220,6 +256,10 @@ data ClipDoc = Clip_Root Root
              | Clip_Section Section
              
              | Clip_Paragraph Paragraph
+             
+             | Clip_Subsection Subsection
+             
+             | Clip_Subsubsection Subsubsection
              
              | Clip_Word Word
              
@@ -252,6 +292,10 @@ data Node = NoNode
           | HoleTreeNode Tree Path 
           | SectionNode Section Path 
           | HoleSectionNode Section Path 
+          | SubsectionNode Subsection Path 
+          | HoleSubsectionNode Subsection Path 
+          | SubsubsectionNode Subsubsection Path 
+          | HoleSubsubsectionNode Subsubsection Path 
           | ParagraphNode Paragraph Path 
           | HoleParagraphNode Paragraph Path 
           | WordNode Word Path 
@@ -276,6 +320,10 @@ data Node = NoNode
           | HoleList_SectionNode List_Section Path 
           | List_ParagraphNode List_Paragraph Path 
           | HoleList_ParagraphNode List_Paragraph Path 
+          | List_SubsectionNode List_Subsection Path 
+          | HoleList_SubsectionNode List_Subsection Path 
+          | List_SubsubsectionNode List_Subsubsection Path 
+          | HoleList_SubsubsectionNode List_Subsubsection Path 
           | List_WordNode List_Word Path 
           | HoleList_WordNode List_Word Path 
           | List_VertexNode List_Vertex Path 
@@ -306,6 +354,10 @@ instance Show Node where
   show (HoleTreeNode _ _)  = "HoleTreeNode"
   show (SectionNode _ _)  = "SectionNode"
   show (HoleSectionNode _ _)  = "HoleSectionNode"
+  show (SubsectionNode _ _)  = "SubsectionNode"
+  show (HoleSubsectionNode _ _)  = "HoleSubsectionNode"
+  show (SubsubsectionNode _ _)  = "SubsubsectionNode"
+  show (HoleSubsubsectionNode _ _)  = "HoleSubsubsectionNode"
   show (ParagraphNode _ _)  = "ParagraphNode"
   show (HoleParagraphNode _ _)  = "HoleParagraphNode"
   show (WordNode _ _)  = "WordNode"
@@ -330,6 +382,10 @@ instance Show Node where
   show (HoleList_SectionNode _ _)  = "HoleList_SectionNode"
   show (List_ParagraphNode _ _)  = "List_ParagraphNode"
   show (HoleList_ParagraphNode _ _)  = "HoleList_ParagraphNode"
+  show (List_SubsectionNode _ _)  = "List_SubsectionNode"
+  show (HoleList_SubsectionNode _ _)  = "HoleList_SubsectionNode"
+  show (List_SubsubsectionNode _ _)  = "List_SubsubsectionNode"
+  show (HoleList_SubsubsectionNode _ _)  = "HoleList_SubsubsectionNode"
   show (List_WordNode _ _)  = "List_WordNode"
   show (HoleList_WordNode _ _)  = "HoleList_WordNode"
   show (List_VertexNode _ _)  = "List_VertexNode"
