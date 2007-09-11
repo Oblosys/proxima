@@ -165,17 +165,20 @@ prunePres' va ova (x,y) (DiffLeaf c) arr p@(EllipseP id  _ _ _ _)   = if c && no
 prunePres' va ova (x,y) (DiffLeaf c) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) p = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 -- because PolyA is never in ova (otherwise it would not be a poly), uncovered might be replaced by overlap with va
+-- when arr is poly, only arrangedP or p is possible
+-- Poly ligt volledig buiten ova (anders was het geen poly), dus ipv uncovered kunnen hergebruiken
+-- als poly niet in va ligt.
 
 --NOTE make sure that no rows are reused for formatter!! Because in ArrangerAG.ag dummy rows are generated
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(FormatterP id _) = 
-  let pruned = pruneFormatter va ova (addOffsetA (x,y) arr) (repeat (DiffLeaf True)) arr (getChildren p)
+  let pruned = pruneFormatter va ova (x,y) (repeat (DiffLeaf True)) arr (getChildren p) -- addOffset is done in pruneFormatter
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
       then if uncovered (x,y) va ova arr
            then setChildren pruned p
            else ArrangedP
       else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr p@(FormatterP id _) =
-  let pruned = pruneFormatter va ova (addOffsetA (x,y) arr) dts arr (getChildren p)
+  let pruned = pruneFormatter va ova (x,y) dts arr (getChildren p) -- addOffset is done in pruneFormatter
   -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
   -- what we extend arr with (pres is used anyway in the recursion)
   in if c then if uncovered (x,y) va ova arr
@@ -183,10 +186,6 @@ prunePres' va ova (x,y) (DiffNode c _ dts) arr p@(FormatterP id _) =
                 else ArrangedP 
       else setChildren pruned p
      
-    
-      
-      
-      
 prunePres' va ova (x,y) (DiffLeaf c) arr p       = 
   let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getChildrenA arr) (getChildren p)
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
@@ -203,12 +202,10 @@ prunePres' va ova (x,y) (DiffNode c _ dts) arr p =
                 else ArrangedP 
       else setChildren pruned p
 prunePres' va ova (x,y) dt arr                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
--- when arr is poly, only arrangedP or p is possible
--- Poly ligt volledig buiten ova (anders was het geen poly), dus ipv uncovered kunnen hergebruiken
--- als poly niet in va ligt.
 
                    
-pruneFormatter va ova (x,y) dts (ColA _ _ _ _ _ _ _ _ _ arrs) press = pruneFormatterRow va ova (x,y) dts arrs press
+pruneFormatter va ova (x,y) dts arr@(ColA _ _ _ _ _ _ _ _ _ arrs) press = debug Prs ("\n\n\npruneFormatter"++ concatMap shallowShowArr arrs) $
+                                                                      pruneFormatterRow va ova (addOffsetA (x,y) arr) dts arrs press
 pruneFormatter va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) press = press
 -- whole column is not arranged before, so we reuse nothing
 
@@ -216,21 +213,38 @@ pruneFormatterRow va ova (x,y) dts [] press = []
 pruneFormatterRow va ova (x,y) dts (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _ : arrs) press = press
 -- we encounter a row that was not arranged, so from hereon nothing is reused
 
-pruneFormatterRow va ova (x,y) dts (RowA _ _ _ _ _ _ _ _ arrs:rows) press =
+pruneFormatterRow va ova (x,y) dts (arr@(RowA _ _ _ _ _ _ _ _ arrs):rows) press =
+    debug Prs ("\npruneFormatterRow"++ concatMap shallowShowArr arrs) $
+                                                                      
    let (rowDts, restDts) = splitAt (length arrs) dts
        (rowPress, restPress) = splitAt (length arrs) press
-   in  zipWith3 (prunePresSpecial va ova (x,y)) rowDts arrs rowPress ++
+   in  zipWith3 (prunePresSpecial va ova (addOffsetA (x,y) arr)) rowDts arrs rowPress ++
        pruneFormatterRow va ova (x,y) restDts rows restPress
 
+-- strip LocatorA, ParsingA, and StructuralA
+{-
+prunePresSpecial va ova (x,y) dt (LocatorA _ arr) pres =
+  prunePresSpecial va ova (x,y) dt arr pres
+prunePresSpecial va ova (x,y) dt (ParsingA _ arr) pres =
+  prunePresSpecial va ova (x,y) dt arr pres
+prunePresSpecial va ova (x,y) dt (StructuralA _ arr) pres =
+  prunePresSpecial va ova (x,y) dt arr pres
+-}
 prunePresSpecial va ova (x,y) dt arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _) pres =
   pres
 prunePresSpecial va ova (x,y) dt arr                                   pres =
-  prunePres va ova (x,y) dt arr pres
+  let ((arrX,arrY),(arrW,arrH)) = getAreaA arr
+      absArrArea = ((arrX+x,arrY+y),(arrW,arrH))
+  in  if isCleanDT dt && contains ova absArrArea 
+      then ArrangedP
+      else pres
 -- TODO: check this!!
   
 -- this solves problem with incorrect nr of children in formatter unfolding
 
-
+-- problem children of formatter may contain unarranged parts, poly checking is not enough
+-- seems that formatter children can only be reused when they were entirely in ova. In other cases
+-- they may fall outside the viewed area, but we cannot check that here.
 
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
 -- anyway, the token tree will soon be replaced by a list, making this function easy
