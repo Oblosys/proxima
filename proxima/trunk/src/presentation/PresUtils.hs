@@ -121,13 +121,6 @@ uncovered (x',y') va ova arr =
       arrAreaAbs = ((x'+x,y'+y),(w,h))
   in  or $ map (overlap arrAreaAbs) (difference va ova)
 
--- getChildA :: Show node => Arrangement node -> Arrangement node
-getChildA caller arr = case getChildrenA arr of
-                  child : _ -> child
-                  []        -> debug Err ("ArrUtils.getChildA: no child " ++show arr++ caller) arr
-
-getAreaA :: Show node => Arrangement node -> Rectangle
-getAreaA a = ((xA a, yA a), (widthA a, heightA a))
 
 addOffsetA :: Show node => (Int,Int) -> Arrangement node -> (Int,Int)
 addOffsetA (x,y) a = (x+xA a, y+yA a)
@@ -171,36 +164,36 @@ prunePres' va ova (x,y) (DiffNode c _ dts) arr@(PolyA _ _ _ _ _ _ _ _ _ _ _ _ _)
 
 --NOTE make sure that no rows are reused for formatter!! Because in ArrangerAG.ag dummy rows are generated
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(FormatterP id _) = 
-  let pruned = pruneFormatter va ova (x,y) (repeat (DiffLeaf True)) arr (getChildren p) -- addOffset is done in pruneFormatter
+  let pruned = pruneFormatter va ova (x,y) (repeat (DiffLeaf True)) arr (getChildrenP p) -- addOffset is done in pruneFormatter
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
       then if uncovered (x,y) va ova arr
-           then setChildren pruned p
+           then setChildrenP pruned p
            else ArrangedP
       else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr p@(FormatterP id _) =
-  let pruned = pruneFormatter va ova (x,y) dts arr (getChildren p) -- addOffset is done in pruneFormatter
+  let pruned = pruneFormatter va ova (x,y) dts arr (getChildrenP p) -- addOffset is done in pruneFormatter
   -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
   -- what we extend arr with (pres is used anyway in the recursion)
   in if c then if uncovered (x,y) va ova arr
-                then setChildren pruned p
+                then setChildrenP pruned p
                 else ArrangedP 
-      else setChildren pruned p
+      else setChildrenP pruned p
      
 prunePres' va ova (x,y) (DiffLeaf c) arr p       = 
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getChildrenA arr) (getChildren p)
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) (repeat $ DiffLeaf True) (getChildrenA arr) (getChildrenP p)
   in  if c                                            -- if arr has fewer kids than p, then c will be false and pruned is not used
       then if uncovered (x,y) va ova arr
-           then setChildren pruned p
+           then setChildrenP pruned p
            else ArrangedP
       else p
 prunePres' va ova (x,y) (DiffNode c _ dts) arr p =
-  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) dts (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0 transparent)) (getChildren p)
+  let pruned = zipWith3 (prunePres va ova (addOffsetA (x,y) arr)) dts (getChildrenA arr++repeat (EmptyA NoIDA 0 0 0 0 0 0 transparent)) (getChildrenP p)
   -- if arr has fewer kids than p then dts must end with (DiffLeaf False)'s, so it does not matter
   -- what we extend arr with (pres is used anyway in the recursion)
   in if c then if uncovered (x,y) va ova arr
-                then setChildren pruned p
+                then setChildrenP pruned p
                 else ArrangedP 
-      else setChildren pruned p
+      else setChildrenP pruned p
 prunePres' va ova (x,y) dt arr                 pr                  = debug Err ("PresUtils.prunePres: can't handle "++ show pr++" with "++show dt) $ pr
 
                    

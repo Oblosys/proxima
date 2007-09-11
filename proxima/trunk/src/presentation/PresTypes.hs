@@ -136,43 +136,47 @@ shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
 shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
 shallowShowPres _                     = "<<<presentation without show>>>"
 
-getChildren (EmptyP id)           = []
-getChildren (StringP id str)      = []
-getChildren (ImageP id str _)       = []
-getChildren (PolyP id _ _ _)        = []
-getChildren (RectangleP id _ _ _ _) = []
-getChildren (EllipseP id _ _ _ _)   = []
-getChildren (RowP id rf press)    = press
-getChildren (ColP id rf _ press)    = press
-getChildren (OverlayP  id press)  = press
-getChildren (FormatterP  id press) = press
-getChildren (GraphP id _ _ _ _ press) = press
-getChildren (VertexP _ _ x y _  pres) = [pres]
-getChildren (WithP ar pres)       = [pres]
-getChildren (StructuralP id pres) = [pres]
-getChildren (ParsingP id pres)    = [pres]
-getChildren (LocatorP loc pres)   = [pres]
-getChildren (ArrangedP)           = []
-getChildren pres                  = debug Err ("PresTypes.getChildren: unhandled presentation"++shallowShowPres pres) []
+getChildrenP (EmptyP id)           = []
+getChildrenP (StringP id str)      = []
+getChildrenP (ImageP id str _)       = []
+getChildrenP (PolyP id _ _ _)        = []
+getChildrenP (RectangleP id _ _ _ _) = []
+getChildrenP (EllipseP id _ _ _ _)   = []
+getChildrenP (RowP id rf press)    = press
+getChildrenP (ColP id rf _ press)    = press
+getChildrenP (OverlayP  id press)  = press
+getChildrenP (FormatterP  id press) = press
+getChildrenP (GraphP id _ _ _ _ press) = press
+getChildrenP (VertexP _ _ x y _  pres) = [pres]
+getChildrenP (WithP ar pres)       = [pres]
+getChildrenP (StructuralP id pres) = [pres]
+getChildrenP (ParsingP id pres)    = [pres]
+getChildrenP (LocatorP loc pres)   = [pres]
+getChildrenP (ArrangedP)           = []
+getChildrenP pres                  = debug Err ("PresTypes.getChildren: unhandled presentation: "++shallowShowPres pres) []
 
-setChildren [] pres@(EmptyP id)           = pres
-setChildren [] pres@(StringP id str)      = pres
-setChildren [] pres@(ImageP id str _)     = pres
-setChildren [] pres@(PolyP id _ _ _)      = pres
-setChildren [] pres@(RectangleP id _ _ _ _) = pres
-setChildren [] pres@(EllipseP id _ _ _ _)   = pres
-setChildren press' (RowP id rf _)     = RowP id rf press'
-setChildren press' (ColP id rf f _)     = ColP id rf f press'
-setChildren press' (OverlayP  id _)   = OverlayP id press'
-setChildren press' (FormatterP  id _) = FormatterP id press'
-setChildren press' (GraphP id d w h es _) = GraphP id d w h es press'
-setChildren [pres'] (VertexP id vid x y ol _) = VertexP id vid x y ol pres'
-setChildren [pres'] (WithP ar _)       = WithP ar pres'
-setChildren [pres'] (StructuralP id _) = StructuralP id pres'
-setChildren [pres'] (ParsingP id _)    = ParsingP id pres'
-setChildren [pres'] (LocatorP loc _)   = LocatorP loc pres'
-setChildren []      (ArrangedP)           = ArrangedP
-setChildren press'  pres                  = debug Err ("PresTypes.getChildren: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
+getChildP pres = case getChildrenP pres of
+                  [child] -> child
+                  _       -> debug Err ("PresTypes.getChild: not a single-child presentation: "++shallowShowPres pres) $ EmptyP NoIDP
+
+setChildrenP [] pres@(EmptyP id)           = pres
+setChildrenP [] pres@(StringP id str)      = pres
+setChildrenP [] pres@(ImageP id str _)     = pres
+setChildrenP [] pres@(PolyP id _ _ _)      = pres
+setChildrenP [] pres@(RectangleP id _ _ _ _) = pres
+setChildrenP [] pres@(EllipseP id _ _ _ _)   = pres
+setChildrenP press' (RowP id rf _)     = RowP id rf press'
+setChildrenP press' (ColP id rf f _)     = ColP id rf f press'
+setChildrenP press' (OverlayP  id _)   = OverlayP id press'
+setChildrenP press' (FormatterP  id _) = FormatterP id press'
+setChildrenP press' (GraphP id d w h es _) = GraphP id d w h es press'
+setChildrenP [pres'] (VertexP id vid x y ol _) = VertexP id vid x y ol pres'
+setChildrenP [pres'] (WithP ar _)       = WithP ar pres'
+setChildrenP [pres'] (StructuralP id _) = StructuralP id pres'
+setChildrenP [pres'] (ParsingP id _)    = ParsingP id pres'
+setChildrenP [pres'] (LocatorP loc _)   = LocatorP loc pres'
+setChildrenP []      (ArrangedP)           = ArrangedP
+setChildrenP press'  pres                  = debug Err ("PresTypes.setChildrenP: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
 
 
 -- overlays: do they need a ref that says which element is the first, or in what order its elts should be parsed?

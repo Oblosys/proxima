@@ -309,6 +309,14 @@ getChildrenA (ParsingA _ arr)                  = [arr]
 getChildrenA (LocatorA _ arr)                  = [arr]
 getChildrenA _                                 = []
 
+getChildA :: Show node => String -> Arrangement node -> Arrangement node
+getChildA caller arr = case getChildrenA arr of
+  [child] -> child
+  []      -> debug Err ("ArrUtils.getChildA: not a single-child arrangement " ++show arr++ caller) arr
+
+getAreaA :: Show node => Arrangement node -> Rectangle
+getAreaA a = ((xA a, yA a), (widthA a, heightA a))
+
 
 setXYWHA x y w h (EmptyA id _ _ _ _ hr vr bc)                  = EmptyA id x y w h  hr vr bc         
 setXYWHA x y w h (StringA id _ _ _ _ hr vr str c bc f cxs)     = StringA id x y w h hr vr str c bc f cxs
