@@ -89,7 +89,7 @@ diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' pres
 diffPres (ColP id rf _ press) (ColP id' rf' _ press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
 diffPres (FormatterP id press) (FormatterP id' press')  = diffPress 0 press 0 press'
-diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = DiffLeaf False -- diffGraph g1 g2
+diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = DiffLeaf True -- diffGraph g1 g2
 diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf _ press) _                    = DiffLeaf False
@@ -112,7 +112,29 @@ diffPress rf press rf' press' =
                childDiffs'
 
 all' = foldl' (&&) True
-       
+
+
+
+-- WithP, StructuralP, ParsingP, LocatorP, and VertexP don't have diffTree nodes, so we ignore these
+-- TODO: for Vertex this is not quite right
+--       what to do with setChildren for ArrangedP?
+prunePres dt (WithP wr pres)       = WithP wr       $ prunePres dt pres
+prunePres dt (StructuralP id pres) = StructuralP id $ prunePres dt pres
+prunePres dt (ParsingP id pres)    = ParsingP id    $ prunePres dt pres
+prunePres dt (LocatorP l pres)     = LocatorP l     $ prunePres dt pres
+prunePres dt (VertexP id v x' y' ol pres) = VertexP id v x' y' ol $ prunePres dt pres
+prunePres (DiffLeaf True)        pres = ArrangedP
+prunePres (DiffLeaf False)       pres = pres
+prunePres (DiffNode True _ _)    pres = ArrangedP
+prunePres (DiffNode False _ dts) pres = 
+  setChildrenP (zipWith prunePres dts (getChildrenP pres)) pres
+
+isComplete (PolyA (IDA (-10)) _ _ _ _ _ _ _ _ _ _ _ _) = False
+isComplete arr = and (map isComplete (getChildrenA arr))
+
+
+
+{-     
 -- we can prune safely whenever the arrangement is not in the newly uncovered area
 -- (x',y') is the absolute offset of the arrangement
 uncovered :: Show node => (Int,Int) -> Rectangle -> Rectangle -> Arrangement node -> Bool
@@ -122,11 +144,13 @@ uncovered (x',y') va ova arr =
   in  or $ map (overlap arrAreaAbs) (difference va ova)
 
 
+
 addOffsetA :: Show node => (Int,Int) -> Arrangement node -> (Int,Int)
 addOffsetA (x,y) a = (x+xA a, y+yA a)
 addOffsetA (x,y) (ParsingA _ _) = debug Err "ArrUtils.addOffsetA called on ParsingA" (x,y)
 addOffsetA (x,y) (StructuralA _ _) = debug Err "ArrUtils.addOffsetA called on StructuralA" (x,y)
 addOffsetA (x,y) (LocatorA _ _) = debug Err "ArrUtils.addOffsetA called on LocatorA" (x,y)
+
 
 -- belong in ArrLayerUtils, also remove import ArrTypes
 prunePres  va ova (x,y) dt arr pres@(FormatterP _ press) = 
@@ -238,6 +262,8 @@ prunePresSpecial va ova (x,y) dt arr                                   pres =
 -- problem children of formatter may contain unarranged parts, poly checking is not enough
 -- seems that formatter children can only be reused when they were entirely in ova. In other cases
 -- they may fall outside the viewed area, but we cannot check that here.
+-}
+
 
 -- probably goes wrong when inserted is not direct child of row, col, or overlay
 -- anyway, the token tree will soon be replaced by a list, making this function easy

@@ -2,6 +2,7 @@ imports
 {
 
 import CommonTypes
+import CommonUtils
 import ArrLayerTypes
 import ArrLayerUtils
 import FontLib
@@ -120,7 +121,7 @@ DATA Presentation
   | StructuralP id : IDP  child : Presentation
   | ParsingP    id : IDP  child : Presentation
   | LocatorP location : {node} child : Presentation
-  | ArrangedP -- pres : Presentation
+  | ArrangedP
 
 --  | TestPresentation id : IDP  area : Int color : Color
 --  | MatrixPresentation id : IDP  m, n : Int presentationList : PresentationList
@@ -817,7 +818,7 @@ SEM PresentationList
 -- Viewed Area
 
 -- propagated with copy rules
-ATTR Root Presentation PresentationList [ viewedArea : Rectangle | | ]
+ATTR Root Presentation PresentationList [ viewedArea, oldViewedArea : Rectangle | | ]
 
 
 -- Upper left corner of the arrangement. Used for determining whether arrangement is in view.
@@ -928,8 +929,8 @@ SEM Presentation
                           ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src @style @lhs.lineColor @lhs.backgroundColor
   | PolyP      
       lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          let mkPoint (rx, ry) = ( round (rx * fromIntegral (@finalWidth-1))
-			                                     , round (ry * fromIntegral (@finalHeight-1)) )
+                          let mkPoint (rx, ry) = ( round (rx * fromIntegral ((@finalWidth-1) `max` 0))
+			                         , round (ry * fromIntegral ((@finalHeight-1) `max` 0)) )
 		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
 		      
 {-
@@ -997,15 +998,23 @@ SEM Presentation
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
-      lhs.arrangement = --OverlayA NoIDA @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef red
-                        --  [ setXYWHA 0 0 @finalWidth @finalHeight @lhs.oldArr 
-                        --  ]
-                        arrangeWhenViewed @lhs.absx @lhs.absy
+      lhs.arrangement = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                           && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
+                           && not (isComplete @lhs.oldArr) 
+                        then debug Arr ("Failed reuse: "++ show (not (isComplete @lhs.oldArr))
+                                        ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
+                                        ++ show (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )   ++show @lhs.oldArr ) $
+                             arrangeWhenViewed @lhs.absx @lhs.absy
                                           @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                          setBGColor yellow $
-                          setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
- -- @finalVRef @finalHRef are taken from arrangedP
+                             setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                             setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
+                        else  
+                             arrangeWhenViewed @lhs.absx @lhs.absy
+                                          @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                             setBGColor yellow $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                             setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
 
+ 
 
   | ArrangedP       -- not exactly clear how to assign these attributes using the old values
                           -- what if the AG computes a different value for the refs, reassign?
@@ -1021,6 +1030,14 @@ SEM Presentation
       loc.finalHRef   = hRefA @lhs.oldArr
       loc.unfoldedTree = ArrangedP
       loc.maxFormatterDepth = 0 
+      loc.allFonts = @lhs.allFonts -- fonts returned by pruned presentation are not comlete. As long as fonts are not deleted,
+                                   -- this is not a problem.
+      inst.unprunedPresHO : Presentation
+      inst.unprunedPresHO = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                               && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
+                               && not (isComplete @lhs.oldArr) 
+                            then @lhs.unprunedPres
+                            else EmptyP NoIDP 
 
 
 ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
