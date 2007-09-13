@@ -98,7 +98,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfpm --Werrors --module=ArrangerAG \
+	-cfpm --self --Werrors --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
 #	-cfpm --Werrors --module=ArrangerAG \
