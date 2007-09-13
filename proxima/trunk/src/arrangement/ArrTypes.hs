@@ -71,6 +71,10 @@ data Arrangement node =
   | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !LineColor
   | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
 
+unarrangedA x y w h hrf vrf =
+  PolyA (IDA (-10)) x y w h hrf vrf [(0,0),(w',0),(w',h'),(0,h'),(0,0),(w',h'),(w',0),(0,h')] 1 Transparent black white transparent
+ where (h',w') = ((h-1) `max` 0, (w-1) `max` 0)
+
 type XCoord = Int
 type YCoord = Int
 type Width = Int
