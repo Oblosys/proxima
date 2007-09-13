@@ -25,15 +25,16 @@ arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
  do { viewedArea <- readIORef $ getViewedAreaRef state
-    ; let lastViewedArea = getLastViewedArea state
+    ; let oldViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
 --          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
           prunedPres = prunePres dt pres
-    --; putStrLn $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
+          
+    --; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
-    ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea lastViewedArea oldArrangement
+    ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldViewedArea oldArrangement
     ; if maxFDepth > 1 
       then debugLnIO Err "Nested formatters may be arranged incorrectly"
       else return ()
