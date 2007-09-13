@@ -82,7 +82,7 @@ data Presentation doc node clip = EmptyP !IDP
            | Formatter [ (Presentation doc node clip) ]
            | Alternative [ (Presentation doc node clip) ]
 -} -- are the !'s in the right place like this?
-           | ArrangedP -- (Presentation doc node clip)     -- experimental for incrementality.
+           | ArrangedP -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
@@ -175,7 +175,7 @@ setChildrenP [pres'] (WithP ar _)       = WithP ar pres'
 setChildrenP [pres'] (StructuralP id _) = StructuralP id pres'
 setChildrenP [pres'] (ParsingP id _)    = ParsingP id pres'
 setChildrenP [pres'] (LocatorP loc _)   = LocatorP loc pres'
-setChildrenP []      (ArrangedP)           = ArrangedP
+setChildrenP []      (ArrangedP)        = ArrangedP
 setChildrenP press'  pres                  = debug Err ("PresTypes.setChildrenP: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
 
 
