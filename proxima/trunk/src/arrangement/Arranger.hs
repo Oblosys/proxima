@@ -1,6 +1,7 @@
 module Arranger where
 
 import CommonTypes hiding (defaultFont)
+import CommonUtils
 import qualified CommonTypes
 import ArrLayerTypes
 import ArrLayerUtils
@@ -34,10 +35,10 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
+   
     ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldViewedArea oldArrangement
-    ; if maxFDepth > 1 
-      then debugLnIO Err "Nested formatters may be arranged incorrectly"
-      else return ()
+    ; when (maxFDepth > 1) $
+        debugLnIO Err "Nested formatters may be arranged incorrectly"
     ; return (attrTree, state')
     }
 
