@@ -525,7 +525,7 @@ leftDocPathsA
 arrangeWhenViewed absx absy x y w h hrf vrf viewedArea idA arrangement =
   if overlap ((absx,absy),(w,h)) viewedArea then arrangement else -- EmptyA idA x y w h 0 0
     --arrangement 
-    unarrangedA
+    unarrangedA x y w h hrf vrf
            
 -- some code from Dazzle's Math.hs
 data DoublePoint = DoublePoint
