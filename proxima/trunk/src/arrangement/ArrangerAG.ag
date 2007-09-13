@@ -154,11 +154,10 @@ ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color ba
             focus : FocusPres
             mouseDown : {Maybe (UpdateDoc doc clip)}
             popupMenuItems : {[ PopupMenuItem ]}
-          || maxFormatterDepth : Int  unfoldedTree : Presentation arrangement : {Arrangement node} ]
+          || maxFormatterDepth : Int arrangement : {Arrangement node} ]
 SEM Root
   | Root
       lhs.maxFormatterDepth = @presentation.maxFormatterDepth
-      lhs.unfoldedTree  = @presentation.unfoldedTree
       lhs.arrangement   = @presentation.arrangement
 
 
@@ -286,65 +285,11 @@ SEM PresentationList
       lhs.maxFormatterDepthList = @hd.maxFormatterDepth : @tl.maxFormatterDepthList
 
 
--- Creating the unfoldedTree
-ATTR Presentation [  | | unfoldedTree : Presentation ]
+-- Unfolding formatters
 SEM Presentation
-  | EmptyP 
-      lhs.unfoldedTree = EmptyP @id 
-  | StringP 
-      lhs.unfoldedTree = StringP @id @text 
-  | RectangleP    
-      lhs.unfoldedTree = RectangleP @id @w @h @lineWidth @style
-  | EllipseP    
-      lhs.unfoldedTree = EllipseP @id @w @h @lineWidth @style
-  | ImageP    
-      lhs.unfoldedTree = ImageP @id @src @style
-  | PolyP
-      lhs.unfoldedTree = PolyP @id @pointList @lineWidth @style
-  | RowP 
-      lhs.unfoldedTree = RowP @id @hRefNr @presentationList.unfoldedTreeList
-  | ColP 
-      lhs.unfoldedTree = ColP @id @vRefNr @formatted @presentationList.unfoldedTreeList
-                         -- formatted will always be NF
-  | OverlayP 
-      lhs.unfoldedTree = OverlayP @id @presentationList.unfoldedTreeList
-  | GraphP 
-      lhs.unfoldedTree = GraphP @id @d @w @h @edges @presentationList.unfoldedTreeList
-  | VertexP
-      lhs.unfoldedTree = VertexP @id @i @x @y @outline @child.unfoldedTree
   | FormatterP
       inst.unfoldedFormatter : Presentation
-      inst.unfoldedFormatter = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
-      lhs.unfoldedTree = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.unfoldedTreeList
-{-
-  | TestPresentation             
-      lhs.unfoldedTree = TestPresentation @id @area @color
-  | MatrixPresentation 
-      lhs.unfoldedTree = MatrixPresentation @id @m @n @presentationList.unfoldedTreeList
-  | LayedOutRowP 
-      lhs.unfoldedTree = LayedOutRowP @id @presentationList.unfoldedTreeList @w @h @offsets
-  | AlternativePresentation 
-      lhs.unfoldedTree = AlternativePresentation @id @presentationList.unfoldedTreeList
--}
-  | WithP
-      lhs.unfoldedTree = WithP @attrRule @child.unfoldedTree
-  | StructuralP
-      lhs.unfoldedTree = StructuralP @id  @child.unfoldedTree
-  | ParsingP
-      lhs.unfoldedTree = ParsingP @id  @child.unfoldedTree
-  | LocatorP
-      lhs.unfoldedTree = LocatorP @location @child.unfoldedTree
--- bit of a hack, but the children are needed as values of type Presentation, so we can use unfoldedTreeList,
--- as there will not be any formatters inside anyway
-
-ATTR PresentationList [  | |  unfoldedTreeList : {[Presentation]} ]
-SEM PresentationList
-  | Nil
-      lhs.unfoldedTreeList = []
-  | Cons 
-      lhs.unfoldedTreeList = @hd.unfoldedTree : @tl.unfoldedTreeList
-
-
+      inst.unfoldedFormatter = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.self
 
 -- char width not ok for more complicated (overlapping) glyphs like ff ligature in tex. 
 -- char height sometimes needed for individual characters
@@ -999,6 +944,7 @@ SEM Presentation
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
       lhs.arrangement = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                           && @lhs.viewedArea == @lhs.oldViewedArea
                            && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
                            && not (isComplete @lhs.oldArr) 
                         then debug Arr ("Failed reuse: "++ show (not (isComplete @lhs.oldArr))
@@ -1028,12 +974,12 @@ SEM Presentation
       loc.finalHeight = heightA @lhs.oldArr
       loc.finalVRef   = vRefA @lhs.oldArr
       loc.finalHRef   = hRefA @lhs.oldArr
-      loc.unfoldedTree = ArrangedP
       loc.maxFormatterDepth = 0 
       loc.allFonts = @lhs.allFonts -- fonts returned by pruned presentation are not comlete. As long as fonts are not deleted,
                                    -- this is not a problem.
       inst.unprunedPresHO : Presentation
       inst.unprunedPresHO = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                               && @lhs.viewedArea == @lhs.oldViewedArea
                                && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
                                && not (isComplete @lhs.oldArr) 
                             then @lhs.unprunedPres

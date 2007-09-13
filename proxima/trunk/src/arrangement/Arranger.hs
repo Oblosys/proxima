@@ -33,7 +33,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
-    ; (attrTree, maxFDepth,_) <- fixed fontMetricsRef focus prunedPres pres viewedArea lastViewedArea oldArrangement
+    ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea lastViewedArea oldArrangement
     ; if maxFDepth > 1 
       then debugLnIO Err "Nested formatters may be arranged incorrectly"
       else return ()
@@ -41,15 +41,15 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     }
 
 fixed :: Show node => FontMetricsRef -> FocusPres -> Presentation doc node clip -> Presentation doc node clip -> Rectangle -> Rectangle -> 
-         Arrangement node -> IO (Arrangement node, Integer, Presentation doc node clip)
+         Arrangement node -> IO (Arrangement node, Integer)
 fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres :: Presentation doc node clip) viewedArea oldViewedArea oldArrangement = 
- mdo { (fontMetrics,arrangement, maxFDepth, unfoldedTree) <- f (fontMetrics,arrangement, maxFDepth, unfoldedTree)
-    ; return (arrangement, maxFDepth, unfoldedTree)
+ mdo { (fontMetrics,arrangement, maxFDepth) <- f (fontMetrics,arrangement, maxFDepth)
+    ; return (arrangement, maxFDepth)
     }
- where f :: (FontMetrics, Arrangement node, Integer, Presentation doc node clip) ->
-            IO (FontMetrics, Arrangement node, Integer, Presentation doc node clip) -- doc and node are scoped type variables
-       f (fontMetrics,_, _, _) = 
-         do { let (allFonts, arrangement, maxFDepth, unfoldedTree) =
+ where f :: (FontMetrics, Arrangement node, Integer) ->
+            IO (FontMetrics, Arrangement node, Integer) -- doc and node are scoped type variables
+       f (fontMetrics,_, _) = 
+         do { let (allFonts, arrangement, maxFDepth,_) = -- _ is the self attribute
                     sem_Root (Root pres) [defaultFont]
                                                defaultBackColor defaultFillColor
                                                focus
@@ -79,7 +79,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres ::
             ; newMetrics <- mkFontMetrics newFonts
             ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics            
-            ; return (updatedMetrics, arrangement, maxFDepth, unfoldedTree)
+            ; return (updatedMetrics, arrangement, maxFDepth)
             }
             
 
