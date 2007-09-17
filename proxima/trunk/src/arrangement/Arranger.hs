@@ -31,7 +31,7 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 --          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
           prunedPres = prunePres dt pres
           
-    --; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show lastViewedArea
+    ; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
     --; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
@@ -59,7 +59,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres ::
                                                fontMetrics
                                                defaultLineColor
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
-                                               oldArrangement
+                                               (Just oldArrangement)
                                                oldViewedArea
                                                []       -- popupMenu : [String, (UpdateDoc doc clip)] 
                                                defaultTextColor

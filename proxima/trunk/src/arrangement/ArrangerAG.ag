@@ -340,7 +340,7 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.vStretch = True
       loc.vRef = 0
       loc.hRef = 0
-  | VertexP -- other attributes are not important, because Graph ignores them anyway.
+  | VertexP -- other attributes are not important because Graph ignores them anyway.
       loc.hRef = @child.hRef - @x
       loc.vRef = @child.vRef - @y
   | RowP 
@@ -943,47 +943,84 @@ SEM Presentation
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP
-      lhs.arrangement = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
-                           && @lhs.viewedArea == @lhs.oldViewedArea
-                           && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
-                           && not (isComplete @lhs.oldArr) 
-                        then debug Arr ("Failed reuse: "++ show (not (isComplete @lhs.oldArr))
-                                        ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
-                                        ++ show (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )   ++show @lhs.oldArr ) $
-                             arrangeWhenViewed @lhs.absx @lhs.absy
-                                          @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                             setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
-                             setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
-                        else  
-                             arrangeWhenViewed @lhs.absx @lhs.absy
-                                          @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                             setBGColor yellow $      -- @finalVRef @finalHRef are taken from the arrangedP node
-                             setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @lhs.oldArr 
-
+      lhs.arrangement = case @lhs.oldArr of
+                          Just oldArr -> 
+                            if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                               && 
+                                  (not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
+                               && not (isComplete oldArr)  ||
+                               @lhs.viewedArea /= @lhs.oldViewedArea )
+                               
+                            then debug Arr ("Failed reuse: "++ show (not (isComplete oldArr))
+                                            ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
+                                            ++ show (@lhs.x == xA oldArr && @lhs.y == yA oldArr )   ++show oldArr ) $
+                                 arrangeWhenViewed @lhs.absx @lhs.absy
+                                              @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                                   setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                                   setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
+                            else  
+                                 arrangeWhenViewed @lhs.absx @lhs.absy
+                                              @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                                   setBGColor yellow $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                                   setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight oldArr 
+                          Nothing ->
+                            arrangeWhenViewed @lhs.absx @lhs.absy
+                                              @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                              setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                              setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
  
 
   | ArrangedP       -- not exactly clear how to assign these attributes using the old values
                           -- what if the AG computes a different value for the refs, reassign?
-      loc.minWidth = widthA @lhs.oldArr
-      loc.minHeight = heightA @lhs.oldArr
-      loc.hStretch = False
-      loc.vStretch = False
-      loc.vRef = vRefA @lhs.oldArr
-      loc.hRef = hRefA @lhs.oldArr
-      loc.finalWidth  = widthA @lhs.oldArr
-      loc.finalHeight = heightA @lhs.oldArr
-      loc.finalVRef   = vRefA @lhs.oldArr
-      loc.finalHRef   = hRefA @lhs.oldArr
-      loc.maxFormatterDepth = 0 
-      loc.allFonts = @lhs.allFonts -- fonts returned by pruned presentation are not comlete. As long as fonts are not deleted,
-                                   -- this is not a problem.
+      loc.minWidth    = case @lhs.oldArr of
+                          Just oldArr -> widthA oldArr
+                          Nothing     -> @unprunedPresHO.minWidth
+      loc.minHeight   = case @lhs.oldArr of
+                          Just oldArr -> heightA oldArr
+                          Nothing     -> @unprunedPresHO.minHeight
+      loc.hStretch    = case @lhs.oldArr of
+                          Just oldArr -> False
+                          Nothing     -> @unprunedPresHO.hStretch
+      loc.vStretch    = case @lhs.oldArr of
+                          Just oldArr -> False
+                          Nothing     -> @unprunedPresHO.vStretch
+      loc.vRef        = case @lhs.oldArr of
+                          Just oldArr -> vRefA oldArr
+                          Nothing     -> @unprunedPresHO.vRef
+      loc.hRef        = case @lhs.oldArr of
+                          Just oldArr -> hRefA oldArr
+                          Nothing     -> @unprunedPresHO.hRef
+      loc.finalWidth  = case @lhs.oldArr of
+                          Just oldArr -> widthA oldArr
+                          Nothing     -> @unprunedPresHO.finalWidth
+      loc.finalHeight = case @lhs.oldArr of
+                          Just oldArr -> heightA oldArr
+                          Nothing     -> @unprunedPresHO.finalHeight
+      loc.finalVRef   = case @lhs.oldArr of
+                          Just oldArr -> vRefA oldArr
+                          Nothing     -> @unprunedPresHO.finalVRef
+      loc.finalHRef   = case @lhs.oldArr of
+                          Just oldArr -> hRefA oldArr
+                          Nothing     -> @unprunedPresHO.finalHRef
+      loc.maxFormatterDepth = case @lhs.oldArr of
+                                Just oldArr -> 0 
+                                Nothing     -> @unprunedPresHO.maxFormatterDepth
+      loc.allFonts = case @lhs.oldArr of
+                       Just oldArr -> @lhs.allFonts
+                       Nothing     -> @unprunedPresHO.allFonts
+      
+      -- fonts returned by pruned presentation are not comlete. As long as fonts are not deleted,
+      -- this is not a problem.
       inst.unprunedPresHO : Presentation
-      inst.unprunedPresHO = if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
-                               && @lhs.viewedArea == @lhs.oldViewedArea
-                               && not (@lhs.x == xA @lhs.oldArr && @lhs.y == yA @lhs.oldArr )
-                               && not (isComplete @lhs.oldArr) 
-                            then @lhs.unprunedPres
-                            else EmptyP NoIDP 
+      inst.unprunedPresHO = case @lhs.oldArr of
+                              Just oldArr -> if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                                 && 
+                                    (not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
+                                 && not (isComplete oldArr)  ||
+                                 @lhs.viewedArea /= @lhs.oldViewedArea )
+                                            then @lhs.unprunedPres
+                                             else EmptyP NoIDP 
+                              Nothing -> @lhs.unprunedPres -- no oldArr, so we always use the presentation
 
 
 ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
@@ -1016,7 +1053,7 @@ SEM Presentation
       lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
 
 
-SEM PresentationList [ || vertices : {[(x,y,Outline)]} ]
+SEM PresentationList [ || vertices : {[(Int,Int,Outline)]} ]
   | Nil
       lhs.vertices = []
   | Cons 
@@ -1036,59 +1073,61 @@ SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
       hd.unprunedPres     = head @lhs.unprunedPresList
       tl.unprunedPresList = tail @lhs.unprunedPresList
 
-ATTR Root         [ oldArr : {Arrangement node}  | | ]
+ATTR Root         [ oldArr : {Maybe (Arrangement node)}  | | ]
 
-SEM Presentation  [ oldArr : {Arrangement node}   | | ]
+SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      RowA _ _ _ _ _ _ _ _ arrs -> --debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
-                                                                   arrs ++ (repeat $ EmptyA NoIDA 0 0 20 20 0 0 blue)
-                                      arr                     -> debug Err ("ArrangerAG.oldArrList Row encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      Just (RowA _ _ _ _ _ _ _ _ arrs) -> --debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
+                                                                          map Just arrs
+                                      arr                              -> repeat Nothing
   | ColP 
-      presentationList.oldArrList = case @formatted of
-                                      NF -> case @lhs.oldArr of 
-                                              ColA _ _ _ _ _ _ _ _ _ arrs -> arrs
-                                              arr                     -> debug Err ("ArrangerAG.oldArrList Col encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
-                                      F nrOfEltss ->
-                                        let rows = getChildrenA @lhs.oldArr
-                                            arrs = concatMap getChildrenA rows
-                                            breaks = tail (scanl (+) 0 nrOfEltss)
-                                            mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
-                                        in  map mkDummyRow $ linesFromBreaks breaks arrs 
+      presentationList.oldArrList = case @lhs.oldArr of
+                                      Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
+                                        case @formatted of
+                                          NF -> map Just rows -- rows not the right name in this case
+                                          F nrOfEltss ->
+                                            let arrs = concatMap getChildrenA rows
+                                                breaks = tail (scanl (+) 0 nrOfEltss)
+                                                mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
+                                            in  map (Just . mkDummyRow) $ linesFromBreaks breaks arrs 
+                                      _ -> repeat Nothing
 --TODO!! Check that dummyrow is never used, and make annotation in source                                        
 -- If the ColP came from a formatter, we take the old arrangements of the child rows, and distribute
 -- them according to the new child distribution in new Rows.
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      OverlayA _ _ _ _ _ _ _ _ arrs -> arrs
-                                      arr                     -> debug Err ("ArrangerAG.oldArrList Overlay encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      Just (OverlayA _ _ _ _ _ _ _ _ arrs) -> map Just arrs
+                                      arr                                  -> repeat Nothing
   | GraphP 
       presentationList.oldArrList = case @lhs.oldArr of
-                                      GraphA _ _ _ _ _ _ _ _ _ arrs -> arrs
-                                      arr                     -> debug Err ("ArrangerAG.oldArrList Graph encounters old "++shallowShowArr arr) $ repeat $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                                      Just (GraphA _ _ _ _ _ _ _ _ _ arrs) -> map Just arrs
+                                      arr                                  -> repeat Nothing
   | VertexP 
       child.oldArr = case @lhs.oldArr of 
-                       VertexA _ _ _ _ _ _ _ _ _ arr -> arr
-                       arr            -> debug Err ("ArrangerAG.oldArrList Vertex encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       Just (VertexA _ _ _ _ _ _ _ _ _ arr) -> Just arr
+                       arr                                  -> Nothing
   | StructuralP 
       child.oldArr = case @lhs.oldArr of
-                       StructuralA _ arr -> arr
-                       arr            -> debug Err ("ArrangerAG.oldArrList Structural encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       Just (StructuralA _ arr) -> Just arr
+                       arr                      -> Nothing
   | ParsingP 
       child.oldArr = case @lhs.oldArr of
-                       ParsingA _ arr -> arr
-                       arr            -> debug Err ("ArrangerAG.oldArrList Parsing encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
+                       Just (ParsingA _ arr) -> Just arr
+                       arr                   -> Nothing
   | LocatorP 
       child.oldArr = case @lhs.oldArr of
-                       LocatorA _ arr -> arr
-                       arr            -> debug Err ("ArrangerAG.oldArrList Locator encounters old "++shallowShowArr arr) $ EmptyA NoIDA 0 0 0 0 0 0 transparent
-  | FormatterP
-      presentationList.oldArrList = let rows = getChildrenA @lhs.oldArr
-                                        arrs = concatMap getChildrenA rows
-                                    in  --debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
-                                        arrs ++ ( repeat $ EmptyA NoIDA 0 0 3 3 0 0 green)
+                       Just (LocatorA _ arr) -> Just arr
+                       arr                   -> Nothing
+  | FormatterP -- TODO add check for Nothing
+      presentationList.oldArrList = case @lhs.oldArr of
+                                      Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
+                                        let arrs = concatMap getChildrenA rows
+                                        in  --debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
+                                            map Just arrs
+                                      Nothing -> repeat Nothing
 
-SEM PresentationList [  oldArrList : {[Arrangement node]} | | ] --  diffTreeList : {[DiffTree]} | | ]
+SEM PresentationList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
   | Cons 
       hd.oldArr     = head @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
