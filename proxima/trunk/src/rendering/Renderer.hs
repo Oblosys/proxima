@@ -329,7 +329,6 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
                                        , joinStyle = JoinRound }
         ; drawPolygon dw gc False pts
-        ; putStrLn $ "Poly: "++show pts ++ show (x,y,w,h)
         ; gcSetClipRegion gc oldClipRegion
         
         }
