@@ -35,9 +35,10 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
           
     ; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
 --    ; debugLnIO Err ("Diff tree"++show dt)
-    --; debugLnIO Err ("Presentation"++show pres)
-    --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
-   
+--    ; debugLnIO Err ("Presentation"++show pres)
+--    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
+--    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
+    
     ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldViewedArea oldArrangement
     ; when (maxFDepth > 1) $
         debugLnIO Err "Nested formatters may be arranged incorrectly"
