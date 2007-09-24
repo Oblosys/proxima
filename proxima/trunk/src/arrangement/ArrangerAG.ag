@@ -6,6 +6,7 @@ import CommonUtils
 import ArrLayerTypes
 import ArrLayerUtils
 import FontLib
+import Maybe
 import Debug.Trace
 }
 
@@ -1146,37 +1147,48 @@ If a row/col/etc. has different nrs of children in the presentation and the old 
 the node in the diffTree is (DiffLeaf False), and therefore, the list of children will not be used.
 
 A ColP may be a column in the presentation, or a generated column originating from a formatter.
-In the latter case, the arrangement will be a column of rows, from which we extract the old
+In the latter case, the arrangement will be a column of rows, from which we retrieve the old
 arrangements and redistribute them according to the new column of rows structure.
 
+
 Similarly, a FormatterP will have a column of rows as its old arrangement, from which the old arrangements
-are extracted.
+are retrieved.
+
+In both these cases, we must take into account that the column of rows may contain unarranged rows. Because
+unarranged rows do not contain info on how many children the row has, we cannot continue the extraction after
+encountering an unarranged row.
 
 TODO rewrite with getChildrenA etc.
-
+TODO linesFromBreaks produces an extra empty line, when given list of nrs of elts. Is this a problem?
 -}
 SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      Just (RowA _ _ _ _ _ _ _ _ arrs) -> --debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
-                                                                          map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in RowP") Nothing)
+                                      Just (RowA idp _ _ _ _ _ _ _ arrs) -> debug Err ("ArrRow "++show idp++" has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
+                                                                          map Just arrs ++ repeat (debug Err ("ERROR: old arr list of differing length accessed in RowP") Nothing)
                                       arr                              -> repeat Nothing
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of
                                       Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
                                         case @formatted of
                                           NF -> map Just rows -- rows not the right name in this case
-                                                ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in ColP NF") Nothing)
+                                                ++ repeat (debug Err ("ERROR: old arr list of differing length accessed in ColP NF") Nothing)
                                           F nrOfEltss ->
-                                            let arrs = concatMap getChildrenA rows
-                                                breaks = tail (scanl (+) 0 nrOfEltss)
-                                                mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
-                                            in  (map (Just . mkDummyRow) $ linesFromBreaks breaks arrs)
-                                                 ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in ColP F") Nothing)
+                                           let arrs = retrieveOldArrangements rows -- may be infinite
+                                               breaks = tail (scanl (+) 0 nrOfEltss)
+                                               maybeRows = linesFromBreaks breaks arrs
+                                            in  debug Arr ("breaks are "++ show breaks ++ "line lens:" ++ show (map length (init (linesFromBreaks breaks arrs)))) $ 
+                                                (map Just $ makeDummyRows maybeRows)
+                                                 ++ repeat (debug Err ("ERROR: old arr list of differing length accessed in ColP F") Nothing)
                                       _ -> repeat Nothing
 --TODO!! Check that dummyrow is never used, and make annotation in source                                        
 -- If the ColP came from a formatter, we take the old arrangements of the child rows, and distribute
 -- them according to the new child distribution in new Rows.
+  | FormatterP -- TODO add check for Nothing
+      presentationList.oldArrList = case @lhs.oldArr of
+                                      Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
+                                        retrieveOldArrangements rows -- possibly infinite list is handled all right by oldArrList attribution rules
+                                      Nothing -> repeat Nothing
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       Just (OverlayA _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in OverlayP") Nothing)
@@ -1201,13 +1213,35 @@ SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
       child.oldArr = case @lhs.oldArr of
                        Just (LocatorA _ arr) -> Just arr
                        arr                   -> Nothing
-  | FormatterP -- TODO add check for Nothing
-      presentationList.oldArrList = case @lhs.oldArr of
-                                      Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
-                                        let arrs = concatMap getChildrenA rows
-                                        in  --debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
-                                            map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in FormatterP") Nothing)
-                                      Nothing -> repeat Nothing
+{
+-- After encountering an unarranged row, just return Nothings
+retrieveOldArrangements [] = []
+retrieveOldArrangements (RowA _ _ _ _ _ _ _ _ elts : rows) = 
+  map Just elts
+  ++ retrieveOldArrangements rows
+retrieveOldArrangements (PolyA _ _ _ _ _ _ _ _ _ _ _ _ _ : _) = repeat Nothing
+retrieveOldArrangements (arr:_) = debug Err ("ArrangerAG: retrieveOldArrangements encountered something other than row or poly:"++shallowShowArr arr) $ repeat Nothing
+
+-- create dummy rows for a list of lists of maybe arrangements. In case of Nothing, we put an unnarranged in the
+-- row, so the attribution rule for oldArr will assign a Nothing to the attribute.
+makeDummyRows [] = []
+makeDummyRows (maybeRow:maybeRows) =
+  RowA (IDA (-88)) 0 0 0 0 0 0 black 
+    [ case mArr of 
+        Nothing -> unarrangedA 0 0 0 0 0 0
+        Just arr -> arr
+    | mArr <- maybeRow
+    ]
+  : makeDummyRows maybeRows
+{-
+makeDummyRows [] = []
+makeDummyRows (maybeRow:maybeRows) =
+  (if all isJust maybeRow 
+   then RowA (IDA (-88)) 0 0 0 0 0 0 black $ catMaybes maybeRow
+   else debug Arr "Unarrangeable" unarrangedA 0 0 0 0 0 0)
+  : makeDummyRows maybeRows
+-}
+}
 
 SEM PresentationList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
   | Cons 
