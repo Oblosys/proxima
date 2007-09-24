@@ -68,6 +68,9 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres ::
                                                viewedArea
                
             ; let usedFonts = nub allFonts
+-- When implementing cleanup of unused fonts (might not be necessary), note that pruned presentations
+-- may yield incomplete list of fonts
+
 --            ; debugLnIO Arr ("The fonts are:"++show usedFonts)
             ; queriedMetrics <- readIORef fontMetricsRef
             
