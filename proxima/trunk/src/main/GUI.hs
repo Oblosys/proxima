@@ -317,14 +317,18 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
           
               -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
-            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
-            ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
-            ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False x y (w-1) (h-1)) updRegions
-                                       -- outline rectangles are 1 px too large
-            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
-            ; let ((x,y),(w,h)) = viewedArea
-            ; drawRectangle dw gc False x y w h 
-
+            ; when markUpdatedRenderingArea $
+               do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
+                  ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+                  ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False x y (w-1) (h-1)) updRegions
+                  }                     -- outline rectangles are 1 px too large
+                   
+            ; when reducedViewedArea $
+               do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
+                  ; let ((x,y),(w,h)) = viewedArea
+                  ; drawRectangle dw gc False x y w h 
+                  }
+                  
             ; return True
             }
     }
@@ -336,9 +340,10 @@ getViewedArea vp =
     ; hA <- viewportGetHAdjustment vp
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
-    ; return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
---    ; return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))
-        -- return a smaller viewed area, for testing incrementality algorithms.
+    ; if reducedViewedArea -- return a smaller viewed area, for testing incrementality algorithms.
+      then return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))
+      else return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+           
     }
     
 resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =

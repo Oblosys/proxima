@@ -978,17 +978,17 @@ SEM Presentation
                                  --           ++ show (@lhs.x == xA oldArr && @lhs.y == yA oldArr )   ++show oldArr ) $
                                  arrangeWhenViewed @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                                   setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                                   (if markArrangementBackground then setBGColor red else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                                    @unprunedPresHO.arrangement
                             else  
                                  arrangeWhenViewed @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y (widthA oldArr) (heightA oldArr) (hRefA oldArr) (vRefA oldArr) {-@finalWidth @finalHeight @finalHRef @finalVRef-} @lhs.viewedArea NoIDA $
-                                   setBGColor yellow $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                                   (if markArrangementBackground then setBGColor yellow else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                                    setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight oldArr 
                           Nothing ->
                             arrangeWhenViewed @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                              setBGColor blue $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                              (if markArrangementBackground then setBGColor blue else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                               @unprunedPresHO.arrangement
 
                                 -- do we need to set width and height? These should not have changed

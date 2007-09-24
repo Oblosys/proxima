@@ -112,3 +112,13 @@ getTimerValue timer =
     }
 
 
+
+
+-- Constants for switching on incrementality, background coloring, etc.
+
+rendererIncrementality = True
+arrangerIncrementality = True
+
+reducedViewedArea = False            -- use a smaller rectangle as viewed area to see what happens outside it
+markArrangementBackground = False    -- mark what parts of the arrangement were reused from the previous one
+markUpdatedRenderingArea = False     -- updated parts of the rendering are surrounded by red rectangles
