@@ -7,7 +7,6 @@ import ArrLayerTypes
 import ArrLayerUtils
 
 import ArrangerAG
---import FontLibGTK
 import FontLib
 import Data.IORef
 import System.IO
@@ -28,11 +27,13 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let oldViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
---          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres
-          prunedPres = prunePres dt pres
+--          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres -- old prune
+
+          prunedPres = prunePres dt pres  -- uncomment this line for incremental arrangement
+--          prunedPres = prunePres (DiffLeaf False) pres -- and this one for non-incremental
           
     ; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
-    --; debugLnIO Err ("Diff tree"++show dt)
+--    ; debugLnIO Err ("Diff tree"++show dt)
     --; debugLnIO Err ("Presentation"++show pres)
     --; debugLnIO Err ("Pruned Presentation"++show prunedPres)
    
@@ -67,8 +68,7 @@ fixed fontMetricsRef focus (pres :: Presentation doc node clip) (unprunedPres ::
                                                viewedArea
                
             ; let usedFonts = nub allFonts
-             
-           -- ; debugLnIO Arr ("The fonts are:"++show usedFonts)
+--            ; debugLnIO Arr ("The fonts are:"++show usedFonts)
             ; queriedMetrics <- readIORef fontMetricsRef
             
             ; let queriedFonts = Map.keys queriedMetrics

@@ -6,6 +6,7 @@ import CommonUtils
 import ArrLayerTypes
 import ArrLayerUtils
 import FontLib
+import Debug.Trace
 }
 
 
@@ -945,30 +946,51 @@ SEM Presentation
   | ArrangedP
       lhs.arrangement = case @lhs.oldArr of
                           Just oldArr -> 
-                            if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
-                               && 
-                                  (not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
-                               && not (isComplete oldArr)  ||
-                               @lhs.viewedArea /= @lhs.oldViewedArea )
+                            
+                            if 
+                               overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                               && not (isComplete oldArr) 
+                               && (    not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
+                                    || @lhs.viewedArea /= @lhs.oldViewedArea )
                                
-                            then debug Arr ("Failed reuse: "++ show (not (isComplete oldArr))
-                                            ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
-                                            ++ show (@lhs.x == xA oldArr && @lhs.y == yA oldArr )   ++show oldArr ) $
+                            then --debug Arr ("Failed reuse: "++ show (not (isComplete oldArr))
+                                 --           ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
+                                 --           ++ show (@lhs.x == xA oldArr && @lhs.y == yA oldArr )   ++show oldArr ) $
                                  arrangeWhenViewed @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
                                    setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
-                                   setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
+                                   @unprunedPresHO.arrangement
                             else  
                                  arrangeWhenViewed @lhs.absx @lhs.absy
-                                              @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
+                                              @lhs.x @lhs.y (widthA oldArr) (heightA oldArr) (hRefA oldArr) (vRefA oldArr) {-@finalWidth @finalHeight @finalHRef @finalVRef-} @lhs.viewedArea NoIDA $
                                    setBGColor yellow $      -- @finalVRef @finalHRef are taken from the arrangedP node
-                                   setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight oldArr 
+                                   setXYWHA @lhs.x @lhs.y (widthA oldArr) (heightA oldArr) {-@finalWidth @finalHeight-} oldArr 
                           Nothing ->
                             arrangeWhenViewed @lhs.absx @lhs.absy
-                                              @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
-                              setBGColor red $      -- @finalVRef @finalHRef are taken from the arrangedP node
-                              setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight @unprunedPresHO.arrangement
- 
+                                              @lhs.x @lhs.y 100 100 0 0 {-@finalWidth @finalHeight @finalHRef @finalVRef-} @lhs.viewedArea NoIDA $
+                              setBGColor blue $      -- @finalVRef @finalHRef are taken from the arrangedP node
+                              @unprunedPresHO.arrangement
+
+                                -- do we need to set width and height? These should not have changed
+                                -- the last one seems wrong for sure 
+{-
+minWidth
+minHeight
+hStretch
+vStretch
+vRef
+hRef
+finalHeight
+finalWidth
+finalVRef
+finalHRef
+maxFormatterDepth
+allFonts
+arrangement
+vertex
+unprunedPres 
+
+-}
 
   | ArrangedP       -- not exactly clear how to assign these attributes using the old values
                           -- what if the AG computes a different value for the refs, reassign?
@@ -990,6 +1012,7 @@ SEM Presentation
       loc.hRef        = case @lhs.oldArr of
                           Just oldArr -> hRefA oldArr
                           Nothing     -> @unprunedPresHO.hRef
+ 
       loc.finalWidth  = case @lhs.oldArr of
                           Just oldArr -> widthA oldArr
                           Nothing     -> @unprunedPresHO.finalWidth
@@ -1002,55 +1025,63 @@ SEM Presentation
       loc.finalHRef   = case @lhs.oldArr of
                           Just oldArr -> hRefA oldArr
                           Nothing     -> @unprunedPresHO.finalHRef
+
       loc.maxFormatterDepth = case @lhs.oldArr of
                                 Just oldArr -> 0 
                                 Nothing     -> @unprunedPresHO.maxFormatterDepth
-      loc.allFonts = case @lhs.oldArr of
+
+      unprunedPresHO.allFonts = @lhs.allFonts -- to prevent copy rule from getting childs inherited allFonts
+                                              -- from loc.allFonts, creating a cycle
+
+      loc.allFonts = case @lhs.oldArr of  
                        Just oldArr -> @lhs.allFonts
                        Nothing     -> @unprunedPresHO.allFonts
-      
-      -- fonts returned by pruned presentation are not comlete. As long as fonts are not deleted,
+      loc.vertex = case @lhs.oldArr of
+                       Just oldArr -> debug Err "Warning: ArrangedP instead of VertexP" (0,0,0,\_->(0,0))
+                       Nothing     -> @unprunedPresHO.vertex
+  
+      -- fonts returned by pruned presentation are not complete. As long as fonts are not deleted,
       -- this is not a problem.
+      
       inst.unprunedPresHO : Presentation
       inst.unprunedPresHO = case @lhs.oldArr of
-                              Just oldArr -> if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
-                                 && 
-                                    (not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
-                                 && not (isComplete oldArr)  ||
-                                 @lhs.viewedArea /= @lhs.oldViewedArea )
-                                            then @lhs.unprunedPres
-                                             else EmptyP NoIDP 
+                              Just oldArr -> 
+                                if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
+                                   && not (isComplete oldArr)
+                                   && (   not (@lhs.x == xA oldArr && @lhs.y == yA oldArr )
+                                       || @lhs.viewedArea /= @lhs.oldViewedArea )
+                                then @lhs.unprunedPres
+                                else EmptyP NoIDP 
                               Nothing -> @lhs.unprunedPres -- no oldArr, so we always use the presentation
-
-
+                             
 ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
 SEM Presentation
   | VertexP
       lhs.vertex = (@i,@x,@y,@outline)
   | EmptyP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | StringP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | RectangleP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | EllipseP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ImageP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | PolyP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | RowP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ColP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | OverlayP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | GraphP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | ArrangedP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
   | FormatterP
-      lhs.vertex = showDebug' Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
+      lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
 
 
 SEM PresentationList [ || vertices : {[(Int,Int,Outline)]} ]
@@ -1063,11 +1094,33 @@ ATTR Root [ unprunedPres : {Presentation doc node clip} | | ]
 
 SEM Presentation [ unprunedPres : {Presentation doc node clip} | | ]
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
-  | RowP ColP OverlayP GraphP FormatterP
-      presentationList.unprunedPresList = getChildrenP @lhs.unprunedPres
+  | RowP OverlayP GraphP FormatterP
+      presentationList.unprunedPresList = debug Arr ("Lengths "++show (length (getChildrenP @lhs.unprunedPres))
+                                                        ++","  ++show (length @presentationList.minWidthList)
+                                                               ++show (map shallowShowPres (getChildrenP @lhs.unprunedPres))
+                                                        ++","  ++show (map shallowShowPres (getChildrenP @self))
+                                                               ) $
+                                          getChildrenP @lhs.unprunedPres
+                                          ++ repeat (debug Err ("ERROR:unprunedPres list of differing length accessed") (StringP NoIDP "X"))
+
   | VertexP WithP StructuralP ParsingP LocatorP 
       child.unprunedPres = getChildP @lhs.unprunedPres
-      
+  | ColP 
+      presentationList.unprunedPresList =
+        case @formatted of
+          NF -> getChildrenP @lhs.unprunedPres
+                ++ repeat (debug Err ("ERROR:unprunedPres list of differing length accessed") (EmptyP NoIDP))
+          F nrOfEltss ->
+            let press = concatMap getChildrenP (getChildrenP @lhs.unprunedPres)
+                breaks = tail (scanl (+) 0 nrOfEltss)
+                mkDummyRow = RowP NoIDP 0
+            in  (map mkDummyRow $ linesFromBreaks breaks press)
+                ++ repeat (debug Err ("ERROR:unprunedPres list of differing length accessed") (EmptyP NoIDP))
+-- for a column that came from a formatter, we distribute the unpruned presentation over the
+-- column of rows.
+
+-- The unprunedPres for @inst.unfoldedFormatter HO attribute is copied directly from its FormatterP parent
+       
 SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
   | Cons 
       hd.unprunedPres     = head @lhs.unprunedPresList
@@ -1075,33 +1128,51 @@ SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
 
 ATTR Root         [ oldArr : {Maybe (Arrangement node)}  | | ]
 
+
+{-
+Old arrangement is passed along according to the structure of the presentation tree.
+
+If a row/col/etc. has different nrs of children in the presentation and the old arrangement,
+the node in the diffTree is (DiffLeaf False), and therefore, the list of children will not be used.
+
+A ColP may be a column in the presentation, or a generated column originating from a formatter.
+In the latter case, the arrangement will be a column of rows, from which we extract the old
+arrangements and redistribute them according to the new column of rows structure.
+
+Similarly, a FormatterP will have a column of rows as its old arrangement, from which the old arrangements
+are extracted.
+
+TODO: Maybe put a warning debug around Nothings as well?
+-}
 SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       Just (RowA _ _ _ _ _ _ _ _ arrs) -> --debug Err ("ArrRow has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
-                                                                          map Just arrs
+                                                                          map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                       arr                              -> repeat Nothing
   | ColP 
       presentationList.oldArrList = case @lhs.oldArr of
                                       Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
                                         case @formatted of
                                           NF -> map Just rows -- rows not the right name in this case
+                                                ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                           F nrOfEltss ->
                                             let arrs = concatMap getChildrenA rows
                                                 breaks = tail (scanl (+) 0 nrOfEltss)
                                                 mkDummyRow = RowA NoIDA 0 0 0 0 0 0 black
-                                            in  map (Just . mkDummyRow) $ linesFromBreaks breaks arrs 
+                                            in  (map (Just . mkDummyRow) $ linesFromBreaks breaks arrs)
+                                                 ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                       _ -> repeat Nothing
 --TODO!! Check that dummyrow is never used, and make annotation in source                                        
 -- If the ColP came from a formatter, we take the old arrangements of the child rows, and distribute
 -- them according to the new child distribution in new Rows.
   | OverlayP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      Just (OverlayA _ _ _ _ _ _ _ _ arrs) -> map Just arrs
+                                      Just (OverlayA _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                       arr                                  -> repeat Nothing
   | GraphP 
       presentationList.oldArrList = case @lhs.oldArr of
-                                      Just (GraphA _ _ _ _ _ _ _ _ _ arrs) -> map Just arrs
+                                      Just (GraphA _ _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                       arr                                  -> repeat Nothing
   | VertexP 
       child.oldArr = case @lhs.oldArr of 
@@ -1124,7 +1195,7 @@ SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
                                       Just (ColA _ _ _ _ _ _ _ _ _ rows) -> 
                                         let arrs = concatMap getChildrenA rows
                                         in  --debug Err ("Formatter has "++ show (length arrs) ++ " arr children and "++ show (@presentationList.nrOfChildren) ++ " pres children") $
-                                            map Just arrs
+                                            map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed") Nothing)
                                       Nothing -> repeat Nothing
 
 SEM PresentationList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
