@@ -57,6 +57,15 @@ pathFromXY xy pres = pathFromXYPres xy pres
 
 -- experimental diff
 -- attributes are still ignored.
+
+-- blue and red spaces after parse: diff sees difference for the words after the edit point, but 
+-- the spaces are the same and will be reused. However, when the number of words is increased, words on 
+-- the right side may try to reuse from unarranged words, leading to blue spaces. decreasing the amount 
+-- of words produces these at the left. Red spaces occur when the arrangement that was reused was 
+-- partially visible.
+
+-- a smarter diff for rows and columns may try to approach from both directions.
+ 
 -- skip WithP StructuralP ParsingP and LocatorP elts
 diffPres :: Presentation doc node clip -> Presentation doc node clip -> DiffTree
 
