@@ -71,14 +71,13 @@ SEM Root
                            -}      
                            -- , col $ replicate 15 $ row $ replicate 20 $ text "bla"
                            --  text "Contents"
-                           --, col @sections.tocPress
-                             @graph.pres
+                               @graph.pres
                            --, @tree.pres
                            --, parsing $ formatter $ replicate 50 $ text "bla"
                            , col @sections.press `withFontSize` 12  `withWidth` 800 
                            --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
                            , text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
-                          --, col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
+                           , col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
                           --, col $ map row $ divide 3 @sections.press
                            , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
@@ -120,17 +119,25 @@ ATTR Section [||tocPres : Presentation_Doc_Node_Clip ]
 SEM Section
   | Section
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres], empty `withHStretch` True ] `withFontSize_` (percent 150)  
+                     (col $ [ row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres], empty `withHStretch` True ] `withFontSize_` (percent 150)  
                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
                            , row [ @subgraph.pres, empty `withHStretch` True ]
-                           ]
+                           ])
+                     `addPopupItems` [ ("Delete Section", deleteSection) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                       row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+
+{
+deleteSection :: UpdateDoc Document clip
+deleteSection (DocumentLevel d path cl) = debug Prs ("Path is " ++ show path) $
+  (DocumentLevel d path cl)
+
+}
 
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     row [ hSpace 5
+                     row [ text " "
                          , boxed $ graph 400 340 @edges.edges @vertices.press
                          ]
       
