@@ -119,6 +119,11 @@ getTimerValue timer =
 rendererIncrementality = True
 arrangerIncrementality = True
 
-reducedViewedArea = False            -- use a smaller rectangle as viewed area to see what happens outside it
-markArrangementBackground = False    -- mark what parts of the arrangement were reused from the previous one
-markUpdatedRenderingArea = False     -- updated parts of the rendering are surrounded by red rectangles
+-- use a smaller rectangle as viewed area to see what happens outside it
+reducedViewedArea = False            
+
+-- mark what parts of the arrangement were reused from the previous one
+markArrangementBackground = False    
+
+-- updated parts of the rendering are surrounded by red rectangles
+markUpdatedRenderingArea = False     
