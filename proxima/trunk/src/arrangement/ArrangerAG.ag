@@ -1164,7 +1164,7 @@ TODO linesFromBreaks produces an extra empty line, when given list of nrs of elt
 SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
-                                      Just (RowA idp _ _ _ _ _ _ _ arrs) -> debug Err ("ArrRow "++show idp++" has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
+                                      Just (RowA idp _ _ _ _ _ _ _ arrs) -> -- debug Err ("ArrRow "++show idp++" has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
                                                                           map Just arrs ++ repeat (debug Err ("ERROR: old arr list of differing length accessed in RowP") Nothing)
                                       arr                              -> repeat Nothing
   | ColP 
@@ -1177,7 +1177,7 @@ SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
                                            let arrs = retrieveOldArrangements rows -- may be infinite
                                                breaks = tail (scanl (+) 0 nrOfEltss)
                                                maybeRows = linesFromBreaks breaks arrs
-                                            in  debug Arr ("breaks are "++ show breaks ++ "line lens:" ++ show (map length (init (linesFromBreaks breaks arrs)))) $ 
+                                            in -- debug Arr ("breaks are "++ show breaks ++ "line lens:" ++ show (map length (init (linesFromBreaks breaks arrs)))) $ 
                                                 (map Just $ makeDummyRows maybeRows)
                                                  ++ repeat (debug Err ("ERROR: old arr list of differing length accessed in ColP F") Nothing)
                                       _ -> repeat Nothing
