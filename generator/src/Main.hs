@@ -1,6 +1,7 @@
 module Main where
 
 import System
+import List
 
 import GenCommon
 import GenParser
@@ -57,7 +58,7 @@ generate filename func parsedFile
           putStr $ "Generating "++filename++"..."  
           let includeTextLines = lines includeText
           if  elem defaultLimit includeTextLines
-              then do let includeTypes = takeWhile (/= defaultLimit) (lines  includeText)
+              then do let includeTypes = takeWhile (isPrefixOf defaultLimit) (lines  includeText)
                       length includeTypes `seq` (writeFile (filename) . unlines . (func includeTypes)) parsedFile -- Reading file !!!
                       putStr $ " done\n"
               else do putStr $ " failed - Couldn't find: " ++ defaultLimit ++ "\n"
