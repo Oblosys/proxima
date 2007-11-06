@@ -75,6 +75,7 @@ diffPres :: Presentation doc node clip -> Presentation doc node clip -> DiffTree
 -- Formatted is ignored, since it does not affect rendering
 
 -- For graphs, doing compare does not work because pres and pres' are equal. Todo: Figure out why this is.
+--                                                                                 (is because the old pres coming from the left was already edited)
 -- Using the diffTree of the old pres does work. (but is not how we should do it)
 diffPres (WithP ar pres)       pres'                   = diffPres pres pres'
 diffPres pres                  (WithP ar' pres')       = diffPres pres pres'
@@ -101,8 +102,8 @@ diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' pres
 diffPres (ColP id rf _ press) (ColP id' rf' _ press')  = diffPress rf press rf' press'
 diffPres (OverlayP id press) (OverlayP id' press') = diffPress 0  press 0   press'
 diffPres (FormatterP id press) (FormatterP id' press')  = diffPress 0 press 0 press'
-diffPres (GraphP _ _ _ _ _ _) (GraphP _ dirty _ _ _ _) = DiffLeaf $ isClean dirty 
---diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = diffGraph g1 g2
+--diffPres (GraphP _ _ _ _ _ _) (GraphP _ dirty _ _ _ _) = DiffLeaf $ isClean dirty 
+diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = diffGraph g1 g2
 diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf _ press) _                    = DiffLeaf False
@@ -113,7 +114,7 @@ diffPres pr                  _                     = debug Err ("PresUtils.diffP
 
 diffGraph (GraphP _ d w h es vs) (GraphP _ d' w' h' es' vs') = -- Graph is all or nothing
   showDebug' Prs ("dirty bits are"++ show d ++ show d') $
-  DiffLeaf $ w == w' && h == h' && es == es' && isCleanDT (diffPress 0 vs 0 vs')
+  DiffLeaf $ isClean d' && w == w' && h == h' && es == es' && isCleanDT (diffPress 0 vs 0 vs')
 
 diffPress rf press rf' press' =
   let nrOfPress   = length press
