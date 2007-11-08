@@ -27,6 +27,15 @@ import GenProxParser
 --- use the name of the generated module for the module name, eg. GenDocumentEdit instead of GenEditable
 
 
+{- Generation
+TODO:
+
+make sure it is easy to generate for:
+types, types with generated list stuff, types without Document and EnrichedDoc
+
+-}
+
+
 ---------------------------------------------------------------------
 --       M A I N                                                   --
 ---------------------------------------------------------------------

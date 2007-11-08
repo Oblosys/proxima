@@ -135,13 +135,17 @@ genParserDecl (Decl typeName prods DeclDef)  =
       map genParserProd prods
 
 genParserProd :: Prod -> String
-genParserProd (Prod cnstr allFields) = "parseXMLCns_"++cnstr++" = "++cnstr++" NoIDD <$ " ++
+genParserProd (Prod cnstr allFields) =
+  "parseXMLCns_"++cnstr++" = "++cnstr++" "++
+     concatMap mkNoID (filter isID allFields) ++ "<$ " ++
   case filter (not. isID) allFields of 
     []      -> "emptyTag \""++cnstr++"\""
     fields  -> "startTag \""++cnstr++"\" <*> " ++ prependAndSepBy "parseXML_" " <*> " (map showField fields)++" <* endTag \""++cnstr++"\""
  where showField (Field _ typeName List) = "List_"++init typeName -- for some reason, this type has an extra s at the end
        showField (Field _ typeName _) = typeName
- 
+       mkNoID (Field nm "IDD" Id)  = "NoIDD "
+       mkNoID (Field nm "IDP" Id)  = "NoIDP "
+       mkNoID (Field nm _     Ids) = "[] "
 -- <PREF>item1<SEP><PREF>item2<SEP>..<SEP><PREF>itemN
 prependAndSepBy :: String -> String -> [String] -> String
 prependAndSepBy pref sep items = concat . intersperse sep . map (pref++) $ items
@@ -155,11 +159,6 @@ parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"
 -}
 
 
-{- Generation
-make sure it is easy to generate for:
-types, types with generated list stuff, types without Document and EnrichedDoc
-
--}
 
 --            [ "toXML"++d++" (Cons"++d++" _ x xs) = toXML"++(init d)++" x : toXML"++d++" xs" --not so nice
 --            , "toXML"++d++" (Nil"++d++" _)       = []"

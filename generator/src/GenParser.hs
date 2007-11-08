@@ -37,12 +37,13 @@ makeField (Just name) (tpName, tp) = Field name tpName tp
 
 
 pComments :: CharParser [Field]
-pComments =  (pToken "{") *> pList (makeField 
+pComments =  pToken "{" *> pList (makeField 
                                       <$> opt (Just <$> pVarid <* (pToken ":")) Nothing -- pList ((\a b ->Field a (fst b) (snd b)) <$> pVarid <* (pToken ":") 
-                                      <*> (  ((\a->(a, Id))<$>pConid) 
-                                      <|> ((\a->(a++"s", Ids))
-                                      <$> pDataList')))  
-           <* (pToken "}")
+                                      <*> (     (\a->(a, Id))       <$> pConid
+                                            <|> (\a->(a++"s", Ids)) <$> pDataList'
+                                          )
+                                 )  
+           <* pToken "}"
 
 pDataList :: CharParser String
 pDataList  = (\a b c ->a++b++c) <$> (pToken "[") <*> pConid <*> (pToken "]")
