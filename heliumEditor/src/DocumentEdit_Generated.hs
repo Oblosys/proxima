@@ -908,6 +908,11 @@ instance Editable Int_ Document Node ClipDoc where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+toList_Decl vs = List_Decl NoIDD (toConsList_Decl vs)
+
+fromList_Decl (List_Decl _ vs) = fromConsList_Decl vs
+fromList_Decl _                  = []
+
 toConsList_Decl [] = Nil_Decl
 toConsList_Decl (x:xs) = Cons_Decl x (toConsList_Decl xs)
 
@@ -962,6 +967,11 @@ instance Editable List_Decl Document Node ClipDoc where
 
   removeList n (List_Decl idd cxs) = Clip_List_Decl $ List_Decl idd (removeList_Decl n cxs)
   removeList _ xs                        = Clip_List_Decl $ xs
+
+toList_Alt vs = List_Alt NoIDD (toConsList_Alt vs)
+
+fromList_Alt (List_Alt _ vs) = fromConsList_Alt vs
+fromList_Alt _                  = []
 
 toConsList_Alt [] = Nil_Alt
 toConsList_Alt (x:xs) = Cons_Alt x (toConsList_Alt xs)
@@ -1018,6 +1028,11 @@ instance Editable List_Alt Document Node ClipDoc where
   removeList n (List_Alt idd cxs) = Clip_List_Alt $ List_Alt idd (removeList_Alt n cxs)
   removeList _ xs                        = Clip_List_Alt $ xs
 
+toList_Exp vs = List_Exp NoIDD (toConsList_Exp vs)
+
+fromList_Exp (List_Exp _ vs) = fromConsList_Exp vs
+fromList_Exp _                  = []
+
 toConsList_Exp [] = Nil_Exp
 toConsList_Exp (x:xs) = Cons_Exp x (toConsList_Exp xs)
 
@@ -1073,6 +1088,11 @@ instance Editable List_Exp Document Node ClipDoc where
   removeList n (List_Exp idd cxs) = Clip_List_Exp $ List_Exp idd (removeList_Exp n cxs)
   removeList _ xs                        = Clip_List_Exp $ xs
 
+toList_Slide vs = List_Slide NoIDD (toConsList_Slide vs)
+
+fromList_Slide (List_Slide _ vs) = fromConsList_Slide vs
+fromList_Slide _                  = []
+
 toConsList_Slide [] = Nil_Slide
 toConsList_Slide (x:xs) = Cons_Slide x (toConsList_Slide xs)
 
@@ -1127,6 +1147,11 @@ instance Editable List_Slide Document Node ClipDoc where
 
   removeList n (List_Slide idd cxs) = Clip_List_Slide $ List_Slide idd (removeList_Slide n cxs)
   removeList _ xs                        = Clip_List_Slide $ xs
+
+toList_Item vs = List_Item NoIDD (toConsList_Item vs)
+
+fromList_Item (List_Item _ vs) = fromConsList_Item vs
+fromList_Item _                  = []
 
 toConsList_Item [] = Nil_Item
 toConsList_Item (x:xs) = Cons_Item x (toConsList_Item xs)
