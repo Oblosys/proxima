@@ -27,9 +27,12 @@ toXMLDocument document = Elt "Document" [] []
 
 
 
-toXMLHeliumTypeInfo = Elt "HeliumTypeInfo" [] []
+toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 
 
+parseXML_Document = undefined -- RootDoc NoIDD <$ emptyTag "Document"
+
+parseXML_HeliumTypeInfo = undefined -- ([],[],[]) <$ emptyTag "HeliumTypeInfo"
 
 ---- constructors for boxed primitive types
 -- fix name clash in ProxParser 
@@ -522,3 +525,127 @@ shallowShowConsList_Item1 (Cons_Item  _ _) = "Cons_Item"
 shallowShowConsList_Item1 (Nil_Item ) = "Nil_Item"
 
 
+
+toXMLEnrichedDoc (RootEnr _ _ idListDecls decls heliumTypeInfo document) = Elt "RootEnr" [] $ toXMLList_Decl idListDecls ++ toXMLList_Decl decls ++ [toXMLHeliumTypeInfo heliumTypeInfo] ++ [toXMLDocument document] ++ []
+toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool_ expanded] ++ [toXMLBool_ autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
+toXMLDecl (BoardDecl _ _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board] ++ []
+toXMLDecl (PPPresentationDecl _ _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation] ++ []
+toXMLIdent (Ident _ _ _ string_) = Elt "Ident" [] $ [toXMLString_ string_] ++ []
+toXMLExp (PlusExp _ _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
+toXMLExp (TimesExp _ _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
+toXMLExp (DivExp _ _ exp1 exp2) = Elt "DivExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
+toXMLExp (PowerExp _ _ exp1 exp2) = Elt "PowerExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
+toXMLExp (BoolExp _ _ bool_) = Elt "BoolExp" [] $ [toXMLBool_ bool_] ++ []
+toXMLExp (IntExp _ _ int_) = Elt "IntExp" [] $ [toXMLInt_ int_] ++ []
+toXMLExp (LamExp _ _ _ ident exp) = Elt "LamExp" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
+toXMLExp (AppExp _ exp1 exp2) = Elt "AppExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
+toXMLExp (CaseExp _ _ _ exp alts) = Elt "CaseExp" [] $ [toXMLExp exp] ++ toXMLList_Alt alts ++ []
+toXMLExp (LetExp _ _ _ decls exp) = Elt "LetExp" [] $ toXMLList_Decl decls ++ [toXMLExp exp] ++ []
+toXMLExp (IdentExp _ ident) = Elt "IdentExp" [] $ [toXMLIdent ident] ++ []
+toXMLExp (IfExp _ _ _ _ exp1 exp2 exp3) = Elt "IfExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ [toXMLExp exp3] ++ []
+toXMLExp (ParenExp _ _ _ exp) = Elt "ParenExp" [] $ [toXMLExp exp] ++ []
+toXMLExp (ListExp _ _ _ _ exps) = Elt "ListExp" [] $ toXMLList_Exp exps ++ []
+toXMLExp (ProductExp _ _ _ _ exps) = Elt "ProductExp" [] $ toXMLList_Exp exps ++ []
+toXMLAlt (Alt _ _ _ ident exp) = Elt "Alt" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
+toXMLBoard (Board _ r1 r2 r3 r4 r5 r6 r7 r8) = Elt "Board" [] $ [toXMLBoardRow r1] ++ [toXMLBoardRow r2] ++ [toXMLBoardRow r3] ++ [toXMLBoardRow r4] ++ [toXMLBoardRow r5] ++ [toXMLBoardRow r6] ++ [toXMLBoardRow r7] ++ [toXMLBoardRow r8] ++ []
+toXMLBoardRow (BoardRow _ ca cb cc cd ce cf cg ch) = Elt "BoardRow" [] $ [toXMLBoardSquare ca] ++ [toXMLBoardSquare cb] ++ [toXMLBoardSquare cc] ++ [toXMLBoardSquare cd] ++ [toXMLBoardSquare ce] ++ [toXMLBoardSquare cf] ++ [toXMLBoardSquare cg] ++ [toXMLBoardSquare ch] ++ []
+toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Empty) = Elt "Empty" [] $ []
+toXMLPPPresentation (PPPresentation _ viewType slides) = Elt "PPPresentation" [] $ [toXMLBool_ viewType] ++ toXMLList_Slide slides ++ []
+toXMLSlide (Slide _ title itemList) = Elt "Slide" [] $ [toXMLString_ title] ++ [toXMLItemList itemList] ++ []
+toXMLItemList (ItemList _ listType items) = Elt "ItemList" [] $ [toXMLListType listType] ++ toXMLList_Item items ++ []
+toXMLListType (Bullet _) = Elt "Bullet" [] $ []
+toXMLListType (Number _) = Elt "Number" [] $ []
+toXMLListType (Alpha _) = Elt "Alpha" [] $ []
+toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString_ string] ++ []
+toXMLItem (HeliumItem _ exp) = Elt "HeliumItem" [] $ [toXMLExp exp] ++ []
+toXMLItem (ListItem _ itemList) = Elt "ListItem" [] $ [toXMLItemList itemList] ++ []
+toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
+toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
+toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
+toXMLList_Decl (List_Decl _ decls) = toXMLConsList_Decl decls
+toXMLConsList_Decl (Cons_Decl decl decls) = toXMLDecl decl : toXMLConsList_Decl decls
+toXMLConsList_Decl Nil_Decl             = []
+toXMLList_Alt (List_Alt _ alts) = toXMLConsList_Alt alts
+toXMLConsList_Alt (Cons_Alt alt alts) = toXMLAlt alt : toXMLConsList_Alt alts
+toXMLConsList_Alt Nil_Alt             = []
+toXMLList_Exp (List_Exp _ exps) = toXMLConsList_Exp exps
+toXMLConsList_Exp (Cons_Exp exp exps) = toXMLExp exp : toXMLConsList_Exp exps
+toXMLConsList_Exp Nil_Exp             = []
+toXMLList_Slide (List_Slide _ slides) = toXMLConsList_Slide slides
+toXMLConsList_Slide (Cons_Slide slide slides) = toXMLSlide slide : toXMLConsList_Slide slides
+toXMLConsList_Slide Nil_Slide             = []
+toXMLList_Item (List_Item _ items) = toXMLConsList_Item items
+toXMLConsList_Item (Cons_Item item items) = toXMLItem item : toXMLConsList_Item items
+toXMLConsList_Item Nil_Item             = []
+
+
+
+parseXML_EnrichedDoc = parseXMLCns_RootEnr
+parseXMLCns_RootEnr = RootEnr NoIDD NoIDP <$ startTag "RootEnr" <*> parseXML_List_Decl <*> parseXML_List_Decl <*> parseXML_HeliumTypeInfo <*> parseXML_Document <* endTag "RootEnr"
+parseXML_Decl = parseXMLCns_Decl <?|> parseXMLCns_BoardDecl <?|> parseXMLCns_PPPresentationDecl
+parseXMLCns_Decl = Decl NoIDD NoIDP NoIDP NoIDP NoIDP <$ startTag "Decl" <*> parseXML_Bool_ <*> parseXML_Bool_ <*> parseXML_Ident <*> parseXML_Exp <* endTag "Decl"
+parseXMLCns_BoardDecl = BoardDecl NoIDD NoIDP NoIDP <$ startTag "BoardDecl" <*> parseXML_Board <* endTag "BoardDecl"
+parseXMLCns_PPPresentationDecl = PPPresentationDecl NoIDD NoIDP NoIDP <$ startTag "PPPresentationDecl" <*> parseXML_PPPresentation <* endTag "PPPresentationDecl"
+parseXML_Ident = parseXMLCns_Ident
+parseXMLCns_Ident = Ident NoIDD NoIDP NoIDP <$ startTag "Ident" <*> parseXML_String_ <* endTag "Ident"
+parseXML_Exp = parseXMLCns_PlusExp <?|> parseXMLCns_TimesExp <?|> parseXMLCns_DivExp <?|> parseXMLCns_PowerExp <?|> parseXMLCns_BoolExp <?|> parseXMLCns_IntExp <?|> parseXMLCns_LamExp <?|> parseXMLCns_AppExp <?|> parseXMLCns_CaseExp <?|> parseXMLCns_LetExp <?|> parseXMLCns_IdentExp <?|> parseXMLCns_IfExp <?|> parseXMLCns_ParenExp <?|> parseXMLCns_ListExp <?|> parseXMLCns_ProductExp
+parseXMLCns_PlusExp = PlusExp NoIDD NoIDP <$ startTag "PlusExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "PlusExp"
+parseXMLCns_TimesExp = TimesExp NoIDD NoIDP <$ startTag "TimesExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "TimesExp"
+parseXMLCns_DivExp = DivExp NoIDD NoIDP <$ startTag "DivExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "DivExp"
+parseXMLCns_PowerExp = PowerExp NoIDD NoIDP <$ startTag "PowerExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "PowerExp"
+parseXMLCns_BoolExp = BoolExp NoIDD NoIDP <$ startTag "BoolExp" <*> parseXML_Bool_ <* endTag "BoolExp"
+parseXMLCns_IntExp = IntExp NoIDD NoIDP <$ startTag "IntExp" <*> parseXML_Int_ <* endTag "IntExp"
+parseXMLCns_LamExp = LamExp NoIDD NoIDP NoIDP <$ startTag "LamExp" <*> parseXML_Ident <*> parseXML_Exp <* endTag "LamExp"
+parseXMLCns_AppExp = AppExp NoIDD <$ startTag "AppExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "AppExp"
+parseXMLCns_CaseExp = CaseExp NoIDD NoIDP NoIDP <$ startTag "CaseExp" <*> parseXML_Exp <*> parseXML_List_Alt <* endTag "CaseExp"
+parseXMLCns_LetExp = LetExp NoIDD NoIDP NoIDP <$ startTag "LetExp" <*> parseXML_List_Decl <*> parseXML_Exp <* endTag "LetExp"
+parseXMLCns_IdentExp = IdentExp NoIDD <$ startTag "IdentExp" <*> parseXML_Ident <* endTag "IdentExp"
+parseXMLCns_IfExp = IfExp NoIDD NoIDP NoIDP NoIDP <$ startTag "IfExp" <*> parseXML_Exp <*> parseXML_Exp <*> parseXML_Exp <* endTag "IfExp"
+parseXMLCns_ParenExp = ParenExp NoIDD NoIDP NoIDP <$ startTag "ParenExp" <*> parseXML_Exp <* endTag "ParenExp"
+parseXMLCns_ListExp = ListExp NoIDD NoIDP NoIDP [] <$ startTag "ListExp" <*> parseXML_List_Exp <* endTag "ListExp"
+parseXMLCns_ProductExp = ProductExp NoIDD NoIDP NoIDP [] <$ startTag "ProductExp" <*> parseXML_List_Exp <* endTag "ProductExp"
+parseXML_Alt = parseXMLCns_Alt
+parseXMLCns_Alt = Alt NoIDD NoIDP NoIDP <$ startTag "Alt" <*> parseXML_Ident <*> parseXML_Exp <* endTag "Alt"
+parseXML_Board = parseXMLCns_Board
+parseXMLCns_Board = Board NoIDD <$ startTag "Board" <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <* endTag "Board"
+parseXML_BoardRow = parseXMLCns_BoardRow
+parseXMLCns_BoardRow = BoardRow NoIDD <$ startTag "BoardRow" <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <* endTag "BoardRow"
+parseXML_BoardSquare = parseXMLCns_Queen <?|> parseXMLCns_King <?|> parseXMLCns_Bishop <?|> parseXMLCns_Knight <?|> parseXMLCns_Rook <?|> parseXMLCns_Pawn <?|> parseXMLCns_Empty
+parseXMLCns_Queen = Queen NoIDD <$ startTag "Queen" <*> parseXML_Bool_ <* endTag "Queen"
+parseXMLCns_King = King NoIDD <$ startTag "King" <*> parseXML_Bool_ <* endTag "King"
+parseXMLCns_Bishop = Bishop NoIDD <$ startTag "Bishop" <*> parseXML_Bool_ <* endTag "Bishop"
+parseXMLCns_Knight = Knight NoIDD <$ startTag "Knight" <*> parseXML_Bool_ <* endTag "Knight"
+parseXMLCns_Rook = Rook NoIDD <$ startTag "Rook" <*> parseXML_Bool_ <* endTag "Rook"
+parseXMLCns_Pawn = Pawn NoIDD <$ startTag "Pawn" <*> parseXML_Bool_ <* endTag "Pawn"
+parseXMLCns_Empty = Empty <$ emptyTag "Empty"
+parseXML_PPPresentation = parseXMLCns_PPPresentation
+parseXMLCns_PPPresentation = PPPresentation NoIDD <$ startTag "PPPresentation" <*> parseXML_Bool_ <*> parseXML_List_Slide <* endTag "PPPresentation"
+parseXML_Slide = parseXMLCns_Slide
+parseXMLCns_Slide = Slide NoIDD <$ startTag "Slide" <*> parseXML_String_ <*> parseXML_ItemList <* endTag "Slide"
+parseXML_ItemList = parseXMLCns_ItemList
+parseXMLCns_ItemList = ItemList NoIDD <$ startTag "ItemList" <*> parseXML_ListType <*> parseXML_List_Item <* endTag "ItemList"
+parseXML_ListType = parseXMLCns_Bullet <?|> parseXMLCns_Number <?|> parseXMLCns_Alpha
+parseXMLCns_Bullet = Bullet NoIDD <$ emptyTag "Bullet"
+parseXMLCns_Number = Number NoIDD <$ emptyTag "Number"
+parseXMLCns_Alpha = Alpha NoIDD <$ emptyTag "Alpha"
+parseXML_Item = parseXMLCns_StringItem <?|> parseXMLCns_HeliumItem <?|> parseXMLCns_ListItem
+parseXMLCns_StringItem = StringItem NoIDD <$ startTag "StringItem" <*> parseXML_String_ <* endTag "StringItem"
+parseXMLCns_HeliumItem = HeliumItem NoIDD <$ startTag "HeliumItem" <*> parseXML_Exp <* endTag "HeliumItem"
+parseXMLCns_ListItem = ListItem NoIDD <$ startTag "ListItem" <*> parseXML_ItemList <* endTag "ListItem"
+parseXML_String_ = parseXMLCns_String_
+parseXMLCns_String_ = String_ NoIDD <$ startTag "String_" <*> parseXML_String <* endTag "String_"
+parseXML_Bool_ = parseXMLCns_Bool_
+parseXMLCns_Bool_ = Bool_ NoIDD <$ startTag "Bool_" <*> parseXML_Bool <* endTag "Bool_"
+parseXML_Int_ = parseXMLCns_Int_
+parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int_"
+parseXML_List_Decl = mkList List_Decl Cons_Decl Nil_Decl <$> many parseXML_Decl
+parseXML_List_Alt = mkList List_Alt Cons_Alt Nil_Alt <$> many parseXML_Alt
+parseXML_List_Exp = mkList List_Exp Cons_Exp Nil_Exp <$> many parseXML_Exp
+parseXML_List_Slide = mkList List_Slide Cons_Slide Nil_Slide <$> many parseXML_Slide
+parseXML_List_Item = mkList List_Item Cons_Item Nil_Item <$> many parseXML_Item
