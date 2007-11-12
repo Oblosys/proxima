@@ -42,9 +42,6 @@ int_ _ = 0
 
 
 
-
--- completely unclear why this one is not necessary in heliumEditor
--- somehow the generator generates different code there.
 toXMLDocument document = Elt "Document" [] []
 
 parseXML_Document = RootDoc NoIDD <$ startTag "RootEnr" <*> parseXML_Root  <* endTag "RootEnr"
