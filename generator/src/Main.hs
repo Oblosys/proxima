@@ -66,9 +66,9 @@ generate filename func parsedFile
           seq (length includeText) $ return ()
           putStr $ "Generating "++filename++"..."  
           let includeTextLines = lines includeText
-          if  elem defaultLimit includeTextLines
+          if  any (isPrefixOf defaultLimit) includeTextLines
               then do let includeTypes = takeWhile (not . isPrefixOf defaultLimit) (lines  includeText)
                       length includeTypes `seq` (writeFile (filename) . unlines . (func includeTypes)) parsedFile -- Reading file !!!
                       putStr $ " done\n"
-              else do putStr $ " failed - Couldn't find: " ++ defaultLimit ++ "\n"
-          
+              else do putStr $ " vailed - Couldn't find: " ++ defaultLimit ++ "\n"
+                      exitWith (ExitFailure 1)
