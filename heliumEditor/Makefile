@@ -125,7 +125,7 @@ HELIUMDIRS	= $(LVMLIBDIR)/common:$(LVMLIBDIR)/common/ghc:$(LVMLIBDIR)/lvm:$(LVML
 ALLSRCDIRS = src:$(PROXIMADIRS):$(HELIUMDIRS)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
-		-package gtk -package parsec -package mtl\
+		-package gtk -package parsec -package mtl -package time\
 		-fno-monomorphism-restriction $(EXTRA_OPTS)
 
 # The main target
