@@ -19,7 +19,7 @@
 
 # recursive make depend?
 
-HC   = /c/Progra~1/Visual~1/bin/ghc
+HC   = ghc
 FIND = /usr/bin/find
 
 PROXIMADIR = ../proxima
@@ -125,7 +125,7 @@ HELIUMDIRS	= $(LVMLIBDIR)/common:$(LVMLIBDIR)/common/ghc:$(LVMLIBDIR)/lvm:$(LVML
 ALLSRCDIRS = src:$(PROXIMADIRS):$(HELIUMDIRS)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
-		-package wx -package parsec -package mtl\
+		-package gtk -package parsec -package mtl\
 		-fno-monomorphism-restriction $(EXTRA_OPTS)
 
 # The main target
