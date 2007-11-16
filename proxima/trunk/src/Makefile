@@ -55,7 +55,7 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 
 HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction\
-		-package wx -package parsec\
+		-package parsec\
 		 -i$(IFACES) $(EXTRA_OPTS)
 
 
@@ -88,7 +88,7 @@ agc: $(AGC)
 
 $(AGC): always
 	@echo ghc: compiling uuagc compiler with -O2
-	@$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -fglasgow-exts -O2
+	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -fglasgow-exts -O2 -package mtl
 
 arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
