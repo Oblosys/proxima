@@ -4,6 +4,7 @@ import DocTypes
 import DocTypes_Generated
 import DocUtils
 import PresTypes
+import DebugLevels
 import Text.ParserCombinators.Parsec
 
 --instance Show Node where
@@ -21,8 +22,12 @@ instance Ord Node where
 
 -- XML
 
-toXMLRootDoc (RootDoc _ root)  = toXMLRoot root
-toXMLRootDoc _                 = Elt "ErrRoot" [] []
+-- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
+toXMLDocument (RootDoc _ root) = toXMLRoot root
+toXMLDocument _                = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
+                                   Elt "Root" [] [] -- this does not occur
+
+parseXML_Document = RootDoc NoIDD <$> parseXML_Root
 
   
 
@@ -41,10 +46,6 @@ int_ (Int_ _ i) = i
 int_ _ = 0
 
 
-
-toXMLDocument document = Elt "Document" [] []
-
-parseXML_Document = RootDoc NoIDD <$ startTag "RootEnr" <*> parseXML_Root  <* endTag "RootEnr"
 
 
 
@@ -315,48 +316,100 @@ shallowShowConsList_Edge1 (Nil_Edge ) = "Nil_Edge"
 
 
 toXMLEnrichedDoc (RootEnr _ root document) = Elt "RootEnr" [] $ [toXMLRoot root] ++ [toXMLDocument document] ++ []
+toXMLEnrichedDoc HoleEnrichedDoc = Elt "HoleEnrichedDoc" [] []
+toXMLEnrichedDoc (ParseErrEnrichedDoc _) = Elt "ParseErrEnrichedDoc" [] []
 toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
+toXMLString_ HoleString_ = Elt "HoleString_" [] []
+toXMLString_ (ParseErrString_ _) = Elt "ParseErrString_" [] []
 toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
+toXMLBool_ HoleBool_ = Elt "HoleBool_" [] []
+toXMLBool_ (ParseErrBool_ _) = Elt "ParseErrBool_" [] []
 toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
+toXMLInt_ HoleInt_ = Elt "HoleInt_" [] []
+toXMLInt_ (ParseErrInt_ _) = Elt "ParseErrInt_" [] []
 toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
+toXMLDummy HoleDummy = Elt "HoleDummy" [] []
+toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
 toXMLRoot (Root _ tree graph sections) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph] ++ toXMLList_Section sections ++ []
+toXMLRoot HoleRoot = Elt "HoleRoot" [] []
+toXMLRoot (ParseErrRoot _) = Elt "ParseErrRoot" [] []
 toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
 toXMLTree (Leaf _) = Elt "Leaf" [] $ []
+toXMLTree HoleTree = Elt "HoleTree" [] []
+toXMLTree (ParseErrTree _) = Elt "ParseErrTree" [] []
 toXMLSection (Section _ title paragraphs subsections subgraph) = Elt "Section" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections ++ [toXMLSubgraph subgraph] ++ []
+toXMLSection HoleSection = Elt "HoleSection" [] []
+toXMLSection (ParseErrSection _) = Elt "ParseErrSection" [] []
 toXMLSubsection (Subsection _ title paragraphs subsubsections) = Elt "Subsection" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsubsection subsubsections ++ []
+toXMLSubsection HoleSubsection = Elt "HoleSubsection" [] []
+toXMLSubsection (ParseErrSubsection _) = Elt "ParseErrSubsection" [] []
 toXMLSubsubsection (Subsubsection _ title paragraphs) = Elt "Subsubsection" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ []
+toXMLSubsubsection HoleSubsubsection = Elt "HoleSubsubsection" [] []
+toXMLSubsubsection (ParseErrSubsubsection _) = Elt "ParseErrSubsubsection" [] []
 toXMLParagraph (Paragraph _ words) = Elt "Paragraph" [] $ toXMLList_Word words ++ []
+toXMLParagraph HoleParagraph = Elt "HoleParagraph" [] []
+toXMLParagraph (ParseErrParagraph _) = Elt "ParseErrParagraph" [] []
 toXMLWord (Word _ word) = Elt "Word" [] $ [toXMLString_ word] ++ []
+toXMLWord HoleWord = Elt "HoleWord" [] []
+toXMLWord (ParseErrWord _) = Elt "ParseErrWord" [] []
 toXMLGraph (Graph _ dirty vertices edges) = Elt "Graph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
+toXMLGraph HoleGraph = Elt "HoleGraph" [] []
+toXMLGraph (ParseErrGraph _) = Elt "ParseErrGraph" [] []
 toXMLVertex (Vertex _ name shape id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLShape shape] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLVertex HoleVertex = Elt "HoleVertex" [] []
+toXMLVertex (ParseErrVertex _) = Elt "ParseErrVertex" [] []
 toXMLShape (Circle _) = Elt "Circle" [] $ []
 toXMLShape (Square _) = Elt "Square" [] $ []
+toXMLShape HoleShape = Elt "HoleShape" [] []
+toXMLShape (ParseErrShape _) = Elt "ParseErrShape" [] []
 toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
+toXMLEdge HoleEdge = Elt "HoleEdge" [] []
+toXMLEdge (ParseErrEdge _) = Elt "ParseErrEdge" [] []
 toXMLSubgraph (Subgraph _ dirty vertices edges) = Elt "Subgraph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
+toXMLSubgraph HoleSubgraph = Elt "HoleSubgraph" [] []
+toXMLSubgraph (ParseErrSubgraph _) = Elt "ParseErrSubgraph" [] []
 toXMLDirty (Dirty _) = Elt "Dirty" [] $ []
 toXMLDirty (Clean _) = Elt "Clean" [] $ []
+toXMLDirty HoleDirty = Elt "HoleDirty" [] []
+toXMLDirty (ParseErrDirty _) = Elt "ParseErrDirty" [] []
 toXMLList_Dummy (List_Dummy _ dummys) = toXMLConsList_Dummy dummys
+toXMLList_Dummy HoleList_Dummy = []
+toXMLList_Dummy (ParseErrList_Dummy _) = []
 toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLConsList_Dummy dummys
 toXMLConsList_Dummy Nil_Dummy             = []
 toXMLList_Section (List_Section _ sections) = toXMLConsList_Section sections
+toXMLList_Section HoleList_Section = []
+toXMLList_Section (ParseErrList_Section _) = []
 toXMLConsList_Section (Cons_Section section sections) = toXMLSection section : toXMLConsList_Section sections
 toXMLConsList_Section Nil_Section             = []
 toXMLList_Paragraph (List_Paragraph _ paragraphs) = toXMLConsList_Paragraph paragraphs
+toXMLList_Paragraph HoleList_Paragraph = []
+toXMLList_Paragraph (ParseErrList_Paragraph _) = []
 toXMLConsList_Paragraph (Cons_Paragraph paragraph paragraphs) = toXMLParagraph paragraph : toXMLConsList_Paragraph paragraphs
 toXMLConsList_Paragraph Nil_Paragraph             = []
 toXMLList_Subsection (List_Subsection _ subsections) = toXMLConsList_Subsection subsections
+toXMLList_Subsection HoleList_Subsection = []
+toXMLList_Subsection (ParseErrList_Subsection _) = []
 toXMLConsList_Subsection (Cons_Subsection subsection subsections) = toXMLSubsection subsection : toXMLConsList_Subsection subsections
 toXMLConsList_Subsection Nil_Subsection             = []
 toXMLList_Subsubsection (List_Subsubsection _ subsubsections) = toXMLConsList_Subsubsection subsubsections
+toXMLList_Subsubsection HoleList_Subsubsection = []
+toXMLList_Subsubsection (ParseErrList_Subsubsection _) = []
 toXMLConsList_Subsubsection (Cons_Subsubsection subsubsection subsubsections) = toXMLSubsubsection subsubsection : toXMLConsList_Subsubsection subsubsections
 toXMLConsList_Subsubsection Nil_Subsubsection             = []
 toXMLList_Word (List_Word _ words) = toXMLConsList_Word words
+toXMLList_Word HoleList_Word = []
+toXMLList_Word (ParseErrList_Word _) = []
 toXMLConsList_Word (Cons_Word word words) = toXMLWord word : toXMLConsList_Word words
 toXMLConsList_Word Nil_Word             = []
 toXMLList_Vertex (List_Vertex _ vertexs) = toXMLConsList_Vertex vertexs
+toXMLList_Vertex HoleList_Vertex = []
+toXMLList_Vertex (ParseErrList_Vertex _) = []
 toXMLConsList_Vertex (Cons_Vertex vertex vertexs) = toXMLVertex vertex : toXMLConsList_Vertex vertexs
 toXMLConsList_Vertex Nil_Vertex             = []
 toXMLList_Edge (List_Edge _ edges) = toXMLConsList_Edge edges
+toXMLList_Edge HoleList_Edge = []
+toXMLList_Edge (ParseErrList_Edge _) = []
 toXMLConsList_Edge (Cons_Edge edge edges) = toXMLEdge edge : toXMLConsList_Edge edges
 toXMLConsList_Edge Nil_Edge             = []
 

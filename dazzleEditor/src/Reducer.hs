@@ -70,28 +70,26 @@ reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = ret
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
   (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
-
-saveFile :: FilePath -> Document -> IO ()
-saveFile filePath doc =
- do { debugLnIO Prs "Saving file"
-    ; writeFile filePath $ showXML $ toXMLRootDoc doc
-    ; return ()
-    }
-
-
 initDoc :: IO Document
 initDoc = return defaultInitDoc
 
 openFile :: String -> IO (Maybe Document)
 openFile fileName =
  do { debugLnIO Prs $ "Opening file: "++fileName
-    ; result <- parseFromFile parseXML_Root fileName
+    ; result <- parseFromFile parseXML_Document fileName
     ; case result of
-        Right res -> return $ Just $ RootDoc NoIDD $ res
+        Right res -> return $ Just res
         Left err -> do { debugLnIO Err "Parse error"
                        ; debugLnIO Err $ show err
                        ; return $ Nothing
                        }
+    }
+
+saveFile :: FilePath -> Document -> IO ()
+saveFile filePath doc =
+ do { debugLnIO Prs "Saving file"
+    ; writeFile filePath $ showXML $ toXMLDocument doc
+    ; return ()
     }
   
 defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
