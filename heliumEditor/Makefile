@@ -80,7 +80,7 @@ src/PresentationAG.hs : $(AGC) \
 	src/LambdaReduce.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --module=PresentationAG src/PresentationAG.ag -P src
+	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=3 --module=PresentationAG src/PresentationAG.ag -P src
 
 # --module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
 
