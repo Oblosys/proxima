@@ -91,10 +91,12 @@ genToXML :: File -> [String]
 genToXML (File _ decls) = concatMap printDeclXML decls
 
 printDeclXML (Decl d _     DeclList)     =  []
-printDeclXML (Decl d prods DeclDef)      =  map (printProdXML d) prods
+printDeclXML (Decl d prods DeclDef)      =  map (printProdXML d) prods ++ printHoleParseErrXML d
 printDeclXML (Decl d prods DeclConsList) =  
-          let   decl =  drop 9 d
+          let   decl =  drop 9 d  -- d == "ConsList_"++decl
           in    [ "toXMLList_"++decl++" (List_"++decl++" _ "++(decapitalize decl)++"s) = toXMLConsList_"++decl++" "++(decapitalize decl)++"s"
+                , "toXMLList_"++decl++" HoleList_"++ decl ++ " = []" 
+                , "toXMLList_"++decl++" (ParseErrList_"++ decl ++ " _) = []" 
                 , "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXMLConsList_"++ decl++" "++(decapitalize decl)++"s"
                 , "toXMLConsList_"++decl++" Nil_"++decl++"             = []"
                 ]
@@ -107,13 +109,15 @@ printProdXML d (Prod p fields) =
                  argsXML = foldr  (\a b ->a++" ++ "++b) "[]" (map singleArg fieldsNotIDs)
              in  "toXML"++d++" ("++ p ++ (concatMap printVar fields)++") = Elt " ++ (show p)++" [] $ " ++ argsXML
 
+printHoleParseErrXML d = 
+                 [ "toXML"++d++" Hole"++ d ++ " = Elt \"Hole"++ d ++ "\" [] []" 
+                 , "toXML"++d++" (ParseErr"++ d ++ " _) = Elt \"ParseErr"++ d ++ "\" [] []" 
+                 ]                 
+
 printVar f@(Field var _ varType) =if (isID f) then " _" else " "++var
 
 getVar fields = map (\(Field var _ _)->var) (filter (not.isID) fields)
 
-typeList (Field varName varType _) = "toXML"++varType++" "++varName 
-
-listArg  d fields   = "map toXML"++d++" "++concat(showAsList(getVar fields))  
 
 singleArg :: Field -> String
 singleArg (Field varName varType List)= "toXMLList_"++init varType++" "++varName
