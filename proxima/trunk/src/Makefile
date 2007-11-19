@@ -54,11 +54,6 @@ AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 
-HC_OPTS = -static -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction\
-		-package parsec\
-		 -i$(IFACES) $(EXTRA_OPTS)
-
-
 # Proxima directories
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
