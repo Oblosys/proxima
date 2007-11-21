@@ -165,6 +165,7 @@ genHoles e DeclConsList =
 --- path is not an attribute of EnrichedDoc, but pIDc is.
 genAtt (File _ decls  ) = let all    = (map (\(Decl n _ _)-> n) decls) 
                               lists  = (map (\(Decl n _ _)-> n) (filter (\d -> isDeclList d || isDeclConsList d) decls)) 
+                              listChildren  = (map (\(Decl n _ _)-> drop 5 n) (filter (\d -> isDeclList d) decls)) 
                               noList = (map (\(Decl n _ _)-> n) (filter (\d -> not (isDeclList d || isDeclConsList d)) decls)) 
                           in   [---"\n\nATTR " ++ prListLine (filter (/="EnrichedDoc") all)
                               --- ,"       [ path : {[Int]} | | ]"  --- removed synthesize path attr
@@ -176,8 +177,9 @@ genAtt (File _ decls  ) = let all    = (map (\(Decl n _ _)-> n) decls)
                                ,"       [ path : {[Int]}  | | ]"   
                                ,"\n\nATTR " ++ prListLine lists ++ " [ | | press : {[Presentation_Doc_Node_Clip]} ]"
                                ,"\n\nATTR " ++ prListLine noList ++ " [ | | pres : Presentation_Doc_Node_Clip ]"
-                               ,"\n\nATTR " ++ prListLine (filter (/="EnrichedDoc") noList) ++ " [ ix : Int || ]"
-                                      ---  ix should only be defined for list children
+                               ,"\n\nATTR " ++ prListLine listChildren ++ " [ ix : Int || ]"
+                                      --  ix should only be defined for list children, so we remove
+                                      -- the "List_" of all lists
                                ]
 
 
