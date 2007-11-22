@@ -29,8 +29,8 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $
-                                 --   ++"\nhas result:") $
+                 in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+                                   ++"\nhas result:") $
                     if null errs then Just enr else Nothing
        
 deepShowTks i tok = case tok of
@@ -107,11 +107,20 @@ keywords =
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
+
 recognizeRootEnr :: ListParser Document Node ClipDoc EnrichedDoc
 recognizeRootEnr = pStr $ 
-          (\str idlistdcls decls-> reuseRootEnr [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls) Nothing Nothing)
+          (\str root -> reuseRootEnr [tokenNode str] Nothing (Just root) Nothing Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
-      <*> parseIDListList_Decl  {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
+      <*> recognizeRootE
+  <|>    RootEnr NoIDD (error "doc hole was parsed") (error "doc hole was parsed") (error "doc hole was parsed")
+     <$ pStructural HoleEnrichedDocNode
+
+recognizeRootE :: ListParser Document Node ClipDoc RootE
+recognizeRootE = pStr $ 
+          (\str {- idlistdcls -} decls-> reuseRootE [tokenNode str] Nothing Nothing Nothing {- (Just idlistdcls)-} (Just decls))
+      <$> pStructural RootENode
+     {- <*> parseIDListList_Decl -} {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 
 -- ?remove pStr from this parser?

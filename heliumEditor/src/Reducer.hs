@@ -10,6 +10,7 @@ import PresTypes -- for initDoc
 import DocTypes_Generated
 import DocUtils_Generated
 import System.Directory
+import Text.ParserCombinators.Parsec
 
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
@@ -26,8 +27,11 @@ reductionSheet state low high editLow =
 reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
             EditEnrichedDoc documentLevel EnrichedDoc ->
             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceIO state enrLvl docLvl                  (OpenFileEnr upd) = debug Err "EvalTranslate.reduce: OpenFile Not implemented yet" $ return (SkipDoc 0, state, enrLvl)
-
+reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
+																	    ; case mDoc' of
+																	        Just doc' -> return (SetDoc doc', state, enrLvl)
+																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
+																	    }
 reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
 -- on save, save xmlrep of previous doc. 
 reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
@@ -60,25 +64,37 @@ reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 -- just copy the enriched document
 reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip -> EnrichedDocLevel EnrichedDoc ->
              IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceEnrIO state (EnrichedDocLevel (RootEnr _ _ oldIdldcls oldDcls _ _) _) _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) =
+reduceEnrIO state (EnrichedDocLevel (RootEnr _ (RootE _  _ oldIdldcls oldDcls) _ _) _) _ 
+           enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp idldcls dcls) _ _) _) =
  do { let dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
           -- dcls' = dcls -- ignore updates on id list
-    ; return (SetDoc (RootDoc idd idp dcls'),state, enrDoc )
+    ; return (SetDoc (RootDoc idd1 (Root idd2 idp dcls')),state, enrDoc )
     }
 --
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd idp idldcls dcls _ _) _) = return $ -- other cases, just copy from decls
-  (SetDoc (RootDoc idd idp dcls),state, enrDoc )
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp idldcls dcls) _ _) _) = return $ -- other cases, just copy from decls
+  (SetDoc (RootDoc idd1 (Root idd2 idp dcls)),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
   (SetDoc (ParseErrDocument prs),state, enrDoc )
 
-
-
+openFile :: String -> IO (Maybe Document)
+openFile fileName = return Nothing
+{-
+ do { debugLnIO Prs $ "Opening file: "++fileName
+    ; result <- parseFromFile parseXML_Root fileName
+    ; case result of
+        Right res -> return $ Just $ RootDoc NoIDD $ res
+        Left err -> do { debugLnIO Err "Parse error"
+                       ; debugLnIO Err $ show err
+                       ; return $ Nothing
+                       }
+    }
+-}
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
-    ; writeFile filePath $ showXML $ toXMLRoot doc
+    ; writeFile filePath $ showXML $ toXMLDocument doc
     ; return ()
     }
 
@@ -89,7 +105,7 @@ initDoc =
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
-    ; return $ RootDoc NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
+    ; return $ RootDoc NoIDD $ Root NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
     
 -- lines' works for Unix, Mac, and Dos format

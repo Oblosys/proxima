@@ -86,20 +86,21 @@ editDoc state doclvl@(DocumentLevel doc pth clipD) EvaluateDoc'     =
 
 -- add the computed types to the enriched document root
 evalTypes :: EnrichedDoc -> EnrichedDoc
-evalTypes (RootEnr idd idp dcls dcls' oldTypes doc) = 
+evalTypes (RootEnr idd1 (RootE idd2 idp dcls dcls') oldTypes doc) = 
   let (errs, env, tps) = evaluate doc
   in  debug Prs ("ERRS AND TYPES: "++show errs++show tps) $
-      RootEnr idd idp dcls dcls' (errs, tps, env) doc
+      RootEnr idd1 (RootE idd2 idp dcls dcls') (errs, tps, env) doc
 
 
-getOldTypeInfo (RootEnr _ _ _ _ oldTypes _) = oldTypes 
+getOldTypeInfo (RootEnr _ _ oldTypes _) = oldTypes 
 getOldTypeInfo (HoleEnrichedDoc)                    = ([],[],[])
 getOldTypeInfo (ParseErrEnrichedDoc _)            = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
 evalDoc :: LayerStateEval -> DocumentLevel Document clip -> EnrichedDoc -> EnrichedDoc
-evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls@(ParseErrList_Decl _)) _ _) enr = RootEnr idd idp (List_Decl NoIDD Nil_Decl) dcls (getOldTypeInfo enr) doc
-evalDoc state (DocumentLevel doc@(RootDoc idd idp dcls) _ _) enr = RootEnr idd idp dcls dcls (getOldTypeInfo enr) doc
+--evalDoc state (DocumentLevel doc@(RootDoc idd1 (RootE idd2 idp dcls@(ParseErrList_Decl _))) _ _) enr = RootEnr idd idp (List_Decl NoIDD Nil_Decl) dcls (getOldTypeInfo enr) doc
+evalDoc state (DocumentLevel doc@(RootDoc idd1 (ParseErrRoot prs)) _ _) enr = RootEnr idd1 (ParseErrRootE prs) (getOldTypeInfo enr) doc
+evalDoc state (DocumentLevel doc@(RootDoc idd1 (Root idd2 idp dcls)) _ _) enr = RootEnr idd1 (RootE idd2 idp dcls dcls) (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc
 evalDoc state (DocumentLevel (ParseErrDocument pr) _ _) _ = ParseErrEnrichedDoc pr
 

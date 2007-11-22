@@ -1,6 +1,17 @@
-data EnrichedDoc = RootEnr idListDecls:[Decl] decls:[Decl] HeliumTypeInfo Document  { id:IDD idP:IDP } 
+data String_ = String_ string : String                   { idd : IDD }
+data Bool_   = Bool_   bool   : Bool                     { idd : IDD }
+data Int_    = Int_    int    : Int                      { idd : IDD }
+
+data Dummy = Dummy Root [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because of design error in generator
+
+-- Don't remove the declarations above
+
+data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document { id:IDD } 
 -- document ref is for popups only
-  
+
+data Root = Root decls:[Decl] { id:IDD idP:IDP } 
+
+data RootE = RootE idListDecls:[Decl] decls:[Decl] { id:IDD idP:IDP }
 -- lists have no pres elts of its own, so no ids for them. This also means we won't be able to recover Decls's id
 
 --  4 pres elts: "=", ";", TypeDecl, and "[...]"
@@ -59,13 +70,4 @@ data Item = StringItem string : String_                  { idd : IDD }
           | HeliumItem Exp                               { idd : IDD }
           | ListItem ItemList                            { idd : IDD }
 
-          
--- Primitive boxed string
--- use same name for field?
--- IDD's are never used, but generator fails on types without IDD
--- do we want holes for these?
--- fix scanner to ignore them.
-
-data String_ = String_ string : String                   { idd : IDD }
-data Bool_   = Bool_   bool   : Bool                     { idd : IDD }
-data Int_    = Int_    int    : Int                      { idd : IDD }
+     

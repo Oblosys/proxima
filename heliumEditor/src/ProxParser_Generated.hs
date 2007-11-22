@@ -25,11 +25,47 @@ import DocTypes_Generated
 -- ProxParser_Generated --
 
 -- Type specific
-reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
-reuseRootEnr nodes  ma0 ma1 ma2 ma3 ma4 ma5
+reuseString_ :: [Maybe Node] -> Maybe IDD -> Maybe String -> String_
+reuseString_ nodes  ma0 ma1
+  = case extractFromNodes extractString_ defaultString_ nodes of
+           (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseString_"
+
+reuseBool_ :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Bool_
+reuseBool_ nodes  ma0 ma1
+  = case extractFromNodes extractBool_ defaultBool_ nodes of
+           (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseBool_"
+
+reuseInt_ :: [Maybe Node] -> Maybe IDD -> Maybe Int -> Int_
+reuseInt_ nodes  ma0 ma1
+  = case extractFromNodes extractInt_ defaultInt_ nodes of
+           (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseInt_"
+
+reuseDummy :: [Maybe Node] -> Maybe IDD -> Maybe Root -> Maybe List_Dummy -> Maybe String_ -> Maybe Bool_ -> Maybe Int_ -> Dummy
+reuseDummy nodes  ma0 ma1 ma2 ma3 ma4 ma5
+  = case extractFromNodes extractDummy defaultDummy nodes of
+           (Dummy a0 a1 a2 a3 a4 a5) -> reuse6 Dummy a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
+           _ -> error "System error:<module>.reuseDummy"
+
+reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
+reuseRootEnr nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0 a1 a2 a3 a4 a5) -> reuse6 RootEnr a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
+           (RootEnr a0 a1 a2 a3) -> reuse4 RootEnr a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRootEnr"
+
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Root
+reuseRoot nodes  ma0 ma1 ma2
+  = case extractFromNodes extractRoot defaultRoot nodes of
+           (Root a0 a1 a2) -> reuse3 Root a0 a1 a2 ma0 ma1 ma2
+           _ -> error "System error:<module>.reuseRoot"
+
+reuseRootE :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
+reuseRootE nodes  ma0 ma1 ma2 ma3
+  = case extractFromNodes extractRootE defaultRootE nodes of
+           (RootE a0 a1 a2 a3) -> reuse4 RootE a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           _ -> error "System error:<module>.reuseRootE"
 
 reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool_ -> Maybe Bool_ -> Maybe Ident -> Maybe Exp -> Decl
 reuseDecl nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
@@ -259,23 +295,11 @@ reuseListItem nodes  ma0 ma1
            (ListItem a0 a1) -> reuse2 ListItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseListItem"
 
-reuseString_ :: [Maybe Node] -> Maybe IDD -> Maybe String -> String_
-reuseString_ nodes  ma0 ma1
-  = case extractFromNodes extractString_ defaultString_ nodes of
-           (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseString_"
-
-reuseBool_ :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Bool_
-reuseBool_ nodes  ma0 ma1
-  = case extractFromNodes extractBool_ defaultBool_ nodes of
-           (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseBool_"
-
-reuseInt_ :: [Maybe Node] -> Maybe IDD -> Maybe Int -> Int_
-reuseInt_ nodes  ma0 ma1
-  = case extractFromNodes extractInt_ defaultInt_ nodes of
-           (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseInt_"
+reuseList_Dummy :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
+reuseList_Dummy nodes  ma0 ma1
+  = case extractFromNodes extractList_Dummy defaultList_Dummy nodes of
+           (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseList_Dummy"
 
 reuseList_Decl :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Decl -> List_Decl
 reuseList_Decl nodes  ma0 ma1
@@ -307,9 +331,33 @@ reuseList_Item nodes  ma0 ma1
            (List_Item a0 a1) -> reuse2 List_Item a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Item"
 
+extractString_ :: Maybe Node -> Maybe String_
+extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
+extractString_ _ = Nothing
+
+extractBool_ :: Maybe Node -> Maybe Bool_
+extractBool_ (Just (Bool_Node x@(Bool_ _ _) _)) = Just x
+extractBool_ _ = Nothing
+
+extractInt_ :: Maybe Node -> Maybe Int_
+extractInt_ (Just (Int_Node x@(Int_ _ _) _)) = Just x
+extractInt_ _ = Nothing
+
+extractDummy :: Maybe Node -> Maybe Dummy
+extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _ _) _)) = Just x
+extractDummy _ = Nothing
+
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (RootEnrNode x@(RootEnr _ _ _ _ _ _) _)) = Just x
+extractRootEnr (Just (RootEnrNode x@(RootEnr _ _ _ _) _)) = Just x
 extractRootEnr _ = Nothing
+
+extractRoot :: Maybe Node -> Maybe Root
+extractRoot (Just (RootNode x@(Root _ _ _) _)) = Just x
+extractRoot _ = Nothing
+
+extractRootE :: Maybe Node -> Maybe RootE
+extractRootE (Just (RootENode x@(RootE _ _ _ _) _)) = Just x
+extractRootE _ = Nothing
 
 extractDecl :: Maybe Node -> Maybe Decl
 extractDecl (Just (DeclNode x@(Decl _ _ _ _ _ _ _ _ _) _)) = Just x
@@ -463,17 +511,9 @@ extractListItem :: Maybe Node -> Maybe Item
 extractListItem (Just (ListItemNode x@(ListItem _ _) _)) = Just x
 extractListItem _ = Nothing
 
-extractString_ :: Maybe Node -> Maybe String_
-extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
-extractString_ _ = Nothing
-
-extractBool_ :: Maybe Node -> Maybe Bool_
-extractBool_ (Just (Bool_Node x@(Bool_ _ _) _)) = Just x
-extractBool_ _ = Nothing
-
-extractInt_ :: Maybe Node -> Maybe Int_
-extractInt_ (Just (Int_Node x@(Int_ _ _) _)) = Just x
-extractInt_ _ = Nothing
+extractList_Dummy :: Maybe Node -> Maybe List_Dummy
+extractList_Dummy (Just (List_DummyNode x@(List_Dummy _ _) _)) = Just x
+extractList_Dummy _ = Nothing
 
 extractList_Decl :: Maybe Node -> Maybe List_Decl
 extractList_Decl (Just (List_DeclNode x@(List_Decl _ _) _)) = Just x
@@ -495,8 +535,26 @@ extractList_Item :: Maybe Node -> Maybe List_Item
 extractList_Item (Just (List_ItemNode x@(List_Item _ _) _)) = Just x
 extractList_Item _ = Nothing
 
+defaultString_ :: String_
+defaultString_ = String_ NoIDD hole
+
+defaultBool_ :: Bool_
+defaultBool_ = Bool_ NoIDD hole
+
+defaultInt_ :: Int_
+defaultInt_ = Int_ NoIDD hole
+
+defaultDummy :: Dummy
+defaultDummy = Dummy NoIDD hole hole hole hole hole
+
 defaultRootEnr :: EnrichedDoc
-defaultRootEnr = RootEnr NoIDD NoIDP hole hole hole hole
+defaultRootEnr = RootEnr NoIDD hole hole hole
+
+defaultRoot :: Root
+defaultRoot = Root NoIDD NoIDP hole
+
+defaultRootE :: RootE
+defaultRootE = RootE NoIDD NoIDP hole hole
 
 defaultDecl :: Decl
 defaultDecl = Decl NoIDD NoIDP NoIDP NoIDP NoIDP hole hole hole hole
@@ -612,14 +670,8 @@ defaultHeliumItem = HeliumItem NoIDD hole
 defaultListItem :: Item
 defaultListItem = ListItem NoIDD hole
 
-defaultString_ :: String_
-defaultString_ = String_ NoIDD hole
-
-defaultBool_ :: Bool_
-defaultBool_ = Bool_ NoIDD hole
-
-defaultInt_ :: Int_
-defaultInt_ = Int_ NoIDD hole
+defaultList_Dummy :: List_Dummy
+defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
 
 defaultList_Decl :: List_Decl
 defaultList_Decl = List_Decl NoIDD Nil_Decl
@@ -642,17 +694,17 @@ defaultList_Item = List_Item NoIDD Nil_Item
 extractFromNodes extr def []     = def
 extractFromNodes extr def (n:ns) = maybe (extractFromNodes extr def ns) id (extr n)
 
+reuse2 :: (a0 -> a1 -> r) -> 
+          a0 -> a1 -> 
+          Maybe a0 -> Maybe a1 -> r
+reuse2 f  a0 a1 ma0 ma1 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) 
+
 reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
 reuse6 f  a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) 
-
-reuse9 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> r) -> 
-          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> Maybe a8 -> r
-reuse9 f  a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6) (maybe a7 id ma7) (maybe a8 id ma8) 
 
 reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> 
@@ -666,17 +718,17 @@ reuse3 :: (a0 -> a1 -> a2 -> r) ->
 reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
 
+reuse9 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> r) -> 
+          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> Maybe a8 -> r
+reuse9 f  a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6) (maybe a7 id ma7) (maybe a8 id ma8) 
+
 reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
-
-reuse2 :: (a0 -> a1 -> r) -> 
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f  a0 a1 ma0 ma1 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) 
 
 reuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 
