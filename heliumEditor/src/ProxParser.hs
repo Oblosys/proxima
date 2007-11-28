@@ -29,8 +29,8 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in showDebug' Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
-                                   ++"\nhas result:") $
+                 in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+                               {- ++"\nhas result:"++show res -}) $
                     if null errs then Just enr else Nothing
        
 deepShowTks i tok = case tok of
@@ -118,9 +118,9 @@ recognizeRootEnr = pStr $
 
 recognizeRootE :: ListParser Document Node ClipDoc RootE
 recognizeRootE = pStr $ 
-          (\str {- idlistdcls -} decls-> reuseRootE [tokenNode str] Nothing Nothing Nothing {- (Just idlistdcls)-} (Just decls))
+          (\str idlistdcls decls-> reuseRootE [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls))
       <$> pStructural RootENode
-     {- <*> parseIDListList_Decl -} {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
+      <*> parseIDListList_Decl {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 
 -- ?remove pStr from this parser?

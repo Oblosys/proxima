@@ -672,10 +672,9 @@ toXMLConsList_Item (Cons_Item item items) = toXMLItem item : toXMLConsList_Item 
 toXMLConsList_Item Nil_Item             = []
 
 
-
 parseXML_String_ = parseXMLCns_String_
 parseXMLCns_String_ = String_ NoIDD <$ startTag "String_" <*> parseXML_String <* endTag "String_"
-parseXML_Bool_ = parseXMLCns_Bool_
+parseXML_Bool_ = parseXMLCns_Bool_ <|> parseHoleAndParseErr "Bool_" HoleBool_ 
 parseXMLCns_Bool_ = Bool_ NoIDD <$ startTag "Bool_" <*> parseXML_Bool <* endTag "Bool_"
 parseXML_Int_ = parseXMLCns_Int_
 parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int_"

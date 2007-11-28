@@ -79,18 +79,17 @@ reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocu
   (SetDoc (ParseErrDocument prs),state, enrDoc )
 
 openFile :: String -> IO (Maybe Document)
-openFile fileName = return Nothing
-{-
+openFile fileName =
  do { debugLnIO Prs $ "Opening file: "++fileName
-    ; result <- parseFromFile parseXML_Root fileName
+    ; result <- parseFromFile parseXML_Document fileName
     ; case result of
-        Right res -> return $ Just $ RootDoc NoIDD $ res
+        Right res -> return $ Just res
         Left err -> do { debugLnIO Err "Parse error"
                        ; debugLnIO Err $ show err
                        ; return $ Nothing
                        }
     }
--}
+
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
@@ -107,6 +106,8 @@ initDoc =
     ; fileContents <- readFile filePath
     ; return $ RootDoc NoIDD $ Root NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
     }
+    -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
+    -- the proxima parser is used when the presented document is parsed.
     
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
