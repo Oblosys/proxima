@@ -135,7 +135,8 @@ genParserDecl (Decl listTypeName _     DeclConsList) =
 genParserDecl (Decl typeName prods DeclList) = [] -- no generation necessary, taken care of by List type
 genParserDecl (Decl typeName prods DeclDef)  = 
   let constrs = map getConstr prods
-  in  [ "parseXML_"++typeName++" = " ++ prependAndSepBy "parseXMLCns_" " <?|> " constrs ] ++
+  in  [ "parseXML_"++typeName++" = " ++ prependAndSepBy "parseXMLCns_" " <?|> " constrs ++ " <?|> " ++
+        "parseHoleAndParseErr \""++typeName++"\" Hole"++typeName  ] ++
       map genParserProd prods
 
 genParserProd :: Prod -> String
