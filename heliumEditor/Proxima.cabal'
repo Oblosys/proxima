@@ -1,0 +1,55 @@
+name: HeliumEditor
+version: 0.1
+cabal-version: -any
+license: AllRightsReserved
+license-file: ""
+copyright: (c) 2007 Martijn Schrage
+maintainer: martijn@cs.uu.nl
+build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
+               parsec ==2.0, time -any
+stability: experimental
+homepage: http://www.cs.uu.nl/research/projects/proxima
+package-url:
+synopsis: Proxima is a generic presentation-oriented structure editor.
+description:
+category:
+author: Martijn Schrage
+tested-with: GHC -any
+data-files:
+extra-source-files: src/PresentationAG.ag
+extra-tmp-files:
+ 
+executable: HeliumEditor
+main-is: Main.hs
+buildable: True
+cc-options:
+ld-options:
+frameworks:
+c-sources:
+extensions:
+extra-libraries:
+extra-lib-dirs: .
+includes:
+install-includes:
+include-dirs:
+hs-source-dirs: src/proxima/src/rendering
+                src/proxima/src/presentation src/proxima/src/main
+                src/proxima/src/layout src/proxima/src/evaluation
+                src/proxima/src/common src/proxima/src/arrangement src
+other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
+               ArrTypes ArrUtils Arranger ArrangerAG FontLib CommonTypes
+               CommonUtils DebugLevels UU_Parsing DocTypes DocUtils DocumentEdit
+               EnrTypes EnrUtils EvalLayerTypes EvalLayerUtils EvalPresent
+               EvalTranslate LayLayerTypes LayLayerUtils LayPresent LayTranslate
+               LayTypes LayUtils Layout TreeEditPres Architecture ArchitectureLibM
+               GUI Proxima PresLayerTypes PresLayerUtils PresPresent PresTranslate
+               PresTypes PresUtils PresentationParsing XLatex XprezLib
+               RenLayerTypes RenLayerUtils RenPresent RenTranslate RenTypes
+               RenUtils Renderer Chess DocTypes_Generated DocUtils_Generated
+               DocumentEdit_Generated EvaluateTypesStubs Evaluator Main
+               PresentationAG ProxParser ProxParser_Generated Reducer Scanner
+ghc-prof-options: -auto-all
+ghc-options: -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+hugs-options:
+nhc-options:
+jhc-options:
