@@ -31,7 +31,7 @@
 # fix generation dir (refers to ../../editor now)
 # fix presentationAG dir  (refers to ../../editor/src now)
 
-HC    = ghc
+HC    = /c/apps/ghc-6.8.1/bin/ghc
 #HC    = /c/Program\ Files/Visual\ Haskell/bin/ghc
 FIND  = /usr/bin/find
 EXE = .exe

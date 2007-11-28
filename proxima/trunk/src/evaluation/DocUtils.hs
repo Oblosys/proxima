@@ -43,8 +43,7 @@ showXML xml =
 -- element with one child PCDATA is displayed on one line. For more than one child it's too much of a hassle
 -- because this function is only temporary
 
-toXMLBool True = Elt "True" [] [] 
-toXMLBool False = Elt "False" [] [] 
+toXMLBool b = Elt "Bool" [("val", show b)] []
 
 toXMLInt i = Elt "Integer" [("val", show i)] []
 
@@ -55,6 +54,14 @@ toXMLString str = Elt "String" [] [PCData str]
 
 mkList listCns consCns nilCns lst = listCns NoIDD $ foldr consCns nilCns lst
 
+{- for the moment, a parseErr in the XML is parsed as a Hole, otherwise, the XML file needs to have
+   an XML representation of the presentation argument of the parse error node.
+-}
+parseHoleAndParseErr typeStr holeConstructor = 
+      holeConstructor <$ emptyTag ("Hole"++typeStr)
+  <|> holeConstructor <$ emptyTag ("ParseErr"++typeStr)
+
+-- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
 parseXML_String :: Parser String
 parseXML_String =
  do { spaces
@@ -62,7 +69,7 @@ parseXML_String =
     ; str <- many (satisfy (/='<')) 
     ; string "</String>"
     ; return str
-    } 
+    }
 
 parseXML_Int :: Parser Int
 parseXML_Int  =
