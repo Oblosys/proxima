@@ -90,6 +90,8 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     
     ; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+    
 --    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
     -- about every half minute, save a backup of the document
 
