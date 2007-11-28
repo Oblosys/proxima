@@ -83,14 +83,14 @@ openFile fileName =
                        ; debugLnIO Err $ show err
                        ; return $ Nothing
                        }
-    }
+    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return Nothing }
 
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
     ; writeFile filePath $ showXML $ toXMLDocument doc
     ; return ()
-    }
+    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return () }
   
 defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Bin NoIDD (Bin NoIDD (Leaf NoIDD) (Leaf NoIDD)) (Leaf NoIDD))
                                           (Graph NoIDD (Clean NoIDD) (List_Vertex NoIDD Nil_Vertex)
