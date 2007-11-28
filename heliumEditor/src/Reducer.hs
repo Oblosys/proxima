@@ -81,21 +81,23 @@ reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocu
 openFile :: String -> IO (Maybe Document)
 openFile fileName =
  do { debugLnIO Prs $ "Opening file: "++fileName
+    
     ; result <- parseFromFile parseXML_Document fileName
+                      
     ; case result of
         Right res -> return $ Just res
         Left err -> do { debugLnIO Err "Parse error"
                        ; debugLnIO Err $ show err
                        ; return $ Nothing
                        }
-    }
+    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return Nothing }
 
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
     ; writeFile filePath $ showXML $ toXMLDocument doc
     ; return ()
-    }
+    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return () }
 
 
 initDoc :: IO Document
