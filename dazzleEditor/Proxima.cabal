@@ -1,4 +1,4 @@
-name: Proxima
+name: DazzleEditor
 version: 0.1
 cabal-version: -any
 license: AllRightsReserved
@@ -20,7 +20,7 @@ extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
                     src/PresentationAG.ag
 extra-tmp-files:
  
-executable: Proxima
+executable: DazzleEditor
 main-is: Main.hs
 buildable: True
 cc-options:

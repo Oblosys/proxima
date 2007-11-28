@@ -52,7 +52,7 @@ deepShowTks i tok = case tok of
 
 recognizeRootEnr :: ListParser Document Node ClipDoc EnrichedDoc
 recognizeRootEnr = pStr $ 
-          (\str decls-> reuseRootEnr [tokenNode str] Nothing (Just decls) Nothing)
+          (\str root-> reuseRootEnr [tokenNode str] Nothing (Just root) Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> recognizeRoot
   <|>    RootEnr NoIDD (error "doc hole was parsed") (error "doc hole was parsed")
