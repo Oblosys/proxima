@@ -22,7 +22,7 @@
 HC   = ghc
 FIND = /usr/bin/find
 
-PROXIMADIR = src/proxima
+PROXIMADIR = ../proxima
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
