@@ -71,7 +71,8 @@ editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel d
 editDoc state (DocumentLevel doc pth clipD) NavDownDoc'      = ((DocumentLevel doc (navigateDownD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavLeftDoc'      = ((DocumentLevel doc (navigateLeftD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavRightDoc'     = ((DocumentLevel doc (navigateRightD pth doc) clipD), state)
-editDoc state doclvl                        CutDoc'          = (editCutD doclvl, state)
+editDoc state doclvl                        CutDoc'          = let r@(DocumentLevel doc' _ _,state) = (editCutD doclvl, state)
+                                                               in  debug Err ("Cutting doc\n\n\n"++show doc') $ r
 editDoc state doclvl                        CopyDoc'         = (editCopyD doclvl, state)
 editDoc state doclvl                        PasteDoc'        = (editPasteD doclvl, state)
 editDoc state doclvl                        DeleteDoc'       = (editDeleteD doclvl, state)
@@ -86,10 +87,10 @@ editDoc state doclvl@(DocumentLevel doc pth clipD) EvaluateDoc'     =
 
 -- add the computed types to the enriched document root
 evalTypes :: EnrichedDoc -> EnrichedDoc
-evalTypes (RootEnr idd1 (RootE idd2 idp dcls dcls') oldTypes doc) = 
+evalTypes (RootEnr idd1 (RootE idd2 idp dcls idlDcls) oldTypes doc) = 
   let (errs, env, tps) = evaluate doc
   in  debug Prs ("ERRS AND TYPES: "++show errs++show tps) $
-      RootEnr idd1 (RootE idd2 idp dcls dcls') (errs, tps, env) doc
+      RootEnr idd1 (RootE idd2 idp dcls idlDcls) (errs, tps, env) doc
 
 
 getOldTypeInfo (RootEnr _ _ oldTypes _) = oldTypes 
@@ -98,7 +99,6 @@ getOldTypeInfo (ParseErrEnrichedDoc _)            = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
 evalDoc :: LayerStateEval -> DocumentLevel Document clip -> EnrichedDoc -> EnrichedDoc
---evalDoc state (DocumentLevel doc@(RootDoc idd1 (RootE idd2 idp dcls@(ParseErrList_Decl _))) _ _) enr = RootEnr idd idp (List_Decl NoIDD Nil_Decl) dcls (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel doc@(RootDoc idd1 (ParseErrRoot prs)) _ _) enr = RootEnr idd1 (ParseErrRootE prs) (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel doc@(RootDoc idd1 (Root idd2 idp dcls)) _ _) enr = RootEnr idd1 (RootE idd2 idp dcls dcls) (getOldTypeInfo enr) doc
 evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc

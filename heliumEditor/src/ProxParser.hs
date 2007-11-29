@@ -118,7 +118,7 @@ recognizeRootEnr = pStr $
 
 recognizeRootE :: ListParser Document Node ClipDoc RootE
 recognizeRootE = pStr $ 
-          (\str idlistdcls decls-> reuseRootE [tokenNode str] Nothing Nothing (Just idlistdcls) (Just decls))
+          (\str idlistdecls decls-> reuseRootE [tokenNode str] Nothing Nothing (Just decls) (Just idlistdecls))
       <$> pStructural RootENode
       <*> parseIDListList_Decl {- <* (pStr' $ pStructural List_DeclNode) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}

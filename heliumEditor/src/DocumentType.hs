@@ -11,7 +11,10 @@ data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document { id:IDD }
 
 data Root = Root decls:[Decl] { id:IDD idP:IDP } 
 
-data RootE = RootE idListDecls:[Decl] decls:[Decl] { id:IDD idP:IDP }
+data RootE = RootE decls:[Decl] idListDecls:[Decl] { id:IDD idP:IDP }
+-- We put the decls first, so the paths in the enriched document and the document are the same.
+-- This is necessary because there is no translation on paths yet.
+
 -- lists have no pres elts of its own, so no ids for them. This also means we won't be able to recover Decls's id
 
 --  4 pres elts: "=", ";", TypeDecl, and "[...]"

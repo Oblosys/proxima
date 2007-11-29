@@ -104,7 +104,7 @@ DATA Root | Root id:IDD idP:IDP decls:List_Decl
           | ParseErrRoot presentation:Presentation_Doc_Node_Clip
 
 
-DATA RootE | RootE id:IDD idP:IDP idListDecls:List_Decl decls:List_Decl 
+DATA RootE | RootE id:IDD idP:IDP decls:List_Decl idListDecls:List_Decl 
            | HoleRootE
            | ParseErrRootE presentation:Presentation_Doc_Node_Clip
 
@@ -295,16 +295,16 @@ SEM Root
 
 
 SEM RootE
-  | RootE idListDecls.pIdC = @lhs.pIdC + 1
-          decls.pIdC = @idListDecls.pIdC
-          lhs.pIdC = @decls.pIdC
+  | RootE decls.pIdC = @lhs.pIdC + 1
+          idListDecls.pIdC = @decls.pIdC
+          lhs.pIdC = @idListDecls.pIdC
   | HoleRootE     lhs.pres = presHole @lhs.focusD "RootE" (HoleRootENode @self @lhs.path) @lhs.path
   | ParseErrRootE lhs.pres = presParseErr @presentation
 
 
 SEM RootE
-  | RootE idListDecls.path  = @lhs.path++[0]
-          decls.path  = @lhs.path++[1]
+  | RootE decls.path  = @lhs.path++[0]
+          idListDecls.path  = @lhs.path++[1]
 
 
 SEM Decl
@@ -776,7 +776,7 @@ SEM Root [ || presXML : Presentation_Doc_Node_Clip ]
 
 SEM RootE [ || presXML : Presentation_Doc_Node_Clip ]
   | RootE
-      lhs.presXML = presentElementXML @lhs.focusD (RootENode @self @lhs.path) @lhs.path "RootE" [ @idListDecls.presXML, @decls.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (RootENode @self @lhs.path) @lhs.path "RootE" [ @decls.presXML, @idListDecls.presXML ] 
   | HoleRootE     lhs.presXML = presHole @lhs.focusD "RootE" (HoleRootENode @self @lhs.path) @lhs.path
   | ParseErrRootE lhs.presXML = presParseErr @presentation
 
@@ -1031,7 +1031,7 @@ SEM Root [ || presTree : Presentation_Doc_Node_Clip ]
 
 SEM RootE [ || presTree : Presentation_Doc_Node_Clip ]
   | RootE
-      lhs.presTree = presentElementTree @lhs.focusD (RootENode @self @lhs.path) @lhs.path "RootE" [ @idListDecls.presTree, @decls.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (RootENode @self @lhs.path) @lhs.path "RootE" [ @decls.presTree, @idListDecls.presTree ] 
   | HoleRootE     lhs.presTree = presHole @lhs.focusD "RootE" (HoleRootENode @self @lhs.path) @lhs.path
   | ParseErrRootE lhs.presTree = presParseErr @presentation
 

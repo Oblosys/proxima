@@ -64,14 +64,14 @@ reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 -- just copy the enriched document
 reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip -> EnrichedDocLevel EnrichedDoc ->
              IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceEnrIO state (EnrichedDocLevel (RootEnr _ (RootE _  _ oldIdldcls oldDcls) _ _) _) _ 
-           enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp idldcls dcls) _ _) _) =
- do { let dcls' = if oldIdldcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
+reduceEnrIO state (EnrichedDocLevel (RootEnr _ (RootE _  _ _ oldIdlDcls) _ _) _) _ 
+           enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) _) =
+ do { let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
           -- dcls' = dcls -- ignore updates on id list
     ; return (SetDoc (RootDoc idd1 (Root idd2 idp dcls')),state, enrDoc )
     }
 --
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp idldcls dcls) _ _) _) = return $ -- other cases, just copy from decls
+reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) _) = return $ -- other cases, just copy from decls
   (SetDoc (RootDoc idd1 (Root idd2 idp dcls)),state, enrDoc )
 reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
