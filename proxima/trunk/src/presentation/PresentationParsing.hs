@@ -63,21 +63,37 @@ pMaybe parser = Just <$> parser `opt` Nothing
 pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
 
 
-
+applyDummyParameters nd = nd (error "This should not have happened") [] 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
 pStr ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
-pStr p = unfoldStructure  
-     <$> pSym (StructuralTk Nothing empty [] NoIDP)
+pStr = pStr' empty
+
+pStrVerbose str = pStr' (text str)
+
+pStr' prs p = unfoldStructure  
+     <$> pSym (StructuralTk Nothing prs [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
+
 -- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
 -- 'top-level' parsing. Hence, the parser succeeds on any structural token, and something like
 -- pStr (pSym <DivExp> ...) <|> pStr (pSym <PowerExp> ...)  always takes the first alternative
+
+pStrAlt ndf p = unfoldStructure  
+     <$> pSym (StructuralTk (Just nd) (text $ show nd) [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+         let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
+             x = parseErr
+          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
+       unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
+       
+       nd = applyDummyParameters ndf
+
 
 
 -- in case of a parse error, the repaired result is used in the tree and an error message
@@ -287,7 +303,7 @@ instance Show a => Show (Token doc node clip (Maybe a)) where
   show (UIdentTk str _ _) = show str
   show (OpTk str _ _)     = show str
   show (SymTk str _ _)    = show str
-  show (StructuralTk Nothing _ _ _) = "<structural:Nothing>" 
+  show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
   show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
   show (ParsingTk _ _ _) = "<presentation>" 
   show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
