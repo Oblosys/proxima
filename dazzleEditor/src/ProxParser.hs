@@ -28,8 +28,9 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in  -- showDebug' Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"with errs"{-++show errs-}++"\nhas result:") $
-                     (if null errs then Just enr else Nothing)
+                     res = if null errs then Just enr else Nothing
+                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
+                     res
        
 deepShowTks i tok = case tok of
                       (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
@@ -109,18 +110,58 @@ recognizeTree = pStr $
 
 
 recognizeSection :: ListParser Document Node ClipDoc Section
-recognizeSection = pStr $
-          (\str t ps sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing (Just sg))
+recognizeSection = pStrAlt SectionNode $
+          (\str t ps ss sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss) (Just sg))
       <$> pStructural SectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
+      <*> pList recognizeSubsection
       <*> recognizeSubgraph
           
+recognizeSubsection :: ListParser Document Node ClipDoc Subsection
+recognizeSubsection =
+  pStrAlt SubsectionNode $
+          (\str t ps sss -> reuseSubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsubsection sss))
+      <$> pStructural SubsectionNode
+      <*> pPrs pLine 
+      <*> pPrs parseParagraphs
+      <*> pList recognizeSubsubsection
+      
+
+recognizeSubsubsection :: ListParser Document Node ClipDoc Subsubsection
+recognizeSubsubsection =
+  pStrAlt SubsubsectionNode $
+          (\str t ps -> reuseSubsubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps))
+      <$> pStructural SubsubsectionNode
+      <*> pPrs pLine 
+      <*> pPrs parseParagraphs
+
+{- niet werkend:
+
+recognizeSection :: ListParser Document Node ClipDoc Section
+recognizeSection = pStr $
+          (\str t ps ss sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing (Just sg))
+      <$> pStructural SectionNode
+      <*> pPrs pLine 
+      <*> pPrs parseParagraphs
+      <*> pList recognizeSubsection
+      <*> recognizeSubgraph
+          
+recognizeSubsection :: ListParser Document Node ClipDoc Subsection
+recognizeSubsection = pStr $
+          (\str t ps  -> reuseSubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing)
+      <$> pStructural SubsectionNode
+      <*> pPrs pLine 
+      <*> pPrs parseParagraphs
+--      <*> recognizeSubgraph
+
+-}
+
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
 recognizeGraph :: ListParser Document Node ClipDoc Graph
-recognizeGraph = pStr $
+recognizeGraph = pStrVerbose "Graph" $
           (\str gt vs -> reuseGraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
@@ -134,7 +175,7 @@ recognizeGraph = pStr $
 -- labels in vertex? Or just in presentation?
 -- before we can parse them, the scanner needs to be modified to handle free text
 recognizeVertex :: ListParser Document Node ClipDoc Vertex
-recognizeVertex = pStr $
+recognizeVertex = pStrVerbose "Vertex" $
           (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
@@ -151,7 +192,7 @@ parseLabel = pPrs $
       <$> pText
 
 recognizeSubgraph :: ListParser Document Node ClipDoc Subgraph
-recognizeSubgraph = pStr $
+recognizeSubgraph = pStrVerbose "Subgraph" $
           (\str gt vs -> reuseSubgraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt)  
                                      (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                      (Just $ List_Edge NoIDD $ toConsList_Edge $ 

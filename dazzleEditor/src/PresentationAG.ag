@@ -35,8 +35,6 @@ focusCol = lightBlue
 
 INCLUDE "PresentationAG_Generated.ag"
 
-
-
 ATTR EnrichedDoc [ | layoutMap : LayoutMap | ]
 
 SEM EnrichedDoc
@@ -76,8 +74,8 @@ SEM Root
                            --, parsing $ formatter $ replicate 50 $ text "bla"
                            , col @sections.press `withFontSize` 12  `withWidth` 800 
                            --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
-                           , text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
-                           , col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
+                           --, text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
+                           --, col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
                           --, col $ map row $ divide 3 @sections.press
                            , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
@@ -118,15 +116,67 @@ SEM Tree
 ATTR Section [||tocPres : Presentation_Doc_Node_Clip ]          
 SEM Section
   | Section
+      loc.numberStr = show @sectionNr ++ "."
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres], empty `withHStretch` True ] `withFontSize_` (percent 150)  
+                     (col $ [ row [ text @numberStr
+                                  , parsing $ formatter [@title.pres], empty `withHStretch` True 
+                                  ] `withFontSize_` (percent 150)  
                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                           , row [ text "subsections below", empty `withHStretch` True ]
+                           , col @subsections.press
                            , row [ @subgraph.pres, empty `withHStretch` True ]
                            ])
                      `addPopupItems` [ ("Delete Section", deleteSection) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                      row [text (show $ @lhs.ix + 1), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+                      row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
+ATTR Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
+SEM Subsection
+  | Subsection
+      loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
+      lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     (col $ [ row [ text @numberStr
+                                  , parsing $ formatter [@title.pres], empty `withHStretch` True
+                                  ] `withFontSize_` (percent 130)  
+                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                            , col @subsubsections.press
+                            ])
+                     `addPopupItems` [ ("Delete Subsection", deleteSection) ]
+      --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+
+ATTR Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
+SEM Subsubsection
+  | Subsubsection
+      loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
+      lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     (col $ [ row [ text @numberStr
+                                  , parsing $ formatter [@title.pres], empty `withHStretch` True
+                                  ] `withFontSize_` (percent 130)  
+                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                            ])
+                     `addPopupItems` [ ("Delete Subsubsection", deleteSection) ]
+      --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      --                row [text (show $ @subsubsectionNr), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+
+
+SEM Section [ || ]
+  | Section
+      loc.sectionNr = @lhs.ix + 1
+
+ATTR List_Subsection ConsList_Subsection Subsection 
+             List_Subsubsection ConsList_Subsubsection Subsubsection [ sectionNr : Int || ]
+
+SEM Subsection [ || ]
+  | Subsection
+      loc.subsectionNr = @lhs.ix + 1
+
+ATTR List_Subsubsection ConsList_Subsubsection Subsubsection [ subsectionNr : Int || ]
+
+SEM Subsubsection [ || ]
+  | Subsubsection
+      loc.subsubsectionNr = @lhs.ix + 1
+  
 {
 deleteSection :: UpdateDoc Document clip
 deleteSection (DocumentLevel d path cl) = debug Prs ("Path is " ++ show path) $
@@ -268,7 +318,7 @@ pasteInSubgraph pth id name subgraph =
 insertNewSection :: [Int] -> UpdateDoc Document clip
 insertNewSection pth =
   let section = Section NoIDD
-                  (String_ NoIDD "")
+                  (String_ NoIDD "<new>")
                   (List_Paragraph NoIDD Nil_Paragraph) 
                   (List_Subsection NoIDD Nil_Subsection) 
                   (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
