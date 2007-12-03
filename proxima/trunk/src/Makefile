@@ -93,7 +93,7 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfpm --Wmax=3 --self --Werrors --module=ArrangerAG \
+	-cfpm --Wmax=12 --self --Werrors --module=ArrangerAG \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
 
 #	-cfpm --Werrors --module=ArrangerAG \
