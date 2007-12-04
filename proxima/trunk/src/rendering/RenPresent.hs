@@ -48,7 +48,12 @@ render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ 
                      then render' scale debugging focus diffTree arr'
                      else render' scale debugging focus (DiffLeaf False) arr'
        size        = (widthA arr', heightA arr')
-   in  -- debug Arr ("Arr Diffs: "++show (diffArr arr' arrOld)) $
+   in  {-debug Arr ("\n\n\nRender: old/new size "++ show (widthA arrOld, heightA arrOld)++ show (widthA arr', heightA arr')
+                  ++ "\nDiffTree: "++ show diffTree
+                  ++"Updated Regions" ++ show updRegions'
+                  ) 
+       
+       $ -}
        ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
 
