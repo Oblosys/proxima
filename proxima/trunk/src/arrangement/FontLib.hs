@@ -46,7 +46,7 @@ metricsLookup font fontMetrics =
 --- query the metrics for font. 
 queryFont :: Font -> IO (Font,(Int, Int, [Int]))
 queryFont font =
- do { debugLnIO Arr $ "Querying: " ++ show (fSize font) ++ " " ++ (fFamily font)
+ do { --debugLnIO Arr $ "Querying: " ++ show (fSize font) ++ " " ++ (fFamily font)
     ; context <- cairoCreateContext Nothing
     ; language <- contextGetLanguage context
     ; fontDescription <- fontDescriptionFromProximaFont font

@@ -60,7 +60,7 @@ unfoldFormatter w ws presentations =
          map (RowP NoIDP 0) dividedPresentations
      unfoldedList = ColP NoIDP 0 (F (map length dividedPresentations)) rows
  in  --debug Arr ("Unfolded formatter "++show ws++ " unfolded as"++ show (map length dividedPresentations)) $ 
-     debug Arr ("Unfolding formatter") $
+     --debug Arr ("Unfolding formatter") $
      unfoldedList
 
 
