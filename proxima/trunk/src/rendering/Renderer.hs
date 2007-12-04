@@ -60,7 +60,7 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   let (oldW,oldH) = (widthA oldArrangement, heightA oldArrangement)
       (newW,newH) = (widthA arrangement, heightA arrangement)
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
-     then [((0, 0),(oldW, oldH))]
+     then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement
           
         
