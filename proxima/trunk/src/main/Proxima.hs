@@ -2,6 +2,7 @@ module Proxima where
  
 import Data.IORef
 import System
+import Control.Exception
 
 import Architecture
 
@@ -122,8 +123,15 @@ proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
 
 
     }
-
-
+ `Control.Exception.catch`
+   \err -> 
+    do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
+       ; print err
+       ; putStrLn "\n<Press a key to exit>"
+       ; getLine
+       ; return ()
+       } -- This way, the dos window on Windows does not exit until the user can see the error.
+       
 {-
 
 proximaLayers' presentationLS layoutLS arrangementLS =
