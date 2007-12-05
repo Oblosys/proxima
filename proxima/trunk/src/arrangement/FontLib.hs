@@ -6,7 +6,7 @@ import Graphics.UI.Gtk hiding (FontMetrics)
 import qualified Data.Map as Map
 import Data.Map (Map)
 
-import Array
+import Data.Array
 
 import Char
 import Data.IORef
