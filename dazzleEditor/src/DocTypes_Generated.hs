@@ -59,20 +59,13 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Tree Graph List_Section 
+data Root = Root IDD Graph List_Section 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show
 
 
-data Tree = Bin IDD Tree Tree 
-          | Leaf IDD 
-          | HoleTree
-          | ParseErrTree (Presentation Document Node ClipDoc)
-             deriving Show
-
-
-data Section = Section IDD String_ List_Paragraph List_Subsection Subgraph 
+data Section = Section IDD String_ List_Paragraph List_Subsection 
              | HoleSection
              | ParseErrSection (Presentation Document Node ClipDoc)
                 deriving Show
@@ -91,6 +84,7 @@ data Subsubsection = Subsubsection IDD String_ List_Paragraph
 
 
 data Paragraph = Paragraph IDD List_Word 
+               | SubgraphPara IDD Subgraph 
                | HoleParagraph
                | ParseErrParagraph (Presentation Document Node ClipDoc)
                   deriving Show
@@ -239,14 +233,13 @@ data ClipDoc = Clip_Root Root
              | Clip_String_ String_
              | Clip_Bool_ Bool_
              | Clip_Int_ Int_
-             | Clip_Tree Tree
              | Clip_Graph Graph
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
              | Clip_List_Subsection List_Subsection
-             | Clip_Subgraph Subgraph
              | Clip_List_Subsubsection List_Subsubsection
              | Clip_List_Word List_Word
+             | Clip_Subgraph Subgraph
              | Clip_Dirty Dirty
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
@@ -287,9 +280,6 @@ data Node = NoNode
           | HoleDummyNode Dummy Path 
           | RootNode Root Path 
           | HoleRootNode Root Path 
-          | BinNode Tree Path 
-          | LeafNode Tree Path 
-          | HoleTreeNode Tree Path 
           | SectionNode Section Path 
           | HoleSectionNode Section Path 
           | SubsectionNode Subsection Path 
@@ -297,6 +287,7 @@ data Node = NoNode
           | SubsubsectionNode Subsubsection Path 
           | HoleSubsubsectionNode Subsubsection Path 
           | ParagraphNode Paragraph Path 
+          | SubgraphParaNode Paragraph Path 
           | HoleParagraphNode Paragraph Path 
           | WordNode Word Path 
           | HoleWordNode Word Path 
@@ -349,9 +340,6 @@ instance Show Node where
   show (HoleDummyNode _ _)  = "HoleDummyNode"
   show (RootNode _ _)  = "RootNode"
   show (HoleRootNode _ _)  = "HoleRootNode"
-  show (BinNode _ _)  = "BinNode"
-  show (LeafNode _ _)  = "LeafNode"
-  show (HoleTreeNode _ _)  = "HoleTreeNode"
   show (SectionNode _ _)  = "SectionNode"
   show (HoleSectionNode _ _)  = "HoleSectionNode"
   show (SubsectionNode _ _)  = "SubsectionNode"
@@ -359,6 +347,7 @@ instance Show Node where
   show (SubsubsectionNode _ _)  = "SubsubsectionNode"
   show (HoleSubsubsectionNode _ _)  = "HoleSubsubsectionNode"
   show (ParagraphNode _ _)  = "ParagraphNode"
+  show (SubgraphParaNode _ _)  = "SubgraphParaNode"
   show (HoleParagraphNode _ _)  = "HoleParagraphNode"
   show (WordNode _ _)  = "WordNode"
   show (HoleWordNode _ _)  = "HoleWordNode"

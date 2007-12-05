@@ -72,49 +72,47 @@ rankNode (DummyNode _ _)  = 11
 rankNode (HoleDummyNode _ _)  = 12
 rankNode (RootNode _ _)  = 13
 rankNode (HoleRootNode _ _)  = 14
-rankNode (BinNode _ _)  = 15
-rankNode (LeafNode _ _)  = 16
-rankNode (HoleTreeNode _ _)  = 17
-rankNode (SectionNode _ _)  = 18
-rankNode (HoleSectionNode _ _)  = 19
-rankNode (SubsectionNode _ _)  = 20
-rankNode (HoleSubsectionNode _ _)  = 21
-rankNode (SubsubsectionNode _ _)  = 22
-rankNode (HoleSubsubsectionNode _ _)  = 23
-rankNode (ParagraphNode _ _)  = 24
-rankNode (HoleParagraphNode _ _)  = 25
-rankNode (WordNode _ _)  = 26
-rankNode (HoleWordNode _ _)  = 27
-rankNode (GraphNode _ _)  = 28
-rankNode (HoleGraphNode _ _)  = 29
-rankNode (VertexNode _ _)  = 30
-rankNode (HoleVertexNode _ _)  = 31
-rankNode (CircleNode _ _)  = 32
-rankNode (SquareNode _ _)  = 33
-rankNode (HoleShapeNode _ _)  = 34
-rankNode (EdgeNode _ _)  = 35
-rankNode (HoleEdgeNode _ _)  = 36
-rankNode (SubgraphNode _ _)  = 37
-rankNode (HoleSubgraphNode _ _)  = 38
-rankNode (DirtyNode _ _)  = 39
-rankNode (CleanNode _ _)  = 40
-rankNode (HoleDirtyNode _ _)  = 41
-rankNode (List_DummyNode _ _)  = 42
-rankNode (HoleList_DummyNode _ _)  = 43
-rankNode (List_SectionNode _ _)  = 44
-rankNode (HoleList_SectionNode _ _)  = 45
-rankNode (List_ParagraphNode _ _)  = 46
-rankNode (HoleList_ParagraphNode _ _)  = 47
-rankNode (List_SubsectionNode _ _)  = 48
-rankNode (HoleList_SubsectionNode _ _)  = 49
-rankNode (List_SubsubsectionNode _ _)  = 50
-rankNode (HoleList_SubsubsectionNode _ _)  = 51
-rankNode (List_WordNode _ _)  = 52
-rankNode (HoleList_WordNode _ _)  = 53
-rankNode (List_VertexNode _ _)  = 54
-rankNode (HoleList_VertexNode _ _)  = 55
-rankNode (List_EdgeNode _ _)  = 56
-rankNode (HoleList_EdgeNode _ _)  = 57
+rankNode (SectionNode _ _)  = 15
+rankNode (HoleSectionNode _ _)  = 16
+rankNode (SubsectionNode _ _)  = 17
+rankNode (HoleSubsectionNode _ _)  = 18
+rankNode (SubsubsectionNode _ _)  = 19
+rankNode (HoleSubsubsectionNode _ _)  = 20
+rankNode (ParagraphNode _ _)  = 21
+rankNode (SubgraphParaNode _ _)  = 22
+rankNode (HoleParagraphNode _ _)  = 23
+rankNode (WordNode _ _)  = 24
+rankNode (HoleWordNode _ _)  = 25
+rankNode (GraphNode _ _)  = 26
+rankNode (HoleGraphNode _ _)  = 27
+rankNode (VertexNode _ _)  = 28
+rankNode (HoleVertexNode _ _)  = 29
+rankNode (CircleNode _ _)  = 30
+rankNode (SquareNode _ _)  = 31
+rankNode (HoleShapeNode _ _)  = 32
+rankNode (EdgeNode _ _)  = 33
+rankNode (HoleEdgeNode _ _)  = 34
+rankNode (SubgraphNode _ _)  = 35
+rankNode (HoleSubgraphNode _ _)  = 36
+rankNode (DirtyNode _ _)  = 37
+rankNode (CleanNode _ _)  = 38
+rankNode (HoleDirtyNode _ _)  = 39
+rankNode (List_DummyNode _ _)  = 40
+rankNode (HoleList_DummyNode _ _)  = 41
+rankNode (List_SectionNode _ _)  = 42
+rankNode (HoleList_SectionNode _ _)  = 43
+rankNode (List_ParagraphNode _ _)  = 44
+rankNode (HoleList_ParagraphNode _ _)  = 45
+rankNode (List_SubsectionNode _ _)  = 46
+rankNode (HoleList_SubsectionNode _ _)  = 47
+rankNode (List_SubsubsectionNode _ _)  = 48
+rankNode (HoleList_SubsubsectionNode _ _)  = 49
+rankNode (List_WordNode _ _)  = 50
+rankNode (HoleList_WordNode _ _)  = 51
+rankNode (List_VertexNode _ _)  = 52
+rankNode (HoleList_VertexNode _ _)  = 53
+rankNode (List_EdgeNode _ _)  = 54
+rankNode (HoleList_EdgeNode _ _)  = 55
 
 
 
@@ -134,9 +132,6 @@ instance HasPath Node where
   pathNode (HoleDummyNode _ pth)  = PathD pth
   pathNode (RootNode _ pth)  = PathD pth
   pathNode (HoleRootNode _ pth)  = PathD pth
-  pathNode (BinNode _ pth)  = PathD pth
-  pathNode (LeafNode _ pth)  = PathD pth
-  pathNode (HoleTreeNode _ pth)  = PathD pth
   pathNode (SectionNode _ pth)  = PathD pth
   pathNode (HoleSectionNode _ pth)  = PathD pth
   pathNode (SubsectionNode _ pth)  = PathD pth
@@ -144,6 +139,7 @@ instance HasPath Node where
   pathNode (SubsubsectionNode _ pth)  = PathD pth
   pathNode (HoleSubsubsectionNode _ pth)  = PathD pth
   pathNode (ParagraphNode _ pth)  = PathD pth
+  pathNode (SubgraphParaNode _ pth)  = PathD pth
   pathNode (HoleParagraphNode _ pth)  = PathD pth
   pathNode (WordNode _ pth)  = PathD pth
   pathNode (HoleWordNode _ pth)  = PathD pth
@@ -201,19 +197,11 @@ dummyIDD (DummyNode (Dummy iDD _ _ _ _) _) = Just iDD
 dummyIDD _                                   = Nothing
 
 rootIDD :: Node -> Maybe IDD
-rootIDD (RootNode (Root iDD _ _ _) _) = Just iDD
+rootIDD (RootNode (Root iDD _ _) _) = Just iDD
 rootIDD _                                   = Nothing
 
-binIDD :: Node -> Maybe IDD
-binIDD (BinNode (Bin iDD _ _) _) = Just iDD
-binIDD _                                   = Nothing
-
-leafIDD :: Node -> Maybe IDD
-leafIDD (LeafNode (Leaf iDD) _) = Just iDD
-leafIDD _                                   = Nothing
-
 sectionIDD :: Node -> Maybe IDD
-sectionIDD (SectionNode (Section iDD _ _ _ _) _) = Just iDD
+sectionIDD (SectionNode (Section iDD _ _ _) _) = Just iDD
 sectionIDD _                                   = Nothing
 
 subsectionIDD :: Node -> Maybe IDD
@@ -227,6 +215,10 @@ subsubsectionIDD _                                   = Nothing
 paragraphIDD :: Node -> Maybe IDD
 paragraphIDD (ParagraphNode (Paragraph iDD _) _) = Just iDD
 paragraphIDD _                                   = Nothing
+
+subgraphParaIDD :: Node -> Maybe IDD
+subgraphParaIDD (SubgraphParaNode (SubgraphPara iDD _) _) = Just iDD
+subgraphParaIDD _                                   = Nothing
 
 wordIDD :: Node -> Maybe IDD
 wordIDD (WordNode (Word iDD _) _) = Just iDD
@@ -272,13 +264,12 @@ shallowShowString_1 (String_  _ _) = "String_"
 shallowShowBool_1 (Bool_  _ _) = "Bool_"
 shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowDummy1 (Dummy  _ _ _ _ _) = "Dummy"
-shallowShowRoot1 (Root  _ _ _ _) = "Root"
-shallowShowTree1 (Bin  _ _ _) = "Bin"
-shallowShowTree1 (Leaf  _) = "Leaf"
-shallowShowSection1 (Section  _ _ _ _ _) = "Section"
+shallowShowRoot1 (Root _ _ _) = "Root"
+shallowShowSection1 (Section  _ _ _ _) = "Section"
 shallowShowSubsection1 (Subsection  _ _ _ _) = "Subsection"
 shallowShowSubsubsection1 (Subsubsection  _ _ _) = "Subsubsection"
 shallowShowParagraph1 (Paragraph  _ _) = "Paragraph"
+shallowShowParagraph1 (SubgraphPara  _ _) = "SubgraphPara"
 shallowShowWord1 (Word  _ _) = "Word"
 shallowShowGraph1 (Graph  _ _ _ _) = "Graph"
 shallowShowVertex1 (Vertex  _ _ _ _ _ _) = "Vertex"
@@ -330,14 +321,10 @@ toXMLInt_ (ParseErrInt_ _) = Elt "ParseErrInt_" [] []
 toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
 toXMLDummy HoleDummy = Elt "HoleDummy" [] []
 toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
-toXMLRoot (Root _ tree graph sections) = Elt "Root" [] $ [toXMLTree tree] ++ [toXMLGraph graph] ++ toXMLList_Section sections ++ []
+toXMLRoot (Root _ graph sections) = Elt "Root" [] $ [toXMLGraph graph] ++ toXMLList_Section sections ++ []
 toXMLRoot HoleRoot = Elt "HoleRoot" [] []
 toXMLRoot (ParseErrRoot _) = Elt "ParseErrRoot" [] []
-toXMLTree (Bin _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right] ++ []
-toXMLTree (Leaf _) = Elt "Leaf" [] $ []
-toXMLTree HoleTree = Elt "HoleTree" [] []
-toXMLTree (ParseErrTree _) = Elt "ParseErrTree" [] []
-toXMLSection (Section _ title paragraphs subsections subgraph) = Elt "Section" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections ++ [toXMLSubgraph subgraph] ++ []
+toXMLSection (Section _ title paragraphs subsections) = Elt "Section" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections ++ []
 toXMLSection HoleSection = Elt "HoleSection" [] []
 toXMLSection (ParseErrSection _) = Elt "ParseErrSection" [] []
 toXMLSubsection (Subsection _ title paragraphs subsubsections) = Elt "Subsection" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsubsection subsubsections ++ []
@@ -347,6 +334,7 @@ toXMLSubsubsection (Subsubsection _ title paragraphs) = Elt "Subsubsection" [] $
 toXMLSubsubsection HoleSubsubsection = Elt "HoleSubsubsection" [] []
 toXMLSubsubsection (ParseErrSubsubsection _) = Elt "ParseErrSubsubsection" [] []
 toXMLParagraph (Paragraph _ words) = Elt "Paragraph" [] $ toXMLList_Word words ++ []
+toXMLParagraph (SubgraphPara _ subgraph) = Elt "SubgraphPara" [] $ [toXMLSubgraph subgraph] ++ []
 toXMLParagraph HoleParagraph = Elt "HoleParagraph" [] []
 toXMLParagraph (ParseErrParagraph _) = Elt "ParseErrParagraph" [] []
 toXMLWord (Word _ word) = Elt "Word" [] $ [toXMLString_ word] ++ []
@@ -426,18 +414,16 @@ parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int
 parseXML_Dummy = parseXMLCns_Dummy
 parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
 parseXML_Root = parseXMLCns_Root
-parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Tree <*> parseXML_Graph <*> parseXML_List_Section <* endTag "Root"
-parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf
-parseXMLCns_Bin = Bin NoIDD <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree <* endTag "Bin"
-parseXMLCns_Leaf = Leaf NoIDD <$ emptyTag "Leaf"
+parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Graph <*> parseXML_List_Section <* endTag "Root"
 parseXML_Section = parseXMLCns_Section
-parseXMLCns_Section = Section NoIDD <$ startTag "Section" <*> parseXML_String_ <*> parseXML_List_Paragraph <*> parseXML_List_Subsection <*> parseXML_Subgraph <* endTag "Section"
+parseXMLCns_Section = Section NoIDD <$ startTag "Section" <*> parseXML_String_ <*> parseXML_List_Paragraph <*> parseXML_List_Subsection <* endTag "Section"
 parseXML_Subsection = parseXMLCns_Subsection
 parseXMLCns_Subsection = Subsection NoIDD <$ startTag "Subsection" <*> parseXML_String_ <*> parseXML_List_Paragraph <*> parseXML_List_Subsubsection <* endTag "Subsection"
 parseXML_Subsubsection = parseXMLCns_Subsubsection
 parseXMLCns_Subsubsection = Subsubsection NoIDD <$ startTag "Subsubsection" <*> parseXML_String_ <*> parseXML_List_Paragraph <* endTag "Subsubsection"
-parseXML_Paragraph = parseXMLCns_Paragraph
+parseXML_Paragraph = parseXMLCns_Paragraph <?|> parseXMLCns_SubgraphPara
 parseXMLCns_Paragraph = Paragraph NoIDD <$ startTag "Paragraph" <*> parseXML_List_Word <* endTag "Paragraph"
+parseXMLCns_SubgraphPara = SubgraphPara NoIDD <$ startTag "SubgraphPara" <*> parseXML_Subgraph <* endTag "SubgraphPara"
 parseXML_Word = parseXMLCns_Word
 parseXMLCns_Word = Word NoIDD <$ startTag "Word" <*> parseXML_String_ <* endTag "Word"
 parseXML_Graph = parseXMLCns_Graph

@@ -70,16 +70,15 @@ SEM Root
                            -- , col $ replicate 15 $ row $ replicate 20 $ text "bla"
                            --  text "Contents"
                                @graph.pres
-                           --, @tree.pres
                            --, parsing $ formatter $ replicate 50 $ text "bla"
                            , col @sections.press `withFontSize` 12  `withWidth` 800 
                            --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
                            --, text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
                            --, col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
                           --, col $ map row $ divide 3 @sections.press
-                           , row [ (boxed $ text "Add view") `withMouseDown` insertNewSection @lhs.path
+                           , row [ (boxed $ text "Add Section") `withMouseDown` insertNewSection @lhs.path
                                  , text " "
-                                 , (boxed $ text "Remove view") `withMouseDown` removeLastSection @lhs.path 
+                                 , (boxed $ text "Remove Section") `withMouseDown` removeLastSection @lhs.path 
                                  ]
                           
                            ] 
@@ -89,29 +88,6 @@ divide n xs = let (h,t) = splitAt n xs
               in  h : divide n t
 }
                            
-SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
-  | List_Paragraph
-      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
-                     col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
-                     -- formatter [text "  "] prevents the column from getting height 0 when empty
-                    
-SEM Paragraph
-  | Paragraph
-      lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ formatter @words.press ]
-
-SEM Word [ || ]
-  | Word
-      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     row [ @word.pres, text " " ]
-SEM Tree
-  | Bin
-      lhs.pres = loc (BinNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     row [ text $ "(", @left.pres, text " Bin ", @right.pres, text ")" ]
-  | Leaf
-      lhs.pres = loc (LeafNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     row [text $ "Leaf", text ""]
-
            
 ATTR Section [||tocPres : Presentation_Doc_Node_Clip ]          
 SEM Section
@@ -122,13 +98,12 @@ SEM Section
                                   , parsing $ formatter [@title.pres], empty `withHStretch` True 
                                   ] `withFontSize_` (percent 150)  
                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
-                           , row [ text "subsections below", empty `withHStretch` True ]
                            , col @subsections.press
-                           , row [ @subgraph.pres, empty `withHStretch` True ]
                            ])
-                     `addPopupItems` [ ("Delete Section", deleteSection) ]
+                     `addPopupItems` [ ("Delete Section", deleteSection @lhs.path) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                       row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+
 
 ATTR Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
 SEM Subsection
@@ -141,7 +116,7 @@ SEM Subsection
                             , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
                             , col @subsubsections.press
                             ])
-                     `addPopupItems` [ ("Delete Subsection", deleteSection) ]
+                     `addPopupItems` [ ("Delete Subsection", deleteSection @lhs.path) ]
       --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
@@ -155,7 +130,7 @@ SEM Subsubsection
                                   ] `withFontSize_` (percent 130)  
                             , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
                             ])
-                     `addPopupItems` [ ("Delete Subsubsection", deleteSection) ]
+                     `addPopupItems` [ ("Delete Subsubsection", deleteSection @lhs.path) ]
       --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (show $ @subsubsectionNr), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
@@ -176,14 +151,36 @@ ATTR List_Subsubsection ConsList_Subsubsection Subsubsection [ subsectionNr : In
 SEM Subsubsection [ || ]
   | Subsubsection
       loc.subsubsectionNr = @lhs.ix + 1
+
+SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
+  | List_Paragraph
+      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
+                     col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
+                     -- formatter [text "  "] prevents the column from getting height 0 when empty
+  | HoleList_Paragraph
+      lhs.pres = presHole @lhs.focusD "List_Paragraph" (HoleList_ParagraphNode @self []) []
+  | ParseErrList_Paragraph
+      lhs.pres = presParseErr @presentation
+      
+                    
+SEM Paragraph
+  | Paragraph
+      lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     (col $ [ formatter @words.press ])
+                       `addPopupItems` [ ("Add Graph", addGraph @lhs.path) ]
+
+  | SubgraphPara
+      lhs.pres = loc (SubgraphParaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                     row [ @subgraph.pres, empty `withHStretch` True ]
+                       `addPopupItems` [ ("Add Graph", addGraph @lhs.path) ]
+                           
+
+SEM Word [ || ]
+  | Word
+      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     row [ @word.pres, text " " ]
+
   
-{
-deleteSection :: UpdateDoc Document clip
-deleteSection (DocumentLevel d path cl) = debug Prs ("Path is " ++ show path) $
-  (DocumentLevel d path cl)
-
-}
-
 SEM Graph
   | Graph
       lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -234,7 +231,7 @@ squareOutline r a | a < pi / 4  || a >= 7 * pi / 4    = (r-1, round $ - tan a * 
 
 }
 
-SEM Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+SEM Subgraph [||] 
   | Subgraph
       lhs.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
                      -- only present vertices that are in the supergraph
@@ -246,17 +243,34 @@ SEM Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)
                                      , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
                                      ])
 
+
+{-
+Graph synthesizes vertexIDNames and edges. At Root, vertexIDNames is unzipped, and inherited attributes
+vertexIDs, vertexNames, and edges are copied down to the subgraphs.
+-}
 SEM Root
   | Root
       (sections.vertexIDs, sections.vertexNames) = unzip @graph.vertexIDNames
       sections.edges = @graph.edges
       
-ATTR Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
+SEM Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
+  | HoleGraph
+      lhs.vertexIDNames = []
+      lhs.edges = []
+  | ParseErrGraph
+      lhs.vertexIDNames = []
+      lhs.edges = []
+      
 -- attributes come from vertices and edges by copy rule
 
-ATTR List_Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
-ATTR ConsList_Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
-ATTR Section [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+ATTR List_Section ConsList_Section Section 
+     List_Subsection ConsList_Subsection Subsection
+     List_Subsubsection ConsList_Subsubsection Subsubsection
+     List_Paragraph ConsList_Paragraph Paragraph
+     [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
+
+
+ATTR Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ]
 
 SEM Edge [ || edge : {Maybe (Int,Int)} ]    
   | Edge
@@ -303,6 +317,26 @@ SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ]
       lhs.vertexIDNames = []
 
 {
+
+--deleteSection :: UpdateDoc Document clip
+deleteSection pth =
+   \(DocumentLevel d _ cl) -> debug Prs ("Path is " ++ show pth) $
+     editCutD (DocumentLevel d (PathD pth) cl)
+
+addGraph pth =
+  \(DocumentLevel d path cl) ->
+    debug Err ("\n\nadding graph at"++show pth) $
+
+    (DocumentLevel 
+      (insertListD (init pth) (last pth+1) -- is a correct index, since pth points to a paragraph because
+              (Clip_Paragraph $ SubgraphPara NoIDD $       -- this function is called from the pres of a paragraph
+                                  Subgraph NoIDD (Dirty NoIDD)
+                                                 (toList_Vertex [])
+                                                 (toList_Edge [])
+              ) d
+       
+      ) path cl)
+    
 pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
@@ -321,9 +355,9 @@ insertNewSection pth =
                   (String_ NoIDD "<new>")
                   (List_Paragraph NoIDD Nil_Paragraph) 
                   (List_Subsection NoIDD Nil_Subsection) 
-                  (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
+--                  (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
   in  \(DocumentLevel d path cl) ->
-        let (Clip_List_Section sectionlist) = select (pth++[2]) d -- nasty: Root tr(0) gr(1) sections(2)
+        let (Clip_List_Section sectionlist) = select (pth++[1]) d -- 1 is nasty: Root [graph(0), sections(1)]
             clipsectionlist' = insertList (length $ fromList_Section sectionlist) (Clip_Section section) sectionlist
             (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
                                                 (clipsectionlist')
@@ -333,16 +367,23 @@ insertNewSection pth =
 removeLastSection :: [Int] -> UpdateDoc Document clip
 removeLastSection pth =
    \(DocumentLevel d path cl) ->
-      let (Clip_List_Section sectionlist) = select (pth++[2]) d -- nasty: Root tr(0) gr(1) sections(2)
+      let (Clip_List_Section sectionlist) = select (pth++[1]) d -- 1 is nasty: Root [graph(0), sections(1)]
           clipsectionlist' = removeList (length (fromList_Section sectionlist) - 1) sectionlist
           (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
                                               (clipsectionlist')
                                               )
       in  (DocumentLevel d' path cl)
+
 }
 
 
+
 -- annoying bits, since we don't have any default behaviour for pres attributes:
+
+SEM Section
+  | HoleSection     lhs.tocPres = presHole @lhs.focusD "Section" (HoleSectionNode @self @lhs.path) @lhs.path
+  | ParseErrSection lhs.tocPres = presParseErr @presentation
+
 
 SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip]}]
   | List_Section
@@ -356,3 +397,18 @@ SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip]}]
 SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
   | Nil_Section      lhs.tocPress = []
+
+{- dummy presentations. We don't use the pres attribute for these nonterminals, but it is declared,
+   so to prevent warnings, we provide the definitions. 
+-}
+SEM Shape [ || ] 
+  | Circle       
+      lhs.pres = empty
+  | Square
+      lhs.pres = empty
+
+SEM Dirty [ || ] 
+  | Dirty
+      lhs.pres = empty
+  | Clean       
+      lhs.pres = empty

@@ -55,28 +55,16 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Graph -> Maybe List_Section -> Root
-reuseRoot nodes  ma0 ma1 ma2 ma3
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Graph -> Maybe List_Section -> Root
+reuseRoot nodes  ma0 ma1 ma2
   = case extractFromNodes extractRoot defaultRoot nodes of
-           (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Root a0 a1 a2) -> reuse3 Root a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseRoot"
 
-reuseBin :: [Maybe Node] -> Maybe IDD -> Maybe Tree -> Maybe Tree -> Tree
-reuseBin nodes  ma0 ma1 ma2
-  = case extractFromNodes extractBin defaultBin nodes of
-           (Bin a0 a1 a2) -> reuse3 Bin a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseBin"
-
-reuseLeaf :: [Maybe Node] -> Maybe IDD -> Tree
-reuseLeaf nodes  ma0
-  = case extractFromNodes extractLeaf defaultLeaf nodes of
-           (Leaf a0) -> reuse1 Leaf a0 ma0
-           _ -> error "System error:<module>.reuseLeaf"
-
-reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Maybe Subgraph -> Section
-reuseSection nodes  ma0 ma1 ma2 ma3 ma4
+reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
+reuseSection nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractSection defaultSection nodes of
-           (Section a0 a1 a2 a3 a4) -> reuse5 Section a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
+           (Section a0 a1 a2 a3) -> reuse4 Section a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSection"
 
 reuseSubsection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
@@ -96,6 +84,12 @@ reuseParagraph nodes  ma0 ma1
   = case extractFromNodes extractParagraph defaultParagraph nodes of
            (Paragraph a0 a1) -> reuse2 Paragraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseParagraph"
+
+reuseSubgraphPara :: [Maybe Node] -> Maybe IDD -> Maybe Subgraph -> Paragraph
+reuseSubgraphPara nodes  ma0 ma1
+  = case extractFromNodes extractSubgraphPara defaultSubgraphPara nodes of
+           (SubgraphPara a0 a1) -> reuse2 SubgraphPara a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseSubgraphPara"
 
 reuseWord :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Word
 reuseWord nodes  ma0 ma1
@@ -220,19 +214,11 @@ extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _ _ _) _)) = Just x
+extractRoot (Just (RootNode x@(Root _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
-extractBin :: Maybe Node -> Maybe Tree
-extractBin (Just (BinNode x@(Bin _ _ _) _)) = Just x
-extractBin _ = Nothing
-
-extractLeaf :: Maybe Node -> Maybe Tree
-extractLeaf (Just (LeafNode x@(Leaf _) _)) = Just x
-extractLeaf _ = Nothing
-
 extractSection :: Maybe Node -> Maybe Section
-extractSection (Just (SectionNode x@(Section _ _ _ _ _) _)) = Just x
+extractSection (Just (SectionNode x@(Section _ _ _ _) _)) = Just x
 extractSection _ = Nothing
 
 extractSubsection :: Maybe Node -> Maybe Subsection
@@ -246,6 +232,10 @@ extractSubsubsection _ = Nothing
 extractParagraph :: Maybe Node -> Maybe Paragraph
 extractParagraph (Just (ParagraphNode x@(Paragraph _ _) _)) = Just x
 extractParagraph _ = Nothing
+
+extractSubgraphPara :: Maybe Node -> Maybe Paragraph
+extractSubgraphPara (Just (SubgraphParaNode x@(SubgraphPara _ _) _)) = Just x
+extractSubgraphPara _ = Nothing
 
 extractWord :: Maybe Node -> Maybe Word
 extractWord (Just (WordNode x@(Word _ _) _)) = Just x
@@ -331,16 +321,10 @@ defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
 defaultRoot :: Root
-defaultRoot = Root NoIDD hole hole hole
-
-defaultBin :: Tree
-defaultBin = Bin NoIDD hole hole
-
-defaultLeaf :: Tree
-defaultLeaf = Leaf NoIDD
+defaultRoot = Root NoIDD hole hole
 
 defaultSection :: Section
-defaultSection = Section NoIDD hole hole hole hole
+defaultSection = Section NoIDD hole hole hole
 
 defaultSubsection :: Subsection
 defaultSubsection = Subsection NoIDD hole hole hole
@@ -350,6 +334,9 @@ defaultSubsubsection = Subsubsection NoIDD hole hole
 
 defaultParagraph :: Paragraph
 defaultParagraph = Paragraph NoIDD hole
+
+defaultSubgraphPara :: Paragraph
+defaultSubgraphPara = SubgraphPara NoIDD hole
 
 defaultWord :: Word
 defaultWord = Word NoIDD hole
@@ -432,17 +419,17 @@ reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
 reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
-reuse1 :: (a0 -> r) -> 
-          a0 -> 
-          Maybe a0 -> r
-reuse1 f  a0 ma0 =
-  f (maybe a0 id ma0) 
-
 reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
 reuse6 f  a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) 
+
+reuse1 :: (a0 -> r) -> 
+          a0 -> 
+          Maybe a0 -> r
+reuse1 f  a0 ma0 =
+  f (maybe a0 id ma0) 
 
 reuse0 :: r -> r
 reuse0 f = f

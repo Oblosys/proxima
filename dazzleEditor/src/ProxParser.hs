@@ -29,7 +29,7 @@ set = Just
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
                      res = if null errs then Just enr else Nothing
-                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
+                 in  -- debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
                      res
        
 deepShowTks i tok = case tok of
@@ -63,16 +63,8 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-{-          (\str graph tree sections  ->
-          reuseRoot [tokenNode str] Nothing (Just tree) (Just graph)
-                                           (Just (toList_Section sections)) )
-      <$> pStructural RootNode
-      <*> recognizeGraph
-      <*> pPrs parseTree {- recognizeTree -}
-      <*> pList recognizeSection -}
-          (\str graph sections ->
-          reuseRoot [tokenNode str] Nothing Nothing (Just graph)
-                                           (Just (toList_Section sections)) )
+         (\str graph sections ->
+          reuseRoot [tokenNode str] Nothing (Just graph) (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pList recognizeSection 
@@ -87,36 +79,13 @@ recognizeRoot = pStr $
       <*  pList (pText <* pKey " "))
 -}    
   
-
-parseTree :: ListParser Document Node ClipDoc Tree
-parseTree = 
-          (\po t1 b t2 pc -> reuseBin [tokenNode po, tokenNode b, tokenNode pc] Nothing (Just t1) (Just t2))
-      <$> pKey "("
-      <*> parseTree
-      <*> pKey "Bin"
-      <*> parseTree
-      <*> pKey ")"
-  <|>     (\l -> reuseLeaf [tokenNode l] Nothing)
-      <$> pKey "Leaf"
-
-recognizeTree :: ListParser Document Node ClipDoc Tree
-recognizeTree = pStr $
-          (\str t1 t2 -> reuseBin [tokenNode str] Nothing (Just t1) (Just t2))
-      <$> pStructural BinNode
-      <*> recognizeTree
-      <*> recognizeTree
-  <|>     (\str -> reuseLeaf [tokenNode str] Nothing)
-      <$> pStructural LeafNode
-
-
 recognizeSection :: ListParser Document Node ClipDoc Section
 recognizeSection = pStrAlt SectionNode $
-          (\str t ps ss sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss) (Just sg))
+          (\str t ps ss -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss))
       <$> pStructural SectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsection
-      <*> recognizeSubgraph
           
 recognizeSubsection :: ListParser Document Node ClipDoc Subsection
 recognizeSubsection =
@@ -136,26 +105,6 @@ recognizeSubsubsection =
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
 
-{- niet werkend:
-
-recognizeSection :: ListParser Document Node ClipDoc Section
-recognizeSection = pStr $
-          (\str t ps ss sg -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing (Just sg))
-      <$> pStructural SectionNode
-      <*> pPrs pLine 
-      <*> pPrs parseParagraphs
-      <*> pList recognizeSubsection
-      <*> recognizeSubgraph
-          
-recognizeSubsection :: ListParser Document Node ClipDoc Subsection
-recognizeSubsection = pStr $
-          (\str t ps  -> reuseSubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) Nothing)
-      <$> pStructural SubsectionNode
-      <*> pPrs pLine 
-      <*> pPrs parseParagraphs
---      <*> recognizeSubgraph
-
--}
 
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
@@ -224,10 +173,9 @@ getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++sh
 
 keywords :: [String]
 keywords = 
-  [ "Leaf"
-  , "Bin"
-  , " "  -- The formatter scanner now produces " " tokens which are handled as keywords
+  [ " "  -- The formatter scanner now produces " " tokens which are handled as keywords
   , "\n"
+  , "\\graph"
   ]
 
 {- Currently, the scanner does not touch anything inside a formatter, so all whitespace is
@@ -244,6 +192,18 @@ parseParagraph =
       <$  pList (pKey " ") 
       <*> pList parseWord
       <*  pKey "\n"
+  <|> 
+          (reuseSubgraphPara [] (Just NoIDD) (Just $ Subgraph NoIDD (Dirty NoIDD)
+                                                              (List_Vertex NoIDD Nil_Vertex)
+                                                              (List_Edge NoIDD Nil_Edge))) -- we need a FreshIDD here    
+      <$  pKey "\\graph"
+  <|>
+      (   pStrAlt SubgraphParaNode $
+          (\str sg -> reuseSubgraphPara [tokenNode str] Nothing (Just sg))
+      <$> pStructural SubgraphParaNode
+      <*> recognizeSubgraph
+      )
+
 
 parseWord = 
           (\str -> reuseWord [] Nothing (Just $ String_ NoIDD str))
