@@ -119,6 +119,16 @@ selectD p doc = select p doc
 pasteD :: Editable doc doc node clip => PathD -> clip -> doc -> doc
 pasteD p c doc = paste p c doc
 
+insertListD :: (Show clip,Clip clip, Editable doc doc node clip) => PathD -> Int -> clip -> doc -> doc
+insertListD path index clip doc = 
+  let list = selectD path doc
+  in    debug Err ("INSERTING:"++ show(insertListClip index clip list)) $
+      if isListClip list
+      then if index <= arityClip list 
+           then pasteD path (insertListClip index clip list) doc
+           else debug Err ("DocumentEdit.insertBeforeD beyond end of list "++show path) $ doc
+      else debug Err ("DocumentEdit.insertBeforeD on non-list at "++show path++show clip) $ doc
+
 -- ugly mix of levels, find out how to do it nicely
 deleteD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> (doc, PathDoc)
 deleteD p d = if not (null p) && isListClip (selectD (init p) d) -- if parent is list, then delete is remove from list
