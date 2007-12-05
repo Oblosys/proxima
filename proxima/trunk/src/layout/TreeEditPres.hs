@@ -114,6 +114,9 @@ deleteGraphPres' (0:ps) (WithP ar pres)            = case deleteGraphPres' ps pr
 deleteGraphPres' (0:ps) (StructuralP id pres)      = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ StructuralP id pres'
                                                        Nothing    -> Nothing
+deleteGraphPres' (0:ps) (ParsingP id pres)      = case deleteGraphPres' ps pres of
+                                                       Just pres' -> Just $ ParsingP id pres'
+                                                       Nothing    -> Nothing
 deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ LocatorP l pres'
                                                        Nothing    -> Nothing
@@ -140,6 +143,7 @@ addVertexPres' (p:ps) vertex (ColP id rf f press)       = ColP id rf f $ replace
 addVertexPres' (p:ps) vertex (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
 addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
+addVertexPres' (0:ps) vertex (ParsingP id pres)         = ParsingP id (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (LocatorP l pres)          = LocatorP l (addVertexPres' ps vertex pres)
 addVertexPres' []     vertex (GraphP id d w h es press) = 
   GraphP id Dirty w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
@@ -160,6 +164,7 @@ addEdgePres' (p:ps) edge (ColP id rf f press)       = ColP id rf f $ replace "Tr
 addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
+addEdgePres' (0:ps) edge (ParsingP id pres)         = ParsingP id (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (LocatorP l pres)          = LocatorP l (addEdgePres' ps edge pres)
 addEdgePres' []     edge (GraphP id d w h es press) = GraphP id Dirty w h (edge:es) press
 addEdgePres' (0:ps) edge (VertexP id v x y ol pres) = VertexP id v x y ol (addEdgePres' ps edge pres)
@@ -175,6 +180,7 @@ getVertexGraphPath' graphPath pth (p:ps) (ColP id rf _ press)       = getVertexG
 getVertexGraphPath' graphPath pth (p:ps) (OverlayP id press)        = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (0:ps) (WithP ar pres)            = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (StructuralP id pres)      = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth (0:ps) (ParsingP id pres)         = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (LocatorP l pres)          = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (p:ps) (GraphP id d w h es press) = getVertexGraphPath' (Just pth) (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphPath' graphPath (pth++[0]) ps pres
@@ -187,6 +193,7 @@ getVertexIDs pth pres =
 
 getVertexID (LocatorP _ pres)     = getVertexID pres
 getVertexID (StructuralP _ pres)  = getVertexID pres
+getVertexID (ParsingP _ pres)     = getVertexID pres
 getVertexID (WithP _ pres)        = getVertexID pres
 getVertexID (VertexP _ i _ _ _ _) = i
 getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
@@ -198,6 +205,7 @@ moveVertexPres (p:ps) pt (ColP id rf f press)       = ColP id rf f $ replace "Tr
 moveVertexPres (p:ps) pt (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
+moveVertexPres (0:ps) pt (ParsingP id pres)         = ParsingP id (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
 moveVertexPres (p:ps) pt (GraphP id d w h es press)   = 
   if p < length press 
