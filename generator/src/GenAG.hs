@@ -167,14 +167,12 @@ genAtt (File _ decls  ) = let all    = (map (\(Decl n _ _)-> n) decls)
                               lists  = (map (\(Decl n _ _)-> n) (filter (\d -> isDeclList d || isDeclConsList d) decls)) 
                               listChildren  = (map (\(Decl n _ _)-> drop 5 n) (filter (\d -> isDeclList d) decls)) 
                               noList = (map (\(Decl n _ _)-> n) (filter (\d -> not (isDeclList d || isDeclConsList d)) decls)) 
-                          in   [---"\n\nATTR " ++ prListLine (filter (/="EnrichedDoc") all)
-                              --- ,"       [ path : {[Int]} | | ]"  --- removed synthesize path attr
-                                "\n\nATTR " ++ prListLine all
+                          in   ["\n\nATTR " ++ prListLine all
                                ,"       [ |  pIdC : Int  | ]"
                                ,"\n\nATTR " ++ prListLine all
                                ,"       [ focusD : FocusDoc | | ]"   
                                ,"\n\nATTR " ++ prListLine (filter (/="EnrichedDoc") all)
-                               ,"       [ path : {[Int]}  | | ]"   
+                               ,"       [ | path : {[Int]} | ]"   
                                ,"\n\nATTR " ++ prListLine lists ++ " [ | | press : {[Presentation_Doc_Node_Clip]} ]"
                                ,"\n\nATTR " ++ prListLine noList ++ " [ | | pres : Presentation_Doc_Node_Clip ]"
                                ,"\n\nATTR " ++ prListLine listChildren ++ " [ ix : Int || ]"
