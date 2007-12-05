@@ -261,17 +261,11 @@ addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip
              (LayerStateLay doc node clip, LayoutLevel doc node clip)
 addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
   let vertexIDs = getVertexIDs pth pres
-      freshID = showDebug' Err "id is"$ head $ dropWhile (`elem` vertexIDs) [0..]
-      pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vanillaVertex) pres
+      freshID = head $ dropWhile (`elem` vertexIDs) [0..]
+      pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vertex) pres
   in  (state, LayoutLevel pres' focus dt)     -- 0 in path is ignored
- where vanillaVertex = col [ rowR 1 [glue, ellipse 36 36 Transparent `withRef` (18,18) `withfColor` (200, 255, 255) , glue]
-                           , vSpace 4 `withHStretch` True
-                           , rowR 1 [glue, boxed 
-                                            (row [ hSpace 3, text "<new>" `withFont'` ("Arial", 10), hSpace 3])
-                                            `withbgColor` (236, 236, 169)
-                                    , glue]
-                           ]
-       outline = \a -> (round $ 17*cos a -1, round $ -17*sin a -1)
+ where vertex = empty
+       outline = const (0,0)
 
 addEdge toPth state layLvl@(LayoutLevel pres focus@(FocusP (PathP fromPth _) _) dt) =
   let pres' = case selectTree fromPth pres of
