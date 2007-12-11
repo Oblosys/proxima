@@ -45,7 +45,8 @@ formatter xps = FormatterP NoIDP xps
 --alt xps = Alternative xps
 with_ xp f = WithP f xp
 structural xp = StructuralP NoIDP xp
-parsing xp = ParsingP NoIDP xp
+parsing xp = ParsingP NoIDP LexInherited xp
+parsing' l xp = ParsingP NoIDP l xp
 loc l xp  = LocatorP l xp
 
 graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip] -> Xprez doc node clip

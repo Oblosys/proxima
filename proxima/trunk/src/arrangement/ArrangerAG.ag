@@ -120,8 +120,8 @@ DATA Presentation
   | VertexP     id : IDP i,x,y: Int outline : Outline child : Presentation
   | FormatterP  id : IDP presentationList : PresentationList
   | WithP       attrRule : AttrRule  child : Presentation
-  | StructuralP id : IDP  child : Presentation
-  | ParsingP    id : IDP  child : Presentation
+  | StructuralP id : IDP child : Presentation
+  | ParsingP    id : IDP lexer : Lexer child : Presentation
   | LocatorP location : {node} child : Presentation
   | ArrangedP
 

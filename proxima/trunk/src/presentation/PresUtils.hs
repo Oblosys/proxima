@@ -81,8 +81,8 @@ diffPres (WithP ar pres)       pres'                   = diffPres pres pres'
 diffPres pres                  (WithP ar' pres')       = diffPres pres pres'
 diffPres (StructuralP id pres) pres'                   = diffPres pres pres'
 diffPres pres                  (StructuralP id pres')  = diffPres pres pres'
-diffPres (ParsingP id pres)    pres'               = diffPres pres pres'
-diffPres pres                  (ParsingP id pres') = diffPres pres pres'
+diffPres (ParsingP id _ pres)    pres'               = diffPres pres pres'
+diffPres pres                  (ParsingP id _ pres') = diffPres pres pres'
 diffPres (LocatorP l pres)     pres'               = diffPres pres pres'
 diffPres pres                  (LocatorP l pres')  = diffPres pres pres'
 
@@ -135,7 +135,7 @@ all' = foldl' (&&) True
 --       what to do with setChildren for ArrangedP?
 prunePres dt (WithP wr pres)       = WithP wr       $ prunePres dt pres
 prunePres dt (StructuralP id pres) = StructuralP id $ prunePres dt pres
-prunePres dt (ParsingP id pres)    = ParsingP id    $ prunePres dt pres
+prunePres dt (ParsingP id l pres)    = ParsingP id l $ prunePres dt pres
 prunePres dt (LocatorP l pres)     = LocatorP l     $ prunePres dt pres
 prunePres dt (VertexP id v x' y' ol pres) = VertexP id v x' y' ol $ prunePres dt pres
 prunePres (DiffLeaf True)        pres = ArrangedP
@@ -298,7 +298,7 @@ deleteInsertedTokens inss (GraphP i d w h es press) = let press' = map (deleteIn
 deleteInsertedTokens inss (VertexP i v x y pl pres) = VertexP i v x y pl $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (WithP ar pres)       = WithP ar $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (StructuralP id pres) = StructuralP id $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss (ParsingP id pres)    = ParsingP id $ deleteInsertedTokens inss pres
+deleteInsertedTokens inss (ParsingP id l pres)    = ParsingP id l $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss (LocatorP l pres)     = LocatorP l $ deleteInsertedTokens inss pres
 deleteInsertedTokens inss pres = pres
 
@@ -321,7 +321,7 @@ normalizePres (ColP id rf NF press)                     = normalizeCol id 0 rf [
 normalizePres (OverlayP id (pres:press))               = OverlayP id (normalizePres pres : press)
 normalizePres (WithP ar pres)                          = WithP ar $ normalizePres pres
 normalizePres (StructuralP id pres)                    = StructuralP id $ normalizePres pres
-normalizePres (ParsingP id pres)                       = ParsingP id $ normalizePres pres
+normalizePres (ParsingP id l pres)                       = ParsingP id l $ normalizePres pres
 normalizePres (LocatorP l pres)                        = LocatorP l $ normalizePres pres
 normalizePres (GraphP id d w h es press)               = GraphP id d w h es $ map normalizePres press
 normalizePres (VertexP id v x y ol pres)               = VertexP id v x y ol $ normalizePres pres
@@ -362,7 +362,7 @@ locateTreePres' location (p:path) (GraphP id _ _ _ _ press)  = locateTreePres' l
 locateTreePres' location (0:path) (VertexP id _ _ _ _ pres)  = locateTreePres' location path pres
 locateTreePres' location (0:path) (WithP ar pres)            = locateTreePres' location path pres
 locateTreePres' location (0:path) (StructuralP id pres)      = locateTreePres' location path pres
-locateTreePres' location (0:path) (ParsingP id pres)         = locateTreePres' location path pres
+locateTreePres' location (0:path) (ParsingP id _ pres)         = locateTreePres' location path pres
 locateTreePres' location (0:path) (LocatorP l pres)          = locateTreePres' (Just l) path pres
 locateTreePres' location (p:path) (FormatterP id press)      = locateTreePres' location path (index "PresUtils.locateTreePres'" press p)
 locateTreePres' location pth      pr                         = debug Err ("*** PresUtils.locateTreePres: can't handle "++show pth++" "++ show pr++"***") Nothing
@@ -377,7 +377,7 @@ isEditableTreePres' editable (p:path) (GraphP id _ _ _ _ press) = isEditableTree
 isEditableTreePres' editable (0:path) (VertexP id _ _ _ _ pres)  = isEditableTreePres' editable path pres
 isEditableTreePres' editable (0:path) (WithP ar pres)            = isEditableTreePres' editable path pres
 isEditableTreePres' editable (0:path) (StructuralP id pres)      = isEditableTreePres' False path pres
-isEditableTreePres' editable (0:path) (ParsingP id pres)         = isEditableTreePres' True path pres
+isEditableTreePres' editable (0:path) (ParsingP id _ pres)         = isEditableTreePres' True path pres
 isEditableTreePres' editable (0:path) (LocatorP l pres)          = isEditableTreePres' editable path pres
 isEditableTreePres' editable (p:path) (FormatterP id press)      = isEditableTreePres' editable path (index "PresUtils.isEditableTreePres'" press p)
 isEditableTreePres' editable pth      pr                         = debug Err ("*** PresUtils.isEditableTreePres': can't handle "++show pth++" "++ show pr++"***") False
@@ -396,7 +396,7 @@ xyFromPathPres x y path           pr@(ColP id rf _ press)    = xyFromPathCol (x+
 xyFromPathPres x y (PathP (0:p) i) (OverlayP _ (pres:press)) = xyFromPathPres x y (PathP p i) pres
 xyFromPathPres x y (PathP (_:p) i) (WithP ar pres)           = xyFromPathPres x y (PathP p i) pres
 xyFromPathPres x y (PathP (_:p) i) (StructuralP id pres)     = xyFromPathPres x y (PathP p i) pres
-xyFromPathPres x y (PathP (_:p) i) (ParsingP id pres)        = xyFromPathPres x y (PathP p i) pres
+xyFromPathPres x y (PathP (_:p) i) (ParsingP id _ pres)      = xyFromPathPres x y (PathP p i) pres
 xyFromPathPres x y (PathP (_:p) i) (LocatorP l pres)         = xyFromPathPres x y (PathP p i) pres
 xyFromPathPres x y pth             pr                        = debug Err ("PresUtils.xyFromPathPres: can't handle "++show pth {-++" "++ show pr-}) (0,0, True)
 
@@ -431,7 +431,7 @@ leftWidthPres (ColP _ _ _ press)        = maximum (0:(map leftWidthPres press))
 leftWidthPres (OverlayP _ (pres:press)) = leftWidthPres pres
 leftWidthPres (WithP _ pres)            = leftWidthPres pres
 leftWidthPres (StructuralP _ pres)      = leftWidthPres pres
-leftWidthPres (ParsingP _ pres)         = leftWidthPres pres
+leftWidthPres (ParsingP _ _ pres)         = leftWidthPres pres
 leftWidthPres (LocatorP _ pres)         = leftWidthPres pres
 leftWidthPres pr                        = debug Err ("PresUtils.leftWidthPres: can't handle "++ show pr) 0
 
@@ -445,7 +445,7 @@ rightWidthPres (ColP _ _ _ press)        = maximum (0:(map rightWidthPres press)
 rightWidthPres (OverlayP _ (pres:press)) = rightWidthPres pres
 rightWidthPres (WithP _ pres)            = rightWidthPres pres
 rightWidthPres (StructuralP _ pres)      = rightWidthPres pres
-rightWidthPres (ParsingP _ pres)         = rightWidthPres pres
+rightWidthPres (ParsingP _ _ pres)         = rightWidthPres pres
 rightWidthPres (LocatorP _ pres)         = rightWidthPres pres
 rightWidthPres pr                        = debug Err ("PresUtils.rightWidthPres: can't handle "++ show pr) 0
 
@@ -460,7 +460,7 @@ topHeightPres (ColP _ rf _ press)       = sum (map heightPres (take rf press)) +
 topHeightPres (OverlayP _ (pres:press)) = topHeightPres pres
 topHeightPres (WithP _ pres)            = topHeightPres pres
 topHeightPres (StructuralP _ pres)      = topHeightPres pres
-topHeightPres (ParsingP _ pres)         = topHeightPres pres
+topHeightPres (ParsingP _ _ pres)         = topHeightPres pres
 topHeightPres (LocatorP _ pres)         = topHeightPres pres
 topHeightPres pr                        = debug Err ("PresUtils.topHeightPres: can't handle "++ show pr) 0
 
@@ -476,7 +476,7 @@ bottomHeightPres (ColP _ rf _ press)       = bottomHeightPres (index "PresUtils.
 bottomHeightPres (OverlayP _ (pres:press)) = bottomHeightPres pres
 bottomHeightPres (WithP _ pres)            = bottomHeightPres pres
 bottomHeightPres (StructuralP _ pres)      = bottomHeightPres pres
-bottomHeightPres (ParsingP _ pres)         = bottomHeightPres pres
+bottomHeightPres (ParsingP _ _ pres)         = bottomHeightPres pres
 bottomHeightPres (LocatorP _ pres)         = bottomHeightPres pres
 bottomHeightPres pr                        = debug Err ("PresUtils.bottomHeightPres: can't handle "++ show pr) 0
 
@@ -492,7 +492,7 @@ pathFromXYPres (x,y,b) pr@(ColP id rf _ press) = pathFromXYCol 0 (x-leftWidthPre
 pathFromXYPres (x,y,b) (OverlayP id (pres:press))  = 0 `consPathP` pathFromXYPres (x,y,b) pres
 pathFromXYPres (x,y,b) (WithP ar pres)    = 0 `consPathP` pathFromXYPres (x,y,b) pres
 pathFromXYPres (x,y,b) (StructuralP id pres)  = 0 `consPathP` pathFromXYPres (x,y,b) pres
-pathFromXYPres (x,y,b) (ParsingP id pres)  = 0 `consPathP` pathFromXYPres (x,y,b) pres
+pathFromXYPres (x,y,b) (ParsingP id _ pres)  = 0 `consPathP` pathFromXYPres (x,y,b) pres
 pathFromXYPres (x,y,b) (LocatorP l pres)  = 0 `consPathP` pathFromXYPres (x,y,b) pres
 pathFromXYPres (x,y,b) pres = debug Err  ("PresUtils.pathFromXYPres: can't handle "++show (x,y)++" "++show pres) NoPathP
 
@@ -558,7 +558,7 @@ stringFromPres' (ColP _ rf _ press)       = concatMap stringFromPres' press
 stringFromPres' (OverlayP _ (pres:press)) = stringFromPres' pres
 stringFromPres' (WithP _ pres)            = stringFromPres' pres
 stringFromPres' (StructuralP _ pres)      = stringFromPres' pres
-stringFromPres' (ParsingP _ pres)         = stringFromPres' pres
+stringFromPres' (ParsingP _ _ pres)         = stringFromPres' pres
 stringFromPres' (LocatorP _ pres)         = stringFromPres' pres
 stringFromPres' pr                        = debug Err ("PresUtils.stringFromPres': can't handle "++ show pr) []
 
@@ -581,7 +581,7 @@ pathToLeftmostLeaf (ColP _ _ _ press)   = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf (OverlayP _ press)   = 0 : pathToLeftmostLeaf (head press)  -- only navigate in head of overlay
 pathToLeftmostLeaf (WithP _ pres)       = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (StructuralP _ pres) = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (ParsingP _ pres)    = 0 : pathToLeftmostLeaf pres
+pathToLeftmostLeaf (ParsingP _ _ pres)    = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (LocatorP _ pres)    = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
@@ -594,7 +594,7 @@ pathToRightmostLeaf (ColP _ _ _ press)   = length press - 1 : pathToRightmostLea
 pathToRightmostLeaf (OverlayP _ press)   = 0 : pathToRightmostLeaf (head press)  -- only navigate in head of overlay
 pathToRightmostLeaf (WithP _ pres)       = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (StructuralP _ pres) = 0 : pathToRightmostLeaf pres
-pathToRightmostLeaf (ParsingP _ pres)    = 0 : pathToRightmostLeaf pres
+pathToRightmostLeaf (ParsingP _ _ pres)    = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (LocatorP _ pres)    = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (FormatterP _ press) = length press - 1  : pathToLeftmostLeaf (last press)
 pathToRightmostLeaf pres                 = debug Err ("PresUtils.pathToRightmostLeaf: can't handle "++show pres) []
@@ -607,7 +607,7 @@ selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (index "PresUtil
 selectTree (0:path) (VertexP _ _ _ _ _ pres)  = selectTree path pres
 selectTree (0:path) (WithP _ pres)            = selectTree path pres
 selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
-selectTree (0:path) (ParsingP _ pres)         = selectTree path pres
+selectTree (0:path) (ParsingP _ _ pres)         = selectTree path pres
 selectTree (0:path) (LocatorP _ pres)         = selectTree path pres
 selectTree (p:path) (FormatterP _ press)      = selectTree path (index "PresUtils.selectTree" press p)
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
@@ -621,7 +621,7 @@ pathsToAncestorRightSiblings root (p:path) (ColP _ _ _ press)      = pathsToAnce
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
 pathsToAncestorRightSiblings root (0:path) (OverlayP _ (pres:_)) = pathsToAncestorRightSiblings (root++[0]) path pres
 pathsToAncestorRightSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorRightSiblings (root++[p]) path pres
-pathsToAncestorRightSiblings root (p:path) (ParsingP _ pres)     = pathsToAncestorRightSiblings (root++[p]) path pres
+pathsToAncestorRightSiblings root (p:path) (ParsingP _ _ pres)   = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (LocatorP _ pres)     = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (WithP _ pres)        = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (FormatterP _ press)  = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
@@ -637,7 +637,7 @@ pathsToAncestorLeftSiblings root (p:path) (ColP _ _ _ press)      = pathsToAnces
                                                              ++ (if p > 0 then [root++[p-1]] else [])
 pathsToAncestorLeftSiblings root (0:path) (OverlayP _ (pres:_)) = pathsToAncestorLeftSiblings (root++[0]) path pres
 pathsToAncestorLeftSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorLeftSiblings (root++[p]) path pres 
-pathsToAncestorLeftSiblings root (p:path) (ParsingP _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
+pathsToAncestorLeftSiblings root (p:path) (ParsingP _ _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (LocatorP _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (WithP _ pres)        = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (FormatterP _ press)  = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
@@ -721,7 +721,7 @@ containsColPres (p:path) (ColP id rf _ press)       = True
 containsColPres (0:path) (OverlayP id press@(pres:_)) = containsColPres path (index "PresUtils.containsColPres" press 0)     
 containsColPres (p:path) (WithP ar pres)            = containsColPres path pres
 containsColPres (p:path) (StructuralP id pres)      = containsColPres path pres
-containsColPres (p:path) (ParsingP id pres)         = containsColPres path pres
+containsColPres (p:path) (ParsingP id _ pres)         = containsColPres path pres
 containsColPres (p:path) (LocatorP _ pres)          = containsColPres path pres
 containsColPres (p:path) (FormatterP id press)      = containsColPres path (index "PresUtils.containsColPres" press p)
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
@@ -742,7 +742,7 @@ focusIsOnGraphPres (p:path) (GraphP _ _ _ _ _ press)  = focusIsOnGraphPres path 
 focusIsOnGraphPres (0:path) (VertexP _ _ _ _ _ pres)  = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (WithP _ pres)            = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (StructuralP _ pres)      = focusIsOnGraphPres path pres
-focusIsOnGraphPres (0:path) (ParsingP _ pres)         = focusIsOnGraphPres path pres
+focusIsOnGraphPres (0:path) (ParsingP _ _ pres)       = focusIsOnGraphPres path pres
 focusIsOnGraphPres (0:path) (LocatorP _ pres)         = focusIsOnGraphPres path pres
 focusIsOnGraphPres (p:path) (FormatterP _ press)      = focusIsOnGraphPres path (index "PresUtils.focusIsOnGraphPres" press p)
 focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.focusIsOnGraph: can't handle "++show pth++" "++show pres) False
@@ -765,7 +765,7 @@ mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (le
                                                                                   (inh',syn') = w (inh,syn)
                                                                               in mouseDown inh') path pres
 mouseDownDocPres' upd (p:path) (StructuralP _ pres)      = mouseDownDocPres' upd path pres
-mouseDownDocPres' upd (p:path) (ParsingP _ pres)         = mouseDownDocPres' upd path pres
+mouseDownDocPres' upd (p:path) (ParsingP _ _ pres)         = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (FormatterP _ press)      = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes.mouseDownDocPres: can't handle "++show pth++" "++show pres) Nothing
@@ -786,7 +786,7 @@ popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres'
                                                                                       (inh',syn') = w (inh,syn)
                                                                                   in popupMenuItems inh') path pres
 popupMenuItemsPres' its (p:path) (StructuralP _ pres)      = popupMenuItemsPres' its path pres
-popupMenuItemsPres' its (p:path) (ParsingP _ pres)         = popupMenuItemsPres' its path pres
+popupMenuItemsPres' its (p:path) (ParsingP _ _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (LocatorP _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (FormatterP _ press)      = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its pth      pres                      = debug Err ("PresTypes.popupMenuItemsPres: can't handle "++show pth++" "++show pres) []
@@ -811,8 +811,8 @@ prez2 =                             col [text "12345"
                 rowR 2 [text "ab",   text "cd", underline $ text "ref", text "noppes", text "bla"]
                                             , text "678Y9"]
 prez2' = structural $                             col [text "12345"
-    , parsing $ rowR 1 [text "abcd", structural $ rowR 1 [italic $ text "ref", vLineW 2,text "ref", strikeOut $ text "ref"], text "noppes", text "bla"],
-                rowR 2 [text "ab", parsing $ bold $ text "cd", underline $ text "ref", text "noppes", text "bla"]
+    , parsing' LexFreeText $ rowR 1 [text "abcd", structural $ rowR 1 [italic $ text "ref", vLineW 2,text "ref", strikeOut $ text "ref"], text "noppes", text "bla"],
+                rowR 2 [text "ab", parsing' LexFreeText $ bold $ text "cd", underline $ text "ref", text "noppes", text "bla"]
                                             , text "678Y9"]
 
 -- why the big speed difference between prez2 and prez2'?

@@ -72,7 +72,7 @@ data Presentation doc node clip = EmptyP !IDP
            | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
            | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
            | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
-           | ParsingP !IDP !(Presentation doc node clip)         -- IDP?
+           | ParsingP !IDP !Lexer !(Presentation doc node clip)         -- IDP?
            | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
            | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation doc node clip] -- width height edges 
            | VertexP !IDP !Int !Int !Int Outline !(Presentation doc node clip) -- vertexID x y outline       see note below
@@ -86,6 +86,12 @@ data Presentation doc node clip = EmptyP !IDP
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
+
+-- This datatype will be in the non-generic part of Proxima in the future. (when an extensible scanner is available)
+-- LexInherited can be used if higher in the presentation tree the lexer is already defined.
+data Lexer = LexFreeText | LexHaskell | LexInherited
+-- Lexer info is not passed on to arrangement, since scanning takes place on the presentation datatype
+-- and does not involve the arrangement.
 
 -- Note: An alternative and safer definition for GraphP is GraphP [Vertex], but this requires all functions that
 -- traverse Presentation to have a separate function for traversing the Vertex type. This is too much of a hassle.
@@ -105,7 +111,7 @@ instance Show (Presentation doc node clip) where
   show (OverlayP  id press)  = "OverlayP ["++concat (intersperse ", " (map show press))++"]"
   show (WithP ar pres)       = "WithP <fn> "++show pres
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
-  show (ParsingP id pres)    = "ParsingP "++show id++" "++show pres
+  show (ParsingP id l pres)    = "ParsingP "++show id++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (GraphP id _ _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
   show (VertexP id vid x y ol pres)  = "Vertex (#"++show vid++":"++show x++","++show y++")"++show pres
@@ -131,7 +137,7 @@ shallowShowPres (GraphP id _ _ _ _ press)  = "{"++show id++":Graph, #children="+
 shallowShowPres (VertexP _ _ x y _  pres)  = "{"++show id++":Vertex, x="++show x++",y="++show y++"}"
 shallowShowPres (WithP ar pres)       = "{WithP}"
 shallowShowPres (StructuralP id pres) = "{"++show id++":StructuralP}"
-shallowShowPres (ParsingP id pres)    = "{"++show id++":ParsingP}"
+shallowShowPres (ParsingP id l pres)    = "{"++show id++":ParsingP}"
 shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
 shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
 shallowShowPres _                     = "<<<presentation without show>>>"
@@ -150,7 +156,7 @@ getChildrenP (GraphP id _ _ _ _ press) = press
 getChildrenP (VertexP _ _ x y _  pres) = [pres]
 getChildrenP (WithP ar pres)       = [pres]
 getChildrenP (StructuralP id pres) = [pres]
-getChildrenP (ParsingP id pres)    = [pres]
+getChildrenP (ParsingP id l pres)    = [pres]
 getChildrenP (LocatorP loc pres)   = [pres]
 getChildrenP (ArrangedP)           = []
 getChildrenP pres                  = debug Err ("PresTypes.getChildren: unhandled presentation: "++shallowShowPres pres) []
@@ -173,7 +179,7 @@ setChildrenP press' (GraphP id d w h es _) = GraphP id d w h es press'
 setChildrenP [pres'] (VertexP id vid x y ol _) = VertexP id vid x y ol pres'
 setChildrenP [pres'] (WithP ar _)       = WithP ar pres'
 setChildrenP [pres'] (StructuralP id _) = StructuralP id pres'
-setChildrenP [pres'] (ParsingP id _)    = ParsingP id pres'
+setChildrenP [pres'] (ParsingP id l _)    = ParsingP id l pres'
 setChildrenP [pres'] (LocatorP loc _)   = LocatorP loc pres'
 setChildrenP []      (ArrangedP)        = ArrangedP
 setChildrenP press'  pres                  = debug Err ("PresTypes.setChildrenP: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
@@ -230,7 +236,7 @@ idP (ColP id _ _ _)       = id
 idP (OverlayP  id press)  = id
 idP (WithP ar pres)       = idP pres
 idP (StructuralP id pres) = id
-idP (ParsingP id pres)    = id
+idP (ParsingP id l pres)    = id
 idP (LocatorP loc pres)   = idP pres
 idP (GraphP id _ _ _ _ _)  = id
 idP (VertexP id _ _ _ _ _) = id

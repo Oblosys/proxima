@@ -14,13 +14,17 @@ import Data.Map (Map)
 --                               detokenize' for adding whitespace until StructureP node
 
 -- Local State is layout, inserted and deleted state
+
+-- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
+-- Note that freetext tokens have no layout in the extra state, but since their id's will not be
+-- in the LayoutMap, nothing will be inserted.
 detokenize :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation doc node clip -> Presentation doc node clip
-detokenize lm (ParsingP id pres)         = let press = detokenize' lm pres
+detokenize lm (ParsingP id l pres)       = let press = detokenize' lm pres
                                            in  if null press 
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
                                                else if length press == 1  -- this will usually be the case because breaks
-                                               then ParsingP id $ head press -- are produced by col's so there will be one there
-                                               else ParsingP id $ ColP NoIDP 0 NF press 
+                                               then ParsingP id l $ head press -- are produced by col's so there will be one there
+                                               else ParsingP id l $ ColP NoIDP 0 NF press 
 detokenize lm pres@(EmptyP _)            = pres
 detokenize lm pres@(StringP _ str)       = pres
 detokenize lm pres@(ImageP _ _ _)        = pres
@@ -55,8 +59,8 @@ detokenize' lm (OverlayP id (pres:press)) = let press' = detokenize' lm pres
                                             in  [ OverlayP id (pres' : press) | pres' <- press' ]
 detokenize' lm (WithP ar pres)            = let press = detokenize' lm pres 
                                             in  map (WithP ar) press
-detokenize' lm (ParsingP id pres)         = let press = detokenize' lm pres 
-                                            in  map (ParsingP id) press
+detokenize' lm (ParsingP id l pres)       = let press = detokenize' lm pres 
+                                            in  map (ParsingP id l) press
 detokenize' lm (LocatorP l pres)          = let press = detokenize' lm pres 
                                             in  map (LocatorP l) press
 detokenize' lm (GraphP id d w h es press) = let press' = map (singleton . detokenize' lm) press

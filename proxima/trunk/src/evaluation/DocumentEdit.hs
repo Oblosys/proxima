@@ -122,8 +122,7 @@ pasteD p c doc = paste p c doc
 insertListD :: (Show clip,Clip clip, Editable doc doc node clip) => PathD -> Int -> clip -> doc -> doc
 insertListD path index clip doc = 
   let list = selectD path doc
-  in    debug Err ("INSERTING:"++ show(insertListClip index clip list)) $
-      if isListClip list
+  in  if isListClip list
       then if index <= arityClip list 
            then pasteD path (insertListClip index clip list) doc
            else debug Err ("DocumentEdit.insertBeforeD beyond end of list "++show path) $ doc

@@ -26,6 +26,8 @@ import IO
 import Directory
 import Data.Time.Clock
 
+import Control.Exception
+
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
 
@@ -273,7 +275,9 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
 --            use the last invalidation when debug markings are used
             }
     }
-
+ `Control.Exception.catch`
+  \err -> putStrLn "Caught!"
+  
 drawRendering :: DrawableClass d => 
                  IORef (RenderingLevel documementLevel) -> Window -> Viewport -> d -> IO ()
 drawRendering renderingLvlVar wi vp pm = 

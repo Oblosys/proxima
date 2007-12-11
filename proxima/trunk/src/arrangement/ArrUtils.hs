@@ -243,7 +243,7 @@ markDirty arr (p:pth) (DiffLeaf True) = DiffNode False True $  -- make self clea
                                       ++ replicate (length (getChildrenA arr) - p - 1) (DiffLeaf True)
 markDirty arr (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self 
                                                take p dts
-                                            ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (dts !! p)]
+                                            ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (index "ArrUtils.markDirty" dts p)]
                                             ++ drop (p+1) dts
 
 
@@ -323,11 +323,11 @@ selectTreeA :: Show node => [Int] -> Arrangement node -> (Int, Int, Arrangement 
 selectTreeA path arr = selectTreeA' 0 0 path arr
 
 selectTreeA' x' y' []       tr                                = (x', y', tr)
-selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
-selectTreeA' x' y' (p:path) (ColA _ x y _ _ _ _ _ _ arrs)         = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
+selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.1" arrs p)
+selectTreeA' x' y' (p:path) (ColA _ x y _ _ _ _ _ _ arrs)         = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.2" arrs p)
 --selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path (last arrs)
 selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path arr
-selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (arrs!!p)
+selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.3" arrs p)
 selectTreeA' x' y' (0:path) (VertexA _ x y _ _ _ _ _ _ arr)     = selectTreeA' (x'+x) (y'+y) path arr
 selectTreeA' x' y' (p:path) (StructuralA _ child)             = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (ParsingA _ child)                = selectTreeA' x' y' path child

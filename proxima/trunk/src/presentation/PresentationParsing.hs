@@ -112,15 +112,20 @@ pStrAlt ndf p = unfoldStructure
 -- so a tree can contain source text (which fails on parsing)
 
 
-pStrDirty ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip (Dirty, a) -> ListParser doc node clip (Dirty, a)
-pStrDirty p = unfoldStructure  
+pStrDirty ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip (a, Dirty) -> ListParser doc node clip (a, Dirty)
+pStrDirty p = pStrExtra Dirty p
+
+
+-- pStrExtra is a variant of pStr that allows an extra parser result to be returned in a tuple.
+-- extraDefault is a default value for this type in case of a parse error.
+pStrExtra ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => b -> ListParser doc node clip (a, b) -> ListParser doc node clip (a, b)
+pStrExtra extraDefault p = unfoldStructure  
      <$> pSym (StructuralTk Nothing empty [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) (Dirty,parseErr pr)
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) (parseErr pr,extraDefault)
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
-
 
 -- TODO: why do we need the 's in Editable?
 pPrs ::  (Editable a doc node clip, Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
@@ -185,7 +190,7 @@ postScanStr kwrds ctxt (RowP i _ press)     = concatMap (postScanStr kwrds ctxt)
 postScanStr kwrds ctxt (LocatorP l pres)    = postScanStr kwrds (Just l) pres  
 postScanStr kwrds ctxt (GraphP i d _ _ es press) = GraphTk d es ctxt i : concatMap (postScanStr kwrds ctxt) press
 postScanStr kwrds ctxt (VertexP i v x y _ pres)  = VertexTk v (x,y) ctxt i : postScanStr kwrds ctxt pres  
-postScanStr kwrds ctxt (ParsingP i pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
+postScanStr kwrds ctxt (ParsingP i _ pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
 --postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
 postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
 postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt) press
@@ -208,7 +213,7 @@ postScanPrs kwrds ctxt (RowP i _ press)     = concatMap (postScanPrs kwrds ctxt)
 postScanPrs kwrds ctxt (LocatorP l pres)    = postScanPrs kwrds (Just l) pres
 postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentation contains Graph that is not part of a structural presentation") []
 postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
-postScanPrs kwrds ctxt (ParsingP _ pres)    = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (ParsingP _ _ pres)    = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
 postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [StrTk "\n" Nothing NoIDP]
 postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []

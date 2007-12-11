@@ -39,7 +39,7 @@ pathAFromPathP' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path
 pathAFromPathP' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (WithP ar pres)          (0:path) = pathAFromPathP' arr pres path -- ignore with path step 
 pathAFromPathP' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathAFromPathP' arr pres path
-pathAFromPathP' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
+pathAFromPathP' (ParsingA _ arr)                (ParsingP _ _ pres)      (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (FormatterP _ press)     path     = pathAFromPathPFormatter arr press path
 pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ shallowShowPres pr++"***") []
@@ -48,7 +48,7 @@ pathAFromPathP' ar                              pr                       pth    
 pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (p:path) =
   let subtractedIndices = filter (>=0) $ scanl (-) p nrOfRowEltss
       (cIx, rIx) = (length subtractedIndices -1 , last subtractedIndices) -- safe, since subtractedIndices always starts with p
-      arr = case rowArrs !! cIx of
+      arr = case index "ArrLayerUtils.pathAFromPathPFormatter" rowArrs cIx of
               (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathAFromPathPFormatter, arr index" arrs rIx
               _                           -> debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
   in  cIx : rIx : pathAFromPathP' arr (index "ArrLayerUtils.pathAFromPathPFormatter, pres index" press p) path
@@ -64,7 +64,7 @@ pathPFromPathA' (GraphA _ _ _ _ _ _ _ _ _ arrs) (GraphP _ _ _ _ _ press) (p:path
                                                                                     else p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path                                            
 pathPFromPathA' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathPFromPathA' arr pres path
-pathPFromPathA' (ParsingA _ arr)                (ParsingP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
+pathPFromPathA' (ParsingA _ arr)                (ParsingP _ _ pres)      (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' arr                             (FormatterP _ press)     path     = pathPFromPathAFormatter arr press path
 pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ shallowShowPres pr++"***") []
@@ -72,7 +72,7 @@ pathPFromPathA' ar                              pr                       pth    
 -- (cIx,rIx) are the indices in the column of rows and are mapped onto an index in the formatter
 pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (cIx:rIx:path) = debug Err ("\n\n\ncol row index is:"++show (cIx,rIx)) $
   let fIx = sum (take cIx nrOfRowEltss) + rIx
-      arr = case rowArrs !! cIx of
+      arr = case index "ArrLayerUtils.pathPFromPathAFormatter" rowArrs cIx of
               (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathPFromPathAFormatter, arr index" arrs rIx
               _                           -> debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
   in  fIx : pathAFromPathP' arr (index "ArrLayerUtils.pathPFromPathAFormatter, pres index" press fIx) path
