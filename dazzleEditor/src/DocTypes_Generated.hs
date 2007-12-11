@@ -59,7 +59,7 @@ data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_
               deriving Show
 
 
-data Root = Root IDD Graph List_Section 
+data Root = Root IDD Graph String_ List_Section 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc)
              deriving Show

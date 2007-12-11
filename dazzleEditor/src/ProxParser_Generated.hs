@@ -55,10 +55,10 @@ reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Graph -> Maybe List_Section -> Root
-reuseRoot nodes  ma0 ma1 ma2
+reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Graph -> Maybe String_ -> Maybe List_Section -> Root
+reuseRoot nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractRoot defaultRoot nodes of
-           (Root a0 a1 a2) -> reuse3 Root a0 a1 a2 ma0 ma1 ma2
+           (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRoot"
 
 reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
@@ -214,7 +214,7 @@ extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _ _) _)) = Just x
+extractRoot (Just (RootNode x@(Root _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractSection :: Maybe Node -> Maybe Section
@@ -321,7 +321,7 @@ defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
 defaultRoot :: Root
-defaultRoot = Root NoIDD hole hole
+defaultRoot = Root NoIDD hole hole hole
 
 defaultSection :: Section
 defaultSection = Section NoIDD hole hole hole

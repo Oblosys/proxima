@@ -63,11 +63,13 @@ recognizeRootEnr = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc Root
 recognizeRoot = pStr $
-         (\str graph sections ->
-          reuseRoot [tokenNode str] Nothing (Just graph) (Just (toList_Section sections)) )
+         (\str graph title sections ->
+          reuseRoot [tokenNode str] Nothing (Just graph) (Just (String_ NoIDD title)) (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
+      <*> pPrs pLine 
       <*> pList recognizeSection 
+
 {- -- for presentation that only contains a parsing formatter
           (\str ->
           reuseRoot [tokenNode str] Nothing Nothing Nothing 

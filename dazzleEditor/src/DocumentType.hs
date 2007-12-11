@@ -9,7 +9,7 @@ data Dummy = Dummy [Dummy] String_ Bool_ Int_ { idd : IDD } -- necessary because
 
 -- Don't remove the declarations above
 
-data Root = Root graph:Graph sections:[Section] { idd : IDD }
+data Root = Root graph:Graph title:String_ sections:[Section] { idd : IDD }
 
 data Section = Section title:String_ paragraphs:[Paragraph] subsections:[Subsection] { idd : IDD }
 

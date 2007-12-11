@@ -94,6 +94,7 @@ saveFile filePath doc =
   
 defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Graph NoIDD (Clean NoIDD) (List_Vertex NoIDD Nil_Vertex)
                                                                        (List_Edge NoIDD Nil_Edge))
+                                            (String_ NoIDD "Reducer.defaultInitDoc")
                                             (List_Section NoIDD Nil_Section)
 -- lines' works for Unix, Mac, and Dos format
 lines'     :: String -> [String]
@@ -114,10 +115,10 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 isCleanDoc (Clean _) = True
 isCleanDoc _         = False
 
-reduceRoot (Root idd graph sections) =
+reduceRoot (Root idd graph title sections) =
   let subgraphs = getSubgraphsSections sections
       (graph', subgraphs') = resolveSubgraphs graph subgraphs
-  in  Root idd graph' (replaceSubgraphsSectionList subgraphs' sections)
+  in  Root idd graph' title (replaceSubgraphsSectionList subgraphs' sections)
 
 
 getSubgraphsSections :: List_Section -> [Subgraph]

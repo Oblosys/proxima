@@ -405,21 +405,23 @@ instance Editable Dummy Document Node ClipDoc where
 
 instance Editable Root Document Node ClipDoc where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ x1 x2) = select p x1
-  select (1:p) (Root _ x1 x2) = select p x2
+  select (0:p) (Root _ x1 x2 x3) = select p x1
+  select (1:p) (Root _ x1 x2 x3) = select p x2
+  select (2:p) (Root _ x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 x1 x2) = Root i1 (paste p c x1) x2
-  paste (1:p) c (Root i1 x1 x2) = Root i1 x1 (paste p c x2)
+  paste (0:p) c (Root i1 x1 x2 x3) = Root i1 (paste p c x1) x2 x3
+  paste (1:p) c (Root i1 x1 x2 x3) = Root i1 x1 (paste p c x2) x3
+  paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Graph} {Sections} "  , Clip_Root $ Root NoIDD hole hole)
+  alternatives _ = [("Root {Graph} {String_} {Sections} "  , Clip_Root $ Root NoIDD hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ x1 x2) = 2
+  arity (Root _ x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrRoot

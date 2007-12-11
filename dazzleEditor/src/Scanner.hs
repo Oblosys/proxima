@@ -12,9 +12,9 @@ import DocTypes_Generated (Node (..))
 tokenize :: Int -> Maybe Node -> Presentation doc Node clip ->
             (Presentation doc Node clip, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
-tokenize i loc (ParsingP id pres)  = let (lc, layout, id, str, tokens, lm, i') = tokenize' i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
-                                         (tok, lm', i'') = makeToken i' lc layout id str
-                                     in  (ParsingP id $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
+tokenize i loc (ParsingP id l pres)  = let (lc, layout, id, str, tokens, lm, i') = tokenize' i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
+                                           (tok, lm', i'') = makeToken i' lc layout id str
+                                       in  (ParsingP id l $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
 tokenize i loc pres@(EmptyP _)           = (pres, Map.empty, i)
 tokenize i loc pres@(StringP _ str)      = (pres, Map.empty, i)
 tokenize i loc pres@(ImageP _ _ _)         = (pres, Map.empty, i)
@@ -184,7 +184,7 @@ tokenize' i loc lc layout id str (LocatorP (HoleInt_Node _ _) pres)  = tokenize'
 tokenize' i loc lc layout id str (LocatorP (Bool_Node _ _) pres)  = tokenize' i loc lc layout id str pres
 tokenize' i loc lc layout id str (LocatorP (HoleBool_Node _ _) pres)  = tokenize' i loc lc layout id str pres -- hole also necessary?
 tokenize' i (_,ar)   lc layout id str (LocatorP loc pres)  = tokenize' i (Just loc,ar) lc layout id str pres
-tokenize' i loc lc layout id str (ParsingP _ pres)    = tokenize' i loc lc layout id str pres
+tokenize' i loc lc layout id str (ParsingP _ _ pres)    = tokenize' i loc lc layout id str pres
 tokenize' i (Nothing,ar) lc layout id "" (StructuralP id' pres)    =
   let (pres', lm1, i'') = tokenize i Nothing pres
   in  (undefTk, (0,0), NoIDP, "", [StructuralP id' $ pres'], 

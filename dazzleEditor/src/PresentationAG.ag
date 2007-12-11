@@ -49,38 +49,12 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ -- empty `withHeight` 300 
-                     --      , mkTreeLeaf False $ text "Bla" 
-                     {-      , boxed $ row [ text "blap" `withFontSize` 100, colR 1 [ poly [] `withbgColor` red
-                                                                               , text "blap"
-                                                                               , poly [] `withbgColor` blue
-                                                                               ] `withHRef` (10)
-                                         ] -}
-                           {-, overlay [ row [rect 100 10] `withbgColor` red `withRef` (45,10) 
-                                                   , rect 10 100
-                                                   ] -}
-                                {- , boxed $ overlay [ rect 100 10  `withRef` (45,10)
-                                                   , rect 10 100
-                                                   ]  -}  
-                         {-  , boxed $ overlay [ col [text "O" ]
-                                             , col[ text "+"]
-                                                `withRef` (20,40)
-                                             ] 
-                           -}      
-                           -- , col $ replicate 15 $ row $ replicate 20 $ text "bla"
-                           --  text "Contents"
-                               @graph.pres
-                           --, parsing $ formatter $ replicate 50 $ text "bla"
+                     col $ [ @graph.pres
+                           , col [ parsing $ formatter [@title.pres], empty `withHStretch` True 
+                               `withFontSize_` (percent 160) 
+                               ] `addPopupItems`
+                               [ ("Add Section", insertAtHeadSection @sections.path) ]  
                            , col @sections.press `withFontSize` 12  `withWidth` 800 
-                           --, parsing $ formatter $ map (text.(++" ").show) [100..149] 
-                           --, text "sdakljdksadjasdlkjasdjakdsjalsdjkasdjajsdkajsdkjalskdjasdjlaskdjaksdj"
-                           --, col $ replicate 4 $ col $ replicate 20 $ text "84792873498237498274987239487923874928" `withbgColor` green
-                          --, col $ map row $ divide 3 @sections.press
-                           , row [ (boxed $ text "Add Section") `withMouseDown` insertNewSection @lhs.path
-                                 , text " "
-                                 , (boxed $ text "Remove Section") `withMouseDown` removeLastSection @lhs.path 
-                                 ]
-                          
                            ] 
 {
 divide n [] = []
@@ -89,48 +63,58 @@ divide n xs = let (h,t) = splitAt n xs
 }
                            
            
-ATTR Section [||tocPres : Presentation_Doc_Node_Clip ]          
-SEM Section
+SEM Section [||tocPres : Presentation_Doc_Node_Clip ]          
   | Section
       loc.numberStr = show @sectionNr ++ "."
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ row [ text @numberStr
-                                  , parsing $ formatter [@title.pres], empty `withHStretch` True 
-                                  ] `withFontSize_` (percent 150)  
-                           , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
-                           , col @subsections.press
-                           ])
-                     `addPopupItems` [ ("Delete Section", deleteSection @lhs.path) ]
+                     (col $ [ col [ row [ text @numberStr
+                                        , parsing $ formatter [@title.pres], empty `withHStretch` True 
+                                        ] `withFontSize_` (percent 150)
+                                          `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
+  
+                                  , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                                  ] `addPopupItems`
+                                    [ ("Add Subsection", insertAtHeadSubsection @subsections.path) ]  
+                            , col @subsections.press
+                            ])
+                     `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
+                                     , ("Add Section", addSection @lhs.path) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                       row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
 
-ATTR Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
-SEM Subsection
+
+SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
       lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ row [ text @numberStr
-                                  , parsing $ formatter [@title.pres], empty `withHStretch` True
-                                  ] `withFontSize_` (percent 130)  
-                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                     (col $ [ col [ row [ text @numberStr
+                                        , parsing $ formatter [@title.pres], empty `withHStretch` True
+                                        ] `withFontSize_` (percent 130)
+                                          `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
+                                  , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                                  ] `addPopupItems`
+                                    [ ("Add Subsubsection", insertAtHeadSubsubsection @subsubsections.path) ]  
                             , col @subsubsections.press
                             ])
-                     `addPopupItems` [ ("Delete Subsection", deleteSection @lhs.path) ]
+                     `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
+                                     , ("Add Subsection", addSubsection @lhs.path) ]
       --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
-ATTR Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
-SEM Subsubsection
+
+SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ row [ text @numberStr
                                   , parsing $ formatter [@title.pres], empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
+                                    `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
                             , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
                             ])
-                     `addPopupItems` [ ("Delete Subsubsection", deleteSection @lhs.path) ]
+                     `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
+                                     , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
       --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (show $ @subsubsectionNr), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
@@ -167,12 +151,14 @@ SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ formatter @words.press ])
-                       `addPopupItems` [ ("Add Graph", addGraph @lhs.path) ]
+                       `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
 
   | SubgraphPara
       lhs.pres = loc (SubgraphParaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ @subgraph.pres, empty `withHStretch` True ]
-                       `addPopupItems` [ ("Add Graph", addGraph @lhs.path) ]
+                       `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
+                                       , ("Add Graph", addSubgraphPara @lhs.path)
+                                       , ("Add Paragraph", addParagraph @lhs.path) ]
                            
 
 SEM Word [ || ]
@@ -317,26 +303,69 @@ SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ]
       lhs.vertexIDNames = []
 
 {
-
---deleteSection :: UpdateDoc Document clip
-deleteSection pth =
-   \(DocumentLevel d _ cl) -> debug Prs ("Path is " ++ show pth) $
+deleteAtPath :: PathD -> UpdateDoc Document ClipDoc
+deleteAtPath pth =
+   \(DocumentLevel d _ cl) ->
      editCutD (DocumentLevel d (PathD pth) cl)
 
-addGraph pth =
-  \(DocumentLevel d path cl) ->
-    debug Err ("\n\nadding graph at"++show pth) $
+newSubgraphPara = Clip_Paragraph $
+                    SubgraphPara NoIDD $
+                      Subgraph NoIDD (Dirty NoIDD)
+                        (toList_Vertex [])
+                        (toList_Edge []) 
 
-    (DocumentLevel 
-      (insertListD (init pth) (last pth+1) -- is a correct index, since pth points to a paragraph because
-              (Clip_Paragraph $ SubgraphPara NoIDD $       -- this function is called from the pres of a paragraph
-                                  Subgraph NoIDD (Dirty NoIDD)
-                                                 (toList_Vertex [])
-                                                 (toList_Edge [])
-              ) d
-       
-      ) path cl)
+newParagraph = Clip_Paragraph $
+                 Paragraph NoIDD $
+                   List_Word NoIDD (Cons_Word (Word NoIDD (String_ NoIDD " ")) Nil_Word)
+
+newSection = Clip_Section $
+               Section NoIDD
+                 (String_ NoIDD "<new section>")
+                 (List_Paragraph NoIDD Nil_Paragraph) 
+                 (List_Subsection NoIDD Nil_Subsection)
+
+newSubsection = Clip_Subsection $
+                    Subsection NoIDD
+                      (String_ NoIDD "<new subsection>")
+                      (List_Paragraph NoIDD Nil_Paragraph) 
+                      (List_Subsubsection NoIDD Nil_Subsubsection) 
+
+newSubsubsection = Clip_Subsubsection $
+                    Subsubsection NoIDD
+                      (String_ NoIDD "<new subsubsection>")
+                      (List_Paragraph NoIDD Nil_Paragraph) 
+
+addSubgraphPara path = addElementAfter path newSubgraphPara
+
+addParagraph path = addElementAfter path newParagraph
+
+addSection path = addElementAfter path $ newSection 
     
+addSubsection path = addElementAfter path $ newSubsection 
+
+addSubsubsection path = addElementAfter path $ newSubsubsection 
+
+insertAtHeadSubgraphPara listPath = insertElementAtHead listPath $ newSubgraphPara
+
+insertAtHeadSection listPath = insertElementAtHead listPath $ newSection
+
+insertAtHeadSubsection listPath = insertElementAtHead listPath $ newSubsection
+
+insertAtHeadSubsubsection listPath = insertElementAtHead listPath $ newSubsubsection
+
+-- PRECONDITION: path points to a list element of the same type as clip
+addElementAfter :: PathD -> ClipDoc -> UpdateDoc Document ClipDoc
+addElementAfter path clip = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
+
+-- PRECONDITION: path points to a list of elements of the same type as clip
+-- NB path points to the list, rather than to an element.
+insertElementAtHead :: PathD -> ClipDoc -> UpdateDoc Document ClipDoc
+insertElementAtHead listPath clip = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD listPath 0 clip d) pth cl)
+
 pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
@@ -349,30 +378,6 @@ pasteInSubgraph pth id name subgraph =
                                                 )
         in  (DocumentLevel d' path cl)
 
-insertNewSection :: [Int] -> UpdateDoc Document clip
-insertNewSection pth =
-  let section = Section NoIDD
-                  (String_ NoIDD "<new>")
-                  (List_Paragraph NoIDD Nil_Paragraph) 
-                  (List_Subsection NoIDD Nil_Subsection) 
---                  (Subgraph NoIDD (Dirty NoIDD) (List_Vertex NoIDD (Nil_Vertex)) (List_Edge NoIDD (Nil_Edge)))
-  in  \(DocumentLevel d path cl) ->
-        let (Clip_List_Section sectionlist) = select (pth++[1]) d -- 1 is nasty: Root [graph(0), sections(1)]
-            clipsectionlist' = insertList (length $ fromList_Section sectionlist) (Clip_Section section) sectionlist
-            (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
-                                                (clipsectionlist')
-                                                )
-        in  (DocumentLevel d' path cl)
-
-removeLastSection :: [Int] -> UpdateDoc Document clip
-removeLastSection pth =
-   \(DocumentLevel d path cl) ->
-      let (Clip_List_Section sectionlist) = select (pth++[1]) d -- 1 is nasty: Root [graph(0), sections(1)]
-          clipsectionlist' = removeList (length (fromList_Section sectionlist) - 1) sectionlist
-          (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD (pth++[2]))
-                                              (clipsectionlist')
-                                              )
-      in  (DocumentLevel d' path cl)
 
 }
 
