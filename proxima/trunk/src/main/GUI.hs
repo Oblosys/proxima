@@ -60,16 +60,16 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; buffer <- newIORef Nothing
     ; renderingLvlVar <- newIORef initRenderingLvl
 
-    ; onExpose canvas $ onPaint handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onKeyPress canvas $ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onMotionNotify canvas False $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonPress canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonRelease canvas $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onDelete window $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onCheckResize window $ resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onExpose canvas $ catchHandler $ onPaint handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onKeyPress canvas $ catchHandler $ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onMotionNotify canvas False $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonPress canvas $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonRelease canvas $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onCheckResize window $ withCatch $ resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; fileMenu <- mkMenu
-        [ ("_Open", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
-        , ("_Save", fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
+        [ ("_Open", withCatch $ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
+        , ("_Save", withCatch $ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
         , ("_Quit", mainQuit)
         ]
     
@@ -89,19 +89,35 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     
     ; widgetShowAll window
       
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
+    ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     
-    ; initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+    ; withCatch $ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
     
---    ; timeoutAdd (backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
+--    ; timeoutAdd (withCatch $ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
     -- about every half minute, save a backup of the document
 
---    ; timeoutAddFull (performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
+--    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
     ; mainGUI
     }    
 
-performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas = 
+-- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
+-- prevent this, we catch the exception in the event handler itself.
+withCatch io = io
+ `Control.Exception.catch`
+   \err -> 
+    do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
+       ; print err
+       ; putStrLn "\n<Press a key to exit>"
+       ; getLine
+       ; mainQuit
+       ; return undefined
+       } -- This way, the dos window on Windows does not exit until the user can see the error.
+
+-- withCatch for handlers that take one argument
+catchHandler handler = \e -> withCatch $ handler e
+ 
+performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas = withCatch $
  do { putStr "\n\n\n\n\nStarting test edit sequence"
     ; timer <- startTimer 
     ; performEditEvents [ MouseDownRen 100 300 (CommonTypes.Modifiers False False False) 1
@@ -275,8 +291,6 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
 --            use the last invalidation when debug markings are used
             }
     }
- `Control.Exception.catch`
-  \err -> putStrLn "Caught!"
   
 drawRendering :: DrawableClass d => 
                  IORef (RenderingLevel documementLevel) -> Window -> Viewport -> d -> IO ()
