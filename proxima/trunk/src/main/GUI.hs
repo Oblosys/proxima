@@ -46,7 +46,6 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
 
     ; canvas <- drawingAreaNew 
     ; widgetSetCanFocus canvas True
-  
     ; sw <- scrolledWindowNew Nothing Nothing
     ; hAdj <- scrolledWindowGetHAdjustment sw
     ; vAdj <- scrolledWindowGetVAdjustment sw
@@ -432,7 +431,8 @@ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp can
     }
          
 closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas _ =
- do { removeFile backupFilename 
+ do { exists <- doesFileExist backupFilename 
+    ; when exists $ removeFile backupFilename 
     ; return False -- False means exit
     }
     
