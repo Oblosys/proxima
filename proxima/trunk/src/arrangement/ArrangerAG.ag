@@ -21,7 +21,7 @@ bug: boxed pres `withHRef` x  does not work for top and bottom line and backgrou
 - why does Empty.arrangement have 0 for x and y?
 
 
-
+unclear: should row [] / col [] be v/h-stretch? probably not.
 -}
 
 
