@@ -89,7 +89,7 @@ data Presentation doc node clip = EmptyP !IDP
 
 -- This datatype will be in the non-generic part of Proxima in the future. (when an extensible scanner is available)
 -- LexInherited can be used if higher in the presentation tree the lexer is already defined.
-data Lexer = LexFreeText | LexHaskell | LexInherited
+data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 -- Lexer info is not passed on to arrangement, since scanning takes place on the presentation datatype
 -- and does not involve the arrangement.
 
@@ -111,7 +111,7 @@ instance Show (Presentation doc node clip) where
   show (OverlayP  id press)  = "OverlayP ["++concat (intersperse ", " (map show press))++"]"
   show (WithP ar pres)       = "WithP <fn> "++show pres
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
-  show (ParsingP id l pres)    = "ParsingP "++show id++" "++show pres
+  show (ParsingP id l pres)    = "ParsingP "++show l++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
   show (GraphP id _ _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
   show (VertexP id vid x y ol pres)  = "Vertex (#"++show vid++":"++show x++","++show y++")"++show pres
