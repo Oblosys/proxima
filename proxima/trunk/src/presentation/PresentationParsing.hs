@@ -171,10 +171,10 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 
 -- put all tokens in one big list
 -- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
--- old TODO: fix silly recursion (what did I mean by that?)
 -- TODO put keyword stuff in Scanner layer
 --      check what happens with tokens without context info. It seems they get it from higher up
 --      in the tree now, which seems wrong. 
+
 postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
