@@ -16,9 +16,10 @@ scanner i loc pres = -- debug Err (show pres) $
 {-
  tokenize on formatters only records spaces, but no line-endings
  
+ 
  tokenize for free text traverses the entire parsing subtree and creates tokens for:
-   sequences of spaces
-   sequences of newlines
+   spaces
+   newlines
    sequences of non-whitespace characters
    structural subpresentations
    
@@ -40,6 +41,7 @@ tokenize :: Lexer -> Int -> Maybe Node -> Presentation doc Node clip ->
             (Presentation doc Node clip, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
 tokenize lx i loc (ParsingP id lx' pres)  = 
+ debug Lay (show pres) $
  let lex = case lx' of
              LexInherited -> lx
              _            -> lx'
@@ -126,7 +128,7 @@ isSymbolChar c = c `elem` symbolChars
 
 
 -- tokenizeString chooses either the Haskell like tokenization, or a free text tokenization
--- in which each kind of whitespace gets its own token, and text as well: "  bla\n" -> ["  ", "bla", "\n"]
+-- in which each kind of whitespace gets its own token, and text as well: "  bla\n" -> [" "," ", "bla", "\n"]
 tokenizeString :: Lexer -> Int -> (Maybe node, AttrRule doc clip) -> IDP ->
                (TokenType, Maybe node, AttrRule doc clip) -> Layout -> IDP -> String -> String ->
                ( (TokenType, Maybe node, AttrRule doc clip), Layout, IDP, String
@@ -193,12 +195,13 @@ tokenizeCol' lx i loc lc layout id str []     = (lc, layout, id, str, [], Map.em
 --                                                   in  (lc'', layout'', id'', str'', tokens0++tokens1, lm0++lm1, i'')
 tokenizeCol' lx i loc lc layout id str (pres:press) = 
   let (lc', (brks,spcs), id', str', tokens0, lm0,i') = tokenize' lx i loc lc layout id str pres
+      lineBreaks = if null press then 0 else 1 -- only add a line break between lines in a column, not at the end
   in  if null str' then -- still collecting whitespace
-        let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' lx i' loc lc' (brks+1,0) id' str' press
+        let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' lx i' loc lc' (brks+lineBreaks,0) id' str' press
         in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
       else
         let (tok, lm, i'') = makeToken i' lc' (brks,spcs) id' str'
-            (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' lx i'' loc undefTk (1,0) NoIDP "" press
+            (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' lx i'' loc undefTk (lineBreaks,0) NoIDP "" press
         in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
 
 
@@ -221,7 +224,7 @@ tokenize' lx i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i'
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' lx i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                               in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' lx i loc lc layout id str (FormatterP _ press) = tokenizeRow'  lx i loc lc layout id str press
+tokenize' lx i loc lc layout id str pres@(FormatterP _ press) = debug Lay ("FORMATTER WS:"++show layout) $ tokenizeRow'  lx i loc lc layout id str press
 tokenize' lx i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' lx i (loc,ar'.ar) lc layout id str pres
 tokenize' lx i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
 tokenize' lx i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' lx i loc lc layout id str pres
@@ -321,14 +324,13 @@ tokenizeStrFree i loc@(l,ar) cid lc@(tt,_,_) layout id (tc:tcs) (c:cs) =
 makeTokenFree :: Int -> (TokenType, Maybe node,AttrRule doc clip) -> Layout -> IDP -> String ->
              ([Presentation doc node clip],Int)
 makeTokenFree i l             layout NoIDP str = makeTokenFree (i+1) l layout (IDP i) str  -- make new ID
-makeTokenFree i (_,Nothing,ar) layout id str =
+makeTokenFree i (_,Nothing,ar) layout id str =debug Lay ("Making token with layout :"++show (layout, str)) $
   (map (WithP ar) $ whitespaceTokens layout ++ [ StringP id (reverse str) ],i)
-makeTokenFree i (_,Just loc,ar) layout id str = 
+makeTokenFree i (_,Just loc,ar) layout id str = debug Lay ("Making token with layout :"++show (layout, str)) $
   (map (LocatorP loc . WithP ar) $ whitespaceTokens layout ++[StringP id (reverse str)],i)
 
 
 whitespaceTokens (newlines, spaces) = 
-  if newlines > 0 then [ StringP NoIDP (replicate newlines '\n')] else [] ++
-  if spaces > 0 then [ StringP NoIDP (replicate spaces ' ')] else [] 
+  replicate newlines (StringP NoIDP "\n") ++ replicate spaces (StringP NoIDP  " ")  
   
 

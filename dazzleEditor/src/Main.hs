@@ -22,6 +22,6 @@ main = proxima Evaluator.evaluationSheet
                Reducer.reductionSheet
                PresentationAG.sem_EnrichedDoc
                ProxParser.parsePres 
-               Scanner.tokenize -- sheet parameters
+               Scanner.scanner -- sheet parameters
                (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                (EnrichedDocLevel HoleEnrichedDoc NoPathD)   

@@ -29,7 +29,7 @@ set = Just
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
                      res = if null errs then Just enr else Nothing
-                 in  -- debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
+                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
                      res
        
 deepShowTks i tok = case tok of
@@ -175,25 +175,20 @@ getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++sh
 
 keywords :: [String]
 keywords = 
-  [ " "  -- The formatter scanner now produces " " tokens which are handled as keywords
+  [ " "
   , "\n"
   , "\\graph"
   ]
 
-{- Currently, the scanner does not touch anything inside a formatter, so all whitespace is
-   retained. Because " " and "\n" are keywords, postScanPrs returns tokens for these strings, 
-   so they can be handled by the parser here. postScanPrs also puts a " " and a "\n" at the end
-   of each formatter
--}
-
+-- this must be a pList1Sep, otherwise we get an error. In this case there is always at least one, but
+-- it should be possible to have an empty list two. Unclear why the parser disallows this.
 parseParagraphs = toList_Paragraph 
-      <$> pList parseParagraph
+      <$> pList1Sep (pKey "\n") parseParagraph
 
 parseParagraph =
           (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))
       <$  pList (pKey " ") 
       <*> pList parseWord
-      <*  pKey "\n"
   <|> 
           (reuseSubgraphPara [] (Just NoIDD) (Just $ Subgraph NoIDD (Dirty NoIDD)
                                                               (List_Vertex NoIDD Nil_Vertex)
@@ -221,7 +216,7 @@ pLine =
 pSpaces = concat <$> pList (const " " <$> pKey " " <|> const "" <$> pKey "\n") -- ignore linebreaks
 
 -- parse any consecutive piece of text (remember that spaces and "\n"'s are tokens)
-pText = concat <$> pList1 (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt <|> pKey "Leaf" <|> pKey "Bin"))
+pText = concat <$> pList1 (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt))
 
 pUIdent = pCSym 20 uIdentTk
 pOp = pCSym 20 opTk

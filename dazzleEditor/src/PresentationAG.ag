@@ -46,13 +46,14 @@ SEM EnrichedDoc
                  loc (RootEnrNode @self []) $ structural $
                    @root.pres
 
+
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      col $ [ @graph.pres
-                           , col [ parsing $ formatter [@title.pres], empty `withHStretch` True 
-                               `withFontSize_` (percent 160) 
-                               ] `addPopupItems`
+                           , row [ parsing' LexFreeText @title.pres, empty `withHStretch` True ]
+                                 `withFontSize_` (percent 160) 
+                                 `addPopupItems`
                                [ ("Add Section", insertAtHeadSection @sections.path) ]  
                            , col @sections.press `withFontSize` 12  `withWidth` 800 
                            ] 
@@ -68,14 +69,14 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip ]
       loc.numberStr = show @sectionNr ++ "."
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text @numberStr
-                                        , parsing $ formatter [@title.pres], empty `withHStretch` True 
+                                        , parsing' LexFreeText @title.pres
                                         ] `withFontSize_` (percent 150)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
-  
-                                  , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                                          `withHStretch` True 
+                                  , @paragraphs.pres
                                   ] `addPopupItems`
                                     [ ("Add Subsection", insertAtHeadSubsection @subsections.path) ]  
-                            , col @subsections.press
+                            , col @subsections.press `withHStretch` True -- withStretch is necessary when subsections == []
                             ])
                      `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
                                      , ("Add Section", addSection @lhs.path) ]
@@ -89,13 +90,13 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
       lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text @numberStr
-                                        , parsing $ formatter [@title.pres], empty `withHStretch` True
+                                        , parsing' LexFreeText @title.pres, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
-                                  , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                                  , @paragraphs.pres
                                   ] `addPopupItems`
                                     [ ("Add Subsubsection", insertAtHeadSubsubsection @subsubsections.path) ]  
-                            , col @subsubsections.press
+                            , col @subsubsections.press `withHStretch` True -- withStretch is necessary when subsubsections == []
                             ])
                      `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsection", addSubsection @lhs.path) ]
@@ -108,10 +109,10 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip ]
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ row [ text @numberStr
-                                  , parsing $ formatter [@title.pres], empty `withHStretch` True
+                                  , parsing' LexFreeText @title.pres, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
                                     `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
-                            , @paragraphs.pres         -- we abuse a formatter for the title to prevent the scanner from touching this whitespace
+                            , @paragraphs.pres
                             ])
                      `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
@@ -138,9 +139,10 @@ SEM Subsubsection [ || ]
 
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
   | List_Paragraph
-      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing $
+      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing' LexFreeText $
                      col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
                      -- formatter [text "  "] prevents the column from getting height 0 when empty
+                     -- not clear why "", or " " don't work
   | HoleList_Paragraph
       lhs.pres = presHole @lhs.focusD "List_Paragraph" (HoleList_ParagraphNode @self []) []
   | ParseErrList_Paragraph
@@ -191,7 +193,7 @@ SEM Vertex [ || ]
                            , vSpace 4 `withHStretch` True
                            , rowR 1 [glue, hRefHalf $ boxed 
                                               (row [ hSpace 3
-                                                   , parsing $ text (@name.str) `withFont'` ("Arial", 6)
+                                                   , parsing' LexHaskell $ text (@name.str) `withFont'` ("Arial", 6)
                                                    , hSpace 3
                                                    ])
                                                 `withbgColor` (236, 236, 169)

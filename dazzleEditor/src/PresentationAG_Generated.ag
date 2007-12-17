@@ -52,7 +52,7 @@ SEM EnrichedDoc
 
 SEM String_
   | String_
-      lhs.pres = loc (String_Node @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (String_Node @self @lhs.path) $ parsing' LexInherited $ presentFocus @lhs.focusD @lhs.path $
                    row [text @string]
 
 SEM String_ [ | | length : Int str : String ]
