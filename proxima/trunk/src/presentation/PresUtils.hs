@@ -107,6 +107,7 @@ diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = diffGraph
 diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
 diffPres (RowP id rf press) _                      = DiffLeaf False
 diffPres (ColP id rf _ press) _                    = DiffLeaf False
+diffPres (FormatterP id press) _                   = DiffLeaf False
 diffPres (OverlayP id press) _                     = DiffLeaf False 
 diffPres (GraphP id _ _ _ _ press) _               = DiffLeaf False
 diffPres (VertexP id _ _ _ _ pres) _                 = DiffLeaf False
