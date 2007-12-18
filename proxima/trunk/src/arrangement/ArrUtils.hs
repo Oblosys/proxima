@@ -104,16 +104,19 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- diffArr skips Structural, Parsing and Locator arrangements, since these do not
 -- influence the rendering. For the same reason, Formatter parameters to rows and
 -- h/vRefs are ignored
+-- we do mark them as self dirty if their child (or descendent in case of a chaing) is dirty.
+-- this is necessary to be able to see at parent level that a direct child may have changed size
+-- (used for example in updatedRectArr)
 
 --       new arrangement     old arrangement
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
 diffArr arr                  (StructuralA id arr')  = diffArr arr arr'
 diffArr (ParsingA id arr)    arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
 diffArr arr                  (ParsingA id arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) True [childDT]
+                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 -- StructuralA ParsingA and LocatorA elts
 
@@ -177,7 +180,7 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 updatedRectArr :: Show node => DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
-updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
+updatedRectArr dt arr = debug Err (show dt) $ updatedRectArr' 0 0 dt arr 
 
 updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr' x' y' dt arr = 
