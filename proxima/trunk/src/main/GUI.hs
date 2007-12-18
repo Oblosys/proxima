@@ -257,7 +257,6 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
  do { renderingLvl@(RenderingLevel _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea vp
     
-    ; putStrLn $ "Writing viewed area"++show viewedArea
     ; writeIORef viewedAreaRef viewedArea
    
     ; (renderingLvl', editRendering) <- handler (renderingLvl,evt)
@@ -303,13 +302,13 @@ drawRendering renderingLvlVar wi vp pm =
     ; gc <- gcNew pm
         
     ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.white }
-    ; 
-    ; putStrLn $ "The updated regions are " ++ show updRegions
+     
+    -- ; putStrLn $ "The updated regions are " ++ show updRegions
       -- clear background for updated regions
     ; mapM_ (\((x,y),(w,h)) -> drawRectangle pm gc True x y w h) updRegions
 
     ; viewedArea <- getViewedArea vp 
-    ; putStrLn $ "The viewed area is" ++ show viewedArea
+    -- ; putStrLn $ "The viewed area is" ++ show viewedArea
     ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
