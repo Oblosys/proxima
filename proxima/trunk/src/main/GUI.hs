@@ -285,9 +285,12 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             ; updatedRegion <- regionNew
             
             ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
-            ; drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
---            ; drawWindowInvalidateRect dw (Rectangle 0 0 (max w w') (max h h'))  False -- invalidate entire rendering
---            use the last invalidation when debug markings are used
+            ; if  markUpdatedRenderingArea
+              then drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
+              else drawWindowInvalidateRect dw (Rectangle 0 0 (max w w') (max h h'))  False -- invalidate entire rendering
+            -- if updated areas are marked, we just invalidate the whole thing. Otherwise, we need
+            -- to invalidate the new position of the focus, the old position (for clearing the focus)
+            -- and the previous old position (for clearing the marker rectangle). 
             }
     }
   
