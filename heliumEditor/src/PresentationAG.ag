@@ -150,7 +150,7 @@ SEM RootE
                                 -- so hline stretches beyond longest line
                               ] `withFontSize` 10
                        , row [ hSpace 3
-                              , row[ text "Top level identifiers: " `withFontFam` "verdana", @idListDecls.idsPres] `withFontSize` 10
+                             , row[ text "Top level identifiers: " `withFontFam` "verdana", @idListDecls.idsPres] `withFontSize` 10
                       --        , row[ text "Top level identifiers disabled" `withFontFam` "verdana"] `withFontSize` 10
                               ]
                        , vSpace 4
@@ -161,6 +161,7 @@ SEM RootE
                        --, structural $ empty -- row [ hSpace 3, box $ row [  hSpace 3, @decls.presTree, text "   "{-, vLine , text "   ", @decls.presXML `withFont'` ("Courier New",8), hSpace 3-}]]
                        --, vSpace 14
                        -- end tree & XML
+                       
                        , row [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
                        , row [ hSpace 3, @decls.pres ]
                        , vSpace 10
@@ -200,13 +201,13 @@ errColor = red
 
 SEM List_Decl [ || pres : Presentation_Doc_Node_Clip ]
   | List_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    row @elts.press
   | ParseErrList_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    presHole @lhs.focusD "Decls" (HoleList_DeclNode @self @lhs.path) @lhs.path
 
 {-
@@ -1126,10 +1127,10 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip ]
 
 SEM List_Decl
-  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                                     @elts.idsPres
   | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (HoleList_DeclNode @self @lhs.path) @lhs.path
-  | ParseErrList_Decl lhs.idsPres = parsing $ empty
+  | ParseErrList_Decl lhs.idsPres = parsing' LexHaskell $ empty
 
 SEM ConsList_Decl
   | Cons_Decl     lhs.idsPres = row [ @head.idsPres, text " ", @tail.idsPres ]

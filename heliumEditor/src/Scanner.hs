@@ -7,44 +7,84 @@ import LayLayerUtils
 
 import DocTypes_Generated (Node (..))
 
+scanner :: Int -> Maybe Node -> Presentation doc Node clip ->
+           (Presentation doc Node clip, LayoutMap, Int)
+scanner i loc pres = -- debug Err (show pres) $
+            tokenize (error "Scanner.hs: Top-most Parsing presentation has no Lexer specified") 
+                     i loc pres
+
+{-
+ tokenize on formatters only records spaces, but no line-endings
+ 
+ 
+ tokenize for free text traverses the entire parsing subtree and creates tokens for:
+   spaces
+   newlines
+   sequences of non-whitespace characters
+   structural subpresentations
+   
+   NB similar to Haskell scanner, spaces after newlines are ignored because whitespace is represented 
+   by (newlines, spaces) in the scanner.
+
+
+ Scanner works together with postScanPres in PresentationParsing. postScanPres converts all strings
+ into actual tokens (according to 'keywords' in the presentation sheet) and removes empty string tokens.
+ 
+ When Presentation has a special constructor TokenP, the scanner can do all these things and make postScanPres
+ obsolete. (although some processing is needed to convert the presentation with presentation and parsing parts to the
+ structuralToken/ list of tokens tree structure that the parser needs.
+-}
+
 -- tokenize traverses the structural parts of the presentation tree. On the parsing branches,
 -- tokenize' is called.
-tokenize :: Int -> Maybe Node -> Presentation doc Node clip ->
+tokenize :: Lexer -> Int -> Maybe Node -> Presentation doc Node clip ->
             (Presentation doc Node clip, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
-tokenize i loc (ParsingP id pres)  = let (lc, layout, id, str, tokens, lm, i') = tokenize' i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
-                                         (tok, lm', i'') = makeToken i' lc layout id str
-                                     in  (ParsingP id $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
-tokenize i loc pres@(EmptyP _)           = (pres, Map.empty, i)
-tokenize i loc pres@(StringP _ str)      = (pres, Map.empty, i)
-tokenize i loc pres@(ImageP _ _ _)         = (pres, Map.empty, i)
-tokenize i loc pres@(PolyP _ _ _ _)        = (pres, Map.empty, i)
-tokenize i loc pres@(RectangleP _ _ _ _ _) = (pres, Map.empty, i)
-tokenize i loc pres@(EllipseP _ _ _ _ _) = (pres, Map.empty, i)
-tokenize i loc (RowP id rf press) = let (press', lm, i') = tokenizeLst i loc press
-                                    in  (RowP id rf press', lm, i')
-tokenize i loc (ColP id rf f press) = let (press', lm, i') = tokenizeLst i loc press
-                                      in  (ColP id rf f press', lm, i')
-tokenize i loc (OverlayP id (pres:press)) = let (pres', lm, i') = tokenize i loc pres
-                                            in  (OverlayP id (pres' : press), lm, i')
-tokenize i loc (WithP ar pres)            = let (pres', lm, i') = tokenize i loc pres
-                                            in  (WithP ar pres', lm, i')
-tokenize i loc (StructuralP id pres)      = let (pres', lm, i') = tokenize i loc pres
-                                            in  (StructuralP id pres', lm, i')
-tokenize i _   (LocatorP loc pres)        = let (pres', lm, i') = tokenize i (Just loc) pres
-                                            in  (LocatorP loc pres', lm, i')
-tokenize i loc (GraphP id d w h edges press) = let (press', lm, i') = tokenizeLst i loc press
-                                               in  (GraphP id d w h edges press', lm, i')
-tokenize i loc (VertexP id v x y o pres)     = let (pres', lm, i') = tokenize i loc pres
-                                               in  (VertexP id v x y o pres', lm, i')              
-tokenize i loc (FormatterP id press) = let (press', lm, i') = tokenizeLst i loc press
-                                    in  (FormatterP id press', lm, i')
-tokenize i loc pr = debug Err ("TreeEditPres.tokenize: can't handle "++ show pr) (pr, Map.empty, i)
+tokenize lx i loc (ParsingP id lx' pres)  = 
+ debug Lay (show pres) $
+ let lex = case lx' of
+             LexInherited -> lx
+             _            -> lx'
+     (lc, layout, id, str, tokens, lm, i') = tokenize' lex i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
+    
+ in case lex of
+      LexHaskell ->
+        let   (tok, lm', i'') = makeToken i' lc layout id str
 
-tokenizeLst i loc []           = ([], Map.empty, i)
-tokenizeLst i loc (pres:press) = let (pres', lm0, i') = tokenize i loc pres
-                                     (press', lm1, i'') = tokenizeLst i' loc press
-                                 in  (pres':press', lm1 `Map.union` lm0, i'')
+        in  (ParsingP id lx' $ RowP NoIDP 0 $ (tokens++[tok]), lm `Map.union` lm', i'')
+      LexFreeText ->
+        let   (toks, i'') = makeTokenFree i' lc layout id str
+        in  (ParsingP id lx' $ RowP NoIDP 0 $ (tokens++toks), lm, i'')
+tokenize lx i loc pres@(EmptyP _)           = (pres, Map.empty, i)
+tokenize lx i loc pres@(StringP _ str)      = (pres, Map.empty, i)
+tokenize lx i loc pres@(ImageP _ _ _)         = (pres, Map.empty, i)
+tokenize lx i loc pres@(PolyP _ _ _ _)        = (pres, Map.empty, i)
+tokenize lx i loc pres@(RectangleP _ _ _ _ _) = (pres, Map.empty, i)
+tokenize lx i loc pres@(EllipseP _ _ _ _ _) = (pres, Map.empty, i)
+tokenize lx i loc (RowP id rf press) = let (press', lm, i') = tokenizeLst lx i loc press
+                                    in  (RowP id rf press', lm, i')
+tokenize lx i loc (ColP id rf f press) = let (press', lm, i') = tokenizeLst lx i loc press
+                                      in  (ColP id rf f press', lm, i')
+tokenize lx i loc (OverlayP id (pres:press)) = let (pres', lm, i') = tokenize lx i loc pres
+                                            in  (OverlayP id (pres' : press), lm, i')
+tokenize lx i loc (WithP ar pres)            = let (pres', lm, i') = tokenize lx i loc pres
+                                            in  (WithP ar pres', lm, i')
+tokenize lx i loc (StructuralP id pres)      = let (pres', lm, i') = tokenize lx i loc pres
+                                            in  (StructuralP id pres', lm, i')
+tokenize lx i _   (LocatorP loc pres)        = let (pres', lm, i') = tokenize lx i (Just loc) pres
+                                            in  (LocatorP loc pres', lm, i')
+tokenize lx i loc (GraphP id d w h edges press) = let (press', lm, i') = tokenizeLst lx i loc press
+                                               in  (GraphP id d w h edges press', lm, i')
+tokenize lx i loc (VertexP id v x y o pres)     = let (pres', lm, i') = tokenize lx i loc pres
+                                               in  (VertexP id v x y o pres', lm, i')              
+tokenize lx i loc (FormatterP id press) = let (press', lm, i') = tokenizeLst lx i loc press
+                                    in  (FormatterP id press', lm, i')
+tokenize lx i loc pr = debug Err ("TreeEditPres.tokenize: can't handle "++ show pr) (pr, Map.empty, i)
+
+tokenizeLst lx i loc []           = ([], Map.empty, i)
+tokenizeLst lx i loc (pres:press) = let (pres', lm0, i') = tokenize lx i loc pres
+                                        (press', lm1, i'') = tokenizeLst lx i' loc press
+                                    in  (pres':press', lm1 `Map.union` lm0, i'')
 -- tokenize is tricky. The information for the token that is being built is threaded through the computation
 -- (lc layout id str), but also the current location (/= the location of the first char of the current token) 
 -- and for tokenizeStr, the id of the string (/= the id of the first character of the token) have to be passed
@@ -85,7 +125,20 @@ symbolChars = ";,(){}[]"
 identChars  = "_'"
 isIdentChar c = isAlphaNum c || elem c identChars
 isSymbolChar c = c `elem` symbolChars
- 
+
+
+-- tokenizeString chooses either the Haskell like tokenization, or a free text tokenization
+-- in which each kind of whitespace gets its own token, and text as well: "  bla\n" -> [" "," ", "bla", "\n"]
+tokenizeString :: Lexer -> Int -> (Maybe node, AttrRule doc clip) -> IDP ->
+               (TokenType, Maybe node, AttrRule doc clip) -> Layout -> IDP -> String -> String ->
+               ( (TokenType, Maybe node, AttrRule doc clip), Layout, IDP, String
+               , [Presentation doc node clip], LayoutMap, Int )
+tokenizeString LexHaskell = tokenizeStr
+tokenizeString LexFreeText = tokenizeStrFree
+
+
+
+
 tokenizeStr :: Int -> (Maybe node, AttrRule doc clip) -> IDP -> 
                (TokenType, Maybe node, AttrRule doc clip) -> Layout -> IDP -> String -> String ->
                ( (TokenType, Maybe node, AttrRule doc clip), Layout, IDP, String
@@ -128,80 +181,81 @@ tokenizeStr i loc@(l,ar) cid lc@(tt,_,_) layout id (tc:tcs) (c:cs) =
 
 --(isAlpha tc && isAlpha c) || (isNum tc && isNum c) || 
 
-tokenizeRow' i loc lc layout id str []     = (lc, layout, id, str, [], Map.empty, i)
-tokenizeRow' i loc lc layout id str (pres:press) = let (lc', layout', id', str', tokens0, lm0, i') = tokenize' i loc lc layout id str pres
-                                                       (lc'', layout'', id'', str'', tokens1, lm1, i'') = tokenizeRow' i' loc lc' layout' id' str' press
-                                                   in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
+tokenizeRow' lx i loc lc layout id str []     = (lc, layout, id, str, [], Map.empty, i)
+tokenizeRow' lx i loc lc layout id str (pres:press) = let (lc', layout', id', str', tokens0, lm0, i') = tokenize' lx i loc lc layout id str pres
+                                                          (lc'', layout'', id'', str'', tokens1, lm1, i'') = tokenizeRow' lx i' loc lc' layout' id' str' press
+                                                      in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
 
 
 -- add case for [pres]
 -- make token here? what about one line column, don't want to tokenize, but more line column, we do, probably
-tokenizeCol' i loc lc layout id str []     = (lc, layout, id, str, [], Map.empty, i)
+tokenizeCol' lx i loc lc layout id str []     = (lc, layout, id, str, [], Map.empty, i)
 --tokenizeCol' i loc lc layout id str (pres:press) = let (lc', layout', id', str', tokens0, lm0,i') = tokenize' i loc lc layout id str pres
 --                                                       (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' i' loc lc' layout' id' str' press
 --                                                   in  (lc'', layout'', id'', str'', tokens0++tokens1, lm0++lm1, i'')
-tokenizeCol' i loc lc layout id str (pres:press) = 
-  let (lc', (brks,spcs), id', str', tokens0, lm0,i') = tokenize' i loc lc layout id str pres
+tokenizeCol' lx i loc lc layout id str (pres:press) = 
+  let (lc', (brks,spcs), id', str', tokens0, lm0,i') = tokenize' lx i loc lc layout id str pres
+      lineBreaks = if null press then 0 else 1 -- only add a line break between lines in a column, not at the end
   in  if null str' then -- still collecting whitespace
-        let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' i' loc lc' (brks+1,0) id' str' press
+        let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' lx i' loc lc' (brks+lineBreaks,0) id' str' press
         in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
       else
         let (tok, lm, i'') = makeToken i' lc' (brks,spcs) id' str'
-            (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' i'' loc undefTk (1,0) NoIDP "" press
+            (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' lx i'' loc undefTk (lineBreaks,0) NoIDP "" press
         in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
 
 
 -- loc is threaded, lc is just inherited. 
-tokenize' :: Int -> (Maybe Node, AttrRule doc clip) -> (TokenType, Maybe Node, AttrRule doc clip) ->
+tokenize' :: Lexer -> Int -> (Maybe Node, AttrRule doc clip) -> (TokenType, Maybe Node, AttrRule doc clip) ->
              Layout -> IDP -> String -> Presentation doc Node clip ->
              ( (TokenType, Maybe Node, AttrRule doc clip), Layout, IDP, String
              , [Presentation doc Node clip], LayoutMap, Int)
-tokenize' i loc lc layout id str (EmptyP _) = (lc, layout, id, str, [], Map.empty, i)
-tokenize' i loc lc layout id str (StringP cid str') = tokenizeStr i loc cid lc layout id str str'
-tokenize' i loc lc layout id str pres@(ImageP _ _ _)       = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str (EmptyP _) = (lc, layout, id, str, [], Map.empty, i)
+tokenize' lx i loc lc layout id str (StringP cid str') = tokenizeString lx i loc cid lc layout id str str'
+tokenize' lx i loc lc layout id str pres@(ImageP _ _ _)       = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(PolyP _ _ _ _)      = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str pres@(PolyP _ _ _ _)      = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(RectangleP _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str pres@(RectangleP _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(EllipseP _ _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str pres@(EllipseP _ _ _ _ _)   = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
+tokenize' lx i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                               in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i loc lc layout id str pres@(FormatterP _ _) = let (tok, lm, i') = makeToken i lc layout id str
-                                                         in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' i (loc,ar'.ar) lc layout id str pres
-tokenize' i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
-tokenize' i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' i loc lc layout id str pres
-tokenize' i loc lc layout id str (ColP _ _ _ press)   = tokenizeCol' i loc lc layout id str press
-tokenize' i loc lc layout id str (RowP _ _ press)     = tokenizeRow' i loc lc layout id str press
-tokenize' i loc lc layout id str (LocatorP (String_Node _ _) pres)  = tokenize' i loc lc layout id str pres
-tokenize' i loc lc layout id str (LocatorP (HoleString_Node _ _) pres)  = tokenize' i loc lc layout id str pres -- hole also necessary?
-tokenize' i loc lc layout id str (LocatorP (Int_Node _ _) pres)  = tokenize' i loc lc layout id str pres
-tokenize' i loc lc layout id str (LocatorP (HoleInt_Node _ _) pres)  = tokenize' i loc lc layout id str pres -- hole also necessary?
-tokenize' i loc lc layout id str (LocatorP (Bool_Node _ _) pres)  = tokenize' i loc lc layout id str pres
-tokenize' i loc lc layout id str (LocatorP (HoleBool_Node _ _) pres)  = tokenize' i loc lc layout id str pres -- hole also necessary?
-tokenize' i (_,ar)   lc layout id str (LocatorP loc pres)  = tokenize' i (Just loc,ar) lc layout id str pres
-tokenize' i loc lc layout id str (ParsingP _ pres)    = tokenize' i loc lc layout id str pres
-tokenize' i (Nothing,ar) lc layout id "" (StructuralP id' pres)    =
-  let (pres', lm1, i'') = tokenize i Nothing pres
+tokenize' lx i loc lc layout id str pres@(FormatterP _ press) = debug Lay ("FORMATTER WS:"++show layout) $ tokenizeRow'  lx i loc lc layout id str press
+tokenize' lx i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' lx i (loc,ar'.ar) lc layout id str pres
+tokenize' lx i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
+tokenize' lx i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' lx i loc lc layout id str pres
+tokenize' lx i loc lc layout id str (ColP _ _ _ press)   = tokenizeCol' lx i loc lc layout id str press
+tokenize' lx i loc lc layout id str (RowP _ _ press)     = tokenizeRow' lx i loc lc layout id str press
+tokenize' lx i loc lc layout id str (LocatorP (String_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
+tokenize' lx i loc lc layout id str (LocatorP (HoleString_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
+tokenize' lx i loc lc layout id str (LocatorP (Int_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
+tokenize' lx i loc lc layout id str (LocatorP (HoleInt_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
+tokenize' lx i loc lc layout id str (LocatorP (Bool_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
+tokenize' lx i loc lc layout id str (LocatorP (HoleBool_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
+tokenize' lx i (_,ar)   lc layout id str (LocatorP loc pres)  = tokenize' lx i (Just loc,ar) lc layout id str pres
+tokenize' lx i loc lc layout id str (ParsingP _ LexInherited pres)    = tokenize' lx i loc lc layout id str pres
+tokenize' _  i loc lc layout id str (ParsingP _ lx pres)    = tokenize' lx i loc lc layout id str pres
+tokenize' lx i (Nothing,ar) lc layout id "" (StructuralP id' pres)    =
+  let (pres', lm1, i'') = tokenize lx i Nothing pres
   in  (undefTk, (0,0), NoIDP, "", [StructuralP id' $ pres'], 
        lm1 `Map.union` (if id' == NoIDP then Map.empty else Map.singleton id' layout),i'')
-tokenize' i (Just loc,ar) lc layout id "" (StructuralP id' pres) =
-  let (pres', lm1, i'') = tokenize i (Just loc) pres
+tokenize' lx i (Just loc,ar) lc layout id "" (StructuralP id' pres) =
+  let (pres', lm1, i'') = tokenize lx i (Just loc) pres
   in  (undefTk, (0,0), NoIDP, "", [LocatorP loc $ StructuralP id' $ pres'],
        lm1 `Map.union` (if id' == NoIDP then Map.empty else Map.singleton id' layout),i'')
-tokenize' i (Nothing,ar) lc layout id str (StructuralP id' pres)    =
+tokenize' lx i (Nothing,ar) lc layout id str (StructuralP id' pres)    =
   let (tok, lm0, i') = makeToken i lc layout id str
-      (pres', lm1, i'') = tokenize i' Nothing pres
+      (pres', lm1, i'') = tokenize lx i' Nothing pres
   in  (undefTk, (0,0), NoIDP, "", [tok, StructuralP id' $ pres'], lm1 `Map.union` lm0,i'')
-tokenize' i (Just loc,ar) lc layout id str (StructuralP id' pres) =
+tokenize' lx i (Just loc,ar) lc layout id str (StructuralP id' pres) =
   let (tok, lm0, i') = makeToken i lc layout id str
-      (pres', lm1, i'') = tokenize i' (Just loc) pres
+      (pres', lm1, i'') = tokenize lx i' (Just loc) pres
   in  (undefTk, (0,0), NoIDP, "", [tok, LocatorP loc $ StructuralP id' $ pres'], lm1 `Map.union` lm0,i'')
-tokenize' i loc lc layout id str pres        = debug Err ("*** PresentationParser.walk: unimplemented presentation: " ++ show pres) (lc, layout, id, str, [], Map.empty, i)
+tokenize' lx i loc lc layout id str pres        = debug Err ("*** PresentationParser.walk: unimplemented presentation: " ++ show pres) (lc, layout, id, str, [], Map.empty, i)
 
 undefTk = (debug Err "Undefined token used" IntToken,Nothing,Prelude.id)
 
@@ -234,4 +288,49 @@ makeToken i (_,Just loc,ar) layout id str = (LocatorP loc $ WithP ar $ StringP i
 -- a future version. Now we just look in local state of deleted tokens.
 -- Editing in deleted tokens will not work.
 
+
+
+
+
+
+
+-- tokenizeStrFree is crudely derived from tokenizedStr. It is only temporary, since an improved scanner
+-- will allow different tokenizations to be specified with regular expressions.
+
+-- end of string, not started scanning a token, so set the id (only if cid non-empty)
+tokenizeStrFree i loc cid lc layout id "" "" = (lc, layout, if cid == NoIDP then id else cid, "", [], Map.empty, i)
+
+-- end of string while scanning a token, so keep token's id
+tokenizeStrFree i loc cid lc layout id str "" = (lc, layout, id, str, [], Map.empty, i)
+
+-- white space, not started scanning a token, so set the id (if non-empty)
+tokenizeStrFree i loc cid lc (brks,spcs) id ""  (' ':cs) = tokenizeStrFree i loc cid undefTk (brks,spcs+1) (if cid == NoIDP then id else cid) "" cs --2nd loc is not used
+
+-- white space, while started scanning a token, make token and set id for new scan (if cid empty, still use it, because id is alread used for token)
+tokenizeStrFree i loc cid lc layout id str (' ':cs) =            -- do we want this? See **
+  let (lc', layout', id', str', tokens', lm, i') = tokenizeStrFree i loc cid undefTk (0,1) cid "" cs   -- 2nd loc is not used
+      (toks, i'') = makeTokenFree i' lc layout id str           
+  in  (lc', layout', id', str', toks ++ tokens', lm, i'')
+
+-- first character of token. if there is no Id, use the one from the whitespace, also clear this strings id because it is used now
+tokenizeStrFree i loc@(l,ar) cid lc layout id ""  (c:cs)   = tokenizeStrFree i loc NoIDP (tokenType c, l,ar) layout (if cid == NoIDP then id else cid) [c] cs
+-- scanning string                         
+tokenizeStrFree i loc@(l,ar) cid lc@(tt,_,_) layout id (tc:tcs) (c:cs) = 
+  tokenizeStrFree i loc cid lc layout id (c:tc:tcs) cs
+  -- no distinction on characters, we continue to recognize the token until whitespace
+  -- is encountered
+
+-- layout is not stored, but returned as explicit tokens
+makeTokenFree :: Int -> (TokenType, Maybe node,AttrRule doc clip) -> Layout -> IDP -> String ->
+             ([Presentation doc node clip],Int)
+makeTokenFree i l             layout NoIDP str = makeTokenFree (i+1) l layout (IDP i) str  -- make new ID
+makeTokenFree i (_,Nothing,ar) layout id str =debug Lay ("Making token with layout :"++show (layout, str)) $
+  (map (WithP ar) $ whitespaceTokens layout ++ [ StringP id (reverse str) ],i)
+makeTokenFree i (_,Just loc,ar) layout id str = debug Lay ("Making token with layout :"++show (layout, str)) $
+  (map (LocatorP loc . WithP ar) $ whitespaceTokens layout ++[StringP id (reverse str)],i)
+
+
+whitespaceTokens (newlines, spaces) = 
+  replicate newlines (StringP NoIDP "\n") ++ replicate spaces (StringP NoIDP  " ")  
+  
 
