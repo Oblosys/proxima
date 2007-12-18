@@ -126,4 +126,4 @@ reducedViewedArea = False
 markArrangementBackground = False
 
 -- updated parts of the rendering are surrounded by red rectangles
-markUpdatedRenderingArea = True
+markUpdatedRenderingArea = False
