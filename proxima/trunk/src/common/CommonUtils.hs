@@ -123,7 +123,7 @@ arrangerIncrementality = True
 reducedViewedArea = False            
 
 -- mark what parts of the arrangement were reused from the previous one
-markArrangementBackground = False    
+markArrangementBackground = False
 
 -- updated parts of the rendering are surrounded by red rectangles
-markUpdatedRenderingArea = False     
+markUpdatedRenderingArea = False
