@@ -10,10 +10,19 @@ import DocTypes_Generated (Node (..))
 scanner :: Int -> Maybe Node -> Presentation doc Node clip ->
            (Presentation doc Node clip, LayoutMap, Int)
 scanner i loc pres = -- debug Err (show pres) $
-            tokenize (error "Scanner.hs: Top-most Parsing presentation has no Lexer specified") 
+            tokenize LexHaskell -- default is Haskell scanner
                      i loc pres
 
 {-
+ Redesigning this module has a high priority. The differences between haskell and free text lexers are are
+ implemented in an ad hoc way. Only for strings, a distinction is made, and in tokenizeCol'. Other presentations
+ besides strings in the free text lexer are not handled correctly.
+ 
+ Moreover, it is not doable to extend the current implementation for storing focus in the tokens.
+
+
+
+
  tokenize on formatters only records spaces, but no line-endings
  
  
@@ -41,13 +50,13 @@ tokenize :: Lexer -> Int -> Maybe Node -> Presentation doc Node clip ->
             (Presentation doc Node clip, LayoutMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
 tokenize lx i loc (ParsingP id lx' pres)  = 
- debug Lay (show pres) $
  let lex = case lx' of
              LexInherited -> lx
              _            -> lx'
      (lc, layout, id, str, tokens, lm, i') = tokenize' lex i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
     
- in case lex of
+ in debug Lay ("tokenize with lexer "++ show lex ++" on " ++show pres) $
+    case lex of
       LexHaskell ->
         let   (tok, lm', i'') = makeToken i' lc layout id str
 
@@ -200,9 +209,13 @@ tokenizeCol' lx i loc lc layout id str (pres:press) =
         let (lc'', layout'', id'', str'', tokens1, lm1,i'') = tokenizeCol' lx i' loc lc' (brks+lineBreaks,0) id' str' press
         in  (lc'', layout'', id'', str'', tokens0++tokens1, lm1 `Map.union` lm0, i'')
       else
-        let (tok, lm, i'') = makeToken i' lc' (brks,spcs) id' str'
+        let (tok, lm, i'') = case lx of 
+               LexHaskell  -> let (t,l,id'') = makeToken i' lc' (brks,spcs) id' str'
+                              in ([t],l,id'')
+               LexFreeText -> let (ts,id'') = makeTokenFree i' lc' (brks,spcs) id' str'
+                              in (ts,Map.empty,id'')
             (lc'', layout'', id'', str'', tokens1, lm1,i''') = tokenizeCol' lx i'' loc undefTk (lineBreaks,0) NoIDP "" press
-        in  (lc'', layout'', id'', str'', tokens0++[tok]++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
+        in  (lc'', layout'', id'', str'', tokens0++tok++tokens1, lm `Map.union` lm0 `Map.union` lm1, i''')
 
 
 -- loc is threaded, lc is just inherited. 
