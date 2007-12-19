@@ -55,7 +55,7 @@ tokenize lx i loc (ParsingP id lx' pres)  =
              _            -> lx'
      (lc, layout, id, str, tokens, lm, i') = tokenize' lex i (loc,Prelude.id) (debug Err "Undefined token used" IntToken,Nothing, Prelude.id) (0,0) NoIDP "" pres
     
- in debug Lay ("tokenize with lexer "++ show lex ++" on " ++show pres) $
+ in --debug Lay ("tokenize with lexer "++ show lex ++" on " ++show pres) $
     case lex of
       LexHaskell ->
         let   (tok, lm', i'') = makeToken i' lc layout id str
@@ -237,7 +237,7 @@ tokenize' lx i loc lc layout id str pres@(GraphP _ _ _ _ _ _) = let (tok, lm, i'
                                                              in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
 tokenize' lx i loc lc layout id str pres@(VertexP _ _ _ _ _ _) = let (tok, lm, i') = makeToken i lc layout id str
                                                               in  (undefTk, (0,0), NoIDP, "", [tok,pres],lm, i')
-tokenize' lx i loc lc layout id str pres@(FormatterP _ press) = debug Lay ("FORMATTER WS:"++show layout) $ tokenizeRow'  lx i loc lc layout id str press
+tokenize' lx i loc lc layout id str pres@(FormatterP _ press) = tokenizeRow'  lx i loc lc layout id str press
 tokenize' lx i (loc,ar) lc layout id str (WithP ar' pres)       = tokenize' lx i (loc,ar'.ar) lc layout id str pres
 tokenize' lx i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str, [],Map.empty,i)
 tokenize' lx i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' lx i loc lc layout id str pres
