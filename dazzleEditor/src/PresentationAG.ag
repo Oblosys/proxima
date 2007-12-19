@@ -50,13 +50,13 @@ SEM EnrichedDoc
 SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     col $ [ @graph.pres
-                           , row [ parsing' LexFreeText @title.pres, empty `withHStretch` True ]
-                                 `withFontSize_` (percent 160) 
-                                 `addPopupItems`
-                               [ ("Add Section", insertAtHeadSection @sections.path) ]  
-                           , col @sections.press `withFontSize` 12  `withWidth` 800 
-                           ] 
+                     (col $ [ @graph.pres
+                            , row [ parsing' LexFreeText @title.pres, empty `withHStretch` True ]
+                                  `withFontSize_` (percent 160) 
+                                  `addPopupItems`
+                                [ ("Add Section", insertAtHeadSection @sections.path) ]  
+                            , col @sections.press 
+                            ]) `withFontSize` 12  `withWidth` 800
 {
 divide n [] = []
 divide n xs = let (h,t) = splitAt n xs
