@@ -398,15 +398,15 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.minHeight = @minTopHeight + @minBottomHeight
       loc.hStretch = not (null @presentationList.hStretchList) && and @presentationList.hStretchList
       loc.vStretch = not (null @presentationList.vStretchList) && and @presentationList.vStretchList
-      loc.vRef = @minTopHeight
       loc.hRef = @minLeftWidth
+      loc.vRef = @minTopHeight
   | FormatterP
-      loc.minWidth = 0
+      loc.minWidth = maximum (0 : @presentationList.minWidthList)
       loc.minHeight = @unfoldedFormatter.finalHeight
       loc.hStretch = True
-      loc.vStretch = False
-      loc.vRef = 0
-      loc.hRef = 0
+      loc.vStretch = False 
+      loc.hRef = 0 -- hRef is not taken from children, since formatter is hstretch, and the meaning would not be clear.
+      loc.vRef = @unfoldedFormatter.vRef
 
     {-  loc.topHeight = maximum @presentationList.vRefList
       loc.bottomHeight = maximum [ minHeight - vRef | (minHeight, vRef) <- zip @presentationList.minHeightList @presentationList.vRefList ]
