@@ -402,9 +402,9 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.hRef = @minLeftWidth
   | FormatterP
       loc.minWidth = 0
-      loc.minHeight = 0
+      loc.minHeight = @unfoldedFormatter.finalHeight
       loc.hStretch = True
-      loc.vStretch = True
+      loc.vStretch = False
       loc.vRef = 0
       loc.hRef = 0
 
@@ -559,13 +559,12 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 					       )
 					       @presentationList.minHeightList
       presentationList.assignedHeightList    = @assignedHeights
-      presentationList.assignedVRefList     = {-debug Arr (  "assVRef:"++show @lhs.assignedVRef
+      presentationList.assignedVRefList     = {- debug Arr (  "assVRef:"++show @lhs.assignedVRef
 						++ "VRef:"++ show @vRef
 						++ "minHeight:"++show minHeight
 						++ "assHeight:"++show @lhs.assignedHeight
-						++ "topTotal:"++ show topTotalSpace
-						++ "botTotal:"++ show bottomTotalSpace
-						)-} @presentationList.vRefList -- is not right, nested cols don't work now
+						) -} 
+					      @presentationList.vRefList -- is not right, nested cols don't work now
 
        -- width of stretching children should not be subtracted from available height
        -- for the moment this amount is added back to it as top and bottom corrections
