@@ -31,7 +31,7 @@ copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
 copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
 pasteTree NoPathP clip pres    = (pres, NoFocusP)
-pasteTree path clip pres       = (pasteTreePres True [] path clip pres, pasteTreePresF path pres)
+pasteTree path clip pres       = (pasteTreePres True [] path clip pres, pasteTreePresF path clip pres)
 -- resulting paste focus is right/down of clips. Also selection of clip, or even left of clip are possibilities
 
 deleteTree NoFocusP pres                 = (pres, NoFocusP)
@@ -425,7 +425,9 @@ deleteTreeColF editable updp p i focus@(FocusP (PathP stp sti) (PathP enp eni)) 
 pasteTreePres editable p (PathP stp sti) clip (StringP id str) = 
   if editable 
   then let st = if stp < p then 0 else sti
-       in  RowP NoIDP 0 [StringP id (take st str), clip,StringP NoIDP (drop st str)]
+       in  case clip of
+             StringP _ clipStr -> StringP id (take st str ++ clipStr ++ drop st str)
+             _                 -> RowP NoIDP 0 [StringP id (take st str), clip,StringP NoIDP (drop st str)]
   else StringP id str
 pasteTreePres editable p path clip (RowP id rf press) = RowP id rf (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p path clip (ColP id rf f press) = ColP id rf f (pasteTreePresList editable p 0 path clip press)
@@ -449,13 +451,15 @@ pasteTreePresList editable p i path@(PathP stp sti) clip (pres:press) =
                            else pres : pasteTreePresList editable p (i+1) path clip press
 
 -- paste keeps tree the same, except for the final leaf (always a StringP     (for now)) 
--- which, if it is editable, is always split in 3
+-- if the clip has type string, the target string is inserted. otherwise it is split, and the clip is inserted in between
 -- the updated focus can therefore be computed nonrecursively
 
-pasteTreePresF path@(PathP p i) pres = if isEditableTreePres p pres 
-                                       then FocusP (PathP (p++[2]) 0) (PathP (p++[2]) 0) 
-                                       else FocusP path path 
-pasteTreePresF NoPathP          pres = NoFocusP
+pasteTreePresF path@(PathP p i) clip pres = if isEditableTreePres p pres 
+                                            then case clip of
+                                                   StringP _ _ -> FocusP (PathP p (i+1)) (PathP p (i+1))
+                                                   _ -> FocusP (PathP (p++[2]) 0) (PathP (p++[2]) 0) 
+                                            else FocusP path path 
+pasteTreePresF NoPathP          _    pres = NoFocusP
 
 
 
