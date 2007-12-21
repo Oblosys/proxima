@@ -9,7 +9,8 @@ import Arranger
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
 presentIO state high low editHigh =
   do { (editLow, state', high') <- arrange state high low editHigh
-     --; debugLnIO Arr $ "editArr':"++show editLow
+     --; debugLnIO Arr $ "EditLayout':"++show editHigh
+     --; debugLnIO Arr $ "EditArrangement':"++show editLow
      ; return (editLow, state', high')
      }
 
