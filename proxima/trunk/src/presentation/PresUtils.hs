@@ -114,7 +114,7 @@ diffPres (VertexP id _ _ _ _ pres) _                 = DiffLeaf False
 diffPres pr                  _                     = debug Err ("PresUtils.diffPres: can't handle "++ show pr) DiffLeaf False
 
 diffGraph (GraphP _ d w h es vs) (GraphP _ d' w' h' es' vs') = -- Graph is all or nothing
-  showDebug' Prs ("dirty bits are"++ show d ++ show d') $
+  -- showDebug' Prs ("dirty bits are"++ show d ++ show d') $
   DiffLeaf $ isClean d' && w == w' && h == h' && es == es' && isCleanDT (diffPress 0 vs 0 vs')
 
 diffPress rf press rf' press' =
@@ -130,6 +130,10 @@ diffPress rf press rf' press' =
 all' = foldl' (&&) True
 
 
+prunePresentation (_,oldSize) (_,newSize) diffTree pres =
+  prunePres (if oldSize == newSize then diffTree else DiffLeaf False) pres
+  -- if the window size has changed, no incrementality can be used, since stretching presentations
+  -- may depend on the new size
 
 -- WithP, StructuralP, ParsingP, LocatorP, and VertexP don't have diffTree nodes, so we ignore these
 -- TODO: for Vertex this is not quite right
