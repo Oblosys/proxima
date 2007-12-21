@@ -1,3 +1,3 @@
 @echo off
-..\..\bin\uuagc -cfpm --self --Wmax=3 --Werrors ArrangerAG
+..\..\bin\uuagc -cfpm --self --Wmax=3 --genlinepragmas --Werrors ArrangerAG
 echo Done.
