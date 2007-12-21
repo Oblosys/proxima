@@ -107,7 +107,7 @@ parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
  let (pres', layout', idCounter') = scannerSheet idCounter Nothing pres
      pres''                       = deleteInsertedTokens inserted pres'
-     presLvl'                     = debug Err ("layTranslate: inss="++show inserted) $ PresentationLevel pres'' (layout',idCounter', inserted, deleted)
+     presLvl'                     = PresentationLevel pres'' (layout',idCounter', inserted, deleted)
  in  (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
 
 
