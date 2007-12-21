@@ -87,9 +87,11 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; containerAdd window vBox
     
     ; widgetShowAll window
-      
+    
+--    ; putStrLn "Init"
     ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     
+--    ; putStrLn "Open document"
     ; withCatch $ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
     
@@ -197,8 +199,7 @@ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas me
  do { editRendering <- 
         case menuItem of
           "open" ->
-           do { debugLnIO Err "Open"
-              ; dialog <- fileChooserDialogNew
+           do { dialog <- fileChooserDialogNew
                             (Just "Open")      -- dialog title
                             (Just window)      -- the parent window
 	                        FileChooserActionOpen  -- the kind of dialog we want
@@ -212,30 +213,25 @@ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas me
                                ResponseCancel      -> return Nothing 
                                ResponseDeleteEvent -> return Nothing
               ; widgetHide dialog
-
               
-              ; debugLnIO Err $ show filePathM
               ; let editRendering = maybe (SkipRen 0) OpenFileRen filePathM
               ; return editRendering
               }
           "save" -> 
-           do { debugLnIO Err "Save"
-              ;   dialog <- fileChooserDialogNew
+           do { dialog <- fileChooserDialogNew
                              (Just "Save")     -- dialog title
                              (Just window)     --the parent window
 	                         FileChooserActionSave --the kind of dialog we want
 	                         [ ("Save", ResponseAccept) 
 	                         , ("Cancel", ResponseCancel) ] --The buttons to display
-              ;  widgetShow dialog
-              ;  response <- dialogRun dialog
-              ;  filePathM <- case response of 
-                                ResponseAccept -> fileChooserGetFilename dialog
-                                ResponseCancel -> return Nothing
-                                ResponseDeleteEvent -> return Nothing
+              ; widgetShow dialog
+              ; response <- dialogRun dialog
+              ; filePathM <- case response of 
+                               ResponseAccept -> fileChooserGetFilename dialog
+                               ResponseCancel -> return Nothing
+                               ResponseDeleteEvent -> return Nothing
               ; widgetHide dialog
  
-              
-              ; debugLnIO Err $ show filePathM
               ; let editRendering = maybe (SkipRen 0) SaveFileRen filePathM
               ; return editRendering
               }
@@ -263,16 +259,16 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
     ; case editRendering of
         SkipRen' _ -> return () -- set the renderingLvlVar ??
          
-        SetRen' renderingLvl''@(RenderingLevel scale _ rendering' (w',h') _ updRegions _) -> 
+        SetRen' renderingLvl''@(RenderingLevel scale _ rendering' (newW,newH) _ updRegions _) -> 
          do { writeIORef renderingLvlVar renderingLvl''
-            ; widgetSetSizeRequest canvas w' h'
-            
+            ; widgetSetSizeRequest canvas newW newH
+  --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
             ; dw <- widgetGetDrawWindow canvas
             
             ; maybePm <- readIORef buffer
-            ; when ((isNothing maybePm || (w,h) /= (w',h')) -- if there was no pixmap, or if the size changed
-                    && (w /= 0 && h /= 0)) $ -- gtk crashes if we create an empty pixmap
-              do { pm <- pixmapNew (Just dw) w' h' Nothing -- we create a new one
+            ; when ((isNothing maybePm || (newW,newH)/=(w,h)) -- if there was no pixmap, or if the size changed
+                    && (newW /= 0 && newH /= 0)) $ -- gtk crashes if we create an empty pixmap
+              do { pm <- pixmapNew (Just dw) newW newH Nothing -- we create a new one
                  ; writeIORef buffer (Just pm)
                  }
             
@@ -286,7 +282,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
             ; if not markUpdatedRenderingArea
               then drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
-              else drawWindowInvalidateRect dw (Rectangle 0 0 (max w w') (max h h'))  False -- invalidate entire rendering
+              else drawWindowInvalidateRect dw (Rectangle 0 0 (max w newW) (max h newH))  False -- invalidate entire rendering
             -- if updated areas are marked, we just invalidate the whole thing. Otherwise, we need
             -- to invalidate the new position of the focus, the old position (for clearing the focus)
             -- and the previous old position (for clearing the marker rectangle). 
@@ -297,7 +293,7 @@ drawRendering :: DrawableClass d =>
                  IORef (RenderingLevel documementLevel) -> Window -> Viewport -> d -> IO ()
 drawRendering renderingLvlVar wi vp pm = 
  do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
-    
+--    ; putStrLn "Drawing rendering"
     ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
     ; gc <- gcNew pm
         
@@ -320,10 +316,12 @@ onPaint :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (R
            Window -> Viewport -> DrawingArea -> Event -> IO Bool
 onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
+--    ; putStrLn "paint"
     ; case maybePm of 
         Nothing -> return True -- buffer has not been initialized yet, so don't paint.
         Just pm ->
-         do { renderedViewedArea <- readIORef viewedAreaRef
+         do { -- putStrLn "buffer initialized"
+            ; renderedViewedArea <- readIORef viewedAreaRef
             ; viewedArea <- getViewedArea vp 
             ; dw <- drawingAreaGetDrawWindow canvas
     
