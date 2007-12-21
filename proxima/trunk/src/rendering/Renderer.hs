@@ -57,6 +57,7 @@ GTK sizes:
 
 
 computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangement =
+  -- showDebug' Err ("updated regions for\n" ++ show oldArrangement ++"\n\n\n" ++ show arrangement ++ "\n\n\n\n" ) $
   let (oldW,oldH) = (widthA oldArrangement, heightA oldArrangement)
       (newW,newH) = (widthA arrangement, heightA arrangement)
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
