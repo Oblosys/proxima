@@ -227,7 +227,7 @@ pSymm = pCSym 20 symTk
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
 mkString_ :: Show node => Token doc node clip (Maybe node) -> String_
-mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
 
 mkInt_ :: Show node => Token doc node clip (Maybe node) -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
