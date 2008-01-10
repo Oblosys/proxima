@@ -56,7 +56,7 @@ an option.
 -}
 
 
-type ListParser doc node clip a = AnaParser [] Pair  (Token doc node clip (Maybe node)) a 
+type ListParser doc node clip a = AnaParser [] Pair  (Token doc node clip) a 
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
@@ -183,7 +183,7 @@ process and should be done in the layout layer.
 --      check what happens with tokens without context info. It seems they get it from higher up
 --      in the tree now, which seems wrong. 
 
-postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
+postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
 postScanStr kwrds ctxt (ImageP _ _ _)         = []
@@ -205,7 +205,7 @@ postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt
 postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
 
 
-postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip (Maybe node)]
+postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip]
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
@@ -237,16 +237,16 @@ newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) d
 
 
 
-data Token doc node clip a = 
-               UserTk UserToken String a IDP
-             | StructuralTk a (Presentation doc node clip) [Token doc node clip a] IDP
-             | ParsingTk (Presentation doc node clip) [Token doc node clip a] IDP -- deriving (Show)
-             | GraphTk Dirty [(Int, Int)] a IDP
-             | VertexTk Int (Int, Int) a IDP
+data Token doc node clip = 
+               UserTk UserToken String (Maybe node) IDP
+             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip] IDP
+             | ParsingTk (Presentation doc node clip) [Token doc node clip] IDP -- deriving (Show)
+             | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
+             | VertexTk Int (Int, Int) (Maybe node) IDP
 -- ParsingTk token does not need a node (at least it didn't when it was encoded as a
 -- (StructuralTk NoNode .. ) token)
 
-instance Show a => Show (Token doc node clip (Maybe a)) where
+instance Show node => Show (Token doc node clip) where
   show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
   show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
   show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
@@ -254,7 +254,7 @@ instance Show a => Show (Token doc node clip (Maybe a)) where
   show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
   show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
   
-instance Eq a => Eq (Token doc node clip (Maybe a)) where
+instance Eq node => Eq (Token doc node clip) where
   UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
   StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
@@ -264,7 +264,7 @@ instance Eq a => Eq (Token doc node clip (Maybe a)) where
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
   _              == _                  = False -- identifier will be added, which will be involved in eq. check
 
-instance Ord a => Ord (Token doc node clip (Maybe a)) where
+instance Ord node => Ord (Token doc node clip) where
   UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
   StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
   StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
@@ -289,19 +289,19 @@ instance Ord a => Ord (Token doc node clip (Maybe a)) where
   _              <= _           = False
 
 
-tokenString :: Token doc node clip (Maybe node) -> String                  
+tokenString :: Token doc node clip -> String                  
 tokenString (UserTk _ s n id)      = s
 tokenString (StructuralTk n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
                              
-tokenNode :: Token doc node clip (Maybe node) -> Maybe node                 
+tokenNode :: Token doc node clip -> Maybe node                 
 tokenNode (StructuralTk n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk u s n id)   = n
 
-tokenIDP :: Token doc node clip (Maybe node) -> IDP       
+tokenIDP :: Token doc node clip -> IDP       
 tokenIDP (UserTk u s n id) = id
 tokenIDP (StructuralTk n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
@@ -310,7 +310,7 @@ tokenIDP (VertexTk i p n id) = id
 
 
 
-instance (Show a, Eq a, Ord a) => Symbol (Token doc node clip (Maybe a)) where
+instance (Ord node, Show node) => Symbol (Token doc node clip) where
 
 runParser (pp) inp =
       let res = UU_Parsing.parse pp inp
@@ -324,7 +324,7 @@ runParser (pp) inp =
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip (Maybe node))
+pStruct :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
 pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 
 
@@ -368,7 +368,7 @@ opTk      = UserTk OpTk "" Nothing (IDP (-1))
 symTk     = UserTk SymTk "" Nothing (IDP (-1))
 
 
-mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip (Maybe node)
+mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip
 mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
                                     | isDigit c           = UserTk IntTk str ctxt i
                                     | isLower c           = UserTk LIdentTk str ctxt i
@@ -382,26 +382,26 @@ isSymbolChar c = c `elem` ";,(){}#_|"
 
 -- Basic parsers
 
-pKey :: (Ord node, Show node) => String -> ListParser doc node clip (Token doc node clip (Maybe node))
+pKey :: (Ord node, Show node) => String -> ListParser doc node clip (Token doc node clip)
 pKey str = pSym  (strTk str)
 
-pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip (Token doc node clip (Maybe node))
+pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip (Token doc node clip)
 pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip (Maybe node))
+pLIdent :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
 pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip (Maybe node))
+pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
 pInt = pCSym 20 intTk
 
-lIdentVal :: Show node => Token doc node clip (Maybe node) -> String
+lIdentVal :: Show node => Token doc node clip -> String
 lIdentVal (UserTk LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
   
-intVal :: Show node => Token doc node clip (Maybe node) -> Int
+intVal :: Show node => Token doc node clip -> Int
 intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (UserTk IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
