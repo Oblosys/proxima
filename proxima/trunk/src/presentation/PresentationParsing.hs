@@ -223,7 +223,7 @@ postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentat
 postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
 postScanPrs kwrds ctxt (ParsingP _ _ pres)    = postScanPrs kwrds ctxt pres
 postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
-postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [UserTk $ StrTk "\n" Nothing NoIDP]
+postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [UserTk (StrTk "\n") "\n" Nothing NoIDP]
 postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
 -- ref to UserTk is now because scanner cannot easily add "\n". The AG scanner will be able to do
 -- this and make this ref obsolete. (PostScanPrs will be obsolete when Token type is added to Presentation)
@@ -238,7 +238,7 @@ newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) d
 
 
 data Token doc node clip a = 
-               UserTk (UserToken a)
+               UserTk UserToken String a IDP
              | StructuralTk a (Presentation doc node clip) [Token doc node clip a] IDP
              | ParsingTk (Presentation doc node clip) [Token doc node clip a] IDP -- deriving (Show)
              | GraphTk Dirty [(Int, Int)] a IDP
@@ -247,7 +247,7 @@ data Token doc node clip a =
 -- (StructuralTk NoNode .. ) token)
 
 instance Show a => Show (Token doc node clip (Maybe a)) where
-  show (UserTk u) = "<user:" ++show u ++ ">"
+  show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
   show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
   show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
   show (ParsingTk _ _ _) = "<presentation>" 
@@ -255,7 +255,7 @@ instance Show a => Show (Token doc node clip (Maybe a)) where
   show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
   
 instance Eq a => Eq (Token doc node clip (Maybe a)) where
-  UserTk u1      == UserTk u2      = u1 == u2
+  UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
   StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
   StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
@@ -265,32 +265,32 @@ instance Eq a => Eq (Token doc node clip (Maybe a)) where
   _              == _                  = False -- identifier will be added, which will be involved in eq. check
 
 instance Ord a => Ord (Token doc node clip (Maybe a)) where
-  UserTk u1        <= UserTk u2     = u1 <= u2
+  UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
   StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
   StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
   StructuralTk (Just nd1) _ _ _ <= StructuralTk (Just nd2) _ _ _ = nd1 <= nd2
-  StructuralTk _ _ _ _ <= UserTk _       = True
+  StructuralTk _ _ _ _ <= UserTk _ _ _ _  = True
   
   ParsingTk _ _ _ <= ParsingTk _ _ _      = True
   ParsingTk _ _ _ <= StructuralTk _ _ _ _ = True
-  ParsingTk _ _ _ <= UserTk _             = True
+  ParsingTk _ _ _ <= UserTk _ _ _ _       = True
 
   GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
   GraphTk _ _ _ _ <= ParsingTk _ _ _      = True
   GraphTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  GraphTk _ _ _ _ <= UserTk _             = True
+  GraphTk _ _ _ _ <= UserTk _ _ _ _       = True
 
   VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
   VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
   VertexTk _ _ _ _ <= ParsingTk _ _ _      = True
   VertexTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  VertexTk _ _ _ _ <= UserTk _             = True
+  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True
 
   _              <= _           = False
 
 
 tokenString :: Token doc node clip (Maybe node) -> String                  
-tokenString (UserTk u)      = tokenStringUserToken u
+tokenString (UserTk _ s n id)      = s
 tokenString (StructuralTk n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
@@ -299,10 +299,10 @@ tokenNode :: Token doc node clip (Maybe node) -> Maybe node
 tokenNode (StructuralTk n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
-tokenNode (UserTk u)          = tokenNodeUserToken u
+tokenNode (UserTk u s n id)   = n
 
 tokenIDP :: Token doc node clip (Maybe node) -> IDP       
-tokenIDP (UserTk u) = tokenIDPUserToken u
+tokenIDP (UserTk u s n id) = id
 tokenIDP (StructuralTk n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
 tokenIDP (VertexTk i p n id) = id
@@ -332,84 +332,26 @@ pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 pCSym c p = pCostSym c p p
 
 
+
+
+strucTk   = StructuralTk Nothing empty [] (IDP (-1))
+parsingTk = (ParsingTk empty [] NoIDP)
+graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
+vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
+
+
 ------------------ User defined token part:
 
 --data Token a = Tk Char a IDP | StructuralTk a (Presentation node) deriving Show
 
 -- use a type field? instead of multiple constructors?
 
-data UserToken a = StrTk String a IDP  -- StrTk is for keywords, so eq takes the string value into account
-                 | IntTk String a IDP
-                 | LIdentTk String a IDP
-                 | UIdentTk String a IDP
-                 | OpTk String a IDP
-                 | SymTk String a IDP
-
-instance Show (UserToken a) where
-  show (StrTk str _ _)    = show str
-  show (IntTk str _ _)    = show str
-  show (LIdentTk str _ _) = show str
-  show (UIdentTk str _ _) = show str
-  show (OpTk str _ _)     = show str
-  show (SymTk str _ _)    = show str
-
-instance Eq (UserToken a) where
-  StrTk str1 _ _ == StrTk str2 _ _ = str1 == str2
-  IntTk _ _ _    == IntTk _ _ _    = True
-  LIdentTk _ _ _ == LIdentTk _ _ _ = True
-  UIdentTk _ _ _ == UIdentTk _ _ _ = True
-  OpTk _ _ _     == OpTk _ _ _     = True
-  SymTk _ _ _    == SymTk _ _ _    = True
-  _              == _              = False
-instance Ord (UserToken a) where
-  StrTk str1 _ _ <= StrTk str2 _ _ = str1 <= str2
-  IntTk _ _ _    <= IntTk _ _ _    = True
-  IntTk _ _ _    <= StrTk _ _ _    = True
-
-  LIdentTk _ _ _ <= LIdentTk _ _ _ = True
-  LIdentTk _ _ _ <= IntTk _ _ _    = True
-  LIdentTk _ _ _ <= StrTk _ _ _    = True
-
-  UIdentTk _ _ _ <= UIdentTk _ _ _ = True
-  UIdentTk _ _ _ <= LIdentTk _ _ _ = True
-  UIdentTk _ _ _ <= IntTk _ _ _    = True
-  UIdentTk _ _ _ <= StrTk _ _ _    = True
-
-  OpTk _ _ _     <= OpTk _ _ _      = True
-  OpTk _ _ _     <= UIdentTk _ _ _  = True
-  OpTk _ _ _     <= LIdentTk _ _ _  = True
-  OpTk _ _ _     <= IntTk _ _ _     = True
-  OpTk _ _ _     <= StrTk _ _ _     = True
- 
-  SymTk _ _ _    <= SymTk _ _ _     = True
-  SymTk _ _ _    <= OpTk _ _ _      = True
-  SymTk _ _ _    <= UIdentTk _ _ _  = True
-  SymTk _ _ _    <= LIdentTk _ _ _  = True
-  SymTk _ _ _    <= IntTk _ _ _     = True
-  SymTk _ _ _    <= StrTk _ _ _     = True
-
-  _              <= _           = False
-
-tokenStringUserToken (StrTk s n id)      = s
-tokenStringUserToken (IntTk s n id)      = s
-tokenStringUserToken (LIdentTk s n id)   = s
-tokenStringUserToken (UIdentTk s n id)   = s
-tokenStringUserToken (OpTk s n id)       = s
-tokenStringUserToken (SymTk s n id)      = s
-
-tokenNodeUserToken (StrTk s n id)      = n
-tokenNodeUserToken (IntTk s n id)      = n
-tokenNodeUserToken (LIdentTk s n id)   = n
-tokenNodeUserToken (UIdentTk s n id)   = n
-tokenNodeUserToken (OpTk s n id)       = n
-tokenNodeUserToken (SymTk s n id)      = n
-
-tokenIDPUserToken (StrTk s n id)    = id
-tokenIDPUserToken (IntTk s n id)    = id
-tokenIDPUserToken (LIdentTk s n id) = id
-tokenIDPUserToken (UIdentTk s n id) = id
-tokenIDPUserToken (OpTk s n id)     = id
-tokenIDPUserToken (SymTk s n id)    = id
+data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
+               | IntTk
+               | LIdentTk
+               | UIdentTk
+               | OpTk
+               | SymTk deriving (Show, Eq, Ord)
 
 
 -- probably have to split strTk in a symbol, an operator and a keyword variant.
@@ -418,25 +360,20 @@ tokenIDPUserToken (SymTk s n id)    = id
 
 -- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
 -- which is also required for copying of presentation subtrees
-strTk str = UserTk $ StrTk str Nothing (IDP (-1))
-intTk     = UserTk $ IntTk "0" Nothing (IDP (-1))
-lIdentTk  = UserTk $ LIdentTk "ident" Nothing (IDP (-1))
-uIdentTk  = UserTk $ UIdentTk "Ident" Nothing (IDP (-1))
-opTk      = UserTk $ OpTk "" Nothing (IDP (-1))
-symTk     = UserTk $ SymTk "" Nothing (IDP (-1))
-strucTk   = StructuralTk Nothing empty [] (IDP (-1))
-parsingTk = (ParsingTk empty [] NoIDP)
-graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
-vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
---parsingTk = StructuralTk (Just NoNode) empty [] NoIDP
+strTk str = UserTk (StrTk str) str Nothing (IDP (-1))
+intTk     = UserTk IntTk "0" Nothing (IDP (-1))
+lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
+uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
+opTk      = UserTk OpTk "" Nothing (IDP (-1))
+symTk     = UserTk SymTk "" Nothing (IDP (-1))
 
 
 mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip (Maybe node)
-mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk $ StrTk str ctxt i
-                                    | isDigit c           = UserTk $ IntTk str ctxt i
-                                    | isLower c           = UserTk $ LIdentTk str ctxt i
-                                    | isUpper c           = UserTk $ UIdentTk str ctxt i
-                                    | otherwise           = UserTk $ OpTk str ctxt i
+mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
+                                    | isDigit c           = UserTk IntTk str ctxt i
+                                    | isLower c           = UserTk LIdentTk str ctxt i
+                                    | isUpper c           = UserTk UIdentTk str ctxt i
+                                    | otherwise           = UserTk OpTk str ctxt i
 
 --makeToken str ctxt i = Tk str ctxt i
 
@@ -460,22 +397,12 @@ pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip (
 pInt = pCSym 20 intTk
 
 lIdentVal :: Show node => Token doc node clip (Maybe node) -> String
-lIdentVal (UserTk (LIdentTk str _ _)) = str
+lIdentVal (UserTk LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
-
--- obsolete, we should user tokenString
-strValTk :: Show node => Token doc node clip (Maybe node) -> String
-strValTk (UserTk (StrTk str _ _))    = str
-strValTk (UserTk (IntTk str _ _))    = str
-strValTk (UserTk (LIdentTk str _ _)) = str
-strValTk (UserTk (UIdentTk str _ _)) = str
-strValTk (UserTk (OpTk str _ _))     = str
-strValTk (UserTk (SymTk str _ _))    = str
-strValTk tk                 = debug Err ("PresentationParser.strValTk: StructuralToken " ++ show tk) $ show tk
   
 intVal :: Show node => Token doc node clip (Maybe node) -> Int
-intVal (UserTk (IntTk "" _ _))  = 0   -- may happen on parse error (although not likely since insert is expensive)
-intVal (UserTk (IntTk str _ _)) = read str
+intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
+intVal (UserTk IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
 
