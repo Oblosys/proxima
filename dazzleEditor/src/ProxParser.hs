@@ -153,23 +153,23 @@ recognizeSubgraph = pStrVerbose "Subgraph" $
       <*> pSym graphTk
       <*> pList recognizeVertex
 
-getGraphTkDirty :: Show node => Token doc node clip (Maybe node)-> Dirty
+getGraphTkDirty :: Show node => Token doc node clip -> Dirty
 getGraphTkDirty (GraphTk dirty _ _ _) = if isClean dirty then Clean NoIDD else Dirty NoIDD
 getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ Dirty NoIDD
 
-getGraphTkEdges :: Show node => Token doc node clip (Maybe node)-> [(Int,Int)]
+getGraphTkEdges :: Show node => Token doc node clip -> [(Int,Int)]
 getGraphTkEdges (GraphTk _ edges _ _) = edges
 getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
 
-getVertexTkId :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkId :: Show node => Token doc node clip -> Int_
 getVertexTkId (VertexTk i (x,y) _ _) = Int_ NoIDD i
 getVertexTkId tk = debug Err ("ERROR: getVertexTkId: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
-getVertexTkX :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkX :: Show node => Token doc node clip -> Int_
 getVertexTkX (VertexTk _ (x,y) _ _) = Int_ NoIDD x
 getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
-getVertexTkY :: Show node => Token doc node clip (Maybe node)-> Int_
+getVertexTkY :: Show node => Token doc node clip -> Int_
 getVertexTkY (VertexTk _ (x,y) _ _) = Int_ NoIDD y
 getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
@@ -226,10 +226,10 @@ pSymm = pCSym 20 symTk
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Show node => Token doc node clip (Maybe node) -> String_
+mkString_ :: Show node => Token doc node clip -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
 
-mkInt_ :: Show node => Token doc node clip (Maybe node) -> Int_
+mkInt_ :: Show node => Token doc node clip -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different
