@@ -56,7 +56,21 @@ data EditPresentation documentLevel doc node clip =
   | DeleteDocPres deriving Show
 
 
+data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
+               | IntTk
+               | LIdentTk
+               | UIdentTk
+               | OpTk
+               | SymTk deriving (Show, Eq, Ord)
+-- TODO call strTk KeyTk
 
+
+data Token doc node clip = 
+               UserTk UserToken String (Maybe node) IDP
+             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip] IDP
+             | ParsingTk (Presentation doc node clip) [Token doc node clip] IDP -- deriving (Show)
+             | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
+             | VertexTk Int (Int, Int) (Maybe node) IDP
 
 
 -- Presentation is Xprez with ID's

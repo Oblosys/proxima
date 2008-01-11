@@ -237,14 +237,6 @@ newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) d
 
 
 
-data Token doc node clip = 
-               UserTk UserToken String (Maybe node) IDP
-             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip] IDP
-             | ParsingTk (Presentation doc node clip) [Token doc node clip] IDP -- deriving (Show)
-             | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
-             | VertexTk Int (Int, Int) (Maybe node) IDP
--- ParsingTk token does not need a node (at least it didn't when it was encoded as a
--- (StructuralTk NoNode .. ) token)
 
 instance Show node => Show (Token doc node clip) where
   show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
@@ -342,20 +334,9 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 
 ------------------ User defined token part:
 
---data Token a = Tk Char a IDP | StructuralTk a (Presentation node) deriving Show
-
--- use a type field? instead of multiple constructors?
-
-data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
-               | IntTk
-               | LIdentTk
-               | UIdentTk
-               | OpTk
-               | SymTk deriving (Show, Eq, Ord)
 
 
--- probably have to split strTk in a symbol, an operator and a keyword variant.
--- TODO call strTk KeyTk
+
 
 
 -- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
