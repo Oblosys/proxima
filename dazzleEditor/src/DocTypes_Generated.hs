@@ -13,8 +13,6 @@ data Document = RootDoc IDD Root
               | ParseErrDocument (Presentation Document Node ClipDoc)
                  deriving Show
 
-instance DocNode Node where
-  noNode = NoNode
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
