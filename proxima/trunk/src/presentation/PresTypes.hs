@@ -12,11 +12,11 @@ data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
 data PresentationLevel doc node clip = PresentationLevel (Presentation doc node clip) (PresentationLS doc node clip) deriving Show
 
-type PresentationLS doc node clip = (LayoutMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip)
+type PresentationLS doc node clip = (WhitespaceMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip)
 
-type Layout = (Int, Int)
+type Whitespace = (Int, Int)
 
-type LayoutMap = Map IDP Layout   -- Layout information for each element in Presentation
+type WhitespaceMap = Map IDP Whitespace   -- Whitespace information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
 type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
@@ -25,7 +25,7 @@ type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- 
 -- show fm = "{FiniteMap}" -- ++show (fmToList fm)
  
 
-initLayout :: LayoutMap
+initLayout :: WhitespaceMap
 initLayout = Map.fromList [(IDP (-1), (0,1))]
 
 data EditPresentation' doc node clip =

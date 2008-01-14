@@ -17,8 +17,8 @@ import Data.Map (Map)
 
 -- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
 -- Note that freetext tokens have no layout in the extra state, but since their id's will not be
--- in the LayoutMap, nothing will be inserted.
-detokenize :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation doc node clip -> Presentation doc node clip
+-- in the WhitespaceMap, nothing will be inserted.
+detokenize :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation doc node clip -> Presentation doc node clip
 detokenize lm (ParsingP id l pres)       = let press = detokenize' lm pres
                                            in  if null press 
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
@@ -73,7 +73,7 @@ singleton []       = debug Err ("TreeEditPres.detokenize': graph child without s
 singleton [pres]   = pres
 singleton (pres:_) = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ pres
 
-detokenizeRow' :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> [Presentation doc node clip] -> [Presentation doc node clip]
+detokenizeRow' :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> [Presentation doc node clip] -> [Presentation doc node clip]
 detokenizeRow' lm [] = []
 detokenizeRow' lm (pres:press) =
   let press' = detokenize' lm pres
@@ -85,7 +85,7 @@ combine [] l2 = l2
 combine l1 [] = l1 
 combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
 
-addWhitespace :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Presentation doc node clip]
+addWhitespace :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Presentation doc node clip]
 addWhitespace (lm,inss, dels) NoIDP str = [StringP NoIDP str]
 addWhitespace (lm,inss, dels) id str = 
   case Map.lookup id lm of
@@ -93,7 +93,7 @@ addWhitespace (lm,inss, dels) id str =
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ StringP id (replicate spaces ' ' ++ str))
 
-addWhitespaceStruct :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
+addWhitespaceStruct :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
 addWhitespaceStruct (lm,inss, dels) NoIDP struct = [struct]
 addWhitespaceStruct (lm,inss, dels) id struct = 
   case Map.lookup id lm of
@@ -104,7 +104,7 @@ addWhitespaceStruct (lm,inss, dels) id struct =
                                                                                ])
                                 
 
-markInssDels :: (LayoutMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
+markInssDels :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
 markInssDels (lm,inss,dels) idp pres = 
   combine 
     (case Map.lookup idp dels of
@@ -115,7 +115,7 @@ markInssDels (lm,inss,dels) idp pres =
      else [pres])
 
 {-
-onlyWhitespace :: LayoutMap -> IDP -> [ Presentation ]
+onlyWhitespace :: WhitespaceMap -> IDP -> [ Presentation ]
 onlyWhitespace lm NoIDP = []
 onlyWhitespace lm id = 
   case Map.lookup lm id of

@@ -41,8 +41,8 @@ present presentationSheet state (EnrichedDocLevel enr _) (PresentationLevel pres
                                                                                      ] -} )), state, enrlvl)
 
 presentEnr :: PresentationSheet doc enr node clip -> LayerStatePres -> EnrichedDocLevel enr ->
-              LayoutMap -> IDPCounter ->
-              (Presentation doc node clip, LayoutMap, IDPCounter)
+              WhitespaceMap -> IDPCounter ->
+              (Presentation doc node clip, WhitespaceMap, IDPCounter)
 presentEnr presentationSheet state (EnrichedDocLevel d focusD ) layM idC = 
       let (layM', idC', pres', self) = (presentationSheet d focusD layM idC)
       in  (pres', layM', idC')                      

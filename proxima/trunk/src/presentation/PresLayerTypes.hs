@@ -10,7 +10,7 @@ import PresTypes
 
 type LayerStatePres = ()
 
-type PresentationSheet doc enr node clip = enr -> FocusDoc -> LayoutMap -> IDPCounter -> 
-                         (LayoutMap, IDPCounter, Presentation doc node clip, enr)
+type PresentationSheet doc enr node clip = enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
+                         (WhitespaceMap, IDPCounter, Presentation doc node clip, enr)
                          
 type ParseSheet doc enr node clip = Presentation doc node clip -> Maybe enr

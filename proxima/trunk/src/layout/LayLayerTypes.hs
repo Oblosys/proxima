@@ -12,4 +12,4 @@ type LayerStateLay = Presentation -- clipboard
 -- local to LayoutLevel, just like the focus
 
 type ScannerSheet doc node clip = IDPCounter -> Maybe node -> Presentation doc node clip ->
-                             (Presentation doc node clip, LayoutMap, IDPCounter)
+                             (Presentation doc node clip, WhitespaceMap, IDPCounter)
