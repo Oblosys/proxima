@@ -207,13 +207,12 @@ moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres p
 moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (ParsingP id l pres)         = ParsingP id l (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
-moveVertexPres (p:ps) pt (GraphP id d w h es press)   = 
+moveVertexPres (p:ps) pt pr@(GraphP id d w h es press)   = 
   if p < length press 
   then GraphP id Dirty w h es $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
-  else debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) $ GraphP id d w h es press
+  else debug Err ("TreeEditPres.moveVertexPres: index out of bounds "++ show p ++" in "++ show pr) $ GraphP id d w h es press
 moveVertexPres []     (dx,dy) (VertexP id i x y ol pres)  = VertexP id i (x+dx) (y+dy) ol pres
 moveVertexPres _      pt pr                      = debug Err ("TreeEditPres.moveVertexPres: can't handle "++ show pr) pr
-
 
 
 
@@ -467,12 +466,6 @@ pasteTreePresF NoPathP          _    pres = NoFocusP
 
 -- nicer to give focus of clip and let calling function decide on after paste focus left or right of clip
 
-
--- sample focus (data decls are in PresTypes.hs)
-fc = (FocusP (PathP [] 2)(PathP [] 4))
-
--- sample presentation (text& row, etc. are in XprezLib.hs, decls also in PresTypes.hs)
-pr = col [text "abcdefg"]
 
 copyTreePres p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   let st = if  stp < p then 0 else sti

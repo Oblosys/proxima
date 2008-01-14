@@ -56,7 +56,7 @@ an option.
 -}
 
 
-type ListParser doc node clip a = AnaParser [] Pair  (Token doc node clip) a 
+type ListParser doc node clip a = AnaParser [] Pair  (Token doc node clip UserToken) a 
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
@@ -183,7 +183,7 @@ process and should be done in the layout layer.
 --      check what happens with tokens without context info. It seems they get it from higher up
 --      in the tree now, which seems wrong. 
 
-postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip]
+postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip UserToken]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
 postScanStr kwrds ctxt (TokenP _ _)         = debug Err ("*** PresentationParser.postScanStr: Token in structural presentation") []
@@ -206,7 +206,7 @@ postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt
 postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
 
 
-postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip]
+postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip UserToken]
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
@@ -245,7 +245,7 @@ newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) d
 
 
 
-instance (Ord node, Show node) => Symbol (Token doc node clip) where
+instance (Ord node, Show node, Ord token, Show token) => Symbol (Token doc node clip token) where
 
 runParser (pp) inp =
       let res = UU_Parsing.parse pp inp
@@ -259,7 +259,7 @@ runParser (pp) inp =
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
+pStruct :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
 pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 
 
@@ -292,7 +292,7 @@ opTk      = UserTk OpTk "" Nothing (IDP (-1))
 symTk     = UserTk SymTk "" Nothing (IDP (-1))
 
 
-mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip
+mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip UserToken
 mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
                                     | isDigit c           = UserTk IntTk str ctxt i
                                     | isLower c           = UserTk LIdentTk str ctxt i
@@ -306,26 +306,26 @@ isSymbolChar c = c `elem` ";,(){}#_|"
 
 -- Basic parsers
 
-pKey :: (Ord node, Show node) => String -> ListParser doc node clip (Token doc node clip)
+pKey :: (Ord node, Show node) => String -> ListParser doc node clip (Token doc node clip UserToken)
 pKey str = pSym  (strTk str)
 
-pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip (Token doc node clip)
+pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip (Token doc node clip UserToken)
 pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
+pLIdent :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
 pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip)
+pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
 pInt = pCSym 20 intTk
 
-lIdentVal :: Show node => Token doc node clip -> String
+lIdentVal :: Show node => Token doc node clip UserToken -> String
 lIdentVal (UserTk LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
   
-intVal :: Show node => Token doc node clip -> Int
+intVal :: Show node => Token doc node clip UserToken -> Int
 intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (UserTk IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)

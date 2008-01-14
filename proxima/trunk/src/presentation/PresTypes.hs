@@ -65,15 +65,15 @@ data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string 
 -- TODO call strTk KeyTk
 
 
-data Token doc node clip = 
-               UserTk UserToken String (Maybe node) IDP
-             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip] IDP
-             | ParsingTk (Presentation doc node clip) [Token doc node clip] IDP -- deriving (Show)
+data Token doc node clip token = 
+               UserTk token String (Maybe node) IDP
+             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip token] IDP
+             | ParsingTk (Presentation doc node clip) [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk Int (Int, Int) (Maybe node) IDP
 
 
-instance Show (Token doc node clip) where
+instance Show token => Show (Token doc node clip token) where
   show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
   show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
   show (StructuralTk (Just nd) _ _ _) = "<structural:>" 
@@ -81,7 +81,7 @@ instance Show (Token doc node clip) where
   show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
   show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
 
-instance Eq node => Eq (Token doc node clip) where
+instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
   StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
@@ -91,7 +91,7 @@ instance Eq node => Eq (Token doc node clip) where
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
   _              == _                  = False -- identifier will be added, which will be involved in eq. check
 
-instance Ord node => Ord (Token doc node clip) where
+instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
   StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
   StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
@@ -111,19 +111,19 @@ instance Ord node => Ord (Token doc node clip) where
   VertexTk _ _ _ _ <= UserTk _ _ _ _       = True
   _              <= _           = False
 
-tokenString :: Token doc node clip -> String                  
+tokenString :: Token doc node clip token -> String                  
 tokenString (UserTk _ s n id)      = s
 tokenString (StructuralTk n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
                              
-tokenNode :: Token doc node clip -> Maybe node                 
+tokenNode :: Token doc node clip token -> Maybe node                 
 tokenNode (StructuralTk n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk u s n id)   = n
 
-tokenIDP :: Token doc node clip -> IDP       
+tokenIDP :: Token doc node clip token -> IDP       
 tokenIDP (UserTk u s n id) = id
 tokenIDP (StructuralTk n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
@@ -135,9 +135,11 @@ tokenIDP (VertexTk i p n id) = id
 
 -- Presentation is Xprez with ID's
 
-data Presentation doc node clip = EmptyP !IDP
+type Presentation doc node clip = Presentation_ doc node clip UserToken
+
+data Presentation_ doc node clip token = EmptyP !IDP
            | StringP !IDP !String
-           | TokenP !IDP !(Token doc node clip)
+           | TokenP !IDP !(Token doc node clip token)
            | ImageP !IDP !String !ImgStyle
            | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth

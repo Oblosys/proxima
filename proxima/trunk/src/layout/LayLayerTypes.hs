@@ -7,7 +7,7 @@ import CommonTypes
 import LayTypes
 
 
-type LayerStateLay = Presentation -- clipboard
+type LayerStateLay doc node clip = Presentation doc node clip -- clipboard
 -- is this  layer local state, instead of level local state? It is focus related, so probably, it should be 
 -- local to LayoutLevel, just like the focus
 
