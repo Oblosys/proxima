@@ -18,45 +18,46 @@ import Data.Map (Map)
 -- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
 -- Note that freetext tokens have no layout in the extra state, but since their id's will not be
 -- in the WhitespaceMap, nothing will be inserted.
-detokenize :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation doc node clip -> Presentation doc node clip
+detokenize :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation_ doc node clip token -> Layout doc node clip
 detokenize lm (ParsingP id l pres)       = let press = detokenize' lm pres
                                            in  if null press 
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
                                                else if length press == 1  -- this will usually be the case because breaks
                                                then ParsingP id l $ head press -- are produced by col's so there will be one there
                                                else ParsingP id l $ ColP NoIDP 0 NF press 
-detokenize lm pres@(EmptyP _)            = pres
-detokenize lm pres@(StringP _ str)       = pres
-detokenize lm pres@(ImageP _ _ _)        = pres
-detokenize lm pres@(PolyP _ _ _ _)       = pres
-detokenize lm pres@(RectangleP _ _ _ _ _)  = pres
-detokenize lm pres@(EllipseP _ _ _ _ _)    = pres
+detokenize lm (EmptyP id)            = EmptyP id
+detokenize lm (StringP id str)       = StringP id str
+detokenize lm (ImageP id str st)        = ImageP id str st
+detokenize lm (PolyP id pts w st)       = PolyP id pts w st
+detokenize lm (RectangleP id w h lw st)  = RectangleP id w h lw st
+detokenize lm (EllipseP id w h lw st)    = EllipseP id w h lw st
 detokenize lm (RowP id rf press)         = RowP id rf $ map (detokenize lm) press
 detokenize lm (ColP id rf f press)         = ColP id rf f $ map (detokenize lm) press
-detokenize lm (OverlayP id (pres:press)) = OverlayP id (detokenize lm pres : press)
+detokenize lm (OverlayP id (pres:press)) = OverlayP id (detokenize lm pres : (map castPresToLay press)) -- cast is safe, no tokens in press
 detokenize lm (WithP ar pres)            = WithP ar $ detokenize lm pres
 detokenize lm (StructuralP id pres)      = StructuralP id $ detokenize lm pres
 detokenize lm (LocatorP l pres)          = LocatorP l $ detokenize lm pres
 detokenize lm (GraphP id d w h es press) = GraphP id d w h es $ map (detokenize lm) press
 detokenize lm (VertexP id v x y o pres)  = VertexP id v x y o $ detokenize lm pres
 detokenize lm (FormatterP id press)      = FormatterP id $ map (detokenize lm) press
-detokenize lm pr                         = debug Err ("Layout.detokenize: can't handle "++ show pr) pr
+detokenize lm pr                         = debug Err ("Layout.detokenize: can't handle "++ show pr) $ castPresToLay pr
 
 
 -- find out semantics of this one        What about Refs?
 
 -- incomplete, only for strings
+detokenize' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation_ doc node clip token -> [Layout doc node clip]
 detokenize' lm (StructuralP id pres)      = addWhitespaceStruct lm id (StructuralP id $ detokenize lm pres)
-detokenize' lm pres@(EmptyP _)            = [pres]
-detokenize' lm pres@(StringP id str)      = addWhitespace lm id str
-detokenize' lm pres@(ImageP id _ _)         = [pres]
-detokenize' lm pres@(PolyP id _ _ _)        = [pres]
-detokenize' lm pres@(RectangleP _ _ _ _ _)  = [pres]
-detokenize' lm pres@(EllipseP _ _ _ _ _)    = [pres]
+detokenize' lm (EmptyP id)                  = [EmptyP id]
+detokenize' lm (StringP id str)      = addWhitespace lm id str
+detokenize' lm (ImageP id str st)      = [ImageP id str st]
+detokenize' lm (PolyP id pts w st)        = [PolyP id pts w st]
+detokenize' lm (RectangleP id w h lw st)  = [RectangleP id w h lw st]
+detokenize' lm (EllipseP id w h lw st)    = [EllipseP id w h lw st]
 detokenize' lm (RowP id rf press)         = detokenizeRow' lm press -- ref gets lost
 detokenize' lm (ColP id rf f press)       = [ColP id rf f $ concat (map (detokenize' lm) press) ]
-detokenize' lm (OverlayP id (pres:press)) = let press' = detokenize' lm pres
-                                            in  [ OverlayP id (pres' : press) | pres' <- press' ]
+detokenize' lm (OverlayP id (pres:press)) = let press' = detokenize' lm pres -- cast is safe, no tokens in press
+                                            in  [ OverlayP id (pres' : map castPresToLay press) | pres' <- press' ]
 detokenize' lm (WithP ar pres)            = let press = detokenize' lm pres 
                                             in  map (WithP ar) press
 detokenize' lm (ParsingP id l pres)       = let press = detokenize' lm pres 
@@ -67,25 +68,25 @@ detokenize' lm (GraphP id d w h es press) = let press' = map (singleton . detoke
                                             in  [GraphP id d w h es press']
 detokenize' lm (VertexP id v x y ol pres) = [VertexP id v x y ol (singleton $ detokenize' lm pres)]
 detokenize' lm (FormatterP id press)      = [FormatterP id $ concat (map (detokenize' lm) press) ]
-detokenize' lm pr                         = debug Err ("Layout.detokenize': can't handle "++ show pr) [pr]
+detokenize' lm pr                         = debug Err ("Layout.detokenize': can't handle "++ show pr) [castPresToLay pr]
 
 singleton []       = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ EmptyP NoIDP
 singleton [pres]   = pres
 singleton (pres:_) = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ pres
 
-detokenizeRow' :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> [Presentation doc node clip] -> [Presentation doc node clip]
+detokenizeRow' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> [Presentation_ doc node clip token] -> [Layout doc node clip]
 detokenizeRow' lm [] = []
 detokenizeRow' lm (pres:press) =
   let press' = detokenize' lm pres
       press'' = detokenizeRow' lm press                         
   in combine press' press''
 
-combine :: [Presentation doc node clip] -> [Presentation doc node clip] -> [Presentation doc node clip]
+combine :: [Presentation_ doc node clip token] -> [Presentation_ doc node clip token] -> [Presentation_ doc node clip token]
 combine [] l2 = l2
 combine l1 [] = l1 
 combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
 
-addWhitespace :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Presentation doc node clip]
+addWhitespace :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Layout doc node clip]
 addWhitespace (lm,inss, dels) NoIDP str = [StringP NoIDP str]
 addWhitespace (lm,inss, dels) id str = 
   case Map.lookup id lm of
@@ -93,7 +94,7 @@ addWhitespace (lm,inss, dels) id str =
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ StringP id (replicate spaces ' ' ++ str))
 
-addWhitespaceStruct :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
+addWhitespaceStruct :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Layout doc node clip -> [Layout doc node clip]
 addWhitespaceStruct (lm,inss, dels) NoIDP struct = [struct]
 addWhitespaceStruct (lm,inss, dels) id struct = 
   case Map.lookup id lm of
@@ -104,14 +105,14 @@ addWhitespaceStruct (lm,inss, dels) id struct =
                                                                                ])
                                 
 
-markInssDels :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Presentation doc node clip -> [Presentation doc node clip]
+--markInssDels :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Layout doc node clip -> [L doc node clip]
 markInssDels (lm,inss,dels) idp pres = 
   combine 
     (case Map.lookup idp dels of
       Just deletedTk -> detokenize' (lm,inss,dels) (squiggly red deletedTk)
       Nothing        -> [])
     (if {-idp `elem` inss-} idp ==IDP (-1)
-     then [squiggly green pres `withbgColor` whiteSmoke]
+     then [pres] -- squiggly green pres `withbgColor` whiteSmoke]
      else [pres])
 
 {-

@@ -9,6 +9,7 @@ import RenLayerUtils
 
 import ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
 import PresTypes hiding (font) -- For Locations
+import LayTypes 
 
 import DocTypes -- For Locations
 import DocUtils
@@ -16,7 +17,7 @@ import DocumentEdit -- Just for now
 import GUI
 import FontLib
 
-import Graphics.UI.Gtk hiding (Scale, Solid, Size)
+import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
 import System.IO.Unsafe
 import Data.IORef
 
@@ -69,7 +70,7 @@ rectBetween (x,y) (x',y') = ((x `min` x', y `min` y'), (abs $ x-x', abs $ y-y'))
   
 -- Automatic popups turned on: enable imports from editor
 
-mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
+mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->

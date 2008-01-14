@@ -12,7 +12,7 @@ import DocTypes -- for UpdateDocLay
 -- cleaner, as Presentation specific definitions (eg. PresentationLevel) are visible at
 -- LayoutLevel. This is not really a problem, however.
 
-data LayoutLevel doc node clip = LayoutLevel (Presentation doc node clip) FocusPres DiffTree deriving Show
+data LayoutLevel doc node clip = LayoutLevel (Layout doc node clip) FocusPres DiffTree deriving Show
                                                     -- DiffTree is experimental for incrementality
 data EditLayout' doc node clip =
     SetLay' (LayoutLevel doc node clip)
@@ -59,3 +59,11 @@ data EditLayout documentLevel doc node clip =
 
 
 -- No special type Layout. Instead, Presentation is used.
+
+data Layout_   -- type without constructor to use as token parameter, so values of Layout
+               -- are guaranteed not to have a TokenP case.
+instance Show Layout_
+
+instance Eq Layout_
+
+type Layout doc node clip = Presentation_ doc node clip Layout_

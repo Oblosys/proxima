@@ -144,16 +144,16 @@ data Presentation_ doc node clip token = EmptyP !IDP
            | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
-           | RowP !IDP !Int ![Presentation doc node clip]    -- vRefNr 
-           | ColP !IDP !Int !Formatted ![Presentation doc node clip]    -- hRefNr
-           | OverlayP !IDP ![ (Presentation doc node clip) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc clip) !(Presentation doc node clip)         -- do these last two have ids?
-           | StructuralP !IDP !(Presentation doc node clip)       -- IDP?
-           | ParsingP !IDP !Lexer !(Presentation doc node clip)         -- IDP?
-           | LocatorP node !(Presentation doc node clip) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation doc node clip] -- width height edges 
-           | VertexP !IDP !Int !Int !Int Outline !(Presentation doc node clip) -- vertexID x y outline       see note below
-           | FormatterP !IDP ![Presentation doc node clip]
+           | RowP !IDP !Int ![Presentation_ doc node clip token]    -- vRefNr 
+           | ColP !IDP !Int !Formatted ![Presentation_ doc node clip token]    -- hRefNr
+           | OverlayP !IDP ![ (Presentation_ doc node clip token) ] -- 1st elt is in front of 2nd, etc.
+           | WithP !(AttrRule doc clip) !(Presentation_ doc node clip token)         -- do these last two have ids?
+           | StructuralP !IDP !(Presentation_ doc node clip token)       -- IDP?
+           | ParsingP !IDP !Lexer !(Presentation_ doc node clip token)         -- IDP?
+           | LocatorP node !(Presentation_ doc node clip token) -- deriving Show -- do we want a ! for location  ? 
+           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation_ doc node clip token] -- width height edges 
+           | VertexP !IDP !Int !Int !Int Outline !(Presentation_ doc node clip token) -- vertexID x y outline       see note below
+           | FormatterP !IDP ![Presentation_ doc node clip token]
 
 {-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (Presentation doc node clip) ]
@@ -176,7 +176,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show (Presentation doc node clip) where
+instance Show token => Show (Presentation_ doc node clip token) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (TokenP id t)         = "{"++show id++":"++show t++"}"

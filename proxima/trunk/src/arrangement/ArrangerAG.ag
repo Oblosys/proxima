@@ -94,9 +94,9 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root doc node clip = Root (Presentation doc node clip)
+data Root doc node clip = Root (Layout doc node clip)
 
-type PresentationList doc node clip = [Presentation doc node clip]
+type PresentationList doc node clip = [Layout doc node clip]
                       
 -- We don't want AG to generate the Presentation data types, so data type generation is turned off.
 -- However, we do need Root and PresentationList

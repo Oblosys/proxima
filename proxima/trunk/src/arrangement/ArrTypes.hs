@@ -3,12 +3,12 @@ module ArrTypes where
 import CommonTypes
 import DocTypes (DocumentLevel) -- for Locations
 
-import PresTypes
+import LayTypes
                   
 data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
-data ArrangementLevel doc node clip = ArrangementLevel (Arrangement node) FocusArr (Presentation doc node clip) deriving Show
+data ArrangementLevel doc node clip = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip) deriving Show
 
 data EditArrangement' doc node clip =
     SetArr' (ArrangementLevel doc node clip)

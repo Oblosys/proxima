@@ -93,7 +93,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: (Show node, HasPath node)  => state -> ArrangementLevel doc node clip ->
-                Presentation doc node clip -> PathArr -> Int ->
+                Layout doc node clip -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip, state, ArrangementLevel doc node clip)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
@@ -109,7 +109,7 @@ mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -
 mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
 
-isGraphEdit :: Show node => Int -> Int -> Arrangement node -> Presentation doc node clip ->
+isGraphEdit :: Show node => Int -> Int -> Arrangement node -> Layout doc node clip ->
                Maybe (EditLayout docLvl doc node clip)
 isGraphEdit x y arr pres =
       case navigateFocus x y arr of 
