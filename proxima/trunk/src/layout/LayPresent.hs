@@ -10,7 +10,7 @@ import TreeEditPres
 import qualified Data.Map as Map
 import Data.Map (Map)
 
-presentIO :: LayerStateLay doc node clip -> PresentationLevel doc node clip -> LayoutLevel doc node clip ->
+presentIO :: Eq node => LayerStateLay doc node clip -> PresentationLevel doc node clip -> LayoutLevel doc node clip ->
              EditPresentation' doc node clip ->
              IO (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip)
 presentIO  state high low@(LayoutLevel pres focus _) editHigh = 
@@ -30,7 +30,7 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 
 
 -- doc in pattern should be pres
-present :: LayerStateLay doc node clip -> PresentationLevel doc node clip -> LayoutLevel doc node clip ->
+present :: Eq node => LayerStateLay doc node clip -> PresentationLevel doc node clip -> LayoutLevel doc node clip ->
            EditPresentation' doc node clip ->
            (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip)
 present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =

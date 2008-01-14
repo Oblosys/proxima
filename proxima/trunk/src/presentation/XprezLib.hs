@@ -30,6 +30,7 @@ data Xprez = Empty
 -- the with parameters are ordered for infix use:  xp `with` ...
 empty = EmptyP NoIDP
 text = StringP NoIDP
+token = TokenP NoIDP
 row = RowP NoIDP 0
 rowR r = RowP NoIDP r
 col = ColP NoIDP 0 NF

@@ -67,7 +67,7 @@ pathFromXY xy pres = pathFromXYPres xy pres
 -- a smarter diff for rows and columns may try to approach from both directions.
  
 -- skip WithP StructuralP ParsingP and LocatorP elts
-diffPres :: Presentation doc node clip -> Presentation doc node clip -> DiffTree
+diffPres :: Eq node => Presentation doc node clip -> Presentation doc node clip -> DiffTree
 
 -- WithP is not handled yet.
 -- Graph is not handled right yet!
@@ -90,6 +90,8 @@ diffPres (EmptyP id)            (EmptyP _)       = DiffLeaf True
 diffPres (EmptyP id)             _               = DiffLeaf False
 diffPres (StringP id str)       (StringP _ str') = DiffLeaf $ str == str'
 diffPres (StringP id str)       _                = DiffLeaf False
+diffPres (TokenP id t)          (TokenP _ t') = DiffLeaf $ t == t'
+diffPres (TokenP id t)          _                = DiffLeaf False
 diffPres (ImageP  id src style)       (ImageP  _ src' style') = DiffLeaf $ src == src' && style == style'
 diffPres (ImageP  id src _)       _                = DiffLeaf False
 diffPres (PolyP   id pts lw style)      (PolyP   _ pts' lw' style') = DiffLeaf $ lw==lw' && pts==pts' && style == style'
@@ -195,6 +197,7 @@ prunePres' va ova (x,y) dt arr (VertexP id v x' y' ol pres) = VertexP id v x' y'
 --prunePres' va ova (x,y) arr _            p@(FormatterP id _)      = p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(EmptyP id)            = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(StringP id str)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
+add TokenP
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(ImageP  id src _)     = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(PolyP   id _ _ _)       = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
 prunePres' va ova (x,y) (DiffLeaf c) arr p@(RectangleP id  _ _ _ _) = if c && not (uncovered (x,y) va ova arr) then ArrangedP else p
@@ -315,9 +318,11 @@ deleteInsertedTokens inss pres = pres
 -- maybe bit harder for normalizeRow
 
 -- in overlay, only head is normalized
+-- tokens are not normalized
 
 normalizePres pres@(EmptyP               _)            = pres
 normalizePres pres@(StringP              _  str)       = pres
+normalizePres pres@(TokenP               _  _)         = pres
 normalizePres pres@(ImageP               _ _  _)       = pres
 normalizePres pres@(PolyP                _  _  _  _)    = pres
 normalizePres pres@(RectangleP           _  _  _  _  _) = pres
@@ -356,6 +361,7 @@ locateTreePres NoPathP        pres = Nothing
 locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
 
 locateTreePres' location _        (StringP id str)           = location
+locateTreePres' location _        (TokenP i_ _)              = location
 locateTreePres' location _        (ImageP _ _ _)             = location
 locateTreePres' location _        (PolyP _ _ _ _)            = location
 locateTreePres' location []       (VertexP id _ _ _ _ pres)  = location
@@ -394,6 +400,7 @@ isEditableTreePres' editable pth      pr                         = debug Err ("*
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 xyFromPathPres x y (PathP p i)     (EmptyP _)                = (x, y, i==0)  -- should not occur
 xyFromPathPres x y (PathP p i)     (StringP _ str)           = (x+i, y, i==0 && length str /= 0 )
+xyFromPathPres x y (PathP p i)     (TokenP _ t)              = (x+i, y, i==0 && length (tokenString t) /= 0 )
 xyFromPathPres x y (PathP p i)     (ImageP _ _ _)            = (x, y, i==0)
 xyFromPathPres x y (PathP p i)     (PolyP _ _ _ _)           = (x, y, i==0)
 xyFromPathPres x y path           pr@(RowP id rf press)      = xyFromPathRow (x) (y+topHeightPres pr) path press
@@ -428,6 +435,7 @@ heightPres pres = topHeightPres pres + bottomHeightPres pres
 
 leftWidthPres (EmptyP _)                = 0
 leftWidthPres (StringP _ str)           = 0
+leftWidthPres (TokenP _ _)              = 0
 leftWidthPres (ImageP _ _ _)            = 0
 leftWidthPres (PolyP _ _ _ _)           = 0
 leftWidthPres (RowP _ rf [])            = 0
@@ -442,6 +450,7 @@ leftWidthPres pr                        = debug Err ("PresUtils.leftWidthPres: c
 
 rightWidthPres (EmptyP _)                = 0
 rightWidthPres (StringP _ str)           = length str
+rightWidthPres (TokenP _ t)              = length (tokenString t)
 rightWidthPres (ImageP _ _ _)            = 1
 rightWidthPres (PolyP _ _ _ _)           = 1
 rightWidthPres (RowP _ rf [])            = 0
@@ -457,6 +466,7 @@ rightWidthPres pr                        = debug Err ("PresUtils.rightWidthPres:
 
 topHeightPres (EmptyP _)                = 0
 topHeightPres (StringP _ str)           = 0
+topHeightPres (TokenP _ t)              = 0
 topHeightPres (ImageP _ _ _)            = 0
 topHeightPres (PolyP _ _ _ _)           = 0
 topHeightPres (RowP _ rf press)         = maximum (0:(map topHeightPres press))
@@ -473,6 +483,7 @@ topHeightPres pr                        = debug Err ("PresUtils.topHeightPres: c
 -- call bottomHeight depth? but then topHeight will be height and we need totalHeight for height
 bottomHeightPres (EmptyP _)                = 0
 bottomHeightPres (StringP _ str)           = 1
+bottomHeightPres (TokenP _ str)            = 1
 bottomHeightPres (ImageP _ _ _)            = 1
 bottomHeightPres (PolyP _ _ _ _)           = 1
 bottomHeightPres (RowP _ rf press)         = maximum (0:(map bottomHeightPres press))
@@ -490,6 +501,10 @@ pathFromXYPres (x,0,b) (EmptyP _)    = PathP [] x
 pathFromXYPres (x,0,b) (StringP _ txt)   = if x > length txt 
                                          then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
                                          else PathP [] x
+pathFromXYPres (x,0,b) (TokenP _ t)   = let txt = tokenString t
+                                        in  if x > length txt 
+                                            then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
+                                            else PathP [] x
 pathFromXYPres (x,0,b) (ImageP _ _ _)  = PathP [] x 
 pathFromXYPres (x,0,b) (PolyP _ _ _ _)   = PathP [] x 
 pathFromXYPres (x,y,b) pr@(RowP id rf press) = pathFromXYRow 0 (x,y-topHeightPres pr,b) press
@@ -521,6 +536,7 @@ pathFromXYCol i (x,y,b) (pres:press) = let h = heightPres pres
 -- get rid of everything but alternating rows and columns with correct refs
 stripPres :: Presentation doc node clip -> Presentation doc node clip
 stripPres pres@(StringP _ str) = pres
+tokenP
 stripPres pres@(ImageP _ _) = pres
 stripPres pres@(PolyP _ _ _) = pres
 stripPres (RowP id rf press) = stripRow 0 rf [] press
@@ -556,6 +572,7 @@ stripCol p rf prs (pres : press )          = stripCol (p+1) rf (pres:prs) press
 stringFromPres pres = concatMap (++"\n") (stringFromPres' pres)
 
 stringFromPres' (StringP _ str)           = [str]
+stringFromPres' (TokenP _ t)              = [tokenString t]
 stringFromPres' (ImageP _ _ _)            = ["#"]
 stringFromPres' (PolyP _ _ _ _)           = ["@"]
 stringFromPres' (RowP _ rf press)         = [concat $ concatMap stringFromPres' press] -- will go wrong if row has cols higher than 2
@@ -579,6 +596,7 @@ presFromString str = ColP NoIDP 0 NF . map (StringP NoIDP) $ lines str
 -- these functions are horrible, can't they be a bit simpler?
 
 pathToLeftmostLeaf (StringP _ _)        = []
+pathToLeftmostLeaf (TokenP _ _)         = []
 pathToLeftmostLeaf (ImageP _ _ _)       = []
 pathToLeftmostLeaf (PolyP _ _ _ _)      = []
 pathToLeftmostLeaf (RowP _ _ press)     = 0 : pathToLeftmostLeaf (head press)
@@ -592,6 +610,7 @@ pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head press)
 pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
 
 pathToRightmostLeaf (StringP _ _)        = []
+pathToRightmostLeaf (TokenP _ _)         = []
 pathToRightmostLeaf (ImageP _ _ _)       = []
 pathToRightmostLeaf (PolyP _ _ _ _)        = []
 pathToRightmostLeaf (RowP _ _ press)     = length press - 1 : pathToRightmostLeaf (last press)
@@ -620,6 +639,7 @@ selectTree pth      pres                      = debug Err ("PresUtils.selectTree
 
 pathsToAncestorRightSiblings _    []       _                     = []
 pathsToAncestorRightSiblings _    (p:path) (StringP _ _)         = [] 
+pathsToAncestorRightSiblings _    (p:path) (TokenP _ _)          = [] 
 pathsToAncestorRightSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
 pathsToAncestorRightSiblings root (p:path) (ColP _ _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
@@ -636,6 +656,7 @@ pathsToAncestorRightSiblings root pth      pres                  = debug Err ("P
 
 pathsToAncestorLeftSiblings _    []       _                     = []
 pathsToAncestorLeftSiblings _    (p:path) (StringP _ _)         = [] 
+pathsToAncestorLeftSiblings _    (p:path) (TokenP _ _)          = [] 
 pathsToAncestorLeftSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
                                                              ++ (if p > 0 then [root++[p-1]] else [])
 pathsToAncestorLeftSiblings root (p:path) (ColP _ _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
@@ -658,6 +679,7 @@ pathToNearestAncestorLeftSibling path pres = let lss = (pathsToAncestorLeftSibli
                                              in  if null lss then Nothing else Just $ head lss
 
 leafLength (StringP _ str) = length str
+leafLength (TokenP _ t) = length (tokenString t)
 leafLength pres = debug Err ("PresUtils.leafLength: non string leaf"++show pres) 0
 
 -- tricky, in one row [text "12|", text "34"] right navigation must be row [text "12", text "3|4"]
@@ -719,6 +741,7 @@ passedColumn fromPath toPath pres =
   
 -- return True if any node on the path, including the root, is a column
 containsColPres _        (StringP id str)           = False
+containsColPres _        (TokenP id t)              = False
 containsColPres _        (ImageP _ _ _)             = False
 containsColPres _        (PolyP _ _ _ _)            = False
 containsColPres (p:path) (RowP id rf press)         = containsColPres path (index "PresUtils.containsColPres" press p)

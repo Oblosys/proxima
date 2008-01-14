@@ -186,6 +186,7 @@ process and should be done in the layout layer.
 postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
+postScanStr kwrds ctxt (TokenP _ _)         = debug Err ("*** PresentationParser.postScanStr: Token in structural presentation") []
 postScanStr kwrds ctxt (ImageP _ _ _)         = []
 postScanStr kwrds ctxt (PolyP _ _ _ _)        = []
 postScanStr kwrds ctxt (RectangleP _ _ _ _ _) = []
@@ -209,6 +210,7 @@ postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token do
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
+postScanPrs kwrds ctxt (TokenP i t)         = [t]
 postScanPrs kwrds ctxt (ImageP _ _ _)         = []
 postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
 postScanPrs kwrds ctxt (RectangleP _ _ _ _ _) = []
@@ -238,66 +240,7 @@ newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) d
 
 
 
-instance Show node => Show (Token doc node clip) where
-  show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
-  show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
-  show (StructuralTk (Just nd) _ _ _) = "<structural:"++show nd++">" 
-  show (ParsingTk _ _ _) = "<presentation>" 
-  show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
-  show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
   
-instance Eq node => Eq (Token doc node clip) where
-  UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
-  StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
-  StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
-  StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
-  ParsingTk _ _ _    == ParsingTk _ _ _ = True   
-  GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
-  VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
-  _              == _                  = False -- identifier will be added, which will be involved in eq. check
-
-instance Ord node => Ord (Token doc node clip) where
-  UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
-  StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
-  StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
-  StructuralTk (Just nd1) _ _ _ <= StructuralTk (Just nd2) _ _ _ = nd1 <= nd2
-  StructuralTk _ _ _ _ <= UserTk _ _ _ _  = True
-  
-  ParsingTk _ _ _ <= ParsingTk _ _ _      = True
-  ParsingTk _ _ _ <= StructuralTk _ _ _ _ = True
-  ParsingTk _ _ _ <= UserTk _ _ _ _       = True
-
-  GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
-  GraphTk _ _ _ _ <= ParsingTk _ _ _      = True
-  GraphTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  GraphTk _ _ _ _ <= UserTk _ _ _ _       = True
-
-  VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
-  VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
-  VertexTk _ _ _ _ <= ParsingTk _ _ _      = True
-  VertexTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True
-
-  _              <= _           = False
-
-
-tokenString :: Token doc node clip -> String                  
-tokenString (UserTk _ s n id)      = s
-tokenString (StructuralTk n _ _ id) = "<structural token>"
-tokenString (GraphTk d es n id) = "<graph token>"
-tokenString (VertexTk i p n id) = "<vertex token>"
-                             
-tokenNode :: Token doc node clip -> Maybe node                 
-tokenNode (StructuralTk n _ _ id) = n
-tokenNode (GraphTk d es n id) = n
-tokenNode (VertexTk i p n id) = n
-tokenNode (UserTk u s n id)   = n
-
-tokenIDP :: Token doc node clip -> IDP       
-tokenIDP (UserTk u s n id) = id
-tokenIDP (StructuralTk n _ _ id)  = id
-tokenIDP (GraphTk d es n id) = id
-tokenIDP (VertexTk i p n id) = id
 
 
 

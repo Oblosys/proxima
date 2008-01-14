@@ -73,10 +73,71 @@ data Token doc node clip =
              | VertexTk Int (Int, Int) (Maybe node) IDP
 
 
+instance Show (Token doc node clip) where
+  show (UserTk u s _ _) = "<user:" ++show u ++ show s ++ ">"
+  show (StructuralTk Nothing p _ _) = "<structural:Nothing:"++show p++">" 
+  show (StructuralTk (Just nd) _ _ _) = "<structural:>" 
+  show (ParsingTk _ _ _) = "<presentation>" 
+  show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
+  show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
+
+instance Eq node => Eq (Token doc node clip) where
+  UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
+  StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
+  StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
+  StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
+  ParsingTk _ _ _    == ParsingTk _ _ _ = True   
+  GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
+  VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
+  _              == _                  = False -- identifier will be added, which will be involved in eq. check
+
+instance Ord node => Ord (Token doc node clip) where
+  UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
+  StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
+  StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
+  StructuralTk (Just nd1) _ _ _ <= StructuralTk (Just nd2) _ _ _ = nd1 <= nd2
+  StructuralTk _ _ _ _ <= UserTk _ _ _ _  = True
+  ParsingTk _ _ _ <= ParsingTk _ _ _      = True
+  ParsingTk _ _ _ <= StructuralTk _ _ _ _ = True
+  ParsingTk _ _ _ <= UserTk _ _ _ _       = True
+  GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
+  GraphTk _ _ _ _ <= ParsingTk _ _ _      = True
+  GraphTk _ _ _ _ <= StructuralTk _ _ _ _ = True
+  GraphTk _ _ _ _ <= UserTk _ _ _ _       = True
+  VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
+  VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
+  VertexTk _ _ _ _ <= ParsingTk _ _ _      = True
+  VertexTk _ _ _ _ <= StructuralTk _ _ _ _ = True
+  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True
+  _              <= _           = False
+
+tokenString :: Token doc node clip -> String                  
+tokenString (UserTk _ s n id)      = s
+tokenString (StructuralTk n _ _ id) = "<structural token>"
+tokenString (GraphTk d es n id) = "<graph token>"
+tokenString (VertexTk i p n id) = "<vertex token>"
+                             
+tokenNode :: Token doc node clip -> Maybe node                 
+tokenNode (StructuralTk n _ _ id) = n
+tokenNode (GraphTk d es n id) = n
+tokenNode (VertexTk i p n id) = n
+tokenNode (UserTk u s n id)   = n
+
+tokenIDP :: Token doc node clip -> IDP       
+tokenIDP (UserTk u s n id) = id
+tokenIDP (StructuralTk n _ _ id)  = id
+tokenIDP (GraphTk d es n id) = id
+tokenIDP (VertexTk i p n id) = id
+
+
+
+
+
 -- Presentation is Xprez with ID's
 
 data Presentation doc node clip = EmptyP !IDP
            | StringP !IDP !String
+           | TokenP !IDP !(Token doc node clip)
            | ImageP !IDP !String !ImgStyle
            | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
@@ -116,6 +177,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 instance Show (Presentation doc node clip) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
+  show (TokenP id t)         = "{"++show id++":"++show t++"}"
   show (ImageP id str _)     = "{"++show id++":Image "++str++"}"
   show (PolyP id _ _ _)        = "{"++show id++":Poly}"
   show (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
@@ -139,6 +201,7 @@ instance Show (Presentation doc node clip) where
 
 shallowShowPres (EmptyP id)           = "{"++show id++":Empty}"
 shallowShowPres (StringP id str)      = "{"++show id++":StringP "++show str++"}"
+shallowShowPres (TokenP id t)         = "{"++show id++":TokenP "++show t++"}"
 shallowShowPres (ImageP id str _)       = "{"++show id++":ImageP "++show str++"}"
 shallowShowPres (PolyP id _ _ _)        = "{"++show id++":Poly}"
 shallowShowPres (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
@@ -158,6 +221,7 @@ shallowShowPres _                     = "<<<presentation without show>>>"
 
 getChildrenP (EmptyP id)           = []
 getChildrenP (StringP id str)      = []
+getChildrenP (TokenP id str)      = []
 getChildrenP (ImageP id str _)       = []
 getChildrenP (PolyP id _ _ _)        = []
 getChildrenP (RectangleP id _ _ _ _) = []
@@ -181,6 +245,7 @@ getChildP pres = case getChildrenP pres of
 
 setChildrenP [] pres@(EmptyP id)           = pres
 setChildrenP [] pres@(StringP id str)      = pres
+setChildrenP [] pres@(TokenP id str)      = pres
 setChildrenP [] pres@(ImageP id str _)     = pres
 setChildrenP [] pres@(PolyP id _ _ _)      = pres
 setChildrenP [] pres@(RectangleP id _ _ _ _) = pres
@@ -241,6 +306,7 @@ type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc cli
 
 idP (EmptyP id)           = id
 idP (StringP id _)        = id
+idP (TokenP id _)        = id
 idP (ImageP id str _)       = id
 idP (PolyP id _ _ _)        = id
 idP (RectangleP id _ _ _ _) = id

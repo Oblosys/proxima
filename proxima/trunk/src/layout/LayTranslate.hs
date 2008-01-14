@@ -143,7 +143,7 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
 editSet :: Presentation doc node clip -> Presentation doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Presentation doc node clip)
 editSet pres' clip (LayoutLevel pres focus@(FocusP f t) dt) = (LayoutLevel pres' NoFocusP dt, clip)
 
-openFile :: String -> Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip)
+openFile :: Eq node => String -> Presentation doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip -> IO (EditPresentation documentLevel doc node clip, Presentation doc node clip, LayoutLevel doc node clip)
 openFile filePath clip layLvl prsLvl =
  do { debugLnIO Lay $ "Opening file: "++filePath
     ; str <- readFile filePath
