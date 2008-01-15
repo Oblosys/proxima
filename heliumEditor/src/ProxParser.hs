@@ -303,7 +303,7 @@ parseParenExp = -- maybe we don't want to build a list for (exp), because now we
 
 -- returns list of separator tokens and a List_Exp the List_Exp is not reused through its separator tokens
 -- because these do not belong to List_Exp, but to its parent
-parseList_Exp :: ListParser Document Node ClipDoc ([Token Document Node ClipDoc (Maybe Node)], List_Exp)
+parseList_Exp :: ListParser Document Node ClipDoc ([Token Document Node ClipDoc UserToken], List_Exp)
 parseList_Exp =
     (\toksElts -> let (toks, elts) = case toksElts of
                                        Nothing        -> ([], [])
@@ -373,10 +373,10 @@ parseIdent =
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Show node => Token doc node clip (Maybe node) -> String_
-mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+mkString_ :: Show node => Token doc node clip UserToken -> String_
+mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
 
-mkInt_ :: Show node => Token doc node clip (Maybe node) -> Int_
+mkInt_ :: Show node => Token doc node clip UserToken -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different
