@@ -64,7 +64,7 @@ divide n xs = let (h,t) = splitAt n xs
 }
                            
            
-SEM Section [||tocPres : Presentation_Doc_Node_Clip ]          
+SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Section
       loc.numberStr = show @sectionNr ++ "."
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -85,7 +85,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip ]
 
 
 
-SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
+SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
       lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -104,7 +104,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip ]
       --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
 
 
-SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip ]          
+SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -137,7 +137,7 @@ SEM Subsubsection [ || ]
   | Subsubsection
       loc.subsubsectionNr = @lhs.ix + 1
 
-SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip ]
+SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
   | List_Paragraph
       lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing' LexFreeText $
                      col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
@@ -392,7 +392,7 @@ SEM Section
   | ParseErrSection lhs.tocPres = presParseErr @presentation
 
 
-SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip]}]
+SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
   | List_Section
       lhs.tocPress = map ( loc (List_SectionNode @self @lhs.path) 
                       . presentFocus @lhs.focusD @lhs.path ) 
@@ -401,7 +401,7 @@ SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip]}]
   | HoleList_Section     lhs.tocPress = []
   | ParseErrList_Section lhs.tocPress = [ presParseErr @presentation ]
 
-SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip]}]
+SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
   | Nil_Section      lhs.tocPress = []
 

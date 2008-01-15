@@ -51,7 +51,7 @@ deepShowTks i tok = case tok of
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeRootEnr :: ListParser Document Node ClipDoc EnrichedDoc
+recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str root-> reuseRootEnr [tokenNode str] Nothing (Just root) Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
@@ -61,7 +61,7 @@ recognizeRootEnr = pStr $
 -- TODO: Why do we need this hole parser here?
 
 
-recognizeRoot :: ListParser Document Node ClipDoc Root
+recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
           reuseRoot [tokenNode str] Nothing (Just graph) (Just (String_ NoIDD title)) (Just (toList_Section sections)) )
@@ -81,7 +81,7 @@ recognizeRoot = pStr $
       <*  pList (pText <* pKey " "))
 -}    
   
-recognizeSection :: ListParser Document Node ClipDoc Section
+recognizeSection :: ListParser Document Node ClipDoc UserToken Section
 recognizeSection = pStrAlt SectionNode $
           (\str t ps ss -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss))
       <$> pStructural SectionNode
@@ -89,7 +89,7 @@ recognizeSection = pStrAlt SectionNode $
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsection
           
-recognizeSubsection :: ListParser Document Node ClipDoc Subsection
+recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt SubsectionNode $
           (\str t ps sss -> reuseSubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsubsection sss))
@@ -99,7 +99,7 @@ recognizeSubsection =
       <*> pList recognizeSubsubsection
       
 
-recognizeSubsubsection :: ListParser Document Node ClipDoc Subsubsection
+recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
   pStrAlt SubsubsectionNode $
           (\str t ps -> reuseSubsubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps))
@@ -111,7 +111,7 @@ recognizeSubsubsection =
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
-recognizeGraph :: ListParser Document Node ClipDoc Graph
+recognizeGraph :: ListParser Document Node ClipDoc UserToken Graph
 recognizeGraph = pStrVerbose "Graph" $
           (\str gt vs -> reuseGraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
@@ -125,7 +125,7 @@ recognizeGraph = pStrVerbose "Graph" $
 
 -- labels in vertex? Or just in presentation?
 -- before we can parse them, the scanner needs to be modified to handle free text
-recognizeVertex :: ListParser Document Node ClipDoc Vertex
+recognizeVertex :: ListParser Document Node ClipDoc UserToken Vertex
 recognizeVertex = pStrVerbose "Vertex" $
           (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
@@ -137,12 +137,12 @@ recognizeVertex = pStrVerbose "Vertex" $
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
 
-parseLabel :: ListParser Document Node ClipDoc String_
+parseLabel :: ListParser Document Node ClipDoc UserToken String_
 parseLabel = pPrs $
           (\str -> String_ NoIDD str)
       <$> pText
 
-recognizeSubgraph :: ListParser Document Node ClipDoc Subgraph
+recognizeSubgraph :: ListParser Document Node ClipDoc UserToken Subgraph
 recognizeSubgraph = pStrVerbose "Subgraph" $
           (\str gt vs -> reuseSubgraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt)  
                                      (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
@@ -236,5 +236,123 @@ mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk))
 -- parsers, which can give the value as an argument
 mkBool_ :: Bool -> Bool_
 mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool)) 
+
+
+
+--- Stuff from PresentationParsing
+
+
+
+-- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
+-- which is also required for copying of presentation subtrees
+strTk str = UserTk (StrTk str) str Nothing (IDP (-1))
+intTk     = UserTk IntTk "0" Nothing (IDP (-1))
+lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
+uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
+opTk      = UserTk OpTk "" Nothing (IDP (-1))
+symTk     = UserTk SymTk "" Nothing (IDP (-1))
+
+
+mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip UserToken
+mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
+                                    | isDigit c           = UserTk IntTk str ctxt i
+                                    | isLower c           = UserTk LIdentTk str ctxt i
+                                    | isUpper c           = UserTk UIdentTk str ctxt i
+                                    | otherwise           = UserTk OpTk str ctxt i
+
+--makeToken str ctxt i = Tk str ctxt i
+
+isSymbolChar c = c `elem` ";,(){}#_|"
+
+
+-- Basic parsers
+
+pKey :: (Ord node, Show node) => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKey str = pSym  (strTk str)
+
+pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKeyC c str = pCSym c (strTk str)
+
+-- expensive, because we want holes to be inserted, not strings
+pLIdent :: (Ord node, Show node) => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pLIdent = pCSym 20 lIdentTk
+
+-- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
+pInt :: (Ord node, Show node) => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pInt = pCSym 20 intTk
+
+lIdentVal :: Show node => Token doc node clip UserToken -> String
+lIdentVal (UserTk LIdentTk str _ _) = str
+lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
+
+  
+intVal :: Show node => Token doc node clip UserToken -> Int
+intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
+intVal (UserTk IntTk str _ _) = read str
+intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
+
+ 
+
+
+
+
+
+
+
+
+---- needs to be here temporarily due to mkToken (which will be transfered to scanner)
+-- put all tokens in one big list
+-- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
+-- TODO put keyword stuff in Scanner layer
+--      check what happens with tokens without context info. It seems they get it from higher up
+--      in the tree now, which seems wrong. 
+
+postScanStr :: [String] -> Maybe node -> Presentation doc node clip UserToken -> [Token doc node clip UserToken]
+postScanStr kwrds ctxt (EmptyP _)           = []
+postScanStr kwrds ctxt (StringP _ _)        = []
+postScanStr kwrds ctxt (TokenP _ _)         = debug Err ("*** PresentationParser.postScanStr: Token in structural presentation") []
+postScanStr kwrds ctxt (ImageP _ _ _)         = []
+postScanStr kwrds ctxt (PolyP _ _ _ _)        = []
+postScanStr kwrds ctxt (RectangleP _ _ _ _ _) = []
+postScanStr kwrds ctxt (EllipseP _ _ _ _ _)   = []
+postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
+postScanStr kwrds ctxt (OverlayP _ [])      = []
+postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
+postScanStr kwrds ctxt (ColP i _ _ press)   = concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (RowP i _ press)     = concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (LocatorP l pres)    = postScanStr kwrds (Just l) pres  
+postScanStr kwrds ctxt (GraphP i d _ _ es press) = GraphTk d es ctxt i : concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt (VertexP i v x y _ pres)  = VertexTk v (x,y) ctxt i : postScanStr kwrds ctxt pres  
+postScanStr kwrds ctxt (ParsingP i _ pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
+--postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
+postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
+postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt) press
+postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
+
+
+postScanPrs :: [String] -> Maybe node -> Presentation doc node clip UserToken -> [Token doc node clip UserToken]
+postScanPrs kwrds ctxt (EmptyP _)           = []
+postScanPrs kwrds ctxt (StringP _ "")       = []
+postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
+postScanPrs kwrds ctxt (TokenP i t)         = [t]
+postScanPrs kwrds ctxt (ImageP _ _ _)         = []
+postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
+postScanPrs kwrds ctxt (RectangleP _ _ _ _ _) = []
+postScanPrs kwrds ctxt (EllipseP _ _ _ _ _)   = []
+postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (OverlayP _ [])      = []
+postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (ColP i _ _ press)   = concatMap (postScanPrs kwrds ctxt) press
+postScanPrs kwrds ctxt (RowP i _ press)     = concatMap (postScanPrs kwrds ctxt) press
+postScanPrs kwrds ctxt (LocatorP l pres)    = postScanPrs kwrds (Just l) pres
+postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentation contains Graph that is not part of a structural presentation") []
+postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
+postScanPrs kwrds ctxt (ParsingP _ _ pres)    = postScanPrs kwrds ctxt pres
+postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
+postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [UserTk (StrTk "\n") "\n" Nothing NoIDP]
+postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
+-- ref to UserTk is now because scanner cannot easily add "\n". The AG scanner will be able to do
+-- this and make this ref obsolete. (PostScanPrs will be obsolete when Token type is added to Presentation)
+
 
 

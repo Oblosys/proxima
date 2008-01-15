@@ -10,8 +10,16 @@ import Char
 
 data Document = RootDoc IDD Root 
               | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc)
+              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
                  deriving Show
+
+data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
+               | IntTk
+               | LIdentTk
+               | UIdentTk
+               | OpTk
+               | SymTk deriving (Show, Eq, Ord)
+-- TODO call strTk KeyTk
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -29,112 +37,112 @@ data Document = RootDoc IDD Root
 
 data EnrichedDoc = RootEnr IDD Root Document 
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc)
+                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                     deriving Show
 
 
 data String_ = String_ IDD String 
              | HoleString_
-             | ParseErrString_ (Presentation Document Node ClipDoc)
+             | ParseErrString_ (Presentation Document Node ClipDoc UserToken)
                 deriving Show
 
 
 data Bool_ = Bool_ IDD Bool 
            | HoleBool_
-           | ParseErrBool_ (Presentation Document Node ClipDoc)
+           | ParseErrBool_ (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
 data Int_ = Int_ IDD Int 
           | HoleInt_
-          | ParseErrInt_ (Presentation Document Node ClipDoc)
+          | ParseErrInt_ (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
 data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_ 
            | HoleDummy
-           | ParseErrDummy (Presentation Document Node ClipDoc)
+           | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
 data Root = Root IDD Graph String_ List_Section 
           | HoleRoot
-          | ParseErrRoot (Presentation Document Node ClipDoc)
+          | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
 data Section = Section IDD String_ List_Paragraph List_Subsection 
              | HoleSection
-             | ParseErrSection (Presentation Document Node ClipDoc)
+             | ParseErrSection (Presentation Document Node ClipDoc UserToken)
                 deriving Show
 
 
 data Subsection = Subsection IDD String_ List_Paragraph List_Subsubsection 
                 | HoleSubsection
-                | ParseErrSubsection (Presentation Document Node ClipDoc)
+                | ParseErrSubsection (Presentation Document Node ClipDoc UserToken)
                    deriving Show
 
 
 data Subsubsection = Subsubsection IDD String_ List_Paragraph 
                    | HoleSubsubsection
-                   | ParseErrSubsubsection (Presentation Document Node ClipDoc)
+                   | ParseErrSubsubsection (Presentation Document Node ClipDoc UserToken)
                       deriving Show
 
 
 data Paragraph = Paragraph IDD List_Word 
                | SubgraphPara IDD Subgraph 
                | HoleParagraph
-               | ParseErrParagraph (Presentation Document Node ClipDoc)
+               | ParseErrParagraph (Presentation Document Node ClipDoc UserToken)
                   deriving Show
 
 
 data Word = Word IDD String_ 
           | HoleWord
-          | ParseErrWord (Presentation Document Node ClipDoc)
+          | ParseErrWord (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
 data Graph = Graph IDD Dirty List_Vertex List_Edge 
            | HoleGraph
-           | ParseErrGraph (Presentation Document Node ClipDoc)
+           | ParseErrGraph (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
 data Vertex = Vertex IDD String_ Shape Int_ Int_ Int_ 
             | HoleVertex
-            | ParseErrVertex (Presentation Document Node ClipDoc)
+            | ParseErrVertex (Presentation Document Node ClipDoc UserToken)
                deriving Show
 
 
 data Shape = Circle IDD 
            | Square IDD 
            | HoleShape
-           | ParseErrShape (Presentation Document Node ClipDoc)
+           | ParseErrShape (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
 data Edge = Edge IDD Int_ Int_ 
           | HoleEdge
-          | ParseErrEdge (Presentation Document Node ClipDoc)
+          | ParseErrEdge (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
 data Subgraph = Subgraph IDD Dirty List_Vertex List_Edge 
               | HoleSubgraph
-              | ParseErrSubgraph (Presentation Document Node ClipDoc)
+              | ParseErrSubgraph (Presentation Document Node ClipDoc UserToken)
                  deriving Show
 
 
 data Dirty = Dirty IDD 
            | Clean IDD 
            | HoleDirty
-           | ParseErrDirty (Presentation Document Node ClipDoc)
+           | ParseErrDirty (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
 data List_Dummy = List_Dummy IDD ConsList_Dummy 
                 | HoleList_Dummy
-                | ParseErrList_Dummy (Presentation Document Node ClipDoc)
+                | ParseErrList_Dummy (Presentation Document Node ClipDoc UserToken)
                    deriving Show
 
 
@@ -145,7 +153,7 @@ data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy
 
 data List_Section = List_Section IDD ConsList_Section 
                   | HoleList_Section
-                  | ParseErrList_Section (Presentation Document Node ClipDoc)
+                  | ParseErrList_Section (Presentation Document Node ClipDoc UserToken)
                      deriving Show
 
 
@@ -156,7 +164,7 @@ data ConsList_Section = Cons_Section Section ConsList_Section
 
 data List_Paragraph = List_Paragraph IDD ConsList_Paragraph 
                     | HoleList_Paragraph
-                    | ParseErrList_Paragraph (Presentation Document Node ClipDoc)
+                    | ParseErrList_Paragraph (Presentation Document Node ClipDoc UserToken)
                        deriving Show
 
 
@@ -167,7 +175,7 @@ data ConsList_Paragraph = Cons_Paragraph Paragraph ConsList_Paragraph
 
 data List_Subsection = List_Subsection IDD ConsList_Subsection 
                      | HoleList_Subsection
-                     | ParseErrList_Subsection (Presentation Document Node ClipDoc)
+                     | ParseErrList_Subsection (Presentation Document Node ClipDoc UserToken)
                         deriving Show
 
 
@@ -178,7 +186,7 @@ data ConsList_Subsection = Cons_Subsection Subsection ConsList_Subsection
 
 data List_Subsubsection = List_Subsubsection IDD ConsList_Subsubsection 
                         | HoleList_Subsubsection
-                        | ParseErrList_Subsubsection (Presentation Document Node ClipDoc)
+                        | ParseErrList_Subsubsection (Presentation Document Node ClipDoc UserToken)
                            deriving Show
 
 
@@ -189,7 +197,7 @@ data ConsList_Subsubsection = Cons_Subsubsection Subsubsection ConsList_Subsubse
 
 data List_Word = List_Word IDD ConsList_Word 
                | HoleList_Word
-               | ParseErrList_Word (Presentation Document Node ClipDoc)
+               | ParseErrList_Word (Presentation Document Node ClipDoc UserToken)
                   deriving Show
 
 
@@ -200,7 +208,7 @@ data ConsList_Word = Cons_Word Word ConsList_Word
 
 data List_Vertex = List_Vertex IDD ConsList_Vertex 
                  | HoleList_Vertex
-                 | ParseErrList_Vertex (Presentation Document Node ClipDoc)
+                 | ParseErrList_Vertex (Presentation Document Node ClipDoc UserToken)
                     deriving Show
 
 
@@ -211,7 +219,7 @@ data ConsList_Vertex = Cons_Vertex Vertex ConsList_Vertex
 
 data List_Edge = List_Edge IDD ConsList_Edge 
                | HoleList_Edge
-               | ParseErrList_Edge (Presentation Document Node ClipDoc)
+               | ParseErrList_Edge (Presentation Document Node ClipDoc UserToken)
                   deriving Show
 
 

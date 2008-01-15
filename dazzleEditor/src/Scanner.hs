@@ -7,8 +7,11 @@ import LayLayerUtils
 
 import DocTypes_Generated (Node (..))
 
+
+
+
 scanner :: Int -> Maybe Node -> Layout doc Node clip ->
-           (Presentation_ doc Node clip token, WhitespaceMap, Int)
+           (Presentation doc Node clip token, WhitespaceMap, Int)
 scanner i loc pres = -- debug Err (show pres) $
             tokenize LexHaskell -- default is Haskell scanner
                      i loc pres
@@ -47,7 +50,7 @@ scanner i loc pres = -- debug Err (show pres) $
 -- tokenize traverses the structural parts of the presentation tree. On the parsing branches,
 -- tokenize' is called.
 tokenize :: Lexer -> Int -> Maybe Node -> Layout doc Node clip ->
-            (Presentation_ doc Node clip token, WhitespaceMap, Int)
+            (Presentation doc Node clip token, WhitespaceMap, Int)
 -- tokenize _ pres = (pres, [])       -- skip tokenize
 tokenize lx i loc (ParsingP id lx' pres)  = 
  let lex = case lx' of
@@ -141,7 +144,7 @@ isSymbolChar c = c `elem` symbolChars
 tokenizeString :: Lexer -> Int -> (Maybe node, AttrRule doc clip) -> IDP ->
                (TokenType, Maybe node, AttrRule doc clip) -> Whitespace -> IDP -> String -> String ->
                ( (TokenType, Maybe node, AttrRule doc clip), Whitespace, IDP, String
-               , [Presentation_ doc node clip token], WhitespaceMap, Int )
+               , [Presentation doc node clip token], WhitespaceMap, Int )
 tokenizeString LexHaskell = tokenizeStr
 tokenizeString LexFreeText = tokenizeStrFree
 
@@ -151,7 +154,7 @@ tokenizeString LexFreeText = tokenizeStrFree
 tokenizeStr :: Int -> (Maybe node, AttrRule doc clip) -> IDP -> 
                (TokenType, Maybe node, AttrRule doc clip) -> Whitespace -> IDP -> String -> String ->
                ( (TokenType, Maybe node, AttrRule doc clip), Whitespace, IDP, String
-               , [Presentation_ doc node clip token], WhitespaceMap, Int )
+               , [Presentation doc node clip token], WhitespaceMap, Int )
 -- end of string, not started scanning a token, so set the id (only if cid non-empty)
 tokenizeStr i loc cid lc layout id "" "" = (lc, layout, if cid == NoIDP then id else cid, "", [], Map.empty, i)
 
@@ -222,7 +225,7 @@ tokenizeCol' lx i loc lc layout id str (pres:press) =
 tokenize' :: Lexer -> Int -> (Maybe Node, AttrRule doc clip) -> (TokenType, Maybe Node, AttrRule doc clip) ->
              Whitespace -> IDP -> String -> Layout doc Node clip ->
              ( (TokenType, Maybe Node, AttrRule doc clip), Whitespace, IDP, String
-             , [Presentation_ doc Node clip token], WhitespaceMap, Int)
+             , [Presentation doc Node clip token], WhitespaceMap, Int)
 tokenize' lx i loc lc layout id str (EmptyP _) = (lc, layout, id, str, [], Map.empty, i)
 tokenize' lx i loc lc layout id str (StringP cid str') = tokenizeString lx i loc cid lc layout id str str'
 tokenize' lx i loc lc layout id str (ImageP idd istr st)       = let (tok, lm, i') = makeToken i lc layout id str
@@ -276,7 +279,7 @@ undefTk = (debug Err "Undefined token used" IntToken,Nothing,Prelude.id)
 -- for now the type is only used to scan correctly, which is impossible without keeping track of the token type
 -- (or we have to inspect the token every time we read a character)
 makeToken :: Int -> (TokenType, Maybe node,AttrRule doc clip) -> Whitespace -> IDP -> String ->
-             (Presentation_ doc node clip token, WhitespaceMap,Int)
+             (Presentation doc node clip token, WhitespaceMap,Int)
 makeToken i l             layout NoIDP str = makeToken (i+1) l layout (IDP i) str  -- make new ID
 makeToken i (_,Nothing,ar)  layout id str = (WithP ar $ StringP id (reverse str), Map.singleton id layout,i)
 makeToken i (_,Just loc,ar) layout id str = (LocatorP loc $ WithP ar $ StringP id (reverse str), Map.singleton id layout,i)
@@ -335,7 +338,7 @@ tokenizeStrFree i loc@(l,ar) cid lc@(tt,_,_) layout id (tc:tcs) (c:cs) =
 
 -- layout is not stored, but returned as explicit tokens
 makeTokenFree :: Int -> (TokenType, Maybe node,AttrRule doc clip) -> Whitespace -> IDP -> String ->
-             ([Presentation_ doc node clip token],Int)
+             ([Presentation doc node clip token],Int)
 makeTokenFree i l             layout NoIDP str = makeTokenFree (i+1) l layout (IDP i) str  -- make new ID
 makeTokenFree i (_,Nothing,ar) layout id str =debug Lay ("Making token with layout :"++show (layout, str)) $
   (map (WithP ar) $ whitespaceTokens layout ++ [ StringP id (reverse str) ],i)
