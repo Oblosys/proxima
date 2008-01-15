@@ -13,6 +13,9 @@ import CommonTypes
 --  show (ExpNode exp pth) = "<"++shallowShowExp1 exp++","++show pth++">"
 --  show _ = "<NODE>"
 
+instance DocNode Node where
+  noNode = NoNode
+
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2
   

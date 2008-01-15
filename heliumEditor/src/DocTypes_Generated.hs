@@ -46,12 +46,6 @@ type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 -}
 
-instance DocNode Node where
-  noNode = NoNode
-
-
--- show Node needs to be here because ParseErr alternatives contain a Node and derive Show
-
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
