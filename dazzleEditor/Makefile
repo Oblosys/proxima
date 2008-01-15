@@ -1,7 +1,9 @@
 HC   = /c/Progra~1/Visual~1/bin/ghc
 FIND = /usr/bin/find
 
-PROXIMADIR = src/proxima
+PROXIMADIR = ../proxima
+#PROXIMADIR = src/proxima
+# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
@@ -13,7 +15,7 @@ MAIN           = proxima$(EXE)
 
 SHELL = /bin/sh
 
-.PHONY : default proxima generate generator presenter agc always
+.PHONY: default proxima generate generator presenter
 
 default: $(MAIN)
 
@@ -32,14 +34,11 @@ PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAI
 
 # Generation 
 
-generator :
+generator:
 	cd $(PROXIMASRCDIR); make generator
 
-generate : src/DocTypes_Generated.hs
+generate: src/DocTypes_Generated.hs
 	
-$(GEN):
-	cd $(PROXIMASRCDIR); make generator
-
 src/DocTypes_Generated.hs : src/DocumentType.hs $(GEN)
 	cd $(PROXIMASRCDIR); make generator
 	$(GEN) src src/DocumentType.hs
@@ -53,12 +52,12 @@ presenter: src/PresentationAG.hs
 $(AGC):
 	cd $(PROXIMASRCDIR); make agc
 
-src/PresentationAG.hs : $(AGC) \
+src/PresentationAG.hs: $(AGC) \
 	src/PresentationAG.ag \
 	src/PresentationAG_Generated.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=12 --module=PresentationAG src/PresentationAG.ag -P src
+	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=12 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
 
 clean:
