@@ -23,6 +23,9 @@ HC   = ghc
 FIND = /usr/bin/find
 
 PROXIMADIR = ../proxima
+#PROXIMADIR = src/proxima
+# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
+
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
@@ -38,7 +41,7 @@ SHELL = /bin/sh
 
 
 default: $(MAIN)
-.PHONY : default proxima generate agc always
+.PHONY : default proxima generate presenter agc always
 
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
@@ -56,10 +59,7 @@ PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(
 
 # Generation 
 
-generate : src/DocTypes_Generated.hs 
-
-$(GEN):
-	cd $(PROXIMASRCDIR); make generator
+generate: src/DocTypes_Generated.hs
 
 src/DocTypes_Generated.hs : src/DocumentType.hs $(GEN)
 	cd $(PROXIMASRCDIR); make generator
@@ -74,7 +74,7 @@ presenter: src/PresentationAG.hs
 $(AGC):
 	cd $(PROXIMASRCDIR); make agc
 
-src/PresentationAG.hs : $(AGC) \
+src/PresentationAG.hs: $(AGC) \
 	src/PresentationAG.ag \
 	src/PresentationAG_Generated.ag \
 	src/LambdaReduce.ag \
