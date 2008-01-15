@@ -1004,7 +1004,7 @@ SEM Exp [ env : Bindings | | val : Value ]
                             
   | LetExp      lhs.val   = -- @exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             let syn  = wrap_Exp @exp Inh_Exp {env_Inh_Exp = (@decls.dcls ++ @lhs.env)}
-                            in  val_Syn_Exp syn)  -- dirty hack because AG does not allow this easily (maybe new version with higher-order stuff makes it easier)
+                            in  val_Syn_Exp syn  -- dirty hack because AG does not allow this easily (maybe new version with higher-order stuff makes it easier)
 
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }
   | IfExp       lhs.val   = case @exp1.val of
