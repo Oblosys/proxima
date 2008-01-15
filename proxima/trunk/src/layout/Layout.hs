@@ -18,7 +18,7 @@ import Data.Map (Map)
 -- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
 -- Note that freetext tokens have no layout in the extra state, but since their id's will not be
 -- in the WhitespaceMap, nothing will be inserted.
-detokenize :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation_ doc node clip token -> Layout doc node clip
+detokenize :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip token) -> Presentation doc node clip token -> Layout doc node clip
 detokenize lm (ParsingP id l pres)       = let press = detokenize' lm pres
                                            in  if null press 
                                                then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
@@ -46,7 +46,7 @@ detokenize lm pr                         = debug Err ("Layout.detokenize: can't 
 -- find out semantics of this one        What about Refs?
 
 -- incomplete, only for strings
-detokenize' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> Presentation_ doc node clip token -> [Layout doc node clip]
+detokenize' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip token) -> Presentation doc node clip token -> [Layout doc node clip]
 detokenize' lm (StructuralP id pres)      = addWhitespaceStruct lm id (StructuralP id $ detokenize lm pres)
 detokenize' lm (EmptyP id)                  = [EmptyP id]
 detokenize' lm (StringP id str)      = addWhitespace lm id str
@@ -74,19 +74,19 @@ singleton []       = debug Err ("TreeEditPres.detokenize': graph child without s
 singleton [pres]   = pres
 singleton (pres:_) = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ pres
 
-detokenizeRow' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> [Presentation_ doc node clip token] -> [Layout doc node clip]
+detokenizeRow' :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip token) -> [Presentation doc node clip token] -> [Layout doc node clip]
 detokenizeRow' lm [] = []
 detokenizeRow' lm (pres:press) =
   let press' = detokenize' lm pres
       press'' = detokenizeRow' lm press                         
   in combine press' press''
 
-combine :: [Presentation_ doc node clip token] -> [Presentation_ doc node clip token] -> [Presentation_ doc node clip token]
+combine :: [Presentation doc node clip token] -> [Presentation doc node clip token] -> [Presentation doc node clip token]
 combine [] l2 = l2
 combine l1 [] = l1 
 combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
 
-addWhitespace :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> String -> [Layout doc node clip]
+addWhitespace :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip token) -> IDP -> String -> [Layout doc node clip]
 addWhitespace (lm,inss, dels) NoIDP str = [StringP NoIDP str]
 addWhitespace (lm,inss, dels) id str = 
   case Map.lookup id lm of
@@ -94,7 +94,7 @@ addWhitespace (lm,inss, dels) id str =
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ (markInssDels (lm,inss,dels) id $ StringP id (replicate spaces ' ' ++ str))
 
-addWhitespaceStruct :: (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip) -> IDP -> Layout doc node clip -> [Layout doc node clip]
+addWhitespaceStruct :: Show token => (WhitespaceMap, InsertedTokenList, DeletedTokenMap doc node clip token) -> IDP -> Layout doc node clip -> [Layout doc node clip]
 addWhitespaceStruct (lm,inss, dels) NoIDP struct = [struct]
 addWhitespaceStruct (lm,inss, dels) id struct = 
   case Map.lookup id lm of

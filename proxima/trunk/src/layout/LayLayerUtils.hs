@@ -10,14 +10,14 @@ import CommonUtils
 import LayUtils
 
 
-castLayToPres :: Layout doc node clip -> Presentation_ doc node clip token
+castLayToPres :: Layout doc node clip -> Presentation doc node clip token
 castLayToPres = cast
 
-castPresToLay :: Presentation_ doc node clip token -> Layout doc node clip
+castPresToLay :: Presentation doc node clip token -> Layout doc node clip
 castPresToLay (TokenP _ _) = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
 castPresToLay pres         = cast pres
 
-cast :: Presentation_ doc node clip token -> Presentation_ doc node clip token'
+cast :: Presentation doc node clip token -> Presentation doc node clip token'
 cast (EmptyP id)                = EmptyP id
 cast (StringP id str)           = StringP id str
 cast (ImageP id str st)         = ImageP id str st

@@ -56,7 +56,7 @@ an option.
 -}
 
 
-type ListParser doc node clip a = AnaParser [] Pair  (Token doc node clip UserToken) a 
+type ListParser doc node clip token a = AnaParser [] Pair  (Token doc node clip token) a 
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
@@ -66,7 +66,7 @@ pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happ
 applyDummyParameters nd = nd (error "This should not have happened") [] 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
+pStr ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pStr = pStr' empty
 
 pStrVerbose str = pStr' (text str)
@@ -112,13 +112,13 @@ pStrAlt ndf p = unfoldStructure
 -- so a tree can contain source text (which fails on parsing)
 
 
-pStrDirty ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => ListParser doc node clip (a, Dirty) -> ListParser doc node clip (a, Dirty)
+pStrDirty ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token (a, Dirty) -> ListParser doc node clip token (a, Dirty)
 pStrDirty p = pStrExtra Dirty p
 
 
 -- pStrExtra is a variant of pStr that allows an extra parser result to be returned in a tuple.
 -- extraDefault is a default value for this type in case of a parse error.
-pStrExtra ::  (Editable a doc node clip, DocNode node, Ord node, Show node) => b -> ListParser doc node clip (a, b) -> ListParser doc node clip (a, b)
+pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
      <$> pSym (StructuralTk Nothing empty [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
@@ -128,7 +128,7 @@ pStrExtra extraDefault p = unfoldStructure
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- TODO: why do we need the 's in Editable?
-pPrs ::  (Editable a doc node clip, Ord node, Show node) => ListParser doc node clip a -> ListParser doc node clip a
+pPrs ::  (Editable a doc node clip token, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk empty [] NoIDP)
  where unfoldStructure presTk@(ParsingTk pr children _) = 
@@ -177,63 +177,11 @@ process and should be done in the layout layer.
 
 
 
--- put all tokens in one big list
--- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
--- TODO put keyword stuff in Scanner layer
---      check what happens with tokens without context info. It seems they get it from higher up
---      in the tree now, which seems wrong. 
-
-postScanStr :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip UserToken]
-postScanStr kwrds ctxt (EmptyP _)           = []
-postScanStr kwrds ctxt (StringP _ _)        = []
-postScanStr kwrds ctxt (TokenP _ _)         = debug Err ("*** PresentationParser.postScanStr: Token in structural presentation") []
-postScanStr kwrds ctxt (ImageP _ _ _)         = []
-postScanStr kwrds ctxt (PolyP _ _ _ _)        = []
-postScanStr kwrds ctxt (RectangleP _ _ _ _ _) = []
-postScanStr kwrds ctxt (EllipseP _ _ _ _ _)   = []
-postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
-postScanStr kwrds ctxt (OverlayP _ [])      = []
-postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
-postScanStr kwrds ctxt (ColP i _ _ press)   = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (RowP i _ press)     = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (LocatorP l pres)    = postScanStr kwrds (Just l) pres  
-postScanStr kwrds ctxt (GraphP i d _ _ es press) = GraphTk d es ctxt i : concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (VertexP i v x y _ pres)  = VertexTk v (x,y) ctxt i : postScanStr kwrds ctxt pres  
-postScanStr kwrds ctxt (ParsingP i _ pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
---postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
-postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
-postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
-
-
-postScanPrs :: [String] -> Maybe node -> Presentation doc node clip -> [Token doc node clip UserToken]
-postScanPrs kwrds ctxt (EmptyP _)           = []
-postScanPrs kwrds ctxt (StringP _ "")       = []
-postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
-postScanPrs kwrds ctxt (TokenP i t)         = [t]
-postScanPrs kwrds ctxt (ImageP _ _ _)         = []
-postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
-postScanPrs kwrds ctxt (RectangleP _ _ _ _ _) = []
-postScanPrs kwrds ctxt (EllipseP _ _ _ _ _)   = []
-postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (OverlayP _ [])      = []
-postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (ColP i _ _ press)   = concatMap (postScanPrs kwrds ctxt) press
-postScanPrs kwrds ctxt (RowP i _ press)     = concatMap (postScanPrs kwrds ctxt) press
-postScanPrs kwrds ctxt (LocatorP l pres)    = postScanPrs kwrds (Just l) pres
-postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentation contains Graph that is not part of a structural presentation") []
-postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
-postScanPrs kwrds ctxt (ParsingP _ _ pres)    = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
-postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [UserTk (StrTk "\n") "\n" Nothing NoIDP]
-postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
--- ref to UserTk is now because scanner cannot easily add "\n". The AG scanner will be able to do
--- this and make this ref obsolete. (PostScanPrs will be obsolete when Token type is added to Presentation)
 
 
 
 
-newtype ParsePres doc node clip a b c = ParsePres (Presentation doc node clip) deriving Show
+newtype ParsePres doc node clip token a b c = ParsePres (Presentation doc node clip token) deriving Show
 
 -- parsing bits
 
@@ -259,7 +207,7 @@ runParser (pp) inp =
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
+pStruct :: (Ord node, Show node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
 pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 
 
@@ -275,58 +223,7 @@ graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never b
 vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
 
 
------------------- User defined token part:
 
 
 
-
-
-
--- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
--- which is also required for copying of presentation subtrees
-strTk str = UserTk (StrTk str) str Nothing (IDP (-1))
-intTk     = UserTk IntTk "0" Nothing (IDP (-1))
-lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
-uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
-opTk      = UserTk OpTk "" Nothing (IDP (-1))
-symTk     = UserTk SymTk "" Nothing (IDP (-1))
-
-
-mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip UserToken
-mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
-                                    | isDigit c           = UserTk IntTk str ctxt i
-                                    | isLower c           = UserTk LIdentTk str ctxt i
-                                    | isUpper c           = UserTk UIdentTk str ctxt i
-                                    | otherwise           = UserTk OpTk str ctxt i
-
---makeToken str ctxt i = Tk str ctxt i
-
-isSymbolChar c = c `elem` ";,(){}#_|"
-
-
--- Basic parsers
-
-pKey :: (Ord node, Show node) => String -> ListParser doc node clip (Token doc node clip UserToken)
-pKey str = pSym  (strTk str)
-
-pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip (Token doc node clip UserToken)
-pKeyC c str = pCSym c (strTk str)
-
--- expensive, because we want holes to be inserted, not strings
-pLIdent :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
-pLIdent = pCSym 20 lIdentTk
-
--- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: (Ord node, Show node) => ListParser doc node clip (Token doc node clip UserToken)
-pInt = pCSym 20 intTk
-
-lIdentVal :: Show node => Token doc node clip UserToken -> String
-lIdentVal (UserTk LIdentTk str _ _) = str
-lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
-
-  
-intVal :: Show node => Token doc node clip UserToken -> Int
-intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
-intVal (UserTk IntTk str _ _) = read str
-intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
 

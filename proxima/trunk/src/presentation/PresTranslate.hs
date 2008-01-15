@@ -8,9 +8,9 @@ import PresLayerUtils
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: Show enr =>
-               ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
-               EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip ->
-               IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
+               ParseSheet doc enr node clip token -> LayerStatePres ->PresentationLevel doc node clip token ->
+               EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip token ->
+               IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip token)
 translateIO parseSheet state low high editLow =
   do { (editHigh, state', low') <- parseIO parseSheet state low high editLow
 --     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
@@ -19,9 +19,9 @@ translateIO parseSheet state low high editLow =
 
 
 -- split in monadic and non-monadic part
-parseIO :: ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
-           EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip ->
-           IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
+parseIO :: ParseSheet doc enr node clip token -> LayerStatePres -> PresentationLevel doc node clip token ->
+           EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip token ->
+           IO (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip token)
 
 -- these need not be monadic anymore:
 parseIO _ state presLvl enrLvl                  (OpenFilePres fpth) = return (OpenFileEnr fpth, state, presLvl)
@@ -30,9 +30,9 @@ parseIO _ state presLvl enrLvl                  InitPres            = return (In
 parseIO parseSheet state presLvl enrLvl                  event               = return $ parse parseSheet state presLvl enrLvl event
 
 
-parse :: ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
-         EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip ->
-         (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
+parse :: ParseSheet doc enr node clip token -> LayerStatePres -> PresentationLevel doc node clip token ->
+         EnrichedDocLevel enr -> EditPresentation documentLevel doc node clip token ->
+         (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip token)
 
 parse parseSheet state _       enrLvl (SetPres presLvl@(PresentationLevel pres layout))  = 
   editParse parseSheet state presLvl enrLvl
@@ -83,9 +83,9 @@ parse _ state presLvl enrLvl _            = (SkipEnr 0, state, presLvl)
 
 -}
     -- parse and type check  (reuse old enrdocument focus)
-editParse :: ParseSheet doc enr node clip -> LayerStatePres -> PresentationLevel doc node clip ->
+editParse :: ParseSheet doc enr node clip token -> LayerStatePres -> PresentationLevel doc node clip token ->
              EnrichedDocLevel enr ->
-             (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip)
+             (EditEnrichedDoc documentLevel enr, LayerStatePres, PresentationLevel doc node clip token)
 editParse parseSheet state presLvl@(PresentationLevel pres layout) (EnrichedDocLevel _ oldFocus) = 
   case parseSheet pres of
      Nothing   -> (SkipEnr 0, state, PresentationLevel (markUnparsed pres) layout)

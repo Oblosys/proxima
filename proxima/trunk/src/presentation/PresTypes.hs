@@ -10,16 +10,16 @@ import Data.Map (Map)
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
-data PresentationLevel doc node clip = PresentationLevel (Presentation doc node clip) (PresentationLS doc node clip) deriving Show
+data PresentationLevel doc node clip token = PresentationLevel (Presentation doc node clip token) (PresentationLS doc node clip token) deriving Show
 
-type PresentationLS doc node clip = (WhitespaceMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip)
+type PresentationLS doc node clip token = (WhitespaceMap, IDPCounter, InsertedTokenList, DeletedTokenMap doc node clip token)
 
 type Whitespace = (Int, Int)
 
 type WhitespaceMap = Map IDP Whitespace   -- Whitespace information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 type InsertedTokenList = [IDP]          -- Not used now. Contains tokens that were inserted by parser
-type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- Not used now. Maps deleted tokens to their successors
+type DeletedTokenMap doc node clip token = Map IDP (Presentation doc node clip token)    -- Not used now. Maps deleted tokens to their successors
 
 --instance (Show a, Show b) => Show (FiniteMap a b) where
 -- show fm = "{FiniteMap}" -- ++show (fmToList fm)
@@ -28,14 +28,14 @@ type DeletedTokenMap doc node clip = Map IDP (Presentation doc node clip)    -- 
 initLayout :: WhitespaceMap
 initLayout = Map.fromList [(IDP (-1), (0,1))]
 
-data EditPresentation' doc node clip =
-    SetPres' (PresentationLevel doc node clip)
+data EditPresentation' doc node clip token =
+    SetPres' (PresentationLevel doc node clip token)
   | SkipPres' Int deriving Show
 
-data EditPresentation documentLevel doc node clip =
+data EditPresentation documentLevel doc node clip token =
     SkipPres Int
   | SetFocusPres FocusPres
-  | SetPres (PresentationLevel doc node clip)
+  | SetPres (PresentationLevel doc node clip token)
   | InitPres
   | ClosePres
 --  | MouseDownPres PathPres Modifiers Int
@@ -56,19 +56,11 @@ data EditPresentation documentLevel doc node clip =
   | DeleteDocPres deriving Show
 
 
-data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
-               | IntTk
-               | LIdentTk
-               | UIdentTk
-               | OpTk
-               | SymTk deriving (Show, Eq, Ord)
--- TODO call strTk KeyTk
-
 
 data Token doc node clip token = 
                UserTk token String (Maybe node) IDP
-             | StructuralTk (Maybe node) (Presentation doc node clip) [Token doc node clip token] IDP
-             | ParsingTk (Presentation doc node clip) [Token doc node clip token] IDP -- deriving (Show)
+             | StructuralTk (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
+             | ParsingTk (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk Int (Int, Int) (Maybe node) IDP
 
@@ -135,25 +127,23 @@ tokenIDP (VertexTk i p n id) = id
 
 -- Presentation is Xprez with ID's
 
-type Presentation doc node clip = Presentation_ doc node clip UserToken
-
-data Presentation_ doc node clip token = EmptyP !IDP
+data Presentation doc node clip token = EmptyP !IDP
            | StringP !IDP !String
            | TokenP !IDP !(Token doc node clip token)
            | ImageP !IDP !String !ImgStyle
            | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
-           | RowP !IDP !Int ![Presentation_ doc node clip token]    -- vRefNr 
-           | ColP !IDP !Int !Formatted ![Presentation_ doc node clip token]    -- hRefNr
-           | OverlayP !IDP ![ (Presentation_ doc node clip token) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc clip) !(Presentation_ doc node clip token)         -- do these last two have ids?
-           | StructuralP !IDP !(Presentation_ doc node clip token)       -- IDP?
-           | ParsingP !IDP !Lexer !(Presentation_ doc node clip token)         -- IDP?
-           | LocatorP node !(Presentation_ doc node clip token) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation_ doc node clip token] -- width height edges 
-           | VertexP !IDP !Int !Int !Int Outline !(Presentation_ doc node clip token) -- vertexID x y outline       see note below
-           | FormatterP !IDP ![Presentation_ doc node clip token]
+           | RowP !IDP !Int ![Presentation doc node clip token]    -- vRefNr 
+           | ColP !IDP !Int !Formatted ![Presentation doc node clip token]    -- hRefNr
+           | OverlayP !IDP ![ (Presentation doc node clip token) ] -- 1st elt is in front of 2nd, etc.
+           | WithP !(AttrRule doc clip) !(Presentation doc node clip token)         -- do these last two have ids?
+           | StructuralP !IDP !(Presentation doc node clip token)       -- IDP?
+           | ParsingP !IDP !Lexer !(Presentation doc node clip token)         -- IDP?
+           | LocatorP node !(Presentation doc node clip token) -- deriving Show -- do we want a ! for location  ? 
+           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![Presentation doc node clip token] -- width height edges 
+           | VertexP !IDP !Int !Int !Int Outline !(Presentation doc node clip token) -- vertexID x y outline       see note below
+           | FormatterP !IDP ![Presentation doc node clip token]
 
 {-         | Matrix [[ (Presentation doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (Presentation doc node clip) ]
@@ -176,7 +166,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show token => Show (Presentation_ doc node clip token) where
+instance Show token => Show (Presentation doc node clip token) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (TokenP id t)         = "{"++show id++":"++show t++"}"

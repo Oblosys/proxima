@@ -21,12 +21,12 @@ import PresTypes
 import List
 import Debug.Trace
 
-class Editable a doc node clip | a -> doc node clip where
+class Editable a doc node clip token | a -> doc node clip token where
   select :: PathD -> a -> clip
   paste :: PathD -> clip -> a -> a
   alternatives :: a -> [ (String, clip) ]
   arity :: a -> Int
-  parseErr :: Presentation doc node clip -> a
+  parseErr :: Presentation doc node clip token -> a
   hole :: a
   isList :: a -> Bool
   insertList :: Int -> clip -> a -> clip
@@ -51,17 +51,17 @@ navigateUpD (PathD [])      _  = NoPathD
 navigateUpD (PathD p@(_:_)) _  = PathD $ init p
 navigateUpD pd              _ = pd
 
-navigateDownD :: (Editable doc doc node clip, Clip clip) => FocusDoc -> doc -> FocusDoc
+navigateDownD :: (Editable doc doc node clip token, Clip clip) => FocusDoc -> doc -> FocusDoc
 navigateDownD NoPathD   d = PathD []
 navigateDownD (PathD p) d = PathD $ if arityD p d > 0 then p++[0] else p
  
-navigateLeftD :: Editable doc doc node clip => FocusDoc -> doc -> FocusDoc
+navigateLeftD :: Editable doc doc node clip token => FocusDoc -> doc -> FocusDoc
 navigateLeftD NoPathD         _ = NoPathD
 navigateLeftD (PathD p@(_:_)) d = PathD $ let i = last p
                                           in  if i > 0 then init p ++ [i-1] else p
 navigateLeftD pd              _ = pd
 
-navigateRightD :: (Editable doc doc node clip, Clip clip) => FocusDoc -> doc -> FocusDoc
+navigateRightD :: (Editable doc doc node clip token, Clip clip) => FocusDoc -> doc -> FocusDoc
 navigateRightD NoPathD         _ = NoPathD
 navigateRightD (PathD p@(_:_)) d = PathD $ let i = last p
                                                a = arityD (init p) d
@@ -71,26 +71,26 @@ navigateRightD pd              _ = pd
 
 
 
-editCopyD :: Editable doc doc node clip => DocumentLevel doc clip -> DocumentLevel doc clip
+editCopyD :: Editable doc doc node clip token => DocumentLevel doc clip -> DocumentLevel doc clip
 editCopyD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editCopyD (DocumentLevel doc pd@(PathD pth) clip) = DocumentLevel doc pd (selectD pth doc)
 
-editCutD :: (Editable doc doc node clip, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
+editCutD :: (Editable doc doc node clip token, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
 editCutD  (DocumentLevel doc NoPathD clip)           = DocumentLevel doc NoPathD clip
 editCutD  (DocumentLevel doc pd@(PathD pth) clip)    = let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' (selectD pth doc)
 
-editDeleteD :: (Editable doc doc node clip, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
+editDeleteD :: (Editable doc doc node clip token, Clip clip) => DocumentLevel doc clip -> DocumentLevel doc clip
 editDeleteD (DocumentLevel doc NoPathD clip)        = DocumentLevel doc NoPathD clip
 editDeleteD (DocumentLevel doc pd@(PathD pth) clip) =  let (doc', pd') = deleteD pth doc
                                                        in  DocumentLevel doc' pd' clip
 
-editPasteD :: Editable doc doc node clip => DocumentLevel doc clip -> DocumentLevel doc clip
+editPasteD :: Editable doc doc node clip token => DocumentLevel doc clip -> DocumentLevel doc clip
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
 -- menuD is probably not a good name
-menuD :: (Editable doc doc node clip, Clip clip) => PathDoc -> doc -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
+menuD :: (Editable doc doc node clip token, Clip clip) => PathDoc -> doc -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
 menuD NoPathD _              = []
 menuD path@(PathD p) d =
   let alts = alternativesD p d
@@ -113,13 +113,13 @@ menuD path@(PathD p) d =
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
 
 
-selectD :: Editable doc doc node clip => PathD -> doc -> clip
+selectD :: Editable doc doc node clip token => PathD -> doc -> clip
 selectD p doc = select p doc
 
-pasteD :: Editable doc doc node clip => PathD -> clip -> doc -> doc
+pasteD :: Editable doc doc node clip token => PathD -> clip -> doc -> doc
 pasteD p c doc = paste p c doc
 
-insertListD :: (Show clip,Clip clip, Editable doc doc node clip) => PathD -> Int -> clip -> doc -> doc
+insertListD :: (Show clip,Clip clip, Editable doc doc node clip token) => PathD -> Int -> clip -> doc -> doc
 insertListD path index clip doc = 
   let list = selectD path doc
   in  if isListClip list
@@ -129,16 +129,16 @@ insertListD path index clip doc =
       else debug Err ("DocumentEdit.insertBeforeD on non-list at "++show path++show clip) $ doc
 
 -- ugly mix of levels, find out how to do it nicely
-deleteD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> (doc, PathDoc)
+deleteD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> (doc, PathDoc)
 deleteD p d = if not (null p) && isListClip (selectD (init p) d) -- if parent is list, then delete is remove from list
               then (pasteD (init p) (removeListClip (last p) (selectD (init p) d)) d, NoPathD)
               else let newhole = holeClip (selectD p d)
                    in  (pasteD p newhole d, PathD p) 
 
-arityD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> Int
+arityD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> Int
 arityD p d = arityClip (select p d)
 
-alternativesD :: (Editable doc doc node clip, Clip clip) => PathD -> doc -> [ (String, clip) ]
+alternativesD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> [ (String, clip) ]
 alternativesD p d = alternativesClip (select p d)
 
  

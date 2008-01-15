@@ -8,7 +8,7 @@ import Maybe
 
 -- switch href and vref href is y and vref is x, so (vref, href) is more logical
 
-type Xprez doc node clip = Presentation doc node clip
+type Xprez doc node clip token = Presentation doc node clip token
 {-
 data Xprez = Empty
            | Text String
@@ -50,11 +50,11 @@ parsing xp = ParsingP NoIDP LexInherited xp
 parsing' l xp = ParsingP NoIDP l xp
 loc l xp  = LocatorP l xp
 
-graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip] -> Xprez doc node clip
+graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip token] -> Xprez doc node clip token
 graph width height edges vertexPress = 
   GraphP NoIDP Clean width height edges vertexPress
  
-vertex :: Int -> Int -> Int -> Outline -> Xprez doc node clip -> Xprez doc node clip
+vertex :: Int -> Int -> Int -> Outline -> Xprez doc node clip token -> Xprez doc node clip token
 vertex id x y outline pres = VertexP NoIDP id x y outline pres
 
 leftXp `beside` rightXp = row [leftXp, rightXp]
@@ -65,106 +65,106 @@ topXp `above` bottomXp = col [topXp, bottomXp]
 withInh xp inf =  with_ xp (\(i,s) -> (inf i, s))
 withSyn xp snf =  with_ xp (\(i,s) -> (i, snf s))
 
-withColor :: Xprez doc node clip -> Color -> Xprez doc node clip
+withColor :: Xprez doc node clip token -> Color -> Xprez doc node clip token
 withColor xp c = withInh xp (\i -> i { textColor = c, lineColor = c})
 
-withtxtColor :: Xprez doc node clip -> Color -> Xprez doc node clip
+withtxtColor :: Xprez doc node clip token -> Color -> Xprez doc node clip token
 withtxtColor xp c = withInh xp (\i -> i { textColor = c})
 
-withtxtColor_ :: Xprez doc node clip -> (Color -> Color) -> Xprez doc node clip
+withtxtColor_ :: Xprez doc node clip token -> (Color -> Color) -> Xprez doc node clip token
 withtxtColor_ xp f = withInh xp (\i -> i { textColor = f (textColor i)})
 
-withlnColor :: Xprez doc node clip -> Color -> Xprez doc node clip
+withlnColor :: Xprez doc node clip token -> Color -> Xprez doc node clip token
 withlnColor xp c = withInh xp (\i -> i { lineColor = c})
 
-withfColor :: Xprez doc node clip -> Color -> Xprez doc node clip
+withfColor :: Xprez doc node clip token -> Color -> Xprez doc node clip token
 withfColor xp c = withInh xp (\i -> i { fillColor = c})
 
-withbgColor :: Xprez doc node clip -> Color -> Xprez doc node clip
+withbgColor :: Xprez doc node clip token -> Color -> Xprez doc node clip token
 withbgColor xp c = withInh xp (\i -> i { backgroundColor = c})
 
-withbgColor_ :: Xprez doc node clip -> (Color -> Color) -> Xprez doc node clip
+withbgColor_ :: Xprez doc node clip token -> (Color -> Color) -> Xprez doc node clip token
 withbgColor_ xp f = withInh xp (\i -> i { backgroundColor = f (backgroundColor i)})
 
-withFontSize :: Xprez doc node clip -> Int -> Xprez doc node clip
+withFontSize :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withFontSize xp fs = withInh xp (\i -> i { font = (font i) { fSize = fs }})
 
-withFontFam :: Xprez doc node clip -> String -> Xprez doc node clip
+withFontFam :: Xprez doc node clip token -> String -> Xprez doc node clip token
 withFontFam xp ff = withInh xp (\i -> i { font = (font i) { fFamily = ff }})
 
-withFontSize_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
+withFontSize_ :: Xprez doc node clip token -> (Int -> Int) -> Xprez doc node clip token
 withFontSize_ xp ffs = withInh xp (\i -> i { font = (font i) { fSize = ffs (fSize (font i)) }})
 
-withFont :: Xprez doc node clip -> Font -> Xprez doc node clip
+withFont :: Xprez doc node clip token -> Font -> Xprez doc node clip token
 withFont xp f = withInh xp (\i -> i { font = f })
 
-withFont_ :: Xprez doc node clip -> (Font -> Font) -> Xprez doc node clip
+withFont_ :: Xprez doc node clip token -> (Font -> Font) -> Xprez doc node clip token
 withFont_ xp ff = withInh xp (\i -> i { font = ff (font i) })
 
 -- just set Family and Size
-withFont' :: Xprez doc node clip -> (String, Int) -> Xprez doc node clip
+withFont' :: Xprez doc node clip token -> (String, Int) -> Xprez doc node clip token
 withFont' xp (ff,fs) = withFont_ xp (\f -> f { fFamily = ff, fSize = fs })
 
-bold :: Xprez doc node clip -> Xprez doc node clip
+bold :: Xprez doc node clip token -> Xprez doc node clip token
 bold xp = withFont_ xp (\f -> f { fBold = True })
 
-italic :: Xprez doc node clip -> Xprez doc node clip
+italic :: Xprez doc node clip token -> Xprez doc node clip token
 italic xp = withFont_ xp (\f -> f { fItalic = True })
 
-underline :: Xprez doc node clip -> Xprez doc node clip
+underline :: Xprez doc node clip token -> Xprez doc node clip token
 underline xp = withFont_ xp (\f -> f { fUnderline = True })
 
-strikeOut :: Xprez doc node clip -> Xprez doc node clip
+strikeOut :: Xprez doc node clip token -> Xprez doc node clip token
 strikeOut xp = withFont_ xp (\f -> f { fStrikeOut = True })
 
 
-withMouseDown :: Xprez doc node clip -> UpdateDoc doc clip -> Xprez doc node clip
+withMouseDown :: Xprez doc node clip token -> UpdateDoc doc clip -> Xprez doc node clip token
 withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just upd })
 
-withPopupMenuItems :: Xprez doc node clip -> [PopupMenuItem doc clip] -> Xprez doc node clip
+withPopupMenuItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
 withPopupMenuItems xp mis = withInh xp (\i -> i { popupMenuItems = mis })
 
-withPopupMenuItems_ :: Xprez doc node clip -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc node clip
+withPopupMenuItems_ :: Xprez doc node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc node clip token
 withPopupMenuItems_ xp fmis = withInh xp (\i -> i { popupMenuItems = fmis (popupMenuItems i) })
 
-addPopupItems :: Xprez doc node clip -> [PopupMenuItem doc clip] -> Xprez doc node clip
+addPopupItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
 addPopupItems xp mis = withPopupMenuItems_ xp (\pmis -> mis++pmis) 
 
-withHRef :: Xprez doc node clip -> Int -> Xprez doc node clip
+withHRef :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withHRef xp h = withSyn xp (\s -> s { hRef = h })
 
-withHRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
+withHRef_ :: Xprez doc node clip token -> (Int -> Int) -> Xprez doc node clip token
 withHRef_ xp fh = withSyn xp (\s -> s { hRef = fh (hRef s) })
 
-withVRef :: Xprez doc node clip -> Int -> Xprez doc node clip
+withVRef :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withVRef xp v = withSyn xp (\s -> s { vRef = v })
 
-withVRef_ :: Xprez doc node clip -> (Int -> Int) -> Xprez doc node clip
+withVRef_ :: Xprez doc node clip token -> (Int -> Int) -> Xprez doc node clip token
 withVRef_ xp fv = withSyn xp (\s -> s { vRef = fv (vRef s) })
 
-withRef :: Xprez doc node clip -> (Int, Int) -> Xprez doc node clip
+withRef :: Xprez doc node clip token -> (Int, Int) -> Xprez doc node clip token
 withRef xp (h,v) = withSyn xp (\s -> s { hRef = h, vRef = v })
 
-withRef_ :: Xprez doc node clip -> ((Int, Int) -> (Int, Int)) -> Xprez doc node clip
+withRef_ :: Xprez doc node clip token -> ((Int, Int) -> (Int, Int)) -> Xprez doc node clip token
 withRef_ xp fhv = withSyn xp (\s -> let (h,v) = fhv (hRef s, vRef s)
                                     in  s { hRef = h, vRef = v })
 
-withHStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
+withHStretch :: Xprez doc node clip token -> Bool -> Xprez doc node clip token
 withHStretch xp hs = withSyn xp (\s -> s { hStretch = hs })
 
-withVStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
+withVStretch :: Xprez doc node clip token -> Bool -> Xprez doc node clip token
 withVStretch xp vs = withSyn xp (\s -> s { vStretch = vs })
 
-withStretch :: Xprez doc node clip -> Bool -> Xprez doc node clip
+withStretch :: Xprez doc node clip token -> Bool -> Xprez doc node clip token
 withStretch xp str = withSyn xp (\s -> s { hStretch = str, vStretch = str })
 
-withWidth :: Xprez doc node clip -> Int -> Xprez doc node clip
+withWidth :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withWidth xp w = withSyn xp (\s -> s { minWidth = w, hStretch = False })
 
-withHeight :: Xprez doc node clip -> Int -> Xprez doc node clip
+withHeight :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withHeight xp h = withSyn xp (\s -> s { minHeight = h, vStretch = False })
 
-withSize :: Xprez doc node clip -> (Int, Int) -> Xprez doc node clip
+withSize :: Xprez doc node clip token -> (Int, Int) -> Xprez doc node clip token
 withSize xp (w,h) = withSyn xp (\s -> s { minWidth = w, hStretch = False 
                                         , minHeight = h, vStretch = False  })
 
@@ -180,17 +180,17 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-x, v-y))
 
 
 
-hLine :: Xprez doc node clip
+hLine :: Xprez doc node clip token
 hLine = poly [(0,0),(1.0,0)] Transparent `withHeight` 1 
 
-vLine :: Xprez doc node clip
+vLine :: Xprez doc node clip token
 vLine = poly [(0,0),(0,1.0)] Transparent `withWidth` 1
 
 -- lineWidth should be an attribute, so we can use a with here
-hLineW :: Int -> Xprez doc node clip
+hLineW :: Int -> Xprez doc node clip token
 hLineW lw = polyW lw [(0,0),(1.0,0)] Transparent `withHeight` 1
 
-vLineW :: Int -> Xprez doc node clip
+vLineW :: Int -> Xprez doc node clip token
 vLineW lw = polyW lw [(0,0),(0,1.0)] Transparent `withWidth` 1
 
 hvStretch = empty `withHStretch` True `withVStretch` True
@@ -227,10 +227,10 @@ vRefHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedHeight i `div`
                                                   
                                      in (newI,newS))
 
-glue :: Xprez doc node clip
+glue :: Xprez doc node clip token
 glue = empty `withHStretch` True `withVStretch` True
 
-boxed :: Xprez doc node clip -> Xprez doc node clip
+boxed :: Xprez doc node clip token -> Xprez doc node clip token
 boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 
 -- multiply x with a percentage

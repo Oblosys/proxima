@@ -66,4 +66,4 @@ instance Show Layout_
 
 instance Eq Layout_
 
-type Layout doc node clip = Presentation_ doc node clip Layout_
+type Layout doc node clip = Presentation doc node clip Layout_
