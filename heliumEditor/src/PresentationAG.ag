@@ -564,7 +564,7 @@ and on parsing, the doc->pres mapping will be set correctly
 
 -- merge the counters
 
-ATTR EnrichedDoc RootE List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | layoutMap : LayoutMap | ]
+ATTR EnrichedDoc RootE List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | layoutMap : WhitespaceMap | ]
 
 ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | newlines, spaces, col : Int | ]
 
