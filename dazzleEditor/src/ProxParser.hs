@@ -226,10 +226,10 @@ pSymm = pCSym 20 symTk
 
 
 -- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: Show node => Token doc node clip UserToken -> String_
+mkString_ :: DocNode node => Token doc node clip UserToken -> String_
 mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
 
-mkInt_ :: Show node => Token doc node clip UserToken -> Int_
+mkInt_ :: DocNode node => Token doc node clip UserToken -> Int_
 mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
 
 -- Extracting the value from the token is not necessary, since true and false have different
@@ -267,26 +267,26 @@ isSymbolChar c = c `elem` ";,(){}#_|"
 
 -- Basic parsers
 
-pKey :: (Ord node, Show node) => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
 pKey str = pSym  (strTk str)
 
-pKeyC :: (Ord node, Show node) => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
 pKeyC c str = pCSym c (strTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: (Ord node, Show node) => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
 pLIdent = pCSym 20 lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: (Ord node, Show node) => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pInt :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
 pInt = pCSym 20 intTk
 
-lIdentVal :: Show node => Token doc node clip UserToken -> String
+lIdentVal :: DocNode node => Token doc node clip UserToken -> String
 lIdentVal (UserTk LIdentTk str _ _) = str
 lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
   
-intVal :: Show node => Token doc node clip UserToken -> Int
+intVal :: DocNode node => Token doc node clip UserToken -> Int
 intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (UserTk IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
