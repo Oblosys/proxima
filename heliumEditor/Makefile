@@ -41,7 +41,7 @@ SHELL = /bin/sh
 
 
 default: $(MAIN)
-.PHONY : default proxima generate presenter agc always
+.PHONY : default proxima generate presenter
 
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
