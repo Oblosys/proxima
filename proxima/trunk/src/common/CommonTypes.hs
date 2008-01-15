@@ -24,7 +24,7 @@ instance Show (a -> b) where
 
 -- Necessary to create Locators with NoNode, without importing DocTypes.
 -- Putting Node in a Maybe would also work, but causes more pattern matching.
-class (Eq node, Ord node) => DocNode node where
+class (Eq node, Ord node, Show node) => DocNode node where
   noNode :: node
   
 -- Eq and Ord are here to reduce the number of constraints in the types

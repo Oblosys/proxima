@@ -66,7 +66,7 @@ pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happ
 applyDummyParameters nd = nd (error "This should not have happened") [] 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
+pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pStr = pStr' empty
 
 pStrVerbose str = pStr' (text str)
@@ -112,13 +112,13 @@ pStrAlt ndf p = unfoldStructure
 -- so a tree can contain source text (which fails on parsing)
 
 
-pStrDirty ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token (a, Dirty) -> ListParser doc node clip token (a, Dirty)
+pStrDirty ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token (a, Dirty) -> ListParser doc node clip token (a, Dirty)
 pStrDirty p = pStrExtra Dirty p
 
 
 -- pStrExtra is a variant of pStr that allows an extra parser result to be returned in a tuple.
 -- extraDefault is a default value for this type in case of a parse error.
-pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord node, Show node, Ord token, Show token) => b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
+pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
      <$> pSym (StructuralTk Nothing empty [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
@@ -128,7 +128,7 @@ pStrExtra extraDefault p = unfoldStructure
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- TODO: why do we need the 's in Editable?
-pPrs ::  (Editable a doc node clip token, Ord node, Show node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
+pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk empty [] NoIDP)
  where unfoldStructure presTk@(ParsingTk pr children _) = 
@@ -193,7 +193,7 @@ newtype ParsePres doc node clip token a b c = ParsePres (Presentation doc node c
 
 
 
-instance (Ord node, Show node, Ord token, Show token) => Symbol (Token doc node clip token) where
+instance (DocNode node, Ord token, Show token) => Symbol (Token doc node clip token) where
 
 runParser (pp) inp =
       let res = UU_Parsing.parse pp inp
@@ -207,7 +207,7 @@ runParser (pp) inp =
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: (Ord node, Show node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
+pStruct :: (DocNode node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
 pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
 
 
