@@ -29,6 +29,9 @@ class (Eq node, Ord node, Show node) => DocNode node where
   
 -- Eq and Ord are here to reduce the number of constraints in the types
 
+-- in DocTypes, there is a class HasPath, which is also instantiated for Node. But since we don't
+-- want to import DocTypes everywhere (and HasPath depends on it) we cannot combine the classes easily.
+
 type Path = [Int]
 
 type Color = (Int,Int,Int)

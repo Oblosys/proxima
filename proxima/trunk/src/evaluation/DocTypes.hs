@@ -18,7 +18,6 @@ type PathD = [Int] -- we don't use PathDoc because NoPath makes algorithms unrea
 
 data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
 
-
 class HasPath node where
   pathNode :: node -> PathDoc
 
