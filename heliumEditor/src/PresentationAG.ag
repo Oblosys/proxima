@@ -188,7 +188,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage str = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation doc Node clip
+presMessage :: HeliumMessage -> Presentation doc Node clip token
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col (map (text) lns) `withColor` errColor
                                                              rng:_   -> col (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -199,7 +199,7 @@ errColor = red
 
 }
 
-SEM List_Decl [ || pres : Presentation_Doc_Node_Clip ]
+SEM List_Decl [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Decl
       lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    row @elts.press
@@ -434,7 +434,7 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Xprez doc node clip -> PathDoc -> Xprez doc node clip
+link :: Xprez doc node clip token -> PathDoc -> Xprez doc node clip token
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
@@ -490,23 +490,23 @@ presParseErr pres =
 
 text' idc = StringP idc
 
-der:: IDP -> String -> Xprez doc node clip
+der:: IDP -> String -> Xprez doc node clip token
 der idc str = StringP idc str `withColor` derCol
 
 
-op :: IDP -> String -> Xprez doc node clip
+op :: IDP -> String -> Xprez doc node clip token
 op idc str = StringP idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez doc node clip
+key :: IDP -> String -> Xprez doc node clip token
 key idc str = StringP idc str `withColor` keyCol
 
-sep :: IDP -> String -> Xprez doc node clip
+sep :: IDP -> String -> Xprez doc node clip token
 sep idc str = StringP idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez doc node clip
+cons :: IDP -> String -> Xprez doc node clip token
 cons idc str = StringP idc str `withColor` consCol
 
-typeD :: IDP -> String -> Xprez doc node clip
+typeD :: IDP -> String -> Xprez doc node clip token
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 
@@ -992,17 +992,19 @@ SEM Exp [ env : Bindings | | val : Value ]
   | IntExp      lhs.val   = IntVal @int_.int
   | LamExp      lhs.val   = -- @exp :: Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
                             LamVal (\arg ->
-                                     let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = @exp undefined ((@ident.str, arg): @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
-                                     in  v)  -- dirty hack because AG does not allow this easily
+                                     let syn  = wrap_Exp @exp Inh_Exp {env_Inh_Exp = ((@ident.str, arg): @lhs.env)}
+                                     in  val_Syn_Exp syn)  -- dirty hack because AG does not allow this easily (maybe new version with higher-order stuff makes it easier)
 
   | AppExp      lhs.val   = case @exp1.val of
                               LamVal f -> f @exp2.val
                               _        -> ErrVal
 
   | CaseExp     lhs.val   = case lookup "a" @alts.alts of {Just v -> v; Nothing -> ErrVal}
+                            -- case is useless, since there are no constructors yet.
+                            
   | LetExp      lhs.val   = -- @exp :: Int -> Bindings -> FocusDoc -> Int -> [Int] -> (Int,Presentation, Exp, Value)
-                            let (_,_,_,_,_,_,_,_,_,_,_,_,v,_) = @exp undefined (@decls.dcls ++ @lhs.env) undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined undefined
-                            in  v  -- dirty hack because AG does not allow this easily
+                            let syn  = wrap_Exp @exp Inh_Exp {env_Inh_Exp = (@decls.dcls ++ @lhs.env)}
+                            in  val_Syn_Exp syn)  -- dirty hack because AG does not allow this easily (maybe new version with higher-order stuff makes it easier)
 
   | IdentExp       lhs.val   = case lookup @ident.str @lhs.env of { Just v -> v; Nothing -> ErrVal }
   | IfExp       lhs.val   = case @exp1.val of
@@ -1124,7 +1126,7 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ------------------------- Identifier list presentation
 --      can we mix pres with idsPres?
 
-ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip ]
+ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip_Token ]
 
 SEM List_Decl
   | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
@@ -1228,7 +1230,7 @@ SEM PPPresentation
 --                                          , row [ text "         ", @slides.pres]
 
 
-SEM List_Slide [ || pres : Presentation_Doc_Node_Clip ]
+SEM List_Slide [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Slide
       lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1274,7 +1276,7 @@ SEM ItemList
                                , @items.pres
                             ] -}
 
-SEM List_Item [ || pres : Presentation_Doc_Node_Clip ]
+SEM List_Item [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Item
       lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
@@ -1346,10 +1348,10 @@ toggleViewType pth (PPPresentation idD viewtp slides) =
 
 }
 
-ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_Doc_Node_Clip ]
-ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_Doc_Node_Clip]} ]
+ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
+ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_Doc_Node_Clip_Token]} ]
 
-SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip ]
+SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip_Token ]
   | List_Slide
       lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col $ intersperse (col [vSpace 4, hLine, vSpace 4]) @elts.press2
@@ -1378,7 +1380,7 @@ SEM ItemList
             items.listType = @listType.self
             items.typeLoc = @listType.typeLoc
 
-SEM ListType [ || pres2 : Presentation_Doc_Node_Clip typeLoc :  {Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip}]
+SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token}]
   | Bullet         lhs.pres2 = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = loc (BulletNode @self @lhs.path)
@@ -1393,7 +1395,7 @@ SEM ListType [ || pres2 : Presentation_Doc_Node_Clip typeLoc :  {Presentation_Do
 
 
 
-SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip ]
+SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
   | List_Item
       lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col @elts.press2
@@ -1406,7 +1408,7 @@ SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip ]
 
 
 
-SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip} ||  ]
+SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ||  ]
   | StringItem     lhs.pres2 = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @string.pres]
   | HeliumItem     lhs.pres2 = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1435,8 +1437,8 @@ SEM ConsList_Slide
   | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
   | Nil_Slide  lhs.press2 = []
 
-ATTR List_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip} || ]
-SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip -> Presentation_Doc_Node_Clip} || ]
+ATTR List_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} || ]
+SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} || ]
   | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
               head.listType = @lhs.listType
               head.typeLoc = @lhs.typeLoc
@@ -1588,9 +1590,9 @@ ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPrese
        [ focusD : FocusDoc | | ]
 
 List & ConsList
-ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation_Doc_Node_Clip]} ]
+ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
 
-ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation_Doc_Node_Clip ]
+ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 
 ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ ix : Int || ]
