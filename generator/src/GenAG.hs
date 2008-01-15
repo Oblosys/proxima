@@ -44,7 +44,7 @@ genAgTypes (File _ decls) = concatMap printAgDecl decls where
                                      ++ indent (6+(length e)) ((map printAgProd prods)
                                      ++ (if decltp /= DeclConsList --- no hole/parseErrs for consLists
                                          then ["| Hole"++e
-                                              ,"| ParseErr"++e++" presentation:Presentation_Doc_Node_Clip"] 
+                                              ,"| ParseErr"++e++" presentation:Presentation_Doc_Node_Clip_Token"] 
                                          else [])
                                      )
     printAgProd (Prod s fields)= "| "++s++" "++ concatMap printField fields 
@@ -59,7 +59,7 @@ printField (Field n s _) = (n++":"++s++" ")
 
 
 
-genSem (File _ decls) = concatMap genSem' decls 
+genSem (File _ decls) = concatMap genSem' decls
 
 genSem' d@(Decl "EnrichedDoc" l _) = []     --- No SEM should be created for EnrichedDoc
 
@@ -173,8 +173,8 @@ genAtt (File _ decls  ) = let all    = (map (\(Decl n _ _)-> n) decls)
                                ,"       [ focusD : FocusDoc | | ]"   
                                ,"\n\nATTR " ++ prListLine (filter (/="EnrichedDoc") all)
                                ,"       [ | path : {[Int]} | ]"   
-                               ,"\n\nATTR " ++ prListLine lists ++ " [ | | press : {[Presentation_Doc_Node_Clip]} ]"
-                               ,"\n\nATTR " ++ prListLine noList ++ " [ | | pres : Presentation_Doc_Node_Clip ]"
+                               ,"\n\nATTR " ++ prListLine lists ++ " [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
+                               ,"\n\nATTR " ++ prListLine noList ++ " [ | | pres : Presentation_Doc_Node_Clip_Token ]"
                                ,"\n\nATTR " ++ prListLine listChildren ++ " [ ix : Int || ]"
                                       --  ix should only be defined for list children, so we remove
                                       -- the "List_" of all lists
@@ -227,7 +227,7 @@ genPresentXML (File _ decls) = concatMap genPresentXMLDecl decls
 
 genPresentXMLDecl (Decl "EnrichedDoc" l _)          = []
 genPresentXMLDecl (Decl e _ DeclConsList) = 
-  [ "SEM ConsList_"++listTp++" [ | | pressXML : {[Presentation_Doc_Node_Clip]} ]"
+  [ "SEM ConsList_"++listTp++" [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} ]"
   , "  | Cons_"++listTp++"     lhs.pressXML  = @head.presXML : @tail.pressXML"
   , "  | Nil_"++listTp++"      lhs.pressXML  = []"
   , ""
@@ -235,7 +235,7 @@ genPresentXMLDecl (Decl e _ DeclConsList) =
  where listTp = drop (length "ConsList_") e --- !!! need to access the type name here in an safe way
 
 genPresentXMLDecl (Decl e _ DeclList) =
-  [ "SEM List_"++listTp++" [ || presXML : Presentation_Doc_Node_Clip ]"
+  [ "SEM List_"++listTp++" [ || presXML : Presentation_Doc_Node_Clip_Token ]"
   , "  | List_"++listTp++""
   , "      lhs.presXML = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    col @elts.pressXML"
@@ -250,7 +250,7 @@ genPresentXMLDecl (Decl e _ DeclList) =
  where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
 
 genPresentXMLDecl (Decl tp prods _) = 
-  [ "SEM "++tp++" [ || presXML : Presentation_Doc_Node_Clip ]" ]
+  [ "SEM "++tp++" [ || presXML : Presentation_Doc_Node_Clip_Token ]" ]
   ++ concatMap genPresentXMLProd prods ++
   [ "  | Hole"++tp++"     lhs.presXML = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
   , "  | ParseErr"++tp++" lhs.presXML = presParseErr @presentation"
@@ -275,7 +275,7 @@ genPresentTree (File _ decls) = concatMap genPresentTreeDecl decls
 
 genPresentTreeDecl (Decl "EnrichedDoc" l _)          = []
 genPresentTreeDecl (Decl e _ DeclConsList) = 
-  [ "SEM ConsList_"++listTp++" [ | | pressTree : {[Presentation_Doc_Node_Clip]} ]"
+  [ "SEM ConsList_"++listTp++" [ | | pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , "  | Cons_"++listTp++"     lhs.pressTree  = @head.presTree : @tail.pressTree"
   , "  | Nil_"++listTp++"      lhs.pressTree  = []"
   , ""
@@ -283,7 +283,7 @@ genPresentTreeDecl (Decl e _ DeclConsList) =
  where listTp = drop (length "ConsList_") e --- !!! need to access the type name here in an safe way
 
 genPresentTreeDecl (Decl e _ DeclList) =
-  [ "SEM List_"++listTp++" [ || presTree : Presentation_Doc_Node_Clip ]"
+  [ "SEM List_"++listTp++" [ || presTree : Presentation_Doc_Node_Clip_Token ]"
   , "  | List_"++listTp++""
   , "      lhs.presTree = loc (List_"++listTp++"Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       col @elts.pressTree"
@@ -298,7 +298,7 @@ genPresentTreeDecl (Decl e _ DeclList) =
  where  listTp = drop (length "List_") e --- !!! need to access the type name here in an safe way
 
 genPresentTreeDecl (Decl tp prods _) = 
-  [ "SEM "++tp++" [ || presTree : Presentation_Doc_Node_Clip ]" ]
+  [ "SEM "++tp++" [ || presTree : Presentation_Doc_Node_Clip_Token ]" ]
   ++ concatMap genPresentTreeProd prods ++
   [ "  | Hole"++tp++"     lhs.presTree = presHole @lhs.focusD \""++tp++"\" (Hole"++tp++"Node @self @lhs.path) @lhs.path"
   , "  | ParseErr"++tp++" lhs.presTree = presParseErr @presentation"

@@ -87,7 +87,7 @@ instances d@(Decl e prods DeclConsList) =  []
 instances d@(Decl e prods DeclList) =  instanceList d ---
 
 {- NON Lists -}
-instances d@(Decl e prods DeclDef)  = ["\n\ninstance Editable " ++ e ++ " Document Node ClipDoc where"]
+instances d@(Decl e prods DeclDef)  = ["\n\ninstance Editable " ++ e ++ " Document Node ClipDoc UserToken where"]
                                     ++ select        d 
                                     ++ paste         d
                                     ++ alternatives  d 
@@ -268,7 +268,7 @@ instanceList (Decl e prods _) =
   , "removeList_"++listTp++" n (Cons_"++listTp++" cx cxs) = Cons_"++listTp++" cx (removeList_"++listTp++" (n-1) cxs)"
   , ""
 -- here's the actual instance declaration
-  , "instance Editable List_"++listTp++" Document Node ClipDoc where"
+  , "instance Editable List_"++listTp++" Document Node ClipDoc UserToken where"
   , "  select []    x                  = Clip_List_"++listTp++" x"
   , "  select (n:p) (List_"++listTp++" _ cxs) = let xs = fromConsList_"++listTp++" cxs"
   , "                                  in  if n < length xs "
