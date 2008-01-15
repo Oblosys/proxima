@@ -35,7 +35,7 @@ focusCol = lightBlue
 
 INCLUDE "PresentationAG_Generated.ag"
 
-ATTR EnrichedDoc [ | layoutMap : LayoutMap | ]
+ATTR EnrichedDoc [ | layoutMap : WhitespaceMap | ]
 
 SEM EnrichedDoc
   | RootEnr
