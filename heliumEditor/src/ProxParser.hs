@@ -480,36 +480,6 @@ enrichedDocTk = (StructuralTk (Just $ HoleEnrichedDocNode HoleEnrichedDoc []) em
 --parsingTk = StrTk "%" Nothing NoIDP -- (ParsingTk [] NoIDP)
 
 
-toks = [ --mkEnrichedDocTk
-          -- [
-             {- mkParsingTk 
-               [ mkDeclTk 
-                    [ mkParsingTk 
-                      [ LIdentTk "x" Nothing NoIDP
-                      ]
-                   ]
-               ]
-           , -} mkParsingTk
-               [
-                 LIdentTk "x" Nothing NoIDP
-               , StrTk "=" Nothing NoIDP
-               , IntTk "1" Nothing NoIDP
-               , StrTk ";" Nothing NoIDP
-               , LIdentTk "y" Nothing NoIDP
-               , StrTk "=" Nothing NoIDP
-               , IntTk "1" Nothing NoIDP
-               , StrTk ";" Nothing NoIDP
-               ]
-               
-         --  ]
-       ]
- where mkEnrichedDocTk cs = (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty cs NoIDP)
-       mkDeclTk cs =  (StructuralTk (Just $ DeclNode hole []) empty cs NoIDP)
-       mkParsingTk cs = (ParsingTk empty cs NoIDP)
-        
-
-
-
 -- UNCLEAR:
 -- default: what to do with things like HeliumTypeInfo? answer: declare as Editable and specify hole
 
