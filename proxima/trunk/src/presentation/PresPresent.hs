@@ -29,16 +29,14 @@ present :: PresentationSheet doc enr node clip token -> LayerStatePres -> Enrich
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
 present _ state enrlvl pres                            (SkipEnr' i) = (SkipPres' (i-1), state, enrlvl)
-present presentationSheet state (EnrichedDocLevel enr _) (PresentationLevel pres (layoutMap,idC  , _,_  )) (SetEnr' enrlvl)  =
+present presentationSheet state (EnrichedDocLevel enr _) (PresentationLevel pres (layoutMap,idC)) (SetEnr' enrlvl)  =
     
   let --focusXY             = saveFocus focus pres
       (pres', layoutMap', idC')      = presentEnr presentationSheet state enrlvl layoutMap idC
       --focus'              = restoreFocus focusXY pres'
 
       --  (pres'', focus'') = (pres',focus')--normalizePresentation pres focus
-  in  (SetPres' (PresentationLevel pres' (layoutMap', idC' , [] , Map.empty {-, inss, dels -} {- [(IDP 2, StringP (IDP (-1)) "deleted")
-                                                                                     ,(IDP (-1), StringP (IDP (-2)) "both")
-                                                                                     ] -} )), state, enrlvl)
+  in  (SetPres' (PresentationLevel pres' (layoutMap', idC')), state, enrlvl)
 
 presentEnr :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr ->
               WhitespaceMap -> IDPCounter ->

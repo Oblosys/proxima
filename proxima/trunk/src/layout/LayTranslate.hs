@@ -104,10 +104,9 @@ parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 -- unparsed presentation.
 
 
-tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
+tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
  let (pres', layout', idCounter') = scannerSheet idCounter Nothing pres
-     pres''                       = deleteInsertedTokens inserted pres'
-     presLvl'                     = PresentationLevel pres'' (layout',idCounter', inserted, deleted)
+     presLvl'                     = PresentationLevel pres' (layout',idCounter')
  in  (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
 
 
@@ -118,7 +117,7 @@ tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationL
 --            Layout doc node clip -> Layout doc node clip -> LayoutLevel doc node clip -> FocusPres -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, Layout doc node clip)
 
 editLay editF state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = (SkipPres 0, state, layLvl)
-editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter, inserted, deleted)) = 
+editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
  let (ll@(LayoutLevel pres' focus' dt), state') = editF state (LayoutLevel pres focus dt) -- this will be layLvl's own focus
      (pres'', focus'')             = (markUnparsed pres', markUnparsedF pres' focus')
    --  (pres''', layout', idCounter') = tokenize idCounter Nothing pres''

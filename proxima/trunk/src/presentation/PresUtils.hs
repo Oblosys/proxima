@@ -288,29 +288,6 @@ prunePresSpecial va ova (x,y) dt arr                                   pres =
 -}
 
 
--- probably goes wrong when inserted is not direct child of row, col, or overlay
--- anyway, the token tree will soon be replaced by a list, making this function easy
-deleteInsertedTokens :: Show token => InsertedTokenList -> Presentation doc node clip token -> Presentation doc node clip token
-deleteInsertedTokens inss (RowP i r press)     = let press' = map (deleteInsertedTokens inss) press
-                                                     press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)) .idP) press'
-                                                 in  RowP i r press''
-deleteInsertedTokens inss (ColP i r f press)   = let press' = map (deleteInsertedTokens inss) press
-                                                     press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
-                                                 in  ColP i r f press''
-deleteInsertedTokens inss (OverlayP i press)   = let press' = map (deleteInsertedTokens inss) press
-                                                     press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
-                                                 in  OverlayP i press''
-deleteInsertedTokens inss (GraphP i d w h es press) = let press' = map (deleteInsertedTokens inss) press
-                                                          press'' = filter ({-not.(`elem` inss)-} (/=IDP (-1)).idP) press'
-                                                      in  GraphP i d w h es press''
-deleteInsertedTokens inss (VertexP i v x y pl pres) = VertexP i v x y pl $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss (WithP ar pres)       = WithP ar $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss (StructuralP id pres) = StructuralP id $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss (ParsingP id l pres)    = ParsingP id l $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss (LocatorP l pres)     = LocatorP l $ deleteInsertedTokens inss pres
-deleteInsertedTokens inss pres = pres
-
-
 -- Normalization
 
 -- is it ok if we normalize away all ids? Or should we only remove the NoIDP's?
