@@ -10,11 +10,11 @@ import DocTypes_Generated (Node (..))
 
 
 
-scanner :: Int -> Maybe Node -> Layout doc Node clip ->
+scanner :: Int -> Layout doc Node clip ->
            (Presentation doc Node clip token, WhitespaceMap, Int)
-scanner i loc pres = -- debug Err (show pres) $
+scanner i pres = -- debug Err (show pres) $
             tokenize LexHaskell -- default is Haskell scanner
-                     i loc pres
+                     i Nothing pres
 
 {-
  Redesigning this module has a high priority. The differences between haskell and free text lexers are are
