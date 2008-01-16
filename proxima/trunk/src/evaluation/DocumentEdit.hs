@@ -9,8 +9,6 @@ Observations:
 
 Document root is different from the rest of the elements. It cannot be selected or deleted, so no hole is needed either.
 
-Basic values should probably be boxed in some way, so there are holes for them.
-
 -}
 
 import CommonTypes
