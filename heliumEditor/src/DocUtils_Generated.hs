@@ -22,6 +22,10 @@ instance Eq Node where
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
+instance Doc Document where
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
+
 -- XML
 
 -- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
@@ -34,16 +38,7 @@ parseXML_Document = RootDoc NoIDD <$> parseXML_Root
 toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
 
----- constructors for boxed primitive types
--- fix name clash in ProxParser 
---mkString_ :: String -> String_
---mkString_ str = String_ NoIDD str
-
---mkBool_ :: Bool -> Bool_
---mkBool_ b = Bool_ NoIDD b
-
---mkInt_ :: Int -> Int_
---mkInt_ i = Int_ NoIDD i
+---- deconstructors for boxed primitive types
 
 string_ :: String_ -> String
 string_ (String_ _ str) = str
@@ -58,6 +53,46 @@ int_ (Int_ _ i) = i
 int_ _ = 0
 
 ----
+
+
+-- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
+
+toXMLBool b = Elt "Bool" [("val", show b)] []
+
+toXMLInt i = Elt "Integer" [("val", show i)] []
+
+toXMLString str = Elt "String" [] [PCData str] 
+
+
+parseXML_String :: Parser String
+parseXML_String =
+ do { spaces
+    ; string "<String>"
+    ; str <- many (satisfy (/='<')) 
+    ; string "</String>"
+    ; return str
+    }
+
+parseXML_Int :: Parser Int
+parseXML_Int  =
+ do { spaces
+    ; string "<Integer val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Bool :: Parser Bool
+parseXML_Bool =
+ do { spaces
+    ; string "<Bool val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    }
+
+
+
 
 
 initBoard = demoBoard -- Board NoIDD (backRow (Bool_ NoIDD True)) (pawnRow (Bool_ NoIDD True)) emptyRow emptyRow emptyRow emptyRow (pawnRow (Bool_ NoIDD False)) (backRow (Bool_ NoIDD False))
