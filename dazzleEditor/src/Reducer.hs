@@ -5,8 +5,6 @@ import EvalLayerTypes
 
 import EvalLayerUtils
 
-import PresTypes -- for initDoc 
-
 import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated

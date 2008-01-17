@@ -3,6 +3,8 @@ module DocUtils_Generated where
 import DocTypes
 import DocTypes_Generated
 import DocUtils
+import DocumentEdit
+import DocumentEdit_Generated
 import PresTypes
 import DebugLevels
 import Text.ParserCombinators.Parsec
@@ -25,6 +27,7 @@ instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
 instance Doc Document where
+  initialDoc = return hole
   toXML = toXMLDocument
   parseXML = parseXML_Document
 
