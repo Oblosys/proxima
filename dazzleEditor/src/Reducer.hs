@@ -10,114 +10,29 @@ import PresTypes -- for initDoc
 import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
-import Text.ParserCombinators.Parsec
 
---translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
-reductionSheet :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
-               EditEnrichedDoc documentLevel EnrichedDoc -> 
-               IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reductionSheet state low high editLow = 
-  do { (editHigh, state', low') <- reduceIO state low high editLow
---     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
-     ; return (editHigh, state', low')
-     }
-
-reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
-            EditEnrichedDoc documentLevel EnrichedDoc ->
-            IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
-																	    ; case mDoc' of
-																	        Just doc' -> return (SetDoc doc', state, enrLvl)
-																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
-																	    }
-
-reduceIO state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
--- on save, save xmlrep of previous doc. 
-reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
-                                              ; return (SetDoc doc', state, enrLvl) }
-
-reduceIO state enrLvl docLvl EvaluateDocEnr = return (EvaluateDoc, state, enrLvl) 
-reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reduceEnrIO state enrLvl docLvl enrLvl'
-reduceIO state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
-
-
-reduce :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
-          EditEnrichedDoc documentLevel EnrichedDoc ->
-          (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
-reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
-reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
-reduce state enrLvl docLvl NavLeftDocEnr = (NavLeftDoc, state, enrLvl)
-reduce state enrLvl docLvl NavRightDocEnr = (NavRightDoc, state, enrLvl)
-reduce state enrLvl docLvl CutDocEnr    = (CutDoc, state, enrLvl)
-reduce state enrLvl docLvl CopyDocEnr   = (CopyDoc, state, enrLvl)
-reduce state enrLvl docLvl PasteDocEnr  = (PasteDoc, state, enrLvl)
-reduce state enrLvl docLvl DeleteDocEnr = (DeleteDoc, state, enrLvl)
-reduce state enrLvl docLvl (UpdateDocEnr upd) = (UpdateDoc upd, state, enrLvl)
-
-reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
-
-
--- just copy the enriched document
-reduceEnrIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
+reductionSheet ::
+               LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
                EnrichedDocLevel EnrichedDoc ->
                IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reduceEnrIO state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel (RootEnr _ root _) _) = return $ -- other cases, just copy from decls
-  (SetDoc (RootDoc idd (reduceRoot root)),state, enrDoc )
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
+reductionSheet state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel (RootEnr _ root _) _) =
+  return (SetDoc (RootDoc idd (reduceRoot root)),state, enrDoc)
+reductionSheet state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
   (SetDoc (HoleDocument),state, enrDoc )
-reduceEnrIO state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
+reductionSheet state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
   (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
-initDoc :: IO Document
-initDoc = return defaultInitDoc
 
-openFile :: String -> IO (Maybe Document)
-openFile fileName =
- do { debugLnIO Prs $ "Opening file: "++fileName
-    ; result <- parseFromFile parseXML fileName
-    ; case result of
-        Right res -> return $ Just res
-        Left err -> do { debugLnIO Err "Parse error"
-                       ; debugLnIO Err $ show err
-                       ; return $ Nothing
-                       }
-    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return Nothing }
-
-saveFile :: FilePath -> Document -> IO ()
-saveFile filePath doc =
- do { debugLnIO Prs "Saving file"
-    ; writeFile filePath $ showXML $ toXML doc
-    ; return ()
-    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return () }
-  
-defaultInitDoc = RootDoc NoIDD $ Root NoIDD (Graph NoIDD (Clean NoIDD) (List_Vertex NoIDD Nil_Vertex)
-                                                                       (List_Edge NoIDD Nil_Edge))
-                                            (String_ NoIDD "Reducer.defaultInitDoc")
-                                            (List_Section NoIDD Nil_Section)
--- lines' works for Unix, Mac, and Dos format
-lines'     :: String -> [String]
-lines' ""   = []
-lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
-             in l : case s' of []      -> []
-                               ('\r' :'\n':s'') -> lines' s''   -- a Dos "\n\r" encountered on Unix or Mac platform
-                               ('\n' :s'') -> lines' s''         -- the current platform's linebreak (?)
-                                                                 -- or a Unix "\n" encountered on a Dos or Mac platform
-                               ('\r':s'') -> lines' s''          -- a  Mac "\r" encountered on Dos or Unix platform 
--- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"?
-
-
-
+reduceRoot (Root idd graph title sections) =
+  let subgraphs = getSubgraphsSections sections
+      (graph', subgraphs') = resolveSubgraphs graph subgraphs
+  in  Root idd graph' title (replaceSubgraphsSectionList subgraphs' sections)
 
 
 
 isCleanDoc (Clean _) = True
 isCleanDoc _         = False
 
-reduceRoot (Root idd graph title sections) =
-  let subgraphs = getSubgraphsSections sections
-      (graph', subgraphs') = resolveSubgraphs graph subgraphs
-  in  Root idd graph' title (replaceSubgraphsSectionList subgraphs' sections)
 
 
 getSubgraphsSections :: List_Section -> [Subgraph]
