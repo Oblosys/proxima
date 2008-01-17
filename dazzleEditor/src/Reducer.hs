@@ -22,7 +22,6 @@ reductionSheet state low high editLow =
      ; return (editHigh, state', low')
      }
 
-
 reduceIO :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
             EditEnrichedDoc documentLevel EnrichedDoc ->
             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
@@ -76,7 +75,7 @@ initDoc = return defaultInitDoc
 openFile :: String -> IO (Maybe Document)
 openFile fileName =
  do { debugLnIO Prs $ "Opening file: "++fileName
-    ; result <- parseFromFile parseXML_Document fileName
+    ; result <- parseFromFile parseXML fileName
     ; case result of
         Right res -> return $ Just res
         Left err -> do { debugLnIO Err "Parse error"
@@ -88,7 +87,7 @@ openFile fileName =
 saveFile :: FilePath -> Document -> IO ()
 saveFile filePath doc =
  do { debugLnIO Prs "Saving file"
-    ; writeFile filePath $ showXML $ toXMLDocument doc
+    ; writeFile filePath $ showXML $ toXML doc
     ; return ()
     } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return () }
   

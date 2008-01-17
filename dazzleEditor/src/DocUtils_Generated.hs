@@ -24,6 +24,9 @@ instance Eq Node where
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
+instance Doc Document where
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
 
 -- XML
 
