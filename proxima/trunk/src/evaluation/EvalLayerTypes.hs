@@ -12,6 +12,9 @@ type EvaluationSheet doc enr clip = LayerStateEval -> DocumentLevel doc clip -> 
              EditDocument' (DocumentLevel doc clip) doc ->
              IO (EditEnrichedDoc' enr, LayerStateEval, DocumentLevel doc clip)
              
-type ReductionSheet doc enr clip = LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-               IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+-- The parameters to the sheet are the old enriched doc and doc, and the new enriched doc.
+-- the result is an edit operation on the document, a new state, and a possibly updated enriched doc
+type ReductionSheet doc enr clip = 
+       LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
+       EnrichedDocLevel enr ->
+       IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr)
