@@ -51,6 +51,43 @@ int_ (Int_ _ i) = i
 int_ _ = 0
 
 
+-- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
+
+toXMLBool b = Elt "Bool" [("val", show b)] []
+
+toXMLInt i = Elt "Integer" [("val", show i)] []
+
+toXMLString str = Elt "String" [] [PCData str] 
+
+
+parseXML_String :: Parser String
+parseXML_String =
+ do { spaces
+    ; string "<String>"
+    ; str <- many (satisfy (/='<')) 
+    ; string "</String>"
+    ; return str
+    }
+
+parseXML_Int :: Parser Int
+parseXML_Int  =
+ do { spaces
+    ; string "<Integer val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Bool :: Parser Bool
+parseXML_Bool =
+ do { spaces
+    ; string "<Bool val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    }
+
+
 
 
 
