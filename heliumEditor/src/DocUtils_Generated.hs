@@ -2,10 +2,14 @@ module DocUtils_Generated where
 
 import DocTypes
 import DocTypes_Generated
+import DocumentEdit
+import DocumentEdit_Generated
 import PresTypes
 import Text.ParserCombinators.Parsec
 import DocUtils
 import CommonTypes
+import CommonUtils
+import System.Directory
 
 --instance Show Node where
 --  show NoNode = "<>"
@@ -23,8 +27,20 @@ instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
 instance Doc Document where
+  initialDoc = initDoc
   toXML = toXMLDocument
   parseXML = parseXML_Document
+
+initDoc :: IO Document
+initDoc = 
+ do { let filePath = "Heliumfile.hs"
+    ; dir <- getCurrentDirectory
+    ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
+    ; fileContents <- readFile filePath
+    ; return $ RootDoc NoIDD $ Root NoIDD NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
+    }
+    -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
+    -- the proxima parser is used when the presented document is parsed.
 
 -- XML
 

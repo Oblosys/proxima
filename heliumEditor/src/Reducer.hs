@@ -9,7 +9,6 @@ import PresTypes -- for initDoc
 
 import DocTypes_Generated
 import DocUtils_Generated
-import System.Directory
 import Text.ParserCombinators.Parsec
 
 
