@@ -5,6 +5,8 @@ import DocTypes
 import PresTypes
 import Text.ParserCombinators.Parsec
 
+import CommonTypes
+
 redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})
 --redirect InitDoc         = (SetDoc' initDoc) -- is done in translate
@@ -22,8 +24,6 @@ redirect _               = (SkipDoc' 0)
 
 
 
-
-data XML = Elt String [(String, String)] [XML] | PCData String | EmptyElt
 
 
 showXML xml = 
@@ -43,11 +43,6 @@ showXML xml =
 -- element with one child PCDATA is displayed on one line. For more than one child it's too much of a hassle
 -- because this function is only temporary
 
-toXMLBool b = Elt "Bool" [("val", show b)] []
-
-toXMLInt i = Elt "Integer" [("val", show i)] []
-
-toXMLString str = Elt "String" [] [PCData str] 
 
 -- Parsing
 
@@ -61,33 +56,6 @@ parseHoleAndParseErr typeStr holeConstructor =
       holeConstructor <$ emptyTag ("Hole"++typeStr)
   <|> holeConstructor <$ emptyTag ("ParseErr"++typeStr)
 
--- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
-
-parseXML_Int :: Parser Int
-parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
-
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
      
 infixl 4 <*>, <$>, <$, <*
 

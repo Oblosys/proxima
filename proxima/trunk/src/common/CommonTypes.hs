@@ -289,3 +289,8 @@ floralWhite = (255,250,240) :: (Int, Int, Int)
 snow = (255,250,250) :: (Int, Int, Int)
 ivory = (255,255,240) :: (Int, Int, Int)
 -}
+
+
+data XML = Elt String [(String, String)] [XML] | PCData String | EmptyElt
+
+

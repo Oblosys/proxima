@@ -21,6 +21,10 @@ data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
 class HasPath node where
   pathNode :: node -> PathDoc
 
+class Doc doc where
+--  toXML :: doc -> XML
+  
+  
 data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
     SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
   | UpdateDoc' (documentLevel -> documentLevel)
