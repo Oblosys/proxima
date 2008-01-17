@@ -5,6 +5,7 @@ import CommonTypes
 
 import List
 import Char
+import Text.ParserCombinators.Parsec
 
 
 data IDD = NoIDD | IDD Int deriving (Show, Read, Eq, Ord) -- don't want another module for this one
@@ -22,8 +23,8 @@ class HasPath node where
   pathNode :: node -> PathDoc
 
 class Doc doc where
---  toXML :: doc -> XML
-  
+  toXML :: doc -> XML
+  parseXML :: Parser doc  
   
 data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
     SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
