@@ -59,8 +59,8 @@ reduce state enrLvl docLvl (UpdateDocEnr upd) = (UpdateDoc upd, state, enrLvl)
 
 reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 
-initDoc :: Editable doc doc node clip token => IO doc
-initDoc = return hole
+initDoc :: Doc doc => IO doc
+initDoc = initialDoc
 
 openFile :: Doc doc => String -> IO (Maybe doc)
 openFile fileName =

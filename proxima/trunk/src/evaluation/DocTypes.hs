@@ -23,8 +23,9 @@ class HasPath node where
   pathNode :: node -> PathDoc
 
 class Doc doc where
+  initialDoc :: IO doc
   toXML :: doc -> XML
-  parseXML :: Parser doc  
+  parseXML :: Parser doc
   
 data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
     SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
