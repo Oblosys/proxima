@@ -7,45 +7,42 @@ import DocUtils
 import DocumentEdit
 import Text.ParserCombinators.Parsec
 
-{-
-translateIO :: ReductionSheet doc enr clip ->
+
+translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-               EditEnrichedDoc documentLevel enr -> 
-               IO (EditDocument documentLevel doc, LayerStateEval, EnrichedDocLevel enr)
--}
-translateIO sheet state low high editLow = 
-  do { (editHigh, state', low') <- reduceIO sheet state low high editLow
+               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
+               IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+
+translateIO state low high editLow = -- extra indirection for debugging purposes
+  do { (editHigh, state', low') <- reduceIO state low high editLow
 --     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
      ; return (editHigh, state', low')
      }
 
-{-reduceIO :: ReductionSheet doc enr clip ->
-            LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-            EditEnrichedDoc documentLevel enr ->
-            IO (EditDocument documentLevel doc, LayerStateEval, EnrichedDocLevel enr)
--}
-reduceIO sheet state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
+reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
+               LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
+               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
+               IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
 																	    ; case mDoc' of
 																	        Just doc' -> return (SetDoc doc', state, enrLvl)
 																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
 																	    }
 
-reduceIO sheet  state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
+reduceIO  state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
 -- on save, save xmlrep of previous doc. 
-reduceIO sheet state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
+reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
                                               ; return (SetDoc doc', state, enrLvl) }
 
-reduceIO sheet state enrLvl docLvl EvaluateDocEnr = return (EvaluateDoc, state, enrLvl) 
-reduceIO sheet state enrLvl docLvl (SetEnr enrLvl')  = sheet state enrLvl docLvl enrLvl'
-reduceIO sheet state enrLvl docLvl event = return $ reduce state enrLvl docLvl event
+reduceIO state enrLvl docLvl EvaluateDocEnr    = return (EvaluateDoc, state, enrLvl) 
+reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reductionSheet state docLvl enrLvl'
+reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl docLvl event
 
 
-{-
-reduce :: ReductionSheet doc enr clip ->
-          LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-          EditEnrichedDoc documentLevel enr ->
-          (EditDocument documentLevel doc, LayerStateEval, EnrichedDocLevel enr)
--}
+reduce :: (Doc doc, ReductionSheet doc enr clip) =>
+               LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
+               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
+               (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
@@ -56,7 +53,6 @@ reduce state enrLvl docLvl CopyDocEnr   = (CopyDoc, state, enrLvl)
 reduce state enrLvl docLvl PasteDocEnr  = (PasteDoc, state, enrLvl)
 reduce state enrLvl docLvl DeleteDocEnr = (DeleteDoc, state, enrLvl)
 reduce state enrLvl docLvl (UpdateDocEnr upd) = (UpdateDoc upd, state, enrLvl)
-
 reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 
 initDoc :: Doc doc => IO doc

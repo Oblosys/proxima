@@ -29,7 +29,7 @@ import RenTypes -- temporarily
 --import FontLibGTK  -- for initial FontMetrics, the Init should take care of this.
 import FontLib  -- for initial FontMetrics, the Init should take care of this.
 
-import EvalLayerTypes (EvaluationSheet, ReductionSheet)
+import EvalLayerTypes (EvaluationSheet, ReductionSheet (..))
 import PresLayerTypes (PresentationSheet, ParseSheet)
 import LayLayerTypes (ScannerSheet)
 
@@ -68,12 +68,12 @@ proxima :: PresentationSheet doc enr node -> ParseSheet doc enr node ->
            DocumentLevel doc clip -> EnrichedDocLevel enr ->
            IO ()
 -}
-proxima evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
+proxima evaluationSheet presentationSheet parseSheet scannerSheet
         initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
     ; viewedAreaRef <- newIORef ((0,0),(0,0)) -- shared by GUI and extra state on Arrangement layer
     ; let layers = 
-            proximaLayers evaluationSheet reductionSheet presentationSheet parseSheet scannerSheet
+            proximaLayers evaluationSheet presentationSheet parseSheet scannerSheet
                           (LayerStateEval, initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   
