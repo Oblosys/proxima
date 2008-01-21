@@ -9,17 +9,11 @@ import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
 
-reductionSheet ::
-               LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip ->
-               EnrichedDocLevel EnrichedDoc ->
-               IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reductionSheet state _ (DocumentLevel (RootDoc idd _) _ _) enrDoc@(EnrichedDocLevel (RootEnr _ root _) _) =
-  return (SetDoc (RootDoc idd (reduceRoot root)),state, enrDoc)
-reductionSheet state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
-  (SetDoc (HoleDocument),state, enrDoc )
-reductionSheet state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
-  (SetDoc (ParseErrDocument prs),state, enrDoc )  -- nd is not right
 
+instance ReductionSheet Document EnrichedDoc ClipDoc where
+  reductionSheetSimplest (RootEnr _ root _)        = RootDoc NoIDD (reduceRoot root)
+  reductionSheetSimplest HoleEnrichedDoc           = HoleDocument
+  reductionSheetSimplest (ParseErrEnrichedDoc prs) = ParseErrDocument prs
 
 reduceRoot (Root idd graph title sections) =
   let subgraphs = getSubgraphsSections sections

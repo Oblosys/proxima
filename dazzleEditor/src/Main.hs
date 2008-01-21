@@ -19,7 +19,6 @@ import CommonTypes
 gain = main -- when typing during compilation GHCI replaces the first command line char by 'g'
 
 main = proxima Evaluator.evaluationSheet
-               Reducer.reductionSheet
                PresentationAG.sem_EnrichedDoc
                ProxParser.parsePres 
                Scanner.scanner -- sheet parameters
