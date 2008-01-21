@@ -68,12 +68,12 @@ proxima :: PresentationSheet doc enr node -> ParseSheet doc enr node ->
            DocumentLevel doc clip -> EnrichedDocLevel enr ->
            IO ()
 -}
-proxima evaluationSheet presentationSheet parseSheet scannerSheet
+proxima presentationSheet parseSheet scannerSheet
         initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
     ; viewedAreaRef <- newIORef ((0,0),(0,0)) -- shared by GUI and extra state on Arrangement layer
     ; let layers = 
-            proximaLayers evaluationSheet presentationSheet parseSheet scannerSheet
+            proximaLayers presentationSheet parseSheet scannerSheet
                           (LayerStateEval, initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   

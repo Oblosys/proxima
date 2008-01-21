@@ -22,7 +22,7 @@ data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
 class HasPath node where
   pathNode :: node -> PathDoc
 
-class Doc doc where
+class Show doc => Doc doc where
   initialDoc :: IO doc
   toXML :: doc -> XML
   parseXML :: Parser doc

@@ -20,7 +20,7 @@ data EnrichedDocLevel enr = EnrichedDocLevel enr FocusDoc deriving Show
 -- TODO figure out where node should go, and clean up
 
 data EditEnrichedDoc' enr =
-    SetEnr' (EnrichedDocLevel enr) -- (InsertedTokenList, DeletedTokenMap)
+    SetEnr' (EnrichedDocLevel enr)
   | SkipEnr' Int
 
 data EditEnrichedDoc documentLevel enr =

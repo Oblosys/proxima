@@ -128,8 +128,7 @@ data ProximaLayer m state doc pres editDoc editPres editDoc' editPres' =
 
 
 
-evaluationLayer evaluationSheet = ProximaLayer EvalTranslate.translateIO
-                                                   (EvalPresent.presentIO evaluationSheet) 
+evaluationLayer   = ProximaLayer EvalTranslate.translateIO EvalPresent.presentIO
 presentationLayer presentationSheet parseSheet = ProximaLayer 
                                                    (PresTranslate.translateIO parseSheet)
                                                    (PresPresent.presentIO presentationSheet)
@@ -139,9 +138,9 @@ arrangementLayer  = ProximaLayer ArrTranslate.translateIO ArrPresent.presentIO
 renderingLayer    = ProximaLayer RenTranslate.translateIO RenPresent.presentIO
 
 
-proximaLayers evaluationSheet presentationSheet parseSheet scannerSheet
+proximaLayers presentationSheet parseSheet scannerSheet
               evaluationLS presentationLS layoutLS arrangementLS rendererLS =
-            lift (wrap (evaluationLayer evaluationSheet))   evaluationLS
+            lift (wrap evaluationLayer)   evaluationLS
   `combine` lift (wrap (presentationLayer presentationSheet parseSheet)) presentationLS
   `combine` lift (wrap (layoutLayer scannerSheet))       layoutLS
   `combine` lift (wrap arrangementLayer)  arrangementLS
