@@ -20,29 +20,35 @@ translateIO state low high editLow = -- extra indirection for debugging purposes
      }
 
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
-               LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-               IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
-reduceIO state enrLvl docLvl                  (OpenFileEnr fpth) =   do { mDoc' <- openFile fpth 
-																	    ; case mDoc' of
-																	        Just doc' -> return (SetDoc doc', state, enrLvl)
-																	        Nothing  -> return (SkipDoc 0, state, enrLvl) 
-																	    }
+            LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
+            EditEnrichedDoc (DocumentLevel doc clip) enr -> 
+            IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+reduceIO state enrLvl docLvl (OpenFileEnr fpth) = 
+ do { mDoc' <- openFile fpth 
+	; case mDoc' of
+		Just doc' -> return (SetDoc doc', state, enrLvl)
+		Nothing  -> return (SkipDoc 0, state, enrLvl) 
+	}
 
-reduceIO  state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) = do {saveFile fpth doc; return (SkipDoc 0, state, enrLvl)}
+reduceIO  state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) =
+ do { saveFile fpth doc
+    ; return (SkipDoc 0, state, enrLvl)
+    }
 -- on save, save xmlrep of previous doc. 
-reduceIO state enrLvl docLvl InitEnr     = do { doc' <- initDoc 
-                                              ; return (SetDoc doc', state, enrLvl) }
 
+reduceIO state enrLvl docLvl InitEnr =
+ do { doc' <- initDoc 
+    ; return (SetDoc doc', state, enrLvl) 
+    }
 reduceIO state enrLvl docLvl EvaluateDocEnr    = return (EvaluateDoc, state, enrLvl) 
 reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reductionSheet state docLvl enrLvl'
 reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl docLvl event
 
 
 reduce :: (Doc doc, ReductionSheet doc enr clip) =>
-               LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-               EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-               (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+          LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
+          EditEnrichedDoc (DocumentLevel doc clip) enr -> 
+          (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
