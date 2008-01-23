@@ -29,8 +29,8 @@ set = Just
 
 parsePres pres = let tokens = postScanStr keywords Nothing pres
                      (enr,errs) = runParser recognizeRootEnr tokens
-                 in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
-                               {- ++"\nhas result:"++show res -}) $
+                 in --debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+                    --           {- ++"\nhas result:"++show res -}) $
                     if null errs then Just enr else Nothing
        
 deepShowTks i tok = case tok of

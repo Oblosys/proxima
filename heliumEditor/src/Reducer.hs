@@ -1,4 +1,4 @@
-module Reducer (reductionSheet) where
+module Reducer where
 
 import CommonTypes
 import EvalLayerTypes
@@ -11,24 +11,22 @@ import DocTypes_Generated
 import DocUtils_Generated
 import Text.ParserCombinators.Parsec
 
+instance ReductionSheet Document EnrichedDoc ClipDoc where
 
--- just copy the enriched document
-reductionSheet :: LayerStateEval -> EnrichedDocLevel EnrichedDoc -> DocumentLevel Document clip -> EnrichedDocLevel EnrichedDoc ->
-             IO (EditDocument documentLevel Document, LayerStateEval, EnrichedDocLevel EnrichedDoc)
-reductionSheet state (EnrichedDocLevel (RootEnr _ (RootE _  _ _ oldIdlDcls) _ _) _) _ 
-           enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) _) =
- do { let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
-          -- dcls' = dcls -- ignore updates on id list
-    ; return (SetDoc (RootDoc idd1 (Root idd2 idp dcls')),state, enrDoc )
-    }
---
-reductionSheet state _ _ enrDoc@(EnrichedDocLevel (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) _) = return $ -- other cases, just copy from decls
-  (SetDoc (RootDoc idd1 (Root idd2 idp dcls)),state, enrDoc )
-reductionSheet state _ _ enrDoc@(EnrichedDocLevel (HoleEnrichedDoc) oldfocus) = return $
-  (SetDoc (HoleDocument),state, enrDoc )
-reductionSheet state _ _ enrDoc@(EnrichedDocLevel (ParseErrEnrichedDoc prs) oldfocus) = return $
-  (SetDoc (ParseErrDocument prs),state, enrDoc )
-
+   -- just copy the enriched document
+  reductionSheetSimple state (RootEnr _    (RootE _    _  _     oldIdlDcls) _ _) _ 
+                      enrDoc@(RootEnr idd1 (RootE idd2 idp dcls idldcls)    _ _) =
+        let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
+           -- dcls' = dcls -- use this assignment to ignore updates on id list
+        in  (RootDoc idd1 (Root idd2 idp dcls'), state, enrDoc)
+  reductionSheetSimple state _ _ enrDoc =
+    case enrDoc of 
+      (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) -> -- if oldEnr is not RootEnr, then just copy from dcls
+        (RootDoc idd1 (Root idd2 idp dcls),state, enrDoc )
+      HoleEnrichedDoc ->
+        (HoleDocument,state, enrDoc )
+      ParseErrEnrichedDoc prs ->
+        (ParseErrDocument prs,state, enrDoc )
 
 
 -- TODO: move to other module
@@ -69,16 +67,3 @@ instance Eq Ident where
   (ParseErrIdent _)     == _                     = True
   _                     == (ParseErrIdent _)     = True
   _                     == _                     = False        
-
- {-
-data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp
-          | BoardDecl IDD IDP IDP Board
-          | PPPresentationDecl IDD IDP IDP PPPresentation
-          | HoleDecl
-          | ParseErrDecl node Presentation deriving Show
-
-data Ident = Ident IDD IDP String
-           | HoleIdent
-           | ParseErrIdent node Presentation deriving Show
-
-  -}

@@ -1,4 +1,4 @@
-module Evaluator (evaluationSheet) where
+module Evaluator where
 
 import CommonTypes
 import EvalLayerTypes
@@ -10,12 +10,10 @@ import DocTypes_Generated
 
 --import EvaluateTypes
 import EvaluateTypesStubs
--- After switching between these two, execute "make depend"
 
 
 {-
 
-Inserted deleted lists are not passed around correctly yet
 
 make Module element, so Root can get rid of ParseErr and Hole
 
@@ -32,60 +30,28 @@ top level Enr should be called EnrichedDoc (in node, makestructural, etc)
 
 
 -}
-
-evaluationSheet :: LayerStateEval -> DocumentLevel Document ClipDoc -> EnrichedDocLevel EnrichedDoc ->
-             EditDocument' (DocumentLevel Document ClipDoc) Document ->
-             IO (EditEnrichedDoc' EnrichedDoc, LayerStateEval, DocumentLevel Document ClipDoc)
-evaluationSheet  state high low@(EnrichedDocLevel enr focus) editHigh =
-  let (editLow, state', high') = eval state high low editHigh
-  in do { -- debugLnIO Prs ("editDoc':"++show editHigh)
-        --; debugLnIO Prs ("editEnr':"++show editLow)
-        ; return $ (editLow, state', high')
-        }
-
--- type evaluation is currently an edit op on doc.
-
-eval state docLvl (EnrichedDocLevel enr oldFocus) (SkipDoc' 0) =
-  (SetEnr' (EnrichedDocLevel enr oldFocus), state, docLvl)  -- we should re-evaluate here because of local state
-eval state doclvl enr                            (SkipDoc' i) = (SkipEnr' (i-1), state, doclvl)
-eval state (DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) (SetDoc' d {- (inss, dels) -})  = 
-  let (enr')      = evalDoc state (DocumentLevel d NoPathD clipD) enr -- should not reuse focus from old Doc      
-  in  (SetEnr' (EnrichedDocLevel enr' focusD), state, DocumentLevel d NoPathD clipD)
+instance EvaluationSheet Document EnrichedDoc ClipDoc where
+  evaluationSheet state oldDocLvl (EnrichedDocLevel oldEnr oldEnrFocus) 
+                        docEdit docLvl@(DocumentLevel doc docFocus clip) = 
+    let enr = evalDoc state oldEnr docLvl
+        enr' = case docEdit of
+                 EvaluateDoc' -> evalTypes enr
+                 _            -> enr             
+    in  return (SetEnr' (EnrichedDocLevel enr' docFocus), state, docLvl)
+{-
 eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) (EvaluateDoc') =
   let (enr')                  = evalDoc state doclvl enr
       (enr'')                 = evalTypes enr'
   in  (SetEnr' (EnrichedDocLevel enr'' focusD), state, doclvl)
 eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docEdit = debug Eva ("DocNavigate"++show focusD) $
-  let (DocumentLevel doc' focusD' clipD',state') = editDoc state doclvl docEdit
-      (enr')                  = evalDoc state' (DocumentLevel doc' focusD' clipD') enr
-  in  (SetEnr' (EnrichedDocLevel enr' focusD'), state', DocumentLevel doc' focusD' clipD')
-
-
-
-
--- TODO: make sure that document is parsed before doing these:
-editDoc :: LayerStateEval -> DocumentLevel Document ClipDoc -> EditDocument' (DocumentLevel Document ClipDoc) Document ->
-           (DocumentLevel Document ClipDoc, LayerStateEval)
-editDoc state doclvl                        (UpdateDoc' upd) = (upd doclvl, state)
-editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)
-editDoc state (DocumentLevel doc pth clipD) NavDownDoc'      = ((DocumentLevel doc (navigateDownD pth doc) clipD), state)
-editDoc state (DocumentLevel doc pth clipD) NavLeftDoc'      = ((DocumentLevel doc (navigateLeftD pth doc) clipD), state)
-editDoc state (DocumentLevel doc pth clipD) NavRightDoc'     = ((DocumentLevel doc (navigateRightD pth doc) clipD), state)
-editDoc state doclvl                        CutDoc'          = let r@(DocumentLevel doc' _ _,state) = (editCutD doclvl, state)
-                                                               in  debug Err ("Cutting doc\n\n\n"++show doc') $ r
-editDoc state doclvl                        CopyDoc'         = (editCopyD doclvl, state)
-editDoc state doclvl                        PasteDoc'        = (editPasteD doclvl, state)
-editDoc state doclvl                        DeleteDoc'       = (editDeleteD doclvl, state)
-editDoc state doclvl                        op               = debug Err ("EvalPresent:unhandled doc edit: "++show op) (doclvl, state)
-{-
-editDoc state doclvl@(DocumentLevel doc pth clipD) EvaluateDoc'     =
-  let (errs, env, tps) = evaluate doc
-  in  --debug Prs (show errs++show tps) $
-      (doclvl, (errs, tps, env))
--}
+  let (DocumentLevel doc' focusD' clipD',state') = editDoc stat
 -- type evaluation is only done at explicit edit command (F2) because it is expensive
 
--- add the computed types to the enriched document root
+-- add the computed types to the enriched document roote doclvl docEdit
+      (enr')                  = evalDoc state' (DocumentLevel doc' focusD' clipD') enr
+  in  (SetEnr' (EnrichedDocLevel enr' focusD'), state', DocumentLevel doc' focusD' clipD')
+-}
+
 evalTypes :: EnrichedDoc -> EnrichedDoc
 evalTypes (RootEnr idd1 (RootE idd2 idp dcls idlDcls) oldTypes doc) = 
   let (errs, env, tps) = evaluate doc
@@ -98,11 +64,11 @@ getOldTypeInfo (HoleEnrichedDoc)                    = ([],[],[])
 getOldTypeInfo (ParseErrEnrichedDoc _)            = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
-evalDoc :: LayerStateEval -> DocumentLevel Document clip -> EnrichedDoc -> EnrichedDoc
-evalDoc state (DocumentLevel doc@(RootDoc idd1 (ParseErrRoot prs)) _ _) enr = RootEnr idd1 (ParseErrRootE prs) (getOldTypeInfo enr) doc
-evalDoc state (DocumentLevel doc@(RootDoc idd1 (Root idd2 idp dcls)) _ _) enr = RootEnr idd1 (RootE idd2 idp dcls dcls) (getOldTypeInfo enr) doc
-evalDoc state (DocumentLevel (HoleDocument) _ _) _ = HoleEnrichedDoc
-evalDoc state (DocumentLevel (ParseErrDocument pr) _ _) _ = ParseErrEnrichedDoc pr
+evalDoc :: LayerStateEval -> EnrichedDoc -> DocumentLevel Document clip -> EnrichedDoc
+evalDoc state enr (DocumentLevel doc@(RootDoc idd1 (ParseErrRoot prs)) _ _) = RootEnr idd1 (ParseErrRootE prs) (getOldTypeInfo enr) doc
+evalDoc state enr (DocumentLevel doc@(RootDoc idd1 (Root idd2 idp dcls)) _ _) = RootEnr idd1 (RootE idd2 idp dcls dcls) (getOldTypeInfo enr) doc
+evalDoc state enr (DocumentLevel (HoleDocument) _ _) = HoleEnrichedDoc
+evalDoc state enr (DocumentLevel (ParseErrDocument pr) _ _) = ParseErrEnrichedDoc pr
 
 
 {-
