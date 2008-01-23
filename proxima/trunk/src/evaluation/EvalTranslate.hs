@@ -11,7 +11,7 @@ import Text.ParserCombinators.Parsec
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
                EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-               IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+               IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr)
 
 translateIO state low high editLow = -- extra indirection for debugging purposes
   do { (editHigh, state', low') <- reduceIO state low high editLow
@@ -22,11 +22,11 @@ translateIO state low high editLow = -- extra indirection for debugging purposes
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
             LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
             EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-            IO (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
-reduceIO state enrLvl docLvl (OpenFileEnr fpth) = 
+            IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr)
+reduceIO state enrLvl (DocumentLevel _ _ clip) (OpenFileEnr fpth) = 
  do { mDoc' <- openFile fpth 
 	; case mDoc' of
-		Just doc' -> return (SetDoc doc', state, enrLvl)
+		Just doc' -> return (SetDoc (DocumentLevel doc' NoPathD clip), state, enrLvl)
 		Nothing  -> return (SkipDoc 0, state, enrLvl) 
 	}
 
@@ -36,9 +36,9 @@ reduceIO  state enrLvl (DocumentLevel doc _ _) (SaveFileEnr fpth) =
     }
 -- on save, save xmlrep of previous doc. 
 
-reduceIO state enrLvl docLvl InitEnr =
+reduceIO state enrLvl (DocumentLevel _ _ clip) InitEnr =
  do { doc' <- initDoc 
-    ; return (SetDoc doc', state, enrLvl) 
+    ; return (SetDoc (DocumentLevel doc' NoPathD clip), state, enrLvl) 
     }
 reduceIO state enrLvl docLvl EvaluateDocEnr    = return (EvaluateDoc, state, enrLvl) 
 reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reductionSheet state enrLvl docLvl enrLvl'
@@ -48,7 +48,7 @@ reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl do
 reduce :: (Doc doc, ReductionSheet doc enr clip) =>
           LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
           EditEnrichedDoc (DocumentLevel doc clip) enr -> 
-          (EditDocument (DocumentLevel doc clip) doc, LayerStateEval, EnrichedDocLevel enr)
+          (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)

@@ -27,9 +27,9 @@ class Show doc => Doc doc where
   toXML :: doc -> XML
   parseXML :: Parser doc
   
-data EditDocument' documentLevel doc = -- Document in SetDoc' should be a DocumentLevel!
-    SetDoc' doc -- (InsertedTokenList, DeletedTokenMap)
-  | UpdateDoc' (documentLevel -> documentLevel)
+data EditDocument' doc clip =
+    SetDoc' (DocumentLevel doc clip)
+  | UpdateDoc' (DocumentLevel doc clip -> DocumentLevel doc clip)
   | NavUpDoc'
   | NavDownDoc'
   | NavLeftDoc'
@@ -41,11 +41,11 @@ data EditDocument' documentLevel doc = -- Document in SetDoc' should be a Docume
   | EvaluateDoc' -- for type evaluation
   | SkipDoc' Int
 
-data EditDocument documentLevel doc =
+data EditDocument doc clip =
     InitDoc
   | CloseDoc
-  | SetDoc doc -- (InsertedTokenList, DeletedTokenMap)
-  | UpdateDoc (documentLevel -> documentLevel)
+  | SetDoc (DocumentLevel doc clip)
+  | UpdateDoc (DocumentLevel doc clip -> DocumentLevel doc clip)
   | NavUpDoc
   | NavDownDoc
   | NavLeftDoc
@@ -57,7 +57,7 @@ data EditDocument documentLevel doc =
   | EvaluateDoc -- for type evaluation
   | SkipDoc Int
 
-instance Show (EditDocument documentLevel doc) where
+instance Show (EditDocument doc clip) where
   show InitDoc         = "InitDoc" 
   show CloseDoc        = "CloseDoc"
   show (SetDoc doc )    = "(SetDoc {Document} {inserted&deleted} )"
@@ -74,8 +74,8 @@ instance Show (EditDocument documentLevel doc) where
   show (SkipDoc i)     = "(SkipDoc " ++ show i ++ ")"   
 
 
-instance Show doc => Show (EditDocument' documentLevel doc) where
-  show (SetDoc' doc )    = "(SetDoc' "++show doc++" {inserted&deleted} )"
+instance Show (EditDocument' doc clip) where
+  show (SetDoc' doc )    = "(SetDoc' {Document})"
   show (UpdateDoc' upd) = "(UpdateDoc' <function>)"
   show NavUpDoc'        = "NavUpDoc'"
   show NavDownDoc'      = "NavDownDoc'"

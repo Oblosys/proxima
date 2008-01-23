@@ -126,8 +126,8 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 
 -- Constants for switching on incrementality, background coloring, etc.
 
-rendererIncrementality = True
-arrangerIncrementality = True
+rendererIncrementality = False --True
+arrangerIncrementality = False --True
 
 -- use a smaller rectangle as viewed area to see what happens outside it
 reducedViewedArea = False            
