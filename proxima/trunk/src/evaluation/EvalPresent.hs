@@ -10,27 +10,31 @@ presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSh
              LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr ->
              EditDocument' (DocumentLevel doc clip) doc ->
              IO (EditEnrichedDoc' enr, LayerStateEval, DocumentLevel doc clip)
-presentIO state high low@(EnrichedDocLevel enr focus) editHigh =
+presentIO state high low editHigh =
   do { (editLow, state', high') <- eval state high low editHigh
-      -- debugLnIO Prs ("editDoc':"++show editHigh)
-      --; debugLnIO Prs ("editEnr':"++show editLow)
+     
+     --; debugLnIO Prs ("editDoc':"++show editHigh)
+     --; debugLnIO Prs ("editEnr':"++show editLow)
      ; return $ (editLow, state', high')
      }
 
-
+{-
 eval :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip) =>
              LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr ->
              EditDocument' (DocumentLevel doc clip) doc ->
              IO (EditEnrichedDoc' enr, LayerStateEval, DocumentLevel doc clip)
+-}
 eval state docLvl@(DocumentLevel doc focusD clipD) enrLvl docEdit =
   case docEdit of 
     SkipDoc' 0 -> return (SetEnr' enrLvl, state, docLvl)  -- we should re-evaluate here because of local state
     SkipDoc' i -> return (SkipEnr' (i-1), state, docLvl)
-    SetDoc' d  -> evaluationSheet state enrLvl (DocumentLevel d NoPathD clipD)
-    EvaluateDoc' -> evaluationSheet state enrLvl docLvl
+    SetDoc' d  -> do { (e,s,_) <- evaluationSheet state docLvl enrLvl docEdit (DocumentLevel d focusD clipD)
+                     ; return (e,s,DocumentLevel d NoPathD clipD)
+                     }
+    EvaluateDoc' -> evaluationSheet state docLvl enrLvl docEdit docLvl
     _ -> debug Eva ("DocNavigate"++show focusD) $
           do { let (doclvl', state') = editDoc state docLvl docEdit
-             ; evaluationSheet state' enrLvl doclvl'
+             ; evaluationSheet state' docLvl enrLvl docEdit doclvl'
              }
 
 -- TODO: make sure that document is parsed before doing these:

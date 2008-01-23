@@ -41,7 +41,7 @@ reduceIO state enrLvl docLvl InitEnr =
     ; return (SetDoc doc', state, enrLvl) 
     }
 reduceIO state enrLvl docLvl EvaluateDocEnr    = return (EvaluateDoc, state, enrLvl) 
-reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reductionSheet state docLvl enrLvl'
+reduceIO state enrLvl docLvl (SetEnr enrLvl')  = reductionSheet state enrLvl docLvl enrLvl'
 reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl docLvl event
 
 
