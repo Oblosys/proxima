@@ -38,19 +38,7 @@ instance EvaluationSheet Document EnrichedDoc ClipDoc where
                  EvaluateDoc' -> evalTypes enr
                  _            -> enr             
     in  return (SetEnr' (EnrichedDocLevel enr' docFocus), state, docLvl)
-{-
-eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) (EvaluateDoc') =
-  let (enr')                  = evalDoc state doclvl enr
-      (enr'')                 = evalTypes enr'
-  in  (SetEnr' (EnrichedDocLevel enr'' focusD), state, doclvl)
-eval state doclvl@(DocumentLevel doc focusD clipD) (EnrichedDocLevel enr _) docEdit = debug Eva ("DocNavigate"++show focusD) $
-  let (DocumentLevel doc' focusD' clipD',state') = editDoc stat
--- type evaluation is only done at explicit edit command (F2) because it is expensive
 
--- add the computed types to the enriched document roote doclvl docEdit
-      (enr')                  = evalDoc state' (DocumentLevel doc' focusD' clipD') enr
-  in  (SetEnr' (EnrichedDocLevel enr' focusD'), state', DocumentLevel doc' focusD' clipD')
--}
 
 evalTypes :: EnrichedDoc -> EnrichedDoc
 evalTypes (RootEnr idd1 (RootE idd2 idp dcls idlDcls) oldTypes doc) = 
