@@ -339,13 +339,13 @@ SEM Exp
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "case"
                         , @exp.pres
                         , key (mkIDP @idP1 @lhs.pIdC 1) "of"
-                        , loc (List_AltNode @alts.self [] {- @alts.path-}) $ parsing $ presentFocus @lhs.focusD [] {-@alts.path-} $ row @alts.press
+                        , loc (List_AltNode @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press
                         ]
   | LetExp
       lhs.pres = loc (CaseExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "let"
-                        , loc (List_DeclNode @decls.self []{-@decls.path-}) $ parsing $ presentFocus @lhs.focusD [] {-@decls.path-} $ row @decls.press
+                        , loc (List_DeclNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press
                         , key (mkIDP @idP1 @lhs.pIdC 1) "in", @exp.pres ]
 
 
