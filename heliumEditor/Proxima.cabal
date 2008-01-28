@@ -17,7 +17,7 @@ author: Martijn Schrage
 tested-with: GHC -any
 data-files:
 extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
-                    src/PresentationAG.ag
+                    src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
  
 executable: HeliumEditor
@@ -46,9 +46,9 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                GUI Proxima PresLayerTypes PresLayerUtils PresPresent PresTranslate
                PresTypes PresUtils PresentationParsing XLatex XprezLib
                RenLayerTypes RenLayerUtils RenPresent RenTranslate RenTypes
-               RenUtils Renderer DocTypes_Generated DocUtils_Generated
-               DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
-               ProxParser_Generated Reducer Scanner Chess EvaluateTypesStubs
+               RenUtils Renderer Chess DocTypes_Generated DocUtils_Generated
+               DocumentEdit_Generated EvaluateTypesStubs Evaluator Main
+               PresentationAG ProxParser ProxParser_Generated Reducer Scanner
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
