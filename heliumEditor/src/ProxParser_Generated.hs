@@ -25,28 +25,10 @@ import DocTypes_Generated
 -- ProxParser_Generated --
 
 -- Type specific
-reuseString_ :: [Maybe Node] -> Maybe IDD -> Maybe String -> String_
-reuseString_ nodes  ma0 ma1
-  = case extractFromNodes extractString_ defaultString_ nodes of
-           (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseString_"
-
-reuseBool_ :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Bool_
-reuseBool_ nodes  ma0 ma1
-  = case extractFromNodes extractBool_ defaultBool_ nodes of
-           (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseBool_"
-
-reuseInt_ :: [Maybe Node] -> Maybe IDD -> Maybe Int -> Int_
-reuseInt_ nodes  ma0 ma1
-  = case extractFromNodes extractInt_ defaultInt_ nodes of
-           (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseInt_"
-
-reuseDummy :: [Maybe Node] -> Maybe IDD -> Maybe Root -> Maybe List_Dummy -> Maybe String_ -> Maybe Bool_ -> Maybe Int_ -> Dummy
-reuseDummy nodes  ma0 ma1 ma2 ma3 ma4 ma5
+reuseDummy :: [Maybe Node] -> Maybe IDD -> Maybe Root -> Maybe Dummy -> Dummy
+reuseDummy nodes  ma0 ma1 ma2
   = case extractFromNodes extractDummy defaultDummy nodes of
-           (Dummy a0 a1 a2 a3 a4 a5) -> reuse6 Dummy a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
+           (Dummy a0 a1 a2) -> reuse3 Dummy a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseDummy"
 
 reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
@@ -67,7 +49,7 @@ reuseRootE nodes  ma0 ma1 ma2 ma3
            (RootE a0 a1 a2 a3) -> reuse4 RootE a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRootE"
 
-reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool_ -> Maybe Bool_ -> Maybe Ident -> Maybe Exp -> Decl
+reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
 reuseDecl nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
   = case extractFromNodes extractDecl defaultDecl nodes of
            (Decl a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 Decl a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
@@ -85,7 +67,7 @@ reusePPPresentationDecl nodes  ma0 ma1 ma2 ma3
            (PPPresentationDecl a0 a1 a2 a3) -> reuse4 PPPresentationDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePPPresentationDecl"
 
-reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String_ -> Ident
+reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String -> Ident
 reuseIdent nodes  ma0 ma1 ma2 ma3
   = case extractFromNodes extractIdent defaultIdent nodes of
            (Ident a0 a1 a2 a3) -> reuse4 Ident a0 a1 a2 a3 ma0 ma1 ma2 ma3
@@ -115,13 +97,13 @@ reusePowerExp nodes  ma0 ma1 ma2 ma3
            (PowerExp a0 a1 a2 a3) -> reuse4 PowerExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePowerExp"
 
-reuseBoolExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Bool_ -> Exp
+reuseBoolExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Bool -> Exp
 reuseBoolExp nodes  ma0 ma1 ma2
   = case extractFromNodes extractBoolExp defaultBoolExp nodes of
            (BoolExp a0 a1 a2) -> reuse3 BoolExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseBoolExp"
 
-reuseIntExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Int_ -> Exp
+reuseIntExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Int -> Exp
 reuseIntExp nodes  ma0 ma1 ma2
   = case extractFromNodes extractIntExp defaultIntExp nodes of
            (IntExp a0 a1 a2) -> reuse3 IntExp a0 a1 a2 ma0 ma1 ma2
@@ -199,37 +181,37 @@ reuseBoardRow nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            (BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "System error:<module>.reuseBoardRow"
 
-reuseQueen :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reuseQueen :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseQueen nodes  ma0 ma1
   = case extractFromNodes extractQueen defaultQueen nodes of
            (Queen a0 a1) -> reuse2 Queen a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseQueen"
 
-reuseKing :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reuseKing :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseKing nodes  ma0 ma1
   = case extractFromNodes extractKing defaultKing nodes of
            (King a0 a1) -> reuse2 King a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKing"
 
-reuseBishop :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reuseBishop :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseBishop nodes  ma0 ma1
   = case extractFromNodes extractBishop defaultBishop nodes of
            (Bishop a0 a1) -> reuse2 Bishop a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseBishop"
 
-reuseKnight :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reuseKnight :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseKnight nodes  ma0 ma1
   = case extractFromNodes extractKnight defaultKnight nodes of
            (Knight a0 a1) -> reuse2 Knight a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKnight"
 
-reuseRook :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reuseRook :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseRook nodes  ma0 ma1
   = case extractFromNodes extractRook defaultRook nodes of
            (Rook a0 a1) -> reuse2 Rook a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseRook"
 
-reusePawn :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> BoardSquare
+reusePawn :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reusePawn nodes  ma0 ma1
   = case extractFromNodes extractPawn defaultPawn nodes of
            (Pawn a0 a1) -> reuse2 Pawn a0 a1 ma0 ma1
@@ -241,13 +223,13 @@ reuseEmpty nodes
            (Empty) -> reuse0 Empty
            _ -> error "System error:<module>.reuseEmpty"
 
-reusePPPresentation :: [Maybe Node] -> Maybe IDD -> Maybe Bool_ -> Maybe List_Slide -> PPPresentation
+reusePPPresentation :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Maybe List_Slide -> PPPresentation
 reusePPPresentation nodes  ma0 ma1 ma2
   = case extractFromNodes extractPPPresentation defaultPPPresentation nodes of
            (PPPresentation a0 a1 a2) -> reuse3 PPPresentation a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reusePPPresentation"
 
-reuseSlide :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe ItemList -> Slide
+reuseSlide :: [Maybe Node] -> Maybe IDD -> Maybe String -> Maybe ItemList -> Slide
 reuseSlide nodes  ma0 ma1 ma2
   = case extractFromNodes extractSlide defaultSlide nodes of
            (Slide a0 a1 a2) -> reuse3 Slide a0 a1 a2 ma0 ma1 ma2
@@ -277,7 +259,7 @@ reuseAlpha nodes  ma0
            (Alpha a0) -> reuse1 Alpha a0 ma0
            _ -> error "System error:<module>.reuseAlpha"
 
-reuseStringItem :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Item
+reuseStringItem :: [Maybe Node] -> Maybe IDD -> Maybe String -> Item
 reuseStringItem nodes  ma0 ma1
   = case extractFromNodes extractStringItem defaultStringItem nodes of
            (StringItem a0 a1) -> reuse2 StringItem a0 a1 ma0 ma1
@@ -294,12 +276,6 @@ reuseListItem nodes  ma0 ma1
   = case extractFromNodes extractListItem defaultListItem nodes of
            (ListItem a0 a1) -> reuse2 ListItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseListItem"
-
-reuseList_Dummy :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
-reuseList_Dummy nodes  ma0 ma1
-  = case extractFromNodes extractList_Dummy defaultList_Dummy nodes of
-           (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseList_Dummy"
 
 reuseList_Decl :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Decl -> List_Decl
 reuseList_Decl nodes  ma0 ma1
@@ -331,20 +307,8 @@ reuseList_Item nodes  ma0 ma1
            (List_Item a0 a1) -> reuse2 List_Item a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Item"
 
-extractString_ :: Maybe Node -> Maybe String_
-extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
-extractString_ _ = Nothing
-
-extractBool_ :: Maybe Node -> Maybe Bool_
-extractBool_ (Just (Bool_Node x@(Bool_ _ _) _)) = Just x
-extractBool_ _ = Nothing
-
-extractInt_ :: Maybe Node -> Maybe Int_
-extractInt_ (Just (Int_Node x@(Int_ _ _) _)) = Just x
-extractInt_ _ = Nothing
-
 extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _ _) _)) = Just x
+extractDummy (Just (DummyNode x@(Dummy _ _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
@@ -511,10 +475,6 @@ extractListItem :: Maybe Node -> Maybe Item
 extractListItem (Just (ListItemNode x@(ListItem _ _) _)) = Just x
 extractListItem _ = Nothing
 
-extractList_Dummy :: Maybe Node -> Maybe List_Dummy
-extractList_Dummy (Just (List_DummyNode x@(List_Dummy _ _) _)) = Just x
-extractList_Dummy _ = Nothing
-
 extractList_Decl :: Maybe Node -> Maybe List_Decl
 extractList_Decl (Just (List_DeclNode x@(List_Decl _ _) _)) = Just x
 extractList_Decl _ = Nothing
@@ -535,17 +495,8 @@ extractList_Item :: Maybe Node -> Maybe List_Item
 extractList_Item (Just (List_ItemNode x@(List_Item _ _) _)) = Just x
 extractList_Item _ = Nothing
 
-defaultString_ :: String_
-defaultString_ = String_ NoIDD hole
-
-defaultBool_ :: Bool_
-defaultBool_ = Bool_ NoIDD hole
-
-defaultInt_ :: Int_
-defaultInt_ = Int_ NoIDD hole
-
 defaultDummy :: Dummy
-defaultDummy = Dummy NoIDD hole hole hole hole hole
+defaultDummy = Dummy NoIDD hole hole
 
 defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr NoIDD hole hole hole
@@ -670,9 +621,6 @@ defaultHeliumItem = HeliumItem NoIDD hole
 defaultListItem :: Item
 defaultListItem = ListItem NoIDD hole
 
-defaultList_Dummy :: List_Dummy
-defaultList_Dummy = List_Dummy NoIDD Nil_Dummy
-
 defaultList_Decl :: List_Decl
 defaultList_Decl = List_Decl NoIDD Nil_Decl
 
@@ -694,29 +642,17 @@ defaultList_Item = List_Item NoIDD Nil_Item
 extractFromNodes extr def []     = def
 extractFromNodes extr def (n:ns) = maybe (extractFromNodes extr def ns) id (extr n)
 
-reuse2 :: (a0 -> a1 -> r) -> 
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f  a0 a1 ma0 ma1 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) 
-
-reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) -> 
-          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
-reuse6 f  a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) 
+reuse3 :: (a0 -> a1 -> a2 -> r) -> 
+          a0 -> a1 -> a2 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
+reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
 
 reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
 reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
-
-reuse3 :: (a0 -> a1 -> a2 -> r) -> 
-          a0 -> a1 -> a2 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
-reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
 
 reuse9 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> 
@@ -729,6 +665,12 @@ reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
+
+reuse2 :: (a0 -> a1 -> r) -> 
+          a0 -> a1 -> 
+          Maybe a0 -> Maybe a1 -> r
+reuse2 f  a0 a1 ma0 ma1 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) 
 
 reuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 

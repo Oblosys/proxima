@@ -68,25 +68,7 @@ Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 
 
 
-data String_ = String_ IDD String 
-             | HoleString_
-             | ParseErrString_ (Presentation Document Node ClipDoc UserToken)
-                deriving Show
-
-
-data Bool_ = Bool_ IDD Bool 
-           | HoleBool_
-           | ParseErrBool_ (Presentation Document Node ClipDoc UserToken)
-              deriving Show
-
-
-data Int_ = Int_ IDD Int 
-          | HoleInt_
-          | ParseErrInt_ (Presentation Document Node ClipDoc UserToken)
-             deriving Show
-
-
-data Dummy = Dummy IDD Root List_Dummy String_ Bool_ Int_ 
+data Dummy = Dummy IDD Root Dummy 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
@@ -110,7 +92,7 @@ data RootE = RootE IDD IDP List_Decl List_Decl
               deriving Show
 
 
-data Decl = Decl IDD IDP IDP IDP IDP Bool_ Bool_ Ident Exp 
+data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp 
           | BoardDecl IDD IDP IDP Board 
           | PPPresentationDecl IDD IDP IDP PPPresentation 
           | HoleDecl
@@ -118,7 +100,7 @@ data Decl = Decl IDD IDP IDP IDP IDP Bool_ Bool_ Ident Exp
              deriving Show
 
 
-data Ident = Ident IDD IDP IDP String_ 
+data Ident = Ident IDD IDP IDP String 
            | HoleIdent
            | ParseErrIdent (Presentation Document Node ClipDoc UserToken)
               deriving Show
@@ -128,8 +110,8 @@ data Exp = PlusExp IDD IDP Exp Exp
          | TimesExp IDD IDP Exp Exp 
          | DivExp IDD IDP Exp Exp 
          | PowerExp IDD IDP Exp Exp 
-         | BoolExp IDD IDP Bool_ 
-         | IntExp IDD IDP Int_ 
+         | BoolExp IDD IDP Bool 
+         | IntExp IDD IDP Int 
          | LamExp IDD IDP IDP Ident Exp 
          | AppExp IDD Exp Exp 
          | CaseExp IDD IDP IDP Exp List_Alt 
@@ -162,25 +144,25 @@ data BoardRow = BoardRow IDD BoardSquare BoardSquare BoardSquare BoardSquare Boa
                  deriving Show
 
 
-data BoardSquare = Queen IDD Bool_ 
-                 | King IDD Bool_ 
-                 | Bishop IDD Bool_ 
-                 | Knight IDD Bool_ 
-                 | Rook IDD Bool_ 
-                 | Pawn IDD Bool_ 
+data BoardSquare = Queen IDD Bool 
+                 | King IDD Bool 
+                 | Bishop IDD Bool 
+                 | Knight IDD Bool 
+                 | Rook IDD Bool 
+                 | Pawn IDD Bool 
                  | Empty 
                  | HoleBoardSquare
                  | ParseErrBoardSquare (Presentation Document Node ClipDoc UserToken)
                     deriving Show
 
 
-data PPPresentation = PPPresentation IDD Bool_ List_Slide 
+data PPPresentation = PPPresentation IDD Bool List_Slide 
                     | HolePPPresentation
                     | ParseErrPPPresentation (Presentation Document Node ClipDoc UserToken)
                        deriving Show
 
 
-data Slide = Slide IDD String_ ItemList 
+data Slide = Slide IDD String ItemList 
            | HoleSlide
            | ParseErrSlide (Presentation Document Node ClipDoc UserToken)
               deriving Show
@@ -200,23 +182,12 @@ data ListType = Bullet IDD
                  deriving Show
 
 
-data Item = StringItem IDD String_ 
+data Item = StringItem IDD String 
           | HeliumItem IDD Exp 
           | ListItem IDD ItemList 
           | HoleItem
           | ParseErrItem (Presentation Document Node ClipDoc UserToken)
              deriving Show
-
-
-data List_Dummy = List_Dummy IDD ConsList_Dummy 
-                | HoleList_Dummy
-                | ParseErrList_Dummy (Presentation Document Node ClipDoc UserToken)
-                   deriving Show
-
-
-data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy 
-                    | Nil_Dummy 
-                       deriving Show
 
 
 data List_Decl = List_Decl IDD ConsList_Decl 
@@ -276,22 +247,19 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 
 -- Generated Types --
 
-data ClipDoc = Clip_String String
-             | Clip_Bool Bool
-             | Clip_Int Int
-             | Clip_Root Root
-             | Clip_List_Dummy List_Dummy
-             | Clip_String_ String_
-             | Clip_Bool_ Bool_
-             | Clip_Int_ Int_
+data ClipDoc = Clip_Root Root
+             | Clip_Dummy Dummy
              | Clip_RootE RootE
              | Clip_HeliumTypeInfo HeliumTypeInfo
              | Clip_Document Document
              | Clip_List_Decl List_Decl
+             | Clip_Bool Bool
              | Clip_Ident Ident
              | Clip_Exp Exp
              | Clip_Board Board
              | Clip_PPPresentation PPPresentation
+             | Clip_String String
+             | Clip_Int Int
              | Clip_List_Alt List_Alt
              | Clip_List_Exp List_Exp
              | Clip_BoardRow BoardRow
@@ -300,8 +268,6 @@ data ClipDoc = Clip_String String
              | Clip_ItemList ItemList
              | Clip_ListType ListType
              | Clip_List_Item List_Item
-             | Clip_Dummy Dummy
-             
              | Clip_Decl Decl
              
              | Clip_Alt Alt
@@ -319,12 +285,6 @@ data ClipDoc = Clip_String String
 data Node = NoNode 
           | RootDocNode Document Path
           | HoleDocumentNode Document Path
-          | String_Node String_ Path 
-          | HoleString_Node String_ Path 
-          | Bool_Node Bool_ Path 
-          | HoleBool_Node Bool_ Path 
-          | Int_Node Int_ Path 
-          | HoleInt_Node Int_ Path 
           | DummyNode Dummy Path 
           | HoleDummyNode Dummy Path 
           | RootEnrNode EnrichedDoc Path 
@@ -383,8 +343,6 @@ data Node = NoNode
           | HeliumItemNode Item Path 
           | ListItemNode Item Path 
           | HoleItemNode Item Path 
-          | List_DummyNode List_Dummy Path 
-          | HoleList_DummyNode List_Dummy Path 
           | List_DeclNode List_Decl Path 
           | HoleList_DeclNode List_Decl Path 
           | List_AltNode List_Alt Path 
@@ -402,12 +360,6 @@ instance Show Node where
   show NoNode            = "NoNode"
   show (RootDocNode _ _) = "RootDocNode"
   show (HoleDocumentNode _ _) = "HoleDocumentNode"
-  show (String_Node _ _)  = "String_Node"
-  show (HoleString_Node _ _)  = "HoleString_Node"
-  show (Bool_Node _ _)  = "Bool_Node"
-  show (HoleBool_Node _ _)  = "HoleBool_Node"
-  show (Int_Node _ _)  = "Int_Node"
-  show (HoleInt_Node _ _)  = "HoleInt_Node"
   show (DummyNode _ _)  = "DummyNode"
   show (HoleDummyNode _ _)  = "HoleDummyNode"
   show (RootEnrNode _ _)  = "RootEnrNode"
@@ -466,8 +418,6 @@ instance Show Node where
   show (HeliumItemNode _ _)  = "HeliumItemNode"
   show (ListItemNode _ _)  = "ListItemNode"
   show (HoleItemNode _ _)  = "HoleItemNode"
-  show (List_DummyNode _ _)  = "List_DummyNode"
-  show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
   show (List_DeclNode _ _)  = "List_DeclNode"
   show (HoleList_DeclNode _ _)  = "HoleList_DeclNode"
   show (List_AltNode _ _)  = "List_AltNode"

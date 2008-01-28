@@ -54,21 +54,6 @@ parseXML_Document = RootDoc NoIDD <$> parseXML_Root
 toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
 
----- deconstructors for boxed primitive types
-
-string_ :: String_ -> String
-string_ (String_ _ str) = str
-string_ _ = ""
-
-bool_ :: Bool_ -> Bool
-bool_ (Bool_ _ b) = b
-bool_ _ = False
-
-int_ :: Int_ -> Int
-int_ (Int_ _ i) = i
-int_ _ = 0
-
-----
 
 
 -- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
@@ -122,7 +107,7 @@ demoBoard = Board NoIDD r8 r7 r6 r5 r4 r3 r2 r1
        r6 = BoardRow NoIDD e  e  e  e  wn e  e  e
        r7 = BoardRow NoIDD wp wp wb e  e  wp wp e
        r8 = BoardRow NoIDD e  wk e  wr e  e  e  e
-       [e,wp,wr,wn,wb,wq,wk,bp,br,bn,bb,bq,bk] = Empty : pieces (Bool_ NoIDD True) ++ pieces (Bool_ NoIDD False)
+       [e,wp,wr,wn,wb,wq,wk,bp,br,bn,bb,bq,bk] = Empty : pieces True ++ pieces False
        pieces c = [Pawn NoIDD c, Rook NoIDD c, Knight NoIDD c, Bishop NoIDD c, Queen NoIDD c, King NoIDD c]
       
   
@@ -141,44 +126,42 @@ backRow c = BoardRow NoIDD (Rook NoIDD c) (Knight NoIDD c) (Bishop NoIDD c) (Que
 
 
 initPPPresentation = 
-  PPPresentation NoIDD (Bool_ NoIDD True) $ List_Slide NoIDD $
+  PPPresentation NoIDD True $ List_Slide NoIDD $
     mkSlides
-      [ Slide NoIDD (mkString_ "slide_1") $
+      [ Slide NoIDD "slide_1" $
           ItemList NoIDD (Bullet NoIDD) $ List_Item NoIDD $
-                         mkItems [ StringItem NoIDD (mkString_ "item_1")
+                         mkItems [ StringItem NoIDD "item_1"
                                  , HeliumItem NoIDD -- simple trick to use parser: Needs an additional parse (F1) though!
                                      --(ident "\\ x -> increaze x")
                                      (ident "\\b -> \\x -> if b then ink x else x")
-                                 , StringItem NoIDD (mkString_ "item_2")
+                                 , StringItem NoIDD "item_2"
                                  , ListItem NoIDD listItem
                                  ]
-       , Slide NoIDD (mkString_ "slide_2") $
+       , Slide NoIDD "slide_2" $
           ItemList NoIDD (Alpha NoIDD) $  List_Item NoIDD $
-                         mkItems [ StringItem NoIDD (mkString_ "item_a")
-                                 , StringItem NoIDD (mkString_ "item_b")
-                                 , StringItem NoIDD (mkString_ "item_c")
+                         mkItems [ StringItem NoIDD "item_a"
+                                 , StringItem NoIDD "item_b"
+                                 , StringItem NoIDD "item_c"
                                  ]
       ]
  where listItem = ItemList NoIDD (Number NoIDD) $  List_Item NoIDD $
-                    mkItems [ StringItem NoIDD (mkString_ "nested_item_1")
+                    mkItems [ StringItem NoIDD "nested_item_1"
                             , ListItem NoIDD listItem'
-                            , StringItem NoIDD (mkString_ "nested_item_2")
-                            , StringItem NoIDD (mkString_ "nested_item_3")
+                            , StringItem NoIDD "nested_item_2"
+                            , StringItem NoIDD "nested_item_3"
                             ]
        listItem' = ItemList NoIDD (Bullet NoIDD) $  List_Item NoIDD $
-                    mkItems [ StringItem NoIDD (mkString_ "nested_nested_item")
-                            , StringItem NoIDD (mkString_ "nested_nested_item")
-                            , StringItem NoIDD (mkString_ "nested_nested_item")
+                    mkItems [ StringItem NoIDD "nested_nested_item"
+                            , StringItem NoIDD "nested_nested_item"
+                            , StringItem NoIDD "nested_nested_item"
                             ]
        dv e1 e2 = DivExp NoIDD NoIDP e1 e2 
-       lam str body = LamExp NoIDD NoIDP NoIDP (Ident NoIDD NoIDP NoIDP (mkString_ str)) body
+       lam str body = LamExp NoIDD NoIDP NoIDP (Ident NoIDD NoIDP NoIDP str) body
        ifxp c t e = IfExp NoIDD NoIDP NoIDP NoIDP c t e 
-       int i = IntExp NoIDD NoIDP (Int_ NoIDD i)
-       bool b = BoolExp NoIDD NoIDP (Bool_ NoIDD b)
-       ident str = IdentExp NoIDD (Ident NoIDD NoIDP NoIDP (mkString_ str))
+       int i = IntExp NoIDD NoIDP i
+       bool b = BoolExp NoIDD NoIDP b
+       ident str = IdentExp NoIDD (Ident NoIDD NoIDP NoIDP str)
        
-
-       mkString_ str = String_ NoIDD str
 
 mkSlides []     = Nil_Slide
 mkSlides (s:ss) = Cons_Slide s (mkSlides ss)
@@ -202,82 +185,74 @@ rankNode :: Node -> Int
 rankNode NoNode            = 0
 rankNode (RootDocNode _ _) = 1
 rankNode (HoleDocumentNode _ _) = 2
-rankNode (String_Node _ _)  = 3
-rankNode (HoleString_Node _ _)  = 4
-rankNode (Bool_Node _ _)  = 5
-rankNode (HoleBool_Node _ _)  = 6
-rankNode (Int_Node _ _)  = 7
-rankNode (HoleInt_Node _ _)  = 8
-rankNode (DummyNode _ _)  = 9
-rankNode (HoleDummyNode _ _)  = 10
-rankNode (RootEnrNode _ _)  = 11
-rankNode (HoleEnrichedDocNode _ _)  = 12
-rankNode (RootNode _ _)  = 13
-rankNode (HoleRootNode _ _)  = 14
-rankNode (RootENode _ _)  = 15
-rankNode (HoleRootENode _ _)  = 16
-rankNode (DeclNode _ _)  = 17
-rankNode (BoardDeclNode _ _)  = 18
-rankNode (PPPresentationDeclNode _ _)  = 19
-rankNode (HoleDeclNode _ _)  = 20
-rankNode (IdentNode _ _)  = 21
-rankNode (HoleIdentNode _ _)  = 22
-rankNode (PlusExpNode _ _)  = 23
-rankNode (TimesExpNode _ _)  = 24
-rankNode (DivExpNode _ _)  = 25
-rankNode (PowerExpNode _ _)  = 26
-rankNode (BoolExpNode _ _)  = 27
-rankNode (IntExpNode _ _)  = 28
-rankNode (LamExpNode _ _)  = 29
-rankNode (AppExpNode _ _)  = 30
-rankNode (CaseExpNode _ _)  = 31
-rankNode (LetExpNode _ _)  = 32
-rankNode (IdentExpNode _ _)  = 33
-rankNode (IfExpNode _ _)  = 34
-rankNode (ParenExpNode _ _)  = 35
-rankNode (ListExpNode _ _)  = 36
-rankNode (ProductExpNode _ _)  = 37
-rankNode (HoleExpNode _ _)  = 38
-rankNode (AltNode _ _)  = 39
-rankNode (HoleAltNode _ _)  = 40
-rankNode (BoardNode _ _)  = 41
-rankNode (HoleBoardNode _ _)  = 42
-rankNode (BoardRowNode _ _)  = 43
-rankNode (HoleBoardRowNode _ _)  = 44
-rankNode (QueenNode _ _)  = 45
-rankNode (KingNode _ _)  = 46
-rankNode (BishopNode _ _)  = 47
-rankNode (KnightNode _ _)  = 48
-rankNode (RookNode _ _)  = 49
-rankNode (PawnNode _ _)  = 50
-rankNode (EmptyNode _ _)  = 51
-rankNode (HoleBoardSquareNode _ _)  = 52
-rankNode (PPPresentationNode _ _)  = 53
-rankNode (HolePPPresentationNode _ _)  = 54
-rankNode (SlideNode _ _)  = 55
-rankNode (HoleSlideNode _ _)  = 56
-rankNode (ItemListNode _ _)  = 57
-rankNode (HoleItemListNode _ _)  = 58
-rankNode (BulletNode _ _)  = 59
-rankNode (NumberNode _ _)  = 60
-rankNode (AlphaNode _ _)  = 61
-rankNode (HoleListTypeNode _ _)  = 62
-rankNode (StringItemNode _ _)  = 63
-rankNode (HeliumItemNode _ _)  = 64
-rankNode (ListItemNode _ _)  = 65
-rankNode (HoleItemNode _ _)  = 66
-rankNode (List_DummyNode _ _)  = 67
-rankNode (HoleList_DummyNode _ _)  = 68
-rankNode (List_DeclNode _ _)  = 69
-rankNode (HoleList_DeclNode _ _)  = 70
-rankNode (List_AltNode _ _)  = 71
-rankNode (HoleList_AltNode _ _)  = 72
-rankNode (List_ExpNode _ _)  = 73
-rankNode (HoleList_ExpNode _ _)  = 74
-rankNode (List_SlideNode _ _)  = 75
-rankNode (HoleList_SlideNode _ _)  = 76
-rankNode (List_ItemNode _ _)  = 77
-rankNode (HoleList_ItemNode _ _)  = 78
+rankNode (DummyNode _ _)  = 3
+rankNode (HoleDummyNode _ _)  = 4
+rankNode (RootEnrNode _ _)  = 5
+rankNode (HoleEnrichedDocNode _ _)  = 6
+rankNode (RootNode _ _)  = 7
+rankNode (HoleRootNode _ _)  = 8
+rankNode (RootENode _ _)  = 9
+rankNode (HoleRootENode _ _)  = 10
+rankNode (DeclNode _ _)  = 11
+rankNode (BoardDeclNode _ _)  = 12
+rankNode (PPPresentationDeclNode _ _)  = 13
+rankNode (HoleDeclNode _ _)  = 14
+rankNode (IdentNode _ _)  = 15
+rankNode (HoleIdentNode _ _)  = 16
+rankNode (PlusExpNode _ _)  = 17
+rankNode (TimesExpNode _ _)  = 18
+rankNode (DivExpNode _ _)  = 19
+rankNode (PowerExpNode _ _)  = 20
+rankNode (BoolExpNode _ _)  = 21
+rankNode (IntExpNode _ _)  = 22
+rankNode (LamExpNode _ _)  = 23
+rankNode (AppExpNode _ _)  = 24
+rankNode (CaseExpNode _ _)  = 25
+rankNode (LetExpNode _ _)  = 26
+rankNode (IdentExpNode _ _)  = 27
+rankNode (IfExpNode _ _)  = 28
+rankNode (ParenExpNode _ _)  = 29
+rankNode (ListExpNode _ _)  = 30
+rankNode (ProductExpNode _ _)  = 31
+rankNode (HoleExpNode _ _)  = 32
+rankNode (AltNode _ _)  = 33
+rankNode (HoleAltNode _ _)  = 34
+rankNode (BoardNode _ _)  = 35
+rankNode (HoleBoardNode _ _)  = 36
+rankNode (BoardRowNode _ _)  = 37
+rankNode (HoleBoardRowNode _ _)  = 38
+rankNode (QueenNode _ _)  = 39
+rankNode (KingNode _ _)  = 40
+rankNode (BishopNode _ _)  = 41
+rankNode (KnightNode _ _)  = 42
+rankNode (RookNode _ _)  = 43
+rankNode (PawnNode _ _)  = 44
+rankNode (EmptyNode _ _)  = 45
+rankNode (HoleBoardSquareNode _ _)  = 46
+rankNode (PPPresentationNode _ _)  = 47
+rankNode (HolePPPresentationNode _ _)  = 48
+rankNode (SlideNode _ _)  = 49
+rankNode (HoleSlideNode _ _)  = 50
+rankNode (ItemListNode _ _)  = 51
+rankNode (HoleItemListNode _ _)  = 52
+rankNode (BulletNode _ _)  = 53
+rankNode (NumberNode _ _)  = 54
+rankNode (AlphaNode _ _)  = 55
+rankNode (HoleListTypeNode _ _)  = 56
+rankNode (StringItemNode _ _)  = 57
+rankNode (HeliumItemNode _ _)  = 58
+rankNode (ListItemNode _ _)  = 59
+rankNode (HoleItemNode _ _)  = 60
+rankNode (List_DeclNode _ _)  = 61
+rankNode (HoleList_DeclNode _ _)  = 62
+rankNode (List_AltNode _ _)  = 63
+rankNode (HoleList_AltNode _ _)  = 64
+rankNode (List_ExpNode _ _)  = 65
+rankNode (HoleList_ExpNode _ _)  = 66
+rankNode (List_SlideNode _ _)  = 67
+rankNode (HoleList_SlideNode _ _)  = 68
+rankNode (List_ItemNode _ _)  = 69
+rankNode (HoleList_ItemNode _ _)  = 70
 
 
 
@@ -285,12 +260,6 @@ instance HasPath Node where
   pathNode NoNode            = NoPathD
   pathNode (RootDocNode _ pth) = PathD pth
   pathNode (HoleDocumentNode _ pth) = PathD pth
-  pathNode (String_Node _ pth)  = PathD pth
-  pathNode (HoleString_Node _ pth)  = PathD pth
-  pathNode (Bool_Node _ pth)  = PathD pth
-  pathNode (HoleBool_Node _ pth)  = PathD pth
-  pathNode (Int_Node _ pth)  = PathD pth
-  pathNode (HoleInt_Node _ pth)  = PathD pth
   pathNode (DummyNode _ pth)  = PathD pth
   pathNode (HoleDummyNode _ pth)  = PathD pth
   pathNode (RootEnrNode _ pth)  = PathD pth
@@ -349,8 +318,6 @@ instance HasPath Node where
   pathNode (HeliumItemNode _ pth)  = PathD pth
   pathNode (ListItemNode _ pth)  = PathD pth
   pathNode (HoleItemNode _ pth)  = PathD pth
-  pathNode (List_DummyNode _ pth)  = PathD pth
-  pathNode (HoleList_DummyNode _ pth)  = PathD pth
   pathNode (List_DeclNode _ pth)  = PathD pth
   pathNode (HoleList_DeclNode _ pth)  = PathD pth
   pathNode (List_AltNode _ pth)  = PathD pth
@@ -364,20 +331,8 @@ instance HasPath Node where
 
 
 
-string_IDD :: Node -> Maybe IDD
-string_IDD (String_Node (String_ iDD _) _) = Just iDD
-string_IDD _                                   = Nothing
-
-bool_IDD :: Node -> Maybe IDD
-bool_IDD (Bool_Node (Bool_ iDD _) _) = Just iDD
-bool_IDD _                                   = Nothing
-
-int_IDD :: Node -> Maybe IDD
-int_IDD (Int_Node (Int_ iDD _) _) = Just iDD
-int_IDD _                                   = Nothing
-
 dummyIDD :: Node -> Maybe IDD
-dummyIDD (DummyNode (Dummy iDD _ _ _ _ _) _) = Just iDD
+dummyIDD (DummyNode (Dummy iDD _ _) _) = Just iDD
 dummyIDD _                                   = Nothing
 
 rootEnrIDD :: Node -> Maybe IDD
@@ -545,10 +500,7 @@ listItemIDD _                                   = Nothing
 
 
 
-shallowShowString_1 (String_  _ _) = "String_"
-shallowShowBool_1 (Bool_  _ _) = "Bool_"
-shallowShowInt_1 (Int_  _ _) = "Int_"
-shallowShowDummy1 (Dummy  _ _ _ _ _ _) = "Dummy"
+shallowShowDummy1 (Dummy  _ _ _) = "Dummy"
 shallowShowEnrichedDoc1 (RootEnr  _ _ _ _) = "RootEnr"
 shallowShowRoot1 (Root  _ _ _) = "Root"
 shallowShowRootE1 (RootE  _ _ _ _) = "RootE"
@@ -590,9 +542,6 @@ shallowShowListType1 (Alpha  _) = "Alpha"
 shallowShowItem1 (StringItem  _ _) = "StringItem"
 shallowShowItem1 (HeliumItem  _ _) = "HeliumItem"
 shallowShowItem1 (ListItem  _ _) = "ListItem"
-shallowShowList_Dummy1 (List_Dummy  _ _) = "List_Dummy"
-shallowShowConsList_Dummy1 (Cons_Dummy  _ _) = "Cons_Dummy"
-shallowShowConsList_Dummy1 (Nil_Dummy ) = "Nil_Dummy"
 shallowShowList_Decl1 (List_Decl  _ _) = "List_Decl"
 shallowShowConsList_Decl1 (Cons_Decl  _ _) = "Cons_Decl"
 shallowShowConsList_Decl1 (Nil_Decl ) = "Nil_Decl"
@@ -611,16 +560,7 @@ shallowShowConsList_Item1 (Nil_Item ) = "Nil_Item"
 
 
 
-toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
-toXMLString_ HoleString_ = Elt "HoleString_" [] []
-toXMLString_ (ParseErrString_ _) = Elt "ParseErrString_" [] []
-toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
-toXMLBool_ HoleBool_ = Elt "HoleBool_" [] []
-toXMLBool_ (ParseErrBool_ _) = Elt "ParseErrBool_" [] []
-toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
-toXMLInt_ HoleInt_ = Elt "HoleInt_" [] []
-toXMLInt_ (ParseErrInt_ _) = Elt "ParseErrInt_" [] []
-toXMLDummy (Dummy _ root dummys string_ bool_ int_) = Elt "Dummy" [] $ [toXMLRoot root] ++ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
+toXMLDummy (Dummy _ root dummy) = Elt "Dummy" [] $ [toXMLRoot root] ++ [toXMLDummy dummy] ++ []
 toXMLDummy HoleDummy = Elt "HoleDummy" [] []
 toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
 toXMLEnrichedDoc (RootEnr _ root heliumTypeInfo document) = Elt "RootEnr" [] $ [toXMLRootE root] ++ [toXMLHeliumTypeInfo heliumTypeInfo] ++ [toXMLDocument document] ++ []
@@ -632,20 +572,20 @@ toXMLRoot (ParseErrRoot _) = Elt "ParseErrRoot" [] []
 toXMLRootE (RootE _ _ decls idListDecls) = Elt "RootE" [] $ toXMLList_Decl decls ++ toXMLList_Decl idListDecls ++ []
 toXMLRootE HoleRootE = Elt "HoleRootE" [] []
 toXMLRootE (ParseErrRootE _) = Elt "ParseErrRootE" [] []
-toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool_ expanded] ++ [toXMLBool_ autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
+toXMLDecl (Decl _ _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool expanded] ++ [toXMLBool autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLDecl (BoardDecl _ _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board] ++ []
 toXMLDecl (PPPresentationDecl _ _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation] ++ []
 toXMLDecl HoleDecl = Elt "HoleDecl" [] []
 toXMLDecl (ParseErrDecl _) = Elt "ParseErrDecl" [] []
-toXMLIdent (Ident _ _ _ string_) = Elt "Ident" [] $ [toXMLString_ string_] ++ []
+toXMLIdent (Ident _ _ _ string) = Elt "Ident" [] $ [toXMLString string] ++ []
 toXMLIdent HoleIdent = Elt "HoleIdent" [] []
 toXMLIdent (ParseErrIdent _) = Elt "ParseErrIdent" [] []
 toXMLExp (PlusExp _ _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (TimesExp _ _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (DivExp _ _ exp1 exp2) = Elt "DivExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (PowerExp _ _ exp1 exp2) = Elt "PowerExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
-toXMLExp (BoolExp _ _ bool_) = Elt "BoolExp" [] $ [toXMLBool_ bool_] ++ []
-toXMLExp (IntExp _ _ int_) = Elt "IntExp" [] $ [toXMLInt_ int_] ++ []
+toXMLExp (BoolExp _ _ bool) = Elt "BoolExp" [] $ [toXMLBool bool] ++ []
+toXMLExp (IntExp _ _ int) = Elt "IntExp" [] $ [toXMLInt int] ++ []
 toXMLExp (LamExp _ _ _ ident exp) = Elt "LamExp" [] $ [toXMLIdent ident] ++ [toXMLExp exp] ++ []
 toXMLExp (AppExp _ exp1 exp2) = Elt "AppExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2] ++ []
 toXMLExp (CaseExp _ _ _ exp alts) = Elt "CaseExp" [] $ [toXMLExp exp] ++ toXMLList_Alt alts ++ []
@@ -666,19 +606,19 @@ toXMLBoard (ParseErrBoard _) = Elt "ParseErrBoard" [] []
 toXMLBoardRow (BoardRow _ ca cb cc cd ce cf cg ch) = Elt "BoardRow" [] $ [toXMLBoardSquare ca] ++ [toXMLBoardSquare cb] ++ [toXMLBoardSquare cc] ++ [toXMLBoardSquare cd] ++ [toXMLBoardSquare ce] ++ [toXMLBoardSquare cf] ++ [toXMLBoardSquare cg] ++ [toXMLBoardSquare ch] ++ []
 toXMLBoardRow HoleBoardRow = Elt "HoleBoardRow" [] []
 toXMLBoardRow (ParseErrBoardRow _) = Elt "ParseErrBoardRow" [] []
-toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool_ color] ++ []
-toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool_ color] ++ []
+toXMLBoardSquare (Queen _ color) = Elt "Queen" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (King _ color) = Elt "King" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (Bishop _ color) = Elt "Bishop" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (Knight _ color) = Elt "Knight" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (Rook _ color) = Elt "Rook" [] $ [toXMLBool color] ++ []
+toXMLBoardSquare (Pawn _ color) = Elt "Pawn" [] $ [toXMLBool color] ++ []
 toXMLBoardSquare (Empty) = Elt "Empty" [] $ []
 toXMLBoardSquare HoleBoardSquare = Elt "HoleBoardSquare" [] []
 toXMLBoardSquare (ParseErrBoardSquare _) = Elt "ParseErrBoardSquare" [] []
-toXMLPPPresentation (PPPresentation _ viewType slides) = Elt "PPPresentation" [] $ [toXMLBool_ viewType] ++ toXMLList_Slide slides ++ []
+toXMLPPPresentation (PPPresentation _ viewType slides) = Elt "PPPresentation" [] $ [toXMLBool viewType] ++ toXMLList_Slide slides ++ []
 toXMLPPPresentation HolePPPresentation = Elt "HolePPPresentation" [] []
 toXMLPPPresentation (ParseErrPPPresentation _) = Elt "ParseErrPPPresentation" [] []
-toXMLSlide (Slide _ title itemList) = Elt "Slide" [] $ [toXMLString_ title] ++ [toXMLItemList itemList] ++ []
+toXMLSlide (Slide _ title itemList) = Elt "Slide" [] $ [toXMLString title] ++ [toXMLItemList itemList] ++ []
 toXMLSlide HoleSlide = Elt "HoleSlide" [] []
 toXMLSlide (ParseErrSlide _) = Elt "ParseErrSlide" [] []
 toXMLItemList (ItemList _ listType items) = Elt "ItemList" [] $ [toXMLListType listType] ++ toXMLList_Item items ++ []
@@ -689,16 +629,11 @@ toXMLListType (Number _) = Elt "Number" [] $ []
 toXMLListType (Alpha _) = Elt "Alpha" [] $ []
 toXMLListType HoleListType = Elt "HoleListType" [] []
 toXMLListType (ParseErrListType _) = Elt "ParseErrListType" [] []
-toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString_ string] ++ []
+toXMLItem (StringItem _ string) = Elt "StringItem" [] $ [toXMLString string] ++ []
 toXMLItem (HeliumItem _ exp) = Elt "HeliumItem" [] $ [toXMLExp exp] ++ []
 toXMLItem (ListItem _ itemList) = Elt "ListItem" [] $ [toXMLItemList itemList] ++ []
 toXMLItem HoleItem = Elt "HoleItem" [] []
 toXMLItem (ParseErrItem _) = Elt "ParseErrItem" [] []
-toXMLList_Dummy (List_Dummy _ dummys) = toXMLConsList_Dummy dummys
-toXMLList_Dummy HoleList_Dummy = []
-toXMLList_Dummy (ParseErrList_Dummy _) = []
-toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLConsList_Dummy dummys
-toXMLConsList_Dummy Nil_Dummy             = []
 toXMLList_Decl (List_Decl _ decls) = toXMLConsList_Decl decls
 toXMLList_Decl HoleList_Decl = []
 toXMLList_Decl (ParseErrList_Decl _) = []
@@ -727,14 +662,8 @@ toXMLConsList_Item Nil_Item             = []
 
 
 
-parseXML_String_ = parseXMLCns_String_ <?|> parseHoleAndParseErr "String_" HoleString_
-parseXMLCns_String_ = String_ NoIDD <$ startTag "String_" <*> parseXML_String <* endTag "String_"
-parseXML_Bool_ = parseXMLCns_Bool_ <?|> parseHoleAndParseErr "Bool_" HoleBool_
-parseXMLCns_Bool_ = Bool_ NoIDD <$ startTag "Bool_" <*> parseXML_Bool <* endTag "Bool_"
-parseXML_Int_ = parseXMLCns_Int_ <?|> parseHoleAndParseErr "Int_" HoleInt_
-parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int_"
 parseXML_Dummy = parseXMLCns_Dummy <?|> parseHoleAndParseErr "Dummy" HoleDummy
-parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_Root <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
+parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_Root <*> parseXML_Dummy <* endTag "Dummy"
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr NoIDD <$ startTag "RootEnr" <*> parseXML_RootE <*> parseXML_HeliumTypeInfo <*> parseXML_Document <* endTag "RootEnr"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
@@ -742,18 +671,18 @@ parseXMLCns_Root = Root NoIDD NoIDP <$ startTag "Root" <*> parseXML_List_Decl <*
 parseXML_RootE = parseXMLCns_RootE <?|> parseHoleAndParseErr "RootE" HoleRootE
 parseXMLCns_RootE = RootE NoIDD NoIDP <$ startTag "RootE" <*> parseXML_List_Decl <*> parseXML_List_Decl <* endTag "RootE"
 parseXML_Decl = parseXMLCns_Decl <?|> parseXMLCns_BoardDecl <?|> parseXMLCns_PPPresentationDecl <?|> parseHoleAndParseErr "Decl" HoleDecl
-parseXMLCns_Decl = Decl NoIDD NoIDP NoIDP NoIDP NoIDP <$ startTag "Decl" <*> parseXML_Bool_ <*> parseXML_Bool_ <*> parseXML_Ident <*> parseXML_Exp <* endTag "Decl"
+parseXMLCns_Decl = Decl NoIDD NoIDP NoIDP NoIDP NoIDP <$ startTag "Decl" <*> parseXML_Bool <*> parseXML_Bool <*> parseXML_Ident <*> parseXML_Exp <* endTag "Decl"
 parseXMLCns_BoardDecl = BoardDecl NoIDD NoIDP NoIDP <$ startTag "BoardDecl" <*> parseXML_Board <* endTag "BoardDecl"
 parseXMLCns_PPPresentationDecl = PPPresentationDecl NoIDD NoIDP NoIDP <$ startTag "PPPresentationDecl" <*> parseXML_PPPresentation <* endTag "PPPresentationDecl"
 parseXML_Ident = parseXMLCns_Ident <?|> parseHoleAndParseErr "Ident" HoleIdent
-parseXMLCns_Ident = Ident NoIDD NoIDP NoIDP <$ startTag "Ident" <*> parseXML_String_ <* endTag "Ident"
+parseXMLCns_Ident = Ident NoIDD NoIDP NoIDP <$ startTag "Ident" <*> parseXML_String <* endTag "Ident"
 parseXML_Exp = parseXMLCns_PlusExp <?|> parseXMLCns_TimesExp <?|> parseXMLCns_DivExp <?|> parseXMLCns_PowerExp <?|> parseXMLCns_BoolExp <?|> parseXMLCns_IntExp <?|> parseXMLCns_LamExp <?|> parseXMLCns_AppExp <?|> parseXMLCns_CaseExp <?|> parseXMLCns_LetExp <?|> parseXMLCns_IdentExp <?|> parseXMLCns_IfExp <?|> parseXMLCns_ParenExp <?|> parseXMLCns_ListExp <?|> parseXMLCns_ProductExp <?|> parseHoleAndParseErr "Exp" HoleExp
 parseXMLCns_PlusExp = PlusExp NoIDD NoIDP <$ startTag "PlusExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "PlusExp"
 parseXMLCns_TimesExp = TimesExp NoIDD NoIDP <$ startTag "TimesExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "TimesExp"
 parseXMLCns_DivExp = DivExp NoIDD NoIDP <$ startTag "DivExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "DivExp"
 parseXMLCns_PowerExp = PowerExp NoIDD NoIDP <$ startTag "PowerExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "PowerExp"
-parseXMLCns_BoolExp = BoolExp NoIDD NoIDP <$ startTag "BoolExp" <*> parseXML_Bool_ <* endTag "BoolExp"
-parseXMLCns_IntExp = IntExp NoIDD NoIDP <$ startTag "IntExp" <*> parseXML_Int_ <* endTag "IntExp"
+parseXMLCns_BoolExp = BoolExp NoIDD NoIDP <$ startTag "BoolExp" <*> parseXML_Bool <* endTag "BoolExp"
+parseXMLCns_IntExp = IntExp NoIDD NoIDP <$ startTag "IntExp" <*> parseXML_Int <* endTag "IntExp"
 parseXMLCns_LamExp = LamExp NoIDD NoIDP NoIDP <$ startTag "LamExp" <*> parseXML_Ident <*> parseXML_Exp <* endTag "LamExp"
 parseXMLCns_AppExp = AppExp NoIDD <$ startTag "AppExp" <*> parseXML_Exp <*> parseXML_Exp <* endTag "AppExp"
 parseXMLCns_CaseExp = CaseExp NoIDD NoIDP NoIDP <$ startTag "CaseExp" <*> parseXML_Exp <*> parseXML_List_Alt <* endTag "CaseExp"
@@ -770,17 +699,17 @@ parseXMLCns_Board = Board NoIDD <$ startTag "Board" <*> parseXML_BoardRow <*> pa
 parseXML_BoardRow = parseXMLCns_BoardRow <?|> parseHoleAndParseErr "BoardRow" HoleBoardRow
 parseXMLCns_BoardRow = BoardRow NoIDD <$ startTag "BoardRow" <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <* endTag "BoardRow"
 parseXML_BoardSquare = parseXMLCns_Queen <?|> parseXMLCns_King <?|> parseXMLCns_Bishop <?|> parseXMLCns_Knight <?|> parseXMLCns_Rook <?|> parseXMLCns_Pawn <?|> parseXMLCns_Empty <?|> parseHoleAndParseErr "BoardSquare" HoleBoardSquare
-parseXMLCns_Queen = Queen NoIDD <$ startTag "Queen" <*> parseXML_Bool_ <* endTag "Queen"
-parseXMLCns_King = King NoIDD <$ startTag "King" <*> parseXML_Bool_ <* endTag "King"
-parseXMLCns_Bishop = Bishop NoIDD <$ startTag "Bishop" <*> parseXML_Bool_ <* endTag "Bishop"
-parseXMLCns_Knight = Knight NoIDD <$ startTag "Knight" <*> parseXML_Bool_ <* endTag "Knight"
-parseXMLCns_Rook = Rook NoIDD <$ startTag "Rook" <*> parseXML_Bool_ <* endTag "Rook"
-parseXMLCns_Pawn = Pawn NoIDD <$ startTag "Pawn" <*> parseXML_Bool_ <* endTag "Pawn"
+parseXMLCns_Queen = Queen NoIDD <$ startTag "Queen" <*> parseXML_Bool <* endTag "Queen"
+parseXMLCns_King = King NoIDD <$ startTag "King" <*> parseXML_Bool <* endTag "King"
+parseXMLCns_Bishop = Bishop NoIDD <$ startTag "Bishop" <*> parseXML_Bool <* endTag "Bishop"
+parseXMLCns_Knight = Knight NoIDD <$ startTag "Knight" <*> parseXML_Bool <* endTag "Knight"
+parseXMLCns_Rook = Rook NoIDD <$ startTag "Rook" <*> parseXML_Bool <* endTag "Rook"
+parseXMLCns_Pawn = Pawn NoIDD <$ startTag "Pawn" <*> parseXML_Bool <* endTag "Pawn"
 parseXMLCns_Empty = Empty <$ emptyTag "Empty"
 parseXML_PPPresentation = parseXMLCns_PPPresentation <?|> parseHoleAndParseErr "PPPresentation" HolePPPresentation
-parseXMLCns_PPPresentation = PPPresentation NoIDD <$ startTag "PPPresentation" <*> parseXML_Bool_ <*> parseXML_List_Slide <* endTag "PPPresentation"
+parseXMLCns_PPPresentation = PPPresentation NoIDD <$ startTag "PPPresentation" <*> parseXML_Bool <*> parseXML_List_Slide <* endTag "PPPresentation"
 parseXML_Slide = parseXMLCns_Slide <?|> parseHoleAndParseErr "Slide" HoleSlide
-parseXMLCns_Slide = Slide NoIDD <$ startTag "Slide" <*> parseXML_String_ <*> parseXML_ItemList <* endTag "Slide"
+parseXMLCns_Slide = Slide NoIDD <$ startTag "Slide" <*> parseXML_String <*> parseXML_ItemList <* endTag "Slide"
 parseXML_ItemList = parseXMLCns_ItemList <?|> parseHoleAndParseErr "ItemList" HoleItemList
 parseXMLCns_ItemList = ItemList NoIDD <$ startTag "ItemList" <*> parseXML_ListType <*> parseXML_List_Item <* endTag "ItemList"
 parseXML_ListType = parseXMLCns_Bullet <?|> parseXMLCns_Number <?|> parseXMLCns_Alpha <?|> parseHoleAndParseErr "ListType" HoleListType
@@ -788,10 +717,9 @@ parseXMLCns_Bullet = Bullet NoIDD <$ emptyTag "Bullet"
 parseXMLCns_Number = Number NoIDD <$ emptyTag "Number"
 parseXMLCns_Alpha = Alpha NoIDD <$ emptyTag "Alpha"
 parseXML_Item = parseXMLCns_StringItem <?|> parseXMLCns_HeliumItem <?|> parseXMLCns_ListItem <?|> parseHoleAndParseErr "Item" HoleItem
-parseXMLCns_StringItem = StringItem NoIDD <$ startTag "StringItem" <*> parseXML_String_ <* endTag "StringItem"
+parseXMLCns_StringItem = StringItem NoIDD <$ startTag "StringItem" <*> parseXML_String <* endTag "StringItem"
 parseXMLCns_HeliumItem = HeliumItem NoIDD <$ startTag "HeliumItem" <*> parseXML_Exp <* endTag "HeliumItem"
 parseXMLCns_ListItem = ListItem NoIDD <$ startTag "ListItem" <*> parseXML_ItemList <* endTag "ListItem"
-parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many parseXML_Dummy
 parseXML_List_Decl = mkList List_Decl Cons_Decl Nil_Decl <$> many parseXML_Decl
 parseXML_List_Alt = mkList List_Alt Cons_Alt Nil_Alt <$> many parseXML_Alt
 parseXML_List_Exp = mkList List_Exp Cons_Exp Nil_Exp <$> many parseXML_Exp

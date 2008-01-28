@@ -146,7 +146,7 @@ recognizeIDListDecl = pStr $
 -- ?remove pStr from this parser?
 parseIdListIdent :: ListParser Document Node ClipDoc UserToken Ident
 parseIdListIdent =  pPrs $
-          (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ mkString_ strTk))
+          (\strTk -> reuseIdent [tokenNode strTk] Nothing Nothing Nothing (Just $ tokenString strTk))
       <$> pLIdent 
 
 -------------------- Chess board parser:
@@ -176,9 +176,9 @@ recognizeList_Slide = pStr $
         -- maybe make a recognizeConsList_Slide?
 
 recognizeSlide =  pStr $
-         (\str title itemList -> reuseSlide [tokenNode str] Nothing (Just title) (Just itemList))
+         (\str title itemList -> reuseSlide [tokenNode str] Nothing (Just $ tokenString title) (Just itemList))
      <$> pStructural SlideNode
-     <*> parseString_ <*> recognizeItemList
+     <*> pLIdent <*> recognizeItemList
 
 recognizeItemList = pStr $                          -- ListType
          (\str listType list_item -> reuseItemList [tokenNode str] Nothing (Just listType) (Just list_item))
@@ -199,9 +199,9 @@ recognizeList_Item = pStr $
      <*> pList recognizeItem
 
 recognizeItem = pStr $ 
-         (\str string_ -> reuseStringItem [tokenNode str] Nothing (Just string_))
+         (\str string_ -> reuseStringItem [tokenNode str] Nothing (Just $ tokenString string_))
      <$> pStructural StringItemNode
-     <*> parseString_
+     <*> pLIdent
   <|>    (\str helium -> reuseHeliumItem [tokenNode str] Nothing (Just helium))
      <$> pStructural HeliumItemNode
      <*> recognizeExp
@@ -240,7 +240,7 @@ parseList_Decl =
       <$> pList parseDecl
 
 parseDecl  =                                                              -- IDD  "="                   ";"                       type sig              not used  expanded    auto-layout
-          (\sig ident tk1 exp tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just $ mkBool_ True) Nothing (Just ident) (Just exp))
+          (\sig ident tk1 exp tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just True) Nothing (Just ident) (Just exp))
       <$> pMaybe (pStructural DeclNode) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
   <|>     (\sig ident tk1 tk2 -> reuseDecl [tokenNode tk1, tokenNode tk2] Nothing (Just $ tokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
@@ -361,7 +361,7 @@ parseFactor'' =
   <|> recognizeExp'
      
 parseIdent = 
-         (\strTk -> reuseIdent [tokenNode strTk] Nothing (Just $ tokenIDP strTk) Nothing (Just $ mkString_ strTk))
+         (\strTk -> reuseIdent [tokenNode strTk] Nothing (Just $ tokenIDP strTk) Nothing (Just $ tokenString strTk))
      <$> pLIdent
 
 
@@ -370,19 +370,6 @@ parseIdent =
 -- maybe make a primIDP ? that takes the idp out of the string_? Then string has an idp field,
 -- but it is not used on presentation. (maybe it can be hidden from the user)
 
-
-
--- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: DocNode node => Token doc node clip UserToken -> String_
-mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
-
-mkInt_ :: DocNode node => Token doc node clip UserToken -> Int_
-mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
-
--- Extracting the value from the token is not necessary, since true and false have different
--- parsers, which can give the value as an argument
-mkBool_ :: Bool -> Bool_
-mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool)) 
 
 --pString_ = 
 --         (\string -> reuseString_ [tokenNode string] Nothing (Just $ tokenIDP string) (Just $ lIdentVal string))
@@ -418,17 +405,18 @@ pTrue   = pKey "True"
 pFalse  = pKey "False"
 
 -------------------- more or less primitive parsers: (because int & bool are unboxed) -- not anymore
-
+{-
+obsolete
 -- parseString needs to parse the ParseToken, rewrite, so it doesn't use reuseString
 parseString_ = pPrs $
---           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+--           (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
           mkString_
      <$>  pLIdent     
      <|> (HoleString_ <$ pStructural HoleString_Node)
 
 
 parseInt_ = pStr $
---           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+--           (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
           mkInt_
      <$>  pInt
      <|> (HoleInt_ <$ pStructural HoleInt_Node)
@@ -436,22 +424,23 @@ parseInt_ = pStr $
 
 
 parseBool_ = pStr $
---           (\strTk -> reuseString_ [] Nothing (Just $ strValTk strTk)) 
+--           (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
          mkBool_
      <$> (True <$ pTrue <|> False <$ pFalse)
      <|> (HoleBool_ <$ pStructural HoleBool_Node)
-
+-}
 
 parseIntExp =
-         (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkInt_ tk))
+         (\tk -> reuseIntExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ read (tokenString tk)))
      <$> pInt
 
 parseBoolExp = 
-         (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkBool_ True))
+         (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just True))
      <$> pTrue
-  <|>    (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just $ mkBool_ False))
+  <|>    (\tk -> reuseBoolExp [tokenNode tk] Nothing (Just $ tokenIDP tk) (Just False))
      <$> pFalse
 
+  
 --------------------------------------------------------------
 --- testing bits
 {-

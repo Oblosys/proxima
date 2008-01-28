@@ -29,10 +29,6 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
         (ParseErrDocument prs,state, enrDoc )
 
 
--- TODO: move to other module
-instance Eq String_ where
-  (String_ _ str1) == (String_ _ str2) = str1 == str2
-
 -- simple implementation of Eq for Decls, to be used in reducer when comparing which decls list was edited
 -- compare only needs to check the things that can be edited in identifier list presentation
 --  and disregards presentation identities
