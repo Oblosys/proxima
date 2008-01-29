@@ -246,14 +246,6 @@ tokenize' lx i loc lc layout id str (OverlayP _ [])      = (lc, layout, id, str,
 tokenize' lx i loc lc layout id str (OverlayP _ (pres:press)) = tokenize' lx i loc lc layout id str pres
 tokenize' lx i loc lc layout id str (ColP _ _ _ press)   = tokenizeCol' lx i loc lc layout id str press
 tokenize' lx i loc lc layout id str (RowP _ _ press)     = tokenizeRow' lx i loc lc layout id str press
-{-
-tokenize' lx i loc lc layout id str (LocatorP (String_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
-tokenize' lx i loc lc layout id str (LocatorP (HoleString_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
-tokenize' lx i loc lc layout id str (LocatorP (Int_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
-tokenize' lx i loc lc layout id str (LocatorP (HoleInt_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
-tokenize' lx i loc lc layout id str (LocatorP (Bool_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres
-tokenize' lx i loc lc layout id str (LocatorP (HoleBool_Node _ _) pres)  = tokenize' lx i loc lc layout id str pres -- hole also necessary?
--}
 tokenize' lx i (_,ar)   lc layout id str (LocatorP loc pres)  = tokenize' lx i (Just loc,ar) lc layout id str pres
 tokenize' lx i loc lc layout id str (ParsingP _ LexInherited pres)    = tokenize' lx i loc lc layout id str pres
 tokenize' _  i loc lc layout id str (ParsingP _ lx pres)    = tokenize' lx i loc lc layout id str pres
