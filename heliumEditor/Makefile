@@ -41,7 +41,7 @@ SHELL = /bin/sh
 
 
 default: $(MAIN)
-.PHONY : default proxima generator generate presenter
+.PHONY : default proxima  generate presenter
 
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
@@ -133,11 +133,10 @@ HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidab
 		-package gtk -package parsec -package mtl -package time\
 		-fno-monomorphism-restriction $(EXTRA_OPTS)
 
-# The main target
 
-proxima: generate presenter
+proxima:
 	cd $(PROXIMASRCDIR); make
 
-	
+# The main target	
 $(MAIN): proxima generate presenter
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
