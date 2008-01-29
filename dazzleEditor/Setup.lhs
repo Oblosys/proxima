@@ -8,8 +8,8 @@
 
 > runMake args buildflags = 
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
->      putStrLn "> make generator"
->      system "make generator"
+>      putStrLn "> make proxima"
+>      system "make proxima"
 >      putStrLn "> make generate"
 >      system "make generate"
 >      putStrLn "> make presenter"
