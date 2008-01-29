@@ -53,7 +53,7 @@ deepShowTks i tok = case tok of
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
-          (\str root-> reuseRootEnr [tokenNode str] Nothing (Just root) Nothing)
+          (\str root-> reuseRootEnr [str] Nothing (Just root) Nothing)
       <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> recognizeRoot
   <|>    RootEnr NoIDD (error "doc hole was parsed") (error "doc hole was parsed")
@@ -64,7 +64,7 @@ recognizeRootEnr = pStr $
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
-          reuseRoot [tokenNode str] Nothing (Just graph) (Just (String_ NoIDD title)) (Just (toList_Section sections)) )
+          reuseRoot [str] Nothing (Just graph) (Just (String_ NoIDD title)) (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs pLine 
@@ -72,7 +72,7 @@ recognizeRoot = pStr $
 
 {- -- for presentation that only contains a parsing formatter
           (\str ->
-          reuseRoot [tokenNode str] Nothing Nothing Nothing 
+          reuseRoot [str] Nothing Nothing Nothing 
                                             Nothing )
       <$> pStructural RootNode
       <*  (pPrs $ Word NoIDD (String_ NoIDD "")
@@ -83,7 +83,7 @@ recognizeRoot = pStr $
   
 recognizeSection :: ListParser Document Node ClipDoc UserToken Section
 recognizeSection = pStrAlt SectionNode $
-          (\str t ps ss -> reuseSection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss))
+          (\str t ps ss -> reuseSection [str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss))
       <$> pStructural SectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -92,7 +92,7 @@ recognizeSection = pStrAlt SectionNode $
 recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt SubsectionNode $
-          (\str t ps sss -> reuseSubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsubsection sss))
+          (\str t ps sss -> reuseSubsection [str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsubsection sss))
       <$> pStructural SubsectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -102,7 +102,7 @@ recognizeSubsection =
 recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
   pStrAlt SubsubsectionNode $
-          (\str t ps -> reuseSubsubsection [tokenNode str] Nothing (Just (String_ NoIDD t)) (Just ps))
+          (\str t ps -> reuseSubsubsection [str] Nothing (Just (String_ NoIDD t)) (Just ps))
       <$> pStructural SubsubsectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -113,7 +113,7 @@ recognizeSubsubsection =
 --         does not have to do this)
 recognizeGraph :: ListParser Document Node ClipDoc UserToken Graph
 recognizeGraph = pStrVerbose "Graph" $
-          (\str gt vs -> reuseGraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt) 
+          (\str gt vs -> reuseGraph [str] Nothing (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                    [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
@@ -127,12 +127,12 @@ recognizeGraph = pStrVerbose "Graph" $
 -- before we can parse them, the scanner needs to be modified to handle free text
 recognizeVertex :: ListParser Document Node ClipDoc UserToken Vertex
 recognizeVertex = pStrVerbose "Vertex" $
-          (\str vt lab -> reuseVertex [tokenNode str] Nothing (Just lab) Nothing Nothing
+          (\str vt lab -> reuseVertex [str] Nothing (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
       <*> parseLabel
-  <|>     (\str vt -> reuseVertex [tokenNode str] Nothing (Just $ String_ NoIDD "<new>") (Just $ Circle NoIDD)
+  <|>     (\str vt -> reuseVertex [str] Nothing (Just $ String_ NoIDD "<new>") (Just $ Circle NoIDD)
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
@@ -144,7 +144,7 @@ parseLabel = pPrs $
 
 recognizeSubgraph :: ListParser Document Node ClipDoc UserToken Subgraph
 recognizeSubgraph = pStrVerbose "Subgraph" $
-          (\str gt vs -> reuseSubgraph [tokenNode str] Nothing (Just $ getGraphTkDirty gt)  
+          (\str gt vs -> reuseSubgraph [str] Nothing (Just $ getGraphTkDirty gt)  
                                      (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                      (Just $ List_Edge NoIDD $ toConsList_Edge $ 
                                      [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt])
@@ -196,7 +196,7 @@ parseParagraph =
       <$  pKey "\\graph"
   <|>
       (   pStrAlt SubgraphParaNode $
-          (\str sg -> reuseSubgraphPara [tokenNode str] Nothing (Just sg))
+          (\str sg -> reuseSubgraphPara [str] Nothing (Just sg))
       <$> pStructural SubgraphParaNode
       <*> recognizeSubgraph
       )

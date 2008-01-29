@@ -25,171 +25,171 @@ import DocTypes_Generated
 -- ProxParser_Generated --
 
 -- Type specific
-reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe Root -> Maybe Document -> EnrichedDoc
+reuseRootEnr :: [Token doc Node clip token] -> Maybe IDD -> Maybe Root -> Maybe Document -> EnrichedDoc
 reuseRootEnr nodes  ma0 ma1 ma2
-  = case extractFromNodes extractRootEnr defaultRootEnr nodes of
+  = case extractFromTokens extractRootEnr defaultRootEnr nodes of
            (RootEnr a0 a1 a2) -> reuse3 RootEnr a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseString_ :: [Maybe Node] -> Maybe IDD -> Maybe String -> String_
+reuseString_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> String_
 reuseString_ nodes  ma0 ma1
-  = case extractFromNodes extractString_ defaultString_ nodes of
+  = case extractFromTokens extractString_ defaultString_ nodes of
            (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseString_"
 
-reuseBool_ :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Bool_
+reuseBool_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> Bool_
 reuseBool_ nodes  ma0 ma1
-  = case extractFromNodes extractBool_ defaultBool_ nodes of
+  = case extractFromTokens extractBool_ defaultBool_ nodes of
            (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseBool_"
 
-reuseInt_ :: [Maybe Node] -> Maybe IDD -> Maybe Int -> Int_
+reuseInt_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe Int -> Int_
 reuseInt_ nodes  ma0 ma1
-  = case extractFromNodes extractInt_ defaultInt_ nodes of
+  = case extractFromTokens extractInt_ defaultInt_ nodes of
            (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseInt_"
 
-reuseDummy :: [Maybe Node] -> Maybe IDD -> Maybe List_Dummy -> Maybe String_ -> Maybe Bool_ -> Maybe Int_ -> Dummy
+reuseDummy :: [Token doc Node clip token] -> Maybe IDD -> Maybe List_Dummy -> Maybe String_ -> Maybe Bool_ -> Maybe Int_ -> Dummy
 reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractDummy defaultDummy nodes of
+  = case extractFromTokens extractDummy defaultDummy nodes of
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe Graph -> Maybe String_ -> Maybe List_Section -> Root
+reuseRoot :: [Token doc Node clip token] -> Maybe IDD -> Maybe Graph -> Maybe String_ -> Maybe List_Section -> Root
 reuseRoot nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractRoot defaultRoot nodes of
+  = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRoot"
 
-reuseSection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
+reuseSection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
 reuseSection nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractSection defaultSection nodes of
+  = case extractFromTokens extractSection defaultSection nodes of
            (Section a0 a1 a2 a3) -> reuse4 Section a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSection"
 
-reuseSubsection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
+reuseSubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
 reuseSubsection nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractSubsection defaultSubsection nodes of
+  = case extractFromTokens extractSubsection defaultSubsection nodes of
            (Subsection a0 a1 a2 a3) -> reuse4 Subsection a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSubsection"
 
-reuseSubsubsection :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Subsubsection
+reuseSubsubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Subsubsection
 reuseSubsubsection nodes  ma0 ma1 ma2
-  = case extractFromNodes extractSubsubsection defaultSubsubsection nodes of
+  = case extractFromTokens extractSubsubsection defaultSubsubsection nodes of
            (Subsubsection a0 a1 a2) -> reuse3 Subsubsection a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseSubsubsection"
 
-reuseParagraph :: [Maybe Node] -> Maybe IDD -> Maybe List_Word -> Paragraph
+reuseParagraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe List_Word -> Paragraph
 reuseParagraph nodes  ma0 ma1
-  = case extractFromNodes extractParagraph defaultParagraph nodes of
+  = case extractFromTokens extractParagraph defaultParagraph nodes of
            (Paragraph a0 a1) -> reuse2 Paragraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseParagraph"
 
-reuseSubgraphPara :: [Maybe Node] -> Maybe IDD -> Maybe Subgraph -> Paragraph
+reuseSubgraphPara :: [Token doc Node clip token] -> Maybe IDD -> Maybe Subgraph -> Paragraph
 reuseSubgraphPara nodes  ma0 ma1
-  = case extractFromNodes extractSubgraphPara defaultSubgraphPara nodes of
+  = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
            (SubgraphPara a0 a1) -> reuse2 SubgraphPara a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseSubgraphPara"
 
-reuseWord :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Word
+reuseWord :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Word
 reuseWord nodes  ma0 ma1
-  = case extractFromNodes extractWord defaultWord nodes of
+  = case extractFromTokens extractWord defaultWord nodes of
            (Word a0 a1) -> reuse2 Word a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseWord"
 
-reuseGraph :: [Maybe Node] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
+reuseGraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractGraph defaultGraph nodes of
+  = case extractFromTokens extractGraph defaultGraph nodes of
            (Graph a0 a1 a2 a3) -> reuse4 Graph a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseGraph"
 
-reuseVertex :: [Maybe Node] -> Maybe IDD -> Maybe String_ -> Maybe Shape -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
+reuseVertex :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe Shape -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
 reuseVertex nodes  ma0 ma1 ma2 ma3 ma4 ma5
-  = case extractFromNodes extractVertex defaultVertex nodes of
+  = case extractFromTokens extractVertex defaultVertex nodes of
            (Vertex a0 a1 a2 a3 a4 a5) -> reuse6 Vertex a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "System error:<module>.reuseVertex"
 
-reuseCircle :: [Maybe Node] -> Maybe IDD -> Shape
+reuseCircle :: [Token doc Node clip token] -> Maybe IDD -> Shape
 reuseCircle nodes  ma0
-  = case extractFromNodes extractCircle defaultCircle nodes of
+  = case extractFromTokens extractCircle defaultCircle nodes of
            (Circle a0) -> reuse1 Circle a0 ma0
            _ -> error "System error:<module>.reuseCircle"
 
-reuseSquare :: [Maybe Node] -> Maybe IDD -> Shape
+reuseSquare :: [Token doc Node clip token] -> Maybe IDD -> Shape
 reuseSquare nodes  ma0
-  = case extractFromNodes extractSquare defaultSquare nodes of
+  = case extractFromTokens extractSquare defaultSquare nodes of
            (Square a0) -> reuse1 Square a0 ma0
            _ -> error "System error:<module>.reuseSquare"
 
-reuseEdge :: [Maybe Node] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Edge
+reuseEdge :: [Token doc Node clip token] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Edge
 reuseEdge nodes  ma0 ma1 ma2
-  = case extractFromNodes extractEdge defaultEdge nodes of
+  = case extractFromTokens extractEdge defaultEdge nodes of
            (Edge a0 a1 a2) -> reuse3 Edge a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseEdge"
 
-reuseSubgraph :: [Maybe Node] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
+reuseSubgraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
 reuseSubgraph nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractSubgraph defaultSubgraph nodes of
+  = case extractFromTokens extractSubgraph defaultSubgraph nodes of
            (Subgraph a0 a1 a2 a3) -> reuse4 Subgraph a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSubgraph"
 
-reuseDirty :: [Maybe Node] -> Maybe IDD -> Dirty
+reuseDirty :: [Token doc Node clip token] -> Maybe IDD -> Dirty
 reuseDirty nodes  ma0
-  = case extractFromNodes extractDirty defaultDirty nodes of
+  = case extractFromTokens extractDirty defaultDirty nodes of
            (Dirty a0) -> reuse1 Dirty a0 ma0
            _ -> error "System error:<module>.reuseDirty"
 
-reuseClean :: [Maybe Node] -> Maybe IDD -> Dirty
+reuseClean :: [Token doc Node clip token] -> Maybe IDD -> Dirty
 reuseClean nodes  ma0
-  = case extractFromNodes extractClean defaultClean nodes of
+  = case extractFromTokens extractClean defaultClean nodes of
            (Clean a0) -> reuse1 Clean a0 ma0
            _ -> error "System error:<module>.reuseClean"
 
-reuseList_Dummy :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
+reuseList_Dummy :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Dummy -> List_Dummy
 reuseList_Dummy nodes  ma0 ma1
-  = case extractFromNodes extractList_Dummy defaultList_Dummy nodes of
+  = case extractFromTokens extractList_Dummy defaultList_Dummy nodes of
            (List_Dummy a0 a1) -> reuse2 List_Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Dummy"
 
-reuseList_Section :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Section -> List_Section
+reuseList_Section :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Section -> List_Section
 reuseList_Section nodes  ma0 ma1
-  = case extractFromNodes extractList_Section defaultList_Section nodes of
+  = case extractFromTokens extractList_Section defaultList_Section nodes of
            (List_Section a0 a1) -> reuse2 List_Section a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Section"
 
-reuseList_Paragraph :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Paragraph -> List_Paragraph
+reuseList_Paragraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Paragraph -> List_Paragraph
 reuseList_Paragraph nodes  ma0 ma1
-  = case extractFromNodes extractList_Paragraph defaultList_Paragraph nodes of
+  = case extractFromTokens extractList_Paragraph defaultList_Paragraph nodes of
            (List_Paragraph a0 a1) -> reuse2 List_Paragraph a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Paragraph"
 
-reuseList_Subsection :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Subsection -> List_Subsection
+reuseList_Subsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Subsection -> List_Subsection
 reuseList_Subsection nodes  ma0 ma1
-  = case extractFromNodes extractList_Subsection defaultList_Subsection nodes of
+  = case extractFromTokens extractList_Subsection defaultList_Subsection nodes of
            (List_Subsection a0 a1) -> reuse2 List_Subsection a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Subsection"
 
-reuseList_Subsubsection :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Subsubsection -> List_Subsubsection
+reuseList_Subsubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Subsubsection -> List_Subsubsection
 reuseList_Subsubsection nodes  ma0 ma1
-  = case extractFromNodes extractList_Subsubsection defaultList_Subsubsection nodes of
+  = case extractFromTokens extractList_Subsubsection defaultList_Subsubsection nodes of
            (List_Subsubsection a0 a1) -> reuse2 List_Subsubsection a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Subsubsection"
 
-reuseList_Word :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Word -> List_Word
+reuseList_Word :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Word -> List_Word
 reuseList_Word nodes  ma0 ma1
-  = case extractFromNodes extractList_Word defaultList_Word nodes of
+  = case extractFromTokens extractList_Word defaultList_Word nodes of
            (List_Word a0 a1) -> reuse2 List_Word a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Word"
 
-reuseList_Vertex :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Vertex -> List_Vertex
+reuseList_Vertex :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Vertex -> List_Vertex
 reuseList_Vertex nodes  ma0 ma1
-  = case extractFromNodes extractList_Vertex defaultList_Vertex nodes of
+  = case extractFromTokens extractList_Vertex defaultList_Vertex nodes of
            (List_Vertex a0 a1) -> reuse2 List_Vertex a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Vertex"
 
-reuseList_Edge :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Edge -> List_Edge
+reuseList_Edge :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Edge -> List_Edge
 reuseList_Edge nodes  ma0 ma1
-  = case extractFromNodes extractList_Edge defaultList_Edge nodes of
+  = case extractFromTokens extractList_Edge defaultList_Edge nodes of
            (List_Edge a0 a1) -> reuse2 List_Edge a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Edge"
 
@@ -391,9 +391,9 @@ defaultList_Edge = List_Edge NoIDD Nil_Edge
 
 -- General
 -- return result of the first extraction application in the list that is not Nothing
---extractFromNodes ::(Node -> Maybe a) -> a -> [Node] -> a
-extractFromNodes extr def []     = def
-extractFromNodes extr def (n:ns) = maybe (extractFromNodes extr def ns) id (extr n)
+extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a
+extractFromTokens extr def []     = def
+extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))
 
 reuse3 :: (a0 -> a1 -> a2 -> r) -> 
           a0 -> a1 -> a2 -> 
