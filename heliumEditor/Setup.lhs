@@ -2,30 +2,17 @@
 
 > import Distribution.Simple
 > import Distribution.PackageDescription
-> import System.Process hiding (runCommand)
-> import System.IO
-> import Directory
+> import System.Cmd
 > 
-> main = defaultMainWithHooks (defaultUserHooks { preBuild = insertCurrentVersion } )
+> main = defaultMainWithHooks (defaultUserHooks { preBuild = runMake } )
 
-> insertCurrentVersion args buildflags = 
+> runMake args buildflags = 
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
 >      putStrLn "> make generator"
->      output <- runCommand "make" ["generator"]
->      putStrLn output
+>      system "make generator"
 >      putStrLn "> make generate"
->      output <- runCommand "make" ["generate"]
->      putStrLn output
+>      system "make generate"
 >      putStrLn "> make presenter"
->      output <- runCommand "make" ["presenter"]
->      putStrLn output
+>      system "make presenter"
 >      putStrLn "end of pre-build hook"
 >      return emptyHookedBuildInfo
-
-> runCommand command args = 
->   do (inh,outh,errh,proch) <- runInteractiveProcess command args Nothing Nothing
->      hClose inh
->      hClose errh
->      output <- hGetContents outh
->      seq output $ waitForProcess proch
->      return output
