@@ -41,7 +41,7 @@ SHELL = /bin/sh
 
 
 default: $(MAIN)
-.PHONY : default proxima generate presenter
+.PHONY : default proxima generator generate presenter
 
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
@@ -59,6 +59,9 @@ PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(
 
 # Generation 
 
+generator:
+	cd $(PROXIMASRCDIR); make generator
+	
 $(GEN): 
 	cd $(PROXIMASRCDIR); make generator
 
