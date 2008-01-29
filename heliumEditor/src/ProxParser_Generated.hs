@@ -25,285 +25,285 @@ import DocTypes_Generated
 -- ProxParser_Generated --
 
 -- Type specific
-reuseDummy :: [Maybe Node] -> Maybe IDD -> Maybe Root -> Maybe Dummy -> Dummy
+reuseDummy :: [Token doc Node clip token] -> Maybe IDD -> Maybe Root -> Maybe Dummy -> Dummy
 reuseDummy nodes  ma0 ma1 ma2
-  = case extractFromNodes extractDummy defaultDummy nodes of
+  = case extractFromTokens extractDummy defaultDummy nodes of
            (Dummy a0 a1 a2) -> reuse3 Dummy a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
+reuseRootEnr :: [Token doc Node clip token] -> Maybe IDD -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
 reuseRootEnr nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractRootEnr defaultRootEnr nodes of
+  = case extractFromTokens extractRootEnr defaultRootEnr nodes of
            (RootEnr a0 a1 a2 a3) -> reuse4 RootEnr a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseRoot :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Root
+reuseRoot :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Root
 reuseRoot nodes  ma0 ma1 ma2
-  = case extractFromNodes extractRoot defaultRoot nodes of
+  = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1 a2) -> reuse3 Root a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseRoot"
 
-reuseRootE :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
+reuseRootE :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
 reuseRootE nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractRootE defaultRootE nodes of
+  = case extractFromTokens extractRootE defaultRootE nodes of
            (RootE a0 a1 a2 a3) -> reuse4 RootE a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRootE"
 
-reuseDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
+reuseDecl :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
 reuseDecl nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
-  = case extractFromNodes extractDecl defaultDecl nodes of
+  = case extractFromTokens extractDecl defaultDecl nodes of
            (Decl a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 Decl a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "System error:<module>.reuseDecl"
 
-reuseBoardDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Board -> Decl
+reuseBoardDecl :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Board -> Decl
 reuseBoardDecl nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractBoardDecl defaultBoardDecl nodes of
+  = case extractFromTokens extractBoardDecl defaultBoardDecl nodes of
            (BoardDecl a0 a1 a2 a3) -> reuse4 BoardDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseBoardDecl"
 
-reusePPPresentationDecl :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe PPPresentation -> Decl
+reusePPPresentationDecl :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe PPPresentation -> Decl
 reusePPPresentationDecl nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractPPPresentationDecl defaultPPPresentationDecl nodes of
+  = case extractFromTokens extractPPPresentationDecl defaultPPPresentationDecl nodes of
            (PPPresentationDecl a0 a1 a2 a3) -> reuse4 PPPresentationDecl a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePPPresentationDecl"
 
-reuseIdent :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String -> Ident
+reuseIdent :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe String -> Ident
 reuseIdent nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractIdent defaultIdent nodes of
+  = case extractFromTokens extractIdent defaultIdent nodes of
            (Ident a0 a1 a2 a3) -> reuse4 Ident a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseIdent"
 
-reusePlusExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
+reusePlusExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reusePlusExp nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractPlusExp defaultPlusExp nodes of
+  = case extractFromTokens extractPlusExp defaultPlusExp nodes of
            (PlusExp a0 a1 a2 a3) -> reuse4 PlusExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePlusExp"
 
-reuseTimesExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
+reuseTimesExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reuseTimesExp nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractTimesExp defaultTimesExp nodes of
+  = case extractFromTokens extractTimesExp defaultTimesExp nodes of
            (TimesExp a0 a1 a2 a3) -> reuse4 TimesExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseTimesExp"
 
-reuseDivExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
+reuseDivExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reuseDivExp nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractDivExp defaultDivExp nodes of
+  = case extractFromTokens extractDivExp defaultDivExp nodes of
            (DivExp a0 a1 a2 a3) -> reuse4 DivExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseDivExp"
 
-reusePowerExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
+reusePowerExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reusePowerExp nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractPowerExp defaultPowerExp nodes of
+  = case extractFromTokens extractPowerExp defaultPowerExp nodes of
            (PowerExp a0 a1 a2 a3) -> reuse4 PowerExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reusePowerExp"
 
-reuseBoolExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Bool -> Exp
+reuseBoolExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Bool -> Exp
 reuseBoolExp nodes  ma0 ma1 ma2
-  = case extractFromNodes extractBoolExp defaultBoolExp nodes of
+  = case extractFromTokens extractBoolExp defaultBoolExp nodes of
            (BoolExp a0 a1 a2) -> reuse3 BoolExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseBoolExp"
 
-reuseIntExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Int -> Exp
+reuseIntExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe Int -> Exp
 reuseIntExp nodes  ma0 ma1 ma2
-  = case extractFromNodes extractIntExp defaultIntExp nodes of
+  = case extractFromTokens extractIntExp defaultIntExp nodes of
            (IntExp a0 a1 a2) -> reuse3 IntExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseIntExp"
 
-reuseLamExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Exp
+reuseLamExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Exp
 reuseLamExp nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractLamExp defaultLamExp nodes of
+  = case extractFromTokens extractLamExp defaultLamExp nodes of
            (LamExp a0 a1 a2 a3 a4) -> reuse5 LamExp a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseLamExp"
 
-reuseAppExp :: [Maybe Node] -> Maybe IDD -> Maybe Exp -> Maybe Exp -> Exp
+reuseAppExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe Exp -> Maybe Exp -> Exp
 reuseAppExp nodes  ma0 ma1 ma2
-  = case extractFromNodes extractAppExp defaultAppExp nodes of
+  = case extractFromTokens extractAppExp defaultAppExp nodes of
            (AppExp a0 a1 a2) -> reuse3 AppExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseAppExp"
 
-reuseCaseExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe List_Alt -> Exp
+reuseCaseExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe List_Alt -> Exp
 reuseCaseExp nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractCaseExp defaultCaseExp nodes of
+  = case extractFromTokens extractCaseExp defaultCaseExp nodes of
            (CaseExp a0 a1 a2 a3 a4) -> reuse5 CaseExp a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseCaseExp"
 
-reuseLetExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe List_Decl -> Maybe Exp -> Exp
+reuseLetExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe List_Decl -> Maybe Exp -> Exp
 reuseLetExp nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractLetExp defaultLetExp nodes of
+  = case extractFromTokens extractLetExp defaultLetExp nodes of
            (LetExp a0 a1 a2 a3 a4) -> reuse5 LetExp a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseLetExp"
 
-reuseIdentExp :: [Maybe Node] -> Maybe IDD -> Maybe Ident -> Exp
+reuseIdentExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe Ident -> Exp
 reuseIdentExp nodes  ma0 ma1
-  = case extractFromNodes extractIdentExp defaultIdentExp nodes of
+  = case extractFromTokens extractIdentExp defaultIdentExp nodes of
            (IdentExp a0 a1) -> reuse2 IdentExp a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseIdentExp"
 
-reuseIfExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Maybe Exp -> Exp
+reuseIfExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Maybe Exp -> Exp
 reuseIfExp nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6
-  = case extractFromNodes extractIfExp defaultIfExp nodes of
+  = case extractFromTokens extractIfExp defaultIfExp nodes of
            (IfExp a0 a1 a2 a3 a4 a5 a6) -> reuse7 IfExp a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6
            _ -> error "System error:<module>.reuseIfExp"
 
-reuseParenExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Exp
+reuseParenExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Exp
 reuseParenExp nodes  ma0 ma1 ma2 ma3
-  = case extractFromNodes extractParenExp defaultParenExp nodes of
+  = case extractFromTokens extractParenExp defaultParenExp nodes of
            (ParenExp a0 a1 a2 a3) -> reuse4 ParenExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseParenExp"
 
-reuseListExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe [IDP]  -> Maybe List_Exp -> Exp
+reuseListExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe [IDP]  -> Maybe List_Exp -> Exp
 reuseListExp nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractListExp defaultListExp nodes of
+  = case extractFromTokens extractListExp defaultListExp nodes of
            (ListExp a0 a1 a2 a3 a4) -> reuse5 ListExp a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseListExp"
 
-reuseProductExp :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe [IDP]  -> Maybe List_Exp -> Exp
+reuseProductExp :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe [IDP]  -> Maybe List_Exp -> Exp
 reuseProductExp nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractProductExp defaultProductExp nodes of
+  = case extractFromTokens extractProductExp defaultProductExp nodes of
            (ProductExp a0 a1 a2 a3 a4) -> reuse5 ProductExp a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseProductExp"
 
-reuseAlt :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Alt
+reuseAlt :: [Token doc Node clip token] -> Maybe IDD -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Alt
 reuseAlt nodes  ma0 ma1 ma2 ma3 ma4
-  = case extractFromNodes extractAlt defaultAlt nodes of
+  = case extractFromTokens extractAlt defaultAlt nodes of
            (Alt a0 a1 a2 a3 a4) -> reuse5 Alt a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseAlt"
 
-reuseBoard :: [Maybe Node] -> Maybe IDD -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Board
+reuseBoard :: [Token doc Node clip token] -> Maybe IDD -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Board
 reuseBoard nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
-  = case extractFromNodes extractBoard defaultBoard nodes of
+  = case extractFromTokens extractBoard defaultBoard nodes of
            (Board a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 Board a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "System error:<module>.reuseBoard"
 
-reuseBoardRow :: [Maybe Node] -> Maybe IDD -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> BoardRow
+reuseBoardRow :: [Token doc Node clip token] -> Maybe IDD -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> BoardRow
 reuseBoardRow nodes  ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
-  = case extractFromNodes extractBoardRow defaultBoardRow nodes of
+  = case extractFromTokens extractBoardRow defaultBoardRow nodes of
            (BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8) -> reuse9 BoardRow a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "System error:<module>.reuseBoardRow"
 
-reuseQueen :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseQueen :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseQueen nodes  ma0 ma1
-  = case extractFromNodes extractQueen defaultQueen nodes of
+  = case extractFromTokens extractQueen defaultQueen nodes of
            (Queen a0 a1) -> reuse2 Queen a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseQueen"
 
-reuseKing :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseKing :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseKing nodes  ma0 ma1
-  = case extractFromNodes extractKing defaultKing nodes of
+  = case extractFromTokens extractKing defaultKing nodes of
            (King a0 a1) -> reuse2 King a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKing"
 
-reuseBishop :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseBishop :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseBishop nodes  ma0 ma1
-  = case extractFromNodes extractBishop defaultBishop nodes of
+  = case extractFromTokens extractBishop defaultBishop nodes of
            (Bishop a0 a1) -> reuse2 Bishop a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseBishop"
 
-reuseKnight :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseKnight :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseKnight nodes  ma0 ma1
-  = case extractFromNodes extractKnight defaultKnight nodes of
+  = case extractFromTokens extractKnight defaultKnight nodes of
            (Knight a0 a1) -> reuse2 Knight a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseKnight"
 
-reuseRook :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reuseRook :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reuseRook nodes  ma0 ma1
-  = case extractFromNodes extractRook defaultRook nodes of
+  = case extractFromTokens extractRook defaultRook nodes of
            (Rook a0 a1) -> reuse2 Rook a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseRook"
 
-reusePawn :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> BoardSquare
+reusePawn :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> BoardSquare
 reusePawn nodes  ma0 ma1
-  = case extractFromNodes extractPawn defaultPawn nodes of
+  = case extractFromTokens extractPawn defaultPawn nodes of
            (Pawn a0 a1) -> reuse2 Pawn a0 a1 ma0 ma1
            _ -> error "System error:<module>.reusePawn"
 
-reuseEmpty :: [Maybe Node] -> BoardSquare
+reuseEmpty :: [Token doc Node clip token] -> BoardSquare
 reuseEmpty nodes 
-  = case extractFromNodes extractEmpty defaultEmpty nodes of
+  = case extractFromTokens extractEmpty defaultEmpty nodes of
            (Empty) -> reuse0 Empty
            _ -> error "System error:<module>.reuseEmpty"
 
-reusePPPresentation :: [Maybe Node] -> Maybe IDD -> Maybe Bool -> Maybe List_Slide -> PPPresentation
+reusePPPresentation :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> Maybe List_Slide -> PPPresentation
 reusePPPresentation nodes  ma0 ma1 ma2
-  = case extractFromNodes extractPPPresentation defaultPPPresentation nodes of
+  = case extractFromTokens extractPPPresentation defaultPPPresentation nodes of
            (PPPresentation a0 a1 a2) -> reuse3 PPPresentation a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reusePPPresentation"
 
-reuseSlide :: [Maybe Node] -> Maybe IDD -> Maybe String -> Maybe ItemList -> Slide
+reuseSlide :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Maybe ItemList -> Slide
 reuseSlide nodes  ma0 ma1 ma2
-  = case extractFromNodes extractSlide defaultSlide nodes of
+  = case extractFromTokens extractSlide defaultSlide nodes of
            (Slide a0 a1 a2) -> reuse3 Slide a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseSlide"
 
-reuseItemList :: [Maybe Node] -> Maybe IDD -> Maybe ListType -> Maybe List_Item -> ItemList
+reuseItemList :: [Token doc Node clip token] -> Maybe IDD -> Maybe ListType -> Maybe List_Item -> ItemList
 reuseItemList nodes  ma0 ma1 ma2
-  = case extractFromNodes extractItemList defaultItemList nodes of
+  = case extractFromTokens extractItemList defaultItemList nodes of
            (ItemList a0 a1 a2) -> reuse3 ItemList a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseItemList"
 
-reuseBullet :: [Maybe Node] -> Maybe IDD -> ListType
+reuseBullet :: [Token doc Node clip token] -> Maybe IDD -> ListType
 reuseBullet nodes  ma0
-  = case extractFromNodes extractBullet defaultBullet nodes of
+  = case extractFromTokens extractBullet defaultBullet nodes of
            (Bullet a0) -> reuse1 Bullet a0 ma0
            _ -> error "System error:<module>.reuseBullet"
 
-reuseNumber :: [Maybe Node] -> Maybe IDD -> ListType
+reuseNumber :: [Token doc Node clip token] -> Maybe IDD -> ListType
 reuseNumber nodes  ma0
-  = case extractFromNodes extractNumber defaultNumber nodes of
+  = case extractFromTokens extractNumber defaultNumber nodes of
            (Number a0) -> reuse1 Number a0 ma0
            _ -> error "System error:<module>.reuseNumber"
 
-reuseAlpha :: [Maybe Node] -> Maybe IDD -> ListType
+reuseAlpha :: [Token doc Node clip token] -> Maybe IDD -> ListType
 reuseAlpha nodes  ma0
-  = case extractFromNodes extractAlpha defaultAlpha nodes of
+  = case extractFromTokens extractAlpha defaultAlpha nodes of
            (Alpha a0) -> reuse1 Alpha a0 ma0
            _ -> error "System error:<module>.reuseAlpha"
 
-reuseStringItem :: [Maybe Node] -> Maybe IDD -> Maybe String -> Item
+reuseStringItem :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Item
 reuseStringItem nodes  ma0 ma1
-  = case extractFromNodes extractStringItem defaultStringItem nodes of
+  = case extractFromTokens extractStringItem defaultStringItem nodes of
            (StringItem a0 a1) -> reuse2 StringItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseStringItem"
 
-reuseHeliumItem :: [Maybe Node] -> Maybe IDD -> Maybe Exp -> Item
+reuseHeliumItem :: [Token doc Node clip token] -> Maybe IDD -> Maybe Exp -> Item
 reuseHeliumItem nodes  ma0 ma1
-  = case extractFromNodes extractHeliumItem defaultHeliumItem nodes of
+  = case extractFromTokens extractHeliumItem defaultHeliumItem nodes of
            (HeliumItem a0 a1) -> reuse2 HeliumItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseHeliumItem"
 
-reuseListItem :: [Maybe Node] -> Maybe IDD -> Maybe ItemList -> Item
+reuseListItem :: [Token doc Node clip token] -> Maybe IDD -> Maybe ItemList -> Item
 reuseListItem nodes  ma0 ma1
-  = case extractFromNodes extractListItem defaultListItem nodes of
+  = case extractFromTokens extractListItem defaultListItem nodes of
            (ListItem a0 a1) -> reuse2 ListItem a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseListItem"
 
-reuseList_Decl :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Decl -> List_Decl
+reuseList_Decl :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Decl -> List_Decl
 reuseList_Decl nodes  ma0 ma1
-  = case extractFromNodes extractList_Decl defaultList_Decl nodes of
+  = case extractFromTokens extractList_Decl defaultList_Decl nodes of
            (List_Decl a0 a1) -> reuse2 List_Decl a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Decl"
 
-reuseList_Alt :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Alt -> List_Alt
+reuseList_Alt :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Alt -> List_Alt
 reuseList_Alt nodes  ma0 ma1
-  = case extractFromNodes extractList_Alt defaultList_Alt nodes of
+  = case extractFromTokens extractList_Alt defaultList_Alt nodes of
            (List_Alt a0 a1) -> reuse2 List_Alt a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Alt"
 
-reuseList_Exp :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Exp -> List_Exp
+reuseList_Exp :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Exp -> List_Exp
 reuseList_Exp nodes  ma0 ma1
-  = case extractFromNodes extractList_Exp defaultList_Exp nodes of
+  = case extractFromTokens extractList_Exp defaultList_Exp nodes of
            (List_Exp a0 a1) -> reuse2 List_Exp a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Exp"
 
-reuseList_Slide :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Slide -> List_Slide
+reuseList_Slide :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Slide -> List_Slide
 reuseList_Slide nodes  ma0 ma1
-  = case extractFromNodes extractList_Slide defaultList_Slide nodes of
+  = case extractFromTokens extractList_Slide defaultList_Slide nodes of
            (List_Slide a0 a1) -> reuse2 List_Slide a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Slide"
 
-reuseList_Item :: [Maybe Node] -> Maybe IDD -> Maybe ConsList_Item -> List_Item
+reuseList_Item :: [Token doc Node clip token] -> Maybe IDD -> Maybe ConsList_Item -> List_Item
 reuseList_Item nodes  ma0 ma1
-  = case extractFromNodes extractList_Item defaultList_Item nodes of
+  = case extractFromTokens extractList_Item defaultList_Item nodes of
            (List_Item a0 a1) -> reuse2 List_Item a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseList_Item"
 
@@ -638,9 +638,9 @@ defaultList_Item = List_Item NoIDD Nil_Item
 
 -- General
 -- return result of the first extraction application in the list that is not Nothing
---extractFromNodes ::(Node -> Maybe a) -> a -> [Node] -> a
-extractFromNodes extr def []     = def
-extractFromNodes extr def (n:ns) = maybe (extractFromNodes extr def ns) id (extr n)
+extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a
+extractFromTokens extr def []     = def
+extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))
 
 reuse3 :: (a0 -> a1 -> a2 -> r) -> 
           a0 -> a1 -> a2 -> 
