@@ -1,4 +1,4 @@
-module GenProxParser where
+    module GenProxParser where
 
 import GenCommon
 import List
@@ -45,9 +45,9 @@ genDocUtils' ds = ["-- Type specific"] ++
 ------- 
 
 genReuse (tp,cnstr,cs,_) =
-  "reuse"++cnstr++" :: [Maybe Node] ->"++concatMap tpsig cs++" "++tp++"\n"++
+  "reuse"++cnstr++" :: [Token doc Node clip token] ->"++concatMap tpsig cs++" "++tp++"\n"++
   "reuse"++cnstr++" nodes "++mas++"\n" ++ --(Just ("++tp++"Node x@("++cnstr++(concat $ replicate arity " _")++") _)) = Just x\n"++
-  "  = case extractFromNodes extract"++cnstr++" default"++cnstr++" nodes of\n"++
+  "  = case extractFromTokens extract"++cnstr++" default"++cnstr++" nodes of\n"++
   "           ("++cnstr++as++") -> reuse"++show arity++" "++cnstr++as++mas++"\n"++
   "           _ -> error \"System error:<module>.reuse"++cnstr++"\"\n"
  where arity = length cs
@@ -74,9 +74,9 @@ genDefault (tp,cnstr,cs,_) =
 
 genExtractFromNodes = -- generate this one as well, because we don't want DocUtils to import yet another module
   [ "-- return result of the first extraction application in the list that is not Nothing\n"++
-    "--extractFromNodes ::(Node -> Maybe a) -> a -> [Node] -> a\n"++
-    "extractFromNodes extr def []     = def\n"++
-    "extractFromNodes extr def (n:ns) = maybe (extractFromNodes extr def ns) id (extr n)\n" ]
+    "extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a\n"++
+    "extractFromTokens extr def []     = def\n"++
+    "extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))\n" ]
 
 genReuseN 0     = "reuse0 :: r -> r\nreuse0 f = f\n" 
 genReuseN arity = 
@@ -118,7 +118,7 @@ reuse6 f {peC} a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
 
 reuseRootEnr :: [Maybe Node] -> Maybe IDD -> Maybe IDP -> Maybe Decls -> Maybe Decls -> Maybe HeliumTypeInfo -> Maybe Document  -> EnrichedDoc
 reuseRootEnr nodes ma0 ma1 ma2 ma3 ma4 ma5
-  = case extractFromNodes extractRootEnr defaultRootEnr nodes of
+  = case extractFromTokens extractRootEnr defaultRootEnr nodes of
            (RootEnr a0 a1 a2 a3 a4 a5) -> reuse6 RootEnr {ParseErrEnr} a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "System error:<module>.reuseRootEnr"
 
