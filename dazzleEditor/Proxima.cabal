@@ -48,7 +48,7 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                XLatex XprezLib RenLayerTypes RenLayerUtils RenPresent RenTranslate
                RenTypes RenUtils Renderer DocTypes_Generated DocUtils_Generated
                DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
-               ProxParser_Generated Reducer Scanner
+               ProxParser_Generated Reducer ScannerSheet
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
