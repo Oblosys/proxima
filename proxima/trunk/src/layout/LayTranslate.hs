@@ -4,6 +4,7 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
+import ScannerAG
 
 import TreeEditPres
 
@@ -106,6 +107,7 @@ parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 
 tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
  let (pres', layout', idCounter') = scannerSheet idCounter pres
+--     i = wrapLayout pres
      presLvl'                     = PresentationLevel pres' (layout',idCounter')
  in  (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
 
