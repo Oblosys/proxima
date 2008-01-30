@@ -38,10 +38,8 @@ EXE = .exe
 
 SHELL = /bin/sh
 
-default: all
-all: agc generator arranger
 
-.PHONY : default all always
+.PHONY: default all agc generator arranger scanner always
 
 PROXIMADIR = ../../proxima
 
@@ -52,7 +50,6 @@ GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
 AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
-
 
 # Proxima directories
 
@@ -66,13 +63,19 @@ PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
 RENDERINGDIR    = $(PROXIMADIR)/src/rendering
 PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
-
 GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
 
+
+# Rules:
+
+default: all
+
+all: agc generator arranger scanner
 
 # The Generator
 generator : $(GEN)
 
+# the always phony target is because we don't want to put all the generator sources here
 $(GEN): always
 	@echo ghc: compiling Generator
 	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts
@@ -81,26 +84,43 @@ $(GEN): always
 
 agc: $(AGC)
 
+# the always phony target is because we don't want to put all the ag compiler sources here
 $(AGC): always
 	@echo ghc: compiling uuagc compiler with -O2
 	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -fglasgow-exts -O2 -package mtl
 
-arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
 # The arranger AG
+
+
+arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
 $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfpm --Wmax=12 --genlinepragmas --self --Werrors --module=ArrangerAG \
+	-cfmp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
+#	--visit --case --strictdata --strictwrap --unbox\
 
-#	-cfpm --Werrors --module=ArrangerAG \
-#	-cfpm --visit --case --strictdata --strictwrap --unbox --Werrors --module=ArrangerAG \
+# no type sigs, because parameterized types are not supported by AG
 
-# -module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
+
+# The scanner AG
+
+scanner: $(LAYOUTDIR)/ScannerAG.hs
+
+$(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
+	@echo uuagc: compiling ScannerAG.ag
+	@$(AGC) -o $(LAYOUTDIR)/ScannerAG.hs \
+	-cfmpw --Wmax=12 --genlinepragmas --self --Werrors \
+	$(LAYOUTDIR)/ScannerAG.ag -P $(LAYOUTDIR)	
+
+# no type sigs, because parameterized types are not supported by AG
+
+
+# Cleaning
 
 clean:
 	$(FIND) $(PROXIMASRCDIR) -name "*.hi" -delete
