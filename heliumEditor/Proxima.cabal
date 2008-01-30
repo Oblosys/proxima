@@ -17,7 +17,8 @@ author: Martijn Schrage
 tested-with: GHC -any
 data-files:
 extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
-                    src/PresentationAG.ag src/PresentationAG_Generated.ag
+                    src/proxima/src/layout/ScannerAG.ag src/PresentationAG.ag
+                    src/PresentationAG_Generated.ag
 extra-tmp-files:
  
 executable: HeliumEditor
@@ -42,13 +43,14 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                CommonUtils DebugLevels UU_Parsing DocTypes DocUtils DocumentEdit
                EnrTypes EnrUtils EvalLayerTypes EvalLayerUtils EvalPresent
                EvalTranslate LayLayerTypes LayLayerUtils LayPresent LayTranslate
-               LayTypes LayUtils Layout TreeEditPres Architecture ArchitectureLibM
-               GUI Proxima PresLayerTypes PresLayerUtils PresPresent PresTranslate
-               PresTypes PresUtils PresentationParsing XLatex XprezLib
-               RenLayerTypes RenLayerUtils RenPresent RenTranslate RenTypes
-               RenUtils Renderer Chess DocTypes_Generated DocUtils_Generated
-               DocumentEdit_Generated EvaluateTypesStubs Evaluator Main
-               PresentationAG ProxParser ProxParser_Generated Reducer Scanner
+               LayTypes LayUtils Layout ScannerAG TreeEditPres Architecture
+               ArchitectureLibM GUI Proxima PresLayerTypes PresLayerUtils
+               PresPresent PresTranslate PresTypes PresUtils PresentationParsing
+               XLatex XprezLib RenLayerTypes RenLayerUtils RenPresent RenTranslate
+               RenTypes RenUtils Renderer Chess DocTypes_Generated
+               DocUtils_Generated DocumentEdit_Generated EvaluateTypesStubs
+               Evaluator Main PresentationAG ProxParser ProxParser_Generated
+               Reducer Scanner
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
