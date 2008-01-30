@@ -4,10 +4,9 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
-import ScannerAG
+import Scanner
 
 import TreeEditPres
-
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (Show token, DocNode node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> EditLayout documentLevel doc node clip
@@ -103,14 +102,6 @@ parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 
 -- doc and/or presentation need some way to say whether document parts are parsed. Now With nodes pile up on the 
 -- unparsed presentation.
-
-
-tokenizeLay scannerSheet state layLvl@(LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
- let (pres', layout', idCounter') = scannerSheet idCounter pres
---     i = wrapLayout pres
-     presLvl'                     = PresentationLevel pres' (layout',idCounter')
- in  (SetPres presLvl', state, layLvl) --LayoutLevel (markUnparsed pres') (markUnparsedF pres' focus'))
-
 
 
 
