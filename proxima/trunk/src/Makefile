@@ -114,7 +114,7 @@ $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -o $(LAYOUTDIR)/ScannerAG.hs \
-	-cfmpw --Wmax=12 --genlinepragmas --self --Werrors \
+	-cfmp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(LAYOUTDIR)/ScannerAG.ag -P $(LAYOUTDIR)	
 
 # no type sigs, because parameterized types are not supported by AG
