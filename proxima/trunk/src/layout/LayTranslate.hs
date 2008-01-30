@@ -245,7 +245,7 @@ graphEdit :: (Show token, DocNode node) => ScannerSheet doc node clip token ->
 graphEdit scannerSheet state layLvl presLvl editFn =
   let (state', layLvl') = editFn state layLvl 
       
-  in tokenizeLay scannerSheet state' layLvl' presLvl
+  in  tokenizeLay scannerSheet state' layLvl' presLvl
 
 
 

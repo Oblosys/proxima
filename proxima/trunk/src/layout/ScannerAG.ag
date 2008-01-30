@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------------------
 {
 import PresTypes
+import List
 }
 
 DATA Layout
@@ -17,11 +18,11 @@ DATA Layout
   | StringP     id : IDP text : String
   | ImageP      id : IDP src : String style : ImgStyle
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : Style
-  | RectangleP  id : IDP w,h : Int lineWidth : Int style : Style
+  | RectangleP  id : IDP w, h : Int lineWidth : Int style : Style
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
-  | RowP        id : IDP hRefNr : Int presentationList : LayoutList
+  | RowP        id : IDP hRefNr : Int                       presentationList : LayoutList
   | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : LayoutList
-  | OverlayP    id : IDP              presentationList : LayoutList
+  | OverlayP    id : IDP                                    presentationList : LayoutList
   | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : LayoutList 
   | VertexP     id : IDP i,x,y: Int outline : Outline child : Layout
   | FormatterP  id : IDP presentationList : LayoutList
@@ -33,8 +34,44 @@ DATA Layout
 
 TYPE LayoutList = [Layout]
 
-SEM Layout [ lloc : {Maybe node} | i : Int | ]
+
+ATTR Layout LayoutList [ lloc : {Maybe node} | | ]
+
+SEM Layout
   | LocatorP
       child.lloc = Just @location
 
-ATTR LayoutList [ lloc : {Maybe node} | i : Int | ]
+
+ATTR Layout [ | | tokenChars : String ]
+
+SEM Layout
+  | StringP
+      lhs.tokenChars = @text
+
+  | RowP
+      lhs.tokenChars = concat @presentationList.tokenCharss
+  | ColP
+      lhs.tokenChars = concat $ intersperse "\n" @presentationList.tokenCharss
+  | OverlayP
+      lhs.tokenChars = head @presentationList.tokenCharss
+  | FormatterP -- maybe add a '\n'?
+      lhs.tokenChars = concat $ intersperse " " @presentationList.tokenCharss
+  | WithP
+      lhs.tokenChars = @child.tokenChars
+  | ParsingP
+      lhs.tokenChars = @child.tokenChars
+  | LocatorP
+      lhs.tokenChars = @child.tokenChars
+  | StructuralP
+      lhs.tokenChars = "" -- ignored for now
+  | EmptyP ImageP PolyP RectangleP EllipseP VertexP GraphP ArrangedP
+      lhs.tokenChars = "" -- should these cause creation of new token. Or maybe count as a space? or some special character?
+      
+ATTR LayoutList [ | | tokenCharss : {[String]} ]
+
+SEM LayoutList
+  | Nil
+      lhs.tokenCharss = []
+  | Cons
+      lhs.tokenCharss = @hd.tokenChars : @tl.tokenCharss
+      
