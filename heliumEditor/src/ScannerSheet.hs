@@ -1,4 +1,4 @@
-module Scanner where
+module ScannerSheet where
 
 import CommonTypes
 import qualified Data.Map as Map

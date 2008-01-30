@@ -6,7 +6,7 @@ import Evaluator
 import Reducer
 import PresentationAG
 import ProxParser
-import Scanner
+import ScannerSheet
 
 import DocTypes
 import DocTypes_Generated
@@ -21,6 +21,6 @@ gain = main -- when typing during compilation GHCI replaces the first command li
 
 main = proxima PresentationAG.sem_EnrichedDoc 
                ProxParser.parsePres 
-               Scanner.scanner -- sheet parameters
+               ScannerSheet.scanner -- sheet parameters
                (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                (EnrichedDocLevel HoleEnrichedDoc NoPathD)   
