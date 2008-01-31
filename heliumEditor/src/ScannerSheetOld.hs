@@ -7,14 +7,15 @@ import LayLayerUtils
 
 import DocTypes_Generated (Node (..))
 
+import ScannerSheet
 
 
 
-scanner :: Int -> Layout doc Node clip ->
-           (Presentation doc Node clip token, WhitespaceMap, Int)
-scanner i pres = -- debug Err (show pres) $
-            tokenize LexHaskell -- default is Haskell scanner
-                     i Nothing pres
+--scanner :: (Int -> Layout doc Node clip ->
+--           (Presentation doc Node clip token, WhitespaceMap, Int)
+scanner = -- debug Err (show pres) $
+            (\i pres -> tokenize LexHaskell -- default is Haskell scanner
+                     i Nothing pres, alexScanTokenz)
 
 {-
  Redesigning this module has a high priority. The differences between haskell and free text lexers are are

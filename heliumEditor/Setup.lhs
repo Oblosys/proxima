@@ -10,6 +10,8 @@
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
 >      putStrLn "> make proxima"
 >      system "make proxima"
+>      putStrLn "> make lexer"
+>      system "make lexer"
 >      putStrLn "> make generate"
 >      system "make generate"
 >      putStrLn "> make presenter"

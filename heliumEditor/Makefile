@@ -41,7 +41,7 @@ SHELL = /bin/sh
 
 
 default: $(MAIN)
-.PHONY : default proxima  generate presenter
+.PHONY : default proxima generate presenter lexer
 
 
 PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
@@ -87,8 +87,10 @@ src/PresentationAG.hs: $(AGC) \
 	@echo "Compiling presentationAG.ag"
 	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=10 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
-# --module is because otherwise uuagc uses ../../presentation/PresentationAG as module name
+lexer: src/ScannerSheet.hs
 
+src/ScannerSheet.hs: src/ScannerSheet.x
+	alex src/ScannerSheet.x
 
 
 clean:
@@ -138,5 +140,5 @@ proxima:
 	cd $(PROXIMASRCDIR); make
 
 # The main target	
-$(MAIN): proxima generate presenter
+$(MAIN): proxima generate presenter lexer
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
