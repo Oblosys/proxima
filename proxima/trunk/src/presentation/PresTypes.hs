@@ -14,7 +14,7 @@ data PresentationLevel doc node clip token = PresentationLevel (Presentation doc
 
 type PresentationLS doc node clip token = (WhitespaceMap, IDPCounter)
 
-type Whitespace = (Int, Int)
+type Whitespace = (Int, Int) -- (line breaks, spaces)
 
 type WhitespaceMap = Map IDP Whitespace   -- Whitespace information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
