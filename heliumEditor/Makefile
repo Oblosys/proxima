@@ -90,7 +90,7 @@ src/PresentationAG.hs: $(AGC) \
 lexer: src/ScannerSheet.hs
 
 src/ScannerSheet.hs: src/ScannerSheet.x
-	alex src/ScannerSheet.x
+	alex --ghc src/ScannerSheet.x
 
 
 clean:
