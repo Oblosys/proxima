@@ -635,7 +635,7 @@ postScanPrs :: [String] -> Maybe node -> Presentation doc node clip UserToken ->
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
-postScanPrs kwrds ctxt (TokenP i (StructuralTk loc pres x idp)) = [StructuralTk loc pres (postScanPrs kwrds ctxt pres) idp]
+postScanPrs kwrds ctxt (TokenP i (StructuralTk loc pres x idp)) = [StructuralTk loc pres (postScanStr kwrds ctxt pres) idp]
 postScanPrs kwrds ctxt (TokenP i t)         = [t]
 postScanPrs kwrds ctxt (ImageP _ _ _)         = []
 postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []

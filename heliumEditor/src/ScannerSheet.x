@@ -59,7 +59,6 @@ tokens :-
 {-
 Old helium scanner seemed to have only keywords, no symbols
 
-Why does \xffa
 
 
 -}
