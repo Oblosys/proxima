@@ -101,9 +101,11 @@ scanPresentation sheet inheritedLex loc idP presentationLex pres =
  let lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (self,scs)    = sem_Layout pres loc
+     (self,scs)    = sem_Layout pres lex loc (scanStructural sheet)
      (_,alexScanner) = sheet
      (tokens, whitespaceMap) = alexScanner scs
  in  debug Lay ("Alex scanner:\n" ++ stringFromScanChars scs ++ "\n" ++ (show tokens)) $
      (ParsingP idP presentationLex $ row $ map (TokenP NoIDP) tokens , whitespaceMap)
 -- in  (ParsingP idP presentationLex $ empty, whitespaceMap)
+
+-- TODO collect structural whitespace, and thread idp counter 

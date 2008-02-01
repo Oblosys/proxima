@@ -38,6 +38,16 @@ DATA Layout
 TYPE LayoutList = [Layout]
 
 
+ATTR Layout LayoutList 
+  [ scanStructural : { () {- type sig is not used, the type is Scanner.tokenizeLay -} } | | ]
+-- the we pass this function as an argument, since either it has to be defined in this module, which
+-- is awkward during development, or a module cycle has to be resolved, complicating the build process
+
+ATTR Layout LayoutList 
+  [ lexer : Lexer | | ]
+
+-- TODO: what about parsing nodes declaring different lexers? give a warning?
+
 ATTR Layout LayoutList [ lloc : {Maybe node} | | ]
 
 SEM Layout
@@ -66,7 +76,8 @@ SEM Layout
   | LocatorP
       lhs.tokenChars = @child.tokenChars
   | StructuralP
-      lhs.tokenChars = [Structural @lhs.lloc (castLayToPres @child.self)]
+      lhs.tokenChars = let (pres, _) = @lhs.scanStructural @lhs.lexer @lhs.lloc @child.self
+                       in  [Structural @lhs.lloc pres]
   | EmptyP 
       lhs.tokenChars = []
   | ImageP PolyP RectangleP EllipseP VertexP GraphP
