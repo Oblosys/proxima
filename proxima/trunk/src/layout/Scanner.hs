@@ -28,7 +28,9 @@ maybe presentation id's need to be kept. This could be what causes the problem w
 
 
 TODO:
--- TODO collect structural whitespace, and thread idp counter 
+collect structural whitespace, and thread idp counter 
+
+fix: Parse errors empty the whole presentation
 
 
 Optimizations:
