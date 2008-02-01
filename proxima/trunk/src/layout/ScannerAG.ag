@@ -9,6 +9,7 @@
 -}
 -----------------------------------------------------------------------------------------
 {
+import CommonTypes
 import PresTypes
 import LayLayerTypes
 import LayLayerUtils
@@ -77,7 +78,8 @@ SEM Layout
       lhs.tokenChars = @child.tokenChars
   | StructuralP
       lhs.tokenChars = let (pres, _) = @lhs.scanStructural @lhs.lexer @lhs.lloc @child.self
-                       in  [Structural @lhs.lloc pres]
+                       in  debug Lay ("Recursive scan structural on "++ show @child.self) $
+                           [Structural @lhs.lloc pres]
   | EmptyP 
       lhs.tokenChars = []
   | ImageP PolyP RectangleP EllipseP VertexP GraphP

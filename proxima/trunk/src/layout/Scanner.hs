@@ -22,8 +22,14 @@ import ScannerAG
 {-
 Challenges:
 
-passing several Alex scanners
-handling tokenization of structural presentations in the parsing presentation
+passing several Alex scanners (probably solved by Alex itself)
+
+maybe presentation id's need to be kept. This could be what causes the problem when identifier list is edited
+
+
+TODO:
+-- TODO collect structural whitespace, and thread idp counter 
+
 
 Optimizations:
 - use . for string concatenation
@@ -108,4 +114,3 @@ scanPresentation sheet inheritedLex loc idP presentationLex pres =
      (ParsingP idP presentationLex $ row $ map (TokenP NoIDP) tokens , whitespaceMap)
 -- in  (ParsingP idP presentationLex $ empty, whitespaceMap)
 
--- TODO collect structural whitespace, and thread idp counter 

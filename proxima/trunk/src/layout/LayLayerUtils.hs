@@ -39,5 +39,5 @@ stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars [] = ""
 stringFromScanChars (sc : scs) =
   (case sc of Char c       -> c
-              Structural _ _ -> '\255')
+              Structural _ _ -> '@') -- in the Alex scanner, this is \255, this output is only for show
    : stringFromScanChars scs                                    
