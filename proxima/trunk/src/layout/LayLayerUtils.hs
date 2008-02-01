@@ -34,3 +34,10 @@ cast (LocatorP l pres)          = LocatorP l $ cast pres
 cast (GraphP id d w h es press) = GraphP id d w h es $ map cast press
 cast (VertexP id v x y o pres)  = VertexP id v x y o $ cast pres
 cast (FormatterP id press)      = FormatterP id $ map cast press
+
+stringFromScanChars :: [ScanChar doc node clip token] -> String
+stringFromScanChars [] = ""
+stringFromScanChars (sc : scs) =
+  (case sc of Char c       -> c
+              Structural _ _ -> '\255')
+   : stringFromScanChars scs                                    

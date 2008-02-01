@@ -52,7 +52,9 @@ inherited attribute   lx: the lexer of                   (simply copied down)
 synthesized attribute pres: the tokenized presentation   (constructed at every case because of cast from Layout to Presentation)
                       wm: the whitespace map             (copied except in List, where the union is taken)
 -}
-scanStructural :: Show token => ScannerSheet doc node clip token -> Lexer -> Maybe node -> Layout doc node clip -> (Presentation doc node clip token, WhitespaceMap)
+scanStructural :: Show token => ScannerSheet doc node clip token ->
+                  Lexer -> Maybe node -> Layout doc node clip ->
+                  (Presentation doc node clip token, WhitespaceMap)
 scanStructural sheet lx loc prez =
   case prez of
     ParsingP idP lx' pres'      -> scanPresentation sheet lx loc idP lx' pres'
@@ -92,14 +94,16 @@ scanStructuralList sheet lx loc (pres:press) = let (pres',  lm0) = scanStructura
                                                in  (pres':press', lm1 `Map.union` lm0)
 
 
+scanPresentation :: Show token => ScannerSheet doc node clip token -> 
+                    Lexer -> Maybe node -> IDP -> Lexer -> Layout doc node clip ->
+                    (Presentation doc node clip token, WhitespaceMap)
 scanPresentation sheet inheritedLex loc idP presentationLex pres =
  let lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (self,str)    = sem_Layout pres loc
-     tokenizedPres = undefined
+     (self,scs)    = sem_Layout pres loc
      (_,alexScanner) = sheet
-     (tokens, whitespaceMap) = alexScanner str
- in  debug Lay ("Alex scanner:" ++ (show tokens)) $
+     (tokens, whitespaceMap) = alexScanner scs
+ in  debug Lay ("Alex scanner:\n" ++ stringFromScanChars scs ++ "\n" ++ (show tokens)) $
      (ParsingP idP presentationLex $ row $ map (TokenP NoIDP) tokens , whitespaceMap)
 -- in  (ParsingP idP presentationLex $ empty, whitespaceMap)

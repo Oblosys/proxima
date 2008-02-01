@@ -10,7 +10,10 @@
 -----------------------------------------------------------------------------------------
 {
 import PresTypes
+import LayLayerTypes
+import LayLayerUtils
 import List
+import Char
 }
 
 DATA Layout
@@ -42,20 +45,20 @@ SEM Layout
       child.lloc = Just @location
 
 
-ATTR Layout [ | | tokenChars : String ]
+ATTR Layout [ | | tokenChars : {[ScanChar]} ]
 
 SEM Layout
   | StringP
-      lhs.tokenChars = @text
+      lhs.tokenChars = map Char @text
 
   | RowP
       lhs.tokenChars = concat @presentationList.tokenCharss
   | ColP
-      lhs.tokenChars = concat $ intersperse "\n" @presentationList.tokenCharss
+      lhs.tokenChars = concat $ intersperse [Char '\n'] @presentationList.tokenCharss
   | OverlayP
       lhs.tokenChars = head @presentationList.tokenCharss
   | FormatterP -- maybe add a '\n'?
-      lhs.tokenChars = concat $ intersperse " " @presentationList.tokenCharss
+      lhs.tokenChars = concat $ intersperse [Char ' '] @presentationList.tokenCharss
   | WithP
       lhs.tokenChars = @child.tokenChars
   | ParsingP
@@ -63,11 +66,15 @@ SEM Layout
   | LocatorP
       lhs.tokenChars = @child.tokenChars
   | StructuralP
-      lhs.tokenChars = "" -- ignored for now
-  | EmptyP ImageP PolyP RectangleP EllipseP VertexP GraphP ArrangedP
-      lhs.tokenChars = "" -- should these cause creation of new token. Or maybe count as a space? or some special character?
+      lhs.tokenChars = [Structural @lhs.lloc (castLayToPres @child.self)]
+  | EmptyP 
+      lhs.tokenChars = []
+  | ImageP PolyP RectangleP EllipseP VertexP GraphP
+      lhs.tokenChars = [] -- for now, we assume these will only appear in structural presentations
+  | ArrangedP 
+      lhs.tokenChars = [] -- will not occur
       
-ATTR LayoutList [ | | tokenCharss : {[String]} ]
+ATTR LayoutList [ | | tokenCharss : {[[ScanChar]]} ]
 
 SEM LayoutList
   | Nil

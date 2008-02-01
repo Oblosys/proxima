@@ -14,5 +14,10 @@ type LayerStateLay doc node clip = Layout doc node clip -- clipboard
 type ScannerSheet doc node clip token = 
       ( IDPCounter -> Layout doc node clip ->
                              (Presentation doc node clip token, WhitespaceMap, IDPCounter)
-      , String -> ([Token doc node clip token], WhitespaceMap)
+      , [ScanChar doc node clip token] -> ([Token doc node clip token], WhitespaceMap)
       )
+      
+data ScanChar doc node clip token = 
+       Char Char
+     | Structural (Maybe node) (Presentation doc node clip token)
+
