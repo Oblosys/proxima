@@ -114,6 +114,16 @@ mkToken tokf (idpCounter, whitespaceMap, collectedWhitespace) scs =
       , (idpCounter + 1, Map.insert idp collectedWhitespace whitespaceMap, (0,0)) 
       )
 
+
+mkStructuralToken :: ScannerState -> [ScanChar_] -> (Maybe (Token Document Node ClipDoc UserToken), ScannerState)
+mkStructuralToken (idpCounter, whitespaceMap, collectedWhitespace) scs = 
+  let idp = IDP idpCounter
+      Structural loc pres = head scs
+  in  ( Just $ StructuralTk loc pres [] idp
+      , (idpCounter + 1, Map.insert idp collectedWhitespace whitespaceMap, (0,0))
+      ) -- TODO handle whitespace for structurals
+
+
 collectWhitespace :: ScannerState -> [ScanChar_] -> (Maybe a, ScannerState)
 collectWhitespace (idpCounter, whitespaceMap, (newlines, spaces)) (c:cs) =
   let newWhitespace = case c of
@@ -122,13 +132,6 @@ collectWhitespace (idpCounter, whitespaceMap, (newlines, spaces)) (c:cs) =
                         -- will always be a Char
   in (Nothing, (idpCounter, whitespaceMap, newWhitespace))
 
-mkStructuralToken :: ScannerState -> [ScanChar_] -> (Maybe (Token Document Node ClipDoc UserToken), ScannerState)
-mkStructuralToken (idpCounter, whitespaceMap, collectedWhitespace) scs = 
-  let idp = IDP idpCounter
-      Structural loc pres = head scs
-  in  ( Just $ StructuralTk loc pres [] idp
-      , (idpCounter, whitespaceMap, (0,0))
-      ) -- TODO handle whitespace for structurals
 
 -- TODO handle pattern match failures with internal errors
 

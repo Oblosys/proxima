@@ -605,6 +605,9 @@ intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ sh
 --      check what happens with tokens without context info. It seems they get it from higher up
 --      in the tree now, which seems wrong. 
 
+
+-- Right now postScanStr puts the structural children in the list arg of the structural token
+-- Maybe the entire functionality (including graph stuff) should be done in Scanner
 postScanStr :: [String] -> Maybe node -> Presentation doc node clip UserToken -> [Token doc node clip UserToken]
 postScanStr kwrds ctxt (EmptyP _)           = []
 postScanStr kwrds ctxt (StringP _ _)        = []
@@ -632,6 +635,7 @@ postScanPrs :: [String] -> Maybe node -> Presentation doc node clip UserToken ->
 postScanPrs kwrds ctxt (EmptyP _)           = []
 postScanPrs kwrds ctxt (StringP _ "")       = []
 postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
+postScanPrs kwrds ctxt (TokenP i (StructuralTk loc pres x idp)) = [StructuralTk loc pres (postScanPrs kwrds ctxt pres) idp]
 postScanPrs kwrds ctxt (TokenP i t)         = [t]
 postScanPrs kwrds ctxt (ImageP _ _ _)         = []
 postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
