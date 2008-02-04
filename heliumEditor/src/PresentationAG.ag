@@ -293,12 +293,12 @@ SEM Exp
                    row [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "*", @exp2.pres]
 
   | DivExp
-      lhs.pres = loc (DivExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (DivExpNode @self @lhs.path) $ StructuralP (mkIDP @idP0 @lhs.pIdC 0) $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    frac @exp1.pres @exp2.pres
 
   | PowerExp
-      lhs.pres = loc (PowerExpNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (PowerExpNode @self @lhs.path) $ StructuralP (mkIDP @idP0 @lhs.pIdC 0) $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    power @exp1.pres @exp2.pres
 
