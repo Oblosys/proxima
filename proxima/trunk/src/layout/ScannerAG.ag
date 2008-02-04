@@ -15,6 +15,7 @@ import LayLayerTypes
 import LayLayerUtils
 import List
 import Char
+import qualified Data.Map as Map
 }
 
 DATA Layout
@@ -56,42 +57,45 @@ SEM Layout
       child.lloc = Just @location
 
 
-ATTR Layout [ | | tokenChars : {[ScanChar]} ]
+ATTR Layout LayoutList [ | idPCounter : IDPCounter whitespaceMap : WhitespaceMap | ]
+
+ATTR Layout [ | | scanChars : {[ScanChar]} ]
 
 SEM Layout
   | StringP
-      lhs.tokenChars = map Char @text
+      lhs.scanChars = map (Char @id) @text
 
   | RowP
-      lhs.tokenChars = concat @presentationList.tokenCharss
+      lhs.scanChars = concat @presentationList.scanCharss
   | ColP
-      lhs.tokenChars = concat $ intersperse [Char '\n'] @presentationList.tokenCharss
+      lhs.scanChars = concat $ intersperse [Char NoIDP '\n'] @presentationList.scanCharss
   | OverlayP
-      lhs.tokenChars = head @presentationList.tokenCharss
+      lhs.scanChars = head @presentationList.scanCharss
   | FormatterP -- maybe add a '\n'?
-      lhs.tokenChars = concat $ intersperse [Char ' '] @presentationList.tokenCharss
+      lhs.scanChars = concat $ intersperse [Char NoIDP ' '] @presentationList.scanCharss
   | WithP
-      lhs.tokenChars = @child.tokenChars
+      lhs.scanChars = @child.scanChars
   | ParsingP
-      lhs.tokenChars = @child.tokenChars
+      lhs.scanChars = @child.scanChars
   | LocatorP
-      lhs.tokenChars = @child.tokenChars
+      lhs.scanChars = @child.scanChars
   | StructuralP
-      lhs.tokenChars = let (pres, _) = @lhs.scanStructural @lhs.lexer @lhs.lloc @child.self
-                       in  debug Lay ("Recursive scan structural on "++ show @child.self) $
-                           [Structural @lhs.lloc pres]
+      (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
+        let (pres, idPCounter, whitespaceMap) = 
+              @lhs.scanStructural @lhs.lexer @lhs.lloc @lhs.idPCounter @lhs.whitespaceMap @child.self
+        in  ([Structural @id @lhs.lloc pres], idPCounter, whitespaceMap)
   | EmptyP 
-      lhs.tokenChars = []
+      lhs.scanChars = []
   | ImageP PolyP RectangleP EllipseP VertexP GraphP
-      lhs.tokenChars = [] -- for now, we assume these will only appear in structural presentations
+      lhs.scanChars = [] -- for now, we assume these will only appear in structural presentations
   | ArrangedP 
-      lhs.tokenChars = [] -- will not occur
+      lhs.scanChars = [] -- will not occur
       
-ATTR LayoutList [ | | tokenCharss : {[[ScanChar]]} ]
+ATTR LayoutList [ | | scanCharss : {[[ScanChar]]} ]
 
 SEM LayoutList
   | Nil
-      lhs.tokenCharss = []
+      lhs.scanCharss = []
   | Cons
-      lhs.tokenCharss = @hd.tokenChars : @tl.tokenCharss
+      lhs.scanCharss = @hd.scanChars : @tl.scanCharss
       
