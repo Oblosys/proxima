@@ -7,10 +7,14 @@ import DocTypes_Generated
 import PresTypes
 import LayLayerTypes
 import LayLayerUtils
+
+import Scanner
 }
 
 $digit = 0-9            -- digits
-$alpha = [a-zA-Z]        -- alphabetic characters
+$lower = [a-z]
+$upper = [A-Z]
+$alpha = [$lower $upper]        -- alphabetic characters
 
 tokens :-
     
@@ -48,11 +52,13 @@ tokens :-
   \[               { mkToken $ \s -> StrTk s }
   \]               { mkToken $ \s -> StrTk s }
   \,               { mkToken $ \s -> StrTk s }
+  \:               { mkToken $ \s -> StrTk s }
   \;               { mkToken $ \s -> StrTk s }
   \\               { mkToken $ \s -> StrTk s }
   \=               { mkToken $ \s -> StrTk s }
   $digit+          { mkToken $ \s -> IntTk }
-  $alpha [$alpha $digit \_ \']*        { mkToken $ \s -> LIdentTk }
+  $lower [$alpha $digit \_ \']* { mkToken $ \s -> LIdentTk }
+  $upper [$alpha $digit \_ \']* { mkToken $ \s -> UIdentTk }
 
 {
 
@@ -73,17 +79,20 @@ type ScanChar_ = ScanChar Document Node ClipDoc UserToken
 type AlexInput  = (Char, [ScanChar_])
 
 alexGetChar (_, [])   = Nothing
-alexGetChar (_, Char c : cs) = Just (c, (c,cs))
-alexGetChar (_, Structural _ _ : cs) = Just ('\255', ('\255',cs))
+alexGetChar (_, Char _ c : cs) = Just (c, (c,cs))
+alexGetChar (_, Structural _ _ _ : cs) = Just ('\255', ('\255',cs))
 
 alexInputPrevChar (c,_) = c
 
 -- TODO final whitespace?
-alexScanTokenz :: [ScanChar_] -> ([Token Document Node ClipDoc UserToken], WhitespaceMap)
-alexScanTokenz scs = 
-  let (mTokens, (_, whitespaceMap, _)) = alexScanTokenzz initScannerState scs
-  in  (catMaybes mTokens, whitespaceMap)
-  
+alexScanTokenz :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap)
+alexScanTokenz idPCounter scs = 
+  let (mTokens, (idPCounter', whitespaceMap, _)) = alexScanTokenzz initScannerState scs
+  in  (catMaybes mTokens, idPCounter', whitespaceMap)
+ where initScannerState :: ScannerState
+       initScannerState = (idPCounter, Map.empty,(0,0))
+
+   
 alexScanTokenzz :: ScannerState -> [ScanChar_] -> 
                    ([Maybe (Token Document Node ClipDoc UserToken)], ScannerState)
 alexScanTokenzz initState scs = go initState ('\n',scs)
@@ -98,40 +107,5 @@ alexScanTokenzz initState scs = go initState ('\n',scs)
 		                          in  (mToken : mTokens, state'') 
 
 
-type ScannerState = (Int, WhitespaceMap, (Int, Int)) -- (idP counter, (newlines, spaces))
-
-initScannerState :: ScannerState
-initScannerState = (0, Map.empty,(0,0))
-
-mkToken :: (String -> UserToken) -> ScannerState -> [ScanChar_] -> 
-           (Maybe (Token doc node clip UserToken), ScannerState)
-mkToken tokf (idpCounter, whitespaceMap, collectedWhitespace) scs = 
-  let str = stringFromScanChars scs
-      userToken = tokf str
-      idp = IDP idpCounter
-  in  ( Just $ UserTk userToken str Nothing idp
-      , (idpCounter + 1, Map.insert idp collectedWhitespace whitespaceMap, (0,0)) 
-      )
-
-
-mkStructuralToken :: ScannerState -> [ScanChar_] -> (Maybe (Token Document Node ClipDoc UserToken), ScannerState)
-mkStructuralToken (idpCounter, whitespaceMap, collectedWhitespace) scs = 
-  let idp = IDP idpCounter
-      Structural loc pres = head scs
-  in  ( Just $ StructuralTk loc pres [] idp
-      , (idpCounter + 1, Map.insert idp collectedWhitespace whitespaceMap, (0,0))
-      ) -- TODO handle whitespace for structurals
-
-
-collectWhitespace :: ScannerState -> [ScanChar_] -> (Maybe a, ScannerState)
-collectWhitespace (idpCounter, whitespaceMap, (newlines, spaces)) (c:cs) =
-  let newWhitespace = case c of
-                        Char '\n' -> (newlines + 1 + length cs, spaces                )
-                        Char ' '  -> (newlines                , spaces + 1 + length cs)
-                        -- will always be a Char
-  in (Nothing, (idpCounter, whitespaceMap, newWhitespace))
-
-
--- TODO handle pattern match failures with internal errors
-
+f = 'x' -- removing this line causes Alex to produce a lexical error.. ???
 }
