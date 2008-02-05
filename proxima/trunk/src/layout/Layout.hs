@@ -48,9 +48,9 @@ detokenize lm pr                         = debug Err ("Layout.detokenize: can't 
 -- incomplete, only for strings
 detokenize' :: Show token => WhitespaceMap -> Presentation doc node clip token -> [Layout doc node clip]
 detokenize' lm (StructuralP id pres)      = addWhitespaceStruct lm id (StructuralP id $ detokenize lm pres)
-detokenize' lm (EmptyP id)                  = [EmptyP id]
-detokenize' lm (StringP id str)      = addWhitespace lm id str
-detokenize' lm (ImageP id str st)      = [ImageP id str st]
+detokenize' lm (EmptyP id)                = [EmptyP id]
+detokenize' lm (StringP id str)           = addWhitespace lm id str
+detokenize' lm (ImageP id str st)         = [ImageP id str st]
 detokenize' lm (PolyP id pts w st)        = [PolyP id pts w st]
 detokenize' lm (RectangleP id w h lw st)  = [RectangleP id w h lw st]
 detokenize' lm (EllipseP id w h lw st)    = [EllipseP id w h lw st]

@@ -38,14 +38,14 @@ cast (FormatterP id press)      = FormatterP id $ map cast press
 stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars [] = ""
 stringFromScanChars (sc : scs) =
-  (case sc of Char _ c         -> c
-              Structural _ _ _ -> '@') -- in the Alex scanner, this is \255, this output is only for show
+  (case sc of Char _ c           -> c
+              Structural _ _ _ _ -> '@') -- in the Alex scanner, this is \255, this output is only for show
    : stringFromScanChars scs                                    
 
 idPFromScanChars :: [ScanChar doc node clip token] -> IDP
 idPFromScanChars [] = NoIDP
 idPFromScanChars (Char (IDP idp) _ : scs) = IDP idp
 idPFromScanChars (Char NoIDP     _ : scs) = idPFromScanChars scs
-idPFromScanChars (Structural (IDP idp) _ _ : scs) = IDP idp
-idPFromScanChars (Structural NoIDP     _ _ : scs) = idPFromScanChars scs
+idPFromScanChars (Structural (IDP idp) _ _ _ : scs) = IDP idp
+idPFromScanChars (Structural NoIDP     _ _ _ : scs) = idPFromScanChars scs
 

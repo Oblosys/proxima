@@ -125,7 +125,7 @@ mkToken tokf (idPCounter, whitespaceMap, collectedWhitespace) scs =
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
-                                        _     -> (idp,          idPCounter    )
+                                        _     -> (idp,            idPCounter    )
   in  ( Just $ UserTk userToken str Nothing idp'
       , (idPCounter', Map.insert idp' collectedWhitespace whitespaceMap, (0,0)) 
       )
@@ -133,12 +133,12 @@ mkToken tokf (idPCounter, whitespaceMap, collectedWhitespace) scs =
 
 mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe (Token doc node clip userToken), ScannerState)
 mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let Structural idp loc pres = head scs
+  let Structural idp loc pres lay = head scs
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
-                                        _     -> (idp,          idPCounter    )
+                                        _     -> (idp,            idPCounter    )
   in  ( Just $ StructuralTk loc pres [] idp'
       , (idPCounter', Map.insert idp' collectedWhitespace whitespaceMap, (0,0))
-      ) -- TODO handle whitespace for structurals
+      )
 
 
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe a, ScannerState)

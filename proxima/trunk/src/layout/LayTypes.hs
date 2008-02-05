@@ -60,10 +60,4 @@ data EditLayout documentLevel doc node clip =
 
 -- No special type Layout. Instead, Presentation is used.
 
-data Layout_   -- type without constructor to use as token parameter, so values of Layout
-               -- are guaranteed not to have a TokenP case.
-instance Show Layout_
-
-instance Eq Layout_
-
-type Layout doc node clip = Presentation doc node clip Layout_
+-- the type def is in PresTypes.hs

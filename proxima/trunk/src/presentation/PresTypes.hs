@@ -343,4 +343,13 @@ focusP _ _                             = NoFocusP
 
 
 
+-- because StructuralTk and PresentationTk contain the Layout in case of parse errors, we need
+-- to declare the Layout type here.
 
+data Layout_   -- type without constructor to use as token parameter, so values of Layout
+               -- are guaranteed not to have a TokenP case.
+instance Show Layout_
+
+instance Eq Layout_
+
+type Layout doc node clip = Presentation doc node clip Layout_
