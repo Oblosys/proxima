@@ -13,13 +13,8 @@ data Document = RootDoc IDD Root
               | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
                  deriving Show
 
-data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
-               | IntTk
-               | LIdentTk
-               | UIdentTk
-               | OpTk
-               | SymTk deriving (Show, Eq, Ord)
--- TODO call strTk KeyTk
+data UserToken = KeyTk String
+               | WordTk deriving (Show, Eq, Ord)
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----

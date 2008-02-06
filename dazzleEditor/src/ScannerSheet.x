@@ -16,10 +16,11 @@ $char = .#[\n\ \255]
 tokens :-
     
 
-  \n               { mkToken $ \s -> StrTk s }
-  \                { mkToken $ \s -> StrTk s }
   \255             { mkStructuralToken }
-  $char+           { mkToken $ \s -> LIdentTk }
+  \n               { mkToken $ \s -> KeyTk s }
+  \                { mkToken $ \s -> KeyTk s }
+  \\graph          { mkToken $ \s -> KeyTk s }
+  $char+           { mkToken $ \s -> WordTk }
 
 {
 

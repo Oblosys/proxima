@@ -147,13 +147,6 @@ getVertexTkY :: Show node => Token doc node clip UserToken -> Int_
 getVertexTkY (VertexTk _ (x,y) _ _) = Int_ NoIDD y
 getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
 
-keywords :: [String]
-keywords = 
-  [ " "
-  , "\n"
-  , "\\graph"
-  ]
-
 -- this must be a pList1Sep, otherwise we get an error. In this case there is always at least one, but
 -- it should be possible to have an empty list two. Unclear why the parser disallows this.
 parseParagraphs = toList_Paragraph 
@@ -190,143 +183,29 @@ pLine =
 pSpaces = concat <$> pList (const " " <$> pKey " " <|> const "" <$> pKey "\n") -- ignore linebreaks
 
 -- parse any consecutive piece of text (remember that spaces and "\n"'s are tokens)
-pText = concat <$> pList1 (tokenString <$> (pLIdent <|> pUIdent <|> pOp <|> pSymm <|> pInt))
-
-pUIdent = pCSym 20 uIdentTk
-pOp = pCSym 20 opTk
-pSymm = pCSym 20 symTk
---
+pText = tokenString <$> pWord
 
 
 
--- don't even have to use reuse now, since the IDD is never used. String_ NoIDD would be sufficient
-mkString_ :: DocNode node => Token doc node clip UserToken -> String_
-mkString_ = (\strTk -> reuseString_ [] Nothing (Just $ tokenString strTk)) 
-
-mkInt_ :: DocNode node => Token doc node clip UserToken -> Int_
-mkInt_ = (\intTk -> reuseInt_ [] Nothing (Just $ intVal intTk)) 
-
--- Extracting the value from the token is not necessary, since true and false have different
--- parsers, which can give the value as an argument
-mkBool_ :: Bool -> Bool_
-mkBool_ = (\bool -> reuseBool_ [] Nothing (Just bool)) 
-
-
-
---- Stuff from PresentationParsing
 
 
 
 -- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
 -- which is also required for copying of presentation subtrees
-strTk str = UserTk (StrTk str) str Nothing (IDP (-1))
-intTk     = UserTk IntTk "0" Nothing (IDP (-1))
-lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
-uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
-opTk      = UserTk OpTk "" Nothing (IDP (-1))
-symTk     = UserTk SymTk "" Nothing (IDP (-1))
-
-
-mkToken :: [String] -> String -> Maybe node -> IDP -> Token doc node clip UserToken
-mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) str ctxt i
-                                    | isDigit c           = UserTk IntTk str ctxt i
-                                    | isLower c           = UserTk LIdentTk str ctxt i
-                                    | isUpper c           = UserTk UIdentTk str ctxt i
-                                    | otherwise           = UserTk OpTk str ctxt i
-
---makeToken str ctxt i = Tk str ctxt i
-
-isSymbolChar c = c `elem` ";,(){}#_|"
+keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
+wordTk    = UserTk WordTk "word" Nothing (IDP (-1))
 
 
 -- Basic parsers
 
 pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKey str = pSym  (strTk str)
+pKey str = pSym  (keyTk str)
 
 pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKeyC c str = pCSym c (strTk str)
+pKeyC c str = pCSym c (keyTk str)
 
--- expensive, because we want holes to be inserted, not strings
-pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pLIdent = pCSym 20 lIdentTk
-
--- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pInt = pCSym 20 intTk
-
-lIdentVal :: DocNode node => Token doc node clip UserToken -> String
-lIdentVal (UserTk LIdentTk str _ _) = str
-lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
-
-  
-intVal :: DocNode node => Token doc node clip UserToken -> Int
-intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
-intVal (UserTk IntTk str _ _) = read str
-intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
-
- 
-
-
-
-
-
-
-
-
----- needs to be here temporarily due to mkToken (which will be transfered to scanner)
--- put all tokens in one big list
--- UNCLEAR: what happens when list is presented again? Will it ever? Maybe we can avoid it, even with the new correcting parser
--- TODO put keyword stuff in Scanner layer
---      check what happens with tokens without context info. It seems they get it from higher up
---      in the tree now, which seems wrong. 
-
-postScanStr :: [String] -> Maybe node -> Presentation doc node clip UserToken -> [Token doc node clip UserToken]
-postScanStr kwrds ctxt (EmptyP _)           = []
-postScanStr kwrds ctxt (StringP _ _)        = []
-postScanStr kwrds ctxt (TokenP _ _)         = debug Err ("*** PresentationParser.postScanStr: Token in structural presentation") []
-postScanStr kwrds ctxt (ImageP _ _ _)         = []
-postScanStr kwrds ctxt (PolyP _ _ _ _)        = []
-postScanStr kwrds ctxt (RectangleP _ _ _ _ _) = []
-postScanStr kwrds ctxt (EllipseP _ _ _ _ _)   = []
-postScanStr kwrds ctxt (WithP _ pres)       = postScanStr kwrds ctxt pres
-postScanStr kwrds ctxt (OverlayP _ [])      = []
-postScanStr kwrds ctxt (OverlayP _ (pres:press)) = postScanStr kwrds ctxt pres
-postScanStr kwrds ctxt (ColP i _ _ press)   = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (RowP i _ press)     = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (LocatorP l pres)    = postScanStr kwrds (Just l) pres  
-postScanStr kwrds ctxt (GraphP i d _ _ es press) = GraphTk d es ctxt i : concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt (VertexP i v x y _ pres)  = VertexTk v (x,y) ctxt i : postScanStr kwrds ctxt pres  
-postScanStr kwrds ctxt (ParsingP i _ pres)     = [ParsingTk pres (postScanPrs kwrds ctxt pres) i]
---postScanStr kwrds ctxt (ParsingP i pres)   = [StructuralTk (Just NoNode) pres (postScanPrs kwrds ctxt pres ctxt) i]
-postScanStr kwrds ctxt (StructuralP i pres)  = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i]
-postScanStr kwrds ctxt (FormatterP i press)  = concatMap (postScanStr kwrds ctxt) press
-postScanStr kwrds ctxt pres = debug Err ("*** PresentationParser.postScanStr: unimplemented presentation: " ++ show pres) []
-
-
-postScanPrs :: [String] -> Maybe node -> Presentation doc node clip UserToken -> [Token doc node clip UserToken]
-postScanPrs kwrds ctxt (EmptyP _)           = []
-postScanPrs kwrds ctxt (StringP _ "")       = []
-postScanPrs kwrds ctxt (StringP i str)      = [mkToken kwrds str ctxt i]
-postScanPrs kwrds ctxt (TokenP i t)         = [t]
-postScanPrs kwrds ctxt (ImageP _ _ _)         = []
-postScanPrs kwrds ctxt (PolyP _ _ _ _)        = []
-postScanPrs kwrds ctxt (RectangleP _ _ _ _ _) = []
-postScanPrs kwrds ctxt (EllipseP _ _ _ _ _)   = []
-postScanPrs kwrds ctxt (WithP _ pres)       = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (OverlayP _ [])      = []
-postScanPrs kwrds ctxt (OverlayP _ (pres:press)) = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (ColP i _ _ press)   = concatMap (postScanPrs kwrds ctxt) press
-postScanPrs kwrds ctxt (RowP i _ press)     = concatMap (postScanPrs kwrds ctxt) press
-postScanPrs kwrds ctxt (LocatorP l pres)    = postScanPrs kwrds (Just l) pres
-postScanPrs kwrds ctxt (GraphP i _ _ _ _ press) = debug Err ("WARNING: presentation contains Graph that is not part of a structural presentation") []
-postScanPrs kwrds ctxt (VertexP _ _ _ _ _ pres) = debug Err ("WARNING: presentation contains Vertex that is not part of a structural presentation") []
-postScanPrs kwrds ctxt (ParsingP _ _ pres)    = postScanPrs kwrds ctxt pres
-postScanPrs kwrds ctxt (StructuralP i pres) = [StructuralTk ctxt pres (postScanStr kwrds ctxt pres) i ]
-postScanPrs kwrds ctxt (FormatterP i press) = concatMap (postScanPrs kwrds ctxt) press ++ [UserTk (StrTk "\n") "\n" Nothing NoIDP]
-postScanPrs kwrds ctxt pres  = debug Err ("*** PresentationParser.postScanPrs: unimplemented presentation: " ++ show pres) []
--- ref to UserTk is now because scanner cannot easily add "\n". The AG scanner will be able to do
--- this and make this ref obsolete. (PostScanPrs will be obsolete when Token type is added to Presentation)
+pWord :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pWord = pSym wordTk
 
 
 
