@@ -1,12 +1,3 @@
-# editing on proxima/PresentationParsing.hs does not cause rebuilding
-# doesn't know when proxima.exe is up to date
-# maybe has to do with proxima and proxima.exe targets
-# problem: when only sources in proxima dir have been changed, this makefile will not
-# detect it. somehow, the proxima/src/Makefile must always be called even when nothing 
-# needs to be done in editor.
-
-# no make when documenttype is modified
-
 # make trekt aan helium objecten als ze in $(OBJS) staan en evaluateTypes/compileHelium 
 # in EDITORSRCS zitten. Dit kan ervoor zorgen dat deze makefile helium sources gaat
 # compileren. Zodra er geen cpp dingen meer in lvm zitten kan Helium waarschijnlijk 
@@ -16,8 +7,6 @@
 
 # Dit zou ook de oorzaak kunnen zijn van de problemen bij het compileren van Set, nl. dat
 # het vanuit de Proxima makefile gebeurde.
-
-# recursive make depend?
 
 HC   = ghc
 FIND = /usr/bin/find
