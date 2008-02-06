@@ -64,11 +64,11 @@ data Token doc node clip token =
 
 
 instance Show token => Show (Token doc node clip token) where
-  show (UserTk u s _ id) = "<\"" ++show u ++"\":"++ show id ++ ">"
-  show (StructuralTk _ _ _ id) = "<structural:"++show id++">" 
-  show (ParsingTk _ _ _) = "<parsing>" 
-  show (GraphTk _ edges _ _)  = "<graph:"++show edges++">"
-  show (VertexTk id pos _ _)  = "<vertex "++show id++":"++show pos++">"
+  show (UserTk u s _ id)       = "<\"" ++show u ++"\":"++ show id ++ ">"
+  show (StructuralTk _ _ tks id) = "<structural:"++show id++">" 
+  show (ParsingTk _ tks _)       = "<parsing"++":"++show tks++">" 
+  show (GraphTk _ edges _ _)   = "<graph:"++show edges++">"
+  show (VertexTk id pos _ _)   = "<vertex "++show id++">"
 
 instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
@@ -118,6 +118,17 @@ tokenIDP (StructuralTk n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
 tokenIDP (VertexTk i p n id) = id
 
+deepShowTks i tok = case tok of
+                      (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
+                                               ++ indent (i+1)++"[\n"
+                                               ++ concatMap (deepShowTks (i+1)) cs 
+                                               ++ indent (i+1)++" ]\n"
+                      (ParsingTk _ cs _) -> indent i ++ show tok ++ "\n"
+                                               ++ indent (i+1)++"[\n"
+                                               ++ concatMap (deepShowTks (i+1)) cs 
+                                               ++ indent (i+1)++" ]\n"
+                      _                     -> indent i ++ show tok ++ "\n" 
+ where indent i = take i (repeat ' ')
 
 
 

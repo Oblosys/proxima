@@ -81,9 +81,9 @@ SEM Layout
       lhs.scanChars = @child.scanChars
   | StructuralP
       (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
-        let (pres, idPCounter, whitespaceMap) = 
+        let (tokens, idPCounter, whitespaceMap) = 
               @lhs.scanStructural @lhs.lexer @lhs.lloc @lhs.idPCounter @lhs.whitespaceMap @child.self
-        in  ([Structural @id @lhs.lloc pres @self], idPCounter, whitespaceMap)
+        in  ([Structural @id @lhs.lloc tokens (castLayToPres @self)], idPCounter, whitespaceMap)
   | EmptyP 
       lhs.scanChars = []
   | ImageP PolyP RectangleP EllipseP VertexP GraphP

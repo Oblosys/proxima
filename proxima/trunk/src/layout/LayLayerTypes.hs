@@ -19,5 +19,5 @@ type ScannerSheet doc node clip token =
       
 data ScanChar doc node clip token = 
        Char IDP Char 
-     | Structural IDP (Maybe node) (Presentation doc node clip token) (Layout doc node clip) -- original layout to show in case of parse/scan errors
+     | Structural IDP (Maybe node) [Token doc node clip token] (Presentation doc node clip token) -- original pres to show in case of parse/scan errors
 
