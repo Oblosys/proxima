@@ -66,7 +66,7 @@ data Token doc node clip token =
 instance Show token => Show (Token doc node clip token) where
   show (UserTk u s _ id)       = "<\"" ++show u ++"\":"++ show id ++ ">"
   show (StructuralTk _ _ tks id) = "<structural:"++show id++">" 
-  show (ParsingTk _ tks _)       = "<parsing"++":"++show tks++">" 
+  show (ParsingTk _ tks _)       = "<parsing>" 
   show (GraphTk _ edges _ _)   = "<graph:"++show edges++">"
   show (VertexTk id pos _ _)   = "<vertex "++show id++">"
 
