@@ -1,4 +1,4 @@
-module ProxParser (parsePres) where
+module ProxParser (recognizeRootEnr) where
 
 import CommonTypes hiding (Dirty (..))
 import qualified CommonTypes
@@ -22,17 +22,7 @@ import Char
 import DocTypes_Generated
 import DocUtils_Generated
 
--- TODO: move to PresentationParsing
-reuse = Nothing
-set = Just
-
-parsePres pres = let tokens = postScanStr keywords Nothing pres
-                     (enr,errs) = runParser recognizeRootEnr tokens
-                     res = if null errs then Just enr else Nothing
-                 in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
-                     res
               
-
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc

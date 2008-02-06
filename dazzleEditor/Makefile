@@ -15,7 +15,7 @@ MAIN           = proxima$(EXE)
 
 SHELL = /bin/sh
 
-.PHONY: default proxima generate generator presenter
+.PHONY: default proxima generate generator presenter lexer
 
 default: $(MAIN)
 
@@ -59,6 +59,10 @@ src/PresentationAG.hs: $(AGC) \
 	@echo "Compiling presentationAG.ag"
 	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=12 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
+lexer: src/ScannerSheet.hs
+
+src/ScannerSheet.hs: src/ScannerSheet.x
+	alex --ghc src/ScannerSheet.x
 
 clean:
 	$(FIND) src -maxdepth 1 -name "*.hi" -delete
@@ -93,5 +97,5 @@ HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidab
 proxima:
 	cd $(PROXIMASRCDIR); make
 	
-$(MAIN): proxima generate presenter
+$(MAIN): proxima generate presenter lexer
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
