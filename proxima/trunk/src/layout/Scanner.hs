@@ -20,11 +20,13 @@ import ScannerAG
 
 
 {-
-Challenges:
+Challenges/todo:
 
 passing several Alex scanners (probably solved by Alex itself)
 
-maybe presentation id's need to be kept. This could be what causes the problem when identifier list is edited
+recover locators for parsing presentations
+
+scanner errors should not crash Proxima. Maybe make an error token?
 
 make sure that pres args to ParsingTk and StructuralTk are lazy
 !! and should these pres args include the ParsingP/StructuralP  nodes? (seems that they should)
@@ -34,9 +36,13 @@ If we allow autowhitespace for strings and structural presentations
 then Layout.hs adds too much whitespace in case of a parseErr presentation
 However, enforcing the use of tokens in the presentationAG is tricky.
 
+This is related to the error pres in the tokens. This is now not processed (so it is a layout instead of 
+a presentation). Processing it recursively is not a problem for Structural presentations, but
+for parsing presentations the lexer can fail on a lexer error, in which case no information is returned
+and we cannot tokenize any structural token children.
 
 
-Do tokens need idp's?
+Do tokens really need idp's?
 -}
 
 
