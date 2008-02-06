@@ -31,23 +31,7 @@ parsePres pres = let tokens = postScanStr keywords Nothing pres
                      res = if null errs then Just enr else Nothing
                  in  debug Prs ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)++"result\n"++show res) $
                      res
-       
-deepShowTks i tok = case tok of
-                      (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
-                                               ++ indent (i+1)++"[\n"
-                                               ++ concatMap (deepShowTks (i+1)) cs 
-                                               ++ indent (i+1)++" ]\n"
-                      (ParsingTk _ cs _) -> indent i ++ show tok ++ "\n"
-                                               ++ indent (i+1)++"[\n"
-                                               ++ concatMap (deepShowTks (i+1)) cs 
-                                               ++ indent (i+1)++" ]\n"
-                      _                     -> indent i ++ show tok ++ "\n" 
- where indent i = take i (repeat ' ')
-       
-
-
-
-
+              
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
