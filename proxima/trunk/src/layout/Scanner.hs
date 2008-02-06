@@ -46,7 +46,7 @@ Do tokens need idp's?
 tokenizeLay :: (Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip ->
                PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip)
-tokenizeLay sheet@(scannerSheet, alexScanner) state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
+tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap) = scanStructural sheet LexHaskell Nothing idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk Nothing (castLayToPres lay) tokens NoIDP)) (whitespaceMap,idPCounter')
  in  debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
@@ -109,8 +109,7 @@ scanPresentation sheet inheritedLex loc idPCounter whitespaceMap idP presentatio
              LexInherited -> inheritedLex
              _            -> presentationLex
      (idPCounter', scanChars, self, whitespaceMap') = sem_Layout lay idPCounter lex loc (scanStructural sheet) whitespaceMap
-     (_,alexScanner) = sheet
-     (tokens, idPCounter'', whitespaceMap'') = alexScanner idPCounter' scanChars
+     (tokens, idPCounter'', whitespaceMap'') = sheet idPCounter' scanChars
  in  -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
      , idPCounter'', whitespaceMap' `Map.union` whitespaceMap'')

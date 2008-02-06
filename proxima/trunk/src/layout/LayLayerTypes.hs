@@ -12,10 +12,7 @@ type LayerStateLay doc node clip = Layout doc node clip -- clipboard
 -- local to LayoutLevel, just like the focus
 
 type ScannerSheet doc node clip token = 
-      ( IDPCounter -> Layout doc node clip ->
-                             (Presentation doc node clip token, WhitespaceMap, IDPCounter)
-      , IDPCounter -> [ScanChar doc node clip token] -> ([Token doc node clip token], IDPCounter, WhitespaceMap)
-      )
+      (IDPCounter -> [ScanChar doc node clip token] -> ([Token doc node clip token], IDPCounter, WhitespaceMap))
       
 data ScanChar doc node clip token = 
        Char IDP Char 
