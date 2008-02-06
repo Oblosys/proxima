@@ -2,7 +2,7 @@ module PresentationParsing where
 
 import CommonTypes
 import PresTypes
-
+import PresLayerTypes
 import DocumentEdit
 import XprezLib
 
@@ -55,8 +55,17 @@ we somehow have to look at the boolean expansion value of the recognized node si
 an option.
 -}
 
+reuse = Nothing
+set = Just
 
-type ListParser doc node clip token a = AnaParser [] Pair  (Token doc node clip token) a 
+
+parsePres recognizeRootEnr (TokenP _ (StructuralTk _ _ tokens _)) = 
+  let (enr,errs) = runParser recognizeRootEnr tokens
+  in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+                 ++"\nhas result:"++show enr ) $
+     if null errs then Just enr else Nothing
+
+parsePres _ _    = error "parsePres: scanned presentation has wrong format"
 
 pMaybe parser = Just <$> parser `opt` Nothing
 

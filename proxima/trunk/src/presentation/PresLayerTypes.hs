@@ -7,10 +7,17 @@ import CommonTypes
 import EnrTypes hiding (DocumentLevel)
 import PresTypes
 
+import UU_Parsing
 
 type LayerStatePres = ()
 
 type PresentationSheet doc enr node clip token = enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
                          (WhitespaceMap, IDPCounter, Presentation doc node clip token, enr)
                          
-type ParseSheet doc enr node clip token = Presentation doc node clip token -> Maybe enr
+
+
+
+
+type ListParser doc node clip token a = AnaParser [] Pair  (Token doc node clip token) a 
+
+type ParseSheet doc enr node clip token = ListParser doc node clip token enr
