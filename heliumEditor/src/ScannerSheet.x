@@ -1,5 +1,5 @@
 {
-module ScannerSheet (alexScanTokenz) where
+module ScannerSheet (scanner) where
 
 import Maybe
 import qualified Data.Map as Map
@@ -85,8 +85,8 @@ alexGetChar (_, Structural _ _ _ _ : cs) = Just ('\255', ('\255',cs))
 alexInputPrevChar (c,_) = c
 
 -- TODO final whitespace?
-alexScanTokenz :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap)
-alexScanTokenz idPCounter scs = 
+scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap)
+scanner idPCounter scs = 
   let (mTokens, (idPCounter', whitespaceMap, _)) = alexScanTokenzz initScannerState scs
   in  (catMaybes mTokens, idPCounter', whitespaceMap)
  where initScannerState :: ScannerState
