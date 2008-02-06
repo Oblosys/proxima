@@ -410,6 +410,11 @@ SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
 {- dummy presentations. We don't use the pres attribute for these nonterminals, but it is declared,
    so to prevent warnings, we provide the definitions. 
 -}
+
+SEM Edge [ || ] 
+  | Edge       
+      lhs.pres = empty
+
 SEM Shape [ || ] 
   | Circle       
       lhs.pres = empty
@@ -420,4 +425,8 @@ SEM Dirty [ || ]
   | Dirty
       lhs.pres = empty
   | Clean       
+      lhs.pres = empty
+
+SEM Dummy [ || ] 
+  | Dummy       
       lhs.pres = empty
