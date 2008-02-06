@@ -162,7 +162,7 @@ SEM RootE
                        --, vSpace 14
                        -- end tree & XML
                        
-                       , row [ hSpace 3, key NoIDP "module ", bold $ text "Main" , key NoIDP " where"]
+                       , row [ hSpace 3, text "module " `withColor` keyCol, bold $ text "Main" , text " where" `withColor` keyCol]
                        , row [ hSpace 3, @decls.pres ]
                        , vSpace 10
                        , hLine
@@ -230,17 +230,17 @@ SEM Decl
                               in  case @typeStr of
                                     Nothing ->
                                        case @exp.val of
-                                               ErrVal -> [ StructuralP sigIDP $ row  -- this structural has no loc, since the value is not in the tree
+                                               ErrVal -> [ structuralToken sigIDP $ row  -- this structural has no loc, since the value is not in the tree
                                                             [text ("-- No value"++autoLStr)]
                                                               `withbgColor` commentCol -- row is for backgr.]
                                                          ]
-                                               v      -> [ StructuralP sigIDP $ row
+                                               v      -> [ structuralToken sigIDP $ row
                                                             [text ("-- Value: " ++ show @exp.val++autoLStr )]
                                                               `withbgColor` commentCol -- row is for backgr.
                                                          ]
 
                                     Just tpstr ->    -- this structural has no loc, since the type and value are not in the tree
-                                      [  StructuralP sigIDP . row $
+                                      [ structuralToken sigIDP $ row 
                                            [ typeD NoIDP (tpstr)
                                            , text " "
                                            , case @exp.val of
@@ -272,7 +272,7 @@ SEM Ident
   | Ident
       lhs.pres = loc (IdentNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
-                   row [ text' (mkIDP @idP0 @lhs.pIdC 0)  @string ]
+                   row [ token (mkIDP @idP0 @lhs.pIdC 0)  @string ]
 
 
 {-
@@ -293,14 +293,14 @@ SEM Exp
                    row [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "*", @exp2.pres]
 
   | DivExp
-      lhs.pres = loc (DivExpNode @self @lhs.path) $ StructuralP (mkIDP @idP0 @lhs.pIdC 0) $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (DivExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   frac @exp1.pres @exp2.pres
+                   structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ frac @exp1.pres @exp2.pres
 
   | PowerExp
-      lhs.pres = loc (PowerExpNode @self @lhs.path) $ StructuralP (mkIDP @idP0 @lhs.pIdC 0) $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (PowerExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   power @exp1.pres @exp2.pres
+                   structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ power @exp1.pres @exp2.pres
 
 
   | BoolExp     -- put the idP in an empty string before the bool presentation
@@ -489,26 +489,29 @@ presParseErr pres =
 
 text' idc = StringP idc
 
-der:: IDP -> String -> Xprez doc node clip token
-der idc str = StringP idc str `withColor` derCol
+der:: IDP -> String -> Xprez doc node clip UserToken
+der idc str = token idc str `withColor` derCol
 
 
-op :: IDP -> String -> Xprez doc node clip token
-op idc str = StringP idc str `withColor` opCol
+op :: IDP -> String -> Xprez doc node clip UserToken
+op idc str = token idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez doc node clip token
-key idc str = StringP idc str `withColor` keyCol
+key :: IDP -> String -> Xprez doc node clip UserToken
+key idc str = token idc str `withColor` keyCol
 
-sep :: IDP -> String -> Xprez doc node clip token
-sep idc str = StringP idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez doc node clip token
-cons idc str = StringP idc str `withColor` consCol
+sep :: IDP -> String -> Xprez doc node clip UserToken
+sep idc str = token idc str `withColor` sepCol
 
-typeD :: IDP -> String -> Xprez doc node clip token
+cons :: IDP -> String -> Xprez doc node clip UserToken
+cons idc str = token idc str `withColor` consCol
+
+typeD :: IDP -> String -> Xprez doc node clip UserToken
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
+token idp str = TokenP idp (UserTk (StrTk str) str Nothing NoIDP)
 
+structuralToken idp pres = TokenP idp (StructuralTk Nothing (structural pres) [] NoIDP)
 
 derCol = green
 opCol = black

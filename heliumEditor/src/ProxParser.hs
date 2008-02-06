@@ -21,32 +21,18 @@ import Char
 import DocTypes_Generated
 import DocUtils_Generated (initBoard, initPPPresentation)
 
--- TODO: move to PresentationParsing
 reuse = Nothing
 set = Just
 
 
 
-parsePres pres = let tokens = postScanStr keywords Nothing pres
-                     (enr,errs) = runParser recognizeRootEnr tokens
-                 in --debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
-                    --           {- ++"\nhas result:"++show res -}) $
-                    if null errs then Just enr else Nothing
-       
-deepShowTks i tok = case tok of
-                      (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
-                                               ++ indent (i+1)++"[\n"
-                                               ++ concatMap (deepShowTks (i+1)) cs 
-                                               ++ indent (i+1)++" ]\n"
-                      (ParsingTk _ cs _) -> indent i ++ show tok ++ "\n"
-                                               ++ indent (i+1)++"[\n"
-                                               ++ concatMap (deepShowTks (i+1)) cs 
-                                               ++ indent (i+1)++" ]\n"
-                      _                     -> indent i ++ show tok ++ "\n" 
- where indent i = take i (repeat ' ')
-       
+parsePres (TokenP _ (StructuralTk _ _ tokens _)) = 
+  let (enr,errs) = runParser recognizeRootEnr tokens
+  in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+                 ++"\nhas result:"++show enr ) $
+     if null errs then Just enr else Nothing
 
-
+parsePres _    = error "parsePres: scanned presentation has wrong format"
 
 
 keywords :: [String]
@@ -216,11 +202,11 @@ recognizeExp =
          
 
 recognizeExp' = pStr $
-         (\str e1 e2 -> reuseDivExp [str] Nothing Nothing (Just e1) (Just e2))
+         (\str e1 e2 -> reuseDivExp [str] Nothing (Just $ tokenIDP str) (Just e1) (Just e2))
      <$> pStructural DivExpNode
      <*> recognizeExp
      <*> recognizeExp
-  <|>    (\str e1 e2 -> reusePowerExp [str] Nothing Nothing (Just e1) (Just e2))
+  <|>    (\str e1 e2 -> reusePowerExp [str] Nothing (Just $ tokenIDP str) (Just e1) (Just e2))
      <$> pStructural PowerExpNode
      <*> recognizeExp
      <*> recognizeExp
@@ -604,7 +590,7 @@ intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ sh
 -- TODO put keyword stuff in Scanner layer
 --      check what happens with tokens without context info. It seems they get it from higher up
 --      in the tree now, which seems wrong. 
-
+{-
 
 -- Right now postScanStr puts the structural children in the list arg of the structural token
 -- Maybe the entire functionality (including graph stuff) should be done in Scanner
@@ -668,3 +654,4 @@ mkToken keywords str@(c:_)   ctxt i | str `elem` keywords = UserTk (StrTk str) s
 --makeToken str ctxt i = Tk str ctxt i
 
 isSymbolChar c = c `elem` ";,(){}#_|"
+-}

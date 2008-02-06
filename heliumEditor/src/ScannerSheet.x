@@ -80,7 +80,7 @@ type AlexInput  = (Char, [ScanChar_])
 
 alexGetChar (_, [])   = Nothing
 alexGetChar (_, Char _ c : cs) = Just (c, (c,cs))
-alexGetChar (_, Structural _ _ _ : cs) = Just ('\255', ('\255',cs))
+alexGetChar (_, Structural _ _ _ _ : cs) = Just ('\255', ('\255',cs))
 
 alexInputPrevChar (c,_) = c
 
