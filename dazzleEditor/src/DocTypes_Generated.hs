@@ -36,49 +36,31 @@ data EnrichedDoc = RootEnr IDD Root Document
                     deriving Show
 
 
-data String_ = String_ IDD String 
-             | HoleString_
-             | ParseErrString_ (Presentation Document Node ClipDoc UserToken)
-                deriving Show
-
-
-data Bool_ = Bool_ IDD Bool 
-           | HoleBool_
-           | ParseErrBool_ (Presentation Document Node ClipDoc UserToken)
-              deriving Show
-
-
-data Int_ = Int_ IDD Int 
-          | HoleInt_
-          | ParseErrInt_ (Presentation Document Node ClipDoc UserToken)
-             deriving Show
-
-
-data Dummy = Dummy IDD List_Dummy String_ Bool_ Int_ 
+data Dummy = Dummy IDD List_Dummy String Bool Int 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data Root = Root IDD Graph String_ List_Section 
+data Root = Root IDD Graph String List_Section 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
-data Section = Section IDD String_ List_Paragraph List_Subsection 
+data Section = Section IDD String List_Paragraph List_Subsection 
              | HoleSection
              | ParseErrSection (Presentation Document Node ClipDoc UserToken)
                 deriving Show
 
 
-data Subsection = Subsection IDD String_ List_Paragraph List_Subsubsection 
+data Subsection = Subsection IDD String List_Paragraph List_Subsubsection 
                 | HoleSubsection
                 | ParseErrSubsection (Presentation Document Node ClipDoc UserToken)
                    deriving Show
 
 
-data Subsubsection = Subsubsection IDD String_ List_Paragraph 
+data Subsubsection = Subsubsection IDD String List_Paragraph 
                    | HoleSubsubsection
                    | ParseErrSubsubsection (Presentation Document Node ClipDoc UserToken)
                       deriving Show
@@ -91,7 +73,7 @@ data Paragraph = Paragraph IDD List_Word
                   deriving Show
 
 
-data Word = Word IDD String_ 
+data Word = Word IDD String 
           | HoleWord
           | ParseErrWord (Presentation Document Node ClipDoc UserToken)
              deriving Show
@@ -103,7 +85,7 @@ data Graph = Graph IDD Dirty List_Vertex List_Edge
               deriving Show
 
 
-data Vertex = Vertex IDD String_ Shape Int_ Int_ Int_ 
+data Vertex = Vertex IDD String Shape Int Int Int 
             | HoleVertex
             | ParseErrVertex (Presentation Document Node ClipDoc UserToken)
                deriving Show
@@ -116,7 +98,7 @@ data Shape = Circle IDD
               deriving Show
 
 
-data Edge = Edge IDD Int_ Int_ 
+data Edge = Edge IDD Int Int 
           | HoleEdge
           | ParseErrEdge (Presentation Document Node ClipDoc UserToken)
              deriving Show
@@ -227,13 +209,10 @@ data ConsList_Edge = Cons_Edge Edge ConsList_Edge
 
 data ClipDoc = Clip_Root Root
              | Clip_Document Document
+             | Clip_List_Dummy List_Dummy
              | Clip_String String
              | Clip_Bool Bool
              | Clip_Int Int
-             | Clip_List_Dummy List_Dummy
-             | Clip_String_ String_
-             | Clip_Bool_ Bool_
-             | Clip_Int_ Int_
              | Clip_Graph Graph
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
@@ -271,12 +250,6 @@ data Node = NoNode
           | HoleDocumentNode Document Path
           | RootEnrNode EnrichedDoc Path 
           | HoleEnrichedDocNode EnrichedDoc Path 
-          | String_Node String_ Path 
-          | HoleString_Node String_ Path 
-          | Bool_Node Bool_ Path 
-          | HoleBool_Node Bool_ Path 
-          | Int_Node Int_ Path 
-          | HoleInt_Node Int_ Path 
           | DummyNode Dummy Path 
           | HoleDummyNode Dummy Path 
           | RootNode Root Path 
@@ -331,12 +304,6 @@ instance Show Node where
   show (HoleDocumentNode _ _) = "HoleDocumentNode"
   show (RootEnrNode _ _)  = "RootEnrNode"
   show (HoleEnrichedDocNode _ _)  = "HoleEnrichedDocNode"
-  show (String_Node _ _)  = "String_Node"
-  show (HoleString_Node _ _)  = "HoleString_Node"
-  show (Bool_Node _ _)  = "Bool_Node"
-  show (HoleBool_Node _ _)  = "HoleBool_Node"
-  show (Int_Node _ _)  = "Int_Node"
-  show (HoleInt_Node _ _)  = "HoleInt_Node"
   show (DummyNode _ _)  = "DummyNode"
   show (HoleDummyNode _ _)  = "HoleDummyNode"
   show (RootNode _ _)  = "RootNode"

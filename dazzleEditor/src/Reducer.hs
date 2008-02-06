@@ -19,7 +19,7 @@ reduceRoot (Root idd graph title sections) =
   let subgraphs = getSubgraphsSections sections
       (graph', subgraphs') = resolveSubgraphs graph subgraphs
   in  Root idd graph' title (replaceSubgraphsSectionList subgraphs' sections)
-
+reduceRoot r = r
 
 
 isCleanDoc (Clean _) = True
@@ -139,9 +139,9 @@ addEdgesFromSubgraph (Subgraph _ _ vs' es') (Graph id d vs es) =
                  if null ((map getID_Vertex $ fromList_Vertex vs') \\ (map getID_Vertex $ fromList_Vertex vs)) then "" else "new nodes in subgraph") $
       Graph id d vs graphEdges
 
-getFrom_Edge (Edge _ (Int_ _ fromV) _) = fromV
+getFrom_Edge (Edge _ fromV _) = fromV
 
-getTo_Edge (Edge _ _ (Int_ _ toV)) = toV
+getTo_Edge (Edge _ _ toV) = toV
 
-getID_Vertex (Vertex _ _ _ (Int_ _ id) _ _) = id
+getID_Vertex (Vertex _ _ _ id _ _) = id
 

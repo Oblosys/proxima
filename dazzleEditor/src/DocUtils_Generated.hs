@@ -27,7 +27,10 @@ instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
 instance Doc Document where
-  initialDoc = return hole
+  initialDoc = return (RootDoc NoIDD (Root NoIDD 
+                                       (Graph NoIDD (Clean NoIDD) (toList_Vertex []) (toList_Edge [])) 
+                                       "" 
+                                       (toList_Section [])))
   toXML = toXMLDocument
   parseXML = parseXML_Document
 
@@ -39,22 +42,6 @@ toXMLDocument _                = debug Err "DocUtils_Generated.toXMLDocument: ma
                                    Elt "Root" [] [] -- this does not occur
 
 parseXML_Document = RootDoc NoIDD <$> parseXML_Root
-
-  
-
----- deconstructors for boxed primitive types
-
-string_ :: String_ -> String
-string_ (String_ _ str) = str
-string_ _ = ""
-
-bool_ :: Bool_ -> Bool
-bool_ (Bool_ _ b) = b
-bool_ _ = False
-
-int_ :: Int_ -> Int
-int_ (Int_ _ i) = i
-int_ _ = 0
 
 
 -- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
@@ -110,57 +97,51 @@ rankNode (RootDocNode _ _) = 1
 rankNode (HoleDocumentNode _ _) = 2
 rankNode (RootEnrNode _ _)  = 3
 rankNode (HoleEnrichedDocNode _ _)  = 4
-rankNode (String_Node _ _)  = 5
-rankNode (HoleString_Node _ _)  = 6
-rankNode (Bool_Node _ _)  = 7
-rankNode (HoleBool_Node _ _)  = 8
-rankNode (Int_Node _ _)  = 9
-rankNode (HoleInt_Node _ _)  = 10
-rankNode (DummyNode _ _)  = 11
-rankNode (HoleDummyNode _ _)  = 12
-rankNode (RootNode _ _)  = 13
-rankNode (HoleRootNode _ _)  = 14
-rankNode (SectionNode _ _)  = 15
-rankNode (HoleSectionNode _ _)  = 16
-rankNode (SubsectionNode _ _)  = 17
-rankNode (HoleSubsectionNode _ _)  = 18
-rankNode (SubsubsectionNode _ _)  = 19
-rankNode (HoleSubsubsectionNode _ _)  = 20
-rankNode (ParagraphNode _ _)  = 21
-rankNode (SubgraphParaNode _ _)  = 22
-rankNode (HoleParagraphNode _ _)  = 23
-rankNode (WordNode _ _)  = 24
-rankNode (HoleWordNode _ _)  = 25
-rankNode (GraphNode _ _)  = 26
-rankNode (HoleGraphNode _ _)  = 27
-rankNode (VertexNode _ _)  = 28
-rankNode (HoleVertexNode _ _)  = 29
-rankNode (CircleNode _ _)  = 30
-rankNode (SquareNode _ _)  = 31
-rankNode (HoleShapeNode _ _)  = 32
-rankNode (EdgeNode _ _)  = 33
-rankNode (HoleEdgeNode _ _)  = 34
-rankNode (SubgraphNode _ _)  = 35
-rankNode (HoleSubgraphNode _ _)  = 36
-rankNode (DirtyNode _ _)  = 37
-rankNode (CleanNode _ _)  = 38
-rankNode (HoleDirtyNode _ _)  = 39
-rankNode (List_DummyNode _ _)  = 40
-rankNode (HoleList_DummyNode _ _)  = 41
-rankNode (List_SectionNode _ _)  = 42
-rankNode (HoleList_SectionNode _ _)  = 43
-rankNode (List_ParagraphNode _ _)  = 44
-rankNode (HoleList_ParagraphNode _ _)  = 45
-rankNode (List_SubsectionNode _ _)  = 46
-rankNode (HoleList_SubsectionNode _ _)  = 47
-rankNode (List_SubsubsectionNode _ _)  = 48
-rankNode (HoleList_SubsubsectionNode _ _)  = 49
-rankNode (List_WordNode _ _)  = 50
-rankNode (HoleList_WordNode _ _)  = 51
-rankNode (List_VertexNode _ _)  = 52
-rankNode (HoleList_VertexNode _ _)  = 53
-rankNode (List_EdgeNode _ _)  = 54
-rankNode (HoleList_EdgeNode _ _)  = 55
+rankNode (DummyNode _ _)  = 5
+rankNode (HoleDummyNode _ _)  = 6
+rankNode (RootNode _ _)  = 7
+rankNode (HoleRootNode _ _)  = 8
+rankNode (SectionNode _ _)  = 9
+rankNode (HoleSectionNode _ _)  = 10
+rankNode (SubsectionNode _ _)  = 11
+rankNode (HoleSubsectionNode _ _)  = 12
+rankNode (SubsubsectionNode _ _)  = 13
+rankNode (HoleSubsubsectionNode _ _)  = 14
+rankNode (ParagraphNode _ _)  = 15
+rankNode (SubgraphParaNode _ _)  = 16
+rankNode (HoleParagraphNode _ _)  = 17
+rankNode (WordNode _ _)  = 18
+rankNode (HoleWordNode _ _)  = 19
+rankNode (GraphNode _ _)  = 20
+rankNode (HoleGraphNode _ _)  = 21
+rankNode (VertexNode _ _)  = 22
+rankNode (HoleVertexNode _ _)  = 23
+rankNode (CircleNode _ _)  = 24
+rankNode (SquareNode _ _)  = 25
+rankNode (HoleShapeNode _ _)  = 26
+rankNode (EdgeNode _ _)  = 27
+rankNode (HoleEdgeNode _ _)  = 28
+rankNode (SubgraphNode _ _)  = 29
+rankNode (HoleSubgraphNode _ _)  = 30
+rankNode (DirtyNode _ _)  = 31
+rankNode (CleanNode _ _)  = 32
+rankNode (HoleDirtyNode _ _)  = 33
+rankNode (List_DummyNode _ _)  = 34
+rankNode (HoleList_DummyNode _ _)  = 35
+rankNode (List_SectionNode _ _)  = 36
+rankNode (HoleList_SectionNode _ _)  = 37
+rankNode (List_ParagraphNode _ _)  = 38
+rankNode (HoleList_ParagraphNode _ _)  = 39
+rankNode (List_SubsectionNode _ _)  = 40
+rankNode (HoleList_SubsectionNode _ _)  = 41
+rankNode (List_SubsubsectionNode _ _)  = 42
+rankNode (HoleList_SubsubsectionNode _ _)  = 43
+rankNode (List_WordNode _ _)  = 44
+rankNode (HoleList_WordNode _ _)  = 45
+rankNode (List_VertexNode _ _)  = 46
+rankNode (HoleList_VertexNode _ _)  = 47
+rankNode (List_EdgeNode _ _)  = 48
+rankNode (HoleList_EdgeNode _ _)  = 49
 
 
 
@@ -170,12 +151,6 @@ instance HasPath Node where
   pathNode (HoleDocumentNode _ pth) = PathD pth
   pathNode (RootEnrNode _ pth)  = PathD pth
   pathNode (HoleEnrichedDocNode _ pth)  = PathD pth
-  pathNode (String_Node _ pth)  = PathD pth
-  pathNode (HoleString_Node _ pth)  = PathD pth
-  pathNode (Bool_Node _ pth)  = PathD pth
-  pathNode (HoleBool_Node _ pth)  = PathD pth
-  pathNode (Int_Node _ pth)  = PathD pth
-  pathNode (HoleInt_Node _ pth)  = PathD pth
   pathNode (DummyNode _ pth)  = PathD pth
   pathNode (HoleDummyNode _ pth)  = PathD pth
   pathNode (RootNode _ pth)  = PathD pth
@@ -227,18 +202,6 @@ instance HasPath Node where
 rootEnrIDD :: Node -> Maybe IDD
 rootEnrIDD (RootEnrNode (RootEnr iDD _ _) _) = Just iDD
 rootEnrIDD _                                   = Nothing
-
-string_IDD :: Node -> Maybe IDD
-string_IDD (String_Node (String_ iDD _) _) = Just iDD
-string_IDD _                                   = Nothing
-
-bool_IDD :: Node -> Maybe IDD
-bool_IDD (Bool_Node (Bool_ iDD _) _) = Just iDD
-bool_IDD _                                   = Nothing
-
-int_IDD :: Node -> Maybe IDD
-int_IDD (Int_Node (Int_ iDD _) _) = Just iDD
-int_IDD _                                   = Nothing
 
 dummyIDD :: Node -> Maybe IDD
 dummyIDD (DummyNode (Dummy iDD _ _ _ _) _) = Just iDD
@@ -308,9 +271,6 @@ cleanIDD _                                   = Nothing
 
 
 shallowShowEnrichedDoc1 (RootEnr  _ _ _) = "RootEnr"
-shallowShowString_1 (String_  _ _) = "String_"
-shallowShowBool_1 (Bool_  _ _) = "Bool_"
-shallowShowInt_1 (Int_  _ _) = "Int_"
 shallowShowDummy1 (Dummy  _ _ _ _ _) = "Dummy"
 shallowShowRoot1 (Root  _ _ _ _) = "Root"
 shallowShowSection1 (Section  _ _ _ _) = "Section"
@@ -357,48 +317,39 @@ shallowShowConsList_Edge1 (Nil_Edge ) = "Nil_Edge"
 toXMLEnrichedDoc (RootEnr _ root document) = Elt "RootEnr" [] $ [toXMLRoot root] ++ [toXMLDocument document] ++ []
 toXMLEnrichedDoc HoleEnrichedDoc = Elt "HoleEnrichedDoc" [] []
 toXMLEnrichedDoc (ParseErrEnrichedDoc _) = Elt "ParseErrEnrichedDoc" [] []
-toXMLString_ (String_ _ string) = Elt "String_" [] $ [toXMLString string] ++ []
-toXMLString_ HoleString_ = Elt "HoleString_" [] []
-toXMLString_ (ParseErrString_ _) = Elt "ParseErrString_" [] []
-toXMLBool_ (Bool_ _ bool) = Elt "Bool_" [] $ [toXMLBool bool] ++ []
-toXMLBool_ HoleBool_ = Elt "HoleBool_" [] []
-toXMLBool_ (ParseErrBool_ _) = Elt "ParseErrBool_" [] []
-toXMLInt_ (Int_ _ int) = Elt "Int_" [] $ [toXMLInt int] ++ []
-toXMLInt_ HoleInt_ = Elt "HoleInt_" [] []
-toXMLInt_ (ParseErrInt_ _) = Elt "ParseErrInt_" [] []
-toXMLDummy (Dummy _ dummys string_ bool_ int_) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString_ string_] ++ [toXMLBool_ bool_] ++ [toXMLInt_ int_] ++ []
+toXMLDummy (Dummy _ dummys string bool int) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString string] ++ [toXMLBool bool] ++ [toXMLInt int] ++ []
 toXMLDummy HoleDummy = Elt "HoleDummy" [] []
 toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
-toXMLRoot (Root _ graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString_ title] ++ toXMLList_Section sections ++ []
+toXMLRoot (Root _ graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections ++ []
 toXMLRoot HoleRoot = Elt "HoleRoot" [] []
 toXMLRoot (ParseErrRoot _) = Elt "ParseErrRoot" [] []
-toXMLSection (Section _ title paragraphs subsections) = Elt "Section" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections ++ []
+toXMLSection (Section _ title paragraphs subsections) = Elt "Section" [] $ [toXMLString title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections ++ []
 toXMLSection HoleSection = Elt "HoleSection" [] []
 toXMLSection (ParseErrSection _) = Elt "ParseErrSection" [] []
-toXMLSubsection (Subsection _ title paragraphs subsubsections) = Elt "Subsection" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsubsection subsubsections ++ []
+toXMLSubsection (Subsection _ title paragraphs subsubsections) = Elt "Subsection" [] $ [toXMLString title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsubsection subsubsections ++ []
 toXMLSubsection HoleSubsection = Elt "HoleSubsection" [] []
 toXMLSubsection (ParseErrSubsection _) = Elt "ParseErrSubsection" [] []
-toXMLSubsubsection (Subsubsection _ title paragraphs) = Elt "Subsubsection" [] $ [toXMLString_ title] ++ toXMLList_Paragraph paragraphs ++ []
+toXMLSubsubsection (Subsubsection _ title paragraphs) = Elt "Subsubsection" [] $ [toXMLString title] ++ toXMLList_Paragraph paragraphs ++ []
 toXMLSubsubsection HoleSubsubsection = Elt "HoleSubsubsection" [] []
 toXMLSubsubsection (ParseErrSubsubsection _) = Elt "ParseErrSubsubsection" [] []
 toXMLParagraph (Paragraph _ words) = Elt "Paragraph" [] $ toXMLList_Word words ++ []
 toXMLParagraph (SubgraphPara _ subgraph) = Elt "SubgraphPara" [] $ [toXMLSubgraph subgraph] ++ []
 toXMLParagraph HoleParagraph = Elt "HoleParagraph" [] []
 toXMLParagraph (ParseErrParagraph _) = Elt "ParseErrParagraph" [] []
-toXMLWord (Word _ word) = Elt "Word" [] $ [toXMLString_ word] ++ []
+toXMLWord (Word _ word) = Elt "Word" [] $ [toXMLString word] ++ []
 toXMLWord HoleWord = Elt "HoleWord" [] []
 toXMLWord (ParseErrWord _) = Elt "ParseErrWord" [] []
 toXMLGraph (Graph _ dirty vertices edges) = Elt "Graph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
 toXMLGraph HoleGraph = Elt "HoleGraph" [] []
 toXMLGraph (ParseErrGraph _) = Elt "ParseErrGraph" [] []
-toXMLVertex (Vertex _ name shape id x y) = Elt "Vertex" [] $ [toXMLString_ name] ++ [toXMLShape shape] ++ [toXMLInt_ id] ++ [toXMLInt_ x] ++ [toXMLInt_ y] ++ []
+toXMLVertex (Vertex _ name shape id x y) = Elt "Vertex" [] $ [toXMLString name] ++ [toXMLShape shape] ++ [toXMLInt id] ++ [toXMLInt x] ++ [toXMLInt y] ++ []
 toXMLVertex HoleVertex = Elt "HoleVertex" [] []
 toXMLVertex (ParseErrVertex _) = Elt "ParseErrVertex" [] []
 toXMLShape (Circle _) = Elt "Circle" [] $ []
 toXMLShape (Square _) = Elt "Square" [] $ []
 toXMLShape HoleShape = Elt "HoleShape" [] []
 toXMLShape (ParseErrShape _) = Elt "ParseErrShape" [] []
-toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt_ from] ++ [toXMLInt_ to] ++ []
+toXMLEdge (Edge _ from to) = Elt "Edge" [] $ [toXMLInt from] ++ [toXMLInt to] ++ []
 toXMLEdge HoleEdge = Elt "HoleEdge" [] []
 toXMLEdge (ParseErrEdge _) = Elt "ParseErrEdge" [] []
 toXMLSubgraph (Subgraph _ dirty vertices edges) = Elt "Subgraph" [] $ [toXMLDirty dirty] ++ toXMLList_Vertex vertices ++ toXMLList_Edge edges ++ []
@@ -453,36 +404,30 @@ toXMLConsList_Edge Nil_Edge             = []
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr NoIDD <$ startTag "RootEnr" <*> parseXML_Root <*> parseXML_Document <* endTag "RootEnr"
-parseXML_String_ = parseXMLCns_String_ <?|> parseHoleAndParseErr "String_" HoleString_
-parseXMLCns_String_ = String_ NoIDD <$ startTag "String_" <*> parseXML_String <* endTag "String_"
-parseXML_Bool_ = parseXMLCns_Bool_ <?|> parseHoleAndParseErr "Bool_" HoleBool_
-parseXMLCns_Bool_ = Bool_ NoIDD <$ startTag "Bool_" <*> parseXML_Bool <* endTag "Bool_"
-parseXML_Int_ = parseXMLCns_Int_ <?|> parseHoleAndParseErr "Int_" HoleInt_
-parseXMLCns_Int_ = Int_ NoIDD <$ startTag "Int_" <*> parseXML_Int <* endTag "Int_"
 parseXML_Dummy = parseXMLCns_Dummy <?|> parseHoleAndParseErr "Dummy" HoleDummy
-parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String_ <*> parseXML_Bool_ <*> parseXML_Int_ <* endTag "Dummy"
+parseXMLCns_Dummy = Dummy NoIDD <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String <*> parseXML_Bool <*> parseXML_Int <* endTag "Dummy"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
-parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String_ <*> parseXML_List_Section <* endTag "Root"
+parseXMLCns_Root = Root NoIDD <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section <* endTag "Root"
 parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection
-parseXMLCns_Section = Section NoIDD <$ startTag "Section" <*> parseXML_String_ <*> parseXML_List_Paragraph <*> parseXML_List_Subsection <* endTag "Section"
+parseXMLCns_Section = Section NoIDD <$ startTag "Section" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsection <* endTag "Section"
 parseXML_Subsection = parseXMLCns_Subsection <?|> parseHoleAndParseErr "Subsection" HoleSubsection
-parseXMLCns_Subsection = Subsection NoIDD <$ startTag "Subsection" <*> parseXML_String_ <*> parseXML_List_Paragraph <*> parseXML_List_Subsubsection <* endTag "Subsection"
+parseXMLCns_Subsection = Subsection NoIDD <$ startTag "Subsection" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsubsection <* endTag "Subsection"
 parseXML_Subsubsection = parseXMLCns_Subsubsection <?|> parseHoleAndParseErr "Subsubsection" HoleSubsubsection
-parseXMLCns_Subsubsection = Subsubsection NoIDD <$ startTag "Subsubsection" <*> parseXML_String_ <*> parseXML_List_Paragraph <* endTag "Subsubsection"
+parseXMLCns_Subsubsection = Subsubsection NoIDD <$ startTag "Subsubsection" <*> parseXML_String <*> parseXML_List_Paragraph <* endTag "Subsubsection"
 parseXML_Paragraph = parseXMLCns_Paragraph <?|> parseXMLCns_SubgraphPara <?|> parseHoleAndParseErr "Paragraph" HoleParagraph
 parseXMLCns_Paragraph = Paragraph NoIDD <$ startTag "Paragraph" <*> parseXML_List_Word <* endTag "Paragraph"
 parseXMLCns_SubgraphPara = SubgraphPara NoIDD <$ startTag "SubgraphPara" <*> parseXML_Subgraph <* endTag "SubgraphPara"
 parseXML_Word = parseXMLCns_Word <?|> parseHoleAndParseErr "Word" HoleWord
-parseXMLCns_Word = Word NoIDD <$ startTag "Word" <*> parseXML_String_ <* endTag "Word"
+parseXMLCns_Word = Word NoIDD <$ startTag "Word" <*> parseXML_String <* endTag "Word"
 parseXML_Graph = parseXMLCns_Graph <?|> parseHoleAndParseErr "Graph" HoleGraph
 parseXMLCns_Graph = Graph NoIDD <$ startTag "Graph" <*> parseXML_Dirty <*> parseXML_List_Vertex <*> parseXML_List_Edge <* endTag "Graph"
 parseXML_Vertex = parseXMLCns_Vertex <?|> parseHoleAndParseErr "Vertex" HoleVertex
-parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String_ <*> parseXML_Shape <*> parseXML_Int_ <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Vertex"
+parseXMLCns_Vertex = Vertex NoIDD <$ startTag "Vertex" <*> parseXML_String <*> parseXML_Shape <*> parseXML_Int <*> parseXML_Int <*> parseXML_Int <* endTag "Vertex"
 parseXML_Shape = parseXMLCns_Circle <?|> parseXMLCns_Square <?|> parseHoleAndParseErr "Shape" HoleShape
 parseXMLCns_Circle = Circle NoIDD <$ emptyTag "Circle"
 parseXMLCns_Square = Square NoIDD <$ emptyTag "Square"
 parseXML_Edge = parseXMLCns_Edge <?|> parseHoleAndParseErr "Edge" HoleEdge
-parseXMLCns_Edge = Edge NoIDD <$ startTag "Edge" <*> parseXML_Int_ <*> parseXML_Int_ <* endTag "Edge"
+parseXMLCns_Edge = Edge NoIDD <$ startTag "Edge" <*> parseXML_Int <*> parseXML_Int <* endTag "Edge"
 parseXML_Subgraph = parseXMLCns_Subgraph <?|> parseHoleAndParseErr "Subgraph" HoleSubgraph
 parseXMLCns_Subgraph = Subgraph NoIDD <$ startTag "Subgraph" <*> parseXML_Dirty <*> parseXML_List_Vertex <*> parseXML_List_Edge <* endTag "Subgraph"
 parseXML_Dirty = parseXMLCns_Dirty <?|> parseXMLCns_Clean <?|> parseHoleAndParseErr "Dirty" HoleDirty

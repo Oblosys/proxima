@@ -31,49 +31,31 @@ reuseRootEnr nodes  ma0 ma1 ma2
            (RootEnr a0 a1 a2) -> reuse3 RootEnr a0 a1 a2 ma0 ma1 ma2
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseString_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> String_
-reuseString_ nodes  ma0 ma1
-  = case extractFromTokens extractString_ defaultString_ nodes of
-           (String_ a0 a1) -> reuse2 String_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseString_"
-
-reuseBool_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe Bool -> Bool_
-reuseBool_ nodes  ma0 ma1
-  = case extractFromTokens extractBool_ defaultBool_ nodes of
-           (Bool_ a0 a1) -> reuse2 Bool_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseBool_"
-
-reuseInt_ :: [Token doc Node clip token] -> Maybe IDD -> Maybe Int -> Int_
-reuseInt_ nodes  ma0 ma1
-  = case extractFromTokens extractInt_ defaultInt_ nodes of
-           (Int_ a0 a1) -> reuse2 Int_ a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseInt_"
-
-reuseDummy :: [Token doc Node clip token] -> Maybe IDD -> Maybe List_Dummy -> Maybe String_ -> Maybe Bool_ -> Maybe Int_ -> Dummy
+reuseDummy :: [Token doc Node clip token] -> Maybe IDD -> Maybe List_Dummy -> Maybe String -> Maybe Bool -> Maybe Int -> Dummy
 reuseDummy nodes  ma0 ma1 ma2 ma3 ma4
   = case extractFromTokens extractDummy defaultDummy nodes of
            (Dummy a0 a1 a2 a3 a4) -> reuse5 Dummy a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "System error:<module>.reuseDummy"
 
-reuseRoot :: [Token doc Node clip token] -> Maybe IDD -> Maybe Graph -> Maybe String_ -> Maybe List_Section -> Root
+reuseRoot :: [Token doc Node clip token] -> Maybe IDD -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
 reuseRoot nodes  ma0 ma1 ma2 ma3
   = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1 a2 a3) -> reuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseRoot"
 
-reuseSection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
+reuseSection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
 reuseSection nodes  ma0 ma1 ma2 ma3
   = case extractFromTokens extractSection defaultSection nodes of
            (Section a0 a1 a2 a3) -> reuse4 Section a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSection"
 
-reuseSubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
+reuseSubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
 reuseSubsection nodes  ma0 ma1 ma2 ma3
   = case extractFromTokens extractSubsection defaultSubsection nodes of
            (Subsection a0 a1 a2 a3) -> reuse4 Subsection a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseSubsection"
 
-reuseSubsubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe List_Paragraph -> Subsubsection
+reuseSubsubsection :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Maybe List_Paragraph -> Subsubsection
 reuseSubsubsection nodes  ma0 ma1 ma2
   = case extractFromTokens extractSubsubsection defaultSubsubsection nodes of
            (Subsubsection a0 a1 a2) -> reuse3 Subsubsection a0 a1 a2 ma0 ma1 ma2
@@ -91,7 +73,7 @@ reuseSubgraphPara nodes  ma0 ma1
            (SubgraphPara a0 a1) -> reuse2 SubgraphPara a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseSubgraphPara"
 
-reuseWord :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Word
+reuseWord :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Word
 reuseWord nodes  ma0 ma1
   = case extractFromTokens extractWord defaultWord nodes of
            (Word a0 a1) -> reuse2 Word a0 a1 ma0 ma1
@@ -103,7 +85,7 @@ reuseGraph nodes  ma0 ma1 ma2 ma3
            (Graph a0 a1 a2 a3) -> reuse4 Graph a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "System error:<module>.reuseGraph"
 
-reuseVertex :: [Token doc Node clip token] -> Maybe IDD -> Maybe String_ -> Maybe Shape -> Maybe Int_ -> Maybe Int_ -> Maybe Int_ -> Vertex
+reuseVertex :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Maybe Shape -> Maybe Int -> Maybe Int -> Maybe Int -> Vertex
 reuseVertex nodes  ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromTokens extractVertex defaultVertex nodes of
            (Vertex a0 a1 a2 a3 a4 a5) -> reuse6 Vertex a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
@@ -121,7 +103,7 @@ reuseSquare nodes  ma0
            (Square a0) -> reuse1 Square a0 ma0
            _ -> error "System error:<module>.reuseSquare"
 
-reuseEdge :: [Token doc Node clip token] -> Maybe IDD -> Maybe Int_ -> Maybe Int_ -> Edge
+reuseEdge :: [Token doc Node clip token] -> Maybe IDD -> Maybe Int -> Maybe Int -> Edge
 reuseEdge nodes  ma0 ma1 ma2
   = case extractFromTokens extractEdge defaultEdge nodes of
            (Edge a0 a1 a2) -> reuse3 Edge a0 a1 a2 ma0 ma1 ma2
@@ -196,18 +178,6 @@ reuseList_Edge nodes  ma0 ma1
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
 extractRootEnr (Just (RootEnrNode x@(RootEnr _ _ _) _)) = Just x
 extractRootEnr _ = Nothing
-
-extractString_ :: Maybe Node -> Maybe String_
-extractString_ (Just (String_Node x@(String_ _ _) _)) = Just x
-extractString_ _ = Nothing
-
-extractBool_ :: Maybe Node -> Maybe Bool_
-extractBool_ (Just (Bool_Node x@(Bool_ _ _) _)) = Just x
-extractBool_ _ = Nothing
-
-extractInt_ :: Maybe Node -> Maybe Int_
-extractInt_ (Just (Int_Node x@(Int_ _ _) _)) = Just x
-extractInt_ _ = Nothing
 
 extractDummy :: Maybe Node -> Maybe Dummy
 extractDummy (Just (DummyNode x@(Dummy _ _ _ _ _) _)) = Just x
@@ -308,15 +278,6 @@ extractList_Edge _ = Nothing
 defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr NoIDD hole hole
 
-defaultString_ :: String_
-defaultString_ = String_ NoIDD hole
-
-defaultBool_ :: Bool_
-defaultBool_ = Bool_ NoIDD hole
-
-defaultInt_ :: Int_
-defaultInt_ = Int_ NoIDD hole
-
 defaultDummy :: Dummy
 defaultDummy = Dummy NoIDD hole hole hole hole
 
@@ -401,12 +362,6 @@ reuse3 :: (a0 -> a1 -> a2 -> r) ->
 reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
 
-reuse2 :: (a0 -> a1 -> r) -> 
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f  a0 a1 ma0 ma1 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) 
-
 reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
@@ -418,6 +373,12 @@ reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
 reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
+
+reuse2 :: (a0 -> a1 -> r) -> 
+          a0 -> a1 -> 
+          Maybe a0 -> Maybe a1 -> r
+reuse2 f  a0 a1 ma0 ma1 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) 
 
 reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) -> 
           a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 

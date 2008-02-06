@@ -51,7 +51,7 @@ SEM Root
   | Root
       lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ @graph.pres
-                            , row [ parsing' LexFreeText @title.pres, empty `withHStretch` True ]
+                            , row [ parsing $ text @title, empty `withHStretch` True ]
                                   `withFontSize_` (percent 160) 
                                   `addPopupItems`
                                 [ ("Add Section", insertAtHeadSection @sections.path) ]  
@@ -69,7 +69,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
       loc.numberStr = show @sectionNr ++ "."
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text @numberStr
-                                        , parsing' LexFreeText @title.pres
+                                        , parsing $ text @title
                                         ] `withFontSize_` (percent 150)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
                                           `withHStretch` True 
@@ -81,8 +81,8 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                      `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
                                      , ("Add Section", addSection @lhs.path) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                      row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
-
+                      row [text @numberStr, parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
+                      -- don't use formatter here
 
 
 SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
@@ -90,7 +90,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
       lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text @numberStr
-                                        , parsing' LexFreeText @title.pres, empty `withHStretch` True
+                                        , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
                                   , @paragraphs.pres
@@ -102,6 +102,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                                      , ("Add Subsection", addSubsection @lhs.path) ]
       --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+                      -- don't use formatter here
 
 
 SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
@@ -109,7 +110,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ row [ text @numberStr
-                                  , parsing' LexFreeText @title.pres, empty `withHStretch` True
+                                  , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
                                     `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
                             , @paragraphs.pres
@@ -118,6 +119,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                                      , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
       --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (show $ @subsubsectionNr), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+                      -- don't use formatter here
 
 
 SEM Section [ || ]
@@ -166,7 +168,7 @@ SEM Paragraph
 SEM Word [ || ]
   | Word
       lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     row [ @word.pres, text " " ]
+                     row [ text @word, text " " ]
 
   
 SEM Graph
@@ -178,7 +180,7 @@ SEM Graph
       
 SEM Vertex [ || ] 
   | Vertex
-      loc.pres = let (nodePres,nodeOutline) =
+      lhs.pres = let (nodePres,nodeOutline) =
                        case @shape.self of
                          (Circle _) -> ( ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
                                        , \a -> (round $ 9*cos a , round $ -9*sin a )
@@ -188,12 +190,12 @@ SEM Vertex [ || ]
                                        )
                       
                  in  loc (VertexNode @self @lhs.path) $ structural $
-                     (vertex @id.int @x.int @y.int nodeOutline $
+                     (vertex @id @x @y nodeOutline $
                        col [ rowR 1 [glue, hRefHalf $ nodePres, glue]
                            , vSpace 4 `withHStretch` True
                            , rowR 1 [glue, hRefHalf $ boxed 
                                               (row [ hSpace 3
-                                                   , parsing' LexHaskell $ text (@name.str) `withFont'` ("Arial", 6)
+                                                   , parsing $ text @name `withFont'` ("Arial", 6)
                                                    , hSpace 3
                                                    ])
                                                 `withbgColor` (236, 236, 169)
@@ -262,7 +264,7 @@ ATTR Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int
 
 SEM Edge [ || edge : {Maybe (Int,Int)} ]    
   | Edge
-      lhs.edge = Just (@from.int, @to.int)
+      lhs.edge = Just (@from, @to)
   | HoleEdge
       lhs.edge = Nothing
   | ParseErrEdge
@@ -284,7 +286,7 @@ SEM ConsList_Edge [ || edges : {[Maybe (Int,Int)]} ]
 
 SEM Vertex [ || vertexIDName : {Maybe (Int,String)} ]    
   | Vertex
-      lhs.vertexIDName = Just (@id.int, @name.str)
+      lhs.vertexIDName = Just (@id, @name)
   | HoleVertex
       lhs.vertexIDName = Nothing
   | ParseErrVertex
@@ -318,23 +320,23 @@ newSubgraphPara = Clip_Paragraph $
 
 newParagraph = Clip_Paragraph $
                  Paragraph NoIDD $
-                   List_Word NoIDD (Cons_Word (Word NoIDD (String_ NoIDD " ")) Nil_Word)
+                   List_Word NoIDD (Cons_Word (Word NoIDD " ") Nil_Word)
 
 newSection = Clip_Section $
                Section NoIDD
-                 (String_ NoIDD "<new section>")
+                 "<new section>"
                  (List_Paragraph NoIDD Nil_Paragraph) 
                  (List_Subsection NoIDD Nil_Subsection)
 
 newSubsection = Clip_Subsection $
                     Subsection NoIDD
-                      (String_ NoIDD "<new subsection>")
+                      "<new subsection>"
                       (List_Paragraph NoIDD Nil_Paragraph) 
                       (List_Subsubsection NoIDD Nil_Subsubsection) 
 
 newSubsubsection = Clip_Subsubsection $
                     Subsubsection NoIDD
-                      (String_ NoIDD "<new subsubsection>")
+                      "<new subsubsection>"
                       (List_Paragraph NoIDD Nil_Paragraph) 
 
 addSubgraphPara path = addElementAfter path newSubgraphPara
@@ -372,7 +374,7 @@ pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
         case subgraph of
-        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  (String_ NoIDD name) (Circle NoIDD) (Int_ NoIDD id) (Int_ NoIDD 20) (Int_ NoIDD 20) : fromList_Vertex vs) es
+        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  name (Circle NoIDD) id 20 20 : fromList_Vertex vs) es
         _                    -> subgraph
   in \(DocumentLevel d path cl) ->
         let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)

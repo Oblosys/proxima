@@ -38,7 +38,7 @@ recognizeRootEnr = pStr $
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
-          reuseRoot [str] Nothing (Just graph) (Just (String_ NoIDD title)) (Just (toList_Section sections)) )
+          reuseRoot [str] Nothing (Just graph) (Just title) (Just (toList_Section sections)) )
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs pLine 
@@ -57,7 +57,7 @@ recognizeRoot = pStr $
   
 recognizeSection :: ListParser Document Node ClipDoc UserToken Section
 recognizeSection = pStrAlt SectionNode $
-          (\str t ps ss -> reuseSection [str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsection ss))
+          (\str t ps ss -> reuseSection [str] Nothing (Just t) (Just ps) (Just $ toList_Subsection ss))
       <$> pStructural SectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -66,7 +66,7 @@ recognizeSection = pStrAlt SectionNode $
 recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt SubsectionNode $
-          (\str t ps sss -> reuseSubsection [str] Nothing (Just (String_ NoIDD t)) (Just ps) (Just $ toList_Subsubsection sss))
+          (\str t ps sss -> reuseSubsection [str] Nothing (Just t) (Just ps) (Just $ toList_Subsubsection sss))
       <$> pStructural SubsectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -76,7 +76,7 @@ recognizeSubsection =
 recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
   pStrAlt SubsubsectionNode $
-          (\str t ps -> reuseSubsubsection [str] Nothing (Just (String_ NoIDD t)) (Just ps))
+          (\str t ps -> reuseSubsubsection [str] Nothing (Just t) (Just ps))
       <$> pStructural SubsubsectionNode
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
@@ -90,7 +90,7 @@ recognizeGraph = pStrVerbose "Graph" $
           (\str gt vs -> reuseGraph [str] Nothing (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                    (Just $ List_Edge NoIDD $ toConsList_Edge $ 
-                                   [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt]))
+                                   [ Edge NoIDD f t |  (f,t) <- getGraphTkEdges gt]))
                         
                                           
       <$> pStructural GraphNode
@@ -105,23 +105,18 @@ recognizeVertex = pStrVerbose "Vertex" $
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural VertexNode
       <*> pSym vertexTk
-      <*> parseLabel
-  <|>     (\str vt -> reuseVertex [str] Nothing (Just $ String_ NoIDD "<new>") (Just $ Circle NoIDD)
+      <*> pPrs pText
+  <|>     (\str vt -> reuseVertex [str] Nothing (Just "<new>") (Just $ Circle NoIDD)
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructural (\_ _ -> NoNode)
       <*> pSym vertexTk
-
-parseLabel :: ListParser Document Node ClipDoc UserToken String_
-parseLabel = pPrs $
-          (\str -> String_ NoIDD str)
-      <$> pText
-
+          
 recognizeSubgraph :: ListParser Document Node ClipDoc UserToken Subgraph
 recognizeSubgraph = pStrVerbose "Subgraph" $
           (\str gt vs -> reuseSubgraph [str] Nothing (Just $ getGraphTkDirty gt)  
                                      (Just $ List_Vertex NoIDD $ toConsList_Vertex vs)
                                      (Just $ List_Edge NoIDD $ toConsList_Edge $ 
-                                     [ Edge NoIDD (Int_ NoIDD f) (Int_ NoIDD t) |  (f,t) <- getGraphTkEdges gt])
+                                     [ Edge NoIDD f t |  (f,t) <- getGraphTkEdges gt])
                       )
       <$> pStructural SubgraphNode
       <*> pSym graphTk
@@ -135,17 +130,17 @@ getGraphTkEdges :: Show node => Token doc node clip UserToken -> [(Int,Int)]
 getGraphTkEdges (GraphTk _ edges _ _) = edges
 getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
 
-getVertexTkId :: Show node => Token doc node clip UserToken -> Int_
-getVertexTkId (VertexTk i (x,y) _ _) = Int_ NoIDD i
-getVertexTkId tk = debug Err ("ERROR: getVertexTkId: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
+getVertexTkId :: Show node => Token doc node clip UserToken -> Int
+getVertexTkId (VertexTk i (x,y) _ _) = i
+getVertexTkId tk = debug Err ("ERROR: getVertexTkId: called on non VertexTk: "++show tk++"\n") $ 0
 
-getVertexTkX :: Show node => Token doc node clip UserToken -> Int_
-getVertexTkX (VertexTk _ (x,y) _ _) = Int_ NoIDD x
-getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
+getVertexTkX :: Show node => Token doc node clip UserToken -> Int
+getVertexTkX (VertexTk _ (x,y) _ _) = x
+getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ 0
 
-getVertexTkY :: Show node => Token doc node clip UserToken -> Int_
-getVertexTkY (VertexTk _ (x,y) _ _) = Int_ NoIDD y
-getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ Int_ NoIDD 0
+getVertexTkY :: Show node => Token doc node clip UserToken -> Int
+getVertexTkY (VertexTk _ (x,y) _ _) = y
+getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ 0
 
 -- this must be a pList1Sep, otherwise we get an error. In this case there is always at least one, but
 -- it should be possible to have an empty list two. Unclear why the parser disallows this.
@@ -170,7 +165,7 @@ parseParagraph =
 
 
 parseWord = 
-          (\str -> reuseWord [] Nothing (Just $ String_ NoIDD str))
+          (\str -> reuseWord [] Nothing (Just str))
       <$> pText
       <*  pList (pKey " ")  
       -- the Scanner produces " " tokens, which are converted to key tokens
