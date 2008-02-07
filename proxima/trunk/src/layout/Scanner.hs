@@ -41,8 +41,6 @@ a presentation). Processing it recursively is not a problem for Structural prese
 for parsing presentations the lexer can fail on a lexer error, in which case no information is returned
 and we cannot tokenize any structural token children.
 
-
-Do tokens really need idp's?
 -}
 
 
