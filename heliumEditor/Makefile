@@ -78,8 +78,9 @@ src/PresentationAG.hs: $(AGC) \
 
 lexer: src/ScannerSheet.hs
 
-src/ScannerSheet.hs: src/ScannerSheet.x
-	alex --ghc src/ScannerSheet.x
+# the -t causes Alex to look for a template file. 
+src/ScannerSheet.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
+	alex -t $(LAYOUTDIR) --ghc src/ScannerSheet.x
 
 
 clean:
