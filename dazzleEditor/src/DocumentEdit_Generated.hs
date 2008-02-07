@@ -460,18 +460,22 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
 instance Editable Word Document Node ClipDoc UserToken where
   select []    x                  = Clip_Word x
   select (0:p) (Word _ x1) = select p x1
+  select (0:p) (NodeRef _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Word c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Word")   x
   paste (0:p) c (Word i1 x1) = Word i1 (paste p c x1)
+  paste (0:p) c (NodeRef i1 x1) = NodeRef i1 (paste p c x1)
   paste _  _  x                    = x
 
   alternatives _ = [("Word "  , Clip_Word $ Word NoIDD hole)
+                   ,("NodeRef "  , Clip_Word $ NodeRef NoIDD hole)
                    ,("{Word}", Clip_Word hole)
                    ]
 
   arity (Word _ x1) = 1
+  arity (NodeRef _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrWord

@@ -79,6 +79,12 @@ reuseWord nodes  ma0 ma1
            (Word a0 a1) -> reuse2 Word a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseWord"
 
+reuseNodeRef :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Word
+reuseNodeRef nodes  ma0 ma1
+  = case extractFromTokens extractNodeRef defaultNodeRef nodes of
+           (NodeRef a0 a1) -> reuse2 NodeRef a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseNodeRef"
+
 reuseGraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes  ma0 ma1 ma2 ma3
   = case extractFromTokens extractGraph defaultGraph nodes of
@@ -211,6 +217,10 @@ extractWord :: Maybe Node -> Maybe Word
 extractWord (Just (WordNode x@(Word _ _) _)) = Just x
 extractWord _ = Nothing
 
+extractNodeRef :: Maybe Node -> Maybe Word
+extractNodeRef (Just (NodeRefNode x@(NodeRef _ _) _)) = Just x
+extractNodeRef _ = Nothing
+
 extractGraph :: Maybe Node -> Maybe Graph
 extractGraph (Just (GraphNode x@(Graph _ _ _ _) _)) = Just x
 extractGraph _ = Nothing
@@ -301,6 +311,9 @@ defaultSubgraphPara = SubgraphPara NoIDD hole
 
 defaultWord :: Word
 defaultWord = Word NoIDD hole
+
+defaultNodeRef :: Word
+defaultNodeRef = NodeRef NoIDD hole
 
 defaultGraph :: Graph
 defaultGraph = Graph NoIDD hole hole hole

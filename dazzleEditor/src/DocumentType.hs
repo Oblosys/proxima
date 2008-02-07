@@ -17,7 +17,8 @@ data Paragraph = Paragraph words:[Word]                  { idd : IDD }
                | SubgraphPara subgraph:Subgraph          { idd : IDD }
 
 data Word = Word word:String                                { idd : IDD }
-
+          | NodeRef nodeName:String                         { idd : IDD } 
+          
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
 
 data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int     { idd : IDD }

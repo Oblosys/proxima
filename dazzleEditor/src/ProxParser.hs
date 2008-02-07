@@ -168,6 +168,10 @@ parseWord =
           (\str -> reuseWord [] Nothing (Just str))
       <$> pText
       <*  pList (pKey " ")  
+  <|>
+          (\str -> reuseNodeRef [] Nothing (Just $ tokenString str))
+      <$> pNodeRef
+      <*  pList (pKey " ")  
       -- the Scanner produces " " tokens, which are converted to key tokens
       -- split adds a " \n", so maybe we encounter two spaces
 
@@ -189,7 +193,7 @@ pText = tokenString <$> pWord
 -- which is also required for copying of presentation subtrees
 keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
 wordTk    = UserTk WordTk "word" Nothing (IDP (-1))
-
+nodeRefTk = UserTk NodeRefTk "nodeRef" Nothing (IDP (-1))
 
 -- Basic parsers
 
@@ -202,5 +206,6 @@ pKeyC c str = pCSym c (keyTk str)
 pWord :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
 pWord = pSym wordTk
 
-
+pNodeRef :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pNodeRef = pSym nodeRefTk
 

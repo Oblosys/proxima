@@ -169,6 +169,14 @@ SEM Word [ || ]
   | Word
       lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ text @word, text " " ]
+  | NodeRef
+      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     row [ text "\\node{" `withColor` blue
+                         , if @nodeName `notElem` @lhs.nodeNames
+                           then squiggly red $ text @nodeName 
+                           else text @nodeName 
+                         , text "}" `withColor` blue
+                         , text " " ]
 
   
 SEM Graph
@@ -385,6 +393,46 @@ pasteInSubgraph pth id name subgraph =
 
 }
 
+
+-- node names in scope
+
+
+ATTR List_Section ConsList_Section Section 
+     List_Subsection ConsList_Subsection Subsection
+     List_Subsubsection ConsList_Subsubsection Subsubsection
+     List_Paragraph ConsList_Paragraph Paragraph
+     List_Word ConsList_Word Word
+     [ nodeNames : {[String]} | | ]
+
+SEM Root
+  | Root 
+      sections.nodeNames = @graph.nodeNames
+
+
+SEM Graph [ | | nodeNames : {[String]} ]
+  | Graph lhs.nodeNames = @vertices.nodeNames
+  | HoleGraph ParseErrGraph
+      lhs.nodeNames = []
+
+SEM List_Vertex [ || nodeNames : {[String]} ] 
+  | List_Vertex
+      lhs.nodeNames = catMaybes @elts.nodeNames
+  | HoleList_Vertex
+      lhs.nodeNames = []
+  | ParseErrList_Vertex
+      lhs.nodeNames = []
+      
+SEM ConsList_Vertex [ || nodeNames : {[Maybe String]} ] 
+  | Cons_Vertex
+      lhs.nodeNames = @head.nodeName : @tail.nodeNames
+  | Nil_Vertex
+      lhs.nodeNames = []
+
+SEM Vertex [ | | nodeName : {Maybe String} ]
+  | Vertex        
+      lhs.nodeName = Just @name
+  | HoleVertex ParseErrVertex
+      lhs.nodeName = Nothing
 
 
 -- annoying bits, since we don't have any default behaviour for pres attributes:

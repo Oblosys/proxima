@@ -94,6 +94,7 @@ DATA Paragraph | Paragraph idd:IDD words:List_Word
 
 
 DATA Word | Word idd:IDD word:String 
+          | NodeRef idd:IDD nodeName:String 
           | HoleWord
           | ParseErrWord presentation:Presentation_Doc_Node_Clip_Token
 
@@ -611,6 +612,8 @@ SEM Paragraph [ || presXML : Presentation_Doc_Node_Clip_Token ]
 SEM Word [ || presXML : Presentation_Doc_Node_Clip_Token ]
   | Word
       lhs.presXML = presentElementXML @lhs.focusD (WordNode @self @lhs.path) @lhs.path "Word" [ presentPrimXMLString @word ] 
+  | NodeRef
+      lhs.presXML = presentElementXML @lhs.focusD (NodeRefNode @self @lhs.path) @lhs.path "NodeRef" [ presentPrimXMLString @nodeName ] 
   | HoleWord     lhs.presXML = presHole @lhs.focusD "Word" (HoleWordNode @self @lhs.path) @lhs.path
   | ParseErrWord lhs.presXML = presParseErr @presentation
 
@@ -820,6 +823,8 @@ SEM Paragraph [ || presTree : Presentation_Doc_Node_Clip_Token ]
 SEM Word [ || presTree : Presentation_Doc_Node_Clip_Token ]
   | Word
       lhs.presTree = presentElementTree @lhs.focusD (WordNode @self @lhs.path) @lhs.path "Word" [ presentPrimTreeString @word ] 
+  | NodeRef
+      lhs.presTree = presentElementTree @lhs.focusD (NodeRefNode @self @lhs.path) @lhs.path "NodeRef" [ presentPrimTreeString @nodeName ] 
   | HoleWord     lhs.presTree = presHole @lhs.focusD "Word" (HoleWordNode @self @lhs.path) @lhs.path
   | ParseErrWord lhs.presTree = presParseErr @presentation
 
