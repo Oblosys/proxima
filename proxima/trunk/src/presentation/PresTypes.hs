@@ -61,14 +61,16 @@ data Token doc node clip token =
              | ParsingTk (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk Int (Int, Int) (Maybe node) IDP
+             | ErrorTk String -- for storing scanner errors
 -- the IDP field is used during the scanning and parsing phase
 
 instance Show token => Show (Token doc node clip token) where
-  show (UserTk u s _ id)       = "<\"" ++show u ++"\":"++ show id ++ ">"
+  show (UserTk u s _ id)         = "<\"" ++show u ++"\":"++ show id ++ ">"
   show (StructuralTk _ _ tks id) = "<structural:"++show id++">" 
   show (ParsingTk _ tks _)       = "<parsing>" 
-  show (GraphTk _ edges _ _)   = "<graph:"++show edges++">"
-  show (VertexTk id pos _ _)   = "<vertex "++show id++">"
+  show (GraphTk _ edges _ _)     = "<graph:"++show edges++">"
+  show (VertexTk id pos _ _)     = "<vertex: "++show id++">"
+  show (ErrorTk str)             = "<error: "++show str++">"
 
 instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
@@ -78,7 +80,9 @@ instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   ParsingTk _ _ _    == ParsingTk _ _ _ = True   
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
-  _              == _                  = False -- identifier will be added, which will be involved in eq. check
+                                              -- identifier will be added, which will be involved in eq. check
+  ErrorTk _  == ErrorTk _              = True
+  _              == _                  = False
 
 instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
@@ -97,26 +101,35 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
   VertexTk _ _ _ _ <= ParsingTk _ _ _      = True
   VertexTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True
-  _              <= _           = False
+  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True 
+  ErrorTk _        <= ErrorTk _            = True
+  ErrorTk _        <= VertexTk _ _ _ _     = True
+  ErrorTk _        <= GraphTk _ _ _ _      = True
+  ErrorTk _        <= ParsingTk _ _ _      = True
+  ErrorTk _        <= StructuralTk _ _ _ _ = True
+  ErrorTk _        <= UserTk _ _ _ _       = True
+  _                <= _           = False
 
 tokenString :: Token doc node clip token -> String                  
 tokenString (UserTk _ s n id)      = s
 tokenString (StructuralTk n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
+tokenString (ErrorTk str)       = "<error token>"
                              
 tokenNode :: Token doc node clip token -> Maybe node                 
 tokenNode (StructuralTk n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk u s n id)   = n
+tokenNode (ErrorTk str)       = error $ "tokenNode called on error token: " ++ str
 
 tokenIDP :: Token doc node clip token -> IDP       
 tokenIDP (UserTk u s n id) = id
 tokenIDP (StructuralTk n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
 tokenIDP (VertexTk i p n id) = id
+tokenIDP (ErrorTk str)       = error $ "tokenIDP called on error token: " ++ str
 
 deepShowTks i tok = case tok of
                       (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
