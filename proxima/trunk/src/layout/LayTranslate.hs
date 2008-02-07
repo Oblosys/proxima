@@ -4,7 +4,7 @@ import CommonTypes
 import LayLayerTypes
 import LayLayerUtils
 
-import Scanner
+import Scanner hiding (empty)
 
 import TreeEditPres
 

@@ -14,14 +14,14 @@ alexGetChar (_, Structural _ _ _ _ : cs) = Just ('\255', ('\255',cs))
 
 alexInputPrevChar (c,_) = c
 
-
+ -- unfortunately Haskell does not allow us to export the qualified Map
 -- TODO final whitespace?
 scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap)
 scanner idPCounter scs = 
   let (mTokens, (idPCounter', whitespaceMap, _)) = alexScanTokenzz initScannerState scs
   in  (catMaybes mTokens, idPCounter', whitespaceMap)
  where initScannerState :: ScannerState
-       initScannerState = (idPCounter, Map.empty,(0,0))
+       initScannerState = (idPCounter, empty,(0,0))
 
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
