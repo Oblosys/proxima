@@ -61,7 +61,7 @@ data Token doc node clip token =
              | ParsingTk (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk Int (Int, Int) (Maybe node) IDP
-
+-- the IDP field is used during the scanning and parsing phase
 
 instance Show token => Show (Token doc node clip token) where
   show (UserTk u s _ id)       = "<\"" ++show u ++"\":"++ show id ++ ">"
