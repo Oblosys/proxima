@@ -18,3 +18,8 @@
 >      system "make lexer"
 >      putStrLn "end of pre-build hook"
 >      return emptyHookedBuildInfo
+
+The make lexer part builds the Alex lexer. Cabal can do this automatically, but does not allow
+the specification of options for Alex.
+
+Because make updates ScannerSheet.hs, Cabal does not preprocess ScannerSheet.x at all.
