@@ -1,13 +1,7 @@
 {
-module ScannerSheet (scanner) where
+module ScannerSheet where
 
-import Maybe
-import qualified Data.Map as Map
 import DocTypes_Generated
-import PresTypes
-import LayLayerTypes
-import LayLayerUtils
-
 import Scanner
 }
 
@@ -23,6 +17,5 @@ tokens :-
   $char+           { mkToken $ \s -> WordTk }
 
 {
- 
 -- in case of a lexical error from Alex, just add a single quote here. (total should be even)
 }
