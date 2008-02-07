@@ -129,11 +129,13 @@ scanPresentation sheet inheritedLex loc idPCounter whitespaceMap idP presentatio
 
 type ScannerState = (Int, WhitespaceMap, (Int, Int)) -- (idP counter, whitespace map, (newlines, spaces))
 
+mkToken = mkTokenEx id
 
-mkToken :: (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
+-- the first strf is for manipulating the string that is stored in the token
+mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
            (Maybe (Token doc node clip userToken), ScannerState)
-mkToken tokf (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let str = stringFromScanChars scs
+mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespace) scs = 
+  let str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
