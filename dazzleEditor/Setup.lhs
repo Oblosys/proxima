@@ -14,5 +14,7 @@
 >      system "make generate"
 >      putStrLn "> make presenter"
 >      system "make presenter"
+>      putStrLn "> make lexer"
+>      system "make lexer"
 >      putStrLn "end of pre-build hook"
 >      return emptyHookedBuildInfo

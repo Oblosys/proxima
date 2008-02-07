@@ -61,8 +61,10 @@ src/PresentationAG.hs: $(AGC) \
 
 lexer: src/ScannerSheet.hs
 
-src/ScannerSheet.hs: src/ScannerSheet.x
-	alex --ghc src/ScannerSheet.x
+src/ScannerSheet.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
+	alex -t $(LAYOUTDIR) --ghc src/ScannerSheet.x
+
+#$(LAYOUTDIR)/AlexTemplate-ghc
 
 clean:
 	$(FIND) src -maxdepth 1 -name "*.hi" -delete

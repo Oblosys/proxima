@@ -17,6 +17,7 @@ author: Martijn Schrage
 tested-with: GHC -any
 data-files:
 extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
+                    src/proxima/src/layout/AlexTemplate-ghc
                     src/proxima/src/layout/ScannerAG.ag src/PresentationAG.ag
 extra-tmp-files:
  
@@ -42,13 +43,14 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
                CommonUtils DebugLevels UU_Parsing DocTypes DocUtils DocumentEdit
                EnrTypes EnrUtils EvalLayerTypes EvalLayerUtils EvalPresent
                EvalTranslate LayLayerTypes LayLayerUtils LayPresent LayTranslate
-               LayTypes LayUtils Layout Scanner ScannerAG TreeEditPres Architecture
-               ArchitectureLibM GUI Proxima PresLayerTypes PresLayerUtils
-               PresPresent PresTranslate PresTypes PresUtils PresentationParsing
-               XLatex XprezLib RenLayerTypes RenLayerUtils RenPresent RenTranslate
-               RenTypes RenUtils Renderer DocTypes_Generated DocUtils_Generated
-               DocumentEdit_Generated Evaluator Main PresentationAG ProxParser
-               ProxParser_Generated Reducer ScannerSheet
+               LayTypes LayUtils Layout Scanner ScannerAG TreeEditPres
+               Architecture ArchitectureLibM GUI Proxima PresLayerTypes
+               PresLayerUtils PresPresent PresTranslate PresTypes PresUtils
+               PresentationParsing XLatex XprezLib RenLayerTypes RenLayerUtils
+               RenPresent RenTranslate RenTypes RenUtils Renderer
+               DocTypes_Generated DocUtils_Generated DocumentEdit_Generated
+               Evaluator Main PresentationAG ProxParser ProxParser_Generated
+               Reducer ScannerSheet
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
