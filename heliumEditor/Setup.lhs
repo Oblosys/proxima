@@ -10,9 +10,9 @@
 > runMake args buildflags = 
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
 >      putStrLn "> make proxima"
->      system "make proxima"
+>      errorOnFailure $ system "make proxima"
 >      putStrLn "> make generate"
->      system "make generate"
+>      errorOnFailure $ system "make generate"
 >      putStrLn "> make presenter"
 >      errorOnFailure $ system "make presenter"
 >      putStrLn "end of pre-build hook"
