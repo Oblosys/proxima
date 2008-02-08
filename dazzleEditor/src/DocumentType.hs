@@ -18,6 +18,8 @@ data Paragraph = Paragraph words:[Word]                  { idd : IDD }
 
 data Word = Word word:String                                { idd : IDD }
           | NodeRef nodeName:String                         { idd : IDD } 
+          | Label label:String                              { idd : IDD } 
+          | LabelRef label:String                           { idd : IDD } 
           
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
 

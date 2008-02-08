@@ -172,6 +172,14 @@ parseWord =
           (\str -> reuseNodeRef [] Nothing (Just $ tokenString str))
       <$> pNodeRef
       <*  pList (pKey " ")  
+  <|>
+          (\str -> reuseLabel [] Nothing (Just $ tokenString str))
+      <$> pLabel
+      <*  pList (pKey " ")  
+  <|>
+          (\str -> reuseLabelRef [] Nothing (Just $ tokenString str))
+      <$> pLabelRef
+      <*  pList (pKey " ")  
       -- the Scanner produces " " tokens, which are converted to key tokens
       -- split adds a " \n", so maybe we encounter two spaces
 
@@ -194,6 +202,8 @@ pText = tokenString <$> pWord
 keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
 wordTk    = UserTk WordTk "word" Nothing (IDP (-1))
 nodeRefTk = UserTk NodeRefTk "nodeRef" Nothing (IDP (-1))
+labelTk   = UserTk LabelTk "labelRef" Nothing (IDP (-1))
+labelRefTk = UserTk LabelRefTk "labelRef" Nothing (IDP (-1))
 
 -- Basic parsers
 
@@ -209,3 +219,8 @@ pWord = pSym wordTk
 pNodeRef :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
 pNodeRef = pSym nodeRefTk
 
+pLabelRef :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pLabelRef = pSym labelRefTk
+
+pLabel :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pLabel = pSym labelTk

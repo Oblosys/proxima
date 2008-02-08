@@ -13,7 +13,9 @@ tokens :-
   \n                  { mkToken $ \s -> KeyTk s }
   \                   { mkToken $ \s -> KeyTk s }
   \\graph             { mkToken $ \s -> KeyTk s }
-  \\node\{$nobrace*\} { mkTokenEx (drop 6 . init) $ \s -> NodeRefTk }
+  \\node\{$nobrace*\}             { mkTokenEx (init . drop 6) $ \s -> NodeRefTk }
+  \\label\{$nobrace*\}            { mkTokenEx (init . drop 7) $ \s -> LabelTk }
+  \\ref\{$nobrace*\}\{$nobrace*\} { mkTokenEx (takeWhile (/='}') . drop 5) $ \s -> LabelRefTk }
   $char+              { mkToken $ \s -> WordTk }
 {
 }

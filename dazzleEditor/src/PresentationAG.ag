@@ -66,9 +66,9 @@ divide n xs = let (h,t) = splitAt n xs
            
 SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Section
-      loc.numberStr = show @sectionNr ++ "."
+      loc.numberStr = show @sectionNr
       lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ col [ row [ text @numberStr
+                     (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title
                                         ] `withFontSize_` (percent 150)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
@@ -81,15 +81,15 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                      `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
                                      , ("Add Section", addSection @lhs.path) ]
       lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                      row [text @numberStr, parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
+                      row [text (@numberStr++"."), parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
 
 SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsection
-      loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr ++ ". "
+      loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr
       lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ col [ row [ text @numberStr
+                     (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
@@ -101,7 +101,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                      `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsection", addSubsection @lhs.path) ]
       --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-      --                row [text @numberStr, parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+      --                row [text (@numberStr++"."), parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
 
@@ -109,7 +109,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ row [ text @numberStr
+                     (col $ [ row [ text (@numberStr++".")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
                                     `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
@@ -118,7 +118,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                      `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
       --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-      --                row [text (show $ @subsubsectionNr), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
+      --                row [text (@numberStr++"."), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
 
@@ -176,7 +176,27 @@ SEM Word [ || ]
                            then squiggly red $ text @nodeName 
                            else text @nodeName 
                          , text "}" `withColor` blue
-                         , text " " ]
+                         , text " "
+                         ]
+  | Label
+      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                     row [ text ("\\label{" ++ @label++"}") `withColor` blue
+                         , text " "
+                         ]
+  | LabelRef
+      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   let mLabelNr = lookup @label @lhs.allLabels   
+                   in row [ text "\\ref{" `withColor` blue
+                          , case mLabelNr of
+                              Nothing -> squiggly red $ text  @label
+                              Just _  -> text @label
+                          , text "}{" `withColor` blue
+                          , case mLabelNr of
+                              Nothing -> text "undefined" `withColor` red
+                              Just nr -> text nr `withColor` green
+                          , text "}" `withColor` blue
+                          , text " "
+                          ]
 
   
 SEM Graph
@@ -394,24 +414,18 @@ pasteInSubgraph pth id name subgraph =
 }
 
 
--- node names in scope
+-- node names in scope, synthesized from Graph to Root, and copied down to paragraphs
 
-
-ATTR List_Section ConsList_Section Section 
-     List_Subsection ConsList_Subsection Subsection
-     List_Subsubsection ConsList_Subsubsection Subsubsection
-     List_Paragraph ConsList_Paragraph Paragraph
-     List_Word ConsList_Word Word
-     [ nodeNames : {[String]} | | ]
-
-SEM Root
-  | Root 
-      sections.nodeNames = @graph.nodeNames
-
-
-SEM Graph [ | | nodeNames : {[String]} ]
-  | Graph lhs.nodeNames = @vertices.nodeNames
-  | HoleGraph ParseErrGraph
+SEM Vertex [ | | nodeName : {Maybe String} ]
+  | Vertex        
+      lhs.nodeName = Just @name
+  | HoleVertex ParseErrVertex
+      lhs.nodeName = Nothing
+      
+SEM ConsList_Vertex [ || nodeNames : {[Maybe String]} ] 
+  | Cons_Vertex
+      lhs.nodeNames = @head.nodeName : @tail.nodeNames
+  | Nil_Vertex
       lhs.nodeNames = []
 
 SEM List_Vertex [ || nodeNames : {[String]} ] 
@@ -421,20 +435,84 @@ SEM List_Vertex [ || nodeNames : {[String]} ]
       lhs.nodeNames = []
   | ParseErrList_Vertex
       lhs.nodeNames = []
-      
-SEM ConsList_Vertex [ || nodeNames : {[Maybe String]} ] 
-  | Cons_Vertex
-      lhs.nodeNames = @head.nodeName : @tail.nodeNames
-  | Nil_Vertex
+
+SEM Graph [ | | nodeNames : {[String]} ]
+  | Graph lhs.nodeNames = @vertices.nodeNames
+  | HoleGraph ParseErrGraph
       lhs.nodeNames = []
 
-SEM Vertex [ | | nodeName : {Maybe String} ]
-  | Vertex        
-      lhs.nodeName = Just @name
-  | HoleVertex ParseErrVertex
-      lhs.nodeName = Nothing
+SEM Root
+  | Root 
+      sections.nodeNames = @graph.nodeNames
+
+ATTR List_Section ConsList_Section Section 
+     List_Subsection ConsList_Subsection Subsection
+     List_Subsubsection ConsList_Subsubsection Subsubsection
+     List_Paragraph ConsList_Paragraph Paragraph
+     List_Word ConsList_Word Word
+     [ nodeNames : {[String]} | | ]
 
 
+-- labels and refs
+
+-- copy upward, taking the first label that is not Nothing
+
+SEM Word [ | | myLabel USE {use} {Nothing} : {Maybe String} ]
+  | Label
+      lhs.myLabel = Just @label
+
+SEM ConsList_Word List_Word Paragraph ConsList_Paragraph List_Paragraph
+    [ | | myLabel USE {`takeFirst`} {Nothing} : {Maybe String} ]
+
+{
+takeFirst :: Maybe x -> Maybe x -> Maybe x
+takeFirst left right = case left of
+                         Just x  -> Just x
+                         Nothing -> right
+}
+
+-- collect all labels
+
+SEM List_Section ConsList_Section Section 
+    List_Subsection ConsList_Subsection Subsection 
+    List_Subsubsection ConsList_Subsubsection Subsubsection 
+    [ | | labels USE {++} {[]} : {[(String,String)]} ]
+
+SEM Section
+  | Section
+      lhs.labels = case @paragraphs.myLabel of
+                     Just label -> (label, @numberStr) : @subsections.labels
+                     Nothing    -> @subsections.labels
+
+SEM Subsection
+  | Subsection
+      lhs.labels = case @paragraphs.myLabel of
+                     Just label -> (label, @numberStr) : @subsubsections.labels
+                     Nothing    -> @subsubsections.labels
+                       
+SEM Subsubsection
+  | Subsubsection
+      lhs.labels = case @paragraphs.myLabel of
+                     Just label -> [(label, @numberStr)]
+                     Nothing    -> []
+
+
+-- the inherited attribute is allLabels, to prevent the copy rule from threading the attribute.
+
+ATTR List_Section ConsList_Section Section 
+     List_Subsection ConsList_Subsection Subsection
+     List_Subsubsection ConsList_Subsubsection Subsubsection
+     List_Paragraph ConsList_Paragraph Paragraph
+     List_Word ConsList_Word Word 
+     [ allLabels : {[(String,String)]} | | ]
+
+SEM Root
+  | Root
+      sections.allLabels = @sections.labels
+           
+           
+           
+           
 -- annoying bits, since we don't have any default behaviour for pres attributes:
 
 SEM Section

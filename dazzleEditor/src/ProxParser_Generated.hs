@@ -85,6 +85,18 @@ reuseNodeRef nodes  ma0 ma1
            (NodeRef a0 a1) -> reuse2 NodeRef a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseNodeRef"
 
+reuseLabel :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Word
+reuseLabel nodes  ma0 ma1
+  = case extractFromTokens extractLabel defaultLabel nodes of
+           (Label a0 a1) -> reuse2 Label a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseLabel"
+
+reuseLabelRef :: [Token doc Node clip token] -> Maybe IDD -> Maybe String -> Word
+reuseLabelRef nodes  ma0 ma1
+  = case extractFromTokens extractLabelRef defaultLabelRef nodes of
+           (LabelRef a0 a1) -> reuse2 LabelRef a0 a1 ma0 ma1
+           _ -> error "System error:<module>.reuseLabelRef"
+
 reuseGraph :: [Token doc Node clip token] -> Maybe IDD -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes  ma0 ma1 ma2 ma3
   = case extractFromTokens extractGraph defaultGraph nodes of
@@ -221,6 +233,14 @@ extractNodeRef :: Maybe Node -> Maybe Word
 extractNodeRef (Just (NodeRefNode x@(NodeRef _ _) _)) = Just x
 extractNodeRef _ = Nothing
 
+extractLabel :: Maybe Node -> Maybe Word
+extractLabel (Just (LabelNode x@(Label _ _) _)) = Just x
+extractLabel _ = Nothing
+
+extractLabelRef :: Maybe Node -> Maybe Word
+extractLabelRef (Just (LabelRefNode x@(LabelRef _ _) _)) = Just x
+extractLabelRef _ = Nothing
+
 extractGraph :: Maybe Node -> Maybe Graph
 extractGraph (Just (GraphNode x@(Graph _ _ _ _) _)) = Just x
 extractGraph _ = Nothing
@@ -314,6 +334,12 @@ defaultWord = Word NoIDD hole
 
 defaultNodeRef :: Word
 defaultNodeRef = NodeRef NoIDD hole
+
+defaultLabel :: Word
+defaultLabel = Label NoIDD hole
+
+defaultLabelRef :: Word
+defaultLabelRef = LabelRef NoIDD hole
 
 defaultGraph :: Graph
 defaultGraph = Graph NoIDD hole hole hole

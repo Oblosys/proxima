@@ -15,7 +15,9 @@ data Document = RootDoc IDD Root
 
 data UserToken = KeyTk String
                | WordTk 
-               | NodeRefTk deriving (Show, Eq, Ord)
+               | NodeRefTk
+               | LabelTk
+               | LabelRefTk deriving (Show, Eq, Ord)
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -76,6 +78,8 @@ data Paragraph = Paragraph IDD List_Word
 
 data Word = Word IDD String 
           | NodeRef IDD String 
+          | Label IDD String 
+          | LabelRef IDD String 
           | HoleWord
           | ParseErrWord (Presentation Document Node ClipDoc UserToken)
              deriving Show
@@ -267,6 +271,8 @@ data Node = NoNode
           | HoleParagraphNode Paragraph Path 
           | WordNode Word Path 
           | NodeRefNode Word Path 
+          | LabelNode Word Path 
+          | LabelRefNode Word Path 
           | HoleWordNode Word Path 
           | GraphNode Graph Path 
           | HoleGraphNode Graph Path 
@@ -322,6 +328,8 @@ instance Show Node where
   show (HoleParagraphNode _ _)  = "HoleParagraphNode"
   show (WordNode _ _)  = "WordNode"
   show (NodeRefNode _ _)  = "NodeRefNode"
+  show (LabelNode _ _)  = "LabelNode"
+  show (LabelRefNode _ _)  = "LabelRefNode"
   show (HoleWordNode _ _)  = "HoleWordNode"
   show (GraphNode _ _)  = "GraphNode"
   show (HoleGraphNode _ _)  = "HoleGraphNode"
