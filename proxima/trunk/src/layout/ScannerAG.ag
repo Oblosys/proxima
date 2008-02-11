@@ -72,7 +72,7 @@ SEM Layout
   | OverlayP
       lhs.scanChars = head @presentationList.scanCharss
   | FormatterP -- maybe add a '\n'?
-      lhs.scanChars = concat $ intersperse [Char NoIDP ' '] @presentationList.scanCharss
+      lhs.scanChars = concat @presentationList.scanCharss
   | WithP
       lhs.scanChars = @child.scanChars
   | ParsingP
