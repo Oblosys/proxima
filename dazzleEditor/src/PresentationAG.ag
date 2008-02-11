@@ -142,9 +142,9 @@ SEM Subsubsection [ || ]
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
   | List_Paragraph
       lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing' LexFreeText $
-                     col $ if null (fromList_Paragraph @self) then [formatter [text "  "]] else @elts.press
-                     -- formatter [text "  "] prevents the column from getting height 0 when empty
-                     -- not clear why "", or " " don't work
+                     col $ if null (fromList_Paragraph @self) then [formatter [text ""]] else @elts.press
+                     -- if paragraph list is empty, we add a dummy text "" to prevent the presentation from getting height 0
+                     -- this dummy is parsed as an empty paragraph
   | HoleList_Paragraph
       lhs.pres = presHole @lhs.focusD "List_Paragraph" (HoleList_ParagraphNode @self []) []
   | ParseErrList_Paragraph
@@ -154,9 +154,10 @@ SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
 SEM Paragraph
   | Paragraph
       lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                     (col $ [ formatter @words.press ])
+                     ( formatter ( if null @words.press then [text ""] else @words.press ))
                        `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
-
+       -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
+       
   | SubgraphPara
       lhs.pres = loc (SubgraphParaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ @subgraph.pres, empty `withHStretch` True ]
@@ -348,7 +349,7 @@ newSubgraphPara = Clip_Paragraph $
 
 newParagraph = Clip_Paragraph $
                  Paragraph NoIDD $
-                   List_Word NoIDD (Cons_Word (Word NoIDD " ") Nil_Word)
+                   List_Word NoIDD Nil_Word
 
 newSection = Clip_Section $
                Section NoIDD

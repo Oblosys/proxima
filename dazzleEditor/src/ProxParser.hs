@@ -143,10 +143,11 @@ getVertexTkY (VertexTk _ (x,y) _ _) = y
 getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ 0
 
 -- this must be a pList1Sep, otherwise we get an error. In this case there is always at least one, but
--- it should be possible to have an empty list two. Unclear why the parser disallows this.
+-- it should be possible to have an empty list too. Unclear why the parser disallows this.
 parseParagraphs = toList_Paragraph 
       <$> pList1Sep (pKey "\n") parseParagraph
 
+  
 parseParagraph =
           (\ws -> reuseParagraph [] Nothing (Just (toList_Word ws)))
       <$  pList (pKey " ") 
@@ -208,7 +209,7 @@ labelRefTk = UserTk LabelRefTk "labelRef" Nothing (IDP (-1))
 -- Basic parsers
 
 pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKey str = pSym  (keyTk str)
+pKey str = pSym (keyTk str)
 
 pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
 pKeyC c str = pCSym c (keyTk str)
