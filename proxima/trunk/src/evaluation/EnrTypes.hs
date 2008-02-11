@@ -21,7 +21,7 @@ data EnrichedDocLevel enr = EnrichedDocLevel enr FocusDoc deriving Show
 
 data EditEnrichedDoc' enr =
     SetEnr' (EnrichedDocLevel enr)
-  | SkipEnr' Int
+  | SkipEnr' Int deriving Show
 
 data EditEnrichedDoc documentLevel enr =
      InitEnr
