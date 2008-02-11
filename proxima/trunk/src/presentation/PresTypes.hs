@@ -65,7 +65,7 @@ data Token doc node clip token =
 -- the IDP field is used during the scanning and parsing phase
 
 instance Show token => Show (Token doc node clip token) where
-  show (UserTk u s _ id)         = "<\"" ++show u ++"\":"++ show id ++ ">"
+  show (UserTk u s _ id)         = "<\""++show u++"\":"++show s++":"++show id++">"
   show (StructuralTk _ _ tks id) = "<structural:"++show id++">" 
   show (ParsingTk _ tks _)       = "<parsing>" 
   show (GraphTk _ edges _ _)     = "<graph:"++show edges++">"
