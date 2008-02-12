@@ -173,7 +173,7 @@ SEM Word [ || ]
   | NodeRef
       lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ text "\\node{" `withColor` blue
-                         , if @nodeName `notElem` @lhs.nodeNames
+                         , if @nodeName `notElem` @lhs.vertexNames
                            then squiggly red $ text @nodeName 
                            else text @nodeName 
                          , text "}" `withColor` blue
@@ -229,9 +229,9 @@ SEM Vertex [ || ]
                                                    ])
                                                 `withbgColor` (236, 236, 169)
                                     , glue]
-                           ]) `addPopupItems` [ ("Circle", setShape @lhs.path (Circle NoIDD) @self)
-                                              , ("Square", setShape @lhs.path (Square NoIDD) @self)
-                                              ]
+                           ]) `addPopupItems` ([ ("Circle", setShape @lhs.path (Circle NoIDD) @self)
+                                               , ("Square", setShape @lhs.path (Square NoIDD) @self)
+                                               ])
 
 {
 setShape :: [Int] -> Shape -> Vertex -> UpdateDoc Document clip
@@ -271,69 +271,35 @@ SEM Root
   | Root
       (sections.vertexIDs, sections.vertexNames) = unzip @graph.vertexIDNames
       sections.edges = @graph.edges
-      
-SEM Graph [ || vertexIDNames : {[(Int, String)]} edges : {[(Int, Int)]} ]
-  | HoleGraph
-      lhs.vertexIDNames = []
-      lhs.edges = []
-  | ParseErrGraph
-      lhs.vertexIDNames = []
-      lhs.edges = []
-      
+            
 -- attributes come from vertices and edges by copy rule
 
 ATTR List_Section ConsList_Section Section 
      List_Subsection ConsList_Subsection Subsection
      List_Subsubsection ConsList_Subsubsection Subsubsection
      List_Paragraph ConsList_Paragraph Paragraph
+     List_Word ConsList_Word Word
      [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
 
 
 ATTR Subgraph [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ]
 
-SEM Edge [ || edge : {Maybe (Int,Int)} ]    
+ATTR Graph
+     List_Edge ConsList_Edge Edge
+     [ | | edges USE {++} {[]} : {[(Int,Int)]} ]
+
+SEM Edge
   | Edge
-      lhs.edge = Just (@from, @to)
-  | HoleEdge
-      lhs.edge = Nothing
-  | ParseErrEdge
-      lhs.edge = Nothing
+      lhs.edges = [(@from, @to)]
 
-SEM List_Edge [ || edges : {[(Int,Int)]} ] 
-  | List_Edge
-      lhs.edges = catMaybes @elts.edges
-  | HoleList_Edge
-      lhs.edges = []
-  | ParseErrList_Edge
-      lhs.edges = []
-      
-SEM ConsList_Edge [ || edges : {[Maybe (Int,Int)]} ] 
-  | Cons_Edge
-      lhs.edges = @head.edge : @tail.edges
-  | Nil_Edge
-      lhs.edges = []
 
-SEM Vertex [ || vertexIDName : {Maybe (Int,String)} ]    
+ATTR Graph
+     List_Vertex ConsList_Vertex Vertex
+     [ | | vertexIDNames USE {++} {[]} : {[(Int,String)]} ]
+
+SEM Vertex
   | Vertex
-      lhs.vertexIDName = Just (@id, @name)
-  | HoleVertex
-      lhs.vertexIDName = Nothing
-  | ParseErrVertex
-      lhs.vertexIDName = Nothing
-
-SEM List_Vertex [ || vertexIDNames : {[(Int,String)]} ] 
-  | List_Vertex
-      lhs.vertexIDNames = catMaybes @elts.vertexIDNames
-  | HoleList_Vertex
-      lhs.vertexIDNames = []
-  | ParseErrList_Vertex
-      lhs.vertexIDNames = []
-      
-SEM ConsList_Vertex [ || vertexIDNames : {[Maybe (Int, String)]} ] 
-  | Cons_Vertex
-      lhs.vertexIDNames = @head.vertexIDName : @tail.vertexIDNames
-  | Nil_Vertex
-      lhs.vertexIDNames = []
+      lhs.vertexIDNames = [(@id, @name)]
 
 {
 deleteAtPath :: PathD -> UpdateDoc Document ClipDoc
@@ -403,7 +369,11 @@ pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
         case subgraph of
-        Subgraph idd d vs es -> Subgraph idd d (toList_Vertex $ Vertex NoIDD  name (Circle NoIDD) id 20 20 : fromList_Vertex vs) es
+        Subgraph idd d vs es -> 
+          Subgraph idd d (toList_Vertex $ 
+                            Vertex NoIDD  name 
+                              (Circle NoIDD) id 20 20
+                            : fromList_Vertex vs) es
         _                    -> subgraph
   in \(DocumentLevel d path cl) ->
         let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
@@ -413,46 +383,6 @@ pasteInSubgraph pth id name subgraph =
 
 
 }
-
-
--- node names in scope, synthesized from Graph to Root, and copied down to paragraphs
-
-SEM Vertex [ | | nodeName : {Maybe String} ]
-  | Vertex        
-      lhs.nodeName = Just @name
-  | HoleVertex ParseErrVertex
-      lhs.nodeName = Nothing
-      
-SEM ConsList_Vertex [ || nodeNames : {[Maybe String]} ] 
-  | Cons_Vertex
-      lhs.nodeNames = @head.nodeName : @tail.nodeNames
-  | Nil_Vertex
-      lhs.nodeNames = []
-
-SEM List_Vertex [ || nodeNames : {[String]} ] 
-  | List_Vertex
-      lhs.nodeNames = catMaybes @elts.nodeNames
-  | HoleList_Vertex
-      lhs.nodeNames = []
-  | ParseErrList_Vertex
-      lhs.nodeNames = []
-
-SEM Graph [ | | nodeNames : {[String]} ]
-  | Graph lhs.nodeNames = @vertices.nodeNames
-  | HoleGraph ParseErrGraph
-      lhs.nodeNames = []
-
-SEM Root
-  | Root 
-      sections.nodeNames = @graph.nodeNames
-
-ATTR List_Section ConsList_Section Section 
-     List_Subsection ConsList_Subsection Subsection
-     List_Subsubsection ConsList_Subsubsection Subsubsection
-     List_Paragraph ConsList_Paragraph Paragraph
-     List_Word ConsList_Word Word
-     [ nodeNames : {[String]} | | ]
-
 
 -- labels and refs
 
