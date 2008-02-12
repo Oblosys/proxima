@@ -9,25 +9,23 @@ import List
 --       P A R S E R                                               --
 ---------------------------------------------------------------------
 
-parseDataTypesFile fname = parseFile show pDataDefs fname
+parseDataTypesFile fname = parseFile (error . show) pDataDefs fname
 
 pDataDefs :: CharParser  File --(String,DataDefs)
 pDataDefs = (File "")  <$> (pSpaces *> pList_ng (pDecl))   -- pToken "module" <*> pConid <* pToken "where"                  
 
-pDecl = Decl <$ pToken "data"
+pDecl = (\t ps -> Decl t ps DeclDef) <$ pToken "data"
               <*> pConid
               <*  pSpec '='
-              <*> pList1Sep (pSpec '|') pProd
-              <*  (pDeriving <|> pSucceed ())
-              <*> pSucceed (DeclDef)
+              <*> pList1Sep_ng (pSpec '|') pProd
 
 
-pProd  = Prod <$> pConid <*> (pField <|> (const [] <$> pSpaces))
+pProd  = Prod <$> pConid <*> pField
 
 pField :: CharParser [Field]
-pField =  flip (++) <$> pList (makeField <$> opt (Just <$> pVarid <* (pToken ":")) Nothing
-                                                                 <*> (((\a->(a,(dataType a)))<$>pConid) <|> ((\a->(a++"s",List))<$>pDataList'))) 
-                     <*> pComments
+pField =  flip (++) <$> pList_ng (makeField <$> opt (Just <$> pVarid <* (pToken ":")) Nothing
+                                         <*> (((\a->(a,(dataType a)))<$>pConid) <|> ((\a->(a++"s",List))<$>pDataList'))) 
+                     <*> (pComments <|> pSucceed [])
 
 dataType a = if (elem a ["Bool","String","Int"]) then Prim else Data
 
@@ -54,7 +52,7 @@ pDataList' = (\a ->a++"s") <$> (pToken "[") *> pConid <* (pToken "]")
  
 
 
-pDeriving = () <$ pToken "deriving" <* (() <$ pConid <|> () <$ pParens (pList1Sep (pSpec ',') pConid))
+--pDeriving = () <$ pToken "deriving" <* (() <$ pConid <|> () <$ pParens (pList1Sep (pSpec ',') pConid))
 
 
 

@@ -196,17 +196,17 @@ hole e = ["  hole = Hole" ++ e ++"\n"]
 
 {- insertList -}
 genInsertList e = [ "  isList _ = True\n"
-               , "  insertList 0 (Clip_"++(init e)++" x )  xs = Clip_"++e++" $ Cons"++e++" NoIDD x xs"
+               , "  insertList 0 (Clip_"++(init e)++" x )  xs = Clip_"++e++" $ Cons"++e++" x xs"
                , "  insertList 0 _                     xs = trace \"Type error, no paste\" $ Clip_"++e++" $ xs"
-               , "  insertList n c (Cons"++e++" i1 x xs) = let (Clip_"++e++" xs') = insertList (n-1) c xs"
-               , "                                           in   Clip_"++e++" $ Cons"++e++" i1 x xs'"
+               , "  insertList n c (Cons"++e++" x xs) = let (Clip_"++e++" xs') = insertList (n-1) c xs"
+               , "                                           in   Clip_"++e++" $ Cons"++e++" x xs'"
                , "  insertList _ c xs                   = Clip_"++e++" xs\n"
                ]
 
 {- removeList -}
-genRemoveList e = [ "  removeList 0 (Cons"++e++" i1 x xs) = Clip_"++e++" $ xs"
-               , "  removeList n (Cons"++e++" i1 x xs) = let (Clip_"++e++" xs') = removeList (n-1) xs"
-               , "                                        in   Clip_"++e++" $ Cons"++e++" i1 x xs'"
+genRemoveList e = [ "  removeList 0 (Cons"++e++" x xs) = Clip_"++e++" $ xs"
+               , "  removeList n (Cons"++e++" x xs) = let (Clip_"++e++" xs') = removeList (n-1) xs"
+               , "                                        in   Clip_"++e++" $ Cons"++e++" x xs'"
                , "  removeList _ xs                        = Clip_"++e++" xs\n"
                ]
 
@@ -243,9 +243,9 @@ instanceList (Decl e prods _) =
   [
 --- some of this code still needs to be moved
 --- these three belong in docUtils
-    "toList_"++listTp++" vs = List_"++listTp++" NoIDD (toConsList_"++listTp++" vs)"
+    "toList_"++listTp++" vs = List_"++listTp++" (toConsList_"++listTp++" vs)"
   , ""
-  , "fromList_"++listTp++" (List_"++listTp++" _ vs) = fromConsList_"++listTp++" vs"
+  , "fromList_"++listTp++" (List_"++listTp++" vs) = fromConsList_"++listTp++" vs"
   , "fromList_"++listTp++" _                  = []"
   , ""
   , "toConsList_"++listTp++" [] = Nil_"++listTp++""
@@ -270,7 +270,7 @@ instanceList (Decl e prods _) =
 -- here's the actual instance declaration
   , "instance Editable List_"++listTp++" Document Node ClipDoc UserToken where"
   , "  select []    x                  = Clip_List_"++listTp++" x"
-  , "  select (n:p) (List_"++listTp++" _ cxs) = let xs = fromConsList_"++listTp++" cxs"
+  , "  select (n:p) (List_"++listTp++" cxs) = let xs = fromConsList_"++listTp++" cxs"
   , "                                  in  if n < length xs "
   , "                                      then select p (xs !! n)"
   , "                                      else Clip_Nothing"
@@ -278,31 +278,31 @@ instanceList (Decl e prods _) =
   , ""
   , "  paste [] (Clip_List_"++listTp++" c) _   = c"
   , "  paste [] c  x                  = trace (\"Type error: pasting \"++show c++\" on List_"++listTp++"\")   x"
-  , "  paste (n:p) c (List_"++listTp++" i1 cxs) = let xs = fromConsList_"++listTp++" cxs"
+  , "  paste (n:p) c (List_"++listTp++" cxs) = let xs = fromConsList_"++listTp++" cxs"
   , "                                    in  if n < length xs"
   , "                                        then let x  = xs!!n"
   , "                                                 x' = paste p c x"
-  , "                                             in  List_"++listTp++" i1 (replaceList_"++listTp++" n x' cxs)"
-  , "                                        else List_"++listTp++" i1 cxs -- paste beyond end of list"
+  , "                                             in  List_"++listTp++" (replaceList_"++listTp++" n x' cxs)"
+  , "                                        else List_"++listTp++" cxs -- paste beyond end of list"
   , "  paste _  _  x                  = x"
   , ""
   , "  alternatives _ = [(\"{List_"++listTp++"}\", Clip_List_"++listTp++" hole)"
   , "                   ]"
   , ""
-  , "  arity (List_"++listTp++" _ x1) = length (fromConsList_"++listTp++" x1)"
-  , "  arity _                        = 0"
+  , "  arity (List_"++listTp++" x1) = length (fromConsList_"++listTp++" x1)"
+  , "  arity _                      = 0"
   , ""
   , "  parseErr = ParseErrList_"++listTp
   , ""
-  , "  hole = List_"++listTp++" NoIDD Nil_"++listTp++""
+  , "  hole = List_"++listTp++" Nil_"++listTp++""
   , ""
   , "  isList _ = True"
   , ""
-  , "  insertList n (Clip_"++listTp++" c) (List_"++listTp++" idd cxs) = Clip_List_"++listTp++" $ List_"++listTp++" idd (insertList_"++listTp++" n c cxs)"
+  , "  insertList n (Clip_"++listTp++" c) (List_"++listTp++" cxs) = Clip_List_"++listTp++" $ List_"++listTp++" (insertList_"++listTp++" n c cxs)"
   , "  insertList _ _             xs = trace \"Type error, no paste\" $ Clip_List_"++listTp++" xs"
   , "  insertList _ c xs                 = Clip_List_"++listTp++" xs"
   , ""
-  , "  removeList n (List_"++listTp++" idd cxs) = Clip_List_"++listTp++" $ List_"++listTp++" idd (removeList_"++listTp++" n cxs)"
+  , "  removeList n (List_"++listTp++" cxs) = Clip_List_"++listTp++" $ List_"++listTp++" (removeList_"++listTp++" n cxs)"
   , "  removeList _ xs                        = Clip_List_"++listTp++" $ xs"
   , ""
   ]

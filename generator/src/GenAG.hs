@@ -78,7 +78,7 @@ genSem' d@(Decl e l _)   = [("\n\nSEM "++e)] ++ indent 2 (concatMap doIdC  l) ++
 doIdC  (Prod e ls) = let l =  takeFieldsNamesNoPrim ls
                   in  if null l then []
                       else lines ("| "++e++" "++(head l)++".pIdC = @lhs.pIdC" ++ " + " 
-                           ++ (show ((length (filter (isID) ls))-1))) --- !!! fails if there is no IDD
+                           ++ (show ((length (filter (isID) ls))))) --- !!! fails if there is no IDD
                            ++ indent (3+(length e)) (linkAttrIdC l)
 
 -- linkAttrIdC ["a","b","c"] = ["c.idC = @b.idC","b.idC = @a.idC","lhs.idC = @c.idC"]   

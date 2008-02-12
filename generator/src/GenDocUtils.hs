@@ -22,9 +22,9 @@ genDocUtils include parsedFile@(File m d) =
                  ++ ["\n\n"]
                  ++ genPathNode    allConstructors
                  ++ ["\n\n"]
-                 ++ genFuncIDD     parsedFile
+{-                 ++ genFuncIDD     parsedFile
                  ++ ["\n\n"]
-                 ++ genShallowShow extendedTypes 
+-}                 ++ genShallowShow extendedTypes 
                  ++ ["\n\n"]
                  ++ genToXML       extendedTypes
                  ++ ["\n\n"]
@@ -57,6 +57,7 @@ genPathNode constrs = [ "instance HasPath Node where"
 
 --- this one doesn't work for holes, but it will be obsolete soon anyway
 {- Function IDD -} 
+{-
 genFuncIDD :: File -> [String]
 genFuncIDD (File _ decls) = concatMap printDeclIDD decls
 
@@ -69,7 +70,7 @@ printProdIDD d (Prod s fields)
                         , name++"IDD ("++s++"Node ("++s++ " iDD"++concat(replicate ((length fields)-1) " _")++") _) = Just iDD"
                         , name++"IDD _                                   = Nothing\n"]
 
-
+-}
 
 
 
@@ -94,7 +95,7 @@ printDeclXML (Decl d _     DeclList)     =  []
 printDeclXML (Decl d prods DeclDef)      =  map (printProdXML d) prods ++ printHoleParseErrXML d
 printDeclXML (Decl d prods DeclConsList) =  
           let   decl =  drop 9 d  -- d == "ConsList_"++decl
-          in    [ "toXMLList_"++decl++" (List_"++decl++" _ "++(decapitalize decl)++"s) = toXMLConsList_"++decl++" "++(decapitalize decl)++"s"
+          in    [ "toXMLList_"++decl++" (List_"++decl++" "++(decapitalize decl)++"s) = toXMLConsList_"++decl++" "++(decapitalize decl)++"s"
                 , "toXMLList_"++decl++" HoleList_"++ decl ++ " = []" 
                 , "toXMLList_"++decl++" (ParseErrList_"++ decl ++ " _) = []" 
                 , "toXMLConsList_"++decl++" (Cons_"++decl++" "++(decapitalize decl)++" "++(decapitalize decl)++"s) = toXML"++decl++" "++(decapitalize decl)++" : toXMLConsList_"++ decl++" "++(decapitalize decl)++"s"

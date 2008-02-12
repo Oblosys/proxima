@@ -64,7 +64,7 @@ genExtract (tp,cnstr,cs,_) =
 
 genDefault (tp,cnstr,cs,DeclList) =
   "default"++cnstr++" :: "++tp++"\n"++
-  "default"++cnstr++" = "++cnstr ++ " NoIDD Nil_" ++ drop 5 tp ++"\n"
+  "default"++cnstr++" = "++cnstr ++ " Nil_" ++ drop 5 tp ++"\n"
 genDefault (tp,cnstr,cs,_) =
   "default"++cnstr++" :: "++tp++"\n"++
   "default"++cnstr++" = "++cnstr ++ (concat $ map def cs) ++"\n"

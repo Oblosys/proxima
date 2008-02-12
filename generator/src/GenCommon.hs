@@ -106,9 +106,8 @@ genListTypes parsedFile = concatMap genListType (getLists parsedFile) --- Extra 
 --- type name is no longer the type ++ "s", so the parser should be updated as well
 --- local defs for the different names (rather than init, decap. etc.) will make the function more readable
 genListType e = [ Decl ("List_" ++ init e) 
-                    [ Prod ("List_"++ init e) [ Field "idd" "IDD" Id
-                                              , Field ("elts") ("ConsList_"++init e) Id]
-                    ] DeclList
+                    [ Prod ("List_"++ init e) [ Field ("elts") ("ConsList_"++init e) Id]
+                    ] DeclList                                      -- Id seems wrong here
                 , Decl ("ConsList_" ++ init e) 
                     [prodCons
                     ,prodNil] DeclConsList
