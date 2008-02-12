@@ -29,7 +29,7 @@ throw: *** Exception: Prelude.(!!): index too large
 -- copy should not do anything when nofocus. 
 copyTree :: FocusPres -> Layout doc node clip -> Layout doc node clip -> Layout doc node clip
 copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
---copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
+copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
 pasteTree NoPathP clip pres    = (pres, NoFocusP)
 pasteTree path clip pres       = (pasteTreePres True [] path clip pres, pasteTreePresF path clip pres)
@@ -439,7 +439,7 @@ pasteTreePres editable p path clip (LocatorP l pres) = LocatorP  l (pasteTreePre
 pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p path clip (VertexP id vid x y ol pres) = VertexP id vid x y ol (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p path clip (FormatterP id press) = FormatterP id (pasteTreePresList editable p 0 path clip press)
-pasteTreePres editable p _ clip pr = text $ "TreeEditPres.pasteTreePres: can't handle "++ show pr
+pasteTreePres editable p _ clip pr = debug Err ("TreeEditPres.pasteTreePres: can't handle "++ show pr) $ text "<ERROR>"
 
 
 pasteTreePresList editable p i _ _ [] = []
@@ -476,12 +476,14 @@ copyTreePres p (FocusP st en) (RowP id rf press) = let press' = copyTreePresList
                                                      in  RowP id (if rf < length press' then rf else length press' -1) press'
 copyTreePres p (FocusP st en) (ColP id rf f press) = let press' = copyTreePresList p 0 (FocusP st en) press
                                                      in  ColP id (if rf < length press' then rf else length press' -1) f press'
+copyTreePres p (FocusP st en) (FormatterP id press) = let press' = copyTreePresList p 0 (FocusP st en) press
+                                                      in RowP id 0 press'
 copyTreePres p focus (OverlayP id (pres:press)) = OverlayP id (copyTreePres (p++[0]) focus pres : press) 
 copyTreePres p focus          (WithP ar pres) = {- WithP ar -} (copyTreePres (p++[0]) focus pres) 
 copyTreePres p focus          (StructuralP id pres) = (copyTreePres (p++[0]) focus pres)
 copyTreePres p focus          (ParsingP id l pres) = (copyTreePres (p++[0]) focus pres)
 copyTreePres p focus          (LocatorP l pres) = LocatorP l (copyTreePres (p++[0]) focus pres)
-copyTreePres p f pr = text $ "TreeEditPres.copyTreePres: can't handle "++show f++" "++ show pr
+copyTreePres p f pr = debug Err("TreeEditPres.copyTreePres: can't handle "++show f++" "++ show pr) $ text "<ERROR>"
 
 copyTreePresList :: Path -> Int -> FocusPres -> [Layout doc node clip] -> [Layout doc node clip] 
 copyTreePresList p i _ [] = []
@@ -559,7 +561,7 @@ splitRowTreePres editable p path            (FormatterP id press) =
                             in  Left (FormatterP id ps1, FormatterP NoIDP ps2)
                        else Right $ FormatterP id press
     Right ps        -> Right $ FormatterP id ps
-splitRowTreePres editable p _ pr = Right $ text $ "TreeEditPres.splitRowTreePres: can't handle "++ show pr
+splitRowTreePres editable p _ pr = Right $ debug Err ("TreeEditPres.splitRowTreePres: can't handle "++ show pr) $ text "<ERROR>"
 
 splitRowTreePresList editable p i _ [] = Right []  -- This will not occur.
 splitRowTreePresList editable p i path@(PathP stp sti) (pres:press) = 

@@ -59,7 +59,7 @@ tokenizeLay :: (Show token) =>
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap) = scanStructural sheet LexHaskell Nothing idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk Nothing (castLayToPres lay) tokens NoIDP)) (whitespaceMap,idPCounter')
- in  debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
+ in  -- debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
      (SetPres presLvl', state, layLvl)
 
 {-
