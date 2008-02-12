@@ -15,7 +15,7 @@ data Subsubsection = Subsubsection title:String paragraphs:[Paragraph] { idd : I
 
 data Paragraph = Paragraph words:[Word]                  { idd : IDD }
                | SubgraphPara subgraph:Subgraph          { idd : IDD }
-
+               
 data Word = Word word:String                                { idd : IDD }
           | NodeRef nodeName:String                         { idd : IDD } 
           | Label label:String                              { idd : IDD } 
@@ -23,13 +23,13 @@ data Word = Word word:String                                { idd : IDD }
           
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
 
-data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int     { idd : IDD }
+data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int { idd : IDD }
 
 data Shape = Circle { idd : IDD } | Square { idd : IDD }
 
 data Edge = Edge from:Int to:Int       { idd : IDD }
 
 data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
-
+            
 data Dirty = Dirty { idd : IDD }
            | Clean { idd : IDD }

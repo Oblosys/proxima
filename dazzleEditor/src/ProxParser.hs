@@ -38,7 +38,7 @@ recognizeRootEnr = pStr $
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
-          reuseRoot [str] Nothing (Just graph) (Just title) (Just (toList_Section sections)) )
+          reuseRoot [str] Nothing (Just graph) (Just title) (Just (toList_Section sections)))
       <$> pStructural RootNode
       <*> recognizeGraph
       <*> pPrs pLine 
