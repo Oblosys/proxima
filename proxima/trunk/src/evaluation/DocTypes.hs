@@ -7,9 +7,6 @@ import List
 import Char
 import Text.ParserCombinators.Parsec
 
-
-data IDD = NoIDD | IDD Int deriving (Show, Read, Eq, Ord) -- don't want another module for this one
-
 data PathDoc = PathD [Int]
              | NoPathD deriving (Show, Eq, Ord)
 

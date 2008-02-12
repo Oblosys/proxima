@@ -47,7 +47,7 @@ showXML xml =
 -- Parsing
 
 
-mkList listCns consCns nilCns lst = listCns NoIDD $ foldr consCns nilCns lst
+mkList listCns consCns nilCns lst = listCns $ foldr consCns nilCns lst
 
 {- for the moment, a parseErr in the XML is parsed as a Hole, otherwise, the XML file needs to have
    an XML representation of the presentation argument of the parse error node.
