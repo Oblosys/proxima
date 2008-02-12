@@ -19,6 +19,7 @@ data-files:
 extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
                     src/proxima/src/layout/AlexTemplate-ghc
                     src/proxima/src/layout/ScannerAG.ag src/PresentationAG.ag
+                    src/PresentationAG_Generated.ag
 extra-tmp-files:
  
 executable: DazzleEditor
