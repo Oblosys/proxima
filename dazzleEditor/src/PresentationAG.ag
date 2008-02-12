@@ -211,12 +211,12 @@ SEM Vertex [ || ]
   | Vertex
       lhs.pres = let (nodePres,nodeOutline) =
                        case @shape.self of
-                         (Circle _) -> ( ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
-                                       , \a -> (round $ 9*cos a , round $ -9*sin a )
-                                       )
-                         _          -> ( rect 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
-                                       , squareOutline 9
-                                       )
+                         Circle -> ( ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
+                                   , \a -> (round $ 9*cos a , round $ -9*sin a )
+                                   )
+                         _      -> ( rect 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
+                                   , squareOutline 9
+                                   )
                       
                  in  loc (VertexNode @self @lhs.path) $ structural $
                      (vertex @id @x @y nodeOutline $
@@ -229,16 +229,16 @@ SEM Vertex [ || ]
                                                    ])
                                                 `withbgColor` (236, 236, 169)
                                     , glue]
-                           ]) `addPopupItems` ([ ("Circle", setShape @lhs.path (Circle NoIDD) @self)
-                                               , ("Square", setShape @lhs.path (Square NoIDD) @self)
+                           ]) `addPopupItems` ([ ("Circle", setShape @lhs.path Circle @self)
+                                               , ("Square", setShape @lhs.path Square @self)
                                                ])
 
 {
 setShape :: [Int] -> Shape -> Vertex -> UpdateDoc Document clip
-setShape pth shape (Vertex idD name _ id x y) =
+setShape pth shape (Vertex name _ id x y) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Vertex (Vertex idD name shape id x y))
+                                              (Clip_Vertex (Vertex name shape id x y))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -308,31 +308,31 @@ deleteAtPath pth =
      editCutD (DocumentLevel d (PathD pth) cl)
 
 newSubgraphPara = Clip_Paragraph $
-                    SubgraphPara NoIDD $
-                      Subgraph NoIDD (Dirty NoIDD)
+                    SubgraphPara $
+                      Subgraph Dirty
                         (toList_Vertex [])
                         (toList_Edge []) 
 
 newParagraph = Clip_Paragraph $
-                 Paragraph NoIDD $
-                   List_Word NoIDD Nil_Word
+                 Paragraph $
+                   List_Word Nil_Word
 
 newSection = Clip_Section $
-               Section NoIDD
+               Section
                  "<new section>"
-                 (List_Paragraph NoIDD Nil_Paragraph) 
-                 (List_Subsection NoIDD Nil_Subsection)
+                 (List_Paragraph Nil_Paragraph) 
+                 (List_Subsection Nil_Subsection)
 
 newSubsection = Clip_Subsection $
-                    Subsection NoIDD
+                    Subsection
                       "<new subsection>"
-                      (List_Paragraph NoIDD Nil_Paragraph) 
-                      (List_Subsubsection NoIDD Nil_Subsubsection) 
+                      (List_Paragraph Nil_Paragraph) 
+                      (List_Subsubsection Nil_Subsubsection) 
 
 newSubsubsection = Clip_Subsubsection $
-                    Subsubsection NoIDD
+                    Subsubsection
                       "<new subsubsection>"
-                      (List_Paragraph NoIDD Nil_Paragraph) 
+                      (List_Paragraph Nil_Paragraph) 
 
 addSubgraphPara path = addElementAfter path newSubgraphPara
 
@@ -369,10 +369,10 @@ pasteInSubgraph :: [Int] -> Int -> String -> Subgraph -> UpdateDoc Document clip
 pasteInSubgraph pth id name subgraph =
   let subgraph' = 
         case subgraph of
-        Subgraph idd d vs es -> 
-          Subgraph idd d (toList_Vertex $ 
-                            Vertex NoIDD  name 
-                              (Circle NoIDD) id 20 20
+        Subgraph d vs es -> 
+          Subgraph d (toList_Vertex $ 
+                            Vertex  name 
+                              Circle id 20 20
                             : fromList_Vertex vs) es
         _                    -> subgraph
   in \(DocumentLevel d path cl) ->

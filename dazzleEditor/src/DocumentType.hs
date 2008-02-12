@@ -1,35 +1,35 @@
-data EnrichedDoc = RootEnr root:Root Document { id:IDD } 
+data EnrichedDoc = RootEnr root:Root Document
 -- document ref is for popups only
 
-data Dummy = Dummy [Dummy] String Bool Int  { idd : IDD } -- necessary because of design error in generator
+data Dummy = Dummy [Dummy] String Bool Int -- necessary because of design error in generator
 
 -- Don't remove the declarations above
 
-data Root = Root graph:Graph title:String sections:[Section] { idd : IDD }
+data Root = Root graph:Graph title:String sections:[Section]
 
-data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection] { idd : IDD }
+data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection]
 
-data Subsection = Subsection title:String paragraphs:[Paragraph] subsubsections:[Subsubsection] { idd : IDD }
+data Subsection = Subsection title:String paragraphs:[Paragraph] subsubsections:[Subsubsection]
 
-data Subsubsection = Subsubsection title:String paragraphs:[Paragraph] { idd : IDD }
+data Subsubsection = Subsubsection title:String paragraphs:[Paragraph]
 
-data Paragraph = Paragraph words:[Word]                  { idd : IDD }
-               | SubgraphPara subgraph:Subgraph          { idd : IDD }
+data Paragraph = Paragraph words:[Word]
+               | SubgraphPara subgraph:Subgraph
                
-data Word = Word word:String                                { idd : IDD }
-          | NodeRef nodeName:String                         { idd : IDD } 
-          | Label label:String                              { idd : IDD } 
-          | LabelRef label:String                           { idd : IDD } 
+data Word = Word word:String
+          | NodeRef nodeName:String
+          | Label label:String
+          | LabelRef label:String
           
-data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
+data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge]
 
-data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int { idd : IDD }
+data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int
 
-data Shape = Circle { idd : IDD } | Square { idd : IDD }
+data Shape = Circle | Square
 
-data Edge = Edge from:Int to:Int       { idd : IDD }
+data Edge = Edge from:Int to:Int
 
-data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge] { idd : IDD }
+data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge]
             
-data Dirty = Dirty { idd : IDD }
-           | Clean { idd : IDD }
+data Dirty = Dirty
+           | Clean

@@ -57,83 +57,83 @@ SEM EnrichedDoc
 ------------------------------------- -}
 
 
-DATA EnrichedDoc | RootEnr id:IDD root:Root document:Document 
+DATA EnrichedDoc | RootEnr root:Root document:Document 
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Dummy | Dummy idd:IDD dummys:List_Dummy string:String bool:Bool int:Int 
+DATA Dummy | Dummy dummys:List_Dummy string:String bool:Bool int:Int 
            | HoleDummy
            | ParseErrDummy presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Root | Root idd:IDD graph:Graph title:String sections:List_Section 
+DATA Root | Root graph:Graph title:String sections:List_Section 
           | HoleRoot
           | ParseErrRoot presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Section | Section idd:IDD title:String paragraphs:List_Paragraph subsections:List_Subsection 
+DATA Section | Section title:String paragraphs:List_Paragraph subsections:List_Subsection 
              | HoleSection
              | ParseErrSection presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Subsection | Subsection idd:IDD title:String paragraphs:List_Paragraph subsubsections:List_Subsubsection 
+DATA Subsection | Subsection title:String paragraphs:List_Paragraph subsubsections:List_Subsubsection 
                 | HoleSubsection
                 | ParseErrSubsection presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Subsubsection | Subsubsection idd:IDD title:String paragraphs:List_Paragraph 
+DATA Subsubsection | Subsubsection title:String paragraphs:List_Paragraph 
                    | HoleSubsubsection
                    | ParseErrSubsubsection presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Paragraph | Paragraph idd:IDD words:List_Word 
-               | SubgraphPara idd:IDD subgraph:Subgraph 
+DATA Paragraph | Paragraph words:List_Word 
+               | SubgraphPara subgraph:Subgraph 
                | HoleParagraph
                | ParseErrParagraph presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Word | Word idd:IDD word:String 
-          | NodeRef idd:IDD nodeName:String 
-          | Label idd:IDD label:String 
-          | LabelRef idd:IDD label:String 
+DATA Word | Word word:String 
+          | NodeRef nodeName:String 
+          | Label label:String 
+          | LabelRef label:String 
           | HoleWord
           | ParseErrWord presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Graph | Graph idd:IDD dirty:Dirty vertices:List_Vertex edges:List_Edge 
+DATA Graph | Graph dirty:Dirty vertices:List_Vertex edges:List_Edge 
            | HoleGraph
            | ParseErrGraph presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Vertex | Vertex idd:IDD name:String shape:Shape id:Int x:Int y:Int 
+DATA Vertex | Vertex name:String shape:Shape id:Int x:Int y:Int 
             | HoleVertex
             | ParseErrVertex presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Shape | Circle idd:IDD 
-           | Square idd:IDD 
+DATA Shape | Circle 
+           | Square 
            | HoleShape
            | ParseErrShape presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Edge | Edge idd:IDD from:Int to:Int 
+DATA Edge | Edge from:Int to:Int 
           | HoleEdge
           | ParseErrEdge presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Subgraph | Subgraph idd:IDD dirty:Dirty vertices:List_Vertex edges:List_Edge 
+DATA Subgraph | Subgraph dirty:Dirty vertices:List_Vertex edges:List_Edge 
               | HoleSubgraph
               | ParseErrSubgraph presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Dirty | Dirty idd:IDD 
-           | Clean idd:IDD 
+DATA Dirty | Dirty 
+           | Clean 
            | HoleDirty
            | ParseErrDirty presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA List_Dummy | List_Dummy idd:IDD elts:ConsList_Dummy 
+DATA List_Dummy | List_Dummy elts:ConsList_Dummy 
                 | HoleList_Dummy
                 | ParseErrList_Dummy presentation:Presentation_Doc_Node_Clip_Token
 
@@ -142,7 +142,7 @@ DATA ConsList_Dummy | Cons_Dummy head:Dummy tail:ConsList_Dummy
                     | Nil_Dummy 
 
 
-DATA List_Section | List_Section idd:IDD elts:ConsList_Section 
+DATA List_Section | List_Section elts:ConsList_Section 
                   | HoleList_Section
                   | ParseErrList_Section presentation:Presentation_Doc_Node_Clip_Token
 
@@ -151,7 +151,7 @@ DATA ConsList_Section | Cons_Section head:Section tail:ConsList_Section
                       | Nil_Section 
 
 
-DATA List_Paragraph | List_Paragraph idd:IDD elts:ConsList_Paragraph 
+DATA List_Paragraph | List_Paragraph elts:ConsList_Paragraph 
                     | HoleList_Paragraph
                     | ParseErrList_Paragraph presentation:Presentation_Doc_Node_Clip_Token
 
@@ -160,7 +160,7 @@ DATA ConsList_Paragraph | Cons_Paragraph head:Paragraph tail:ConsList_Paragraph
                         | Nil_Paragraph 
 
 
-DATA List_Subsection | List_Subsection idd:IDD elts:ConsList_Subsection 
+DATA List_Subsection | List_Subsection elts:ConsList_Subsection 
                      | HoleList_Subsection
                      | ParseErrList_Subsection presentation:Presentation_Doc_Node_Clip_Token
 
@@ -169,7 +169,7 @@ DATA ConsList_Subsection | Cons_Subsection head:Subsection tail:ConsList_Subsect
                          | Nil_Subsection 
 
 
-DATA List_Subsubsection | List_Subsubsection idd:IDD elts:ConsList_Subsubsection 
+DATA List_Subsubsection | List_Subsubsection elts:ConsList_Subsubsection 
                         | HoleList_Subsubsection
                         | ParseErrList_Subsubsection presentation:Presentation_Doc_Node_Clip_Token
 
@@ -178,7 +178,7 @@ DATA ConsList_Subsubsection | Cons_Subsubsection head:Subsubsection tail:ConsLis
                             | Nil_Subsubsection 
 
 
-DATA List_Word | List_Word idd:IDD elts:ConsList_Word 
+DATA List_Word | List_Word elts:ConsList_Word 
                | HoleList_Word
                | ParseErrList_Word presentation:Presentation_Doc_Node_Clip_Token
 
@@ -187,7 +187,7 @@ DATA ConsList_Word | Cons_Word head:Word tail:ConsList_Word
                    | Nil_Word 
 
 
-DATA List_Vertex | List_Vertex idd:IDD elts:ConsList_Vertex 
+DATA List_Vertex | List_Vertex elts:ConsList_Vertex 
                  | HoleList_Vertex
                  | ParseErrList_Vertex presentation:Presentation_Doc_Node_Clip_Token
 
@@ -196,7 +196,7 @@ DATA ConsList_Vertex | Cons_Vertex head:Vertex tail:ConsList_Vertex
                      | Nil_Vertex 
 
 
-DATA List_Edge | List_Edge idd:IDD elts:ConsList_Edge 
+DATA List_Edge | List_Edge elts:ConsList_Edge 
                | HoleList_Edge
                | ParseErrList_Edge presentation:Presentation_Doc_Node_Clip_Token
 

@@ -20,8 +20,8 @@ import Debug.Trace
 
 -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
 instance Editable Document Document Node ClipDoc UserToken where
-  select p (RootDoc id x) = select p x
-  paste p c (RootDoc id  x) = RootDoc id $ paste p c x
+  select p (RootDoc x) = select p x
+  paste p c (RootDoc x) = RootDoc $ paste p c x
   hole = HoleDocument
   parseErr = ParseErrDocument
   isList _ = False
@@ -273,25 +273,25 @@ instance Clip ClipDoc where
 
 instance Editable Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_Dummy x
-  select (0:p) (Dummy _ x1 x2 x3 x4) = select p x1
-  select (1:p) (Dummy _ x1 x2 x3 x4) = select p x2
-  select (2:p) (Dummy _ x1 x2 x3 x4) = select p x3
-  select (3:p) (Dummy _ x1 x2 x3 x4) = select p x4
+  select (0:p) (Dummy x1 x2 x3 x4) = select p x1
+  select (1:p) (Dummy x1 x2 x3 x4) = select p x2
+  select (2:p) (Dummy x1 x2 x3 x4) = select p x3
+  select (3:p) (Dummy x1 x2 x3 x4) = select p x4
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Dummy c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Dummy")   x
-  paste (0:p) c (Dummy i1 x1 x2 x3 x4) = Dummy i1 (paste p c x1) x2 x3 x4
-  paste (1:p) c (Dummy i1 x1 x2 x3 x4) = Dummy i1 x1 (paste p c x2) x3 x4
-  paste (2:p) c (Dummy i1 x1 x2 x3 x4) = Dummy i1 x1 x2 (paste p c x3) x4
-  paste (3:p) c (Dummy i1 x1 x2 x3 x4) = Dummy i1 x1 x2 x3 (paste p c x4)
+  paste (0:p) c (Dummy x1 x2 x3 x4) = Dummy (paste p c x1) x2 x3 x4
+  paste (1:p) c (Dummy x1 x2 x3 x4) = Dummy x1 (paste p c x2) x3 x4
+  paste (2:p) c (Dummy x1 x2 x3 x4) = Dummy x1 x2 (paste p c x3) x4
+  paste (3:p) c (Dummy x1 x2 x3 x4) = Dummy x1 x2 x3 (paste p c x4)
   paste _  _  x                    = x
 
-  alternatives _ = [("Dummy {Dummys} "  , Clip_Dummy $ Dummy NoIDD hole hole hole hole)
+  alternatives _ = [("Dummy {Dummys} "  , Clip_Dummy $ Dummy hole hole hole hole)
                    ,("{Dummy}", Clip_Dummy hole)
                    ]
 
-  arity (Dummy _ x1 x2 x3 x4) = 4
+  arity (Dummy x1 x2 x3 x4) = 4
   arity _                        = 0
 
   parseErr = ParseErrDummy
@@ -306,23 +306,23 @@ instance Editable Dummy Document Node ClipDoc UserToken where
 
 instance Editable Root Document Node ClipDoc UserToken where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ x1 x2 x3) = select p x1
-  select (1:p) (Root _ x1 x2 x3) = select p x2
-  select (2:p) (Root _ x1 x2 x3) = select p x3
+  select (0:p) (Root x1 x2 x3) = select p x1
+  select (1:p) (Root x1 x2 x3) = select p x2
+  select (2:p) (Root x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 x1 x2 x3) = Root i1 (paste p c x1) x2 x3
-  paste (1:p) c (Root i1 x1 x2 x3) = Root i1 x1 (paste p c x2) x3
-  paste (2:p) c (Root i1 x1 x2 x3) = Root i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Root x1 x2 x3) = Root (paste p c x1) x2 x3
+  paste (1:p) c (Root x1 x2 x3) = Root x1 (paste p c x2) x3
+  paste (2:p) c (Root x1 x2 x3) = Root x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Graph} {Sections} "  , Clip_Root $ Root NoIDD hole hole hole)
+  alternatives _ = [("Root {Graph} {Sections} "  , Clip_Root $ Root hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ x1 x2 x3) = 3
+  arity (Root x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrRoot
@@ -337,23 +337,23 @@ instance Editable Root Document Node ClipDoc UserToken where
 
 instance Editable Section Document Node ClipDoc UserToken where
   select []    x                  = Clip_Section x
-  select (0:p) (Section _ x1 x2 x3) = select p x1
-  select (1:p) (Section _ x1 x2 x3) = select p x2
-  select (2:p) (Section _ x1 x2 x3) = select p x3
+  select (0:p) (Section x1 x2 x3) = select p x1
+  select (1:p) (Section x1 x2 x3) = select p x2
+  select (2:p) (Section x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Section c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Section")   x
-  paste (0:p) c (Section i1 x1 x2 x3) = Section i1 (paste p c x1) x2 x3
-  paste (1:p) c (Section i1 x1 x2 x3) = Section i1 x1 (paste p c x2) x3
-  paste (2:p) c (Section i1 x1 x2 x3) = Section i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Section x1 x2 x3) = Section (paste p c x1) x2 x3
+  paste (1:p) c (Section x1 x2 x3) = Section x1 (paste p c x2) x3
+  paste (2:p) c (Section x1 x2 x3) = Section x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Section {Paragraphs} {Subsections} "  , Clip_Section $ Section NoIDD hole hole hole)
+  alternatives _ = [("Section {Paragraphs} {Subsections} "  , Clip_Section $ Section hole hole hole)
                    ,("{Section}", Clip_Section hole)
                    ]
 
-  arity (Section _ x1 x2 x3) = 3
+  arity (Section x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrSection
@@ -368,23 +368,23 @@ instance Editable Section Document Node ClipDoc UserToken where
 
 instance Editable Subsection Document Node ClipDoc UserToken where
   select []    x                  = Clip_Subsection x
-  select (0:p) (Subsection _ x1 x2 x3) = select p x1
-  select (1:p) (Subsection _ x1 x2 x3) = select p x2
-  select (2:p) (Subsection _ x1 x2 x3) = select p x3
+  select (0:p) (Subsection x1 x2 x3) = select p x1
+  select (1:p) (Subsection x1 x2 x3) = select p x2
+  select (2:p) (Subsection x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Subsection c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Subsection")   x
-  paste (0:p) c (Subsection i1 x1 x2 x3) = Subsection i1 (paste p c x1) x2 x3
-  paste (1:p) c (Subsection i1 x1 x2 x3) = Subsection i1 x1 (paste p c x2) x3
-  paste (2:p) c (Subsection i1 x1 x2 x3) = Subsection i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Subsection x1 x2 x3) = Subsection (paste p c x1) x2 x3
+  paste (1:p) c (Subsection x1 x2 x3) = Subsection x1 (paste p c x2) x3
+  paste (2:p) c (Subsection x1 x2 x3) = Subsection x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subsection {Paragraphs} {Subsubsections} "  , Clip_Subsection $ Subsection NoIDD hole hole hole)
+  alternatives _ = [("Subsection {Paragraphs} {Subsubsections} "  , Clip_Subsection $ Subsection hole hole hole)
                    ,("{Subsection}", Clip_Subsection hole)
                    ]
 
-  arity (Subsection _ x1 x2 x3) = 3
+  arity (Subsection x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrSubsection
@@ -399,21 +399,21 @@ instance Editable Subsection Document Node ClipDoc UserToken where
 
 instance Editable Subsubsection Document Node ClipDoc UserToken where
   select []    x                  = Clip_Subsubsection x
-  select (0:p) (Subsubsection _ x1 x2) = select p x1
-  select (1:p) (Subsubsection _ x1 x2) = select p x2
+  select (0:p) (Subsubsection x1 x2) = select p x1
+  select (1:p) (Subsubsection x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Subsubsection c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Subsubsection")   x
-  paste (0:p) c (Subsubsection i1 x1 x2) = Subsubsection i1 (paste p c x1) x2
-  paste (1:p) c (Subsubsection i1 x1 x2) = Subsubsection i1 x1 (paste p c x2)
+  paste (0:p) c (Subsubsection x1 x2) = Subsubsection (paste p c x1) x2
+  paste (1:p) c (Subsubsection x1 x2) = Subsubsection x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subsubsection {Paragraphs} "  , Clip_Subsubsection $ Subsubsection NoIDD hole hole)
+  alternatives _ = [("Subsubsection {Paragraphs} "  , Clip_Subsubsection $ Subsubsection hole hole)
                    ,("{Subsubsection}", Clip_Subsubsection hole)
                    ]
 
-  arity (Subsubsection _ x1 x2) = 2
+  arity (Subsubsection x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrSubsubsection
@@ -428,23 +428,23 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
 
 instance Editable Paragraph Document Node ClipDoc UserToken where
   select []    x                  = Clip_Paragraph x
-  select (0:p) (Paragraph _ x1) = select p x1
-  select (0:p) (SubgraphPara _ x1) = select p x1
+  select (0:p) (Paragraph x1) = select p x1
+  select (0:p) (SubgraphPara x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Paragraph c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Paragraph")   x
-  paste (0:p) c (Paragraph i1 x1) = Paragraph i1 (paste p c x1)
-  paste (0:p) c (SubgraphPara i1 x1) = SubgraphPara i1 (paste p c x1)
+  paste (0:p) c (Paragraph x1) = Paragraph (paste p c x1)
+  paste (0:p) c (SubgraphPara x1) = SubgraphPara (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Paragraph {Words} "  , Clip_Paragraph $ Paragraph NoIDD hole)
-                   ,("SubgraphPara {Subgraph} "  , Clip_Paragraph $ SubgraphPara NoIDD hole)
+  alternatives _ = [("Paragraph {Words} "  , Clip_Paragraph $ Paragraph hole)
+                   ,("SubgraphPara {Subgraph} "  , Clip_Paragraph $ SubgraphPara hole)
                    ,("{Paragraph}", Clip_Paragraph hole)
                    ]
 
-  arity (Paragraph _ x1) = 1
-  arity (SubgraphPara _ x1) = 1
+  arity (Paragraph x1) = 1
+  arity (SubgraphPara x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrParagraph
@@ -459,31 +459,31 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
 
 instance Editable Word Document Node ClipDoc UserToken where
   select []    x                  = Clip_Word x
-  select (0:p) (Word _ x1) = select p x1
-  select (0:p) (NodeRef _ x1) = select p x1
-  select (0:p) (Label _ x1) = select p x1
-  select (0:p) (LabelRef _ x1) = select p x1
+  select (0:p) (Word x1) = select p x1
+  select (0:p) (NodeRef x1) = select p x1
+  select (0:p) (Label x1) = select p x1
+  select (0:p) (LabelRef x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Word c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Word")   x
-  paste (0:p) c (Word i1 x1) = Word i1 (paste p c x1)
-  paste (0:p) c (NodeRef i1 x1) = NodeRef i1 (paste p c x1)
-  paste (0:p) c (Label i1 x1) = Label i1 (paste p c x1)
-  paste (0:p) c (LabelRef i1 x1) = LabelRef i1 (paste p c x1)
+  paste (0:p) c (Word x1) = Word (paste p c x1)
+  paste (0:p) c (NodeRef x1) = NodeRef (paste p c x1)
+  paste (0:p) c (Label x1) = Label (paste p c x1)
+  paste (0:p) c (LabelRef x1) = LabelRef (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Word "  , Clip_Word $ Word NoIDD hole)
-                   ,("NodeRef "  , Clip_Word $ NodeRef NoIDD hole)
-                   ,("Label "  , Clip_Word $ Label NoIDD hole)
-                   ,("LabelRef "  , Clip_Word $ LabelRef NoIDD hole)
+  alternatives _ = [("Word "  , Clip_Word $ Word hole)
+                   ,("NodeRef "  , Clip_Word $ NodeRef hole)
+                   ,("Label "  , Clip_Word $ Label hole)
+                   ,("LabelRef "  , Clip_Word $ LabelRef hole)
                    ,("{Word}", Clip_Word hole)
                    ]
 
-  arity (Word _ x1) = 1
-  arity (NodeRef _ x1) = 1
-  arity (Label _ x1) = 1
-  arity (LabelRef _ x1) = 1
+  arity (Word x1) = 1
+  arity (NodeRef x1) = 1
+  arity (Label x1) = 1
+  arity (LabelRef x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrWord
@@ -498,23 +498,23 @@ instance Editable Word Document Node ClipDoc UserToken where
 
 instance Editable Graph Document Node ClipDoc UserToken where
   select []    x                  = Clip_Graph x
-  select (0:p) (Graph _ x1 x2 x3) = select p x1
-  select (1:p) (Graph _ x1 x2 x3) = select p x2
-  select (2:p) (Graph _ x1 x2 x3) = select p x3
+  select (0:p) (Graph x1 x2 x3) = select p x1
+  select (1:p) (Graph x1 x2 x3) = select p x2
+  select (2:p) (Graph x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Graph c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Graph")   x
-  paste (0:p) c (Graph i1 x1 x2 x3) = Graph i1 (paste p c x1) x2 x3
-  paste (1:p) c (Graph i1 x1 x2 x3) = Graph i1 x1 (paste p c x2) x3
-  paste (2:p) c (Graph i1 x1 x2 x3) = Graph i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Graph x1 x2 x3) = Graph (paste p c x1) x2 x3
+  paste (1:p) c (Graph x1 x2 x3) = Graph x1 (paste p c x2) x3
+  paste (2:p) c (Graph x1 x2 x3) = Graph x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Graph {Dirty} {Vertexs} {Edges} "  , Clip_Graph $ Graph NoIDD hole hole hole)
+  alternatives _ = [("Graph {Dirty} {Vertexs} {Edges} "  , Clip_Graph $ Graph hole hole hole)
                    ,("{Graph}", Clip_Graph hole)
                    ]
 
-  arity (Graph _ x1 x2 x3) = 3
+  arity (Graph x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrGraph
@@ -529,27 +529,27 @@ instance Editable Graph Document Node ClipDoc UserToken where
 
 instance Editable Vertex Document Node ClipDoc UserToken where
   select []    x                  = Clip_Vertex x
-  select (0:p) (Vertex _ x1 x2 x3 x4 x5) = select p x1
-  select (1:p) (Vertex _ x1 x2 x3 x4 x5) = select p x2
-  select (2:p) (Vertex _ x1 x2 x3 x4 x5) = select p x3
-  select (3:p) (Vertex _ x1 x2 x3 x4 x5) = select p x4
-  select (4:p) (Vertex _ x1 x2 x3 x4 x5) = select p x5
+  select (0:p) (Vertex x1 x2 x3 x4 x5) = select p x1
+  select (1:p) (Vertex x1 x2 x3 x4 x5) = select p x2
+  select (2:p) (Vertex x1 x2 x3 x4 x5) = select p x3
+  select (3:p) (Vertex x1 x2 x3 x4 x5) = select p x4
+  select (4:p) (Vertex x1 x2 x3 x4 x5) = select p x5
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Vertex c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Vertex")   x
-  paste (0:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 (paste p c x1) x2 x3 x4 x5
-  paste (1:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 (paste p c x2) x3 x4 x5
-  paste (2:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 (paste p c x3) x4 x5
-  paste (3:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 x3 (paste p c x4) x5
-  paste (4:p) c (Vertex i1 x1 x2 x3 x4 x5) = Vertex i1 x1 x2 x3 x4 (paste p c x5)
+  paste (0:p) c (Vertex x1 x2 x3 x4 x5) = Vertex (paste p c x1) x2 x3 x4 x5
+  paste (1:p) c (Vertex x1 x2 x3 x4 x5) = Vertex x1 (paste p c x2) x3 x4 x5
+  paste (2:p) c (Vertex x1 x2 x3 x4 x5) = Vertex x1 x2 (paste p c x3) x4 x5
+  paste (3:p) c (Vertex x1 x2 x3 x4 x5) = Vertex x1 x2 x3 (paste p c x4) x5
+  paste (4:p) c (Vertex x1 x2 x3 x4 x5) = Vertex x1 x2 x3 x4 (paste p c x5)
   paste _  _  x                    = x
 
-  alternatives _ = [("Vertex {Shape} "  , Clip_Vertex $ Vertex NoIDD hole hole hole hole hole)
+  alternatives _ = [("Vertex {Shape} "  , Clip_Vertex $ Vertex hole hole hole hole hole)
                    ,("{Vertex}", Clip_Vertex hole)
                    ]
 
-  arity (Vertex _ x1 x2 x3 x4 x5) = 5
+  arity (Vertex x1 x2 x3 x4 x5) = 5
   arity _                        = 0
 
   parseErr = ParseErrVertex
@@ -570,13 +570,13 @@ instance Editable Shape Document Node ClipDoc UserToken where
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Shape")   x
   paste _  _  x                    = x
 
-  alternatives _ = [("Circle "  , Clip_Shape $ Circle NoIDD)
-                   ,("Square "  , Clip_Shape $ Square NoIDD)
+  alternatives _ = [("Circle "  , Clip_Shape $ Circle)
+                   ,("Square "  , Clip_Shape $ Square)
                    ,("{Shape}", Clip_Shape hole)
                    ]
 
-  arity (Circle _) = 0
-  arity (Square _) = 0
+  arity (Circle) = 0
+  arity (Square) = 0
   arity _                        = 0
 
   parseErr = ParseErrShape
@@ -591,21 +591,21 @@ instance Editable Shape Document Node ClipDoc UserToken where
 
 instance Editable Edge Document Node ClipDoc UserToken where
   select []    x                  = Clip_Edge x
-  select (0:p) (Edge _ x1 x2) = select p x1
-  select (1:p) (Edge _ x1 x2) = select p x2
+  select (0:p) (Edge x1 x2) = select p x1
+  select (1:p) (Edge x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Edge c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Edge")   x
-  paste (0:p) c (Edge i1 x1 x2) = Edge i1 (paste p c x1) x2
-  paste (1:p) c (Edge i1 x1 x2) = Edge i1 x1 (paste p c x2)
+  paste (0:p) c (Edge x1 x2) = Edge (paste p c x1) x2
+  paste (1:p) c (Edge x1 x2) = Edge x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Edge "  , Clip_Edge $ Edge NoIDD hole hole)
+  alternatives _ = [("Edge "  , Clip_Edge $ Edge hole hole)
                    ,("{Edge}", Clip_Edge hole)
                    ]
 
-  arity (Edge _ x1 x2) = 2
+  arity (Edge x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrEdge
@@ -620,23 +620,23 @@ instance Editable Edge Document Node ClipDoc UserToken where
 
 instance Editable Subgraph Document Node ClipDoc UserToken where
   select []    x                  = Clip_Subgraph x
-  select (0:p) (Subgraph _ x1 x2 x3) = select p x1
-  select (1:p) (Subgraph _ x1 x2 x3) = select p x2
-  select (2:p) (Subgraph _ x1 x2 x3) = select p x3
+  select (0:p) (Subgraph x1 x2 x3) = select p x1
+  select (1:p) (Subgraph x1 x2 x3) = select p x2
+  select (2:p) (Subgraph x1 x2 x3) = select p x3
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Subgraph c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Subgraph")   x
-  paste (0:p) c (Subgraph i1 x1 x2 x3) = Subgraph i1 (paste p c x1) x2 x3
-  paste (1:p) c (Subgraph i1 x1 x2 x3) = Subgraph i1 x1 (paste p c x2) x3
-  paste (2:p) c (Subgraph i1 x1 x2 x3) = Subgraph i1 x1 x2 (paste p c x3)
+  paste (0:p) c (Subgraph x1 x2 x3) = Subgraph (paste p c x1) x2 x3
+  paste (1:p) c (Subgraph x1 x2 x3) = Subgraph x1 (paste p c x2) x3
+  paste (2:p) c (Subgraph x1 x2 x3) = Subgraph x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subgraph {Dirty} {Vertexs} {Edges} "  , Clip_Subgraph $ Subgraph NoIDD hole hole hole)
+  alternatives _ = [("Subgraph {Dirty} {Vertexs} {Edges} "  , Clip_Subgraph $ Subgraph hole hole hole)
                    ,("{Subgraph}", Clip_Subgraph hole)
                    ]
 
-  arity (Subgraph _ x1 x2 x3) = 3
+  arity (Subgraph x1 x2 x3) = 3
   arity _                        = 0
 
   parseErr = ParseErrSubgraph
@@ -657,13 +657,13 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Dirty")   x
   paste _  _  x                    = x
 
-  alternatives _ = [("Dirty "  , Clip_Dirty $ Dirty NoIDD)
-                   ,("Clean "  , Clip_Dirty $ Clean NoIDD)
+  alternatives _ = [("Dirty "  , Clip_Dirty $ Dirty)
+                   ,("Clean "  , Clip_Dirty $ Clean)
                    ,("{Dirty}", Clip_Dirty hole)
                    ]
 
-  arity (Dirty _) = 0
-  arity (Clean _) = 0
+  arity (Dirty) = 0
+  arity (Clean) = 0
   arity _                        = 0
 
   parseErr = ParseErrDirty
@@ -674,9 +674,9 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
-toList_Dummy vs = List_Dummy NoIDD (toConsList_Dummy vs)
+toList_Dummy vs = List_Dummy (toConsList_Dummy vs)
 
-fromList_Dummy (List_Dummy _ vs) = fromConsList_Dummy vs
+fromList_Dummy (List_Dummy vs) = fromConsList_Dummy vs
 fromList_Dummy _                  = []
 
 toConsList_Dummy [] = Nil_Dummy
@@ -699,7 +699,7 @@ removeList_Dummy n (Cons_Dummy cx cxs) = Cons_Dummy cx (removeList_Dummy (n-1) c
 
 instance Editable List_Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Dummy x
-  select (n:p) (List_Dummy _ cxs) = let xs = fromConsList_Dummy cxs
+  select (n:p) (List_Dummy cxs) = let xs = fromConsList_Dummy cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -707,36 +707,36 @@ instance Editable List_Dummy Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Dummy c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Dummy")   x
-  paste (n:p) c (List_Dummy i1 cxs) = let xs = fromConsList_Dummy cxs
+  paste (n:p) c (List_Dummy cxs) = let xs = fromConsList_Dummy cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Dummy i1 (replaceList_Dummy n x' cxs)
-                                        else List_Dummy i1 cxs -- paste beyond end of list
+                                             in  List_Dummy (replaceList_Dummy n x' cxs)
+                                        else List_Dummy cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Dummy}", Clip_List_Dummy hole)
                    ]
 
-  arity (List_Dummy _ x1) = length (fromConsList_Dummy x1)
-  arity _                        = 0
+  arity (List_Dummy x1) = length (fromConsList_Dummy x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Dummy
 
-  hole = List_Dummy NoIDD Nil_Dummy
+  hole = List_Dummy Nil_Dummy
 
   isList _ = True
 
-  insertList n (Clip_Dummy c) (List_Dummy idd cxs) = Clip_List_Dummy $ List_Dummy idd (insertList_Dummy n c cxs)
+  insertList n (Clip_Dummy c) (List_Dummy cxs) = Clip_List_Dummy $ List_Dummy (insertList_Dummy n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Dummy xs
   insertList _ c xs                 = Clip_List_Dummy xs
 
-  removeList n (List_Dummy idd cxs) = Clip_List_Dummy $ List_Dummy idd (removeList_Dummy n cxs)
+  removeList n (List_Dummy cxs) = Clip_List_Dummy $ List_Dummy (removeList_Dummy n cxs)
   removeList _ xs                        = Clip_List_Dummy $ xs
 
-toList_Section vs = List_Section NoIDD (toConsList_Section vs)
+toList_Section vs = List_Section (toConsList_Section vs)
 
-fromList_Section (List_Section _ vs) = fromConsList_Section vs
+fromList_Section (List_Section vs) = fromConsList_Section vs
 fromList_Section _                  = []
 
 toConsList_Section [] = Nil_Section
@@ -759,7 +759,7 @@ removeList_Section n (Cons_Section cx cxs) = Cons_Section cx (removeList_Section
 
 instance Editable List_Section Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Section x
-  select (n:p) (List_Section _ cxs) = let xs = fromConsList_Section cxs
+  select (n:p) (List_Section cxs) = let xs = fromConsList_Section cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -767,36 +767,36 @@ instance Editable List_Section Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Section c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Section")   x
-  paste (n:p) c (List_Section i1 cxs) = let xs = fromConsList_Section cxs
+  paste (n:p) c (List_Section cxs) = let xs = fromConsList_Section cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Section i1 (replaceList_Section n x' cxs)
-                                        else List_Section i1 cxs -- paste beyond end of list
+                                             in  List_Section (replaceList_Section n x' cxs)
+                                        else List_Section cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Section}", Clip_List_Section hole)
                    ]
 
-  arity (List_Section _ x1) = length (fromConsList_Section x1)
-  arity _                        = 0
+  arity (List_Section x1) = length (fromConsList_Section x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Section
 
-  hole = List_Section NoIDD Nil_Section
+  hole = List_Section Nil_Section
 
   isList _ = True
 
-  insertList n (Clip_Section c) (List_Section idd cxs) = Clip_List_Section $ List_Section idd (insertList_Section n c cxs)
+  insertList n (Clip_Section c) (List_Section cxs) = Clip_List_Section $ List_Section (insertList_Section n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Section xs
   insertList _ c xs                 = Clip_List_Section xs
 
-  removeList n (List_Section idd cxs) = Clip_List_Section $ List_Section idd (removeList_Section n cxs)
+  removeList n (List_Section cxs) = Clip_List_Section $ List_Section (removeList_Section n cxs)
   removeList _ xs                        = Clip_List_Section $ xs
 
-toList_Paragraph vs = List_Paragraph NoIDD (toConsList_Paragraph vs)
+toList_Paragraph vs = List_Paragraph (toConsList_Paragraph vs)
 
-fromList_Paragraph (List_Paragraph _ vs) = fromConsList_Paragraph vs
+fromList_Paragraph (List_Paragraph vs) = fromConsList_Paragraph vs
 fromList_Paragraph _                  = []
 
 toConsList_Paragraph [] = Nil_Paragraph
@@ -819,7 +819,7 @@ removeList_Paragraph n (Cons_Paragraph cx cxs) = Cons_Paragraph cx (removeList_P
 
 instance Editable List_Paragraph Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Paragraph x
-  select (n:p) (List_Paragraph _ cxs) = let xs = fromConsList_Paragraph cxs
+  select (n:p) (List_Paragraph cxs) = let xs = fromConsList_Paragraph cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -827,36 +827,36 @@ instance Editable List_Paragraph Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Paragraph c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Paragraph")   x
-  paste (n:p) c (List_Paragraph i1 cxs) = let xs = fromConsList_Paragraph cxs
+  paste (n:p) c (List_Paragraph cxs) = let xs = fromConsList_Paragraph cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Paragraph i1 (replaceList_Paragraph n x' cxs)
-                                        else List_Paragraph i1 cxs -- paste beyond end of list
+                                             in  List_Paragraph (replaceList_Paragraph n x' cxs)
+                                        else List_Paragraph cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Paragraph}", Clip_List_Paragraph hole)
                    ]
 
-  arity (List_Paragraph _ x1) = length (fromConsList_Paragraph x1)
-  arity _                        = 0
+  arity (List_Paragraph x1) = length (fromConsList_Paragraph x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Paragraph
 
-  hole = List_Paragraph NoIDD Nil_Paragraph
+  hole = List_Paragraph Nil_Paragraph
 
   isList _ = True
 
-  insertList n (Clip_Paragraph c) (List_Paragraph idd cxs) = Clip_List_Paragraph $ List_Paragraph idd (insertList_Paragraph n c cxs)
+  insertList n (Clip_Paragraph c) (List_Paragraph cxs) = Clip_List_Paragraph $ List_Paragraph (insertList_Paragraph n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Paragraph xs
   insertList _ c xs                 = Clip_List_Paragraph xs
 
-  removeList n (List_Paragraph idd cxs) = Clip_List_Paragraph $ List_Paragraph idd (removeList_Paragraph n cxs)
+  removeList n (List_Paragraph cxs) = Clip_List_Paragraph $ List_Paragraph (removeList_Paragraph n cxs)
   removeList _ xs                        = Clip_List_Paragraph $ xs
 
-toList_Subsection vs = List_Subsection NoIDD (toConsList_Subsection vs)
+toList_Subsection vs = List_Subsection (toConsList_Subsection vs)
 
-fromList_Subsection (List_Subsection _ vs) = fromConsList_Subsection vs
+fromList_Subsection (List_Subsection vs) = fromConsList_Subsection vs
 fromList_Subsection _                  = []
 
 toConsList_Subsection [] = Nil_Subsection
@@ -879,7 +879,7 @@ removeList_Subsection n (Cons_Subsection cx cxs) = Cons_Subsection cx (removeLis
 
 instance Editable List_Subsection Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Subsection x
-  select (n:p) (List_Subsection _ cxs) = let xs = fromConsList_Subsection cxs
+  select (n:p) (List_Subsection cxs) = let xs = fromConsList_Subsection cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -887,36 +887,36 @@ instance Editable List_Subsection Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Subsection c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Subsection")   x
-  paste (n:p) c (List_Subsection i1 cxs) = let xs = fromConsList_Subsection cxs
+  paste (n:p) c (List_Subsection cxs) = let xs = fromConsList_Subsection cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Subsection i1 (replaceList_Subsection n x' cxs)
-                                        else List_Subsection i1 cxs -- paste beyond end of list
+                                             in  List_Subsection (replaceList_Subsection n x' cxs)
+                                        else List_Subsection cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Subsection}", Clip_List_Subsection hole)
                    ]
 
-  arity (List_Subsection _ x1) = length (fromConsList_Subsection x1)
-  arity _                        = 0
+  arity (List_Subsection x1) = length (fromConsList_Subsection x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Subsection
 
-  hole = List_Subsection NoIDD Nil_Subsection
+  hole = List_Subsection Nil_Subsection
 
   isList _ = True
 
-  insertList n (Clip_Subsection c) (List_Subsection idd cxs) = Clip_List_Subsection $ List_Subsection idd (insertList_Subsection n c cxs)
+  insertList n (Clip_Subsection c) (List_Subsection cxs) = Clip_List_Subsection $ List_Subsection (insertList_Subsection n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Subsection xs
   insertList _ c xs                 = Clip_List_Subsection xs
 
-  removeList n (List_Subsection idd cxs) = Clip_List_Subsection $ List_Subsection idd (removeList_Subsection n cxs)
+  removeList n (List_Subsection cxs) = Clip_List_Subsection $ List_Subsection (removeList_Subsection n cxs)
   removeList _ xs                        = Clip_List_Subsection $ xs
 
-toList_Subsubsection vs = List_Subsubsection NoIDD (toConsList_Subsubsection vs)
+toList_Subsubsection vs = List_Subsubsection (toConsList_Subsubsection vs)
 
-fromList_Subsubsection (List_Subsubsection _ vs) = fromConsList_Subsubsection vs
+fromList_Subsubsection (List_Subsubsection vs) = fromConsList_Subsubsection vs
 fromList_Subsubsection _                  = []
 
 toConsList_Subsubsection [] = Nil_Subsubsection
@@ -939,7 +939,7 @@ removeList_Subsubsection n (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (
 
 instance Editable List_Subsubsection Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Subsubsection x
-  select (n:p) (List_Subsubsection _ cxs) = let xs = fromConsList_Subsubsection cxs
+  select (n:p) (List_Subsubsection cxs) = let xs = fromConsList_Subsubsection cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -947,36 +947,36 @@ instance Editable List_Subsubsection Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Subsubsection c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Subsubsection")   x
-  paste (n:p) c (List_Subsubsection i1 cxs) = let xs = fromConsList_Subsubsection cxs
+  paste (n:p) c (List_Subsubsection cxs) = let xs = fromConsList_Subsubsection cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Subsubsection i1 (replaceList_Subsubsection n x' cxs)
-                                        else List_Subsubsection i1 cxs -- paste beyond end of list
+                                             in  List_Subsubsection (replaceList_Subsubsection n x' cxs)
+                                        else List_Subsubsection cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Subsubsection}", Clip_List_Subsubsection hole)
                    ]
 
-  arity (List_Subsubsection _ x1) = length (fromConsList_Subsubsection x1)
-  arity _                        = 0
+  arity (List_Subsubsection x1) = length (fromConsList_Subsubsection x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Subsubsection
 
-  hole = List_Subsubsection NoIDD Nil_Subsubsection
+  hole = List_Subsubsection Nil_Subsubsection
 
   isList _ = True
 
-  insertList n (Clip_Subsubsection c) (List_Subsubsection idd cxs) = Clip_List_Subsubsection $ List_Subsubsection idd (insertList_Subsubsection n c cxs)
+  insertList n (Clip_Subsubsection c) (List_Subsubsection cxs) = Clip_List_Subsubsection $ List_Subsubsection (insertList_Subsubsection n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Subsubsection xs
   insertList _ c xs                 = Clip_List_Subsubsection xs
 
-  removeList n (List_Subsubsection idd cxs) = Clip_List_Subsubsection $ List_Subsubsection idd (removeList_Subsubsection n cxs)
+  removeList n (List_Subsubsection cxs) = Clip_List_Subsubsection $ List_Subsubsection (removeList_Subsubsection n cxs)
   removeList _ xs                        = Clip_List_Subsubsection $ xs
 
-toList_Word vs = List_Word NoIDD (toConsList_Word vs)
+toList_Word vs = List_Word (toConsList_Word vs)
 
-fromList_Word (List_Word _ vs) = fromConsList_Word vs
+fromList_Word (List_Word vs) = fromConsList_Word vs
 fromList_Word _                  = []
 
 toConsList_Word [] = Nil_Word
@@ -999,7 +999,7 @@ removeList_Word n (Cons_Word cx cxs) = Cons_Word cx (removeList_Word (n-1) cxs)
 
 instance Editable List_Word Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Word x
-  select (n:p) (List_Word _ cxs) = let xs = fromConsList_Word cxs
+  select (n:p) (List_Word cxs) = let xs = fromConsList_Word cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1007,36 +1007,36 @@ instance Editable List_Word Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Word c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Word")   x
-  paste (n:p) c (List_Word i1 cxs) = let xs = fromConsList_Word cxs
+  paste (n:p) c (List_Word cxs) = let xs = fromConsList_Word cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Word i1 (replaceList_Word n x' cxs)
-                                        else List_Word i1 cxs -- paste beyond end of list
+                                             in  List_Word (replaceList_Word n x' cxs)
+                                        else List_Word cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Word}", Clip_List_Word hole)
                    ]
 
-  arity (List_Word _ x1) = length (fromConsList_Word x1)
-  arity _                        = 0
+  arity (List_Word x1) = length (fromConsList_Word x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Word
 
-  hole = List_Word NoIDD Nil_Word
+  hole = List_Word Nil_Word
 
   isList _ = True
 
-  insertList n (Clip_Word c) (List_Word idd cxs) = Clip_List_Word $ List_Word idd (insertList_Word n c cxs)
+  insertList n (Clip_Word c) (List_Word cxs) = Clip_List_Word $ List_Word (insertList_Word n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Word xs
   insertList _ c xs                 = Clip_List_Word xs
 
-  removeList n (List_Word idd cxs) = Clip_List_Word $ List_Word idd (removeList_Word n cxs)
+  removeList n (List_Word cxs) = Clip_List_Word $ List_Word (removeList_Word n cxs)
   removeList _ xs                        = Clip_List_Word $ xs
 
-toList_Vertex vs = List_Vertex NoIDD (toConsList_Vertex vs)
+toList_Vertex vs = List_Vertex (toConsList_Vertex vs)
 
-fromList_Vertex (List_Vertex _ vs) = fromConsList_Vertex vs
+fromList_Vertex (List_Vertex vs) = fromConsList_Vertex vs
 fromList_Vertex _                  = []
 
 toConsList_Vertex [] = Nil_Vertex
@@ -1059,7 +1059,7 @@ removeList_Vertex n (Cons_Vertex cx cxs) = Cons_Vertex cx (removeList_Vertex (n-
 
 instance Editable List_Vertex Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Vertex x
-  select (n:p) (List_Vertex _ cxs) = let xs = fromConsList_Vertex cxs
+  select (n:p) (List_Vertex cxs) = let xs = fromConsList_Vertex cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1067,36 +1067,36 @@ instance Editable List_Vertex Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Vertex c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Vertex")   x
-  paste (n:p) c (List_Vertex i1 cxs) = let xs = fromConsList_Vertex cxs
+  paste (n:p) c (List_Vertex cxs) = let xs = fromConsList_Vertex cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Vertex i1 (replaceList_Vertex n x' cxs)
-                                        else List_Vertex i1 cxs -- paste beyond end of list
+                                             in  List_Vertex (replaceList_Vertex n x' cxs)
+                                        else List_Vertex cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Vertex}", Clip_List_Vertex hole)
                    ]
 
-  arity (List_Vertex _ x1) = length (fromConsList_Vertex x1)
-  arity _                        = 0
+  arity (List_Vertex x1) = length (fromConsList_Vertex x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Vertex
 
-  hole = List_Vertex NoIDD Nil_Vertex
+  hole = List_Vertex Nil_Vertex
 
   isList _ = True
 
-  insertList n (Clip_Vertex c) (List_Vertex idd cxs) = Clip_List_Vertex $ List_Vertex idd (insertList_Vertex n c cxs)
+  insertList n (Clip_Vertex c) (List_Vertex cxs) = Clip_List_Vertex $ List_Vertex (insertList_Vertex n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Vertex xs
   insertList _ c xs                 = Clip_List_Vertex xs
 
-  removeList n (List_Vertex idd cxs) = Clip_List_Vertex $ List_Vertex idd (removeList_Vertex n cxs)
+  removeList n (List_Vertex cxs) = Clip_List_Vertex $ List_Vertex (removeList_Vertex n cxs)
   removeList _ xs                        = Clip_List_Vertex $ xs
 
-toList_Edge vs = List_Edge NoIDD (toConsList_Edge vs)
+toList_Edge vs = List_Edge (toConsList_Edge vs)
 
-fromList_Edge (List_Edge _ vs) = fromConsList_Edge vs
+fromList_Edge (List_Edge vs) = fromConsList_Edge vs
 fromList_Edge _                  = []
 
 toConsList_Edge [] = Nil_Edge
@@ -1119,7 +1119,7 @@ removeList_Edge n (Cons_Edge cx cxs) = Cons_Edge cx (removeList_Edge (n-1) cxs)
 
 instance Editable List_Edge Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Edge x
-  select (n:p) (List_Edge _ cxs) = let xs = fromConsList_Edge cxs
+  select (n:p) (List_Edge cxs) = let xs = fromConsList_Edge cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1127,30 +1127,30 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Edge c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Edge")   x
-  paste (n:p) c (List_Edge i1 cxs) = let xs = fromConsList_Edge cxs
+  paste (n:p) c (List_Edge cxs) = let xs = fromConsList_Edge cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Edge i1 (replaceList_Edge n x' cxs)
-                                        else List_Edge i1 cxs -- paste beyond end of list
+                                             in  List_Edge (replaceList_Edge n x' cxs)
+                                        else List_Edge cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Edge}", Clip_List_Edge hole)
                    ]
 
-  arity (List_Edge _ x1) = length (fromConsList_Edge x1)
-  arity _                        = 0
+  arity (List_Edge x1) = length (fromConsList_Edge x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Edge
 
-  hole = List_Edge NoIDD Nil_Edge
+  hole = List_Edge Nil_Edge
 
   isList _ = True
 
-  insertList n (Clip_Edge c) (List_Edge idd cxs) = Clip_List_Edge $ List_Edge idd (insertList_Edge n c cxs)
+  insertList n (Clip_Edge c) (List_Edge cxs) = Clip_List_Edge $ List_Edge (insertList_Edge n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Edge xs
   insertList _ c xs                 = Clip_List_Edge xs
 
-  removeList n (List_Edge idd cxs) = Clip_List_Edge $ List_Edge idd (removeList_Edge n cxs)
+  removeList n (List_Edge cxs) = Clip_List_Edge $ List_Edge (removeList_Edge n cxs)
   removeList _ xs                        = Clip_List_Edge $ xs
 
