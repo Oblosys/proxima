@@ -61,8 +61,8 @@ set = Just
 
 parsePres recognizeRootEnr (TokenP _ (StructuralTk _ _ tokens _)) = 
   let (enr,errs) = runParser recognizeRootEnr tokens
-  in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
-                 ++"\nhas result:"++show enr ) $
+  in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+     --             ++"\nhas result:"++show enr ) $
      if null errs then Just enr else Nothing
 
 parsePres _ _    = error "parsePres: scanned presentation has wrong format"

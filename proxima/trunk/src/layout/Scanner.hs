@@ -32,6 +32,9 @@ passing several Alex scanners (probably solved by Alex itself)
 
 recover locators for parsing presentations
 
+handle focus at the right of the last char (and whitespace to the right of the last char)
+we could put an extra token there, which is parsed automatically.
+
 make sure that pres args to ParsingTk and StructuralTk are lazy
 !! and should these pres args include the ParsingP/StructuralP  nodes? (seems that they should)
 
@@ -55,13 +58,18 @@ tokenizeLay :: (Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip ->
                PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
- let (tokens, idPCounter', whitespaceMap) = scanStructural sheet focus LexHaskell Nothing [] idPCounter Map.empty lay 
+ let (tokens, idPCounter', whitespaceMap) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk Nothing (castLayToPres lay) tokens NoIDP)) (whitespaceMap,idPCounter')
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
      ) 
      -- debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
      (SetPres presLvl', state, layLvl)
+
+fixFocus (FocusP (PathP sp si) (PathP ep ei)) = ((sp,si),(ep,ei))
+fixFocus (FocusP (PathP sp si) NoPathP)       = ((sp,si),(sp,si))
+fixFocus (FocusP NoPathP       (PathP ep ei)) = ((ep,ei),(ep,ei))
+fixFocus _                                    = (([],0),([],0)) -- not that clean, altough this will never match with any focus
 
 {-
 tokenize traverses the structural parts of the tree, calling scanPresentation on Parsing subtrees.
@@ -77,7 +85,7 @@ inh & synthesized     idP: the presentation id counter   (threaded)
 synthesized attribute pres: the tokenized presentation   (constructed at every case because of cast from Layout to Presentation)
                       
 -}
-scanStructural :: Show token => ScannerSheet doc node clip token -> FocusPres ->
+scanStructural :: Show token => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
                   Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip ->
                   ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanStructural sheet foc lx loc pth idpc wm presentation =
@@ -105,18 +113,18 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
 
 
 scanStructuralList :: Show token => 
-                      ScannerSheet doc node clip token -> FocusPres -> Lexer ->
+                      ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
                       Maybe node -> Path ->
                       IDPCounter -> WhitespaceMap -> [Layout doc node clip] ->
                       ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' sheet foc lx loc pth idpc wm 0 press
  where scanStructuralList' sheet foc lx loc pth idpc wm i []           = ([], idpc, wm)
        scanStructuralList' sheet foc lx loc pth idpc wm i (pres:press) = 
-         let (tokens,  idpc',  wm')   = scanStructural sheet foc lx loc (pth++[i]) idpc wm pres
+         let (tokens,  idpc',  wm')  = scanStructural sheet foc lx loc (pth++[i]) idpc wm pres
              (tokenss, idpc'', wm'') = scanStructuralList' sheet foc lx loc pth idpc' wm' (i+1) press
          in  (tokens ++ tokenss, idpc'', wm'')
 
-scanPresentation :: Show token => ScannerSheet doc node clip token -> FocusPres -> 
+scanPresentation :: Show token => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
                     IDP -> Lexer -> Layout doc node clip ->
                     ([Token doc node clip token], IDPCounter, WhitespaceMap)
@@ -124,13 +132,20 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
  let lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (idPCounter', scanChars, self, whitespaceMap') = sem_Layout lay idPCounter lex loc pth (scanStructural sheet foc) whitespaceMap
-     (tokens, idPCounter'', whitespaceMap'') = sheet idPCounter' scanChars
+     (idPCounter', pos, scanChars, scannedFocusStart, scannedFocusEnd, self, whitespaceMap') =
+       sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
+       -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
+     focusedScanChars = markFocus markFocusStart scannedFocusStart $
+                        markFocus markFocusEnd scannedFocusEnd scanChars 
+     (tokens, idPCounter'', whitespaceMap'') = sheet idPCounter' focusedScanChars
  in  -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
      , idPCounter'', whitespaceMap' `Map.union` whitespaceMap'')
 
 
+markFocus f Nothing    scs = scs
+markFocus f (Just pos) scs = let (left, focusedChar:right) = splitAt pos scs
+                             in  left ++ f focusedChar : right
 
 
 
@@ -147,7 +162,14 @@ mkToken = mkTokenEx id
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
            (Maybe (Token doc node clip userToken), ScannerState)
 mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let str = strf $ stringFromScanChars scs
+  let str = debug Lay ((case hasStart 0 scs of 
+                        Just i  -> "Focus start on "++ show (stringFromScanChars scs)++" at "++show i
+                        Nothing -> "") ++
+                       (case hasEnd 0 scs of 
+                        Just i  -> "Focus end on "++ show (stringFromScanChars scs)++" at "++show i
+                        Nothing -> "") 
+                       ) $
+            strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
@@ -155,11 +177,16 @@ mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespace) scs =
   in  ( Just $ UserTk userToken str Nothing idp'
       , (idPCounter', Map.insert idp' collectedWhitespace whitespaceMap, (0,0)) 
       )
+      
+hasStart i [] = Nothing
+hasStart i (c:cs) = if hasFocusStartMark c then Just i else hasStart (i+1) cs
 
+hasEnd i [] = Nothing
+hasEnd i (c:cs) = if hasFocusEndMark c then Just i else hasEnd (i+1) cs
 
 mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe (Token doc node clip userToken), ScannerState)
 mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let Structural idp loc tokens lay = head scs
+  let Structural idp _ _ loc tokens lay = head scs
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
   in  ( Just $ StructuralTk loc lay tokens idp'
@@ -170,8 +197,8 @@ mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespace) scs =
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe a, ScannerState)
 collectWhitespace (idPCounter, whitespaceMap, (newlines, spaces)) (c:cs) =
   let newWhitespace = case c of
-                        Char _ '\n' -> (newlines + 1 + length cs, spaces                )
-                        Char _ ' '  -> (newlines                , spaces + 1 + length cs)
+                        Char _ _ _ '\n' -> (newlines + 1 + length cs, spaces                )
+                        Char _ _ _ ' '  -> (newlines                , spaces + 1 + length cs)
                         -- will always be a Char
   in (Nothing, (idPCounter, whitespaceMap, newWhitespace))
 

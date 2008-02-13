@@ -15,6 +15,7 @@ type ScannerSheet doc node clip token =
       (IDPCounter -> [ScanChar doc node clip token] -> ([Token doc node clip token], IDPCounter, WhitespaceMap))
       
 data ScanChar doc node clip token = 
-       Char IDP Char 
-     | Structural IDP (Maybe node) [Token doc node clip token] (Presentation doc node clip token) -- original pres to show in case of parse/scan errors
+       Char IDP FocusMark FocusMark Char 
+     | Structural IDP FocusMark FocusMark (Maybe node) [Token doc node clip token] (Presentation doc node clip token) -- original pres to show in case of parse/scan errors
 
+data FocusMark = FocusMark | NoFocusMark
