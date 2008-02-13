@@ -109,7 +109,7 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
     ; let ctxtItems = case ArrLayerUtils.point x y arr of
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathAFromPathP' pthA prs) prs
-              
+                                                        -- seems to be wrong
    ; case pointDoc x y arr of
         Just node ->
          do { let pathDoc = pathNode node
