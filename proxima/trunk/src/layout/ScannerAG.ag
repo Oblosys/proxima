@@ -56,14 +56,29 @@ SEM Layout
   | LocatorP
       child.lloc = Just @location
 
+ATTR Layout [ path : Path | | ]
 
+ATTR LayoutList [ path : Path index : Int | | ]
+
+SEM Layout
+  | RowP ColP OverlayP FormatterP GraphP
+      presentationList.path = @lhs.path
+      presentationList.index = 0
+  | WithP ParsingP LocatorP StructuralP VertexP
+      child.path = @lhs.path ++ [0]
+      
+SEM LayoutList [ | | ]
+  | Cons
+      hd.path = @lhs.path++[@lhs.index]
+      tl.index = @lhs.index + 1
+      
 ATTR Layout LayoutList [ | idPCounter : IDPCounter whitespaceMap : WhitespaceMap | ]
 
 ATTR Layout [ | | scanChars : {[ScanChar]} ]
 
 SEM Layout
   | StringP
-      lhs.scanChars = map (Char @id) @text
+      lhs.scanChars = debug Lay (show @lhs.path ++ ":" ++ @text ++ "\n") $map (Char @id) @text
 
   | RowP
       lhs.scanChars = concat @presentationList.scanCharss
@@ -82,7 +97,7 @@ SEM Layout
   | StructuralP
       (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
         let (tokens, idPCounter, whitespaceMap) = 
-              @lhs.scanStructural @lhs.lexer @lhs.lloc @lhs.idPCounter @lhs.whitespaceMap @child.self
+              @lhs.scanStructural @lhs.lexer @lhs.lloc @lhs.path @lhs.idPCounter @lhs.whitespaceMap @child.self
         in  ([Structural @id @lhs.lloc tokens (castLayToPres @self)], idPCounter, whitespaceMap)
   | EmptyP 
       lhs.scanChars = []
