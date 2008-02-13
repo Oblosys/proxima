@@ -46,6 +46,7 @@ PROXIMADIR = ../../proxima
 PROXIMABINDIR = $(PROXIMADIR)/bin
 PROXIMASRCDIR = $(PROXIMADIR)/src
 UUAGCDIR = $(PROXIMADIR)/../uuagc/src
+UUAGCDERIVEDDIR = $(PROXIMADIR)/../uuagc/src-derived
 GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
 AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
@@ -87,7 +88,7 @@ agc: $(AGC)
 # the always phony target is because we don't want to put all the ag compiler sources here
 $(AGC): always
 	@echo ghc: compiling uuagc compiler with -O2
-	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -fglasgow-exts -O2 -package mtl
+	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -i$(UUAGCDERIVEDDIR) -fglasgow-exts -O2 -package mtl
 
 
 # The arranger AG
@@ -130,6 +131,8 @@ clean:
 clean-agc:
 	$(FIND) $(UUAGCDIR) -name "*.hi" -delete
 	$(FIND) $(UUAGCDIR) -name "*.o" -delete
+	$(FIND) $(UUAGCDERIVEDDIR) -name "*.hi" -delete
+	$(FIND) $(UUAGCDERIVEDDIR) -name "*.o" -delete
 	$(FIND) $(PROXIMABINDIR) -name "uuagc.*" -delete
 
 clean-all: clean clean-agc
