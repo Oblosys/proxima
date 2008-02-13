@@ -21,8 +21,8 @@ import Debug.Trace
 
 -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
 instance Editable Document Document Node ClipDoc UserToken where
-  select p (RootDoc id x) = select p x
-  paste p c (RootDoc id  x) = RootDoc id $ paste p c x
+  select p (RootDoc x) = select p x
+  paste p c (RootDoc x) = RootDoc $ paste p c x
   hole = HoleDocument
   parseErr = ParseErrDocument
   isList _ = False
@@ -350,21 +350,21 @@ instance Clip ClipDoc where
 
 instance Editable Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_Dummy x
-  select (0:p) (Dummy _ x1 x2) = select p x1
-  select (1:p) (Dummy _ x1 x2) = select p x2
+  select (0:p) (Dummy x1 x2) = select p x1
+  select (1:p) (Dummy x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Dummy c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Dummy")   x
-  paste (0:p) c (Dummy i1 x1 x2) = Dummy i1 (paste p c x1) x2
-  paste (1:p) c (Dummy i1 x1 x2) = Dummy i1 x1 (paste p c x2)
+  paste (0:p) c (Dummy x1 x2) = Dummy (paste p c x1) x2
+  paste (1:p) c (Dummy x1 x2) = Dummy x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Dummy {Root} {Dummy} "  , Clip_Dummy $ Dummy NoIDD hole hole)
+  alternatives _ = [("Dummy {Root} {Dummy} "  , Clip_Dummy $ Dummy hole hole)
                    ,("{Dummy}", Clip_Dummy hole)
                    ]
 
-  arity (Dummy _ x1 x2) = 2
+  arity (Dummy x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrDummy
@@ -379,19 +379,19 @@ instance Editable Dummy Document Node ClipDoc UserToken where
 
 instance Editable Root Document Node ClipDoc UserToken where
   select []    x                  = Clip_Root x
-  select (0:p) (Root _ _ x1) = select p x1
+  select (0:p) (Root _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Root c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Root")   x
-  paste (0:p) c (Root i1 i2 x1) = Root i1 i2 (paste p c x1)
+  paste (0:p) c (Root i1 x1) = Root i1 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Decls} "  , Clip_Root $ Root NoIDD NoIDP hole)
+  alternatives _ = [("Root {Decls} "  , Clip_Root $ Root NoIDP hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root _ _ x1) = 1
+  arity (Root _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrRoot
@@ -406,21 +406,21 @@ instance Editable Root Document Node ClipDoc UserToken where
 
 instance Editable RootE Document Node ClipDoc UserToken where
   select []    x                  = Clip_RootE x
-  select (0:p) (RootE _ _ x1 x2) = select p x1
-  select (1:p) (RootE _ _ x1 x2) = select p x2
+  select (0:p) (RootE _ x1 x2) = select p x1
+  select (1:p) (RootE _ x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_RootE c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on RootE")   x
-  paste (0:p) c (RootE i1 i2 x1 x2) = RootE i1 i2 (paste p c x1) x2
-  paste (1:p) c (RootE i1 i2 x1 x2) = RootE i1 i2 x1 (paste p c x2)
+  paste (0:p) c (RootE i1 x1 x2) = RootE i1 (paste p c x1) x2
+  paste (1:p) c (RootE i1 x1 x2) = RootE i1 x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("RootE {Decls} {Decls} "  , Clip_RootE $ RootE NoIDD NoIDP hole hole)
+  alternatives _ = [("RootE {Decls} {Decls} "  , Clip_RootE $ RootE NoIDP hole hole)
                    ,("{RootE}", Clip_RootE hole)
                    ]
 
-  arity (RootE _ _ x1 x2) = 2
+  arity (RootE _ x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrRootE
@@ -435,33 +435,33 @@ instance Editable RootE Document Node ClipDoc UserToken where
 
 instance Editable Decl Document Node ClipDoc UserToken where
   select []    x                  = Clip_Decl x
-  select (0:p) (Decl _ _ _ _ _ x1 x2 x3 x4) = select p x1
-  select (1:p) (Decl _ _ _ _ _ x1 x2 x3 x4) = select p x2
-  select (2:p) (Decl _ _ _ _ _ x1 x2 x3 x4) = select p x3
-  select (3:p) (Decl _ _ _ _ _ x1 x2 x3 x4) = select p x4
-  select (0:p) (BoardDecl _ _ _ x1) = select p x1
-  select (0:p) (PPPresentationDecl _ _ _ x1) = select p x1
+  select (0:p) (Decl _ _ _ _ x1 x2 x3 x4) = select p x1
+  select (1:p) (Decl _ _ _ _ x1 x2 x3 x4) = select p x2
+  select (2:p) (Decl _ _ _ _ x1 x2 x3 x4) = select p x3
+  select (3:p) (Decl _ _ _ _ x1 x2 x3 x4) = select p x4
+  select (0:p) (BoardDecl _ _ x1) = select p x1
+  select (0:p) (PPPresentationDecl _ _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Decl c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Decl")   x
-  paste (0:p) c (Decl i1 i2 i3 i4 i5 x1 x2 x3 x4) = Decl i1 i2 i3 i4 i5 (paste p c x1) x2 x3 x4
-  paste (1:p) c (Decl i1 i2 i3 i4 i5 x1 x2 x3 x4) = Decl i1 i2 i3 i4 i5 x1 (paste p c x2) x3 x4
-  paste (2:p) c (Decl i1 i2 i3 i4 i5 x1 x2 x3 x4) = Decl i1 i2 i3 i4 i5 x1 x2 (paste p c x3) x4
-  paste (3:p) c (Decl i1 i2 i3 i4 i5 x1 x2 x3 x4) = Decl i1 i2 i3 i4 i5 x1 x2 x3 (paste p c x4)
-  paste (0:p) c (BoardDecl i1 i2 i3 x1) = BoardDecl i1 i2 i3 (paste p c x1)
-  paste (0:p) c (PPPresentationDecl i1 i2 i3 x1) = PPPresentationDecl i1 i2 i3 (paste p c x1)
+  paste (0:p) c (Decl i1 i2 i3 i4 x1 x2 x3 x4) = Decl i1 i2 i3 i4 (paste p c x1) x2 x3 x4
+  paste (1:p) c (Decl i1 i2 i3 i4 x1 x2 x3 x4) = Decl i1 i2 i3 i4 x1 (paste p c x2) x3 x4
+  paste (2:p) c (Decl i1 i2 i3 i4 x1 x2 x3 x4) = Decl i1 i2 i3 i4 x1 x2 (paste p c x3) x4
+  paste (3:p) c (Decl i1 i2 i3 i4 x1 x2 x3 x4) = Decl i1 i2 i3 i4 x1 x2 x3 (paste p c x4)
+  paste (0:p) c (BoardDecl i1 i2 x1) = BoardDecl i1 i2 (paste p c x1)
+  paste (0:p) c (PPPresentationDecl i1 i2 x1) = PPPresentationDecl i1 i2 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Decl {Ident} {Exp} "  , Clip_Decl $ Decl NoIDD NoIDP NoIDP NoIDP NoIDP hole hole hole hole)
-                   ,("BoardDecl {Board} "  , Clip_Decl $ BoardDecl NoIDD NoIDP NoIDP hole)
-                   ,("PPPresentationDecl {PPPresentation} "  , Clip_Decl $ PPPresentationDecl NoIDD NoIDP NoIDP hole)
+  alternatives _ = [("Decl {Ident} {Exp} "  , Clip_Decl $ Decl NoIDP NoIDP NoIDP NoIDP hole hole hole hole)
+                   ,("BoardDecl {Board} "  , Clip_Decl $ BoardDecl NoIDP NoIDP hole)
+                   ,("PPPresentationDecl {PPPresentation} "  , Clip_Decl $ PPPresentationDecl NoIDP NoIDP hole)
                    ,("{Decl}", Clip_Decl hole)
                    ]
 
-  arity (Decl _ _ _ _ _ x1 x2 x3 x4) = 4
-  arity (BoardDecl _ _ _ x1) = 1
-  arity (PPPresentationDecl _ _ _ x1) = 1
+  arity (Decl _ _ _ _ x1 x2 x3 x4) = 4
+  arity (BoardDecl _ _ x1) = 1
+  arity (PPPresentationDecl _ _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrDecl
@@ -476,19 +476,19 @@ instance Editable Decl Document Node ClipDoc UserToken where
 
 instance Editable Ident Document Node ClipDoc UserToken where
   select []    x                  = Clip_Ident x
-  select (0:p) (Ident _ _ _ x1) = select p x1
+  select (0:p) (Ident _ _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Ident c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Ident")   x
-  paste (0:p) c (Ident i1 i2 i3 x1) = Ident i1 i2 i3 (paste p c x1)
+  paste (0:p) c (Ident i1 i2 x1) = Ident i1 i2 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Ident "  , Clip_Ident $ Ident NoIDD NoIDP NoIDP hole)
+  alternatives _ = [("Ident "  , Clip_Ident $ Ident NoIDP NoIDP hole)
                    ,("{Ident}", Clip_Ident hole)
                    ]
 
-  arity (Ident _ _ _ x1) = 1
+  arity (Ident _ _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrIdent
@@ -503,95 +503,95 @@ instance Editable Ident Document Node ClipDoc UserToken where
 
 instance Editable Exp Document Node ClipDoc UserToken where
   select []    x                  = Clip_Exp x
-  select (0:p) (PlusExp _ _ x1 x2) = select p x1
-  select (1:p) (PlusExp _ _ x1 x2) = select p x2
-  select (0:p) (TimesExp _ _ x1 x2) = select p x1
-  select (1:p) (TimesExp _ _ x1 x2) = select p x2
-  select (0:p) (DivExp _ _ x1 x2) = select p x1
-  select (1:p) (DivExp _ _ x1 x2) = select p x2
-  select (0:p) (PowerExp _ _ x1 x2) = select p x1
-  select (1:p) (PowerExp _ _ x1 x2) = select p x2
-  select (0:p) (BoolExp _ _ x1) = select p x1
-  select (0:p) (IntExp _ _ x1) = select p x1
-  select (0:p) (LamExp _ _ _ x1 x2) = select p x1
-  select (1:p) (LamExp _ _ _ x1 x2) = select p x2
-  select (0:p) (AppExp _ x1 x2) = select p x1
-  select (1:p) (AppExp _ x1 x2) = select p x2
-  select (0:p) (CaseExp _ _ _ x1 x2) = select p x1
-  select (1:p) (CaseExp _ _ _ x1 x2) = select p x2
-  select (0:p) (LetExp _ _ _ x1 x2) = select p x1
-  select (1:p) (LetExp _ _ _ x1 x2) = select p x2
-  select (0:p) (IdentExp _ x1) = select p x1
-  select (0:p) (IfExp _ _ _ _ x1 x2 x3) = select p x1
-  select (1:p) (IfExp _ _ _ _ x1 x2 x3) = select p x2
-  select (2:p) (IfExp _ _ _ _ x1 x2 x3) = select p x3
-  select (0:p) (ParenExp _ _ _ x1) = select p x1
-  select (0:p) (ListExp _ _ _ _ x1) = select p x1
-  select (0:p) (ProductExp _ _ _ _ x1) = select p x1
+  select (0:p) (PlusExp _ x1 x2) = select p x1
+  select (1:p) (PlusExp _ x1 x2) = select p x2
+  select (0:p) (TimesExp _ x1 x2) = select p x1
+  select (1:p) (TimesExp _ x1 x2) = select p x2
+  select (0:p) (DivExp _ x1 x2) = select p x1
+  select (1:p) (DivExp _ x1 x2) = select p x2
+  select (0:p) (PowerExp _ x1 x2) = select p x1
+  select (1:p) (PowerExp _ x1 x2) = select p x2
+  select (0:p) (BoolExp _ x1) = select p x1
+  select (0:p) (IntExp _ x1) = select p x1
+  select (0:p) (LamExp _ _ x1 x2) = select p x1
+  select (1:p) (LamExp _ _ x1 x2) = select p x2
+  select (0:p) (AppExp x1 x2) = select p x1
+  select (1:p) (AppExp x1 x2) = select p x2
+  select (0:p) (CaseExp _ _ x1 x2) = select p x1
+  select (1:p) (CaseExp _ _ x1 x2) = select p x2
+  select (0:p) (LetExp _ _ x1 x2) = select p x1
+  select (1:p) (LetExp _ _ x1 x2) = select p x2
+  select (0:p) (IdentExp x1) = select p x1
+  select (0:p) (IfExp _ _ _ x1 x2 x3) = select p x1
+  select (1:p) (IfExp _ _ _ x1 x2 x3) = select p x2
+  select (2:p) (IfExp _ _ _ x1 x2 x3) = select p x3
+  select (0:p) (ParenExp _ _ x1) = select p x1
+  select (0:p) (ListExp _ _ _ x1) = select p x1
+  select (0:p) (ProductExp _ _ _ x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Exp c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Exp")   x
-  paste (0:p) c (PlusExp i1 i2 x1 x2) = PlusExp i1 i2 (paste p c x1) x2
-  paste (1:p) c (PlusExp i1 i2 x1 x2) = PlusExp i1 i2 x1 (paste p c x2)
-  paste (0:p) c (TimesExp i1 i2 x1 x2) = TimesExp i1 i2 (paste p c x1) x2
-  paste (1:p) c (TimesExp i1 i2 x1 x2) = TimesExp i1 i2 x1 (paste p c x2)
-  paste (0:p) c (DivExp i1 i2 x1 x2) = DivExp i1 i2 (paste p c x1) x2
-  paste (1:p) c (DivExp i1 i2 x1 x2) = DivExp i1 i2 x1 (paste p c x2)
-  paste (0:p) c (PowerExp i1 i2 x1 x2) = PowerExp i1 i2 (paste p c x1) x2
-  paste (1:p) c (PowerExp i1 i2 x1 x2) = PowerExp i1 i2 x1 (paste p c x2)
-  paste (0:p) c (BoolExp i1 i2 x1) = BoolExp i1 i2 (paste p c x1)
-  paste (0:p) c (IntExp i1 i2 x1) = IntExp i1 i2 (paste p c x1)
-  paste (0:p) c (LamExp i1 i2 i3 x1 x2) = LamExp i1 i2 i3 (paste p c x1) x2
-  paste (1:p) c (LamExp i1 i2 i3 x1 x2) = LamExp i1 i2 i3 x1 (paste p c x2)
-  paste (0:p) c (AppExp i1 x1 x2) = AppExp i1 (paste p c x1) x2
-  paste (1:p) c (AppExp i1 x1 x2) = AppExp i1 x1 (paste p c x2)
-  paste (0:p) c (CaseExp i1 i2 i3 x1 x2) = CaseExp i1 i2 i3 (paste p c x1) x2
-  paste (1:p) c (CaseExp i1 i2 i3 x1 x2) = CaseExp i1 i2 i3 x1 (paste p c x2)
-  paste (0:p) c (LetExp i1 i2 i3 x1 x2) = LetExp i1 i2 i3 (paste p c x1) x2
-  paste (1:p) c (LetExp i1 i2 i3 x1 x2) = LetExp i1 i2 i3 x1 (paste p c x2)
-  paste (0:p) c (IdentExp i1 x1) = IdentExp i1 (paste p c x1)
-  paste (0:p) c (IfExp i1 i2 i3 i4 x1 x2 x3) = IfExp i1 i2 i3 i4 (paste p c x1) x2 x3
-  paste (1:p) c (IfExp i1 i2 i3 i4 x1 x2 x3) = IfExp i1 i2 i3 i4 x1 (paste p c x2) x3
-  paste (2:p) c (IfExp i1 i2 i3 i4 x1 x2 x3) = IfExp i1 i2 i3 i4 x1 x2 (paste p c x3)
-  paste (0:p) c (ParenExp i1 i2 i3 x1) = ParenExp i1 i2 i3 (paste p c x1)
-  paste (0:p) c (ListExp i1 i2 i3 i4 x1) = ListExp i1 i2 i3 i4 (paste p c x1)
-  paste (0:p) c (ProductExp i1 i2 i3 i4 x1) = ProductExp i1 i2 i3 i4 (paste p c x1)
+  paste (0:p) c (PlusExp i1 x1 x2) = PlusExp i1 (paste p c x1) x2
+  paste (1:p) c (PlusExp i1 x1 x2) = PlusExp i1 x1 (paste p c x2)
+  paste (0:p) c (TimesExp i1 x1 x2) = TimesExp i1 (paste p c x1) x2
+  paste (1:p) c (TimesExp i1 x1 x2) = TimesExp i1 x1 (paste p c x2)
+  paste (0:p) c (DivExp i1 x1 x2) = DivExp i1 (paste p c x1) x2
+  paste (1:p) c (DivExp i1 x1 x2) = DivExp i1 x1 (paste p c x2)
+  paste (0:p) c (PowerExp i1 x1 x2) = PowerExp i1 (paste p c x1) x2
+  paste (1:p) c (PowerExp i1 x1 x2) = PowerExp i1 x1 (paste p c x2)
+  paste (0:p) c (BoolExp i1 x1) = BoolExp i1 (paste p c x1)
+  paste (0:p) c (IntExp i1 x1) = IntExp i1 (paste p c x1)
+  paste (0:p) c (LamExp i1 i2 x1 x2) = LamExp i1 i2 (paste p c x1) x2
+  paste (1:p) c (LamExp i1 i2 x1 x2) = LamExp i1 i2 x1 (paste p c x2)
+  paste (0:p) c (AppExp x1 x2) = AppExp (paste p c x1) x2
+  paste (1:p) c (AppExp x1 x2) = AppExp x1 (paste p c x2)
+  paste (0:p) c (CaseExp i1 i2 x1 x2) = CaseExp i1 i2 (paste p c x1) x2
+  paste (1:p) c (CaseExp i1 i2 x1 x2) = CaseExp i1 i2 x1 (paste p c x2)
+  paste (0:p) c (LetExp i1 i2 x1 x2) = LetExp i1 i2 (paste p c x1) x2
+  paste (1:p) c (LetExp i1 i2 x1 x2) = LetExp i1 i2 x1 (paste p c x2)
+  paste (0:p) c (IdentExp x1) = IdentExp (paste p c x1)
+  paste (0:p) c (IfExp i1 i2 i3 x1 x2 x3) = IfExp i1 i2 i3 (paste p c x1) x2 x3
+  paste (1:p) c (IfExp i1 i2 i3 x1 x2 x3) = IfExp i1 i2 i3 x1 (paste p c x2) x3
+  paste (2:p) c (IfExp i1 i2 i3 x1 x2 x3) = IfExp i1 i2 i3 x1 x2 (paste p c x3)
+  paste (0:p) c (ParenExp i1 i2 x1) = ParenExp i1 i2 (paste p c x1)
+  paste (0:p) c (ListExp i1 i2 i3 x1) = ListExp i1 i2 i3 (paste p c x1)
+  paste (0:p) c (ProductExp i1 i2 i3 x1) = ProductExp i1 i2 i3 (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("PlusExp {Exp} {Exp} "  , Clip_Exp $ PlusExp NoIDD NoIDP hole hole)
-                   ,("TimesExp {Exp} {Exp} "  , Clip_Exp $ TimesExp NoIDD NoIDP hole hole)
-                   ,("DivExp {Exp} {Exp} "  , Clip_Exp $ DivExp NoIDD NoIDP hole hole)
-                   ,("PowerExp {Exp} {Exp} "  , Clip_Exp $ PowerExp NoIDD NoIDP hole hole)
-                   ,("BoolExp "  , Clip_Exp $ BoolExp NoIDD NoIDP hole)
-                   ,("IntExp "  , Clip_Exp $ IntExp NoIDD NoIDP hole)
-                   ,("LamExp {Ident} {Exp} "  , Clip_Exp $ LamExp NoIDD NoIDP NoIDP hole hole)
-                   ,("AppExp {Exp} {Exp} "  , Clip_Exp $ AppExp NoIDD hole hole)
-                   ,("CaseExp {Exp} {Alts} "  , Clip_Exp $ CaseExp NoIDD NoIDP NoIDP hole hole)
-                   ,("LetExp {Decls} {Exp} "  , Clip_Exp $ LetExp NoIDD NoIDP NoIDP hole hole)
-                   ,("IdentExp {Ident} "  , Clip_Exp $ IdentExp NoIDD hole)
-                   ,("IfExp {Exp} {Exp} {Exp} "  , Clip_Exp $ IfExp NoIDD NoIDP NoIDP NoIDP hole hole hole)
-                   ,("ParenExp {Exp} "  , Clip_Exp $ ParenExp NoIDD NoIDP NoIDP hole)
-                   ,("ListExp {Exps} "  , Clip_Exp $ ListExp NoIDD NoIDP NoIDP [] hole)
-                   ,("ProductExp {Exps} "  , Clip_Exp $ ProductExp NoIDD NoIDP NoIDP [] hole)
+  alternatives _ = [("PlusExp {Exp} {Exp} "  , Clip_Exp $ PlusExp NoIDP hole hole)
+                   ,("TimesExp {Exp} {Exp} "  , Clip_Exp $ TimesExp NoIDP hole hole)
+                   ,("DivExp {Exp} {Exp} "  , Clip_Exp $ DivExp NoIDP hole hole)
+                   ,("PowerExp {Exp} {Exp} "  , Clip_Exp $ PowerExp NoIDP hole hole)
+                   ,("BoolExp "  , Clip_Exp $ BoolExp NoIDP hole)
+                   ,("IntExp "  , Clip_Exp $ IntExp NoIDP hole)
+                   ,("LamExp {Ident} {Exp} "  , Clip_Exp $ LamExp NoIDP NoIDP hole hole)
+                   ,("AppExp {Exp} {Exp} "  , Clip_Exp $ AppExp hole hole)
+                   ,("CaseExp {Exp} {Alts} "  , Clip_Exp $ CaseExp NoIDP NoIDP hole hole)
+                   ,("LetExp {Decls} {Exp} "  , Clip_Exp $ LetExp NoIDP NoIDP hole hole)
+                   ,("IdentExp {Ident} "  , Clip_Exp $ IdentExp hole)
+                   ,("IfExp {Exp} {Exp} {Exp} "  , Clip_Exp $ IfExp NoIDP NoIDP NoIDP hole hole hole)
+                   ,("ParenExp {Exp} "  , Clip_Exp $ ParenExp NoIDP NoIDP hole)
+                   ,("ListExp {Exps} "  , Clip_Exp $ ListExp NoIDP NoIDP [] hole)
+                   ,("ProductExp {Exps} "  , Clip_Exp $ ProductExp NoIDP NoIDP [] hole)
                    ,("{Exp}", Clip_Exp hole)
                    ]
 
-  arity (PlusExp _ _ x1 x2) = 2
-  arity (TimesExp _ _ x1 x2) = 2
-  arity (DivExp _ _ x1 x2) = 2
-  arity (PowerExp _ _ x1 x2) = 2
-  arity (BoolExp _ _ x1) = 1
-  arity (IntExp _ _ x1) = 1
-  arity (LamExp _ _ _ x1 x2) = 2
-  arity (AppExp _ x1 x2) = 2
-  arity (CaseExp _ _ _ x1 x2) = 2
-  arity (LetExp _ _ _ x1 x2) = 2
-  arity (IdentExp _ x1) = 1
-  arity (IfExp _ _ _ _ x1 x2 x3) = 3
-  arity (ParenExp _ _ _ x1) = 1
-  arity (ListExp _ _ _ _ x1) = 1
-  arity (ProductExp _ _ _ _ x1) = 1
+  arity (PlusExp _ x1 x2) = 2
+  arity (TimesExp _ x1 x2) = 2
+  arity (DivExp _ x1 x2) = 2
+  arity (PowerExp _ x1 x2) = 2
+  arity (BoolExp _ x1) = 1
+  arity (IntExp _ x1) = 1
+  arity (LamExp _ _ x1 x2) = 2
+  arity (AppExp x1 x2) = 2
+  arity (CaseExp _ _ x1 x2) = 2
+  arity (LetExp _ _ x1 x2) = 2
+  arity (IdentExp x1) = 1
+  arity (IfExp _ _ _ x1 x2 x3) = 3
+  arity (ParenExp _ _ x1) = 1
+  arity (ListExp _ _ _ x1) = 1
+  arity (ProductExp _ _ _ x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrExp
@@ -606,21 +606,21 @@ instance Editable Exp Document Node ClipDoc UserToken where
 
 instance Editable Alt Document Node ClipDoc UserToken where
   select []    x                  = Clip_Alt x
-  select (0:p) (Alt _ _ _ x1 x2) = select p x1
-  select (1:p) (Alt _ _ _ x1 x2) = select p x2
+  select (0:p) (Alt _ _ x1 x2) = select p x1
+  select (1:p) (Alt _ _ x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Alt c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Alt")   x
-  paste (0:p) c (Alt i1 i2 i3 x1 x2) = Alt i1 i2 i3 (paste p c x1) x2
-  paste (1:p) c (Alt i1 i2 i3 x1 x2) = Alt i1 i2 i3 x1 (paste p c x2)
+  paste (0:p) c (Alt i1 i2 x1 x2) = Alt i1 i2 (paste p c x1) x2
+  paste (1:p) c (Alt i1 i2 x1 x2) = Alt i1 i2 x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Alt {Ident} {Exp} "  , Clip_Alt $ Alt NoIDD NoIDP NoIDP hole hole)
+  alternatives _ = [("Alt {Ident} {Exp} "  , Clip_Alt $ Alt NoIDP NoIDP hole hole)
                    ,("{Alt}", Clip_Alt hole)
                    ]
 
-  arity (Alt _ _ _ x1 x2) = 2
+  arity (Alt _ _ x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrAlt
@@ -635,33 +635,33 @@ instance Editable Alt Document Node ClipDoc UserToken where
 
 instance Editable Board Document Node ClipDoc UserToken where
   select []    x                  = Clip_Board x
-  select (0:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
-  select (1:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
-  select (2:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
-  select (3:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
-  select (4:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
-  select (5:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
-  select (6:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
-  select (7:p) (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
+  select (0:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
+  select (1:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
+  select (2:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
+  select (3:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
+  select (4:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
+  select (5:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
+  select (6:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
+  select (7:p) (Board x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Board c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Board")   x
-  paste (0:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 (paste p c x1) x2 x3 x4 x5 x6 x7 x8
-  paste (1:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 (paste p c x2) x3 x4 x5 x6 x7 x8
-  paste (2:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 (paste p c x3) x4 x5 x6 x7 x8
-  paste (3:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 x3 (paste p c x4) x5 x6 x7 x8
-  paste (4:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 x3 x4 (paste p c x5) x6 x7 x8
-  paste (5:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 x3 x4 x5 (paste p c x6) x7 x8
-  paste (6:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 x3 x4 x5 x6 (paste p c x7) x8
-  paste (7:p) c (Board i1 x1 x2 x3 x4 x5 x6 x7 x8) = Board i1 x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
+  paste (0:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board (paste p c x1) x2 x3 x4 x5 x6 x7 x8
+  paste (1:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 (paste p c x2) x3 x4 x5 x6 x7 x8
+  paste (2:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 (paste p c x3) x4 x5 x6 x7 x8
+  paste (3:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 x3 (paste p c x4) x5 x6 x7 x8
+  paste (4:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 x3 x4 (paste p c x5) x6 x7 x8
+  paste (5:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 x3 x4 x5 (paste p c x6) x7 x8
+  paste (6:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 x3 x4 x5 x6 (paste p c x7) x8
+  paste (7:p) c (Board x1 x2 x3 x4 x5 x6 x7 x8) = Board x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
   paste _  _  x                    = x
 
-  alternatives _ = [("Board {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} "  , Clip_Board $ Board NoIDD hole hole hole hole hole hole hole hole)
+  alternatives _ = [("Board {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} {BoardRow} "  , Clip_Board $ Board hole hole hole hole hole hole hole hole)
                    ,("{Board}", Clip_Board hole)
                    ]
 
-  arity (Board _ x1 x2 x3 x4 x5 x6 x7 x8) = 8
+  arity (Board x1 x2 x3 x4 x5 x6 x7 x8) = 8
   arity _                        = 0
 
   parseErr = ParseErrBoard
@@ -676,33 +676,33 @@ instance Editable Board Document Node ClipDoc UserToken where
 
 instance Editable BoardRow Document Node ClipDoc UserToken where
   select []    x                  = Clip_BoardRow x
-  select (0:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
-  select (1:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
-  select (2:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
-  select (3:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
-  select (4:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
-  select (5:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
-  select (6:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
-  select (7:p) (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
+  select (0:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
+  select (1:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
+  select (2:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
+  select (3:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
+  select (4:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
+  select (5:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
+  select (6:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
+  select (7:p) (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_BoardRow c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on BoardRow")   x
-  paste (0:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 (paste p c x1) x2 x3 x4 x5 x6 x7 x8
-  paste (1:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 (paste p c x2) x3 x4 x5 x6 x7 x8
-  paste (2:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 (paste p c x3) x4 x5 x6 x7 x8
-  paste (3:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 x3 (paste p c x4) x5 x6 x7 x8
-  paste (4:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 x3 x4 (paste p c x5) x6 x7 x8
-  paste (5:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 x3 x4 x5 (paste p c x6) x7 x8
-  paste (6:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 x3 x4 x5 x6 (paste p c x7) x8
-  paste (7:p) c (BoardRow i1 x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow i1 x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
+  paste (0:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow (paste p c x1) x2 x3 x4 x5 x6 x7 x8
+  paste (1:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 (paste p c x2) x3 x4 x5 x6 x7 x8
+  paste (2:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 (paste p c x3) x4 x5 x6 x7 x8
+  paste (3:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 x3 (paste p c x4) x5 x6 x7 x8
+  paste (4:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 x3 x4 (paste p c x5) x6 x7 x8
+  paste (5:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 x3 x4 x5 (paste p c x6) x7 x8
+  paste (6:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 x3 x4 x5 x6 (paste p c x7) x8
+  paste (7:p) c (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = BoardRow x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
   paste _  _  x                    = x
 
-  alternatives _ = [("BoardRow {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} "  , Clip_BoardRow $ BoardRow NoIDD hole hole hole hole hole hole hole hole)
+  alternatives _ = [("BoardRow {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} {BoardSquare} "  , Clip_BoardRow $ BoardRow hole hole hole hole hole hole hole hole)
                    ,("{BoardRow}", Clip_BoardRow hole)
                    ]
 
-  arity (BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = 8
+  arity (BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = 8
   arity _                        = 0
 
   parseErr = ParseErrBoardRow
@@ -717,40 +717,40 @@ instance Editable BoardRow Document Node ClipDoc UserToken where
 
 instance Editable BoardSquare Document Node ClipDoc UserToken where
   select []    x                  = Clip_BoardSquare x
-  select (0:p) (Queen _ x1) = select p x1
-  select (0:p) (King _ x1) = select p x1
-  select (0:p) (Bishop _ x1) = select p x1
-  select (0:p) (Knight _ x1) = select p x1
-  select (0:p) (Rook _ x1) = select p x1
-  select (0:p) (Pawn _ x1) = select p x1
+  select (0:p) (Queen x1) = select p x1
+  select (0:p) (King x1) = select p x1
+  select (0:p) (Bishop x1) = select p x1
+  select (0:p) (Knight x1) = select p x1
+  select (0:p) (Rook x1) = select p x1
+  select (0:p) (Pawn x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_BoardSquare c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on BoardSquare")   x
-  paste (0:p) c (Queen i1 x1) = Queen i1 (paste p c x1)
-  paste (0:p) c (King i1 x1) = King i1 (paste p c x1)
-  paste (0:p) c (Bishop i1 x1) = Bishop i1 (paste p c x1)
-  paste (0:p) c (Knight i1 x1) = Knight i1 (paste p c x1)
-  paste (0:p) c (Rook i1 x1) = Rook i1 (paste p c x1)
-  paste (0:p) c (Pawn i1 x1) = Pawn i1 (paste p c x1)
+  paste (0:p) c (Queen x1) = Queen (paste p c x1)
+  paste (0:p) c (King x1) = King (paste p c x1)
+  paste (0:p) c (Bishop x1) = Bishop (paste p c x1)
+  paste (0:p) c (Knight x1) = Knight (paste p c x1)
+  paste (0:p) c (Rook x1) = Rook (paste p c x1)
+  paste (0:p) c (Pawn x1) = Pawn (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Queen "  , Clip_BoardSquare $ Queen NoIDD hole)
-                   ,("King "  , Clip_BoardSquare $ King NoIDD hole)
-                   ,("Bishop "  , Clip_BoardSquare $ Bishop NoIDD hole)
-                   ,("Knight "  , Clip_BoardSquare $ Knight NoIDD hole)
-                   ,("Rook "  , Clip_BoardSquare $ Rook NoIDD hole)
-                   ,("Pawn "  , Clip_BoardSquare $ Pawn NoIDD hole)
+  alternatives _ = [("Queen "  , Clip_BoardSquare $ Queen hole)
+                   ,("King "  , Clip_BoardSquare $ King hole)
+                   ,("Bishop "  , Clip_BoardSquare $ Bishop hole)
+                   ,("Knight "  , Clip_BoardSquare $ Knight hole)
+                   ,("Rook "  , Clip_BoardSquare $ Rook hole)
+                   ,("Pawn "  , Clip_BoardSquare $ Pawn hole)
                    ,("Empty "  , Clip_BoardSquare $ Empty)
                    ,("{BoardSquare}", Clip_BoardSquare hole)
                    ]
 
-  arity (Queen _ x1) = 1
-  arity (King _ x1) = 1
-  arity (Bishop _ x1) = 1
-  arity (Knight _ x1) = 1
-  arity (Rook _ x1) = 1
-  arity (Pawn _ x1) = 1
+  arity (Queen x1) = 1
+  arity (King x1) = 1
+  arity (Bishop x1) = 1
+  arity (Knight x1) = 1
+  arity (Rook x1) = 1
+  arity (Pawn x1) = 1
   arity (Empty) = 0
   arity _                        = 0
 
@@ -766,21 +766,21 @@ instance Editable BoardSquare Document Node ClipDoc UserToken where
 
 instance Editable PPPresentation Document Node ClipDoc UserToken where
   select []    x                  = Clip_PPPresentation x
-  select (0:p) (PPPresentation _ x1 x2) = select p x1
-  select (1:p) (PPPresentation _ x1 x2) = select p x2
+  select (0:p) (PPPresentation x1 x2) = select p x1
+  select (1:p) (PPPresentation x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_PPPresentation c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on PPPresentation")   x
-  paste (0:p) c (PPPresentation i1 x1 x2) = PPPresentation i1 (paste p c x1) x2
-  paste (1:p) c (PPPresentation i1 x1 x2) = PPPresentation i1 x1 (paste p c x2)
+  paste (0:p) c (PPPresentation x1 x2) = PPPresentation (paste p c x1) x2
+  paste (1:p) c (PPPresentation x1 x2) = PPPresentation x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("PPPresentation {Slides} "  , Clip_PPPresentation $ PPPresentation NoIDD hole hole)
+  alternatives _ = [("PPPresentation {Slides} "  , Clip_PPPresentation $ PPPresentation hole hole)
                    ,("{PPPresentation}", Clip_PPPresentation hole)
                    ]
 
-  arity (PPPresentation _ x1 x2) = 2
+  arity (PPPresentation x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrPPPresentation
@@ -795,21 +795,21 @@ instance Editable PPPresentation Document Node ClipDoc UserToken where
 
 instance Editable Slide Document Node ClipDoc UserToken where
   select []    x                  = Clip_Slide x
-  select (0:p) (Slide _ x1 x2) = select p x1
-  select (1:p) (Slide _ x1 x2) = select p x2
+  select (0:p) (Slide x1 x2) = select p x1
+  select (1:p) (Slide x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Slide c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Slide")   x
-  paste (0:p) c (Slide i1 x1 x2) = Slide i1 (paste p c x1) x2
-  paste (1:p) c (Slide i1 x1 x2) = Slide i1 x1 (paste p c x2)
+  paste (0:p) c (Slide x1 x2) = Slide (paste p c x1) x2
+  paste (1:p) c (Slide x1 x2) = Slide x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Slide {ItemList} "  , Clip_Slide $ Slide NoIDD hole hole)
+  alternatives _ = [("Slide {ItemList} "  , Clip_Slide $ Slide hole hole)
                    ,("{Slide}", Clip_Slide hole)
                    ]
 
-  arity (Slide _ x1 x2) = 2
+  arity (Slide x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrSlide
@@ -824,21 +824,21 @@ instance Editable Slide Document Node ClipDoc UserToken where
 
 instance Editable ItemList Document Node ClipDoc UserToken where
   select []    x                  = Clip_ItemList x
-  select (0:p) (ItemList _ x1 x2) = select p x1
-  select (1:p) (ItemList _ x1 x2) = select p x2
+  select (0:p) (ItemList x1 x2) = select p x1
+  select (1:p) (ItemList x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_ItemList c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on ItemList")   x
-  paste (0:p) c (ItemList i1 x1 x2) = ItemList i1 (paste p c x1) x2
-  paste (1:p) c (ItemList i1 x1 x2) = ItemList i1 x1 (paste p c x2)
+  paste (0:p) c (ItemList x1 x2) = ItemList (paste p c x1) x2
+  paste (1:p) c (ItemList x1 x2) = ItemList x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("ItemList {ListType} {Items} "  , Clip_ItemList $ ItemList NoIDD hole hole)
+  alternatives _ = [("ItemList {ListType} {Items} "  , Clip_ItemList $ ItemList hole hole)
                    ,("{ItemList}", Clip_ItemList hole)
                    ]
 
-  arity (ItemList _ x1 x2) = 2
+  arity (ItemList x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrItemList
@@ -859,15 +859,15 @@ instance Editable ListType Document Node ClipDoc UserToken where
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on ListType")   x
   paste _  _  x                    = x
 
-  alternatives _ = [("Bullet "  , Clip_ListType $ Bullet NoIDD)
-                   ,("Number "  , Clip_ListType $ Number NoIDD)
-                   ,("Alpha "  , Clip_ListType $ Alpha NoIDD)
+  alternatives _ = [("Bullet "  , Clip_ListType $ Bullet)
+                   ,("Number "  , Clip_ListType $ Number)
+                   ,("Alpha "  , Clip_ListType $ Alpha)
                    ,("{ListType}", Clip_ListType hole)
                    ]
 
-  arity (Bullet _) = 0
-  arity (Number _) = 0
-  arity (Alpha _) = 0
+  arity (Bullet) = 0
+  arity (Number) = 0
+  arity (Alpha) = 0
   arity _                        = 0
 
   parseErr = ParseErrListType
@@ -882,27 +882,27 @@ instance Editable ListType Document Node ClipDoc UserToken where
 
 instance Editable Item Document Node ClipDoc UserToken where
   select []    x                  = Clip_Item x
-  select (0:p) (StringItem _ x1) = select p x1
-  select (0:p) (HeliumItem _ x1) = select p x1
-  select (0:p) (ListItem _ x1) = select p x1
+  select (0:p) (StringItem x1) = select p x1
+  select (0:p) (HeliumItem x1) = select p x1
+  select (0:p) (ListItem x1) = select p x1
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Item c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Item")   x
-  paste (0:p) c (StringItem i1 x1) = StringItem i1 (paste p c x1)
-  paste (0:p) c (HeliumItem i1 x1) = HeliumItem i1 (paste p c x1)
-  paste (0:p) c (ListItem i1 x1) = ListItem i1 (paste p c x1)
+  paste (0:p) c (StringItem x1) = StringItem (paste p c x1)
+  paste (0:p) c (HeliumItem x1) = HeliumItem (paste p c x1)
+  paste (0:p) c (ListItem x1) = ListItem (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("StringItem "  , Clip_Item $ StringItem NoIDD hole)
-                   ,("HeliumItem {Exp} "  , Clip_Item $ HeliumItem NoIDD hole)
-                   ,("ListItem {ItemList} "  , Clip_Item $ ListItem NoIDD hole)
+  alternatives _ = [("StringItem "  , Clip_Item $ StringItem hole)
+                   ,("HeliumItem {Exp} "  , Clip_Item $ HeliumItem hole)
+                   ,("ListItem {ItemList} "  , Clip_Item $ ListItem hole)
                    ,("{Item}", Clip_Item hole)
                    ]
 
-  arity (StringItem _ x1) = 1
-  arity (HeliumItem _ x1) = 1
-  arity (ListItem _ x1) = 1
+  arity (StringItem x1) = 1
+  arity (HeliumItem x1) = 1
+  arity (ListItem x1) = 1
   arity _                        = 0
 
   parseErr = ParseErrItem
@@ -913,9 +913,9 @@ instance Editable Item Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
-toList_Decl vs = List_Decl NoIDD (toConsList_Decl vs)
+toList_Decl vs = List_Decl (toConsList_Decl vs)
 
-fromList_Decl (List_Decl _ vs) = fromConsList_Decl vs
+fromList_Decl (List_Decl vs) = fromConsList_Decl vs
 fromList_Decl _                  = []
 
 toConsList_Decl [] = Nil_Decl
@@ -938,7 +938,7 @@ removeList_Decl n (Cons_Decl cx cxs) = Cons_Decl cx (removeList_Decl (n-1) cxs)
 
 instance Editable List_Decl Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Decl x
-  select (n:p) (List_Decl _ cxs) = let xs = fromConsList_Decl cxs
+  select (n:p) (List_Decl cxs) = let xs = fromConsList_Decl cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -946,36 +946,36 @@ instance Editable List_Decl Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Decl c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Decl")   x
-  paste (n:p) c (List_Decl i1 cxs) = let xs = fromConsList_Decl cxs
+  paste (n:p) c (List_Decl cxs) = let xs = fromConsList_Decl cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Decl i1 (replaceList_Decl n x' cxs)
-                                        else List_Decl i1 cxs -- paste beyond end of list
+                                             in  List_Decl (replaceList_Decl n x' cxs)
+                                        else List_Decl cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Decl}", Clip_List_Decl hole)
                    ]
 
-  arity (List_Decl _ x1) = length (fromConsList_Decl x1)
-  arity _                        = 0
+  arity (List_Decl x1) = length (fromConsList_Decl x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Decl
 
-  hole = List_Decl NoIDD Nil_Decl
+  hole = List_Decl Nil_Decl
 
   isList _ = True
 
-  insertList n (Clip_Decl c) (List_Decl idd cxs) = Clip_List_Decl $ List_Decl idd (insertList_Decl n c cxs)
+  insertList n (Clip_Decl c) (List_Decl cxs) = Clip_List_Decl $ List_Decl (insertList_Decl n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Decl xs
   insertList _ c xs                 = Clip_List_Decl xs
 
-  removeList n (List_Decl idd cxs) = Clip_List_Decl $ List_Decl idd (removeList_Decl n cxs)
+  removeList n (List_Decl cxs) = Clip_List_Decl $ List_Decl (removeList_Decl n cxs)
   removeList _ xs                        = Clip_List_Decl $ xs
 
-toList_Alt vs = List_Alt NoIDD (toConsList_Alt vs)
+toList_Alt vs = List_Alt (toConsList_Alt vs)
 
-fromList_Alt (List_Alt _ vs) = fromConsList_Alt vs
+fromList_Alt (List_Alt vs) = fromConsList_Alt vs
 fromList_Alt _                  = []
 
 toConsList_Alt [] = Nil_Alt
@@ -998,7 +998,7 @@ removeList_Alt n (Cons_Alt cx cxs) = Cons_Alt cx (removeList_Alt (n-1) cxs)
 
 instance Editable List_Alt Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Alt x
-  select (n:p) (List_Alt _ cxs) = let xs = fromConsList_Alt cxs
+  select (n:p) (List_Alt cxs) = let xs = fromConsList_Alt cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1006,36 +1006,36 @@ instance Editable List_Alt Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Alt c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Alt")   x
-  paste (n:p) c (List_Alt i1 cxs) = let xs = fromConsList_Alt cxs
+  paste (n:p) c (List_Alt cxs) = let xs = fromConsList_Alt cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Alt i1 (replaceList_Alt n x' cxs)
-                                        else List_Alt i1 cxs -- paste beyond end of list
+                                             in  List_Alt (replaceList_Alt n x' cxs)
+                                        else List_Alt cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Alt}", Clip_List_Alt hole)
                    ]
 
-  arity (List_Alt _ x1) = length (fromConsList_Alt x1)
-  arity _                        = 0
+  arity (List_Alt x1) = length (fromConsList_Alt x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Alt
 
-  hole = List_Alt NoIDD Nil_Alt
+  hole = List_Alt Nil_Alt
 
   isList _ = True
 
-  insertList n (Clip_Alt c) (List_Alt idd cxs) = Clip_List_Alt $ List_Alt idd (insertList_Alt n c cxs)
+  insertList n (Clip_Alt c) (List_Alt cxs) = Clip_List_Alt $ List_Alt (insertList_Alt n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Alt xs
   insertList _ c xs                 = Clip_List_Alt xs
 
-  removeList n (List_Alt idd cxs) = Clip_List_Alt $ List_Alt idd (removeList_Alt n cxs)
+  removeList n (List_Alt cxs) = Clip_List_Alt $ List_Alt (removeList_Alt n cxs)
   removeList _ xs                        = Clip_List_Alt $ xs
 
-toList_Exp vs = List_Exp NoIDD (toConsList_Exp vs)
+toList_Exp vs = List_Exp (toConsList_Exp vs)
 
-fromList_Exp (List_Exp _ vs) = fromConsList_Exp vs
+fromList_Exp (List_Exp vs) = fromConsList_Exp vs
 fromList_Exp _                  = []
 
 toConsList_Exp [] = Nil_Exp
@@ -1058,7 +1058,7 @@ removeList_Exp n (Cons_Exp cx cxs) = Cons_Exp cx (removeList_Exp (n-1) cxs)
 
 instance Editable List_Exp Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Exp x
-  select (n:p) (List_Exp _ cxs) = let xs = fromConsList_Exp cxs
+  select (n:p) (List_Exp cxs) = let xs = fromConsList_Exp cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1066,36 +1066,36 @@ instance Editable List_Exp Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Exp c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Exp")   x
-  paste (n:p) c (List_Exp i1 cxs) = let xs = fromConsList_Exp cxs
+  paste (n:p) c (List_Exp cxs) = let xs = fromConsList_Exp cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Exp i1 (replaceList_Exp n x' cxs)
-                                        else List_Exp i1 cxs -- paste beyond end of list
+                                             in  List_Exp (replaceList_Exp n x' cxs)
+                                        else List_Exp cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Exp}", Clip_List_Exp hole)
                    ]
 
-  arity (List_Exp _ x1) = length (fromConsList_Exp x1)
-  arity _                        = 0
+  arity (List_Exp x1) = length (fromConsList_Exp x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Exp
 
-  hole = List_Exp NoIDD Nil_Exp
+  hole = List_Exp Nil_Exp
 
   isList _ = True
 
-  insertList n (Clip_Exp c) (List_Exp idd cxs) = Clip_List_Exp $ List_Exp idd (insertList_Exp n c cxs)
+  insertList n (Clip_Exp c) (List_Exp cxs) = Clip_List_Exp $ List_Exp (insertList_Exp n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Exp xs
   insertList _ c xs                 = Clip_List_Exp xs
 
-  removeList n (List_Exp idd cxs) = Clip_List_Exp $ List_Exp idd (removeList_Exp n cxs)
+  removeList n (List_Exp cxs) = Clip_List_Exp $ List_Exp (removeList_Exp n cxs)
   removeList _ xs                        = Clip_List_Exp $ xs
 
-toList_Slide vs = List_Slide NoIDD (toConsList_Slide vs)
+toList_Slide vs = List_Slide (toConsList_Slide vs)
 
-fromList_Slide (List_Slide _ vs) = fromConsList_Slide vs
+fromList_Slide (List_Slide vs) = fromConsList_Slide vs
 fromList_Slide _                  = []
 
 toConsList_Slide [] = Nil_Slide
@@ -1118,7 +1118,7 @@ removeList_Slide n (Cons_Slide cx cxs) = Cons_Slide cx (removeList_Slide (n-1) c
 
 instance Editable List_Slide Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Slide x
-  select (n:p) (List_Slide _ cxs) = let xs = fromConsList_Slide cxs
+  select (n:p) (List_Slide cxs) = let xs = fromConsList_Slide cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1126,36 +1126,36 @@ instance Editable List_Slide Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Slide c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Slide")   x
-  paste (n:p) c (List_Slide i1 cxs) = let xs = fromConsList_Slide cxs
+  paste (n:p) c (List_Slide cxs) = let xs = fromConsList_Slide cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Slide i1 (replaceList_Slide n x' cxs)
-                                        else List_Slide i1 cxs -- paste beyond end of list
+                                             in  List_Slide (replaceList_Slide n x' cxs)
+                                        else List_Slide cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Slide}", Clip_List_Slide hole)
                    ]
 
-  arity (List_Slide _ x1) = length (fromConsList_Slide x1)
-  arity _                        = 0
+  arity (List_Slide x1) = length (fromConsList_Slide x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Slide
 
-  hole = List_Slide NoIDD Nil_Slide
+  hole = List_Slide Nil_Slide
 
   isList _ = True
 
-  insertList n (Clip_Slide c) (List_Slide idd cxs) = Clip_List_Slide $ List_Slide idd (insertList_Slide n c cxs)
+  insertList n (Clip_Slide c) (List_Slide cxs) = Clip_List_Slide $ List_Slide (insertList_Slide n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Slide xs
   insertList _ c xs                 = Clip_List_Slide xs
 
-  removeList n (List_Slide idd cxs) = Clip_List_Slide $ List_Slide idd (removeList_Slide n cxs)
+  removeList n (List_Slide cxs) = Clip_List_Slide $ List_Slide (removeList_Slide n cxs)
   removeList _ xs                        = Clip_List_Slide $ xs
 
-toList_Item vs = List_Item NoIDD (toConsList_Item vs)
+toList_Item vs = List_Item (toConsList_Item vs)
 
-fromList_Item (List_Item _ vs) = fromConsList_Item vs
+fromList_Item (List_Item vs) = fromConsList_Item vs
 fromList_Item _                  = []
 
 toConsList_Item [] = Nil_Item
@@ -1178,7 +1178,7 @@ removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
 
 instance Editable List_Item Document Node ClipDoc UserToken where
   select []    x                  = Clip_List_Item x
-  select (n:p) (List_Item _ cxs) = let xs = fromConsList_Item cxs
+  select (n:p) (List_Item cxs) = let xs = fromConsList_Item cxs
                                   in  if n < length xs 
                                       then select p (xs !! n)
                                       else Clip_Nothing
@@ -1186,30 +1186,30 @@ instance Editable List_Item Document Node ClipDoc UserToken where
 
   paste [] (Clip_List_Item c) _   = c
   paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Item")   x
-  paste (n:p) c (List_Item i1 cxs) = let xs = fromConsList_Item cxs
+  paste (n:p) c (List_Item cxs) = let xs = fromConsList_Item cxs
                                     in  if n < length xs
                                         then let x  = xs!!n
                                                  x' = paste p c x
-                                             in  List_Item i1 (replaceList_Item n x' cxs)
-                                        else List_Item i1 cxs -- paste beyond end of list
+                                             in  List_Item (replaceList_Item n x' cxs)
+                                        else List_Item cxs -- paste beyond end of list
   paste _  _  x                  = x
 
   alternatives _ = [("{List_Item}", Clip_List_Item hole)
                    ]
 
-  arity (List_Item _ x1) = length (fromConsList_Item x1)
-  arity _                        = 0
+  arity (List_Item x1) = length (fromConsList_Item x1)
+  arity _                      = 0
 
   parseErr = ParseErrList_Item
 
-  hole = List_Item NoIDD Nil_Item
+  hole = List_Item Nil_Item
 
   isList _ = True
 
-  insertList n (Clip_Item c) (List_Item idd cxs) = Clip_List_Item $ List_Item idd (insertList_Item n c cxs)
+  insertList n (Clip_Item c) (List_Item cxs) = Clip_List_Item $ List_Item (insertList_Item n c cxs)
   insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Item xs
   insertList _ c xs                 = Clip_List_Item xs
 
-  removeList n (List_Item idd cxs) = Clip_List_Item $ List_Item idd (removeList_Item n cxs)
+  removeList n (List_Item cxs) = Clip_List_Item $ List_Item (removeList_Item n cxs)
   removeList _ xs                        = Clip_List_Item $ xs
 

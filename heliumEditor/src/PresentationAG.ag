@@ -443,36 +443,36 @@ navigateTo (PathD pth) = (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth)
 
 
 expand :: [Int] -> Decl -> UpdateDoc Document clip
-expand pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
+expand pth (Decl idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 True autoLayout ident exp))
+                                              (Clip_Decl (Decl idP0 idP1 idP2 idP3 True autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
 toggleExpanded :: [Int] -> Decl -> UpdateDoc Document clip
-toggleExpanded pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
+toggleExpanded pth (Decl idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 (not expanded) autoLayout ident exp))
+                                              (Clip_Decl (Decl idP0 idP1 idP2 idP3 (not expanded) autoLayout ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
 
 toggleAutoLayout :: [Int] -> Decl -> UpdateDoc Document clip
-toggleAutoLayout pth (Decl idD idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
+toggleAutoLayout pth (Decl idP0 idP1 idP2 idP3 expanded autoLayout ident exp) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Decl (Decl idD idP0 idP1 idP2 idP3 expanded (not autoLayout) ident exp))
+                                              (Clip_Decl (Decl idP0 idP1 idP2 idP3 expanded (not autoLayout) ident exp))
                                             )
     in  (DocumentLevel d' path cl)
 
 
 -- use attributes!
-strFromIdent (Ident _ _ _ str) = str
+strFromIdent (Ident _ _ str) = str
 strFromIdent _               = ""
 
-idP0FromIdent (Ident _ idp0 _ str) = idp0
+idP0FromIdent (Ident idp0 _ str) = idp0
 idP0FromIdent _                    = NoIDP
 
 box xp = overlay [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] Transparent,empty]
@@ -1341,10 +1341,10 @@ SEM Item
 {
 -- many Document refs may be doc when editPasteD is fixed
 toggleViewType :: [Int] -> PPPresentation -> UpdateDoc Document clip
-toggleViewType pth (PPPresentation idD viewtp slides) =
+toggleViewType pth (PPPresentation viewtp slides) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_PPPresentation (PPPresentation idD (not viewtp) slides))
+                                              (Clip_PPPresentation (PPPresentation (not viewtp) slides))
                                             )
     in  (DocumentLevel d' path cl)
 
@@ -1427,10 +1427,10 @@ SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> P
 
 
 {
-itemStart i (Bullet _) typeLoc = typeLoc $ text "- "
-itemStart i (Number _) typeLoc = typeLoc $ text (show (i+1) ++ ") ")
-itemStart i (Alpha  _) typeLoc = typeLoc $ text (chr (ord 'a' + i):") ")
-itemStart i (_)        typeLoc = typeLoc $ text "  "
+itemStart i Bullet typeLoc = typeLoc $ text "- "
+itemStart i Number typeLoc = typeLoc $ text (show (i+1) ++ ") ")
+itemStart i Alpha  typeLoc = typeLoc $ text (chr (ord 'a' + i):") ")
+itemStart i _      typeLoc = typeLoc $ text "  "
 }
 
 

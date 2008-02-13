@@ -74,113 +74,113 @@ presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 ------------------------------------- -}
 
 
-DATA Dummy | Dummy idd:IDD root:Root dummy:Dummy 
+DATA Dummy | Dummy root:Root dummy:Dummy 
            | HoleDummy
            | ParseErrDummy presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA EnrichedDoc | RootEnr id:IDD root:RootE heliumTypeInfo:HeliumTypeInfo document:Document 
+DATA EnrichedDoc | RootEnr root:RootE heliumTypeInfo:HeliumTypeInfo document:Document 
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Root | Root id:IDD idP:IDP decls:List_Decl 
+DATA Root | Root idP:IDP decls:List_Decl 
           | HoleRoot
           | ParseErrRoot presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA RootE | RootE id:IDD idP:IDP decls:List_Decl idListDecls:List_Decl 
+DATA RootE | RootE idP:IDP decls:List_Decl idListDecls:List_Decl 
            | HoleRootE
            | ParseErrRootE presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Decl | Decl idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool autoLayout:Bool ident:Ident exp:Exp 
-          | BoardDecl idD:IDD idP0:IDP idP1:IDP board:Board 
-          | PPPresentationDecl idD:IDD idP0:IDP idP1:IDP pPPresentation:PPPresentation 
+DATA Decl | Decl idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool autoLayout:Bool ident:Ident exp:Exp 
+          | BoardDecl idP0:IDP idP1:IDP board:Board 
+          | PPPresentationDecl idP0:IDP idP1:IDP pPPresentation:PPPresentation 
           | HoleDecl
           | ParseErrDecl presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Ident | Ident idD:IDD idP0:IDP idP1:IDP string:String 
+DATA Ident | Ident idP0:IDP idP1:IDP string:String 
            | HoleIdent
            | ParseErrIdent presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Exp | PlusExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
-         | TimesExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
-         | DivExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
-         | PowerExp idD:IDD idP0:IDP exp1:Exp exp2:Exp 
-         | BoolExp idD:IDD idP0:IDP bool:Bool 
-         | IntExp idD:IDD idP0:IDP int:Int 
-         | LamExp idD:IDD idP0:IDP idP1:IDP ident:Ident exp:Exp 
-         | AppExp idD:IDD exp1:Exp exp2:Exp 
-         | CaseExp idD:IDD idP0:IDP idP1:IDP exp:Exp alts:List_Alt 
-         | LetExp idD:IDD idP0:IDP idP1:IDP decls:List_Decl exp:Exp 
-         | IdentExp idd:IDD ident:Ident 
-         | IfExp idD:IDD idP0:IDP idP1:IDP idP2:IDP exp1:Exp exp2:Exp exp3:Exp 
-         | ParenExp idD:IDD idP0:IDP idP1:IDP exp:Exp 
-         | ListExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
-         | ProductExp idD:IDD idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
+DATA Exp | PlusExp idP0:IDP exp1:Exp exp2:Exp 
+         | TimesExp idP0:IDP exp1:Exp exp2:Exp 
+         | DivExp idP0:IDP exp1:Exp exp2:Exp 
+         | PowerExp idP0:IDP exp1:Exp exp2:Exp 
+         | BoolExp idP0:IDP bool:Bool 
+         | IntExp idP0:IDP int:Int 
+         | LamExp idP0:IDP idP1:IDP ident:Ident exp:Exp 
+         | AppExp exp1:Exp exp2:Exp 
+         | CaseExp idP0:IDP idP1:IDP exp:Exp alts:List_Alt 
+         | LetExp idP0:IDP idP1:IDP decls:List_Decl exp:Exp 
+         | IdentExp ident:Ident 
+         | IfExp idP0:IDP idP1:IDP idP2:IDP exp1:Exp exp2:Exp exp3:Exp 
+         | ParenExp idP0:IDP idP1:IDP exp:Exp 
+         | ListExp idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
+         | ProductExp idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp 
          | HoleExp
          | ParseErrExp presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Alt | Alt idD:IDD idP0:IDP idP1:IDP ident:Ident exp:Exp 
+DATA Alt | Alt idP0:IDP idP1:IDP ident:Ident exp:Exp 
          | HoleAlt
          | ParseErrAlt presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Board | Board idD:IDD r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow 
+DATA Board | Board r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow 
            | HoleBoard
            | ParseErrBoard presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA BoardRow | BoardRow idD:IDD ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare 
+DATA BoardRow | BoardRow ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare 
               | HoleBoardRow
               | ParseErrBoardRow presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA BoardSquare | Queen idD:IDD color:Bool 
-                 | King idD:IDD color:Bool 
-                 | Bishop idD:IDD color:Bool 
-                 | Knight idD:IDD color:Bool 
-                 | Rook idD:IDD color:Bool 
-                 | Pawn idD:IDD color:Bool 
+DATA BoardSquare | Queen color:Bool 
+                 | King color:Bool 
+                 | Bishop color:Bool 
+                 | Knight color:Bool 
+                 | Rook color:Bool 
+                 | Pawn color:Bool 
                  | Empty 
                  | HoleBoardSquare
                  | ParseErrBoardSquare presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA PPPresentation | PPPresentation idd:IDD viewType:Bool slides:List_Slide 
+DATA PPPresentation | PPPresentation viewType:Bool slides:List_Slide 
                     | HolePPPresentation
                     | ParseErrPPPresentation presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Slide | Slide idd:IDD title:String itemList:ItemList 
+DATA Slide | Slide title:String itemList:ItemList 
            | HoleSlide
            | ParseErrSlide presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA ItemList | ItemList idd:IDD listType:ListType items:List_Item 
+DATA ItemList | ItemList listType:ListType items:List_Item 
               | HoleItemList
               | ParseErrItemList presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA ListType | Bullet idd:IDD 
-              | Number idd:IDD 
-              | Alpha idd:IDD 
+DATA ListType | Bullet 
+              | Number 
+              | Alpha 
               | HoleListType
               | ParseErrListType presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Item | StringItem idd:IDD string:String 
-          | HeliumItem idd:IDD exp:Exp 
-          | ListItem idd:IDD itemList:ItemList 
+DATA Item | StringItem string:String 
+          | HeliumItem exp:Exp 
+          | ListItem itemList:ItemList 
           | HoleItem
           | ParseErrItem presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA List_Decl | List_Decl idd:IDD elts:ConsList_Decl 
+DATA List_Decl | List_Decl elts:ConsList_Decl 
                | HoleList_Decl
                | ParseErrList_Decl presentation:Presentation_Doc_Node_Clip_Token
 
@@ -189,7 +189,7 @@ DATA ConsList_Decl | Cons_Decl head:Decl tail:ConsList_Decl
                    | Nil_Decl 
 
 
-DATA List_Alt | List_Alt idd:IDD elts:ConsList_Alt 
+DATA List_Alt | List_Alt elts:ConsList_Alt 
               | HoleList_Alt
               | ParseErrList_Alt presentation:Presentation_Doc_Node_Clip_Token
 
@@ -198,7 +198,7 @@ DATA ConsList_Alt | Cons_Alt head:Alt tail:ConsList_Alt
                   | Nil_Alt 
 
 
-DATA List_Exp | List_Exp idd:IDD elts:ConsList_Exp 
+DATA List_Exp | List_Exp elts:ConsList_Exp 
               | HoleList_Exp
               | ParseErrList_Exp presentation:Presentation_Doc_Node_Clip_Token
 
@@ -207,7 +207,7 @@ DATA ConsList_Exp | Cons_Exp head:Exp tail:ConsList_Exp
                   | Nil_Exp 
 
 
-DATA List_Slide | List_Slide idd:IDD elts:ConsList_Slide 
+DATA List_Slide | List_Slide elts:ConsList_Slide 
                 | HoleList_Slide
                 | ParseErrList_Slide presentation:Presentation_Doc_Node_Clip_Token
 
@@ -216,7 +216,7 @@ DATA ConsList_Slide | Cons_Slide head:Slide tail:ConsList_Slide
                     | Nil_Slide 
 
 
-DATA List_Item | List_Item idd:IDD elts:ConsList_Item 
+DATA List_Item | List_Item elts:ConsList_Item 
                | HoleList_Item
                | ParseErrList_Item presentation:Presentation_Doc_Node_Clip_Token
 

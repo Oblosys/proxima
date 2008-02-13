@@ -43,7 +43,7 @@ data HeliumMessage =
 
 
 -- this one cannot be generated, but needs to be here for now
-data Document = RootDoc IDD Root
+data Document = RootDoc Root
               | HoleDocument
               | ParseErrDocument (Presentation Document Node ClipDoc UserToken) deriving Show
 
@@ -68,129 +68,129 @@ Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 
 
 
-data Dummy = Dummy IDD Root Dummy 
+data Dummy = Dummy Root Dummy 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data EnrichedDoc = RootEnr IDD RootE HeliumTypeInfo Document 
+data EnrichedDoc = RootEnr RootE HeliumTypeInfo Document 
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                     deriving Show
 
 
-data Root = Root IDD IDP List_Decl 
+data Root = Root IDP List_Decl 
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
-data RootE = RootE IDD IDP List_Decl List_Decl 
+data RootE = RootE IDP List_Decl List_Decl 
            | HoleRootE
            | ParseErrRootE (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data Decl = Decl IDD IDP IDP IDP IDP Bool Bool Ident Exp 
-          | BoardDecl IDD IDP IDP Board 
-          | PPPresentationDecl IDD IDP IDP PPPresentation 
+data Decl = Decl IDP IDP IDP IDP Bool Bool Ident Exp 
+          | BoardDecl IDP IDP Board 
+          | PPPresentationDecl IDP IDP PPPresentation 
           | HoleDecl
           | ParseErrDecl (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
-data Ident = Ident IDD IDP IDP String 
+data Ident = Ident IDP IDP String 
            | HoleIdent
            | ParseErrIdent (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data Exp = PlusExp IDD IDP Exp Exp 
-         | TimesExp IDD IDP Exp Exp 
-         | DivExp IDD IDP Exp Exp 
-         | PowerExp IDD IDP Exp Exp 
-         | BoolExp IDD IDP Bool 
-         | IntExp IDD IDP Int 
-         | LamExp IDD IDP IDP Ident Exp 
-         | AppExp IDD Exp Exp 
-         | CaseExp IDD IDP IDP Exp List_Alt 
-         | LetExp IDD IDP IDP List_Decl Exp 
-         | IdentExp IDD Ident 
-         | IfExp IDD IDP IDP IDP Exp Exp Exp 
-         | ParenExp IDD IDP IDP Exp 
-         | ListExp IDD IDP IDP [IDP] List_Exp 
-         | ProductExp IDD IDP IDP [IDP] List_Exp 
+data Exp = PlusExp IDP Exp Exp 
+         | TimesExp IDP Exp Exp 
+         | DivExp IDP Exp Exp 
+         | PowerExp IDP Exp Exp 
+         | BoolExp IDP Bool 
+         | IntExp IDP Int 
+         | LamExp IDP IDP Ident Exp 
+         | AppExp Exp Exp 
+         | CaseExp IDP IDP Exp List_Alt 
+         | LetExp IDP IDP List_Decl Exp 
+         | IdentExp Ident 
+         | IfExp IDP IDP IDP Exp Exp Exp 
+         | ParenExp IDP IDP Exp 
+         | ListExp IDP IDP [IDP] List_Exp 
+         | ProductExp IDP IDP [IDP] List_Exp 
          | HoleExp
          | ParseErrExp (Presentation Document Node ClipDoc UserToken)
             deriving Show
 
 
-data Alt = Alt IDD IDP IDP Ident Exp 
+data Alt = Alt IDP IDP Ident Exp 
          | HoleAlt
          | ParseErrAlt (Presentation Document Node ClipDoc UserToken)
             deriving Show
 
 
-data Board = Board IDD BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow 
+data Board = Board BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow 
            | HoleBoard
            | ParseErrBoard (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data BoardRow = BoardRow IDD BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare 
+data BoardRow = BoardRow BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare 
               | HoleBoardRow
               | ParseErrBoardRow (Presentation Document Node ClipDoc UserToken)
                  deriving Show
 
 
-data BoardSquare = Queen IDD Bool 
-                 | King IDD Bool 
-                 | Bishop IDD Bool 
-                 | Knight IDD Bool 
-                 | Rook IDD Bool 
-                 | Pawn IDD Bool 
+data BoardSquare = Queen Bool 
+                 | King Bool 
+                 | Bishop Bool 
+                 | Knight Bool 
+                 | Rook Bool 
+                 | Pawn Bool 
                  | Empty 
                  | HoleBoardSquare
                  | ParseErrBoardSquare (Presentation Document Node ClipDoc UserToken)
                     deriving Show
 
 
-data PPPresentation = PPPresentation IDD Bool List_Slide 
+data PPPresentation = PPPresentation Bool List_Slide 
                     | HolePPPresentation
                     | ParseErrPPPresentation (Presentation Document Node ClipDoc UserToken)
                        deriving Show
 
 
-data Slide = Slide IDD String ItemList 
+data Slide = Slide String ItemList 
            | HoleSlide
            | ParseErrSlide (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
 
-data ItemList = ItemList IDD ListType List_Item 
+data ItemList = ItemList ListType List_Item 
               | HoleItemList
               | ParseErrItemList (Presentation Document Node ClipDoc UserToken)
                  deriving Show
 
 
-data ListType = Bullet IDD 
-              | Number IDD 
-              | Alpha IDD 
+data ListType = Bullet 
+              | Number 
+              | Alpha 
               | HoleListType
               | ParseErrListType (Presentation Document Node ClipDoc UserToken)
                  deriving Show
 
 
-data Item = StringItem IDD String 
-          | HeliumItem IDD Exp 
-          | ListItem IDD ItemList 
+data Item = StringItem String 
+          | HeliumItem Exp 
+          | ListItem ItemList 
           | HoleItem
           | ParseErrItem (Presentation Document Node ClipDoc UserToken)
              deriving Show
 
 
-data List_Decl = List_Decl IDD ConsList_Decl 
+data List_Decl = List_Decl ConsList_Decl 
                | HoleList_Decl
                | ParseErrList_Decl (Presentation Document Node ClipDoc UserToken)
                   deriving Show
@@ -201,7 +201,7 @@ data ConsList_Decl = Cons_Decl Decl ConsList_Decl
                       deriving Show
 
 
-data List_Alt = List_Alt IDD ConsList_Alt 
+data List_Alt = List_Alt ConsList_Alt 
               | HoleList_Alt
               | ParseErrList_Alt (Presentation Document Node ClipDoc UserToken)
                  deriving Show
@@ -212,7 +212,7 @@ data ConsList_Alt = Cons_Alt Alt ConsList_Alt
                      deriving Show
 
 
-data List_Exp = List_Exp IDD ConsList_Exp 
+data List_Exp = List_Exp ConsList_Exp 
               | HoleList_Exp
               | ParseErrList_Exp (Presentation Document Node ClipDoc UserToken)
                  deriving Show
@@ -223,7 +223,7 @@ data ConsList_Exp = Cons_Exp Exp ConsList_Exp
                      deriving Show
 
 
-data List_Slide = List_Slide IDD ConsList_Slide 
+data List_Slide = List_Slide ConsList_Slide 
                 | HoleList_Slide
                 | ParseErrList_Slide (Presentation Document Node ClipDoc UserToken)
                    deriving Show
@@ -234,7 +234,7 @@ data ConsList_Slide = Cons_Slide Slide ConsList_Slide
                        deriving Show
 
 
-data List_Item = List_Item IDD ConsList_Item 
+data List_Item = List_Item ConsList_Item 
                | HoleList_Item
                | ParseErrList_Item (Presentation Document Node ClipDoc UserToken)
                   deriving Show

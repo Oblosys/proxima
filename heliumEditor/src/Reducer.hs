@@ -14,15 +14,15 @@ import Text.ParserCombinators.Parsec
 instance ReductionSheet Document EnrichedDoc ClipDoc where
 
    -- just copy the enriched document
-  reductionSheetSimple state (RootEnr _    (RootE _    _  _     oldIdlDcls) _ _) _ 
-                      enrDoc@(RootEnr idd1 (RootE idd2 idp dcls idldcls)    _ _) =
+  reductionSheetSimple state (RootEnr (RootE _  _     oldIdlDcls) _ _) _ 
+                      enrDoc@(RootEnr (RootE idp dcls idldcls)    _ _) =
         let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
            -- dcls' = dcls -- use this assignment to ignore updates on id list
-        in  (RootDoc idd1 (Root idd2 idp dcls'), state, enrDoc)
+        in  (RootDoc (Root idp dcls'), state, enrDoc)
   reductionSheetSimple state _ _ enrDoc =
     case enrDoc of 
-      (RootEnr idd1 (RootE idd2 idp dcls idldcls) _ _) -> -- if oldEnr is not RootEnr, then just copy from dcls
-        (RootDoc idd1 (Root idd2 idp dcls),state, enrDoc )
+      (RootEnr (RootE idp dcls idldcls) _ _) -> -- if oldEnr is not RootEnr, then just copy from dcls
+        (RootDoc (Root idp dcls),state, enrDoc )
       HoleEnrichedDoc ->
         (HoleDocument,state, enrDoc )
       ParseErrEnrichedDoc prs ->
@@ -35,11 +35,11 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
 
 -- in case of parse error, return true so other pres is used
 instance Eq List_Decl where
-  (List_Decl _ decls1) == (List_Decl _ decls2)        = decls1 == decls2
-  HoleList_Decl              == HoleList_Decl         = True
-  (ParseErrList_Decl _)      == _                     = True
-  _                          == (ParseErrList_Decl _) = True
-  _                          == _                     = False
+  (List_Decl decls1)    == (List_Decl decls2)    = decls1 == decls2
+  HoleList_Decl         == HoleList_Decl         = True
+  (ParseErrList_Decl _) == _                     = True
+  _                     == (ParseErrList_Decl _) = True
+  _                     == _                     = False
 
 
 instance Eq ConsList_Decl where
@@ -49,17 +49,17 @@ instance Eq ConsList_Decl where
 
   
 instance Eq Decl where
-  (Decl id1 _ _ _ _ _ _ ident1 _) == (Decl id2 _ _ _ _ _ _ ident2 _) = id1 == id2 && ident1 == ident2
-  (BoardDecl id1 _ _ _)           == (BoardDecl id2 _ _ _)           = True
-  (PPPresentationDecl id1 _ _ _)  == (PPPresentationDecl id2 _ _ _)  = True
-  HoleDecl                        == HoleDecl                      = True
-  (ParseErrDecl _)                == _                             = True
-  _                               == (ParseErrDecl _)              = True
-  _                               == _                             = False        
+  (Decl _ _ _ _ _ _ ident1 _) == (Decl _ _ _ _ _ _ ident2 _) = ident1 == ident2
+  (BoardDecl _ _ _)           == (BoardDecl _ _ _)           = True
+  (PPPresentationDecl _ _ _)  == (PPPresentationDecl _ _ _)  = True
+  HoleDecl                    == HoleDecl                    = True
+  (ParseErrDecl _)            == _                           = True
+  _                           == (ParseErrDecl _)            = True
+  _                           == _                           = False        
 
 instance Eq Ident where
-  (Ident id1 _ _ str1)  == (Ident id2 _ _ str2)  = id1 == id2 && str1 == str2
-  HoleIdent             == HoleIdent             = True
-  (ParseErrIdent _)     == _                     = True
-  _                     == (ParseErrIdent _)     = True
-  _                     == _                     = False        
+  (Ident _ _ str1)  == (Ident _ _ str2)  = str1 == str2
+  HoleIdent         == HoleIdent         = True
+  (ParseErrIdent _) == _                 = True
+  _                 == (ParseErrIdent _) = True
+  _                 == _                 = False        

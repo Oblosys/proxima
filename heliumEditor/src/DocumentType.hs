@@ -1,73 +1,73 @@
-data Dummy = Dummy Root Dummy { idd : IDD } -- necessary because of design error in generator
+data Dummy = Dummy Root Dummy  -- necessary because of design error in generator
 
 -- Don't remove the declaration above
 
 
-data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document { id:IDD } 
+data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document
 -- document ref is for popups only
 
-data Root = Root decls:[Decl] { id:IDD idP:IDP } 
+data Root = Root decls:[Decl] { idP:IDP } 
 
-data RootE = RootE decls:[Decl] idListDecls:[Decl] { id:IDD idP:IDP }
+data RootE = RootE decls:[Decl] idListDecls:[Decl] { idP:IDP }
 -- We put the decls first, so the paths in the enriched document and the document are the same.
 -- This is necessary because there is no translation on paths yet.
 
 -- lists have no pres elts of its own, so no ids for them. This also means we won't be able to recover Decls's id
 
 --  4 pres elts: "=", ";", TypeDecl, and "[...]"
-data Decl = Decl expanded:Bool autoLayout:Bool Ident Exp { idD:IDD idP0:IDP idP1:IDP idP2:IDP idP3:IDP }
-          | BoardDecl Board                              { idD: IDD idP0:IDP idP1:IDP }
-          | PPPresentationDecl PPPresentation            { idD: IDD idP0:IDP idP1:IDP }
+data Decl = Decl expanded:Bool autoLayout:Bool Ident Exp { idP0:IDP idP1:IDP idP2:IDP idP3:IDP }
+          | BoardDecl Board                              { idP0:IDP idP1:IDP }
+          | PPPresentationDecl PPPresentation            { idP0:IDP idP1:IDP }
 
 -- one pres elt for in program source, other for in list
 -- however, only the one for source is used, the other has no layout
-data Ident = Ident String                                { idD:IDD idP0:IDP idP1:IDP }
+data Ident = Ident String                                { idP0:IDP idP1:IDP }
 
-data Exp = PlusExp exp1:Exp exp2:Exp                     { idD:IDD idP0:IDP }
-         | TimesExp  exp1:Exp exp2:Exp                   { idD:IDD idP0:IDP }
-         | DivExp exp1:Exp exp2:Exp                      { idD:IDD idP0:IDP }
-         | PowerExp exp1:Exp exp2:Exp                    { idD:IDD idP0:IDP }
-         | BoolExp  Bool                                 { idD:IDD idP0:IDP }
-         | IntExp Int                                    { idD:IDD idP0:IDP }
-         | LamExp Ident Exp                              { idD:IDD idP0:IDP idP1:IDP }
-         | AppExp exp1:Exp exp2:Exp                      { idD:IDD }
-         | CaseExp Exp alts:[Alt]                        { idD:IDD idP0:IDP idP1:IDP }
-         | LetExp [Decl] Exp                             { idD:IDD idP0:IDP idP1:IDP }
-         | IdentExp Ident                                { idd:IDD }
-         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idD:IDD idP0:IDP idP1:IDP idP2:IDP }
-         | ParenExp Exp                                  { idD:IDD idP0:IDP idP1:IDP }
-         | ListExp exps:[Exp]                            { idD:IDD idP0:IDP idP1:IDP ids:[IDP] }
-         | ProductExp exps:[Exp]                         { idD:IDD idP0:IDP idP1:IDP ids:[IDP] }
+data Exp = PlusExp exp1:Exp exp2:Exp                     { idP0:IDP }
+         | TimesExp  exp1:Exp exp2:Exp                   { idP0:IDP }
+         | DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
+         | PowerExp exp1:Exp exp2:Exp                    { idP0:IDP }
+         | BoolExp  Bool                                 { idP0:IDP }
+         | IntExp Int                                    { idP0:IDP }
+         | LamExp Ident Exp                              { idP0:IDP idP1:IDP }
+         | AppExp exp1:Exp exp2:Exp                      
+         | CaseExp Exp alts:[Alt]                        { idP0:IDP idP1:IDP }
+         | LetExp [Decl] Exp                             { idP0:IDP idP1:IDP }
+         | IdentExp Ident                                
+         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
+         | ParenExp Exp                                  { idP0:IDP idP1:IDP }
+         | ListExp exps:[Exp]                            { idP0:IDP idP1:IDP ids:[IDP] }
+         | ProductExp exps:[Exp]                         { idP0:IDP idP1:IDP ids:[IDP] }
 
-data Alt = Alt Ident Exp                                 { idD:IDD idP0:IDP idP1:IDP }
+data Alt = Alt Ident Exp                                 { idP0:IDP idP1:IDP }
 
 data Board       = Board    r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow
-                            r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow { idD: IDD }
+                            r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow
                             
 data BoardRow    = BoardRow ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare
-                            ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare { idD: IDD }
+                            ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare
 
-data BoardSquare = Queen color  : Bool                   { idD : IDD }
-                 | King  color  : Bool                   { idD : IDD }
-                 | Bishop color : Bool                   { idD : IDD }
-                 | Knight color : Bool                   { idD : IDD }
-                 | Rook color   : Bool                   { idD : IDD }
-                 | Pawn color   : Bool                   { idD : IDD }
-                 | Empty                                 { }
+data BoardSquare = Queen color  : Bool                   
+                 | King  color  : Bool                   
+                 | Bishop color : Bool                   
+                 | Knight color : Bool                   
+                 | Rook color   : Bool                   
+                 | Pawn color   : Bool                   
+                 | Empty                            
 
 
-data PPPresentation = PPPresentation viewType : Bool [Slide] { idd : IDD }
+data PPPresentation = PPPresentation viewType : Bool [Slide] 
 
-data Slide = Slide title : String ItemList               { idd : IDD }
+data Slide = Slide title : String ItemList               
 
-data ItemList = ItemList ListType items:[Item]           { idd : IDD }
+data ItemList = ItemList ListType items:[Item]           
 
-data ListType = Bullet                                  { idd : IDD }
-              | Number                                  { idd : IDD }
-              | Alpha                                   { idd : IDD }
+data ListType = Bullet                                  
+              | Number                                  
+              | Alpha                                   
 
-data Item = StringItem string : String                   { idd : IDD }
-          | HeliumItem Exp                               { idd : IDD }
-          | ListItem ItemList                            { idd : IDD }
+data Item = StringItem string : String                   
+          | HeliumItem Exp                               
+          | ListItem ItemList                            
 
      

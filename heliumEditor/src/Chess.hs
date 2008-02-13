@@ -25,18 +25,18 @@ piece pc sqColor rowNr colNr moves focus path =
        pieceXp Prox.Empty          sqc f  = if isReachable 
                                        then markReachable `withMouseDown` moveHere path focus 
                                        else empty
-       pieceXp (Prox.King _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'k'
-       pieceXp (Prox.Queen _ c)    sqc _  = txtPiece  $ (if c then toUpper else id) 'q'
-       pieceXp (Prox.Bishop _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'b'
-       pieceXp (Prox.Knight _ c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'n'
-       pieceXp (Prox.Rook _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'r'
-       pieceXp (Prox.Pawn _ c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'p'
-      -- pieceXp (Prox.King _ True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
-      -- pieceXp (Prox.King _ False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
-      -- pieceXp (Prox.King _ True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
-      -- pieceXp (Prox.King _ False) True _  = img "img/Chess/pieceBW.bmp" `withSize` (80,84)
-      -- pieceXp (Prox.King _ True)  False _  =  img "img/Chess/pieceWB.bmp" `withSize` (80,84)
-      -- pieceXp (Prox.King _ False) False _  = img "img/Chess/pieceBB.bmp" `withSize` (80,84)
+       pieceXp (Prox.King c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'k'
+       pieceXp (Prox.Queen c)    sqc _  = txtPiece  $ (if c then toUpper else id) 'q'
+       pieceXp (Prox.Bishop c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'b'
+       pieceXp (Prox.Knight c)   sqc _  = txtPiece  $ (if c then toUpper else id) 'n'
+       pieceXp (Prox.Rook c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'r'
+       pieceXp (Prox.Pawn c)     sqc _  = txtPiece  $ (if c then toUpper else id) 'p'
+      -- pieceXp (Prox.King True)  sqc True  = img "img/Chess/pieceWF.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King False) sqc True  = img "img/Chess/pieceBF.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King True)  True _  = img "img/Chess/pieceWW.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King False) True _  = img "img/Chess/pieceBW.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King True)  False _  =  img "img/Chess/pieceWB.bmp" `withSize` (80,84)
+      -- pieceXp (Prox.King False) False _  = img "img/Chess/pieceBB.bmp" `withSize` (80,84)
        
        txtPiece  ch = (if isReachable then (\x -> withMouseDown x (moveHere path focus)) else id) 
                        $ overlay $
@@ -80,23 +80,23 @@ computeMoves board lt = map tupleFromMove
     
                
 listFromBoard :: Prox.Board -> [[Field]]
-listFromBoard (Prox.Board _ x1 x2 x3 x4 x5 x6 x7 x8)    = map listFromRow [x1,x2,x3,x4,x5,x6,x7,x8]
+listFromBoard (Prox.Board x1 x2 x3 x4 x5 x6 x7 x8)    = map listFromRow [x1,x2,x3,x4,x5,x6,x7,x8]
 listFromBoard _                                         = replicate 8 (replicate 8 Empty)
-listFromRow   (Prox.BoardRow _ x1 x2 x3 x4 x5 x6 x7 x8) = map pieceFromSquare [x1,x2,x3,x4,x5,x6,x7,x8]
+listFromRow   (Prox.BoardRow x1 x2 x3 x4 x5 x6 x7 x8) = map pieceFromSquare [x1,x2,x3,x4,x5,x6,x7,x8]
 listFromRow   _                                        = replicate 8 Empty
 
-pieceFromSquare (Prox.Queen _ True)  = Piece White Queen
-pieceFromSquare (Prox.Queen _ _)     = Piece Black Queen
-pieceFromSquare (Prox.King _ True)   = Piece White King
-pieceFromSquare (Prox.King _ _)      = Piece Black King
-pieceFromSquare (Prox.Rook _ True)   = Piece White Rook
-pieceFromSquare (Prox.Rook _ _)      = Piece Black Rook
-pieceFromSquare (Prox.Knight _ True) = Piece White Knight
-pieceFromSquare (Prox.Knight _ _)    = Piece Black Knight
-pieceFromSquare (Prox.Bishop _ True) = Piece White Bishop
-pieceFromSquare (Prox.Bishop _ _)    = Piece Black Bishop
-pieceFromSquare (Prox.Pawn _ True)   = Piece White Pawn
-pieceFromSquare (Prox.Pawn _ _)      = Piece Black Pawn
+pieceFromSquare (Prox.Queen True)  = Piece White Queen
+pieceFromSquare (Prox.Queen _)     = Piece Black Queen
+pieceFromSquare (Prox.King True)   = Piece White King
+pieceFromSquare (Prox.King _)      = Piece Black King
+pieceFromSquare (Prox.Rook True)   = Piece White Rook
+pieceFromSquare (Prox.Rook _)      = Piece Black Rook
+pieceFromSquare (Prox.Knight True) = Piece White Knight
+pieceFromSquare (Prox.Knight _)    = Piece Black Knight
+pieceFromSquare (Prox.Bishop True) = Piece White Bishop
+pieceFromSquare (Prox.Bishop _)    = Piece Black Bishop
+pieceFromSquare (Prox.Pawn True)   = Piece White Pawn
+pieceFromSquare (Prox.Pawn _)      = Piece Black Pawn
 pieceFromSquare Prox.Empty           = Empty
 
 
