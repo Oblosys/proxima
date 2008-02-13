@@ -56,8 +56,8 @@ $(GEN):
 
 generate: src/DocTypes_Generated.hs
 
-src/DocTypes_Generated.hs : src/DocumentType.hs $(GEN)
-	$(GEN) src src/DocumentType.hs
+src/DocTypes_Generated.hs : src/DocumentType.prx $(GEN)
+	$(GEN) src src/DocumentType.prx
 
 
 # The presentation AG
@@ -87,10 +87,10 @@ clean:
 	$(FIND) src -name "*.hi" -delete
 	$(FIND) src -name "*.o" -delete
 	$(FIND) src -name "presentationAG.hs" -delete
-	touch src/DocumentType.hs
+	touch src/DocumentType.prx
 	$(FIND) . -name "proxima.*" -delete
 
-# cannot delete .._Generated sources, so we touch src/DocumentType.hs, causing them to be
+# cannot delete .._Generated sources, so we touch src/DocumentType.prx, causing them to be
 # recompiled on the next make
 	
 
