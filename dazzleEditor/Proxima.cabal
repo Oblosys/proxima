@@ -6,7 +6,7 @@ license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               parsec ==2.0, time ==1.0
+               parsec >=2.0, time >=1.0, containers -any, array -any
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -55,5 +55,4 @@ other-modules: ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
-nhc-options:
 jhc-options:
