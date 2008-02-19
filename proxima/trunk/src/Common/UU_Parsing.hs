@@ -6,7 +6,7 @@
                3508 TB UTRECHT
                the Netherlands
                swierstra@cs.uu.nl -}
-module UU_Parsing
+module Common.UU_Parsing
 (
 Result,
 mapOnePars,

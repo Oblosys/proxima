@@ -1,6 +1,7 @@
-module CommonUtils where
+module Common.CommonUtils where
 
-import CommonTypes
+import Common.CommonTypes
+import qualified Common.CommonTypes as CommonTypes
 import Graphics.UI.Gtk hiding (Rectangle)
 import Data.Time.Clock
 import Data.IORef

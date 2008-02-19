@@ -1,14 +1,14 @@
-module CommonTypes ( module Char 
+module Common.CommonTypes ( module Char 
                    , module List
-                   , module DebugLevels
-                   , module CommonTypes ) where
+                   , module Common.DebugLevels
+                   , module Common.CommonTypes ) where
 
 {- GHCI defs:
 :def R (\_ -> return ":r")
 
 
 -}
-import DebugLevels 
+import Common.DebugLevels 
 
 import Char
 import List

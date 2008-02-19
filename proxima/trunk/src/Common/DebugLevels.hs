@@ -1,4 +1,4 @@
-module DebugLevels ( DebugLevel (..)
+module Common.DebugLevels ( DebugLevel (..)
                    , debug
                    , showDebug
                    , showDebug'
