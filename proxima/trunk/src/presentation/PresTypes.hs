@@ -146,8 +146,6 @@ deepShowTks i tok = case tok of
 
 
 
--- Presentation is Xprez with ID's
-
 data Presentation doc node clip token = EmptyP !IDP
            | StringP !IDP !String
            | TokenP !IDP !(Token doc node clip token)

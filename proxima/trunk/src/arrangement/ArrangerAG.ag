@@ -267,7 +267,7 @@ ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
 -- putting in overlays changes paths, and may have many consequences
 -- probably best to have a focus attribute in each arr node, but this involves
 -- changing many patterns in arrangement functions
--- In the future we probably want an info node with (ID Focus Dirty etc.)
+-- In the future we probably want an info node with (IDP Focus Dirty etc.)
 -- maybe for now just fix markFocusArr and diffArr a bit.
 
 
