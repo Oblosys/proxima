@@ -1,12 +1,12 @@
-module LayTypes (module PresTypes, module LayTypes) where
+module Layout.LayTypes (module Presentation.PresTypes, module Layout.LayTypes) where
 
-import CommonTypes
-import PresTypes
+import Common.CommonTypes
+import Presentation.PresTypes
 
-import CommonUtils
+import Common.CommonUtils
 
 
-import DocTypes -- for UpdateDocLay
+import Evaluation.DocTypes -- for UpdateDocLay
 -- Layout imports and exports PresTypes because the level type is the same for both
 -- levels. A separate module imported by both PresTypes and LayTypes would be a bit
 -- cleaner, as Presentation specific definitions (eg. PresentationLevel) are visible at

@@ -1,12 +1,12 @@
-module LayTranslate where
+module Layout.LayTranslate where
 
-import CommonTypes
-import LayLayerTypes
-import LayLayerUtils
+import Common.CommonTypes
+import Layout.LayLayerTypes
+import Layout.LayLayerUtils
 
-import Scanner hiding (empty)
+import Layout.Scanner hiding (empty)
 
-import TreeEditPres
+import Layout.TreeEditPres
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (Show token, DocNode node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> EditLayout documentLevel doc node clip
@@ -114,7 +114,7 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
  let (ll@(LayoutLevel pres' focus' dt), state') = editF state (LayoutLevel pres focus dt) -- this will be layLvl's own focus
      (pres'', focus'')             = (markUnparsed pres', markUnparsedF pres' focus')
    --  (pres''', layout', idCounter') = tokenize idCounter Nothing pres''
-   -- ******** don't forget to delete inserted tokens! when uncommenting this tokenize
+   --  ******** don't forget to delete inserted tokens! when uncommenting this tokenize
    --  presLvl'                      = PresentationLevel pres''' (layout', idCounter')
 -- in  setUpd AllUpdated $ (SetPres presLvl', state', ll)
      diffTree = diffPres pres'' pres

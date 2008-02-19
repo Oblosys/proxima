@@ -9,10 +9,10 @@
 -}
 -----------------------------------------------------------------------------------------
 {
-import CommonTypes
-import PresTypes
-import LayLayerTypes
-import LayLayerUtils
+import Common.CommonTypes
+import Presentation.PresTypes
+import Layout.LayLayerTypes
+import Layout.LayLayerUtils
 import List
 import Char
 import qualified Data.Map as Map

@@ -1,5 +1,5 @@
-module LayUtils (module PresUtils, module LayUtils) where
+module Layout.LayUtils (module Presentation.PresUtils, module Layout.LayUtils) where
 
-import PresUtils
-import LayLayerTypes
+import Presentation.PresUtils
+import Layout.LayLayerTypes
 

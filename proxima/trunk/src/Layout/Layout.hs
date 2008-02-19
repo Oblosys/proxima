@@ -1,8 +1,8 @@
-module Layout where
+module Layout.Layout where
 
-import CommonTypes
-import LayLayerTypes
-import LayLayerUtils
+import Common.CommonTypes
+import Layout.LayLayerTypes
+import Layout.LayLayerUtils
 
 import qualified Data.Map as Map
 import Data.Map (Map)

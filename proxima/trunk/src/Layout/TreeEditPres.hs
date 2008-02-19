@@ -1,15 +1,15 @@
-module TreeEditPres where
+module Layout.TreeEditPres where
 
 -- import IOExts
 
-import CommonTypes
-import CommonUtils
-import DocTypes
-import PresTypes
-import LayTypes
+import Common.CommonTypes
+import Common.CommonUtils
+import Evaluation.DocTypes
+import Presentation.PresTypes
+import Layout.LayTypes
 
-import PresUtils
-import XprezLib
+import Presentation.PresUtils
+import Presentation.XprezLib
 
 {-
 
