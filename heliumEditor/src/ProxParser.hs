@@ -97,7 +97,7 @@ recognizeSlide =  pStr $
      <$> pStructural SlideNode
      <*> pLIdent <*> recognizeItemList
 
-recognizeItemList = pStr $                          -- ListType
+recognizeItemList = pStr $                         -- ListType
          (\str listType list_item -> reuseItemList [str] (Just listType) (Just list_item))
      <$> pStructural ItemListNode
      <*> recognizeListType <*> recognizeList_Item
