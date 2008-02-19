@@ -1,8 +1,8 @@
-module PresPresent where
+module Presentation.PresPresent where
 
-import CommonTypes
-import PresLayerTypes
-import PresLayerUtils
+import Common.CommonTypes
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
 
 import qualified Data.Map as Map
 import Data.Map (Map)

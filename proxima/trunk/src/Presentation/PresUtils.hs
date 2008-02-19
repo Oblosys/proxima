@@ -1,14 +1,14 @@
-module PresUtils (module XprezLib, module PresUtils) where
+module Presentation.PresUtils (module Presentation.XprezLib, module Presentation.PresUtils) where
 
-import CommonTypes
-import PresTypes
-import CommonUtils
+import Common.CommonTypes
+import Presentation.PresTypes
+import Common.CommonUtils
  
-import XprezLib
+import Presentation.XprezLib
 import Maybe
 import Data.List
 
-import ArrTypes
+import Arrangement.ArrTypes
 
 squiggly :: Color -> Xprez doc node clip token -> Xprez doc node clip token
 squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]

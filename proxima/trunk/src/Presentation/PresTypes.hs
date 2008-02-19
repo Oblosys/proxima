@@ -1,9 +1,9 @@
-module PresTypes where
+module Presentation.PresTypes where
 
-import CommonTypes
-import DocTypes (DocumentLevel)
+import Common.CommonTypes
+import Evaluation.DocTypes (DocumentLevel)
 
-import CommonUtils
+import Common.CommonUtils
 
 import qualified Data.Map as Map
 import Data.Map (Map)

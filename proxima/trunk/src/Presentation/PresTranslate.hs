@@ -1,11 +1,11 @@
-module PresTranslate where
+module Presentation.PresTranslate where
 
-import CommonTypes
-import PresLayerTypes
+import Common.CommonTypes
+import Presentation.PresLayerTypes
 
-import PresLayerUtils
+import Presentation.PresLayerUtils
 
-import PresentationParsing
+import Presentation.PresentationParsing
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (DocNode node, Ord token, Show token, Show enr) =>

@@ -1,13 +1,13 @@
-module PresLayerTypes ( module EnrTypes
-                      , module PresTypes
-                      , module PresLayerTypes    ) where
+module Presentation.PresLayerTypes ( module Evaluation.EnrTypes
+                      , module Presentation.PresTypes
+                      , module Presentation.PresLayerTypes    ) where
 
 
-import CommonTypes
-import EnrTypes hiding (DocumentLevel)
-import PresTypes
+import Common.CommonTypes
+import Evaluation.EnrTypes hiding (DocumentLevel)
+import Presentation.PresTypes
 
-import UU_Parsing
+import Common.UU_Parsing
 
 type LayerStatePres = ()
 

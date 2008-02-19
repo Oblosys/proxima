@@ -1,8 +1,8 @@
-module XprezLib where
+module Presentation.XprezLib where
 
-import CommonTypes
-import DocTypes
-import PresTypes
+import Common.CommonTypes
+import Evaluation.DocTypes
+import Presentation.PresTypes
 
 import Maybe
 

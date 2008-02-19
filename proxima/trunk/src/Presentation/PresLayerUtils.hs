@@ -1,11 +1,11 @@
-module PresLayerUtils ( module EnrUtils
-                      , module PresUtils
-                      , module PresLayerUtils    ) where
+module Presentation.PresLayerUtils ( module Evaluation.EnrUtils
+                      , module Presentation.PresUtils
+                      , module Presentation.PresLayerUtils    ) where
 
 
-import CommonTypes
-import PresLayerTypes
+import Common.CommonTypes
+import Presentation.PresLayerTypes
 
-import CommonUtils
-import EnrUtils
-import PresUtils
+import Common.CommonUtils
+import Evaluation.EnrUtils
+import Presentation.PresUtils

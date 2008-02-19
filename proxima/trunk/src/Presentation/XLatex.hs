@@ -1,8 +1,8 @@
-module XLatex where
+module Presentation.XLatex where
 
-import XprezLib
-import PresTypes
-import CommonTypes
+import Presentation.XprezLib
+import Presentation.PresTypes
+import Common.CommonTypes
 
 import Char
 
