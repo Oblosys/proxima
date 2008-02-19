@@ -42,7 +42,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils Arrangement.A
                Evaluation.EnrTypes Evaluation.EnrUtils Evaluation.EvalLayerTypes Evaluation.EvalLayerUtils Evaluation.EvalPresent
                Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils Layout.LayPresent Layout.LayTranslate
                Layout.LayTypes Layout.LayUtils Layout.Layout Layout.Scanner Layout.ScannerAG Layout.TreeEditPres
-               Main.Architecture Main.ArchitectureLibM Main.GUI Main.Proxima Presentation.PresLayerTypes
+               Proxima.Architecture Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Presentation.PresLayerTypes
                Presentation.PresLayerUtils Presentation.PresPresent Presentation.PresTranslate Presentation.PresTypes Presentation.PresUtils
                Presentation.PresentationParsing Presentation.XLatex Presentation.XprezLib Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes Rendering.RenUtils Rendering.Renderer

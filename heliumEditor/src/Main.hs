@@ -1,6 +1,6 @@
 module Main where
 
-import Main.Proxima
+import Proxima.Proxima
 
 import Evaluator
 import Reducer
