@@ -1,14 +1,14 @@
-module ArrLayerUtils ( module LayUtils
-                     , module ArrUtils
-                     , module ArrLayerUtils     ) where
+module Arrangement.ArrLayerUtils ( module Layout.LayUtils
+                     , module Arrangement.ArrUtils
+                     , module Arrangement.ArrLayerUtils     ) where
 
 
-import CommonTypes
-import ArrLayerTypes
+import Common.CommonTypes
+import Arrangement.ArrLayerTypes
 
-import CommonUtils
-import LayUtils
-import ArrUtils
+import Common.CommonUtils
+import Layout.LayUtils
+import Arrangement.ArrUtils
 
 idAFromP :: IDP -> IDA
 idAFromP NoIDP    = NoIDA

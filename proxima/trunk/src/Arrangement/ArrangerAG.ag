@@ -1,11 +1,11 @@
 imports
 {
 
-import CommonTypes
-import CommonUtils
-import ArrLayerTypes
-import ArrLayerUtils
-import FontLib
+import Common.CommonTypes
+import Common.CommonUtils
+import Arrangement.ArrLayerTypes
+import Arrangement.ArrLayerUtils
+import Arrangement.FontLib
 import Maybe
 import Debug.Trace
 }

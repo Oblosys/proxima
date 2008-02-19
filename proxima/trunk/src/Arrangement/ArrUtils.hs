@@ -1,8 +1,8 @@
-module ArrUtils where
+module Arrangement.ArrUtils where
 
-import CommonTypes
-import ArrTypes
-import CommonUtils
+import Common.CommonTypes
+import Arrangement.ArrTypes
+import Common.CommonUtils
 
 import Maybe 
 

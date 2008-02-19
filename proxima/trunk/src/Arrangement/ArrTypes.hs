@@ -1,9 +1,9 @@
-module ArrTypes where
+module Arrangement.ArrTypes where
 
-import CommonTypes
-import DocTypes (DocumentLevel) -- for Locations
+import Common.CommonTypes
+import Evaluation.DocTypes (DocumentLevel) -- for Locations
 
-import LayTypes
+import Layout.LayTypes
                   
 data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                

@@ -1,13 +1,18 @@
-module Arranger where
+module Arrangement.Arranger where
 
-import CommonTypes hiding (defaultFont)
-import CommonUtils
-import qualified CommonTypes
-import ArrLayerTypes
-import ArrLayerUtils
+import Common.CommonTypes hiding (defaultFont)
+import Common.CommonUtils
+import qualified Common.CommonTypes as CommonTypes
+import Arrangement.ArrLayerTypes
+import Arrangement.ArrLayerUtils
 
-import ArrangerAG
-import FontLib
+import Arrangement.ArrangerAG
+import Arrangement.FontLib
+{-import Arrangement.ArrLayerTypes
+import Arrangement.ArrLayerUtils
+
+import Arrangement.ArrangerAG
+import Arrangement.FontLib-}
 import Data.IORef
 import System.IO
 

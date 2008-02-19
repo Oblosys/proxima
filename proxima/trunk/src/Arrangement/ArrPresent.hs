@@ -1,10 +1,10 @@
-module ArrPresent where
+module Arrangement.ArrPresent where
 
-import CommonTypes
-import ArrLayerTypes
-import ArrLayerUtils
+import Common.CommonTypes
+import Arrangement.ArrLayerTypes
+import Arrangement.ArrLayerUtils
 
-import Arranger
+import Arrangement.Arranger
 
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
 presentIO state high low editHigh =

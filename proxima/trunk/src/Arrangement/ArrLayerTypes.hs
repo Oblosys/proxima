@@ -1,15 +1,15 @@
-module ArrLayerTypes ( module LayTypes
-                     , module ArrTypes
-                     , module ArrLayerTypes    ) where
+module Arrangement.ArrLayerTypes ( module Layout.LayTypes
+                     , module Arrangement.ArrTypes
+                     , module Arrangement.ArrLayerTypes    ) where
 
 
-import CommonTypes
-import LayTypes
-import ArrTypes
+import Common.CommonTypes
+import Layout.LayTypes
+import Arrangement.ArrTypes
 import Data.IORef
 
 --import FontLibGTK
-import FontLib
+import Arrangement.FontLib
 
 data LocalStateArr = LocalStateArr { getFontMetricsRef :: FontMetricsRef
                                    , getLastMousePress :: Maybe (Int,Int)

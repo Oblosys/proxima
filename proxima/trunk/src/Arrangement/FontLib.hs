@@ -1,6 +1,6 @@
-module FontLib where
+module Arrangement.FontLib where
 
-import CommonTypes
+import Common.CommonTypes
 import Graphics.UI.Gtk hiding (FontMetrics)
 
 import qualified Data.Map as Map

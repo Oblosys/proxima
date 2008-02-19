@@ -1,12 +1,12 @@
-module ArrTranslate where
+module Arrangement.ArrTranslate where
 
-import CommonTypes
-import ArrLayerTypes
-import ArrLayerUtils
+import Common.CommonTypes
+import Arrangement.ArrLayerTypes
+import Arrangement.ArrLayerUtils
 
-import DocTypes
-import DocUtils
-import qualified TreeEditPres -- for mouse handling stuff
+import Evaluation.DocTypes
+import Evaluation.DocUtils
+import qualified Layout.TreeEditPres as TreeEditPres -- for mouse handling stuff
 
 
 translateIO state low high editLow = return $ unArrange state low high editLow
@@ -54,7 +54,8 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
         Just addVertex    -> ( addVertex, state, arrLvl )
         Nothing           -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
                        , state, arrLvl )
-    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
+--    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
+    MouseDownArr x y ms@(Modifiers False True False) i -> -- ctrl down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
       case getLastMousePress state of -- should not be Nothing, since a mouseDrag is preceded by a mouseDown
