@@ -10,34 +10,13 @@
 # TODO:
 # add platform dependent stuff (configure?)
 # add strip
-# TODO: on normal make, generator is not rebuilt after sources have been edited (only on make generate) May have something to do with fact that generation affects multiple files, whereas only one dependency (PresentationAG_Generated) is explicit in makeFile
-
-# it would be nice if the document specific makefile could always execute this makefile 
-# first. Is this possible?
-
-# HC
-# moet er in de regel voor Proxima niet een ref naar de executable zitten?
-# generator is mixed with the rest, maybe should be in different makefile, but
-# since there is no conflict, this solution is okay
-# now, because standard rules are used, generator ifaces must be added to hcopts
-
-# for ghc-6.4
-# $proxima\proxima\src\evaluation>ghc -c DocTypes.hs-boot
-# $proxima\proxima\src\evaluation>DocTypes_Generated.hs-boot
-# $proxima\lvm\src\lib\common>ghc -c Set.hs
-# remove $proxima\proxima\src\presentation\PresTypes.hs:26-27 instance Show FiniteMap
-# remove $proxima\Top\src\Top\Solvers\SimpleSubst.hs:20-21 instance Show SimpleState
-
-# fix generation dir (refers to ../../editor now)
-# fix presentationAG dir  (refers to ../../editor/src now)
 
 HC    = ghc
-#HC    = /c/Program\ Files/Visual\ Haskell/bin/ghc
+
 FIND  = /usr/bin/find
 EXE = .exe
 
 SHELL = /bin/sh
-
 
 .PHONY: default all agc generator arranger scanner always
 
@@ -57,12 +36,6 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 ARRANGEMENTDIR  = $(PROXIMADIR)/src/Arrangement
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
-#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-#COMMONDIR       = $(PROXIMADIR)/src/common
-#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-#MAINDIR         = $(PROXIMADIR)/src/main
-#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
-#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
 GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
 
@@ -99,9 +72,8 @@ arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
-	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfp --Wmax=12 --genlinepragmas --self --Werrors --module=Arrangement.ArrangerAG \
-	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR):$(PROXIMADIR)/src
+	@$(AGC) -cfp --Wmax=12 --genlinepragmas --self --Werrors \
+	$(ARRANGEMENTDIR)/ArrangerAG.ag --module=Arrangement.ArrangerAG -P $(ARRANGEMENTDIR)
 #	--visit --case --strictdata --strictwrap --unbox\
 
 # no type sigs, because parameterized types are not supported by AG
@@ -114,9 +86,8 @@ scanner: $(LAYOUTDIR)/ScannerAG.hs
 $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
-	@$(AGC) -o $(LAYOUTDIR)/ScannerAG.hs \
-	-cfp --Wmax=12 --genlinepragmas --self --Werrors --module=Layout.ScannerAG \
-	$(LAYOUTDIR)/ScannerAG.ag -P $(LAYOUTDIR)
+	@$(AGC) -cfp --Wmax=12 --genlinepragmas --self --Werrors \
+	$(LAYOUTDIR)/ScannerAG.ag --module=Layout.ScannerAG -P $(LAYOUTDIR)
 
 # no type sigs, because parameterized types are not supported by AG
 
