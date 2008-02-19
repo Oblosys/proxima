@@ -11,8 +11,8 @@
 HC   = ghc
 FIND = /usr/bin/find
 
-#PROXIMADIR = ../proxima
-PROXIMADIR = src/proxima
+PROXIMADIR = ../proxima
+#PROXIMADIR = src/proxima
 # use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
 
 PROXIMASRCDIR = $(PROXIMADIR)/src
@@ -33,18 +33,18 @@ default: $(MAIN)
 .PHONY : default proxima generate presenter lexer
 
 
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
-COMMONDIR       = $(PROXIMADIR)/src/common
-EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-GENERATORDIR    = $(PROXIMADIR)/src/generator
 LAYOUTDIR       = $(PROXIMADIR)/src/layout
-MAINDIR         = $(PROXIMADIR)/src/main
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-RENDERINGDIR    = $(PROXIMADIR)/src/rendering
 
-PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
+#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
+#ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
+#COMMONDIR       = $(PROXIMADIR)/src/common
+#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
+#GENERATORDIR    = $(PROXIMADIR)/src/generator
+#MAINDIR         = $(PROXIMADIR)/src/main
+#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
+#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
+PROXIMADIRS = $(PROXIMASRCDIR)
 
 # Generation 
 

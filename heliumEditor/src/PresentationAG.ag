@@ -1,13 +1,13 @@
 imports
 {
-import CommonTypes
-import PresLayerTypes
-import PresLayerUtils
+import Common.CommonTypes
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
 
-import XprezLib
-import XLatex hiding (bold)
+import Presentation.XprezLib
+import Presentation.XLatex hiding (bold)
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 
 import List
 import qualified Data.Map as Map
@@ -18,7 +18,7 @@ import System.IO.Unsafe
 
 import qualified Chess
 
-import DocTypes (DocumentLevel (..))
+import Evaluation.DocTypes (DocumentLevel (..))
 import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated

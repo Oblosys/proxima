@@ -1,6 +1,6 @@
 module ScannerSheetOld where
 
-import CommonTypes
+import Common.CommonTypes
 import qualified Data.Map as Map
 import LayLayerTypes
 import LayLayerUtils

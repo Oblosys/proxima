@@ -1,6 +1,6 @@
 module Main where
 
-import Proxima
+import Main.Proxima
 
 import Evaluator
 import Reducer
@@ -8,13 +8,13 @@ import PresentationAG
 import ProxParser
 import ScannerSheet
 
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
-import EnrTypes
-import PresTypes
-import LayTypes
-import ArrTypes
-import CommonTypes
+import Evaluation.EnrTypes
+import Presentation.PresTypes
+import Layout.LayTypes
+import Arrangement.ArrTypes
+import Common.CommonTypes
 
 gain = main -- when typing during compilation GHCI replaces the first command line char by 'g'
 

@@ -1,9 +1,9 @@
 module DocTypes_Generated where
 
-import CommonTypes
-import DocTypes
+import Common.CommonTypes
+import Evaluation.DocTypes
 
-import PresTypes
+import Presentation.PresTypes
 import List
 import Char
 

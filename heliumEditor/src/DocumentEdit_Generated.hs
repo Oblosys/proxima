@@ -1,11 +1,11 @@
 module DocumentEdit_Generated where
 
-import CommonTypes
-import DocTypes
+import Common.CommonTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
-import DocumentEdit
-import DocUtils
-import PresTypes
+import Evaluation.DocumentEdit
+import Evaluation.DocUtils
+import Presentation.PresTypes
 
 import Debug.Trace
 

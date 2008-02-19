@@ -1,14 +1,14 @@
 module DocUtils_Generated where
 
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
-import PresTypes
+import Presentation.PresTypes
 import Text.ParserCombinators.Parsec
-import DocUtils
-import CommonTypes
-import CommonUtils
+import Evaluation.DocUtils
+import Common.CommonTypes
+import Common.CommonUtils
 import System.Directory
 
 --instance Show Node where

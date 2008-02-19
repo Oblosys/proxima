@@ -1,12 +1,12 @@
 module ProxParser_Generated where
 
-import CommonTypes
-import PresLayerTypes
-import PresLayerUtils
+import Common.CommonTypes
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----

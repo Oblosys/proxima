@@ -1,15 +1,15 @@
 module Chess where
 
 
-import CommonTypes
+import Common.CommonTypes
 import qualified DocTypes_Generated as Prox
-import DocTypes
-import DocUtils
+import Evaluation.DocTypes
+import Evaluation.DocUtils
 import DocUtils_Generated
-import XprezLib
-import PresTypes
+import Presentation.XprezLib
+import Presentation.PresTypes
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 import Char
 
 import Maybe

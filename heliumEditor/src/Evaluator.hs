@@ -1,10 +1,10 @@
 module Evaluator where
 
-import CommonTypes
-import EvalLayerTypes
-import EvalLayerUtils
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
+import Evaluation.EvalLayerUtils
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import DocTypes_Generated
 

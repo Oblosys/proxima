@@ -1,21 +1,21 @@
 module ProxParser (recognizeRootEnr) where
 
-import CommonTypes
-import PresLayerTypes
-import PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
-import PresentationParsing
-import XprezLib
+import Common.CommonTypes
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
+import Presentation.PresentationParsing
+import Presentation.XprezLib
 
-import UU_Parsing hiding (Exp, parse)
+import Common.UU_Parsing hiding (Exp, parse)
 
 import List hiding (delete)
 
 
 import ProxParser_Generated
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 
-import qualified UU_Parsing
+import qualified Common.UU_Parsing as UU_Parsing
 import Char
 
 import DocTypes_Generated

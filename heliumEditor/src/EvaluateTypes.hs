@@ -1,14 +1,14 @@
 module EvaluateTypes where
 
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
 
-import DebugLevels
+import Common.DebugLevels
 import System.IO.Unsafe -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
 import qualified Data.Map as Map
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 
 import UHA_Syntax

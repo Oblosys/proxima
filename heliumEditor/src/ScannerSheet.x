@@ -2,7 +2,7 @@
 module ScannerSheet where
 
 import DocTypes_Generated
-import Scanner
+import Layout.Scanner
 }
 
 $digit = 0-9            -- digits

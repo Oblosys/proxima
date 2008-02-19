@@ -1,11 +1,11 @@
 module Reducer where
 
-import CommonTypes
-import EvalLayerTypes
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
 
-import EvalLayerUtils
+import Evaluation.EvalLayerUtils
 
-import PresTypes -- for initDoc 
+import Presentation.PresTypes -- for initDoc 
 
 import DocTypes_Generated
 import DocUtils_Generated
