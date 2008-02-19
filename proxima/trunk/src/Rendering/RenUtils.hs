@@ -1,8 +1,8 @@
-module RenUtils where
+module Rendering.RenUtils where
 
-import CommonTypes
+import Common.CommonTypes
 --import RenTypesGTK
-import RenTypes
+import Rendering.RenTypes
 
 import Graphics.UI.Gtk
 

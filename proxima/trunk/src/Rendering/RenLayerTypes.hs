@@ -1,10 +1,10 @@
-module RenLayerTypes ( module ArrTypes
+module Rendering.RenLayerTypes ( module Arrangement.ArrTypes
 --                     , module RenTypesGTK
-                     , module RenTypes
-                     , module RenLayerTypes    ) where
+                     , module Rendering.RenTypes
+                     , module Rendering.RenLayerTypes    ) where
 
 
-import CommonTypes
-import ArrTypes
+import Common.CommonTypes
+import Arrangement.ArrTypes
 --import RenTypesGTK
-import RenTypes
+import Rendering.RenTypes

@@ -1,12 +1,12 @@
-module RenLayerUtils ( module CommonUtils
-                     , module ArrUtils
-                     , module RenUtils
-                     , module RenLayerUtils    ) where
+module Rendering.RenLayerUtils ( module Common.CommonUtils
+                     , module Arrangement.ArrUtils
+                     , module Rendering.RenUtils
+                     , module Rendering.RenLayerUtils    ) where
 
 
-import CommonTypes
-import RenLayerTypes
+import Common.CommonTypes
+import Rendering.RenLayerTypes
 
-import CommonUtils
-import ArrUtils
-import RenUtils
+import Common.CommonUtils
+import Arrangement.ArrUtils
+import Rendering.RenUtils

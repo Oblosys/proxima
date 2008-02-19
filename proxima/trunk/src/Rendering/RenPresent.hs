@@ -1,13 +1,13 @@
-module RenPresent where
+module Rendering.RenPresent where
 
-import CommonTypes
-import RenLayerTypes
-import RenLayerUtils -- for context menu hack
+import Common.CommonTypes
+import Rendering.RenLayerTypes
+import Rendering.RenLayerUtils -- for context menu hack
 
 --import RendererGTK
-import Renderer
+import Rendering.Renderer
 
-import DocTypes (DocumentLevel, HasPath)
+import Evaluation.DocTypes (DocumentLevel, HasPath)
 
 presentIO state high low editHigh = return $ present state high low editHigh
 

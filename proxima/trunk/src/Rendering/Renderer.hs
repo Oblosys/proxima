@@ -1,21 +1,21 @@
-module Renderer where
+module Rendering.Renderer where
 
-import CommonTypes hiding (Rectangle)
-import qualified CommonTypes
-import CommonUtils
+import Common.CommonTypes hiding (Rectangle)
+import qualified Common.CommonTypes as CommonTypes
+import Common.CommonUtils
 
-import RenLayerTypes
-import RenLayerUtils
+import Rendering.RenLayerTypes
+import Rendering.RenLayerUtils
 
-import ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
-import PresTypes hiding (font) -- For Locations
-import LayTypes 
+import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
+import Presentation.PresTypes hiding (font) -- For Locations
+import Layout.LayTypes 
 
-import DocTypes -- For Locations
-import DocUtils
-import DocumentEdit -- Just for now
-import GUI
-import FontLib
+import Evaluation.DocTypes -- For Locations
+import Evaluation.DocUtils
+import Evaluation.DocumentEdit -- Just for now
+import Main.GUI
+import Arrangement.FontLib
 
 import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
 import System.IO.Unsafe
@@ -24,7 +24,7 @@ import Data.IORef
 -- for automatic popup menus, allow these imports
 import DocTypes_Generated (Document, ClipDoc, Node (..))
 import DocUtils_Generated ()  -- instance HasPath Node
-import DocumentEdit (menuD)
+import Evaluation.DocumentEdit (menuD)
 import DocumentEdit_Generated -- instance Editable Document Document Node ClipDoc
 -----
 
@@ -77,14 +77,14 @@ mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
 mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
-    ; let ctxtItems = case ArrLayerUtils.point x y arr of
+    ; let ctxtItems = case point x y arr of
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
               
    ; case pointDoc x y arr of
         Just node ->
          do { let pathDoc = pathNode node
-                  alts = DocumentEdit.menuD pathDoc doc
+                  alts = menuD pathDoc doc
                   items = ctxtItems ++ alts
             ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
                                     | (str, upd) <- items]
@@ -239,11 +239,13 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) imageColor imageColor
  
+        ; pb <- pixbufNewFromFile src
+{-      changes in gtk2hs interface (0.9.12)
         ; ePB <- pixbufNewFromFile src 
         ; case ePB of
             Left (_,errStr) -> debugLnIO Err $ "Renderer.renderArr: could not open bitmap "++show src ++
                                                "\n" ++ errStr
-            Right pb ->
+            Right pb -> -} ;
              do {        
                 -- TODO: make this the Tile case and make a Resize case, and add clipping
                 -- and store pixbufs in rendering state, to avoid reloading.

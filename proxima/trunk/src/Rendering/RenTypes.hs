@@ -1,13 +1,13 @@
-module RenTypes where
+module Rendering.RenTypes where
 
 import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
 import Data.IORef
 
-import CommonTypes
-import qualified CommonTypes
-import CommonUtils
+import Common.CommonTypes
+import qualified Common.CommonTypes as CommonTypes
+import Common.CommonUtils
 
-import DocTypes
+import Evaluation.DocTypes
 
 data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions LeftButtonDown
 

@@ -1,8 +1,8 @@
-module RenTranslate where
+module Rendering.RenTranslate where
 
-import CommonTypes
-import RenLayerTypes
-import RenLayerUtils
+import Common.CommonTypes
+import Rendering.RenLayerTypes
+import Rendering.RenLayerUtils
 
 import Char
 -- import IOExts
