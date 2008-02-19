@@ -124,6 +124,8 @@ scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' shee
              (tokenss, idpc'', wm'') = scanStructuralList' sheet foc lx loc pth idpc' wm' (i+1) press
          in  (tokens ++ tokenss, idpc'', wm'')
 
+
+
 scanPresentation :: Show token => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
                     IDP -> Lexer -> Layout doc node clip ->
@@ -136,7 +138,8 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
        sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
      focusedScanChars = markFocus markFocusStart scannedFocusStart $
-                        markFocus markFocusEnd scannedFocusEnd scanChars 
+                        markFocus markFocusEnd scannedFocusEnd 
+                          (scanChars) -- ++ [EndOfParsing NoFocusMark NoFocusMark]) 
      (tokens, idPCounter'', whitespaceMap'') = sheet idPCounter' focusedScanChars
  in  -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
@@ -153,6 +156,12 @@ markFocus f (Just pos) scs = let (left, focusedChar:right) = splitAt pos scs
 -- The functions below are used by the Alex Scanner, which imports Scanner.hs
 -- Some scanner functionality could not be factorized and can be found in AlexTemplate-ghc
 
+alexGetChar (_, [])   = Nothing
+alexGetChar (_, Char _ _ _ c : cs) = Just (c, (c,cs))
+alexGetChar (_, Structural _ _ _ _ _ _ : cs) = Just ('\255', ('\255', cs))
+alexGetChar (_, EndOfParsing _ _ : cs)       = Just ('\254', ('\254', cs))
+
+alexInputPrevChar (c,_) = c
 
 type ScannerState = (Int, WhitespaceMap, (Int, Int)) -- (idP counter, whitespace map, (newlines, spaces))
 

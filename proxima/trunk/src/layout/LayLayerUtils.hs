@@ -36,11 +36,12 @@ cast (VertexP id v x y o pres)  = VertexP id v x y o $ cast pres
 cast (FormatterP id press)      = FormatterP id $ map cast press
 
 stringFromScanChars :: [ScanChar doc node clip token] -> String
-stringFromScanChars [] = ""
-stringFromScanChars (sc : scs) =
-  (case sc of Char _ _ _ c           -> c
-              Structural _ _ _ _ _ _ -> '@') -- in the Alex scanner, this is \255, this output is only for show
-   : stringFromScanChars scs                                    
+stringFromScanChars scs = 
+  [ case sc of Char _ _ _ c           -> c
+               Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
+               EndOfParsing _ _       -> '#' -- in the Alex scanner, this is \254, this output is only for show
+  | sc <- scs
+  ]
 
 idPFromScanChars :: [ScanChar doc node clip token] -> IDP
 idPFromScanChars [] = NoIDP
@@ -48,17 +49,13 @@ idPFromScanChars (Char (IDP idp) _ _ _ : scs) = IDP idp
 idPFromScanChars (Char NoIDP     _ _ _ : scs) = idPFromScanChars scs
 idPFromScanChars (Structural (IDP idp) _ _ _ _ _ : scs) = IDP idp
 idPFromScanChars (Structural NoIDP     _ _ _ _ _ : scs) = idPFromScanChars scs
+idPFromScanChars (EndOfParsing _ _ : _) = NoIDP
 
-markFocusStart (Char idp _ focusEnd c) = Char idp FocusMark focusEnd c
-markFocusStart (Structural idp _ focusEnd loc tokens lay) = Structural idp FocusMark focusEnd loc tokens lay 
+markFocusStart scanChar = scanChar { startFocusMark = FocusMark }
 
-markFocusEnd (Char idp focusStart _ c) = Char idp focusStart FocusMark c
-markFocusEnd (Structural idp focusStart _ loc tokens lay) = Structural idp focusStart FocusMark loc tokens lay 
+markFocusEnd scanChar = scanChar { endFocusMark = FocusMark }
 
-hasFocusStartMark (Char _ FocusMark _ _)           = True 
-hasFocusStartMark (Structural _ FocusMark _ _ _ _) = True 
-hasFocusStartMark _                                = False
+hasFocusStartMark scanChar = startFocusMark scanChar == FocusMark
 
-hasFocusEndMark (Char _ _ FocusMark _)           = True 
-hasFocusEndMark (Structural _ _ FocusMark _ _ _) = True 
-hasFocusEndMark _                                = False
+hasFocusEndMark scanChar = endFocusMark scanChar == FocusMark
+
