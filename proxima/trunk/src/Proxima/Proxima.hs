@@ -1,13 +1,13 @@
-module Main.Proxima where
+module Proxima.Proxima where
  
 import Data.IORef
 import System
 import Control.Exception
 
-import Main.Architecture
+import Proxima.Architecture
 
 --import GUIGTK
-import Main.GUI
+import Proxima.GUI
 
 import Common.CommonTypes
 import Evaluation.DocTypes

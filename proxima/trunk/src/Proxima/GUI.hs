@@ -1,4 +1,4 @@
-module Main.GUI where
+module Proxima.GUI where
 
 {-
 Initialization of the document is done with timer handler, because it may show a dialog (about the

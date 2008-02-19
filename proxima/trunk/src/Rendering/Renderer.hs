@@ -16,7 +16,7 @@ import Layout.LayTypes
 import Evaluation.DocTypes -- For Locations
 import Evaluation.DocUtils
 import Evaluation.DocumentEdit -- Just for now
-import Main.GUI
+import Proxima.GUI
 import Arrangement.FontLib
 
 import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)

@@ -1,6 +1,6 @@
-module Main.Architecture where
+module Proxima.Architecture where
 
-import Main.ArchitectureLibM
+import Proxima.ArchitectureLibM
 
 import qualified Evaluation.EvalPresent     as EvalPresent
 import qualified Evaluation.EvalTranslate   as EvalTranslate
