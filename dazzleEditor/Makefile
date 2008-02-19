@@ -1,10 +1,13 @@
-#HC   = /c/Progra~1/Visual~1/bin/ghc
-HC = ghc
+#HC = ghc
+#PROXIMADIR = ../proxima
+
+HC   = /c/Progra~1/Visual~1/bin/ghc
+PROXIMADIR = src/proxima
+
+# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
+
 FIND = /usr/bin/find
 
-PROXIMADIR = ../proxima
-#PROXIMADIR = src/proxima
-# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
@@ -22,14 +25,6 @@ default: $(MAIN)
 
 
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
-
-#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-#ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
-#COMMONDIR       = $(PROXIMADIR)/src/common
-#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-#MAINDIR         = $(PROXIMADIR)/src/main
-#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
-#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
 PROXIMADIRS = $(PROXIMASRCDIR)
 
@@ -90,7 +85,7 @@ clean-proxima-all: clean
 #directories
 
 
-ALLSRCDIRS = src:$(PROXIMADIRS)
+ALLSRCDIRS = src:$(PROXIMASRCDIR)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
 		-package parsec -package mtl \
