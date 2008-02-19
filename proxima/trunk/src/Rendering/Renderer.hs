@@ -239,14 +239,20 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) imageColor imageColor
  
+-- GHC > 6.6
+{-
         ; pb <- pixbufNewFromFile src
-{-      changes in gtk2hs interface (0.9.12)
+        ;    do {
+-}
+-- GHC <= 6.6
+--      changes in gtk2hs interface (0.9.12)
         ; ePB <- pixbufNewFromFile src 
         ; case ePB of
             Left (_,errStr) -> debugLnIO Err $ "Renderer.renderArr: could not open bitmap "++show src ++
                                                "\n" ++ errStr
-            Right pb -> -} ;
-             do {        
+            Right pb ->
+             do { 
+--         
                 -- TODO: make this the Tile case and make a Resize case, and add clipping
                 -- and store pixbufs in rendering state, to avoid reloading.
                 
