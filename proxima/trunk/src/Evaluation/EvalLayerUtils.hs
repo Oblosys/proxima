@@ -1,11 +1,11 @@
-module EvalLayerUtils ( module CommonUtils
-                      , module EnrUtils
-                      , module EvalLayerUtils    ) where
+module Evaluation.EvalLayerUtils ( module Common.CommonUtils
+                      , module Evaluation.EnrUtils
+                      , module Evaluation.EvalLayerUtils    ) where
 
 
-import CommonTypes
-import EvalLayerTypes
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
 
-import CommonUtils
+import Common.CommonUtils
 --import DocUtils already imported via EnrUtils
-import EnrUtils
+import Evaluation.EnrUtils

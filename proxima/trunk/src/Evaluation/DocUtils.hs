@@ -1,11 +1,11 @@
-module DocUtils where
+module Evaluation.DocUtils where
 
 
-import DocTypes
-import PresTypes
+import Evaluation.DocTypes
+import Presentation.PresTypes
 import Text.ParserCombinators.Parsec
 
-import CommonTypes
+import Common.CommonTypes
 
 redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})

@@ -1,10 +1,10 @@
-module EvalLayerTypes ( module EnrTypes
-                      , module EvalLayerTypes    ) where
+module Evaluation.EvalLayerTypes ( module Evaluation.EnrTypes
+                      , module Evaluation.EvalLayerTypes    ) where
 
 
-import CommonTypes
-import EnrTypes 
-import DocTypes
+import Common.CommonTypes
+import Evaluation.EnrTypes 
+import Evaluation.DocTypes
 
 data LayerStateEval = LayerStateEval
 

@@ -1,10 +1,10 @@
-module EvalPresent where
+module Evaluation.EvalPresent where
 
-import CommonTypes
-import EvalLayerTypes
-import EvalLayerUtils
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
+import Evaluation.EvalLayerUtils
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 
 presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip) =>
              LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr ->

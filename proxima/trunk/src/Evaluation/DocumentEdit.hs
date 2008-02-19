@@ -1,4 +1,4 @@
-module DocumentEdit where
+module Evaluation.DocumentEdit where
 
 {-
 
@@ -11,10 +11,10 @@ Document root is different from the rest of the elements. It cannot be selected 
 
 -}
 
-import CommonTypes
-import DocTypes
-import DocUtils
-import PresTypes
+import Common.CommonTypes
+import Evaluation.DocTypes
+import Evaluation.DocUtils
+import Presentation.PresTypes
 
 import List
 import Debug.Trace

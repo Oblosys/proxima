@@ -1,10 +1,10 @@
-module EvalTranslate where
+module Evaluation.EvalTranslate where
 
-import CommonTypes
-import EvalLayerTypes
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
 
-import DocUtils
-import DocumentEdit
+import Evaluation.DocUtils
+import Evaluation.DocumentEdit
 import Text.ParserCombinators.Parsec
 
 

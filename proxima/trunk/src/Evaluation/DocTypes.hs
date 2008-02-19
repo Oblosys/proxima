@@ -1,7 +1,7 @@
-module DocTypes where
+module Evaluation.DocTypes where
 
 
-import CommonTypes
+import Common.CommonTypes
 
 import List
 import Char

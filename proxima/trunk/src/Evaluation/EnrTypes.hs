@@ -1,11 +1,11 @@
-module EnrTypes (module DocTypes, module EnrTypes) where
+module Evaluation.EnrTypes (module Evaluation.DocTypes, module Evaluation.EnrTypes) where
 
-import CommonTypes
-import DocTypes 
+import Common.CommonTypes
+import Evaluation.DocTypes 
 
-import CommonUtils
+import Common.CommonUtils
 
-import PresTypes -- for inserted/deleted token hack
+import Presentation.PresTypes -- for inserted/deleted token hack
 
 -- EnrTypes imports and exports DocTypes because the level type is the same for both
 -- levels. A separate module imported by both DocTypes and EnrTypes would be a bit

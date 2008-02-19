@@ -1,6 +1,6 @@
-module EnrUtils (module DocUtils, module EnrUtils) where
+module Evaluation.EnrUtils (module Evaluation.DocUtils, module Evaluation.EnrUtils) where
 
-import DocTypes
-import DocUtils
+import Evaluation.DocTypes
+import Evaluation.DocUtils
 
 
