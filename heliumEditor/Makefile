@@ -11,8 +11,8 @@
 HC   = ghc
 FIND = /usr/bin/find
 
-PROXIMADIR = ../proxima
-#PROXIMADIR = src/proxima
+#PROXIMADIR = ../proxima
+PROXIMADIR = src/proxima
 # use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
 
 PROXIMASRCDIR = $(PROXIMADIR)/src
@@ -34,17 +34,6 @@ default: $(MAIN)
 
 
 LAYOUTDIR       = $(PROXIMADIR)/src/layout
-
-#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-#ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
-#COMMONDIR       = $(PROXIMADIR)/src/common
-#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-#GENERATORDIR    = $(PROXIMADIR)/src/generator
-#MAINDIR         = $(PROXIMADIR)/src/main
-#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
-#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(GENERATORDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
-
-PROXIMADIRS = $(PROXIMASRCDIR)
 
 # Generation 
 
@@ -119,7 +108,7 @@ TOPDIR        = ../Top/src/Top
 
 HELIUMDIRS	= $(LVMLIBDIR)/common:$(LVMLIBDIR)/common/ghc:$(LVMLIBDIR)/lvm:$(LVMLIBDIR)/asm:$(LVMLIBDIR)/core:$(HELIUMSRCDIR)/utils:$(PARSECDIR):$(HELIUMSRCDIR)/parser:$(HELIUMSRCDIR)/staticanalysis/miscellaneous:$(HELIUMSRCDIR)/staticanalysis/inferencers:$(HELIUMSRCDIR)/staticanalysis/directives:$(HELIUMSRCDIR)/staticanalysis/staticchecks:$(HELIUMSRCDIR)/staticanalysis/heuristics:$(HELIUMSRCDIR)/staticanalysis/messages:$(HELIUMSRCDIR)/syntax:$(HELIUMSRCDIR)/codegeneration:$(HELIUMSRCDIR)/main:$(HELIUMSRCDIR)/modulesystem:$(TOPDIR):$(TOPDIR)/..
 
-ALLSRCDIRS = src:$(PROXIMADIRS):$(HELIUMDIRS)
+ALLSRCDIRS = src:$(PROXIMASRCDIR):$(HELIUMDIRS)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
 		-package gtk -package parsec -package mtl -package time\
