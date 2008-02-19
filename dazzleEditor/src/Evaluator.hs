@@ -1,8 +1,8 @@
 module Evaluator (evaluationSheet) where
 
-import CommonTypes
-import EvalLayerTypes
-import EvalLayerUtils
+import Common.CommonTypes
+import Evaluation.EvalLayerTypes
+import Evaluation.EvalLayerUtils
 
 import DocTypes_Generated
 

@@ -1,11 +1,11 @@
 module DocumentEdit_Generated where
 
-import CommonTypes hiding (Dirty (..))
-import DocTypes
+import Common.CommonTypes hiding (Dirty (..))
+import Evaluation.DocTypes
 import DocTypes_Generated
-import DocumentEdit
-import DocUtils
-import PresTypes
+import Evaluation.DocumentEdit
+import Evaluation.DocUtils
+import Presentation.PresTypes
 
 import Debug.Trace
 
@@ -107,11 +107,10 @@ instance Editable String Document Node ClipDoc UserToken where
 instance Clip ClipDoc where
   arityClip (Clip_Root x) = arity x
   arityClip (Clip_Document x) = arity x
-  arityClip (Clip_List_Dummy x) = arity x
-  arityClip (Clip_String x) = arity x
+  arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_Bool x) = arity x
-  arityClip (Clip_Int x) = arity x
   arityClip (Clip_Graph x) = arity x
+  arityClip (Clip_String x) = arity x
   arityClip (Clip_List_Section x) = arity x
   arityClip (Clip_List_Paragraph x) = arity x
   arityClip (Clip_List_Subsection x) = arity x
@@ -122,7 +121,7 @@ instance Clip ClipDoc where
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
   arityClip (Clip_Shape x) = arity x
-  arityClip (Clip_Dummy x) = arity x
+  arityClip (Clip_Int x) = arity x
   arityClip (Clip_Section x) = arity x
   arityClip (Clip_Paragraph x) = arity x
   arityClip (Clip_Subsection x) = arity x
@@ -133,11 +132,10 @@ instance Clip ClipDoc where
   arityClip (Clip_Nothing)   = -1
   alternativesClip (Clip_Root x) = alternatives x
   alternativesClip (Clip_Document x) = alternatives x
-  alternativesClip (Clip_List_Dummy x) = alternatives x
-  alternativesClip (Clip_String x) = alternatives x
+  alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
-  alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
+  alternativesClip (Clip_String x) = alternatives x
   alternativesClip (Clip_List_Section x) = alternatives x
   alternativesClip (Clip_List_Paragraph x) = alternatives x
   alternativesClip (Clip_List_Subsection x) = alternatives x
@@ -148,7 +146,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
   alternativesClip (Clip_Shape x) = alternatives x
-  alternativesClip (Clip_Dummy x) = alternatives x
+  alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_Section x) = alternatives x
   alternativesClip (Clip_Paragraph x) = alternatives x
   alternativesClip (Clip_Subsection x) = alternatives x
@@ -160,11 +158,10 @@ instance Clip ClipDoc where
 
   holeClip (Clip_Root x) = Clip_Root hole
   holeClip (Clip_Document x) = Clip_Document hole
-  holeClip (Clip_List_Dummy x) = Clip_List_Dummy hole
-  holeClip (Clip_String x) = Clip_String hole
+  holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_Bool x) = Clip_Bool hole
-  holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_Graph x) = Clip_Graph hole
+  holeClip (Clip_String x) = Clip_String hole
   holeClip (Clip_List_Section x) = Clip_List_Section hole
   holeClip (Clip_List_Paragraph x) = Clip_List_Paragraph hole
   holeClip (Clip_List_Subsection x) = Clip_List_Subsection hole
@@ -175,7 +172,7 @@ instance Clip ClipDoc where
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
   holeClip (Clip_Shape x) = Clip_Shape hole
-  holeClip (Clip_Dummy x) = Clip_Dummy hole
+  holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_Section x) = Clip_Section hole
   holeClip (Clip_Paragraph x) = Clip_Paragraph hole
   holeClip (Clip_Subsection x) = Clip_Subsection hole
@@ -187,11 +184,10 @@ instance Clip ClipDoc where
 
   isListClip (Clip_Root x) = isList x
   isListClip (Clip_Document x) = isList x
-  isListClip (Clip_List_Dummy x) = isList x
-  isListClip (Clip_String x) = isList x
+  isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_Bool x) = isList x
-  isListClip (Clip_Int x) = isList x
   isListClip (Clip_Graph x) = isList x
+  isListClip (Clip_String x) = isList x
   isListClip (Clip_List_Section x) = isList x
   isListClip (Clip_List_Paragraph x) = isList x
   isListClip (Clip_List_Subsection x) = isList x
@@ -202,7 +198,7 @@ instance Clip ClipDoc where
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
   isListClip (Clip_Shape x) = isList x
-  isListClip (Clip_Dummy x) = isList x
+  isListClip (Clip_Int x) = isList x
   isListClip (Clip_Section x) = isList x
   isListClip (Clip_Paragraph x) = isList x
   isListClip (Clip_Subsection x) = isList x
@@ -214,11 +210,10 @@ instance Clip ClipDoc where
 
   insertListClip i c (Clip_Root x) = insertList i c x
   insertListClip i c (Clip_Document x) = insertList i c x
-  insertListClip i c (Clip_List_Dummy x) = insertList i c x
-  insertListClip i c (Clip_String x) = insertList i c x
+  insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
-  insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
+  insertListClip i c (Clip_String x) = insertList i c x
   insertListClip i c (Clip_List_Section x) = insertList i c x
   insertListClip i c (Clip_List_Paragraph x) = insertList i c x
   insertListClip i c (Clip_List_Subsection x) = insertList i c x
@@ -229,7 +224,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
   insertListClip i c (Clip_Shape x) = insertList i c x
-  insertListClip i c (Clip_Dummy x) = insertList i c x
+  insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_Section x) = insertList i c x
   insertListClip i c (Clip_Paragraph x) = insertList i c x
   insertListClip i c (Clip_Subsection x) = insertList i c x
@@ -241,11 +236,10 @@ instance Clip ClipDoc where
 
   removeListClip i (Clip_Root x) = removeList i x
   removeListClip i (Clip_Document x) = removeList i x
-  removeListClip i (Clip_List_Dummy x) = removeList i x
-  removeListClip i (Clip_String x) = removeList i x
+  removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
-  removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
+  removeListClip i (Clip_String x) = removeList i x
   removeListClip i (Clip_List_Section x) = removeList i x
   removeListClip i (Clip_List_Paragraph x) = removeList i x
   removeListClip i (Clip_List_Subsection x) = removeList i x
@@ -256,7 +250,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
   removeListClip i (Clip_Shape x) = removeList i x
-  removeListClip i (Clip_Dummy x) = removeList i x
+  removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_Section x) = removeList i x
   removeListClip i (Clip_Paragraph x) = removeList i x
   removeListClip i (Clip_Subsection x) = removeList i x
@@ -273,25 +267,21 @@ instance Clip ClipDoc where
 
 instance Editable Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_Dummy x
-  select (0:p) (Dummy x1 x2 x3 x4) = select p x1
-  select (1:p) (Dummy x1 x2 x3 x4) = select p x2
-  select (2:p) (Dummy x1 x2 x3 x4) = select p x3
-  select (3:p) (Dummy x1 x2 x3 x4) = select p x4
+  select (0:p) (Dummy x1 x2) = select p x1
+  select (1:p) (Dummy x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Dummy c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Dummy")   x
-  paste (0:p) c (Dummy x1 x2 x3 x4) = Dummy (paste p c x1) x2 x3 x4
-  paste (1:p) c (Dummy x1 x2 x3 x4) = Dummy x1 (paste p c x2) x3 x4
-  paste (2:p) c (Dummy x1 x2 x3 x4) = Dummy x1 x2 (paste p c x3) x4
-  paste (3:p) c (Dummy x1 x2 x3 x4) = Dummy x1 x2 x3 (paste p c x4)
+  paste (0:p) c (Dummy x1 x2) = Dummy (paste p c x1) x2
+  paste (1:p) c (Dummy x1 x2) = Dummy x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Dummy {Dummys} "  , Clip_Dummy $ Dummy hole hole hole hole)
+  alternatives _ = [("Dummy {Dummy} "  , Clip_Dummy $ Dummy hole hole)
                    ,("{Dummy}", Clip_Dummy hole)
                    ]
 
-  arity (Dummy x1 x2 x3 x4) = 4
+  arity (Dummy x1 x2) = 2
   arity _                        = 0
 
   parseErr = ParseErrDummy
@@ -674,66 +664,6 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
-toList_Dummy vs = List_Dummy (toConsList_Dummy vs)
-
-fromList_Dummy (List_Dummy vs) = fromConsList_Dummy vs
-fromList_Dummy _                  = []
-
-toConsList_Dummy [] = Nil_Dummy
-toConsList_Dummy (x:xs) = Cons_Dummy x (toConsList_Dummy xs)
-
-fromConsList_Dummy Nil_Dummy = []
-fromConsList_Dummy (Cons_Dummy x xs) = x: fromConsList_Dummy xs
-
-replaceList_Dummy _ x Nil_Dummy = Nil_Dummy -- replace beyond end of list
-replaceList_Dummy 0 x (Cons_Dummy cx cxs) = Cons_Dummy x cxs
-replaceList_Dummy n x (Cons_Dummy cx cxs) = Cons_Dummy cx (replaceList_Dummy (n-1) x cxs)
-
-insertList_Dummy 0 x cxs = Cons_Dummy x cxs
-insertList_Dummy _ x Nil_Dummy  = Nil_Dummy   -- insert beyond end of list
-insertList_Dummy n x (Cons_Dummy cx cxs) = Cons_Dummy cx (insertList_Dummy (n-1) x cxs)
-
-removeList_Dummy _ Nil_Dummy  = Nil_Dummy -- remove beyond end of list
-removeList_Dummy 0 (Cons_Dummy cx cxs) = cxs
-removeList_Dummy n (Cons_Dummy cx cxs) = Cons_Dummy cx (removeList_Dummy (n-1) cxs)
-
-instance Editable List_Dummy Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Dummy x
-  select (n:p) (List_Dummy cxs) = let xs = fromConsList_Dummy cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_List_Dummy c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Dummy")   x
-  paste (n:p) c (List_Dummy cxs) = let xs = fromConsList_Dummy cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Dummy (replaceList_Dummy n x' cxs)
-                                        else List_Dummy cxs -- paste beyond end of list
-  paste _  _  x                  = x
-
-  alternatives _ = [("{List_Dummy}", Clip_List_Dummy hole)
-                   ]
-
-  arity (List_Dummy x1) = length (fromConsList_Dummy x1)
-  arity _                      = 0
-
-  parseErr = ParseErrList_Dummy
-
-  hole = List_Dummy Nil_Dummy
-
-  isList _ = True
-
-  insertList n (Clip_Dummy c) (List_Dummy cxs) = Clip_List_Dummy $ List_Dummy (insertList_Dummy n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Dummy xs
-  insertList _ c xs                 = Clip_List_Dummy xs
-
-  removeList n (List_Dummy cxs) = Clip_List_Dummy $ List_Dummy (removeList_Dummy n cxs)
-  removeList _ xs                        = Clip_List_Dummy $ xs
-
 toList_Section vs = List_Section (toConsList_Section vs)
 
 fromList_Section (List_Section vs) = fromConsList_Section vs

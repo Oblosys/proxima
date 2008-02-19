@@ -1,8 +1,9 @@
-HC   = /c/Progra~1/Visual~1/bin/ghc
+#HC   = /c/Progra~1/Visual~1/bin/ghc
+HC = ghc
 FIND = /usr/bin/find
 
-#PROXIMADIR = ../proxima
-PROXIMADIR = src/proxima
+PROXIMADIR = ../proxima
+#PROXIMADIR = src/proxima
 # use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
@@ -20,17 +21,17 @@ SHELL = /bin/sh
 default: $(MAIN)
 
 
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
-COMMONDIR       = $(PROXIMADIR)/src/common
-EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-LAYOUTDIR       = $(PROXIMADIR)/src/layout
-MAINDIR         = $(PROXIMADIR)/src/main
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-RENDERINGDIR    = $(PROXIMADIR)/src/rendering
+LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
-PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
+#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
+#ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
+#COMMONDIR       = $(PROXIMADIR)/src/common
+#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
+#MAINDIR         = $(PROXIMADIR)/src/main
+#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
+#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
+PROXIMADIRS = $(PROXIMASRCDIR)
 
 # Generation 
 
@@ -92,8 +93,8 @@ clean-proxima-all: clean
 ALLSRCDIRS = src:$(PROXIMADIRS)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
-		-package wx -package parsec -package mtl\
-		-fno-monomorphism-restriction $(EXTRA_OPTS)
+		-package parsec -package mtl \
+		-fno-monomorphism-restriction  $(EXTRA_OPTS)
 
 # The main target
 

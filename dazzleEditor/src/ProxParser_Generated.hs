@@ -1,12 +1,12 @@
 module ProxParser_Generated where
 
-import CommonTypes hiding (Dirty (..))
-import PresLayerTypes
-import PresLayerUtils
+import Common.CommonTypes hiding (Dirty (..))
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
 
-import DocumentEdit
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -31,10 +31,10 @@ reuseRootEnr nodes  ma0 ma1
            (RootEnr a0 a1) -> reuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseDummy :: [Token doc Node clip token] -> Maybe List_Dummy -> Maybe String -> Maybe Bool -> Maybe Int -> Dummy
-reuseDummy nodes  ma0 ma1 ma2 ma3
+reuseDummy :: [Token doc Node clip token] -> Maybe Dummy -> Maybe Bool -> Dummy
+reuseDummy nodes  ma0 ma1
   = case extractFromTokens extractDummy defaultDummy nodes of
-           (Dummy a0 a1 a2 a3) -> reuse4 Dummy a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Dummy a0 a1) -> reuse2 Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseDummy"
 
 reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
@@ -145,12 +145,6 @@ reuseClean nodes
            (Clean) -> reuse0 Clean
            _ -> error "System error:<module>.reuseClean"
 
-reuseList_Dummy :: [Token doc Node clip token] -> Maybe ConsList_Dummy -> List_Dummy
-reuseList_Dummy nodes  ma0
-  = case extractFromTokens extractList_Dummy defaultList_Dummy nodes of
-           (List_Dummy a0) -> reuse1 List_Dummy a0 ma0
-           _ -> error "System error:<module>.reuseList_Dummy"
-
 reuseList_Section :: [Token doc Node clip token] -> Maybe ConsList_Section -> List_Section
 reuseList_Section nodes  ma0
   = case extractFromTokens extractList_Section defaultList_Section nodes of
@@ -198,7 +192,7 @@ extractRootEnr (Just (RootEnrNode x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (DummyNode x@(Dummy _ _ _ _) _)) = Just x
+extractDummy (Just (DummyNode x@(Dummy _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
@@ -273,10 +267,6 @@ extractClean :: Maybe Node -> Maybe Dirty
 extractClean (Just (CleanNode x@(Clean) _)) = Just x
 extractClean _ = Nothing
 
-extractList_Dummy :: Maybe Node -> Maybe List_Dummy
-extractList_Dummy (Just (List_DummyNode x@(List_Dummy _) _)) = Just x
-extractList_Dummy _ = Nothing
-
 extractList_Section :: Maybe Node -> Maybe List_Section
 extractList_Section (Just (List_SectionNode x@(List_Section _) _)) = Just x
 extractList_Section _ = Nothing
@@ -309,7 +299,7 @@ defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr hole hole
 
 defaultDummy :: Dummy
-defaultDummy = Dummy hole hole hole hole
+defaultDummy = Dummy hole hole
 
 defaultRoot :: Root
 defaultRoot = Root hole hole hole
@@ -365,9 +355,6 @@ defaultDirty = Dirty
 defaultClean :: Dirty
 defaultClean = Clean
 
-defaultList_Dummy :: List_Dummy
-defaultList_Dummy = List_Dummy Nil_Dummy
-
 defaultList_Section :: List_Section
 defaultList_Section = List_Section Nil_Section
 
@@ -400,12 +387,6 @@ reuse2 :: (a0 -> a1 -> r) ->
           Maybe a0 -> Maybe a1 -> r
 reuse2 f  a0 a1 ma0 ma1 =
   f (maybe a0 id ma0) (maybe a1 id ma1) 
-
-reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) -> 
-          a0 -> a1 -> a2 -> a3 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
-reuse4 f  a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) 
 
 reuse3 :: (a0 -> a1 -> a2 -> r) -> 
           a0 -> a1 -> a2 -> 

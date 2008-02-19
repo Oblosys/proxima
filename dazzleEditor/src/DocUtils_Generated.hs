@@ -1,15 +1,15 @@
 module DocUtils_Generated where
 
-import DocTypes
+import Evaluation.DocTypes
 import DocTypes_Generated
-import DocUtils
-import DocumentEdit
+import Evaluation.DocUtils
+import Evaluation.DocumentEdit
 import DocumentEdit_Generated
-import PresTypes
-import DebugLevels
+import Presentation.PresTypes
+import Common.DebugLevels
 import Text.ParserCombinators.Parsec
 
-import CommonTypes hiding (Clean, Dirty)
+import Common.CommonTypes hiding (Clean, Dirty)
 
 --instance Show Node where
 --  show NoNode = "<>"
@@ -128,22 +128,20 @@ rankNode (HoleSubgraphNode _ _)  = 33
 rankNode (DirtyNode _ _)  = 34
 rankNode (CleanNode _ _)  = 35
 rankNode (HoleDirtyNode _ _)  = 36
-rankNode (List_DummyNode _ _)  = 37
-rankNode (HoleList_DummyNode _ _)  = 38
-rankNode (List_SectionNode _ _)  = 39
-rankNode (HoleList_SectionNode _ _)  = 40
-rankNode (List_ParagraphNode _ _)  = 41
-rankNode (HoleList_ParagraphNode _ _)  = 42
-rankNode (List_SubsectionNode _ _)  = 43
-rankNode (HoleList_SubsectionNode _ _)  = 44
-rankNode (List_SubsubsectionNode _ _)  = 45
-rankNode (HoleList_SubsubsectionNode _ _)  = 46
-rankNode (List_WordNode _ _)  = 47
-rankNode (HoleList_WordNode _ _)  = 48
-rankNode (List_VertexNode _ _)  = 49
-rankNode (HoleList_VertexNode _ _)  = 50
-rankNode (List_EdgeNode _ _)  = 51
-rankNode (HoleList_EdgeNode _ _)  = 52
+rankNode (List_SectionNode _ _)  = 37
+rankNode (HoleList_SectionNode _ _)  = 38
+rankNode (List_ParagraphNode _ _)  = 39
+rankNode (HoleList_ParagraphNode _ _)  = 40
+rankNode (List_SubsectionNode _ _)  = 41
+rankNode (HoleList_SubsectionNode _ _)  = 42
+rankNode (List_SubsubsectionNode _ _)  = 43
+rankNode (HoleList_SubsubsectionNode _ _)  = 44
+rankNode (List_WordNode _ _)  = 45
+rankNode (HoleList_WordNode _ _)  = 46
+rankNode (List_VertexNode _ _)  = 47
+rankNode (HoleList_VertexNode _ _)  = 48
+rankNode (List_EdgeNode _ _)  = 49
+rankNode (HoleList_EdgeNode _ _)  = 50
 
 
 
@@ -185,8 +183,6 @@ instance HasPath Node where
   pathNode (DirtyNode _ pth)  = PathD pth
   pathNode (CleanNode _ pth)  = PathD pth
   pathNode (HoleDirtyNode _ pth)  = PathD pth
-  pathNode (List_DummyNode _ pth)  = PathD pth
-  pathNode (HoleList_DummyNode _ pth)  = PathD pth
   pathNode (List_SectionNode _ pth)  = PathD pth
   pathNode (HoleList_SectionNode _ pth)  = PathD pth
   pathNode (List_ParagraphNode _ pth)  = PathD pth
@@ -205,7 +201,7 @@ instance HasPath Node where
 
 
 shallowShowEnrichedDoc1 (RootEnr  _ _) = "RootEnr"
-shallowShowDummy1 (Dummy  _ _ _ _) = "Dummy"
+shallowShowDummy1 (Dummy  _ _) = "Dummy"
 shallowShowRoot1 (Root  _ _ _) = "Root"
 shallowShowSection1 (Section  _ _ _) = "Section"
 shallowShowSubsection1 (Subsection  _ _ _) = "Subsection"
@@ -224,9 +220,6 @@ shallowShowEdge1 (Edge  _ _) = "Edge"
 shallowShowSubgraph1 (Subgraph  _ _ _) = "Subgraph"
 shallowShowDirty1 (Dirty ) = "Dirty"
 shallowShowDirty1 (Clean ) = "Clean"
-shallowShowList_Dummy1 (List_Dummy  _) = "List_Dummy"
-shallowShowConsList_Dummy1 (Cons_Dummy  _ _) = "Cons_Dummy"
-shallowShowConsList_Dummy1 (Nil_Dummy ) = "Nil_Dummy"
 shallowShowList_Section1 (List_Section  _) = "List_Section"
 shallowShowConsList_Section1 (Cons_Section  _ _) = "Cons_Section"
 shallowShowConsList_Section1 (Nil_Section ) = "Nil_Section"
@@ -254,7 +247,7 @@ shallowShowConsList_Edge1 (Nil_Edge ) = "Nil_Edge"
 toXMLEnrichedDoc (RootEnr root document) = Elt "RootEnr" [] $ [toXMLRoot root] ++ [toXMLDocument document] ++ []
 toXMLEnrichedDoc HoleEnrichedDoc = Elt "HoleEnrichedDoc" [] []
 toXMLEnrichedDoc (ParseErrEnrichedDoc _) = Elt "ParseErrEnrichedDoc" [] []
-toXMLDummy (Dummy dummys string bool int) = Elt "Dummy" [] $ toXMLList_Dummy dummys ++ [toXMLString string] ++ [toXMLBool bool] ++ [toXMLInt int] ++ []
+toXMLDummy (Dummy dummy bool) = Elt "Dummy" [] $ [toXMLDummy dummy] ++ [toXMLBool bool] ++ []
 toXMLDummy HoleDummy = Elt "HoleDummy" [] []
 toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
 toXMLRoot (Root graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections ++ []
@@ -299,11 +292,6 @@ toXMLDirty (Dirty) = Elt "Dirty" [] $ []
 toXMLDirty (Clean) = Elt "Clean" [] $ []
 toXMLDirty HoleDirty = Elt "HoleDirty" [] []
 toXMLDirty (ParseErrDirty _) = Elt "ParseErrDirty" [] []
-toXMLList_Dummy (List_Dummy dummys) = toXMLConsList_Dummy dummys
-toXMLList_Dummy HoleList_Dummy = []
-toXMLList_Dummy (ParseErrList_Dummy _) = []
-toXMLConsList_Dummy (Cons_Dummy dummy dummys) = toXMLDummy dummy : toXMLConsList_Dummy dummys
-toXMLConsList_Dummy Nil_Dummy             = []
 toXMLList_Section (List_Section sections) = toXMLConsList_Section sections
 toXMLList_Section HoleList_Section = []
 toXMLList_Section (ParseErrList_Section _) = []
@@ -345,7 +333,7 @@ toXMLConsList_Edge Nil_Edge             = []
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root <*> parseXML_Document <* endTag "RootEnr"
 parseXML_Dummy = parseXMLCns_Dummy <?|> parseHoleAndParseErr "Dummy" HoleDummy
-parseXMLCns_Dummy = Dummy <$ startTag "Dummy" <*> parseXML_List_Dummy <*> parseXML_String <*> parseXML_Bool <*> parseXML_Int <* endTag "Dummy"
+parseXMLCns_Dummy = Dummy <$ startTag "Dummy" <*> parseXML_Dummy <*> parseXML_Bool <* endTag "Dummy"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section <* endTag "Root"
 parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection
@@ -376,7 +364,6 @@ parseXMLCns_Subgraph = Subgraph <$ startTag "Subgraph" <*> parseXML_Dirty <*> pa
 parseXML_Dirty = parseXMLCns_Dirty <?|> parseXMLCns_Clean <?|> parseHoleAndParseErr "Dirty" HoleDirty
 parseXMLCns_Dirty = Dirty <$ emptyTag "Dirty"
 parseXMLCns_Clean = Clean <$ emptyTag "Clean"
-parseXML_List_Dummy = mkList List_Dummy Cons_Dummy Nil_Dummy <$> many parseXML_Dummy
 parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> many parseXML_Section
 parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> many parseXML_Paragraph
 parseXML_List_Subsection = mkList List_Subsection Cons_Subsection Nil_Subsection <$> many parseXML_Subsection

@@ -1,9 +1,9 @@
 module DocTypes_Generated where
 
-import CommonTypes hiding (Dirty (..))
-import DocTypes
+import Common.CommonTypes hiding (Dirty (..))
+import Evaluation.DocTypes
 
-import PresTypes
+import Presentation.PresTypes
 import List
 import Char
 
@@ -39,7 +39,7 @@ data EnrichedDoc = RootEnr Root Document
                     deriving Show
 
 
-data Dummy = Dummy List_Dummy String Bool Int 
+data Dummy = Dummy Dummy Bool 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
@@ -123,17 +123,6 @@ data Dirty = Dirty
               deriving Show
 
 
-data List_Dummy = List_Dummy ConsList_Dummy 
-                | HoleList_Dummy
-                | ParseErrList_Dummy (Presentation Document Node ClipDoc UserToken)
-                   deriving Show
-
-
-data ConsList_Dummy = Cons_Dummy Dummy ConsList_Dummy 
-                    | Nil_Dummy 
-                       deriving Show
-
-
 data List_Section = List_Section ConsList_Section 
                   | HoleList_Section
                   | ParseErrList_Section (Presentation Document Node ClipDoc UserToken)
@@ -215,11 +204,10 @@ data ConsList_Edge = Cons_Edge Edge ConsList_Edge
 
 data ClipDoc = Clip_Root Root
              | Clip_Document Document
-             | Clip_List_Dummy List_Dummy
-             | Clip_String String
+             | Clip_Dummy Dummy
              | Clip_Bool Bool
-             | Clip_Int Int
              | Clip_Graph Graph
+             | Clip_String String
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
              | Clip_List_Subsection List_Subsection
@@ -230,8 +218,7 @@ data ClipDoc = Clip_Root Root
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
              | Clip_Shape Shape
-             | Clip_Dummy Dummy
-             
+             | Clip_Int Int
              | Clip_Section Section
              
              | Clip_Paragraph Paragraph
@@ -288,8 +275,6 @@ data Node = NoNode
           | DirtyNode Dirty Path 
           | CleanNode Dirty Path 
           | HoleDirtyNode Dirty Path 
-          | List_DummyNode List_Dummy Path 
-          | HoleList_DummyNode List_Dummy Path 
           | List_SectionNode List_Section Path 
           | HoleList_SectionNode List_Section Path 
           | List_ParagraphNode List_Paragraph Path 
@@ -345,8 +330,6 @@ instance Show Node where
   show (DirtyNode _ _)  = "DirtyNode"
   show (CleanNode _ _)  = "CleanNode"
   show (HoleDirtyNode _ _)  = "HoleDirtyNode"
-  show (List_DummyNode _ _)  = "List_DummyNode"
-  show (HoleList_DummyNode _ _)  = "HoleList_DummyNode"
   show (List_SectionNode _ _)  = "List_SectionNode"
   show (HoleList_SectionNode _ _)  = "HoleList_SectionNode"
   show (List_ParagraphNode _ _)  = "List_ParagraphNode"

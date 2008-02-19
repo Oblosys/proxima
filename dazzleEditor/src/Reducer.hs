@@ -1,9 +1,9 @@
 module Reducer (reductionSheet) where
 
-import CommonTypes hiding (Dirty (..))
-import EvalLayerTypes
+import Common.CommonTypes hiding (Dirty (..))
+import Evaluation.EvalLayerTypes
 
-import EvalLayerUtils
+import Evaluation.EvalLayerUtils
 
 import DocTypes_Generated
 import DocUtils_Generated
