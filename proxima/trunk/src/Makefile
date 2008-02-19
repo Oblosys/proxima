@@ -54,15 +54,15 @@ GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 # Proxima directories
 
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-ARRANGEMENTDIR  = $(PROXIMADIR)/src/arrangement
-COMMONDIR       = $(PROXIMADIR)/src/common
-EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
-LAYOUTDIR       = $(PROXIMADIR)/src/layout
-MAINDIR         = $(PROXIMADIR)/src/main
-PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
-RENDERINGDIR    = $(PROXIMADIR)/src/rendering
-PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
+ARRANGEMENTDIR  = $(PROXIMADIR)/src/Arrangement
+LAYOUTDIR       = $(PROXIMADIR)/src/Layout
+
+#PRESENTATIONDIR = $(PROXIMADIR)/src/presentation
+#COMMONDIR       = $(PROXIMADIR)/src/common
+#EVALUATIONDIR   = $(PROXIMADIR)/src/evaluation
+#MAINDIR         = $(PROXIMADIR)/src/main
+#RENDERINGDIR    = $(PROXIMADIR)/src/rendering
+#PROXIMADIRS	= $(ARRANGEMENTDIR):$(COMMONDIR):$(EVALUATIONDIR):$(LAYOUTDIR):$(MAINDIR):$(PRESENTATIONDIR):$(RENDERINGDIR)
 
 GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
 
@@ -100,8 +100,8 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -o $(ARRANGEMENTDIR)/ArrangerAG.hs \
-	-cfmp --Wmax=12 --genlinepragmas --self --Werrors \
-	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR)
+	-cfp --Wmax=12 --genlinepragmas --self --Werrors --module=Arrangement.ArrangerAG \
+	$(ARRANGEMENTDIR)/ArrangerAG.ag -P $(ARRANGEMENTDIR):$(PROXIMADIR)/src
 #	--visit --case --strictdata --strictwrap --unbox\
 
 # no type sigs, because parameterized types are not supported by AG
@@ -115,8 +115,8 @@ $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -o $(LAYOUTDIR)/ScannerAG.hs \
-	-cfmp --Wmax=12 --genlinepragmas --self --Werrors \
-	$(LAYOUTDIR)/ScannerAG.ag -P $(LAYOUTDIR)	
+	-cfp --Wmax=12 --genlinepragmas --self --Werrors --module=Layout.ScannerAG \
+	$(LAYOUTDIR)/ScannerAG.ag -P $(LAYOUTDIR)
 
 # no type sigs, because parameterized types are not supported by AG
 
