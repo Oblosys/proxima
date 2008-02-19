@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-} 
+-- CPP is enabled only for this module, since it slows the build process down quite a bit
 module Rendering.Renderer where
 
 import Common.CommonTypes hiding (Rectangle)
@@ -239,20 +241,19 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) imageColor imageColor
  
--- GHC > 6.6
-{-
-        ; pb <- pixbufNewFromFile src
-        ;    do {
--}
--- GHC <= 6.6
---      changes in gtk2hs interface (0.9.12)
+-- Unfortunately, this check cannot distinguish between 6.6 and 6.6.1 (both are 606)
+-- Therefore, when using GHC 6.6.1, the #else part must be enabled manually
+#if __GLASGOW_HASKELL__ <= 606
         ; ePB <- pixbufNewFromFile src 
         ; case ePB of
             Left (_,errStr) -> debugLnIO Err $ "Renderer.renderArr: could not open bitmap "++show src ++
                                                "\n" ++ errStr
             Right pb ->
              do { 
---         
+#else
+        ; pb <- pixbufNewFromFile src
+        ;    do {
+#endif
                 -- TODO: make this the Tile case and make a Resize case, and add clipping
                 -- and store pixbufs in rendering state, to avoid reloading.
                 
