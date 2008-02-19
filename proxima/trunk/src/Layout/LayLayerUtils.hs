@@ -1,13 +1,13 @@
-module LayLayerUtils ( module LayUtils
-                     , module LayLayerUtils    ) where
+module Layout.LayLayerUtils ( module Layout.LayUtils
+                     , module Layout.LayLayerUtils    ) where
 
 
-import CommonTypes
-import LayLayerTypes
+import Common.CommonTypes
+import Layout.LayLayerTypes
 
-import CommonUtils
+import Common.CommonUtils
 --import PresUtils imported via LayUtils
-import LayUtils
+import Layout.LayUtils
 
 
 castLayToPres :: Layout doc node clip -> Presentation doc node clip token

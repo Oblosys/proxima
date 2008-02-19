@@ -9,21 +9,21 @@
 -}
 -----------------------------------------------------------------------------------------
 
-module Scanner ( module Scanner
+module Layout.Scanner ( module Layout.Scanner
                , module Maybe
-               , module LayLayerTypes
-               , module LayLayerUtils
+               , module Layout.LayLayerTypes
+               , module Layout.LayLayerUtils
                , module Map
                ) where
 -- we export a lot of stuff here, so the Alex sheet only has to import Scanner.hs
 -- unfortunately Haskell does not allow us to export the qualified Map
-import CommonTypes
-import LayLayerTypes
-import LayLayerUtils hiding (empty)
+import Common.CommonTypes
+import Layout.LayLayerTypes
+import Layout.LayLayerUtils hiding (empty)
 import Data.Map as Map hiding (mapMaybe, (!))
 import Maybe
 
-import ScannerAG
+import Layout.ScannerAG
 
 {-
 Challenges/todo:

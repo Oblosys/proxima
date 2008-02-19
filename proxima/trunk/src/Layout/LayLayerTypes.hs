@@ -1,10 +1,10 @@
-module LayLayerTypes ( module LayTypes
-                     , module LayLayerTypes    ) where
+module Layout.LayLayerTypes ( module Layout.LayTypes
+                     , module Layout.LayLayerTypes    ) where
 
 
-import CommonTypes
+import Common.CommonTypes
 --import PresTypes -- already imported via LayoutTypes
-import LayTypes
+import Layout.LayTypes
 
 
 type LayerStateLay doc node clip = Layout doc node clip -- clipboard

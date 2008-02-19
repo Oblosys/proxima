@@ -1,13 +1,13 @@
-module PresentationParsing where
+module Presentation.PresentationParsing where
 
-import CommonTypes
-import PresTypes
-import PresLayerTypes
-import DocumentEdit
-import XprezLib
+import Common.CommonTypes
+import Presentation.PresTypes
+import Presentation.PresLayerTypes
+import Evaluation.DocumentEdit
+import Presentation.XprezLib
 
-import UU_Parsing hiding (Exp, parse, parseIO)
-import qualified UU_Parsing
+import Common.UU_Parsing hiding (Exp, parse, parseIO)
+import qualified Common.UU_Parsing as UU_Parsing
 import Char
 
 import Debug.Trace
