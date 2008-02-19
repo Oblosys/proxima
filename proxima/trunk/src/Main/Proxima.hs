@@ -1,43 +1,43 @@
-module Proxima where
+module Main.Proxima where
  
 import Data.IORef
 import System
 import Control.Exception
 
-import Architecture
+import Main.Architecture
 
 --import GUIGTK
-import GUI
+import Main.GUI
 
-import CommonTypes
-import DocTypes
-import DocUtils -- for redirect
+import Common.CommonTypes
+import Evaluation.DocTypes
+import Evaluation.DocUtils -- for redirect
 
-import PresPresent
-import EnrTypes
+import Presentation.PresPresent
+import Evaluation.EnrTypes
 --import Graphics.UI.WX.Types hiding (Size)
 import Graphics.UI.Gtk
 
-import PresTypes -- temporarily
-import PresUtils -- temporarily
-import LayTypes
-import ArrTypes -- temporarily
-import ArrLayerTypes -- for initial extra state
+import Presentation.PresTypes -- temporarily
+import Presentation.PresUtils -- temporarily
+import Layout.LayTypes
+import Arrangement.ArrTypes -- temporarily
+import Arrangement.ArrLayerTypes -- for initial extra state
 --import RenTypesGTK -- temporarily
-import RenTypes -- temporarily
+import Rendering.RenTypes -- temporarily
 --import HeliumPlugin -- for debugging on command line
 --import FontLibGTK  -- for initial FontMetrics, the Init should take care of this.
-import FontLib  -- for initial FontMetrics, the Init should take care of this.
+import Arrangement.FontLib  -- for initial FontMetrics, the Init should take care of this.
 
-import EvalLayerTypes (EvaluationSheet, ReductionSheet (..))
-import PresLayerTypes (PresentationSheet, ParseSheet)
-import LayLayerTypes (ScannerSheet)
+import Evaluation.EvalLayerTypes (EvaluationSheet, ReductionSheet (..))
+import Presentation.PresLayerTypes (PresentationSheet, ParseSheet)
+import Layout.LayLayerTypes (ScannerSheet)
 
 
-import PresentationParsing
-import Layout hiding (combine)
-import ArrUtils
-import EvalLayerTypes (LayerStateEval (..))
+import Presentation.PresentationParsing
+import Layout.Layout hiding (combine)
+import Arrangement.ArrUtils
+import Evaluation.EvalLayerTypes (LayerStateEval (..))
 
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -127,7 +127,7 @@ proxima presentationSheet parseSheet scannerSheet
    \err -> 
     do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
        ; print err
-       ; putStrLn "\n<Press a key to exit>"
+       ; putStrLn "\n<Press return to exit>"
        ; getLine
        ; return ()
        } -- This way, the dos window on Windows does not exit until the user can see the error.

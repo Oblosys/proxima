@@ -1,17 +1,17 @@
-module Architecture where
+module Main.Architecture where
 
-import ArchitectureLibM
+import Main.ArchitectureLibM
 
-import qualified EvalPresent
-import qualified EvalTranslate
-import qualified PresPresent
-import qualified PresTranslate
-import qualified LayPresent
-import qualified LayTranslate
-import qualified ArrPresent
-import qualified ArrTranslate
-import qualified RenPresent
-import qualified RenTranslate
+import qualified Evaluation.EvalPresent     as EvalPresent
+import qualified Evaluation.EvalTranslate   as EvalTranslate
+import qualified Presentation.PresPresent   as PresPresent
+import qualified Presentation.PresTranslate as PresTranslate
+import qualified Layout.LayPresent          as LayPresent
+import qualified Layout.LayTranslate        as LayTranslate
+import qualified Arrangement.ArrPresent     as ArrPresent
+import qualified Arrangement.ArrTranslate   as ArrTranslate
+import qualified Rendering.RenPresent       as RenPresent
+import qualified Rendering.RenTranslate     as RenTranslate
 
 type Step m nextstep a b c d = (a -> m (b, nextstep m c d a b))
 

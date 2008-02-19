@@ -1,4 +1,4 @@
-module GUI where
+module Main.GUI where
 
 {-
 Initialization of the document is done with timer handler, because it may show a dialog (about the
@@ -14,11 +14,11 @@ TODO: fix wrong hRef (hSpaces are the problem)
 import Graphics.UI.Gtk hiding (Size)
 import Data.IORef
 
-import CommonTypes (DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO)
-import qualified CommonTypes
-import RenTypes
-import RenUtils
-import CommonUtils
+import Common.CommonTypes (DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO)
+import qualified Common.CommonTypes as CommonTypes
+import Rendering.RenTypes
+import Rendering.RenUtils
+import Common.CommonUtils
 
 import Char
 import Maybe
@@ -109,7 +109,7 @@ withCatch io = io
    \err -> 
     do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
        ; print err
-       ; putStrLn "\n<Press a key to exit>"
+       ; putStrLn "\n<Press return to exit>"
        ; getLine
        ; mainQuit
        ; return undefined

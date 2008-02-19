@@ -1,6 +1,6 @@
-module TestMonadicLib where
+module Main.TestMonadicLib where
 
-import ArchitectureLibM
+import Main.ArchitectureLibM
 
 
 -- Simple test module for ArchitectureLibM

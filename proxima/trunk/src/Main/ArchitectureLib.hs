@@ -1,4 +1,4 @@
-module ArchitectureLib where
+module Main.ArchitectureLib where
 
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
