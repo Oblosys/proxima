@@ -16,9 +16,9 @@ category:
 author: Martijn Schrage
 tested-with: GHC -any
 data-files:
-extra-source-files: src/proxima/src/arrangement/ArrangerAG.ag
-                    src/proxima/src/layout/AlexTemplate-ghc
-                    src/proxima/src/layout/ScannerAG.ag src/DocumentType.prx
+extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
+                    src/proxima/src/Layout/AlexTemplate-ghc
+                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
  
