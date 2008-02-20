@@ -5,7 +5,7 @@ import DocTypes_Generated
 import Layout.Scanner
 }
 
-$char = .#[\n\ \255]
+$char = .#[\n\ \255]  -- we need to exclude the proxima specific stuff (can be reduced to only \255)
 $nobrace = .#[\{]
 
 tokens :-
