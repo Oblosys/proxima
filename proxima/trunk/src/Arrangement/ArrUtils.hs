@@ -180,7 +180,7 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 updatedRectArr :: Show node => DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
-updatedRectArr dt arr = debug Err (show dt) $ updatedRectArr' 0 0 dt arr 
+updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
 
 updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr' x' y' dt arr = 
