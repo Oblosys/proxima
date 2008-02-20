@@ -16,6 +16,10 @@ type PresentationLS doc node clip token = (WhitespaceMap, IDPCounter)
 
 type Whitespace = (Int, Int) -- (line breaks, spaces)
 
+type FocusStartEnd = (Maybe Int, Maybe Int)
+
+type WhitespaceFocus = ((Int,Int), FocusStartEnd)
+
 type WhitespaceMap = Map IDP Whitespace   -- Whitespace information for each element in Presentation
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 
@@ -366,7 +370,7 @@ focusP _ _                             = NoFocusP
 
 
 -- because StructuralTk and PresentationTk contain the Layout in case of parse errors, we need
--- to declare the Layout type here.
+-- to declare the Layout type here in PresTypes.hs instead of LayTypes.hs.
 
 data Layout_   -- type without constructor to use as token parameter, so values of Layout
                -- are guaranteed not to have a TokenP case.

@@ -137,21 +137,35 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
      (idPCounter', pos, scanChars, scannedFocusStart, scannedFocusEnd, self, whitespaceMap') =
        sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
+     afterLastCharFocusStart = focusAfterLastChar scanChars scannedFocusStart
+     afterLastCharFocusEnd   = focusAfterLastChar scanChars scannedFocusEnd
      focusedScanChars = markFocus markFocusStart scannedFocusStart $
-                        markFocus markFocusEnd scannedFocusEnd 
-                          (scanChars) -- ++ [EndOfParsing NoFocusMark NoFocusMark]) 
-     (tokens, idPCounter'', whitespaceMap'') = sheet idPCounter' focusedScanChars
- in  -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
+                        markFocus markFocusEnd   scannedFocusEnd 
+                                  scanChars 
+     (tokens, idPCounter'', scannedWhitespaceMap, lastWhitespaceFocus) = sheet idPCounter' focusedScanChars
+     lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
+     whitespaceMapWithLastWhitespace = scannedWhitespaceMap
+ in  debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
+     -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
-     , idPCounter'', whitespaceMap' `Map.union` whitespaceMap'')
+     , idPCounter'', whitespaceMap' `Map.union` whitespaceMapWithLastWhitespace)
+
+focusAfterLastChar scs Nothing    = False
+focusAfterLastChar scs (Just pos) = pos == length scs
+
+-- if the focus is after last char, we cannot encode it in the scanChars (it is handled separately) 
+markFocus f Nothing          scs = scs
+markFocus f focus@(Just pos) scs = if not $ focusAfterLastChar scs focus 
+                                   then let (left, focusedChar:right) = splitAt pos scs
+                                        in  left ++ f focusedChar : right
+                                   else scs
 
 
-markFocus f Nothing    scs = scs
-markFocus f (Just pos) scs = let (left, focusedChar:right) = splitAt pos scs
-                             in  left ++ f focusedChar : right
-
-
-
+markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd 
+                               ((newlines, spaces), (focusStart, focusEnd)) =
+  let focusStart' = if afterLastCharFocusStart then Just (newlines+spaces) else focusStart
+      focusEnd'   = if afterLastCharFocusEnd   then Just (newlines+spaces) else focusEnd
+  in  ((newlines, spaces), (focusStart', focusEnd'))
 
 -- The functions below are used by the Alex Scanner, which imports Scanner.hs
 -- Some scanner functionality could not be factorized and can be found in AlexTemplate-ghc
@@ -159,57 +173,76 @@ markFocus f (Just pos) scs = let (left, focusedChar:right) = splitAt pos scs
 alexGetChar (_, [])   = Nothing
 alexGetChar (_, Char _ _ _ c : cs) = Just (c, (c,cs))
 alexGetChar (_, Structural _ _ _ _ _ _ : cs) = Just ('\255', ('\255', cs))
-alexGetChar (_, EndOfParsing _ _ : cs)       = Just ('\254', ('\254', cs))
 
 alexInputPrevChar (c,_) = c
 
-type ScannerState = (Int, WhitespaceMap, (Int, Int)) -- (idP counter, whitespace map, (newlines, spaces))
+type ScannerState = (Int, WhitespaceMap, WhitespaceFocus) -- (idP counter, whitespace map, (newlines, spaces))
 
 mkToken = mkTokenEx id
+
+
+
+initWhitespaceFocus :: WhitespaceFocus
+initWhitespaceFocus = ((0,0),(Nothing,Nothing))
+
+data TokenLayout = TokenLayout WhitespaceFocus         -- preceding whitespace & focus
+                               FocusStartEnd           -- focus in token 
+                               (Maybe WhitespaceFocus) -- for the last token only: whitespace &B focus
+                               deriving Show
 
 -- the first strf is for manipulating the string that is stored in the token
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
            (Maybe (Token doc node clip userToken), ScannerState)
-mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let str = debug Lay ((case hasStart 0 scs of 
-                        Just i  -> "Focus start on "++ show (stringFromScanChars scs)++" at "++show i
-                        Nothing -> "") ++
-                       (case hasEnd 0 scs of 
-                        Just i  -> "Focus end on "++ show (stringFromScanChars scs)++" at "++show i
-                        Nothing -> "") 
-                       ) $
-            strf $ stringFromScanChars scs
+mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespaceFocus) scs = 
+  let tokenLayout = TokenLayout collectedWhitespaceFocus
+                                (getFocusStartEnd scs)
+                                Nothing -- will be added by Scanner.scanPresentation (if it is the last token)
+      str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
-  in  ( Just $ UserTk userToken str Nothing idp'
-      , (idPCounter', Map.insert idp' collectedWhitespace whitespaceMap, (0,0)) 
+  in  debug Lay (show str ++ " " ++ show tokenLayout) $
+      ( Just $ UserTk userToken str Nothing idp'
+      , (idPCounter', Map.insert idp' (fst collectedWhitespaceFocus) whitespaceMap, initWhitespaceFocus) 
       )
-      
-hasStart i [] = Nothing
-hasStart i (c:cs) = if hasFocusStartMark c then Just i else hasStart (i+1) cs
 
-hasEnd i [] = Nothing
-hasEnd i (c:cs) = if hasFocusEndMark c then Just i else hasEnd (i+1) cs
 
 mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe (Token doc node clip userToken), ScannerState)
-mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespace) scs = 
-  let Structural idp _ _ loc tokens lay = head scs
+mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespaceFocus) 
+                  scs@[Structural idp _ _ loc tokens lay] = 
+  let tokenLayout = TokenLayout collectedWhitespaceFocus
+                                (getFocusStartEnd scs)
+                                Nothing -- will be added by Scanner.scanPresentation (if it is the last token)
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
-  in  ( Just $ StructuralTk loc lay tokens idp'
-      , (idPCounter', Map.insert idp' collectedWhitespace whitespaceMap, (0,0))
+  in  debug Lay ("Structural " ++ show tokenLayout) $
+      ( Just $ StructuralTk loc lay tokens idp'
+      , (idPCounter', Map.insert idp' (fst collectedWhitespaceFocus) whitespaceMap, initWhitespaceFocus)
       )
 
 
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe a, ScannerState)
-collectWhitespace (idPCounter, whitespaceMap, (newlines, spaces)) (c:cs) =
-  let newWhitespace = case c of
-                        Char _ _ _ '\n' -> (newlines + 1 + length cs, spaces                )
-                        Char _ _ _ ' '  -> (newlines                , spaces + 1 + length cs)
-                        -- will always be a Char
-  in (Nothing, (idPCounter, whitespaceMap, newWhitespace))
-
+collectWhitespace (idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd)) 
+                  (sc@(Char _ _ _ c):scs) = -- will always be a Char
+  let newWhitespace = case c of                                                
+                        '\n' -> (newlines + 1 + length scs, spaces                 )
+                        ' '  -> (newlines                 , spaces + 1 + length scs)
+  in (Nothing, (idPCounter, whitespaceMap, ( newWhitespace
+                                           , updateFocusStartEnd (newlines+spaces) focusStartEnd (sc:scs) )))
+       -- we add
 
 -- TODO handle pattern match failures with internal errors
+
+
+getFocusStartEnd scs = updateFocusStartEnd 0 (Nothing, Nothing) scs
+
+updateFocusStartEnd :: Int -> FocusStartEnd -> [ScanChar doc node clip userToken] -> FocusStartEnd
+updateFocusStartEnd i (oldFocusStart, oldFocusEnd) cs =
+  (getFocusStart i oldFocusStart cs, getFocusEnd i oldFocusEnd cs) 
+  
+getFocusStart i oldFocusStart []     = Nothing
+getFocusStart i oldFocusStart (c:cs) = if hasFocusStartMark c then Just i else getFocusStart (i+1) oldFocusStart cs
+
+getFocusEnd i oldFocusEnd []     = Nothing
+getFocusEnd i oldFocusEnd (c:cs) = if hasFocusEndMark c then Just i else getFocusEnd (i+1) oldFocusEnd cs

@@ -39,7 +39,6 @@ stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars scs = 
   [ case sc of Char _ _ _ c           -> c
                Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
-               EndOfParsing _ _       -> '#' -- in the Alex scanner, this is \254, this output is only for show
   | sc <- scs
   ]
 
@@ -49,7 +48,6 @@ idPFromScanChars (Char (IDP idp) _ _ _ : scs) = IDP idp
 idPFromScanChars (Char NoIDP     _ _ _ : scs) = idPFromScanChars scs
 idPFromScanChars (Structural (IDP idp) _ _ _ _ _ : scs) = IDP idp
 idPFromScanChars (Structural NoIDP     _ _ _ _ _ : scs) = idPFromScanChars scs
-idPFromScanChars (EndOfParsing _ _ : _) = NoIDP
 
 markFocusStart scanChar = scanChar { startFocusMark = FocusMark }
 

@@ -19,14 +19,12 @@ type ScanChar_ = ScanChar Document Node ClipDoc UserToken
 type AlexInput  = (Char, [ScanChar_])
 
 
- -- unfortunately Haskell does not allow us to export the qualified Map
--- TODO final whitespace?
-scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap)
+scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap, WhitespaceFocus)
 scanner idPCounter scs = 
-  let (mTokens, (idPCounter', whitespaceMap, _)) = alexScanTokens initScannerState scs
-  in  (catMaybes mTokens, idPCounter', whitespaceMap)
+  let (mTokens, (idPCounter', whitespaceMap, lastWhitespaceFocus)) = alexScanTokens initScannerState scs
+  in  (catMaybes mTokens, idPCounter', whitespaceMap, lastWhitespaceFocus)
  where initScannerState :: ScannerState
-       initScannerState = (idPCounter, empty,(0,0))
+       initScannerState = (idPCounter, empty,initWhitespaceFocus)
 
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
