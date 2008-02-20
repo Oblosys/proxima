@@ -473,7 +473,7 @@ uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
 opTk      = UserTk OpTk "" Nothing (IDP (-1))
 symTk     = UserTk SymTk "" Nothing (IDP (-1))
 -- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
--- which is also required for copying of presentation subtrees
+-- which is also required for copying of presentation subtrees (only if we use error correcting)
 
 
 
