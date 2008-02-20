@@ -90,18 +90,18 @@ addWhitespace wm NoIDP str = [StringP NoIDP str]
 addWhitespace wm id str = 
   case Map.lookup id wm of
     Nothing -> [StringP id str]
-    Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
-                             ++ [StringP id (replicate spaces ' ' ++ str)]
+    Just ((breaks, spaces),focus) ->    replicate breaks (StringP NoIDP "") 
+                                     ++ [StringP id (replicate spaces ' ' ++ str)]
 
 addWhitespaceStruct :: WhitespaceMap -> IDP -> Layout doc node clip -> [Layout doc node clip]
 addWhitespaceStruct wm NoIDP struct = [struct]
 addWhitespaceStruct wm id struct = 
   case Map.lookup id wm of
     Nothing -> [struct]
-    Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
-                             ++ [RowP NoIDP 0 [ StringP NoIDP (replicate spaces ' ')
-                                             , struct
-                                             ]]
+    Just ((breaks, spaces),focus) ->    replicate breaks (StringP NoIDP "") 
+                                     ++ [RowP NoIDP 0 [ StringP NoIDP (replicate spaces ' ')
+                                                      , struct
+                                                      ]]
                                 
 addWhitespaceToken :: Show token => WhitespaceMap -> IDP -> Token doc node clip token -> [Layout doc node clip]
 addWhitespaceToken wm id (UserTk _ str _ _) = addWhitespace wm id str

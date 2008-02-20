@@ -20,7 +20,8 @@ type FocusStartEnd = (Maybe Int, Maybe Int)
 
 type WhitespaceFocus = ((Int,Int), FocusStartEnd)
 
-type WhitespaceMap = Map IDP Whitespace   -- Whitespace information for each element in Presentation
+type WhitespaceMap = Map IDP WhitespaceFocus   -- Whitespace information for each element in Presentation
+
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 
 --instance (Show a, Show b) => Show (FiniteMap a b) where
@@ -28,7 +29,7 @@ type IDPCounter = Int                   -- Counter for generating new unique IDP
  
 
 initLayout :: WhitespaceMap
-initLayout = Map.fromList [(IDP (-1), (0,1))]
+initLayout = Map.fromList []
 
 data EditPresentation' doc node clip token =
     SetPres' (PresentationLevel doc node clip token)

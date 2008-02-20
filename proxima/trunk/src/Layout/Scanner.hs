@@ -30,6 +30,8 @@ Challenges/todo:
 
 passing several Alex scanners (probably solved by Alex itself)
 
+focus for parse errors?
+
 recover locators for parsing presentations
 
 handle focus at the right of the last char (and whitespace to the right of the last char)
@@ -63,7 +65,7 @@ tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
      ) 
-     -- debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
+     debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
      (SetPres presLvl', state, layLvl)
 
 fixFocus (FocusP (PathP sp si) (PathP ep ei)) = ((sp,si),(ep,ei))
@@ -146,9 +148,10 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
      lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
      whitespaceMapWithLastWhitespace = scannedWhitespaceMap
  in  debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
+     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
-     , idPCounter'', whitespaceMap' `Map.union` whitespaceMapWithLastWhitespace)
+     , idPCounter'', whitespaceMapWithLastWhitespace `Map.union` whitespaceMap')
 
 focusAfterLastChar scs Nothing    = False
 focusAfterLastChar scs (Just pos) = pos == length scs
@@ -202,9 +205,9 @@ mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespaceFocus) scs =
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
-  in  debug Lay (show str ++ " " ++ show tokenLayout) $
+  in  debug Lay (show idp ++ show str ++ " " ++ show tokenLayout) $
       ( Just $ UserTk userToken str Nothing idp'
-      , (idPCounter', Map.insert idp' (fst collectedWhitespaceFocus) whitespaceMap, initWhitespaceFocus) 
+      , (idPCounter', Map.insert idp' collectedWhitespaceFocus whitespaceMap, initWhitespaceFocus) 
       )
 
 
@@ -218,7 +221,7 @@ mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespaceFocus)
                                         _     -> (idp,            idPCounter    )
   in  debug Lay ("Structural " ++ show tokenLayout) $
       ( Just $ StructuralTk loc lay tokens idp'
-      , (idPCounter', Map.insert idp' (fst collectedWhitespaceFocus) whitespaceMap, initWhitespaceFocus)
+      , (idPCounter', Map.insert idp' collectedWhitespaceFocus whitespaceMap, initWhitespaceFocus)
       )
 
 
