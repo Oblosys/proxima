@@ -64,14 +64,13 @@ Temporary workaround, add StringP _ "" to row
 
 SEM Root
   | Root
-            decls.col = error "Root.decls.col should not be used"
             decls.env = error "Root.decls.env should not be used"
             decls.errs = error "Root.decls.errs should not be used"
-            decls.layoutMap = error "Root.decls.layoutmap should not be used"
+--            decls.layoutMap = error "Root.decls.layoutmap should not be used"
             decls.level = error "Root.decls.level should not be used"
-            decls.newlines = error "Root.decls.newlines should not be used"
+--            decls.newlines = error "Root.decls.newlines should not be used"
             decls.ranges = error "Root.decls.ranges should not be used"
-            decls.spaces = error "Root.decls.spaces should not be used"
+--            decls.spaces = error "Root.decls.spaces should not be used"
             decls.varsInScope = error "Root.decls.varsInScope should not be used"
             decls.typeEnv = error "Root.decls.typeEnv should not be used"
             decls.topLevelEnv = error "Root.decls.topLevelEnv should not be used"
@@ -306,12 +305,12 @@ SEM Exp
   | BoolExp     -- put the idP in an empty string before the bool presentation
       lhs.pres = loc (BoolExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row [ text' (mkIDP @idP0 @lhs.pIdC 0) $ show @bool ]
+                   row [ token (mkIDP @idP0 @lhs.pIdC 0) $ show @bool ]
 
   | IntExp      -- put the idP in an empty string before the int presentation
       lhs.pres = loc (IntExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row [ text' (mkIDP @idP0 @lhs.pIdC 0) $ show @int]
+                   row [ token (mkIDP @idP0 @lhs.pIdC 0) $ show @int]
 
   | LamExp
       lhs.pres = loc (LamExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -487,11 +486,6 @@ presParseErr pres =
                           `withbgColor` whiteSmoke
 
 
-text' idc = StringP idc
-
-der:: IDP -> String -> Xprez doc node clip UserToken
-der idc str = token idc str `withColor` derCol
-
 
 op :: IDP -> String -> Xprez doc node clip UserToken
 op idc str = token idc str `withColor` opCol
@@ -513,7 +507,6 @@ token idp str = TokenP idp (UserTk (StrTk str) str Nothing NoIDP)
 
 structuralToken idp pres = TokenP idp (StructuralTk Nothing (structural pres) [] NoIDP)
 
-derCol = green
 opCol = black
 keyCol = blue
 sepCol = brown
@@ -558,6 +551,13 @@ mkIDP id@(IDP _) _ _   = id
 --------------------------------------------------------------
 
 
+SEM EnrichedDoc [ | layoutMap : WhitespaceMap | ]
+  | RootEnr
+            lhs.layoutMap = @lhs.layoutMap -- no auto layout
+-- auto layout has been disabled. It will become somewhat more complex now that the scanner also records
+-- the focus
+{-
+
 {-
 CREATION OF NEW PRES ELTS:
 Can't change the doc->pres mapping, but if we make new pres elts, just give them a unique id,
@@ -573,7 +573,7 @@ ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsL
 
 SEM RootE
   | RootE
-           --lhs.layoutMap = @lhs.layoutMap -- no auto layout
+            --lhs.layoutMap = @lhs.layoutMap -- no auto layout
             decls.layoutMap = @lhs.layoutMap
             decls.col = 0
             decls.newlines = 1
@@ -760,6 +760,7 @@ SEM ConsList_Alt [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
         lhs.maxLHSLength = @head.lhsLength `max` @tail.maxLHSLength
     | Nil_Alt
         lhs.maxLHSLength = 0
+-}
 
 --------------------------------------------------------------
 --
@@ -1057,7 +1058,7 @@ SEM Alt [ env : Bindings | | alt : Binding ]
 SEM Decl
   | BoardDecl
       lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row [text' (mkIDP @idP0 @lhs.pIdC 0) "Chess: ", @board.pres]
+                   row [key (mkIDP @idP0 @lhs.pIdC 0) "Chess: ", @board.pres]
 
 
 SEM Board [ | | ]
@@ -1160,10 +1161,12 @@ SEM Ident
 
 
 SEM RootE -- don't understand why this is necessary, it should not be used. However, without ag eval crashes
-  | RootE   idListDecls.col = 0         -- auto layout
+  | RootE
+{-  
+            idListDecls.col = 0         -- auto layout
             idListDecls.newlines = 0    --
             idListDecls.spaces = 0      --
-
+-}
             idListDecls.level = 0 -- not right
 
             idListDecls.errs = []
@@ -1180,12 +1183,14 @@ SEM RootE -- don't understand why this is necessary, it should not be used. Howe
 
 -- heliumItems don't have auto layout and other tricks yet.
 SEM Item
-  | HeliumItem exp.col = 0         -- auto layout
+  | HeliumItem
+{-  
+               exp.col = 0         -- auto layout
                exp.newlines = 0    --
                exp.spaces = 0      --
-
+-}
                exp.level = 0 -- not right
-               exp.layoutMap = Map.empty
+--               exp.layoutMap = Map.empty
 
                exp.errs = []
                exp.typeEnv = []
@@ -1203,7 +1208,7 @@ ATTR PPPresentation List_Slide ConsList_Slide Slide ItemList ListType List_Item 
 SEM Decl
   | PPPresentationDecl
       lhs.pres = loc (PPPresentationDeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row [ text' (mkIDP @idP0 @lhs.pIdC 0) "Slides: ", @pPPresentation.pres ]
+                   row [ key (mkIDP @idP0 @lhs.pIdC 0) "Slides: ", @pPPresentation.pres ]
 
 
 SEM PPPresentation
