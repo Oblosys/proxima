@@ -361,7 +361,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               
                ; sequence_ $ [ drawLine dw gc (x+i,y) (x+i,y+h-1)
                              | i <- if null arrs then []
-                                                 else showDebug Ren $ tail.init $
+                                                 else tail.init $
                                                       scanl (\n1 n2 -> n1 + (scaleInt scale (pd-1))+n2 ) 0 
                                                             (map (scaleInt scale . widthA) arrs)]
               ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
@@ -391,7 +391,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                             
               ; sequence_ $ [ drawLine dw gc (x,y+i) (x+w-1,y+i)
                             | i <- if null arrs then []
-                                                else showDebug Ren $ tail.init $
+                                                else tail.init $
                                                      scanl (\n1 n2 -> n1+(scaleInt scale (pd-1))+n2 ) 0 
                                                            (map (scaleInt scale . heightA) arrs)]
         
