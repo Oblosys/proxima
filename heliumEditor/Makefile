@@ -33,7 +33,7 @@ default: $(MAIN)
 .PHONY : default proxima generate presenter lexer
 
 
-LAYOUTDIR       = $(PROXIMADIR)/src/layout
+LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
 # Generation 
 
