@@ -223,7 +223,7 @@ SEM Decl
       lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                      (row $
-                        (if @lhs.level == 0
+                        {-(if @lhs.level == 0
                          then let sigIDP    = mkIDP @idP2 @lhs.pIdC 2
                                   autoLStr = if @autoLayout then "             {auto layout}" else ""
                               in  case @typeStr of
@@ -252,7 +252,7 @@ SEM Decl
                                       ]
                          else [empty])
 
-                           ++
+                           ++ -}
                               [ @ident.pres, key (mkIDP @idP0 @lhs.pIdC 0) "="]
                            ++ (if @expanded then
                                  [ @exp.pres,  sep (mkIDP @idP1 @lhs.pIdC 1) ";"
@@ -503,9 +503,9 @@ cons idc str = token idc str `withColor` consCol
 typeD :: IDP -> String -> Xprez doc node clip UserToken
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
-token idp str = TokenP idp (UserTk (StrTk str) str Nothing NoIDP)
+token idp str = TokenP idp (UserTk (StrTk str) str Nothing idp)
 
-structuralToken idp pres = TokenP idp (StructuralTk Nothing (structural pres) [] NoIDP)
+structuralToken idp pres = TokenP idp (StructuralTk Nothing (structural pres) [] idp)
 
 opCol = black
 keyCol = blue
