@@ -76,12 +76,16 @@ debugLevel level val debugVal = if level `elem` debugLevels then debugVal else v
 
 debug :: DebugLevel -> String -> a -> a
 debug      level str x = debugLevel level x $ trace str           x
+--debug      level str x = debugLevel level x $ trace (show level ++ str)           x
+-- as a help for finding debug applications that just show a value.
 
 showDebug :: Show a => DebugLevel -> a -> a
 showDebug  level     x = debugLevel level x $ trace (show x)      x
+--showDebug  level     x = debugLevel level x $ trace (show level ++ show x)      x
 
 showDebug' :: Show a => DebugLevel -> String -> a -> a
 showDebug' level str x = debugLevel level x $ trace (str++show x) x
+--showDebug' level str x = debugLevel level x $ trace (show level ++ str++show x) x
 
 debugIO :: DebugLevel -> String -> IO ()
 debugIO    level str   = debugLevel level (return ()) $ putStr   str
