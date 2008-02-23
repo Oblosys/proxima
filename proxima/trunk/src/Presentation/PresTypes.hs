@@ -20,7 +20,11 @@ type FocusStartEnd = (Maybe Int, Maybe Int)
 
 type WhitespaceFocus = ((Int,Int), FocusStartEnd)
 
-type WhitespaceMap = Map IDP WhitespaceFocus   -- Whitespace information for each element in Presentation
+data TokenLayout = TokenLayout { whitespaceFocus :: WhitespaceFocus -- preceding whitespace & focus
+                               , tokenFocus :: FocusStartEnd        -- focus in token 
+                               } deriving Show
+
+type WhitespaceMap = Map IDP TokenLayout   -- Whitespace information for each element in Presentation
 
 type IDPCounter = Int                   -- Counter for generating new unique IDPs
 

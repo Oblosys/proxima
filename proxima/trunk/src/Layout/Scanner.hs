@@ -34,8 +34,16 @@ focus for parse errors?
 
 recover locators for parsing presentations
 
+if formatters have linebreak whitespace, layouter will probably go wrong.
+
+whitespace if no tokens are present? (example: decl* with empty pres)
+
+scanner duplicates idp's
+
 handle focus at the right of the last char (and whitespace to the right of the last char)
 we could put an extra token there, which is parsed automatically.
+
+problem with structurals. focus in auto type sig is not recognized properly
 
 make sure that pres args to ParsingTk and StructuralTk are lazy
 !! and should these pres args include the ParsingP/StructuralP  nodes? (seems that they should)
@@ -146,12 +154,17 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
                                   scanChars 
      (tokens, idPCounter'', scannedWhitespaceMap, lastWhitespaceFocus) = sheet idPCounter' focusedScanChars
      lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
-     whitespaceMapWithLastWhitespace = scannedWhitespaceMap
  in  debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
      debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
-     , idPCounter'', whitespaceMapWithLastWhitespace `Map.union` whitespaceMap')
+     , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
+
+-- when there are no tokens, no whitespace is saved
+updateScannedWhitespaceMap []     lastWhitespaceFocus scannedWhitespaceMap = scannedWhitespaceMap
+updateScannedWhitespaceMap tokens lastWhitespaceFocus scannedWhitespaceMap =
+  let f = Map.update (\a -> Just a) (tokenIDP (last tokens)) scannedWhitespaceMap
+  in undefined
 
 focusAfterLastChar scs Nothing    = False
 focusAfterLastChar scs (Just pos) = pos == length scs
@@ -188,10 +201,6 @@ mkToken = mkTokenEx id
 initWhitespaceFocus :: WhitespaceFocus
 initWhitespaceFocus = ((0,0),(Nothing,Nothing))
 
-data TokenLayout = TokenLayout WhitespaceFocus         -- preceding whitespace & focus
-                               FocusStartEnd           -- focus in token 
-                               (Maybe WhitespaceFocus) -- for the last token only: whitespace &B focus
-                               deriving Show
 
 -- the first strf is for manipulating the string that is stored in the token
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
@@ -199,7 +208,6 @@ mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanC
 mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespaceFocus) scs = 
   let tokenLayout = TokenLayout collectedWhitespaceFocus
                                 (getFocusStartEnd scs)
-                                Nothing -- will be added by Scanner.scanPresentation (if it is the last token)
       str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       userToken = tokf str
@@ -207,7 +215,7 @@ mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespaceFocus) scs =
                                         _     -> (idp,            idPCounter    )
   in  debug Lay (show idp ++ show str ++ " " ++ show tokenLayout) $
       ( Just $ UserTk userToken str Nothing idp'
-      , (idPCounter', Map.insert idp' collectedWhitespaceFocus whitespaceMap, initWhitespaceFocus) 
+      , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
       )
 
 
@@ -216,12 +224,11 @@ mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespaceFocus)
                   scs@[Structural idp _ _ loc tokens lay] = 
   let tokenLayout = TokenLayout collectedWhitespaceFocus
                                 (getFocusStartEnd scs)
-                                Nothing -- will be added by Scanner.scanPresentation (if it is the last token)
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
   in  debug Lay ("Structural " ++ show tokenLayout) $
       ( Just $ StructuralTk loc lay tokens idp'
-      , (idPCounter', Map.insert idp' collectedWhitespaceFocus whitespaceMap, initWhitespaceFocus)
+      , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus)
       )
 
 
@@ -233,7 +240,7 @@ collectWhitespace (idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd
                         ' '  -> (newlines                 , spaces + 1 + length scs)
   in (Nothing, (idPCounter, whitespaceMap, ( newWhitespace
                                            , updateFocusStartEnd (newlines+spaces) focusStartEnd (sc:scs) )))
-       -- we add
+       -- The preceding newlines and spaces are the offset for the focus
 
 -- TODO handle pattern match failures with internal errors
 
