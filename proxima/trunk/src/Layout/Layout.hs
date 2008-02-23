@@ -4,6 +4,8 @@ import Common.CommonTypes
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
 
+import Layout.TreeEditPres
+
 import qualified Data.Map as Map
 import Data.Map (Map)
 
@@ -15,97 +17,209 @@ import Data.Map (Map)
 
 -- Local State is layout
 
--- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
-detokenize :: Show token => WhitespaceMap -> Presentation doc node clip token -> Layout doc node clip
-detokenize wm (ParsingP id l pres)       = let press = detokenize' wm pres
-                                           in  if null press 
-                                               then debug Err ("TreeEditPres.detokenize empty token list") (StringP NoIDP "") 
-                                               else if length press == 1  -- this will usually be the case because breaks
-                                               then ParsingP id l $ head press -- are produced by col's so there will be one there
-                                               else ParsingP id l $ ColP NoIDP 0 NF press 
-detokenize wm (EmptyP id)                = EmptyP id
-detokenize wm (StringP id str)           = StringP id str
-detokenize wm (ImageP id str st)         = ImageP id str st
-detokenize wm (PolyP id pts w st)        = PolyP id pts w st
-detokenize wm (RectangleP id w h lw st)  = RectangleP id w h lw st
-detokenize wm (EllipseP id w h lw st)    = EllipseP id w h lw st
-detokenize wm (RowP id rf press)         = RowP id rf $ map (detokenize wm) press
-detokenize wm (ColP id rf f press)       = ColP id rf f $ map (detokenize wm) press
-detokenize wm (OverlayP id (pres:press)) = OverlayP id (detokenize wm pres : (map castPresToLay press)) -- cast is safe, no tokens in press
-detokenize wm (WithP ar pres)            = WithP ar $ detokenize wm pres
-detokenize wm (StructuralP id pres)      = StructuralP id $ detokenize wm pres
-detokenize wm (LocatorP l pres)          = LocatorP l $ detokenize wm pres
-detokenize wm (GraphP id d w h es press) = GraphP id d w h es $ map (detokenize wm) press
-detokenize wm (VertexP id v x y o pres)  = VertexP id v x y o $ detokenize wm pres
-detokenize wm (FormatterP id press)      = FormatterP id $ map (detokenize wm) press
-detokenize wm pr                         = debug Err ("Layout.detokenize: can't handle "++ show pr) $ castPresToLay pr
+testPres :: Presentation doc node clip ()
+testPres = ParsingP NoIDP LexInherited $
+           RowP NoIDP 0 [  
+                         RowP NoIDP 0 [ 
+                            TokenP (IDP 1) (UserTk () "een" Nothing NoIDP)
+                          , TokenP (IDP 2) (UserTk () "twee" Nothing NoIDP)
+                          , TokenP (IDP 3) (UserTk () "drie" Nothing NoIDP)
+                        ]
+                        ]
+testWM = Map.fromList [(IDP 1, emptyTokenLayout { whitespaceFocus = ((1,0),(Nothing,Nothing))} )
+                      ,(IDP 2, emptyTokenLayout { whitespaceFocus = ((0,1),(Nothing,Nothing))} )
+                      ,(IDP 3, emptyTokenLayout { whitespaceFocus = ((0,1),(Nothing,Nothing)), tokenFocus = (Just 0, Just 0)} )
+                      ]
+emptyTokenLayout = TokenLayout { whitespaceFocus = ((0,0),(Nothing,Nothing))
+                               , tokenFocus = (Nothing,Nothing)
+                               }
 
+-- maybe split whitespacefocus
+-- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
+detokenizer wm pres = let (l',focusp) = detokenize testWM [] testPres
+                      in  debug Lay ("\n\n\n\ndetokenize test\n"++show (l',focusp)++"\nfocus is on "++case fromP focusp of
+                                                                                          NoPathP    -> ""
+                                                                                          PathP pth _ -> show(selectTree pth l')
+                                                                                          ) $
+                          detokenize wm [] pres
+
+detokenize :: Show token => WhitespaceMap -> Path -> Presentation doc node clip token ->
+              (Layout doc node clip, FocusPres)
+detokenize wm p (ParsingP idp l pres)       = let (press, f) = detokenize' wm (p++[0]) False pres
+                                               in if null press 
+                                                  then debug Err ("Layout.detokenize empty token list") (StringP NoIDP "", noFocus)
+                                                  else (ParsingP idp l $ ColP NoIDP 0 NF press, f)
+                                                  
+detokenize wm p (EmptyP idp)                = (EmptyP idp, noFocus) 
+detokenize wm p (StringP idp str)           = (StringP idp str,          noFocus)
+detokenize wm p (ImageP idp str st)         = (ImageP idp str st,        noFocus)
+detokenize wm p (PolyP idp pts w st)        = (PolyP idp pts w st,       noFocus)
+detokenize wm p (RectangleP idp w h lw st)  = (RectangleP idp w h lw st, noFocus)
+detokenize wm p (EllipseP idp w h lw st)    = (EllipseP idp w h lw st,   noFocus)
+detokenize wm p (RowP idp rf press)         = let (press', f) = detokenizeList wm p 0 press
+                                             in  (RowP idp rf press', f)
+detokenize wm p (ColP idp rf fm press)      = let (press', f) = detokenizeList wm p 0 press
+                                             in  debug Lay ("At col"++show p) (ColP idp rf fm press', f)
+detokenize wm p (OverlayP idp (pres:press)) = let (pres', f) = detokenize wm (p++[0]) pres
+                                             in  (OverlayP idp (pres' : (map castPresToLay press)), f) -- cast is safe, no tokens in press
+detokenize wm p (WithP ar pres)            = let (pres', f) = detokenize wm (p++[0]) pres
+                                             in  (WithP ar pres', f) 
+detokenize wm p (StructuralP idp pres)      = let (pres', f) = detokenize wm (p++[0]) pres
+                                             in  (StructuralP idp pres', f)
+detokenize wm p (LocatorP l pres)          = let (pres', f) = detokenize wm (p++[0]) pres
+                                             in  (LocatorP l pres', f)
+detokenize wm p (GraphP idp d w h es press) = let (press', f) = detokenizeList wm p 0 press
+                                             in  (GraphP idp d w h es press', f)
+detokenize wm p (VertexP idp v x y o pres)  = let (pres', f) = detokenize wm (p++[0]) pres
+                                             in  (VertexP idp v x y o pres', f)
+detokenize wm p (FormatterP idp press)      = let (press', f) = detokenizeList wm p 0 press
+                                             in  (FormatterP idp press', f)
+detokenize wm p pr                         = debug Err ("Layout.detokenize: can't handle "++ show pr) $ (castPresToLay pr, noFocus)
+
+detokenizeList wm p i []           = ([], noFocus)
+detokenizeList wm p i (pres:press) = let (pres',  f1) = detokenize wm (p++[i]) pres 
+                                         (press', f2) = detokenizeList wm p (i+1) press
+                                     in  (pres' : press', combineFocus f1 f2)
+
+
+-- use the paths from the argument in which they are defined. (each should be defined in only one arg)
+combineFocus (FocusP (PathP sp si) (PathP ep ei)) _                = (FocusP (PathP sp si) (PathP ep ei))
+combineFocus (FocusP (PathP sp si) _            ) (FocusP _   ep2) = (FocusP (PathP sp si) ep2          )
+combineFocus (FocusP _             (PathP ep ei)) (FocusP sp2 _)   = (FocusP sp2           (PathP ep ei))
+combineFocus (FocusP _             _            ) (FocusP sp2 ep2) = (FocusP sp2 ep2)
+
+noFocus = FocusP NoPathP NoPathP
+
+prependToFocus pth (FocusP sp ep) pre = FocusP (prependToPath sp) (prependToPath ep)
+ where prependToPath NoPathP     = NoPathP
+       prependToPath (PathP p i) = let (left, right) = splitAt (length pth) p 
+                                   in  PathP (left ++ pre ++right) i
+                                     
 
 -- find out semantics of this one        What about Refs?
-
 -- incomplete, only for strings
-detokenize' :: Show token => WhitespaceMap -> Presentation doc node clip token -> [Layout doc node clip]
-detokenize' wm (StructuralP id pres)      = [StructuralP id $ detokenize wm pres]
-detokenize' wm (EmptyP id)                = [EmptyP id]
-detokenize' wm (StringP id str)           = [StringP id str] -- addWhitespace wm id str
-detokenize' wm (TokenP id token)          = addWhitespaceToken wm id token
-detokenize' wm (ImageP id str st)         = [ImageP id str st]
-detokenize' wm (PolyP id pts w st)        = [PolyP id pts w st]
-detokenize' wm (RectangleP id w h lw st)  = [RectangleP id w h lw st]
-detokenize' wm (EllipseP id w h lw st)    = [EllipseP id w h lw st]
-detokenize' wm (RowP id rf press)         = detokenizeRow' wm press -- ref gets lost
-detokenize' wm (ColP id rf f press)       = [ColP id rf f $ concat (map (detokenize' wm) press)]
-detokenize' wm (OverlayP id (pres:press)) = let press' = detokenize' wm pres -- cast is safe, no tokens in press
-                                            in  [ OverlayP id (pres' : map castPresToLay press) | pres' <- press' ]
-detokenize' wm (WithP ar pres)            = let press = detokenize' wm pres 
-                                            in  map (WithP ar) press
-detokenize' wm (ParsingP id l pres)       = let press = detokenize' wm pres 
-                                            in  map (ParsingP id l) press
-detokenize' wm (LocatorP l pres)          = let press = detokenize' wm pres 
-                                            in  map (LocatorP l) press
-detokenize' wm (GraphP id d w h es press) = let press' = map (singleton . detokenize' wm) press
-                                            in  [GraphP id d w h es press']
-detokenize' wm (VertexP id v x y ol pres) = [VertexP id v x y ol (singleton $ detokenize' wm pres)]
-detokenize' wm (FormatterP id press)      = [FormatterP id $ concat (map (detokenize' wm) press) ]
-detokenize' wm pr                         = debug Err ("Layout.detokenize': can't handle "++ show pr) [castPresToLay pr]
+detokenize' :: Show token => WhitespaceMap -> Path -> Bool -> Presentation doc node clip token -> 
+               ([Layout doc node clip], FocusPres)
+detokenize' wm p t (StructuralP idp pres)      = let (pres', f) = detokenize wm (p++[0]) pres
+                                              in  ([StructuralP idp pres'], f)
+detokenize' wm p t (EmptyP idp)                = ([EmptyP idp], noFocus)
 
-singleton []       = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ EmptyP NoIDP
+             
+detokenize' wm p t (StringP idp str)           = ([StringP idp str], noFocus)
+detokenize' wm p t (TokenP idp token)          = addWhitespaceToken wm p idp token
+detokenize' wm p t (ImageP idp str st)         = ([ImageP idp str st], noFocus)
+detokenize' wm p t (PolyP idp pts w st)        = ([PolyP idp pts w st], noFocus)
+detokenize' wm p t (RectangleP idp w h lw st)  = ([RectangleP idp w h lw st], noFocus)
+detokenize' wm p t (EllipseP idp w h lw st)    = ([EllipseP idp w h lw st], noFocus)
+
+detokenize' wm p t (RowP idp rf press)         = detokenizeRow' wm p t 0 press -- ref gets lost
+--detokenize' wm p t (ColP idp rf fm press)      = let (press',f) = detokenizeList' wm p t 0 press
+--                                               in  ([ColP idp rf fm press'], f)
+--detokenize' wm p t (OverlayP idp (pres:press)) = let (press',f) = detokenize' wm (p++[0]) t pres -- cast is safe, no tokens in press
+--                                              in  ([ OverlayP idp (pres' : map castPresToLay press) | pres' <- press' ], f)
+detokenize' wm p t (WithP ar pres)            = let (press',f) = detokenize' wm (p++[0]) t pres 
+                                              in  (map (WithP ar) press', f)
+detokenize' wm p t (ParsingP idp l pres)       = let (press', f) = detokenize' wm (p++[0]) t pres 
+                                              in  (map (ParsingP idp l) press', f)
+detokenize' wm p t (LocatorP l pres)          = let (press', f) = detokenize' wm (p++[0]) t pres 
+                                              in  (map (LocatorP l) press', f)
+--detokenize' wm p t (FormatterP idp press)      = let (press', f) = detokenizeList' wm p t 0 press
+--                                              in  ([FormatterP idp press'], f)
+-- graph and vertex are not assumed to be in parsing presentations
+detokenize' wm p t pr                         = debug Err ("Layout.detokenize': can't handle "++ show pr) ([castPresToLay pr], noFocus)
+
+detokenizeList' wm p t i []           = ([], noFocus)
+detokenizeList' wm p t i (pres:press) = let (press',  f1) = detokenize' wm (p++[i]) t pres 
+                                            (presss', f2) = detokenizeList' wm p t (i+length press') press
+                                        in  debug Lay ("detokList "++show i)  (press' ++ presss', combineFocus f1 f2)
+
+
+-- recursive rows cause problems. we cannot add to the path for every row (only the topmost), but if deeper rows
+-- cause the creation of more rows in the result, then this should be taken into account at the top-level.
+-- in order to do so, we would need some threaded attribute, which will complicate the code even more.
+
+detokenizeRow' :: Show token => WhitespaceMap -> Path -> Bool -> Int -> [Presentation doc node clip token] -> 
+                  ([Layout doc node clip], FocusPres)
+detokenizeRow' wm p t i [] = ([], noFocus)
+detokenizeRow' wm p t i (pres:press) =
+  let i' = i+length press' - if null press' then 0 else 1
+      (press',  f1) = if t then detokenize' wm (p) True pres
+                           else detokenize' wm (p++[i]) True pres
+      (press'', f2) = detokenizeRow' wm p t i' press
+  in (combine p i' press' press'' f1 f2)
+  -- the last and first lines are merged, so if press' has more than 0 lines, we decrement i with 1
+  
+
+singleton []       = debug Err ("Layout.detokenize': graph child without singleton token (add row to presentation)") $ EmptyP NoIDP
 singleton [pres]   = pres
-singleton (pres:_) = debug Err ("TreeEditPres.detokenize': graph child without singleton token (add row to presentation)") $ pres
+singleton (pres:_) = debug Err ("Layout.detokenize': graph child without singleton token (add row to presentation)") $ pres
 
-detokenizeRow' :: Show token => WhitespaceMap -> [Presentation doc node clip token] -> [Layout doc node clip]
-detokenizeRow' wm [] = []
-detokenizeRow' wm (pres:press) =
-  let press' = detokenize' wm pres
-      press'' = detokenizeRow' wm press                         
-  in combine press' press''
+combine :: Path -> Int -> [Presentation doc node clip token] -> [Presentation doc node clip token] ->
+           FocusPres -> FocusPres -> ([Presentation doc node clip token], FocusPres)
+combine pth i [] l2 f1 f2 = (l2, f2) -- in this case f1 will always be noFocus, so we take f2
+combine pth i l1 [] f1 f2 = (l1, f1) -- in this case f2 will always be noFocus, so we take f1
+combine pth i l1 l2 f1 f2 = let f1' = modifyLeftFocus pth i f1 
+                                f2' = modifyRightFocus pth i f2
+                            in  ( init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
+                                , combineFocus f1' f2'
+                                )
 
-combine :: [Presentation doc node clip token] -> [Presentation doc node clip token] -> [Presentation doc node clip token]
-combine [] l2 = l2
-combine l1 [] = l1 
-combine l1 l2 = init l1 ++ [RowP NoIDP 0 $ [last l1,head l2] ] ++ tail l2
+-- focus : [ .. path .. ] ++ n : rest  -> [ .. path .. ] ++ n : 0 : rest
+modifyLeftFocus path mergedRow focus = mapFocusPath f focus
+ where f focusPath = 
+         case drop (length path) focusPath of -- the focus starting at location pth
+                 (i:rest) -> if i == mergedRow then let res = path ++ i:0:rest 
+                                             in debug Lay ("Focus l modified "++show focusPath ++ "->"++ show res ) res
+                             else path ++ i:rest
+                 []       -> debug Err ("Layout.detokenize': modifyLeftFocus path is empty") $ focusPath
+                            
+-- focus : [ .. path .. ] ++ n : rest  -> [ .. path .. ] ++ n : 1 : rest
+modifyRightFocus path mergedRow focus = mapFocusPath f focus
+ where f focusPath = 
+         case drop (length path) focusPath of -- the focus starting at location pth
+                 (i:rest) -> if i == mergedRow then let res = path ++ i:1:rest 
+                                             in debug Lay ("Focus r modified "++show focusPath ++ "->"++ show res ) res
+                             else path ++ i:rest
+                 []       -> debug Err ("Layout.detokenize': modifyLeftFocus path is empty") $ focusPath
+
+mapFocusPath :: (Path -> Path) -> FocusPres -> FocusPres
+mapFocusPath f NoFocusP = NoFocusP
+mapFocusPath f (FocusP p1 p2) = FocusP (mapPath p1) (mapPath p2)
+ where mapPath NoPathP = NoPathP
+       mapPath (PathP p i) = PathP (f p) i
+
+
+addWhitespaceToken :: Show token => WhitespaceMap -> Path -> IDP -> Token doc node clip token -> 
+                      ([Layout doc node clip], FocusPres)
+addWhitespaceToken wm p idp (UserTk _ str _ _) = 
+  case Map.lookup idp wm of 
+    Just tokenLayout  -> (if hasFocus (tokenFocus tokenLayout) then debug Lay ("Focus on"++str++show p) else id) 
+                         (addWhitespace wm idp str, if hasFocus (tokenFocus tokenLayout) then FocusP (PathP p 0) (PathP p 0) else noFocus)
+    Nothing           -> error "no info"
+  where hasFocus (Nothing, Nothing) = False
+        hasFocus _ = True
+addWhitespaceToken wm p idp (StructuralTk _ pres _ _) = 
+  let (pres', f) = detokenize wm p pres
+  in (addWhitespaceStruct wm idp pres', f)
 
 addWhitespace :: WhitespaceMap -> IDP -> String -> [Layout doc node clip]
 addWhitespace wm NoIDP str = [StringP NoIDP str]
-addWhitespace wm id str = 
-  case Map.lookup id wm of
-    Nothing -> [StringP id str]
+addWhitespace wm idp str = 
+  case fmap whitespaceFocus $ Map.lookup idp wm  of
+    Nothing -> [StringP idp str]
     Just ((breaks, spaces),focus) ->    replicate breaks (StringP NoIDP "") 
-                                     ++ [StringP id (replicate spaces ' ' ++ str)]
+                                     ++ [row [StringP NoIDP (replicate spaces ' '), StringP idp str]]
 
 addWhitespaceStruct :: WhitespaceMap -> IDP -> Layout doc node clip -> [Layout doc node clip]
 addWhitespaceStruct wm NoIDP struct = [struct]
-addWhitespaceStruct wm id struct = 
-  case Map.lookup id wm of
+addWhitespaceStruct wm idp struct = 
+  case fmap whitespaceFocus $ Map.lookup idp wm of
     Nothing -> [struct]
     Just ((breaks, spaces),focus) ->    replicate breaks (StringP NoIDP "") 
                                      ++ [RowP NoIDP 0 [ StringP NoIDP (replicate spaces ' ')
                                                       , struct
                                                       ]]
                                 
-addWhitespaceToken :: Show token => WhitespaceMap -> IDP -> Token doc node clip token -> [Layout doc node clip]
-addWhitespaceToken wm id (UserTk _ str _ _) = addWhitespace wm id str
-addWhitespaceToken wm id (StructuralTk _ pres _ _) = addWhitespaceStruct wm id (detokenize wm pres)
 
 
 
@@ -113,8 +227,8 @@ addWhitespaceToken wm id (StructuralTk _ pres _ _) = addWhitespaceStruct wm id (
 {-
 onlyWhitespace :: WhitespaceMap -> IDP -> [ Presentation ]
 onlyWhitespace wm NoIDP = []
-onlyWhitespace wm id = 
-  case Map.lookup wm id of
+onlyWhitespace wm idp = 
+  case Map.lookup wm idp of
     Nothing -> []
     Just (breaks, spaces) ->    replicate breaks (StringP NoIDP "") 
                              ++ [StringP NoIDP (replicate spaces ' ')]
@@ -131,7 +245,7 @@ onlyWhitespace wm id =
 
 -- white space in front of images not correct now
 
--- new anonymous character in front of token, leads to anonymous token. Maybe take id from the first non anonymous
+-- new anonymous character in front of token, leads to anonymous token. Maybe take idp from the first non anonymous
 -- character.
 
 -- structurals should have whitespace
