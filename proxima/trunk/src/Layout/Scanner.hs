@@ -26,6 +26,8 @@ import Maybe
 import Layout.ScannerAG
 
 {-
+bug 
+
 Challenges/todo:
 
 passing several Alex scanners (probably solved by Alex itself)
@@ -73,7 +75,7 @@ tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
      ) 
-     debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
+--     debug Lay ("Scanned tokens:"++show tokens++"\n"++ show whitespaceMap) $
      (SetPres presLvl', state, layLvl)
 
 fixFocus (FocusP (PathP sp si) (PathP ep ei)) = ((sp,si),(ep,ei))
@@ -155,7 +157,7 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
      (tokens, idPCounter'', scannedWhitespaceMap, lastWhitespaceFocus) = sheet idPCounter' focusedScanChars
      lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
  in  debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
-     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
+     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
@@ -205,24 +207,25 @@ initWhitespaceFocus = ((0,0),(Nothing,Nothing))
 -- the first strf is for manipulating the string that is stored in the token
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
            (Maybe (Token doc node clip userToken), ScannerState)
-mkTokenEx strf tokf (idPCounter, whitespaceMap, collectedWhitespaceFocus) scs = 
-  let tokenLayout = TokenLayout collectedWhitespaceFocus
+mkTokenEx strf tokf (idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) scs = 
+  let tokenLayout = TokenLayout collectedWhitespace
+                                whitespaceFocus
                                 (getFocusStartEnd scs)
       str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
-  in  debug Lay (show idp ++ show str ++ " " ++ show tokenLayout) $
-      ( Just $ UserTk userToken str Nothing idp'
+  in  ( Just $ UserTk userToken str Nothing idp'
       , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
       )
 
 
 mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe (Token doc node clip userToken), ScannerState)
-mkStructuralToken (idPCounter, whitespaceMap, collectedWhitespaceFocus) 
+mkStructuralToken (idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) 
                   scs@[Structural idp _ _ loc tokens lay] = 
-  let tokenLayout = TokenLayout collectedWhitespaceFocus
+  let tokenLayout = TokenLayout collectedWhitespace
+                                whitespaceFocus
                                 (getFocusStartEnd scs)
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> (idp,            idPCounter    )
@@ -236,7 +239,7 @@ collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Mayb
 collectWhitespace (idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd)) 
                   (sc@(Char _ _ _ c):scs) = -- will always be a Char
   let newWhitespace = case c of                                                
-                        '\n' -> (newlines + 1 + length scs, spaces                 )
+                        '\n' -> (newlines + 1 + length scs, 0                      ) -- newline resets spaces
                         ' '  -> (newlines                 , spaces + 1 + length scs)
   in (Nothing, (idPCounter, whitespaceMap, ( newWhitespace
                                            , updateFocusStartEnd (newlines+spaces) focusStartEnd (sc:scs) )))

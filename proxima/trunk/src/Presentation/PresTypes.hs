@@ -20,7 +20,8 @@ type FocusStartEnd = (Maybe Int, Maybe Int)
 
 type WhitespaceFocus = ((Int,Int), FocusStartEnd)
 
-data TokenLayout = TokenLayout { whitespaceFocus :: WhitespaceFocus -- preceding whitespace & focus
+data TokenLayout = TokenLayout { whitespace :: Whitespace
+                               , whitespaceFocus :: FocusStartEnd -- preceding whitespace & focus
                                , tokenFocus :: FocusStartEnd        -- focus in token 
                                } deriving Show
 
