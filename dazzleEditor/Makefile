@@ -107,7 +107,7 @@ GHC_LIB = /usr/local/lib/ghc-6.8.2/
 TARGET = src/Main.hs
 TITLE = "Proxima DazzleEditor"
 
-IMPORTS = --optghc=-i$(PROXIMASRCDIR):$(EDITORSRC)
+IMPORTS = --optghc=-i$(PROXIMASRCDIR):src
 GHCOPTS = $(IMPORTS) --optghc=-fglasgow-exts \
   --optghc=-fallow-undecidable-instances \
   --optghc=-fno-monomorphism-restriction \
