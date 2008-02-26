@@ -30,6 +30,8 @@ bug
 from and to seem to be reversed (becomes obvious when extending the selection from a structural part
 into a parsing part.
 
+focus recovery does not work in identifier list presentation.
+
 Challenges/todo:
 
 passing several Alex scanners (probably solved by Alex itself)
@@ -145,11 +147,11 @@ scanPresentation :: Show token => ScannerSheet doc node clip token -> ((Path,Int
                     IDP -> Lexer -> Layout doc node clip ->
                     ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP presentationLex lay =
- let lex = case  presentationLex of
+ let --lay = parsing (row [ structural (row [ text "<", parsing (text "blaa"), text ">"]), text "   " ])
+     lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (idPCounter', pos, scanChars, scannedFocusStart, scannedFocusEnd, self, whitespaceMap') =
-       sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
+     (idPCounter', pos, scanChars, scannedFocusStart, scannedFocusEnd, self, whitespaceMap') = sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
      afterLastCharFocusStart = focusAfterLastChar scanChars scannedFocusStart
      afterLastCharFocusEnd   = focusAfterLastChar scanChars scannedFocusEnd
@@ -158,9 +160,9 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
                                   scanChars 
      (tokens, idPCounter'', scannedWhitespaceMap, lastWhitespaceFocus) = sheet idPCounter' focusedScanChars
      lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
- in  debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
+ in  --debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     -- debug Lay ("Alex scanner:\n" ++ stringFromScanChars scanChars ++ "\n" ++ (show tokens)) $
+     --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars ++ "\n"++show lay) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
 

@@ -39,7 +39,6 @@ DATA Layout
 
 TYPE LayoutList = [Layout]
 
-
 ATTR Layout LayoutList 
   [ scanStructural : { () {- type sig is not used, the type is Scanner.tokenizeLay -} } | | ]
 -- the we pass this function as an argument, since either it has to be defined in this module, which
@@ -118,6 +117,9 @@ SEM Layout
         in  ( if startPth == @lhs.path then Just (@lhs.pos+startIndex) else @lhs.scannedFocusStart
             , if endPth == @lhs.path then Just (@lhs.pos+endIndex) else @lhs.scannedFocusEnd
             )
+  | StructuralP
+      lhs.scannedFocusStart = @lhs.scannedFocusStart
+      lhs.scannedFocusEnd   = @lhs.scannedFocusEnd
 
 
 -- generation of scanChar list
@@ -147,7 +149,7 @@ SEM Layout
   | StructuralP
       (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
         let (tokens, idPCounter, whitespaceMap) = 
-              @lhs.scanStructural @lhs.focus @lhs.lexer @lhs.lloc @lhs.path @lhs.idPCounter 
+              @lhs.scanStructural @lhs.focus @lhs.lexer @lhs.lloc (@lhs.path++[0]) @lhs.idPCounter 
                                   @lhs.whitespaceMap @child.self
         in  ( [Structural @id NoFocusMark NoFocusMark @lhs.lloc tokens (castLayToPres @self)]
             , idPCounter, whitespaceMap

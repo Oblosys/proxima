@@ -39,12 +39,12 @@ emptyTokenLayout = TokenLayout { whitespace = (0,0)
 
 -- maybe split whitespacefocus
 -- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
-detokenizer wm pres = let (l',focusp) = detokenize testWM testPres
+detokenizer wm pres = {- let (l',focusp) = detokenize testWM testPres
                       in  debug Lay ("\n\n\n\ndetokenize test\n"++show (l',focusp)++"\nfocus is on "++case fromP focusp of
                                                                                           NoPathP    -> ""
                                                                                           PathP pth _ -> show(selectTree pth l')
                                                                                           ) $
-                          detokenize wm pres
+                      -} detokenize wm pres
 
 detokenize :: Show token => WhitespaceMap -> Presentation doc node clip token ->
               (Layout doc node clip, FocusPres)
@@ -114,7 +114,8 @@ detokenize' wm t (EmptyP idp)                = [(EmptyP idp, noFocus)]
             
 detokenize' wm t (StringP idp str)           = [(StringP idp str, noFocus)]
 detokenize' wm t (TokenP idp token)          = let res = addWhitespaceToken wm idp token
-                                               in  debug Lay ("Token:"++show res ) res
+                                               in  -- debug Lay ("Token:"++show res ) $
+                                                   res
 detokenize' wm t (ImageP idp str st)         = [(ImageP idp str st, noFocus)]
 detokenize' wm t (PolyP idp pts w st)        = [(PolyP idp pts w st, noFocus)]
 detokenize' wm t (RectangleP idp w h lw st)  = [(RectangleP idp w h lw st, noFocus)]
