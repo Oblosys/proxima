@@ -98,3 +98,21 @@ proxima:
 	
 $(MAIN): proxima generate presenter lexer
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
+
+
+
+# For generating Haddock documentation
+
+GHC_LIB = /usr/local/lib/ghc-6.8.2/
+TARGET = src/Main.hs
+TITLE = "Proxima DazzleEditor"
+
+IMPORTS = --optghc=-i$(PROXIMASRCDIR):$(EDITORSRC)
+GHCOPTS = $(IMPORTS) --optghc=-fglasgow-exts \
+  --optghc=-fallow-undecidable-instances \
+  --optghc=-fno-monomorphism-restriction \
+  --optghc=-w
+
+haddock: 
+	haddock -o doc -h -B $(GHC_LIB) -t $(TITLE) $(GHCOPTS) $(TARGET) 
+
