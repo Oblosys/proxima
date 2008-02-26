@@ -41,7 +41,14 @@ present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
   let -- focusXY = saveFocus focus lay
       (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
-      focus' = scannedFocus  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
+      focus' = case (scannedFocus, focus) of
+                 (NoFocusP,               focus       ) -> focus
+                 (FocusP NoPathP NoPathP, FocusP fp tp) -> FocusP fp      tp
+                 (FocusP NoPathP tp,      FocusP fp _ ) -> FocusP fp      tp
+                 (FocusP fp      NoPathP, FocusP _  tp) -> FocusP fp      tp
+                 (FocusP fp      tp,      _           ) -> FocusP fp      tp
+                 
+                  -- restoreFocus focusXY presL'              -- focus hack. should be combined with higher level focus
       diffTree = diffPres lay' lay
   in  debug Lay ("old focus:    " ++ show focus ++ "\nScannedFocus: "++show scannedFocus)
       (SetLay' (LayoutLevel lay' focus' diffTree), state, hp) 
