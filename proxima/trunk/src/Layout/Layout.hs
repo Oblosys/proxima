@@ -175,35 +175,38 @@ prependToFocus i focus = mapFocusPath (i:) focus
 
 mapFocusPath :: (Path -> Path) -> FocusPres -> FocusPres
 mapFocusPath f NoFocusP = NoFocusP
-mapFocusPath f (FocusP p1 p2) = FocusP (mapPath p1) (mapPath p2)
- where mapPath NoPathP = NoPathP
-       mapPath (PathP p i) = PathP (f p) i
+mapFocusPath f (FocusP p1 p2) = FocusP (mapPath f p1) (mapPath f p2)
+
+mapPath f NoPathP = NoPathP
+mapPath f (PathP p i) = PathP (f p) i
 
 
 addWhitespaceToken :: Show token => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [(Layout doc node clip, FocusPres)]
-addWhitespaceToken wm idp (UserTk _ str _ _)        = addWhitespace wm idp (StringP idp str)
+addWhitespaceToken wm idp (UserTk _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
 addWhitespaceToken wm idp (StructuralTk _ pres _ _) = let (pres', f) = detokenize wm pres
-                                                      in  addWhitespace wm idp pres'
+                                                      in  addWhitespace wm (Just f) idp pres'
+                                                      
 
-addWhitespace :: WhitespaceMap -> IDP -> Layout doc node clip -> [(Layout doc node clip, FocusPres)]
-addWhitespace wm NoIDP pres = [(pres,noFocus)]
-addWhitespace wm idp pres = 
+addWhitespace :: WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip -> [(Layout doc node clip, FocusPres)]
+addWhitespace wm mStrFocus NoIDP pres = [(pres,noFocus)]
+addWhitespace wm mStrFocus idp pres = 
   case Map.lookup idp wm  of
     Nothing -> [(pres, noFocus)]
     Just tLayout@(TokenLayout (breaks, spaces) wsFocus  tFocus)  ->
       let rows =  replicate breaks (StringP NoIDP "") 
                   ++ [row [StringP NoIDP (replicate spaces ' '), pres]]
-          focuss = mkFocuss tLayout
+          focuss = mkFocuss tLayout (case mStrFocus of Just strFocus -> strFocus
+                                                       Nothing       -> noFocus)
       in zip rows focuss
 
-mkFocuss (TokenLayout (breaks, spaces) (wsStartFocus,wsEndFocus) (tStartFocus,tEndFocus)) = 
+mkFocuss (TokenLayout (breaks, spaces) (wsStartFocus,wsEndFocus) (tStartFocus,tEndFocus)) strFocus = 
   zipWith FocusP
-      (mkStartOrEndFocuss (breaks, spaces) wsStartFocus tStartFocus)
-      (mkStartOrEndFocuss (breaks, spaces) wsEndFocus   tEndFocus)
+      (mkStartOrEndFocuss (breaks, spaces) wsStartFocus tStartFocus (fromP strFocus))
+      (mkStartOrEndFocuss (breaks, spaces) wsEndFocus   tEndFocus (toP strFocus))
 
 -- because these focuses are either both start or both end focus, we know that only one can be a (Just i)
-mkStartOrEndFocuss (breaks, spaces) wFocus tFocus = 
+mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus inside structural token
   let breaksFocuss = case wFocus of 
                        Just i  -> take breaks $ (replicate i NoPathP) ++ [PathP [] 0] ++ repeat NoPathP
                        Nothing -> take breaks $ repeat NoPathP
@@ -213,7 +216,8 @@ mkStartOrEndFocuss (breaks, spaces) wFocus tFocus =
                                  else NoPathP
                        Nothing -> case tFocus of 
                                     Just i  -> PathP [1] i   -- [1] for selecting the second elt of the added row
-                                    Nothing -> NoPathP                                    
+                                    Nothing -> mapPath (1:) sFocus
+                                    -- if nothing else has focus, use the structural focus
   in breaksFocuss ++ [rowFocus]
 --instance (Show a, Show b, Show c, Show d, Show e, Show f) => Show (a,b,c,d,e,f) where -- why isn't this a standard instance?
 --  show (a,b,c,d,e,f) = "("++show a++","++show b++","++show c++","++show d++","++show e++","++show f++")"
