@@ -27,6 +27,8 @@ import Layout.ScannerAG
 
 {-
 bug 
+from and to seem to be reversed (becomes obvious when extending the selection from a structural part
+into a parsing part.
 
 Challenges/todo:
 
@@ -174,9 +176,10 @@ focusAfterLastChar scs (Just pos) = pos == length scs
 -- if the focus is after last char, we cannot encode it in the scanChars (it is handled separately) 
 markFocus f Nothing          scs = scs
 markFocus f focus@(Just pos) scs = if not $ focusAfterLastChar scs focus 
-                                   then let (left, focusedChar:right) = splitAt pos scs
-                                        in  left ++ f focusedChar : right
-                                   else scs
+                                   then case splitAt pos scs of
+                                          (left, focusedChar:right) -> left ++ f focusedChar : right
+                                          _                         -> debug Err "markFocus: problem, cannot record focus" scs
+                                                                             else scs
 
 
 markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd 
