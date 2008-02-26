@@ -27,10 +27,6 @@ import Layout.ScannerAG
 
 {-
 bug 
-from and to seem to be reversed (becomes obvious when extending the selection from a structural part
-into a parsing part.
-
-focus recovery does not work in identifier list presentation.
 
 Challenges/todo:
 
@@ -151,7 +147,7 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
      lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (idPCounter', pos, scanChars, scannedFocusStart, scannedFocusEnd, self, whitespaceMap') = sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
+     (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
      afterLastCharFocusStart = focusAfterLastChar scanChars scannedFocusStart
      afterLastCharFocusEnd   = focusAfterLastChar scanChars scannedFocusEnd
@@ -162,7 +158,7 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
      lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
  in  --debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars ++ "\n"++show lay) $
+     --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      ( [ParsingTk (castLayToPres lay) tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
 
