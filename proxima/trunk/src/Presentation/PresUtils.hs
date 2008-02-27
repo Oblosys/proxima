@@ -573,33 +573,65 @@ presFromString str = ColP NoIDP 0 NF . map (StringP NoIDP) $ lines str
 -- images are not handled yet
 -- these functions are horrible, can't they be a bit simpler?
 
-pathToLeftmostLeaf (StringP _ _)        = []
-pathToLeftmostLeaf (TokenP _ _)         = []
-pathToLeftmostLeaf (ImageP _ _ _)       = []
-pathToLeftmostLeaf (PolyP _ _ _ _)      = []
-pathToLeftmostLeaf (RowP _ _ press)     = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
-pathToLeftmostLeaf (ColP _ _ _ press)   = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
-pathToLeftmostLeaf (OverlayP _ press)   = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)  -- only navigate in head of overlay
-pathToLeftmostLeaf (WithP _ pres)       = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (StructuralP _ pres) = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (ParsingP _ _ pres)    = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (LocatorP _ pres)    = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
-pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
+pathToLeftmostLeaf (StringP _ _)        = Just []
+pathToLeftmostLeaf (TokenP _ _)         = Just []
+pathToLeftmostLeaf (ImageP _ _ _)       = Just []
+pathToLeftmostLeaf (PolyP _ _ _ _)      = Just []
+pathToLeftmostLeaf (RowP _ _ (pres:_))     = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (ColP _ _ _ (pres:_))   = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (OverlayP _ (pres:_))   = case pathToLeftmostLeaf pres of -- only navigate in head of overlay
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (WithP _ pres)       = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (StructuralP _ pres) = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (ParsingP _ _ pres)    = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (LocatorP _ pres)    = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (FormatterP _ (pres:_)) = case pathToLeftmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf pres                 = Nothing
 
-pathToRightmostLeaf (StringP _ _)        = []
-pathToRightmostLeaf (TokenP _ _)         = []
-pathToRightmostLeaf (ImageP _ _ _)       = []
-pathToRightmostLeaf (PolyP _ _ _ _)        = []
-pathToRightmostLeaf (RowP _ _ press)     = length press - 1 : pathToRightmostLeaf (last press)
-pathToRightmostLeaf (ColP _ _ _ press)   = length press - 1 : pathToRightmostLeaf (last press)
-pathToRightmostLeaf (OverlayP _ press)   = 0 : pathToRightmostLeaf (head' "PresUtils.pathToRightmostLeaf" press)  -- only navigate in head of overlay
-pathToRightmostLeaf (WithP _ pres)       = 0 : pathToRightmostLeaf pres
-pathToRightmostLeaf (StructuralP _ pres) = 0 : pathToRightmostLeaf pres
-pathToRightmostLeaf (ParsingP _ _ pres)    = 0 : pathToRightmostLeaf pres
-pathToRightmostLeaf (LocatorP _ pres)    = 0 : pathToRightmostLeaf pres
-pathToRightmostLeaf (FormatterP _ press) = length press - 1  : pathToLeftmostLeaf (last press)
-pathToRightmostLeaf pres                 = debug Err ("PresUtils.pathToRightmostLeaf: can't handle "++show pres) []
+pathToRightmostLeaf (StringP _ _)        = Just []
+pathToRightmostLeaf (TokenP _ _)         = Just []
+pathToRightmostLeaf (ImageP _ _ _)       = Just []
+pathToRightmostLeaf (PolyP _ _ _ _)      = Just []
+pathToRightmostLeaf (RowP _ _ press@(_:_))   = case pathToRightmostLeaf (last press) of
+                                                 Nothing  -> Nothing
+                                                 Just pth -> Just $ length press - 1 : pth
+pathToRightmostLeaf (ColP _ _ _ press@(_:_)) = case pathToRightmostLeaf (last press) of
+                                                 Nothing  -> Nothing
+                                                 Just pth -> Just $ length press - 1 : pth
+pathToRightmostLeaf (OverlayP _ (pres:_)) = case pathToRightmostLeaf pres of -- only navigate in head of overlay
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToRightmostLeaf (WithP _ pres)       = case pathToRightmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToRightmostLeaf (StructuralP _ pres) = case pathToRightmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToRightmostLeaf (ParsingP _ _ pres)  = case pathToRightmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToRightmostLeaf (LocatorP _ pres)    = case pathToRightmostLeaf pres of
+                                            Nothing  -> Nothing
+                                            Just pth -> Just $ 0 : pth
+pathToRightmostLeaf (FormatterP _ press@(_:_)) = case pathToRightmostLeaf (last press) of
+                                                   Nothing  -> Nothing
+                                                   Just pth -> Just $ length press - 1 : pth
+pathToRightmostLeaf pres                 = Nothing
 
 selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
@@ -649,12 +681,26 @@ pathsToAncestorLeftSiblings root (p:path) (FormatterP _ press)  = pathsToAncesto
 pathsToAncestorLeftSiblings root pth      pres                  = debug Err ("PresUtils.pathsToAncestorLeftSiblings: can't handle "++show root++" "++show pth++" "++show pres) []
 
 
+-- find the nearest ancestor right sibling that has a left-most leaf, and return the path to this leaf
+rightNearestLeafPath path pres = 
+  let rightSiblingPaths = pathsToAncestorRightSiblings [] path pres
+  in  case catMaybes $ map leftMostLeafPath rightSiblingPaths of
+        []                -> Nothing
+        nearestLeafPath:_ -> Just nearestLeafPath
+ where leftMostLeafPath pth = case pathToLeftmostLeaf (selectTree pth pres) of
+                                Nothing  -> Nothing
+                                Just leafPth -> Just $ pth ++ leafPth
 
-pathToNearestAncestorRightSibling path pres = let rss = (pathsToAncestorRightSiblings [] path pres)
-                                              in  if null rss then Nothing else Just $ head' "PresUtils.pathToNearestAncestorRightSibling" rss
-
-pathToNearestAncestorLeftSibling path pres = let lss = (pathsToAncestorLeftSiblings [] path pres)
-                                             in  if null lss then Nothing else Just $ head' "PresUtils.pathToNearestAncestorLeftSibling" lss
+-- find the nearest ancestor left sibling that has a right-most leaf, and return the path to this leaf
+leftNearestLeafPath path pres = 
+  let leftSiblingPaths = pathsToAncestorLeftSiblings [] path pres
+  in  case catMaybes $ map rightMostLeafPath leftSiblingPaths of
+        []                -> Nothing
+        nearestLeafPath:_ -> Just nearestLeafPath
+ where rightMostLeafPath pth = case pathToRightmostLeaf (selectTree pth pres) of
+                                Nothing  -> Nothing
+                                Just leafPth -> Just $ pth ++ leafPth
+  
 
 leafLength (StringP _ str) = length str
 leafLength (TokenP _ t) = length (tokenString t)
@@ -662,14 +708,13 @@ leafLength pres = debug Err ("PresUtils.leafLength: non string leaf"++show pres)
 
 -- tricky, in one row [text "12|", text "34"] right navigation must be row [text "12", text "3|4"]
 --         but if there is a column, we want col [text "12", text "|34"]
-rightNavigatePath (PathP path offset) pres = 
+rightNavigatePath (PathP path offset) pres = debug Prs ("pres is "++show pres)$
   if offset < leafLength (selectTree path pres) 
   then PathP path (offset+1)
-  else case showDebug Prs $ pathToNearestAncestorRightSibling path pres of
+  else case rightNearestLeafPath  path pres of
          Nothing              -> PathP path offset
-         Just siblingTreePath -> let leafPath = siblingTreePath ++ pathToLeftmostLeaf (selectTree siblingTreePath pres)
-                                     pathP = PathP leafPath 0
-                                 in  -- pathP
+         Just leafPath -> let pathP = PathP leafPath 0
+                          in  -- pathP
 {- If we pass through a column, we do want to navigate to
    the empty, otherwise we skip empty lines. Also apart from skipping empties, in a string we should go to 1 instead o 0
    Also, if these things are implemented, we still need a way to do the fine grained navigation
@@ -679,28 +724,27 @@ rightNavigatePath (PathP path offset) pres =
    for rows with singleton colums this may give an unexpected result, but in order to change
    that a more sophisticated navigation is required.
 -}
-                                     if passedColumn path leafPath pres
-                                     then pathP
-                                     else -- no column encountered, so if leaf is empty go to next one
-                                          if leafLength (selectTree leafPath pres) == 0 
-                                          then rightNavigatePath pathP pres
-                                          else PathP leafPath 1 -- and skip first pos
+                              if passedColumn path leafPath pres
+                              then pathP
+                              else -- no column encountered, so if leaf is empty go to next one
+                                  if leafLength (selectTree leafPath pres) == 0 
+                                  then rightNavigatePath pathP pres
+                                  else PathP leafPath 1 -- and skip first pos
 
 leftNavigatePath  (PathP path offset) pres = 
   if offset > 0 
   then PathP path (offset-1)
-  else case pathToNearestAncestorLeftSibling path pres of
-         Nothing              -> PathP path offset
-         Just siblingTreePath -> let leafPath = siblingTreePath ++ pathToRightmostLeaf (selectTree siblingTreePath pres)
-                                     leafLn = (leafLength (selectTree leafPath pres)) 
-                                     pathP = PathP leafPath leafLn
-                                 in  -- pathP
-                                     if passedColumn path leafPath pres
-                                     then pathP
-                                     else -- no column encountered, so if leaf is empty go to previous one
-                                     if leafLn == 0 
-                                     then leftNavigatePath pathP pres
-                                     else PathP leafPath (leafLn -1 ) -- and skip last pos
+  else case leftNearestLeafPath path pres of
+         Nothing       -> PathP path offset
+         Just leafPath -> let leafLn = (leafLength (selectTree leafPath pres)) 
+                              pathP = PathP leafPath leafLn
+                          in  -- pathP
+                              if passedColumn path leafPath pres
+                              then pathP
+                              else -- no column encountered, so if leaf is empty go to previous one
+                                  if leafLn == 0 
+                                  then leftNavigatePath pathP pres
+                                  else PathP leafPath (leafLn -1 ) -- and skip last pos
 
 -- passedColumn returns true if a column is present from the common prefix of fromPath and toPath to
 -- fromPath and toPath. Meaning that if a column is encountered if we move from fromPath to 
