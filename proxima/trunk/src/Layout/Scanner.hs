@@ -216,7 +216,12 @@ mkTokenEx strf tokf (idPCounter, whitespaceMap, (collectedWhitespace, whitespace
       idp = idPFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
-                                        _     -> (idp,            idPCounter    )
+                                        _     -> case Map.lookup idp whitespaceMap of
+                                                   Nothing -> (idp,            idPCounter    )
+                                                   _       -> (IDP idPCounter, idPCounter + 1)
+                           -- if there is no idp, we create a new one. If there is an idp, but
+                           -- it is already in the whitespaceMap, we also create a new one.                                                   
+                                                   
   in  ( Just $ UserTk userToken str Nothing idp'
       , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
       )
