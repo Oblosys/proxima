@@ -571,18 +571,16 @@ presFromString str = ColP NoIDP 0 NF . map (StringP NoIDP) $ lines str
 -- for navigation, overlays are characterized by their head element
 
 -- images are not handled yet
--- these functions are horrible, can't they be a bit simpler?
 
+
+pathToLeftmostLeaf (EmptyP _)           = Nothing
 pathToLeftmostLeaf (StringP _ _)        = Just []
 pathToLeftmostLeaf (TokenP _ _)         = Just []
-pathToLeftmostLeaf (ImageP _ _ _)       = Just []
-pathToLeftmostLeaf (PolyP _ _ _ _)      = Just []
-pathToLeftmostLeaf (RowP _ _ (pres:_))     = case pathToLeftmostLeaf pres of
-                                            Nothing  -> Nothing
-                                            Just pth -> Just $ 0 : pth
-pathToLeftmostLeaf (ColP _ _ _ (pres:_))   = case pathToLeftmostLeaf pres of
-                                            Nothing  -> Nothing
-                                            Just pth -> Just $ 0 : pth
+pathToLeftmostLeaf (ImageP _ _ _)       = Nothing
+pathToLeftmostLeaf (PolyP _ _ _ _)      = Nothing
+pathToLeftmostLeaf (RowP _ _ press)     = pathToLeftmostLeafList 0 press
+pathToLeftmostLeaf (ColP _ _ _ press)   = pathToLeftmostLeafList 0 press
+pathToLeftmostLeaf (FormatterP _ press) = pathToLeftmostLeafList 0 press
 pathToLeftmostLeaf (OverlayP _ (pres:_))   = case pathToLeftmostLeaf pres of -- only navigate in head of overlay
                                             Nothing  -> Nothing
                                             Just pth -> Just $ 0 : pth
@@ -598,21 +596,23 @@ pathToLeftmostLeaf (ParsingP _ _ pres)    = case pathToLeftmostLeaf pres of
 pathToLeftmostLeaf (LocatorP _ pres)    = case pathToLeftmostLeaf pres of
                                             Nothing  -> Nothing
                                             Just pth -> Just $ 0 : pth
-pathToLeftmostLeaf (FormatterP _ (pres:_)) = case pathToLeftmostLeaf pres of
-                                            Nothing  -> Nothing
-                                            Just pth -> Just $ 0 : pth
 pathToLeftmostLeaf pres                 = Nothing
 
+pathToLeftmostLeafList i []           = Nothing
+pathToLeftmostLeafList i (pres:press) = 
+  case pathToLeftmostLeaf pres of
+    Just pth -> Just $ i:pth
+    Nothing  -> pathToLeftmostLeafList (i+1) press
+    
+
+pathToRightmostLeaf (EmptyP _)           = Nothing
 pathToRightmostLeaf (StringP _ _)        = Just []
 pathToRightmostLeaf (TokenP _ _)         = Just []
-pathToRightmostLeaf (ImageP _ _ _)       = Just []
-pathToRightmostLeaf (PolyP _ _ _ _)      = Just []
-pathToRightmostLeaf (RowP _ _ press@(_:_))   = case pathToRightmostLeaf (last press) of
-                                                 Nothing  -> Nothing
-                                                 Just pth -> Just $ length press - 1 : pth
-pathToRightmostLeaf (ColP _ _ _ press@(_:_)) = case pathToRightmostLeaf (last press) of
-                                                 Nothing  -> Nothing
-                                                 Just pth -> Just $ length press - 1 : pth
+pathToRightmostLeaf (ImageP _ _ _)       = Nothing
+pathToRightmostLeaf (PolyP _ _ _ _)      = Nothing
+pathToRightmostLeaf (RowP _ _ press)     = pathToRightmostLeafList 0 press
+pathToRightmostLeaf (ColP _ _ _ press)   = pathToRightmostLeafList 0 press
+pathToRightmostLeaf (FormatterP _ press) = pathToRightmostLeafList 0 press
 pathToRightmostLeaf (OverlayP _ (pres:_)) = case pathToRightmostLeaf pres of -- only navigate in head of overlay
                                             Nothing  -> Nothing
                                             Just pth -> Just $ 0 : pth
@@ -628,10 +628,16 @@ pathToRightmostLeaf (ParsingP _ _ pres)  = case pathToRightmostLeaf pres of
 pathToRightmostLeaf (LocatorP _ pres)    = case pathToRightmostLeaf pres of
                                             Nothing  -> Nothing
                                             Just pth -> Just $ 0 : pth
-pathToRightmostLeaf (FormatterP _ press@(_:_)) = case pathToRightmostLeaf (last press) of
-                                                   Nothing  -> Nothing
-                                                   Just pth -> Just $ length press - 1 : pth
 pathToRightmostLeaf pres                 = Nothing
+
+-- this one is subtle, we first recursively check if one of the right siblings (press) yields a path, and if not
+-- we try the current sibling (pres).
+pathToRightmostLeafList i []           = Nothing
+pathToRightmostLeafList i (pres:press) = 
+  case pathToRightmostLeafList (i+1) press of
+    Just pth -> Just pth
+    Nothing  -> fmap (i:) $ pathToRightmostLeaf pres
+    
 
 selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
@@ -641,7 +647,7 @@ selectTree (p:path) (GraphP _ _ _ _ _ press)  = selectTree path (index "PresUtil
 selectTree (0:path) (VertexP _ _ _ _ _ pres)  = selectTree path pres
 selectTree (0:path) (WithP _ pres)            = selectTree path pres
 selectTree (0:path) (StructuralP _ pres)      = selectTree path pres
-selectTree (0:path) (ParsingP _ _ pres)         = selectTree path pres
+selectTree (0:path) (ParsingP _ _ pres)       = selectTree path pres
 selectTree (0:path) (LocatorP _ pres)         = selectTree path pres
 selectTree (p:path) (FormatterP _ press)      = selectTree path (index "PresUtils.selectTree" press p)
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
@@ -683,20 +689,26 @@ pathsToAncestorLeftSiblings root pth      pres                  = debug Err ("Pr
 
 -- find the nearest ancestor right sibling that has a left-most leaf, and return the path to this leaf
 rightNearestLeafPath path pres = 
-  let rightSiblingPaths = pathsToAncestorRightSiblings [] path pres
-  in  case catMaybes $ map leftMostLeafPath rightSiblingPaths of
-        []                -> Nothing
-        nearestLeafPath:_ -> Just nearestLeafPath
+  case pathsToAncestorRightSiblings [] path pres of
+    [] -> Nothing  -- no ancestor right sibling, so we are at the far right of the presentation
+    ancestorRightSiblingPath:_ ->
+      case leftMostLeafPath ancestorRightSiblingPath of
+        Nothing              -> rightNearestLeafPath ancestorRightSiblingPath pres 
+        -- if the sibling tree yields no focusable positions, we continue searching upward from its root
+        
+        Just nearestLeafPath -> Just nearestLeafPath
  where leftMostLeafPath pth = case pathToLeftmostLeaf (selectTree pth pres) of
                                 Nothing  -> Nothing
                                 Just leafPth -> Just $ pth ++ leafPth
 
 -- find the nearest ancestor left sibling that has a right-most leaf, and return the path to this leaf
 leftNearestLeafPath path pres = 
-  let leftSiblingPaths = pathsToAncestorLeftSiblings [] path pres
-  in  case catMaybes $ map rightMostLeafPath leftSiblingPaths of
-        []                -> Nothing
-        nearestLeafPath:_ -> Just nearestLeafPath
+  case pathsToAncestorLeftSiblings [] path pres of
+  [] -> Nothing -- no ancestor left sibling, so we are at the far left of the presentation
+  ancestorLeftSiblingPath:_ ->
+    case rightMostLeafPath ancestorLeftSiblingPath of
+        Nothing              -> leftNearestLeafPath ancestorLeftSiblingPath pres
+        Just nearestLeafPath -> Just nearestLeafPath
  where rightMostLeafPath pth = case pathToRightmostLeaf (selectTree pth pres) of
                                 Nothing  -> Nothing
                                 Just leafPth -> Just $ pth ++ leafPth
