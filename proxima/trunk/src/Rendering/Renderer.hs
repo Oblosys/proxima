@@ -211,10 +211,10 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                                 , AttrStrikethrough 0 (length str) (fStrikeOut fnt)
                                 ] -- underline and strikeout don't seem to work
               ; case pangoItems of 
-                  [pangoItem] -> do { glyphItem <- pangoShape (head pangoItems)
+                  [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x (y+ascnt) glyphItem
                                     }
-                  pangoItem:_ -> do { glyphItem <- pangoShape (head pangoItems)
+                  pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
                                     ; debug Err ("Renderer.renderArr: too many pango items for string \""++str++"\"") $ return ()
                                     }
@@ -478,7 +478,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
 
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
@@ -504,7 +504,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
        
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -516,7 +516,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
        
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
@@ -524,7 +524,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
@@ -562,7 +562,7 @@ renderID (wi,dw,gc) scale x y id  =
     ; gcSetValues gc $ newGCValues { foreground = gtkColor black }
     ; pangoItems <- pangoItemize context idStr [ AttrFontDescription 0 (length idStr) fontDescription ] 
     ; case pangoItems of 
-        [pangoItem] -> do { glyphItem <- pangoShape (head pangoItems)
+        [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderID" pangoItems)
                           ; (_, PangoRectangle x' y' w' h') <-glyphItemExtents glyphItem
                           ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
                           ; drawGlyphs dw gc (x+1) (y+1 - round y') glyphItem

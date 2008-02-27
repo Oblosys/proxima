@@ -441,7 +441,7 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.hStretch = False
       loc.vStretch = False
       loc.vRef = if null @presentationList.vRefList then 0
-                else head @rowTopHeights
+                else head' "ArrangerAG.MatrixPresentation.loc.vRef" @rowTopHeights
       loc.hRef = 0
   | LayedOutRowP 
       loc.minWidth = error "not implemented"
@@ -643,13 +643,13 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 
 SEM PresentationList [ assignedWidthList, assignedHeightList, assignedVRefList, assignedHRefList : {[Int]} | | ]
   | Cons 
-      hd.assignedWidth = head @lhs.assignedWidthList
+      hd.assignedWidth = head' "ArrangerAG.PresentationList.hd.assignedWidth" @lhs.assignedWidthList
       tl.assignedWidthList = tail @lhs.assignedWidthList
-      hd.assignedHeight = head @lhs.assignedHeightList
+      hd.assignedHeight = head' "ArrangerAG.PresentationList.hd.assignedHeight" @lhs.assignedHeightList
       tl.assignedHeightList = tail @lhs.assignedHeightList
-      hd.assignedVRef = head @lhs.assignedVRefList
+      hd.assignedVRef = head' "ArrangerAG.PresentationList.assignedVRef" @lhs.assignedVRefList
       tl.assignedVRefList = tail @lhs.assignedVRefList
-      hd.assignedHRef = head @lhs.assignedHRefList
+      hd.assignedHRef = head' "ArrangerAG.PresentationList.assignedHRef" @lhs.assignedHRefList
       tl.assignedHRefList = tail @lhs.assignedHRefList
 
 
@@ -743,9 +743,9 @@ SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
       loc.finalWidth = @lhs.assignedWidth
       loc.finalHeight = @lhs.assignedHeight
       loc.finalVRef = if null @presentationList.vRefList then 0 -- we need H/HRefNrs here, but there not in MatrixPresentation yet
-                      else head @rowTopHeights
+                      else head' "ArrangerAG.MatrixPresentation.finalVRef" @rowTopHeights
       loc.finalHRef = if null @presentationList.vRefList then 0
-                      else head @colLeftWidths
+                      else head' "ArrangerAG.MatrixPresentation.finalHRef" @colLeftWidths
   | LayedOutRowP 
       loc.finalWidth = error "not implemented"
       loc.finalHeight = error "not implemented"
@@ -801,8 +801,8 @@ SEM Root
       
 SEM PresentationList
   | Cons 
-      hd.absx = @lhs.absx + head @lhs.xList
-      hd.absy = @lhs.absy + head @lhs.yList
+      hd.absx = @lhs.absx + head' "ArrangerAG.PresentationList.hd.absx" @lhs.xList
+      hd.absy = @lhs.absy + head' "ArrangerAG.PresentationList.hd.absy" @lhs.yList
 
       
 -- lu attributes for all the other situations are handled by copy rules
@@ -855,8 +855,8 @@ SEM Presentation
 ATTR PresentationList [ xList, yList : {[Int]} | | ]
 SEM PresentationList
   | Cons 
-      hd.x = head @lhs.xList
-      hd.y = head @lhs.yList
+      hd.x = head' "ArrangerAG.PresentationList.hd.x" @lhs.xList
+      hd.y = head' "ArrangerAG.PresentationList.hd.y" @lhs.yList
       tl.xList = tail @lhs.xList
       tl.yList = tail @lhs.yList
 
@@ -1133,7 +1133,7 @@ SEM Presentation [ unprunedPres : {Presentation doc node clip} | | ]
        
 SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
   | Cons 
-      hd.unprunedPres     = head @lhs.unprunedPresList
+      hd.unprunedPres     = head' "ArrangerAG.PresentationList.hd.unPrunedPres" @lhs.unprunedPresList
       tl.unprunedPresList = tail @lhs.unprunedPresList
 
 ATTR Root         [ oldArr : {Maybe (Arrangement node)}  | | ]
@@ -1244,7 +1244,7 @@ makeDummyRows (maybeRow:maybeRows) =
 
 SEM PresentationList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
   | Cons 
-      hd.oldArr     = head @lhs.oldArrList
+      hd.oldArr     = head'  "ArrangerAG.PresentationList.hd.oldArr" @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
  
 

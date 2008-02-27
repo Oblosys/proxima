@@ -1,6 +1,7 @@
 module Layout.LayTranslate where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
 
@@ -253,7 +254,7 @@ addVertex :: DocNode node => [Int] -> (Int, Int) ->  LayerStateLay doc node clip
              (LayerStateLay doc node clip, LayoutLevel doc node clip)
 addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
   let vertexIDs = getVertexIDs pth pres
-      freshID = head $ dropWhile (`elem` vertexIDs) [0..]
+      freshID = head' "LayTranslate.addVertex" $ dropWhile (`elem` vertexIDs) [0..]
       pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vertex) pres
   in  (state, LayoutLevel pres' focus dt)     -- 0 in path is ignored
  where vertex = empty

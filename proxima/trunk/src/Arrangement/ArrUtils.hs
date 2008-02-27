@@ -195,14 +195,14 @@ updatedRectArr' x' y' dt arr =
                                 in  [((x, y), (widthA arr, heightA arr))]
     DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
       case arr of                      -- NOTE for overlay and graph, this should not occur
-      (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
-      (ParsingA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
-      (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head dts) arr else problem
+      (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
+      (ParsingA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
+      (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (RowA id x y w h hr vr bc arrs)     -> updatedRectRow (x'+x) (y'+y) h dts arrs
       (ColA id x y w h hr vr bc f arrs)   -> updatedRectCol (x'+x) (y'+y) w dts arrs 
       (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (GraphA id x y w h hr vr bc nvs arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
-      (VertexA id x y w h hr vr bc ol arr) -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head dts) arr else problem
+      (VertexA id x y w h hr vr bc ol arr) -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (OverlayA id x y w h hr vr bc arrs)  -> updatedRectArrs (x'+x) (y'+y) dts arrs
       _                                    -> problem
  where updatedRectArrs x' y' dts arrs = concat $ zipWith (updatedRectArr' x' y') dts arrs
@@ -361,7 +361,7 @@ navigateFocus x y arr = case point x y arr of
 centerXCoords []      = [] -- this never occurs
 centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
                             halfwidths = map (`div` 2) widths
-                        in  head xcoords : zipWith (+) xcoords halfwidths
+                        in  head' "ArrUtils.centerXCoords" xcoords : zipWith (+) xcoords halfwidths
 -- don't want cumulative character widths
 
 setFocus x y arr     = showDebug' GI "focus set to " $
@@ -577,7 +577,7 @@ subtractDoublePointVector (DoublePoint x0 y0) (DoublePoint x1 y1) =
 dotProduct :: Vector -> Vector -> Double
 dotProduct (Vector v1 v2) (Vector w1 w2) = v1 * w1 + v2 * w2
 
-edges vs = (head vs, last vs) : edges' vs
+edges vs = (head' "ArrUtils.edges" vs, last vs) : edges' vs
  where edges' (e1:rest@(e2:_)) = (e1,e2) : edges' rest
        edges' _                = []
        

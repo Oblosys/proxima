@@ -123,7 +123,10 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
                                ('\r':s'') -> lines' s''          -- a  Mac "\r" encountered on Dos or Unix platform 
 -- what happens with '\r' on mac? is it automatically converted to '\n'? If so, will a Dos file then contain "\n\n"?
 
-
+-- Version of head that reports the caller in case of empty list.
+head' caller xs = case xs of
+                    []  -> error $ caller ++ ": called head' []"
+                    x:_ -> x 
 
 -- Constants for switching on incrementality, background coloring, etc.
 

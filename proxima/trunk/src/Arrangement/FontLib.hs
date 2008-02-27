@@ -1,6 +1,7 @@
 module Arrangement.FontLib where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Graphics.UI.Gtk hiding (FontMetrics)
 
 import qualified Data.Map as Map
@@ -53,9 +54,9 @@ queryFont font =
     
     ; let allChars = map chr [32..255]
     ; widths <- mapM (\c -> do { pangoItems <- pangoItemize context [c] [ AttrFontDescription 0 255 fontDescription]
-                               ; glyphItem <- pangoShape (head pangoItems)
+                               ; glyphItem <- pangoShape (head' "Fontlib.queryFont" pangoItems)
                                ; widths <- glyphItemGetLogicalWidths glyphItem (Just False)
-                               ; return (round $ head widths)
+                               ; return (round $ head' "Fontlib.queryFont" widths)
                                })
                      allChars
     

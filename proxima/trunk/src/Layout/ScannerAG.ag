@@ -10,6 +10,7 @@
 -----------------------------------------------------------------------------------------
 {
 import Common.CommonTypes
+import Common.CommonUtils
 import Presentation.PresTypes
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
@@ -137,7 +138,7 @@ SEM Layout
   | ColP
       lhs.scanChars = concat $ intersperse [Char NoIDP NoFocusMark NoFocusMark '\n'] @presentationList.scanCharss
   | OverlayP
-      lhs.scanChars = head @presentationList.scanCharss
+      lhs.scanChars = head' "ScannerAG.OverlayP.lhs.scanChars" @presentationList.scanCharss
   | FormatterP
       lhs.scanChars = concat @presentationList.scanCharss
   | WithP

@@ -577,14 +577,14 @@ pathToLeftmostLeaf (StringP _ _)        = []
 pathToLeftmostLeaf (TokenP _ _)         = []
 pathToLeftmostLeaf (ImageP _ _ _)       = []
 pathToLeftmostLeaf (PolyP _ _ _ _)      = []
-pathToLeftmostLeaf (RowP _ _ press)     = 0 : pathToLeftmostLeaf (head press)
-pathToLeftmostLeaf (ColP _ _ _ press)   = 0 : pathToLeftmostLeaf (head press)
-pathToLeftmostLeaf (OverlayP _ press)   = 0 : pathToLeftmostLeaf (head press)  -- only navigate in head of overlay
+pathToLeftmostLeaf (RowP _ _ press)     = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
+pathToLeftmostLeaf (ColP _ _ _ press)   = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
+pathToLeftmostLeaf (OverlayP _ press)   = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)  -- only navigate in head of overlay
 pathToLeftmostLeaf (WithP _ pres)       = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (StructuralP _ pres) = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (ParsingP _ _ pres)    = 0 : pathToLeftmostLeaf pres
 pathToLeftmostLeaf (LocatorP _ pres)    = 0 : pathToLeftmostLeaf pres
-pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head press)
+pathToLeftmostLeaf (FormatterP _ press) = 0 : pathToLeftmostLeaf (head' "PresUtils.pathToLeftmostLeaf" press)
 pathToLeftmostLeaf pres                 = debug Err ("PresUtils.pathToLeftmostLeaf: can't handle "++show pres) []
 
 pathToRightmostLeaf (StringP _ _)        = []
@@ -593,7 +593,7 @@ pathToRightmostLeaf (ImageP _ _ _)       = []
 pathToRightmostLeaf (PolyP _ _ _ _)        = []
 pathToRightmostLeaf (RowP _ _ press)     = length press - 1 : pathToRightmostLeaf (last press)
 pathToRightmostLeaf (ColP _ _ _ press)   = length press - 1 : pathToRightmostLeaf (last press)
-pathToRightmostLeaf (OverlayP _ press)   = 0 : pathToRightmostLeaf (head press)  -- only navigate in head of overlay
+pathToRightmostLeaf (OverlayP _ press)   = 0 : pathToRightmostLeaf (head' "PresUtils.pathToRightmostLeaf" press)  -- only navigate in head of overlay
 pathToRightmostLeaf (WithP _ pres)       = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (StructuralP _ pres) = 0 : pathToRightmostLeaf pres
 pathToRightmostLeaf (ParsingP _ _ pres)    = 0 : pathToRightmostLeaf pres
@@ -651,10 +651,10 @@ pathsToAncestorLeftSiblings root pth      pres                  = debug Err ("Pr
 
 
 pathToNearestAncestorRightSibling path pres = let rss = (pathsToAncestorRightSiblings [] path pres)
-                                              in  if null rss then Nothing else Just $ head rss
+                                              in  if null rss then Nothing else Just $ head' "PresUtils.pathToNearestAncestorRightSibling" rss
 
 pathToNearestAncestorLeftSibling path pres = let lss = (pathsToAncestorLeftSiblings [] path pres)
-                                             in  if null lss then Nothing else Just $ head lss
+                                             in  if null lss then Nothing else Just $ head' "PresUtils.pathToNearestAncestorLeftSibling" lss
 
 leafLength (StringP _ str) = length str
 leafLength (TokenP _ t) = length (tokenString t)

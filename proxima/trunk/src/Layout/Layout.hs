@@ -1,6 +1,7 @@
 module Layout.Layout where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
 
@@ -164,7 +165,7 @@ combine [] l2 = l2 -- in this case f1 will always be noFocus, so we take f2
 combine l1 [] = l1 -- in this case f2 will always be noFocus, so we take f1
 combine l1 l2 = ( init l1 ++ 
                  [let (lastR, lastF) = last l1
-                      (firstR, firstF) = head l2
+                      (firstR, firstF) = head' "Layout.combine" l2
                   in (RowP NoIDP 0 $ [lastR,firstR], prependToFocus 0 lastF `combineFocus` prependToFocus 1 firstF) 
                  ] 
                  ++ tail l2
