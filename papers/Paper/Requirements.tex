@@ -7,6 +7,8 @@
 \usepackage{utils}
 \usepackage{requirements}
 \usepackage{epsfig}
+\usepackage{color}
+
 % The following is enclosed to allow easy detection of differences in
 % ascii coding.
 % Upper-case    A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
@@ -26,6 +28,7 @@
 
 \newcommand{\p}[1]{\texttt{#1}}
 \newcommand{\spc}{\textvisiblespace}
+\setlength{\fboxsep}{1pt}
 
 \runningheads{M.M. Schrage et al}{Editing structured documents: Requirements} 
 
@@ -57,8 +60,8 @@ In this paper we investigate the requirements for a generic editor that combines
 
 Many software applications involve some form of editing: a user views a data structure and provides edit gestures in order to modify this data structure. Different kinds of documents require different ways of editing, and hence a multitude of editors exists, each having its own specific edit model and user-interface conventions. Moreover,  since application designers have different ideas on what constitutes a pleasant edit model, even editors for the same document type may show significantly different edit behavior. Nevertheless, the core edit behavior, whether performed in a word-processor or a spreadsheet, is largely similar: document fragments may be copied and pasted, and new parts of the document may be constructed by selecting from menus or entering text. 
 
-An obvious research question is to abstract from the specific aspects of each editor and construct a generic system that can be instantiated to a specific editor application. Building an editor with such a system would require only a fraction of the amount of engineering required to build an editor from scratch. 
-A generic editor enhances consistency between editors, because all instantiated editors share the same edit model, and, furthermore, it facilitates the integration of editors for different document types.
+An obvious research question is how to abstract from the specific aspects of each editor and construct a generic system that can be instantiated to a specific editor application. Building an editor with such a system would require only a fraction of the amount of engineering required to build an editor from scratch. 
+A generic editor improves consistency between editors, because all instantiated editors share the same edit model, and, furthermore, it facilitates the integration of editors for different document types.
 
 Especially in the nineteen-eighties, many research projects on structure editing were started. However, the editors developed were generally perceived as being overly restrictive, and attempts at developing less restrictive systems resulted mainly in text-only editors. Further, regardless of the restrictiveness of the edit model, the applicability of the generic editors was generally limited to source editors for programming languages and simple word-processing applications.
 
@@ -76,6 +79,10 @@ There is a choice between using an expensive custom-made editor for a particular
 
 In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
 
+
+Meer over Proxima
+
+
 This paper is organized as follows. Section \ref{preliminaries} discusses the basic concepts that play a role in editing structured documents. Section \ref{usecases} presents five use cases of possible applications for a generic structure editor. From these use cases we formulate a set of functional requirements for a flexible non-restrictive structure editor in Section~\ref{sect:reqs}. Existing editors are evaluated according to these requirements in sections~\ref{sect:editorOverview} and~\ref{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how Proxima, a generic structure editor developed at Utrecht University, meets the requirements and thus will be able to implement all of the use cases. Section \ref{conclusions} concludes.
 
 \section{Preliminaries}
@@ -84,7 +91,7 @@ This paper is organized as follows. Section \ref{preliminaries} discusses the ba
 \subsection{Structured documents} 
 \label{sect:structdocs}
 
-A {\em structured document} is a collection of logical entities between which a structural relation exists. Examples of structured documents are HTML pages, program sources, word processor documents, etc. 
+A {\em structured document} is a collection of logical entities between which a structural relation exists. Examples of structured documents are HTML pages, program sources, word-processor documents, etc. 
 
 In this paper, we restrict ourselves to structured documents that have a tree structure that can be described by an EBNF grammar. Although graphs can be viewed as structured documents as well, algorithms for performing computations over graphs are far more complex than tree algorithms. Furthermore, parsers for graphs are less well understood than parsers for trees, as well as computationally more expensive. 
 
@@ -465,40 +472,19 @@ The upper pane of the editor in the screenshot shows a highlighted source of a s
 Some structure editors use an automatic layout scheme while editing program sources. The user then does not need to worry about layout issues, such as the alignment of parameters in functions with multiple clauses. However, for a Haskell editor this situation is not optimal because Haskell programs mainly consist of expressions, which are hard to layout automatically. Therefore, rather than having automatic layout be continuously performed on the entire source, a user may request the editor to automatically lay out a selected part of the program. The specification of the layout of the program is part of a presentation sheet and may be adapted by the user. Of course, if desired, it is also possible to turn on continuous automatic layout.
 \vspace{1em}
 
-\newcommand{\editScreenshot}[4]{%
-%
-\noindent
-\begin{center}
-\begin{picture}(350,135)(0,0)
-\begin{scriptsize}
-\put(0,30){ \framebox(160,105){#1}}
-\put(180,30){ \framebox(160,105){#2}}
-\end{scriptsize}
-\put(165,80){ $\Rightarrow$}
-\put(0,0) { \makebox(160,30){#3}}
-\put(180,0) { \makebox(160,30){#4}}
-\end{picture}
-\end{center}
-}
-
-\newcommand{\editScreenshotTrnsSz}[4]{%
-%
-\noindent
-\begin{center}
-\begin{picture}(350,130)(0,0)
-\begin{scriptsize}
-\put(0,30){ \framebox#1{#2}}
-\put(180,30){ \framebox#1{#3}}
-\end{scriptsize}
-\put(165,80){ $\Rightarrow$}
-\put(96,0) { \makebox(150,30){#4}}
-\end{picture}
-\end{center}
-}
 
 \newcommand{\editScreenshotTrns}[3]{%
-%
-\editScreenshotTrnsSz{(160,105)}{#1}{#2}{#3}
+\noindent
+\begin{center}
+\begin{picture}(400,155)(0,0)
+\begin{scriptsize}
+\put(0,30){ \framebox(185,125){#1}}
+\put(215,30){ \framebox(185,125){#2}}
+\end{scriptsize}
+\put(195,90){ $\Rightarrow$}
+\put(0,0) { \makebox(400,30){\centering #3 }}
+\end{picture}
+\end{center}
 }
 
 \editScreenshotTrns{
@@ -606,8 +592,6 @@ let y=2; \framebox{x=1\strut} in x+y    \\ [1mm]
 {\small \hspace*{0.13cm}\hspace*{3.47cm} cut \hspace{1.3cm} move focus  \hspace{1.20cm} paste}}
 \end{small}\end{center}
 
-%\editScreenshot{let y=2 in \underline{x}+y}{let y=2; \framebox{x=1\strut} in x+y}{after cut}{after paste}
-
 
 When the declaration is pasted, a semicolon is automatically placed in front of it. The whitespace from the semicolon is copied from the whitespace of the other semicolons in the presentation (or may come from a pretty-printing algorithm). If the list has an irregular layout (e.g.\ \verb|[1,  2,    3, 4]|), the layout after the paste operation may not be what is expected. However, since list structures are usually layed out in a regular way, this need not be a problem.
 
@@ -698,38 +682,38 @@ This section describes a WYSIWYG document editor with a user interface similar t
 %
 \noindent 
 \begin{center}
-\begin{picture}(225,165)(0,0)
+\begin{picture}(290,195)(0,0)
 \begin{scriptsize}
-\put(-2,30){ \epsfig{file=pics/eps/WordprocessorWindow.eps, height=4.8cm}}
-\put(0,132){ 
-\begin{tabular}[t]{p{7cm}}
+\put(-2,30){ \epsfig{file=pics/eps/WordprocessorWindow.eps, height=6cm}}
+\put(0,146){ 
+\begin{tabular}[t]{p{9cm}}
 \hfill{\normalsize Proxima}\hfill~\\
 \vspace{0.001cm}
 \hfill{\scriptsize Martijn M. Schrage}\hfill~\\
 \vspace{0.0005cm}
 {\small Contents}\\
-\vspace{0.0007cm}
+\vspace{0.0004cm}
 ~~~1~~Editing~structured~documents\\
 ~~~2~~Use cases \\
 ~~~3~~Functional requirements\\
-\vspace{0.2cm}
+\vspace{0.15cm}
 {\small 1~~Editing~structured~documents}\\
-\vspace{0.001cm}
-\parbox{6.9cm}{While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or\vline~ the ubiquitous Microsoft Notepad, we will ~~~~~~~~~~~~~~~~~\strut
+\vspace{0.0008cm}
+\parbox{9cm}{While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or\vline~ the ubiquitous Microsoft Notepad, we will ~~~~~~~~~~~~~~~~~\strut
 }\\
 \end{tabular}
 }
 %\put(1,33){ \epsfig{file=pics/eps/EqEdWin.eps, height=102.5pt}}
 %\put(1,33){ \epsfig{file=pics/screenshots/Wordprocessor.png.eps, height=102.5pt}}
 \end{scriptsize}
-\put(0,0) { \makebox(190,30){#2}}
+\put(0,0){\makebox(290,30){\centering {#2}}}
 \end{picture}
 \end{center}
 }
 
 
 \screenshotWin{%\epsfig{file=pics/Screenshots/Wordprocessor.png.eps, height=6cm}
-}{\hspace*{1cm}\normalsize \sf The word processor.}
+}{\normalsize \sf The word processor.}
 %$\langle$Word-processor document with table of contents, citations, etc.$\rangle$
 
 The document model consists of chapters, sections and subsections. The editor supports free editing in the WYSIWYG presentation with optimal line breaking, a derived table of contents, and an automatic bibliography. Cross-references, such as citations or references to figures, can be clicked to bring the referred part of the document into focus.
@@ -740,7 +724,7 @@ Although Microsoft Word is one of the most popular word-processing tools in the 
 
 
 
-\editStepScrshotSz{4.5cm}{
+\editStepScrshotSz{6cm}{
 \begin{scriptsize}\begin{tabular}{@{}l@{}}
 \rmfamily
 normal text {\em \vline{\bf \em italic and bold} just italic} normal\\
@@ -798,7 +782,7 @@ A structure editor may be of some help here, because the structural similarities
 ~~~~3~~Functional requirements
 \end{tabular}\end{scriptsize}
 }
-{0em}{\small change to section}
+{0em}{\small change subsection to section}
  
 The screenshot shows the effect of the structural edit operation ``change to section''. If the containing section (``Editing structured documents'') had had any subsections following the promoted subsection, these could have become subsections of the new ``Use cases'' section. However, different behavior for such sections may be specified by the user in a preferences window for the edit operation.
 
@@ -815,33 +799,32 @@ The word processor has support for the specification of a generated table of con
 %
 \noindent
 \begin{center}
-\begin{picture}(350,100)(0,0)
+\begin{picture}(350,110)(0,0)
 \begin{scriptsize}
-\put(5,30){ \makebox(160,75){#1}}
-\put(5,30){ \epsfig{file=pics/eps/frameSmall.eps, height=70pt} }
-\put(180,30){ \makebox(160,75){#2}}
-\put(180,30){ \epsfig{file=pics/eps/frameSmall.eps, height=70pt} }
+\put(0,30){ \makebox(160,95){#1}}
+\put(-14,30){ \epsfig{file=pics/eps/frameSmall.eps, height=80pt} }
+\put(180,30){ \makebox(160,95){#2}}
+\put(180,30){ \epsfig{file=pics/eps/frameSmall.eps, height=80pt} }
 \end{scriptsize}
-\put(165,60){ $\Rightarrow$}
+\put(166,66){ $\Rightarrow$}
 \put(96,0) { \makebox(150,30){#3}}
 \end{picture}
 \end{center}
 }
 
-
 \editScreenshotTrnsFrSmall{
 \begin{tiny}
-\begin{tabular}[t]{p{5.2cm}}
+\begin{tabular}[t]{p{6.2cm}}
 \\ [3ex]
 {\small Contents}\\
-\vspace{0.001cm}
+\vspace{0.0004cm}
 ~~~1~~Editing~structured~documents\\
 ~~~2~~\framebox{$\!$U$\!$}se cases\\
 ~~~3~~Functional requirements\\
 \vspace{0.3cm}
 {\small 2~~Use cases}\\
 \vspace{0.001cm}
-\parbox{5.2cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the defini- ~~~~~~~~~~~~~~~~~\strut
+\parbox{5.7cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use 
 }
 \end{tabular}
 \end{tiny}
@@ -850,19 +833,18 @@ The word processor has support for the specification of a generated table of con
 \begin{tabular}[t]{p{5.2cm}}
 \\ [3ex]
 {\small Contents}\\
-\vspace{0.001cm}
+\vspace{0.0004cm}
 ~~~1~~Editing~structured~documents\\
 ~~~2~~The u\vline se cases\\
 ~~~3~~Functional requirements\\
 \vspace{0.3cm}
 {\small 2~~The use cases}\\
 \vspace{0.001cm}
-\parbox{5.2cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the defini- ~~~~~~~~~~~~~~~~~\strut
+\parbox{5.7cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use 
 }
 \end{tabular}
 \end{tiny}
 }{\small enter ``\p{The\spc u}''}
-% In final picture maybe use Lambert's idea instead of dots? (3 different blocks, each with zigzag ends)
 
 The screenshot shows a document with a table of contents. The second entry in the table of contents is edited by entering the text ``The u'' over the selected letter `U' at the beginning of the title. The result is that the title in the table of contents as well as the title in the section is updated.
 
@@ -874,15 +856,15 @@ Besides textual edit operations, it is also possible to perform structural edit 
 \newcommand{\editScreenshotTrnsFr}[3]{%
 %
 \begin{center}
-\begin{picture}(340,135)(0,0)
+\begin{picture}(383,148)(0,0)
 \begin{scriptsize}
-\put(2,30){ \makebox(160,105){#1}}
-\put(2,30){ \epsfig{file=pics/eps/frame.eps, height=105pt} }
-\put(180,30){ \makebox(160,105){#2}}
-\put(180,30){ \epsfig{file=pics/eps/frame.eps, height=105pt} }
+\put(-5,34){ \makebox(170,110){#1}}
+\put(0,30){ \epsfig{file=pics/eps/frame.eps, height=118pt} }
+\put(193,34.6){ \makebox(170,110){#2}}
+\put(200,30){ \epsfig{file=pics/eps/frame.eps, height=118pt} }
 \end{scriptsize}
-\put(165,80){ $\Rightarrow$}
-\put(96,0) { \makebox(150,30){#3}}
+\put(183,85){ $\Rightarrow$}
+\put(0,0) { \makebox(383,30){\centering #3}}
 \end{picture}
 \end{center}
 }
@@ -890,48 +872,39 @@ Besides textual edit operations, it is also possible to perform structural edit 
 \editScreenshotTrnsFr{
 \begin{tiny}
 \begin{tabular}[t]{p{5.2cm}}
-\\[0mm]
 {\small Contents}\\
-\vspace{0.001cm}
-~~$\!\,$\framebox{1~~Editing~structured~documents}\\
+\vspace*{0.00cm}~~\hspace{1.3pt}\framebox{1~~Editing~structured~documents}\\
 ~~~2~~Use cases \\
 ~~~3~~Functional requirements\\
-\vspace{0.2cm}
+\vspace{0.15cm}
 {\small 1~~Editing~structured~documents}\\
-\vspace{0.001cm}
-\parbox{5.2cm}{
-While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or the ubiquitous Microsoft Notepad, we will use the 
- ~~~~~~~~~~~~~~~~~\strut
-}\\
-\vspace{0.07cm}
+\vspace{0.0004cm}
+\parbox{5.7cm}{
+While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or the \linebreak }\\
+\vspace{-\baselineskip}\vspace{0.50cm}
 {\small 2~~Use cases}\\
 \vspace{0.001cm}
-\parbox{5.2cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the defini- ~~~~~~~~~~~~~~~~~\strut 
-}
+\parbox{5.7cm}{In this section, we present five use cases of possible applications for a generic structure editor. The use}
 \end{tabular}
 \end{tiny}
 }{
 \begin{tiny}
 \begin{tabular}[t]{p{5.2cm}}
-\\[0mm]
 {\small Contents}\\
 \vspace*{0.034cm}
 ~~~ 1~~Use cases\\
-~~~$\!\,$\framebox{2~~Editing~structured~documents}\\
+~~~\hspace{1pt}\framebox{2~~Editing~structured~documents}\\
 ~~~ 3~~Functional requirements\\
-\vspace{0.2cm}
+\vspace{0.15cm}
 {\small 1~~Use cases}\\
 \vspace{0.001cm}
-\parbox{5.2cm}{
-In this section, we present five use cases of possible applications for a generic structure editor. The use cases will shed more light on the defini- ~~~~~~~~~~~~~~~~~\strut 
-}\\
-\vspace{0.07cm}
+\parbox{5.7cm}{
+In this section, we present five use cases of possible applications for a generic structure editor. The use}\\
+\vspace{0.45cm}
 {\small 2~~Editing~structured~documents}\\
 \vspace{0.001cm}
-\parbox{5.2cm}{
-While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or the ubiquitous Microsoft Notepad, we will use the 
- ~~~~~~~~~~~~~~~~~\strut
-}
+\parbox{5.7cm}{
+While the term {\em editor} is usually only associated with plain-text editors such as Emacs~\cite{stallman81emacs} or the \linebreak\vspace{-\baselineskip}}
 \end{tabular}
 \end{tiny}
 }{\small move section entry}
@@ -963,7 +936,7 @@ Because mathematical formulas have a high degree of structure, a mathematical eq
 \begin{center}
 \begin{picture}(200,90)(0,0)
 \begin{scriptsize}
-\put(-2,30){ \epsfig{file=pics/eps/EqEdWin.eps, height=60pt}}
+\put(-6,30){ \epsfig{file=pics/eps/EqEdWin.eps, height=63pt}}
 \put(5,25){ \makebox(190,50){#1}}
 \end{scriptsize}
 \put(0,0) { \makebox(190,30){#2}}
@@ -978,7 +951,6 @@ U(\vec{x}_1,\vec{x}_2,t) =
 \left( \frac{\nabla^2_1R(\vec{x}_1,\vec{x}_2,t)}{2m_1} +
  \frac{ \nabla^2_{2}\vline}{2m_2} \right)
 \end{displaymath}}
-% \nabla^2_2R(\vec{x}_1,\vec{x}_2,t)
 }{\normalsize \sf The equation editor.}
 
 
@@ -992,8 +964,7 @@ Although such a rather restricted edit model is common even in the current gener
 
 Direct manipulation of parts of the formula is supported on a structural level. A proper subtree of the formula can be dragged to a different location.
 
-%%\definecolor{gray}{gray}{.6}
-\newcommand{\textcolor}[1]{#1}
+\definecolor{gray}{gray}{.6}
 \editStepScrshot
 {$ \frac{(x-1)\times{ \framebox{\scriptsize $(x+1)$}}}{y + \textcolor{gray}{\{\tt Exp\}}}    $}
 {\begin{normalsize}$ \frac{(x-1)\times{\textcolor{gray}{\{\tt Exp\}}} }{y + \framebox{\scriptsize $x+1$}}{\vrule height1.8ex width-2.5pt depth1.99ex} $ \end{normalsize}}
@@ -1046,18 +1017,9 @@ Because parts of an expression may be missing during its construction,  the edit
 
 An outline view, or tree browser, is a hierarchical view on tree structures. It is found in the Java Swing GUI library and also forms the main navigation tool in Microsoft's Windows Explorer application. 
 
-%\screenshot{$\langle$tree browser in an integrated development environment$\rangle$}{Tree-browser view}
-
 Some editors, especially XML editors, provide tree-browser views on the document, but in almost all editors, the view is hard-coded. If an editor is sufficiently powerful to express a tree-browser view without resorting to a primitive tree-browser widget, this offers many possibilities for integrating the tree view with other views on the document. 
 
 Tree views are useful for giving an overview of large structures, such as a program source that consists of a number of different modules. By combining a tree presentation with a source editor, we can support the kind of project management that is found in integrated development environments, such as JBuilder or Eclipse~\cite{eclipse2001}. 
-
-%\begin{center}
-%\epsfig{file=pics/eps/TreebrowserIntegrated.eps, height=4.5cm}\\ [2mm]
-%??Tree-browser view
-%\end{center}
-
-%\editScreenshotTrns{$\langle$module structure + Haskell Editor$\rangle$}{$\langle$selected name has focus in %Haskell editor$\rangle$}{click on function name}
 
 \begin{center}
 \epsfig{file=pics/eps/TreebrowserWindow.eps, height=4.5cm}\\ [3mm]
@@ -1082,8 +1044,6 @@ The tree browser supports drag and drop edit behavior that allows nodes in the t
 \hspace{\stretch{1}}\nopagebreak[4] \nopagebreak[4] \\ [3mm]
 {\small move ``{\tt citrus}'' node}
 \end{center}
-
-%\editScreenshotTrns{$\langle$tree$\rangle$}{$\langle$rearranged tree$\rangle$}{drag tree node}
 
 The screenshot shows the effect of dragging the node with label ``{\tt citrus}'' to a new position immediately below ``{\tt fruit}''. The operation results in a structural document change in which the element with presentation ``{\tt citrus}'' becomes the first child of the element that has presentation ``{\tt fruit}''.
 
@@ -1178,43 +1138,6 @@ In most presentations, the structure of the presentation depends on the document
 {\small increase number of jobs}
 \end{center}
 
-%\editScreenshotTrns{
-%\begin{tiny}
-%\begin{tabular}[t]{l@{\:\:}l@{\:\:}l@{\:\:}l}
-%Income\\
-%Nr. of jobs & \framebox(19,6){\hfill 2}\\
-%\\
-%Job nr. & Description & Salary & Tax withheld\\
-%1 & \framebox(40,6){PhD student}		& \framebox(19,6){\hfill 10} &\framebox(19,6){\hfill 2}\\
-%2 & \framebox(40,6){Programmer}		& \framebox(19,6){\hfill 20} &\framebox(19,6){\hfill 5}\\
-%Total income: & 30\\
-%Tax paid: & 7\\ 
-%\\
-%Interest:&\framebox(19,6){\hfill 2}\\
-%\\
-%Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
-%\end{tabular}
-%\end{tiny}
-%}{
-%\begin{tiny}
-%\begin{tabular}[t]{l@{\:\:}l@{\:\:}l@{\:\:}l}
-%Income\\
-%Nr. of jobs & \framebox(19,6){\hfill 3}\\
-%\\
-%Job nr. & Description & Salary & Tax withheld\\
-%1 & \framebox(40,6){PhD student}		& \framebox(19,6){\hfill 10} &\framebox(19,6){\hfill 2}\\
-%2 & \framebox(40,6){Programmer}		& \framebox(19,6){\hfill 20} &\framebox(19,6){\hfill 5}\\
-%3 & \framebox(40,6){}				& \framebox(19,6){\hfill 0} &\framebox(19,6){\hfill 0}\\
-%Total income: & 30\\
-%Tax paid: & 7\\ 
-%\\
-%Interest:&\framebox(19,6){\hfill 2}\\
-%\\
-%Tax due:& \multicolumn{3}{l}{35\% of income - paid = {\bf 3.5}}
-%\end{tabular}
-%\end{tiny}
-%}{increase number of jobs}
-
 The number of input fields for job information depends on the number of jobs. When the number is increased, the structure of the input form changes accordingly, showing an extra line of input fields. Decreasing the number hides the corresponding input fields, but after a subsequent increase, the fields reappear containing their previous values.
 
 \head{The tax-man view} 
@@ -1225,29 +1148,6 @@ A different presentation of the tax form allows a user to design the form by edi
 \epsfig{file=pics/eps/TaxMan.eps, height=5.25cm}\\ [3mm]  %4.9 is same size as 2->3 scrshot
 {\normalsize \sf The tax form for the tax man.}
 \end{center}
-%\screenshot{
-%\begin{tiny}
-%\begin{tabular}[t]{l@{}|l@{}|l@{}|l}
-%\framebox{Income}\\
-%\framebox{Nr. of jobs} & c1: special \framebox{jobs.length}\\
-%\\
-%\framebox{Job nr.} & \framebox {Description} & \framebox{Salary} & \framebox{Tax withheld}\\
-%LIST: jobs\\
-%derived \framebox {index} & cs1: input & cs2: input & cs3: input \\
-%derived:  1 & cs1[0]: input \framebox{PhD student}		& cs2[0]: input \framebox{10}& cs3[0]: input %\framebox{2}\\
-%derived: 2 & cs1[1]: input \framebox{Programmer}	& cs2[1]: input \framebox{20}& cs3[1]: input \framebox{5}\\
-%\framebox{Total income:} & c2: derived \framebox{sum cs1} {\em 30}\\
-%\framebox{Tax paid:} & c3: derived \framebox{sum cs2} {\em 7}\\ 
-%\\
-%\framebox{Interest:}& c4: input \framebox{2}\\
-%\\
-%\framebox{Tax due:}& \multicolumn{3}{l}{
-%\framebox{35\% of income - paid = }
-% \vline\ c5: derived \framebox{0.35*(c2+c4)-c3} {\bf \em 3.5}
-%}\\
-%\end{tabular}
-%\end{tiny}
-%}{Tax form for the tax man}
 
 The screenshot gives an impression of a presentation in which the tax-form structure and layout are editable. The tax-form document is the same as for the first screenshot. Text blocks, as well as input fields and derived value fields can be inserted or deleted, and the computations for the derived values (``{\tt .ix+1}'', ``{\tt sum jobs.ss}'', ``{\tt sum jobs.ts}'', and ``{\tt 0.35*in-tax}'') can be modified. \bc The labels (c1 \dots c5, and cs1 \dots cs3) are supplied automatically, but may also be changed. \ec The input values of the input fields are still editable to allow for easy testing of the specified computations. 
 
