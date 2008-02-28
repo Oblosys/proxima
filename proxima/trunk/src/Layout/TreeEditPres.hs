@@ -42,7 +42,7 @@ deleteTree focus pres =
   let orderedFocus@(FocusP (PathP _ sti) _) = orderFocusP focus
       pth'   = deleteTreePresF True [] [] orderedFocus pres
       focus' = FocusP (PathP pth' sti) (PathP pth' sti)
-  in  debug Prs ("delfocus"++show focus') (deleteTreePres True [] orderedFocus pres, focus')
+  in  (deleteTreePres True [] orderedFocus pres, focus')
 
 
 
@@ -264,7 +264,12 @@ deleteTreePres editable p focus          (WithP ar pres)    = WithP ar (deleteTr
 deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id (deleteTreePres False (p++[0]) focus pres)
 deleteTreePres editable p focus          (ParsingP id l pres)  = ParsingP id l (deleteTreePres True (p++[0]) focus pres)
 deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
---deleteTreePres editable p focus          (GraphP id d w h es pres) = GraphP id d w h es (deleteTreePres editable (p++[0]) focus pres)
+deleteTreePres editable p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
+  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ take (length p) focusPath 
+                     -- we only take into account the from path
+      (left, editedVertex: right) = splitAt editedVertexNr press
+      editedVertex' = deleteTreePres editable (p++[editedVertexNr]) focus editedVertex
+  in  GraphP id d w h es (left ++ editedVertex' : right)
 deleteTreePres editable p focus          (VertexP id vid x y ol pres) = VertexP id vid x y ol (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p (FocusP st en) (FormatterP id press) = let press' = deleteTreeRow editable p 0 (FocusP st en) press
                                                      in  FormatterP id press'
@@ -376,6 +381,10 @@ deleteTreePresF editable updp p focus          (WithP ar pres)    = deleteTreePr
 deleteTreePresF editable updp p focus          (StructuralP id pres)  = deleteTreePresF False (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (ParsingP id l pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (LocatorP l pres)  = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
+deleteTreePresF editable updp p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
+  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ take (length p) focusPath 
+  in  deleteTreePresF editable  (updp++[editedVertexNr]) (p++[editedVertexNr]) focus (press!!editedVertexNr)
+deleteTreePresF editable updp p focus          (VertexP _ _ _ _ _ pres) = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p (FocusP st en) (FormatterP id press) = deleteTreeRowF editable updp p 0 (FocusP st en) press
 deleteTreePresF editable updp p f pr = debug Err ("TreeEditPres.deleteTreePresF: can't handle "++show f++" "++ show pr) []
 
