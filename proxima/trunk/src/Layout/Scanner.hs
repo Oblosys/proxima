@@ -34,6 +34,8 @@ passing several Alex scanners (probably solved by Alex itself)
 
 focus for parse errors?
 
+what to do with columns and formatters containing tokens?
+
 recover locators for parsing presentations
 
 if formatters have linebreak whitespace, layouter will probably go wrong.

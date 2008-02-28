@@ -135,12 +135,12 @@ detokenize' wm t (LocatorP l pres)          = [(LocatorP l pres', prependToFocus
 -- graph and vertex are not assumed to be in parsing presentations
 detokenize' wm t pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ show pr) [(castPresToLay pr, noFocus)]
 
-{-
 
-detokenizeList' wm t i []           = ([], noFocus)
+{-
+detokenizeList' wm t i []           = []
 detokenizeList' wm t i (pres:press) = let (press',  f1) = detokenize' wm  t pres 
                                           (presss', f2) = detokenizeList' wm t (i+length press') press
-                                      in  debug Lay ("detokList "++show i)  (press' ++ presss', combineFocus f1 f2)
+                                      in  (press' ++ presss', combineFocus f1 f2)
 -}
 
 -- recursive rows cause problems. we cannot add to the path for every row (only the topmost), but if deeper rows
