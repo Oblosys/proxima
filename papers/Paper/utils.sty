@@ -1,8 +1,14 @@
-\let\bc=\iffalse % start block comment
-\let\ec=\fi        % end block comment
+%% block comments
+%\usepackage{version}
+%\usepackage{comment}
 
+% start block comment
+\let\bc=\iffalse
 
-%% Minder royale itemize
+% end block comment
+\let\ec=\fi         
+
+%% itize & enumate: Compacte itemize en enumerate
 
 \newenvironment{itize}{%
 \begin{list}{$\bullet$}{
@@ -12,6 +18,7 @@
 \itemsep = 0pt
 }}{\end{list}}
 \newcounter{enumctr}
+
 \newenvironment{enumate}{%
 \begin{list}{\arabic{enumctr}}{
 \usecounter{enumctr}
@@ -22,7 +29,13 @@
 }}{\end{list}}
 
 
-%% Easy lists %%
+%% Lichte syntax voor lists
+% 
+% 
+% \bl
+% \o list item 1
+% \o list item 2
+% \el
 
 % first save the old \o in an sbox and call it \slasho
 \newsavebox{\slashobox}
@@ -33,14 +46,62 @@
 \sbox{\bfslashobox}{\bf \o}
 \newcommand{\bfslasho}{\usebox{\bfslashobox}}
 
+\renewcommand{\o}{\item}
+
 \newcommand{\bl}[0]{\begin{itize}}
 \renewcommand{\o}[0]{\item}
 \newcommand{\el}[0]{\end{itize}}
 
 
-% kopje met skip ervoor en geen pagebreak erna
-\newcommand{\head}[1]{\bigskip{\sffamily\bfseries #1}\nopagebreak[4]}
+%% \gray: shorthand for \textcolor{gray}
+\newcommand{\gray}[1]{\textcolor{gray}{#1}}
 
-% commands to fiddle with pagelength, for getting rid of orphans
+
+%% \pre: shorthand for \texttt    (pre from HTML's <PRE>)
+\newcommand{\pre}[1]{\texttt{#1}}
+
+\newcommand{\todo}[1]{%
+%\error                uncomment to make sure there are no todos left
+\textcolor{blue}{\mbox{$^\ast$}}\marginpar{\raggedright
+\hspace{0pt}\sffamily\tiny{\sc \textcolor{blue}{todo:}}\\ \textcolor{blue}{#1}}}
+
+
+
+%% \pgffigure: create a pgf figure
+% parameters: {caption}{label}{filename}{width in pixels}{height in pixels}
+
+% pgf documentation:
+% http://mirror.aarnet.edu.au/pub/CTAN/graphics/pgf/pgfuserguide.pdf
+
+\newlength{\pixelsize}
+\setlength{\pixelsize}{0.017cm}
+
+\newcommand{\pgffigure}[5]{%
+\begin{figure}
+\begin{center}
+\begin{center}
+\begin{pgfpicture}{0cm}{0cm}{#4\pixelsize}{#5\pixelsize}
+\pgfputat{\pgfxy(0,0)}{\pgfbox[left,base]{\pgfimage[interpolate=true,height=#5\pixelsize]{#3}}}
+\end{pgfpicture}
+\end{center}\caption{#1}\label{#2} 
+\end{center}
+\end{figure}}
+
+\newcommand{\pgffigureWide}[5]{%
+\begin{figure*}
+\begin{center}
+\begin{center}
+\begin{pgfpicture}{0cm}{0cm}{#4\pixelsize}{#5\pixelsize}
+\pgfputat{\pgfxy(0,0)}{\pgfbox[left,base]{\pgfimage[interpolate=true,height=#5\pixelsize]{#3}}}
+\end{pgfpicture}
+\end{center}\caption{#1}\label{#2} 
+\end{center}
+\end{figure*}}
+
+%% kopje met skip ervoor en geen pagebreak erna
+\newcommand{\head}[1]{\bigskip\noindent{\sffamily\bfseries #1}\nopagebreak[4]}
+
+
+%% commands to fiddle with pagelength, for getting rid of orphans
 \newcommand{\finallongpage}{\enlargethispage{\baselineskip}}
 \newcommand{\finalshortpage}{\enlargethispage{-\baselineskip}}
