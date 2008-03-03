@@ -7,6 +7,7 @@
 \usepackage{utils}
 \usepackage{requirements}
 \usepackage{epsfig}
+\usepackage{pgf}
 \usepackage{color}
 
 % The following is enclosed to allow easy detection of differences in
@@ -33,7 +34,7 @@
 \runningheads{M.M. Schrage et al}{Editing structured documents: Requirements} 
 
 \begin{document}
-\SPE{0}{0}{0}{0}{2005} 
+\SPE{0}{0}{0}{0}{2008} 
 
 
   \title{Editing structured documents\\ Part I: requirements} 
@@ -79,8 +80,14 @@ There is a choice between using an expensive custom-made editor for a particular
 
 In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
 
+The Proxima prototype is currently used to implement an editor for documenting Bayesian networks \ref{}. 
+network has different parts. doc about parts. changes in network changes in according parts. unfeasible.
 
-Meer over Proxima
+\pgffigure{A documentation editor for Bayesian networks.}{fig:bayesDocEditor} 
+          {pics/Screenshots/BayesDocEditor}{829}{603}
+
+Editor has network and several views that are consistent (both editable). Text may refer to nodes in the network. Inconsistencies are shown.
+
 
 
 This paper is organized as follows. Section \ref{preliminaries} discusses the basic concepts that play a role in editing structured documents. Section \ref{usecases} presents five use cases of possible applications for a generic structure editor. From these use cases we formulate a set of functional requirements for a flexible non-restrictive structure editor in Section~\ref{sect:reqs}. Existing editors are evaluated according to these requirements in sections~\ref{sect:editorOverview} and~\ref{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how Proxima, a generic structure editor developed at Utrecht University, meets the requirements and thus will be able to implement all of the use cases. Section \ref{conclusions} concludes.
@@ -590,11 +597,9 @@ let y=2; \framebox{x=1\strut} in x+y    \\ [1mm]
 }
 \hspace{\stretch{1}}\nopagebreak[4]\\ [2mm]
 \begin{small}
-\parbox{125mm}{
-{\small \hspace*{0.13cm}\hspace*{3.47cm} cut \hspace{1.3cm} move focus  \hspace{1.20cm} paste}}
+\parbox{\textwidth}{
+{\hspace*{3.75cm} cut \hspace{1.79cm} move focus  \hspace{1.8cm} paste}}
 \end{small}\end{center}
-
-\todo{check labels}
 
 When the declaration is pasted, a semicolon is automatically placed in front of it. The whitespace from the semicolon is copied from the whitespace of the other semicolons in the presentation (or may come from a pretty-printing algorithm). If the list has an irregular layout (e.g.\ \verb|[1,  2,    3, 4]|), the layout after the paste operation may not be what is expected. However, since list structures are usually layed out in a regular way, this need not be a problem.
 
@@ -1421,8 +1426,14 @@ The presentation formalism in Thot, called P, is a powerful graphical presentati
 
 Thot editors are of a syntax-directed nature. Multiple views on the document may be edited simultaneously, and user-specified transformations are supported. However, free text editing can only be done in a separate window in a different mode. Also, no computations are supported other than some basic counters in the presentation. 
 
-%\head{Eclipse}
-%
+\head{Eclipse}
+
+eclipse is not a generic editor, but an environment. however source editors can be created with it.
+how this is done. syntax recognizing.
+disadvantages
+new editor is hard (check)
+no textual is hard
+
 %\cite{eclipse2001}
 % IDE, also editor Program editor.
 %veel programmeerwerk.
@@ -1434,6 +1445,7 @@ Thot editors are of a syntax-directed nature. Multiple views on the document may
 The Microsoft Visual Studio environment includes an integrated source editor. Although the editor does not contain any novel features, and thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
 
 The Visual Studio editor is of the syntax-recognizing kind with colored-text presentations. No document-oriented edit functionality is supported, other than performing semantic analysis and displaying the results. These results are displayed by marking a location in the source with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and displaying a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically correct, the editor provides a surprisingly usable environment. 
+
 
 \bc
 \toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
