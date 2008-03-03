@@ -165,7 +165,9 @@ also in defs
 
 The presentation relation for an editor may be (partially) specified in a style sheet, or {\em presentation sheet}. A presentation sheet describes how elements of the document type are to be presented, and is a parameter of the presentation process. By modifying the sheet, a user may influence the appearance of the document without having to modify the editor itself. A presentation sheet can be regarded as a parameter to the interpretation process as well, since the interpretation depends on the presentation specified in the sheet. Examples of style-sheet formalisms are the Cascading Style Sheets (CSS)~\cite{css2} for HTML as well as XML, and the Extensible Stylesheet Language (XSL)~\cite{xsl10} for XML.
 
-Generally speaking, editing consists of repeated interactive cycles of presenting and interpreting. The editor shows a presentation of the document together with the current focus to the user. The user then provides the editor with an {\em edit gesture}, such as a key press or a mouse movement, which is interpreted as an update on the document. The document is then re-presented and shown to the user. The process is repeated until the user quits the editor. We provide a more formal description of the editing process in \cite{proximaformal}.
+Generally speaking, editing consists of repeated interactive cycles of presenting and interpreting. The editor shows a presentation of the document together with the current focus to the user. The user then provides the editor with an {\em edit gesture}, such as a key press or a mouse movement, which is interpreted as an update on the document. The document is then re-presented and shown to the user. The process is repeated until the user quits the editor. We provide a more formal description of the editing process in\todo{No we don't.}
+
+
 
 \head{Document-oriented versus presentation-oriented editing}
 
@@ -592,6 +594,7 @@ let y=2; \framebox{x=1\strut} in x+y    \\ [1mm]
 {\small \hspace*{0.13cm}\hspace*{3.47cm} cut \hspace{1.3cm} move focus  \hspace{1.20cm} paste}}
 \end{small}\end{center}
 
+\todo{check labels}
 
 When the declaration is pasted, a semicolon is automatically placed in front of it. The whitespace from the semicolon is copied from the whitespace of the other semicolons in the presentation (or may come from a pretty-printing algorithm). If the list has an irregular layout (e.g.\ \verb|[1,  2,    3, 4]|), the layout after the paste operation may not be what is expected. However, since list structures are usually layed out in a regular way, this need not be a problem.
 
@@ -1591,7 +1594,7 @@ Summarizing, the current and previous generations of structure editors are not p
 
 \section{The Proxima editor}\label{sect:proxEditor}
 
-Proxima~\cite{prximaarch} will be able to handle all five use cases from Section~\ref{usecases}. It is designed according to the requirements from Section~\ref{sect:reqs}.
+Proxima~\cite{proximaarch} will be able to handle all five use cases from Section~\ref{usecases}. It is designed according to the requirements from Section~\ref{sect:reqs}.
 
 The editor uses an attribute-grammar formalism for performing semantic analysis, as well as for specifying derived structures and values, which may appear in the presentation. The presentation formalism supports graphical presentations and a box layout model with alignment, strong enough to specify presentations of mathematical equations. Furthermore, edit operations may be targeted at both presentation and document level, as well as at derived structures, without mode switching.
 
