@@ -1,4 +1,7 @@
 \usepackage{ifpdf}
+\usepackage{pgf}
+\usepackage{color}
+
 %% block comments
 %\usepackage{version}
 %\usepackage{comment}
@@ -73,6 +76,9 @@
 
 % pgf documentation:
 % http://mirror.aarnet.edu.au/pub/CTAN/graphics/pgf/pgfuserguide.pdf
+
+% Because pgf cannot process png files anymore in dvi mode (neither can includegraphics),
+% the image is not loaded when in dvi mode.
 
 \newlength{\pixelsize}
 \setlength{\pixelsize}{0.017cm}
