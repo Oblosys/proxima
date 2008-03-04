@@ -3,12 +3,9 @@
 
 \documentclass{speauth} 
 
-\usepackage{graphicx}
 \usepackage{utils}
 \usepackage{requirements}
 \usepackage{epsfig}
-\usepackage{pgf}
-\usepackage{color}
 
 % The following is enclosed to allow easy detection of differences in
 % ascii coding.
@@ -80,11 +77,17 @@ There is a choice between using an expensive custom-made editor for a particular
 
 In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
 
-The Proxima prototype is currently used to implement an editor for documenting Bayesian networks \ref{}. 
+The Proxima prototype is currently used to implement an editor for documenting Bayesian networks~\cite{Jensen2001BayesianNetworks}. 
 network has different parts. doc about parts. changes in network changes in according parts. unfeasible.
 
+
+
 \pgffigure{A documentation editor for Bayesian networks.}{fig:bayesDocEditor} 
-          {pics/Screenshots/BayesDocEditor}{829}{603}
+          {pics/Screenshots/BayesDocEditor.png}{829}{603}
+
+
+
+
 
 Editor has network and several views that are consistent (both editable). Text may refer to nodes in the network. Inconsistencies are shown.
 
