@@ -1,3 +1,4 @@
+\usepackage{ifpdf}
 %% block comments
 %\usepackage{version}
 %\usepackage{comment}
@@ -81,7 +82,12 @@
 \begin{center}
 \begin{center}
 \begin{pgfpicture}{0cm}{0cm}{#4\pixelsize}{#5\pixelsize}
+\ifpdf
 \pgfputat{\pgfxy(0,0)}{\pgfbox[left,base]{\pgfimage[interpolate=true,height=#5\pixelsize]{#3}}}
+\else
+\pgfrect[stroke]{\pgfpoint{0cm}{0cm}}{\pgfpoint{#4\pixelsize}{#5\pixelsize}}
+\pgfputat{\pgfxy(0.01cm,0.01cm)}{\pgfbox[left,bottom]{#3}}
+\fi
 \end{pgfpicture}
 \end{center}\caption{#1}\label{#2} 
 \end{center}
@@ -92,7 +98,11 @@
 \begin{center}
 \begin{center}
 \begin{pgfpicture}{0cm}{0cm}{#4\pixelsize}{#5\pixelsize}
+\ifpdf
 \pgfputat{\pgfxy(0,0)}{\pgfbox[left,base]{\pgfimage[interpolate=true,height=#5\pixelsize]{#3}}}
+\else
+\pgfrect[stroke]{\pgfpoint{0cm}{0cm}}{\pgfpoint{#4\pixelsize}{#5\pixelsize}}
+\pgfputat{\pgfxy(0.01cm,0.01cm)}{\pgfbox[left,bottom]{#3}}
 \end{pgfpicture}
 \end{center}\caption{#1}\label{#2} 
 \end{center}
