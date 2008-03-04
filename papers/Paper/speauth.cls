@@ -133,7 +133,7 @@
 {\footnotesize\it Softw. Pract. Exper.\ }\footnotesize #5; {\bf#3}:\ifnum #1 = #2 #2 \else #1--#2\fi\ %
 \hfill\scriptsize\textit{Prepared using \textsf{speauth.cls} [Version: \update]}\\[3pt]
 \rule{21pc}{0.5pt}\\
-\hspace*{24.5pc}\raisebox{-49pt}{\smash{\resizebox{9.5pc}{!}{\includegraphics{spelogol}}}}
+\hspace*{24.5pc}\raisebox{-49pt}{\smash{\resizebox{9.5pc}{!}{\includegraphics{spelogol.eps}}}}
 }}
 \setcounter{page}{#1}
 \newcounter{pageone}
@@ -180,10 +180,10 @@
 \let\@mkboth\@gobbletwo
 \def\@evenhead{\parbox[t]{\textwidth}{\normalsize%
 \thepage\hspace*{1.5pc}\footnotesize{\leftmark}\hfill%
-\smash{\raisebox{-10.5pt}{\resizebox{3pc}{!}{\includegraphics*{spelogos}}}}\\[12pt]
+\smash{\raisebox{-10.5pt}{\resizebox{3pc}{!}{\includegraphics*{spelogos.eps}}}}\\[12pt]
 \rule{\textwidth}{0.5pt}}}
 \def\@oddhead{\parbox[t]{\textwidth}{\normalsize{\hspace{0pt}}%
-\smash{\raisebox{-10.5pt}{\resizebox{3pc}{!}{\includegraphics*{spelogos}}}}%
+\smash{\raisebox{-10.5pt}{\resizebox{3pc}{!}{\includegraphics*{spelogos.eps}}}}%
 \hfill\footnotesize{\rightmark}\hspace*{1.5pc}\normalsize\thepage\footnotesize\\[12pt]
 \rule{\textwidth}{0.5pt}}}
 \def\@evenfoot{\parbox[t]{\textwidth}{\rule{\textwidth}{0.5pt}\\[13pt]
