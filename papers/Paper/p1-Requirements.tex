@@ -1,11 +1,10 @@
-%JJ: ref naar Amaya
-%JJ: Eclipse
 
 \documentclass{speauth} 
 
 \usepackage{utils}
 \usepackage{requirements}
 \usepackage{epsfig}
+
 
 % The following is enclosed to allow easy detection of differences in
 % ascii coding.
@@ -34,10 +33,11 @@
 \SPE{0}{0}{0}{0}{2008} 
 
 
-  \title{Editing structured documents\\ Part I: requirements} 
+  \title{Editing structured documents\\ Part I: requirements \\{\small \version}} 
   \longauthor{Martijn M. Schrage, Johan Jeuring, Lambert Meertens, Doaitse Swierstra}
   \address{Institute of Information and Computing Sciences\\ Utrecht University\\
     Utrecht, The Netherlands}     
+
 \begin{abstract} 
 Many software applications involve some form of editing: a user views a data structure and provides edit gestures in order to modify this data structure. Different kinds of documents require different ways of editing, and hence a multitude of editors exists, each having its own specific edit model and user-interface conventions. Nevertheless, the core edit behavior, whether performed in a word-processor or a spreadsheet, is largely similar: document fragments may be copied and pasted, and new parts of the document may be constructed by selecting from menus or entering text. 
 
@@ -48,7 +48,7 @@ Especially in the nineteen-eighties, many research projects on structure editing
 
 With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many XML document types are being developed, but support for editing documents of these types is still poor. 
 
-In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
+In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper \cite{proximaarch} we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
 \end{abstract}
 
 
@@ -67,8 +67,6 @@ In the years following, research interest in structure editing steadily declined
 
 In our opinion, the problem with most of these structure editors is that they either focus on editing the document structure, or the presentation (often just text).
 
-%Lambert: (maar welke structuur-editors focussen op de presentatie en niet op de structuur??)
-
 The document-oriented editors may have a powerful presentation mechanism, but poor editing support in the presentation, which results in a restrictive edit model. On the other hand,  purely presentation-oriented editors lack edit operations on the document, and have relatively weak presentation mechanisms.
 
 With the increasing popularity of the XML format for representing structured documents, the advantages of a powerful generic editor are becoming even more apparent. Many XML document types are being developed, but support for editing documents of these types is still poor. 
@@ -77,21 +75,19 @@ There is a choice between using an expensive custom-made editor for a particular
 
 In this paper we investigate the requirements for a generic editor that combines the advantages of structure editing and a powerful presentation formalism with a non-restrictive presentation-oriented edit model. The result of this research is a list of six basic requirements. In a companion paper we give the architecture of the presentation-oriented structure editor Proxima, an editor that satisfies  the requirements derived in this paper.
 
-The Proxima prototype is currently used to implement an editor for documenting Bayesian networks~\cite{Jensen2001BayesianNetworks}. 
-network has different parts. doc about parts. changes in network changes in according parts. unfeasible.
+\cbstart
 
+The Proxima prototype is currently being used to implement an editor for constructing and documenting Bayesian networks~\cite{Jensen2001BayesianNetworks}. Figure~\ref{fig:bayesDocEditor} shows a screenshot of this editor\todo{make a nice screenshot}. For the discussion here, it suffices to regard a Bayesian network as a directed acyclic graph that is documented by describing small parts of it in separate sections or subsections, accompanied by a picture of the corresponding part of the network. 
+
+Keeping the documentation consistent in a normal word processor using pictures of the network is problematic, since the same part of the network may be represented in several pictures scattered over the document. Moreover, when the network is changed, the corresponding documentation may need to be updated as well. This process turned out to be infeasable for a networks .
+
+The Proxima editor helps by providing several editable views on the network. At the top of the document is a view that contains the entire network. Subsequent sections contain subviews of this network. All views are editable and are kept consistent. Moreover, if the text refers to a non-existent node (e.g.\ \verb|\node{ceenter}|), this is signalled with a squiggly line. A future version of the editor will also issue warnings that text referring to part of the network must be checked after that part has been edited. The prototype editor is written in about 700 lines of mostly straightforward code.
 
 
 \pgffigure{A documentation editor for Bayesian networks.}{fig:bayesDocEditor} 
           {pics/Screenshots/BayesDocEditor.png}{829}{603}
 
-
-
-
-
-Editor has network and several views that are consistent (both editable). Text may refer to nodes in the network. Inconsistencies are shown.
-
-
+\cbend
 
 This paper is organized as follows. Section \ref{preliminaries} discusses the basic concepts that play a role in editing structured documents. Section \ref{usecases} presents five use cases of possible applications for a generic structure editor. From these use cases we formulate a set of functional requirements for a flexible non-restrictive structure editor in Section~\ref{sect:reqs}. Existing editors are evaluated according to these requirements in sections~\ref{sect:editorOverview} and~\ref{sect:discussion}, showing why none of these editors can handle all use cases. Finally, in Section~\ref{sect:proxEditor} we discuss how Proxima, a generic structure editor developed at Utrecht University, meets the requirements and thus will be able to implement all of the use cases. Section \ref{conclusions} concludes.
 
@@ -146,7 +142,7 @@ Obviously, word processors, image editors, and text editors are editors in this 
 
 \begin{center}
 
-~\hspace{1.7cm}\epsfig{file=pics/eps/editor.eps, width=10cm}
+~\hspace{1.7cm}\epsfig{file=pics/eps/editor, width=10cm}
 
 \end{center}\caption{Schematic representation of an editor.}\label{editor} 
 
@@ -175,8 +171,7 @@ also in defs
 
 The presentation relation for an editor may be (partially) specified in a style sheet, or {\em presentation sheet}. A presentation sheet describes how elements of the document type are to be presented, and is a parameter of the presentation process. By modifying the sheet, a user may influence the appearance of the document without having to modify the editor itself. A presentation sheet can be regarded as a parameter to the interpretation process as well, since the interpretation depends on the presentation specified in the sheet. Examples of style-sheet formalisms are the Cascading Style Sheets (CSS)~\cite{css2} for HTML as well as XML, and the Extensible Stylesheet Language (XSL)~\cite{xsl10} for XML.
 
-Generally speaking, editing consists of repeated interactive cycles of presenting and interpreting. The editor shows a presentation of the document together with the current focus to the user. The user then provides the editor with an {\em edit gesture}, such as a key press or a mouse movement, which is interpreted as an update on the document. The document is then re-presented and shown to the user. The process is repeated until the user quits the editor. We provide a more formal description of the editing process in\todo{No we don't.}
-
+Generally speaking, editing consists of repeated interactive cycles of presenting and interpreting. The editor shows a presentation of the document together with the current focus to the user. The user then provides the editor with an {\em edit gesture}, such as a key press or a mouse movement, which is interpreted as an update on the document. The document is then re-presented and shown to the user. The process is repeated until the user quits the editor.
 
 
 \head{Document-oriented versus presentation-oriented editing}
@@ -189,7 +184,7 @@ On the other hand, {\em presentation-oriented} editing consists of edit operatio
 
 $(1+2) \times (3+4)$. Deleting the middle part $(1+\framebox{$\,2) \times ($}\,3+4)$ yields $(1+3+4)$ and is a presentation-oriented edit operation that does not directly correspond to a logical operation on the document level. Another example is navigating downwards in a formatted paragraph of a word processor, since the concept of lines in a paragraph only exists at the presentation level. 
 
-We give a more thorough discussion of both document- and presentation-oriented  editing on different levels in \cite{proximaarch}. 
+We give a more thorough discussion of both document- and presentation-oriented  editing on different levels in~\cite{proximaarch}. 
 
 \head{Different kinds of editors}
 
@@ -269,7 +264,7 @@ Early syntax-directed editors show a textual presentation of the document (usual
 
 \begin{center}
 
-\epsfig{file=pics/eps/SynDirEditor.eps, width=3.5cm}
+\epsfig{file=pics/eps/SynDirEditor, width=3.5cm}
 
 \end{center}\caption{A syntax-directed editor.}\label{synDirEdit} 
 
@@ -303,7 +298,7 @@ At the other end of the spectrum are the {\em syntax-recognizing} structure edit
 
 \begin{center}
 
-\epsfig{file=pics/eps/SynRecEditor.eps, width=3.5cm}
+\epsfig{file=pics/eps/SynRecEditor, width=3.5cm}
 
 \end{center}\caption{A syntax-recognizing editor.}\label{synRecEdit} 
 
@@ -333,7 +328,7 @@ A {\em hybrid} editor supports structural as well as presentation-oriented edit 
 
 \begin{center}
 
-\epsfig{file=pics/eps/HybridEditor.eps, width=3.5cm}
+\epsfig{file=pics/eps/HybridEditor, width=3.5cm}
 
 \end{center}\caption{A hybrid editor.}\label{hybridEditor} 
 
@@ -399,9 +394,6 @@ TODO: change wordprocessor screenshot to actual paper chapter text
 Whitespace in use cases
 Layout/captions of screenshots
 
-Add Eclipse!
-
-Mention OpenDoc, Views? Not really structure editors.
 
 mention that instead of preventing syntax errors, continuous parsing with in-place error 
 info is a good model as well?
@@ -469,7 +461,7 @@ There exists evidence showing that syntax highlighting makes programs more reada
 %$\langle$Haskell listing with syntax coloring and type information$\rangle$
 %(also type decls) type info in layered menu? (see text below) 
 \begin{center}
-\epsfig{file=pics/eps/HaskellWindow.eps, height=4.5cm}\\ [3mm]
+\epsfig{file=pics/eps/HaskellWindow, height=4.5cm}\\ [3mm]
 {\sf The Haskell source editor.}
 \end{center}
 
@@ -695,7 +687,7 @@ This section describes a WYSIWYG document editor with a user interface similar t
 \begin{center}
 \begin{picture}(290,195)(0,0)
 \begin{scriptsize}
-\put(-2,30){ \epsfig{file=pics/eps/WordprocessorWindow.eps, height=6cm}}
+\put(-2,30){ \epsfig{file=pics/eps/WordprocessorWindow, height=6cm}}
 \put(0,146){ 
 \begin{tabular}[t]{p{9cm}}
 \hfill{\normalsize Proxima}\hfill~\\
@@ -714,8 +706,6 @@ This section describes a WYSIWYG document editor with a user interface similar t
 }\\
 \end{tabular}
 }
-%\put(1,33){ \epsfig{file=pics/eps/EqEdWin.eps, height=102.5pt}}
-%\put(1,33){ \epsfig{file=pics/screenshots/Wordprocessor.png.eps, height=102.5pt}}
 \end{scriptsize}
 \put(0,0){\makebox(290,30){\centering {#2}}}
 \end{picture}
@@ -723,7 +713,7 @@ This section describes a WYSIWYG document editor with a user interface similar t
 }
 
 
-\screenshotWin{%\epsfig{file=pics/Screenshots/Wordprocessor.png.eps, height=6cm}
+\screenshotWin{
 }{\normalsize \sf The word processor.}
 %$\langle$Word-processor document with table of contents, citations, etc.$\rangle$
 
@@ -813,9 +803,9 @@ The word processor has support for the specification of a generated table of con
 \begin{picture}(350,110)(0,0)
 \begin{scriptsize}
 \put(0,30){ \makebox(160,95){#1}}
-\put(-14,30){ \epsfig{file=pics/eps/frameSmall.eps, height=80pt} }
+\put(-14,30){ \epsfig{file=pics/eps/frameSmall, height=80pt} }
 \put(180,30){ \makebox(160,95){#2}}
-\put(180,30){ \epsfig{file=pics/eps/frameSmall.eps, height=80pt} }
+\put(180,30){ \epsfig{file=pics/eps/frameSmall, height=80pt} }
 \end{scriptsize}
 \put(166,66){ $\Rightarrow$}
 \put(96,0) { \makebox(150,30){#3}}
@@ -870,9 +860,9 @@ Besides textual edit operations, it is also possible to perform structural edit 
 \begin{picture}(383,148)(0,0)
 \begin{scriptsize}
 \put(-5,34){ \makebox(170,110){#1}}
-\put(0,30){ \epsfig{file=pics/eps/frame.eps, height=118pt} }
+\put(0,30){ \epsfig{file=pics/eps/frame, height=118pt} }
 \put(193,34.6){ \makebox(170,110){#2}}
-\put(200,30){ \epsfig{file=pics/eps/frame.eps, height=118pt} }
+\put(200,30){ \epsfig{file=pics/eps/frame, height=118pt} }
 \end{scriptsize}
 \put(183,85){ $\Rightarrow$}
 \put(0,0) { \makebox(383,30){\centering #3}}
@@ -947,7 +937,7 @@ Because mathematical formulas have a high degree of structure, a mathematical eq
 \begin{center}
 \begin{picture}(200,90)(0,0)
 \begin{scriptsize}
-\put(-6,30){ \epsfig{file=pics/eps/EqEdWin.eps, height=63pt}}
+\put(-6,30){ \epsfig{file=pics/eps/EqEdWin, height=63pt}}
 \put(5,25){ \makebox(190,50){#1}}
 \end{scriptsize}
 \put(0,0) { \makebox(190,30){#2}}
@@ -1033,7 +1023,7 @@ Some editors, especially XML editors, provide tree-browser views on the document
 Tree views are useful for giving an overview of large structures, such as a program source that consists of a number of different modules. By combining a tree presentation with a source editor, we can support the kind of project management that is found in integrated development environments, such as JBuilder or Eclipse~\cite{eclipse2001}. 
 
 \begin{center}
-\epsfig{file=pics/eps/TreebrowserWindow.eps, height=4.5cm}\\ [3mm]
+\epsfig{file=pics/eps/TreebrowserWindow, height=4.5cm}\\ [3mm]
 {\normalsize \sf  A source editor with a tree-browser pane.}
 \end{center}
 
@@ -1046,11 +1036,11 @@ The tree browser supports drag and drop edit behavior that allows nodes in the t
 \begin{center}
 \hspace{\stretch{1}}
 \begin{tabular}[c]{@{}c@{}} %\\ [-2mm]
-\fbox{\epsfig{file=pics/screenshots/TreeDrag.png.eps, height=3cm}}
+\fbox{\epsfig{file=pics/screenshots/TreeDrag, height=3cm}}
 \end{tabular}
 \thenn
 \begin{tabular}[c]{@{}c@{}} %\\ [-2mm]
-\hspace*{0.8mm}\fbox{\epsfig{file=pics/screenshots/TreeDropped.png.eps, height=3cm}}
+\hspace*{0.8mm}\fbox{\epsfig{file=pics/screenshots/TreeDropped, height=3cm}}
 \end{tabular}
 \hspace{\stretch{1}}\nopagebreak[4] \nopagebreak[4] \\ [3mm]
 {\small move ``{\tt citrus}'' node}
@@ -1066,7 +1056,7 @@ Because the tree presentation is not primitive, the editor designer or user can 
 
 
 \begin{center}
-\fbox{\epsfig{file=pics/screenshots/TreeAlternative.png.eps, height=1.9cm}}\\ [3mm]
+\fbox{\epsfig{file=pics/screenshots/TreeAlternative, height=1.9cm}}\\ [3mm]
 {\normalsize \sf  An alternative tree-browser view.}
 \end{center}
 %\screenshot{
@@ -1098,7 +1088,7 @@ The last example is a simple tax-form application, which is basically a spreadsh
 
 \vspace*{1.4ex}
 \begin{center}
-\epsfig{file=pics/eps/TaxWindow.eps, height=4.4cm}\\ [3mm]
+\epsfig{file=pics/eps/TaxWindow, height=4.4cm}\\ [3mm]
 {\normalsize \sf  A much simplified tax form.}
 \end{center}
 \vspace*{1.4ex}
@@ -1139,11 +1129,11 @@ In most presentations, the structure of the presentation depends on the document
 \begin{center}
 \hspace{\stretch{1}}
 \begin{tabular}[c]{@{}c@{}} %\\ [-2mm]
-\epsfig{file=pics/eps/TaxWindow.eps, height=4.4cm}
+\epsfig{file=pics/eps/TaxWindow, height=4.4cm}
 \end{tabular}
 \thenn
 \begin{tabular}[c]{@{}c@{}} %\\ [-2mm]
-\hspace*{0.8mm}\epsfig{file=pics/eps/TaxWindow3.eps, height=4.4cm}
+\hspace*{0.8mm}\epsfig{file=pics/eps/TaxWindow3, height=4.4cm}
 \end{tabular}
 \hspace{\stretch{1}}\nopagebreak[4] \nopagebreak[4] \\ [3mm]
 {\small increase number of jobs}
@@ -1156,7 +1146,7 @@ The number of input fields for job information depends on the number of jobs. Wh
 A different presentation of the tax form allows a user to design the form by editing the structure of the form, rather than the values of its input fields.
 
 \begin{center}
-\epsfig{file=pics/eps/TaxMan.eps, height=5.25cm}\\ [3mm]  %4.9 is same size as 2->3 scrshot
+\epsfig{file=pics/eps/TaxMan, height=5.25cm}\\ [3mm]  %4.9 is same size as 2->3 scrshot
 {\normalsize \sf The tax form for the tax man.}
 \end{center}
 
@@ -1379,7 +1369,7 @@ Pan offers some document-oriented editing, but edit operations on document struc
 \bc
 The GSE~\cite{koorn92gse} editor has been developed as part of the Esprit project ``Generation of Interactive Programming Environment'' (GIPE). It is still being used in the ASF+SDF meta environment~\cite{klint93asfsdf}. The editor is primarily aimed at programming languages and the presentations are assumed to be lines of text. GSE supports free editing of the program text without an explicit mode switch, but structural edit operations on the program that keep user-specified layout intact are not supported. Furthermore, the results of computations on the document cannot be shown in the presentation. \ec
 
-The GSE~\cite{koorn92gse} editor has been developed as part of the Esprit project ``Generation of Interactive Programming Environment'' (GIPE). It is part of the ASF+SDF meta environment~\cite{klint93asfsdf} and under active development. The editor is primarily aimed at programming languages and the presentations are assumed to be lines of text. GSE supports free editing of the program text without an explicit mode switch. A powerful transformation formalism is available for specifying document edit operations that keep intact the layout~\cite{brand00rewriteLayout}. On the other hand, such transformations cannot form part of the presentation process.
+The GSE~\cite{koorn92gse} editor has been developed as part of the Esprit project ``Generation of Interactive Programming Environment'' (GIPE). It is part of the ASF+SDF meta environment~\cite{klint93asfsdf} and under active development. The editor is primarily aimed at programming languages and the presentations are assumed to be lines of text. GSE supports free editing of the program text without an explicit mode switch. A powerful transformation formalism is available for specifying document edit operations that keep the layout~\cite{brand00rewriteLayout} intact. On the other hand, such transformations cannot form part of the presentation process.
 
 \head{Ensemble}
 
@@ -1429,42 +1419,30 @@ The presentation formalism in Thot, called P, is a powerful graphical presentati
 
 Thot editors are of a syntax-directed nature. Multiple views on the document may be edited simultaneously, and user-specified transformations are supported. However, free text editing can only be done in a separate window in a different mode. Also, no computations are supported other than some basic counters in the presentation. 
 
+\cbstart
+
 \head{Eclipse}
 
-eclipse is not a generic editor, but an environment. however source editors can be created with it.
-how this is done. syntax recognizing.
-disadvantages
-new editor is hard (check)
-no textual is hard
+Eclipse~\cite{eclipse2001} is a platform for building integrated development environments written in Java. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. 
 
-%\cite{eclipse2001}
-% IDE, also editor Program editor.
-%veel programmeerwerk.
-%
-%***{also add to comparison}
+Unfortunately, building a code editor similar to the Java editor for a different language requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
+
+\head{Barista, Citrus}
+
+Barista~\cite{KoMyers06Barista} is a powerful framework for building code editors. It is built on top of Citrus~\cite{KoMyers05Citrus}, which is a UI toolkit together with an object-oriented language. Although Barista is targeted at code editors, the presentation of the code can be visual, for example allowing for images to appear in comments, or having graphical presentations of code. The editors created with Barista are syntax directed, but presentation-oriented editing is available. 
+
+Because of the orientation towards code editing, word-processing editors will be harder to specify in Barista. The same holds for editors for which the structure of the presentation does not follow the structure of the document. Barista has no special support for derived values in the presentation or for editable derived structures.
+
+\cbend
+
+\bc  Visual Studio was too close to Eclipse (and not really a str. editor anyway).
 
 \head{Visual Studio editor}
 
 The Microsoft Visual Studio environment includes an integrated source editor. Although the editor does not contain any novel features, and thousands of lines of code need to be written to tailor the editor for a specific language, we do include it in the discussion because it is a structure editor that is actually used by a rather large number of people. 
 
-The Visual Studio editor is of the syntax-recognizing kind with colored-text presentations. No document-oriented edit functionality is supported, other than performing semantic analysis and displaying the results. These results are displayed by marking a location in the source with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}\epsfig{file=Pics/eps/squiggly.bmp.eps, width=0.042in}}line, and displaying a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically correct, the editor provides a surprisingly usable environment. 
+The Visual Studio editor is of the syntax-recognizing kind with colored-text presentations. No document-oriented edit functionality is supported, other than performing semantic analysis and displaying the results. These results are displayed by marking a location in the source with a squiggly \makebox(0,0)[lt]{\epsfig{file=Pics/eps/squiggly, width=0.042in}\epsfig{file=Pics/eps/squiggly, width=0.042in}\epsfig{file=Pics/eps/squiggly, width=0.042in}\epsfig{file=Pics/eps/squiggly, width=0.042in}\epsfig{file=Pics/eps/squiggly, width=0.042in}}line, and displaying a corresponding message in a separate window pane as well as in a tooltip. Pop-up list boxes can be used to show auto-completion alternatives. Despite its simple model, in which semantic analysis is only possible when the entire presentation is syntactically correct, the editor provides a surprisingly usable environment. 
 
-
-\bc
-\toHere     % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-\head{Other editor toolkits}
-
-*First find out more about them.*\\
-Xemacs\\
-Andrew system\\
-Opendoc.\\
-
-\fromHere  % VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-
-% FIELD? and its relation to Desert?
-
-% what about non source editors? mention, ref, ignore?
 \ec
 
 %																
@@ -1489,6 +1467,7 @@ Some editors support a user-defined presentation, or at least allow the user to 
 It is remarkable that support for textual presentations of XML documents is this weak, since many languages for processing and describing XML documents are specified in XML itself (e.g.\ XML Schema~\cite{xmlSchema1,xmlSchema2}  and XSLT~\cite{xslt10}) and editing these languages would be greatly simplified by providing the user with a concise concrete syntax, rather than the verbose XML syntax.
 
 \item[Editing power.]
+
 %check transformation
 Most XML editors offer simple document-oriented edit operations for structure entry and manipulation. However, none of the reviewed editors support user-specified transformations on the tree structure.
 
@@ -1519,42 +1498,43 @@ XMLSPY is a large system that has functionality similar to X-Metal. An important
 
 % Also a number that were not introduced due to space limitations (or some similar reason)?
 
+\cbstart
+
 \begin{figure}
 \begin{center}
 \begin{scriptsize}
 \begin{tabular}[t]{l|c|c|c|c|c|c}
- 			&Genericity& Computation & Presentation & Editing    & Modeless & Extra \\
-			&		&   formalism   &   formalism   & power     &  editing   & state \\
+ 	                 &Genericity& Computation& Presentation& Editing&  Modeless & Extra \\
+		              &		    & formalism  &   formalism & power  &  editing  & state \\
 \hline
-%                                           generic  comps      pres        editing    integration extra state
-Synthesizer Generator	&  $++$	&   $++$	&  $\pm$ 	&   $+$	&   $--$	&    $\pm$ 	\\
-LRC					&   $++$	&   $++$	&   $+$ 	&   $+$	&   $--$ 	&    $\pm$	\\
-PSG					&   $++$	&    $+$	&   $--$	&   $\pm$	&  $+$	&    $\pm$	\\
-SbyS \bc, Mj\slasho lner/Orm\ec&   $++$	&   $-$	&   $--$ 	&   $-$		&   n/a	&    $\pm$	\\
+Synthesizer Generator &   $++$  &    $++$	&   $\pm$ 	&   $+$	    &   $--$    &    $\pm$ 	\\
+LRC				 	  &   $++$	&    $++$	&   $+$ 	&   $+$ 	&   $--$    &    $\pm$	\\
+SbyS, Mj\bfslasho lner/Orm & $++$ &  $-$    &   $--$ 	&   $-$	    &   n/a	    &    $\pm$	\\
+PSG					  &   $++$	&    $+$	&   $--$	&   $\pm$   &   $+$	    &    $\pm$	\\
 \hline
-%SRE			&   ?	&   ?	&   ? 	&   ?	&   ?	&    $--$	\\
-Pan					&   $++$	&  $\pm$	&   $-$ 	&   $\pm$	&   $++$	&     $-$	\\
-GSE					&   $++$	&   $--$	&   $--$ 	&   $+$		&   $++$	&     $-$	\\
-% GSE layout structure edit: \pm to +      and    whitespace es: - to pm?
-Desert				&   $++$	&   $--$	&   $\pm$ 	&   $\pm$	&   $--$	&     $-$	\\
-%Intent. Progr. Editor	&   ?	&   ?	&   + 	&   ?	&   $++$	&    $--$	\\
-Ensemble				&   $++$	&   $\pm$	&   $+$ 	&   $+$	&   $++$	&     $-$	\\
+Pan			    	  &   $++$	&   $\pm$	&   $-$ 	&   $\pm$	&   $++$    &     $-$	\\
+GSE, ASF+SDF          &   $++$	&   $--$	&   $--$ 	&   $+$		&   $++$    &     $-$	\\
+Ensemble		      &   $++$	&   $\pm$	&   $+$ 	&   $+$	    &   $++$    &     $-$	\\
+Desert				  &   $++$	&   $--$	&   $\pm$ 	&   $\pm$	&   $--$    &     $-$	\\
 \hline
-Amaya, Thot			&   $+$	&   $\pm$	&  $+$ 	&   $+$	&   $--$	&    $-$	\\
-Visual Studio			&   $\pm$	&   $\pm$	&   $-$ 	&   $-$	&   n/a	&    $-$	\\
+Amaya, Thot			  &   $+$	&   $\pm$	&   $+$     &   $+$	    &   $--$    &    $-$	\\
+Eclipse			      &   $\pm$	&   $\pm$	&   $-$ 	&   $-$	    &   n/a	    &    $-$	\\
+Barista, Citrus       &   $++$  &    $\pm$  &   $+$     &   $++$    &   $++$    &    $++$   \\
+%Visual Studio		  &   $\pm$	&   $\pm$	&   $-$ 	&   $-$	    &   n/a	    &    $-$	\\
 \hline
-XMetal				&   $++$	&   $-$	&  $\pm$ 	&  $\pm$	&   $--$	&   $\pm$	\\
-XMLSPY				&   $++$	&   $\pm$	&   $+$ 	&  $\pm$	&   $--$	&   $\pm$	\\
-Other XML editors		&   $++$   & max. $-$ & max. $\pm$&  $\pm$&   $--$	&   max. $\pm$	\\
+XMetal				  &   $++$	&   $-$	    &   $\pm$ 	&  $\pm$	&   $--$    &   $\pm$	\\
+XMLSPY				  &   $++$	&   $\pm$	&   $+$ 	&  $\pm$	&   $--$    &   $\pm$	\\
+Other XML editors	  &   $++$  & max. $-$  & max. $\pm$&  $\pm$    &   $--$    & max. $\pm$\\
 \hline
-%\dots			&   ?	&   ?	&   ? 	&   ?	&   ?	&     $-$$-$	\\
-Proxima				&   $++$	&   $++$	&   $++$ 	&   $++$	&   $++$	&     $++$	\\
+Proxima				  &   $++$	&   $++$	&   $++$ 	&   $++$	&   $++$    &     $++$	\\
 \end{tabular}                                                   
 \end{scriptsize}
 \caption{Editor comparison}\label{scoretable} 
 \end{center}
 \end{figure}
 
+\todo{check citrus and eclipse}
+\cbend
 
 
 %             EXPLANATION OF SCORES??
