@@ -265,7 +265,7 @@ deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id
 deleteTreePres editable p focus          (ParsingP id l pres)  = ParsingP id l (deleteTreePres True (p++[0]) focus pres)
 deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
-  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ take (length p) focusPath 
+  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ drop (length p) focusPath 
                      -- we only take into account the from path
       (left, editedVertex: right) = splitAt editedVertexNr press
       editedVertex' = deleteTreePres editable (p++[editedVertexNr]) focus editedVertex
@@ -382,7 +382,7 @@ deleteTreePresF editable updp p focus          (StructuralP id pres)  = deleteTr
 deleteTreePresF editable updp p focus          (ParsingP id l pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (LocatorP l pres)  = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
-  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ take (length p) focusPath 
+  let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ drop (length p) focusPath 
   in  deleteTreePresF editable  (updp++[editedVertexNr]) (p++[editedVertexNr]) focus (press!!editedVertexNr)
 deleteTreePresF editable updp p focus          (VertexP _ _ _ _ _ pres) = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p (FocusP st en) (FormatterP id press) = deleteTreeRowF editable updp p 0 (FocusP st en) press
