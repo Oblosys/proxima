@@ -77,11 +77,11 @@ In this paper we investigate the requirements for a generic editor that combines
 
 \cbstart
 
-The Proxima prototype is currently being used to implement an editor for constructing and documenting Bayesian networks~\cite{Jensen2001BayesianNetworks}. Figure~\ref{fig:bayesDocEditor} shows a screenshot of this editor\todo{make a nice screenshot}. For the discussion here, it suffices to regard a Bayesian network as a directed acyclic graph that is documented by describing small parts of it in separate sections or subsections, accompanied by a picture of the corresponding part of the network. 
+The Proxima prototype is currently being used to implement an editor for constructing and documenting Bayesian networks~\cite{Jensen2001BayesianNetworks}. Figure~\ref{fig:bayesDocEditor} shows a screenshot of this editor\todo{make a nice screenshot}. For the discussion here, it suffices to regard a Bayesian network as a directed acyclic graph that is documented by describing small parts of it in separate sections or subsections which are accompanied by a picture of the corresponding part of the network. The documentation also contains a picture of the complete network.
 
-Keeping the documentation consistent in a normal word processor using pictures of the network is problematic, since the same part of the network may be represented in several pictures scattered over the document. Moreover, when the network is changed, the corresponding documentation may need to be updated as well. This process turned out to be infeasable for a networks .
+Using a normal word processor, it is difficult to keep the documentation and the pictures of the network consistent, since the same part of the network may be represented in several pictures scattered over the document. Moreover, when the network is changed, the corresponding documentation needs to be looked at as well. This process turned out to be infeasable when the networks reached a certain size.
 
-The Proxima editor helps by providing several editable views on the network. At the top of the document is a view that contains the entire network. Subsequent sections contain subviews of this network. All views are editable and are kept consistent. Moreover, if the text refers to a non-existent node (e.g.\ \verb|\node{ceenter}|), this is signalled with a squiggly line. A future version of the editor will also issue warnings that text referring to part of the network must be checked after that part has been edited. The prototype editor is written in about 700 lines of mostly straightforward code.
+The Proxima editor helps by providing several editable views on the network. At the top of the document is a view that shows the entire network. Subsequent sections contain subviews of this network. All views are editable and are kept consistent. Moreover, if the text refers to a non-existent node (e.g.\ \verb|\node{ceenter}|), this is signalled with a squiggly line. A future version of the editor will also issue a warning that text referring to a certain part of the network must be checked after that part has been edited. The prototype editor is written in about 700 lines of mostly straightforward code.
 
 
 \pgffigure{A documentation editor for Bayesian networks.}{fig:bayesDocEditor} 
@@ -1423,9 +1423,9 @@ Thot editors are of a syntax-directed nature. Multiple views on the document may
 
 \head{Eclipse}
 
-Eclipse~\cite{eclipse2001} is a platform for building integrated development environments written in Java. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. 
+Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
 
-Unfortunately, building a code editor similar to the Java editor for a different language requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
+Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. Unfortunately, building a code editor similar to the Java editor for a different language, requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
 
 \head{Barista, Citrus}
 
@@ -1533,7 +1533,6 @@ Proxima				  &   $++$	&   $++$	&   $++$ 	&   $++$	&   $++$    &     $++$	\\
 \end{center}
 \end{figure}
 
-\todo{check citrus and eclipse}
 \cbend
 
 
