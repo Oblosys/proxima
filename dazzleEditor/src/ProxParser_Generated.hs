@@ -31,10 +31,10 @@ reuseRootEnr nodes  ma0 ma1
            (RootEnr a0 a1) -> reuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseRootEnr"
 
-reuseDummy :: [Token doc Node clip token] -> Dummy
-reuseDummy nodes 
+reuseDummy :: [Token doc Node clip token] -> Maybe Dummy -> Maybe Bool -> Dummy
+reuseDummy nodes  ma0 ma1
   = case extractFromTokens extractDummy defaultDummy nodes of
-           (Dummy) -> reuse0 Dummy
+           (Dummy a0 a1) -> reuse2 Dummy a0 a1 ma0 ma1
            _ -> error "System error:<module>.reuseDummy"
 
 reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
@@ -192,7 +192,7 @@ extractRootEnr (Just (RootEnrNode x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (DummyNode x@(Dummy) _)) = Just x
+extractDummy (Just (DummyNode x@(Dummy _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
@@ -299,7 +299,7 @@ defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr hole hole
 
 defaultDummy :: Dummy
-defaultDummy = Dummy
+defaultDummy = Dummy hole hole
 
 defaultRoot :: Root
 defaultRoot = Root hole hole hole
@@ -388,9 +388,6 @@ reuse2 :: (a0 -> a1 -> r) ->
 reuse2 f  a0 a1 ma0 ma1 =
   f (maybe a0 id ma0) (maybe a1 id ma1) 
 
-reuse0 :: r -> r
-reuse0 f = f
-
 reuse3 :: (a0 -> a1 -> a2 -> r) -> 
           a0 -> a1 -> a2 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> r
@@ -408,4 +405,7 @@ reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
+
+reuse0 :: r -> r
+reuse0 f = f
 

@@ -39,7 +39,7 @@ data EnrichedDoc = RootEnr Root Document
                     deriving Show
 
 
-data Dummy = Dummy 
+data Dummy = Dummy Dummy Bool 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
