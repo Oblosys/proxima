@@ -5,7 +5,6 @@ import Common.CommonTypes
 
 import List
 import Char
-import Text.ParserCombinators.Parsec
 
 data PathDoc = PathD [Int]
              | NoPathD deriving (Show, Eq, Ord)
