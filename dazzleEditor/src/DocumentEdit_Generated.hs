@@ -107,8 +107,6 @@ instance Editable String Document Node ClipDoc UserToken where
 instance Clip ClipDoc where
   arityClip (Clip_Root x) = arity x
   arityClip (Clip_Document x) = arity x
-  arityClip (Clip_Dummy x) = arity x
-  arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Graph x) = arity x
   arityClip (Clip_String x) = arity x
   arityClip (Clip_List_Section x) = arity x
@@ -132,8 +130,6 @@ instance Clip ClipDoc where
   arityClip (Clip_Nothing)   = -1
   alternativesClip (Clip_Root x) = alternatives x
   alternativesClip (Clip_Document x) = alternatives x
-  alternativesClip (Clip_Dummy x) = alternatives x
-  alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
   alternativesClip (Clip_List_Section x) = alternatives x
@@ -158,8 +154,6 @@ instance Clip ClipDoc where
 
   holeClip (Clip_Root x) = Clip_Root hole
   holeClip (Clip_Document x) = Clip_Document hole
-  holeClip (Clip_Dummy x) = Clip_Dummy hole
-  holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Graph x) = Clip_Graph hole
   holeClip (Clip_String x) = Clip_String hole
   holeClip (Clip_List_Section x) = Clip_List_Section hole
@@ -184,8 +178,6 @@ instance Clip ClipDoc where
 
   isListClip (Clip_Root x) = isList x
   isListClip (Clip_Document x) = isList x
-  isListClip (Clip_Dummy x) = isList x
-  isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Graph x) = isList x
   isListClip (Clip_String x) = isList x
   isListClip (Clip_List_Section x) = isList x
@@ -210,8 +202,6 @@ instance Clip ClipDoc where
 
   insertListClip i c (Clip_Root x) = insertList i c x
   insertListClip i c (Clip_Document x) = insertList i c x
-  insertListClip i c (Clip_Dummy x) = insertList i c x
-  insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
   insertListClip i c (Clip_List_Section x) = insertList i c x
@@ -236,8 +226,6 @@ instance Clip ClipDoc where
 
   removeListClip i (Clip_Root x) = removeList i x
   removeListClip i (Clip_Document x) = removeList i x
-  removeListClip i (Clip_Dummy x) = removeList i x
-  removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
   removeListClip i (Clip_List_Section x) = removeList i x
@@ -267,21 +255,17 @@ instance Clip ClipDoc where
 
 instance Editable Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_Dummy x
-  select (0:p) (Dummy x1 x2) = select p x1
-  select (1:p) (Dummy x1 x2) = select p x2
   select _     _                  = Clip_Nothing
 
   paste [] (Clip_Dummy c) _      = c
   paste [] c  x                    = trace ("Type error: pasting "++show c++" on Dummy")   x
-  paste (0:p) c (Dummy x1 x2) = Dummy (paste p c x1) x2
-  paste (1:p) c (Dummy x1 x2) = Dummy x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Dummy {Dummy} "  , Clip_Dummy $ Dummy hole hole)
+  alternatives _ = [("Dummy "  , Clip_Dummy $ Dummy)
                    ,("{Dummy}", Clip_Dummy hole)
                    ]
 
-  arity (Dummy x1 x2) = 2
+  arity (Dummy) = 0
   arity _                        = 0
 
   parseErr = ParseErrDummy

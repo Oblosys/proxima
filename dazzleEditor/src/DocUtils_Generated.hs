@@ -201,7 +201,7 @@ instance HasPath Node where
 
 
 shallowShowEnrichedDoc1 (RootEnr  _ _) = "RootEnr"
-shallowShowDummy1 (Dummy  _ _) = "Dummy"
+shallowShowDummy1 (Dummy ) = "Dummy"
 shallowShowRoot1 (Root  _ _ _) = "Root"
 shallowShowSection1 (Section  _ _ _) = "Section"
 shallowShowSubsection1 (Subsection  _ _ _) = "Subsection"
@@ -247,7 +247,7 @@ shallowShowConsList_Edge1 (Nil_Edge ) = "Nil_Edge"
 toXMLEnrichedDoc (RootEnr root document) = Elt "RootEnr" [] $ [toXMLRoot root] ++ [toXMLDocument document] ++ []
 toXMLEnrichedDoc HoleEnrichedDoc = Elt "HoleEnrichedDoc" [] []
 toXMLEnrichedDoc (ParseErrEnrichedDoc _) = Elt "ParseErrEnrichedDoc" [] []
-toXMLDummy (Dummy dummy bool) = Elt "Dummy" [] $ [toXMLDummy dummy] ++ [toXMLBool bool] ++ []
+toXMLDummy (Dummy) = Elt "Dummy" [] $ []
 toXMLDummy HoleDummy = Elt "HoleDummy" [] []
 toXMLDummy (ParseErrDummy _) = Elt "ParseErrDummy" [] []
 toXMLRoot (Root graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections ++ []
@@ -333,7 +333,7 @@ toXMLConsList_Edge Nil_Edge             = []
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root <*> parseXML_Document <* endTag "RootEnr"
 parseXML_Dummy = parseXMLCns_Dummy <?|> parseHoleAndParseErr "Dummy" HoleDummy
-parseXMLCns_Dummy = Dummy <$ startTag "Dummy" <*> parseXML_Dummy <*> parseXML_Bool <* endTag "Dummy"
+parseXMLCns_Dummy = Dummy <$ emptyTag "Dummy"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section <* endTag "Root"
 parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection

@@ -62,7 +62,7 @@ DATA EnrichedDoc | RootEnr root:Root document:Document
                  | ParseErrEnrichedDoc presentation:Presentation_Doc_Node_Clip_Token
 
 
-DATA Dummy | Dummy dummy:Dummy bool:Bool 
+DATA Dummy | Dummy 
            | HoleDummy
            | ParseErrDummy presentation:Presentation_Doc_Node_Clip_Token
 
@@ -197,14 +197,8 @@ DATA ConsList_Edge | Cons_Edge head:Edge tail:ConsList_Edge
 
 
 SEM Dummy
-  | Dummy dummy.pIdC = @lhs.pIdC + 0
-          lhs.pIdC = @dummy.pIdC
   | HoleDummy     lhs.pres = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
   | ParseErrDummy lhs.pres = presParseErr @presentation
-
-
-SEM Dummy
-  | Dummy dummy.path  = @lhs.path++[0]
 
 
 SEM Root
@@ -540,7 +534,7 @@ ATTR  Section Paragraph Subsection Subsubsection Word Vertex Edge [ ix : Int || 
 
 SEM Dummy [ || presXML : Presentation_Doc_Node_Clip_Token ]
   | Dummy
-      lhs.presXML = presentElementXML @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [ @dummy.presXML, presentPrimXMLBool @bool ] 
+      lhs.presXML = presentElementXML @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [  ] 
   | HoleDummy     lhs.presXML = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
   | ParseErrDummy lhs.presXML = presParseErr @presentation
 
@@ -740,7 +734,7 @@ SEM ConsList_Edge [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} ]
 
 SEM Dummy [ || presTree : Presentation_Doc_Node_Clip_Token ]
   | Dummy
-      lhs.presTree = presentElementTree @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [ @dummy.presTree, presentPrimTreeBool @bool ] 
+      lhs.presTree = presentElementTree @lhs.focusD (DummyNode @self @lhs.path) @lhs.path "Dummy" [  ] 
   | HoleDummy     lhs.presTree = presHole @lhs.focusD "Dummy" (HoleDummyNode @self @lhs.path) @lhs.path
   | ParseErrDummy lhs.presTree = presParseErr @presentation
 

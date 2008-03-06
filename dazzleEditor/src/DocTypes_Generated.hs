@@ -39,7 +39,7 @@ data EnrichedDoc = RootEnr Root Document
                     deriving Show
 
 
-data Dummy = Dummy Dummy Bool 
+data Dummy = Dummy 
            | HoleDummy
            | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
               deriving Show
@@ -202,37 +202,31 @@ data ConsList_Edge = Cons_Edge Edge ConsList_Edge
 
 -- Generated Types --
 
-data ClipDoc = Clip_Root Root
-             | Clip_Document Document
+data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Dummy Dummy
-             | Clip_Bool Bool
+             | Clip_Root Root
+             | Clip_Section Section
+             | Clip_Subsection Subsection
+             | Clip_Subsubsection Subsubsection
+             | Clip_Paragraph Paragraph
+             | Clip_Word Word
              | Clip_Graph Graph
-             | Clip_String String
+             | Clip_Vertex Vertex
+             | Clip_Shape Shape
+             | Clip_Edge Edge
+             | Clip_Subgraph Subgraph
+             | Clip_Dirty Dirty
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
              | Clip_List_Subsection List_Subsection
              | Clip_List_Subsubsection List_Subsubsection
              | Clip_List_Word List_Word
-             | Clip_Subgraph Subgraph
-             | Clip_Dirty Dirty
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
-             | Clip_Shape Shape
+             | Clip_Document Document
+             | Clip_Bool Bool
              | Clip_Int Int
-             | Clip_Section Section
-             
-             | Clip_Paragraph Paragraph
-             
-             | Clip_Subsection Subsection
-             
-             | Clip_Subsubsection Subsubsection
-             
-             | Clip_Word Word
-             
-             | Clip_Vertex Vertex
-             
-             | Clip_Edge Edge
-             
+             | Clip_String String
              | Clip_Nothing deriving Show
 
 

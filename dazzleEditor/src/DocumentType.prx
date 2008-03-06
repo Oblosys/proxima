@@ -1,36 +1,72 @@
-data EnrichedDoc = RootEnr root:Root Document
+data Dummy = Dummy Root Dummy  -- necessary because of design error in generator
+
+-- Don't remove the declaration above
+
+
+data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document
 -- document ref is for popups only
 
-data Dummy = Dummy Dummy Bool -- necessary because of design error in generator
--- data Dummy = Dummy [Dummy] String Bool Int -- necessary because of design error in generator
+data Root = Root decls:[Decl] { idP:IDP } 
 
--- Don't remove the declarations above
+data RootE = RootE decls:[Decl] idListDecls:[Decl] { idP:IDP }
+-- We put the decls first, so the paths in the enriched document and the document are the same.
+-- This is necessary because there is no translation on paths yet.
 
-data Root = Root graph:Graph title:String sections:[Section]
+-- lists have no pres elts of its own, so no ids for them. This also means we won't be able to recover Decls's id
 
-data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection]
+--  4 pres elts: "=", ";", TypeDecl, and "[...]"
+data Decl = Decl expanded:Bool autoLayout:Bool Ident Exp { idP0:IDP idP1:IDP idP2:IDP idP3:IDP }
+          | BoardDecl Board                              { idP0:IDP idP1:IDP }
+          | PPPresentationDecl PPPresentation            { idP0:IDP idP1:IDP }
 
-data Subsection = Subsection title:String paragraphs:[Paragraph] subsubsections:[Subsubsection]
+-- one pres elt for in program source, other for in list
+-- however, only the one for source is used, the other has no layout
+data Ident = Ident String                                { idP0:IDP idP1:IDP }
 
-data Subsubsection = Subsubsection title:String paragraphs:[Paragraph]
+data Exp = PlusExp exp1:Exp exp2:Exp                     { idP0:IDP }
+         | TimesExp  exp1:Exp exp2:Exp                   { idP0:IDP }
+         | DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
+         | PowerExp exp1:Exp exp2:Exp                    { idP0:IDP }
+         | BoolExp  Bool                                 { idP0:IDP }
+         | IntExp Int                                    { idP0:IDP }
+         | LamExp Ident Exp                              { idP0:IDP idP1:IDP }
+         | AppExp exp1:Exp exp2:Exp                      
+         | CaseExp Exp alts:[Alt]                        { idP0:IDP idP1:IDP }
+         | LetExp [Decl] Exp                             { idP0:IDP idP1:IDP }
+         | IdentExp Ident                                
+         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
+         | ParenExp Exp                                  { idP0:IDP idP1:IDP }
+         | ListExp exps:[Exp]                            { idP0:IDP idP1:IDP ids:[IDP] }
+         | ProductExp exps:[Exp]                         { idP0:IDP idP1:IDP ids:[IDP] }
 
-data Paragraph = Paragraph words:[Word]
-               | SubgraphPara subgraph:Subgraph
-               
-data Word = Word word:String
-          | NodeRef nodeName:String
-          | Label label:String
-          | LabelRef label:String
-          
-data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge]
+data Alt = Alt Ident Exp                                 { idP0:IDP idP1:IDP }
 
-data Vertex = Vertex name:String shape:Shape id:Int x:Int y:Int
+data Board       = Board    r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow
+                            r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow
+                            
+data BoardRow    = BoardRow ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare
+                            ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare
 
-data Shape = Circle | Square
+data BoardSquare = Queen color  : Bool                   
+                 | King  color  : Bool                   
+                 | Bishop color : Bool                   
+                 | Knight color : Bool                   
+                 | Rook color   : Bool                   
+                 | Pawn color   : Bool                   
+                 | Empty                            
 
-data Edge = Edge from:Int to:Int
 
-data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge]
-            
-data Dirty = Dirty
-           | Clean
+data PPPresentation = PPPresentation viewType : Bool [Slide] 
+
+data Slide = Slide title : String ItemList               
+
+data ItemList = ItemList ListType items:[Item]           
+
+data ListType = Bullet                                  
+              | Number                                  
+              | Alpha                                   
+
+data Item = StringItem string : String                   
+          | HeliumItem Exp                               
+          | ListItem ItemList                            
+
