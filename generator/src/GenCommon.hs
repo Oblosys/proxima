@@ -33,7 +33,14 @@ data DeclType = DeclList
               | DeclConsList            --- 
               | DeclDef                    deriving (Show, Eq) --- Eq
 
+
+
+primitiveTypes = ["Document", "Bool", "Int", "String"]
+
 {- L I B -}
+
+-- get all types, including any list types, but not the conslists
+getTypes (File _ decls) =  map (\(Decl tp _ _) -> tp) $ filter (\(Decl _ _ dt) -> dt /= DeclConsList) decls
 
 getConstr :: Prod -> String
 getConstr (Prod constr _) = constr

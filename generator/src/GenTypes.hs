@@ -59,12 +59,11 @@ genNode cnstrs = [    "data Node = NoNode "]
 --- no clip for conslist, is unsafe string compare hack now, should be done nicely!!!
 --- a special ConsList label in fields is not a good idea. Instead of from getFields, these
 --- types should come from the lefthand sides of the declarations
-genClipDoc parsedFile = ("data ClipDoc = Clip_" ++ fieldType (head fields) ++" "++ fieldType (head fields)):  
-                        indent 13 ((map makeClipAlt (tail fields)) 
+genClipDoc parsedFile = ("data ClipDoc = Clip_" ++ (head types) ++" "++ (head types)):  
+                        indent 13 ((map makeClipAlt (tail types)) 
                         ++ ["| Clip_Nothing deriving Show\n"]) where
-                        fields = removeRepeat(getFields' parsedFile)
-                        makeClipAlt (Field _ ('C':'o':'n':'s':'L':'i':'s':'t':'_':_) _) = ""
-                        makeClipAlt e = "| Clip_" ++ fieldType e ++" "++ fieldType e
+                        types = getTypes parsedFile ++ primitiveTypes
+                        makeClipAlt t = "| Clip_" ++ t ++" "++ t
 
 
                         
