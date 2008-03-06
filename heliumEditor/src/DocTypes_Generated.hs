@@ -247,36 +247,31 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 
 -- Generated Types --
 
-data ClipDoc = Clip_Root Root
-             | Clip_Dummy Dummy
+data ClipDoc = Clip_Dummy Dummy
+             | Clip_EnrichedDoc EnrichedDoc
+             | Clip_Root Root
              | Clip_RootE RootE
-             | Clip_HeliumTypeInfo HeliumTypeInfo
-             | Clip_Document Document
-             | Clip_List_Decl List_Decl
-             | Clip_Bool Bool
+             | Clip_Decl Decl
              | Clip_Ident Ident
              | Clip_Exp Exp
+             | Clip_Alt Alt
              | Clip_Board Board
-             | Clip_PPPresentation PPPresentation
-             | Clip_String String
-             | Clip_Int Int
-             | Clip_List_Alt List_Alt
-             | Clip_List_Exp List_Exp
              | Clip_BoardRow BoardRow
              | Clip_BoardSquare BoardSquare
-             | Clip_List_Slide List_Slide
+             | Clip_PPPresentation PPPresentation
+             | Clip_Slide Slide
              | Clip_ItemList ItemList
              | Clip_ListType ListType
-             | Clip_List_Item List_Item
-             | Clip_Decl Decl
-             
-             | Clip_Alt Alt
-             
-             
-             | Clip_Slide Slide
-             
              | Clip_Item Item
-             
+             | Clip_List_Decl List_Decl
+             | Clip_List_Alt List_Alt
+             | Clip_List_Exp List_Exp
+             | Clip_List_Slide List_Slide
+             | Clip_List_Item List_Item
+             | Clip_Document Document
+             | Clip_Bool Bool
+             | Clip_Int Int
+             | Clip_String String
              | Clip_Nothing deriving Show
 
 
