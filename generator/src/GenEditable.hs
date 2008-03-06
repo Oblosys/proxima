@@ -15,7 +15,7 @@ genDocumentEdit include parsedFile =
                  ,  "\n-------------------------------------- -}"
                  ]
                  ++ ["\n\n-- Generated clipfunctions  --\n"]
-                 ++ clipfunctions (listFields extendedTypes)
+                 ++ clipfunctions (getTypes parsedFile ++ primitiveTypes)
                  ++ ["\n\n-- Editable Instances --\n"]
                  ++ genEditableInstances extendedTypes
                  where
@@ -27,13 +27,13 @@ genDocumentEdit include parsedFile =
 
 
 ---
-clipfunctions fields =  ["instance Clip ClipDoc where"]
-                     ++ genArityClip        fields
-                     ++ genAlternativesClip fields ++ [""]
-                     ++ genHoleClip         fields ++ [""]
-                     ++ genIsListClip       fields ++ [""]
-                     ++ genInsertListClip   fields ++ [""]
-                     ++ genRemoveListClip   fields
+clipfunctions types =  ["instance Clip ClipDoc where"]
+                     ++ genArityClip        types
+                     ++ genAlternativesClip types ++ [""]
+                     ++ genHoleClip         types ++ [""]
+                     ++ genIsListClip       types ++ [""]
+                     ++ genInsertListClip   types ++ [""]
+                     ++ genRemoveListClip   types
                      
  --- no generation for conslists (unsafe, should be done in a different way)
 listFields parsedFile = map fieldType . filter (\(Field _ tp _)-> not $ isPrefixOf "ConsList_" tp) $ removeRepeat(getFields' parsedFile) 
