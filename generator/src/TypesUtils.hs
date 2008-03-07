@@ -74,7 +74,7 @@ genTypeName (ListType typeName)  = "List_"++typeName
 genIDPType (BasicType typeName) = typeName
 genIDPType (ListType typeName)  = "["++typeName++"]"
 
-genNoID (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
+genNoIDP (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
 
 
 genPattern (Prod cnstrName idpFields fields) = 

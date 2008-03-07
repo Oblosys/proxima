@@ -25,21 +25,23 @@ genReuse decls = addBanner "reuse functions" $ concat
   [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"
     , "  = case extractFromTokens extract%1 default%1 nodes of"
-    , "           %5 -> reuse%6 %1 %7%4"
+    , "           %5 -> reuse%6 %1%7%4"
     , "           _ -> error \"Internal error:ProxParser_Generated.reuse%1\""
     , ""
-    ] `subst` [ cnstrName                                                      -- %1
-              , prefixBy " -> Maybe " $ map (genTypeName . fieldType) fields   -- %2
-              , typeName                                                       -- %3
-              , prefixBy " m" $ cnstrArgs fields                               -- %4
-              , "("++cnstrName++ concatMap (" "++) (cnstrArgs fields) ++")"    -- %5
-              , show $ length fields                                           -- %6
-              , prefixBy " " $ cnstrArgs fields                                -- %7
+    ] `subst` [ cnstrName                                                         -- %1
+              , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
+                                        map (genTypeName . fieldType) fields      -- %2
+              , typeName                                                          -- %3
+              , prefixBy " m" $ cnstrArgs                                         -- %4
+              , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5
+              , show $ length idpFields + length fields                           -- %6
+              , prefixBy " " $ cnstrArgs                                          -- %7
               ] -- we don't use genPattern and fieldNames, since the (" m"++) could cause problems 
                 -- e.g. for T a:A ma : M, we would get ma mma and a ma
-  | Decl _ typeName prods <- decls, prod@(Prod cnstrName idpFields fields) <- prods 
+  | Decl _ typeName prods <- decls, prod@(Prod cnstrName idpFields fields) <- prods
+  , let cnstrArgs = zipWith (++) (replicate (length idpFields + length fields) "a") (map show [0..]) 
   ]
- where cnstrArgs fields = zipWith (++) (replicate (length fields) "a") (map show [0..])
+
 
 genExtract decls = addBanner "extract functions" $ concat
   [ [ "extract%1 :: Maybe Node -> Maybe %2"
@@ -54,7 +56,8 @@ genExtract decls = addBanner "extract functions" $ concat
 genDefault decls = addBanner "default functions" $ concat
   [ case declType of
       Basic -> [ "default%1 :: %2"
-               , "default%1 = %1"++concat (replicate (length fields) " hole")
+               , "default%1 = %1" ++ prefixBy " " (map genNoIDP idpFields) ++
+                                     concat (replicate (length fields) " hole")
                , ""
                ] `subst` [ cnstrName, typeName ]
       List  -> [ "defaultList_%1 :: List_%1"
@@ -62,7 +65,7 @@ genDefault decls = addBanner "default functions" $ concat
                , ""
                ] `subst` [ drop 5 typeName ]
              
-  | Decl declType typeName prods <- decls, Prod cnstrName _ fields <- prods 
+  | Decl declType typeName prods <- decls, Prod cnstrName idpFields fields <- prods 
   ]
 
 
