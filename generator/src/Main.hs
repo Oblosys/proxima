@@ -7,6 +7,7 @@ import TypesUtils
 import Parser
 import qualified Gen_DocTypes
 import qualified Gen_DocUtils
+import qualified Gen_ProxParser
 
 
 import List
@@ -14,7 +15,6 @@ import GenCommon
 import GenParser
 import GenAG
 import GenEditable
-import GenProxParser
 
 
 --- All lines containing a --- have been altered by Martijn.
@@ -40,27 +40,30 @@ TODO:
 -rename <constructor>Node to Node_<constructor>
 
 -- get rid of hacks: (drop 5) (drop 9) to get list type name  and ("ParseErr" `isPrefixOf`)
-
+-- rename reusen to genericReuse (after diffing)
+-- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
 -}
 
 
 {-
 main =
  do { docType <- parseDocumentType "DocumentType.prx"
-    ; generateFile "." "Test.hs" $ Gen_DocUtils.generate docType
+    ; output <- generateFile "." "Test.hs" $ Gen_ProxParser.generate docType
+    ; putStr output
     ; getChar
     }
 -}
 
-generateFile :: String -> String -> [String] -> IO ()
+generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
  do { let filePath = path ++ "/" ++ fileName
     ; oldContents <- readFile filePath
     ; seq (length oldContents) $ return ()
     ; case removeGeneratedContent oldContents of
         Nothing -> stop ("File "++filePath++" should contain the following line:\n\n"++delimiterLine)
-        Just nonGenerated -> -- putStr $ nonGenerated ++ unlines (delimiterLine : generatedLines)
-                             writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+        Just nonGenerated -> do { writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+                                ; return $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+                                }
     } `catch` \err -> stop (show err)
 
 removeGeneratedContent :: String -> Maybe String
@@ -91,10 +94,11 @@ generateFiles srcPath fname
           docType <- parseDocumentType fname
           generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
           generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
+          generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
           generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
 --          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
           generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
-          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
+--          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
 
 -- make this function more clear
 generate filename func parsedFile

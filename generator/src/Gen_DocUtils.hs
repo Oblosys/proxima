@@ -26,17 +26,16 @@ generate docType = genRankNode (addHolesParseErrs (documentDecl : docTypeWithLis
 genRankNode decls = addBanner "rankNode" $
   "rankNode :: Node -> Int" :
   "rankNode NoNode = 0" :
-  zipWith (++) [ "rankNode (%1Node _ _) = " <~ [cnstrName]
-               | Decl _ _ prods <- decls, Prod cnstrName _ _ <- prods 
-               ]
+  zipWith (++) (map genRankNodeCnstr (getAllConstructorNames decls))
                (map show [1..])
+  where genRankNodeCnstr cnstrName = "rankNode (%1Node _ _) = " <~ [cnstrName]
+               
 
 genPathNode decls = addBanner "HasPath instance for Node" $
   "instance HasPath Node where" :
   "  pathNode NoNode            = NoPathD" :
-  [ "  pathNode (%1Node _ pth) = PathD pth" <~ [cnstrName]
-  | Decl _ _ prods <- decls, prod@(Prod cnstrName _ _) <- prods
-  ]
+  map genPathNodeCnstr (getAllConstructorNames decls)
+  where genPathNodeCnstr cnstrName = "  pathNode (%1Node _ pth) = PathD pth" <~ [cnstrName]
 
 genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl Basic typeName prods) = 
@@ -47,14 +46,14 @@ genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
          | prod@(Prod cnstrName _ fields) <- prods 
          ]
         genToXMLDecl (Decl List typeName prods) = 
-          [ "toXMLList_%1 (List_%1 xs) = toXMLConsList_%1 xs" <~ [ drop 5 typeName ]
-          , "toXMLList_%1 HoleList_%1 = []" <~ [ drop 5 typeName ]
-          , "toXMLList_%1 (ParseErrList_%1 _) = []" <~ [ drop 5 typeName ]
-          ]
+          [ "toXMLList_%1 (List_%1 xs) = toXMLConsList_%1 xs"
+          , "toXMLList_%1 HoleList_%1 = []"
+          , "toXMLList_%1 (ParseErrList_%1 _) = []"
+          ] `subst` [ drop 5 typeName ]
         genToXMLDecl (Decl ConsList typeName prods) = 
-          [ "toXMLConsList_%1 (Cons_%1 x xs) = toXML%1 x : toXMLConsList_%1 xs" <~ [ drop 9 typeName ]
-          , "toXMLConsList_%1 Nil_%1             = []" <~ [ drop 9 typeName ]
-          ]
+          [ "toXMLConsList_%1 (Cons_%1 x xs) = toXML%1 x : toXMLConsList_%1 xs"
+          , "toXMLConsList_%1 Nil_%1             = []"  
+          ] `subst` [ drop 9 typeName ]
      
         genToXMLFields [] = "[]"
         genToXMLFields fields = separateBy " ++ "

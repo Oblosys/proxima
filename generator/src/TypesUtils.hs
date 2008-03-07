@@ -55,6 +55,9 @@ getAllUsedTypes decls = nub
 getAllUsedListTypes :: DocumentType -> [Type]
 getAllUsedListTypes decls = filter isListType $ getAllUsedTypes decls
 
+getAllProductions :: DocumentType -> [Prod]
+getAllProductions decls = [ prod | Decl _ _ prods <- decls, prod <- prods ]
+
 getAllConstructorNames :: DocumentType -> [ConstructorName]
 getAllConstructorNames decls = [ name | Decl _ _ prods <- decls, Prod name _ _ <- prods ]
 
@@ -100,9 +103,9 @@ addHolesParseErrs decls = [ Decl declType typeName $ prods ++ holeParseErr typeN
   
 addBanner str lines = 
  [""
- ,"--------------------------------------------------------------------------------"
- ,"-- " ++ str ++  replicate (75 - length str) ' ' ++ "--"
- ,"--------------------------------------------------------------------------------"
+ ,"--------------------------------------------------------------------------"
+ ,"-- " ++ str ++  replicate (69 - length str) ' ' ++ "--"
+ ,"--------------------------------------------------------------------------"
  ,""
  ] ++ lines ++ ["",""]
  
@@ -111,6 +114,12 @@ appendToLastLine str lines = init lines ++ [last lines ++ str]
 
 separateBy sep strs = concat $ intersperse sep strs
 
+prefixBy pre strs = concatMap (pre++) strs
+
+suffixBy suf strs = concatMap (++suf) strs
+
+surroundBy pre suf strs = concatMap (\str -> pre ++ str ++ suf) strs
+ 
 str <~ args = substitute str
  where substitute "" = ""
        substitute [c] = [c]
@@ -122,6 +131,8 @@ str <~ args = substitute str
                                    else args !! (i-1) ++ substitute cs
        substitute (c:cs) = c : substitute cs 
        
+subst strs args = map (<~ args) strs
+
 stop err =
  do { putStrLn "\n\nCode generation failed."
     ; putStrLn err

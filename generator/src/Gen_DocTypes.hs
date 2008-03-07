@@ -46,9 +46,9 @@ genNode decls = addBanner "Node" $
 
 genShowNode decls = addBanner "Show instance for Node" $
   "instance Show Node where" :
-    "  show NoNode = \"NoNode\"" :
+   "  show NoNode = \"NoNode\"" :
   [ "  show (%1Node _ _) = \"%1Node\" " <~ [cnstrName]
-  | Decl _ _ prods <- decls, prod@(Prod cnstrName _ _) <- prods
+  | cnstrName <- getAllConstructorNames decls
   ]
 
 
