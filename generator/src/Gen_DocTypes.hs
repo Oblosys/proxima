@@ -31,7 +31,9 @@ genDataType decls = addBanner "Proxima data type" $
                       (map genProd prods) ++
          [ replicate (length typeName + 10) ' ' ++ "deriving Show", "" ]
        genProd (Prod cnstrName idpFields fields) = 
-         cnstrName ++ (concatMap ((" "++) . genTypeName . fieldType) $ idpFields ++ fields)
+         cnstrName ++ (prefixBy " " $ map (genIDPType . fieldType) idpFields ++
+                                      map (genTypeName . fieldType) fields
+                      )
 
 genClipDoc decls = addBanner "ClipDoc" $
   zipWith (++) ("data ClipDoc = " : repeat "             | ")

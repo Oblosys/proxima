@@ -68,10 +68,14 @@ fieldNameFromType tpe = case genTypeName tpe of
                           []     -> error "Types.genFieldName: empty typeName"
                           (c:cs) -> toLower c : cs ++ if isListType tpe then "s" else ""
 
-
-
 genTypeName (BasicType typeName) = typeName
 genTypeName (ListType typeName)  = "List_"++typeName
+
+genIDPType (BasicType typeName) = typeName
+genIDPType (ListType typeName)  = "["++typeName++"]"
+
+genNoID (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
+
 
 genPattern (Prod cnstrName idpFields fields) = 
   "(%1%2%3)" <~ 

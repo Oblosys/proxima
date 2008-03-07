@@ -42,6 +42,7 @@ TODO:
 -- get rid of hacks: (drop 5) (drop 9) to get list type name  and ("ParseErr" `isPrefixOf`)
 -- rename reusen to genericReuse (after diffing)
 -- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
+-- swap field type and field name
 -}
 
 

@@ -64,7 +64,7 @@ genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
 
 genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType decls
  where genParseXMLType (Decl Basic typeName prods) =
-         "parseXML_%1 = %2parseHoleAndParseErr \"%1\" Hole%1" <~ 
+         "parzeXML_%1 = %2parseHoleAndParseErr \"%1\" Hole%1" <~ 
            [ typeName
            , concat [ "parseXMLCns_%1 <?|> " <~ [cnstrName] | Prod cnstrName _ _ <- prods ]
            ] :
@@ -74,9 +74,9 @@ genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType d
            [ drop 5 typeName ]
          ]
        genParseXMLProd (Prod cnstrName _ fields) =
-         ("parseXMLCns_%1 = %1 <$ " ++
+         ("parseXMLCns_%1 = %1%2 <$ " ++
           if null fields 
           then "emptyTag \"%1\""
           else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genTypeName . fieldType) fields ++ "<* endTag \"%1\""
-         ) <~ [cnstrName]
+         ) <~ [cnstrName, prefixBy " " $ map genNoID fields ]
          
