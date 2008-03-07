@@ -16,7 +16,7 @@ import qualified Text.ParserCombinators.Parsec.Token as P
 import Text.ParserCombinators.Parsec.Language( haskellDef )
 import Char
 
-import Types
+import TypesUtils
 
 lexer :: P.TokenParser Int
 lexer  = P.makeTokenParser $ haskellDef

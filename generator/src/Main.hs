@@ -9,7 +9,9 @@ import GenAG
 import GenTypes
 import GenEditable
 import GenDocUtils
-import GenProxParser 
+import GenProxParser
+
+import TypesUtils
 
 --- All lines containing a --- have been altered by Martijn.
 --- For changed or added functions, a --- has been put in front of it rather than on each line
@@ -41,6 +43,13 @@ types that appear in lists
 --       M A I N                                                   --
 ---------------------------------------------------------------------
 
+{-
+main =
+ do { parseDocumentType "DocumentType.prx"
+    ; getChar
+    }
+-}
+
 main =
  do { args <- getArgs
     ; case args of
@@ -49,6 +58,13 @@ main =
                            ; exitWith (ExitFailure 1)
                            }
     }
+
+exitOnFailure :: Either String a -> IO a
+exitOnFailure (Left err) =
+ do { print err
+    ; exitWith (ExitFailure 1)
+    }
+exitOnFailure (Right res) = return res
 
 
 generateFiles srcPath fname  
