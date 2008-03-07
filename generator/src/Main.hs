@@ -5,7 +5,7 @@ import System
 
 import TypesUtils
 import Parser
-import qualified Gen_DocUtils
+import qualified Gen_DocTypes
 
 
 import List
@@ -86,7 +86,7 @@ generateFiles srcPath fname
           putStr $ " done\n"                           --- simply terminate with a parse error.
 --          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
           docType <- parseDocumentType fname
-          generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocUtils.generate docType
+          generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
           generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
           generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
           generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
