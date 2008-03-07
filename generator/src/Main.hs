@@ -6,6 +6,7 @@ import System
 import TypesUtils
 import Parser
 import qualified Gen_DocTypes
+import qualified Gen_DocUtils
 
 
 import List
