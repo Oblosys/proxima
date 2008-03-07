@@ -18,7 +18,11 @@ import Char
 
 import TypesUtils
 
-lexer :: P.TokenParser Int
+type ParserState = ()
+
+initState = ()
+
+lexer :: P.TokenParser ParserState
 lexer  = P.makeTokenParser $ haskellDef
 
 whiteSpace = P.whiteSpace lexer
@@ -33,18 +37,15 @@ reservedOp = P.reservedOp lexer
 braces     = P.braces lexer
 squares    = P.squares lexer
 
-parseDocumentType :: String -> IO ()
+parseDocumentType :: String -> IO DocumentType
 parseDocumentType filePath =
  do { input <- readFile filePath
-    ; case runParser pDocumentType 0 filePath input of
-        Right decls   -> print decls
-                           
-        Left  errors  -> do { putStr "parse error at "
-                            ; print errors
-                            } 
+    ; case runParser pDocumentType initState filePath input of
+        Right docType -> return docType
+        Left  errors  -> stop $ "Parse error:\n"++show errors
     }
 
-pDocumentType :: CharParser Int [Decl] -- The state is for uniquely naming anonymous fields
+pDocumentType :: CharParser ParserState [Decl] 
 pDocumentType =
  do { whiteSpace 
     ; decls <- many pDecl
@@ -62,14 +63,13 @@ pDecl =
 
 pProd = 
  do { constructorName <- ucIdentifier
-    ; setState 1
-    ; fields <- many (pField Regular)
-    ; idPFields <- pIDPFields
-    ; return $ Prod constructorName (idPFields ++ fields)
+    ; fields <- many pField
+    ; idpFields <- pIDPFields
+    ; return $ Prod constructorName idpFields fields
     }
 
 
-pField fieldType =
+pField =
  do { mFieldName <- option Nothing $ do { fieldName <- lcIdentifier
                                         ; reservedOp ":"
                                         ; return $ Just fieldName
@@ -77,20 +77,15 @@ pField fieldType =
     ; tpe <- pType
     
     ; fieldName <- case mFieldName of
-                     Nothing        -> do { ix <- getState
-                                          ; setState (ix+1)
-                                          ; return $ mkFieldName (getTypeName tpe) ++ show ix
-                                          }
+                     Nothing        -> return $ fieldNameFromType tpe
                      Just fieldName -> return fieldName
                  
-    ; return $ Field fieldType fieldName tpe
+    ; return $ Field fieldName tpe
     }
     
-mkFieldName ""     = error "Types.mkFieldName: empty typeName"
-mkFieldName (c:cs) = toLower c : cs
 
 
-pIDPFields = option [] $ braces $ many $ pField IDP
+pIDPFields = option [] $ braces $ many $ pField
 
 pType = choice
  [ do { typeName <- ucIdentifier

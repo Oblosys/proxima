@@ -1,8 +1,14 @@
 module Main where
 
-import System
-import List
 
+import System
+
+import TypesUtils
+import Parser
+import qualified Gen_DocUtils
+
+
+import List
 import GenCommon
 import GenParser
 import GenAG
@@ -11,7 +17,6 @@ import GenEditable
 import GenDocUtils
 import GenProxParser
 
-import TypesUtils
 
 --- All lines containing a --- have been altered by Martijn.
 --- For changed or added functions, a --- has been put in front of it rather than on each line
@@ -26,52 +31,62 @@ import TypesUtils
 --- the ag type, and one for the Haskell type. Now inits appear everywhere in the source.
 
 
---- use the name of the generated module for the module name, eg. GenDocumentEdit instead of GenEditable
 
 
 {- Generation
 TODO:
-
-make sure it is easy to generate for:
-types, types with generated list stuff, types without Document and EnrichedDoc,
-types that appear in lists
+-can we get rid of parse err and hole for node type?
+-add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
+-rename <constructor>Node to Node_<constructor>
 
 -}
 
-
----------------------------------------------------------------------
---       M A I N                                                   --
----------------------------------------------------------------------
 
 {-
 main =
- do { parseDocumentType "DocumentType.prx"
+ do { docType <- parseDocumentType "DocumentType.prx"
+    ; generateFile "Test.hs" $ Gen_DocUtils.generate docType
     ; getChar
     }
+
 -}
+generateFile :: String -> String -> [String] -> IO ()
+generateFile path fileName generatedLines =
+ do { let filePath = path ++ "/" ++ fileName
+    ; oldContents <- readFile filePath
+    ; seq (length oldContents) $ return ()
+    ; case removeGeneratedContent oldContents of
+        Nothing -> stop ("File "++filePath++" should contain the following line:\n\n"++delimiterLine)
+        Just nonGenerated -> writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+    } `catch` \err -> stop (show err)
+
+removeGeneratedContent :: String -> Maybe String
+removeGeneratedContent content = 
+  let contentLines = lines content
+  in  if any (isPrefixOf defaultLimit) contentLines
+      then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
+      else Nothing
+
 
 main =
  do { args <- getArgs
     ; case args of
         [srcPath, fname] -> generateFiles srcPath fname
-        _            -> do { putStrLn "Usage: generate <path to proxima src directory> <document type definition>.hs"
-                           ; exitWith (ExitFailure 1)
-                           }
+        _                -> 
+          stop "Usage: generate <path to proxima src directory> <document type definition>.prx"
+                           
     }
 
-exitOnFailure :: Either String a -> IO a
-exitOnFailure (Left err) =
- do { print err
-    ; exitWith (ExitFailure 1)
-    }
-exitOnFailure (Right res) = return res
+
 
 
 generateFiles srcPath fname  
      = do putStr $ "Parsing File: "++(show fname)++" ..."
           parsedFile <- parseDataTypesFile fname       -- What if the parser goes wrong?? 
           putStr $ " done\n"                           --- simply terminate with a parse error.
-          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
+--          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
+          docType <- parseDocumentType fname
+          generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocUtils.generate docType
           generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
           generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
           generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
