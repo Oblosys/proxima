@@ -36,9 +36,12 @@ import GenProxParser
 
 {- Generation
 TODO:
--can we get rid of parse err and hole for node type?
+-can we get rid of parse err and hole for node type? (also change rankNode and pathNode
+  old generator only made nodes for holes, not parse errs
 -add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
 -rename <constructor>Node to Node_<constructor>
+
+-- get rid of hacks: (drop 5) (drop 9) to get list type name  and ("ParseErr" `isPrefixOf`)
 
 -}
 
@@ -46,11 +49,11 @@ TODO:
 {-
 main =
  do { docType <- parseDocumentType "DocumentType.prx"
-    ; generateFile "Test.hs" $ Gen_DocUtils.generate docType
+    ; generateFile "." "Test.hs" $ Gen_DocUtils.generate docType
     ; getChar
     }
-
 -}
+
 generateFile :: String -> String -> [String] -> IO ()
 generateFile path fileName generatedLines =
  do { let filePath = path ++ "/" ++ fileName
@@ -58,7 +61,8 @@ generateFile path fileName generatedLines =
     ; seq (length oldContents) $ return ()
     ; case removeGeneratedContent oldContents of
         Nothing -> stop ("File "++filePath++" should contain the following line:\n\n"++delimiterLine)
-        Just nonGenerated -> writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+        Just nonGenerated -> -- putStr $ nonGenerated ++ unlines (delimiterLine : generatedLines)
+                             writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
     } `catch` \err -> stop (show err)
 
 removeGeneratedContent :: String -> Maybe String
@@ -88,8 +92,9 @@ generateFiles srcPath fname
 --          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
           docType <- parseDocumentType fname
           generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
+          generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
           generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
-          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
+--          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
           generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
           generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
 

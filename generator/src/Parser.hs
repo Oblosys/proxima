@@ -58,7 +58,7 @@ pDecl =
     ; typeName <- ucIdentifier
     ; reservedOp "="
     ; prods    <- pProd `sepBy1` reservedOp "|" 
-    ; return $ Decl typeName prods
+    ; return $ Decl Basic typeName prods
     }
 
 pProd = 
