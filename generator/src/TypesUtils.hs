@@ -9,7 +9,7 @@
 -}
 -----------------------------------------------------------------------------------------
 
-module Types where
+module TypesUtils where
 
 
 data Decl = Decl TypeName [Prod] deriving Show
