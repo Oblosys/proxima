@@ -13,9 +13,7 @@ import List
 import GenCommon
 import GenParser
 import GenAG
-import GenTypes
 import GenEditable
-import GenDocUtils
 import GenProxParser
 
 
