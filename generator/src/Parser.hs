@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------------------------
-{-| Module      : Types
+{-| Module      : Parser
     Copyright   : 
     License     : All Rights Reserved
 
@@ -9,33 +9,14 @@
 -}
 -----------------------------------------------------------------------------------------
 
-module Types where
+module Parser where
 
 import Text.ParserCombinators.Parsec
 import qualified Text.ParserCombinators.Parsec.Token as P
 import Text.ParserCombinators.Parsec.Language( haskellDef )
 import Char
 
-data Decl = Decl TypeName [Prod] deriving Show
-
-data Prod = Prod ConstructorName [Field] deriving Show
-
-data Field = Field FieldType FieldName Type deriving Show
-
-data FieldType = IDP | Regular deriving Show
-
-data Type = BasicType TypeName
-          | ListType  TypeName deriving Show
-          
-type TypeName = String
-
-type ConstructorName = String
-
-type FieldName = String
-
-getTypeName (BasicType typeName) = typeName
-getTypeName (ListType typeName)  = "List_"++typeName
-
+import Types
 
 lexer :: P.TokenParser Int
 lexer  = P.makeTokenParser $ haskellDef
@@ -137,6 +118,3 @@ ucIdentifier = try $
                  else fail "Upper case identifier expected"
         []     -> return str -- does not occur
     }
-{- 
-identifier stuff
--}
