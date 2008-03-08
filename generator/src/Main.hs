@@ -1,35 +1,18 @@
 module Main where
 
-
-import System
-
 import TypesUtils
 import Parser
 import qualified Gen_DocTypes
 import qualified Gen_DocUtils
 import qualified Gen_ProxParser
+import qualified Gen_PresentationAG
 
-
+import System
 import List
 import GenCommon
 import GenParser
 import GenAG
 import GenEditable
-
-
---- All lines containing a --- have been altered by Martijn.
---- For changed or added functions, a --- has been put in front of it rather than on each line
-
-
---- Hole and ParseErr are still a bit hacky. Rather than being added to the datatype, they
---- are added as strings by each of the generator modules. A change on them is therefore
---- hard to realize
-
-
---- more abstraction on the types is necessary, for example simply have a function for printing
---- the ag type, and one for the Haskell type. Now inits appear everywhere in the source.
-
-
 
 
 {- Generation
@@ -43,18 +26,17 @@ TODO:
 -- do a diff on generated files to check that they are correct.
 -- rename reusen to genericReuse (after diffing)
 -- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
--- swap field type and field name
 -}
 
 
-{-
+
 main =
- do { docType <- parseDocumentType "DocumentType.prx"
-    ; output <- generateFile "." "Test.hs" $ Gen_ProxParser.generate docType
+ do { docType <- parseDocumentType "../DocumentType.prx"
+    ; output <- generateFile ".." "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
     ; putStr output
     ; getChar
     }
--}
+
 
 generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
@@ -75,16 +57,16 @@ removeGeneratedContent content =
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
 
-
+{-
 main =
  do { args <- getArgs
     ; case args of
         [srcPath, fname] -> generateFiles srcPath fname
         _                -> 
-          stop "Usage: generate <path to proxima src directory> <document type definition>.prx"
+          stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
-
+-}
 
 
 

@@ -58,8 +58,8 @@ genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
         genToXMLFields [] = "[]"
         genToXMLFields fields = separateBy " ++ "
           [ if isListType . fieldType $ field 
-            then "toXML%1 %2" <~ [genTypeName (fieldType field), fieldName field] 
-            else "[toXML%1 %2]" <~ [genTypeName (fieldType field), fieldName field] 
+            then "toXML%1 %2" <~ [genType (fieldType field), fieldName field] 
+            else "[toXML%1 %2]" <~ [genType (fieldType field), fieldName field] 
           | field <- fields ]
 
 genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType decls
@@ -77,6 +77,6 @@ genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType d
          ("parseXMLCns_%1 = %1%2 <$ " ++
           if null fields 
           then "emptyTag \"%1\""
-          else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genTypeName . fieldType) fields ++ "<* endTag \"%1\""
+          else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genType . fieldType) fields ++ "<* endTag \"%1\""
          ) <~ [cnstrName, prefixBy " " $ map genNoIDP idpFields ]
          

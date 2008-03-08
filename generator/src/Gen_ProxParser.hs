@@ -30,7 +30,7 @@ genReuse decls = addBanner "reuse functions" $ concat
     , ""
     ] `subst` [ cnstrName                                                         -- %1
               , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
-                                        map (genTypeName . fieldType) fields      -- %2
+                                        map (genType . fieldType) fields          -- %2
               , typeName                                                          -- %3
               , prefixBy " m" $ cnstrArgs                                         -- %4
               , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5

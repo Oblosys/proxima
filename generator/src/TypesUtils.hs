@@ -24,16 +24,17 @@ documentDecl = Decl Basic "Document" [Prod "RootDoc" [] [Field "root" (BasicType
 
 type DocumentType = [Decl]
 
-data Decl = Decl { declType :: DeclType, declTypeName :: TypeName, productions :: [Prod] } deriving Show
+data Decl = Decl { declKind :: DeclKind, declTypeName :: TypeName, productions :: [Prod] } deriving Show
 
-data DeclType = Basic | List | ConsList deriving Show
+data DeclKind = Basic | List | ConsList deriving Show
 
 data Prod = Prod { constructorName :: ConstructorName, idpFields :: [Field], fields :: [Field] } deriving Show
 
 data Field = Field { fieldName :: FieldName, fieldType :: Type } deriving Show
 
-data Type = BasicType { typeName :: TypeName }
-          | ListType  { typeName :: TypeName } deriving (Show, Eq)
+data Type = BasicType     { typeName :: TypeName }
+          | ListType      { typeName :: TypeName }
+          | CompositeType { typeName :: TypeName } deriving (Show, Eq)
           
 type TypeName = String
 
@@ -64,16 +65,27 @@ getAllConstructorNames decls = [ name | Decl _ _ prods <- decls, Prod name _ _ <
 getArity :: Prod -> Int
 getArity (Prod _ idpFields fields) = length idpFields + length fields
 
-fieldNameFromType tpe = case genTypeName tpe of
+fieldNameFromType (CompositeType typeName) = [ if c == ' ' then '_' else c | c <- typeName ]
+fieldNameFromType tpe = case typeName tpe of
                           []     -> error "Types.genFieldName: empty typeName"
                           (c:cs) -> toLower c : cs ++ if isListType tpe then "s" else ""
 
-genTypeName (BasicType typeName) = typeName
-genTypeName (ListType typeName)  = "List_"++typeName
+genIDPType (BasicType typeName)     = typeName
+genIDPType (ListType typeName)      = "["++typeName++"]"
+genIDPType (CompositeType typeName) = "("++typeName++")"
 
-genIDPType (BasicType typeName) = typeName
-genIDPType (ListType typeName)  = "["++typeName++"]"
+genIDPTypeAG (BasicType typeName)     = typeName
+genIDPTypeAG (ListType typeName)      = "{["++typeName++"]}"
+genIDPTypeAG (CompositeType typeName) = "{"++typeName++"}"
 
+genType (BasicType typeName)     = typeName
+genType (ListType typeName)      = "List_"++typeName
+genType (CompositeType typeName) = "("++typeName++")"
+ 
+genTypeAG (BasicType typeName)     = typeName
+genTypeAG (ListType typeName)      = "List_"++typeName
+genTypeAG (CompositeType typeName) = "{("++typeName++")}"
+ 
 genNoIDP (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
 
 
@@ -84,7 +96,7 @@ genPattern (Prod cnstrName idpFields fields) =
 
 
 genListDecls decls = map genListDecl $ getAllUsedListTypes decls
- where genListDecl tpe = Decl List (genTypeName tpe) 
+ where genListDecl tpe = Decl List (genType tpe) 
                            [ Prod ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
 
 
@@ -98,11 +110,11 @@ genConsListDecls decls = map genConsListDecl $ getAllUsedListTypes decls
                            ]
                            
 addHolesParseErrs :: DocumentType -> DocumentType
-addHolesParseErrs decls = [ Decl declType typeName $ prods ++ holeParseErr typeName 
-                          | Decl declType typeName prods <- decls ]
+addHolesParseErrs decls = [ Decl declKind typeName $ prods ++ holeParseErr typeName 
+                          | Decl declKind typeName prods <- decls ]
  where holeParseErr typeName = [ Prod ("Hole"++typeName) [] [] 
                                , Prod ("ParseErr"++typeName) [] 
-                                   [ Field "presentation" (BasicType "(Presentation Document Node ClipDoc UserToken)") ]
+                                   [ Field "presentation" (CompositeType "Presentation Document Node ClipDoc UserToken") ]
                                ]
   
 addBanner str lines = 
