@@ -105,29 +105,33 @@ genPattern (Prod _ cnstrName idpFields fields) =
 
 
 
-genListDecls decls = map genListDecl $ getAllUsedListTypes decls
+addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)
  where genListDecl tpe = Decl (LHSListType $ typeName tpe) 
                            [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
 
-
-genConsListDecls decls = map genConsListDecl $ getAllUsedListTypes decls
- where genConsListDecl tpe = Decl(LHSConsListType (typeName tpe))
+-- it doesn't matter if addListDecls has been called before using addConsListDecls, since addListDecls does
+-- not introduce additional lists.
+addConsListDecls decls = decls ++ (map genConsListDecl $ getAllUsedListTypes decls)
+ where genConsListDecl tpe = Decl (LHSConsListType (typeName tpe))
                            [ Prod ConsProd ("Cons_"++typeName tpe) [] 
                                [ Field "head" (BasicType (typeName tpe))
                                , Field "tail" (BasicType ("ConsList_"++typeName tpe))
                                ]
                            , Prod NilProd ("Nil_"++typeName tpe) [] []
                            ]
-                           
+            
+-- add Hole and ParseErr productions to all declarations, except ConsLists            
 addHolesParseErrs :: DocumentType -> DocumentType
-addHolesParseErrs decls = [ Decl lhsType $ prods ++ holeParseErr (genTypeName lhsType)
+addHolesParseErrs decls = [ Decl lhsType $ prods ++ case lhsType of
+                                                      LHSConsListType _ -> []
+                                                      _                 -> holeParseErr (genTypeName lhsType)
                           | Decl lhsType prods <- decls ]
  where holeParseErr typeName = [ Prod HoleProd ("Hole"++typeName) [] [] 
                                , Prod ParseErrProd ("ParseErr"++typeName) [] 
                                    [ Field "presentation" (CompositeType "Presentation Document Node ClipDoc UserToken") ]
                                ]
   
-addBanner str lines = 
+genBanner str lines = 
  [""
  ,"--------------------------------------------------------------------------"
  ,"-- " ++ str ++  replicate (69 - length str) ' ' ++ "--"

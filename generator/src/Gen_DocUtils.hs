@@ -19,11 +19,11 @@ import TypesUtils
 generate :: DocumentType -> [String]
 generate docType = genRankNode (addHolesParseErrs (documentDecl : docTypeWithLists))
                 ++ genPathNode (addHolesParseErrs (documentDecl : docTypeWithLists))
-                ++ genToXML    (addHolesParseErrs docTypeWithLists ++ genConsListDecls docType)  
+                ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genParseXML (docTypeWithLists)  
-  where docTypeWithLists = docType ++ genListDecls docType
+  where docTypeWithLists = addListDecls docType
 
-genRankNode decls = addBanner "rankNode" $
+genRankNode decls = genBanner "rankNode" $
   "rankNode :: Node -> Int" :
   "rankNode NoNode = 0" :
   zipWith (++) (map genRankNodeCnstr (getAllConstructorNames decls))
@@ -31,13 +31,13 @@ genRankNode decls = addBanner "rankNode" $
   where genRankNodeCnstr cnstrName = "rankNode (%1Node _ _) = " <~ [cnstrName]
                
 
-genPathNode decls = addBanner "HasPath instance for Node" $
+genPathNode decls = genBanner "HasPath instance for Node" $
   "instance HasPath Node where" :
   "  pathNode NoNode            = NoPathD" :
   map genPathNodeCnstr (getAllConstructorNames decls)
   where genPathNodeCnstr cnstrName = "  pathNode (%1Node _ pth) = PathD pth" <~ [cnstrName]
 
-genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
+genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 
          [ case prodKind of 
              ParseErrProd -> "toXML%1 %2 = Elt \"%3\" [] []" <~ [typeName, genPattern prod, cnstrName] 
@@ -62,7 +62,7 @@ genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
             else "[toXML%1 %2]" <~ [genType (fieldType field), fieldName field] 
           | field <- fields ]
 
-genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType decls
+genParseXML decls = genBanner "parseXML functions" $ concatMap genParseXMLType decls
  where genParseXMLType (Decl (LHSBasicType typeName) prods) =
          "parseXML_%1 = %2parseHoleAndParseErr \"%1\" Hole%1" <~ 
            [ typeName

@@ -25,10 +25,10 @@ import TypesUtils
 import List
 
 generate :: DocumentType -> [String]
-generate docType = genDataType (addHolesParseErrs docTypeWithLists ++ genConsListDecls docType)
-  where docTypeWithLists = docType ++ genListDecls docType
+generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
+  where docTypeWithLists = addListDecls docType
 
-genDataType decls = addBanner "AG data type" $
+genDataType decls = genBanner "AG data type" $
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) = 
          "DATA %1" <~ [genTypeName lhsType] :

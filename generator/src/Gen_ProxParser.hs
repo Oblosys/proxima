@@ -19,9 +19,9 @@ generate docType = genReuse   docTypeWithLists
                 ++ genDefault docTypeWithLists
                 ++ genExtractFromTokens 
                 ++ genGenericReuse docTypeWithLists
-  where docTypeWithLists = docType ++ genListDecls docType
+  where docTypeWithLists = addListDecls docType
   
-genReuse decls = addBanner "reuse functions" $ concat
+genReuse decls = genBanner "reuse functions" $ concat
   [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"
     , "  = case extractFromTokens extract%1 default%1 nodes of"
@@ -43,7 +43,7 @@ genReuse decls = addBanner "reuse functions" $ concat
   ]
 
 
-genExtract decls = addBanner "extract functions" $ concat
+genExtract decls = genBanner "extract functions" $ concat
   [ [ "extract%1 :: Maybe Node -> Maybe %2"
     , "extract%1 (Just (%1Node x@%3 _)) = Just x"
     , "extract%1 _ = Nothing"
@@ -53,7 +53,7 @@ genExtract decls = addBanner "extract functions" $ concat
   ]             
    
 
-genDefault decls = addBanner "default functions" $ concat
+genDefault decls = genBanner "default functions" $ concat
   [ case lhsType of
       LHSBasicType typeName -> 
                [ "default%1 :: %2"
@@ -61,7 +61,8 @@ genDefault decls = addBanner "default functions" $ concat
                                      concat (replicate (length fields) " hole")
                , ""
                ] `subst` [ cnstrName, genTypeName lhsType ]
-      LHSListType typeName -> [ "defaultList_%1 :: List_%1"
+      LHSListType typeName -> 
+               [ "defaultList_%1 :: List_%1"
                , "defaultList_%1 = List_%1 Nil_%1"
                , ""
                ] `subst` [ typeName ]
@@ -74,14 +75,14 @@ genDefault decls = addBanner "default functions" $ concat
 this one is here because we don't want DocUtils to import another module (it could also be put in the
 non-generated part). 
 -}
-genExtractFromTokens = addBanner "extractFromTokens" $
+genExtractFromTokens = genBanner "extractFromTokens" $
  [ "-- return result of the first extraction application in the list that is not Nothing"
  , "extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a"
  , "extractFromTokens extr def []     = def"
  , "extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))"
  ]
 
-genGenericReuse decls = addBanner "genericReuse functions" $
+genGenericReuse decls = genBanner "genericReuse functions" $
   concatMap genGenericReuseN $ [0.. maximum (map getArity (getAllProductions decls))]
  where genGenericReuseN n = 
          let aArgs = zipWith (++) (replicate n "a") (map show [0..])

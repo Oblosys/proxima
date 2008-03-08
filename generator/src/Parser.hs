@@ -88,13 +88,13 @@ pField =
 pIDPFields = option [] $ braces $ many $ pField
 
 pType = choice
- [ do { typeName <- ucIdentifier
-      ; return $ BasicType typeName
-      }
- , do { typeName <- squares ucIdentifier 
-      ; return $ ListType typeName
-      } 
- ]
+  [ do { typeName <- ucIdentifier
+       ; return $ BasicType typeName
+       }
+  , do { typeName <- squares ucIdentifier 
+       ; return $ ListType typeName
+       } 
+  ]
 
 lcIdentifier = try $
  do { str <- identifier

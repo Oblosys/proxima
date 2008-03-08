@@ -16,15 +16,15 @@ import Char
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genDataType (addHolesParseErrs docTypeWithLists ++ genConsListDecls docType)
-                ++ genClipDoc  (documentDecl : docTypeWithLists ++ primTypes)
+generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
+                ++ genClipDoc                     (documentDecl : docTypeWithLists ++ primTypes)
                 ++ genNode     (addHolesParseErrs (documentDecl : docTypeWithLists))
                 ++ genShowNode (addHolesParseErrs (documentDecl : docTypeWithLists))
-  where docTypeWithLists = docType ++ genListDecls docType
+  where docTypeWithLists = addListDecls docType
 
                 
 
-genDataType decls = addBanner "Proxima data type" $
+genDataType decls = genBanner "Proxima data type" $
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) =
          let typeName = genTypeName lhsType
@@ -35,18 +35,18 @@ genDataType decls = addBanner "Proxima data type" $
          cnstrName ++ (prefixBy " " $ map (genIDPType . fieldType) idpFields ++
                                       map (genType . fieldType) fields)
 
-genClipDoc decls = addBanner "ClipDoc" $
+genClipDoc decls = genBanner "ClipDoc" $
   zipWith (++) ("data ClipDoc = " : repeat "             | ")
                [ "Clip_%1 %1" <~ [name] | name <- getAllDeclaredTypeNames decls ] ++
   ["             | Clip_Nothing deriving Show"]
     
-genNode decls = addBanner "Node" $
+genNode decls = genBanner "Node" $
   "data Node = NoNode" :
   [ "          | %1Node %2 Path" <~ [cnstrName, genTypeName lhsType]
   | Decl lhsType prods <- decls, Prod _ cnstrName _ _ <- prods 
   ]
 
-genShowNode decls = addBanner "Show instance for Node" $
+genShowNode decls = genBanner "Show instance for Node" $
   "instance Show Node where" :
    "  show NoNode = \"NoNode\"" :
   [ "  show (%1Node _ _) = \"%1Node\" " <~ [cnstrName]

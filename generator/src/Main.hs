@@ -17,17 +17,14 @@ import GenEditable
 
 {- Generation
 TODO:
--can we get rid of parse err and hole for node type? (also change rankNode and pathNode
+- do a diff on generated files to check that they are correct.
+- rename reusen to genericReuse (after diffing)
+- rename <constructor>Node to Node_<constructor>
+- can we get rid of parse err and hole for node type? (also change rankNode and pathNode
   old generator only made nodes for holes, not parse errs
--add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
--rename <constructor>Node to Node_<constructor>
+- add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
 
--- get rid of hacks: (drop 5) (drop 9) to get list type name
--- do a diff on generated files to check that they are correct.
--- rename reusen to genericReuse (after diffing)
--- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
-
--- genListDecls needs a different name (gen suggests it produces [String])
+- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
 -}
 
 
@@ -78,7 +75,6 @@ generateFiles srcPath fname
           putStr $ " done\n"                           --- simply terminate with a parse error.
 --          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
           docType <- parseDocumentType fname
-          print $ genListDecls docType
           generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
           generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
           generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
