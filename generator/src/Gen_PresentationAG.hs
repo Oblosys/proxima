@@ -34,7 +34,7 @@ genDataType decls = addBanner "AG data type" $
          "DATA %1" <~ [typeName] :
          [ "  | " ++ genProd prod | prod <- prods] ++
          [ "", "" ]
-        where genProd (Prod cnstrName idpFields fields) =
+        where genProd (Prod _ cnstrName idpFields fields) =
                 cnstrName ++ (prefixBy " " $ map genIDPField idpFields ++
                                              map genField fields)
                       

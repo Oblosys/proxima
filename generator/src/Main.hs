@@ -22,7 +22,7 @@ TODO:
 -add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
 -rename <constructor>Node to Node_<constructor>
 
--- get rid of hacks: (drop 5) (drop 9) to get list type name  and ("ParseErr" `isPrefixOf`)
+-- get rid of hacks: (drop 5) (drop 9) to get list type name
 -- do a diff on generated files to check that they are correct.
 -- rename reusen to genericReuse (after diffing)
 -- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)

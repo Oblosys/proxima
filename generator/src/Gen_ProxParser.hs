@@ -38,7 +38,7 @@ genReuse decls = addBanner "reuse functions" $ concat
               , prefixBy " " $ cnstrArgs                                          -- %7
               ] -- we don't use genPattern and fieldNames, since the (" m"++) could cause problems 
                 -- e.g. for T a:A ma : M, we would get ma mma and a ma
-  | Decl _ typeName prods <- decls, prod@(Prod cnstrName idpFields fields) <- prods
+  | Decl _ typeName prods <- decls, prod@(Prod _ cnstrName idpFields fields) <- prods
   , let cnstrArgs = zipWith (++) (replicate (length idpFields + length fields) "a") (map show [0..]) 
   ]
 
@@ -49,12 +49,12 @@ genExtract decls = addBanner "extract functions" $ concat
     , "extract%1 _ = Nothing"
     , ""
     ] `subst` [ cnstrName, typeName, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]
-  | Decl _ typeName prods <- decls, prod@(Prod cnstrName _ _) <- prods 
+  | Decl _ typeName prods <- decls, prod@(Prod _ cnstrName _ _) <- prods 
   ]             
    
 
 genDefault decls = addBanner "default functions" $ concat
-  [ case declType of
+  [ case declKind of
       Basic -> [ "default%1 :: %2"
                , "default%1 = %1" ++ prefixBy " " (map genNoIDP idpFields) ++
                                      concat (replicate (length fields) " hole")
@@ -65,7 +65,7 @@ genDefault decls = addBanner "default functions" $ concat
                , ""
                ] `subst` [ drop 5 typeName ]
              
-  | Decl declType typeName prods <- decls, Prod cnstrName idpFields fields <- prods 
+  | Decl declKind typeName prods <- decls, Prod _ cnstrName idpFields fields <- prods 
   ]
 
 

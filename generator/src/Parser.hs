@@ -65,7 +65,7 @@ pProd =
  do { constructorName <- ucIdentifier
     ; fields <- many pField
     ; idpFields <- pIDPFields
-    ; return $ Prod constructorName idpFields fields
+    ; return $ Prod ExplicitProd constructorName idpFields fields
     }
 
 

@@ -39,11 +39,11 @@ genPathNode decls = addBanner "HasPath instance for Node" $
 
 genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl Basic typeName prods) = 
-         [ if "ParseErr" `isPrefixOf` cnstrName 
-         then "toXML%1 %2 = Elt \"%3\" [] []" <~ [typeName, genPattern prod, cnstrName] 
-         else "toXML%1 %2 = Elt \"%3\" [] $ " <~ [typeName, genPattern prod, cnstrName] ++
-             genToXMLFields fields
-         | prod@(Prod cnstrName _ fields) <- prods 
+         [ case prodKind of 
+             ParseErrProd -> "toXML%1 %2 = Elt \"%3\" [] []" <~ [typeName, genPattern prod, cnstrName] 
+             _            -> "toXML%1 %2 = Elt \"%3\" [] $ " <~ [typeName, genPattern prod, cnstrName] ++
+                                               genToXMLFields fields
+         | prod@(Prod prodKind cnstrName _ fields) <- prods 
          ]
         genToXMLDecl (Decl List typeName prods) = 
           [ "toXMLList_%1 (List_%1 xs) = toXMLConsList_%1 xs"
@@ -66,14 +66,14 @@ genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType d
  where genParseXMLType (Decl Basic typeName prods) =
          "parseXML_%1 = %2parseHoleAndParseErr \"%1\" Hole%1" <~ 
            [ typeName
-           , concat [ "parseXMLCns_%1 <?|> " <~ [cnstrName] | Prod cnstrName _ _ <- prods ]
+           , concat [ "parseXMLCns_%1 <?|> " <~ [cnstrName] | Prod _ cnstrName _ _ <- prods ]
            ] :
            map genParseXMLProd prods
        genParseXMLType (Decl List typeName prods) =
          ["parseXML_List_%1 = mkList List_%1 Cons_%1 Nil_%1 <$> many parseXML_%1" <~ 
            [ drop 5 typeName ]
          ]
-       genParseXMLProd (Prod cnstrName idpFields fields) =
+       genParseXMLProd (Prod _ cnstrName idpFields fields) =
          ("parseXMLCns_%1 = %1%2 <$ " ++
           if null fields 
           then "emptyTag \"%1\""

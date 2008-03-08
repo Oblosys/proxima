@@ -20,15 +20,19 @@ delimiterLine = "----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS
 primTypes = map primDecl ["Bool", "Int", "String", "Float"]
  where primDecl tpe = Decl Basic tpe []
  
-documentDecl = Decl Basic "Document" [Prod "RootDoc" [] [Field "root" (BasicType "Root")]]
+documentDecl = Decl Basic "Document" [Prod ExplicitProd "RootDoc" [] [Field "root" (BasicType "Root")]]
 
 type DocumentType = [Decl]
 
 data Decl = Decl { declKind :: DeclKind, declTypeName :: TypeName, productions :: [Prod] } deriving Show
 
 data DeclKind = Basic | List | ConsList deriving Show
+-- encodes the origin of a declaration. Basic comes from the document type definition or the implicit Document decl.
 
-data Prod = Prod { constructorName :: ConstructorName, idpFields :: [Field], fields :: [Field] } deriving Show
+data Prod = Prod { prodKind :: ProdKind, constructorName :: ConstructorName, idpFields :: [Field], fields :: [Field] } deriving Show
+
+data ProdKind = ExplicitProd | ListProd | ConsProd | NilProd | HoleProd | ParseErrProd deriving Show
+-- encodes the origin of a production. ExplicitProd comes from the document type definition or the implicit Document decl.
 
 data Field = Field { fieldName :: FieldName, fieldType :: Type } deriving Show
 
@@ -50,7 +54,7 @@ getAllDeclaredTypeNames decls = [ name | Decl _ name _ <- decls ]
 
 getAllUsedTypes :: DocumentType -> [Type]
 getAllUsedTypes decls = nub 
-  [ tpe | Decl _ _ prods <- decls, Prod name _ fields <- prods, Field _ tpe <- fields  ]
+  [ tpe | Decl _ _ prods <- decls, Prod _ name _ fields <- prods, Field _ tpe <- fields  ]
 
 -- return the list types appearing in right-hand sides
 getAllUsedListTypes :: DocumentType -> [Type]
@@ -60,10 +64,10 @@ getAllProductions :: DocumentType -> [Prod]
 getAllProductions decls = [ prod | Decl _ _ prods <- decls, prod <- prods ]
 
 getAllConstructorNames :: DocumentType -> [ConstructorName]
-getAllConstructorNames decls = [ name | Decl _ _ prods <- decls, Prod name _ _ <- prods ]
+getAllConstructorNames decls = [ name | Decl _ _ prods <- decls, Prod _ name _ _ <- prods ]
 
 getArity :: Prod -> Int
-getArity (Prod _ idpFields fields) = length idpFields + length fields
+getArity (Prod _ _ idpFields fields) = length idpFields + length fields
 
 fieldNameFromType (CompositeType typeName) = [ if c == ' ' then '_' else c | c <- typeName ]
 fieldNameFromType tpe = case typeName tpe of
@@ -89,7 +93,7 @@ genTypeAG (CompositeType typeName) = "{("++typeName++")}"
 genNoIDP (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
 
 
-genPattern (Prod cnstrName idpFields fields) = 
+genPattern (Prod _ cnstrName idpFields fields) = 
   "(%1%2%3)" <~ 
   [cnstrName, concat $ replicate (length idpFields) " _", concatMap ((" "++) . fieldName) fields]
 
@@ -97,23 +101,23 @@ genPattern (Prod cnstrName idpFields fields) =
 
 genListDecls decls = map genListDecl $ getAllUsedListTypes decls
  where genListDecl tpe = Decl List (genType tpe) 
-                           [ Prod ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
+                           [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
 
 
 genConsListDecls decls = map genConsListDecl $ getAllUsedListTypes decls
  where genConsListDecl tpe = Decl ConsList ("ConsList_"++typeName tpe)
-                           [ Prod ("Cons_"++typeName tpe) [] 
+                           [ Prod ConsProd ("Cons_"++typeName tpe) [] 
                                [ Field "head" (BasicType (typeName tpe))
                                , Field "tail" (BasicType ("ConsList_"++typeName tpe))
                                ]
-                           , Prod ("Nil_"++typeName tpe) [] []
+                           , Prod NilProd ("Nil_"++typeName tpe) [] []
                            ]
                            
 addHolesParseErrs :: DocumentType -> DocumentType
 addHolesParseErrs decls = [ Decl declKind typeName $ prods ++ holeParseErr typeName 
                           | Decl declKind typeName prods <- decls ]
- where holeParseErr typeName = [ Prod ("Hole"++typeName) [] [] 
-                               , Prod ("ParseErr"++typeName) [] 
+ where holeParseErr typeName = [ Prod HoleProd ("Hole"++typeName) [] [] 
+                               , Prod ParseErrProd ("ParseErr"++typeName) [] 
                                    [ Field "presentation" (CompositeType "Presentation Document Node ClipDoc UserToken") ]
                                ]
   
