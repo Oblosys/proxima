@@ -26,17 +26,19 @@ TODO:
 -- do a diff on generated files to check that they are correct.
 -- rename reusen to genericReuse (after diffing)
 -- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
+
+-- genListDecls needs a different name (gen suggests it produces [String])
 -}
 
 
-
+{-
 main =
  do { docType <- parseDocumentType "../DocumentType.prx"
     ; output <- generateFile ".." "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
     ; putStr output
     ; getChar
     }
-
+-}
 
 generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
@@ -57,7 +59,7 @@ removeGeneratedContent content =
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
 
-{-
+
 main =
  do { args <- getArgs
     ; case args of
@@ -66,7 +68,7 @@ main =
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
--}
+
 
 
 
@@ -76,6 +78,7 @@ generateFiles srcPath fname
           putStr $ " done\n"                           --- simply terminate with a parse error.
 --          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
           docType <- parseDocumentType fname
+          print $ genListDecls docType
           generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
           generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
           generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType

@@ -17,22 +17,20 @@ import List
 
 delimiterLine = "----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----"
 
-primTypes = map primDecl ["Bool", "Int", "String", "Float"]
- where primDecl tpe = Decl Basic tpe []
+primTypes = map primDecl [(LHSBasicType "Bool"), (LHSBasicType "Int"), (LHSBasicType "String"), (LHSBasicType "Float") ]
+ where primDecl tpe = Decl tpe []
  
-documentDecl = Decl Basic "Document" [Prod ExplicitProd "RootDoc" [] [Field "root" (BasicType "Root")]]
+documentDecl = Decl (LHSBasicType "Document") [Prod ExplicitProd "RootDoc" [] [Field "root" (BasicType "Root")]]
 
 type DocumentType = [Decl]
 
-data Decl = Decl { declKind :: DeclKind, declTypeName :: TypeName, productions :: [Prod] } deriving Show
-
-data DeclKind = Basic | List | ConsList deriving Show
--- encodes the origin of a declaration. Basic comes from the document type definition or the implicit Document decl.
+data Decl = Decl { declLHSType :: LHSType, productions :: [Prod] } deriving Show
 
 data Prod = Prod { prodKind :: ProdKind, constructorName :: ConstructorName, idpFields :: [Field], fields :: [Field] } deriving Show
 
 data ProdKind = ExplicitProd | ListProd | ConsProd | NilProd | HoleProd | ParseErrProd deriving Show
 -- encodes the origin of a production. ExplicitProd comes from the document type definition or the implicit Document decl.
+-- only ParseErrProd is being used at the time.
 
 data Field = Field { fieldName :: FieldName, fieldType :: Type } deriving Show
 
@@ -40,6 +38,10 @@ data Type = BasicType     { typeName :: TypeName }
           | ListType      { typeName :: TypeName }
           | CompositeType { typeName :: TypeName } deriving (Show, Eq)
           
+data LHSType = LHSBasicType    { lhsTypeName :: TypeName }
+             | LHSListType     { lhsTypeName :: TypeName }
+             | LHSConsListType { lhsTypeName :: TypeName } deriving (Show, Eq)
+
 type TypeName = String
 
 type ConstructorName = String
@@ -50,21 +52,21 @@ isListType (ListType _) = True
 isListType _            = False
 
 getAllDeclaredTypeNames :: DocumentType -> [TypeName]
-getAllDeclaredTypeNames decls = [ name | Decl _ name _ <- decls ]
+getAllDeclaredTypeNames decls = [ genTypeName name | Decl name _ <- decls ]
 
 getAllUsedTypes :: DocumentType -> [Type]
 getAllUsedTypes decls = nub 
-  [ tpe | Decl _ _ prods <- decls, Prod _ name _ fields <- prods, Field _ tpe <- fields  ]
+  [ tpe | Decl _ prods <- decls, Prod _ name _ fields <- prods, Field _ tpe <- fields  ]
 
 -- return the list types appearing in right-hand sides
 getAllUsedListTypes :: DocumentType -> [Type]
 getAllUsedListTypes decls = filter isListType $ getAllUsedTypes decls
 
 getAllProductions :: DocumentType -> [Prod]
-getAllProductions decls = [ prod | Decl _ _ prods <- decls, prod <- prods ]
+getAllProductions decls = [ prod | Decl _ prods <- decls, prod <- prods ]
 
 getAllConstructorNames :: DocumentType -> [ConstructorName]
-getAllConstructorNames decls = [ name | Decl _ _ prods <- decls, Prod _ name _ _ <- prods ]
+getAllConstructorNames decls = [ name | Decl _ prods <- decls, Prod _ name _ _ <- prods ]
 
 getArity :: Prod -> Int
 getArity (Prod _ _ idpFields fields) = length idpFields + length fields
@@ -89,7 +91,11 @@ genType (CompositeType typeName) = "("++typeName++")"
 genTypeAG (BasicType typeName)     = typeName
 genTypeAG (ListType typeName)      = "List_"++typeName
 genTypeAG (CompositeType typeName) = "{("++typeName++")}"
- 
+
+genTypeName (LHSBasicType typeName)    = typeName
+genTypeName (LHSListType typeName)     = "List_"++typeName
+genTypeName (LHSConsListType typeName) = "ConsList_"++typeName
+
 genNoIDP (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
 
 
@@ -100,12 +106,12 @@ genPattern (Prod _ cnstrName idpFields fields) =
 
 
 genListDecls decls = map genListDecl $ getAllUsedListTypes decls
- where genListDecl tpe = Decl List (genType tpe) 
+ where genListDecl tpe = Decl (LHSListType $ typeName tpe) 
                            [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
 
 
 genConsListDecls decls = map genConsListDecl $ getAllUsedListTypes decls
- where genConsListDecl tpe = Decl ConsList ("ConsList_"++typeName tpe)
+ where genConsListDecl tpe = Decl(LHSConsListType (typeName tpe))
                            [ Prod ConsProd ("Cons_"++typeName tpe) [] 
                                [ Field "head" (BasicType (typeName tpe))
                                , Field "tail" (BasicType ("ConsList_"++typeName tpe))
@@ -114,8 +120,8 @@ genConsListDecls decls = map genConsListDecl $ getAllUsedListTypes decls
                            ]
                            
 addHolesParseErrs :: DocumentType -> DocumentType
-addHolesParseErrs decls = [ Decl declKind typeName $ prods ++ holeParseErr typeName 
-                          | Decl declKind typeName prods <- decls ]
+addHolesParseErrs decls = [ Decl lhsType $ prods ++ holeParseErr (genTypeName lhsType)
+                          | Decl lhsType prods <- decls ]
  where holeParseErr typeName = [ Prod HoleProd ("Hole"++typeName) [] [] 
                                , Prod ParseErrProd ("ParseErr"++typeName) [] 
                                    [ Field "presentation" (CompositeType "Presentation Document Node ClipDoc UserToken") ]

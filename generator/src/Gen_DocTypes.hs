@@ -26,10 +26,11 @@ generate docType = genDataType (addHolesParseErrs docTypeWithLists ++ genConsLis
 
 genDataType decls = addBanner "Proxima data type" $
   concatMap genDataDecl decls
- where genDataDecl (Decl _ typeName prods) = 
-         zipWith (++) ("data %1 = " <~ [typeName] : repeat (replicate (length typeName + 6) ' ' ++ "| ")) 
-                      (map genProd prods) ++
-         [ replicate (length typeName + 10) ' ' ++ "deriving Show", "" ]
+ where genDataDecl (Decl lhsType prods) =
+         let typeName = genTypeName lhsType
+         in  zipWith (++) ("data %1 = " <~ [typeName] : repeat (replicate (length typeName + 6) ' ' ++ "| ")) 
+                          (map genProd prods) ++
+             [ replicate (length typeName + 10) ' ' ++ "deriving Show", "" ]
        genProd (Prod _ cnstrName idpFields fields) = 
          cnstrName ++ (prefixBy " " $ map (genIDPType . fieldType) idpFields ++
                                       map (genType . fieldType) fields)
@@ -41,8 +42,8 @@ genClipDoc decls = addBanner "ClipDoc" $
     
 genNode decls = addBanner "Node" $
   "data Node = NoNode" :
-  [ "          | %1Node %2 Path" <~ [cnstrName, typeName]
-  | Decl _ typeName prods <- decls, Prod _ cnstrName _ _ <- prods 
+  [ "          | %1Node %2 Path" <~ [cnstrName, genTypeName lhsType]
+  | Decl lhsType prods <- decls, Prod _ cnstrName _ _ <- prods 
   ]
 
 genShowNode decls = addBanner "Show instance for Node" $

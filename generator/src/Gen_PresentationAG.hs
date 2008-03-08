@@ -30,8 +30,8 @@ generate docType = genDataType (addHolesParseErrs docTypeWithLists ++ genConsLis
 
 genDataType decls = addBanner "AG data type" $
   concatMap genDataDecl decls
- where genDataDecl (Decl _ typeName prods) = 
-         "DATA %1" <~ [typeName] :
+ where genDataDecl (Decl lhsType prods) = 
+         "DATA %1" <~ [genTypeName lhsType] :
          [ "  | " ++ genProd prod | prod <- prods] ++
          [ "", "" ]
         where genProd (Prod _ cnstrName idpFields fields) =

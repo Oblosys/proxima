@@ -38,22 +38,22 @@ genPathNode decls = addBanner "HasPath instance for Node" $
   where genPathNodeCnstr cnstrName = "  pathNode (%1Node _ pth) = PathD pth" <~ [cnstrName]
 
 genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
-  where genToXMLDecl (Decl Basic typeName prods) = 
+  where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 
          [ case prodKind of 
              ParseErrProd -> "toXML%1 %2 = Elt \"%3\" [] []" <~ [typeName, genPattern prod, cnstrName] 
              _            -> "toXML%1 %2 = Elt \"%3\" [] $ " <~ [typeName, genPattern prod, cnstrName] ++
                                                genToXMLFields fields
          | prod@(Prod prodKind cnstrName _ fields) <- prods 
          ]
-        genToXMLDecl (Decl List typeName prods) = 
+        genToXMLDecl (Decl (LHSListType typeName) prods) = 
           [ "toXMLList_%1 (List_%1 xs) = toXMLConsList_%1 xs"
           , "toXMLList_%1 HoleList_%1 = []"
           , "toXMLList_%1 (ParseErrList_%1 _) = []"
-          ] `subst` [ drop 5 typeName ]
-        genToXMLDecl (Decl ConsList typeName prods) = 
+          ] `subst` [ typeName ]
+        genToXMLDecl (Decl (LHSConsListType typeName) prods) = 
           [ "toXMLConsList_%1 (Cons_%1 x xs) = toXML%1 x : toXMLConsList_%1 xs"
           , "toXMLConsList_%1 Nil_%1             = []"  
-          ] `subst` [ drop 9 typeName ]
+          ] `subst` [ typeName ]
      
         genToXMLFields [] = "[]"
         genToXMLFields fields = separateBy " ++ "
@@ -63,16 +63,17 @@ genToXML decls = addBanner "toXML functions" $ concatMap genToXMLDecl decls
           | field <- fields ]
 
 genParseXML decls = addBanner "parseXML functions" $ concatMap genParseXMLType decls
- where genParseXMLType (Decl Basic typeName prods) =
+ where genParseXMLType (Decl (LHSBasicType typeName) prods) =
          "parseXML_%1 = %2parseHoleAndParseErr \"%1\" Hole%1" <~ 
            [ typeName
            , concat [ "parseXMLCns_%1 <?|> " <~ [cnstrName] | Prod _ cnstrName _ _ <- prods ]
            ] :
            map genParseXMLProd prods
-       genParseXMLType (Decl List typeName prods) =
-         ["parseXML_List_%1 = mkList List_%1 Cons_%1 Nil_%1 <$> many parseXML_%1" <~ 
-           [ drop 5 typeName ]
+       genParseXMLType (Decl (LHSListType typeName) prods) =
+         [ "parseXML_List_%1 = mkList List_%1 Cons_%1 Nil_%1 <$> many parseXML_%1" <~ 
+           [ typeName ]
          ]
+         
        genParseXMLProd (Prod _ cnstrName idpFields fields) =
          ("parseXMLCns_%1 = %1%2 <$ " ++
           if null fields 

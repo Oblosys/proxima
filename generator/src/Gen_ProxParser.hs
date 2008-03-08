@@ -31,14 +31,14 @@ genReuse decls = addBanner "reuse functions" $ concat
     ] `subst` [ cnstrName                                                         -- %1
               , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
                                         map (genType . fieldType) fields          -- %2
-              , typeName                                                          -- %3
+              , genTypeName lhsType                                               -- %3
               , prefixBy " m" $ cnstrArgs                                         -- %4
               , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5
               , show $ length idpFields + length fields                           -- %6
               , prefixBy " " $ cnstrArgs                                          -- %7
               ] -- we don't use genPattern and fieldNames, since the (" m"++) could cause problems 
                 -- e.g. for T a:A ma : M, we would get ma mma and a ma
-  | Decl _ typeName prods <- decls, prod@(Prod _ cnstrName idpFields fields) <- prods
+  | Decl lhsType prods <- decls, prod@(Prod _ cnstrName idpFields fields) <- prods
   , let cnstrArgs = zipWith (++) (replicate (length idpFields + length fields) "a") (map show [0..]) 
   ]
 
@@ -48,24 +48,25 @@ genExtract decls = addBanner "extract functions" $ concat
     , "extract%1 (Just (%1Node x@%3 _)) = Just x"
     , "extract%1 _ = Nothing"
     , ""
-    ] `subst` [ cnstrName, typeName, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]
-  | Decl _ typeName prods <- decls, prod@(Prod _ cnstrName _ _) <- prods 
+    ] `subst` [ cnstrName, genTypeName lhsType, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]
+  | Decl lhsType prods <- decls, prod@(Prod _ cnstrName _ _) <- prods 
   ]             
    
 
 genDefault decls = addBanner "default functions" $ concat
-  [ case declKind of
-      Basic -> [ "default%1 :: %2"
+  [ case lhsType of
+      LHSBasicType typeName -> 
+               [ "default%1 :: %2"
                , "default%1 = %1" ++ prefixBy " " (map genNoIDP idpFields) ++
                                      concat (replicate (length fields) " hole")
                , ""
-               ] `subst` [ cnstrName, typeName ]
-      List  -> [ "defaultList_%1 :: List_%1"
+               ] `subst` [ cnstrName, genTypeName lhsType ]
+      LHSListType typeName -> [ "defaultList_%1 :: List_%1"
                , "defaultList_%1 = List_%1 Nil_%1"
                , ""
-               ] `subst` [ drop 5 typeName ]
+               ] `subst` [ typeName ]
              
-  | Decl declKind typeName prods <- decls, Prod _ cnstrName idpFields fields <- prods 
+  | Decl lhsType prods <- decls, Prod _ cnstrName idpFields fields <- prods 
   ]
 
 
