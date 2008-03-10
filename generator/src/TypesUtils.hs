@@ -118,23 +118,6 @@ addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)
  where genListDecl tpe = Decl (LHSListType $ typeName tpe) 
                            [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
 
-
--- TODO remove this one
--- special version that puts conslist after list for diffing with old code
-addConsListDecls' decls = concat
-  [ case lhsType of
-      LHSBasicType _       -> [decl]
-      LHSListType typeName -> [decl, genConsListDecl typeName]  
-  | decl@(Decl lhsType prods) <- decls ]
- where genConsListDecl typeName = Decl (LHSConsListType (typeName))
-                           [ Prod ConsProd ("Cons_"++typeName) [] 
-                               [ Field "head" (BasicType (typeName))
-                               , Field "tail" (BasicType ("ConsList_"++typeName))
-                               ]
-                           , Prod NilProd ("Nil_"++typeName) [] []
-                           ]
-
-
 -- it doesn't matter if addListDecls has been called before using addConsListDecls, since addListDecls does
 -- not introduce additional lists.
 addConsListDecls decls = decls ++ (map genConsListDecl $ getAllUsedListTypes decls)
