@@ -29,28 +29,24 @@ TODO:
 
 - make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
 -}
-
-
-
 main =
- do { docType <- parseDocumentType "../DocumentType.prx"
-    ; output <- generateFile ".." "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
-    ; putStr output
-    ; generateFiles ".." "../DocumentType.prx"
-    ; getChar
+
+ do { args <- getArgs
+    ; case args of
+        [srcPath, fname] -> generateFiles srcPath fname
+        _                -> 
+          stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
+                           
     }
 
-
-generateFile :: String -> String -> [String] -> IO String
+generateFile :: String -> String -> [String] -> IO ()
 generateFile path fileName generatedLines =
  do { let filePath = path ++ "/" ++ fileName
     ; oldContents <- readFile filePath
     ; seq (length oldContents) $ return ()
     ; case removeGeneratedContent oldContents of
         Nothing -> stop ("File "++filePath++" should contain the following line:\n\n"++delimiterLine)
-        Just nonGenerated -> do { writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
-                                ; return $ nonGenerated ++ unlines (delimiterLine : generatedLines)
-                                }
+        Just nonGenerated -> writeFile filePath $ nonGenerated ++ unlines (delimiterLine : generatedLines)
     } `catch` \err -> stop (show err)
 
 removeGeneratedContent :: String -> Maybe String
@@ -59,19 +55,6 @@ removeGeneratedContent content =
   in  if any (isPrefixOf defaultLimit) contentLines
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
-
-{-
-main =
- do { args <- getArgs
-    ; case args of
-        [srcPath, fname] -> generateFiles srcPath fname
-        _                -> 
-          stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
-                           
-    }
--}
-
-
 
 generateFiles srcPath fname  
      = do putStr $ "Parsing File: "++(show fname)++" ..."

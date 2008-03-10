@@ -13,8 +13,6 @@ module Gen_PresentationAG where
 
 import TypesUtils
 
-import List
-
 generate :: DocumentType -> [String]
 generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genAttr docType
@@ -25,6 +23,7 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithL
         docTypeWithLists = addListDecls docType
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
+
 
 genAttr decls = genBanner "Attr declarations" $
   [ "ATTR %1" -- all types including lists and conslists

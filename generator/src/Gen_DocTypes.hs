@@ -23,7 +23,6 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithL
   where docTypeWithLists = addListDecls docType
 
                 
-
 genDataType decls = genBanner "Proxima data type" $
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) =

@@ -21,6 +21,7 @@ generate docType = genReuse   docTypeWithLists
                 ++ genGenericReuse docTypeWithLists
   where docTypeWithLists = addListDecls docType
   
+  
 genReuse decls = genBanner "reuse functions" $ concat
   [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"
