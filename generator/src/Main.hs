@@ -24,29 +24,29 @@ TODO:
 
 - make a mechanism to add fragments from a hs file? 
 -  (so the non-generated part can contain only user specified stuff) useful for editable instances for prim types
- 
 -}
+
 main =
  do { args <- getArgs
     ; case args of
         [srcPath, fname] -> generateFiles srcPath fname
         _                -> 
-          stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
-                           
+          stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"                           
     }
     
-generateFiles srcPath fname =
- do { docType <- parseDocumentType fname
-    ; generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
-    ; generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
-    ; generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
+generateFiles srcPath fileName =
+ do { docType <- parseDocumentType fileName
+    ; generateFile srcPath "DocTypes_Generated.hs"       $ Gen_DocTypes.generate docType
+    ; generateFile srcPath "DocUtils_Generated.hs"       $ Gen_DocUtils.generate docType
+    ; generateFile srcPath "ProxParser_Generated.hs"     $ Gen_ProxParser.generate docType
     ; generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
-    ; generateFile srcPath "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
+    ; generateFile srcPath "DocumentEdit_Generated.hs"   $ Gen_DocumentEdit.generate docType
     }
     
 generateFile :: String -> String -> [String] -> IO ()
 generateFile path fileName generatedLines =
- do { let filePath = path ++ "/" ++ fileName
+ do { putStrLn "Generating fileName"
+    ; let filePath = path ++ "/" ++ fileName
     ; oldContents <- readFile filePath
     ; seq (length oldContents) $ return ()
     ; case removeGeneratedContent oldContents of
@@ -57,6 +57,6 @@ generateFile path fileName generatedLines =
 removeGeneratedContent :: String -> Maybe String
 removeGeneratedContent content = 
   let contentLines = lines content
-  in  if any (isPrefixOf defaultLimit) contentLines
+  in  if any (isPrefixOf delimiterLine) contentLines
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
