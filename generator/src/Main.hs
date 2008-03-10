@@ -28,14 +28,15 @@ TODO:
 -}
 
 
-{-
+
 main =
  do { docType <- parseDocumentType "../DocumentType.prx"
     ; output <- generateFile ".." "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
     ; putStr output
+    ; generateFiles ".." "../DocumentType.prx"
     ; getChar
     }
--}
+
 
 generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
@@ -56,7 +57,7 @@ removeGeneratedContent content =
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
 
-
+{-
 main =
  do { args <- getArgs
     ; case args of
@@ -65,7 +66,7 @@ main =
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
-
+-}
 
 
 
@@ -73,15 +74,16 @@ generateFiles srcPath fname
      = do putStr $ "Parsing File: "++(show fname)++" ..."
           parsedFile <- parseDataTypesFile fname       -- What if the parser goes wrong?? 
           putStr $ " done\n"                           --- simply terminate with a parse error.
---          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
           docType <- parseDocumentType fname
           generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
           generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
           generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
+          generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
           generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
+--          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
 --          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
-          generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
 --          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
+--          generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
 
 -- make this function more clear
 generate filename func parsedFile

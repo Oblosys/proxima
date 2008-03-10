@@ -49,11 +49,11 @@ genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
           [ "toXMLList_%1 (List_%1 xs) = toXMLConsList_%1 xs"
           , "toXMLList_%1 HoleList_%1 = []"
           , "toXMLList_%1 (ParseErrList_%1 _) = []"
-          ] `subst` [ typeName ]
+          ] <~ [ typeName ]
         genToXMLDecl (Decl (LHSConsListType typeName) prods) = 
           [ "toXMLConsList_%1 (Cons_%1 x xs) = toXML%1 x : toXMLConsList_%1 xs"
           , "toXMLConsList_%1 Nil_%1             = []"  
-          ] `subst` [ typeName ]
+          ] <~ [ typeName ]
      
         genToXMLFields [] = "[]"
         genToXMLFields fields = separateBy " ++ "

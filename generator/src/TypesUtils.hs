@@ -150,18 +150,24 @@ suffixBy suf strs = concatMap (++suf) strs
 
 surroundBy pre suf strs = concatMap (\str -> pre ++ str ++ suf) strs
  
-str <~ args = substitute str
- where substitute "" = ""
-       substitute [c] = [c]
-       substitute ('%':d:cs) = if not $ isDigit d 
-                          then error $ "subs: incorrect format: "++show str
-                          else let i = ord d - ord '0'
-                               in  if i > length args 
-                                   then "subs: not enough arguments: "++show str
-                                   else args !! (i-1) ++ substitute cs
-       substitute (c:cs) = c : substitute cs 
-       
-subst strs args = map (<~ args) strs
+ 
+class Substitute x where
+  (<~) :: x -> [String] -> x
+  
+instance Substitute String where
+ str <~ args = substitute str
+  where substitute "" = ""
+        substitute [c] = [c]
+        substitute ('%':d:cs) = if not $ isDigit d 
+                           then error $ "subs: incorrect format: "++show str
+                           else let i = ord d - ord '0'
+                                in  if i > length args 
+                                    then "subs: not enough arguments: "++show str
+                                    else args !! (i-1) ++ substitute cs
+        substitute (c:cs) = c : substitute cs 
+
+instance Substitute [String] where
+ strs <~ args = map (<~ args) strs
 
 stop err =
  do { putStrLn "\n\nCode generation failed."

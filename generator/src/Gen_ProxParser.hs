@@ -28,16 +28,16 @@ genReuse decls = genBanner "reuse functions" $ concat
     , "           %5 -> reuse%6 %1%7%4"
     , "           _ -> error \"Internal error:ProxParser_Generated.reuse%1\""
     , ""
-    ] `subst` [ cnstrName                                                         -- %1
-              , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
-                                        map (genType . fieldType) fields          -- %2
-              , genTypeName lhsType                                               -- %3
-              , prefixBy " m" $ cnstrArgs                                         -- %4
-              , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5
-              , show $ length idpFields + length fields                           -- %6
-              , prefixBy " " $ cnstrArgs                                          -- %7
-              ] -- we don't use genPattern and fieldNames, since the (" m"++) could cause problems 
-                -- e.g. for T a:A ma : M, we would get ma mma and a ma
+    ] <~ [ cnstrName                                                         -- %1
+         , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
+                                   map (genType . fieldType) fields          -- %2
+         , genTypeName lhsType                                               -- %3
+         , prefixBy " m" $ cnstrArgs                                         -- %4
+         , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5
+         , show $ length idpFields + length fields                           -- %6
+         , prefixBy " " $ cnstrArgs                                          -- %7
+         ] -- we don't use genPattern and fieldNames, since the (" m"++) could cause problems 
+           -- e.g. for T a:A ma : M, we would get ma mma and a ma
   | Decl lhsType prods <- decls, prod@(Prod _ cnstrName idpFields fields) <- prods
   , let cnstrArgs = zipWith (++) (replicate (length idpFields + length fields) "a") (map show [0..]) 
   ]
@@ -48,7 +48,7 @@ genExtract decls = genBanner "extract functions" $ concat
     , "extract%1 (Just (%1Node x@%3 _)) = Just x"
     , "extract%1 _ = Nothing"
     , ""
-    ] `subst` [ cnstrName, genTypeName lhsType, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]
+    ] <~ [ cnstrName, genTypeName lhsType, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]
   | Decl lhsType prods <- decls, prod@(Prod _ cnstrName _ _) <- prods 
   ]             
    
@@ -60,12 +60,12 @@ genDefault decls = genBanner "default functions" $ concat
                , "default%1 = %1" ++ prefixBy " " (map genNoIDP idpFields) ++
                                      concat (replicate (length fields) " hole")
                , ""
-               ] `subst` [ cnstrName, genTypeName lhsType ]
+               ] <~ [ cnstrName, genTypeName lhsType ]
       LHSListType typeName -> 
                [ "defaultList_%1 :: List_%1"
                , "defaultList_%1 = List_%1 Nil_%1"
                , ""
-               ] `subst` [ typeName ]
+               ] <~ [ typeName ]
              
   | Decl lhsType prods <- decls, Prod _ cnstrName idpFields fields <- prods 
   ]
@@ -93,7 +93,7 @@ genGenericReuse decls = genBanner "genericReuse functions" $
             , "reuse%1 f%4 ="
             , "  f%5"
             , ""
-            ] `subst` [ show n                                                                          -- %1
+            ] <~ [ show n                                                                          -- %1
                       , suffixBy " -> " $ aArgs                                                         -- %2
                       , surroundBy "Maybe " " -> " $ aArgs                                              -- %3
                       , prefixBy " " $ aArgs ++ maArgs                                                  -- %4
