@@ -6,6 +6,7 @@ import qualified Gen_DocTypes
 import qualified Gen_DocUtils
 import qualified Gen_ProxParser
 import qualified Gen_PresentationAG
+import qualified Gen_DocumentEdit
 
 import System
 import List
@@ -30,15 +31,15 @@ TODO:
 -}
 
 
-{-
+
 main =
  do { docType <- parseDocumentType "../DocumentType.prx"
-    ; output <- generateFile ".." "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
+    ; output <- generateFile ".." "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
     ; putStr output
     ; generateFiles ".." "../DocumentType.prx"
---    ; getChar
+    ; getChar
     }
--}
+
 
 generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
@@ -59,7 +60,7 @@ removeGeneratedContent content =
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
 
-
+{-
 main =
  do { args <- getArgs
     ; case args of
@@ -68,7 +69,7 @@ main =
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
-
+-}
 
 
 
@@ -81,11 +82,12 @@ generateFiles srcPath fname
           generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
           generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
           generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
-          generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
+          generateFile srcPath "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
 --          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
 --          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
 --          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
 --          generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
+--          generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
 
 -- make this function more clear
 generate filename func parsedFile

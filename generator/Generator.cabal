@@ -33,8 +33,8 @@ install-includes:
 include-dirs:
 hs-source-dirs: src ../uuagc/src
 other-modules: GenAG GenCommon GenEditable GenParser Gen_DocTypes
-               Gen_DocUtils Gen_PresentationAG Gen_ProxParser Main Parser
-               TypesUtils
+               Gen_DocUtils Gen_DocumentEdit Gen_PresentationAG Gen_ProxParser
+               Main Parser TypesUtils
 ghc-prof-options:
 ghc-options: -fglasgow-exts
 hugs-options:
