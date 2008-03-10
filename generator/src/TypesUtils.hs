@@ -17,7 +17,9 @@ import List
 
 delimiterLine = "----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----"
 
-primTypes = map primDecl [(LHSBasicType "Bool"), (LHSBasicType "Int"), (LHSBasicType "String"), (LHSBasicType "Float") ]
+primTypes = map LHSBasicType [ "Bool", "Int", "String", "Float" ]
+
+primTypeDecls = map primDecl [(LHSBasicType "Bool"), (LHSBasicType "Int"), (LHSBasicType "String"), (LHSBasicType "Float") ]
  where primDecl tpe = Decl tpe []
  
 documentDecl = Decl (LHSBasicType "Document") [Prod ExplicitProd "RootDoc" [] [Field "root" (BasicType "Root")]]
@@ -76,6 +78,12 @@ fieldNameFromType tpe = case typeName tpe of
                           []     -> error "Types.genFieldName: empty typeName"
                           (c:cs) -> toLower c : cs ++ if isListType tpe then "s" else ""
 
+-- return whether the type was declared (explicitly or implicitly as a list)
+isDeclaredType :: DocumentType -> Type -> Bool
+isDeclaredType decls (BasicType typeName') =  typeName' `notElem` map lhsTypeName primTypes
+isDeclaredType decls (ListType _) = True -- no check, since for all lists, a declaration is generated
+isDeclaredType decls (CompositeType _) = False
+
 genIDPType (BasicType typeName)     = typeName
 genIDPType (ListType typeName)      = "["++typeName++"]"
 genIDPType (CompositeType typeName) = "("++typeName++")"
@@ -104,10 +112,28 @@ genPattern (Prod _ cnstrName idpFields fields) =
   [cnstrName, concat $ replicate (length idpFields) " _", concatMap ((" "++) . fieldName) fields]
 
 
+removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . lhsTypeName . declLHSType) decls
 
 addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)
  where genListDecl tpe = Decl (LHSListType $ typeName tpe) 
                            [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
+
+
+-- TODO remove this one
+-- special version that puts conslist after list for diffing with old code
+addConsListDecls' decls = concat
+  [ case lhsType of
+      LHSBasicType _       -> [decl]
+      LHSListType typeName -> [decl, genConsListDecl typeName]  
+  | decl@(Decl lhsType prods) <- decls ]
+ where genConsListDecl typeName = Decl (LHSConsListType (typeName))
+                           [ Prod ConsProd ("Cons_"++typeName) [] 
+                               [ Field "head" (BasicType (typeName))
+                               , Field "tail" (BasicType ("ConsList_"++typeName))
+                               ]
+                           , Prod NilProd ("Nil_"++typeName) [] []
+                           ]
+
 
 -- it doesn't matter if addListDecls has been called before using addConsListDecls, since addListDecls does
 -- not introduce additional lists.
@@ -150,6 +176,7 @@ suffixBy suf strs = concatMap (++suf) strs
 
 surroundBy pre suf strs = concatMap (\str -> pre ++ str ++ suf) strs
  
+infixl 9 <~
  
 class Substitute x where
   (<~) :: x -> [String] -> x

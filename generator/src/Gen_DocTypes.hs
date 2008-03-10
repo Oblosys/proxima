@@ -17,7 +17,7 @@ import TypesUtils
 
 generate :: DocumentType -> [String]
 generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genClipDoc                     (documentDecl : docTypeWithLists ++ primTypes)
+                ++ genClipDoc                     (documentDecl : docTypeWithLists ++ primTypeDecls)
                 ++ genNode     (addHolesParseErrs (documentDecl : docTypeWithLists))
                 ++ genShowNode (addHolesParseErrs (documentDecl : docTypeWithLists))
   where docTypeWithLists = addListDecls docType

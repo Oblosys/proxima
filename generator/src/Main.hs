@@ -17,6 +17,8 @@ import GenEditable
 
 {- Generation
 TODO:
+
+- get rid of addConsListDecls'
 - do a diff on generated files to check that they are correct.
 - rename reusen to genericReuse (after diffing)
 - rename <constructor>Node to Node_<constructor>
@@ -28,15 +30,15 @@ TODO:
 -}
 
 
-
+{-
 main =
  do { docType <- parseDocumentType "../DocumentType.prx"
     ; output <- generateFile ".." "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
     ; putStr output
     ; generateFiles ".." "../DocumentType.prx"
-    ; getChar
+--    ; getChar
     }
-
+-}
 
 generateFile :: String -> String -> [String] -> IO String
 generateFile path fileName generatedLines =
@@ -57,7 +59,7 @@ removeGeneratedContent content =
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
 
-{-
+
 main =
  do { args <- getArgs
     ; case args of
@@ -66,7 +68,7 @@ main =
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
--}
+
 
 
 
