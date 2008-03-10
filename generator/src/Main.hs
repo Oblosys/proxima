@@ -10,27 +10,23 @@ import qualified Gen_DocumentEdit
 
 import System
 import List
-import GenCommon
-import GenParser
-import GenAG
-import GenEditable
 
 
 {- Generation
 TODO:
 
-- get rid of addConsListDecls'
-- do a diff on generated files to check that they are correct.
+- do a diff on generated files to check that they are correct. ag and docedit have been checked already
 - rename reusen to genericReuse (after diffing)
 - rename <constructor>Node to Node_<constructor>
 - can we get rid of parse err and hole for node type? (also change rankNode and pathNode
   old generator only made nodes for holes, not parse errs
 - add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
 
-- make a mechanism to add fragments from a hs file? (so the non-generated part can contain only user specified stuff)
+- make a mechanism to add fragments from a hs file? 
+-  (so the non-generated part can contain only user specified stuff) useful for editable instances for prim types
+ 
 -}
 main =
-
  do { args <- getArgs
     ; case args of
         [srcPath, fname] -> generateFiles srcPath fname
@@ -38,7 +34,16 @@ main =
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"
                            
     }
-
+    
+generateFiles srcPath fname =
+ do { docType <- parseDocumentType fname
+    ; generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
+    ; generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
+    ; generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
+    ; generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
+    ; generateFile srcPath "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
+    }
+    
 generateFile :: String -> String -> [String] -> IO ()
 generateFile path fileName generatedLines =
  do { let filePath = path ++ "/" ++ fileName
@@ -55,32 +60,3 @@ removeGeneratedContent content =
   in  if any (isPrefixOf defaultLimit) contentLines
       then Just $ unlines $ takeWhile (not . isPrefixOf delimiterLine) contentLines
       else Nothing
-
-generateFiles srcPath fname  
-     = do putStr $ "Parsing File: "++(show fname)++" ..."
-          parsedFile <- parseDataTypesFile fname       -- What if the parser goes wrong?? 
-          putStr $ " done\n"                           --- simply terminate with a parse error.
-          docType <- parseDocumentType fname
-          generateFile srcPath "DocTypes_Generated.hs" $ Gen_DocTypes.generate docType
-          generateFile srcPath "DocUtils_Generated.hs" $ Gen_DocUtils.generate docType
-          generateFile srcPath "ProxParser_Generated.hs" $ Gen_ProxParser.generate docType
-          generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
-          generateFile srcPath "DocumentEdit_Generated.hs" $ Gen_DocumentEdit.generate docType
---          generate (srcPath++"/DocTypes_Generated.hs")         genDocumentTypes   parsedFile
---          generate (srcPath++"/DocUtils_Generated.hs")         genDocUtils        parsedFile
---          generate (srcPath++"/ProxParser_Generated.hs")     genProxParser      parsedFile
---          generate (srcPath++"/PresentationAG_Generated.ag") genPresentationAG  parsedFile
---          generate (srcPath++"/DocumentEdit_Generated.hs")     genDocumentEdit    parsedFile
-
--- make this function more clear
-generate filename func parsedFile
-     = do includeText <- readFile filename 
-          seq (length includeText) $ return ()
-          putStr $ "Generating "++filename++"..."  
-          let includeTextLines = lines includeText
-          if  any (isPrefixOf defaultLimit) includeTextLines
-              then do let includeTypes = takeWhile (not . isPrefixOf defaultLimit) (lines  includeText)
-                      length includeTypes `seq` (writeFile (filename) . unlines . (func includeTypes)) parsedFile -- Reading file !!!
-                      putStr $ " done\n"
-              else do putStr $ " vailed - Couldn't find: " ++ defaultLimit ++ "\n"
-                      exitWith (ExitFailure 1)
