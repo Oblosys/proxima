@@ -129,16 +129,16 @@ SEM Exp
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (RootDocNode @document []) $  --HACK!! top level loc needs to be a ref to the document
+      lhs.pres = loc (Node_RootDoc @document []) $  --HACK!! top level loc needs to be a ref to the document
                                                         -- it is used by mkPopupMenuXY in Renderer.
                                                         -- A better implementation of popups will create the menu in
                                                         -- the higher layers. Although it is still a bit unclear where
-                 loc (RootEnrNode @self []) $ structural $
+                 loc (Node_RootEnr @self []) $ structural $
                    @root.pres
                  
 SEM RootE
   | RootE
-      lhs.pres = loc (RootENode @self []) $ structural $
+      lhs.pres = loc (Node_RootE @self []) $ structural $
                    col [ row [ hSpace 3
                        --       , text $ "Document focus: " ++show @lhs.focusD
                               , text "Focused expression"  `withFontFam` "verdana" -- ++show @lhs.focusD
@@ -200,27 +200,27 @@ errColor = red
 
 SEM List_Decl [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    row @elts.press
   | ParseErrList_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Decl
-      lhs.pres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Decls" (HoleList_DeclNode @self @lhs.path) @lhs.path
+      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Decls" (Node_HoleList_Decl @self @lhs.path) @lhs.path
 
 {-
 SEM List_Decl
-  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+  | List_Decl         lhs.idsPres = loc (Node_List_Decl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                                     @elts.idsPres
-  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (List_DeclNode @self @lhs.path) @lhs.path
+  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (Node_List_Decl @self @lhs.path) @lhs.path
   | ParseErrList_Decl lhs.idsPres = empty  -- must be empty, otherwise initDoc hack fails
   -}
 
 
 SEM Decl
   | Decl
-      lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Decl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                      (row $
                         {-(if @lhs.level == 0
@@ -269,7 +269,7 @@ SEM Decl
 
 SEM Ident
   | Ident
-      lhs.pres = loc (IdentNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Ident @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                    row [ token (mkIDP @idP0 @lhs.pIdC 0)  @string ]
 
@@ -282,38 +282,38 @@ The items are added to the presentation with:  addReductionPopupItems @reduction
 
 SEM Exp
   | PlusExp
-      lhs.pres = loc (PlusExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_PlusExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "+", @exp2.pres]
 
   | TimesExp
-      lhs.pres = loc (TimesExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_TimesExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [@exp1.pres , op (mkIDP @idP0 @lhs.pIdC 0) "*", @exp2.pres]
 
   | DivExp
-      lhs.pres = loc (DivExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_DivExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ frac @exp1.pres @exp2.pres
 
   | PowerExp
-      lhs.pres = loc (PowerExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_PowerExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ power @exp1.pres @exp2.pres
 
 
   | BoolExp     -- put the idP in an empty string before the bool presentation
-      lhs.pres = loc (BoolExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_BoolExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ token (mkIDP @idP0 @lhs.pIdC 0) $ show @bool ]
 
   | IntExp      -- put the idP in an empty string before the int presentation
-      lhs.pres = loc (IntExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_IntExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ token (mkIDP @idP0 @lhs.pIdC 0) $ show @int]
 
   | LamExp
-      lhs.pres = loc (LamExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_LamExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [
                           key (mkIDP @idP0 @lhs.pIdC 0) "\\"
@@ -327,28 +327,28 @@ SEM Exp
 
 
   | AppExp
-      lhs.pres = loc (AppExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_AppExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [@exp1.pres, @exp2.pres]
 
   | CaseExp
-      lhs.pres = loc (CaseExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_CaseExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "case"
                         , @exp.pres
                         , key (mkIDP @idP1 @lhs.pIdC 1) "of"
-                        , loc (List_AltNode @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press
+                        , loc (Node_List_Alt @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press
                         ]
   | LetExp
-      lhs.pres = loc (CaseExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_CaseExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "let"
-                        , loc (List_DeclNode @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press
+                        , loc (Node_List_Decl @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press
                         , key (mkIDP @idP1 @lhs.pIdC 1) "in", @exp.pres ]
 
 
   | IdentExp
-      lhs.pres = loc (IdentExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_IdentExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                      @ident.pres
                        `addPopupItems`
@@ -359,7 +359,7 @@ SEM Exp
 
 
   | IfExp
-      lhs.pres = loc (IfExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_IfExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row  $ [ key (mkIDP @idP0 @lhs.pIdC 0) "if",   @exp1.pres
                            , key (mkIDP @idP1 @lhs.pIdC 1) "then", @exp2.pres
@@ -367,7 +367,7 @@ SEM Exp
 
 
   | ParenExp
-      lhs.pres = loc (ParenExpNode @self @lhs.path) 
+      lhs.pres = loc (Node_ParenExp @self @lhs.path) 
                   $ parsing 
                   $ presentFocus @lhs.focusD @lhs.path 
                   $ squiggleRanges @lhs.ranges @lhs.path 
@@ -379,7 +379,7 @@ SEM Exp
 
 
   | ListExp
-      lhs.pres = loc (ListExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_ListExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row $    [sep (mkIDP @idP0 @lhs.pIdC 0) "["]
                           ++ let xps = @exps.press
@@ -389,7 +389,7 @@ SEM Exp
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
                           ++ [sep (mkIDP @idP1 @lhs.pIdC 1) "]"]
   | ProductExp
-      lhs.pres = loc (ProductExpNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_ProductExp @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row $    [sep (mkIDP @idP0 @lhs.pIdC 0) "("]
                           ++ let xps = @exps.press
@@ -402,7 +402,7 @@ SEM Exp
 
 SEM Alt
   | Alt
-      lhs.pres = loc (AltNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Alt @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    squiggleRanges @lhs.ranges @lhs.path $
                    row  $ [ @ident.pres
                            , key (mkIDP @idP0 @lhs.pIdC 0) "->"
@@ -524,7 +524,7 @@ commentCol = (240,240,240)
 -- oparen pprec cprec = if pprec > cprec then [text "("] else []
 -- cparen pprec cprec = if pprec > cprec then [text ")"] else []
 
---addloc exp pth pres = loc (ExpNode exp pth)
+--addloc exp pth pres = loc (Node_Exp exp pth)
 
 
 idCounter = unsafePerformIO $ newIORef (0 :: Int)
@@ -1057,13 +1057,13 @@ SEM Alt [ env : Bindings | | alt : Binding ]
 
 SEM Decl
   | BoardDecl
-      lhs.pres = loc (DeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Decl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row [key (mkIDP @idP0 @lhs.pIdC 0) "Chess: ", @board.pres]
 
 
 SEM Board [ | | ]
   | Board
-      lhs.pres = loc (BoardNode @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Board @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
                    structural $ colR 4 (reverse [@r1.pres,@r2.pres,@r3.pres,@r4.pres,@r5.pres,@r6.pres,@r7.pres,@r8.pres])
       r1.rowNr = 0
       r1.sqCol = False
@@ -1074,7 +1074,7 @@ SEM Board [ | | ]
 
 SEM BoardRow [ possibleMoves : {[(Int, Int)]}| sqCol : Bool rowNr : Int focusedPiece : { Maybe (BoardSquare,(Int,Int)) } | ]
   | BoardRow
-      lhs.pres = loc (BoardRowNode @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_BoardRow @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
                  structural $  row [@ca.pres,@cb.pres,@cc.pres,@cd.pres,@ce.pres,@cf.pres,@cg.pres,@ch.pres]
       lhs.sqCol = not @lhs.sqCol
       lhs.rowNr = 1 + @lhs.rowNr
@@ -1082,44 +1082,44 @@ SEM BoardRow [ possibleMoves : {[(Int, Int)]}| sqCol : Bool rowNr : Int focusedP
 
 SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { Maybe (BoardSquare,(Int,Int)) } sqCol : Bool colNr : Int | ]
   | King
-      lhs.pres = loc (KingNode @self @lhs.path) $
+      lhs.pres = loc (Node_King @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
   | Queen
-      lhs.pres = loc (QueenNode @self @lhs.path) $
+      lhs.pres = loc (Node_Queen @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
   | Bishop
-      lhs.pres = loc (BishopNode @self @lhs.path) $
+      lhs.pres = loc (Node_Bishop @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
   | Knight
-      lhs.pres = loc (KnightNode @self @lhs.path) $
+      lhs.pres = loc (Node_Knight @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
   | Rook
-      lhs.pres = loc (RookNode @self @lhs.path) $
+      lhs.pres = loc (Node_Rook @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
 
   | Pawn
-      lhs.pres = loc (PawnNode @self @lhs.path) $
+      lhs.pres = loc (Node_Pawn @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
       lhs.focusedPiece = if (PathD @lhs.path) == @lhs.focusD then Just (@self, (@lhs.colNr,@lhs.rowNr)) else @lhs.focusedPiece
   | Empty
-      lhs.pres = loc (EmptyNode @self @lhs.path) $
+      lhs.pres = loc (Node_Empty @self @lhs.path) $
                    structural $ Chess.piece @self @lhs.sqCol @lhs.rowNr @lhs.colNr @lhs.possibleMoves @lhs.focusD @lhs.path
       lhs.sqCol = not @lhs.sqCol
       lhs.colNr = 1 + @lhs.colNr
@@ -1132,9 +1132,9 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip_Token ]
 
 SEM List_Decl
-  | List_Decl         lhs.idsPres = loc (List_DeclNode @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
+  | List_Decl         lhs.idsPres = loc (Node_List_Decl @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
                                     @elts.idsPres
-  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (HoleList_DeclNode @self @lhs.path) @lhs.path
+  | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (Node_HoleList_Decl @self @lhs.path) @lhs.path
   | ParseErrList_Decl lhs.idsPres = parsing' LexHaskell $ empty
 
 SEM ConsList_Decl
@@ -1142,19 +1142,19 @@ SEM ConsList_Decl
   | Nil_Decl      lhs.idsPres = parsing $ empty
 
 SEM Decl
-  | Decl               lhs.idsPres = loc (DeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Decl               lhs.idsPres = loc (Node_Decl @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                        row [ text "'", @ident.idsPres, text "';" ]
-  | BoardDecl          lhs.idsPres = loc (BoardDeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | BoardDecl          lhs.idsPres = loc (Node_BoardDecl @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                        row [ text "board;" ]
-  | PPPresentationDecl lhs.idsPres = loc (PPPresentationDeclNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | PPPresentationDecl lhs.idsPres = loc (Node_PPPresentationDecl @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                        row [ text "slides;" ]
-  | HoleDecl           lhs.idsPres = presHole @lhs.focusD "Decl" (HoleDeclNode @self @lhs.path) @lhs.path
+  | HoleDecl           lhs.idsPres = presHole @lhs.focusD "Decl" (Node_HoleDecl @self @lhs.path) @lhs.path
   | ParseErrDecl       lhs.idsPres = presParseErr @presentation
 
 SEM Ident
-  | Ident              lhs.idsPres = loc (IdentNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+  | Ident              lhs.idsPres = loc (Node_Ident @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                                        row [ text @string ]
-  | HoleIdent          lhs.idsPres = presHole @lhs.focusD "Ident" (HoleIdentNode @self @lhs.path) @lhs.path
+  | HoleIdent          lhs.idsPres = presHole @lhs.focusD "Ident" (Node_HoleIdent @self @lhs.path) @lhs.path
   | ParseErrIdent      lhs.idsPres = presParseErr @presentation
 
 
@@ -1207,12 +1207,12 @@ ATTR PPPresentation List_Slide ConsList_Slide Slide ItemList ListType List_Item 
 
 SEM Decl
   | PPPresentationDecl
-      lhs.pres = loc (PPPresentationDeclNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_PPPresentationDecl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "Slides: ", @pPPresentation.pres ]
 
 
 SEM PPPresentation
-  | PPPresentation lhs.pres = loc (PPPresentationNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | PPPresentation lhs.pres = loc (Node_PPPresentation @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  col $ [ row [-- text "View type: ",
                                                 if @viewType
                                                 then (box $ text $ "XML view") `addPopupItems` [("Change to presentation view",toggleViewType @lhs.path @self)]
@@ -1239,14 +1239,14 @@ SEM PPPresentation
 
 SEM List_Slide [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Slide
-      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
   | ParseErrList_Slide
-      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Slide -- remove this line?
-      lhs.pres = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path
+      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path
 
 
 {
@@ -1259,13 +1259,13 @@ presentList ps = row [ text "  ", col ps ]
 
 
 SEM Slide
-  | Slide lhs.pres = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Slide lhs.pres = loc (Node_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col [ row [ text "<slide>", row [ text "<title>", text @title `withColor` darkViolet , text "</title>"
                                                                   ]]
                             , row [ text "  ", @itemList.pres ]
                             , text "</slide>"
                             ]
-{-| Slide lhs.pres = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+{-| Slide lhs.pres = loc (Node_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col [ row [ text "Slide ", row [ text "\"", @title.pres, text "\""
                                                                   ] `withColor` darkViolet  , text " $"]
                             , row [ text "  ", @itemList.pres ]
@@ -1273,60 +1273,60 @@ SEM Slide
 -}
 
 SEM ItemList
-  | ItemList lhs.pres = loc (ItemListNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | ItemList lhs.pres = loc (Node_ItemList @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                           col [ row [ text "<itemList style=", row [text "\"", @listType.pres, text "\""] `withColor` darkViolet, text ">"]
                                , @items.pres
                                , text "</itemList>"
                             ]
-{-  | ItemList lhs.pres = loc (ItemListNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+{-  | ItemList lhs.pres = loc (Node_ItemList @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                           col [ row [ text "ItemList ", @listType.pres, text " $"]
                                , @items.pres
                             ] -}
 
 SEM List_Item [ || pres : Presentation_Doc_Node_Clip_Token ]
   | List_Item
-      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presentList @elts.press
   | ParseErrList_Item
-      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Item
-      lhs.pres = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path
+      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path
 
 
 SEM ListType
-  | Bullet         lhs.pres = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Bullet         lhs.pres = loc (Node_Bullet @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 text "Bullet"
-  | Number         lhs.pres = loc (NumberNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Number         lhs.pres = loc (Node_Number @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 text "Number"
-  | Alpha          lhs.pres = loc (AlphaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Alpha          lhs.pres = loc (Node_Alpha @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 text "Alpha"
 
 SEM Item
-  | StringItem     lhs.pres = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | StringItem     lhs.pres = loc (Node_StringItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [ text "<stringItem>", text @string `withColor` darkViolet, text "</stringItem>" ]
-  | HeliumItem     lhs.pres = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | HeliumItem     lhs.pres = loc (Node_HeliumItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 col [ text "<heliumItem>"
                                      , row [text "  ", @exp.pres]
                                      , text "</heliumItem>"
                                      ]
-  | ListItem       lhs.pres = loc (ListItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | ListItem       lhs.pres = loc (Node_ListItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 col [ text "<listItem>"
                                      , row [text "  ", @itemList.pres]
                                      , text "</listItem>"
                                      ]
-{-| StringItem     lhs.pres = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+{-| StringItem     lhs.pres = loc (Node_StringItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [ text "StringItem "
                                       , row [ text "\""
                                              , @string.pres
                                              , text "\""
                                              ] `withColor` darkViolet ]
-  | HeliumItem     lhs.pres = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | HeliumItem     lhs.pres = loc (Node_HeliumItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 col [ text "HeliumItem $"
                                      , row [text "  ", @exp.pres]
                                      ]
-  | ListItem       lhs.pres = loc (ListItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | ListItem       lhs.pres = loc (Node_ListItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 col [ text "ListItem $"
                                      , row [text "  ", @itemList.pres]
                                      ]     -}
@@ -1338,7 +1338,7 @@ SEM Item
 --SEM String_
 --  | String_
 --      lhs.pres = row [ text "\""
---                      , loc (String_Node @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+--                      , loc (Node_String_ @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
 --                          row [text @string, text ""] -- ? why this empty string?
 --                      , text "\""
 --                      ] `withColor` darkViolet
@@ -1360,18 +1360,18 @@ ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentat
 
 SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip_Token ]
   | List_Slide
-      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col $ intersperse (col [vSpace 4, hLine, vSpace 4]) @elts.press2
   | ParseErrList_Slide
-      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Slide
-      lhs.pres2 = loc (List_SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path
+      lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path
 
 
 SEM Slide
-  | Slide lhs.pres2 = loc (SlideNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Slide lhs.pres2 = loc (Node_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                          slide (text @title)
                                @itemList.pres2
 
@@ -1379,7 +1379,7 @@ SEM Slide
 -- makeStructuralListType expects it
 
 SEM ItemList
-  | ItemList lhs.pres2 = loc (ItemListNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | ItemList lhs.pres2 = loc (Node_ItemList @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                            row [ @listType.pres2
                                 , @items.pres2
                                 ]
@@ -1388,15 +1388,15 @@ SEM ItemList
             items.typeLoc = @listType.typeLoc
 
 SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token}]
-  | Bullet         lhs.pres2 = loc (BulletNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | Bullet         lhs.pres2 = loc (Node_Bullet @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (BulletNode @self @lhs.path)
-  | Number         lhs.pres2 = loc (NumberNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   lhs.typeLoc = loc (Node_Bullet @self @lhs.path)
+  | Number         lhs.pres2 = loc (Node_Number @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (NumberNode @self @lhs.path)
-  | Alpha          lhs.pres2 = loc (AlphaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   lhs.typeLoc = loc (Node_Number @self @lhs.path)
+  | Alpha          lhs.pres2 = loc (Node_Alpha @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (AlphaNode @self @lhs.path)
+                   lhs.typeLoc = loc (Node_Alpha @self @lhs.path)
   | ParseErrListType lhs.typeLoc = id
   | HoleListType lhs.typeLoc = id
 
@@ -1404,26 +1404,26 @@ SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentat
 
 SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
   | List_Item
-      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col @elts.press2
   | ParseErrList_Item
-      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    presParseErr @presentation
   | HoleList_Item
-      lhs.pres2 = loc (List_ItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path
+      lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path
 
 
 
 SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ||  ]
-  | StringItem     lhs.pres2 = loc (StringItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | StringItem     lhs.pres2 = loc (Node_StringItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, text @string]
-  | HeliumItem     lhs.pres2 = loc (HeliumItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | HeliumItem     lhs.pres2 = loc (Node_HeliumItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @exp.pres
                                                                            `withColor` black
                                                                            `withbgColor` white
                                                                            `withFontFam` "Courier New" `withFontSize_` (\s->s-3) ]
-  | ListItem       lhs.pres2 = loc (ListItemNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+  | ListItem       lhs.pres2 = loc (Node_ListItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [ hSpace 25,
                                         @itemList.pres2
                                                     `withFontSize_` (\fs -> if fs > 5 then fs * 80 `div` 100 else fs)
@@ -1452,27 +1452,27 @@ SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_T
   | Nil_Item  lhs.press2 = []
 
 SEM List_Slide
-  | HoleList_Slide     lhs.press2 = [presHole @lhs.focusD "Slides" (HoleList_SlideNode @self @lhs.path) @lhs.path]
+  | HoleList_Slide     lhs.press2 = [presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path]
   | ParseErrList_Slide lhs.press2 = [presParseErr @presentation]
 
 SEM Slide
-  | HoleSlide     lhs.pres2 = presHole @lhs.focusD "Slide" (HoleSlideNode @self @lhs.path) @lhs.path
+  | HoleSlide     lhs.pres2 = presHole @lhs.focusD "Slide" (Node_HoleSlide @self @lhs.path) @lhs.path
   | ParseErrSlide lhs.pres2 = presParseErr @presentation
 
 SEM ItemList
-  | HoleItemList     lhs.pres2 = presHole @lhs.focusD "ItemList" (HoleItemListNode @self @lhs.path) @lhs.path
+  | HoleItemList     lhs.pres2 = presHole @lhs.focusD "ItemList" (Node_HoleItemList @self @lhs.path) @lhs.path
   | ParseErrItemList lhs.pres2 = presParseErr @presentation
 
 SEM ListType
-  | HoleListType     lhs.pres2 = presHole @lhs.focusD "ListType" (HoleListTypeNode @self @lhs.path) @lhs.path
+  | HoleListType     lhs.pres2 = presHole @lhs.focusD "ListType" (Node_HoleListType @self @lhs.path) @lhs.path
   | ParseErrListType lhs.pres2 = presParseErr @presentation
 
 SEM List_Item
-  | HoleList_Item     lhs.press2 = [presHole @lhs.focusD "Items" (HoleList_ItemNode @self @lhs.path) @lhs.path]
+  | HoleList_Item     lhs.press2 = [presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path]
   | ParseErrList_Item lhs.press2 = [presParseErr @presentation]
 
 SEM Item
-  | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (HoleItemNode @self @lhs.path) @lhs.path
+  | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (Node_HoleItem @self @lhs.path) @lhs.path
   | ParseErrItem lhs.pres2 = presParseErr @presentation
 
 
@@ -1488,7 +1488,7 @@ SEM List_Exp
 
 SEM List_Exp
   | List_Exp
-      lhs.press = map (  loc (List_ExpNode @self @lhs.path)
+      lhs.press = map (  loc (Node_List_Exp @self @lhs.path)
                       -- . parsing -- if press is used, the parent is reponsible for setting parsing/structural
                        . presentFocus @lhs.focusD @lhs.path )
                       @elts.press

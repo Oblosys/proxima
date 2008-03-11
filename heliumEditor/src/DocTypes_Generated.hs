@@ -254,98 +254,98 @@ data ClipDoc = Clip_Document Document
 --------------------------------------------------------------------------
 
 data Node = NoNode
-          | RootDocNode Document Path
-          | HoleDocumentNode Document Path
-          | ParseErrDocumentNode Document Path
-          | DummyNode Dummy Path
-          | HoleDummyNode Dummy Path
-          | ParseErrDummyNode Dummy Path
-          | RootEnrNode EnrichedDoc Path
-          | HoleEnrichedDocNode EnrichedDoc Path
-          | ParseErrEnrichedDocNode EnrichedDoc Path
-          | RootNode Root Path
-          | HoleRootNode Root Path
-          | ParseErrRootNode Root Path
-          | RootENode RootE Path
-          | HoleRootENode RootE Path
-          | ParseErrRootENode RootE Path
-          | DeclNode Decl Path
-          | BoardDeclNode Decl Path
-          | PPPresentationDeclNode Decl Path
-          | HoleDeclNode Decl Path
-          | ParseErrDeclNode Decl Path
-          | IdentNode Ident Path
-          | HoleIdentNode Ident Path
-          | ParseErrIdentNode Ident Path
-          | PlusExpNode Exp Path
-          | TimesExpNode Exp Path
-          | DivExpNode Exp Path
-          | PowerExpNode Exp Path
-          | BoolExpNode Exp Path
-          | IntExpNode Exp Path
-          | LamExpNode Exp Path
-          | AppExpNode Exp Path
-          | CaseExpNode Exp Path
-          | LetExpNode Exp Path
-          | IdentExpNode Exp Path
-          | IfExpNode Exp Path
-          | ParenExpNode Exp Path
-          | ListExpNode Exp Path
-          | ProductExpNode Exp Path
-          | HoleExpNode Exp Path
-          | ParseErrExpNode Exp Path
-          | AltNode Alt Path
-          | HoleAltNode Alt Path
-          | ParseErrAltNode Alt Path
-          | BoardNode Board Path
-          | HoleBoardNode Board Path
-          | ParseErrBoardNode Board Path
-          | BoardRowNode BoardRow Path
-          | HoleBoardRowNode BoardRow Path
-          | ParseErrBoardRowNode BoardRow Path
-          | QueenNode BoardSquare Path
-          | KingNode BoardSquare Path
-          | BishopNode BoardSquare Path
-          | KnightNode BoardSquare Path
-          | RookNode BoardSquare Path
-          | PawnNode BoardSquare Path
-          | EmptyNode BoardSquare Path
-          | HoleBoardSquareNode BoardSquare Path
-          | ParseErrBoardSquareNode BoardSquare Path
-          | PPPresentationNode PPPresentation Path
-          | HolePPPresentationNode PPPresentation Path
-          | ParseErrPPPresentationNode PPPresentation Path
-          | SlideNode Slide Path
-          | HoleSlideNode Slide Path
-          | ParseErrSlideNode Slide Path
-          | ItemListNode ItemList Path
-          | HoleItemListNode ItemList Path
-          | ParseErrItemListNode ItemList Path
-          | BulletNode ListType Path
-          | NumberNode ListType Path
-          | AlphaNode ListType Path
-          | HoleListTypeNode ListType Path
-          | ParseErrListTypeNode ListType Path
-          | StringItemNode Item Path
-          | HeliumItemNode Item Path
-          | ListItemNode Item Path
-          | HoleItemNode Item Path
-          | ParseErrItemNode Item Path
-          | List_DeclNode List_Decl Path
-          | HoleList_DeclNode List_Decl Path
-          | ParseErrList_DeclNode List_Decl Path
-          | List_AltNode List_Alt Path
-          | HoleList_AltNode List_Alt Path
-          | ParseErrList_AltNode List_Alt Path
-          | List_ExpNode List_Exp Path
-          | HoleList_ExpNode List_Exp Path
-          | ParseErrList_ExpNode List_Exp Path
-          | List_SlideNode List_Slide Path
-          | HoleList_SlideNode List_Slide Path
-          | ParseErrList_SlideNode List_Slide Path
-          | List_ItemNode List_Item Path
-          | HoleList_ItemNode List_Item Path
-          | ParseErrList_ItemNode List_Item Path
+          | Node_RootDoc Document Path
+          | Node_HoleDocument Document Path
+          | Node_ParseErrDocument Document Path
+          | Node_Dummy Dummy Path
+          | Node_HoleDummy Dummy Path
+          | Node_ParseErrDummy Dummy Path
+          | Node_RootEnr EnrichedDoc Path
+          | Node_HoleEnrichedDoc EnrichedDoc Path
+          | Node_ParseErrEnrichedDoc EnrichedDoc Path
+          | Node_Root Root Path
+          | Node_HoleRoot Root Path
+          | Node_ParseErrRoot Root Path
+          | Node_RootE RootE Path
+          | Node_HoleRootE RootE Path
+          | Node_ParseErrRootE RootE Path
+          | Node_Decl Decl Path
+          | Node_BoardDecl Decl Path
+          | Node_PPPresentationDecl Decl Path
+          | Node_HoleDecl Decl Path
+          | Node_ParseErrDecl Decl Path
+          | Node_Ident Ident Path
+          | Node_HoleIdent Ident Path
+          | Node_ParseErrIdent Ident Path
+          | Node_PlusExp Exp Path
+          | Node_TimesExp Exp Path
+          | Node_DivExp Exp Path
+          | Node_PowerExp Exp Path
+          | Node_BoolExp Exp Path
+          | Node_IntExp Exp Path
+          | Node_LamExp Exp Path
+          | Node_AppExp Exp Path
+          | Node_CaseExp Exp Path
+          | Node_LetExp Exp Path
+          | Node_IdentExp Exp Path
+          | Node_IfExp Exp Path
+          | Node_ParenExp Exp Path
+          | Node_ListExp Exp Path
+          | Node_ProductExp Exp Path
+          | Node_HoleExp Exp Path
+          | Node_ParseErrExp Exp Path
+          | Node_Alt Alt Path
+          | Node_HoleAlt Alt Path
+          | Node_ParseErrAlt Alt Path
+          | Node_Board Board Path
+          | Node_HoleBoard Board Path
+          | Node_ParseErrBoard Board Path
+          | Node_BoardRow BoardRow Path
+          | Node_HoleBoardRow BoardRow Path
+          | Node_ParseErrBoardRow BoardRow Path
+          | Node_Queen BoardSquare Path
+          | Node_King BoardSquare Path
+          | Node_Bishop BoardSquare Path
+          | Node_Knight BoardSquare Path
+          | Node_Rook BoardSquare Path
+          | Node_Pawn BoardSquare Path
+          | Node_Empty BoardSquare Path
+          | Node_HoleBoardSquare BoardSquare Path
+          | Node_ParseErrBoardSquare BoardSquare Path
+          | Node_PPPresentation PPPresentation Path
+          | Node_HolePPPresentation PPPresentation Path
+          | Node_ParseErrPPPresentation PPPresentation Path
+          | Node_Slide Slide Path
+          | Node_HoleSlide Slide Path
+          | Node_ParseErrSlide Slide Path
+          | Node_ItemList ItemList Path
+          | Node_HoleItemList ItemList Path
+          | Node_ParseErrItemList ItemList Path
+          | Node_Bullet ListType Path
+          | Node_Number ListType Path
+          | Node_Alpha ListType Path
+          | Node_HoleListType ListType Path
+          | Node_ParseErrListType ListType Path
+          | Node_StringItem Item Path
+          | Node_HeliumItem Item Path
+          | Node_ListItem Item Path
+          | Node_HoleItem Item Path
+          | Node_ParseErrItem Item Path
+          | Node_List_Decl List_Decl Path
+          | Node_HoleList_Decl List_Decl Path
+          | Node_ParseErrList_Decl List_Decl Path
+          | Node_List_Alt List_Alt Path
+          | Node_HoleList_Alt List_Alt Path
+          | Node_ParseErrList_Alt List_Alt Path
+          | Node_List_Exp List_Exp Path
+          | Node_HoleList_Exp List_Exp Path
+          | Node_ParseErrList_Exp List_Exp Path
+          | Node_List_Slide List_Slide Path
+          | Node_HoleList_Slide List_Slide Path
+          | Node_ParseErrList_Slide List_Slide Path
+          | Node_List_Item List_Item Path
+          | Node_HoleList_Item List_Item Path
+          | Node_ParseErrList_Item List_Item Path
 
 
 
@@ -355,97 +355,97 @@ data Node = NoNode
 
 instance Show Node where
   show NoNode = "NoNode"
-  show (RootDocNode _ _) = "RootDocNode" 
-  show (HoleDocumentNode _ _) = "HoleDocumentNode" 
-  show (ParseErrDocumentNode _ _) = "ParseErrDocumentNode" 
-  show (DummyNode _ _) = "DummyNode" 
-  show (HoleDummyNode _ _) = "HoleDummyNode" 
-  show (ParseErrDummyNode _ _) = "ParseErrDummyNode" 
-  show (RootEnrNode _ _) = "RootEnrNode" 
-  show (HoleEnrichedDocNode _ _) = "HoleEnrichedDocNode" 
-  show (ParseErrEnrichedDocNode _ _) = "ParseErrEnrichedDocNode" 
-  show (RootNode _ _) = "RootNode" 
-  show (HoleRootNode _ _) = "HoleRootNode" 
-  show (ParseErrRootNode _ _) = "ParseErrRootNode" 
-  show (RootENode _ _) = "RootENode" 
-  show (HoleRootENode _ _) = "HoleRootENode" 
-  show (ParseErrRootENode _ _) = "ParseErrRootENode" 
-  show (DeclNode _ _) = "DeclNode" 
-  show (BoardDeclNode _ _) = "BoardDeclNode" 
-  show (PPPresentationDeclNode _ _) = "PPPresentationDeclNode" 
-  show (HoleDeclNode _ _) = "HoleDeclNode" 
-  show (ParseErrDeclNode _ _) = "ParseErrDeclNode" 
-  show (IdentNode _ _) = "IdentNode" 
-  show (HoleIdentNode _ _) = "HoleIdentNode" 
-  show (ParseErrIdentNode _ _) = "ParseErrIdentNode" 
-  show (PlusExpNode _ _) = "PlusExpNode" 
-  show (TimesExpNode _ _) = "TimesExpNode" 
-  show (DivExpNode _ _) = "DivExpNode" 
-  show (PowerExpNode _ _) = "PowerExpNode" 
-  show (BoolExpNode _ _) = "BoolExpNode" 
-  show (IntExpNode _ _) = "IntExpNode" 
-  show (LamExpNode _ _) = "LamExpNode" 
-  show (AppExpNode _ _) = "AppExpNode" 
-  show (CaseExpNode _ _) = "CaseExpNode" 
-  show (LetExpNode _ _) = "LetExpNode" 
-  show (IdentExpNode _ _) = "IdentExpNode" 
-  show (IfExpNode _ _) = "IfExpNode" 
-  show (ParenExpNode _ _) = "ParenExpNode" 
-  show (ListExpNode _ _) = "ListExpNode" 
-  show (ProductExpNode _ _) = "ProductExpNode" 
-  show (HoleExpNode _ _) = "HoleExpNode" 
-  show (ParseErrExpNode _ _) = "ParseErrExpNode" 
-  show (AltNode _ _) = "AltNode" 
-  show (HoleAltNode _ _) = "HoleAltNode" 
-  show (ParseErrAltNode _ _) = "ParseErrAltNode" 
-  show (BoardNode _ _) = "BoardNode" 
-  show (HoleBoardNode _ _) = "HoleBoardNode" 
-  show (ParseErrBoardNode _ _) = "ParseErrBoardNode" 
-  show (BoardRowNode _ _) = "BoardRowNode" 
-  show (HoleBoardRowNode _ _) = "HoleBoardRowNode" 
-  show (ParseErrBoardRowNode _ _) = "ParseErrBoardRowNode" 
-  show (QueenNode _ _) = "QueenNode" 
-  show (KingNode _ _) = "KingNode" 
-  show (BishopNode _ _) = "BishopNode" 
-  show (KnightNode _ _) = "KnightNode" 
-  show (RookNode _ _) = "RookNode" 
-  show (PawnNode _ _) = "PawnNode" 
-  show (EmptyNode _ _) = "EmptyNode" 
-  show (HoleBoardSquareNode _ _) = "HoleBoardSquareNode" 
-  show (ParseErrBoardSquareNode _ _) = "ParseErrBoardSquareNode" 
-  show (PPPresentationNode _ _) = "PPPresentationNode" 
-  show (HolePPPresentationNode _ _) = "HolePPPresentationNode" 
-  show (ParseErrPPPresentationNode _ _) = "ParseErrPPPresentationNode" 
-  show (SlideNode _ _) = "SlideNode" 
-  show (HoleSlideNode _ _) = "HoleSlideNode" 
-  show (ParseErrSlideNode _ _) = "ParseErrSlideNode" 
-  show (ItemListNode _ _) = "ItemListNode" 
-  show (HoleItemListNode _ _) = "HoleItemListNode" 
-  show (ParseErrItemListNode _ _) = "ParseErrItemListNode" 
-  show (BulletNode _ _) = "BulletNode" 
-  show (NumberNode _ _) = "NumberNode" 
-  show (AlphaNode _ _) = "AlphaNode" 
-  show (HoleListTypeNode _ _) = "HoleListTypeNode" 
-  show (ParseErrListTypeNode _ _) = "ParseErrListTypeNode" 
-  show (StringItemNode _ _) = "StringItemNode" 
-  show (HeliumItemNode _ _) = "HeliumItemNode" 
-  show (ListItemNode _ _) = "ListItemNode" 
-  show (HoleItemNode _ _) = "HoleItemNode" 
-  show (ParseErrItemNode _ _) = "ParseErrItemNode" 
-  show (List_DeclNode _ _) = "List_DeclNode" 
-  show (HoleList_DeclNode _ _) = "HoleList_DeclNode" 
-  show (ParseErrList_DeclNode _ _) = "ParseErrList_DeclNode" 
-  show (List_AltNode _ _) = "List_AltNode" 
-  show (HoleList_AltNode _ _) = "HoleList_AltNode" 
-  show (ParseErrList_AltNode _ _) = "ParseErrList_AltNode" 
-  show (List_ExpNode _ _) = "List_ExpNode" 
-  show (HoleList_ExpNode _ _) = "HoleList_ExpNode" 
-  show (ParseErrList_ExpNode _ _) = "ParseErrList_ExpNode" 
-  show (List_SlideNode _ _) = "List_SlideNode" 
-  show (HoleList_SlideNode _ _) = "HoleList_SlideNode" 
-  show (ParseErrList_SlideNode _ _) = "ParseErrList_SlideNode" 
-  show (List_ItemNode _ _) = "List_ItemNode" 
-  show (HoleList_ItemNode _ _) = "HoleList_ItemNode" 
-  show (ParseErrList_ItemNode _ _) = "ParseErrList_ItemNode" 
+  show (Node_RootDoc _ _) = "Node_RootDoc" 
+  show (Node_HoleDocument _ _) = "Node_HoleDocument" 
+  show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
+  show (Node_Dummy _ _) = "Node_Dummy" 
+  show (Node_HoleDummy _ _) = "Node_HoleDummy" 
+  show (Node_ParseErrDummy _ _) = "Node_ParseErrDummy" 
+  show (Node_RootEnr _ _) = "Node_RootEnr" 
+  show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
+  show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 
+  show (Node_Root _ _) = "Node_Root" 
+  show (Node_HoleRoot _ _) = "Node_HoleRoot" 
+  show (Node_ParseErrRoot _ _) = "Node_ParseErrRoot" 
+  show (Node_RootE _ _) = "Node_RootE" 
+  show (Node_HoleRootE _ _) = "Node_HoleRootE" 
+  show (Node_ParseErrRootE _ _) = "Node_ParseErrRootE" 
+  show (Node_Decl _ _) = "Node_Decl" 
+  show (Node_BoardDecl _ _) = "Node_BoardDecl" 
+  show (Node_PPPresentationDecl _ _) = "Node_PPPresentationDecl" 
+  show (Node_HoleDecl _ _) = "Node_HoleDecl" 
+  show (Node_ParseErrDecl _ _) = "Node_ParseErrDecl" 
+  show (Node_Ident _ _) = "Node_Ident" 
+  show (Node_HoleIdent _ _) = "Node_HoleIdent" 
+  show (Node_ParseErrIdent _ _) = "Node_ParseErrIdent" 
+  show (Node_PlusExp _ _) = "Node_PlusExp" 
+  show (Node_TimesExp _ _) = "Node_TimesExp" 
+  show (Node_DivExp _ _) = "Node_DivExp" 
+  show (Node_PowerExp _ _) = "Node_PowerExp" 
+  show (Node_BoolExp _ _) = "Node_BoolExp" 
+  show (Node_IntExp _ _) = "Node_IntExp" 
+  show (Node_LamExp _ _) = "Node_LamExp" 
+  show (Node_AppExp _ _) = "Node_AppExp" 
+  show (Node_CaseExp _ _) = "Node_CaseExp" 
+  show (Node_LetExp _ _) = "Node_LetExp" 
+  show (Node_IdentExp _ _) = "Node_IdentExp" 
+  show (Node_IfExp _ _) = "Node_IfExp" 
+  show (Node_ParenExp _ _) = "Node_ParenExp" 
+  show (Node_ListExp _ _) = "Node_ListExp" 
+  show (Node_ProductExp _ _) = "Node_ProductExp" 
+  show (Node_HoleExp _ _) = "Node_HoleExp" 
+  show (Node_ParseErrExp _ _) = "Node_ParseErrExp" 
+  show (Node_Alt _ _) = "Node_Alt" 
+  show (Node_HoleAlt _ _) = "Node_HoleAlt" 
+  show (Node_ParseErrAlt _ _) = "Node_ParseErrAlt" 
+  show (Node_Board _ _) = "Node_Board" 
+  show (Node_HoleBoard _ _) = "Node_HoleBoard" 
+  show (Node_ParseErrBoard _ _) = "Node_ParseErrBoard" 
+  show (Node_BoardRow _ _) = "Node_BoardRow" 
+  show (Node_HoleBoardRow _ _) = "Node_HoleBoardRow" 
+  show (Node_ParseErrBoardRow _ _) = "Node_ParseErrBoardRow" 
+  show (Node_Queen _ _) = "Node_Queen" 
+  show (Node_King _ _) = "Node_King" 
+  show (Node_Bishop _ _) = "Node_Bishop" 
+  show (Node_Knight _ _) = "Node_Knight" 
+  show (Node_Rook _ _) = "Node_Rook" 
+  show (Node_Pawn _ _) = "Node_Pawn" 
+  show (Node_Empty _ _) = "Node_Empty" 
+  show (Node_HoleBoardSquare _ _) = "Node_HoleBoardSquare" 
+  show (Node_ParseErrBoardSquare _ _) = "Node_ParseErrBoardSquare" 
+  show (Node_PPPresentation _ _) = "Node_PPPresentation" 
+  show (Node_HolePPPresentation _ _) = "Node_HolePPPresentation" 
+  show (Node_ParseErrPPPresentation _ _) = "Node_ParseErrPPPresentation" 
+  show (Node_Slide _ _) = "Node_Slide" 
+  show (Node_HoleSlide _ _) = "Node_HoleSlide" 
+  show (Node_ParseErrSlide _ _) = "Node_ParseErrSlide" 
+  show (Node_ItemList _ _) = "Node_ItemList" 
+  show (Node_HoleItemList _ _) = "Node_HoleItemList" 
+  show (Node_ParseErrItemList _ _) = "Node_ParseErrItemList" 
+  show (Node_Bullet _ _) = "Node_Bullet" 
+  show (Node_Number _ _) = "Node_Number" 
+  show (Node_Alpha _ _) = "Node_Alpha" 
+  show (Node_HoleListType _ _) = "Node_HoleListType" 
+  show (Node_ParseErrListType _ _) = "Node_ParseErrListType" 
+  show (Node_StringItem _ _) = "Node_StringItem" 
+  show (Node_HeliumItem _ _) = "Node_HeliumItem" 
+  show (Node_ListItem _ _) = "Node_ListItem" 
+  show (Node_HoleItem _ _) = "Node_HoleItem" 
+  show (Node_ParseErrItem _ _) = "Node_ParseErrItem" 
+  show (Node_List_Decl _ _) = "Node_List_Decl" 
+  show (Node_HoleList_Decl _ _) = "Node_HoleList_Decl" 
+  show (Node_ParseErrList_Decl _ _) = "Node_ParseErrList_Decl" 
+  show (Node_List_Alt _ _) = "Node_List_Alt" 
+  show (Node_HoleList_Alt _ _) = "Node_HoleList_Alt" 
+  show (Node_ParseErrList_Alt _ _) = "Node_ParseErrList_Alt" 
+  show (Node_List_Exp _ _) = "Node_List_Exp" 
+  show (Node_HoleList_Exp _ _) = "Node_HoleList_Exp" 
+  show (Node_ParseErrList_Exp _ _) = "Node_ParseErrList_Exp" 
+  show (Node_List_Slide _ _) = "Node_List_Slide" 
+  show (Node_HoleList_Slide _ _) = "Node_HoleList_Slide" 
+  show (Node_ParseErrList_Slide _ _) = "Node_ParseErrList_Slide" 
+  show (Node_List_Item _ _) = "Node_List_Item" 
+  show (Node_HoleList_Item _ _) = "Node_HoleList_Item" 
+  show (Node_ParseErrList_Item _ _) = "Node_ParseErrList_Item" 
 
 

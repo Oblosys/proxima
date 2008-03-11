@@ -306,191 +306,191 @@ reuseList_Item nodes ma0
 --------------------------------------------------------------------------
 
 extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (DummyNode x@(Dummy _ _) _)) = Just x
+extractDummy (Just (Node_Dummy x@(Dummy _ _) _)) = Just x
 extractDummy _ = Nothing
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (RootEnrNode x@(RootEnr _ _ _) _)) = Just x
+extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (RootNode x@(Root _ _) _)) = Just x
+extractRoot (Just (Node_Root x@(Root _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractRootE :: Maybe Node -> Maybe RootE
-extractRootE (Just (RootENode x@(RootE _ _ _) _)) = Just x
+extractRootE (Just (Node_RootE x@(RootE _ _ _) _)) = Just x
 extractRootE _ = Nothing
 
 extractDecl :: Maybe Node -> Maybe Decl
-extractDecl (Just (DeclNode x@(Decl _ _ _ _ _ _ _ _) _)) = Just x
+extractDecl (Just (Node_Decl x@(Decl _ _ _ _ _ _ _ _) _)) = Just x
 extractDecl _ = Nothing
 
 extractBoardDecl :: Maybe Node -> Maybe Decl
-extractBoardDecl (Just (BoardDeclNode x@(BoardDecl _ _ _) _)) = Just x
+extractBoardDecl (Just (Node_BoardDecl x@(BoardDecl _ _ _) _)) = Just x
 extractBoardDecl _ = Nothing
 
 extractPPPresentationDecl :: Maybe Node -> Maybe Decl
-extractPPPresentationDecl (Just (PPPresentationDeclNode x@(PPPresentationDecl _ _ _) _)) = Just x
+extractPPPresentationDecl (Just (Node_PPPresentationDecl x@(PPPresentationDecl _ _ _) _)) = Just x
 extractPPPresentationDecl _ = Nothing
 
 extractIdent :: Maybe Node -> Maybe Ident
-extractIdent (Just (IdentNode x@(Ident _ _ _) _)) = Just x
+extractIdent (Just (Node_Ident x@(Ident _ _ _) _)) = Just x
 extractIdent _ = Nothing
 
 extractPlusExp :: Maybe Node -> Maybe Exp
-extractPlusExp (Just (PlusExpNode x@(PlusExp _ _ _) _)) = Just x
+extractPlusExp (Just (Node_PlusExp x@(PlusExp _ _ _) _)) = Just x
 extractPlusExp _ = Nothing
 
 extractTimesExp :: Maybe Node -> Maybe Exp
-extractTimesExp (Just (TimesExpNode x@(TimesExp _ _ _) _)) = Just x
+extractTimesExp (Just (Node_TimesExp x@(TimesExp _ _ _) _)) = Just x
 extractTimesExp _ = Nothing
 
 extractDivExp :: Maybe Node -> Maybe Exp
-extractDivExp (Just (DivExpNode x@(DivExp _ _ _) _)) = Just x
+extractDivExp (Just (Node_DivExp x@(DivExp _ _ _) _)) = Just x
 extractDivExp _ = Nothing
 
 extractPowerExp :: Maybe Node -> Maybe Exp
-extractPowerExp (Just (PowerExpNode x@(PowerExp _ _ _) _)) = Just x
+extractPowerExp (Just (Node_PowerExp x@(PowerExp _ _ _) _)) = Just x
 extractPowerExp _ = Nothing
 
 extractBoolExp :: Maybe Node -> Maybe Exp
-extractBoolExp (Just (BoolExpNode x@(BoolExp _ _) _)) = Just x
+extractBoolExp (Just (Node_BoolExp x@(BoolExp _ _) _)) = Just x
 extractBoolExp _ = Nothing
 
 extractIntExp :: Maybe Node -> Maybe Exp
-extractIntExp (Just (IntExpNode x@(IntExp _ _) _)) = Just x
+extractIntExp (Just (Node_IntExp x@(IntExp _ _) _)) = Just x
 extractIntExp _ = Nothing
 
 extractLamExp :: Maybe Node -> Maybe Exp
-extractLamExp (Just (LamExpNode x@(LamExp _ _ _ _) _)) = Just x
+extractLamExp (Just (Node_LamExp x@(LamExp _ _ _ _) _)) = Just x
 extractLamExp _ = Nothing
 
 extractAppExp :: Maybe Node -> Maybe Exp
-extractAppExp (Just (AppExpNode x@(AppExp _ _) _)) = Just x
+extractAppExp (Just (Node_AppExp x@(AppExp _ _) _)) = Just x
 extractAppExp _ = Nothing
 
 extractCaseExp :: Maybe Node -> Maybe Exp
-extractCaseExp (Just (CaseExpNode x@(CaseExp _ _ _ _) _)) = Just x
+extractCaseExp (Just (Node_CaseExp x@(CaseExp _ _ _ _) _)) = Just x
 extractCaseExp _ = Nothing
 
 extractLetExp :: Maybe Node -> Maybe Exp
-extractLetExp (Just (LetExpNode x@(LetExp _ _ _ _) _)) = Just x
+extractLetExp (Just (Node_LetExp x@(LetExp _ _ _ _) _)) = Just x
 extractLetExp _ = Nothing
 
 extractIdentExp :: Maybe Node -> Maybe Exp
-extractIdentExp (Just (IdentExpNode x@(IdentExp _) _)) = Just x
+extractIdentExp (Just (Node_IdentExp x@(IdentExp _) _)) = Just x
 extractIdentExp _ = Nothing
 
 extractIfExp :: Maybe Node -> Maybe Exp
-extractIfExp (Just (IfExpNode x@(IfExp _ _ _ _ _ _) _)) = Just x
+extractIfExp (Just (Node_IfExp x@(IfExp _ _ _ _ _ _) _)) = Just x
 extractIfExp _ = Nothing
 
 extractParenExp :: Maybe Node -> Maybe Exp
-extractParenExp (Just (ParenExpNode x@(ParenExp _ _ _) _)) = Just x
+extractParenExp (Just (Node_ParenExp x@(ParenExp _ _ _) _)) = Just x
 extractParenExp _ = Nothing
 
 extractListExp :: Maybe Node -> Maybe Exp
-extractListExp (Just (ListExpNode x@(ListExp _ _ _ _) _)) = Just x
+extractListExp (Just (Node_ListExp x@(ListExp _ _ _ _) _)) = Just x
 extractListExp _ = Nothing
 
 extractProductExp :: Maybe Node -> Maybe Exp
-extractProductExp (Just (ProductExpNode x@(ProductExp _ _ _ _) _)) = Just x
+extractProductExp (Just (Node_ProductExp x@(ProductExp _ _ _ _) _)) = Just x
 extractProductExp _ = Nothing
 
 extractAlt :: Maybe Node -> Maybe Alt
-extractAlt (Just (AltNode x@(Alt _ _ _ _) _)) = Just x
+extractAlt (Just (Node_Alt x@(Alt _ _ _ _) _)) = Just x
 extractAlt _ = Nothing
 
 extractBoard :: Maybe Node -> Maybe Board
-extractBoard (Just (BoardNode x@(Board _ _ _ _ _ _ _ _) _)) = Just x
+extractBoard (Just (Node_Board x@(Board _ _ _ _ _ _ _ _) _)) = Just x
 extractBoard _ = Nothing
 
 extractBoardRow :: Maybe Node -> Maybe BoardRow
-extractBoardRow (Just (BoardRowNode x@(BoardRow _ _ _ _ _ _ _ _) _)) = Just x
+extractBoardRow (Just (Node_BoardRow x@(BoardRow _ _ _ _ _ _ _ _) _)) = Just x
 extractBoardRow _ = Nothing
 
 extractQueen :: Maybe Node -> Maybe BoardSquare
-extractQueen (Just (QueenNode x@(Queen _) _)) = Just x
+extractQueen (Just (Node_Queen x@(Queen _) _)) = Just x
 extractQueen _ = Nothing
 
 extractKing :: Maybe Node -> Maybe BoardSquare
-extractKing (Just (KingNode x@(King _) _)) = Just x
+extractKing (Just (Node_King x@(King _) _)) = Just x
 extractKing _ = Nothing
 
 extractBishop :: Maybe Node -> Maybe BoardSquare
-extractBishop (Just (BishopNode x@(Bishop _) _)) = Just x
+extractBishop (Just (Node_Bishop x@(Bishop _) _)) = Just x
 extractBishop _ = Nothing
 
 extractKnight :: Maybe Node -> Maybe BoardSquare
-extractKnight (Just (KnightNode x@(Knight _) _)) = Just x
+extractKnight (Just (Node_Knight x@(Knight _) _)) = Just x
 extractKnight _ = Nothing
 
 extractRook :: Maybe Node -> Maybe BoardSquare
-extractRook (Just (RookNode x@(Rook _) _)) = Just x
+extractRook (Just (Node_Rook x@(Rook _) _)) = Just x
 extractRook _ = Nothing
 
 extractPawn :: Maybe Node -> Maybe BoardSquare
-extractPawn (Just (PawnNode x@(Pawn _) _)) = Just x
+extractPawn (Just (Node_Pawn x@(Pawn _) _)) = Just x
 extractPawn _ = Nothing
 
 extractEmpty :: Maybe Node -> Maybe BoardSquare
-extractEmpty (Just (EmptyNode x@(Empty) _)) = Just x
+extractEmpty (Just (Node_Empty x@(Empty) _)) = Just x
 extractEmpty _ = Nothing
 
 extractPPPresentation :: Maybe Node -> Maybe PPPresentation
-extractPPPresentation (Just (PPPresentationNode x@(PPPresentation _ _) _)) = Just x
+extractPPPresentation (Just (Node_PPPresentation x@(PPPresentation _ _) _)) = Just x
 extractPPPresentation _ = Nothing
 
 extractSlide :: Maybe Node -> Maybe Slide
-extractSlide (Just (SlideNode x@(Slide _ _) _)) = Just x
+extractSlide (Just (Node_Slide x@(Slide _ _) _)) = Just x
 extractSlide _ = Nothing
 
 extractItemList :: Maybe Node -> Maybe ItemList
-extractItemList (Just (ItemListNode x@(ItemList _ _) _)) = Just x
+extractItemList (Just (Node_ItemList x@(ItemList _ _) _)) = Just x
 extractItemList _ = Nothing
 
 extractBullet :: Maybe Node -> Maybe ListType
-extractBullet (Just (BulletNode x@(Bullet) _)) = Just x
+extractBullet (Just (Node_Bullet x@(Bullet) _)) = Just x
 extractBullet _ = Nothing
 
 extractNumber :: Maybe Node -> Maybe ListType
-extractNumber (Just (NumberNode x@(Number) _)) = Just x
+extractNumber (Just (Node_Number x@(Number) _)) = Just x
 extractNumber _ = Nothing
 
 extractAlpha :: Maybe Node -> Maybe ListType
-extractAlpha (Just (AlphaNode x@(Alpha) _)) = Just x
+extractAlpha (Just (Node_Alpha x@(Alpha) _)) = Just x
 extractAlpha _ = Nothing
 
 extractStringItem :: Maybe Node -> Maybe Item
-extractStringItem (Just (StringItemNode x@(StringItem _) _)) = Just x
+extractStringItem (Just (Node_StringItem x@(StringItem _) _)) = Just x
 extractStringItem _ = Nothing
 
 extractHeliumItem :: Maybe Node -> Maybe Item
-extractHeliumItem (Just (HeliumItemNode x@(HeliumItem _) _)) = Just x
+extractHeliumItem (Just (Node_HeliumItem x@(HeliumItem _) _)) = Just x
 extractHeliumItem _ = Nothing
 
 extractListItem :: Maybe Node -> Maybe Item
-extractListItem (Just (ListItemNode x@(ListItem _) _)) = Just x
+extractListItem (Just (Node_ListItem x@(ListItem _) _)) = Just x
 extractListItem _ = Nothing
 
 extractList_Decl :: Maybe Node -> Maybe List_Decl
-extractList_Decl (Just (List_DeclNode x@(List_Decl _) _)) = Just x
+extractList_Decl (Just (Node_List_Decl x@(List_Decl _) _)) = Just x
 extractList_Decl _ = Nothing
 
 extractList_Alt :: Maybe Node -> Maybe List_Alt
-extractList_Alt (Just (List_AltNode x@(List_Alt _) _)) = Just x
+extractList_Alt (Just (Node_List_Alt x@(List_Alt _) _)) = Just x
 extractList_Alt _ = Nothing
 
 extractList_Exp :: Maybe Node -> Maybe List_Exp
-extractList_Exp (Just (List_ExpNode x@(List_Exp _) _)) = Just x
+extractList_Exp (Just (Node_List_Exp x@(List_Exp _) _)) = Just x
 extractList_Exp _ = Nothing
 
 extractList_Slide :: Maybe Node -> Maybe List_Slide
-extractList_Slide (Just (List_SlideNode x@(List_Slide _) _)) = Just x
+extractList_Slide (Just (Node_List_Slide x@(List_Slide _) _)) = Just x
 extractList_Slide _ = Nothing
 
 extractList_Item :: Maybe Node -> Maybe List_Item
-extractList_Item (Just (List_ItemNode x@(List_Item _) _)) = Just x
+extractList_Item (Just (Node_List_Item x@(List_Item _) _)) = Just x
 extractList_Item _ = Nothing
 
 
