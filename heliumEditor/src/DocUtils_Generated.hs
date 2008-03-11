@@ -11,6 +11,11 @@ import Common.CommonUtils
 import System.Directory
 import Presentation.XprezLib
 
+instance Doc Document where
+  initialDoc = initDoc
+  toXML    = toXMLDocument
+  parseXML = parseXML_Document
+
 initDoc :: IO Document
 initDoc = 
  do { let filePath = "Heliumfile.hs"
