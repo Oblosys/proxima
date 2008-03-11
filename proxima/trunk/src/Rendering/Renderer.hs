@@ -77,7 +77,7 @@ mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr@(LocatorA (RootDocNode doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
+mkPopupMenuXY prs scale arr@(LocatorA (Node_RootDoc doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
