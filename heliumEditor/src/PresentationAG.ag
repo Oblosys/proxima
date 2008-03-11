@@ -416,9 +416,6 @@ SEM Alt
 
 
 {
-presentFocus NoPathD     path pres = pres
-presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
-
 squiggleRanges (rngs1, rngs2, rngs3) pth pres =
   if (PathD pth) `elem` rngs1 then squiggly error1Color pres
   else if (PathD pth) `elem` rngs2 then pres -- squiggly error2Color pres
@@ -512,7 +509,6 @@ keyCol = blue
 sepCol = brown
 consCol = black
 typeDCol = purple --darkViolet
-focusCol = lightBlue -- lightGrey
 commentCol = (240,240,240)
 --idC = unsafePerformIO $ newIORef (0 :: Int)
 

@@ -1,55 +1,3 @@
-
-SEM EnrichedDoc
-  | RootEnr root.pIdC = @lhs.pIdC
-            lhs.pIdC  = @root.pIdC
-  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self []) []
-  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation
-
-
-SEM EnrichedDoc
-  | RootEnr root.path  = []
-
-{
-type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
-
-presentElementXML :: FocusDoc -> Node -> [Int] -> String -> [Presentation_Doc_Node_Clip_Token] -> Presentation_Doc_Node_Clip_Token
-presentElementXML focusD node path tag children =
-  loc node $ parsing $ presentFocus focusD path $                  
-    if null children
-    then col [ text $ "<"++tag++"/>"]
-    else col [ text  $ "<"++tag++">"
-             , row [ text "  ", col children ]
-             , text $ "</"++tag++">" ]      
-    
-presentPrimXMLBool :: Bool -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
-
-presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
-
-presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLString x = text $ "<String>"++x++"<String>"
-
-
-presentElementTree :: FocusDoc -> Node -> [Int] -> String -> [Presentation_Doc_Node_Clip_Token] -> Presentation_Doc_Node_Clip_Token
-presentElementTree focusD node path tag children =
-  loc node $ parsing $ presentFocus focusD path $                  
-    if null children
-    then mkTreeLeaf False $ text $ tag
-    else mkTreeNode False True (text tag) children
-    
-presentPrimTreeBool :: Bool -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
-
-presentPrimTreeInt :: Int -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
-
-presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
-
-}                   
-
-
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -235,6 +183,22 @@ ATTR Decl Alt Exp Slide Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Sl
 ATTR ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
      [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
 
+
+
+
+--------------------------------------------------------------------------
+-- Sem functions for EnrichedDoc                                        --
+--------------------------------------------------------------------------
+
+SEM EnrichedDoc
+  | RootEnr
+      root.pIdC = @lhs.pIdC
+      lhs.pIdC  = @root.pIdC
+  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self []) []
+  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation
+
+SEM EnrichedDoc
+  | RootEnr root.path  = []
 
 
 
