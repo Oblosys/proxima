@@ -52,39 +52,35 @@ pawnRow c = BoardRow (Pawn c) (Pawn c) (Pawn c) (Pawn c)
 backRow c = BoardRow (Rook c) (Knight c) (Bishop c) (Queen c) 
                           (King c) (Bishop c) (Knight c) (Rook c)
 
-
-
-
 initPPPresentation = 
-  PPPresentation True $ List_Slide $
-    mkSlides
+  PPPresentation True $ toList_Slide $
       [ Slide "slide_1" $
-          ItemList (Bullet) $ List_Item $
-                         mkItems [ StringItem "item_1"
-                                 , HeliumItem -- simple trick to use parser: Needs an additional parse (F1) though!
-                                     --(ident "\\ x -> increaze x")
-                                     (ident "\\b -> \\x -> if b then ink x else x")
-                                 , StringItem "item_2"
-                                 , ListItem listItem
-                                 ]
+          ItemList (Bullet) $ toList_Item $
+                                [ StringItem "item_1"
+                                , HeliumItem -- simple trick to use parser: Needs an additional parse (F1) though!
+                                    --(ident "\\ x -> increaze x")
+                                    (ident "\\b -> \\x -> if b then ink x else x")
+                                , StringItem "item_2"
+                                , ListItem listItem
+                                ]
        , Slide "slide_2" $
-          ItemList (Alpha) $  List_Item $
-                         mkItems [ StringItem "item_a"
-                                 , StringItem "item_b"
-                                 , StringItem "item_c"
-                                 ]
+          ItemList (Alpha) $ toList_Item $
+                               [ StringItem "item_a"
+                               , StringItem "item_b"
+                               , StringItem "item_c"
+                               ]
       ]
- where listItem = ItemList (Number) $  List_Item $
-                    mkItems [ StringItem "nested_item_1"
-                            , ListItem listItem'
-                            , StringItem "nested_item_2"
-                            , StringItem "nested_item_3"
-                            ]
-       listItem' = ItemList (Bullet) $  List_Item $
-                    mkItems [ StringItem "nested_nested_item"
-                            , StringItem "nested_nested_item"
-                            , StringItem "nested_nested_item"
-                            ]
+ where listItem = ItemList (Number) $ toList_Item $
+                                        [ StringItem "nested_item_1"
+                                        , ListItem listItem'
+                                        , StringItem "nested_item_2"
+                                        , StringItem "nested_item_3"
+                                        ]
+       listItem' = ItemList (Bullet) $ toList_Item $
+                                         [ StringItem "nested_nested_item"
+                                         , StringItem "nested_nested_item"
+                                         , StringItem "nested_nested_item"
+                                         ]
        dv e1 e2 = DivExp NoIDP e1 e2 
        lam str body = LamExp NoIDP NoIDP (Ident NoIDP NoIDP str) body
        ifxp c t e = IfExp NoIDP NoIDP NoIDP c t e 
@@ -92,96 +88,6 @@ initPPPresentation =
        bool b = BoolExp NoIDP b
        ident str = IdentExp (Ident NoIDP NoIDP str)
        
-
-mkSlides []     = Nil_Slide
-mkSlides (s:ss) = Cons_Slide s (mkSlides ss)
-
-mkItems []     = Nil_Item 
-mkItems (s:ss) = Cons_Item s (mkItems ss)
-
-
-
-
-instance DocNode Node where
-  noNode = NoNode
-
-instance Eq Node where
-  nd1 == nd2 = rankNode nd1 == rankNode nd2
-  
-instance Ord Node where
-  nd1 <= nd2 = rankNode nd1 <= rankNode nd2
-
-instance Doc Document where
-  initialDoc = initDoc
-  toXML = toXMLDocument
-  parseXML = parseXML_Document
-
--- XML
-
--- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
-toXMLDocument (RootDoc root) = toXMLRoot root
-toXMLDocument _              = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
-                                 Elt "Root" [] [] -- this does not occur
-
-parseXML_Document = RootDoc <$> parseXML_Root
-
-
--- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
-
-toXMLBool b = Elt "Bool" [("val", show b)] []
-
-toXMLInt i = Elt "Integer" [("val", show i)] []
-
-toXMLString str = Elt "String" [] [PCData str] 
-
-
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
-
-parseXML_Int :: Parser Int
-parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
-
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
-
-
-type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
-    
-presentPrimXMLBool :: Bool -> Presentation doc node clip token
-presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
-
-presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
-
-presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLString x = text $ "<String>"++x++"<String>"
-
-presentPrimTreeBool :: Bool -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
-
-presentPrimTreeInt :: Int -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
-
-presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
-presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -563,6 +469,11 @@ parseXML_List_Slide = mkList List_Slide Cons_Slide Nil_Slide <$> many parseXML_S
 parseXML_List_Item = mkList List_Item Cons_Item Nil_Item <$> many parseXML_Item
 
 
+
+--------------------------------------------------------------------------
+-- List utility functions                                               --
+--------------------------------------------------------------------------
+
 toList_Decl vs = List_Decl (toConsList_Decl vs)
 
 fromList_Decl (List_Decl vs) = fromConsList_Decl vs
@@ -677,4 +588,115 @@ insertList_Item n x (Cons_Item cx cxs) = Cons_Item cx (insertList_Item (n-1) x c
 removeList_Item _ Nil_Item  = Nil_Item  -- remove beyond end of list
 removeList_Item 0 (Cons_Item cx cxs) = cxs
 removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
+
+
+
+
+--------------------------------------------------------------------------
+-- Miscellaneous                                                        --
+--------------------------------------------------------------------------
+
+type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
+
+instance DocNode Node where
+  noNode = NoNode
+
+instance Eq Node where
+  nd1 == nd2 = rankNode nd1 == rankNode nd2
+  
+instance Ord Node where
+  nd1 <= nd2 = rankNode nd1 <= rankNode nd2
+
+instance Doc Document where
+  initialDoc = initDoc
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
+
+
+-- toXML for Document and primitive types
+
+-- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
+toXMLDocument (RootDoc root) = toXMLRoot root
+toXMLDocument _              = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
+                                 Elt "Root" [] [] -- this does not occur
+
+toXMLInt i = Elt "Integer" [("val", show i)] []
+
+toXMLInt f = Elt "Float" [("val", show f)] []
+
+toXMLBool b = Elt "Bool" [("val", show b)] []
+
+toXMLString str = Elt "String" [] [PCData str] 
+
+
+-- parseXML for Document and primitive types
+
+parseXML_Document = RootDoc <$> parseXML_Root
+
+parseXML_Int :: Parser Int
+parseXML_Int  =
+ do { spaces
+    ; string "<Integer val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Float :: Parser Float
+parseXML_Float  =
+ do { spaces
+    ; string "<Float val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Bool :: Parser Bool
+parseXML_Bool =
+ do { spaces
+    ; string "<Bool val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    }
+
+parseXML_String :: Parser String
+parseXML_String =
+ do { spaces
+    ; string "<String>"
+    ; str <- many (satisfy (/='<')) 
+    ; string "</String>"
+    ; return str
+    }
+ 
+
+-- Xprez XML presentation for primitive types
+
+presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
+
+presentPrimXMLFloat :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLFloat x = text $ "<Float>"++x++"<Float>"
+
+presentPrimXMLBool :: Bool -> Presentation doc node clip token
+presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
+
+presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLString x = text $ "<String>"++x++"<String>"
+
+
+-- Xprez tree presentation for primitive types
+
+presentPrimTreeInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
+
+presentPrimTreeFloat :: Float -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeFloat x =  mkTreeLeaf False $ text $ "Float: "++show x
+
+presentPrimTreeBool :: Bool -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
+
+presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
+
 
