@@ -39,7 +39,7 @@ generateFiles srcPath fileName =
     
 generateFile :: String -> String -> [String] -> IO ()
 generateFile path fileName generatedLines =
- do { putStrLn "Generating fileName"
+ do { putStrLn $ "Generating "++fileName
     ; let filePath = path ++ "/" ++ fileName
     ; oldContents <- readFile filePath
     ; seq (length oldContents) $ return ()
