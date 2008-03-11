@@ -612,11 +612,6 @@ instance Eq Node where
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
 
-instance Doc Document where
-  initialDoc = initDoc
-  toXML = toXMLDocument
-  parseXML = parseXML_Document
-
 
 -- toXML for Document and primitive types
 
