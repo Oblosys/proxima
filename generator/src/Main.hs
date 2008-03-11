@@ -11,16 +11,13 @@ import qualified Gen_DocumentEdit
 import System
 import List
 
-
-{- Generation
+{-
 
 TODO:
-- can we get rid of parse err and hole for node type? (also change rankNode and pathNode
-  old generator only made nodes for holes, not parse errs
-
 - add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
-- put standard code in the generator (e.g. editable instances for prim types)
+- put all standard code in the generator (e.g. editable instances for prim types)
   This way the non-generated part consists only of user-specified code.
+
 -}
 
 main =
