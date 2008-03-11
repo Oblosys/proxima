@@ -21,6 +21,7 @@ TODO:
 - can we get rid of parse err and hole for node type? (also change rankNode and pathNode
   old generator only made nodes for holes, not parse errs
 - add some static checks: double types, duplicate fieldnames (or maybe use suffix 1, 2 .. to create unique names)
+- put editable instances for prims in generator, maybe also for other modules?
 
 - make a mechanism to add fragments from a hs file? 
 -  (so the non-generated part can contain only user specified stuff) useful for editable instances for prim types

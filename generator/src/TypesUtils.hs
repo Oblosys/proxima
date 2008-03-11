@@ -107,10 +107,25 @@ genTypeName (LHSConsListType typeName) = "ConsList_"++typeName
 genNoIDP (Field _ tpe) = if isListType tpe then "[]" else "NoIDP"         
 
 
+-- Generate a pattern with named parameters and _ for idps. Eg. (Bin _ left right)
 genPattern (Prod _ cnstrName idpFields fields) = 
   "(%1%2%3)" <~ 
   [cnstrName, concat $ replicate (length idpFields) " _", concatMap ((" "++) . fieldName) fields]
 
+-- Generate a pattern with x parameters and _ for idps. Eg. (Bin _ x0 x1)
+genXPattern (Prod _ cnstrName idpFields fields) = 
+  "(%1%2%3)"
+  <~ [ cnstrName
+     , concat $ replicate (length idpFields) " _"
+     , prefixBy " x" $map show [0..length fields-1]
+     ]
+-- Generate a pattern with x parameters and i for idps. Eg. (Bin i0 x0 x1)     
+genIXPattern (Prod _ cnstrName idpFields fields) = 
+  "(%1%2%3)"
+  <~ [ cnstrName
+     , prefixBy " i" $ map show [0..length idpFields-1]
+     , prefixBy " x" $ map show [0..length fields-1]
+     ]
 
 removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . lhsTypeName . declLHSType) decls
 
