@@ -16,6 +16,7 @@ import TypesUtils
 generate :: DocumentType -> [String]
 generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genAttr docType
+                ++ genSemEnrichedDoc
                 ++ genSem (addConsListDecls docTypeWithoutEnrWithLists)
                 ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
                 ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
@@ -24,6 +25,19 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithL
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
 
+
+genDataType decls = genBanner "AG data type" $
+  concatMap genDataDecl decls
+ where genDataDecl (Decl lhsType prods) = 
+         "DATA %1" <~ [genTypeName lhsType] :
+         [ "  | " ++ genProd prod | prod <- prods] ++
+         [ "" ]
+        where genProd (Prod _ cnstrName idpFields fields) =
+                cnstrName ++ (prefixBy " " $ map genIDPField idpFields ++
+                                             map genField fields)
+                      
+       genIDPField (Field fieldName fieldType) = fieldName ++ ":" ++ genIDPTypeAG  fieldType
+       genField    (Field fieldName fieldType) = fieldName ++ ":" ++ genTypeAG fieldType
 
 genAttr decls = genBanner "Attr declarations" $
   [ "ATTR %1" -- all types including lists and conslists
@@ -59,18 +73,17 @@ genAttr decls = genBanner "Attr declarations" $
        listNames = map ("List_"++) listTypeNames
        consListNames = map ("ConsList_"++) listTypeNames
  
-genDataType decls = genBanner "AG data type" $
-  concatMap genDataDecl decls
- where genDataDecl (Decl lhsType prods) = 
-         "DATA %1" <~ [genTypeName lhsType] :
-         [ "  | " ++ genProd prod | prod <- prods] ++
-         [ "" ]
-        where genProd (Prod _ cnstrName idpFields fields) =
-                cnstrName ++ (prefixBy " " $ map genIDPField idpFields ++
-                                             map genField fields)
-                      
-       genIDPField (Field fieldName fieldType) = fieldName ++ ":" ++ genIDPTypeAG  fieldType
-       genField    (Field fieldName fieldType) = fieldName ++ ":" ++ genTypeAG fieldType
+genSemEnrichedDoc = genBanner "Sem functions for EnrichedDoc" $
+  [ "SEM EnrichedDoc"
+  , "  | RootEnr"
+  , "      root.pIdC = @lhs.pIdC"
+  , "      lhs.pIdC  = @root.pIdC"
+  , "  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD \"EnrichedDoc\" (Node_HoleEnrichedDoc @self []) []"
+  , "  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation"
+  , ""
+  , "SEM EnrichedDoc"
+  , "  | RootEnr root.path  = []"
+  ]
 
 genSem decls = genBanner "General sem functions" $
   concatMap genSemDecl decls
