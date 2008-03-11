@@ -16,40 +16,40 @@ tokens :-
   \n+              { collectWhitespace }
   \ +              { collectWhitespace }
   \255             { mkStructuralToken }
-  module           { mkToken $ \s -> StrTk s }
-  let              { mkToken $ \s -> StrTk s }
-  in               { mkToken $ \s -> StrTk s }
-  False            { mkToken $ \s -> StrTk s }
-  True             { mkToken $ \s -> StrTk s }
-  if               { mkToken $ \s -> StrTk s }
-  then             { mkToken $ \s -> StrTk s }
-  else             { mkToken $ \s -> StrTk s }
-  let              { mkToken $ \s -> StrTk s }
-  in               { mkToken $ \s -> StrTk s }
-  case             { mkToken $ \s -> StrTk s }
-  of               { mkToken $ \s -> StrTk s }
-  Chess            { mkToken $ \s -> StrTk s }
-  board            { mkToken $ \s -> StrTk s }
-  Slides           { mkToken $ \s -> StrTk s }
-  pres             { mkToken $ \s -> StrTk s }
-  \+               { mkToken $ \s -> StrTk s }
-  \-               { mkToken $ \s -> StrTk s }
-  \*               { mkToken $ \s -> StrTk s }
-  \%               { mkToken $ \s -> StrTk s }
-  \/               { mkToken $ \s -> StrTk s }
-  \^               { mkToken $ \s -> StrTk s }
-  \-\>             { mkToken $ \s -> StrTk s }
-  \(               { mkToken $ \s -> StrTk s }
-  \)               { mkToken $ \s -> StrTk s }
-  \{               { mkToken $ \s -> StrTk s }
-  \}               { mkToken $ \s -> StrTk s }
-  \[               { mkToken $ \s -> StrTk s }
-  \]               { mkToken $ \s -> StrTk s }
-  \,               { mkToken $ \s -> StrTk s }
-  \:               { mkToken $ \s -> StrTk s }
-  \;               { mkToken $ \s -> StrTk s }
-  \\               { mkToken $ \s -> StrTk s }
-  \=               { mkToken $ \s -> StrTk s }
+  module           { mkToken $ \s -> KeyTk s }
+  let              { mkToken $ \s -> KeyTk s }
+  in               { mkToken $ \s -> KeyTk s }
+  False            { mkToken $ \s -> KeyTk s }
+  True             { mkToken $ \s -> KeyTk s }
+  if               { mkToken $ \s -> KeyTk s }
+  then             { mkToken $ \s -> KeyTk s }
+  else             { mkToken $ \s -> KeyTk s }
+  let              { mkToken $ \s -> KeyTk s }
+  in               { mkToken $ \s -> KeyTk s }
+  case             { mkToken $ \s -> KeyTk s }
+  of               { mkToken $ \s -> KeyTk s }
+  Chess            { mkToken $ \s -> KeyTk s }
+  board            { mkToken $ \s -> KeyTk s }
+  Slides           { mkToken $ \s -> KeyTk s }
+  pres             { mkToken $ \s -> KeyTk s }
+  \+               { mkToken $ \s -> KeyTk s }
+  \-               { mkToken $ \s -> KeyTk s }
+  \*               { mkToken $ \s -> KeyTk s }
+  \%               { mkToken $ \s -> KeyTk s }
+  \/               { mkToken $ \s -> KeyTk s }
+  \^               { mkToken $ \s -> KeyTk s }
+  \-\>             { mkToken $ \s -> KeyTk s }
+  \(               { mkToken $ \s -> KeyTk s }
+  \)               { mkToken $ \s -> KeyTk s }
+  \{               { mkToken $ \s -> KeyTk s }
+  \}               { mkToken $ \s -> KeyTk s }
+  \[               { mkToken $ \s -> KeyTk s }
+  \]               { mkToken $ \s -> KeyTk s }
+  \,               { mkToken $ \s -> KeyTk s }
+  \:               { mkToken $ \s -> KeyTk s }
+  \;               { mkToken $ \s -> KeyTk s }
+  \\               { mkToken $ \s -> KeyTk s }
+  \=               { mkToken $ \s -> KeyTk s }
 -- Old helium scanner seemed to have only keywords, no symbols
 
   $digit+          { mkToken $ \s -> IntTk }

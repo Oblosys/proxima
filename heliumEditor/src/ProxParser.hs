@@ -465,7 +465,7 @@ HOLE = 2;                                 copied from following token
 
 -- User token values that can be used to construct basic token parsers
 
-strTk str = UserTk (StrTk str) str Nothing (IDP (-1))
+keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
 intTk     = UserTk IntTk "0" Nothing (IDP (-1))
 lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
 uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
@@ -482,10 +482,10 @@ symTk     = UserTk SymTk "" Nothing (IDP (-1))
 -- Basic parsers
 
 pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKey str = pSym  (strTk str)
+pKey str = pSym  (keyTk str)
 
 pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKeyC c str = pCSym c (strTk str)
+pKeyC c str = pCSym c (keyTk str)
 
 -- expensive, because we want holes to be inserted, not strings
 pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)

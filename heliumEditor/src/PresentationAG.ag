@@ -503,7 +503,7 @@ cons idc str = token idc str `withColor` consCol
 typeD :: IDP -> String -> Xprez doc node clip UserToken
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
-token idp str = TokenP idp (UserTk (StrTk str) str Nothing idp)
+token idp str = TokenP idp (UserTk (KeyTk str) str Nothing idp)
 
 structuralToken idp pres = TokenP idp (StructuralTk Nothing (structural pres) [] idp)
 
