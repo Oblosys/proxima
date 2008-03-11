@@ -7,12 +7,6 @@ import Presentation.PresTypes
 import List
 import Char
 
-
-data Document = RootDoc Root 
-              | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
-                 deriving Show
-
 data UserToken = KeyTk String
                | WordTk 
                | NodeRefTk
@@ -25,6 +19,11 @@ data UserToken = KeyTk String
 --------------------------------------------------------------------------
 -- Proxima data type                                                    --
 --------------------------------------------------------------------------
+
+data Document = RootDoc Root
+              | HoleDocument
+              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
+                  deriving Show
 
 data EnrichedDoc = RootEnr Root Document
                  | HoleEnrichedDoc
