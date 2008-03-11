@@ -237,6 +237,11 @@ boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 percent :: Int -> Int -> Int
 percent a x = a * x `div` 100
 
+presHole focus typeStr nd pth = loc nd $
+  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
+
+presParseErr node pres =
+  loc node $ parsing $ pres `withbgColor` whiteSmoke
 
 presentFocus NoPathD     path pres = pres
 presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
