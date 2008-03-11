@@ -39,17 +39,17 @@ ATTR EnrichedDoc [ | layoutMap : WhitespaceMap | ]
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (RootDocNode @document []) $  --HACK!! top level loc needs to be a ref to the document
+      lhs.pres = loc (Node_RootDoc @document []) $  --HACK!! top level loc needs to be a ref to the document
                                                         -- it is used by mkPopupMenuXY in Renderer.
                                                         -- A better implementation of popups will create the menu in
                                                         -- the higher layers. Although it is still a bit unclear where
-                 loc (RootEnrNode @self []) $ structural $
+                 loc (Node_RootEnr @self []) $ structural $
                    @root.pres
 
 
 SEM Root
   | Root
-      lhs.pres = loc (RootNode @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Root @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ @graph.pres
                             , row [ parsing $ text @title, empty `withHStretch` True ]
                                   `withFontSize_` (percent 160) 
@@ -67,7 +67,7 @@ divide n xs = let (h,t) = splitAt n xs
 SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Section
       loc.numberStr = show @sectionNr
-      lhs.pres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title
                                         ] `withFontSize_` (percent 150)
@@ -80,7 +80,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                             ])
                      `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
                                      , ("Add Section", addSection @lhs.path) ]
-      lhs.tocPres = loc (SectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.tocPres = loc (Node_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                       row [text (@numberStr++"."), parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
@@ -88,7 +88,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
 SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr
-      lhs.pres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
@@ -100,7 +100,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                             ])
                      `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsection", addSubsection @lhs.path) ]
-      --lhs.tocPres = loc (SubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      --lhs.tocPres = loc (Node_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (@numberStr++"."), parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
@@ -108,7 +108,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
 SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
-      lhs.pres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ row [ text (@numberStr++".")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
@@ -117,7 +117,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                             ])
                      `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
-      --lhs.tocPres = loc (SubsubsectionNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      --lhs.tocPres = loc (Node_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (@numberStr++"."), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
@@ -141,25 +141,25 @@ SEM Subsubsection [ || ]
 
 SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
   | List_Paragraph
-      lhs.pres = loc (List_ParagraphNode @self @lhs.path) $ parsing' LexFreeText $
+      lhs.pres = loc (Node_List_Paragraph @self @lhs.path) $ parsing' LexFreeText $
                      col $ if null (fromList_Paragraph @self) then [formatter [text ""]] else @elts.press
                      -- if paragraph list is empty, we add a dummy text "" to prevent the presentation from getting height 0
                      -- this dummy is parsed as an empty paragraph
   | HoleList_Paragraph
-      lhs.pres = presHole @lhs.focusD "List_Paragraph" (HoleList_ParagraphNode @self []) []
+      lhs.pres = presHole @lhs.focusD "List_Paragraph" (Node_HoleList_Paragraph @self []) []
   | ParseErrList_Paragraph
       lhs.pres = presParseErr @presentation
       
                     
 SEM Paragraph
   | Paragraph
-      lhs.pres = loc (ParagraphNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Paragraph @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      ( formatter ( if null @words.press then [text ""] else @words.press ))
                        `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
        
   | SubgraphPara
-      lhs.pres = loc (SubgraphParaNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_SubgraphPara @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ @subgraph.pres, empty `withHStretch` True ]
                        `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
                                        , ("Add Graph", addSubgraphPara @lhs.path)
@@ -168,10 +168,10 @@ SEM Paragraph
 
 SEM Word [ || ]
   | Word
-      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ text @word, text " " ]
   | NodeRef
-      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ text "\\node{" `withColor` blue
                          , if @nodeName `notElem` @lhs.vertexNames
                            then squiggly red $ text @nodeName 
@@ -180,12 +180,12 @@ SEM Word [ || ]
                          , text " "
                          ]
   | Label
-      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                      row [ text ("\\label{" ++ @label++"}") `withColor` blue
                          , text " "
                          ]
   | LabelRef
-      lhs.pres = loc (WordNode @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    let mLabelNr = lookup @label @lhs.allLabels   
                    in row [ text "\\ref{" `withColor` blue
                           , case mLabelNr of
@@ -202,7 +202,7 @@ SEM Word [ || ]
   
 SEM Graph
   | Graph
-      lhs.pres = loc (GraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Graph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      row [ text " "
                          , boxed $ graph 400 340 @edges.edges @vertices.press
                          ]
@@ -218,7 +218,7 @@ SEM Vertex [ || ]
                                    , squareOutline 9
                                    )
                       
-                 in  loc (VertexNode @self @lhs.path) $ structural $
+                 in  loc (Node_Vertex @self @lhs.path) $ structural $
                      (vertex @id @x @y nodeOutline $
                        col [ rowR 1 [glue, hRefHalf $ nodePres, glue]
                            , vSpace 4 `withHStretch` True
@@ -255,7 +255,7 @@ SEM Subgraph [||]
       lhs.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
                      -- only present vertices that are in the supergraph
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
-                 in  loc (SubgraphNode @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                 in  loc (Node_Subgraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        (boxed $ graph 100 100 subEdges @vertices.press
                      `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
@@ -447,13 +447,13 @@ SEM Root
 -- annoying bits, since we don't have any default behaviour for pres attributes:
 
 SEM Section
-  | HoleSection     lhs.tocPres = presHole @lhs.focusD "Section" (HoleSectionNode @self @lhs.path) @lhs.path
+  | HoleSection     lhs.tocPres = presHole @lhs.focusD "Section" (Node_HoleSection @self @lhs.path) @lhs.path
   | ParseErrSection lhs.tocPres = presParseErr @presentation
 
 
 SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
   | List_Section
-      lhs.tocPress = map ( loc (List_SectionNode @self @lhs.path) 
+      lhs.tocPress = map ( loc (Node_List_Section @self @lhs.path) 
                       . presentFocus @lhs.focusD @lhs.path ) 
                       @elts.tocPress
                       -- parent is reponsible for setting parsing/structural

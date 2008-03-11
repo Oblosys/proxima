@@ -207,78 +207,78 @@ data ClipDoc = Clip_Document Document
 --------------------------------------------------------------------------
 
 data Node = NoNode
-          | RootDocNode Document Path
-          | HoleDocumentNode Document Path
-          | ParseErrDocumentNode Document Path
-          | RootEnrNode EnrichedDoc Path
-          | HoleEnrichedDocNode EnrichedDoc Path
-          | ParseErrEnrichedDocNode EnrichedDoc Path
-          | DummyNode Dummy Path
-          | HoleDummyNode Dummy Path
-          | ParseErrDummyNode Dummy Path
-          | RootNode Root Path
-          | HoleRootNode Root Path
-          | ParseErrRootNode Root Path
-          | SectionNode Section Path
-          | HoleSectionNode Section Path
-          | ParseErrSectionNode Section Path
-          | SubsectionNode Subsection Path
-          | HoleSubsectionNode Subsection Path
-          | ParseErrSubsectionNode Subsection Path
-          | SubsubsectionNode Subsubsection Path
-          | HoleSubsubsectionNode Subsubsection Path
-          | ParseErrSubsubsectionNode Subsubsection Path
-          | ParagraphNode Paragraph Path
-          | SubgraphParaNode Paragraph Path
-          | HoleParagraphNode Paragraph Path
-          | ParseErrParagraphNode Paragraph Path
-          | WordNode Word Path
-          | NodeRefNode Word Path
-          | LabelNode Word Path
-          | LabelRefNode Word Path
-          | HoleWordNode Word Path
-          | ParseErrWordNode Word Path
-          | GraphNode Graph Path
-          | HoleGraphNode Graph Path
-          | ParseErrGraphNode Graph Path
-          | VertexNode Vertex Path
-          | HoleVertexNode Vertex Path
-          | ParseErrVertexNode Vertex Path
-          | CircleNode Shape Path
-          | SquareNode Shape Path
-          | HoleShapeNode Shape Path
-          | ParseErrShapeNode Shape Path
-          | EdgeNode Edge Path
-          | HoleEdgeNode Edge Path
-          | ParseErrEdgeNode Edge Path
-          | SubgraphNode Subgraph Path
-          | HoleSubgraphNode Subgraph Path
-          | ParseErrSubgraphNode Subgraph Path
-          | DirtyNode Dirty Path
-          | CleanNode Dirty Path
-          | HoleDirtyNode Dirty Path
-          | ParseErrDirtyNode Dirty Path
-          | List_SectionNode List_Section Path
-          | HoleList_SectionNode List_Section Path
-          | ParseErrList_SectionNode List_Section Path
-          | List_ParagraphNode List_Paragraph Path
-          | HoleList_ParagraphNode List_Paragraph Path
-          | ParseErrList_ParagraphNode List_Paragraph Path
-          | List_SubsectionNode List_Subsection Path
-          | HoleList_SubsectionNode List_Subsection Path
-          | ParseErrList_SubsectionNode List_Subsection Path
-          | List_SubsubsectionNode List_Subsubsection Path
-          | HoleList_SubsubsectionNode List_Subsubsection Path
-          | ParseErrList_SubsubsectionNode List_Subsubsection Path
-          | List_WordNode List_Word Path
-          | HoleList_WordNode List_Word Path
-          | ParseErrList_WordNode List_Word Path
-          | List_VertexNode List_Vertex Path
-          | HoleList_VertexNode List_Vertex Path
-          | ParseErrList_VertexNode List_Vertex Path
-          | List_EdgeNode List_Edge Path
-          | HoleList_EdgeNode List_Edge Path
-          | ParseErrList_EdgeNode List_Edge Path
+          | Node_RootDoc Document Path
+          | Node_HoleDocument Document Path
+          | Node_ParseErrDocument Document Path
+          | Node_RootEnr EnrichedDoc Path
+          | Node_HoleEnrichedDoc EnrichedDoc Path
+          | Node_ParseErrEnrichedDoc EnrichedDoc Path
+          | Node_Dummy Dummy Path
+          | Node_HoleDummy Dummy Path
+          | Node_ParseErrDummy Dummy Path
+          | Node_Root Root Path
+          | Node_HoleRoot Root Path
+          | Node_ParseErrRoot Root Path
+          | Node_Section Section Path
+          | Node_HoleSection Section Path
+          | Node_ParseErrSection Section Path
+          | Node_Subsection Subsection Path
+          | Node_HoleSubsection Subsection Path
+          | Node_ParseErrSubsection Subsection Path
+          | Node_Subsubsection Subsubsection Path
+          | Node_HoleSubsubsection Subsubsection Path
+          | Node_ParseErrSubsubsection Subsubsection Path
+          | Node_Paragraph Paragraph Path
+          | Node_SubgraphPara Paragraph Path
+          | Node_HoleParagraph Paragraph Path
+          | Node_ParseErrParagraph Paragraph Path
+          | Node_Word Word Path
+          | Node_NodeRef Word Path
+          | Node_Label Word Path
+          | Node_LabelRef Word Path
+          | Node_HoleWord Word Path
+          | Node_ParseErrWord Word Path
+          | Node_Graph Graph Path
+          | Node_HoleGraph Graph Path
+          | Node_ParseErrGraph Graph Path
+          | Node_Vertex Vertex Path
+          | Node_HoleVertex Vertex Path
+          | Node_ParseErrVertex Vertex Path
+          | Node_Circle Shape Path
+          | Node_Square Shape Path
+          | Node_HoleShape Shape Path
+          | Node_ParseErrShape Shape Path
+          | Node_Edge Edge Path
+          | Node_HoleEdge Edge Path
+          | Node_ParseErrEdge Edge Path
+          | Node_Subgraph Subgraph Path
+          | Node_HoleSubgraph Subgraph Path
+          | Node_ParseErrSubgraph Subgraph Path
+          | Node_Dirty Dirty Path
+          | Node_Clean Dirty Path
+          | Node_HoleDirty Dirty Path
+          | Node_ParseErrDirty Dirty Path
+          | Node_List_Section List_Section Path
+          | Node_HoleList_Section List_Section Path
+          | Node_ParseErrList_Section List_Section Path
+          | Node_List_Paragraph List_Paragraph Path
+          | Node_HoleList_Paragraph List_Paragraph Path
+          | Node_ParseErrList_Paragraph List_Paragraph Path
+          | Node_List_Subsection List_Subsection Path
+          | Node_HoleList_Subsection List_Subsection Path
+          | Node_ParseErrList_Subsection List_Subsection Path
+          | Node_List_Subsubsection List_Subsubsection Path
+          | Node_HoleList_Subsubsection List_Subsubsection Path
+          | Node_ParseErrList_Subsubsection List_Subsubsection Path
+          | Node_List_Word List_Word Path
+          | Node_HoleList_Word List_Word Path
+          | Node_ParseErrList_Word List_Word Path
+          | Node_List_Vertex List_Vertex Path
+          | Node_HoleList_Vertex List_Vertex Path
+          | Node_ParseErrList_Vertex List_Vertex Path
+          | Node_List_Edge List_Edge Path
+          | Node_HoleList_Edge List_Edge Path
+          | Node_ParseErrList_Edge List_Edge Path
 
 
 
@@ -288,77 +288,77 @@ data Node = NoNode
 
 instance Show Node where
   show NoNode = "NoNode"
-  show (RootDocNode _ _) = "RootDocNode" 
-  show (HoleDocumentNode _ _) = "HoleDocumentNode" 
-  show (ParseErrDocumentNode _ _) = "ParseErrDocumentNode" 
-  show (RootEnrNode _ _) = "RootEnrNode" 
-  show (HoleEnrichedDocNode _ _) = "HoleEnrichedDocNode" 
-  show (ParseErrEnrichedDocNode _ _) = "ParseErrEnrichedDocNode" 
-  show (DummyNode _ _) = "DummyNode" 
-  show (HoleDummyNode _ _) = "HoleDummyNode" 
-  show (ParseErrDummyNode _ _) = "ParseErrDummyNode" 
-  show (RootNode _ _) = "RootNode" 
-  show (HoleRootNode _ _) = "HoleRootNode" 
-  show (ParseErrRootNode _ _) = "ParseErrRootNode" 
-  show (SectionNode _ _) = "SectionNode" 
-  show (HoleSectionNode _ _) = "HoleSectionNode" 
-  show (ParseErrSectionNode _ _) = "ParseErrSectionNode" 
-  show (SubsectionNode _ _) = "SubsectionNode" 
-  show (HoleSubsectionNode _ _) = "HoleSubsectionNode" 
-  show (ParseErrSubsectionNode _ _) = "ParseErrSubsectionNode" 
-  show (SubsubsectionNode _ _) = "SubsubsectionNode" 
-  show (HoleSubsubsectionNode _ _) = "HoleSubsubsectionNode" 
-  show (ParseErrSubsubsectionNode _ _) = "ParseErrSubsubsectionNode" 
-  show (ParagraphNode _ _) = "ParagraphNode" 
-  show (SubgraphParaNode _ _) = "SubgraphParaNode" 
-  show (HoleParagraphNode _ _) = "HoleParagraphNode" 
-  show (ParseErrParagraphNode _ _) = "ParseErrParagraphNode" 
-  show (WordNode _ _) = "WordNode" 
-  show (NodeRefNode _ _) = "NodeRefNode" 
-  show (LabelNode _ _) = "LabelNode" 
-  show (LabelRefNode _ _) = "LabelRefNode" 
-  show (HoleWordNode _ _) = "HoleWordNode" 
-  show (ParseErrWordNode _ _) = "ParseErrWordNode" 
-  show (GraphNode _ _) = "GraphNode" 
-  show (HoleGraphNode _ _) = "HoleGraphNode" 
-  show (ParseErrGraphNode _ _) = "ParseErrGraphNode" 
-  show (VertexNode _ _) = "VertexNode" 
-  show (HoleVertexNode _ _) = "HoleVertexNode" 
-  show (ParseErrVertexNode _ _) = "ParseErrVertexNode" 
-  show (CircleNode _ _) = "CircleNode" 
-  show (SquareNode _ _) = "SquareNode" 
-  show (HoleShapeNode _ _) = "HoleShapeNode" 
-  show (ParseErrShapeNode _ _) = "ParseErrShapeNode" 
-  show (EdgeNode _ _) = "EdgeNode" 
-  show (HoleEdgeNode _ _) = "HoleEdgeNode" 
-  show (ParseErrEdgeNode _ _) = "ParseErrEdgeNode" 
-  show (SubgraphNode _ _) = "SubgraphNode" 
-  show (HoleSubgraphNode _ _) = "HoleSubgraphNode" 
-  show (ParseErrSubgraphNode _ _) = "ParseErrSubgraphNode" 
-  show (DirtyNode _ _) = "DirtyNode" 
-  show (CleanNode _ _) = "CleanNode" 
-  show (HoleDirtyNode _ _) = "HoleDirtyNode" 
-  show (ParseErrDirtyNode _ _) = "ParseErrDirtyNode" 
-  show (List_SectionNode _ _) = "List_SectionNode" 
-  show (HoleList_SectionNode _ _) = "HoleList_SectionNode" 
-  show (ParseErrList_SectionNode _ _) = "ParseErrList_SectionNode" 
-  show (List_ParagraphNode _ _) = "List_ParagraphNode" 
-  show (HoleList_ParagraphNode _ _) = "HoleList_ParagraphNode" 
-  show (ParseErrList_ParagraphNode _ _) = "ParseErrList_ParagraphNode" 
-  show (List_SubsectionNode _ _) = "List_SubsectionNode" 
-  show (HoleList_SubsectionNode _ _) = "HoleList_SubsectionNode" 
-  show (ParseErrList_SubsectionNode _ _) = "ParseErrList_SubsectionNode" 
-  show (List_SubsubsectionNode _ _) = "List_SubsubsectionNode" 
-  show (HoleList_SubsubsectionNode _ _) = "HoleList_SubsubsectionNode" 
-  show (ParseErrList_SubsubsectionNode _ _) = "ParseErrList_SubsubsectionNode" 
-  show (List_WordNode _ _) = "List_WordNode" 
-  show (HoleList_WordNode _ _) = "HoleList_WordNode" 
-  show (ParseErrList_WordNode _ _) = "ParseErrList_WordNode" 
-  show (List_VertexNode _ _) = "List_VertexNode" 
-  show (HoleList_VertexNode _ _) = "HoleList_VertexNode" 
-  show (ParseErrList_VertexNode _ _) = "ParseErrList_VertexNode" 
-  show (List_EdgeNode _ _) = "List_EdgeNode" 
-  show (HoleList_EdgeNode _ _) = "HoleList_EdgeNode" 
-  show (ParseErrList_EdgeNode _ _) = "ParseErrList_EdgeNode" 
+  show (Node_RootDoc _ _) = "Node_RootDoc" 
+  show (Node_HoleDocument _ _) = "Node_HoleDocument" 
+  show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
+  show (Node_RootEnr _ _) = "Node_RootEnr" 
+  show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
+  show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 
+  show (Node_Dummy _ _) = "Node_Dummy" 
+  show (Node_HoleDummy _ _) = "Node_HoleDummy" 
+  show (Node_ParseErrDummy _ _) = "Node_ParseErrDummy" 
+  show (Node_Root _ _) = "Node_Root" 
+  show (Node_HoleRoot _ _) = "Node_HoleRoot" 
+  show (Node_ParseErrRoot _ _) = "Node_ParseErrRoot" 
+  show (Node_Section _ _) = "Node_Section" 
+  show (Node_HoleSection _ _) = "Node_HoleSection" 
+  show (Node_ParseErrSection _ _) = "Node_ParseErrSection" 
+  show (Node_Subsection _ _) = "Node_Subsection" 
+  show (Node_HoleSubsection _ _) = "Node_HoleSubsection" 
+  show (Node_ParseErrSubsection _ _) = "Node_ParseErrSubsection" 
+  show (Node_Subsubsection _ _) = "Node_Subsubsection" 
+  show (Node_HoleSubsubsection _ _) = "Node_HoleSubsubsection" 
+  show (Node_ParseErrSubsubsection _ _) = "Node_ParseErrSubsubsection" 
+  show (Node_Paragraph _ _) = "Node_Paragraph" 
+  show (Node_SubgraphPara _ _) = "Node_SubgraphPara" 
+  show (Node_HoleParagraph _ _) = "Node_HoleParagraph" 
+  show (Node_ParseErrParagraph _ _) = "Node_ParseErrParagraph" 
+  show (Node_Word _ _) = "Node_Word" 
+  show (Node_NodeRef _ _) = "Node_NodeRef" 
+  show (Node_Label _ _) = "Node_Label" 
+  show (Node_LabelRef _ _) = "Node_LabelRef" 
+  show (Node_HoleWord _ _) = "Node_HoleWord" 
+  show (Node_ParseErrWord _ _) = "Node_ParseErrWord" 
+  show (Node_Graph _ _) = "Node_Graph" 
+  show (Node_HoleGraph _ _) = "Node_HoleGraph" 
+  show (Node_ParseErrGraph _ _) = "Node_ParseErrGraph" 
+  show (Node_Vertex _ _) = "Node_Vertex" 
+  show (Node_HoleVertex _ _) = "Node_HoleVertex" 
+  show (Node_ParseErrVertex _ _) = "Node_ParseErrVertex" 
+  show (Node_Circle _ _) = "Node_Circle" 
+  show (Node_Square _ _) = "Node_Square" 
+  show (Node_HoleShape _ _) = "Node_HoleShape" 
+  show (Node_ParseErrShape _ _) = "Node_ParseErrShape" 
+  show (Node_Edge _ _) = "Node_Edge" 
+  show (Node_HoleEdge _ _) = "Node_HoleEdge" 
+  show (Node_ParseErrEdge _ _) = "Node_ParseErrEdge" 
+  show (Node_Subgraph _ _) = "Node_Subgraph" 
+  show (Node_HoleSubgraph _ _) = "Node_HoleSubgraph" 
+  show (Node_ParseErrSubgraph _ _) = "Node_ParseErrSubgraph" 
+  show (Node_Dirty _ _) = "Node_Dirty" 
+  show (Node_Clean _ _) = "Node_Clean" 
+  show (Node_HoleDirty _ _) = "Node_HoleDirty" 
+  show (Node_ParseErrDirty _ _) = "Node_ParseErrDirty" 
+  show (Node_List_Section _ _) = "Node_List_Section" 
+  show (Node_HoleList_Section _ _) = "Node_HoleList_Section" 
+  show (Node_ParseErrList_Section _ _) = "Node_ParseErrList_Section" 
+  show (Node_List_Paragraph _ _) = "Node_List_Paragraph" 
+  show (Node_HoleList_Paragraph _ _) = "Node_HoleList_Paragraph" 
+  show (Node_ParseErrList_Paragraph _ _) = "Node_ParseErrList_Paragraph" 
+  show (Node_List_Subsection _ _) = "Node_List_Subsection" 
+  show (Node_HoleList_Subsection _ _) = "Node_HoleList_Subsection" 
+  show (Node_ParseErrList_Subsection _ _) = "Node_ParseErrList_Subsection" 
+  show (Node_List_Subsubsection _ _) = "Node_List_Subsubsection" 
+  show (Node_HoleList_Subsubsection _ _) = "Node_HoleList_Subsubsection" 
+  show (Node_ParseErrList_Subsubsection _ _) = "Node_ParseErrList_Subsubsection" 
+  show (Node_List_Word _ _) = "Node_List_Word" 
+  show (Node_HoleList_Word _ _) = "Node_HoleList_Word" 
+  show (Node_ParseErrList_Word _ _) = "Node_ParseErrList_Word" 
+  show (Node_List_Vertex _ _) = "Node_List_Vertex" 
+  show (Node_HoleList_Vertex _ _) = "Node_HoleList_Vertex" 
+  show (Node_ParseErrList_Vertex _ _) = "Node_ParseErrList_Vertex" 
+  show (Node_List_Edge _ _) = "Node_List_Edge" 
+  show (Node_HoleList_Edge _ _) = "Node_HoleList_Edge" 
+  show (Node_ParseErrList_Edge _ _) = "Node_ParseErrList_Edge" 
 
 

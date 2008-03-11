@@ -28,10 +28,10 @@ import DocUtils_Generated
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str root-> reuseRootEnr [str] (Just root) Nothing)
-      <$> pSym (StructuralTk (Just $ RootEnrNode HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
+      <$> pSym (StructuralTk (Just $ Node_RootEnr HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> recognizeRoot
   <|>    RootEnr (error "doc hole was parsed") (error "doc hole was parsed")
-     <$ pStructural HoleEnrichedDocNode
+     <$ pStructural Node_HoleEnrichedDoc
 -- TODO: Why do we need this hole parser here?
 
 
@@ -39,7 +39,7 @@ recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
           reuseRoot [str] (Just graph) (Just title) (Just (toList_Section sections)))
-      <$> pStructural RootNode
+      <$> pStructural Node_Root
       <*> recognizeGraph
       <*> pPrs pLine 
       <*> pList recognizeSection 
@@ -48,7 +48,7 @@ recognizeRoot = pStr $
           (\str ->
           reuseRoot [str] Nothing Nothing Nothing 
                                             Nothing )
-      <$> pStructural RootNode
+      <$> pStructural Node_Root
       <*  (pPrs $ Word (String_ "")
       <$
           pList (pKey " ")
@@ -56,18 +56,18 @@ recognizeRoot = pStr $
 -}    
   
 recognizeSection :: ListParser Document Node ClipDoc UserToken Section
-recognizeSection = pStrAlt SectionNode $
+recognizeSection = pStrAlt Node_Section $
           (\str t ps ss -> reuseSection [str] (Just t) (Just ps) (Just $ toList_Subsection ss))
-      <$> pStructural SectionNode
+      <$> pStructural Node_Section
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsection
           
 recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
-  pStrAlt SubsectionNode $
+  pStrAlt Node_Subsection $
           (\str t ps sss -> reuseSubsection [str] (Just t) (Just ps) (Just $ toList_Subsubsection sss))
-      <$> pStructural SubsectionNode
+      <$> pStructural Node_Subsection
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsubsection
@@ -75,9 +75,9 @@ recognizeSubsection =
 
 recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
-  pStrAlt SubsubsectionNode $
+  pStrAlt Node_Subsubsection $
           (\str t ps -> reuseSubsubsection [str] (Just t) (Just ps))
-      <$> pStructural SubsubsectionNode
+      <$> pStructural Node_Subsubsection
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
 
@@ -93,7 +93,7 @@ recognizeGraph = pStrVerbose "Graph" $
                                    [ Edge f t |  (f,t) <- getGraphTkEdges gt]))
                         
                                           
-      <$> pStructural GraphNode
+      <$> pStructural Node_Graph
       <*> pSym graphTk
       <*> pList recognizeVertex
 
@@ -103,7 +103,7 @@ recognizeVertex :: ListParser Document Node ClipDoc UserToken Vertex
 recognizeVertex = pStrVerbose "Vertex" $
           (\str vt lab -> reuseVertex [str] (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
-      <$> pStructural VertexNode
+      <$> pStructural Node_Vertex
       <*> pSym vertexTk
       <*> pPrs pText
   <|>     (\str vt -> reuseVertex [str] (Just "<new>") (Just Circle)
@@ -118,7 +118,7 @@ recognizeSubgraph = pStrVerbose "Subgraph" $
                                      (Just $ List_Edge $ toConsList_Edge $ 
                                      [ Edge f t |  (f,t) <- getGraphTkEdges gt])
                       )
-      <$> pStructural SubgraphNode
+      <$> pStructural Node_Subgraph
       <*> pSym graphTk
       <*> pList recognizeVertex
 
@@ -158,9 +158,9 @@ parseParagraph =
                                           (List_Edge Nil_Edge))) -- we need a FreshIDD here    
       <$  pKey "\\graph"
   <|>
-      (   pStrAlt SubgraphParaNode $
+      (   pStrAlt Node_SubgraphPara $
           (\str sg -> reuseSubgraphPara [str] (Just sg))
-      <$> pStructural SubgraphParaNode
+      <$> pStructural Node_SubgraphPara
       <*> recognizeSubgraph
       )
 
