@@ -81,7 +81,7 @@ genSem decls = genBanner "General sem functions" $
 genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) = 
   "SEM %1" <~ [typeName] :
   concatMap genSemPIDCProd prods ++
-  [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Hole%1Node @self @lhs.path) @lhs.path"
+  [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
   , "  | ParseErr%1 lhs.pres = presParseErr @presentation"
   , ""
   ] <~ [typeName]
@@ -103,7 +103,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
 genSemListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
-  , "      lhs.press = map ( loc (List_%1Node @self @lhs.path)" -- remove spaces
+  , "      lhs.press = map ( loc (Node_List_%1 @self @lhs.path)" -- remove spaces
   , "                      . presentFocus @lhs.focusD @lhs.path )"
   , "                      @elts.press"
   , "                      -- parent is reponsible for setting parsing/structural"
@@ -141,11 +141,11 @@ genSemXML decls = genBanner "Sem functions for XML presentation" $
 genSemXMLBasicDecl decls (Decl (LHSBasicType typeName) prods) =  
   "SEM %1" <~ [typeName] : concat
   [ [ "  | %1"
-    , "      lhs.presXML = presentElementXML @lhs.focusD (%1Node @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
+    , "      lhs.presXML = presentElementXML @lhs.focusD (Node_%1 @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
     ] <~ [ cnstrName, separateBy ", " $ map genField fields ] 
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
-  ([ "  | Hole%1     lhs.presXML = presHole @lhs.focusD \"%1\" (Hole%1Node @self @lhs.path) @lhs.path"
+  ([ "  | Hole%1     lhs.presXML = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
    , "  | ParseErr%1 lhs.presXML = presParseErr @presentation"
    , ""
    ] <~ [typeName])
@@ -157,14 +157,14 @@ genSemXMLBasicDecl decls (Decl (LHSBasicType typeName) prods) =
 genSemXMLListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
-  , "      lhs.presXML = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    col @elts.pressXML"
   , "  | ParseErrList_%1"
-  , "      lhs.presXML = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    presParseErr @presentation"
   , "  | HoleList_%1"
-  , "      lhs.presXML = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presHole @lhs.focusD \"List_%1\" (HoleList_%1Node @self @lhs.path) @lhs.path"
+  , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                    presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
   ] <~ [typeName]
 
@@ -186,11 +186,11 @@ genSemTree decls = genBanner "Sem functions for tree presentation" $
 genSemTreeBasicDecl decls (Decl (LHSBasicType typeName) prods) =  
   "SEM %1" <~ [typeName] : concat
   [ [ "  | %1"
-    , "      lhs.presTree = presentElementTree @lhs.focusD (%1Node @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
+    , "      lhs.presTree = presentElementTree @lhs.focusD (Node_%1 @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
     ] <~ [ cnstrName, separateBy ", " $ map genField fields ] 
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
-  ([ "  | Hole%1     lhs.presTree = presHole @lhs.focusD \"%1\" (Hole%1Node @self @lhs.path) @lhs.path"
+  ([ "  | Hole%1     lhs.presTree = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
    , "  | ParseErr%1 lhs.presTree = presParseErr @presentation"
    , ""
    ] <~ [typeName])
@@ -202,14 +202,14 @@ genSemTreeBasicDecl decls (Decl (LHSBasicType typeName) prods) =
 genSemTreeListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
-  , "      lhs.presTree = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       col @elts.pressTree"
   , "  | ParseErrList_%1"
-  , "      lhs.presTree = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       presParseErr @presentation"
   , "  | HoleList_%1"
-  , "      lhs.presTree = loc (List_%1Node @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                       presHole @lhs.focusD \"List_%1\" (HoleList_%1Node @self @lhs.path) @lhs.path"
+  , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
+  , "                       presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
   ] <~ [typeName]
 

@@ -29,14 +29,14 @@ genRankNode decls = genBanner "rankNode" $
   "rankNode NoNode = 0" :
   zipWith (++) (map genRankNodeCnstr (getAllConstructorNames decls))
                (map show [1..])
-  where genRankNodeCnstr cnstrName = "rankNode (%1Node _ _) = " <~ [cnstrName]
+  where genRankNodeCnstr cnstrName = "rankNode (Node_%1 _ _) = " <~ [cnstrName]
                
 
 genPathNode decls = genBanner "HasPath instance for Node" $
   "instance HasPath Node where" :
   "  pathNode NoNode            = NoPathD" :
   map genPathNodeCnstr (getAllConstructorNames decls)
-  where genPathNodeCnstr cnstrName = "  pathNode (%1Node _ pth) = PathD pth" <~ [cnstrName]
+  where genPathNodeCnstr cnstrName = "  pathNode (Node_%1 _ pth) = PathD pth" <~ [cnstrName]
 
 genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 

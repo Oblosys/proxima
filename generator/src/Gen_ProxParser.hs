@@ -46,7 +46,7 @@ genReuse decls = genBanner "reuse functions" $ concat
 
 genExtract decls = genBanner "extract functions" $ concat
   [ [ "extract%1 :: Maybe Node -> Maybe %2"
-    , "extract%1 (Just (%1Node x@%3 _)) = Just x"
+    , "extract%1 (Just (Node_%1 x@%3 _)) = Just x"
     , "extract%1 _ = Nothing"
     , ""
     ] <~ [ cnstrName, genTypeName lhsType, "(" ++ cnstrName ++ concat (replicate (getArity prod) " _") ++ ")" ]

@@ -41,14 +41,14 @@ genClipDoc decls = genBanner "ClipDoc" $
     
 genNode decls = genBanner "Node" $
   "data Node = NoNode" :
-  [ "          | %1Node %2 Path" <~ [cnstrName, genTypeName lhsType]
+  [ "          | Node_%1 %2 Path" <~ [cnstrName, genTypeName lhsType]
   | Decl lhsType prods <- decls, Prod _ cnstrName _ _ <- prods 
   ]
 
 genShowNode decls = genBanner "Show instance for Node" $
   "instance Show Node where" :
    "  show NoNode = \"NoNode\"" :
-  [ "  show (%1Node _ _) = \"%1Node\" " <~ [cnstrName]
+  [ "  show (Node_%1 _ _) = \"Node_%1\" " <~ [cnstrName]
   | cnstrName <- getAllConstructorNames decls
   ]
 
