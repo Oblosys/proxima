@@ -11,181 +11,178 @@ import DocTypes_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
-{- ------------------------------------
+--------------------------------------------------------------------------
+-- reuse functions                                                      --
+--------------------------------------------------------------------------
 
- generated part
-
--------------------------------------- -}
-
-
-
-
-
-
--- ProxParser_Generated --
-
--- Type specific
 reuseRootEnr :: [Token doc Node clip token] -> Maybe Root -> Maybe Document -> EnrichedDoc
-reuseRootEnr nodes  ma0 ma1
+reuseRootEnr nodes ma0 ma1
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
            (RootEnr a0 a1) -> reuse2 RootEnr a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseRootEnr"
+           _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
 reuseDummy :: [Token doc Node clip token] -> Maybe Dummy -> Maybe Bool -> Dummy
-reuseDummy nodes  ma0 ma1
+reuseDummy nodes ma0 ma1
   = case extractFromTokens extractDummy defaultDummy nodes of
            (Dummy a0 a1) -> reuse2 Dummy a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseDummy"
+           _ -> error "Internal error:ProxParser_Generated.reuseDummy"
 
 reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
-reuseRoot nodes  ma0 ma1 ma2
+reuseRoot nodes ma0 ma1 ma2
   = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1 a2) -> reuse3 Root a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseRoot"
+           _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
 reuseSection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
-reuseSection nodes  ma0 ma1 ma2
+reuseSection nodes ma0 ma1 ma2
   = case extractFromTokens extractSection defaultSection nodes of
            (Section a0 a1 a2) -> reuse3 Section a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseSection"
+           _ -> error "Internal error:ProxParser_Generated.reuseSection"
 
 reuseSubsection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
-reuseSubsection nodes  ma0 ma1 ma2
+reuseSubsection nodes ma0 ma1 ma2
   = case extractFromTokens extractSubsection defaultSubsection nodes of
            (Subsection a0 a1 a2) -> reuse3 Subsection a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseSubsection"
+           _ -> error "Internal error:ProxParser_Generated.reuseSubsection"
 
 reuseSubsubsection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Subsubsection
-reuseSubsubsection nodes  ma0 ma1
+reuseSubsubsection nodes ma0 ma1
   = case extractFromTokens extractSubsubsection defaultSubsubsection nodes of
            (Subsubsection a0 a1) -> reuse2 Subsubsection a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseSubsubsection"
+           _ -> error "Internal error:ProxParser_Generated.reuseSubsubsection"
 
 reuseParagraph :: [Token doc Node clip token] -> Maybe List_Word -> Paragraph
-reuseParagraph nodes  ma0
+reuseParagraph nodes ma0
   = case extractFromTokens extractParagraph defaultParagraph nodes of
            (Paragraph a0) -> reuse1 Paragraph a0 ma0
-           _ -> error "System error:<module>.reuseParagraph"
+           _ -> error "Internal error:ProxParser_Generated.reuseParagraph"
 
 reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Paragraph
-reuseSubgraphPara nodes  ma0
+reuseSubgraphPara nodes ma0
   = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
            (SubgraphPara a0) -> reuse1 SubgraphPara a0 ma0
-           _ -> error "System error:<module>.reuseSubgraphPara"
+           _ -> error "Internal error:ProxParser_Generated.reuseSubgraphPara"
 
 reuseWord :: [Token doc Node clip token] -> Maybe String -> Word
-reuseWord nodes  ma0
+reuseWord nodes ma0
   = case extractFromTokens extractWord defaultWord nodes of
            (Word a0) -> reuse1 Word a0 ma0
-           _ -> error "System error:<module>.reuseWord"
+           _ -> error "Internal error:ProxParser_Generated.reuseWord"
 
 reuseNodeRef :: [Token doc Node clip token] -> Maybe String -> Word
-reuseNodeRef nodes  ma0
+reuseNodeRef nodes ma0
   = case extractFromTokens extractNodeRef defaultNodeRef nodes of
            (NodeRef a0) -> reuse1 NodeRef a0 ma0
-           _ -> error "System error:<module>.reuseNodeRef"
+           _ -> error "Internal error:ProxParser_Generated.reuseNodeRef"
 
 reuseLabel :: [Token doc Node clip token] -> Maybe String -> Word
-reuseLabel nodes  ma0
+reuseLabel nodes ma0
   = case extractFromTokens extractLabel defaultLabel nodes of
            (Label a0) -> reuse1 Label a0 ma0
-           _ -> error "System error:<module>.reuseLabel"
+           _ -> error "Internal error:ProxParser_Generated.reuseLabel"
 
 reuseLabelRef :: [Token doc Node clip token] -> Maybe String -> Word
-reuseLabelRef nodes  ma0
+reuseLabelRef nodes ma0
   = case extractFromTokens extractLabelRef defaultLabelRef nodes of
            (LabelRef a0) -> reuse1 LabelRef a0 ma0
-           _ -> error "System error:<module>.reuseLabelRef"
+           _ -> error "Internal error:ProxParser_Generated.reuseLabelRef"
 
 reuseGraph :: [Token doc Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
-reuseGraph nodes  ma0 ma1 ma2
+reuseGraph nodes ma0 ma1 ma2
   = case extractFromTokens extractGraph defaultGraph nodes of
            (Graph a0 a1 a2) -> reuse3 Graph a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseGraph"
+           _ -> error "Internal error:ProxParser_Generated.reuseGraph"
 
 reuseVertex :: [Token doc Node clip token] -> Maybe String -> Maybe Shape -> Maybe Int -> Maybe Int -> Maybe Int -> Vertex
-reuseVertex nodes  ma0 ma1 ma2 ma3 ma4
+reuseVertex nodes ma0 ma1 ma2 ma3 ma4
   = case extractFromTokens extractVertex defaultVertex nodes of
            (Vertex a0 a1 a2 a3 a4) -> reuse5 Vertex a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
-           _ -> error "System error:<module>.reuseVertex"
+           _ -> error "Internal error:ProxParser_Generated.reuseVertex"
 
 reuseCircle :: [Token doc Node clip token] -> Shape
-reuseCircle nodes 
+reuseCircle nodes
   = case extractFromTokens extractCircle defaultCircle nodes of
            (Circle) -> reuse0 Circle
-           _ -> error "System error:<module>.reuseCircle"
+           _ -> error "Internal error:ProxParser_Generated.reuseCircle"
 
 reuseSquare :: [Token doc Node clip token] -> Shape
-reuseSquare nodes 
+reuseSquare nodes
   = case extractFromTokens extractSquare defaultSquare nodes of
            (Square) -> reuse0 Square
-           _ -> error "System error:<module>.reuseSquare"
+           _ -> error "Internal error:ProxParser_Generated.reuseSquare"
 
 reuseEdge :: [Token doc Node clip token] -> Maybe Int -> Maybe Int -> Edge
-reuseEdge nodes  ma0 ma1
+reuseEdge nodes ma0 ma1
   = case extractFromTokens extractEdge defaultEdge nodes of
            (Edge a0 a1) -> reuse2 Edge a0 a1 ma0 ma1
-           _ -> error "System error:<module>.reuseEdge"
+           _ -> error "Internal error:ProxParser_Generated.reuseEdge"
 
 reuseSubgraph :: [Token doc Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
-reuseSubgraph nodes  ma0 ma1 ma2
+reuseSubgraph nodes ma0 ma1 ma2
   = case extractFromTokens extractSubgraph defaultSubgraph nodes of
            (Subgraph a0 a1 a2) -> reuse3 Subgraph a0 a1 a2 ma0 ma1 ma2
-           _ -> error "System error:<module>.reuseSubgraph"
+           _ -> error "Internal error:ProxParser_Generated.reuseSubgraph"
 
 reuseDirty :: [Token doc Node clip token] -> Dirty
-reuseDirty nodes 
+reuseDirty nodes
   = case extractFromTokens extractDirty defaultDirty nodes of
            (Dirty) -> reuse0 Dirty
-           _ -> error "System error:<module>.reuseDirty"
+           _ -> error "Internal error:ProxParser_Generated.reuseDirty"
 
 reuseClean :: [Token doc Node clip token] -> Dirty
-reuseClean nodes 
+reuseClean nodes
   = case extractFromTokens extractClean defaultClean nodes of
            (Clean) -> reuse0 Clean
-           _ -> error "System error:<module>.reuseClean"
+           _ -> error "Internal error:ProxParser_Generated.reuseClean"
 
 reuseList_Section :: [Token doc Node clip token] -> Maybe ConsList_Section -> List_Section
-reuseList_Section nodes  ma0
+reuseList_Section nodes ma0
   = case extractFromTokens extractList_Section defaultList_Section nodes of
            (List_Section a0) -> reuse1 List_Section a0 ma0
-           _ -> error "System error:<module>.reuseList_Section"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Section"
 
 reuseList_Paragraph :: [Token doc Node clip token] -> Maybe ConsList_Paragraph -> List_Paragraph
-reuseList_Paragraph nodes  ma0
+reuseList_Paragraph nodes ma0
   = case extractFromTokens extractList_Paragraph defaultList_Paragraph nodes of
            (List_Paragraph a0) -> reuse1 List_Paragraph a0 ma0
-           _ -> error "System error:<module>.reuseList_Paragraph"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Paragraph"
 
 reuseList_Subsection :: [Token doc Node clip token] -> Maybe ConsList_Subsection -> List_Subsection
-reuseList_Subsection nodes  ma0
+reuseList_Subsection nodes ma0
   = case extractFromTokens extractList_Subsection defaultList_Subsection nodes of
            (List_Subsection a0) -> reuse1 List_Subsection a0 ma0
-           _ -> error "System error:<module>.reuseList_Subsection"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Subsection"
 
 reuseList_Subsubsection :: [Token doc Node clip token] -> Maybe ConsList_Subsubsection -> List_Subsubsection
-reuseList_Subsubsection nodes  ma0
+reuseList_Subsubsection nodes ma0
   = case extractFromTokens extractList_Subsubsection defaultList_Subsubsection nodes of
            (List_Subsubsection a0) -> reuse1 List_Subsubsection a0 ma0
-           _ -> error "System error:<module>.reuseList_Subsubsection"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Subsubsection"
 
 reuseList_Word :: [Token doc Node clip token] -> Maybe ConsList_Word -> List_Word
-reuseList_Word nodes  ma0
+reuseList_Word nodes ma0
   = case extractFromTokens extractList_Word defaultList_Word nodes of
            (List_Word a0) -> reuse1 List_Word a0 ma0
-           _ -> error "System error:<module>.reuseList_Word"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Word"
 
 reuseList_Vertex :: [Token doc Node clip token] -> Maybe ConsList_Vertex -> List_Vertex
-reuseList_Vertex nodes  ma0
+reuseList_Vertex nodes ma0
   = case extractFromTokens extractList_Vertex defaultList_Vertex nodes of
            (List_Vertex a0) -> reuse1 List_Vertex a0 ma0
-           _ -> error "System error:<module>.reuseList_Vertex"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Vertex"
 
 reuseList_Edge :: [Token doc Node clip token] -> Maybe ConsList_Edge -> List_Edge
-reuseList_Edge nodes  ma0
+reuseList_Edge nodes ma0
   = case extractFromTokens extractList_Edge defaultList_Edge nodes of
            (List_Edge a0) -> reuse1 List_Edge a0 ma0
-           _ -> error "System error:<module>.reuseList_Edge"
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Edge"
+
+
+
+
+--------------------------------------------------------------------------
+-- extract functions                                                    --
+--------------------------------------------------------------------------
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
 extractRootEnr (Just (RootEnrNode x@(RootEnr _ _) _)) = Just x
@@ -295,6 +292,13 @@ extractList_Edge :: Maybe Node -> Maybe List_Edge
 extractList_Edge (Just (List_EdgeNode x@(List_Edge _) _)) = Just x
 extractList_Edge _ = Nothing
 
+
+
+
+--------------------------------------------------------------------------
+-- default functions                                                    --
+--------------------------------------------------------------------------
+
 defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr hole hole
 
@@ -376,36 +380,59 @@ defaultList_Vertex = List_Vertex Nil_Vertex
 defaultList_Edge :: List_Edge
 defaultList_Edge = List_Edge Nil_Edge
 
--- General
+
+
+
+--------------------------------------------------------------------------
+-- extractFromTokens                                                    --
+--------------------------------------------------------------------------
+
 -- return result of the first extraction application in the list that is not Nothing
 extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a
 extractFromTokens extr def []     = def
 extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))
 
-reuse2 :: (a0 -> a1 -> r) -> 
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f  a0 a1 ma0 ma1 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) 
 
-reuse3 :: (a0 -> a1 -> a2 -> r) -> 
-          a0 -> a1 -> a2 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
-reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
 
-reuse1 :: (a0 -> r) -> 
+--------------------------------------------------------------------------
+-- genericReuse functions                                               --
+--------------------------------------------------------------------------
+
+reuse0 :: (r) ->
+          
+          r
+reuse0 f =
+  f
+
+reuse1 :: (a0 -> r) ->
           a0 -> 
           Maybe a0 -> r
-reuse1 f  a0 ma0 =
-  f (maybe a0 id ma0) 
+reuse1 f a0 ma0 =
+  f (maybe a0 id ma0)
 
-reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) -> 
+reuse2 :: (a0 -> a1 -> r) ->
+          a0 -> a1 -> 
+          Maybe a0 -> Maybe a1 -> r
+reuse2 f a0 a1 ma0 ma1 =
+  f (maybe a0 id ma0) (maybe a1 id ma1)
+
+reuse3 :: (a0 -> a1 -> a2 -> r) ->
+          a0 -> a1 -> a2 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
+reuse3 f a0 a1 a2 ma0 ma1 ma2 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2)
+
+reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
+          a0 -> a1 -> a2 -> a3 -> 
+          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
+reuse4 f a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3)
+
+reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
           a0 -> a1 -> a2 -> a3 -> a4 -> 
           Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
-reuse5 f  a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) 
+reuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4)
 
-reuse0 :: r -> r
-reuse0 f = f
+
 

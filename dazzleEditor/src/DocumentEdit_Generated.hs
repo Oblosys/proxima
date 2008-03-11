@@ -53,6 +53,24 @@ instance Editable Int Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
+instance Editable Float Document Node ClipDoc UserToken where
+  select [] x = Clip_Float x
+  select _  _ = Clip_Nothing
+  paste [] (Clip_Float c) x = c
+  paste [] c              x =  trace ("Type error: pasting "++show c++" on Float") x
+  paste _  _              x = x
+  
+  alternatives _ = [ ("0.0", Clip_Float 0.0) ]
+  
+  arity _ = 0
+  parseErr _ = 0
+
+  hole = 0
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
 instance Editable Bool Document Node ClipDoc UserToken where                         
   select [] x = Clip_Bool x                            
   select _  _ = Clip_Nothing                           
@@ -95,16 +113,12 @@ instance Editable String Document Node ClipDoc UserToken where
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
-{- ------------------------------------
-
- generated part
-
--------------------------------------- -}
-
-
--- Generated clipfunctions  --
+--------------------------------------------------------------------------
+-- Clip instance                                                        --
+--------------------------------------------------------------------------
 
 instance Clip ClipDoc where
+  arityClip Clip_Nothing = -1
   arityClip (Clip_EnrichedDoc x) = arity x
   arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_Root x) = arity x
@@ -119,11 +133,20 @@ instance Clip ClipDoc where
   arityClip (Clip_Edge x) = arity x
   arityClip (Clip_Subgraph x) = arity x
   arityClip (Clip_Dirty x) = arity x
+  arityClip (Clip_List_Section x) = arity x
+  arityClip (Clip_List_Paragraph x) = arity x
+  arityClip (Clip_List_Subsection x) = arity x
+  arityClip (Clip_List_Subsubsection x) = arity x
+  arityClip (Clip_List_Word x) = arity x
+  arityClip (Clip_List_Vertex x) = arity x
+  arityClip (Clip_List_Edge x) = arity x
   arityClip (Clip_Document x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
   arityClip (Clip_String x) = arity x
-  arityClip (Clip_Nothing)   = -1
+  arityClip (Clip_Float x) = arity x
+
+  alternativesClip Clip_Nothing = []
   alternativesClip (Clip_EnrichedDoc x) = alternatives x
   alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_Root x) = alternatives x
@@ -138,12 +161,20 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Edge x) = alternatives x
   alternativesClip (Clip_Subgraph x) = alternatives x
   alternativesClip (Clip_Dirty x) = alternatives x
+  alternativesClip (Clip_List_Section x) = alternatives x
+  alternativesClip (Clip_List_Paragraph x) = alternatives x
+  alternativesClip (Clip_List_Subsection x) = alternatives x
+  alternativesClip (Clip_List_Subsubsection x) = alternatives x
+  alternativesClip (Clip_List_Word x) = alternatives x
+  alternativesClip (Clip_List_Vertex x) = alternatives x
+  alternativesClip (Clip_List_Edge x) = alternatives x
   alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
-  alternativesClip (Clip_Nothing)   = []
+  alternativesClip (Clip_Float x) = alternatives x
 
+  holeClip Clip_Nothing = Clip_Nothing
   holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
   holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_Root x) = Clip_Root hole
@@ -158,12 +189,20 @@ instance Clip ClipDoc where
   holeClip (Clip_Edge x) = Clip_Edge hole
   holeClip (Clip_Subgraph x) = Clip_Subgraph hole
   holeClip (Clip_Dirty x) = Clip_Dirty hole
+  holeClip (Clip_List_Section x) = Clip_List_Section hole
+  holeClip (Clip_List_Paragraph x) = Clip_List_Paragraph hole
+  holeClip (Clip_List_Subsection x) = Clip_List_Subsection hole
+  holeClip (Clip_List_Subsubsection x) = Clip_List_Subsubsection hole
+  holeClip (Clip_List_Word x) = Clip_List_Word hole
+  holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
+  holeClip (Clip_List_Edge x) = Clip_List_Edge hole
   holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_String x) = Clip_String hole
-  holeClip Clip_Nothing   = Clip_Nothing
+  holeClip (Clip_Float x) = Clip_Float hole
 
+  isListClip Clip_Nothing = False
   isListClip (Clip_EnrichedDoc x) = isList x
   isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_Root x) = isList x
@@ -178,12 +217,20 @@ instance Clip ClipDoc where
   isListClip (Clip_Edge x) = isList x
   isListClip (Clip_Subgraph x) = isList x
   isListClip (Clip_Dirty x) = isList x
+  isListClip (Clip_List_Section x) = isList x
+  isListClip (Clip_List_Paragraph x) = isList x
+  isListClip (Clip_List_Subsection x) = isList x
+  isListClip (Clip_List_Subsubsection x) = isList x
+  isListClip (Clip_List_Word x) = isList x
+  isListClip (Clip_List_Vertex x) = isList x
+  isListClip (Clip_List_Edge x) = isList x
   isListClip (Clip_Document x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
   isListClip (Clip_String x) = isList x
-  isListClip (Clip_Nothing)   = False
+  isListClip (Clip_Float x) = isList x
 
+  insertListClip i c Clip_Nothing = Clip_Nothing
   insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
   insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_Root x) = insertList i c x
@@ -198,12 +245,20 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Edge x) = insertList i c x
   insertListClip i c (Clip_Subgraph x) = insertList i c x
   insertListClip i c (Clip_Dirty x) = insertList i c x
+  insertListClip i c (Clip_List_Section x) = insertList i c x
+  insertListClip i c (Clip_List_Paragraph x) = insertList i c x
+  insertListClip i c (Clip_List_Subsection x) = insertList i c x
+  insertListClip i c (Clip_List_Subsubsection x) = insertList i c x
+  insertListClip i c (Clip_List_Word x) = insertList i c x
+  insertListClip i c (Clip_List_Vertex x) = insertList i c x
+  insertListClip i c (Clip_List_Edge x) = insertList i c x
   insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
-  insertListClip i c (Clip_Nothing)   = Clip_Nothing
+  insertListClip i c (Clip_Float x) = insertList i c x
 
+  removeListClip i Clip_Nothing = Clip_Nothing
   removeListClip i (Clip_EnrichedDoc x) = removeList i x
   removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_Root x) = removeList i x
@@ -218,16 +273,25 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Edge x) = removeList i x
   removeListClip i (Clip_Subgraph x) = removeList i x
   removeListClip i (Clip_Dirty x) = removeList i x
+  removeListClip i (Clip_List_Section x) = removeList i x
+  removeListClip i (Clip_List_Paragraph x) = removeList i x
+  removeListClip i (Clip_List_Subsection x) = removeList i x
+  removeListClip i (Clip_List_Subsubsection x) = removeList i x
+  removeListClip i (Clip_List_Word x) = removeList i x
+  removeListClip i (Clip_List_Vertex x) = removeList i x
+  removeListClip i (Clip_List_Edge x) = removeList i x
   removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
-  removeListClip i (Clip_Nothing)   = Clip_Nothing
+  removeListClip i (Clip_Float x) = removeList i x
 
 
--- Editable Instances --
 
 
+--------------------------------------------------------------------------
+-- Editable instances                                                   --
+--------------------------------------------------------------------------
 
 instance Editable Dummy Document Node ClipDoc UserToken where
   select []    x                  = Clip_Dummy x
@@ -241,7 +305,7 @@ instance Editable Dummy Document Node ClipDoc UserToken where
   paste (1:p) c (Dummy x1 x2) = Dummy x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Dummy {Dummy} "  , Clip_Dummy $ Dummy hole hole)
+  alternatives _ = [("Dummy {Dummy} {Bool} "  , Clip_Dummy $ Dummy hole hole)
                    ,("{Dummy}", Clip_Dummy hole)
                    ]
 
@@ -272,7 +336,7 @@ instance Editable Root Document Node ClipDoc UserToken where
   paste (2:p) c (Root x1 x2 x3) = Root x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Root {Graph} {Sections} "  , Clip_Root $ Root hole hole hole)
+  alternatives _ = [("Root {Graph} {String} {List_Section} "  , Clip_Root $ Root hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
@@ -303,7 +367,7 @@ instance Editable Section Document Node ClipDoc UserToken where
   paste (2:p) c (Section x1 x2 x3) = Section x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Section {Paragraphs} {Subsections} "  , Clip_Section $ Section hole hole hole)
+  alternatives _ = [("Section {String} {List_Paragraph} {List_Subsection} "  , Clip_Section $ Section hole hole hole)
                    ,("{Section}", Clip_Section hole)
                    ]
 
@@ -334,7 +398,7 @@ instance Editable Subsection Document Node ClipDoc UserToken where
   paste (2:p) c (Subsection x1 x2 x3) = Subsection x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subsection {Paragraphs} {Subsubsections} "  , Clip_Subsection $ Subsection hole hole hole)
+  alternatives _ = [("Subsection {String} {List_Paragraph} {List_Subsubsection} "  , Clip_Subsection $ Subsection hole hole hole)
                    ,("{Subsection}", Clip_Subsection hole)
                    ]
 
@@ -363,7 +427,7 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
   paste (1:p) c (Subsubsection x1 x2) = Subsubsection x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subsubsection {Paragraphs} "  , Clip_Subsubsection $ Subsubsection hole hole)
+  alternatives _ = [("Subsubsection {String} {List_Paragraph} "  , Clip_Subsubsection $ Subsubsection hole hole)
                    ,("{Subsubsection}", Clip_Subsubsection hole)
                    ]
 
@@ -392,7 +456,7 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
   paste (0:p) c (SubgraphPara x1) = SubgraphPara (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Paragraph {Words} "  , Clip_Paragraph $ Paragraph hole)
+  alternatives _ = [("Paragraph {List_Word} "  , Clip_Paragraph $ Paragraph hole)
                    ,("SubgraphPara {Subgraph} "  , Clip_Paragraph $ SubgraphPara hole)
                    ,("{Paragraph}", Clip_Paragraph hole)
                    ]
@@ -427,10 +491,10 @@ instance Editable Word Document Node ClipDoc UserToken where
   paste (0:p) c (LabelRef x1) = LabelRef (paste p c x1)
   paste _  _  x                    = x
 
-  alternatives _ = [("Word "  , Clip_Word $ Word hole)
-                   ,("NodeRef "  , Clip_Word $ NodeRef hole)
-                   ,("Label "  , Clip_Word $ Label hole)
-                   ,("LabelRef "  , Clip_Word $ LabelRef hole)
+  alternatives _ = [("Word {String} "  , Clip_Word $ Word hole)
+                   ,("NodeRef {String} "  , Clip_Word $ NodeRef hole)
+                   ,("Label {String} "  , Clip_Word $ Label hole)
+                   ,("LabelRef {String} "  , Clip_Word $ LabelRef hole)
                    ,("{Word}", Clip_Word hole)
                    ]
 
@@ -464,7 +528,7 @@ instance Editable Graph Document Node ClipDoc UserToken where
   paste (2:p) c (Graph x1 x2 x3) = Graph x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Graph {Dirty} {Vertexs} {Edges} "  , Clip_Graph $ Graph hole hole hole)
+  alternatives _ = [("Graph {Dirty} {List_Vertex} {List_Edge} "  , Clip_Graph $ Graph hole hole hole)
                    ,("{Graph}", Clip_Graph hole)
                    ]
 
@@ -499,7 +563,7 @@ instance Editable Vertex Document Node ClipDoc UserToken where
   paste (4:p) c (Vertex x1 x2 x3 x4 x5) = Vertex x1 x2 x3 x4 (paste p c x5)
   paste _  _  x                    = x
 
-  alternatives _ = [("Vertex {Shape} "  , Clip_Vertex $ Vertex hole hole hole hole hole)
+  alternatives _ = [("Vertex {String} {Shape} {Int} {Int} {Int} "  , Clip_Vertex $ Vertex hole hole hole hole hole)
                    ,("{Vertex}", Clip_Vertex hole)
                    ]
 
@@ -555,7 +619,7 @@ instance Editable Edge Document Node ClipDoc UserToken where
   paste (1:p) c (Edge x1 x2) = Edge x1 (paste p c x2)
   paste _  _  x                    = x
 
-  alternatives _ = [("Edge "  , Clip_Edge $ Edge hole hole)
+  alternatives _ = [("Edge {Int} {Int} "  , Clip_Edge $ Edge hole hole)
                    ,("{Edge}", Clip_Edge hole)
                    ]
 
@@ -586,7 +650,7 @@ instance Editable Subgraph Document Node ClipDoc UserToken where
   paste (2:p) c (Subgraph x1 x2 x3) = Subgraph x1 x2 (paste p c x3)
   paste _  _  x                    = x
 
-  alternatives _ = [("Subgraph {Dirty} {Vertexs} {Edges} "  , Clip_Subgraph $ Subgraph hole hole hole)
+  alternatives _ = [("Subgraph {Dirty} {List_Vertex} {List_Edge} "  , Clip_Subgraph $ Subgraph hole hole hole)
                    ,("{Subgraph}", Clip_Subgraph hole)
                    ]
 
@@ -628,6 +692,8 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+
+
 toList_Section vs = List_Section (toConsList_Section vs)
 
 fromList_Section (List_Section vs) = fromConsList_Section vs
@@ -1047,4 +1113,6 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
 
   removeList n (List_Edge cxs) = Clip_List_Edge $ List_Edge (removeList_Edge n cxs)
   removeList _ xs                        = Clip_List_Edge $ xs
+
+
 
