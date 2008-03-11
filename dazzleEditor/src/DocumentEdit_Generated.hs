@@ -3,6 +3,7 @@ module DocumentEdit_Generated where
 import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.DocTypes
 import DocTypes_Generated
+import DocUtils_Generated
 import Evaluation.DocumentEdit
 import Evaluation.DocUtils
 import Presentation.PresTypes
@@ -668,29 +669,6 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-toList_Section vs = List_Section (toConsList_Section vs)
-
-fromList_Section (List_Section vs) = fromConsList_Section vs
-fromList_Section _ = []
-
-toConsList_Section [] = Nil_Section
-toConsList_Section (x:xs) = Cons_Section x (toConsList_Section xs)
-
-fromConsList_Section Nil_Section = []
-fromConsList_Section (Cons_Section x xs) = x: fromConsList_Section xs
-
-replaceList_Section _ x Nil_Section = Nil_Section  -- replace beyond end of list
-replaceList_Section 0 x (Cons_Section cx cxs) = Cons_Section x cxs
-replaceList_Section n x (Cons_Section cx cxs) = Cons_Section cx (replaceList_Section (n-1) x cxs)
-
-insertList_Section 0 x cxs = Cons_Section x cxs
-insertList_Section _ x Nil_Section  = Nil_Section  -- insert beyond end of list
-insertList_Section n x (Cons_Section cx cxs) = Cons_Section cx (insertList_Section (n-1) x cxs)
-
-removeList_Section _ Nil_Section  = Nil_Section  -- remove beyond end of list
-removeList_Section 0 (Cons_Section cx cxs) = cxs
-removeList_Section n (Cons_Section cx cxs) = Cons_Section cx (removeList_Section (n-1) cxs)
-
 instance Editable List_Section Document Node ClipDoc UserToken where
   select [] x = Clip_List_Section x
   select (n:p) (List_Section cxs) =
@@ -729,29 +707,6 @@ instance Editable List_Section Document Node ClipDoc UserToken where
 
   removeList n (List_Section cxs) = Clip_List_Section $ List_Section (removeList_Section n cxs)
   removeList _ xs = Clip_List_Section $ xs
-
-toList_Paragraph vs = List_Paragraph (toConsList_Paragraph vs)
-
-fromList_Paragraph (List_Paragraph vs) = fromConsList_Paragraph vs
-fromList_Paragraph _ = []
-
-toConsList_Paragraph [] = Nil_Paragraph
-toConsList_Paragraph (x:xs) = Cons_Paragraph x (toConsList_Paragraph xs)
-
-fromConsList_Paragraph Nil_Paragraph = []
-fromConsList_Paragraph (Cons_Paragraph x xs) = x: fromConsList_Paragraph xs
-
-replaceList_Paragraph _ x Nil_Paragraph = Nil_Paragraph  -- replace beyond end of list
-replaceList_Paragraph 0 x (Cons_Paragraph cx cxs) = Cons_Paragraph x cxs
-replaceList_Paragraph n x (Cons_Paragraph cx cxs) = Cons_Paragraph cx (replaceList_Paragraph (n-1) x cxs)
-
-insertList_Paragraph 0 x cxs = Cons_Paragraph x cxs
-insertList_Paragraph _ x Nil_Paragraph  = Nil_Paragraph  -- insert beyond end of list
-insertList_Paragraph n x (Cons_Paragraph cx cxs) = Cons_Paragraph cx (insertList_Paragraph (n-1) x cxs)
-
-removeList_Paragraph _ Nil_Paragraph  = Nil_Paragraph  -- remove beyond end of list
-removeList_Paragraph 0 (Cons_Paragraph cx cxs) = cxs
-removeList_Paragraph n (Cons_Paragraph cx cxs) = Cons_Paragraph cx (removeList_Paragraph (n-1) cxs)
 
 instance Editable List_Paragraph Document Node ClipDoc UserToken where
   select [] x = Clip_List_Paragraph x
@@ -792,29 +747,6 @@ instance Editable List_Paragraph Document Node ClipDoc UserToken where
   removeList n (List_Paragraph cxs) = Clip_List_Paragraph $ List_Paragraph (removeList_Paragraph n cxs)
   removeList _ xs = Clip_List_Paragraph $ xs
 
-toList_Subsection vs = List_Subsection (toConsList_Subsection vs)
-
-fromList_Subsection (List_Subsection vs) = fromConsList_Subsection vs
-fromList_Subsection _ = []
-
-toConsList_Subsection [] = Nil_Subsection
-toConsList_Subsection (x:xs) = Cons_Subsection x (toConsList_Subsection xs)
-
-fromConsList_Subsection Nil_Subsection = []
-fromConsList_Subsection (Cons_Subsection x xs) = x: fromConsList_Subsection xs
-
-replaceList_Subsection _ x Nil_Subsection = Nil_Subsection  -- replace beyond end of list
-replaceList_Subsection 0 x (Cons_Subsection cx cxs) = Cons_Subsection x cxs
-replaceList_Subsection n x (Cons_Subsection cx cxs) = Cons_Subsection cx (replaceList_Subsection (n-1) x cxs)
-
-insertList_Subsection 0 x cxs = Cons_Subsection x cxs
-insertList_Subsection _ x Nil_Subsection  = Nil_Subsection  -- insert beyond end of list
-insertList_Subsection n x (Cons_Subsection cx cxs) = Cons_Subsection cx (insertList_Subsection (n-1) x cxs)
-
-removeList_Subsection _ Nil_Subsection  = Nil_Subsection  -- remove beyond end of list
-removeList_Subsection 0 (Cons_Subsection cx cxs) = cxs
-removeList_Subsection n (Cons_Subsection cx cxs) = Cons_Subsection cx (removeList_Subsection (n-1) cxs)
-
 instance Editable List_Subsection Document Node ClipDoc UserToken where
   select [] x = Clip_List_Subsection x
   select (n:p) (List_Subsection cxs) =
@@ -853,29 +785,6 @@ instance Editable List_Subsection Document Node ClipDoc UserToken where
 
   removeList n (List_Subsection cxs) = Clip_List_Subsection $ List_Subsection (removeList_Subsection n cxs)
   removeList _ xs = Clip_List_Subsection $ xs
-
-toList_Subsubsection vs = List_Subsubsection (toConsList_Subsubsection vs)
-
-fromList_Subsubsection (List_Subsubsection vs) = fromConsList_Subsubsection vs
-fromList_Subsubsection _ = []
-
-toConsList_Subsubsection [] = Nil_Subsubsection
-toConsList_Subsubsection (x:xs) = Cons_Subsubsection x (toConsList_Subsubsection xs)
-
-fromConsList_Subsubsection Nil_Subsubsection = []
-fromConsList_Subsubsection (Cons_Subsubsection x xs) = x: fromConsList_Subsubsection xs
-
-replaceList_Subsubsection _ x Nil_Subsubsection = Nil_Subsubsection  -- replace beyond end of list
-replaceList_Subsubsection 0 x (Cons_Subsubsection cx cxs) = Cons_Subsubsection x cxs
-replaceList_Subsubsection n x (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (replaceList_Subsubsection (n-1) x cxs)
-
-insertList_Subsubsection 0 x cxs = Cons_Subsubsection x cxs
-insertList_Subsubsection _ x Nil_Subsubsection  = Nil_Subsubsection  -- insert beyond end of list
-insertList_Subsubsection n x (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (insertList_Subsubsection (n-1) x cxs)
-
-removeList_Subsubsection _ Nil_Subsubsection  = Nil_Subsubsection  -- remove beyond end of list
-removeList_Subsubsection 0 (Cons_Subsubsection cx cxs) = cxs
-removeList_Subsubsection n (Cons_Subsubsection cx cxs) = Cons_Subsubsection cx (removeList_Subsubsection (n-1) cxs)
 
 instance Editable List_Subsubsection Document Node ClipDoc UserToken where
   select [] x = Clip_List_Subsubsection x
@@ -916,29 +825,6 @@ instance Editable List_Subsubsection Document Node ClipDoc UserToken where
   removeList n (List_Subsubsection cxs) = Clip_List_Subsubsection $ List_Subsubsection (removeList_Subsubsection n cxs)
   removeList _ xs = Clip_List_Subsubsection $ xs
 
-toList_Word vs = List_Word (toConsList_Word vs)
-
-fromList_Word (List_Word vs) = fromConsList_Word vs
-fromList_Word _ = []
-
-toConsList_Word [] = Nil_Word
-toConsList_Word (x:xs) = Cons_Word x (toConsList_Word xs)
-
-fromConsList_Word Nil_Word = []
-fromConsList_Word (Cons_Word x xs) = x: fromConsList_Word xs
-
-replaceList_Word _ x Nil_Word = Nil_Word  -- replace beyond end of list
-replaceList_Word 0 x (Cons_Word cx cxs) = Cons_Word x cxs
-replaceList_Word n x (Cons_Word cx cxs) = Cons_Word cx (replaceList_Word (n-1) x cxs)
-
-insertList_Word 0 x cxs = Cons_Word x cxs
-insertList_Word _ x Nil_Word  = Nil_Word  -- insert beyond end of list
-insertList_Word n x (Cons_Word cx cxs) = Cons_Word cx (insertList_Word (n-1) x cxs)
-
-removeList_Word _ Nil_Word  = Nil_Word  -- remove beyond end of list
-removeList_Word 0 (Cons_Word cx cxs) = cxs
-removeList_Word n (Cons_Word cx cxs) = Cons_Word cx (removeList_Word (n-1) cxs)
-
 instance Editable List_Word Document Node ClipDoc UserToken where
   select [] x = Clip_List_Word x
   select (n:p) (List_Word cxs) =
@@ -978,29 +864,6 @@ instance Editable List_Word Document Node ClipDoc UserToken where
   removeList n (List_Word cxs) = Clip_List_Word $ List_Word (removeList_Word n cxs)
   removeList _ xs = Clip_List_Word $ xs
 
-toList_Vertex vs = List_Vertex (toConsList_Vertex vs)
-
-fromList_Vertex (List_Vertex vs) = fromConsList_Vertex vs
-fromList_Vertex _ = []
-
-toConsList_Vertex [] = Nil_Vertex
-toConsList_Vertex (x:xs) = Cons_Vertex x (toConsList_Vertex xs)
-
-fromConsList_Vertex Nil_Vertex = []
-fromConsList_Vertex (Cons_Vertex x xs) = x: fromConsList_Vertex xs
-
-replaceList_Vertex _ x Nil_Vertex = Nil_Vertex  -- replace beyond end of list
-replaceList_Vertex 0 x (Cons_Vertex cx cxs) = Cons_Vertex x cxs
-replaceList_Vertex n x (Cons_Vertex cx cxs) = Cons_Vertex cx (replaceList_Vertex (n-1) x cxs)
-
-insertList_Vertex 0 x cxs = Cons_Vertex x cxs
-insertList_Vertex _ x Nil_Vertex  = Nil_Vertex  -- insert beyond end of list
-insertList_Vertex n x (Cons_Vertex cx cxs) = Cons_Vertex cx (insertList_Vertex (n-1) x cxs)
-
-removeList_Vertex _ Nil_Vertex  = Nil_Vertex  -- remove beyond end of list
-removeList_Vertex 0 (Cons_Vertex cx cxs) = cxs
-removeList_Vertex n (Cons_Vertex cx cxs) = Cons_Vertex cx (removeList_Vertex (n-1) cxs)
-
 instance Editable List_Vertex Document Node ClipDoc UserToken where
   select [] x = Clip_List_Vertex x
   select (n:p) (List_Vertex cxs) =
@@ -1039,29 +902,6 @@ instance Editable List_Vertex Document Node ClipDoc UserToken where
 
   removeList n (List_Vertex cxs) = Clip_List_Vertex $ List_Vertex (removeList_Vertex n cxs)
   removeList _ xs = Clip_List_Vertex $ xs
-
-toList_Edge vs = List_Edge (toConsList_Edge vs)
-
-fromList_Edge (List_Edge vs) = fromConsList_Edge vs
-fromList_Edge _ = []
-
-toConsList_Edge [] = Nil_Edge
-toConsList_Edge (x:xs) = Cons_Edge x (toConsList_Edge xs)
-
-fromConsList_Edge Nil_Edge = []
-fromConsList_Edge (Cons_Edge x xs) = x: fromConsList_Edge xs
-
-replaceList_Edge _ x Nil_Edge = Nil_Edge  -- replace beyond end of list
-replaceList_Edge 0 x (Cons_Edge cx cxs) = Cons_Edge x cxs
-replaceList_Edge n x (Cons_Edge cx cxs) = Cons_Edge cx (replaceList_Edge (n-1) x cxs)
-
-insertList_Edge 0 x cxs = Cons_Edge x cxs
-insertList_Edge _ x Nil_Edge  = Nil_Edge  -- insert beyond end of list
-insertList_Edge n x (Cons_Edge cx cxs) = Cons_Edge cx (insertList_Edge (n-1) x cxs)
-
-removeList_Edge _ Nil_Edge  = Nil_Edge  -- remove beyond end of list
-removeList_Edge 0 (Cons_Edge cx cxs) = cxs
-removeList_Edge n (Cons_Edge cx cxs) = Cons_Edge cx (removeList_Edge (n-1) cxs)
 
 instance Editable List_Edge Document Node ClipDoc UserToken where
   select [] x = Clip_List_Edge x
