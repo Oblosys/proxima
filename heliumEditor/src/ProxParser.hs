@@ -19,7 +19,7 @@ import qualified Common.UU_Parsing as UU_Parsing
 import Char
 
 import DocTypes_Generated
-import DocUtils_Generated (initBoard, initPPPresentation)
+import DocUtils_Generated
 
 
 -------------------- Proxima Parser/Structure Recognizer -------------------- 

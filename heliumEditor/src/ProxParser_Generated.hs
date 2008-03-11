@@ -8,6 +8,7 @@ import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import Evaluation.DocTypes
 import DocTypes_Generated
+import DocUtils_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 

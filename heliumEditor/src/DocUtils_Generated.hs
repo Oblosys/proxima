@@ -3,7 +3,6 @@ module DocUtils_Generated where
 import Evaluation.DocTypes
 import DocTypes_Generated
 import Evaluation.DocumentEdit
-import DocumentEdit_Generated
 import Presentation.PresTypes
 import Text.ParserCombinators.Parsec
 import Evaluation.DocUtils
@@ -552,4 +551,119 @@ parseXML_List_Exp = mkList List_Exp Cons_Exp Nil_Exp <$> many parseXML_Exp
 parseXML_List_Slide = mkList List_Slide Cons_Slide Nil_Slide <$> many parseXML_Slide
 parseXML_List_Item = mkList List_Item Cons_Item Nil_Item <$> many parseXML_Item
 
+
+toList_Decl vs = List_Decl (toConsList_Decl vs)
+
+fromList_Decl (List_Decl vs) = fromConsList_Decl vs
+fromList_Decl _ = []
+
+toConsList_Decl [] = Nil_Decl
+toConsList_Decl (x:xs) = Cons_Decl x (toConsList_Decl xs)
+
+fromConsList_Decl Nil_Decl = []
+fromConsList_Decl (Cons_Decl x xs) = x: fromConsList_Decl xs
+
+replaceList_Decl _ x Nil_Decl = Nil_Decl  -- replace beyond end of list
+replaceList_Decl 0 x (Cons_Decl cx cxs) = Cons_Decl x cxs
+replaceList_Decl n x (Cons_Decl cx cxs) = Cons_Decl cx (replaceList_Decl (n-1) x cxs)
+
+insertList_Decl 0 x cxs = Cons_Decl x cxs
+insertList_Decl _ x Nil_Decl  = Nil_Decl  -- insert beyond end of list
+insertList_Decl n x (Cons_Decl cx cxs) = Cons_Decl cx (insertList_Decl (n-1) x cxs)
+
+removeList_Decl _ Nil_Decl  = Nil_Decl  -- remove beyond end of list
+removeList_Decl 0 (Cons_Decl cx cxs) = cxs
+removeList_Decl n (Cons_Decl cx cxs) = Cons_Decl cx (removeList_Decl (n-1) cxs)
+
+toList_Alt vs = List_Alt (toConsList_Alt vs)
+
+fromList_Alt (List_Alt vs) = fromConsList_Alt vs
+fromList_Alt _ = []
+
+toConsList_Alt [] = Nil_Alt
+toConsList_Alt (x:xs) = Cons_Alt x (toConsList_Alt xs)
+
+fromConsList_Alt Nil_Alt = []
+fromConsList_Alt (Cons_Alt x xs) = x: fromConsList_Alt xs
+
+replaceList_Alt _ x Nil_Alt = Nil_Alt  -- replace beyond end of list
+replaceList_Alt 0 x (Cons_Alt cx cxs) = Cons_Alt x cxs
+replaceList_Alt n x (Cons_Alt cx cxs) = Cons_Alt cx (replaceList_Alt (n-1) x cxs)
+
+insertList_Alt 0 x cxs = Cons_Alt x cxs
+insertList_Alt _ x Nil_Alt  = Nil_Alt  -- insert beyond end of list
+insertList_Alt n x (Cons_Alt cx cxs) = Cons_Alt cx (insertList_Alt (n-1) x cxs)
+
+removeList_Alt _ Nil_Alt  = Nil_Alt  -- remove beyond end of list
+removeList_Alt 0 (Cons_Alt cx cxs) = cxs
+removeList_Alt n (Cons_Alt cx cxs) = Cons_Alt cx (removeList_Alt (n-1) cxs)
+
+toList_Exp vs = List_Exp (toConsList_Exp vs)
+
+fromList_Exp (List_Exp vs) = fromConsList_Exp vs
+fromList_Exp _ = []
+
+toConsList_Exp [] = Nil_Exp
+toConsList_Exp (x:xs) = Cons_Exp x (toConsList_Exp xs)
+
+fromConsList_Exp Nil_Exp = []
+fromConsList_Exp (Cons_Exp x xs) = x: fromConsList_Exp xs
+
+replaceList_Exp _ x Nil_Exp = Nil_Exp  -- replace beyond end of list
+replaceList_Exp 0 x (Cons_Exp cx cxs) = Cons_Exp x cxs
+replaceList_Exp n x (Cons_Exp cx cxs) = Cons_Exp cx (replaceList_Exp (n-1) x cxs)
+
+insertList_Exp 0 x cxs = Cons_Exp x cxs
+insertList_Exp _ x Nil_Exp  = Nil_Exp  -- insert beyond end of list
+insertList_Exp n x (Cons_Exp cx cxs) = Cons_Exp cx (insertList_Exp (n-1) x cxs)
+
+removeList_Exp _ Nil_Exp  = Nil_Exp  -- remove beyond end of list
+removeList_Exp 0 (Cons_Exp cx cxs) = cxs
+removeList_Exp n (Cons_Exp cx cxs) = Cons_Exp cx (removeList_Exp (n-1) cxs)
+
+toList_Slide vs = List_Slide (toConsList_Slide vs)
+
+fromList_Slide (List_Slide vs) = fromConsList_Slide vs
+fromList_Slide _ = []
+
+toConsList_Slide [] = Nil_Slide
+toConsList_Slide (x:xs) = Cons_Slide x (toConsList_Slide xs)
+
+fromConsList_Slide Nil_Slide = []
+fromConsList_Slide (Cons_Slide x xs) = x: fromConsList_Slide xs
+
+replaceList_Slide _ x Nil_Slide = Nil_Slide  -- replace beyond end of list
+replaceList_Slide 0 x (Cons_Slide cx cxs) = Cons_Slide x cxs
+replaceList_Slide n x (Cons_Slide cx cxs) = Cons_Slide cx (replaceList_Slide (n-1) x cxs)
+
+insertList_Slide 0 x cxs = Cons_Slide x cxs
+insertList_Slide _ x Nil_Slide  = Nil_Slide  -- insert beyond end of list
+insertList_Slide n x (Cons_Slide cx cxs) = Cons_Slide cx (insertList_Slide (n-1) x cxs)
+
+removeList_Slide _ Nil_Slide  = Nil_Slide  -- remove beyond end of list
+removeList_Slide 0 (Cons_Slide cx cxs) = cxs
+removeList_Slide n (Cons_Slide cx cxs) = Cons_Slide cx (removeList_Slide (n-1) cxs)
+
+toList_Item vs = List_Item (toConsList_Item vs)
+
+fromList_Item (List_Item vs) = fromConsList_Item vs
+fromList_Item _ = []
+
+toConsList_Item [] = Nil_Item
+toConsList_Item (x:xs) = Cons_Item x (toConsList_Item xs)
+
+fromConsList_Item Nil_Item = []
+fromConsList_Item (Cons_Item x xs) = x: fromConsList_Item xs
+
+replaceList_Item _ x Nil_Item = Nil_Item  -- replace beyond end of list
+replaceList_Item 0 x (Cons_Item cx cxs) = Cons_Item x cxs
+replaceList_Item n x (Cons_Item cx cxs) = Cons_Item cx (replaceList_Item (n-1) x cxs)
+
+insertList_Item 0 x cxs = Cons_Item x cxs
+insertList_Item _ x Nil_Item  = Nil_Item  -- insert beyond end of list
+insertList_Item n x (Cons_Item cx cxs) = Cons_Item cx (insertList_Item (n-1) x cxs)
+
+removeList_Item _ Nil_Item  = Nil_Item  -- remove beyond end of list
+removeList_Item 0 (Cons_Item cx cxs) = cxs
+removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
 
