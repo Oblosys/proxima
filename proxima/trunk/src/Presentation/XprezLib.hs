@@ -237,3 +237,101 @@ boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 percent :: Int -> Int -> Int
 percent a x = a * x `div` 100
 
+
+presentFocus NoPathD     path pres = pres
+presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
+
+focusCol = lightBlue -- lightGrey
+
+presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token
+presentElementXML focusD node path tag children =
+  loc node $ parsing $ presentFocus focusD path $                  
+    if null children
+    then col [ text $ "<"++tag++"/>"]
+    else col [ text  $ "<"++tag++">"
+             , row [ text "  ", col children ]
+             , text $ "</"++tag++">" ]      
+    
+
+presentElementTree :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token
+presentElementTree focusD node path tag children =
+  loc node $ parsing $ presentFocus focusD path $                  
+    if null children
+    then mkTreeLeaf False $ text $ tag
+    else mkTreeNode False True (text tag) children
+
+-------------------------------------------------------------------------
+-- change hLine and vLine to empty to get rid of lines
+hLine' = hLine -- empty
+vLine' = vLine -- empty
+
+
+mkTreeLeaf :: Bool -> Xprez doc node clip token -> Xprez doc node clip token
+mkTreeLeaf isLast label =
+  row [ leafHandle isLast, hLine `withWidth` 12, leafImg
+      , hLine `withWidth` 5, vRefHalf label ]
+
+mkTreeNode :: Bool -> Bool -> Xprez doc node clip token -> [ Xprez doc node clip token ] -> Xprez doc node clip token
+mkTreeNode isLast isExp label children =
+  rowR 0 [ nodeHandle isExp isLast, hLine `withWidth` 7
+         , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
+                       , hLine `withWidth` 5, vRefHalf label
+                       ]
+                 ] ++ (if isExp then children else [] )
+         ]
+
+nodeHandle isExp isLast
+ = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])          -- old version
+-- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
+
+leafHandle isLast
+ = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
+
+handleImg isExp = if isExp then minusImg else plusImg
+
+nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
+
+leafImg = img "img/text.bmp" `withSize` (13,16) `withRef` (6,7)
+
+plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+
+{-  version that works for built-in tree presentation
+
+hLine' = hLine -- empty
+vLine' = vLine -- empty
+
+mkTreeLeaf :: Bool -> Xprez doc node clip token -> Xprez doc node clip token
+mkTreeLeaf isLast label =
+  row [ leafHandle isLast, hLine `withWidth` 12, leafImg
+      , hLine `withWidth` 5, refHalf label ]
+
+mkTreeNode :: Bool -> Bool -> Xprez doc node clip token -> [ Xprez doc node clip token ] -> Xprez doc node clip token
+mkTreeNode isLast isExp label children =
+  rowR 1 [ nodeHandle isExp isLast, hLine `withWidth` 7
+         , col $ [ row [ col [ nodeImg , if isExp then vLine' else empty ]
+                       , hLine `withWidth` 5,refHalf label
+                       ]
+                 ] ++ (if isExp then children else [] )
+         ]
+
+nodeHandle isExp isLast
+ = colR 1 ([ vLine', handleImg isExp ]++ if isLast then [] else [vLine'])
+-- = colR 1 ([ vLine', rowR 1 [ empty  `withWidth` 2, handleImg isExp] ]++ if isLast then [] else [vLine'])
+
+leafHandle isLast
+ = colR 1 ([vLine', empty {-`withSize` (9,9) `withRef` (4,4)-}]++ if isLast then [] else [vLine'])
+
+handleImg isExp = if isExp then minusImg else plusImg
+
+nodeImg = img "img/folder.bmp" `withSize` (15,13) `withRef` (7,7)
+
+leafImg = img "img/help.bmp" `withSize` (16,16) `withRef` (6,7)
+
+plusImg = img "img/plus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+minusImg = img "img/minus.bmp" `withSize` (9,9) `withRef` (4,4)
+
+-}
