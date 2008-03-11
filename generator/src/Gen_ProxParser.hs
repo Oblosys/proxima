@@ -26,7 +26,7 @@ genReuse decls = genBanner "reuse functions" $ concat
   [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"
     , "  = case extractFromTokens extract%1 default%1 nodes of"
-    , "           %5 -> reuse%6 %1%7%4"
+    , "           %5 -> genericReuse%6 %1%7%4"
     , "           _ -> error \"Internal error:ProxParser_Generated.reuse%1\""
     , ""
     ] <~ [ cnstrName                                                         -- %1
@@ -88,10 +88,10 @@ genGenericReuse decls = genBanner "genericReuse functions" $
  where genGenericReuseN n = 
          let aArgs = zipWith (++) (replicate n "a") (map show [0..])
              maArgs = map ("m"++) aArgs
-         in [ "reuse%1 :: (%2r) ->"
-            , "          %2"
-            , "          %3r"
-            , "reuse%1 f%4 ="
+         in [ "genericReuse%1 :: (%2r) ->"
+            , "                 %2"
+            , "                 %3r"
+            , "genericReuse%1 f%4 ="
             , "  f%5"
             , ""
             ] <~ [ show n                                                                          -- %1
@@ -101,17 +101,3 @@ genGenericReuse decls = genBanner "genericReuse functions" $
                       , concat $ zipWith (\a ma -> " (maybe " ++ a ++ " id " ++ ma ++ ")") aArgs maArgs -- %5
                       ]
        
-{- 
-reuse2 :: (a0 -> a1 -> r) -> 
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f  a0 a1 ma0 ma1 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) 
-
-reuse3 :: (a0 -> a1 -> a2 -> r) -> 
-          a0 -> a1 -> a2 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
-reuse3 f  a0 a1 a2 ma0 ma1 ma2 =
-  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) 
-
--}

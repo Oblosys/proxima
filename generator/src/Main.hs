@@ -15,7 +15,6 @@ import List
 {- Generation
 TODO:
 
-- do a diff on generated files to check that they are correct. ag and docedit have been checked already
 - rename reusen to genericReuse (after diffing)
 - rename <constructor>Node to Node_<constructor>
 - can we get rid of parse err and hole for node type? (also change rankNode and pathNode
