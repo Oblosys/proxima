@@ -11,12 +11,6 @@ import Text.ParserCombinators.Parsec
 
 import Common.CommonTypes hiding (Clean, Dirty)
 
---instance Show Node where
---  show NoNode = "<>"
---  show (DocNode doc pth) = "<"++shallowShowDoc1 doc++","++show pth++">"
---  show (ExpNode exp pth) = "<"++shallowShowExp1 exp++","++show pth++">"
---  show _ = "<NODE>"
-
 instance DocNode Node where
   noNode = NoNode
 
