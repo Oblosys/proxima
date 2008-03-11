@@ -1,18 +1,4 @@
 
---ATTR Document HeliumTypeInfo [ path : {[Int]} |  pIdC : Int  | ]
-
---DATA Document | RootDoc IDD IDP Decls
-
---DATA HeliumTypeInfo | HeliumTypeInfo
-
---Document = 
---              | HoleDoc
---              | ParseErrDoc Presentation deriving Show
-
-
---type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
-
-
 SEM EnrichedDoc
   | RootEnr root.pIdC = @lhs.pIdC
             lhs.pIdC  = @root.pIdC
@@ -61,7 +47,6 @@ presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
 presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
 presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
---n2 = mkTreeNode False False (text "node 2" `withFontSize` 50) []
 }                   
 
 

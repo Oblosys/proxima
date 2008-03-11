@@ -10,26 +10,6 @@ import Common.CommonTypes
 import Common.CommonUtils
 import System.Directory
 
---instance Show Node where
---  show NoNode = "<>"
---  show (DocNode doc pth) = "<"++shallowShowDoc1 doc++","++show pth++">"
---  show (ExpNode exp pth) = "<"++shallowShowExp1 exp++","++show pth++">"
---  show _ = "<NODE>"
-
-instance DocNode Node where
-  noNode = NoNode
-
-instance Eq Node where
-  nd1 == nd2 = rankNode nd1 == rankNode nd2
-  
-instance Ord Node where
-  nd1 <= nd2 = rankNode nd1 <= rankNode nd2
-
-instance Doc Document where
-  initialDoc = initDoc
-  toXML = toXMLDocument
-  parseXML = parseXML_Document
-
 initDoc :: IO Document
 initDoc = 
  do { let filePath = "Heliumfile.hs"
@@ -41,59 +21,9 @@ initDoc =
     -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
     -- the proxima parser is used when the presented document is parsed.
 
--- XML
-
--- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
-toXMLDocument (RootDoc root) = toXMLRoot root
-toXMLDocument _              = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
-                                 Elt "Root" [] [] -- this does not occur
-
-parseXML_Document = RootDoc <$> parseXML_Root
 
 toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
-
-
-
--- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
-
-toXMLBool b = Elt "Bool" [("val", show b)] []
-
-toXMLInt i = Elt "Integer" [("val", show i)] []
-
-toXMLString str = Elt "String" [] [PCData str] 
-
-
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
-
-parseXML_Int :: Parser Int
-parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
-
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
-
-
-
-
 
 initBoard = demoBoard -- Board (backRow (Bool_ True)) (pawnRow (Bool_ True)) emptyRow emptyRow emptyRow emptyRow (pawnRow (Bool_ False)) (backRow (Bool_ False))
 
@@ -169,6 +99,67 @@ mkItems []     = Nil_Item
 mkItems (s:ss) = Cons_Item s (mkItems ss)
 
 
+
+
+instance DocNode Node where
+  noNode = NoNode
+
+instance Eq Node where
+  nd1 == nd2 = rankNode nd1 == rankNode nd2
+  
+instance Ord Node where
+  nd1 <= nd2 = rankNode nd1 <= rankNode nd2
+
+instance Doc Document where
+  initialDoc = initDoc
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
+
+-- XML
+
+-- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
+toXMLDocument (RootDoc root) = toXMLRoot root
+toXMLDocument _              = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
+                                 Elt "Root" [] [] -- this does not occur
+
+parseXML_Document = RootDoc <$> parseXML_Root
+
+
+-- String, Int, and Bool are unboxed types in the Document, so they can't be holes or parseErrs
+
+toXMLBool b = Elt "Bool" [("val", show b)] []
+
+toXMLInt i = Elt "Integer" [("val", show i)] []
+
+toXMLString str = Elt "String" [] [PCData str] 
+
+
+parseXML_String :: Parser String
+parseXML_String =
+ do { spaces
+    ; string "<String>"
+    ; str <- many (satisfy (/='<')) 
+    ; string "</String>"
+    ; return str
+    }
+
+parseXML_Int :: Parser Int
+parseXML_Int  =
+ do { spaces
+    ; string "<Integer val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    } 
+
+parseXML_Bool :: Parser Bool
+parseXML_Bool =
+ do { spaces
+    ; string "<Bool val=\""
+    ; str <- many (satisfy (/='"')) 
+    ; string "\"/>"
+    ; return $ read str
+    }
 
 
 

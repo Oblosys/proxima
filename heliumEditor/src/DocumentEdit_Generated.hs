@@ -8,183 +8,11 @@ import Evaluation.DocumentEdit
 import Evaluation.DocUtils
 import Presentation.PresTypes
 
-import Debug.Trace
-
-
--- not entirely generated: hole is special for chessboard and pppresentation, because hole is initialized
--- This is not good. hole must be just a hole for cut operations.
--- an initialized value must be specified separately class member initialValue?
-
-
--- Constructor for HoleClip can be put in class as toClip or inject
-
-
-
--- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
-instance Editable Document Document Node ClipDoc UserToken where
-  select p (RootDoc x) = select p x
-  paste p c (RootDoc x) = RootDoc $ paste p c x
-  hole = HoleDocument
-  parseErr = ParseErrDocument
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-  
 instance Editable HeliumTypeInfo Document Node ClipDoc UserToken where
   hole =  ([],[],[])
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
-
-
--- from Editable, only the member parseErr is used for EnrichedDoc
-instance Editable EnrichedDoc Document Node ClipDoc UserToken where
---  hole = HoleEnrichedDoc
-  parseErr = ParseErrEnrichedDoc
-
-instance Editable Int Document Node ClipDoc UserToken where
-  select [] x = Clip_Int x
-  select _  _ = Clip_Nothing
-  paste [] (Clip_Int c) x = c
-  paste [] c            x =  trace ("Type error: pasting "++show c++" on Int") x
-  paste _  _             x = x
-  
-  alternatives _ = [ ("0", Clip_Int 0) ]
-  
-  arity _ = 0
-  parseErr _ = 0
-
-  hole = 0
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-instance Editable Float Document Node ClipDoc UserToken where
-  select [] x = Clip_Float x
-  select _  _ = Clip_Nothing
-  paste [] (Clip_Float c) x = c
-  paste [] c              x =  trace ("Type error: pasting "++show c++" on Float") x
-  paste _  _              x = x
-  
-  alternatives _ = [ ("0.0", Clip_Float 0.0) ]
-  
-  arity _ = 0
-  parseErr _ = 0
-
-  hole = 0
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-instance Editable Bool Document Node ClipDoc UserToken where                         
-  select [] x = Clip_Bool x                            
-  select _  _ = Clip_Nothing                           
-  paste [] (Clip_Bool c) x = c                         
-  paste [] c             x =  trace ("Type error: pasting "++show c++" on Bool") x
-  paste _  _             x = x
-  alternatives _ = [ ("True", Clip_Bool True)        
-                   , ("False", Clip_Bool False)      
-                   ]    
-  arity _ = 0                                          
-  parseErr _ = False
-
-  hole = False
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-instance Editable String Document Node ClipDoc UserToken where
-  select [] x = Clip_String x
-  select _  _ = Clip_Nothing
-  paste [] (Clip_String c) x = c
-  paste [] c             x =  trace ("Type error: pasting "++show c++" on String") x
-  paste _  _             x = x
-
-  alternatives _ = [ ("string", Clip_String "string")
-                   ] 
- 
-  arity _ = 0
-  parseErr _ = "{ParseErr}"
-
-  hole = "{String}"
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
-
-{-
--- editable instances for boxed values
-
-instance Editable String_ where
-  select []    x                  = Clip_String_ x
-  select (0:p) (String_ _ x1) = select p x1
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_String_ c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on String_")   x
-  paste (0:p) c (String_ i1 x1) = String_ i1 (paste p c x1)
-  paste _  _  x                    = x
-
-  alternatives _ = [("String_ "  , Clip_String_ $ String_ NoIDD hole)
-                   ,("{String_}", Clip_String_ hole)
-                   ]
-
-  arity (String_ _ x1) = 1
-  arity _                        = 0
-
-  parseErr = ParseErrString_
-
-  hole = HoleString_
-
-
-
-instance Editable Bool_ where
-  select []    x                  = Clip_Bool_ x
-  select (0:p) (Bool_ _ x1) = select p x1
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_Bool_ c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Bool_")   x
-  paste (0:p) c (Bool_ i1 x1) = Bool_ i1 (paste p c x1)
-  paste _  _  x                    = x
-
-  alternatives _ = [("Bool_ "  , Clip_Bool_ $ Bool_ NoIDD hole)
-                   ,("{Bool_}", Clip_Bool_ hole)
-                   ]
-
-  arity (Bool_ _ x1) = 1
-  arity _                        = 0
-
-  parseErr = ParseErrBool_
-
-  hole = HoleBool_
-
-
-
-instance Editable Int_ where
-  select []    x                  = Clip_Int_ x
-  select _     _                  = Clip_Nothing
-
-  paste [] (Clip_Int_ c) _      = c
-  paste [] c  x                    = trace ("Type error: pasting "++show c++" on Int_")   x
-  paste (0:p) c (Int_ i1 x1) = Int_ i1 (paste p c x1)
-  paste _  _  x                    = x
-
-  alternatives _ = [("Int_ "  , Clip_Int_ $ Int_ NoIDD hole)
-                   ,("{Int_}", Clip_Int_ hole)
-                   ]
-
-  arity _                        = 0
-
-  parseErr = ParseErrInt_
-
-  hole = HoleInt_
-
--}
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -1100,5 +928,99 @@ instance Editable List_Item Document Node ClipDoc UserToken where
   removeList n (List_Item cxs) = Clip_List_Item $ List_Item (removeList_Item n cxs)
   removeList _ xs = Clip_List_Item $ xs
 
+
+
+
+--------------------------------------------------------------------------
+-- Editable instances for Document, EnrichedDoc and primitive types     --
+--------------------------------------------------------------------------
+
+instance Editable Document Document Node ClipDoc UserToken where
+  -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
+  select p (RootDoc x) = select p x
+  paste p c (RootDoc x) = RootDoc $ paste p c x
+  hole = HoleDocument
+  parseErr = ParseErrDocument
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+  
+-- for EnrichedDoc, only the member parseErr is used from Editable
+instance Editable EnrichedDoc Document Node ClipDoc UserToken where
+  hole = HoleEnrichedDoc
+  parseErr = ParseErrEnrichedDoc
+
+instance Editable Int Document Node ClipDoc UserToken where
+  select [] x = Clip_Int x
+  select _  _ = Clip_Nothing
+  paste [] (Clip_Int c) x = c
+  paste [] c            x =  debug Err ("Type error: pasting "++show c++" on Int") x
+  paste _  _             x = x
+  
+  alternatives _ = [ ("0", Clip_Int 0) ]
+  
+  arity _ = 0
+  parseErr _ = 0
+
+  hole = 0
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Float Document Node ClipDoc UserToken where
+  select [] x = Clip_Float x
+  select _  _ = Clip_Nothing
+  paste [] (Clip_Float c) x = c
+  paste [] c              x =  debug Err ("Type error: pasting "++show c++" on Float") x
+  paste _  _              x = x
+  
+  alternatives _ = [ ("0.0", Clip_Float 0.0) ]
+  
+  arity _ = 0
+  parseErr _ = 0
+
+  hole = 0
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Bool Document Node ClipDoc UserToken where
+  select [] x = Clip_Bool x                            
+  select _  _ = Clip_Nothing                           
+  paste [] (Clip_Bool c) x = c                         
+  paste [] c             x =  debug Err ("Type error: pasting "++show c++" on Bool") x
+  paste _  _             x = x
+  alternatives _ = [ ("True", Clip_Bool True)        
+                   , ("False", Clip_Bool False)      
+                   ]    
+  arity _ = 0                                          
+  parseErr _ = False
+
+  hole = False
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable String Document Node ClipDoc UserToken where
+  select [] x = Clip_String x
+  select _  _ = Clip_Nothing
+  paste [] (Clip_String c) x = c
+  paste [] c             x =  debug Err ("Type error: pasting "++show c++" on String") x
+  paste _  _             x = x
+
+  alternatives _ = [ ("string", Clip_String "string")
+                   ] 
+ 
+  arity _ = 0
+  parseErr _ = "{ParseErr}"
+
+  hole = "{String}"
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
 
 
