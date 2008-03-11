@@ -79,7 +79,7 @@ genSemEnrichedDoc = genBanner "Sem functions for EnrichedDoc" $
   , "      root.pIdC = @lhs.pIdC"
   , "      lhs.pIdC  = @root.pIdC"
   , "  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD \"EnrichedDoc\" (Node_HoleEnrichedDoc @self []) []"
-  , "  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation"
+  , "  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self []) @presentation"
   , ""
   , "SEM EnrichedDoc"
   , "  | RootEnr root.path  = []"
@@ -95,7 +95,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   "SEM %1" <~ [typeName] :
   concatMap genSemPIDCProd prods ++
   [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-  , "  | ParseErr%1 lhs.pres = presParseErr @presentation"
+  , "  | ParseErr%1 lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
   , ""
   ] <~ [typeName]
  where genSemPIDCProd (Prod _ cnstrName idpFields fields) =
@@ -125,7 +125,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
   , "  | HoleList_%1     lhs.press = []"
-  , "  | ParseErrList_%1 lhs.press = [ presParseErr @presentation ]"
+  , "  | ParseErrList_%1 lhs.press = [ presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation ]"
   , ""
   ] <~ [typeName]
 
@@ -159,7 +159,7 @@ genSemXMLBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
   ([ "  | Hole%1     lhs.presXML = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-   , "  | ParseErr%1 lhs.presXML = presParseErr @presentation"
+   , "  | ParseErr%1 lhs.presXML = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
    , ""
    ] <~ [typeName])
  where genField (Field fieldName fieldType) = 
@@ -174,7 +174,7 @@ genSemXMLListDecl (Decl (LHSListType typeName) _) =
   , "                    col @elts.pressXML"
   , "  | ParseErrList_%1"
   , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presParseErr @presentation"
+  , "                    presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation"
   , "  | HoleList_%1"
   , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
@@ -204,7 +204,7 @@ genSemTreeBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
   ([ "  | Hole%1     lhs.presTree = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-   , "  | ParseErr%1 lhs.presTree = presParseErr @presentation"
+   , "  | ParseErr%1 lhs.presTree = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
    , ""
    ] <~ [typeName])
  where genField (Field fieldName fieldType) = 
@@ -219,7 +219,7 @@ genSemTreeListDecl (Decl (LHSListType typeName) _) =
   , "                       col @elts.pressTree"
   , "  | ParseErrList_%1"
   , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                       presParseErr @presentation"
+  , "                       presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation"
   , "  | HoleList_%1"
   , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
