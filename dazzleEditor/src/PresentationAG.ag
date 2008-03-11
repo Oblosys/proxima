@@ -26,10 +26,6 @@ presHole focus typeStr nd pth = loc nd $
 presParseErr pres =
   loc NoNode $ parsing $ pres `withbgColor` whiteSmoke
 
-presentFocus NoPathD     path pres = pres
-presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
-
-focusCol = lightBlue
 
 }
 

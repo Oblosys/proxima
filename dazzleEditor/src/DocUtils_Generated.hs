@@ -5,6 +5,7 @@ import DocTypes_Generated
 import Evaluation.DocUtils
 import Evaluation.DocumentEdit
 import Presentation.PresTypes
+import Presentation.XprezLib
 import Common.DebugLevels
 import Text.ParserCombinators.Parsec
 
@@ -77,6 +78,27 @@ parseXML_Bool =
     ; string "\"/>"
     ; return $ read str
     }
+
+type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
+    
+presentPrimXMLBool :: Bool -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
+
+presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
+
+presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLString x = text $ "<String>"++x++"<String>"
+    
+presentPrimTreeBool :: Bool -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
+
+presentPrimTreeInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
+
+presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
+
 
 
 
