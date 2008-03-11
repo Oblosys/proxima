@@ -19,283 +19,283 @@ import DocUtils_Generated
 reuseDummy :: [Token doc Node clip token] -> Maybe Root -> Maybe Dummy -> Dummy
 reuseDummy nodes ma0 ma1
   = case extractFromTokens extractDummy defaultDummy nodes of
-           (Dummy a0 a1) -> reuse2 Dummy a0 a1 ma0 ma1
+           (Dummy a0 a1) -> genericReuse2 Dummy a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseDummy"
 
 reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
 reuseRootEnr nodes ma0 ma1 ma2
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0 a1 a2) -> reuse3 RootEnr a0 a1 a2 ma0 ma1 ma2
+           (RootEnr a0 a1 a2) -> genericReuse3 RootEnr a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
 reuseRoot :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Root
 reuseRoot nodes ma0 ma1
   = case extractFromTokens extractRoot defaultRoot nodes of
-           (Root a0 a1) -> reuse2 Root a0 a1 ma0 ma1
+           (Root a0 a1) -> genericReuse2 Root a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
 reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
 reuseRootE nodes ma0 ma1 ma2
   = case extractFromTokens extractRootE defaultRootE nodes of
-           (RootE a0 a1 a2) -> reuse3 RootE a0 a1 a2 ma0 ma1 ma2
+           (RootE a0 a1 a2) -> genericReuse3 RootE a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseRootE"
 
 reuseDecl :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
 reuseDecl nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
   = case extractFromTokens extractDecl defaultDecl nodes of
-           (Decl a0 a1 a2 a3 a4 a5 a6 a7) -> reuse8 Decl a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
+           (Decl a0 a1 a2 a3 a4 a5 a6 a7) -> genericReuse8 Decl a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
            _ -> error "Internal error:ProxParser_Generated.reuseDecl"
 
 reuseBoardDecl :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Board -> Decl
 reuseBoardDecl nodes ma0 ma1 ma2
   = case extractFromTokens extractBoardDecl defaultBoardDecl nodes of
-           (BoardDecl a0 a1 a2) -> reuse3 BoardDecl a0 a1 a2 ma0 ma1 ma2
+           (BoardDecl a0 a1 a2) -> genericReuse3 BoardDecl a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseBoardDecl"
 
 reusePPPresentationDecl :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe PPPresentation -> Decl
 reusePPPresentationDecl nodes ma0 ma1 ma2
   = case extractFromTokens extractPPPresentationDecl defaultPPPresentationDecl nodes of
-           (PPPresentationDecl a0 a1 a2) -> reuse3 PPPresentationDecl a0 a1 a2 ma0 ma1 ma2
+           (PPPresentationDecl a0 a1 a2) -> genericReuse3 PPPresentationDecl a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reusePPPresentationDecl"
 
 reuseIdent :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe String -> Ident
 reuseIdent nodes ma0 ma1 ma2
   = case extractFromTokens extractIdent defaultIdent nodes of
-           (Ident a0 a1 a2) -> reuse3 Ident a0 a1 a2 ma0 ma1 ma2
+           (Ident a0 a1 a2) -> genericReuse3 Ident a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseIdent"
 
 reusePlusExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reusePlusExp nodes ma0 ma1 ma2
   = case extractFromTokens extractPlusExp defaultPlusExp nodes of
-           (PlusExp a0 a1 a2) -> reuse3 PlusExp a0 a1 a2 ma0 ma1 ma2
+           (PlusExp a0 a1 a2) -> genericReuse3 PlusExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reusePlusExp"
 
 reuseTimesExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reuseTimesExp nodes ma0 ma1 ma2
   = case extractFromTokens extractTimesExp defaultTimesExp nodes of
-           (TimesExp a0 a1 a2) -> reuse3 TimesExp a0 a1 a2 ma0 ma1 ma2
+           (TimesExp a0 a1 a2) -> genericReuse3 TimesExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseTimesExp"
 
 reuseDivExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reuseDivExp nodes ma0 ma1 ma2
   = case extractFromTokens extractDivExp defaultDivExp nodes of
-           (DivExp a0 a1 a2) -> reuse3 DivExp a0 a1 a2 ma0 ma1 ma2
+           (DivExp a0 a1 a2) -> genericReuse3 DivExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseDivExp"
 
 reusePowerExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Exp
 reusePowerExp nodes ma0 ma1 ma2
   = case extractFromTokens extractPowerExp defaultPowerExp nodes of
-           (PowerExp a0 a1 a2) -> reuse3 PowerExp a0 a1 a2 ma0 ma1 ma2
+           (PowerExp a0 a1 a2) -> genericReuse3 PowerExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reusePowerExp"
 
 reuseBoolExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Bool -> Exp
 reuseBoolExp nodes ma0 ma1
   = case extractFromTokens extractBoolExp defaultBoolExp nodes of
-           (BoolExp a0 a1) -> reuse2 BoolExp a0 a1 ma0 ma1
+           (BoolExp a0 a1) -> genericReuse2 BoolExp a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseBoolExp"
 
 reuseIntExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe Int -> Exp
 reuseIntExp nodes ma0 ma1
   = case extractFromTokens extractIntExp defaultIntExp nodes of
-           (IntExp a0 a1) -> reuse2 IntExp a0 a1 ma0 ma1
+           (IntExp a0 a1) -> genericReuse2 IntExp a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseIntExp"
 
 reuseLamExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Exp
 reuseLamExp nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractLamExp defaultLamExp nodes of
-           (LamExp a0 a1 a2 a3) -> reuse4 LamExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (LamExp a0 a1 a2 a3) -> genericReuse4 LamExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseLamExp"
 
 reuseAppExp :: [Token doc Node clip token] -> Maybe Exp -> Maybe Exp -> Exp
 reuseAppExp nodes ma0 ma1
   = case extractFromTokens extractAppExp defaultAppExp nodes of
-           (AppExp a0 a1) -> reuse2 AppExp a0 a1 ma0 ma1
+           (AppExp a0 a1) -> genericReuse2 AppExp a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseAppExp"
 
 reuseCaseExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe List_Alt -> Exp
 reuseCaseExp nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractCaseExp defaultCaseExp nodes of
-           (CaseExp a0 a1 a2 a3) -> reuse4 CaseExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (CaseExp a0 a1 a2 a3) -> genericReuse4 CaseExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseCaseExp"
 
 reuseLetExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe List_Decl -> Maybe Exp -> Exp
 reuseLetExp nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractLetExp defaultLetExp nodes of
-           (LetExp a0 a1 a2 a3) -> reuse4 LetExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (LetExp a0 a1 a2 a3) -> genericReuse4 LetExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseLetExp"
 
 reuseIdentExp :: [Token doc Node clip token] -> Maybe Ident -> Exp
 reuseIdentExp nodes ma0
   = case extractFromTokens extractIdentExp defaultIdentExp nodes of
-           (IdentExp a0) -> reuse1 IdentExp a0 ma0
+           (IdentExp a0) -> genericReuse1 IdentExp a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseIdentExp"
 
 reuseIfExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Maybe Exp -> Maybe Exp -> Exp
 reuseIfExp nodes ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromTokens extractIfExp defaultIfExp nodes of
-           (IfExp a0 a1 a2 a3 a4 a5) -> reuse6 IfExp a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
+           (IfExp a0 a1 a2 a3 a4 a5) -> genericReuse6 IfExp a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "Internal error:ProxParser_Generated.reuseIfExp"
 
 reuseParenExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Exp -> Exp
 reuseParenExp nodes ma0 ma1 ma2
   = case extractFromTokens extractParenExp defaultParenExp nodes of
-           (ParenExp a0 a1 a2) -> reuse3 ParenExp a0 a1 a2 ma0 ma1 ma2
+           (ParenExp a0 a1 a2) -> genericReuse3 ParenExp a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseParenExp"
 
 reuseListExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe [IDP] -> Maybe List_Exp -> Exp
 reuseListExp nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractListExp defaultListExp nodes of
-           (ListExp a0 a1 a2 a3) -> reuse4 ListExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (ListExp a0 a1 a2 a3) -> genericReuse4 ListExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseListExp"
 
 reuseProductExp :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe [IDP] -> Maybe List_Exp -> Exp
 reuseProductExp nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractProductExp defaultProductExp nodes of
-           (ProductExp a0 a1 a2 a3) -> reuse4 ProductExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (ProductExp a0 a1 a2 a3) -> genericReuse4 ProductExp a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseProductExp"
 
 reuseAlt :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Ident -> Maybe Exp -> Alt
 reuseAlt nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractAlt defaultAlt nodes of
-           (Alt a0 a1 a2 a3) -> reuse4 Alt a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Alt a0 a1 a2 a3) -> genericReuse4 Alt a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseAlt"
 
 reuseBoard :: [Token doc Node clip token] -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Maybe BoardRow -> Board
 reuseBoard nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
   = case extractFromTokens extractBoard defaultBoard nodes of
-           (Board a0 a1 a2 a3 a4 a5 a6 a7) -> reuse8 Board a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
+           (Board a0 a1 a2 a3 a4 a5 a6 a7) -> genericReuse8 Board a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
            _ -> error "Internal error:ProxParser_Generated.reuseBoard"
 
 reuseBoardRow :: [Token doc Node clip token] -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> Maybe BoardSquare -> BoardRow
 reuseBoardRow nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
   = case extractFromTokens extractBoardRow defaultBoardRow nodes of
-           (BoardRow a0 a1 a2 a3 a4 a5 a6 a7) -> reuse8 BoardRow a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
+           (BoardRow a0 a1 a2 a3 a4 a5 a6 a7) -> genericReuse8 BoardRow a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7
            _ -> error "Internal error:ProxParser_Generated.reuseBoardRow"
 
 reuseQueen :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reuseQueen nodes ma0
   = case extractFromTokens extractQueen defaultQueen nodes of
-           (Queen a0) -> reuse1 Queen a0 ma0
+           (Queen a0) -> genericReuse1 Queen a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseQueen"
 
 reuseKing :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reuseKing nodes ma0
   = case extractFromTokens extractKing defaultKing nodes of
-           (King a0) -> reuse1 King a0 ma0
+           (King a0) -> genericReuse1 King a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseKing"
 
 reuseBishop :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reuseBishop nodes ma0
   = case extractFromTokens extractBishop defaultBishop nodes of
-           (Bishop a0) -> reuse1 Bishop a0 ma0
+           (Bishop a0) -> genericReuse1 Bishop a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseBishop"
 
 reuseKnight :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reuseKnight nodes ma0
   = case extractFromTokens extractKnight defaultKnight nodes of
-           (Knight a0) -> reuse1 Knight a0 ma0
+           (Knight a0) -> genericReuse1 Knight a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseKnight"
 
 reuseRook :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reuseRook nodes ma0
   = case extractFromTokens extractRook defaultRook nodes of
-           (Rook a0) -> reuse1 Rook a0 ma0
+           (Rook a0) -> genericReuse1 Rook a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseRook"
 
 reusePawn :: [Token doc Node clip token] -> Maybe Bool -> BoardSquare
 reusePawn nodes ma0
   = case extractFromTokens extractPawn defaultPawn nodes of
-           (Pawn a0) -> reuse1 Pawn a0 ma0
+           (Pawn a0) -> genericReuse1 Pawn a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reusePawn"
 
 reuseEmpty :: [Token doc Node clip token] -> BoardSquare
 reuseEmpty nodes
   = case extractFromTokens extractEmpty defaultEmpty nodes of
-           (Empty) -> reuse0 Empty
+           (Empty) -> genericReuse0 Empty
            _ -> error "Internal error:ProxParser_Generated.reuseEmpty"
 
 reusePPPresentation :: [Token doc Node clip token] -> Maybe Bool -> Maybe List_Slide -> PPPresentation
 reusePPPresentation nodes ma0 ma1
   = case extractFromTokens extractPPPresentation defaultPPPresentation nodes of
-           (PPPresentation a0 a1) -> reuse2 PPPresentation a0 a1 ma0 ma1
+           (PPPresentation a0 a1) -> genericReuse2 PPPresentation a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reusePPPresentation"
 
 reuseSlide :: [Token doc Node clip token] -> Maybe String -> Maybe ItemList -> Slide
 reuseSlide nodes ma0 ma1
   = case extractFromTokens extractSlide defaultSlide nodes of
-           (Slide a0 a1) -> reuse2 Slide a0 a1 ma0 ma1
+           (Slide a0 a1) -> genericReuse2 Slide a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseSlide"
 
 reuseItemList :: [Token doc Node clip token] -> Maybe ListType -> Maybe List_Item -> ItemList
 reuseItemList nodes ma0 ma1
   = case extractFromTokens extractItemList defaultItemList nodes of
-           (ItemList a0 a1) -> reuse2 ItemList a0 a1 ma0 ma1
+           (ItemList a0 a1) -> genericReuse2 ItemList a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseItemList"
 
 reuseBullet :: [Token doc Node clip token] -> ListType
 reuseBullet nodes
   = case extractFromTokens extractBullet defaultBullet nodes of
-           (Bullet) -> reuse0 Bullet
+           (Bullet) -> genericReuse0 Bullet
            _ -> error "Internal error:ProxParser_Generated.reuseBullet"
 
 reuseNumber :: [Token doc Node clip token] -> ListType
 reuseNumber nodes
   = case extractFromTokens extractNumber defaultNumber nodes of
-           (Number) -> reuse0 Number
+           (Number) -> genericReuse0 Number
            _ -> error "Internal error:ProxParser_Generated.reuseNumber"
 
 reuseAlpha :: [Token doc Node clip token] -> ListType
 reuseAlpha nodes
   = case extractFromTokens extractAlpha defaultAlpha nodes of
-           (Alpha) -> reuse0 Alpha
+           (Alpha) -> genericReuse0 Alpha
            _ -> error "Internal error:ProxParser_Generated.reuseAlpha"
 
 reuseStringItem :: [Token doc Node clip token] -> Maybe String -> Item
 reuseStringItem nodes ma0
   = case extractFromTokens extractStringItem defaultStringItem nodes of
-           (StringItem a0) -> reuse1 StringItem a0 ma0
+           (StringItem a0) -> genericReuse1 StringItem a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseStringItem"
 
 reuseHeliumItem :: [Token doc Node clip token] -> Maybe Exp -> Item
 reuseHeliumItem nodes ma0
   = case extractFromTokens extractHeliumItem defaultHeliumItem nodes of
-           (HeliumItem a0) -> reuse1 HeliumItem a0 ma0
+           (HeliumItem a0) -> genericReuse1 HeliumItem a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseHeliumItem"
 
 reuseListItem :: [Token doc Node clip token] -> Maybe ItemList -> Item
 reuseListItem nodes ma0
   = case extractFromTokens extractListItem defaultListItem nodes of
-           (ListItem a0) -> reuse1 ListItem a0 ma0
+           (ListItem a0) -> genericReuse1 ListItem a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseListItem"
 
 reuseList_Decl :: [Token doc Node clip token] -> Maybe ConsList_Decl -> List_Decl
 reuseList_Decl nodes ma0
   = case extractFromTokens extractList_Decl defaultList_Decl nodes of
-           (List_Decl a0) -> reuse1 List_Decl a0 ma0
+           (List_Decl a0) -> genericReuse1 List_Decl a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Decl"
 
 reuseList_Alt :: [Token doc Node clip token] -> Maybe ConsList_Alt -> List_Alt
 reuseList_Alt nodes ma0
   = case extractFromTokens extractList_Alt defaultList_Alt nodes of
-           (List_Alt a0) -> reuse1 List_Alt a0 ma0
+           (List_Alt a0) -> genericReuse1 List_Alt a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Alt"
 
 reuseList_Exp :: [Token doc Node clip token] -> Maybe ConsList_Exp -> List_Exp
 reuseList_Exp nodes ma0
   = case extractFromTokens extractList_Exp defaultList_Exp nodes of
-           (List_Exp a0) -> reuse1 List_Exp a0 ma0
+           (List_Exp a0) -> genericReuse1 List_Exp a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Exp"
 
 reuseList_Slide :: [Token doc Node clip token] -> Maybe ConsList_Slide -> List_Slide
 reuseList_Slide nodes ma0
   = case extractFromTokens extractList_Slide defaultList_Slide nodes of
-           (List_Slide a0) -> reuse1 List_Slide a0 ma0
+           (List_Slide a0) -> genericReuse1 List_Slide a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Slide"
 
 reuseList_Item :: [Token doc Node clip token] -> Maybe ConsList_Item -> List_Item
 reuseList_Item nodes ma0
   = case extractFromTokens extractList_Item defaultList_Item nodes of
-           (List_Item a0) -> reuse1 List_Item a0 ma0
+           (List_Item a0) -> genericReuse1 List_Item a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Item"
 
 
@@ -659,58 +659,58 @@ extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (ex
 -- genericReuse functions                                               --
 --------------------------------------------------------------------------
 
-reuse0 :: (r) ->
-          
-          r
-reuse0 f =
+genericReuse0 :: (r) ->
+                 
+                 r
+genericReuse0 f =
   f
 
-reuse1 :: (a0 -> r) ->
-          a0 -> 
-          Maybe a0 -> r
-reuse1 f a0 ma0 =
+genericReuse1 :: (a0 -> r) ->
+                 a0 -> 
+                 Maybe a0 -> r
+genericReuse1 f a0 ma0 =
   f (maybe a0 id ma0)
 
-reuse2 :: (a0 -> a1 -> r) ->
-          a0 -> a1 -> 
-          Maybe a0 -> Maybe a1 -> r
-reuse2 f a0 a1 ma0 ma1 =
+genericReuse2 :: (a0 -> a1 -> r) ->
+                 a0 -> a1 -> 
+                 Maybe a0 -> Maybe a1 -> r
+genericReuse2 f a0 a1 ma0 ma1 =
   f (maybe a0 id ma0) (maybe a1 id ma1)
 
-reuse3 :: (a0 -> a1 -> a2 -> r) ->
-          a0 -> a1 -> a2 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> r
-reuse3 f a0 a1 a2 ma0 ma1 ma2 =
+genericReuse3 :: (a0 -> a1 -> a2 -> r) ->
+                 a0 -> a1 -> a2 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> r
+genericReuse3 f a0 a1 a2 ma0 ma1 ma2 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2)
 
-reuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
-          a0 -> a1 -> a2 -> a3 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
-reuse4 f a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
+genericReuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
+genericReuse4 f a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3)
 
-reuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
-          a0 -> a1 -> a2 -> a3 -> a4 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
-reuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
+genericReuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
+genericReuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4)
 
-reuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) ->
-          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
-reuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+genericReuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
+genericReuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5)
 
-reuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) ->
-          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> r
-reuse7 f a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6 =
+genericReuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> r
+genericReuse7 f a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6)
 
-reuse8 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> r) ->
-          a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> 
-          Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> r
-reuse8 f a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 =
+genericReuse8 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> r
+genericReuse8 f a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6) (maybe a7 id ma7)
 
 
