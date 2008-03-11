@@ -7,52 +7,18 @@ import Presentation.PresTypes
 import List
 import Char
 
-data UserToken = StrTk String  -- StrTk is for keywords, so eq takes the string value into account
+data UserToken = KeyTk String  -- StrTk is for keywords, so eq takes the string value into account
                | IntTk
                | LIdentTk
                | UIdentTk
                | OpTk
                | SymTk deriving (Show, Eq, Ord)
--- TODO call strTk KeyTk
-
--- what about IDP fields for primitive type String_?
--- seems to be a general problem, IDP fields depend on what kind of presentations the value
--- is part of
-
--- Do lists need Hole's? Or can we use Nil for that?
-
-
-
--- Clip contains a constructor for each of the types in the document
--- Node contains a constructor for each of the constructors in each of the types in the document
-
-
+               
 data HeliumMessage =
          HMessage [String] 
        | HError [String] [PathDoc] [PathDoc] [PathDoc] deriving Show
 
-
-
-
-
-
-
--- ?? what does this old comment mean:
--- data depends on IDP, not good. Now a pres change may cause a data update.
--- Do this automatically, store elsewhere?
-
-
--- this one cannot be generated, but needs to be here for now
-data Document = RootDoc Root
-              | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc UserToken) deriving Show
-
-
 type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
-
-{-
-Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
--}
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -60,6 +26,11 @@ Find out more on how to integrate non proxima types (such as HeliumTypeInfo)
 --------------------------------------------------------------------------
 -- Proxima data type                                                    --
 --------------------------------------------------------------------------
+
+data Document = RootDoc Root
+              | HoleDocument
+              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
+                  deriving Show
 
 data Dummy = Dummy Root Dummy
            | HoleDummy
