@@ -183,7 +183,7 @@ SEM EnrichedDoc
       root.pIdC = @lhs.pIdC
       lhs.pIdC  = @root.pIdC
   | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self []) []
-  | ParseErrEnrichedDoc lhs.pres = presParseErr @presentation
+  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self []) @presentation
 
 SEM EnrichedDoc
   | RootEnr root.path  = []
@@ -200,7 +200,7 @@ SEM Dummy
       lhs.pIdC = @dummy.pIdC
       dummy.path  = @lhs.path++[0]
   | HoleDummy     lhs.pres = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.pres = presParseErr @presentation
+  | ParseErrDummy lhs.pres = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
 
 SEM Root
   | Root 
@@ -210,7 +210,7 @@ SEM Root
       graph.path  = @lhs.path++[0]
       sections.path  = @lhs.path++[2]
   | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.pres = presParseErr @presentation
+  | ParseErrRoot lhs.pres = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
 
 SEM Section
   | Section 
@@ -220,7 +220,7 @@ SEM Section
       paragraphs.path  = @lhs.path++[1]
       subsections.path  = @lhs.path++[2]
   | HoleSection     lhs.pres = presHole @lhs.focusD "Section" (Node_HoleSection @self @lhs.path) @lhs.path
-  | ParseErrSection lhs.pres = presParseErr @presentation
+  | ParseErrSection lhs.pres = presParseErr (Node_ParseErrSection @self @lhs.path) @presentation
 
 SEM Subsection
   | Subsection 
@@ -230,7 +230,7 @@ SEM Subsection
       paragraphs.path  = @lhs.path++[1]
       subsubsections.path  = @lhs.path++[2]
   | HoleSubsection     lhs.pres = presHole @lhs.focusD "Subsection" (Node_HoleSubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsection lhs.pres = presParseErr @presentation
+  | ParseErrSubsection lhs.pres = presParseErr (Node_ParseErrSubsection @self @lhs.path) @presentation
 
 SEM Subsubsection
   | Subsubsection 
@@ -238,7 +238,7 @@ SEM Subsubsection
       lhs.pIdC = @paragraphs.pIdC
       paragraphs.path  = @lhs.path++[1]
   | HoleSubsubsection     lhs.pres = presHole @lhs.focusD "Subsubsection" (Node_HoleSubsubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsubsection lhs.pres = presParseErr @presentation
+  | ParseErrSubsubsection lhs.pres = presParseErr (Node_ParseErrSubsubsection @self @lhs.path) @presentation
 
 SEM Paragraph
   | Paragraph 
@@ -250,7 +250,7 @@ SEM Paragraph
       lhs.pIdC = @subgraph.pIdC
       subgraph.path  = @lhs.path++[0]
   | HoleParagraph     lhs.pres = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
-  | ParseErrParagraph lhs.pres = presParseErr @presentation
+  | ParseErrParagraph lhs.pres = presParseErr (Node_ParseErrParagraph @self @lhs.path) @presentation
 
 SEM Word
   | Word 
@@ -262,7 +262,7 @@ SEM Word
   | LabelRef 
       lhs.pIdC = @lhs.pIdC + 0
   | HoleWord     lhs.pres = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
-  | ParseErrWord lhs.pres = presParseErr @presentation
+  | ParseErrWord lhs.pres = presParseErr (Node_ParseErrWord @self @lhs.path) @presentation
 
 SEM Graph
   | Graph 
@@ -274,7 +274,7 @@ SEM Graph
       vertices.path  = @lhs.path++[1]
       edges.path  = @lhs.path++[2]
   | HoleGraph     lhs.pres = presHole @lhs.focusD "Graph" (Node_HoleGraph @self @lhs.path) @lhs.path
-  | ParseErrGraph lhs.pres = presParseErr @presentation
+  | ParseErrGraph lhs.pres = presParseErr (Node_ParseErrGraph @self @lhs.path) @presentation
 
 SEM Vertex
   | Vertex 
@@ -282,7 +282,7 @@ SEM Vertex
       lhs.pIdC = @shape.pIdC
       shape.path  = @lhs.path++[1]
   | HoleVertex     lhs.pres = presHole @lhs.focusD "Vertex" (Node_HoleVertex @self @lhs.path) @lhs.path
-  | ParseErrVertex lhs.pres = presParseErr @presentation
+  | ParseErrVertex lhs.pres = presParseErr (Node_ParseErrVertex @self @lhs.path) @presentation
 
 SEM Shape
   | Circle 
@@ -290,13 +290,13 @@ SEM Shape
   | Square 
       lhs.pIdC = @lhs.pIdC + 0
   | HoleShape     lhs.pres = presHole @lhs.focusD "Shape" (Node_HoleShape @self @lhs.path) @lhs.path
-  | ParseErrShape lhs.pres = presParseErr @presentation
+  | ParseErrShape lhs.pres = presParseErr (Node_ParseErrShape @self @lhs.path) @presentation
 
 SEM Edge
   | Edge 
       lhs.pIdC = @lhs.pIdC + 0
   | HoleEdge     lhs.pres = presHole @lhs.focusD "Edge" (Node_HoleEdge @self @lhs.path) @lhs.path
-  | ParseErrEdge lhs.pres = presParseErr @presentation
+  | ParseErrEdge lhs.pres = presParseErr (Node_ParseErrEdge @self @lhs.path) @presentation
 
 SEM Subgraph
   | Subgraph 
@@ -308,7 +308,7 @@ SEM Subgraph
       vertices.path  = @lhs.path++[1]
       edges.path  = @lhs.path++[2]
   | HoleSubgraph     lhs.pres = presHole @lhs.focusD "Subgraph" (Node_HoleSubgraph @self @lhs.path) @lhs.path
-  | ParseErrSubgraph lhs.pres = presParseErr @presentation
+  | ParseErrSubgraph lhs.pres = presParseErr (Node_ParseErrSubgraph @self @lhs.path) @presentation
 
 SEM Dirty
   | Dirty 
@@ -316,7 +316,7 @@ SEM Dirty
   | Clean 
       lhs.pIdC = @lhs.pIdC + 0
   | HoleDirty     lhs.pres = presHole @lhs.focusD "Dirty" (Node_HoleDirty @self @lhs.path) @lhs.path
-  | ParseErrDirty lhs.pres = presParseErr @presentation
+  | ParseErrDirty lhs.pres = presParseErr (Node_ParseErrDirty @self @lhs.path) @presentation
 
 SEM List_Section
   | List_Section
@@ -329,7 +329,7 @@ SEM List_Section
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Section     lhs.press = []
-  | ParseErrList_Section lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Section lhs.press = [ presParseErr (Node_ParseErrList_Section @self @lhs.path) @presentation ]
 
 SEM List_Paragraph
   | List_Paragraph
@@ -342,7 +342,7 @@ SEM List_Paragraph
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Paragraph     lhs.press = []
-  | ParseErrList_Paragraph lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Paragraph lhs.press = [ presParseErr (Node_ParseErrList_Paragraph @self @lhs.path) @presentation ]
 
 SEM List_Subsection
   | List_Subsection
@@ -355,7 +355,7 @@ SEM List_Subsection
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Subsection     lhs.press = []
-  | ParseErrList_Subsection lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Subsection lhs.press = [ presParseErr (Node_ParseErrList_Subsection @self @lhs.path) @presentation ]
 
 SEM List_Subsubsection
   | List_Subsubsection
@@ -368,7 +368,7 @@ SEM List_Subsubsection
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Subsubsection     lhs.press = []
-  | ParseErrList_Subsubsection lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Subsubsection lhs.press = [ presParseErr (Node_ParseErrList_Subsubsection @self @lhs.path) @presentation ]
 
 SEM List_Word
   | List_Word
@@ -381,7 +381,7 @@ SEM List_Word
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Word     lhs.press = []
-  | ParseErrList_Word lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Word lhs.press = [ presParseErr (Node_ParseErrList_Word @self @lhs.path) @presentation ]
 
 SEM List_Vertex
   | List_Vertex
@@ -394,7 +394,7 @@ SEM List_Vertex
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Vertex     lhs.press = []
-  | ParseErrList_Vertex lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Vertex lhs.press = [ presParseErr (Node_ParseErrList_Vertex @self @lhs.path) @presentation ]
 
 SEM List_Edge
   | List_Edge
@@ -407,7 +407,7 @@ SEM List_Edge
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Edge     lhs.press = []
-  | ParseErrList_Edge lhs.press = [ presParseErr @presentation ]
+  | ParseErrList_Edge lhs.press = [ presParseErr (Node_ParseErrList_Edge @self @lhs.path) @presentation ]
 
   SEM ConsList_Section
   | Cons_Section
@@ -497,31 +497,31 @@ SEM Dummy
   | Dummy
       lhs.presXML = presentElementXML @lhs.focusD (Node_Dummy @self @lhs.path) @lhs.path "Dummy" [ @dummy.presXML, presentPrimXMLBool @bool ] 
   | HoleDummy     lhs.presXML = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presXML = presParseErr @presentation
+  | ParseErrDummy lhs.presXML = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
 
 SEM Root
   | Root
       lhs.presXML = presentElementXML @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presXML, presentPrimXMLString @title, @sections.presXML ] 
   | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.presXML = presParseErr @presentation
+  | ParseErrRoot lhs.presXML = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
 
 SEM Section
   | Section
       lhs.presXML = presentElementXML @lhs.focusD (Node_Section @self @lhs.path) @lhs.path "Section" [ presentPrimXMLString @title, @paragraphs.presXML, @subsections.presXML ] 
   | HoleSection     lhs.presXML = presHole @lhs.focusD "Section" (Node_HoleSection @self @lhs.path) @lhs.path
-  | ParseErrSection lhs.presXML = presParseErr @presentation
+  | ParseErrSection lhs.presXML = presParseErr (Node_ParseErrSection @self @lhs.path) @presentation
 
 SEM Subsection
   | Subsection
       lhs.presXML = presentElementXML @lhs.focusD (Node_Subsection @self @lhs.path) @lhs.path "Subsection" [ presentPrimXMLString @title, @paragraphs.presXML, @subsubsections.presXML ] 
   | HoleSubsection     lhs.presXML = presHole @lhs.focusD "Subsection" (Node_HoleSubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsection lhs.presXML = presParseErr @presentation
+  | ParseErrSubsection lhs.presXML = presParseErr (Node_ParseErrSubsection @self @lhs.path) @presentation
 
 SEM Subsubsection
   | Subsubsection
       lhs.presXML = presentElementXML @lhs.focusD (Node_Subsubsection @self @lhs.path) @lhs.path "Subsubsection" [ presentPrimXMLString @title, @paragraphs.presXML ] 
   | HoleSubsubsection     lhs.presXML = presHole @lhs.focusD "Subsubsection" (Node_HoleSubsubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsubsection lhs.presXML = presParseErr @presentation
+  | ParseErrSubsubsection lhs.presXML = presParseErr (Node_ParseErrSubsubsection @self @lhs.path) @presentation
 
 SEM Paragraph
   | Paragraph
@@ -529,7 +529,7 @@ SEM Paragraph
   | SubgraphPara
       lhs.presXML = presentElementXML @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presXML ] 
   | HoleParagraph     lhs.presXML = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
-  | ParseErrParagraph lhs.presXML = presParseErr @presentation
+  | ParseErrParagraph lhs.presXML = presParseErr (Node_ParseErrParagraph @self @lhs.path) @presentation
 
 SEM Word
   | Word
@@ -541,19 +541,19 @@ SEM Word
   | LabelRef
       lhs.presXML = presentElementXML @lhs.focusD (Node_LabelRef @self @lhs.path) @lhs.path "LabelRef" [ presentPrimXMLString @label ] 
   | HoleWord     lhs.presXML = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
-  | ParseErrWord lhs.presXML = presParseErr @presentation
+  | ParseErrWord lhs.presXML = presParseErr (Node_ParseErrWord @self @lhs.path) @presentation
 
 SEM Graph
   | Graph
       lhs.presXML = presentElementXML @lhs.focusD (Node_Graph @self @lhs.path) @lhs.path "Graph" [ @dirty.presXML, @vertices.presXML, @edges.presXML ] 
   | HoleGraph     lhs.presXML = presHole @lhs.focusD "Graph" (Node_HoleGraph @self @lhs.path) @lhs.path
-  | ParseErrGraph lhs.presXML = presParseErr @presentation
+  | ParseErrGraph lhs.presXML = presParseErr (Node_ParseErrGraph @self @lhs.path) @presentation
 
 SEM Vertex
   | Vertex
       lhs.presXML = presentElementXML @lhs.focusD (Node_Vertex @self @lhs.path) @lhs.path "Vertex" [ presentPrimXMLString @name, @shape.presXML, presentPrimXMLInt @id, presentPrimXMLInt @x, presentPrimXMLInt @y ] 
   | HoleVertex     lhs.presXML = presHole @lhs.focusD "Vertex" (Node_HoleVertex @self @lhs.path) @lhs.path
-  | ParseErrVertex lhs.presXML = presParseErr @presentation
+  | ParseErrVertex lhs.presXML = presParseErr (Node_ParseErrVertex @self @lhs.path) @presentation
 
 SEM Shape
   | Circle
@@ -561,19 +561,19 @@ SEM Shape
   | Square
       lhs.presXML = presentElementXML @lhs.focusD (Node_Square @self @lhs.path) @lhs.path "Square" [  ] 
   | HoleShape     lhs.presXML = presHole @lhs.focusD "Shape" (Node_HoleShape @self @lhs.path) @lhs.path
-  | ParseErrShape lhs.presXML = presParseErr @presentation
+  | ParseErrShape lhs.presXML = presParseErr (Node_ParseErrShape @self @lhs.path) @presentation
 
 SEM Edge
   | Edge
       lhs.presXML = presentElementXML @lhs.focusD (Node_Edge @self @lhs.path) @lhs.path "Edge" [ presentPrimXMLInt @from, presentPrimXMLInt @to ] 
   | HoleEdge     lhs.presXML = presHole @lhs.focusD "Edge" (Node_HoleEdge @self @lhs.path) @lhs.path
-  | ParseErrEdge lhs.presXML = presParseErr @presentation
+  | ParseErrEdge lhs.presXML = presParseErr (Node_ParseErrEdge @self @lhs.path) @presentation
 
 SEM Subgraph
   | Subgraph
       lhs.presXML = presentElementXML @lhs.focusD (Node_Subgraph @self @lhs.path) @lhs.path "Subgraph" [ @dirty.presXML, @vertices.presXML, @edges.presXML ] 
   | HoleSubgraph     lhs.presXML = presHole @lhs.focusD "Subgraph" (Node_HoleSubgraph @self @lhs.path) @lhs.path
-  | ParseErrSubgraph lhs.presXML = presParseErr @presentation
+  | ParseErrSubgraph lhs.presXML = presParseErr (Node_ParseErrSubgraph @self @lhs.path) @presentation
 
 SEM Dirty
   | Dirty
@@ -581,7 +581,7 @@ SEM Dirty
   | Clean
       lhs.presXML = presentElementXML @lhs.focusD (Node_Clean @self @lhs.path) @lhs.path "Clean" [  ] 
   | HoleDirty     lhs.presXML = presHole @lhs.focusD "Dirty" (Node_HoleDirty @self @lhs.path) @lhs.path
-  | ParseErrDirty lhs.presXML = presParseErr @presentation
+  | ParseErrDirty lhs.presXML = presParseErr (Node_ParseErrDirty @self @lhs.path) @presentation
 
 SEM List_Section
   | List_Section
@@ -589,7 +589,7 @@ SEM List_Section
                     col @elts.pressXML
   | ParseErrList_Section
       lhs.presXML = loc (Node_List_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Section @self @lhs.path) @presentation
   | HoleList_Section
       lhs.presXML = loc (Node_List_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Section" (Node_HoleList_Section @self @lhs.path) @lhs.path
@@ -600,7 +600,7 @@ SEM List_Paragraph
                     col @elts.pressXML
   | ParseErrList_Paragraph
       lhs.presXML = loc (Node_List_Paragraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Paragraph @self @lhs.path) @presentation
   | HoleList_Paragraph
       lhs.presXML = loc (Node_List_Paragraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Paragraph" (Node_HoleList_Paragraph @self @lhs.path) @lhs.path
@@ -611,7 +611,7 @@ SEM List_Subsection
                     col @elts.pressXML
   | ParseErrList_Subsection
       lhs.presXML = loc (Node_List_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Subsection @self @lhs.path) @presentation
   | HoleList_Subsection
       lhs.presXML = loc (Node_List_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Subsection" (Node_HoleList_Subsection @self @lhs.path) @lhs.path
@@ -622,7 +622,7 @@ SEM List_Subsubsection
                     col @elts.pressXML
   | ParseErrList_Subsubsection
       lhs.presXML = loc (Node_List_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Subsubsection @self @lhs.path) @presentation
   | HoleList_Subsubsection
       lhs.presXML = loc (Node_List_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Subsubsection" (Node_HoleList_Subsubsection @self @lhs.path) @lhs.path
@@ -633,7 +633,7 @@ SEM List_Word
                     col @elts.pressXML
   | ParseErrList_Word
       lhs.presXML = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Word @self @lhs.path) @presentation
   | HoleList_Word
       lhs.presXML = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Word" (Node_HoleList_Word @self @lhs.path) @lhs.path
@@ -644,7 +644,7 @@ SEM List_Vertex
                     col @elts.pressXML
   | ParseErrList_Vertex
       lhs.presXML = loc (Node_List_Vertex @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Vertex @self @lhs.path) @presentation
   | HoleList_Vertex
       lhs.presXML = loc (Node_List_Vertex @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Vertex" (Node_HoleList_Vertex @self @lhs.path) @lhs.path
@@ -655,7 +655,7 @@ SEM List_Edge
                     col @elts.pressXML
   | ParseErrList_Edge
       lhs.presXML = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr @presentation
+                    presParseErr (Node_ParseErrList_Edge @self @lhs.path) @presentation
   | HoleList_Edge
       lhs.presXML = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Edge" (Node_HoleList_Edge @self @lhs.path) @lhs.path
@@ -699,31 +699,31 @@ SEM Dummy
   | Dummy
       lhs.presTree = presentElementTree @lhs.focusD (Node_Dummy @self @lhs.path) @lhs.path "Dummy" [ @dummy.presTree, presentPrimTreeBool @bool ] 
   | HoleDummy     lhs.presTree = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presTree = presParseErr @presentation
+  | ParseErrDummy lhs.presTree = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
 
 SEM Root
   | Root
       lhs.presTree = presentElementTree @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presTree, presentPrimTreeString @title, @sections.presTree ] 
   | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
-  | ParseErrRoot lhs.presTree = presParseErr @presentation
+  | ParseErrRoot lhs.presTree = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
 
 SEM Section
   | Section
       lhs.presTree = presentElementTree @lhs.focusD (Node_Section @self @lhs.path) @lhs.path "Section" [ presentPrimTreeString @title, @paragraphs.presTree, @subsections.presTree ] 
   | HoleSection     lhs.presTree = presHole @lhs.focusD "Section" (Node_HoleSection @self @lhs.path) @lhs.path
-  | ParseErrSection lhs.presTree = presParseErr @presentation
+  | ParseErrSection lhs.presTree = presParseErr (Node_ParseErrSection @self @lhs.path) @presentation
 
 SEM Subsection
   | Subsection
       lhs.presTree = presentElementTree @lhs.focusD (Node_Subsection @self @lhs.path) @lhs.path "Subsection" [ presentPrimTreeString @title, @paragraphs.presTree, @subsubsections.presTree ] 
   | HoleSubsection     lhs.presTree = presHole @lhs.focusD "Subsection" (Node_HoleSubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsection lhs.presTree = presParseErr @presentation
+  | ParseErrSubsection lhs.presTree = presParseErr (Node_ParseErrSubsection @self @lhs.path) @presentation
 
 SEM Subsubsection
   | Subsubsection
       lhs.presTree = presentElementTree @lhs.focusD (Node_Subsubsection @self @lhs.path) @lhs.path "Subsubsection" [ presentPrimTreeString @title, @paragraphs.presTree ] 
   | HoleSubsubsection     lhs.presTree = presHole @lhs.focusD "Subsubsection" (Node_HoleSubsubsection @self @lhs.path) @lhs.path
-  | ParseErrSubsubsection lhs.presTree = presParseErr @presentation
+  | ParseErrSubsubsection lhs.presTree = presParseErr (Node_ParseErrSubsubsection @self @lhs.path) @presentation
 
 SEM Paragraph
   | Paragraph
@@ -731,7 +731,7 @@ SEM Paragraph
   | SubgraphPara
       lhs.presTree = presentElementTree @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presTree ] 
   | HoleParagraph     lhs.presTree = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
-  | ParseErrParagraph lhs.presTree = presParseErr @presentation
+  | ParseErrParagraph lhs.presTree = presParseErr (Node_ParseErrParagraph @self @lhs.path) @presentation
 
 SEM Word
   | Word
@@ -743,19 +743,19 @@ SEM Word
   | LabelRef
       lhs.presTree = presentElementTree @lhs.focusD (Node_LabelRef @self @lhs.path) @lhs.path "LabelRef" [ presentPrimTreeString @label ] 
   | HoleWord     lhs.presTree = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
-  | ParseErrWord lhs.presTree = presParseErr @presentation
+  | ParseErrWord lhs.presTree = presParseErr (Node_ParseErrWord @self @lhs.path) @presentation
 
 SEM Graph
   | Graph
       lhs.presTree = presentElementTree @lhs.focusD (Node_Graph @self @lhs.path) @lhs.path "Graph" [ @dirty.presTree, @vertices.presTree, @edges.presTree ] 
   | HoleGraph     lhs.presTree = presHole @lhs.focusD "Graph" (Node_HoleGraph @self @lhs.path) @lhs.path
-  | ParseErrGraph lhs.presTree = presParseErr @presentation
+  | ParseErrGraph lhs.presTree = presParseErr (Node_ParseErrGraph @self @lhs.path) @presentation
 
 SEM Vertex
   | Vertex
       lhs.presTree = presentElementTree @lhs.focusD (Node_Vertex @self @lhs.path) @lhs.path "Vertex" [ presentPrimTreeString @name, @shape.presTree, presentPrimTreeInt @id, presentPrimTreeInt @x, presentPrimTreeInt @y ] 
   | HoleVertex     lhs.presTree = presHole @lhs.focusD "Vertex" (Node_HoleVertex @self @lhs.path) @lhs.path
-  | ParseErrVertex lhs.presTree = presParseErr @presentation
+  | ParseErrVertex lhs.presTree = presParseErr (Node_ParseErrVertex @self @lhs.path) @presentation
 
 SEM Shape
   | Circle
@@ -763,19 +763,19 @@ SEM Shape
   | Square
       lhs.presTree = presentElementTree @lhs.focusD (Node_Square @self @lhs.path) @lhs.path "Square" [  ] 
   | HoleShape     lhs.presTree = presHole @lhs.focusD "Shape" (Node_HoleShape @self @lhs.path) @lhs.path
-  | ParseErrShape lhs.presTree = presParseErr @presentation
+  | ParseErrShape lhs.presTree = presParseErr (Node_ParseErrShape @self @lhs.path) @presentation
 
 SEM Edge
   | Edge
       lhs.presTree = presentElementTree @lhs.focusD (Node_Edge @self @lhs.path) @lhs.path "Edge" [ presentPrimTreeInt @from, presentPrimTreeInt @to ] 
   | HoleEdge     lhs.presTree = presHole @lhs.focusD "Edge" (Node_HoleEdge @self @lhs.path) @lhs.path
-  | ParseErrEdge lhs.presTree = presParseErr @presentation
+  | ParseErrEdge lhs.presTree = presParseErr (Node_ParseErrEdge @self @lhs.path) @presentation
 
 SEM Subgraph
   | Subgraph
       lhs.presTree = presentElementTree @lhs.focusD (Node_Subgraph @self @lhs.path) @lhs.path "Subgraph" [ @dirty.presTree, @vertices.presTree, @edges.presTree ] 
   | HoleSubgraph     lhs.presTree = presHole @lhs.focusD "Subgraph" (Node_HoleSubgraph @self @lhs.path) @lhs.path
-  | ParseErrSubgraph lhs.presTree = presParseErr @presentation
+  | ParseErrSubgraph lhs.presTree = presParseErr (Node_ParseErrSubgraph @self @lhs.path) @presentation
 
 SEM Dirty
   | Dirty
@@ -783,7 +783,7 @@ SEM Dirty
   | Clean
       lhs.presTree = presentElementTree @lhs.focusD (Node_Clean @self @lhs.path) @lhs.path "Clean" [  ] 
   | HoleDirty     lhs.presTree = presHole @lhs.focusD "Dirty" (Node_HoleDirty @self @lhs.path) @lhs.path
-  | ParseErrDirty lhs.presTree = presParseErr @presentation
+  | ParseErrDirty lhs.presTree = presParseErr (Node_ParseErrDirty @self @lhs.path) @presentation
 
 SEM List_Section
   | List_Section
@@ -791,7 +791,7 @@ SEM List_Section
                        col @elts.pressTree
   | ParseErrList_Section
       lhs.presTree = loc (Node_List_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Section @self @lhs.path) @presentation
   | HoleList_Section
       lhs.presTree = loc (Node_List_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Section" (Node_HoleList_Section @self @lhs.path) @lhs.path
@@ -802,7 +802,7 @@ SEM List_Paragraph
                        col @elts.pressTree
   | ParseErrList_Paragraph
       lhs.presTree = loc (Node_List_Paragraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Paragraph @self @lhs.path) @presentation
   | HoleList_Paragraph
       lhs.presTree = loc (Node_List_Paragraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Paragraph" (Node_HoleList_Paragraph @self @lhs.path) @lhs.path
@@ -813,7 +813,7 @@ SEM List_Subsection
                        col @elts.pressTree
   | ParseErrList_Subsection
       lhs.presTree = loc (Node_List_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Subsection @self @lhs.path) @presentation
   | HoleList_Subsection
       lhs.presTree = loc (Node_List_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Subsection" (Node_HoleList_Subsection @self @lhs.path) @lhs.path
@@ -824,7 +824,7 @@ SEM List_Subsubsection
                        col @elts.pressTree
   | ParseErrList_Subsubsection
       lhs.presTree = loc (Node_List_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Subsubsection @self @lhs.path) @presentation
   | HoleList_Subsubsection
       lhs.presTree = loc (Node_List_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Subsubsection" (Node_HoleList_Subsubsection @self @lhs.path) @lhs.path
@@ -835,7 +835,7 @@ SEM List_Word
                        col @elts.pressTree
   | ParseErrList_Word
       lhs.presTree = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Word @self @lhs.path) @presentation
   | HoleList_Word
       lhs.presTree = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Word" (Node_HoleList_Word @self @lhs.path) @lhs.path
@@ -846,7 +846,7 @@ SEM List_Vertex
                        col @elts.pressTree
   | ParseErrList_Vertex
       lhs.presTree = loc (Node_List_Vertex @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Vertex @self @lhs.path) @presentation
   | HoleList_Vertex
       lhs.presTree = loc (Node_List_Vertex @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Vertex" (Node_HoleList_Vertex @self @lhs.path) @lhs.path
@@ -857,7 +857,7 @@ SEM List_Edge
                        col @elts.pressTree
   | ParseErrList_Edge
       lhs.presTree = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr @presentation
+                       presParseErr (Node_ParseErrList_Edge @self @lhs.path) @presentation
   | HoleList_Edge
       lhs.presTree = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Edge" (Node_HoleList_Edge @self @lhs.path) @lhs.path
