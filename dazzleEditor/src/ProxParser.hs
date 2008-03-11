@@ -14,7 +14,6 @@ import List hiding (delete)
 
 import ProxParser_Generated
 import Evaluation.DocumentEdit
---import DocumentEdit_Generated
 import DocUtils_Generated
 
 import qualified Common.UU_Parsing as UU_Parsing
