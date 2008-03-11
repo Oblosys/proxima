@@ -374,7 +374,7 @@ instance Editable Dummy Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Dummy c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Dummy")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Dummy") x
   paste (0:p) c (Dummy x0 x1) = Dummy (paste p c x0) x1
   paste (1:p) c (Dummy x0 x1) = Dummy x0 (paste p c x1)
   paste _ _ x = x
@@ -400,7 +400,7 @@ instance Editable Root Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Root c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Root")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Root") x
   paste (0:p) c (Root i0 x0) = Root i0 (paste p c x0)
   paste _ _ x = x
 
@@ -426,7 +426,7 @@ instance Editable RootE Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_RootE c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on RootE")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on RootE") x
   paste (0:p) c (RootE i0 x0 x1) = RootE i0 (paste p c x0) x1
   paste (1:p) c (RootE i0 x0 x1) = RootE i0 x0 (paste p c x1)
   paste _ _ x = x
@@ -457,7 +457,7 @@ instance Editable Decl Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Decl c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Decl")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Decl") x
   paste (0:p) c (Decl i0 i1 i2 i3 x0 x1 x2 x3) = Decl i0 i1 i2 i3 (paste p c x0) x1 x2 x3
   paste (1:p) c (Decl i0 i1 i2 i3 x0 x1 x2 x3) = Decl i0 i1 i2 i3 x0 (paste p c x1) x2 x3
   paste (2:p) c (Decl i0 i1 i2 i3 x0 x1 x2 x3) = Decl i0 i1 i2 i3 x0 x1 (paste p c x2) x3
@@ -491,7 +491,7 @@ instance Editable Ident Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Ident c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Ident")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Ident") x
   paste (0:p) c (Ident i0 i1 x0) = Ident i0 i1 (paste p c x0)
   paste _ _ x = x
 
@@ -540,7 +540,7 @@ instance Editable Exp Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Exp c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Exp")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Exp") x
   paste (0:p) c (PlusExp i0 x0 x1) = PlusExp i0 (paste p c x0) x1
   paste (1:p) c (PlusExp i0 x0 x1) = PlusExp i0 x0 (paste p c x1)
   paste (0:p) c (TimesExp i0 x0 x1) = TimesExp i0 (paste p c x0) x1
@@ -618,7 +618,7 @@ instance Editable Alt Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Alt c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Alt")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Alt") x
   paste (0:p) c (Alt i0 i1 x0 x1) = Alt i0 i1 (paste p c x0) x1
   paste (1:p) c (Alt i0 i1 x0 x1) = Alt i0 i1 x0 (paste p c x1)
   paste _ _ x = x
@@ -651,7 +651,7 @@ instance Editable Board Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Board c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Board")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Board") x
   paste (0:p) c (Board x0 x1 x2 x3 x4 x5 x6 x7) = Board (paste p c x0) x1 x2 x3 x4 x5 x6 x7
   paste (1:p) c (Board x0 x1 x2 x3 x4 x5 x6 x7) = Board x0 (paste p c x1) x2 x3 x4 x5 x6 x7
   paste (2:p) c (Board x0 x1 x2 x3 x4 x5 x6 x7) = Board x0 x1 (paste p c x2) x3 x4 x5 x6 x7
@@ -690,7 +690,7 @@ instance Editable BoardRow Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_BoardRow c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on BoardRow")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on BoardRow") x
   paste (0:p) c (BoardRow x0 x1 x2 x3 x4 x5 x6 x7) = BoardRow (paste p c x0) x1 x2 x3 x4 x5 x6 x7
   paste (1:p) c (BoardRow x0 x1 x2 x3 x4 x5 x6 x7) = BoardRow x0 (paste p c x1) x2 x3 x4 x5 x6 x7
   paste (2:p) c (BoardRow x0 x1 x2 x3 x4 x5 x6 x7) = BoardRow x0 x1 (paste p c x2) x3 x4 x5 x6 x7
@@ -727,7 +727,7 @@ instance Editable BoardSquare Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_BoardSquare c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on BoardSquare")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on BoardSquare") x
   paste (0:p) c (Queen x0) = Queen (paste p c x0)
   paste (0:p) c (King x0) = King (paste p c x0)
   paste (0:p) c (Bishop x0) = Bishop (paste p c x0)
@@ -770,7 +770,7 @@ instance Editable PPPresentation Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_PPPresentation c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on PPPresentation")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on PPPresentation") x
   paste (0:p) c (PPPresentation x0 x1) = PPPresentation (paste p c x0) x1
   paste (1:p) c (PPPresentation x0 x1) = PPPresentation x0 (paste p c x1)
   paste _ _ x = x
@@ -797,7 +797,7 @@ instance Editable Slide Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Slide c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Slide")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Slide") x
   paste (0:p) c (Slide x0 x1) = Slide (paste p c x0) x1
   paste (1:p) c (Slide x0 x1) = Slide x0 (paste p c x1)
   paste _ _ x = x
@@ -824,7 +824,7 @@ instance Editable ItemList Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_ItemList c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on ItemList")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on ItemList") x
   paste (0:p) c (ItemList x0 x1) = ItemList (paste p c x0) x1
   paste (1:p) c (ItemList x0 x1) = ItemList x0 (paste p c x1)
   paste _ _ x = x
@@ -849,7 +849,7 @@ instance Editable ListType Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_ListType c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on ListType")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on ListType") x
   paste _ _ x = x
 
   alternatives _ = [ ("Bullet "  , Clip_ListType $ Bullet)
@@ -879,7 +879,7 @@ instance Editable Item Document Node ClipDoc UserToken where
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Item c) _ = c
-  paste [] c x = trace ("Type error: pasting "++show c++" on Item")   x
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Item") x
   paste (0:p) c (StringItem x0) = StringItem (paste p c x0)
   paste (0:p) c (HeliumItem x0) = HeliumItem (paste p c x0)
   paste (0:p) c (ListItem x0) = ListItem (paste p c x0)
@@ -907,7 +907,7 @@ instance Editable Item Document Node ClipDoc UserToken where
 toList_Decl vs = List_Decl (toConsList_Decl vs)
 
 fromList_Decl (List_Decl vs) = fromConsList_Decl vs
-fromList_Decl _                  = []
+fromList_Decl _ = []
 
 toConsList_Decl [] = Nil_Decl
 toConsList_Decl (x:xs) = Cons_Decl x (toConsList_Decl xs)
@@ -915,41 +915,43 @@ toConsList_Decl (x:xs) = Cons_Decl x (toConsList_Decl xs)
 fromConsList_Decl Nil_Decl = []
 fromConsList_Decl (Cons_Decl x xs) = x: fromConsList_Decl xs
 
-replaceList_Decl _ x Nil_Decl = Nil_Decl -- replace beyond end of list
+replaceList_Decl _ x Nil_Decl = Nil_Decl  -- replace beyond end of list
 replaceList_Decl 0 x (Cons_Decl cx cxs) = Cons_Decl x cxs
 replaceList_Decl n x (Cons_Decl cx cxs) = Cons_Decl cx (replaceList_Decl (n-1) x cxs)
 
 insertList_Decl 0 x cxs = Cons_Decl x cxs
-insertList_Decl _ x Nil_Decl  = Nil_Decl   -- insert beyond end of list
+insertList_Decl _ x Nil_Decl  = Nil_Decl  -- insert beyond end of list
 insertList_Decl n x (Cons_Decl cx cxs) = Cons_Decl cx (insertList_Decl (n-1) x cxs)
 
-removeList_Decl _ Nil_Decl  = Nil_Decl -- remove beyond end of list
+removeList_Decl _ Nil_Decl  = Nil_Decl  -- remove beyond end of list
 removeList_Decl 0 (Cons_Decl cx cxs) = cxs
 removeList_Decl n (Cons_Decl cx cxs) = Cons_Decl cx (removeList_Decl (n-1) cxs)
 
 instance Editable List_Decl Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Decl x
-  select (n:p) (List_Decl cxs) = let xs = fromConsList_Decl cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
+  select [] x = Clip_List_Decl x
+  select (n:p) (List_Decl cxs) =
+    let xs = fromConsList_Decl cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_Decl c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Decl")   x
-  paste (n:p) c (List_Decl cxs) = let xs = fromConsList_Decl cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Decl (replaceList_Decl n x' cxs)
-                                        else List_Decl cxs -- paste beyond end of list
-  paste _  _  x                  = x
+  paste [] (Clip_List_Decl c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Decl")   x
+  paste (n:p) c (List_Decl cxs) =
+    let xs = fromConsList_Decl cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Decl (replaceList_Decl n x' cxs)
+        else List_Decl cxs -- paste beyond end of list
+  paste _ _ x = x
 
   alternatives _ = [("{List_Decl}", Clip_List_Decl hole)
                    ]
 
   arity (List_Decl x1) = length (fromConsList_Decl x1)
-  arity _                      = 0
+  arity _ = 0
 
   parseErr = ParseErrList_Decl
 
@@ -958,16 +960,16 @@ instance Editable List_Decl Document Node ClipDoc UserToken where
   isList _ = True
 
   insertList n (Clip_Decl c) (List_Decl cxs) = Clip_List_Decl $ List_Decl (insertList_Decl n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Decl xs
-  insertList _ c xs                 = Clip_List_Decl xs
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Decl xs
+  insertList _ c xs = Clip_List_Decl xs
 
   removeList n (List_Decl cxs) = Clip_List_Decl $ List_Decl (removeList_Decl n cxs)
-  removeList _ xs                        = Clip_List_Decl $ xs
+  removeList _ xs = Clip_List_Decl $ xs
 
 toList_Alt vs = List_Alt (toConsList_Alt vs)
 
 fromList_Alt (List_Alt vs) = fromConsList_Alt vs
-fromList_Alt _                  = []
+fromList_Alt _ = []
 
 toConsList_Alt [] = Nil_Alt
 toConsList_Alt (x:xs) = Cons_Alt x (toConsList_Alt xs)
@@ -975,41 +977,43 @@ toConsList_Alt (x:xs) = Cons_Alt x (toConsList_Alt xs)
 fromConsList_Alt Nil_Alt = []
 fromConsList_Alt (Cons_Alt x xs) = x: fromConsList_Alt xs
 
-replaceList_Alt _ x Nil_Alt = Nil_Alt -- replace beyond end of list
+replaceList_Alt _ x Nil_Alt = Nil_Alt  -- replace beyond end of list
 replaceList_Alt 0 x (Cons_Alt cx cxs) = Cons_Alt x cxs
 replaceList_Alt n x (Cons_Alt cx cxs) = Cons_Alt cx (replaceList_Alt (n-1) x cxs)
 
 insertList_Alt 0 x cxs = Cons_Alt x cxs
-insertList_Alt _ x Nil_Alt  = Nil_Alt   -- insert beyond end of list
+insertList_Alt _ x Nil_Alt  = Nil_Alt  -- insert beyond end of list
 insertList_Alt n x (Cons_Alt cx cxs) = Cons_Alt cx (insertList_Alt (n-1) x cxs)
 
-removeList_Alt _ Nil_Alt  = Nil_Alt -- remove beyond end of list
+removeList_Alt _ Nil_Alt  = Nil_Alt  -- remove beyond end of list
 removeList_Alt 0 (Cons_Alt cx cxs) = cxs
 removeList_Alt n (Cons_Alt cx cxs) = Cons_Alt cx (removeList_Alt (n-1) cxs)
 
 instance Editable List_Alt Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Alt x
-  select (n:p) (List_Alt cxs) = let xs = fromConsList_Alt cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
+  select [] x = Clip_List_Alt x
+  select (n:p) (List_Alt cxs) =
+    let xs = fromConsList_Alt cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_Alt c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Alt")   x
-  paste (n:p) c (List_Alt cxs) = let xs = fromConsList_Alt cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Alt (replaceList_Alt n x' cxs)
-                                        else List_Alt cxs -- paste beyond end of list
-  paste _  _  x                  = x
+  paste [] (Clip_List_Alt c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Alt")   x
+  paste (n:p) c (List_Alt cxs) =
+    let xs = fromConsList_Alt cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Alt (replaceList_Alt n x' cxs)
+        else List_Alt cxs -- paste beyond end of list
+  paste _ _ x = x
 
   alternatives _ = [("{List_Alt}", Clip_List_Alt hole)
                    ]
 
   arity (List_Alt x1) = length (fromConsList_Alt x1)
-  arity _                      = 0
+  arity _ = 0
 
   parseErr = ParseErrList_Alt
 
@@ -1018,16 +1022,16 @@ instance Editable List_Alt Document Node ClipDoc UserToken where
   isList _ = True
 
   insertList n (Clip_Alt c) (List_Alt cxs) = Clip_List_Alt $ List_Alt (insertList_Alt n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Alt xs
-  insertList _ c xs                 = Clip_List_Alt xs
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Alt xs
+  insertList _ c xs = Clip_List_Alt xs
 
   removeList n (List_Alt cxs) = Clip_List_Alt $ List_Alt (removeList_Alt n cxs)
-  removeList _ xs                        = Clip_List_Alt $ xs
+  removeList _ xs = Clip_List_Alt $ xs
 
 toList_Exp vs = List_Exp (toConsList_Exp vs)
 
 fromList_Exp (List_Exp vs) = fromConsList_Exp vs
-fromList_Exp _                  = []
+fromList_Exp _ = []
 
 toConsList_Exp [] = Nil_Exp
 toConsList_Exp (x:xs) = Cons_Exp x (toConsList_Exp xs)
@@ -1035,41 +1039,43 @@ toConsList_Exp (x:xs) = Cons_Exp x (toConsList_Exp xs)
 fromConsList_Exp Nil_Exp = []
 fromConsList_Exp (Cons_Exp x xs) = x: fromConsList_Exp xs
 
-replaceList_Exp _ x Nil_Exp = Nil_Exp -- replace beyond end of list
+replaceList_Exp _ x Nil_Exp = Nil_Exp  -- replace beyond end of list
 replaceList_Exp 0 x (Cons_Exp cx cxs) = Cons_Exp x cxs
 replaceList_Exp n x (Cons_Exp cx cxs) = Cons_Exp cx (replaceList_Exp (n-1) x cxs)
 
 insertList_Exp 0 x cxs = Cons_Exp x cxs
-insertList_Exp _ x Nil_Exp  = Nil_Exp   -- insert beyond end of list
+insertList_Exp _ x Nil_Exp  = Nil_Exp  -- insert beyond end of list
 insertList_Exp n x (Cons_Exp cx cxs) = Cons_Exp cx (insertList_Exp (n-1) x cxs)
 
-removeList_Exp _ Nil_Exp  = Nil_Exp -- remove beyond end of list
+removeList_Exp _ Nil_Exp  = Nil_Exp  -- remove beyond end of list
 removeList_Exp 0 (Cons_Exp cx cxs) = cxs
 removeList_Exp n (Cons_Exp cx cxs) = Cons_Exp cx (removeList_Exp (n-1) cxs)
 
 instance Editable List_Exp Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Exp x
-  select (n:p) (List_Exp cxs) = let xs = fromConsList_Exp cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
+  select [] x = Clip_List_Exp x
+  select (n:p) (List_Exp cxs) =
+    let xs = fromConsList_Exp cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_Exp c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Exp")   x
-  paste (n:p) c (List_Exp cxs) = let xs = fromConsList_Exp cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Exp (replaceList_Exp n x' cxs)
-                                        else List_Exp cxs -- paste beyond end of list
-  paste _  _  x                  = x
+  paste [] (Clip_List_Exp c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Exp")   x
+  paste (n:p) c (List_Exp cxs) =
+    let xs = fromConsList_Exp cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Exp (replaceList_Exp n x' cxs)
+        else List_Exp cxs -- paste beyond end of list
+  paste _ _ x = x
 
   alternatives _ = [("{List_Exp}", Clip_List_Exp hole)
                    ]
 
   arity (List_Exp x1) = length (fromConsList_Exp x1)
-  arity _                      = 0
+  arity _ = 0
 
   parseErr = ParseErrList_Exp
 
@@ -1078,16 +1084,16 @@ instance Editable List_Exp Document Node ClipDoc UserToken where
   isList _ = True
 
   insertList n (Clip_Exp c) (List_Exp cxs) = Clip_List_Exp $ List_Exp (insertList_Exp n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Exp xs
-  insertList _ c xs                 = Clip_List_Exp xs
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Exp xs
+  insertList _ c xs = Clip_List_Exp xs
 
   removeList n (List_Exp cxs) = Clip_List_Exp $ List_Exp (removeList_Exp n cxs)
-  removeList _ xs                        = Clip_List_Exp $ xs
+  removeList _ xs = Clip_List_Exp $ xs
 
 toList_Slide vs = List_Slide (toConsList_Slide vs)
 
 fromList_Slide (List_Slide vs) = fromConsList_Slide vs
-fromList_Slide _                  = []
+fromList_Slide _ = []
 
 toConsList_Slide [] = Nil_Slide
 toConsList_Slide (x:xs) = Cons_Slide x (toConsList_Slide xs)
@@ -1095,41 +1101,43 @@ toConsList_Slide (x:xs) = Cons_Slide x (toConsList_Slide xs)
 fromConsList_Slide Nil_Slide = []
 fromConsList_Slide (Cons_Slide x xs) = x: fromConsList_Slide xs
 
-replaceList_Slide _ x Nil_Slide = Nil_Slide -- replace beyond end of list
+replaceList_Slide _ x Nil_Slide = Nil_Slide  -- replace beyond end of list
 replaceList_Slide 0 x (Cons_Slide cx cxs) = Cons_Slide x cxs
 replaceList_Slide n x (Cons_Slide cx cxs) = Cons_Slide cx (replaceList_Slide (n-1) x cxs)
 
 insertList_Slide 0 x cxs = Cons_Slide x cxs
-insertList_Slide _ x Nil_Slide  = Nil_Slide   -- insert beyond end of list
+insertList_Slide _ x Nil_Slide  = Nil_Slide  -- insert beyond end of list
 insertList_Slide n x (Cons_Slide cx cxs) = Cons_Slide cx (insertList_Slide (n-1) x cxs)
 
-removeList_Slide _ Nil_Slide  = Nil_Slide -- remove beyond end of list
+removeList_Slide _ Nil_Slide  = Nil_Slide  -- remove beyond end of list
 removeList_Slide 0 (Cons_Slide cx cxs) = cxs
 removeList_Slide n (Cons_Slide cx cxs) = Cons_Slide cx (removeList_Slide (n-1) cxs)
 
 instance Editable List_Slide Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Slide x
-  select (n:p) (List_Slide cxs) = let xs = fromConsList_Slide cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
+  select [] x = Clip_List_Slide x
+  select (n:p) (List_Slide cxs) =
+    let xs = fromConsList_Slide cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_Slide c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Slide")   x
-  paste (n:p) c (List_Slide cxs) = let xs = fromConsList_Slide cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Slide (replaceList_Slide n x' cxs)
-                                        else List_Slide cxs -- paste beyond end of list
-  paste _  _  x                  = x
+  paste [] (Clip_List_Slide c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Slide")   x
+  paste (n:p) c (List_Slide cxs) =
+    let xs = fromConsList_Slide cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Slide (replaceList_Slide n x' cxs)
+        else List_Slide cxs -- paste beyond end of list
+  paste _ _ x = x
 
   alternatives _ = [("{List_Slide}", Clip_List_Slide hole)
                    ]
 
   arity (List_Slide x1) = length (fromConsList_Slide x1)
-  arity _                      = 0
+  arity _ = 0
 
   parseErr = ParseErrList_Slide
 
@@ -1138,16 +1146,16 @@ instance Editable List_Slide Document Node ClipDoc UserToken where
   isList _ = True
 
   insertList n (Clip_Slide c) (List_Slide cxs) = Clip_List_Slide $ List_Slide (insertList_Slide n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Slide xs
-  insertList _ c xs                 = Clip_List_Slide xs
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Slide xs
+  insertList _ c xs = Clip_List_Slide xs
 
   removeList n (List_Slide cxs) = Clip_List_Slide $ List_Slide (removeList_Slide n cxs)
-  removeList _ xs                        = Clip_List_Slide $ xs
+  removeList _ xs = Clip_List_Slide $ xs
 
 toList_Item vs = List_Item (toConsList_Item vs)
 
 fromList_Item (List_Item vs) = fromConsList_Item vs
-fromList_Item _                  = []
+fromList_Item _ = []
 
 toConsList_Item [] = Nil_Item
 toConsList_Item (x:xs) = Cons_Item x (toConsList_Item xs)
@@ -1155,41 +1163,43 @@ toConsList_Item (x:xs) = Cons_Item x (toConsList_Item xs)
 fromConsList_Item Nil_Item = []
 fromConsList_Item (Cons_Item x xs) = x: fromConsList_Item xs
 
-replaceList_Item _ x Nil_Item = Nil_Item -- replace beyond end of list
+replaceList_Item _ x Nil_Item = Nil_Item  -- replace beyond end of list
 replaceList_Item 0 x (Cons_Item cx cxs) = Cons_Item x cxs
 replaceList_Item n x (Cons_Item cx cxs) = Cons_Item cx (replaceList_Item (n-1) x cxs)
 
 insertList_Item 0 x cxs = Cons_Item x cxs
-insertList_Item _ x Nil_Item  = Nil_Item   -- insert beyond end of list
+insertList_Item _ x Nil_Item  = Nil_Item  -- insert beyond end of list
 insertList_Item n x (Cons_Item cx cxs) = Cons_Item cx (insertList_Item (n-1) x cxs)
 
-removeList_Item _ Nil_Item  = Nil_Item -- remove beyond end of list
+removeList_Item _ Nil_Item  = Nil_Item  -- remove beyond end of list
 removeList_Item 0 (Cons_Item cx cxs) = cxs
 removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
 
 instance Editable List_Item Document Node ClipDoc UserToken where
-  select []    x                  = Clip_List_Item x
-  select (n:p) (List_Item cxs) = let xs = fromConsList_Item cxs
-                                  in  if n < length xs 
-                                      then select p (xs !! n)
-                                      else Clip_Nothing
-  select _     _                  = Clip_Nothing
+  select [] x = Clip_List_Item x
+  select (n:p) (List_Item cxs) =
+    let xs = fromConsList_Item cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_Item c) _   = c
-  paste [] c  x                  = trace ("Type error: pasting "++show c++" on List_Item")   x
-  paste (n:p) c (List_Item cxs) = let xs = fromConsList_Item cxs
-                                    in  if n < length xs
-                                        then let x  = xs!!n
-                                                 x' = paste p c x
-                                             in  List_Item (replaceList_Item n x' cxs)
-                                        else List_Item cxs -- paste beyond end of list
-  paste _  _  x                  = x
+  paste [] (Clip_List_Item c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Item")   x
+  paste (n:p) c (List_Item cxs) =
+    let xs = fromConsList_Item cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Item (replaceList_Item n x' cxs)
+        else List_Item cxs -- paste beyond end of list
+  paste _ _ x = x
 
   alternatives _ = [("{List_Item}", Clip_List_Item hole)
                    ]
 
   arity (List_Item x1) = length (fromConsList_Item x1)
-  arity _                      = 0
+  arity _ = 0
 
   parseErr = ParseErrList_Item
 
@@ -1198,11 +1208,11 @@ instance Editable List_Item Document Node ClipDoc UserToken where
   isList _ = True
 
   insertList n (Clip_Item c) (List_Item cxs) = Clip_List_Item $ List_Item (insertList_Item n c cxs)
-  insertList _ _             xs = trace "Type error, no paste" $ Clip_List_Item xs
-  insertList _ c xs                 = Clip_List_Item xs
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Item xs
+  insertList _ c xs = Clip_List_Item xs
 
   removeList n (List_Item cxs) = Clip_List_Item $ List_Item (removeList_Item n cxs)
-  removeList _ xs                        = Clip_List_Item $ xs
+  removeList _ xs = Clip_List_Item $ xs
 
 
 
