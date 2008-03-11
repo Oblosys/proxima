@@ -19,7 +19,8 @@ generate :: DocumentType -> [String]
 generate docType = genRankNode (addHolesParseErrs (documentDecl : docTypeWithLists))
                 ++ genPathNode (addHolesParseErrs (documentDecl : docTypeWithLists))
                 ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genParseXML (docTypeWithLists)  
+                ++ genParseXML (docTypeWithLists)
+                ++ genListUtils (removeEnrichedDocDecl docTypeWithLists)
   where docTypeWithLists = addListDecls docType
 
 
@@ -80,4 +81,31 @@ genParseXML decls = genBanner "parseXML functions" $ concatMap genParseXMLType d
           then "emptyTag \"%1\""
           else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genType . fieldType) fields ++ "<* endTag \"%1\""
          ) <~ [cnstrName, prefixBy " " $ map genNoIDP idpFields ]
-         
+
+genListUtils decls = concat
+  [ [ "toList_%1 vs = List_%1 (toConsList_%1 vs)"
+    , ""
+    , "fromList_%1 (List_%1 vs) = fromConsList_%1 vs"
+    , "fromList_%1 _ = []"
+    , ""
+    , "toConsList_%1 [] = Nil_%1"
+    , "toConsList_%1 (x:xs) = Cons_%1 x (toConsList_%1 xs)"
+    , ""
+    , "fromConsList_%1 Nil_%1 = []"
+    , "fromConsList_%1 (Cons_%1 x xs) = x: fromConsList_%1 xs"
+    , ""
+    , "replaceList_%1 _ x Nil_%1 = Nil_%1  -- replace beyond end of list"
+    , "replaceList_%1 0 x (Cons_%1 cx cxs) = Cons_%1 x cxs"
+    , "replaceList_%1 n x (Cons_%1 cx cxs) = Cons_%1 cx (replaceList_%1 (n-1) x cxs)"
+    , ""
+    , "insertList_%1 0 x cxs = Cons_%1 x cxs"
+    , "insertList_%1 _ x Nil_%1  = Nil_%1  -- insert beyond end of list"
+    , "insertList_%1 n x (Cons_%1 cx cxs) = Cons_%1 cx (insertList_%1 (n-1) x cxs)"
+    , ""
+    , "removeList_%1 _ Nil_%1  = Nil_%1  -- remove beyond end of list"
+    , "removeList_%1 0 (Cons_%1 cx cxs) = cxs"
+    , "removeList_%1 n (Cons_%1 cx cxs) = Cons_%1 cx (removeList_%1 (n-1) cxs)"
+    , ""
+    ] <~ [typeName tpe]
+  | tpe <- getAllUsedListTypes decls
+  ]
