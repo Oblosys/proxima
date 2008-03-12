@@ -11,7 +11,7 @@ import Common.UU_Parsing
 
 type LayerStatePres = ()
 
-type PresentationSheet doc enr node clip token = enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
+type PresentationSheet doc enr node clip token = enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> Path -> 
                          (WhitespaceMap, IDPCounter, Presentation doc node clip token, enr)
                          
 
