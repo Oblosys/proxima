@@ -82,7 +82,7 @@ mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
+mkPopupMenuXY prs scale arr@(LocatorA (Node_RootDoc doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
@@ -91,8 +91,8 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window 
    ; case pointDoc x y arr of
         Just node ->
          do { let pathDoc = pathNode node
---                  alts = menuD pathDoc doc
-                  items = ctxtItems -- ++ alts
+                  alts = menuD pathDoc doc
+                  items = ctxtItems ++ alts
             ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
                                     | (str, upd) <- items]
             ; return $ Just contextMenu                                          
