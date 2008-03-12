@@ -114,6 +114,11 @@ genListUtils decls = genBanner "List utility functions" $ concat
 genMisc = genBanner "Miscellaneous" $
   [ "type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken"
   , ""
+  , "instance Doc Document where"
+  , "  initialDoc = initialDocument"
+  , "  toXML = toXMLDocument"
+  , "  parseXML = parseXML_Document"
+  , ""
   , "instance DocNode Node where"
   , "  noNode = NoNode"
   , ""
