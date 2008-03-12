@@ -1,3 +1,5 @@
+data Document = RootDoc root:Root
+
 data EnrichedDoc = RootEnr root:Root Document
 -- document ref is for popups only
 

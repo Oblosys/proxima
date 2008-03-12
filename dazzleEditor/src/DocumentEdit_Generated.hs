@@ -16,6 +16,7 @@ import Presentation.PresTypes
 
 instance Clip ClipDoc where
   arityClip Clip_Nothing = -1
+  arityClip (Clip_Document x) = arity x
   arityClip (Clip_EnrichedDoc x) = arity x
   arityClip (Clip_Root x) = arity x
   arityClip (Clip_Section x) = arity x
@@ -36,13 +37,13 @@ instance Clip ClipDoc where
   arityClip (Clip_List_Word x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
-  arityClip (Clip_Document x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
   arityClip (Clip_String x) = arity x
   arityClip (Clip_Float x) = arity x
 
   alternativesClip Clip_Nothing = []
+  alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_EnrichedDoc x) = alternatives x
   alternativesClip (Clip_Root x) = alternatives x
   alternativesClip (Clip_Section x) = alternatives x
@@ -63,13 +64,13 @@ instance Clip ClipDoc where
   alternativesClip (Clip_List_Word x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
-  alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
   alternativesClip (Clip_Float x) = alternatives x
 
   holeClip Clip_Nothing = Clip_Nothing
+  holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
   holeClip (Clip_Root x) = Clip_Root hole
   holeClip (Clip_Section x) = Clip_Section hole
@@ -90,13 +91,13 @@ instance Clip ClipDoc where
   holeClip (Clip_List_Word x) = Clip_List_Word hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
-  holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_String x) = Clip_String hole
   holeClip (Clip_Float x) = Clip_Float hole
 
   isListClip Clip_Nothing = False
+  isListClip (Clip_Document x) = isList x
   isListClip (Clip_EnrichedDoc x) = isList x
   isListClip (Clip_Root x) = isList x
   isListClip (Clip_Section x) = isList x
@@ -117,13 +118,13 @@ instance Clip ClipDoc where
   isListClip (Clip_List_Word x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
-  isListClip (Clip_Document x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
   isListClip (Clip_String x) = isList x
   isListClip (Clip_Float x) = isList x
 
   insertListClip i c Clip_Nothing = Clip_Nothing
+  insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
   insertListClip i c (Clip_Root x) = insertList i c x
   insertListClip i c (Clip_Section x) = insertList i c x
@@ -144,13 +145,13 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_List_Word x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
-  insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
   insertListClip i c (Clip_Float x) = insertList i c x
 
   removeListClip i Clip_Nothing = Clip_Nothing
+  removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_EnrichedDoc x) = removeList i x
   removeListClip i (Clip_Root x) = removeList i x
   removeListClip i (Clip_Section x) = removeList i x
@@ -171,7 +172,6 @@ instance Clip ClipDoc where
   removeListClip i (Clip_List_Word x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
-  removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
@@ -183,6 +183,58 @@ instance Clip ClipDoc where
 --------------------------------------------------------------------------
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
+
+instance Editable Document Document Node ClipDoc UserToken where
+  select [] x = Clip_Document x
+  select (0:p) (RootDoc x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Document c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Document") x
+  paste (0:p) c (RootDoc x0) = RootDoc (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("RootDoc {Root} "  , Clip_Document $ RootDoc hole)
+                   ,("{Document}", Clip_Document hole)
+                   ]
+
+  arity (RootDoc x0) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrDocument
+
+  hole = HoleDocument
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable EnrichedDoc Document Node ClipDoc UserToken where
+  select [] x = Clip_EnrichedDoc x
+  select (0:p) (RootEnr x0 x1) = select p x0
+  select (1:p) (RootEnr x0 x1) = select p x1
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_EnrichedDoc c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on EnrichedDoc") x
+  paste (0:p) c (RootEnr x0 x1) = RootEnr (paste p c x0) x1
+  paste (1:p) c (RootEnr x0 x1) = RootEnr x0 (paste p c x1)
+  paste _ _ x = x
+
+  alternatives _ = [ ("RootEnr {Root} {Document} "  , Clip_EnrichedDoc $ RootEnr hole hole)
+                   ,("{EnrichedDoc}", Clip_EnrichedDoc hole)
+                   ]
+
+  arity (RootEnr x0 x1) = 2
+  arity _                        = 0
+
+  parseErr = ParseErrEnrichedDoc
+
+  hole = HoleEnrichedDoc
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
 
 instance Editable Root Document Node ClipDoc UserToken where
   select [] x = Clip_Root x
@@ -811,21 +863,6 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
 --------------------------------------------------------------------------
 -- Editable instances for Document, EnrichedDoc and primitive types     --
 --------------------------------------------------------------------------
-
-instance Editable Document Document Node ClipDoc UserToken where
-  -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
-  select p (RootDoc x) = select p x
-  paste p c (RootDoc x) = RootDoc $ paste p c x
-  hole = HoleDocument
-  parseErr = ParseErrDocument
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-  
--- for EnrichedDoc, only the member parseErr is used from Editable
-instance Editable EnrichedDoc Document Node ClipDoc UserToken where
-  hole = HoleEnrichedDoc
-  parseErr = ParseErrEnrichedDoc
 
 instance Editable Int Document Node ClipDoc UserToken where
   select [] x = Clip_Int x
