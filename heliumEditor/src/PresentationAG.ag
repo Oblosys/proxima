@@ -42,9 +42,6 @@ TODO: fix loc and path for case and let exps
 -- parsing/structural nodes should be inserted above holes and parse errors as well!
 -- otherwise recognition/gatherchildren misses children
 
-
--- prims should be boxed, otherwise there are too many special cases
-
 -- need control over structural navigation! focus on invisible elements, or Ident instead of IdentExp
 -- is not good.
 Important:
@@ -52,29 +49,7 @@ Important:
 When defining new attributes on Exp, take care that the (,,,,) patterns at LamExp.val and LetExp.val in the evaluator AG
 are updated as well. Both mimic higher order ag behavior by calling the semExp function.
 
-Xprez problem, background color on row with one StringP element does not work.
-Temporary workaround, add StringP _ "" to row
-
 -}
-
-
--- The following declarations prevent warnings during compilation.
--- Since sem_Root is never called, the document root does not need to define these attributes
--- Ideally, Document data structures are not present in the attribute grammar datatype
-
-SEM Root
-  | Root
-            decls.env = error "Root.decls.env should not be used"
-            decls.errs = error "Root.decls.errs should not be used"
---            decls.layoutMap = error "Root.decls.layoutmap should not be used"
-            decls.level = error "Root.decls.level should not be used"
---            decls.newlines = error "Root.decls.newlines should not be used"
-            decls.ranges = error "Root.decls.ranges should not be used"
---            decls.spaces = error "Root.decls.spaces should not be used"
-            decls.varsInScope = error "Root.decls.varsInScope should not be used"
-            decls.typeEnv = error "Root.decls.typeEnv should not be used"
-            decls.topLevelEnv = error "Root.decls.topLevelEnv should not be used"
-            decls.varsInScopeAtFocus = error "Root.decls.varsInScopeAtFocus should not be used"
 
 
 --------------------------------------------------------------
