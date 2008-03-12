@@ -348,8 +348,8 @@ idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++sho
 emptyAttrs = (Inh defaultFont black black black black Nothing [] 0 0 0 0, Syn 0 0 0 0 False False 0 0 0 0)
 
 type UpdateDoc doc clip = DocumentLevel doc clip -> DocumentLevel doc clip
-type PopupMenuItem doc clip = (String, UpdateDoc doc clip)
 
+type PopupMenuItem doc clip = (String, UpdateDoc doc clip)
 
 data PathPres = PathP [Int] Int 
               | NoPathP deriving (Show, Eq, Ord)
