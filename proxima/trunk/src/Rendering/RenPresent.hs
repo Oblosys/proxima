@@ -7,7 +7,7 @@ import Rendering.RenLayerUtils -- for context menu hack
 --import RendererGTK
 import Rendering.Renderer
 
-import Evaluation.DocTypes (DocumentLevel, HasPath)
+import Evaluation.DocTypes (DocumentLevel)
 
 presentIO state high low editHigh = return $ present state high low editHigh
 
