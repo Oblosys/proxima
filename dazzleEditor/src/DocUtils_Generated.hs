@@ -11,12 +11,10 @@ import Text.ParserCombinators.Parsec
 
 import Common.CommonTypes hiding (Clean, Dirty)
 
-instance Doc Document where
-  initialDoc = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_Edge [])) 
-                                     "" 
-                                     (toList_Section [])))
-  toXML = toXMLDocument
-  parseXML = parseXML_Document
+initialDocument :: IO Document
+initialDocument = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_Edge [])) 
+                                  "" 
+                                  (toList_Section [])))
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -493,6 +491,11 @@ removeList_Edge n (Cons_Edge cx cxs) = Cons_Edge cx (removeList_Edge (n-1) cxs)
 --------------------------------------------------------------------------
 
 type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
+
+instance Doc Document where
+  initialDoc = initialDocument
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
 
 instance DocNode Node where
   noNode = NoNode
