@@ -23,7 +23,9 @@ instance Editable HeliumTypeInfo Document Node ClipDoc UserToken where
 
 instance Clip ClipDoc where
   arityClip Clip_Nothing = -1
+  arityClip (Clip_Document x) = arity x
   arityClip (Clip_Root x) = arity x
+  arityClip (Clip_EnrichedDoc x) = arity x
   arityClip (Clip_RootE x) = arity x
   arityClip (Clip_Decl x) = arity x
   arityClip (Clip_Ident x) = arity x
@@ -48,7 +50,9 @@ instance Clip ClipDoc where
   arityClip (Clip_Float x) = arity x
 
   alternativesClip Clip_Nothing = []
+  alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_Root x) = alternatives x
+  alternativesClip (Clip_EnrichedDoc x) = alternatives x
   alternativesClip (Clip_RootE x) = alternatives x
   alternativesClip (Clip_Decl x) = alternatives x
   alternativesClip (Clip_Ident x) = alternatives x
@@ -73,7 +77,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Float x) = alternatives x
 
   holeClip Clip_Nothing = Clip_Nothing
+  holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_Root x) = Clip_Root hole
+  holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
   holeClip (Clip_RootE x) = Clip_RootE hole
   holeClip (Clip_Decl x) = Clip_Decl hole
   holeClip (Clip_Ident x) = Clip_Ident hole
@@ -98,7 +104,9 @@ instance Clip ClipDoc where
   holeClip (Clip_Float x) = Clip_Float hole
 
   isListClip Clip_Nothing = False
+  isListClip (Clip_Document x) = isList x
   isListClip (Clip_Root x) = isList x
+  isListClip (Clip_EnrichedDoc x) = isList x
   isListClip (Clip_RootE x) = isList x
   isListClip (Clip_Decl x) = isList x
   isListClip (Clip_Ident x) = isList x
@@ -123,7 +131,9 @@ instance Clip ClipDoc where
   isListClip (Clip_Float x) = isList x
 
   insertListClip i c Clip_Nothing = Clip_Nothing
+  insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_Root x) = insertList i c x
+  insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
   insertListClip i c (Clip_RootE x) = insertList i c x
   insertListClip i c (Clip_Decl x) = insertList i c x
   insertListClip i c (Clip_Ident x) = insertList i c x
@@ -148,7 +158,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Float x) = insertList i c x
 
   removeListClip i Clip_Nothing = Clip_Nothing
+  removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_Root x) = removeList i x
+  removeListClip i (Clip_EnrichedDoc x) = removeList i x
   removeListClip i (Clip_RootE x) = removeList i x
   removeListClip i (Clip_Decl x) = removeList i x
   removeListClip i (Clip_Ident x) = removeList i x
@@ -179,6 +191,31 @@ instance Clip ClipDoc where
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
 
+instance Editable Document Document Node ClipDoc UserToken where
+  select [] x = Clip_Document x
+  select (0:p) (RootDoc x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Document c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Document") x
+  paste (0:p) c (RootDoc x0) = RootDoc (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("RootDoc {Root} "  , Clip_Document $ RootDoc hole)
+                   ,("{Document}", Clip_Document hole)
+                   ]
+
+  arity (RootDoc x0) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrDocument
+
+  hole = HoleDocument
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
 instance Editable Root Document Node ClipDoc UserToken where
   select [] x = Clip_Root x
   select (0:p) (Root _ x0) = select p x0
@@ -199,6 +236,33 @@ instance Editable Root Document Node ClipDoc UserToken where
   parseErr = ParseErrRoot
 
   hole = HoleRoot
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable EnrichedDoc Document Node ClipDoc UserToken where
+  select [] x = Clip_EnrichedDoc x
+  select (0:p) (RootEnr x0 x1) = select p x0
+  select (1:p) (RootEnr x0 x1) = select p x1
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_EnrichedDoc c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on EnrichedDoc") x
+  paste (0:p) c (RootEnr x0 x1) = RootEnr (paste p c x0) x1
+  paste (1:p) c (RootEnr x0 x1) = RootEnr x0 (paste p c x1)
+  paste _ _ x = x
+
+  alternatives _ = [ ("RootEnr {RootE} {Document} "  , Clip_EnrichedDoc $ RootEnr hole hole)
+                   ,("{EnrichedDoc}", Clip_EnrichedDoc hole)
+                   ]
+
+  arity (RootEnr x0 x1) = 2
+  arity _                        = 0
+
+  parseErr = ParseErrEnrichedDoc
+
+  hole = HoleEnrichedDoc
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -892,16 +956,6 @@ instance Editable List_Item Document Node ClipDoc UserToken where
 --------------------------------------------------------------------------
 -- Editable instances for Document, EnrichedDoc and primitive types     --
 --------------------------------------------------------------------------
-
-instance Editable Document Document Node ClipDoc UserToken where
-  -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified
-  select p (RootDoc x) = select p x
-  paste p c (RootDoc x) = RootDoc $ paste p c x
-  hole = error "internal error: hole document accessed"
-  parseErr = error "internal error: parseErr document accessed"
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
 
 instance Editable Int Document Node ClipDoc UserToken where
   select [] x = Clip_Int x

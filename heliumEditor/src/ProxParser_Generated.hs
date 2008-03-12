@@ -16,11 +16,23 @@ import DocUtils_Generated
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
+reuseRootDoc :: [Token doc Node clip token] -> Maybe Root -> Document
+reuseRootDoc nodes ma0
+  = case extractFromTokens extractRootDoc defaultRootDoc nodes of
+           (RootDoc a0) -> genericReuse1 RootDoc a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
+
 reuseRoot :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Root
 reuseRoot nodes ma0 ma1
   = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1) -> genericReuse2 Root a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
+
+reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe Document -> EnrichedDoc
+reuseRootEnr nodes ma0 ma1
+  = case extractFromTokens extractRootEnr defaultRootEnr nodes of
+           (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
+           _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
 reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> Maybe HeliumTypeInfo -> RootE
 reuseRootE nodes ma0 ma1 ma2 ma3
@@ -293,9 +305,17 @@ reuseList_Item nodes ma0
 -- extract functions                                                    --
 --------------------------------------------------------------------------
 
+extractRootDoc :: Maybe Node -> Maybe Document
+extractRootDoc (Just (Node_RootDoc x@(RootDoc _) _)) = Just x
+extractRootDoc _ = Nothing
+
 extractRoot :: Maybe Node -> Maybe Root
 extractRoot (Just (Node_Root x@(Root _ _) _)) = Just x
 extractRoot _ = Nothing
+
+extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
+extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
+extractRootEnr _ = Nothing
 
 extractRootE :: Maybe Node -> Maybe RootE
 extractRootE (Just (Node_RootE x@(RootE _ _ _ _) _)) = Just x
@@ -480,8 +500,14 @@ extractList_Item _ = Nothing
 -- default functions                                                    --
 --------------------------------------------------------------------------
 
+defaultRootDoc :: Document
+defaultRootDoc = RootDoc hole
+
 defaultRoot :: Root
 defaultRoot = Root NoIDP hole
+
+defaultRootEnr :: EnrichedDoc
+defaultRootEnr = RootEnr hole hole
 
 defaultRootE :: RootE
 defaultRootE = RootE NoIDP hole hole hole

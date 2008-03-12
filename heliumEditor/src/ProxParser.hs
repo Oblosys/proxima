@@ -25,9 +25,10 @@ import DocUtils_Generated
 
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
-recognizeRootEnr = 
-          (\rootE -> RootEnr rootE (error "internal error: parsed Doc accessed"))
-      <$> recognizeRootE
+recognizeRootEnr = pStr $
+          (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
+      <$> pStructural Node_RootEnr
+      <*> recognizeRootE
 
 recognizeRootE :: ListParser Document Node ClipDoc UserToken RootE
 recognizeRootE = pStr $ 

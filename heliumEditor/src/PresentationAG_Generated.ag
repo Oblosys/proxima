@@ -4,13 +4,15 @@
 -- AG data type                                                         --
 --------------------------------------------------------------------------
 
-DATA EnrichedDoc
-  | RootEnr root:RootE document:Document
-
 DATA Root
   | Root idP:IDP decls:List_Decl
   | HoleRoot
   | ParseErrRoot presentation:{(Presentation Document Node ClipDoc UserToken)}
+
+DATA EnrichedDoc
+  | RootEnr root:RootE document:Document
+  | HoleEnrichedDoc
+  | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 
 DATA RootE
   | RootE idP:IDP decls:List_Decl idListDecls:List_Decl heliumTypeInfo:HeliumTypeInfo
@@ -155,16 +157,13 @@ DATA ConsList_Item
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
-     [ focusD : FocusDoc |  pIdC : Int  | ]
-
-ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
-     [ | path : {[Int]} | ]
+ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
+     [ focusD : FocusDoc path : {[Int]} |  pIdC : Int  | ]
 
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
      [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
+ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
@@ -180,18 +179,6 @@ ATTR ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
 
 
 --------------------------------------------------------------------------
--- Sem functions for EnrichedDoc                                        --
---------------------------------------------------------------------------
-
-SEM EnrichedDoc [ focusD : FocusDoc  | pIdC : Int | pres: Presentation_Doc_Node_Clip_Token  ]
-  | RootEnr
-      root.pIdC = @lhs.pIdC
-      lhs.pIdC  = @root.pIdC
-      root.path  = []
-
-
-
---------------------------------------------------------------------------
 -- General sem functions                                                --
 --------------------------------------------------------------------------
 
@@ -202,6 +189,14 @@ SEM Root
       decls.path  = @lhs.path++[0]
   | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.pres = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
+
+SEM EnrichedDoc
+  | RootEnr 
+      root.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @root.pIdC
+      root.path  = @lhs.path++[0]
+  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
+  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @presentation
 
 SEM RootE
   | RootE 

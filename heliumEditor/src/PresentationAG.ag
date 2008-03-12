@@ -125,11 +125,12 @@ SEM EnrichedDoc
                                                         -- it is used by mkPopupMenuXY in Renderer.
                                                         -- A better implementation of popups will create the menu in
                                                         -- the higher layers. Although it is still a bit unclear where
+                 loc (Node_RootEnr @self []) $ structural $
                    @root.pres
                  
 SEM RootE
   | RootE
-      lhs.pres = loc (Node_RootE @self []) $ structural $
+      lhs.pres = loc (Node_RootE @self @lhs.path) $ structural $
                    col [ row [ hSpace 3
                        --       , text $ "Document focus: " ++show @lhs.focusD
                               , text "Focused expression"  `withFontFam` "verdana" -- ++show @lhs.focusD
@@ -390,6 +391,15 @@ SEM Exp
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
                           ++ [sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
 
+
+-- this is a bit annoying, maybe generate these?
+SEM List_Alt [ | | path : Path ]
+  | List_Alt
+      lhs.path = @lhs.path
+      
+SEM List_Decl [ | | path : Path ]
+  | List_Decl
+      lhs.path = @lhs.path
 
 SEM Alt
   | Alt

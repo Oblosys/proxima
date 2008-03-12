@@ -24,5 +24,5 @@ main = proxima PresentationAG.sem_EnrichedDoc
                -- sheet parameters (evaluation and reduction sheets are passed implicitly through
                -- instances of Evaluation/ReductionSheet classes)
                --
-               (DocumentLevel (error "Document not initialized") NoPathD Clip_Nothing)   
-               (EnrichedDocLevel HoleEnr NoPathD)   
+               (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
+               (EnrichedDocLevel HoleEnrichedDoc NoPathD)   

@@ -27,15 +27,20 @@ data HeliumMessage =
 -- Proxima data type                                                    --
 --------------------------------------------------------------------------
 
-data Document = RootDoc Root deriving Show
-
-data EnrichedDoc = RootEnr RootE Document
-                 | HoleEnr deriving Show
+data Document = RootDoc Root
+              | HoleDocument
+              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
+                  deriving Show
 
 data Root = Root IDP List_Decl
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
               deriving Show
+
+data EnrichedDoc = RootEnr RootE Document
+                 | HoleEnrichedDoc
+                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
+                     deriving Show
 
 data RootE = RootE IDP List_Decl List_Decl HeliumTypeInfo
            | HoleRootE
@@ -180,7 +185,9 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 -- ClipDoc                                                              --
 --------------------------------------------------------------------------
 
-data ClipDoc = Clip_Root Root
+data ClipDoc = Clip_Document Document
+             | Clip_Root Root
+             | Clip_EnrichedDoc EnrichedDoc
              | Clip_RootE RootE
              | Clip_Decl Decl
              | Clip_Ident Ident
@@ -213,9 +220,14 @@ data ClipDoc = Clip_Root Root
 
 data Node = NoNode
           | Node_RootDoc Document Path
+          | Node_HoleDocument Document Path
+          | Node_ParseErrDocument Document Path
           | Node_Root Root Path
           | Node_HoleRoot Root Path
           | Node_ParseErrRoot Root Path
+          | Node_RootEnr EnrichedDoc Path
+          | Node_HoleEnrichedDoc EnrichedDoc Path
+          | Node_ParseErrEnrichedDoc EnrichedDoc Path
           | Node_RootE RootE Path
           | Node_HoleRootE RootE Path
           | Node_ParseErrRootE RootE Path
@@ -305,9 +317,15 @@ data Node = NoNode
 
 instance Show Node where
   show NoNode = "NoNode"
+  show (Node_RootDoc _ _) = "Node_RootDoc" 
+  show (Node_HoleDocument _ _) = "Node_HoleDocument" 
+  show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
   show (Node_Root _ _) = "Node_Root" 
   show (Node_HoleRoot _ _) = "Node_HoleRoot" 
   show (Node_ParseErrRoot _ _) = "Node_ParseErrRoot" 
+  show (Node_RootEnr _ _) = "Node_RootEnr" 
+  show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
+  show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 
   show (Node_RootE _ _) = "Node_RootE" 
   show (Node_HoleRootE _ _) = "Node_HoleRootE" 
   show (Node_ParseErrRootE _ _) = "Node_ParseErrRootE" 

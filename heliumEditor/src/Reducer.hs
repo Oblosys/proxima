@@ -19,8 +19,18 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
         let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
            -- dcls' = dcls -- use this assignment to ignore updates on id list
         in  (RootDoc (Root idp dcls'), state, enrDoc)
-  reductionSheetSimple state _ _ enrDoc@(RootEnr (RootE idp dcls idldcls _) _) = 
-    (RootDoc (Root idp dcls),state, enrDoc )
+  reductionSheetSimple state _ _ enrDoc =
+    case enrDoc of 
+      (RootEnr (RootE idp dcls idldcls _) _) -> -- if oldEnr is not RootEnr, then just copy from dcls
+        (RootDoc (Root idp dcls),state, enrDoc )
+      (RootEnr (ParseErrRootE p) _) ->
+        (RootDoc (ParseErrRoot p),state, enrDoc )
+      (RootEnr HoleRootE _) ->
+        (RootDoc HoleRoot,state, enrDoc )
+      HoleEnrichedDoc ->
+        (HoleDocument,state, enrDoc )
+      ParseErrEnrichedDoc prs ->
+        (ParseErrDocument prs,state, enrDoc )
 
 
 -- simple implementation of Eq for Decls, to be used in reducer when comparing which decls list was edited
