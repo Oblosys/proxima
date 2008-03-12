@@ -37,7 +37,6 @@ recognizeRootE = pStr $
       <*> parseIDListList_Decl {- <* (pStr' $ pStructural Node_List_Decl) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 
--- ?remove pStr from this parser?
 parseIDListList_Decl :: ListParser Document Node ClipDoc UserToken List_Decl
 parseIDListList_Decl = pPrs $
           (\dcls -> reuseList_Decl [] (Just $ toConsList_Decl dcls)) 
@@ -57,7 +56,6 @@ recognizeIDListDecl = pStr $
                   <$> pSym declHoleTk
 -}       
 
--- ?remove pStr from this parser?
 parseIdListIdent :: ListParser Document Node ClipDoc UserToken Ident
 parseIdListIdent =  pPrs $
           (\strTk -> reuseIdent [strTk] Nothing Nothing (Just $ tokenString strTk))
