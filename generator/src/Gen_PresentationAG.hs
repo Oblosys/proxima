@@ -151,8 +151,8 @@ genSemXML decls = genBanner "Sem functions for XML presentation" $
        genSemXMLDecl decl@(Decl (LHSListType _) _)     = genSemXMLListDecl decl
        genSemXMLDecl decl@(Decl (LHSConsListType _) _) = genSemXMLConsListDecl decl
 
-genSemXMLBasicDecl decls (Decl (LHSBasicType typeName) prods) =  
-  "SEM %1" <~ [typeName] : concat
+genSemXMLBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =  
+  "SEM %1" <~ [lhsTypeName] : concat
   [ [ "  | %1"
     , "      lhs.presXML = presentElementXML @lhs.focusD (Node_%1 @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
     ] <~ [ cnstrName, separateBy ", " $ map genField fields ] 
@@ -161,12 +161,15 @@ genSemXMLBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   ([ "  | Hole%1     lhs.presXML = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
    , "  | ParseErr%1 lhs.presXML = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
    , ""
-   ] <~ [typeName])
+   ] <~ [lhsTypeName])
  where genField (Field fieldName fieldType) = 
          (if isDeclaredType decls fieldType
           then "@%1.presXML"
-          else "presentPrimXML%2 @%1") <~ [ fieldName, genTypeAG fieldType]  
-
+          else if typeName fieldType `elem` primTypeNames
+          then "presentPrimXML%2 @%1"
+          else "presentXML%2 @%1"
+         ) <~ [ fieldName, genTypeAG fieldType]  
+       
 genSemXMLListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
@@ -196,8 +199,8 @@ genSemTree decls = genBanner "Sem functions for tree presentation" $
        genSemTreeDecl decl@(Decl (LHSListType _) _)     = genSemTreeListDecl decl
        genSemTreeDecl decl@(Decl (LHSConsListType _) _) = genSemTreeConsListDecl decl
 
-genSemTreeBasicDecl decls (Decl (LHSBasicType typeName) prods) =  
-  "SEM %1" <~ [typeName] : concat
+genSemTreeBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =  
+  "SEM %1" <~ [lhsTypeName] : concat
   [ [ "  | %1"
     , "      lhs.presTree = presentElementTree @lhs.focusD (Node_%1 @self @lhs.path) @lhs.path \"%1\" [ %2 ] "
     ] <~ [ cnstrName, separateBy ", " $ map genField fields ] 
@@ -206,11 +209,14 @@ genSemTreeBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   ([ "  | Hole%1     lhs.presTree = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
    , "  | ParseErr%1 lhs.presTree = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
    , ""
-   ] <~ [typeName])
+   ] <~ [lhsTypeName])
  where genField (Field fieldName fieldType) = 
          (if isDeclaredType decls fieldType
           then "@%1.presTree"
-          else "presentPrimTree%2 @%1") <~ [ fieldName, genTypeAG fieldType]  
+          else if typeName fieldType `elem` primTypeNames
+          then "presentPrimXML%2 @%1"
+          else "presentXML%2 @%1"
+         ) <~ [ fieldName, genTypeAG fieldType]  
 
 genSemTreeListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"

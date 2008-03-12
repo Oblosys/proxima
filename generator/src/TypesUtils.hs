@@ -17,7 +17,9 @@ import List
 
 delimiterLine = "----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----"
 
-primTypes = map LHSBasicType [ "Bool", "Int", "String", "Float" ]
+primTypeNames = [ "Bool", "Int", "String", "Float" ]
+
+primTypes = map LHSBasicType primTypeNames
 
 primTypeDecls = map primDecl [(LHSBasicType "Bool"), (LHSBasicType "Int"), (LHSBasicType "String"), (LHSBasicType "Float") ]
  where primDecl tpe = Decl tpe []
