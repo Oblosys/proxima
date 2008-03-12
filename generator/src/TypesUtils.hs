@@ -126,6 +126,8 @@ genIXPattern (Prod _ cnstrName idpFields fields) =
      , prefixBy " x" $ map show [0..length fields-1]
      ]
 
+removeDocumentDecl decls = filter ((/= "Document") . lhsTypeName . declLHSType) decls
+
 removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . lhsTypeName . declLHSType) decls
 
 addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)

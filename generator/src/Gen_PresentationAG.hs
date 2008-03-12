@@ -15,20 +15,18 @@ import TypesUtils
 
 generate :: DocumentType -> [String]
 generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genAttr docType
-                ++ genSemEnrichedDoc
+                ++ genAttr (removeDocumentDecl docType)
                 ++ genSem (addConsListDecls docTypeWithLists)
-                ++ genSemXML (addConsListDecls docTypeWithLists)
-                ++ genSemTree (addConsListDecls docTypeWithLists)
-  where docTypeWithLists = addListDecls docType
+                ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
+                ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
+  where docTypeWithoutEnrWithLists = addListDecls (removeEnrichedDocDecl (removeDocumentDecl docType))
+        docTypeWithLists = addListDecls (removeDocumentDecl docType)
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
 
+-- instead of removing documentDecl, we should actually recursively determine all used AG types from EnrichedDoc
+
 genDataType decls = genBanner "AG data type" $
-  [ "DATA EnrichedDoc"
-  , "  | RootEnr root:RootE document:Document"
-  , ""
-  ] ++
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) = 
          "DATA %1" <~ [genTypeName lhsType] :
@@ -41,30 +39,27 @@ genDataType decls = genBanner "AG data type" $
        genIDPField (Field fieldName fieldType) = fieldName ++ ":" ++ genIDPTypeAG  fieldType
        genField    (Field fieldName fieldType) = fieldName ++ ":" ++ genTypeAG fieldType
 
+-- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
   [ "ATTR %1" -- all types including lists and conslists
-  , "     [ focusD : FocusDoc |  pIdC : Int  | ]"
+  , "     [ focusD : FocusDoc path : {[Int]} |  pIdC : Int  | ]"
   , ""
-  , "ATTR %2" -- all types except EnrichedDoc including lists and conslists
-  , "     [ | path : {[Int]} | ]"
-  , ""
-  , "ATTR %3" -- all types except EnrichedDoc including lists
+  , "ATTR %2" -- all types except EnrichedDoc including lists
   , "     [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
   , ""
-  , "ATTR %4" -- all types including EnrichedDoc except lists and conslists
+  , "ATTR %3" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
-  , "ATTR %5" -- all lists and conslists
+  , "ATTR %4" -- all lists and conslists
   , "     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
-  , "ATTR %6"  -- all conslists and all types appearing in lists
+  , "ATTR %5"  -- all conslists and all types appearing in lists
   , "     [ ix : Int | | ]"
   , ""
-  , "ATTR %7"  -- all conslists
+  , "ATTR %6"  -- all conslists
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
   ] <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
-       , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addConsListDecls (addListDecls decls)))
        , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
        , separateBy " " $ getAllDeclaredTypeNames decls
        , separateBy " " $ listNames ++ consListNames
@@ -75,15 +70,6 @@ genAttr decls = genBanner "Attr declarations" $
        listNames = map ("List_"++) listTypeNames
        consListNames = map ("ConsList_"++) listTypeNames
  
--- todo declare these attrs with other attrs
-genSemEnrichedDoc = genBanner "Sem functions for EnrichedDoc" $
-  [ "SEM EnrichedDoc [ focusD : FocusDoc  | pIdC : Int | pres: Presentation_Doc_Node_Clip_Token  ]"
-  , "  | RootEnr"
-  , "      root.pIdC = @lhs.pIdC"
-  , "      lhs.pIdC  = @root.pIdC"
-  , "      root.path  = []"
-  ]
-
 genSem decls = genBanner "General sem functions" $
   concatMap genSemDecl decls
  where genSemDecl decl@(Decl (LHSBasicType _) _)    = genSemBasicDecl decls decl

@@ -16,14 +16,13 @@ import List
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genRankNode (addHolesParseErrs (docTypeWithLists))
-                ++ genPathNode (addHolesParseErrs (docTypeWithLists))
-                ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genParseXML (docTypeWithLists)
-                ++ genListUtils (removeEnrichedDocDecl docTypeWithLists)
+generate docType = genRankNode (addHolesParseErrs (docTypeWithLists)) -- with Document
+                ++ genPathNode (addHolesParseErrs (docTypeWithLists)) -- with Document
+                ++ genToXML    (addHolesParseErrs (addConsListDecls (removeDocumentDecl docTypeWithLists)))
+                ++ genParseXML  (removeDocumentDecl (docTypeWithLists))
+                ++ genListUtils docTypeWithLists
                 ++ genMisc
   where docTypeWithLists = addListDecls docType
-
 
 genRankNode decls = genBanner "rankNode" $
   "rankNode :: Node -> Int" :

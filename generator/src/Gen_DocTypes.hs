@@ -20,16 +20,10 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls (docTypeWith
                 ++ genClipDoc                     (docTypeWithLists ++ primTypeDecls)
                 ++ genNode     (addHolesParseErrs (docTypeWithLists))
                 ++ genShowNode (addHolesParseErrs (docTypeWithLists))
-  where docTypeWithLists = addListDecls docType
+  where docTypeWithLists = addListDecls docType  -- all are with Document
 
                 
 genDataType decls = genBanner "Proxima data type" $
-  [ "data Document = RootDoc Root deriving Show"
-  , "" 
-  , "data EnrichedDoc = RootEnr RootE Document"
-  , "                 | HoleEnr deriving Show"
-  , "" 
-  ] ++
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) =
          let typeName = genTypeName lhsType
@@ -47,7 +41,6 @@ genClipDoc decls = genBanner "ClipDoc" $
     
 genNode decls = genBanner "Node" $
   "data Node = NoNode" :
-  "          | Node_RootDoc Document Path" :  -- TODO: get rid of this one after popup hack is solved
   [ "          | Node_%1 %2 Path" <~ [cnstrName, genTypeName lhsType]
   | Decl lhsType prods <- decls, Prod _ cnstrName _ _ <- prods 
   ]

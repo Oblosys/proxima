@@ -19,8 +19,8 @@ TODO:
 
 -}
 generate :: DocumentType -> [String]
-generate docType = genClip (docTypeWithLists ++ primTypeDecls) ++
-                   genEditable (removeEnrichedDocDecl docTypeWithLists) ++
+generate docType = genClip (docTypeWithLists ++ primTypeDecls) ++ -- with Document
+                   genEditable docTypeWithLists ++
                    genEditableDocEnrichedDocAndPrims
  where docTypeWithLists = addListDecls docType
 
@@ -147,20 +147,8 @@ genEditableDecl (Decl (LHSListType typeName) prods) =
   , ""
   ] <~ [typeName]
 
--- TODO fix layout here and in other places
--- TODO don't want Document instance of editable (or maybe just get rid of document altogether)
 genEditableDocEnrichedDocAndPrims = genBanner "Editable instances for Document, EnrichedDoc and primitive types" $
-  [ "instance Editable Document Document Node ClipDoc UserToken where"
-  , "  -- paths start below RootDoc, so on traversing the RootDoc constructor p is not modified"
-  , "  select p (RootDoc x) = select p x"
-  , "  paste p c (RootDoc x) = RootDoc $ paste p c x"
-  , "  hole = error \"internal error: hole document accessed\""
-  , "  parseErr = error \"internal error: parseErr document accessed\""
-  , "  isList _ = False"
-  , "  insertList _ _ _ = Clip_Nothing"
-  , "  removeList _ _ = Clip_Nothing"
-  , ""
-  , "instance Editable Int Document Node ClipDoc UserToken where"
+  [ "instance Editable Int Document Node ClipDoc UserToken where"
   , "  select [] x = Clip_Int x"
   , "  select _  _ = Clip_Nothing"
   , "  paste [] (Clip_Int c) x = c"
