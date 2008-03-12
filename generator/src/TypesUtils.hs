@@ -129,8 +129,6 @@ genIXPattern (Prod _ cnstrName idpFields fields) =
 
 removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . lhsTypeName . declLHSType) decls
 
-removeRootDecl decls = filter ((/="Root") . lhsTypeName . declLHSType) decls
-
 addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)
  where genListDecl tpe = Decl (LHSListType $ typeName tpe) 
                            [ Prod ListProd ("List_"++typeName tpe) [] [Field "elts" (BasicType ("ConsList_"++typeName tpe))] ]
