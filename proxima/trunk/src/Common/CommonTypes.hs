@@ -21,18 +21,17 @@ import System.IO.Unsafe
 instance Show (a -> b) where
   show _ = "function: (a -> b)"
 
+type Path = [Int]
 
--- Necessary to create Locators with NoNode, without importing DocTypes.
--- Putting Node in a Maybe would also work, but causes more pattern matching.
+data PathDoc = PathD Path
+             | NoPathD deriving (Show, Eq, Ord)
+
 class (Eq node, Ord node, Show node) => DocNode node where
   noNode :: node
+  pathNode :: node -> PathDoc
   
+-- This class allows us to access NoNode and the (Node_ .. path) in the generic part of Proxima
 -- Eq and Ord are here to reduce the number of constraints in the types
-
--- in DocTypes, there is a class HasPath, which is also instantiated for Node. But since we don't
--- want to import DocTypes everywhere (and HasPath depends on it) we cannot combine the classes easily.
-
-type Path = [Int]
 
 type Color = (Int,Int,Int)
 
