@@ -13,12 +13,12 @@ data UserToken = KeyTk String  -- StrTk is for keywords, so eq takes the string 
                | UIdentTk
                | OpTk
                | SymTk deriving (Show, Eq, Ord)
+
+type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
                
 data HeliumMessage =
          HMessage [String] 
        | HError [String] [PathDoc] [PathDoc] [PathDoc] deriving Show
-
-type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -31,11 +31,6 @@ data Document = RootDoc Root
               | HoleDocument
               | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
                   deriving Show
-
-data Dummy = Dummy Root Dummy
-           | HoleDummy
-           | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
-               deriving Show
 
 data EnrichedDoc = RootEnr RootE HeliumTypeInfo Document
                  | HoleEnrichedDoc
@@ -191,7 +186,6 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 --------------------------------------------------------------------------
 
 data ClipDoc = Clip_Document Document
-             | Clip_Dummy Dummy
              | Clip_EnrichedDoc EnrichedDoc
              | Clip_Root Root
              | Clip_RootE RootE
@@ -228,9 +222,6 @@ data Node = NoNode
           | Node_RootDoc Document Path
           | Node_HoleDocument Document Path
           | Node_ParseErrDocument Document Path
-          | Node_Dummy Dummy Path
-          | Node_HoleDummy Dummy Path
-          | Node_ParseErrDummy Dummy Path
           | Node_RootEnr EnrichedDoc Path
           | Node_HoleEnrichedDoc EnrichedDoc Path
           | Node_ParseErrEnrichedDoc EnrichedDoc Path
@@ -329,9 +320,6 @@ instance Show Node where
   show (Node_RootDoc _ _) = "Node_RootDoc" 
   show (Node_HoleDocument _ _) = "Node_HoleDocument" 
   show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
-  show (Node_Dummy _ _) = "Node_Dummy" 
-  show (Node_HoleDummy _ _) = "Node_HoleDummy" 
-  show (Node_ParseErrDummy _ _) = "Node_ParseErrDummy" 
   show (Node_RootEnr _ _) = "Node_RootEnr" 
   show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
   show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 

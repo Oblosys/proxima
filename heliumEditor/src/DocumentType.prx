@@ -1,8 +1,3 @@
-data Dummy = Dummy Root Dummy  -- necessary because of design error in generator
-
--- Don't remove the declaration above
-
-
 data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document
 -- document ref is for popups only
 

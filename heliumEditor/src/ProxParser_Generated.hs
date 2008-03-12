@@ -16,12 +16,6 @@ import DocUtils_Generated
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
-reuseDummy :: [Token doc Node clip token] -> Maybe Root -> Maybe Dummy -> Dummy
-reuseDummy nodes ma0 ma1
-  = case extractFromTokens extractDummy defaultDummy nodes of
-           (Dummy a0 a1) -> genericReuse2 Dummy a0 a1 ma0 ma1
-           _ -> error "Internal error:ProxParser_Generated.reuseDummy"
-
 reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
 reuseRootEnr nodes ma0 ma1 ma2
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
@@ -305,10 +299,6 @@ reuseList_Item nodes ma0
 -- extract functions                                                    --
 --------------------------------------------------------------------------
 
-extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (Node_Dummy x@(Dummy _ _) _)) = Just x
-extractDummy _ = Nothing
-
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
 extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _ _) _)) = Just x
 extractRootEnr _ = Nothing
@@ -499,9 +489,6 @@ extractList_Item _ = Nothing
 --------------------------------------------------------------------------
 -- default functions                                                    --
 --------------------------------------------------------------------------
-
-defaultDummy :: Dummy
-defaultDummy = Dummy hole hole
 
 defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr hole hole hole

@@ -8,6 +8,7 @@ import Evaluation.DocumentEdit
 import Evaluation.DocUtils
 import Presentation.PresTypes
 
+-- HeliumTypeInfo is not a ProximaType, so we need to give an Editable instance
 instance Editable HeliumTypeInfo Document Node ClipDoc UserToken where
   hole =  ([],[],[])
   isList _ = False
@@ -22,7 +23,6 @@ instance Editable HeliumTypeInfo Document Node ClipDoc UserToken where
 
 instance Clip ClipDoc where
   arityClip Clip_Nothing = -1
-  arityClip (Clip_Dummy x) = arity x
   arityClip (Clip_EnrichedDoc x) = arity x
   arityClip (Clip_Root x) = arity x
   arityClip (Clip_RootE x) = arity x
@@ -50,7 +50,6 @@ instance Clip ClipDoc where
   arityClip (Clip_Float x) = arity x
 
   alternativesClip Clip_Nothing = []
-  alternativesClip (Clip_Dummy x) = alternatives x
   alternativesClip (Clip_EnrichedDoc x) = alternatives x
   alternativesClip (Clip_Root x) = alternatives x
   alternativesClip (Clip_RootE x) = alternatives x
@@ -78,7 +77,6 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Float x) = alternatives x
 
   holeClip Clip_Nothing = Clip_Nothing
-  holeClip (Clip_Dummy x) = Clip_Dummy hole
   holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
   holeClip (Clip_Root x) = Clip_Root hole
   holeClip (Clip_RootE x) = Clip_RootE hole
@@ -106,7 +104,6 @@ instance Clip ClipDoc where
   holeClip (Clip_Float x) = Clip_Float hole
 
   isListClip Clip_Nothing = False
-  isListClip (Clip_Dummy x) = isList x
   isListClip (Clip_EnrichedDoc x) = isList x
   isListClip (Clip_Root x) = isList x
   isListClip (Clip_RootE x) = isList x
@@ -134,7 +131,6 @@ instance Clip ClipDoc where
   isListClip (Clip_Float x) = isList x
 
   insertListClip i c Clip_Nothing = Clip_Nothing
-  insertListClip i c (Clip_Dummy x) = insertList i c x
   insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
   insertListClip i c (Clip_Root x) = insertList i c x
   insertListClip i c (Clip_RootE x) = insertList i c x
@@ -162,7 +158,6 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Float x) = insertList i c x
 
   removeListClip i Clip_Nothing = Clip_Nothing
-  removeListClip i (Clip_Dummy x) = removeList i x
   removeListClip i (Clip_EnrichedDoc x) = removeList i x
   removeListClip i (Clip_Root x) = removeList i x
   removeListClip i (Clip_RootE x) = removeList i x
@@ -195,33 +190,6 @@ instance Clip ClipDoc where
 --------------------------------------------------------------------------
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
-
-instance Editable Dummy Document Node ClipDoc UserToken where
-  select [] x = Clip_Dummy x
-  select (0:p) (Dummy x0 x1) = select p x0
-  select (1:p) (Dummy x0 x1) = select p x1
-  select _ _ = Clip_Nothing
-
-  paste [] (Clip_Dummy c) _ = c
-  paste [] c x = debug Err ("Type error: pasting "++show c++" on Dummy") x
-  paste (0:p) c (Dummy x0 x1) = Dummy (paste p c x0) x1
-  paste (1:p) c (Dummy x0 x1) = Dummy x0 (paste p c x1)
-  paste _ _ x = x
-
-  alternatives _ = [ ("Dummy {Root} {Dummy} "  , Clip_Dummy $ Dummy hole hole)
-                   ,("{Dummy}", Clip_Dummy hole)
-                   ]
-
-  arity (Dummy x0 x1) = 2
-  arity _                        = 0
-
-  parseErr = ParseErrDummy
-
-  hole = HoleDummy
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
 
 instance Editable Root Document Node ClipDoc UserToken where
   select [] x = Clip_Root x
