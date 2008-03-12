@@ -4,11 +4,6 @@ module Evaluation.DocumentEdit where
 
 Defines document edit (structure edit) functions
 
-
-Observations:
-
-Document root is different from the rest of the elements. It cannot be selected or deleted, so no hole is needed either.
-
 -}
 
 import Common.CommonTypes
@@ -20,8 +15,8 @@ import List
 import Debug.Trace
 
 class Editable a doc node clip token | a -> doc node clip token where
-  select :: PathD -> a -> clip
-  paste :: PathD -> clip -> a -> a
+  select :: Path -> a -> clip
+  paste :: Path -> clip -> a -> a
   alternatives :: a -> [ (String, clip) ]
   arity :: a -> Int
   parseErr :: Presentation doc node clip token -> a
@@ -87,6 +82,7 @@ editPasteD :: Editable doc doc node clip token => DocumentLevel doc clip -> Docu
 editPasteD (DocumentLevel doc NoPathD clip)         = DocumentLevel doc NoPathD clip
 editPasteD (DocumentLevel doc pd@(PathD pth) clip)  = DocumentLevel (pasteD pth clip doc) pd clip
 
+
 -- menuD is probably not a good name
 menuD :: (Editable doc doc node clip token, Clip clip) => PathDoc -> doc -> [ (String, DocumentLevel doc clip -> DocumentLevel doc clip) ]
 menuD NoPathD _              = []
@@ -111,13 +107,13 @@ menuD path@(PathD p) d =
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
 
 
-selectD :: Editable doc doc node clip token => PathD -> doc -> clip
+selectD :: Editable doc doc node clip token => Path -> doc -> clip
 selectD p doc = select p doc
 
-pasteD :: Editable doc doc node clip token => PathD -> clip -> doc -> doc
+pasteD :: Editable doc doc node clip token => Path -> clip -> doc -> doc
 pasteD p c doc = paste p c doc
 
-insertListD :: (Show clip,Clip clip, Editable doc doc node clip token) => PathD -> Int -> clip -> doc -> doc
+insertListD :: (Show clip,Clip clip, Editable doc doc node clip token) => Path -> Int -> clip -> doc -> doc
 insertListD path index clip doc = 
   let list = selectD path doc
   in  if isListClip list
@@ -127,16 +123,16 @@ insertListD path index clip doc =
       else debug Err ("DocumentEdit.insertBeforeD on non-list at "++show path++show clip) $ doc
 
 -- ugly mix of levels, find out how to do it nicely
-deleteD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> (doc, PathDoc)
+deleteD :: (Editable doc doc node clip token, Clip clip) => Path -> doc -> (doc, PathDoc)
 deleteD p d = if not (null p) && isListClip (selectD (init p) d) -- if parent is list, then delete is remove from list
               then (pasteD (init p) (removeListClip (last p) (selectD (init p) d)) d, NoPathD)
               else let newhole = holeClip (selectD p d)
                    in  (pasteD p newhole d, PathD p) 
 
-arityD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> Int
+arityD :: (Editable doc doc node clip token, Clip clip) => Path -> doc -> Int
 arityD p d = arityClip (select p d)
 
-alternativesD :: (Editable doc doc node clip token, Clip clip) => PathD -> doc -> [ (String, clip) ]
+alternativesD :: (Editable doc doc node clip token, Clip clip) => Path -> doc -> [ (String, clip) ]
 alternativesD p d = alternativesClip (select p d)
 
  
