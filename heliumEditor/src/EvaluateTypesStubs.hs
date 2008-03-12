@@ -4,7 +4,7 @@ module EvaluateTypesStubs where
 
 import Evaluation.DocTypes
 import DocTypes_Generated
-
+import Common.CommonTypes
 import Common.DebugLevels
 --import IOExts -- evaluate has IO, so the unsafePerformIO is only temporary
 
