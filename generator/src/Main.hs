@@ -18,6 +18,9 @@ TODO:
 - put all standard code in the generator (e.g. editable instances for prim types)
   This way the non-generated part consists only of user-specified code.
 
+- make a record with all variations of declarations (with lists, with parse errs, etc.)
+    general functions like getDeclaredTypeNames can get the record and therefore do not depend on
+    what kind of decls are passed to it.
 -}
 
 main =

@@ -78,11 +78,10 @@ fieldNameFromType tpe = case typeName tpe of
                           []     -> error "Types.genFieldName: empty typeName"
                           (c:cs) -> toLower c : cs ++ if isListType tpe then "s" else ""
 
--- return whether the type was declared (explicitly or implicitly as a list)
+-- return whether the type was declared (explicitly or implicitly as a list or a primitive)
 isDeclaredType :: DocumentType -> Type -> Bool
-isDeclaredType decls (BasicType typeName') =  typeName' `notElem` map lhsTypeName primTypes
 isDeclaredType decls (ListType _) = True -- no check, since for all lists, a declaration is generated
-isDeclaredType decls (CompositeType _) = False
+isDeclaredType decls tpe = typeName tpe `elem` getAllDeclaredTypeNames decls
 
 genIDPType (BasicType typeName)     = typeName
 genIDPType (ListType typeName)      = "["++typeName++"]"
