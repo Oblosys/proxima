@@ -292,7 +292,7 @@ SEM Vertex
       lhs.vertexIDNames = [(@id, @name)]
 
 {
-deleteAtPath :: PathD -> UpdateDoc Document ClipDoc
+deleteAtPath :: Path -> UpdateDoc Document ClipDoc
 deleteAtPath pth =
    \(DocumentLevel d _ cl) ->
      editCutD (DocumentLevel d (PathD pth) cl)
@@ -343,14 +343,14 @@ insertAtHeadSubsection listPath = insertElementAtHead listPath $ newSubsection
 insertAtHeadSubsubsection listPath = insertElementAtHead listPath $ newSubsubsection
 
 -- PRECONDITION: path points to a list element of the same type as clip
-addElementAfter :: PathD -> ClipDoc -> UpdateDoc Document ClipDoc
+addElementAfter :: Path -> ClipDoc -> UpdateDoc Document ClipDoc
 addElementAfter path clip = 
   \(DocumentLevel d pth cl) ->
     (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
 
 -- PRECONDITION: path points to a list of elements of the same type as clip
 -- NB path points to the list, rather than to an element.
-insertElementAtHead :: PathD -> ClipDoc -> UpdateDoc Document ClipDoc
+insertElementAtHead :: Path -> ClipDoc -> UpdateDoc Document ClipDoc
 insertElementAtHead listPath clip = 
   \(DocumentLevel d pth cl) ->
     (DocumentLevel (insertListD listPath 0 clip d) pth cl)
