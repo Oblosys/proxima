@@ -11,25 +11,6 @@ import DocTypes_Generated
 --import EvaluateTypes
 import EvaluateTypesStubs
 
-
-{-
-
-
-make Module element, so Root can get rid of ParseErr and Hole
-
-fix up translate and present modules
- caps in ..lvl: eg docLvl instead of doclvl
- nice case
- clear handling of set and skip
-
-BUG Nil in decls kills the entire presentation
-
-What node types should exist and where to define them?
-
-top level Enr should be called EnrichedDoc (in node, makestructural, etc)
-
-
--}
 instance EvaluationSheet Document EnrichedDoc ClipDoc where
   evaluationSheet state oldDocLvl (EnrichedDocLevel oldEnr oldEnrFocus) 
                         docEdit docLvl@(DocumentLevel doc docFocus clip) = 
