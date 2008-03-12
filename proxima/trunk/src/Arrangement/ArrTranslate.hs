@@ -16,7 +16,7 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
-unArrange :: (HasPath node, Show node) => LocalStateArr -> ArrangementLevel doc node clip -> LayoutLevel doc node clip ->
+unArrange :: DocNode node => LocalStateArr -> ArrangementLevel doc node clip -> LayoutLevel doc node clip ->
              EditArrangement (DocumentLevel doc clip) ->
              (EditLayout (DocumentLevel doc clip) doc node clip, LocalStateArr, ArrangementLevel doc node clip)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
@@ -93,7 +93,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   
   
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: (Show node, HasPath node)  => state -> ArrangementLevel doc node clip ->
+mouseDownDoc :: DocNode node  => state -> ArrangementLevel doc node clip ->
                 Layout doc node clip -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip, state, ArrangementLevel doc node clip)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
