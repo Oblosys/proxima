@@ -16,12 +16,6 @@ import DocUtils_Generated
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
-reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe Document -> EnrichedDoc
-reuseRootEnr nodes ma0 ma1
-  = case extractFromTokens extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
-           _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
-
 reuseRoot :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Root
 reuseRoot nodes ma0 ma1
   = case extractFromTokens extractRoot defaultRoot nodes of
@@ -299,10 +293,6 @@ reuseList_Item nodes ma0
 -- extract functions                                                    --
 --------------------------------------------------------------------------
 
-extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
-extractRootEnr _ = Nothing
-
 extractRoot :: Maybe Node -> Maybe Root
 extractRoot (Just (Node_Root x@(Root _ _) _)) = Just x
 extractRoot _ = Nothing
@@ -489,9 +479,6 @@ extractList_Item _ = Nothing
 --------------------------------------------------------------------------
 -- default functions                                                    --
 --------------------------------------------------------------------------
-
-defaultRootEnr :: EnrichedDoc
-defaultRootEnr = RootEnr hole hole
 
 defaultRoot :: Root
 defaultRoot = Root NoIDP hole

@@ -27,15 +27,10 @@ data HeliumMessage =
 -- Proxima data type                                                    --
 --------------------------------------------------------------------------
 
-data Document = RootDoc Root
-              | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
-                  deriving Show
+data Document = RootDoc Root deriving Show
 
 data EnrichedDoc = RootEnr RootE Document
-                 | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
-                     deriving Show
+                 | HoleEnr deriving Show
 
 data Root = Root IDP List_Decl
           | HoleRoot
@@ -185,9 +180,7 @@ data ConsList_Item = Cons_Item Item ConsList_Item
 -- ClipDoc                                                              --
 --------------------------------------------------------------------------
 
-data ClipDoc = Clip_Document Document
-             | Clip_EnrichedDoc EnrichedDoc
-             | Clip_Root Root
+data ClipDoc = Clip_Root Root
              | Clip_RootE RootE
              | Clip_Decl Decl
              | Clip_Ident Ident
@@ -201,15 +194,15 @@ data ClipDoc = Clip_Document Document
              | Clip_ItemList ItemList
              | Clip_ListType ListType
              | Clip_Item Item
-             | Clip_Bool Bool
-             | Clip_Int Int
-             | Clip_String String
-             | Clip_Float Float
              | Clip_List_Decl List_Decl
              | Clip_List_Alt List_Alt
              | Clip_List_Exp List_Exp
              | Clip_List_Slide List_Slide
              | Clip_List_Item List_Item
+             | Clip_Bool Bool
+             | Clip_Int Int
+             | Clip_String String
+             | Clip_Float Float
              | Clip_Nothing deriving Show
 
 
@@ -220,11 +213,6 @@ data ClipDoc = Clip_Document Document
 
 data Node = NoNode
           | Node_RootDoc Document Path
-          | Node_HoleDocument Document Path
-          | Node_ParseErrDocument Document Path
-          | Node_RootEnr EnrichedDoc Path
-          | Node_HoleEnrichedDoc EnrichedDoc Path
-          | Node_ParseErrEnrichedDoc EnrichedDoc Path
           | Node_Root Root Path
           | Node_HoleRoot Root Path
           | Node_ParseErrRoot Root Path
@@ -317,12 +305,6 @@ data Node = NoNode
 
 instance Show Node where
   show NoNode = "NoNode"
-  show (Node_RootDoc _ _) = "Node_RootDoc" 
-  show (Node_HoleDocument _ _) = "Node_HoleDocument" 
-  show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
-  show (Node_RootEnr _ _) = "Node_RootEnr" 
-  show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
-  show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 
   show (Node_Root _ _) = "Node_Root" 
   show (Node_HoleRoot _ _) = "Node_HoleRoot" 
   show (Node_ParseErrRoot _ _) = "Node_ParseErrRoot" 

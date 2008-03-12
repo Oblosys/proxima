@@ -6,8 +6,6 @@
 
 DATA EnrichedDoc
   | RootEnr root:RootE document:Document
-  | HoleEnrichedDoc
-  | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 
 DATA Root
   | Root idP:IDP decls:List_Decl
@@ -157,7 +155,7 @@ DATA ConsList_Item
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
+ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
      [ focusD : FocusDoc |  pIdC : Int  | ]
 
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
@@ -166,7 +164,7 @@ ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Sli
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
      [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR EnrichedDoc Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
+ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
@@ -185,15 +183,11 @@ ATTR ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
 -- Sem functions for EnrichedDoc                                        --
 --------------------------------------------------------------------------
 
-SEM EnrichedDoc
+SEM EnrichedDoc [ focusD : FocusDoc  | pIdC : Int | pres: Presentation_Doc_Node_Clip_Token  ]
   | RootEnr
       root.pIdC = @lhs.pIdC
       lhs.pIdC  = @root.pIdC
-  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self []) []
-  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self []) @presentation
-
-SEM EnrichedDoc
-  | RootEnr root.path  = []
+      root.path  = []
 
 
 

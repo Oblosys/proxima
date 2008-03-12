@@ -29,12 +29,9 @@ evalTypes (RootEnr (RootE idp dcls idlDcls oldTypes) doc) =
 
 
 getOldTypeInfo (RootEnr (RootE _ _ _ oldTypes) _) = oldTypes 
-getOldTypeInfo (HoleEnrichedDoc)                    = ([],[],[])
-getOldTypeInfo (ParseErrEnrichedDoc _)            = ([],[],[])
+getOldTypeInfo HoleEnr = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
 evalDoc :: LayerStateEval -> EnrichedDoc -> DocumentLevel Document clip -> EnrichedDoc
 evalDoc state enr (DocumentLevel doc@(RootDoc (ParseErrRoot prs)) _ _) = RootEnr (ParseErrRootE prs) doc
 evalDoc state enr (DocumentLevel doc@(RootDoc (Root idp dcls)) _ _) = RootEnr (RootE idp dcls dcls (getOldTypeInfo enr)) doc
-evalDoc state enr (DocumentLevel (HoleDocument) _ _) = HoleEnrichedDoc
-evalDoc state enr (DocumentLevel (ParseErrDocument pr) _ _) = ParseErrEnrichedDoc pr

@@ -1,6 +1,3 @@
-data EnrichedDoc = RootEnr root:RootE Document
--- document ref is for popups only
-
 data Root = Root decls:[Decl] { idP:IDP } 
 
 data RootE = RootE decls:[Decl] idListDecls:[Decl] HeliumTypeInfo { idP:IDP }
