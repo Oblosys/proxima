@@ -16,8 +16,8 @@ import List
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genRankNode (addHolesParseErrs (documentDecl : docTypeWithLists))
-                ++ genPathNode (addHolesParseErrs (documentDecl : docTypeWithLists))
+generate docType = genRankNode (addHolesParseErrs (docTypeWithLists))
+                ++ genPathNode (addHolesParseErrs (docTypeWithLists))
                 ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genParseXML (docTypeWithLists)
                 ++ genListUtils (removeEnrichedDocDecl docTypeWithLists)

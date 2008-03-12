@@ -24,8 +24,6 @@ primTypes = map LHSBasicType primTypeNames
 primTypeDecls = map primDecl [(LHSBasicType "Bool"), (LHSBasicType "Int"), (LHSBasicType "String"), (LHSBasicType "Float") ]
  where primDecl tpe = Decl tpe []
  
-documentDecl = Decl (LHSBasicType "Document") [Prod ExplicitProd "RootDoc" [] [Field "root" (BasicType "Root")]]
-
 type DocumentType = [Decl]
 
 data Decl = Decl { declLHSType :: LHSType, productions :: [Prod] } deriving Show

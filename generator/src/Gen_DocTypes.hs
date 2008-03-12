@@ -16,14 +16,20 @@ import Char
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genDataType (addHolesParseErrs (addConsListDecls (documentDecl : docTypeWithLists)))
-                ++ genClipDoc                     (documentDecl : docTypeWithLists ++ primTypeDecls)
-                ++ genNode     (addHolesParseErrs (documentDecl : docTypeWithLists))
-                ++ genShowNode (addHolesParseErrs (documentDecl : docTypeWithLists))
+generate docType = genDataType (addHolesParseErrs (addConsListDecls (docTypeWithLists)))
+                ++ genClipDoc                     (docTypeWithLists ++ primTypeDecls)
+                ++ genNode     (addHolesParseErrs (docTypeWithLists))
+                ++ genShowNode (addHolesParseErrs (docTypeWithLists))
   where docTypeWithLists = addListDecls docType
 
                 
 genDataType decls = genBanner "Proxima data type" $
+  [ "data Document = RootDoc Root deriving Show"
+  , "" 
+  , "data EnrichedDoc = RootEnr RootE Document"
+  , "                 | HoleEnr deriving Show"
+  , "" 
+  ] ++
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) =
          let typeName = genTypeName lhsType
@@ -41,6 +47,7 @@ genClipDoc decls = genBanner "ClipDoc" $
     
 genNode decls = genBanner "Node" $
   "data Node = NoNode" :
+  "          | Node_RootDoc Document Path" :  -- TODO: get rid of this one after popup hack is solved
   [ "          | Node_%1 %2 Path" <~ [cnstrName, genTypeName lhsType]
   | Decl lhsType prods <- decls, Prod _ cnstrName _ _ <- prods 
   ]
