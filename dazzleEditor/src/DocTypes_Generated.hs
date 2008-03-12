@@ -30,11 +30,6 @@ data EnrichedDoc = RootEnr Root Document
                  | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                      deriving Show
 
-data Dummy = Dummy Dummy Bool
-           | HoleDummy
-           | ParseErrDummy (Presentation Document Node ClipDoc UserToken)
-               deriving Show
-
 data Root = Root Graph String List_Section
           | HoleRoot
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
@@ -173,7 +168,6 @@ data ConsList_Edge = Cons_Edge Edge ConsList_Edge
 
 data ClipDoc = Clip_Document Document
              | Clip_EnrichedDoc EnrichedDoc
-             | Clip_Dummy Dummy
              | Clip_Root Root
              | Clip_Section Section
              | Clip_Subsection Subsection
@@ -212,9 +206,6 @@ data Node = NoNode
           | Node_RootEnr EnrichedDoc Path
           | Node_HoleEnrichedDoc EnrichedDoc Path
           | Node_ParseErrEnrichedDoc EnrichedDoc Path
-          | Node_Dummy Dummy Path
-          | Node_HoleDummy Dummy Path
-          | Node_ParseErrDummy Dummy Path
           | Node_Root Root Path
           | Node_HoleRoot Root Path
           | Node_ParseErrRoot Root Path
@@ -293,9 +284,6 @@ instance Show Node where
   show (Node_RootEnr _ _) = "Node_RootEnr" 
   show (Node_HoleEnrichedDoc _ _) = "Node_HoleEnrichedDoc" 
   show (Node_ParseErrEnrichedDoc _ _) = "Node_ParseErrEnrichedDoc" 
-  show (Node_Dummy _ _) = "Node_Dummy" 
-  show (Node_HoleDummy _ _) = "Node_HoleDummy" 
-  show (Node_ParseErrDummy _ _) = "Node_ParseErrDummy" 
   show (Node_Root _ _) = "Node_Root" 
   show (Node_HoleRoot _ _) = "Node_HoleRoot" 
   show (Node_ParseErrRoot _ _) = "Node_ParseErrRoot" 

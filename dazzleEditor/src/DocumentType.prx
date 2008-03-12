@@ -1,11 +1,6 @@
 data EnrichedDoc = RootEnr root:Root Document
 -- document ref is for popups only
 
-data Dummy = Dummy Dummy Bool -- necessary because of design error in generator
--- data Dummy = Dummy [Dummy] String Bool Int -- necessary because of design error in generator
-
--- Don't remove the declarations above
-
 data Root = Root graph:Graph title:String sections:[Section]
 
 data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection]

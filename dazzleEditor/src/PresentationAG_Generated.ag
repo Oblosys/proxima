@@ -9,11 +9,6 @@ DATA EnrichedDoc
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 
-DATA Dummy
-  | Dummy dummy:Dummy bool:Bool
-  | HoleDummy
-  | ParseErrDummy presentation:{(Presentation Document Node ClipDoc UserToken)}
-
 DATA Root
   | Root graph:Graph title:String sections:List_Section
   | HoleRoot
@@ -150,16 +145,16 @@ DATA ConsList_Edge
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Dummy Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
      [ focusD : FocusDoc |  pIdC : Int  | ]
 
-ATTR Dummy Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
      [ | path : {[Int]} | ]
 
-ATTR Dummy Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
+ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
      [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR EnrichedDoc Dummy Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
@@ -193,14 +188,6 @@ SEM EnrichedDoc
 --------------------------------------------------------------------------
 -- General sem functions                                                --
 --------------------------------------------------------------------------
-
-SEM Dummy
-  | Dummy 
-      dummy.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @dummy.pIdC
-      dummy.path  = @lhs.path++[0]
-  | HoleDummy     lhs.pres = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.pres = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
 
 SEM Root
   | Root 
@@ -493,12 +480,6 @@ SEM List_Edge
 -- Sem functions for XML presentation                                   --
 --------------------------------------------------------------------------
 
-SEM Dummy
-  | Dummy
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Dummy @self @lhs.path) @lhs.path "Dummy" [ @dummy.presXML, presentPrimXMLBool @bool ] 
-  | HoleDummy     lhs.presXML = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presXML = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
-
 SEM Root
   | Root
       lhs.presXML = presentElementXML @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presXML, presentPrimXMLString @title, @sections.presXML ] 
@@ -694,12 +675,6 @@ SEM ConsList_Edge
 --------------------------------------------------------------------------
 -- Sem functions for tree presentation                                  --
 --------------------------------------------------------------------------
-
-SEM Dummy
-  | Dummy
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Dummy @self @lhs.path) @lhs.path "Dummy" [ @dummy.presTree, presentPrimTreeBool @bool ] 
-  | HoleDummy     lhs.presTree = presHole @lhs.focusD "Dummy" (Node_HoleDummy @self @lhs.path) @lhs.path
-  | ParseErrDummy lhs.presTree = presParseErr (Node_ParseErrDummy @self @lhs.path) @presentation
 
 SEM Root
   | Root

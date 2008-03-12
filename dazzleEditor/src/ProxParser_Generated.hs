@@ -21,12 +21,6 @@ reuseRootEnr nodes ma0 ma1
            (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
-reuseDummy :: [Token doc Node clip token] -> Maybe Dummy -> Maybe Bool -> Dummy
-reuseDummy nodes ma0 ma1
-  = case extractFromTokens extractDummy defaultDummy nodes of
-           (Dummy a0 a1) -> genericReuse2 Dummy a0 a1 ma0 ma1
-           _ -> error "Internal error:ProxParser_Generated.reuseDummy"
-
 reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
 reuseRoot nodes ma0 ma1 ma2
   = case extractFromTokens extractRoot defaultRoot nodes of
@@ -188,10 +182,6 @@ extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
 extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
-extractDummy :: Maybe Node -> Maybe Dummy
-extractDummy (Just (Node_Dummy x@(Dummy _ _) _)) = Just x
-extractDummy _ = Nothing
-
 extractRoot :: Maybe Node -> Maybe Root
 extractRoot (Just (Node_Root x@(Root _ _ _) _)) = Just x
 extractRoot _ = Nothing
@@ -301,9 +291,6 @@ extractList_Edge _ = Nothing
 
 defaultRootEnr :: EnrichedDoc
 defaultRootEnr = RootEnr hole hole
-
-defaultDummy :: Dummy
-defaultDummy = Dummy hole hole
 
 defaultRoot :: Root
 defaultRoot = Root hole hole hole

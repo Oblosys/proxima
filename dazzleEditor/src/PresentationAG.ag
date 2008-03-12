@@ -473,7 +473,3 @@ SEM Dirty [ || ]
       lhs.pres = empty
   | Clean       
       lhs.pres = empty
-
-SEM Dummy [ || ] 
-  | Dummy       
-      lhs.pres = empty
