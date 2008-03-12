@@ -32,7 +32,7 @@ data Document = RootDoc Root
               | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
                   deriving Show
 
-data EnrichedDoc = RootEnr RootE HeliumTypeInfo Document
+data EnrichedDoc = RootEnr RootE Document
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                      deriving Show
@@ -42,7 +42,7 @@ data Root = Root IDP List_Decl
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
-data RootE = RootE IDP List_Decl List_Decl
+data RootE = RootE IDP List_Decl List_Decl HeliumTypeInfo
            | HoleRootE
            | ParseErrRootE (Presentation Document Node ClipDoc UserToken)
                deriving Show

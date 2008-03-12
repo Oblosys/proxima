@@ -17,7 +17,7 @@ initialDocument =
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
-    ; return $ RootDoc $ Root NoIDP $ ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents) {- [] -}
+    ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents))                                   
     }
     -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
     -- the proxima parser is used when the presented document is parsed.
@@ -26,6 +26,12 @@ initialDocument =
 toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
 
+
+presentXMLHeliumTypeInfo :: HeliumTypeInfo -> Presentation_Doc_Node_Clip_Token
+presentXMLHeliumTypeInfo x = text $ "<HeliumTypeInfo/>"
+
+presentTreeHeliumTypeInfo :: HeliumTypeInfo -> Presentation_Doc_Node_Clip_Token
+presentTreeHeliumTypeInfo x =  mkTreeLeaf False $ text $ "HeliumTypeInfo"
 
 
 -- initBoard and initPPPresentation are called from ProxParser
@@ -296,13 +302,13 @@ instance HasPath Node where
 -- toXML functions                                                      --
 --------------------------------------------------------------------------
 
-toXMLEnrichedDoc (RootEnr root heliumTypeInfo document) = Elt "RootEnr" [] $ [toXMLRootE root] ++ [toXMLHeliumTypeInfo heliumTypeInfo] ++ [toXMLDocument document]
+toXMLEnrichedDoc (RootEnr root document) = Elt "RootEnr" [] $ [toXMLRootE root] ++ [toXMLDocument document]
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
 toXMLEnrichedDoc (ParseErrEnrichedDoc presentation) = Elt "ParseErrEnrichedDoc" [] []
 toXMLRoot (Root _ decls) = Elt "Root" [] $ toXMLList_Decl decls
 toXMLRoot (HoleRoot) = Elt "HoleRoot" [] $ []
 toXMLRoot (ParseErrRoot presentation) = Elt "ParseErrRoot" [] []
-toXMLRootE (RootE _ decls idListDecls) = Elt "RootE" [] $ toXMLList_Decl decls ++ toXMLList_Decl idListDecls
+toXMLRootE (RootE _ decls idListDecls heliumTypeInfo) = Elt "RootE" [] $ toXMLList_Decl decls ++ toXMLList_Decl idListDecls ++ [toXMLHeliumTypeInfo heliumTypeInfo]
 toXMLRootE (HoleRootE) = Elt "HoleRootE" [] $ []
 toXMLRootE (ParseErrRootE presentation) = Elt "ParseErrRootE" [] []
 toXMLDecl (Decl _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool expanded] ++ [toXMLBool autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp]
@@ -400,11 +406,11 @@ toXMLConsList_Item Nil_Item             = []
 --------------------------------------------------------------------------
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
-parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_RootE <*> parseXML_HeliumTypeInfo <*> parseXML_Document<* endTag "RootEnr"
+parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_RootE <*> parseXML_Document<* endTag "RootEnr"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root NoIDP <$ startTag "Root" <*> parseXML_List_Decl<* endTag "Root"
 parseXML_RootE = parseXMLCns_RootE <?|> parseHoleAndParseErr "RootE" HoleRootE
-parseXMLCns_RootE = RootE NoIDP <$ startTag "RootE" <*> parseXML_List_Decl <*> parseXML_List_Decl<* endTag "RootE"
+parseXMLCns_RootE = RootE NoIDP <$ startTag "RootE" <*> parseXML_List_Decl <*> parseXML_List_Decl <*> parseXML_HeliumTypeInfo<* endTag "RootE"
 parseXML_Decl = parseXMLCns_Decl <?|> parseXMLCns_BoardDecl <?|> parseXMLCns_PPPresentationDecl <?|> parseHoleAndParseErr "Decl" HoleDecl
 parseXMLCns_Decl = Decl NoIDP NoIDP NoIDP NoIDP <$ startTag "Decl" <*> parseXML_Bool <*> parseXML_Bool <*> parseXML_Ident <*> parseXML_Exp<* endTag "Decl"
 parseXMLCns_BoardDecl = BoardDecl NoIDP NoIDP <$ startTag "BoardDecl" <*> parseXML_Board<* endTag "BoardDecl"

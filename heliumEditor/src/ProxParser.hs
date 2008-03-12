@@ -26,15 +26,15 @@ import DocUtils_Generated
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
-          (\str root -> reuseRootEnr [str] (Just root) Nothing Nothing)
+          (\str root -> reuseRootEnr [str] (Just root) Nothing)
       <$> pSym (StructuralTk (Just $ Node_RootEnr HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
       <*> recognizeRootE
-  <|>    RootEnr (error "doc hole was parsed") (error "doc hole was parsed") (error "doc hole was parsed")
+  <|>    RootEnr (error "doc hole was parsed") (error "doc hole was parsed")
      <$ pStructural Node_HoleEnrichedDoc
 
 recognizeRootE :: ListParser Document Node ClipDoc UserToken RootE
 recognizeRootE = pStr $ 
-          (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls))
+          (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls) Nothing)
       <$> pStructural Node_RootE
       <*> parseIDListList_Decl {- <* (pStr' $ pStructural Node_List_Decl) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}

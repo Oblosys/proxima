@@ -16,10 +16,10 @@ import DocUtils_Generated
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
-reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe HeliumTypeInfo -> Maybe Document -> EnrichedDoc
-reuseRootEnr nodes ma0 ma1 ma2
+reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe Document -> EnrichedDoc
+reuseRootEnr nodes ma0 ma1
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0 a1 a2) -> genericReuse3 RootEnr a0 a1 a2 ma0 ma1 ma2
+           (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
 reuseRoot :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Root
@@ -28,10 +28,10 @@ reuseRoot nodes ma0 ma1
            (Root a0 a1) -> genericReuse2 Root a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
-reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
-reuseRootE nodes ma0 ma1 ma2
+reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> Maybe HeliumTypeInfo -> RootE
+reuseRootE nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractRootE defaultRootE nodes of
-           (RootE a0 a1 a2) -> genericReuse3 RootE a0 a1 a2 ma0 ma1 ma2
+           (RootE a0 a1 a2 a3) -> genericReuse4 RootE a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseRootE"
 
 reuseDecl :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
@@ -300,7 +300,7 @@ reuseList_Item nodes ma0
 --------------------------------------------------------------------------
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _ _) _)) = Just x
+extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
@@ -308,7 +308,7 @@ extractRoot (Just (Node_Root x@(Root _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractRootE :: Maybe Node -> Maybe RootE
-extractRootE (Just (Node_RootE x@(RootE _ _ _) _)) = Just x
+extractRootE (Just (Node_RootE x@(RootE _ _ _ _) _)) = Just x
 extractRootE _ = Nothing
 
 extractDecl :: Maybe Node -> Maybe Decl
@@ -491,13 +491,13 @@ extractList_Item _ = Nothing
 --------------------------------------------------------------------------
 
 defaultRootEnr :: EnrichedDoc
-defaultRootEnr = RootEnr hole hole hole
+defaultRootEnr = RootEnr hole hole
 
 defaultRoot :: Root
 defaultRoot = Root NoIDP hole
 
 defaultRootE :: RootE
-defaultRootE = RootE NoIDP hole hole
+defaultRootE = RootE NoIDP hole hole hole
 
 defaultDecl :: Decl
 defaultDecl = Decl NoIDP NoIDP NoIDP NoIDP hole hole hole hole

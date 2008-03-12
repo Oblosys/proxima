@@ -14,14 +14,14 @@ import Text.ParserCombinators.Parsec
 instance ReductionSheet Document EnrichedDoc ClipDoc where
 
    -- just copy the enriched document
-  reductionSheetSimple state (RootEnr (RootE _  _     oldIdlDcls) _ _) _ 
-                      enrDoc@(RootEnr (RootE idp dcls idldcls)    _ _) =
+  reductionSheetSimple state (RootEnr (RootE _  _     oldIdlDcls _) _) _ 
+                      enrDoc@(RootEnr (RootE idp dcls idldcls _)    _) =
         let dcls' = if oldIdlDcls == idldcls then dcls else idldcls -- if idlist has been edited, take dcls from idlist
            -- dcls' = dcls -- use this assignment to ignore updates on id list
         in  (RootDoc (Root idp dcls'), state, enrDoc)
   reductionSheetSimple state _ _ enrDoc =
     case enrDoc of 
-      (RootEnr (RootE idp dcls idldcls) _ _) -> -- if oldEnr is not RootEnr, then just copy from dcls
+      (RootEnr (RootE idp dcls idldcls _) _) -> -- if oldEnr is not RootEnr, then just copy from dcls
         (RootDoc (Root idp dcls),state, enrDoc )
       HoleEnrichedDoc ->
         (HoleDocument,state, enrDoc )

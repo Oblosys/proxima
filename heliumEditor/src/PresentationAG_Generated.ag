@@ -5,7 +5,7 @@
 --------------------------------------------------------------------------
 
 DATA EnrichedDoc
-  | RootEnr root:RootE heliumTypeInfo:HeliumTypeInfo document:Document
+  | RootEnr root:RootE document:Document
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 
@@ -15,7 +15,7 @@ DATA Root
   | ParseErrRoot presentation:{(Presentation Document Node ClipDoc UserToken)}
 
 DATA RootE
-  | RootE idP:IDP decls:List_Decl idListDecls:List_Decl
+  | RootE idP:IDP decls:List_Decl idListDecls:List_Decl heliumTypeInfo:HeliumTypeInfo
   | HoleRootE
   | ParseErrRootE presentation:{(Presentation Document Node ClipDoc UserToken)}
 
@@ -580,7 +580,7 @@ SEM Root
 
 SEM RootE
   | RootE
-      lhs.presXML = presentElementXML @lhs.focusD (Node_RootE @self @lhs.path) @lhs.path "RootE" [ @decls.presXML, @idListDecls.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_RootE @self @lhs.path) @lhs.path "RootE" [ @decls.presXML, @idListDecls.presXML, presentXMLHeliumTypeInfo @heliumTypeInfo ] 
   | HoleRootE     lhs.presXML = presHole @lhs.focusD "RootE" (Node_HoleRootE @self @lhs.path) @lhs.path
   | ParseErrRootE lhs.presXML = presParseErr (Node_ParseErrRootE @self @lhs.path) @presentation
 
@@ -798,13 +798,13 @@ SEM Root
 
 SEM RootE
   | RootE
-      lhs.presTree = presentElementTree @lhs.focusD (Node_RootE @self @lhs.path) @lhs.path "RootE" [ @decls.presTree, @idListDecls.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_RootE @self @lhs.path) @lhs.path "RootE" [ @decls.presTree, @idListDecls.presTree, presentXMLHeliumTypeInfo @heliumTypeInfo ] 
   | HoleRootE     lhs.presTree = presHole @lhs.focusD "RootE" (Node_HoleRootE @self @lhs.path) @lhs.path
   | ParseErrRootE lhs.presTree = presParseErr (Node_ParseErrRootE @self @lhs.path) @presentation
 
 SEM Decl
   | Decl
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Decl @self @lhs.path) @lhs.path "Decl" [ presentPrimTreeBool @expanded, presentPrimTreeBool @autoLayout, @ident.presTree, @exp.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Decl @self @lhs.path) @lhs.path "Decl" [ presentPrimXMLBool @expanded, presentPrimXMLBool @autoLayout, @ident.presTree, @exp.presTree ] 
   | BoardDecl
       lhs.presTree = presentElementTree @lhs.focusD (Node_BoardDecl @self @lhs.path) @lhs.path "BoardDecl" [ @board.presTree ] 
   | PPPresentationDecl
@@ -814,7 +814,7 @@ SEM Decl
 
 SEM Ident
   | Ident
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Ident @self @lhs.path) @lhs.path "Ident" [ presentPrimTreeString @string ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Ident @self @lhs.path) @lhs.path "Ident" [ presentPrimXMLString @string ] 
   | HoleIdent     lhs.presTree = presHole @lhs.focusD "Ident" (Node_HoleIdent @self @lhs.path) @lhs.path
   | ParseErrIdent lhs.presTree = presParseErr (Node_ParseErrIdent @self @lhs.path) @presentation
 
@@ -828,9 +828,9 @@ SEM Exp
   | PowerExp
       lhs.presTree = presentElementTree @lhs.focusD (Node_PowerExp @self @lhs.path) @lhs.path "PowerExp" [ @exp1.presTree, @exp2.presTree ] 
   | BoolExp
-      lhs.presTree = presentElementTree @lhs.focusD (Node_BoolExp @self @lhs.path) @lhs.path "BoolExp" [ presentPrimTreeBool @bool ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_BoolExp @self @lhs.path) @lhs.path "BoolExp" [ presentPrimXMLBool @bool ] 
   | IntExp
-      lhs.presTree = presentElementTree @lhs.focusD (Node_IntExp @self @lhs.path) @lhs.path "IntExp" [ presentPrimTreeInt @int ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_IntExp @self @lhs.path) @lhs.path "IntExp" [ presentPrimXMLInt @int ] 
   | LamExp
       lhs.presTree = presentElementTree @lhs.focusD (Node_LamExp @self @lhs.path) @lhs.path "LamExp" [ @ident.presTree, @exp.presTree ] 
   | AppExp
@@ -872,17 +872,17 @@ SEM BoardRow
 
 SEM BoardSquare
   | Queen
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Queen @self @lhs.path) @lhs.path "Queen" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Queen @self @lhs.path) @lhs.path "Queen" [ presentPrimXMLBool @color ] 
   | King
-      lhs.presTree = presentElementTree @lhs.focusD (Node_King @self @lhs.path) @lhs.path "King" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_King @self @lhs.path) @lhs.path "King" [ presentPrimXMLBool @color ] 
   | Bishop
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Bishop @self @lhs.path) @lhs.path "Bishop" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Bishop @self @lhs.path) @lhs.path "Bishop" [ presentPrimXMLBool @color ] 
   | Knight
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Knight @self @lhs.path) @lhs.path "Knight" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Knight @self @lhs.path) @lhs.path "Knight" [ presentPrimXMLBool @color ] 
   | Rook
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Rook @self @lhs.path) @lhs.path "Rook" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Rook @self @lhs.path) @lhs.path "Rook" [ presentPrimXMLBool @color ] 
   | Pawn
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Pawn @self @lhs.path) @lhs.path "Pawn" [ presentPrimTreeBool @color ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Pawn @self @lhs.path) @lhs.path "Pawn" [ presentPrimXMLBool @color ] 
   | Empty
       lhs.presTree = presentElementTree @lhs.focusD (Node_Empty @self @lhs.path) @lhs.path "Empty" [  ] 
   | HoleBoardSquare     lhs.presTree = presHole @lhs.focusD "BoardSquare" (Node_HoleBoardSquare @self @lhs.path) @lhs.path
@@ -890,13 +890,13 @@ SEM BoardSquare
 
 SEM PPPresentation
   | PPPresentation
-      lhs.presTree = presentElementTree @lhs.focusD (Node_PPPresentation @self @lhs.path) @lhs.path "PPPresentation" [ presentPrimTreeBool @viewType, @slides.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_PPPresentation @self @lhs.path) @lhs.path "PPPresentation" [ presentPrimXMLBool @viewType, @slides.presTree ] 
   | HolePPPresentation     lhs.presTree = presHole @lhs.focusD "PPPresentation" (Node_HolePPPresentation @self @lhs.path) @lhs.path
   | ParseErrPPPresentation lhs.presTree = presParseErr (Node_ParseErrPPPresentation @self @lhs.path) @presentation
 
 SEM Slide
   | Slide
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Slide @self @lhs.path) @lhs.path "Slide" [ presentPrimTreeString @title, @itemList.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Slide @self @lhs.path) @lhs.path "Slide" [ presentPrimXMLString @title, @itemList.presTree ] 
   | HoleSlide     lhs.presTree = presHole @lhs.focusD "Slide" (Node_HoleSlide @self @lhs.path) @lhs.path
   | ParseErrSlide lhs.presTree = presParseErr (Node_ParseErrSlide @self @lhs.path) @presentation
 
@@ -918,7 +918,7 @@ SEM ListType
 
 SEM Item
   | StringItem
-      lhs.presTree = presentElementTree @lhs.focusD (Node_StringItem @self @lhs.path) @lhs.path "StringItem" [ presentPrimTreeString @string ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_StringItem @self @lhs.path) @lhs.path "StringItem" [ presentPrimXMLString @string ] 
   | HeliumItem
       lhs.presTree = presentElementTree @lhs.focusD (Node_HeliumItem @self @lhs.path) @lhs.path "HeliumItem" [ @exp.presTree ] 
   | ListItem

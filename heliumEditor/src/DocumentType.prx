@@ -1,9 +1,9 @@
-data EnrichedDoc = RootEnr root:RootE HeliumTypeInfo Document
+data EnrichedDoc = RootEnr root:RootE Document
 -- document ref is for popups only
 
 data Root = Root decls:[Decl] { idP:IDP } 
 
-data RootE = RootE decls:[Decl] idListDecls:[Decl] { idP:IDP }
+data RootE = RootE decls:[Decl] idListDecls:[Decl] HeliumTypeInfo { idP:IDP }
 -- We put the decls first, so the paths in the enriched document and the document are the same.
 -- This is necessary because there is no translation on paths yet.
 
