@@ -9,6 +9,11 @@ DATA EnrichedDoc
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 
+DATA Root
+  | Root idP:IDP decls:List_Decl
+  | HoleRoot
+  | ParseErrRoot presentation:{(Presentation Document Node ClipDoc UserToken)}
+
 DATA RootE
   | RootE idP:IDP decls:List_Decl idListDecls:List_Decl
   | HoleRootE
@@ -152,16 +157,16 @@ DATA ConsList_Item
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
+ATTR EnrichedDoc Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
      [ focusD : FocusDoc |  pIdC : Int  | ]
 
-ATTR RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
+ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
      [ | path : {[Int]} | ]
 
-ATTR RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
+ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
      [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
+ATTR EnrichedDoc Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
@@ -195,6 +200,14 @@ SEM EnrichedDoc
 --------------------------------------------------------------------------
 -- General sem functions                                                --
 --------------------------------------------------------------------------
+
+SEM Root
+  | Root 
+      decls.pIdC = @lhs.pIdC + 1
+      lhs.pIdC = @decls.pIdC
+      decls.path  = @lhs.path++[0]
+  | HoleRoot     lhs.pres = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
+  | ParseErrRoot lhs.pres = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
 
 SEM RootE
   | RootE 
@@ -559,6 +572,12 @@ SEM List_Item
 -- Sem functions for XML presentation                                   --
 --------------------------------------------------------------------------
 
+SEM Root
+  | Root
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @decls.presXML ] 
+  | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
+  | ParseErrRoot lhs.presXML = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
+
 SEM RootE
   | RootE
       lhs.presXML = presentElementXML @lhs.focusD (Node_RootE @self @lhs.path) @lhs.path "RootE" [ @decls.presXML, @idListDecls.presXML ] 
@@ -770,6 +789,12 @@ SEM ConsList_Item
 --------------------------------------------------------------------------
 -- Sem functions for tree presentation                                  --
 --------------------------------------------------------------------------
+
+SEM Root
+  | Root
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @decls.presTree ] 
+  | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
+  | ParseErrRoot lhs.presTree = presParseErr (Node_ParseErrRoot @self @lhs.path) @presentation
 
 SEM RootE
   | RootE

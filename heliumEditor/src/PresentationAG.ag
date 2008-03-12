@@ -52,6 +52,25 @@ are updated as well. Both mimic higher order ag behavior by calling the semExp f
 -}
 
 
+-- The following declarations prevent warnings during compilation.
+-- Since sem_Root is never called, the document root does not need to define these attributes
+-- Ideally, Document data structures are not present in the attribute grammar datatype
+
+SEM Root
+  | Root
+            decls.env = error "Root.decls.env should not be used"
+            decls.errs = error "Root.decls.errs should not be used"
+--            decls.layoutMap = error "Root.decls.layoutmap should not be used"
+            decls.level = error "Root.decls.level should not be used"
+--            decls.newlines = error "Root.decls.newlines should not be used"
+            decls.ranges = error "Root.decls.ranges should not be used"
+--            decls.spaces = error "Root.decls.spaces should not be used"
+            decls.varsInScope = error "Root.decls.varsInScope should not be used"
+            decls.typeEnv = error "Root.decls.typeEnv should not be used"
+            decls.topLevelEnv = error "Root.decls.topLevelEnv should not be used"
+            decls.varsInScopeAtFocus = error "Root.decls.varsInScopeAtFocus should not be used"
+
+
 --------------------------------------------------------------
 --
 -- Parse errors
