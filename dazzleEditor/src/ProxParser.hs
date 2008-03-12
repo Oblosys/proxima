@@ -27,13 +27,9 @@ import DocUtils_Generated
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
-          (\str root-> reuseRootEnr [str] (Just root) Nothing)
-      <$> pSym (StructuralTk (Just $ Node_RootEnr HoleEnrichedDoc []) empty [] NoIDP) -- EnrichedDoc is not instance of Editable
+          (\str root-> reuseRootEnr [str] (Just root))
+      <$> pStructural Node_RootEnr
       <*> recognizeRoot
-  <|>    RootEnr (error "doc hole was parsed") (error "doc hole was parsed")
-     <$ pStructural Node_HoleEnrichedDoc
--- TODO: Why do we need this hole parser here?
-
 
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $

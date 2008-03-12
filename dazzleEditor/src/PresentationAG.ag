@@ -29,17 +29,12 @@ ATTR EnrichedDoc [ | layoutMap : WhitespaceMap | ]
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (Node_RootDoc @document []) $  --HACK!! top level loc needs to be a ref to the document
-                                                        -- it is used by mkPopupMenuXY in Renderer.
-                                                        -- A better implementation of popups will create the menu in
-                                                        -- the higher layers. Although it is still a bit unclear where
-                 loc (Node_RootEnr @self []) $ structural $
+      lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $
                    @root.pres
-
 
 SEM Root
   | Root
-      lhs.pres = loc (Node_Root @self []) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      lhs.pres = loc (Node_Root @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                      (col $ [ @graph.pres
                             , row [ parsing $ text @title, empty `withHStretch` True ]
                                   `withFontSize_` (percent 160) 

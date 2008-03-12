@@ -5,7 +5,7 @@
 --------------------------------------------------------------------------
 
 DATA EnrichedDoc
-  | RootEnr root:Root document:Document
+  | RootEnr root:Root
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 

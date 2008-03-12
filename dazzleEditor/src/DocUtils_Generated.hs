@@ -179,7 +179,7 @@ instance DocNode Node where
 -- toXML functions                                                      --
 --------------------------------------------------------------------------
 
-toXMLEnrichedDoc (RootEnr root document) = Elt "RootEnr" [] $ [toXMLRoot root] ++ [toXMLDocument document]
+toXMLEnrichedDoc (RootEnr root) = Elt "RootEnr" [] $ [toXMLRoot root]
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
 toXMLEnrichedDoc (ParseErrEnrichedDoc presentation) = Elt "ParseErrEnrichedDoc" [] []
 toXMLRoot (Root graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections
@@ -267,7 +267,7 @@ toXMLConsList_Edge Nil_Edge             = []
 --------------------------------------------------------------------------
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
-parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root <*> parseXML_Document<* endTag "RootEnr"
+parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root<* endTag "RootEnr"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
 parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection
@@ -492,6 +492,9 @@ instance Eq Node where
   
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
+
+instance PopupMenuHack Node Document where
+  mkDocNode doc = Node_RootDoc doc []
 
 
 -- toXML for Document and primitive types

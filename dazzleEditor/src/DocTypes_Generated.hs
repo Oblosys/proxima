@@ -25,7 +25,7 @@ data Document = RootDoc Root
               | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
                   deriving Show
 
-data EnrichedDoc = RootEnr Root Document
+data EnrichedDoc = RootEnr Root
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                      deriving Show
