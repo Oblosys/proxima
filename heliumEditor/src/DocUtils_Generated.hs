@@ -11,13 +11,8 @@ import Common.CommonUtils
 import System.Directory
 import Presentation.XprezLib
 
-instance Doc Document where
-  initialDoc = initDoc
-  toXML    = toXMLDocument
-  parseXML = parseXML_Document
-
-initDoc :: IO Document
-initDoc = 
+initialDocument :: IO Document
+initialDocument = 
  do { let filePath = "Heliumfile.hs"
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
@@ -602,6 +597,11 @@ removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
 --------------------------------------------------------------------------
 
 type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken
+
+instance Doc Document where
+  initialDoc = initialDocument
+  toXML = toXMLDocument
+  parseXML = parseXML_Document
 
 instance DocNode Node where
   noNode = NoNode
