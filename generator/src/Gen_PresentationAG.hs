@@ -14,14 +14,16 @@ module Gen_PresentationAG where
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genAttr docType
+generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithoutRootAndLists))
+                ++ genAttr (removeRootDecl docType)
                 ++ genSemEnrichedDoc
-                ++ genSem (addConsListDecls docTypeWithoutEnrWithLists)
-                ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
-                ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
-  where docTypeWithoutEnrWithLists = addListDecls (removeEnrichedDocDecl docType)
-        docTypeWithLists = addListDecls docType
+                ++ genSem (addConsListDecls docTypeWithoutEnrAndRootWithLists)
+                ++ genSemXML (addConsListDecls docTypeWithoutEnrAndRootWithLists)
+                ++ genSemTree (addConsListDecls docTypeWithoutEnrAndRootWithLists)
+  where docTypeWithoutEnrAndRootWithLists = addListDecls (removeEnrichedDocDecl (removeRootDecl docType))
+        docTypeWithoutRootAndLists = addListDecls (removeRootDecl docType)
+        -- The presentation ag works on the enriched document, so we remove the Root declaration.
+        
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
 
