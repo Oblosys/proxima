@@ -306,7 +306,7 @@ instance DocNode Node where
 toXMLRoot (Root _ decls) = Elt "Root" [] $ toXMLList_Decl decls
 toXMLRoot (HoleRoot) = Elt "HoleRoot" [] $ []
 toXMLRoot (ParseErrRoot presentation) = Elt "ParseErrRoot" [] []
-toXMLEnrichedDoc (RootEnr root document) = Elt "RootEnr" [] $ [toXMLRootE root] ++ [toXMLDocument document]
+toXMLEnrichedDoc (RootEnr root) = Elt "RootEnr" [] $ [toXMLRootE root]
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
 toXMLEnrichedDoc (ParseErrEnrichedDoc presentation) = Elt "ParseErrEnrichedDoc" [] []
 toXMLRootE (RootE _ decls idListDecls heliumTypeInfo) = Elt "RootE" [] $ toXMLList_Decl decls ++ toXMLList_Decl idListDecls ++ [toXMLHeliumTypeInfo heliumTypeInfo]
@@ -409,7 +409,7 @@ toXMLConsList_Item Nil_Item             = []
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root NoIDP <$ startTag "Root" <*> parseXML_List_Decl<* endTag "Root"
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
-parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_RootE <*> parseXML_Document<* endTag "RootEnr"
+parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_RootE<* endTag "RootEnr"
 parseXML_RootE = parseXMLCns_RootE <?|> parseHoleAndParseErr "RootE" HoleRootE
 parseXMLCns_RootE = RootE NoIDP <$ startTag "RootE" <*> parseXML_List_Decl <*> parseXML_List_Decl <*> parseXML_HeliumTypeInfo<* endTag "RootE"
 parseXML_Decl = parseXMLCns_Decl <?|> parseXMLCns_BoardDecl <?|> parseXMLCns_PPPresentationDecl <?|> parseHoleAndParseErr "Decl" HoleDecl
@@ -608,6 +608,9 @@ instance Eq Node where
   
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
+
+instance PopupMenuHack Node Document where
+  mkDocNode doc = Node_RootDoc doc []
 
 
 -- toXML for Document and primitive types

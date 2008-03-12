@@ -26,7 +26,7 @@ import DocUtils_Generated
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $
-          (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
+          (\str rootE -> reuseRootEnr [str] (Just rootE))
       <$> pStructural Node_RootEnr
       <*> recognizeRootE
 

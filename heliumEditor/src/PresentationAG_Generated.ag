@@ -10,7 +10,7 @@ DATA Root
   | ParseErrRoot presentation:{(Presentation Document Node ClipDoc UserToken)}
 
 DATA EnrichedDoc
-  | RootEnr root:RootE document:Document
+  | RootEnr root:RootE
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
 

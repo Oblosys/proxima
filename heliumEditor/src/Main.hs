@@ -25,4 +25,4 @@ main = proxima PresentationAG.sem_EnrichedDoc
                -- instances of Evaluation/ReductionSheet classes)
                --
                (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
-               (EnrichedDocLevel HoleEnrichedDoc NoPathD)   
+               (EnrichedDocLevel HoleEnrichedDoc NoPathD HoleDocument)   

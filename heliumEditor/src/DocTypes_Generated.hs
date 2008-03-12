@@ -37,7 +37,7 @@ data Root = Root IDP List_Decl
           | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
               deriving Show
 
-data EnrichedDoc = RootEnr RootE Document
+data EnrichedDoc = RootEnr RootE
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
                      deriving Show

@@ -243,21 +243,19 @@ instance Editable Root Document Node ClipDoc UserToken where
 
 instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
-  select (0:p) (RootEnr x0 x1) = select p x0
-  select (1:p) (RootEnr x0 x1) = select p x1
+  select (0:p) (RootEnr x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_EnrichedDoc c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on EnrichedDoc") x
-  paste (0:p) c (RootEnr x0 x1) = RootEnr (paste p c x0) x1
-  paste (1:p) c (RootEnr x0 x1) = RootEnr x0 (paste p c x1)
+  paste (0:p) c (RootEnr x0) = RootEnr (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("RootEnr {RootE} {Document} "  , Clip_EnrichedDoc $ RootEnr hole hole)
+  alternatives _ = [ ("RootEnr {RootE} "  , Clip_EnrichedDoc $ RootEnr hole)
                    ,("{EnrichedDoc}", Clip_EnrichedDoc hole)
                    ]
 
-  arity (RootEnr x0 x1) = 2
+  arity (RootEnr x0) = 1
   arity _                        = 0
 
   parseErr = ParseErrEnrichedDoc
