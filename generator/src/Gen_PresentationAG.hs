@@ -17,6 +17,7 @@ generate :: DocumentType -> [String]
 generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genAttr (removeDocumentDecl docType)
                 ++ genSem (addConsListDecls docTypeWithLists)
+                ++ genSemSynthesizedPath (docTypeWithoutEnrWithLists)
                 ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
                 ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
   where docTypeWithoutEnrWithLists = addListDecls (removeEnrichedDocDecl (removeDocumentDecl docType))
@@ -42,10 +43,10 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
   [ "ATTR %1" -- all types including lists and conslists
-  , "     [ focusD : FocusDoc path : {[Int]} |  pIdC : Int  | ]"
+  , "     [ focusD : FocusDoc path : Path |  pIdC : Int  | ]"
   , ""
   , "ATTR %2" -- all types except EnrichedDoc including lists
-  , "     [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
+  , "     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
   , ""
   , "ATTR %3" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
@@ -115,7 +116,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   ] <~ [typeName]
 
 genSemConsListDecl (Decl (LHSConsListType typeName) _) = 
-  [ "  SEM ConsList_%1"
+  [ "SEM ConsList_%1"
   , "  | Cons_%1" 
   , "      head.path  = @lhs.path++[@lhs.ix]"
   , "      tail.path = @lhs.path"
@@ -128,7 +129,15 @@ genSemConsListDecl (Decl (LHSConsListType typeName) _) =
   , ""
   ] <~ [typeName]
 
-
+-- somehow this is also produced by the copy rules, but that seems odd, since path would be a threaded attribute
+genSemSynthesizedPath decls = genBanner "Synthesized path rules" $ concat
+  [ "SEM %1" <~ [genTypeName lhsType] :
+    [ "  | %1 lhs.path = @lhs.path" <~ [cnstrName]
+    | Prod _ cnstrName  _ _ <- prods 
+    ] ++
+    [ "" ] 
+  | Decl lhsType prods <- decls
+  ] 
   
 genSemXML decls = genBanner "Sem functions for XML presentation" $
   concatMap genSemXMLDecl decls
@@ -175,7 +184,6 @@ genSemXMLConsListDecl (Decl (LHSConsListType typeName) _) =
   , "  | Nil_%1  lhs.pressXML  = []"
   , ""
   ] <~ [typeName]
-
 
 
 genSemTree decls = genBanner "Sem functions for tree presentation" $
