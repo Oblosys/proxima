@@ -201,15 +201,15 @@ data ClipDoc = Clip_Document Document
              | Clip_ItemList ItemList
              | Clip_ListType ListType
              | Clip_Item Item
+             | Clip_Bool Bool
+             | Clip_Int Int
+             | Clip_String String
+             | Clip_Float Float
              | Clip_List_Decl List_Decl
              | Clip_List_Alt List_Alt
              | Clip_List_Exp List_Exp
              | Clip_List_Slide List_Slide
              | Clip_List_Item List_Item
-             | Clip_Bool Bool
-             | Clip_Int Int
-             | Clip_String String
-             | Clip_Float Float
              | Clip_Nothing deriving Show
 
 
