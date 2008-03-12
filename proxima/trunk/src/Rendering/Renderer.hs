@@ -10,12 +10,10 @@ import Rendering.RenLayerTypes
 import Rendering.RenLayerUtils
 
 import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
-import Presentation.PresTypes hiding (font) -- For Locations
+--import Presentation.PresTypes hiding (font) -- For Locations
 import Layout.LayTypes 
 
-import Evaluation.DocTypes -- For Locations
-import Evaluation.DocUtils
-import Evaluation.DocumentEdit -- Just for now
+import Evaluation.DocTypes (DocumentLevel)
 import Proxima.GUI
 import Arrangement.FontLib
 
@@ -25,9 +23,8 @@ import Data.IORef
 
 -- for automatic popup menus, allow these imports
 import DocTypes_Generated (Document, ClipDoc, Node (..))
-import DocUtils_Generated ()  -- instance HasPath Node
 import Evaluation.DocumentEdit (menuD)
-import DocumentEdit_Generated -- instance Editable Document Document Node ClipDoc
+import DocumentEdit_Generated
 -----
 
 arrowHeadSize :: Double
@@ -72,12 +69,20 @@ rectBetween (x,y) (x',y') = ((x `min` x', y `min` y'), (abs $ x-x', abs $ y-y'))
   
 -- Automatic popups turned on: enable imports from editor
 
+
+{-
+mkPopupMenuXY :: DocNode node => Layout doc node clip -> Scale -> Arrangement node ->
+                 ((RenderingLevel (DocumentLevel doc clip), EditRendering (DocumentLevel doc clip)) ->
+                 IO (RenderingLevel (DocumentLevel doc clip), EditRendering' (DocumentLevel doc clip))) ->
+                 IORef (RenderingLevel (DocumentLevel doc clip)) ->
+                 IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
+-}
 mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr@(LocatorA (Node_RootDoc doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
+mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
@@ -86,8 +91,8 @@ mkPopupMenuXY prs scale arr@(LocatorA (Node_RootDoc doc _) _) handler renderingL
    ; case pointDoc x y arr of
         Just node ->
          do { let pathDoc = pathNode node
-                  alts = menuD pathDoc doc
-                  items = ctxtItems ++ alts
+--                  alts = menuD pathDoc doc
+                  items = ctxtItems -- ++ alts
             ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
                                     | (str, upd) <- items]
             ; return $ Just contextMenu                                          
@@ -147,8 +152,8 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
   
     }
     
-renderArr :: DrawableClass drawWindow => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
-                                         (Point, Size) -> DiffTree -> Arrangement Node -> IO ()    
+renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
+                                         (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
 renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
