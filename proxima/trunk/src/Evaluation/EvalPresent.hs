@@ -7,9 +7,9 @@ import Evaluation.EvalLayerUtils
 import Evaluation.DocumentEdit
 
 presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip) =>
-             LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr ->
+             LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
              EditDocument' doc clip ->
-             IO (EditEnrichedDoc' enr, LayerStateEval, DocumentLevel doc clip)
+             IO (EditEnrichedDoc' enr doc, LayerStateEval, DocumentLevel doc clip)
 presentIO state high low editHigh =
   do { (editLow, state', high') <- eval state high low editHigh
      

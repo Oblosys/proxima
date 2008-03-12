@@ -33,6 +33,9 @@ class (Eq node, Ord node, Show node) => DocNode node where
 -- This class allows us to access NoNode and the (Node_ .. path) in the generic part of Proxima
 -- Eq and Ord are here to reduce the number of constraints in the types
 
+class PopupMenuHack node doc where
+  mkDocNode :: doc -> node
+
 type Color = (Int,Int,Int)
 
 type Rectangle = ((Int,Int),(Int,Int))

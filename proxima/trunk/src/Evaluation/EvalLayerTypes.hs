@@ -12,8 +12,8 @@ data LayerStateEval = LayerStateEval
 -- instantiating only one of these is enough
 class EvaluationSheet doc enr clip | doc -> clip where
   evaluationSheet ::
-                LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr -> EditDocument' doc clip -> DocumentLevel doc clip -> 
-                IO (EditEnrichedDoc' enr, LayerStateEval, DocumentLevel doc clip)
+                LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr doc -> EditDocument' doc clip -> DocumentLevel doc clip -> 
+                IO (EditEnrichedDoc' enr doc, LayerStateEval, DocumentLevel doc clip)
 -- The parameters to the sheet are the old document, the old enriched doc, and the new enriched doc.
 -- also the edit operation on the document is passed, but this has already been applied to old
 -- doc, yielding the new document. It is only present to implement special behavior for certain
@@ -25,10 +25,10 @@ class EvaluationSheet doc enr clip | doc -> clip where
   evaluationSheetSimple   :: LayerStateEval -> doc -> enr -> doc -> (enr, LayerStateEval, doc)
   evaluationSheetSimplest :: doc -> enr
 
-  evaluationSheet state (DocumentLevel oldDoc oldDocFocus oldClip) (EnrichedDocLevel oldEnr oldEnrFocus)
+  evaluationSheet state (DocumentLevel oldDoc oldDocFocus oldClip) (EnrichedDocLevel oldEnr oldEnrFocus _)
                         docEdit (DocumentLevel doc docFocus clip) = 
      do { (newEnr, newState, newDoc) <- evaluationSheetSimpleIO state oldDoc oldEnr doc
-        ; return (SetEnr' (EnrichedDocLevel newEnr docFocus), newState, DocumentLevel newDoc docFocus clip)
+        ; return (SetEnr' (EnrichedDocLevel newEnr docFocus newDoc), newState, DocumentLevel newDoc docFocus clip)
         } -- copy the doc focus to the enriched focus
         
   evaluationSheetSimpleIO state oldDoc enr doc = return $ evaluationSheetSimple state oldDoc enr doc
@@ -39,9 +39,9 @@ class EvaluationSheet doc enr clip | doc -> clip where
        
 -- instantiating only one of these is enough
 class ReductionSheet doc enr clip | doc -> clip where
-  reductionSheet :: LayerStateEval -> EnrichedDocLevel enr -> DocumentLevel doc clip ->
-               EnrichedDocLevel enr ->
-               IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr)
+  reductionSheet :: LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
+               EnrichedDocLevel enr doc ->
+               IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
 -- The parameters to the sheet are the old enriched doc, the old document, and the new enriched doc.
 -- the result is an edit operation on the document, a new state, and a possibly updated enriched doc
 -- If necessary, the old enriched document could also be provided in an interface
@@ -50,12 +50,12 @@ class ReductionSheet doc enr clip | doc -> clip where
   reductionSheetSimple   :: LayerStateEval -> enr -> doc -> enr -> (doc, LayerStateEval, enr)
   reductionSheetSimplest :: enr -> doc
 
-  reductionSheet state (EnrichedDocLevel oldEnr oldEnrFocus) (DocumentLevel oldDoc oldDocFocus oldClip)
-                       (EnrichedDocLevel enr enrFocus) = 
+  reductionSheet state (EnrichedDocLevel oldEnr oldEnrFocus _) (DocumentLevel oldDoc oldDocFocus oldClip)
+                       (EnrichedDocLevel enr enrFocus doc) = 
    do { (newDoc, newState, newEnr) <- reductionSheetSimpleIO state oldEnr oldDoc enr
-      ; return (SetDoc (DocumentLevel newDoc enrFocus oldClip), newState, EnrichedDocLevel newEnr enrFocus)
-      } -- copy the enriched focus to the doc focus
-      
+      ; return (SetDoc (DocumentLevel newDoc enrFocus oldClip), newState, EnrichedDocLevel newEnr enrFocus newDoc) -- popupHack arg, but it is only used on presentation
+      } -- copy the enriched focus to the doc focus         
+           
   reductionSheetSimpleIO state oldEnr oldDoc enr = return $ reductionSheetSimple state oldEnr oldDoc enr
   
   reductionSheetSimple state oldEnr oldDoc enr   = (reductionSheetSimplest enr, state, enr)
