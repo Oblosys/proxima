@@ -17,7 +17,7 @@ import TypesUtils
 
 generate :: DocumentType -> [String]
 generate docType = genRankNode (addHolesParseErrs (docTypeWithLists)) -- with Document
-                ++ genPathNode (addHolesParseErrs (docTypeWithLists)) -- with Document
+                ++ genDocNode (addHolesParseErrs (docTypeWithLists)) -- with Document
                 ++ genToXML    (addHolesParseErrs (addConsListDecls (removeDocumentDecl docTypeWithLists)))
                 ++ genParseXML  (removeDocumentDecl (docTypeWithLists))
                 ++ genListUtils docTypeWithLists
@@ -32,9 +32,11 @@ genRankNode decls = genBanner "rankNode" $
   where genRankNodeCnstr cnstrName = "rankNode (Node_%1 _ _) = " <~ [cnstrName]
                
 
-genPathNode decls = genBanner "HasPath instance for Node" $
-  "instance HasPath Node where" :
-  "  pathNode NoNode            = NoPathD" :
+genDocNode decls = genBanner "DocNode instance for Node" $
+  [ "instance DocNode Node where"
+  , "  noNode = NoNode"
+  , "  pathNode NoNode            = NoPathD" 
+  ] ++
   map genPathNodeCnstr (getAllConstructorNames decls)
   where genPathNodeCnstr cnstrName = "  pathNode (Node_%1 _ pth) = PathD pth" <~ [cnstrName]
 
@@ -117,9 +119,6 @@ genMisc = genBanner "Miscellaneous" $
   , "  initialDoc = initialDocument"
   , "  toXML = toXMLDocument"
   , "  parseXML = parseXML_Document"
-  , ""
-  , "instance DocNode Node where"
-  , "  noNode = NoNode"
   , ""
   , "instance Eq Node where"
   , "  nd1 == nd2 = rankNode nd1 == rankNode nd2"
