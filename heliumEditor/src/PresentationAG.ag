@@ -121,11 +121,7 @@ SEM Exp
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (Node_RootDoc @document []) $  --HACK!! top level loc needs to be a ref to the document
-                                                        -- it is used by mkPopupMenuXY in Renderer.
-                                                        -- A better implementation of popups will create the menu in
-                                                        -- the higher layers. Although it is still a bit unclear where
-                 loc (Node_RootEnr @self []) $ structural $
+      lhs.pres = loc (Node_RootEnr @self []) $ structural $
                    @root.pres
                  
 SEM RootE
@@ -390,16 +386,6 @@ SEM Exp
                                  then []
                                  else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
                           ++ [sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
-
-
--- this is a bit annoying, maybe generate these?
-SEM List_Alt [ | | path : Path ]
-  | List_Alt
-      lhs.path = @lhs.path
-      
-SEM List_Decl [ | | path : Path ]
-  | List_Decl
-      lhs.path = @lhs.path
 
 SEM Alt
   | Alt

@@ -158,10 +158,10 @@ DATA ConsList_Item
 --------------------------------------------------------------------------
 
 ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
-     [ focusD : FocusDoc path : {[Int]} |  pIdC : Int  | ]
+     [ focusD : FocusDoc path : Path |  pIdC : Int  | ]
 
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
-     [ | | presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
@@ -499,7 +499,7 @@ SEM List_Item
   | HoleList_Item     lhs.press = []
   | ParseErrList_Item lhs.press = [ presParseErr (Node_ParseErrList_Item @self @lhs.path) @presentation ]
 
-  SEM ConsList_Decl
+SEM ConsList_Decl
   | Cons_Decl
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
@@ -510,7 +510,7 @@ SEM List_Item
       tail.ix  = @lhs.ix + 1
   | Nil_Decl      lhs.press = []
 
-  SEM ConsList_Alt
+SEM ConsList_Alt
   | Cons_Alt
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
@@ -521,7 +521,7 @@ SEM List_Item
       tail.ix  = @lhs.ix + 1
   | Nil_Alt      lhs.press = []
 
-  SEM ConsList_Exp
+SEM ConsList_Exp
   | Cons_Exp
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
@@ -532,7 +532,7 @@ SEM List_Item
       tail.ix  = @lhs.ix + 1
   | Nil_Exp      lhs.press = []
 
-  SEM ConsList_Slide
+SEM ConsList_Slide
   | Cons_Slide
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
@@ -543,7 +543,7 @@ SEM List_Item
       tail.ix  = @lhs.ix + 1
   | Nil_Slide      lhs.press = []
 
-  SEM ConsList_Item
+SEM ConsList_Item
   | Cons_Item
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
@@ -553,6 +553,96 @@ SEM List_Item
       lhs.pIdC = @tail.pIdC
       tail.ix  = @lhs.ix + 1
   | Nil_Item      lhs.press = []
+
+
+
+
+--------------------------------------------------------------------------
+-- Synthesized path rules                                               --
+--------------------------------------------------------------------------
+
+SEM Root
+  | Root lhs.path = @lhs.path
+
+SEM RootE
+  | RootE lhs.path = @lhs.path
+
+SEM Decl
+  | Decl lhs.path = @lhs.path
+  | BoardDecl lhs.path = @lhs.path
+  | PPPresentationDecl lhs.path = @lhs.path
+
+SEM Ident
+  | Ident lhs.path = @lhs.path
+
+SEM Exp
+  | PlusExp lhs.path = @lhs.path
+  | TimesExp lhs.path = @lhs.path
+  | DivExp lhs.path = @lhs.path
+  | PowerExp lhs.path = @lhs.path
+  | BoolExp lhs.path = @lhs.path
+  | IntExp lhs.path = @lhs.path
+  | LamExp lhs.path = @lhs.path
+  | AppExp lhs.path = @lhs.path
+  | CaseExp lhs.path = @lhs.path
+  | LetExp lhs.path = @lhs.path
+  | IdentExp lhs.path = @lhs.path
+  | IfExp lhs.path = @lhs.path
+  | ParenExp lhs.path = @lhs.path
+  | ListExp lhs.path = @lhs.path
+  | ProductExp lhs.path = @lhs.path
+
+SEM Alt
+  | Alt lhs.path = @lhs.path
+
+SEM Board
+  | Board lhs.path = @lhs.path
+
+SEM BoardRow
+  | BoardRow lhs.path = @lhs.path
+
+SEM BoardSquare
+  | Queen lhs.path = @lhs.path
+  | King lhs.path = @lhs.path
+  | Bishop lhs.path = @lhs.path
+  | Knight lhs.path = @lhs.path
+  | Rook lhs.path = @lhs.path
+  | Pawn lhs.path = @lhs.path
+  | Empty lhs.path = @lhs.path
+
+SEM PPPresentation
+  | PPPresentation lhs.path = @lhs.path
+
+SEM Slide
+  | Slide lhs.path = @lhs.path
+
+SEM ItemList
+  | ItemList lhs.path = @lhs.path
+
+SEM ListType
+  | Bullet lhs.path = @lhs.path
+  | Number lhs.path = @lhs.path
+  | Alpha lhs.path = @lhs.path
+
+SEM Item
+  | StringItem lhs.path = @lhs.path
+  | HeliumItem lhs.path = @lhs.path
+  | ListItem lhs.path = @lhs.path
+
+SEM List_Decl
+  | List_Decl lhs.path = @lhs.path
+
+SEM List_Alt
+  | List_Alt lhs.path = @lhs.path
+
+SEM List_Exp
+  | List_Exp lhs.path = @lhs.path
+
+SEM List_Slide
+  | List_Slide lhs.path = @lhs.path
+
+SEM List_Item
+  | List_Item lhs.path = @lhs.path
 
 
 
