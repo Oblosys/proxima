@@ -201,10 +201,11 @@ rankNode (Node_ParseErrList_Item _ _) = 89
 
 
 --------------------------------------------------------------------------
--- HasPath instance for Node                                            --
+-- DocNode instance for Node                                            --
 --------------------------------------------------------------------------
 
-instance HasPath Node where
+instance DocNode Node where
+  noNode = NoNode
   pathNode NoNode            = NoPathD
   pathNode (Node_RootDoc _ pth) = PathD pth
   pathNode (Node_HoleDocument _ pth) = PathD pth
@@ -601,9 +602,6 @@ instance Doc Document where
   initialDoc = initialDocument
   toXML = toXMLDocument
   parseXML = parseXML_Document
-
-instance DocNode Node where
-  noNode = NoNode
 
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2
