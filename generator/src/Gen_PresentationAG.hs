@@ -14,7 +14,8 @@ module Gen_PresentationAG where
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
+generate docType = genPresentationSheet
+                ++ genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
                 ++ genAttr (removeDocumentDecl docType)
                 ++ genSem (addConsListDecls docTypeWithLists)
                 ++ genSemSynthesizedPath (docTypeWithoutEnrWithLists)
@@ -26,6 +27,32 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls docTypeWithL
 -- but just generate code for them in the gen functions.
 
 -- instead of removing documentDecl, we should actually recursively determine all used AG types from EnrichedDoc
+
+genPresentationSheet = genBanner "presentationSheet" $
+  [ "WRAPPER Root"
+  , ""
+  , "{"
+  , "-- type PresentationSheet doc enr node clip token = "
+  , "--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> Path -> "
+  , "--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)"
+  , ""
+  , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
+  , "presentationSheet enrichedDoc focusD whiteSpaceMap pIdC path = "
+  , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap) = "
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC path whitespaceMap)"
+  , "  in  (whitespaceMap, pIdC', pres)"
+  , ""
+  , "{- "
+  , "A type error here means that extra attributes were declared on EnrichedDoc"
+  , "The attribute signature for EnrichedDoc should be:"
+  , ""
+  , "EnrichedDoc  [ focusD : FocusDoc path : Path"
+  , "             | pIdC : Int layoutMap : WhitespaceMap"
+  , "             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc "
+  , "             ]"
+  , "-}"
+  , "}" 
+  ]
 
 genDataType decls = genBanner "AG data type" $
   concatMap genDataDecl decls
@@ -43,7 +70,7 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
   [ "ATTR %1" -- all types including lists and conslists
-  , "     [ focusD : FocusDoc path : Path |  pIdC : Int  | ]"
+  , "     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""
   , "ATTR %2" -- all types except EnrichedDoc including lists
   , "     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
