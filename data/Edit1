@@ -1,0 +1,18 @@
+C
+A
+
+Framework for using type classes to define structured editors for Haskell values. By declaring an instance of Display, graphical presentation. Also list of edit functions for the value. Edit fns are string to string based. When clicked, the program source is parsed and the corresponding edit operations on the selected part are computed and shown. On selection, the source is modified and the new program is displayed.
+
+Direct manipulation, but no drag & drop. Page 7 'drags', but is likely to be 'moves' since no extra information regarding the dragged
+
+Untyped. Mentioned by authors, but still weakness. clipboard of incorrect type?
+
+Furthermore,
+Weak editors:
+ - No holes, always structurally correct.
+ - No focus model for selecting components and no holes. 
+ - rather weak pic language without mentioned alignment
+
+Why is edit part of the Display class? Editing could be orthogonal to having a graphical display. Furthermore, separation would make it possible to edit values that are an instance of Show but not of Display.
+
+Between a B and a C, but closer to C.

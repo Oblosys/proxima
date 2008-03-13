@@ -1,0 +1,15 @@
+Eudora
+first: Martijn 
+last: Schrage 
+code: 5576-0973-8461-7391
+
+
+
+Command prompt here:
+command:
+HKEY_CLASSES_ROOT\Directory\shell\DosHere\command
+(Default): {Windows Dir}\System32\cmd.exe /k cd "%1"
+
+menu text:
+HKEY_CLASSES_ROOT\Directory\shell\DosHere
+(Default): Command Prompt Here

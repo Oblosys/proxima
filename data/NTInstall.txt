@@ -1,0 +1,153 @@
+NOTES:
+
+Softex docking services v2.39 only work with NT service pack 3 or 4, not with 5
+
+
+Create suspend to disk partition with S2D utilities vA04: 
+   "mks2d -f" after booting from the disk
+
+
+
+
+------------
+
+Windows 2000: unstable, slow, unknown devices, many strange errors.
+
+Win NT:  Product ID 36397-OEM-0029433-48453
+
+undock the computer
+Install NT on NTFS partition
+
+
+add user martijn
+control panel/system startup/shutdown: show list "0 seconds"
+Install Neomagic NT audio driver (no need to reboot)
+install Latitude CPi Neomagic NM2200 NT video driver
+  (reboot now)
+
+*Problem: incorrect video mode
+*Solution: apply service pack
+apply service pack 4
+also for data acces components
+
+Install softex docking services
+
+
+dock the computer
+
+*error installing driver, conflicts
+few reboots, then install system provided driver works, otherwise try installing from disk and
+canceling.
+
+  obtain ip addres automatically, domain: cs.uu.nl
+
+
+install network: workgroup STAFF
+
+*Problem: unable to start server service. 
+*Solution: reapply service pack
+
+apply service pack 4, (disk 19, Development Platform)
+
+
+install IE4.0 from from visual J++ 6.0 cd (disk 4, Office Test Platform & Dev. Tools)
+
+install notcd (from internet)
+
+install eudora (by copying eudora folder)
+install realplayer (from internet)
+install winzip (from \\sw\depot\winzip)
+initialize favorites
+install ie5.0 (from internet)
+   customize
+    - ie5:  not internet connection wizard
+    - comm components: only outlook express
+    - multimedia: all
+    - web authoring: not web publishing wizard
+    - additional components: none
+    - multilanguage: none
+
+use outlook for reading news (mailserver is none.cs.uu.nl to prevent mail checking)
+
+
+*Problem No midi playback
+
+Copy \\sw\pkg\local\lstat.bat to c:\winnt
+
+Home directory found in workgroup/staff_home
+
+Installed printers:
+  nt explorer: \\staff_print\  double click on printers and install locally
+
+laspr1: 'Lexmark Optra S 1855 (A125)'
+laspr2: 'HP Laserjet 4050N (A225)'
+laspr3: 'HP Laserjet 4050N (A326)'
+laspr4 'HP Laserjet 4M/2 (A335)'
+color2: 'HP Deskjet 1600CM (A326)'
+oce:  'OCE Printer (A326)'
+
+click have disk and enter \\sw\depot\printerdrivers
+for each printer, click properties and device settings and set all available trays
+from letter to A4
+
+then in document defaults, (change letter to a4?) and (advanced) set graphic res. to 1200 dpi
+
+*laspr4 will be upgraded soon
+*lexmark does not work
+
+install office
+uninstall AOL instant messenger (from systems management)
+install pfe (from \\sw\depot\pfe)
+  preferences: backup never
+install photoshop 5.0 (from systems management)
+  serial nr: PWE500s7000001-999-234
+install exceed single user, program data: c:\bin\exceed user data: c:\data\exceed
+  xsession sunshine:
+  start method: RLOGIN (TCP/IP)  program type: X Window
+  user id: martijn     host: sunshine.cs.uu.nl   
+  command: /sw/bin/xterm -geometry 80x45 -ls -sb -display nasi.cs.uu.nl:0.0
+  prompt: none
+install snagit (from \\sw\depot\snagit)
+*note: Pineaux is called nasi.cs.uu.nl in DNS
+
+install Ghostscript 5.50  (from: http://www.cs.wisc.edu/~ghost/aladdin/get550.html)
+install Acrobat reader (from \\sw\depot\acrobat)
+
+run gold card setup without card inserted. install to c:\bin\pgd
+follow instructions in readme
+  dial properties: tone (pulse doesn't work) area 030, no prefix
+move directories pdg and esytools from c:\ to c:\bin
+start tools from startmenu to update shortcuts
+
+Install Dial-Up Connection
+  My Computer/Dial-Up Networking install RAS for goldcard modem
+  New entry "UU", know all about connections (no wizard)
+  Basic: Phone number: 2534100
+         Use another port if busy: NO
+  Server: only tcp/ip
+     tcp/ip settings primary & secondary dns (131.211.80.32/30)
+     script annex.scp in WINNT\System32\ras 
+        (name: martijn passwd: AvbEpkWL)
+
+   on login user: martijn password: "rx53rzv5teTerC3m" domain: ""
+
+install Java Plugin (from http://java.sun.com/products/plugin/)
+ does not seem to work
+
+
+Install Diskeeper lite to c:\bin\utils (from http://www.execsoft.co.uk/)
+Install Emergency undelete to c:\bin\utils (from http://www.execsoft.co.uk/)
+Install Fat32 to c:\bin (from http://www.sysinternals.com/)
+
+
+install scour media agent to program files
+
+--
+
+Mapped network drives on My Computer:
+	H:  \\staff_home\user
+	U:  \\staff_home\users       
+	V:  \\staff_www\www       
+	W:  \\staff_www\homepage
+  
+
