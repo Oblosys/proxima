@@ -16,8 +16,8 @@ import Presentation.PresTypes
 
 instance Clip ClipDoc where
   arityClip Clip_Nothing = -1
-  arityClip (Clip_Document x) = arity x
   arityClip (Clip_EnrichedDoc x) = arity x
+  arityClip (Clip_Document x) = arity x
   arityClip (Clip_Root x) = arity x
   arityClip (Clip_Section x) = arity x
   arityClip (Clip_Subsection x) = arity x
@@ -43,8 +43,8 @@ instance Clip ClipDoc where
   arityClip (Clip_Float x) = arity x
 
   alternativesClip Clip_Nothing = []
-  alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_EnrichedDoc x) = alternatives x
+  alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_Root x) = alternatives x
   alternativesClip (Clip_Section x) = alternatives x
   alternativesClip (Clip_Subsection x) = alternatives x
@@ -70,8 +70,8 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Float x) = alternatives x
 
   holeClip Clip_Nothing = Clip_Nothing
-  holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
+  holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_Root x) = Clip_Root hole
   holeClip (Clip_Section x) = Clip_Section hole
   holeClip (Clip_Subsection x) = Clip_Subsection hole
@@ -97,8 +97,8 @@ instance Clip ClipDoc where
   holeClip (Clip_Float x) = Clip_Float hole
 
   isListClip Clip_Nothing = False
-  isListClip (Clip_Document x) = isList x
   isListClip (Clip_EnrichedDoc x) = isList x
+  isListClip (Clip_Document x) = isList x
   isListClip (Clip_Root x) = isList x
   isListClip (Clip_Section x) = isList x
   isListClip (Clip_Subsection x) = isList x
@@ -124,8 +124,8 @@ instance Clip ClipDoc where
   isListClip (Clip_Float x) = isList x
 
   insertListClip i c Clip_Nothing = Clip_Nothing
-  insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
+  insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_Root x) = insertList i c x
   insertListClip i c (Clip_Section x) = insertList i c x
   insertListClip i c (Clip_Subsection x) = insertList i c x
@@ -151,8 +151,8 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Float x) = insertList i c x
 
   removeListClip i Clip_Nothing = Clip_Nothing
-  removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_EnrichedDoc x) = removeList i x
+  removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_Root x) = removeList i x
   removeListClip i (Clip_Section x) = removeList i x
   removeListClip i (Clip_Subsection x) = removeList i x
@@ -184,31 +184,6 @@ instance Clip ClipDoc where
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
 
-instance Editable Document Document Node ClipDoc UserToken where
-  select [] x = Clip_Document x
-  select (0:p) (RootDoc x0) = select p x0
-  select _ _ = Clip_Nothing
-
-  paste [] (Clip_Document c) _ = c
-  paste [] c x = debug Err ("Type error: pasting "++show c++" on Document") x
-  paste (0:p) c (RootDoc x0) = RootDoc (paste p c x0)
-  paste _ _ x = x
-
-  alternatives _ = [ ("RootDoc {Root} "  , Clip_Document $ RootDoc hole)
-                   ,("{Document}", Clip_Document hole)
-                   ]
-
-  arity (RootDoc x0) = 1
-  arity _                        = 0
-
-  parseErr = ParseErrDocument
-
-  hole = HoleDocument
-
-  isList _ = False
-  insertList _ _ _ = Clip_Nothing
-  removeList _ _ = Clip_Nothing
-
 instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
   select (0:p) (RootEnr x0) = select p x0
@@ -229,6 +204,31 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   parseErr = ParseErrEnrichedDoc
 
   hole = HoleEnrichedDoc
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Document Document Node ClipDoc UserToken where
+  select [] x = Clip_Document x
+  select (0:p) (RootDoc x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Document c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Document") x
+  paste (0:p) c (RootDoc x0) = RootDoc (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("RootDoc {Root} "  , Clip_Document $ RootDoc hole)
+                   ,("{Document}", Clip_Document hole)
+                   ]
+
+  arity (RootDoc x0) = 1
+  arity _                        = 0
+
+  parseErr = ParseErrDocument
+
+  hole = HoleDocument
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing

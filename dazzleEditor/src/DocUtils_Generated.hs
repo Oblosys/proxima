@@ -24,12 +24,12 @@ initialDocument = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_
 
 rankNode :: Node -> Int
 rankNode NoNode = 0
-rankNode (Node_RootDoc _ _) = 1
-rankNode (Node_HoleDocument _ _) = 2
-rankNode (Node_ParseErrDocument _ _) = 3
-rankNode (Node_RootEnr _ _) = 4
-rankNode (Node_HoleEnrichedDoc _ _) = 5
-rankNode (Node_ParseErrEnrichedDoc _ _) = 6
+rankNode (Node_RootEnr _ _) = 1
+rankNode (Node_HoleEnrichedDoc _ _) = 2
+rankNode (Node_ParseErrEnrichedDoc _ _) = 3
+rankNode (Node_RootDoc _ _) = 4
+rankNode (Node_HoleDocument _ _) = 5
+rankNode (Node_ParseErrDocument _ _) = 6
 rankNode (Node_Root _ _) = 7
 rankNode (Node_HoleRoot _ _) = 8
 rankNode (Node_ParseErrRoot _ _) = 9
@@ -103,12 +103,12 @@ rankNode (Node_ParseErrList_Edge _ _) = 69
 instance DocNode Node where
   noNode = NoNode
   pathNode NoNode            = NoPathD
-  pathNode (Node_RootDoc _ pth) = PathD pth
-  pathNode (Node_HoleDocument _ pth) = PathD pth
-  pathNode (Node_ParseErrDocument _ pth) = PathD pth
   pathNode (Node_RootEnr _ pth) = PathD pth
   pathNode (Node_HoleEnrichedDoc _ pth) = PathD pth
   pathNode (Node_ParseErrEnrichedDoc _ pth) = PathD pth
+  pathNode (Node_RootDoc _ pth) = PathD pth
+  pathNode (Node_HoleDocument _ pth) = PathD pth
+  pathNode (Node_ParseErrDocument _ pth) = PathD pth
   pathNode (Node_Root _ pth) = PathD pth
   pathNode (Node_HoleRoot _ pth) = PathD pth
   pathNode (Node_ParseErrRoot _ pth) = PathD pth

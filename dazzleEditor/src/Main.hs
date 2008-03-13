@@ -26,3 +26,5 @@ main = proxima PresentationAG.presentationSheet
                --
                (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                (EnrichedDocLevel HoleEnrichedDoc NoPathD HoleDocument)   
+
+-- Note: this file does not need to be changed when instantiating an editor.
