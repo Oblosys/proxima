@@ -1,6 +1,36 @@
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
+-- presentationSheet                                                    --
+--------------------------------------------------------------------------
+
+WRAPPER Root
+
+{
+-- type PresentationSheet doc enr node clip token = 
+--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
+--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)
+
+presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken
+presentationSheet enrichedDoc focusD whiteSpaceMap pIdC = 
+  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap) = 
+        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)
+  in  (whitespaceMap, pIdC', pres)
+
+{- 
+A type error here means that extra attributes were declared on EnrichedDoc
+The attribute signature for EnrichedDoc should be:
+
+EnrichedDoc  [ focusD : FocusDoc path : Path
+             | pIdC : Int layoutMap : WhitespaceMap
+             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc 
+             ]
+-}
+}
+
+
+
+--------------------------------------------------------------------------
 -- AG data type                                                         --
 --------------------------------------------------------------------------
 
@@ -146,7 +176,7 @@ DATA ConsList_Edge
 --------------------------------------------------------------------------
 
 ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
-     [ focusD : FocusDoc path : Path |  pIdC : Int  | ]
+     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
 ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
      [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]

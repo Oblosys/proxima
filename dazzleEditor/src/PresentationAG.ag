@@ -25,7 +25,6 @@ import DocumentEdit_Generated
 
 INCLUDE "PresentationAG_Generated.ag"
 
-ATTR EnrichedDoc [ | layoutMap : WhitespaceMap | ]
 
 SEM EnrichedDoc
   | RootEnr
