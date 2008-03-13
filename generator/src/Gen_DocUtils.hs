@@ -22,7 +22,7 @@ generate docType = genRankNode (addHolesParseErrs (docTypeWithLists)) -- with Do
                 ++ genParseXML  (removeDocumentDecl (docTypeWithLists))
                 ++ genListUtils docTypeWithLists
                 ++ genMisc
-  where docTypeWithLists = addListDecls docType
+  where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
 
 genRankNode decls = genBanner "rankNode" $
   "rankNode :: Node -> Int" :

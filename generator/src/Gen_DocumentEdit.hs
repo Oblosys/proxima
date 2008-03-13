@@ -22,7 +22,7 @@ generate :: DocumentType -> [String]
 generate docType = genClip (docTypeWithLists ++ primTypeDecls) ++ -- with Document
                    genEditable docTypeWithLists ++
                    genEditableDocEnrichedDocAndPrims
- where docTypeWithLists = addListDecls docType
+ where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
 
 
 genClip decls = genBanner "Clip instance" $

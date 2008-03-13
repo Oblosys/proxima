@@ -20,7 +20,7 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls (docTypeWith
                 ++ genClipDoc                     (docTypeWithLists ++ primTypeDecls)
                 ++ genNode     (addHolesParseErrs (docTypeWithLists))
                 ++ genShowNode (addHolesParseErrs (docTypeWithLists))
-  where docTypeWithLists = addListDecls docType  -- all are with Document
+  where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)  -- all are with Document
 
                 
 genDataType decls = genBanner "Proxima data type" $

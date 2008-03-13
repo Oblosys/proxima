@@ -19,7 +19,7 @@ generate docType = genReuse   docTypeWithLists
                 ++ genDefault docTypeWithLists
                 ++ genExtractFromTokens 
                 ++ genGenericReuse docTypeWithLists
-  where docTypeWithLists = addListDecls docType
+  where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
   
   
 genReuse decls = genBanner "reuse functions" $ concat

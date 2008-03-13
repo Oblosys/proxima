@@ -53,6 +53,13 @@ type FieldName = String
 isListType (ListType _) = True
 isListType _            = False
 
+getDocumentDecl :: DocumentType -> Decl
+getDocumentDecl decls = 
+  case [ decl | decl@(Decl lhsType _) <- decls, genTypeName lhsType == "Document" ] of
+    []     -> error "No declaration for Document"
+    [decl] -> decl
+    _      -> error "Multiple declarations for Document"
+  
 getAllDeclaredTypeNames :: DocumentType -> [TypeName]
 getAllDeclaredTypeNames decls = [ genTypeName name | Decl name _ <- decls ]
 
@@ -126,9 +133,19 @@ genIXPattern (Prod _ cnstrName idpFields fields) =
      , prefixBy " x" $ map show [0..length fields-1]
      ]
 
-removeDocumentDecl decls = filter ((/= "Document") . lhsTypeName . declLHSType) decls
+-- If there is no EnrichedDoc declaration, create one, taking the right-hand side
+-- from the Document declaration
+addEnrichedDocDecl decls = 
+  if "EnrichedDoc" `elem` getAllDeclaredTypeNames decls
+  then decls 
+  else case getDocumentDecl decls of
+         Decl _ [Prod prodKind "RootDoc" idpFields fields] -> 
+           Decl (LHSBasicType "EnrichedDoc") [Prod prodKind "RootEnr" idpFields fields]  : decls
+         _                     -> error "Automatic EnrichedDoc generation only for simple \"data Document = RootDoc ..\""
 
-removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . lhsTypeName . declLHSType) decls
+removeDocumentDecl decls = filter ((/= "Document") . genTypeName . declLHSType) decls
+
+removeEnrichedDocDecl decls = filter ((/= "EnrichedDoc") . genTypeName . declLHSType) decls
 
 addListDecls decls = decls ++ (map genListDecl $ getAllUsedListTypes decls)
  where genListDecl tpe = Decl (LHSListType $ typeName tpe) 

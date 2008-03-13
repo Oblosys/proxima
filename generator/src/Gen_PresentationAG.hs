@@ -16,13 +16,13 @@ import TypesUtils
 generate :: DocumentType -> [String]
 generate docType = genPresentationSheet
                 ++ genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genAttr (removeDocumentDecl docType)
+                ++ genAttr (removeDocumentDecl (addEnrichedDocDecl docType))
                 ++ genSem (addConsListDecls docTypeWithLists)
                 ++ genSemSynthesizedPath (docTypeWithoutEnrWithLists)
                 ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
                 ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
-  where docTypeWithoutEnrWithLists = addListDecls (removeEnrichedDocDecl (removeDocumentDecl docType))
-        docTypeWithLists = addListDecls (removeDocumentDecl docType)
+  where docTypeWithoutEnrWithLists = addListDecls (removeEnrichedDocDecl (removeDocumentDecl (addEnrichedDocDecl docType)))
+        docTypeWithLists = addListDecls (removeDocumentDecl (addEnrichedDocDecl docType))
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
 
