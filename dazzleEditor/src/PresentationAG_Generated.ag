@@ -12,10 +12,10 @@ WRAPPER Root
 --        (WhitespaceMap, IDPCounter, Presentation doc node clip token)
 
 presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken
-presentationSheet enrichedDoc focusD whiteSpaceMap pIdC = 
-  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap) = 
+presentationSheet enrichedDoc focusD whitespaceMap pIdC = 
+  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = 
         wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)
-  in  (whitespaceMap, pIdC', pres)
+  in  (whitespaceMap', pIdC', pres)
 
 {- 
 A type error here means that extra attributes were declared on EnrichedDoc
@@ -178,11 +178,11 @@ DATA ConsList_Edge
 ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
      [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
-     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
-
 ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
+
+ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
+     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
      [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]

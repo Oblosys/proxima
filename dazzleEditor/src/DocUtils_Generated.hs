@@ -182,6 +182,9 @@ instance DocNode Node where
 toXMLEnrichedDoc (RootEnr root) = Elt "RootEnr" [] $ [toXMLRoot root]
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
 toXMLEnrichedDoc (ParseErrEnrichedDoc presentation) = Elt "ParseErrEnrichedDoc" [] []
+toXMLDocument (RootDoc root) = Elt "RootDoc" [] $ [toXMLRoot root]
+toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
+toXMLDocument (ParseErrDocument presentation) = Elt "ParseErrDocument" [] []
 toXMLRoot (Root graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections
 toXMLRoot (HoleRoot) = Elt "HoleRoot" [] $ []
 toXMLRoot (ParseErrRoot presentation) = Elt "ParseErrRoot" [] []
@@ -268,6 +271,8 @@ toXMLConsList_Edge Nil_Edge             = []
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root<* endTag "RootEnr"
+parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
+parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Root<* endTag "RootDoc"
 parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
 parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection
@@ -497,12 +502,7 @@ instance PopupMenuHack Node Document where
   mkDocNode doc = Node_RootDoc doc []
 
 
--- toXML for Document and primitive types
-
--- we don't put a "RootDoc" element in the XML, because this type is not visible to the user.
-toXMLDocument (RootDoc root) = toXMLRoot root
-toXMLDocument _              = debug Err "DocUtils_Generated.toXMLDocument: malformed Document" $
-                                 Elt "Root" [] [] -- this does not occur
+-- toXML for primitive types
 
 toXMLInt i = Elt "Integer" [("val", show i)] []
 
@@ -513,9 +513,7 @@ toXMLBool b = Elt "Bool" [("val", show b)] []
 toXMLString str = Elt "String" [] [PCData str] 
 
 
--- parseXML for Document and primitive types
-
-parseXML_Document = RootDoc <$> parseXML_Root
+-- parseXML for primitive types
 
 parseXML_Int :: Parser Int
 parseXML_Int  =

@@ -205,6 +205,8 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
 
   hole = HoleEnrichedDoc
 
+  holeNodeConstr = Node_HoleEnrichedDoc
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -229,6 +231,8 @@ instance Editable Document Document Node ClipDoc UserToken where
   parseErr = ParseErrDocument
 
   hole = HoleDocument
+
+  holeNodeConstr = Node_HoleDocument
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -259,6 +263,8 @@ instance Editable Root Document Node ClipDoc UserToken where
 
   hole = HoleRoot
 
+  holeNodeConstr = Node_HoleRoot
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -287,6 +293,8 @@ instance Editable Section Document Node ClipDoc UserToken where
   parseErr = ParseErrSection
 
   hole = HoleSection
+
+  holeNodeConstr = Node_HoleSection
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -317,6 +325,8 @@ instance Editable Subsection Document Node ClipDoc UserToken where
 
   hole = HoleSubsection
 
+  holeNodeConstr = Node_HoleSubsection
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -343,6 +353,8 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
   parseErr = ParseErrSubsubsection
 
   hole = HoleSubsubsection
+
+  holeNodeConstr = Node_HoleSubsubsection
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -372,6 +384,8 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
   parseErr = ParseErrParagraph
 
   hole = HoleParagraph
+
+  holeNodeConstr = Node_HoleParagraph
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -410,6 +424,8 @@ instance Editable Word Document Node ClipDoc UserToken where
 
   hole = HoleWord
 
+  holeNodeConstr = Node_HoleWord
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -438,6 +454,8 @@ instance Editable Graph Document Node ClipDoc UserToken where
   parseErr = ParseErrGraph
 
   hole = HoleGraph
+
+  holeNodeConstr = Node_HoleGraph
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -472,6 +490,8 @@ instance Editable Vertex Document Node ClipDoc UserToken where
 
   hole = HoleVertex
 
+  holeNodeConstr = Node_HoleVertex
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -496,6 +516,8 @@ instance Editable Shape Document Node ClipDoc UserToken where
   parseErr = ParseErrShape
 
   hole = HoleShape
+
+  holeNodeConstr = Node_HoleShape
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -523,6 +545,8 @@ instance Editable Edge Document Node ClipDoc UserToken where
   parseErr = ParseErrEdge
 
   hole = HoleEdge
+
+  holeNodeConstr = Node_HoleEdge
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -553,6 +577,8 @@ instance Editable Subgraph Document Node ClipDoc UserToken where
 
   hole = HoleSubgraph
 
+  holeNodeConstr = Node_HoleSubgraph
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -577,6 +603,8 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   parseErr = ParseErrDirty
 
   hole = HoleDirty
+
+  holeNodeConstr = Node_HoleDirty
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -611,6 +639,8 @@ instance Editable List_Section Document Node ClipDoc UserToken where
   parseErr = ParseErrList_Section
 
   hole = List_Section Nil_Section
+
+  holeNodeConstr = Node_HoleList_Section
 
   isList _ = True
 
@@ -651,6 +681,8 @@ instance Editable List_Paragraph Document Node ClipDoc UserToken where
 
   hole = List_Paragraph Nil_Paragraph
 
+  holeNodeConstr = Node_HoleList_Paragraph
+
   isList _ = True
 
   insertList n (Clip_Paragraph c) (List_Paragraph cxs) = Clip_List_Paragraph $ List_Paragraph (insertList_Paragraph n c cxs)
@@ -689,6 +721,8 @@ instance Editable List_Subsection Document Node ClipDoc UserToken where
   parseErr = ParseErrList_Subsection
 
   hole = List_Subsection Nil_Subsection
+
+  holeNodeConstr = Node_HoleList_Subsection
 
   isList _ = True
 
@@ -729,6 +763,8 @@ instance Editable List_Subsubsection Document Node ClipDoc UserToken where
 
   hole = List_Subsubsection Nil_Subsubsection
 
+  holeNodeConstr = Node_HoleList_Subsubsection
+
   isList _ = True
 
   insertList n (Clip_Subsubsection c) (List_Subsubsection cxs) = Clip_List_Subsubsection $ List_Subsubsection (insertList_Subsubsection n c cxs)
@@ -767,6 +803,8 @@ instance Editable List_Word Document Node ClipDoc UserToken where
   parseErr = ParseErrList_Word
 
   hole = List_Word Nil_Word
+
+  holeNodeConstr = Node_HoleList_Word
 
   isList _ = True
 
@@ -807,6 +845,8 @@ instance Editable List_Vertex Document Node ClipDoc UserToken where
 
   hole = List_Vertex Nil_Vertex
 
+  holeNodeConstr = Node_HoleList_Vertex
+
   isList _ = True
 
   insertList n (Clip_Vertex c) (List_Vertex cxs) = Clip_List_Vertex $ List_Vertex (insertList_Vertex n c cxs)
@@ -846,6 +886,8 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
 
   hole = List_Edge Nil_Edge
 
+  holeNodeConstr = Node_HoleList_Edge
+
   isList _ = True
 
   insertList n (Clip_Edge c) (List_Edge cxs) = Clip_List_Edge $ List_Edge (insertList_Edge n c cxs)
@@ -876,6 +918,8 @@ instance Editable Int Document Node ClipDoc UserToken where
 
   hole = 0
 
+  holeNodeConstr = error "Type Int is primitive and has no hole node constructorstructor"
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -893,6 +937,8 @@ instance Editable Float Document Node ClipDoc UserToken where
   parseErr _ = 0
 
   hole = 0
+
+  holeNodeConstr = error "Type Float is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -912,6 +958,8 @@ instance Editable Bool Document Node ClipDoc UserToken where
 
   hole = False
 
+  holeNodeConstr = error "Type Bool is primitive and has no hole node constructorstructor"
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -930,6 +978,8 @@ instance Editable String Document Node ClipDoc UserToken where
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"
+
+  holeNodeConstr = error "Type String is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
