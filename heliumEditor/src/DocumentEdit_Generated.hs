@@ -212,6 +212,8 @@ instance Editable Document Document Node ClipDoc UserToken where
 
   hole = HoleDocument
 
+  holeNodeConstr = Node_HoleDocument
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -236,6 +238,8 @@ instance Editable Root Document Node ClipDoc UserToken where
   parseErr = ParseErrRoot
 
   hole = HoleRoot
+
+  holeNodeConstr = Node_HoleRoot
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -264,6 +268,8 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
 
   hole = HoleEnrichedDoc
 
+  holeNodeConstr = Node_HoleEnrichedDoc
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -290,6 +296,8 @@ instance Editable RootE Document Node ClipDoc UserToken where
   parseErr = ParseErrRootE
 
   hole = HoleRootE
+
+  holeNodeConstr = Node_HoleRootE
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -330,6 +338,8 @@ instance Editable Decl Document Node ClipDoc UserToken where
 
   hole = HoleDecl
 
+  holeNodeConstr = Node_HoleDecl
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -354,6 +364,8 @@ instance Editable Ident Document Node ClipDoc UserToken where
   parseErr = ParseErrIdent
 
   hole = HoleIdent
+
+  holeNodeConstr = Node_HoleIdent
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -456,6 +468,8 @@ instance Editable Exp Document Node ClipDoc UserToken where
 
   hole = HoleExp
 
+  holeNodeConstr = Node_HoleExp
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -482,6 +496,8 @@ instance Editable Alt Document Node ClipDoc UserToken where
   parseErr = ParseErrAlt
 
   hole = HoleAlt
+
+  holeNodeConstr = Node_HoleAlt
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -522,6 +538,8 @@ instance Editable Board Document Node ClipDoc UserToken where
 
   hole = HoleBoard
 
+  holeNodeConstr = Node_HoleBoard
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -560,6 +578,8 @@ instance Editable BoardRow Document Node ClipDoc UserToken where
   parseErr = ParseErrBoardRow
 
   hole = HoleBoardRow
+
+  holeNodeConstr = Node_HoleBoardRow
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -608,6 +628,8 @@ instance Editable BoardSquare Document Node ClipDoc UserToken where
 
   hole = HoleBoardSquare
 
+  holeNodeConstr = Node_HoleBoardSquare
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -634,6 +656,8 @@ instance Editable PPPresentation Document Node ClipDoc UserToken where
   parseErr = ParseErrPPPresentation
 
   hole = HolePPPresentation
+
+  holeNodeConstr = Node_HolePPPresentation
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -662,6 +686,8 @@ instance Editable Slide Document Node ClipDoc UserToken where
 
   hole = HoleSlide
 
+  holeNodeConstr = Node_HoleSlide
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -689,6 +715,8 @@ instance Editable ItemList Document Node ClipDoc UserToken where
 
   hole = HoleItemList
 
+  holeNodeConstr = Node_HoleItemList
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -715,6 +743,8 @@ instance Editable ListType Document Node ClipDoc UserToken where
   parseErr = ParseErrListType
 
   hole = HoleListType
+
+  holeNodeConstr = Node_HoleListType
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -749,6 +779,8 @@ instance Editable Item Document Node ClipDoc UserToken where
 
   hole = HoleItem
 
+  holeNodeConstr = Node_HoleItem
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -782,6 +814,8 @@ instance Editable List_Decl Document Node ClipDoc UserToken where
   parseErr = ParseErrList_Decl
 
   hole = List_Decl Nil_Decl
+
+  holeNodeConstr = Node_HoleList_Decl
 
   isList _ = True
 
@@ -822,6 +856,8 @@ instance Editable List_Alt Document Node ClipDoc UserToken where
 
   hole = List_Alt Nil_Alt
 
+  holeNodeConstr = Node_HoleList_Alt
+
   isList _ = True
 
   insertList n (Clip_Alt c) (List_Alt cxs) = Clip_List_Alt $ List_Alt (insertList_Alt n c cxs)
@@ -860,6 +896,8 @@ instance Editable List_Exp Document Node ClipDoc UserToken where
   parseErr = ParseErrList_Exp
 
   hole = List_Exp Nil_Exp
+
+  holeNodeConstr = Node_HoleList_Exp
 
   isList _ = True
 
@@ -900,6 +938,8 @@ instance Editable List_Slide Document Node ClipDoc UserToken where
 
   hole = List_Slide Nil_Slide
 
+  holeNodeConstr = Node_HoleList_Slide
+
   isList _ = True
 
   insertList n (Clip_Slide c) (List_Slide cxs) = Clip_List_Slide $ List_Slide (insertList_Slide n c cxs)
@@ -939,6 +979,8 @@ instance Editable List_Item Document Node ClipDoc UserToken where
 
   hole = List_Item Nil_Item
 
+  holeNodeConstr = Node_HoleList_Item
+
   isList _ = True
 
   insertList n (Clip_Item c) (List_Item cxs) = Clip_List_Item $ List_Item (insertList_Item n c cxs)
@@ -969,6 +1011,8 @@ instance Editable Int Document Node ClipDoc UserToken where
 
   hole = 0
 
+  holeNodeConstr = error "Type Int is primitive and has no hole node constructorstructor"
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -986,6 +1030,8 @@ instance Editable Float Document Node ClipDoc UserToken where
   parseErr _ = 0
 
   hole = 0
+
+  holeNodeConstr = error "Type Float is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -1005,6 +1051,8 @@ instance Editable Bool Document Node ClipDoc UserToken where
 
   hole = False
 
+  holeNodeConstr = error "Type Bool is primitive and has no hole node constructorstructor"
+
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -1023,6 +1071,8 @@ instance Editable String Document Node ClipDoc UserToken where
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"
+
+  holeNodeConstr = error "Type String is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
