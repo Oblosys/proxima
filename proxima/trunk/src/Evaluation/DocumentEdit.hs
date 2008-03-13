@@ -21,10 +21,10 @@ class Editable a doc node clip token | a -> doc node clip token where
   arity :: a -> Int
   parseErr :: Presentation doc node clip token -> a
   hole :: a
+  holeNodeConstr :: (a -> Path -> node) -- for automatic hole parsing in PresentationParsing.pStr
   isList :: a -> Bool
   insertList :: Int -> clip -> a -> clip
   removeList :: Int -> a -> clip
--- defaults for non-list types don't work because of ClipNothing constructor
 
 class Clip clip where
   arityClip :: clip -> Int
@@ -33,10 +33,6 @@ class Clip clip where
   isListClip :: clip -> Bool
   insertListClip :: Int -> clip -> clip -> clip
   removeListClip :: Int -> clip -> clip
-
-
--- Generic part
-
   
 navigateUpD :: FocusDoc -> document -> FocusDoc
 navigateUpD NoPathD         _  = NoPathD

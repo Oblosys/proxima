@@ -75,7 +75,8 @@ pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happ
 applyDummyParameters nd = nd (error "This should not have happened") [] 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
-pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
+--pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
+--         ListParser doc node clip token a -> ListParser doc node clip token a
 pStr = pStr' empty
 
 pStrVerbose str = pStr' (text str)
@@ -83,15 +84,27 @@ pStrVerbose str = pStr' (text str)
 pStr' prs p = unfoldStructure  
      <$> pSym (StructuralTk Nothing prs [] NoIDP)
  where unfoldStructure structTk@(StructuralTk nd pr children _) = 
-         let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
+         let (res, errs) = runParser (addHoleParser p) (structTk : children) {- (p <|> hole/parseErr parser)-}
+             x = parseErr
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
+       unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
+
+-- The scoped type variable is necessary to get hole and holeNodeConstr of the same type a.
+addHoleParser :: forall a doc node clip token . (DocNode node, Ord token, Show token, Editable a doc node clip token) => ListParser doc node clip token a -> ListParser doc node clip token a 
+addHoleParser p =
+  p <|> hole <$ pStructural (holeNodeConstr :: a -> Path -> node)
+  
+
+pStr'' nodeC hole p = unfoldStructure  
+     <$> pSym (StructuralTk Nothing empty [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+         let pOrHole = p <|> hole <$ pStructural nodeC
+             (res, errs) = runParser pOrHole (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 
--- unfortunately, the first parser in p (which recognizes the structure token) cannot be used for the 
--- 'top-level' parsing. Hence, the parser succeeds on any structural token, and something like
--- pStr (pSym <DivExp> ...) <|> pStr (pSym <PowerExp> ...)  always takes the first alternative
 
 pStrAlt ndf p = unfoldStructure  
      <$> pSym (StructuralTk (Just nd) (text $ show nd) [] NoIDP)
