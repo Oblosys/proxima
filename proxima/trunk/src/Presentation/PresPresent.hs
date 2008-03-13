@@ -45,7 +45,7 @@ presentEnr :: PopupMenuHack node doc =>
               WhitespaceMap -> IDPCounter ->
               (Presentation doc node clip token, WhitespaceMap, IDPCounter)
 presentEnr presentationSheet state (EnrichedDocLevel d focusD doc) layM idC = 
-      let (layM', idC', pres', self) = presentationSheet d focusD layM idC []
+      let (layM', idC', pres') = presentationSheet d focusD layM idC []
           pres'' = loc (mkDocNode doc) $ pres' 
                    -- HACK!! top level loc needs to be a ref to the document
                    -- it is used by mkPopupMenuXY in Renderer.
