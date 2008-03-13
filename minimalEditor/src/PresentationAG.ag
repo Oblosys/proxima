@@ -31,8 +31,8 @@ SEM EnrichedDoc
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col [ text $ "Tree with depth "++show @tree.depth, @tree.pres ]
 
-SEM Tree
-  | Bin  lhs.depth = @left.depth `max` @right.depth
+SEM Tree [ | | depth : Int ]
+  | Bin  lhs.depth = @left.depth `max` @right.depth + 1
   | Leaf lhs.depth = 1
   | HoleTree ParseErrTree
       lhs.depth = 0
@@ -47,7 +47,7 @@ SEM Tree
                    row [ text "Leaf" ]
 -}
 
-SEM Tree [ | | depth : Int ]
+SEM Tree
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    row [ col [ vSpace 10, @left.pres]

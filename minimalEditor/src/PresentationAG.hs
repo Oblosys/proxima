@@ -32,10 +32,10 @@ import DocumentEdit_Generated
 --        (WhitespaceMap, IDPCounter, Presentation doc node clip token)
 
 presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken
-presentationSheet enrichedDoc focusD whiteSpaceMap pIdC = 
-  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap) = 
+presentationSheet enrichedDoc focusD whitespaceMap pIdC = 
+  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = 
         wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)
-  in  (whitespaceMap, pIdC', pres)
+  in  (whitespaceMap', pIdC', pres)
 
 {- 
 A type error here means that extra attributes were declared on EnrichedDoc
@@ -324,7 +324,7 @@ sem_Tree_Bin left_ right_  =
               -- "src/PresentationAG.ag"(line 35, column 10)
               _lhsOdepth =
                   {-# LINE 35 "src/PresentationAG.ag" #-}
-                  _leftIdepth `max` _rightIdepth
+                  _leftIdepth `max` _rightIdepth + 1
                   {-# LINE 329 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG.ag"(line 52, column 7)
               _lhsOpres =
