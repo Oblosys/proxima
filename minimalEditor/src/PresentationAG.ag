@@ -1,0 +1,49 @@
+imports
+{
+import Common.CommonTypes hiding (Dirty (..))
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
+
+import Presentation.XprezLib
+import Presentation.XLatex hiding (bold)
+
+import Evaluation.DocumentEdit
+
+import List
+import Maybe
+import qualified Data.Map as Map
+import Data.Map (Map)
+
+
+import Evaluation.DocTypes (DocumentLevel (..))
+import DocTypes_Generated
+import DocUtils_Generated
+import DocumentEdit_Generated
+
+
+}
+
+INCLUDE "PresentationAG_Generated.ag"
+
+
+SEM EnrichedDoc
+  | RootEnr
+      lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   @tree.pres
+
+SEM Tree
+  | Bin
+      lhs.pres = loc (Node_Bin @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row [ text "Bin (", @left.pres, text ") (", @right.pres, text ")" ]
+  | Leaf
+      lhs.pres = loc (Node_Leaf @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+                   row [ text "Leaf" ]
+{-
+SEM Tree
+  | Bin
+      lhs.pres = loc (Node_Bin @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [@left.pres, text " Bin ", @right.pres ]
+  | Leaf
+      lhs.pres = loc (Node_Leaf @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                   row [ text "Leaf" ]
+-}

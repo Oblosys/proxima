@@ -1,0 +1,133 @@
+----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
+
+--------------------------------------------------------------------------
+-- presentationSheet                                                    --
+--------------------------------------------------------------------------
+
+WRAPPER Root
+
+{
+-- type PresentationSheet doc enr node clip token = 
+--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
+--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)
+
+presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken
+presentationSheet enrichedDoc focusD whiteSpaceMap pIdC = 
+  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap) = 
+        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)
+  in  (whitespaceMap, pIdC', pres)
+
+{- 
+A type error here means that extra attributes were declared on EnrichedDoc
+The attribute signature for EnrichedDoc should be:
+
+EnrichedDoc  [ focusD : FocusDoc path : Path
+             | pIdC : Int layoutMap : WhitespaceMap
+             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc 
+             ]
+-}
+}
+
+
+
+--------------------------------------------------------------------------
+-- AG data type                                                         --
+--------------------------------------------------------------------------
+
+DATA EnrichedDoc
+  | RootEnr tree:Tree
+  | HoleEnrichedDoc
+  | ParseErrEnrichedDoc presentation:{(Presentation Document Node ClipDoc UserToken)}
+
+DATA Tree
+  | Bin left:Tree right:Tree
+  | Leaf
+  | HoleTree
+  | ParseErrTree presentation:{(Presentation Document Node ClipDoc UserToken)}
+
+
+
+
+--------------------------------------------------------------------------
+-- Attr declarations                                                    --
+--------------------------------------------------------------------------
+
+ATTR EnrichedDoc Tree
+     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
+
+ATTR EnrichedDoc Tree
+     [ | | pres : Presentation_Doc_Node_Clip_Token ]
+
+ATTR Tree
+     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+
+
+
+
+--------------------------------------------------------------------------
+-- General sem functions                                                --
+--------------------------------------------------------------------------
+
+SEM EnrichedDoc
+  | RootEnr 
+      tree.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @tree.pIdC
+      tree.path  = @lhs.path++[0]
+  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
+  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @presentation
+
+SEM Tree
+  | Bin 
+      left.pIdC = @lhs.pIdC + 0
+      right.pIdC = @left.pIdC
+      lhs.pIdC = @right.pIdC
+      left.path  = @lhs.path++[0]
+      right.path  = @lhs.path++[1]
+  | Leaf 
+      lhs.pIdC = @lhs.pIdC + 0
+  | HoleTree     lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+  | ParseErrTree lhs.pres = presParseErr (Node_ParseErrTree @self @lhs.path) @presentation
+
+
+
+
+--------------------------------------------------------------------------
+-- Synthesized path rules                                               --
+--------------------------------------------------------------------------
+
+SEM Tree
+  | Bin lhs.path = @lhs.path
+  | Leaf lhs.path = @lhs.path
+
+
+
+
+--------------------------------------------------------------------------
+-- Sem functions for XML presentation                                   --
+--------------------------------------------------------------------------
+
+SEM Tree
+  | Bin
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Bin @self @lhs.path) @lhs.path "Bin" [ @left.presXML, @right.presXML ] 
+  | Leaf
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [  ] 
+  | HoleTree     lhs.presXML = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+  | ParseErrTree lhs.presXML = presParseErr (Node_ParseErrTree @self @lhs.path) @presentation
+
+
+
+
+--------------------------------------------------------------------------
+-- Sem functions for tree presentation                                  --
+--------------------------------------------------------------------------
+
+SEM Tree
+  | Bin
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Bin @self @lhs.path) @lhs.path "Bin" [ @left.presTree, @right.presTree ] 
+  | Leaf
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [  ] 
+  | HoleTree     lhs.presTree = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+  | ParseErrTree lhs.presTree = presParseErr (Node_ParseErrTree @self @lhs.path) @presentation
+
+
+

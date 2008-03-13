@@ -1,0 +1,4 @@
+data Document = RootDoc tree:Tree
+
+data Tree = Bin left : Tree right : Tree
+          | Leaf
