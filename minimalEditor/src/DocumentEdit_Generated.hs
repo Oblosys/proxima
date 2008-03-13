@@ -97,8 +97,6 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
 
   hole = HoleEnrichedDoc
 
-  holeNodeConstr = Node_HoleEnrichedDoc
-
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -123,8 +121,6 @@ instance Editable Document Document Node ClipDoc UserToken where
   parseErr = ParseErrDocument
 
   hole = HoleDocument
-
-  holeNodeConstr = Node_HoleDocument
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -155,8 +151,6 @@ instance Editable Tree Document Node ClipDoc UserToken where
 
   hole = HoleTree
 
-  holeNodeConstr = Node_HoleTree
-
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -182,8 +176,6 @@ instance Editable Int Document Node ClipDoc UserToken where
 
   hole = 0
 
-  holeNodeConstr = error "Type Int is primitive and has no hole node constructorstructor"
-
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -201,8 +193,6 @@ instance Editable Float Document Node ClipDoc UserToken where
   parseErr _ = 0
 
   hole = 0
-
-  holeNodeConstr = error "Type Float is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -222,8 +212,6 @@ instance Editable Bool Document Node ClipDoc UserToken where
 
   hole = False
 
-  holeNodeConstr = error "Type Bool is primitive and has no hole node constructorstructor"
-
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
@@ -242,8 +230,6 @@ instance Editable String Document Node ClipDoc UserToken where
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"
-
-  holeNodeConstr = error "Type String is primitive and has no hole node constructorstructor"
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing

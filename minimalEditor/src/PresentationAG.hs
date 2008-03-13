@@ -173,6 +173,7 @@ sem_EnrichedDoc_RootEnr tree_  =
               _lhsOwhitespaceMap :: WhitespaceMap
               _treeOfocusD :: FocusDoc
               _treeOwhitespaceMap :: WhitespaceMap
+              _treeIdepth :: Int
               _treeIpIdC :: Int
               _treeIpath :: Path
               _treeIpres :: Presentation_Doc_Node_Clip_Token
@@ -184,23 +185,23 @@ sem_EnrichedDoc_RootEnr tree_  =
               _lhsOpres =
                   {-# LINE 31 "src/PresentationAG.ag" #-}
                   loc (Node_RootEnr _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
-                    row [ text "Tree: ", _treeIpres ]
-                  {-# LINE 189 "src/PresentationAG.hs" #-}
+                    col [ text $ "Tree with depth "++show _treeIdepth, _treeIpres ]
+                  {-# LINE 190 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 73, column 7)
               _treeOpIdC =
                   {-# LINE 73 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpIdC + 0
-                  {-# LINE 194 "src/PresentationAG.hs" #-}
+                  {-# LINE 195 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 74, column 7)
               _lhsOpIdC =
                   {-# LINE 74 "src/PresentationAG_Generated.ag" #-}
                   _treeIpIdC
-                  {-# LINE 199 "src/PresentationAG.hs" #-}
+                  {-# LINE 200 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 75, column 7)
               _treeOpath =
                   {-# LINE 75 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath++[0]
-                  {-# LINE 204 "src/PresentationAG.hs" #-}
+                  {-# LINE 205 "src/PresentationAG.hs" #-}
               -- self rule
               _self =
                   RootEnr _treeIself
@@ -211,18 +212,18 @@ sem_EnrichedDoc_RootEnr tree_  =
               _lhsOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _treeIwhitespaceMap
-                  {-# LINE 215 "src/PresentationAG.hs" #-}
+                  {-# LINE 216 "src/PresentationAG.hs" #-}
               -- copy rule (down)
               _treeOfocusD =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIfocusD
-                  {-# LINE 220 "src/PresentationAG.hs" #-}
+                  {-# LINE 221 "src/PresentationAG.hs" #-}
               -- copy rule (down)
               _treeOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIwhitespaceMap
-                  {-# LINE 225 "src/PresentationAG.hs" #-}
-              ( _treeIpIdC,_treeIpath,_treeIpres,_treeIpresTree,_treeIpresXML,_treeIself,_treeIwhitespaceMap) =
+                  {-# LINE 226 "src/PresentationAG.hs" #-}
+              ( _treeIdepth,_treeIpIdC,_treeIpath,_treeIpres,_treeIpresTree,_treeIpresXML,_treeIself,_treeIwhitespaceMap) =
                   (tree_ _treeOfocusD _treeOpIdC _treeOpath _treeOwhitespaceMap )
           in  ( _lhsOpIdC,_lhsOpres,_lhsOself,_lhsOwhitespaceMap)))
 -- Tree --------------------------------------------------------
@@ -235,6 +236,7 @@ sem_EnrichedDoc_RootEnr tree_  =
          path                 : Path
          whitespaceMap        : WhitespaceMap
       synthesized attributes:
+         depth                : Int
          pres                 : Presentation_Doc_Node_Clip_Token
          presTree             : Presentation_Doc_Node_Clip_Token
          presXML              : Presentation_Doc_Node_Clip_Token
@@ -272,13 +274,13 @@ type T_Tree = FocusDoc ->
               Int ->
               Path ->
               WhitespaceMap ->
-              ( Int,Path,Presentation_Doc_Node_Clip_Token,Presentation_Doc_Node_Clip_Token,Presentation_Doc_Node_Clip_Token,Tree,WhitespaceMap)
+              ( Int,Int,Path,Presentation_Doc_Node_Clip_Token,Presentation_Doc_Node_Clip_Token,Presentation_Doc_Node_Clip_Token,Tree,WhitespaceMap)
 data Inh_Tree = Inh_Tree {focusD_Inh_Tree :: FocusDoc,pIdC_Inh_Tree :: Int,path_Inh_Tree :: Path,whitespaceMap_Inh_Tree :: WhitespaceMap}
-data Syn_Tree = Syn_Tree {pIdC_Syn_Tree :: Int,path_Syn_Tree :: Path,pres_Syn_Tree :: Presentation_Doc_Node_Clip_Token,presTree_Syn_Tree :: Presentation_Doc_Node_Clip_Token,presXML_Syn_Tree :: Presentation_Doc_Node_Clip_Token,self_Syn_Tree :: Tree,whitespaceMap_Syn_Tree :: WhitespaceMap}
+data Syn_Tree = Syn_Tree {depth_Syn_Tree :: Int,pIdC_Syn_Tree :: Int,path_Syn_Tree :: Path,pres_Syn_Tree :: Presentation_Doc_Node_Clip_Token,presTree_Syn_Tree :: Presentation_Doc_Node_Clip_Token,presXML_Syn_Tree :: Presentation_Doc_Node_Clip_Token,self_Syn_Tree :: Tree,whitespaceMap_Syn_Tree :: WhitespaceMap}
 wrap_Tree sem (Inh_Tree _lhsIfocusD _lhsIpIdC _lhsIpath _lhsIwhitespaceMap )  =
-    (let ( _lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap) =
+    (let ( _lhsOdepth,_lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap) =
              (sem _lhsIfocusD _lhsIpIdC _lhsIpath _lhsIwhitespaceMap )
-     in  (Syn_Tree _lhsOpIdC _lhsOpath _lhsOpres _lhsOpresTree _lhsOpresXML _lhsOself _lhsOwhitespaceMap ))
+     in  (Syn_Tree _lhsOdepth _lhsOpIdC _lhsOpath _lhsOpres _lhsOpresTree _lhsOpresXML _lhsOself _lhsOwhitespaceMap ))
 sem_Tree_Bin :: T_Tree ->
                 T_Tree ->
                 T_Tree
@@ -287,7 +289,8 @@ sem_Tree_Bin left_ right_  =
        _lhsIpIdC
        _lhsIpath
        _lhsIwhitespaceMap ->
-         (let _lhsOpres :: Presentation_Doc_Node_Clip_Token
+         (let _lhsOdepth :: Int
+              _lhsOpres :: Presentation_Doc_Node_Clip_Token
               _leftOpIdC :: Int
               _rightOpIdC :: Int
               _lhsOpIdC :: Int
@@ -302,6 +305,7 @@ sem_Tree_Bin left_ right_  =
               _leftOwhitespaceMap :: WhitespaceMap
               _rightOfocusD :: FocusDoc
               _rightOwhitespaceMap :: WhitespaceMap
+              _leftIdepth :: Int
               _leftIpIdC :: Int
               _leftIpath :: Path
               _leftIpres :: Presentation_Doc_Node_Clip_Token
@@ -309,6 +313,7 @@ sem_Tree_Bin left_ right_  =
               _leftIpresXML :: Presentation_Doc_Node_Clip_Token
               _leftIself :: Tree
               _leftIwhitespaceMap :: WhitespaceMap
+              _rightIdepth :: Int
               _rightIpIdC :: Int
               _rightIpath :: Path
               _rightIpres :: Presentation_Doc_Node_Clip_Token
@@ -316,55 +321,60 @@ sem_Tree_Bin left_ right_  =
               _rightIpresXML :: Presentation_Doc_Node_Clip_Token
               _rightIself :: Tree
               _rightIwhitespaceMap :: WhitespaceMap
-              -- "src/PresentationAG.ag"(line 44, column 7)
+              -- "src/PresentationAG.ag"(line 35, column 10)
+              _lhsOdepth =
+                  {-# LINE 35 "src/PresentationAG.ag" #-}
+                  _leftIdepth `max` _rightIdepth
+                  {-# LINE 329 "src/PresentationAG.hs" #-}
+              -- "src/PresentationAG.ag"(line 52, column 7)
               _lhsOpres =
-                  {-# LINE 44 "src/PresentationAG.ag" #-}
+                  {-# LINE 52 "src/PresentationAG.ag" #-}
                   loc (Node_Bin _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                     row [ col [ vSpace 10, _leftIpres]
                         , text "Bin"
                         , col [ vSpace 10, _rightIpres ]
                         ]
-                  {-# LINE 328 "src/PresentationAG.hs" #-}
+                  {-# LINE 338 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 81, column 7)
               _leftOpIdC =
                   {-# LINE 81 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpIdC + 0
-                  {-# LINE 333 "src/PresentationAG.hs" #-}
+                  {-# LINE 343 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 82, column 7)
               _rightOpIdC =
                   {-# LINE 82 "src/PresentationAG_Generated.ag" #-}
                   _leftIpIdC
-                  {-# LINE 338 "src/PresentationAG.hs" #-}
+                  {-# LINE 348 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 83, column 7)
               _lhsOpIdC =
                   {-# LINE 83 "src/PresentationAG_Generated.ag" #-}
                   _rightIpIdC
-                  {-# LINE 343 "src/PresentationAG.hs" #-}
+                  {-# LINE 353 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 84, column 7)
               _leftOpath =
                   {-# LINE 84 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath++[0]
-                  {-# LINE 348 "src/PresentationAG.hs" #-}
+                  {-# LINE 358 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 85, column 7)
               _rightOpath =
                   {-# LINE 85 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath++[1]
-                  {-# LINE 353 "src/PresentationAG.hs" #-}
+                  {-# LINE 363 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 99, column 9)
               _lhsOpath =
                   {-# LINE 99 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath
-                  {-# LINE 358 "src/PresentationAG.hs" #-}
+                  {-# LINE 368 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 111, column 7)
               _lhsOpresXML =
                   {-# LINE 111 "src/PresentationAG_Generated.ag" #-}
                   presentElementXML _lhsIfocusD (Node_Bin _self _lhsIpath) _lhsIpath "Bin" [ _leftIpresXML, _rightIpresXML ]
-                  {-# LINE 363 "src/PresentationAG.hs" #-}
+                  {-# LINE 373 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 126, column 7)
               _lhsOpresTree =
                   {-# LINE 126 "src/PresentationAG_Generated.ag" #-}
                   presentElementTree _lhsIfocusD (Node_Bin _self _lhsIpath) _lhsIpath "Bin" [ _leftIpresTree, _rightIpresTree ]
-                  {-# LINE 368 "src/PresentationAG.hs" #-}
+                  {-# LINE 378 "src/PresentationAG.hs" #-}
               -- self rule
               _self =
                   Bin _leftIself _rightIself
@@ -375,60 +385,66 @@ sem_Tree_Bin left_ right_  =
               _lhsOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _rightIwhitespaceMap
-                  {-# LINE 379 "src/PresentationAG.hs" #-}
+                  {-# LINE 389 "src/PresentationAG.hs" #-}
               -- copy rule (down)
               _leftOfocusD =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIfocusD
-                  {-# LINE 384 "src/PresentationAG.hs" #-}
+                  {-# LINE 394 "src/PresentationAG.hs" #-}
               -- copy rule (down)
               _leftOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIwhitespaceMap
-                  {-# LINE 389 "src/PresentationAG.hs" #-}
+                  {-# LINE 399 "src/PresentationAG.hs" #-}
               -- copy rule (down)
               _rightOfocusD =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIfocusD
-                  {-# LINE 394 "src/PresentationAG.hs" #-}
+                  {-# LINE 404 "src/PresentationAG.hs" #-}
               -- copy rule (chain)
               _rightOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _leftIwhitespaceMap
-                  {-# LINE 399 "src/PresentationAG.hs" #-}
-              ( _leftIpIdC,_leftIpath,_leftIpres,_leftIpresTree,_leftIpresXML,_leftIself,_leftIwhitespaceMap) =
+                  {-# LINE 409 "src/PresentationAG.hs" #-}
+              ( _leftIdepth,_leftIpIdC,_leftIpath,_leftIpres,_leftIpresTree,_leftIpresXML,_leftIself,_leftIwhitespaceMap) =
                   (left_ _leftOfocusD _leftOpIdC _leftOpath _leftOwhitespaceMap )
-              ( _rightIpIdC,_rightIpath,_rightIpres,_rightIpresTree,_rightIpresXML,_rightIself,_rightIwhitespaceMap) =
+              ( _rightIdepth,_rightIpIdC,_rightIpath,_rightIpres,_rightIpresTree,_rightIpresXML,_rightIself,_rightIwhitespaceMap) =
                   (right_ _rightOfocusD _rightOpIdC _rightOpath _rightOwhitespaceMap )
-          in  ( _lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
+          in  ( _lhsOdepth,_lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
 sem_Tree_HoleTree :: T_Tree
 sem_Tree_HoleTree  =
     (\ _lhsIfocusD
        _lhsIpIdC
        _lhsIpath
        _lhsIwhitespaceMap ->
-         (let _lhsOpres :: Presentation_Doc_Node_Clip_Token
+         (let _lhsOdepth :: Int
+              _lhsOpres :: Presentation_Doc_Node_Clip_Token
               _lhsOpresXML :: Presentation_Doc_Node_Clip_Token
               _lhsOpresTree :: Presentation_Doc_Node_Clip_Token
               _lhsOself :: Tree
               _lhsOpIdC :: Int
               _lhsOpath :: Path
               _lhsOwhitespaceMap :: WhitespaceMap
+              -- "src/PresentationAG.ag"(line 38, column 7)
+              _lhsOdepth =
+                  {-# LINE 38 "src/PresentationAG.ag" #-}
+                  0
+                  {-# LINE 433 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 88, column 18)
               _lhsOpres =
                   {-# LINE 88 "src/PresentationAG_Generated.ag" #-}
                   presHole _lhsIfocusD "Tree" (Node_HoleTree _self _lhsIpath) _lhsIpath
-                  {-# LINE 422 "src/PresentationAG.hs" #-}
+                  {-# LINE 438 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 114, column 18)
               _lhsOpresXML =
                   {-# LINE 114 "src/PresentationAG_Generated.ag" #-}
                   presHole _lhsIfocusD "Tree" (Node_HoleTree _self _lhsIpath) _lhsIpath
-                  {-# LINE 427 "src/PresentationAG.hs" #-}
+                  {-# LINE 443 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 129, column 18)
               _lhsOpresTree =
                   {-# LINE 129 "src/PresentationAG_Generated.ag" #-}
                   presHole _lhsIfocusD "Tree" (Node_HoleTree _self _lhsIpath) _lhsIpath
-                  {-# LINE 432 "src/PresentationAG.hs" #-}
+                  {-# LINE 448 "src/PresentationAG.hs" #-}
               -- self rule
               _self =
                   HoleTree
@@ -439,57 +455,63 @@ sem_Tree_HoleTree  =
               _lhsOpIdC =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpIdC
-                  {-# LINE 443 "src/PresentationAG.hs" #-}
+                  {-# LINE 459 "src/PresentationAG.hs" #-}
               -- copy rule (chain)
               _lhsOpath =
                   {-# LINE 62 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath
-                  {-# LINE 448 "src/PresentationAG.hs" #-}
+                  {-# LINE 464 "src/PresentationAG.hs" #-}
               -- copy rule (chain)
               _lhsOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIwhitespaceMap
-                  {-# LINE 453 "src/PresentationAG.hs" #-}
-          in  ( _lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
+                  {-# LINE 469 "src/PresentationAG.hs" #-}
+          in  ( _lhsOdepth,_lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
 sem_Tree_Leaf :: T_Tree
 sem_Tree_Leaf  =
     (\ _lhsIfocusD
        _lhsIpIdC
        _lhsIpath
        _lhsIwhitespaceMap ->
-         (let _lhsOpres :: Presentation_Doc_Node_Clip_Token
+         (let _lhsOdepth :: Int
+              _lhsOpres :: Presentation_Doc_Node_Clip_Token
               _lhsOpIdC :: Int
               _lhsOpath :: Path
               _lhsOpresXML :: Presentation_Doc_Node_Clip_Token
               _lhsOpresTree :: Presentation_Doc_Node_Clip_Token
               _lhsOself :: Tree
               _lhsOwhitespaceMap :: WhitespaceMap
-              -- "src/PresentationAG.ag"(line 50, column 7)
+              -- "src/PresentationAG.ag"(line 36, column 10)
+              _lhsOdepth =
+                  {-# LINE 36 "src/PresentationAG.ag" #-}
+                  1
+                  {-# LINE 489 "src/PresentationAG.hs" #-}
+              -- "src/PresentationAG.ag"(line 58, column 7)
               _lhsOpres =
-                  {-# LINE 50 "src/PresentationAG.ag" #-}
+                  {-# LINE 58 "src/PresentationAG.ag" #-}
                   loc (Node_Leaf _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
                     row [ text "Leaf" ]
-                  {-# LINE 473 "src/PresentationAG.hs" #-}
+                  {-# LINE 495 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 87, column 7)
               _lhsOpIdC =
                   {-# LINE 87 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpIdC + 0
-                  {-# LINE 478 "src/PresentationAG.hs" #-}
+                  {-# LINE 500 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 100, column 10)
               _lhsOpath =
                   {-# LINE 100 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath
-                  {-# LINE 483 "src/PresentationAG.hs" #-}
+                  {-# LINE 505 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 113, column 7)
               _lhsOpresXML =
                   {-# LINE 113 "src/PresentationAG_Generated.ag" #-}
                   presentElementXML _lhsIfocusD (Node_Leaf _self _lhsIpath) _lhsIpath "Leaf" [  ]
-                  {-# LINE 488 "src/PresentationAG.hs" #-}
+                  {-# LINE 510 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 128, column 7)
               _lhsOpresTree =
                   {-# LINE 128 "src/PresentationAG_Generated.ag" #-}
                   presentElementTree _lhsIfocusD (Node_Leaf _self _lhsIpath) _lhsIpath "Leaf" [  ]
-                  {-# LINE 493 "src/PresentationAG.hs" #-}
+                  {-# LINE 515 "src/PresentationAG.hs" #-}
               -- self rule
               _self =
                   Leaf
@@ -500,8 +522,8 @@ sem_Tree_Leaf  =
               _lhsOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIwhitespaceMap
-                  {-# LINE 504 "src/PresentationAG.hs" #-}
-          in  ( _lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
+                  {-# LINE 526 "src/PresentationAG.hs" #-}
+          in  ( _lhsOdepth,_lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
 sem_Tree_ParseErrTree :: ((Presentation Document Node ClipDoc UserToken)) ->
                          T_Tree
 sem_Tree_ParseErrTree presentation_  =
@@ -509,28 +531,34 @@ sem_Tree_ParseErrTree presentation_  =
        _lhsIpIdC
        _lhsIpath
        _lhsIwhitespaceMap ->
-         (let _lhsOpres :: Presentation_Doc_Node_Clip_Token
+         (let _lhsOdepth :: Int
+              _lhsOpres :: Presentation_Doc_Node_Clip_Token
               _lhsOpresXML :: Presentation_Doc_Node_Clip_Token
               _lhsOpresTree :: Presentation_Doc_Node_Clip_Token
               _lhsOself :: Tree
               _lhsOpIdC :: Int
               _lhsOpath :: Path
               _lhsOwhitespaceMap :: WhitespaceMap
+              -- "src/PresentationAG.ag"(line 38, column 7)
+              _lhsOdepth =
+                  {-# LINE 38 "src/PresentationAG.ag" #-}
+                  0
+                  {-# LINE 547 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 89, column 18)
               _lhsOpres =
                   {-# LINE 89 "src/PresentationAG_Generated.ag" #-}
                   presParseErr (Node_ParseErrTree _self _lhsIpath) presentation_
-                  {-# LINE 524 "src/PresentationAG.hs" #-}
+                  {-# LINE 552 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 115, column 18)
               _lhsOpresXML =
                   {-# LINE 115 "src/PresentationAG_Generated.ag" #-}
                   presParseErr (Node_ParseErrTree _self _lhsIpath) presentation_
-                  {-# LINE 529 "src/PresentationAG.hs" #-}
+                  {-# LINE 557 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 130, column 18)
               _lhsOpresTree =
                   {-# LINE 130 "src/PresentationAG_Generated.ag" #-}
                   presParseErr (Node_ParseErrTree _self _lhsIpath) presentation_
-                  {-# LINE 534 "src/PresentationAG.hs" #-}
+                  {-# LINE 562 "src/PresentationAG.hs" #-}
               -- self rule
               _self =
                   ParseErrTree presentation_
@@ -541,15 +569,15 @@ sem_Tree_ParseErrTree presentation_  =
               _lhsOpIdC =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpIdC
-                  {-# LINE 545 "src/PresentationAG.hs" #-}
+                  {-# LINE 573 "src/PresentationAG.hs" #-}
               -- copy rule (chain)
               _lhsOpath =
                   {-# LINE 62 "src/PresentationAG_Generated.ag" #-}
                   _lhsIpath
-                  {-# LINE 550 "src/PresentationAG.hs" #-}
+                  {-# LINE 578 "src/PresentationAG.hs" #-}
               -- copy rule (chain)
               _lhsOwhitespaceMap =
                   {-# LINE 56 "src/PresentationAG_Generated.ag" #-}
                   _lhsIwhitespaceMap
-                  {-# LINE 555 "src/PresentationAG.hs" #-}
-          in  ( _lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))
+                  {-# LINE 583 "src/PresentationAG.hs" #-}
+          in  ( _lhsOdepth,_lhsOpIdC,_lhsOpath,_lhsOpres,_lhsOpresTree,_lhsOpresXML,_lhsOself,_lhsOwhitespaceMap)))

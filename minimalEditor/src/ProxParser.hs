@@ -40,7 +40,7 @@ recognizeTree = pStr $
       <$> pStructural Node_Leaf
 
 parseTree :: ListParser Document Node ClipDoc UserToken Tree
-parseTree = addHoleParser $
+parseTree = 
           (\token left right -> reuseBin [token] (Just left) (Just right))
       <$> pToken BinToken
       <*  pToken (SymToken "(")

@@ -29,7 +29,14 @@ INCLUDE "PresentationAG_Generated.ag"
 SEM EnrichedDoc
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   row [ text "Tree: ", @tree.pres ]
+                   col [ text $ "Tree with depth "++show @tree.depth, @tree.pres ]
+
+SEM Tree
+  | Bin  lhs.depth = @left.depth `max` @right.depth
+  | Leaf lhs.depth = 1
+  | HoleTree ParseErrTree
+      lhs.depth = 0
+
 {-
 SEM Tree
   | Bin
@@ -39,7 +46,8 @@ SEM Tree
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row [ text "Leaf" ]
 -}
-SEM Tree
+
+SEM Tree [ | | depth : Int ]
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    row [ col [ vSpace 10, @left.pres]
