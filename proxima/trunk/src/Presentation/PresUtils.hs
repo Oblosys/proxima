@@ -48,10 +48,10 @@ orderFocusP NoFocusP         = NoFocusP
 markUnparsed p           =  p
 markUnparsedF _           f = f
 
-xyFromPath :: Show token => PathPres -> Presentation doc node clip token -> (Int,Int, Bool)
+xyFromPath :: (DocNode node, Show token) => PathPres -> Presentation doc node clip token -> (Int,Int, Bool)
 xyFromPath path pres = xyFromPathPres 0 0 path pres
 
-pathFromXY :: Show token => (Int,Int,Bool) -> Presentation doc node clip token -> PathPres
+pathFromXY :: (DocNode node, Show token) => (Int,Int,Bool) -> Presentation doc node clip token -> PathPres
 pathFromXY xy pres = pathFromXYPres xy pres
 
 
@@ -67,7 +67,7 @@ pathFromXY xy pres = pathFromXYPres xy pres
 -- a smarter diff for rows and columns may try to approach from both directions.
  
 -- skip WithP StructuralP ParsingP and LocatorP elts
-diffPres :: (Eq node, Eq token, Show token) => Presentation doc node clip token -> Presentation doc node clip token -> DiffTree
+diffPres :: (DocNode node, Eq token, Show token) => Presentation doc node clip token -> Presentation doc node clip token -> DiffTree
 
 -- WithP is not handled yet.
 -- Graph is not handled right yet!
@@ -297,7 +297,7 @@ prunePresSpecial va ova (x,y) dt arr                                   pres =
 -- in overlay, only head is normalized
 -- tokens are not normalized
 
-normalizePres :: Show token => Presentation doc node clip token -> Presentation doc node clip token
+normalizePres :: (DocNode node, Show token) => Presentation doc node clip token -> Presentation doc node clip token
 normalizePres pres@(EmptyP               _)            = pres
 normalizePres pres@(StringP              _  str)       = pres
 normalizePres pres@(TokenP               _  _)         = pres
@@ -315,7 +315,7 @@ normalizePres (GraphP id d w h es press)               = GraphP id d w h es $ ma
 normalizePres (VertexP id v x y ol pres)               = VertexP id v x y ol $ normalizePres pres
 normalizePres pr                                       = debug Err ("PresUtils.normalizePres: can't handle "++ show pr) pr
 
-normalizeRow :: Show token => [Presentation doc node clip token] -> [Presentation doc node clip token] -- not fixed for refs
+normalizeRow :: (DocNode node, Show token) => [Presentation doc node clip token] -> [Presentation doc node clip token] -- not fixed for refs
 normalizeRow []                      = []
 normalizeRow (RowP id rf press: row) = normalizeRow (press ++ row)
 -- normalizeRow (StringP id [] : row) = normalizeRow row        -- don't remove empty strings, because row[row []] presents wrongly 
@@ -324,7 +324,7 @@ normalizeRow (StringP id txt : row)  = case normalizeRow row of
                                         row'                  -> StringP id txt : row'
 normalizeRow (pres            : row) = normalizePres pres : normalizeRow row
 
-normalizeCol :: Show token => IDP -> Int -> Int -> [Presentation doc node clip token] -> [Presentation doc node clip token] -> Presentation doc node clip token
+normalizeCol :: (DocNode node, Show token) => IDP -> Int -> Int -> [Presentation doc node clip token] -> [Presentation doc node clip token] -> Presentation doc node clip token
 normalizeCol id p rf prs [] = ColP id rf NF (reverse prs) 
 normalizeCol id p rf prs (ColP _ rf' NF press: col) = 
   let rf'' = if p < rf then rf + length press - 1 -- -1 because the col (1) is replaced by length press children 
@@ -334,7 +334,7 @@ normalizeCol id p rf prs (ColP _ rf' NF press: col) =
 normalizeCol id p rf prs (pres            : col) = normalizeCol id (p+1) rf (normalizePres pres:prs) col
 
 -- | Return innermost enclosing locator for path in pres
-locateTreePres :: Show token => PathPres -> Presentation doc node clip token-> Maybe node
+locateTreePres :: (DocNode node, Show token) => PathPres -> Presentation doc node clip token-> Maybe node
 locateTreePres NoPathP        pres = Nothing
 locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
 
@@ -761,7 +761,7 @@ leftNavigatePath  (PathP path offset) pres =
 -- passedColumn returns true if a column is present from the common prefix of fromPath and toPath to
 -- fromPath and toPath. Meaning that if a column is encountered if we move from fromPath to 
 -- toPath in the shortest way then True is returned.
-passedColumn :: Show token => [Int] -> [Int] -> Presentation doc node clip token -> Bool
+passedColumn :: (DocNode node, Show token) => [Int] -> [Int] -> Presentation doc node clip token -> Bool
 passedColumn fromPath toPath pres =
   let commonPath = commonPrefix fromPath toPath
       commonTree = selectTree commonPath pres
@@ -789,11 +789,11 @@ containsColPres (p:path) (FormatterP id press)      = containsColPres path (inde
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
 -- | Return True if the focus is on either a vertex, or an edge (focus on graph, index larger than nr of vertices)
-focusIsOnGraph :: Show token => FocusPres -> Presentation doc node clip token -> Bool
+focusIsOnGraph :: (DocNode node, Show token) => FocusPres -> Presentation doc node clip token -> Bool
 focusIsOnGraph (FocusP (PathP path _) _) pres = focusIsOnGraphPres path pres
 focusIsOnGraph _ _         = False
 
-focusIsOnGraphPres :: Show token => [Int] -> Presentation doc node clip token -> Bool
+focusIsOnGraphPres :: (DocNode node, Show token) => [Int] -> Presentation doc node clip token -> Bool
 focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = True 
 focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then True else False
 focusIsOnGraphPres []        tr                       = False
@@ -813,10 +813,10 @@ focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.fo
 
 -- VVV HACK VVV              will be handled more generally in the future
 -- | Collect the bottom-most mouseDown update function that is added by WithP nodes on path in pres 
-mouseDownDocPres :: Show token => [Int] -> Presentation doc node clip token -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres :: (DocNode node, Show token) => [Int] -> Presentation doc node clip token -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres = mouseDownDocPres' Nothing
 
-mouseDownDocPres' :: Show token => Maybe (UpdateDoc doc clip) -> [Int] -> Presentation doc node clip token -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres' :: (DocNode node, Show token) => Maybe (UpdateDoc doc clip) -> [Int] -> Presentation doc node clip token -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (ColP _ _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
@@ -834,10 +834,10 @@ mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes
 
 
 -- | Collect all popupMenuItems that are added by WithP nodes on path in pres 
-popupMenuItemsPres :: Show token => [Int] -> Presentation doc node clip token -> [PopupMenuItem doc clip]
+popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> Presentation doc node clip token -> [PopupMenuItem doc clip]
 popupMenuItemsPres path pres = popupMenuItemsPres' [] path pres
 
-popupMenuItemsPres' :: Show token => [PopupMenuItem doc clip] -> [Int] -> Presentation doc node clip token -> [PopupMenuItem doc clip]
+popupMenuItemsPres' :: (DocNode node, Show token) => [PopupMenuItem doc clip] -> [Int] -> Presentation doc node clip token -> [PopupMenuItem doc clip]
 popupMenuItemsPres' its []       tr                        = its
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (ColP _ _ _ press)        = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)

@@ -136,7 +136,7 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
 editSet :: Layout doc node clip -> Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
 editSet pres' clip (LayoutLevel pres focus@(FocusP f t) dt) = (LayoutLevel pres' NoFocusP dt, clip)
 
-openFile :: Eq node => String -> Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> IO (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+openFile :: DocNode node => String -> Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> IO (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 openFile filePath clip layLvl prsLvl =
  do { debugLnIO Lay $ "Opening file: "++filePath
     ; str <- readFile filePath
@@ -144,19 +144,19 @@ openFile filePath clip layLvl prsLvl =
     ; return $ editLay (editSet pres') clip layLvl prsLvl
     }
     
-editInsert :: Char -> Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
+editInsert :: DocNode node => Char -> Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
 editInsert c clip (LayoutLevel pres focus@(FocusP f t) dt) = 
   let (pres', focus')  = if f==t then (pres,focus) else deleteTree focus pres
       (pres'',focus'') = pasteTree (fromP focus') (text [c]) pres'
   in  (LayoutLevel pres'' focus'' dt, clip)
 
-editCut :: Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
+editCut :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
 editCut clip (LayoutLevel pres focus dt) = 
   let clip' = copyTree focus clip pres                                                                                              
       (pres', focus') = deleteTree focus pres
   in  (LayoutLevel pres' focus' dt, clip')
 
-editCopy :: Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+editCopy :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 editCopy clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 editCopy clip layLvl@(LayoutLevel pres focus dt)    doc = 
   let clip' = copyTree focus clip pres                                                                     
@@ -179,7 +179,7 @@ editSplit clip (LayoutLevel pres focus dt) =
 
 
 -- only for column of rows:
-editNormalize :: Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
+editNormalize :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> (LayoutLevel doc node clip, Layout doc node clip)
 editNormalize clip (LayoutLevel pres focus dt) = 
  let (pres', focus') = normalizePresentation pres focus
  in  (LayoutLevel pres' focus' dt, clip)
@@ -204,26 +204,26 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
 
 
 
-navigateLeft :: Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+navigateLeft :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 navigateLeft clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 navigateLeft clip (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
   in  (SkipPres 0, clip, LayoutLevel pres focus' dt)
 
-navigateRight :: Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+navigateRight :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 navigateRight clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 navigateRight clip (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres
   in  (SkipPres 0, clip, LayoutLevel pres focus' dt)
 
-enlargeLeft :: Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+enlargeLeft :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 enlargeLeft clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 enlargeLeft clip (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
        focus'' = FocusP (fromP focus) (fromP focus')
   in  (SkipPres 0, clip, LayoutLevel pres focus'' dt)
 
-enlargeRight :: Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
+enlargeRight :: DocNode node => Layout doc node clip -> LayoutLevel doc node clip -> PresentationLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, Layout doc node clip, LayoutLevel doc node clip)
 enlargeRight clip layLvl@(LayoutLevel pres NoFocusP dt) doc = (SkipPres 0, clip, layLvl)
 enlargeRight clip (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres

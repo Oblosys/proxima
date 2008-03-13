@@ -10,7 +10,7 @@ import Layout.TreeEditPres
 import qualified Data.Map as Map
 import Data.Map (Map)
 
-presentIO :: (Show token, Eq node) => LayerStateLay doc node clip -> PresentationLevel doc node clip token -> LayoutLevel doc node clip ->
+presentIO :: (DocNode node, Show token) => LayerStateLay doc node clip -> PresentationLevel doc node clip token -> LayoutLevel doc node clip ->
              EditPresentation' doc node clip token ->
              IO (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip token)
 presentIO  state high low@(LayoutLevel pres focus _) editHigh = 
@@ -30,7 +30,7 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 
 
 -- doc in pattern should be pres
-present :: (Show token, Eq node) => LayerStateLay doc node clip -> PresentationLevel doc node clip token -> LayoutLevel doc node clip ->
+present :: (DocNode node, Show token) => LayerStateLay doc node clip -> PresentationLevel doc node clip token -> LayoutLevel doc node clip ->
            EditPresentation' doc node clip token ->
            (EditLayout' doc node clip, LayerStateLay doc node clip, PresentationLevel doc node clip token)
 present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
@@ -59,9 +59,9 @@ present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres 
  
 
 -- goes wrong if focus is in empty string on left side of column
-saveFocus :: Show token => FocusPres -> Presentation doc node clip token -> ((Int, Int, Bool), (Int, Int, Bool))
+saveFocus :: (DocNode node, Show token) => FocusPres -> Presentation doc node clip token -> ((Int, Int, Bool), (Int, Int, Bool))
 saveFocus NoFocusP _  = ((1,0,True),(1,0,True))
 saveFocus focus pres = debug Err "AFOCUS" (xyFromPath (fromP focus) pres, xyFromPath (toP focus) pres)
 
-restoreFocus :: Show token => ((Int, Int, Bool), (Int, Int, Bool)) -> Presentation doc node clip token -> FocusPres
+restoreFocus :: (DocNode node, Show token) => ((Int, Int, Bool), (Int, Int, Bool)) -> Presentation doc node clip token -> FocusPres
 restoreFocus (fxy,txy) pres = FocusP (pathFromXY fxy pres) (pathFromXY fxy pres) 

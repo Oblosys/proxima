@@ -27,7 +27,7 @@ throw: *** Exception: Prelude.(!!): index too large
 
 -- cut = delete
 -- copy should not do anything when nofocus. 
-copyTree :: FocusPres -> Layout doc node clip -> Layout doc node clip -> Layout doc node clip
+copyTree :: DocNode node => FocusPres -> Layout doc node clip -> Layout doc node clip -> Layout doc node clip
 copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
 copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
@@ -47,7 +47,7 @@ deleteTree focus pres =
 
 
 
-normalizePresentation :: Layout doc node clip -> FocusPres -> (Layout doc node clip, FocusPres)
+normalizePresentation :: DocNode node => Layout doc node clip -> FocusPres -> (Layout doc node clip, FocusPres)
 normalizePresentation pres NoFocusP = (normalizeTreePres pres, NoFocusP)
 normalizePresentation pres focus = 
   let fxy   = xyFromPath (fromP focus) pres
@@ -75,16 +75,16 @@ splitRowTree path@(PathP pth ix) pres =
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 
 
-normalizeTreePres :: Layout doc node clip -> Layout doc node clip
+normalizeTreePres :: DocNode node => Layout doc node clip -> Layout doc node clip
 normalizeTreePres pres = normalizePres pres
 
-navigateLeftTreePres :: PathPres -> Layout doc node clip -> FocusPres
+navigateLeftTreePres :: DocNode node => PathPres -> Layout doc node clip -> FocusPres
 navigateLeftTreePres NoPathP pres = NoFocusP
 navigateLeftTreePres path pres =
   let path' = leftNavigatePath path pres
   in  FocusP path' path'
   
-navigateRightTreePres :: PathPres -> Layout doc node clip -> FocusPres
+navigateRightTreePres :: DocNode node => PathPres -> Layout doc node clip -> FocusPres
 navigateRightTreePres NoPathP pres = NoFocusP
 navigateRightTreePres path pres =
   let path' = rightNavigatePath path pres
@@ -200,7 +200,7 @@ getVertexID (VertexP _ i _ _ _ _) = i
 getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
 
 
-moveVertexPres :: [Int] -> (Int,Int) -> Layout doc node clip -> Layout doc node clip                                      
+moveVertexPres :: DocNode node => [Int] -> (Int,Int) -> Layout doc node clip -> Layout doc node clip                                      
 moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
@@ -476,7 +476,7 @@ pasteTreePresF NoPathP          _    pres = NoFocusP
 
 -- nicer to give focus of clip and let calling function decide on after paste focus left or right of clip
 
-copyTreePres :: Path -> FocusPres -> Layout doc node clip -> Layout doc node clip 
+copyTreePres :: DocNode node => Path -> FocusPres -> Layout doc node clip -> Layout doc node clip 
 copyTreePres p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   let st = if  stp < p then 0 else sti
       en = if  enp > p then length str else eni               
@@ -494,7 +494,7 @@ copyTreePres p focus          (ParsingP id l pres) = (copyTreePres (p++[0]) focu
 copyTreePres p focus          (LocatorP l pres) = LocatorP l (copyTreePres (p++[0]) focus pres)
 copyTreePres p f pr = debug Err("TreeEditPres.copyTreePres: can't handle "++show f++" "++ show pr) $ text "<ERROR>"
 
-copyTreePresList :: Path -> Int -> FocusPres -> [Layout doc node clip] -> [Layout doc node clip] 
+copyTreePresList :: DocNode node => Path -> Int -> FocusPres -> [Layout doc node clip] -> [Layout doc node clip] 
 copyTreePresList p i _ [] = []
 copyTreePresList p i focus@(FocusP (PathP stp sti) (PathP enp eni)) (pres:press) = 
                            if   enp < (p++[i])-- take (length p+1) enp < p++[i]

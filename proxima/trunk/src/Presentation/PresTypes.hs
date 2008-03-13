@@ -74,9 +74,15 @@ data Token doc node clip token =
              | ErrorTk String -- for storing scanner errors
 -- the IDP field is used during the scanning and parsing phase
 
-instance Show token => Show (Token doc node clip token) where
+instance (Show node, Show token) => Show (Token doc node clip token) where
   show (UserTk u s _ id)         = "<\""++show u++"\":"++show s++":"++show id++">"
-  show (StructuralTk _ _ tks id) = "<structural:"++show id++">" 
+  show (StructuralTk Nothing _ tks id) = "<structural:Nothing:"++show id++">" 
+  show (StructuralTk (Just node) _ tks id) = 
+    let showNode = show node -- not the nicest way of showing the constructor. Maybe include this in the node class
+        nodeStr = if "Node_" `isPrefixOf` showNode
+                  then drop (length "Node_") showNode
+                  else nodeStr
+    in  "<structural:"++nodeStr++":"++show id++">" 
   show (ParsingTk _ tks _)       = "<parsing>" 
   show (GraphTk _ edges _ _)     = "<graph:"++show edges++">"
   show (VertexTk id pos _ _)     = "<vertex: "++show id++">"
@@ -195,7 +201,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance Show token => Show (Presentation doc node clip token) where
+instance (Show node, Show token) => Show (Presentation doc node clip token) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (TokenP id t)         = "{"++show id++":"++show t++"}"

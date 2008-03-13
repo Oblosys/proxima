@@ -68,7 +68,7 @@ and we cannot tokenize any structural token children.
 
 
 
-tokenizeLay :: (Show token) =>
+tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip ->
                PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
@@ -99,7 +99,7 @@ inh & synthesized     idP: the presentation id counter   (threaded)
 synthesized attribute pres: the tokenized presentation   (constructed at every case because of cast from Layout to Presentation)
                       
 -}
-scanStructural :: Show token => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
+scanStructural :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
                   Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip ->
                   ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanStructural sheet foc lx loc pth idpc wm presentation =
@@ -126,7 +126,7 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
     pr -> debug Err ("Scanner.scanStructural: can't handle "++ show pr) ([], idpc, wm)
 
 
-scanStructuralList :: Show token => 
+scanStructuralList :: (DocNode node, Show token) => 
                       ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
                       Maybe node -> Path ->
                       IDPCounter -> WhitespaceMap -> [Layout doc node clip] ->
@@ -140,7 +140,7 @@ scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' shee
 
 
 
-scanPresentation :: Show token => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
+scanPresentation :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
                     IDP -> Lexer -> Layout doc node clip ->
                     ([Token doc node clip token], IDPCounter, WhitespaceMap)

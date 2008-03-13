@@ -47,7 +47,7 @@ detokenizer wm pres = {- let (l',focusp) = detokenize testWM testPres
                                                                                           ) $
                       -} detokenize wm pres
 
-detokenize :: Show token => WhitespaceMap -> Presentation doc node clip token ->
+detokenize :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc node clip token ->
               (Layout doc node clip, FocusPres)
 detokenize wm pres@(ParsingP idp l _)     = detokenizeParsing wm pres
                                                   
@@ -107,7 +107,7 @@ noFocus = FocusP NoPathP NoPathP
 
 -- find out semantics of this one        What about Refs?
 -- incomplete, only for strings
-detokenize' :: Show token => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
+detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
                [(Layout doc node clip, FocusPres)]
 detokenize' wm t (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
                                             in  [(StructuralP idp pres', prependToFocus 0 f)]
@@ -147,7 +147,7 @@ detokenizeList' wm t i (pres:press) = let (press',  f1) = detokenize' wm  t pres
 -- cause the creation of more rows in the result, then this should be taken into account at the top-level.
 -- in order to do so, we would need some threaded attribute, which will complicate the code even more.
 
-detokenizeRow' :: Show token => WhitespaceMap -> Bool -> Int -> [Presentation doc node clip token] -> 
+detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Int -> [Presentation doc node clip token] -> 
                   [(Layout doc node clip, FocusPres)]
 detokenizeRow' wm t i [] = []
 detokenizeRow' wm t i (pres:press) =
@@ -182,7 +182,7 @@ mapPath f NoPathP = NoPathP
 mapPath f (PathP p i) = PathP (f p) i
 
 
-addWhitespaceToken :: Show token => WhitespaceMap -> IDP -> Token doc node clip token -> 
+addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [(Layout doc node clip, FocusPres)]
 addWhitespaceToken wm idp (UserTk _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
 addWhitespaceToken wm idp (StructuralTk _ pres _ _) = let (pres', f) = detokenize wm pres
