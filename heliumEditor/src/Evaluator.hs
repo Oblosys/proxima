@@ -22,19 +22,18 @@ instance EvaluationSheet Document EnrichedDoc ClipDoc where
 
 
 evalTypes :: Document -> EnrichedDoc -> EnrichedDoc
-evalTypes doc (RootEnr (RootE idp dcls idlDcls oldTypes)) = 
+evalTypes doc (RootEnr rootE _) = 
   let (errs, env, tps) = evaluate doc
-  in  debug Prs ("ERRS AND TYPES: "++show errs++show tps) $
-      RootEnr (RootE idp dcls idlDcls (errs, tps, env))
+  in  debug Eva ("ERRS AND TYPES: "++show errs++show tps) $
+      RootEnr rootE (errs, tps, env)
 
 
-getOldTypeInfo (RootEnr (RootE _ _ _ oldTypes)) = oldTypes 
-getOldTypeInfo (HoleEnrichedDoc)                = ([],[],[])
-getOldTypeInfo (ParseErrEnrichedDoc _)          = ([],[],[])
+getOldTypeInfo (RootEnr _ oldTypes)    = oldTypes 
+getOldTypeInfo (HoleEnrichedDoc)       = ([],[],[])
+getOldTypeInfo (ParseErrEnrichedDoc _) = ([],[],[])
 
 -- in case of a parse err, don't duplicate, because parser of idList will fail. What to do with parse errs?
 evalDoc :: LayerStateEval -> EnrichedDoc -> DocumentLevel Document clip -> EnrichedDoc
-evalDoc state enr (DocumentLevel doc@(RootDoc (ParseErrRoot prs)) _ _) = RootEnr (ParseErrRootE prs)
-evalDoc state enr (DocumentLevel doc@(RootDoc (Root idp dcls)) _ _) = RootEnr (RootE idp dcls dcls (getOldTypeInfo enr))
+evalDoc state enr (DocumentLevel (RootDoc (Root idp dcls)) _ _) = RootEnr (RootE idp dcls dcls) (getOldTypeInfo enr)
 evalDoc state enr (DocumentLevel (HoleDocument) _ _) = HoleEnrichedDoc
 evalDoc state enr (DocumentLevel (ParseErrDocument pr) _ _) = ParseErrEnrichedDoc pr

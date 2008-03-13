@@ -94,7 +94,7 @@ SEM ConsList_Decl [ | | parseErrs : {[String]} ]
 --------------------------------------------------------------
 
 
-ATTR List_Decl ConsList_Decl Decl Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt -- don't want to put these in Exp and Exps, but otherwise we have
+ATTR RootE List_Decl ConsList_Decl Decl Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt -- don't want to put these in Exp and Exps, but otherwise we have
                                   -- to define them at LetExp's
                          [ errs : {[HeliumMessage]}
                            topLevelEnv : {[(String, String)]}
@@ -107,13 +107,12 @@ ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsL
 
 SEM EnrichedDoc
   | RootEnr
+     (loc.errs, loc.topLevelEnv, loc.typeEnv) = @heliumTypeInfo
 
 SEM RootE
   | RootE
       decls.level = 0
-      (loc.errs, loc.topLevelEnv, loc.typeEnv) = @heliumTypeInfo
-
-
+ 
 SEM Exp
   | LetExp
       decls.level = @lhs.level + 1
@@ -130,7 +129,7 @@ SEM RootE
                    col [ row [ hSpace 3
                        --       , text $ "Document focus: " ++show @lhs.focusD
                               , text "Focused expression"  `withFontFam` "verdana" -- ++show @lhs.focusD
-                              , typeD NoIDP $ ( case lookup @lhs.focusD @typeEnv of
+                              , typeD NoIDP $ ( case lookup @lhs.focusD @lhs.typeEnv of
                                                  Nothing -> ""
                                                  Just tp -> " :: "++tp)
                                                ++ replicate 80 ' '
@@ -154,7 +153,7 @@ SEM RootE
                        , vSpace 10
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez
-                       , let errs = if null @decls.parseErrs then @errs else map toMessage @decls.parseErrs
+                       , let errs = if null @decls.parseErrs then @lhs.errs else map toMessage @decls.parseErrs
                          in  col (map presMessage errs ++ [empty]) `withFontSize` 12
                        , vSpace 10
                        , hLine
@@ -166,7 +165,7 @@ SEM RootE
                        ]
                      `withFont'` ("Courier New",14)
       decls.ranges = (\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
-                     $ map pthFrmMsg @errs
+                     $ map pthFrmMsg @lhs.errs
 {
 pthFrmMsg :: HeliumMessage -> ([PathDoc], [PathDoc], [PathDoc])
 pthFrmMsg (HError _ ps1 ps2 ps3) = (ps1, ps2, ps3)

@@ -243,19 +243,21 @@ instance Editable Root Document Node ClipDoc UserToken where
 
 instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
-  select (0:p) (RootEnr x0) = select p x0
+  select (0:p) (RootEnr x0 x1) = select p x0
+  select (1:p) (RootEnr x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_EnrichedDoc c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on EnrichedDoc") x
-  paste (0:p) c (RootEnr x0) = RootEnr (paste p c x0)
+  paste (0:p) c (RootEnr x0 x1) = RootEnr (paste p c x0) x1
+  paste (1:p) c (RootEnr x0 x1) = RootEnr x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("RootEnr {RootE} "  , Clip_EnrichedDoc $ RootEnr hole)
+  alternatives _ = [ ("RootEnr {RootE} {HeliumTypeInfo} "  , Clip_EnrichedDoc $ RootEnr hole hole)
                    ,("{EnrichedDoc}", Clip_EnrichedDoc hole)
                    ]
 
-  arity (RootEnr x0) = 1
+  arity (RootEnr x0 x1) = 2
   arity _                        = 0
 
   parseErr = ParseErrEnrichedDoc
@@ -268,23 +270,21 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
 
 instance Editable RootE Document Node ClipDoc UserToken where
   select [] x = Clip_RootE x
-  select (0:p) (RootE _ x0 x1 x2) = select p x0
-  select (1:p) (RootE _ x0 x1 x2) = select p x1
-  select (2:p) (RootE _ x0 x1 x2) = select p x2
+  select (0:p) (RootE _ x0 x1) = select p x0
+  select (1:p) (RootE _ x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_RootE c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on RootE") x
-  paste (0:p) c (RootE i0 x0 x1 x2) = RootE i0 (paste p c x0) x1 x2
-  paste (1:p) c (RootE i0 x0 x1 x2) = RootE i0 x0 (paste p c x1) x2
-  paste (2:p) c (RootE i0 x0 x1 x2) = RootE i0 x0 x1 (paste p c x2)
+  paste (0:p) c (RootE i0 x0 x1) = RootE i0 (paste p c x0) x1
+  paste (1:p) c (RootE i0 x0 x1) = RootE i0 x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("RootE {List_Decl} {List_Decl} {HeliumTypeInfo} "  , Clip_RootE $ RootE NoIDP hole hole hole)
+  alternatives _ = [ ("RootE {List_Decl} {List_Decl} "  , Clip_RootE $ RootE NoIDP hole hole)
                    ,("{RootE}", Clip_RootE hole)
                    ]
 
-  arity (RootE _ x0 x1 x2) = 3
+  arity (RootE _ x0 x1) = 2
   arity _                        = 0
 
   parseErr = ParseErrRootE

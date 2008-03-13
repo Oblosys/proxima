@@ -28,16 +28,16 @@ reuseRoot nodes ma0 ma1
            (Root a0 a1) -> genericReuse2 Root a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
-reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> EnrichedDoc
-reuseRootEnr nodes ma0
+reuseRootEnr :: [Token doc Node clip token] -> Maybe RootE -> Maybe HeliumTypeInfo -> EnrichedDoc
+reuseRootEnr nodes ma0 ma1
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0) -> genericReuse1 RootEnr a0 ma0
+           (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
-reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> Maybe HeliumTypeInfo -> RootE
-reuseRootE nodes ma0 ma1 ma2 ma3
+reuseRootE :: [Token doc Node clip token] -> Maybe IDP -> Maybe List_Decl -> Maybe List_Decl -> RootE
+reuseRootE nodes ma0 ma1 ma2
   = case extractFromTokens extractRootE defaultRootE nodes of
-           (RootE a0 a1 a2 a3) -> genericReuse4 RootE a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (RootE a0 a1 a2) -> genericReuse3 RootE a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseRootE"
 
 reuseDecl :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Bool -> Maybe Bool -> Maybe Ident -> Maybe Exp -> Decl
@@ -314,11 +314,11 @@ extractRoot (Just (Node_Root x@(Root _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (Node_RootEnr x@(RootEnr _) _)) = Just x
+extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractRootE :: Maybe Node -> Maybe RootE
-extractRootE (Just (Node_RootE x@(RootE _ _ _ _) _)) = Just x
+extractRootE (Just (Node_RootE x@(RootE _ _ _) _)) = Just x
 extractRootE _ = Nothing
 
 extractDecl :: Maybe Node -> Maybe Decl
@@ -507,10 +507,10 @@ defaultRoot :: Root
 defaultRoot = Root NoIDP hole
 
 defaultRootEnr :: EnrichedDoc
-defaultRootEnr = RootEnr hole
+defaultRootEnr = RootEnr hole hole
 
 defaultRootE :: RootE
-defaultRootE = RootE NoIDP hole hole hole
+defaultRootE = RootE NoIDP hole hole
 
 defaultDecl :: Decl
 defaultDecl = Decl NoIDP NoIDP NoIDP NoIDP hole hole hole hole

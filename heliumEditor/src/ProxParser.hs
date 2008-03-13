@@ -26,13 +26,13 @@ import DocUtils_Generated
 
 recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $
-          (\str rootE -> reuseRootEnr [str] (Just rootE))
+          (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
       <$> pStructural Node_RootEnr
       <*> recognizeRootE
 
 recognizeRootE :: ListParser Document Node ClipDoc UserToken RootE
 recognizeRootE = pStr $ 
-          (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls) Nothing)
+          (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls))
       <$> pStructural Node_RootE
       <*> parseIDListList_Decl {- <* (pStr' $ pStructural Node_List_Decl) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
