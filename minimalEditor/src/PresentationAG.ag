@@ -30,7 +30,7 @@ SEM EnrichedDoc
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    @tree.pres
-
+{-
 SEM Tree
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -38,12 +38,14 @@ SEM Tree
   | Leaf
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                    row [ text "Leaf" ]
-{-
+-}
 SEM Tree
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   row [@left.pres, text " Bin ", @right.pres ]
+                   row [ col [ vSpace 10, @left.pres]
+                       , text "Bin"
+                       , col [ vSpace 10, @right.pres ] 
+                       ]
   | Leaf
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    row [ text "Leaf" ]
--}
