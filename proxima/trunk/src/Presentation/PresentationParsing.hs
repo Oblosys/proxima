@@ -212,7 +212,10 @@ runParser (pp) inp =
 
 
 
-
+-- parser for token
+pToken :: (DocNode node, Ord token, Show token) =>
+          token -> ListParser doc node clip token (Token doc node clip token)
+pToken token = pSym $ UserTk token (show token) Nothing (IDP (-1))
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
