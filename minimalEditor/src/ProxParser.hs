@@ -21,7 +21,6 @@ import Char
 
 import DocTypes_Generated
 import DocUtils_Generated
-
               
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
@@ -30,7 +29,6 @@ recognizeRootEnr = pStr $
           (\str root-> reuseRootEnr [str] (Just root))
       <$> pStructural Node_RootEnr
       <*> recognizeTree
---      <*> pPrs parseTree
 
 recognizeTree :: ListParser Document Node ClipDoc UserToken Tree
 recognizeTree = pStr $
@@ -42,7 +40,7 @@ recognizeTree = pStr $
       <$> pStructural Node_Leaf
 
 parseTree :: ListParser Document Node ClipDoc UserToken Tree
-parseTree = 
+parseTree = addHoleParser $
           (\token left right -> reuseBin [token] (Just left) (Just right))
       <$> pToken BinToken
       <*  pToken (SymToken "(")
@@ -53,6 +51,4 @@ parseTree =
       <*  pToken (SymToken ")")      
   <|>     (\str -> reuseLeaf [str])
       <$> pToken LeafToken
-  <|>     HoleTree
-      <$  pStructural Node_HoleTree
 

@@ -184,7 +184,7 @@ sem_EnrichedDoc_RootEnr tree_  =
               _lhsOpres =
                   {-# LINE 31 "src/PresentationAG.ag" #-}
                   loc (Node_RootEnr _self _lhsIpath) $ structural $ presentFocus _lhsIfocusD _lhsIpath $
-                    _treeIpres
+                    row [ text "Tree: ", _treeIpres ]
                   {-# LINE 189 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG_Generated.ag"(line 73, column 7)
               _treeOpIdC =

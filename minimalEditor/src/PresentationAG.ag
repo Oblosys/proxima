@@ -29,7 +29,7 @@ INCLUDE "PresentationAG_Generated.ag"
 SEM EnrichedDoc
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   @tree.pres
+                   row [ text "Tree: ", @tree.pres ]
 {-
 SEM Tree
   | Bin
