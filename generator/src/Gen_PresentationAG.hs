@@ -33,7 +33,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , ""
   , "{"
   , "-- type PresentationSheet doc enr node clip token = "
-  , "--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> Path -> "
+  , "--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> "
   , "--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)"
   , ""
   , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
