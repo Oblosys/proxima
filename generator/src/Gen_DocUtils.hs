@@ -18,8 +18,8 @@ import TypesUtils
 generate :: DocumentType -> [String]
 generate docType = genRankNode (addHolesParseErrs (docTypeWithLists)) -- with Document
                 ++ genDocNode (addHolesParseErrs (docTypeWithLists)) -- with Document
-                ++ genToXML    (addHolesParseErrs (addConsListDecls (removeDocumentDecl docTypeWithLists)))
-                ++ genParseXML  (removeDocumentDecl (docTypeWithLists))
+                ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
+                ++ genParseXML  (docTypeWithLists)
                 ++ genListUtils docTypeWithLists
                 ++ genMisc
   where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
@@ -130,13 +130,15 @@ genMisc = genBanner "Miscellaneous" $
   , "  mkDocNode doc = Node_RootDoc doc []"      -- a better way
   , ""
   , ""
-  , "-- toXML for Document and primitive types"
+  , "-- toXML for primitive types"
   , ""
+ {-
   , "-- we don't put a \"RootDoc\" element in the XML, because this type is not visible to the user."
   , "toXMLDocument (RootDoc root) = toXMLRoot root"
   , "toXMLDocument _              = debug Err \"DocUtils_Generated.toXMLDocument: malformed Document\" $"
   , "                                 Elt \"Root\" [] [] -- this does not occur"
   , ""
+ -}
   , "toXMLInt i = Elt \"Integer\" [(\"val\", show i)] []"
   , ""
   , "toXMLInt f = Elt \"Float\" [(\"val\", show f)] []"
@@ -146,10 +148,10 @@ genMisc = genBanner "Miscellaneous" $
   , "toXMLString str = Elt \"String\" [] [PCData str] "
   , ""
   , ""
-  , "-- parseXML for Document and primitive types"
+  , "-- parseXML for primitive types"
   , ""
-  , "parseXML_Document = RootDoc <$> parseXML_Root"
-  , ""
+--  , "parseXML_Document = RootDoc <$> parseXML_Root"
+--  , ""
   , "parseXML_Int :: Parser Int"
   , "parseXML_Int  ="
   , " do { spaces"

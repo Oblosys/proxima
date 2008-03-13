@@ -69,16 +69,18 @@ genDataType decls = genBanner "AG data type" $
 
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
-  [ "ATTR %1" -- all types including lists and conslists
+ ([ "ATTR %1" -- all types including lists and conslists
   , "     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""
-  , "ATTR %2" -- all types except EnrichedDoc including lists
-  , "     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
-  , ""
-  , "ATTR %3" -- all types including EnrichedDoc except lists and conslists
+  , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
-  , "ATTR %4" -- all lists and conslists
+  ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
+  [ "ATTR %3" -- all types except EnrichedDoc including lists
+  , "     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
+  , ""
+  ] ++ if null listTypeNames then [] else
+  [ "ATTR %4" -- all lists and conslists
   , "     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
   , "ATTR %5"  -- all conslists and all types appearing in lists
@@ -87,13 +89,13 @@ genAttr decls = genBanner "Attr declarations" $
   , "ATTR %6"  -- all conslists
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
-  ] <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
-       , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
-       , separateBy " " $ getAllDeclaredTypeNames decls
-       , separateBy " " $ listNames ++ consListNames
-       , separateBy " " $ listTypeNames ++ consListNames
-       , separateBy " " $ consListNames
-       ]
+  ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
+        , separateBy " " $ getAllDeclaredTypeNames decls
+        , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
+        , separateBy " " $ listNames ++ consListNames
+        , separateBy " " $ listTypeNames ++ consListNames
+        , separateBy " " $ consListNames
+        ]
  where listTypeNames = map typeName $ getAllUsedListTypes decls
        listNames = map ("List_"++) listTypeNames
        consListNames = map ("ConsList_"++) listTypeNames
