@@ -62,7 +62,7 @@ data Font = Font { fFamily :: String, fSize :: Int
                  , fBold :: Bool , fUnderline :: Bool
                  , fItalic :: Bool, fStrikeOut :: Bool } deriving (Show, Eq, Ord, Read)
 
-defaultFont = Font "Times New Roman" 24 False False False False
+defaultFont = Font "Verdana" 14 False False False False
 
 data Style = Solid | Transparent deriving (Show, Eq, Read)
 
