@@ -28,8 +28,8 @@ recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeRootEnr = pStr $ 
           (\str root-> reuseRootEnr [str] (Just root))
       <$> pStructural Node_RootEnr
-      <*> recognizeTree
---      <*> pPrs parseTree
+--      <*> recognizeTree
+      <*> pPrs parseTree
       
 recognizeTree :: ListParser Document Node ClipDoc UserToken Tree
 recognizeTree = pStr $

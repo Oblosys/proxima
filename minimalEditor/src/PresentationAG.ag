@@ -36,24 +36,31 @@ SEM Tree [ | | depth : Int ]
   | Leaf lhs.depth = 1
   | HoleTree ParseErrTree
       lhs.depth = 0
+      
+SEM Tree
+  | Bin
+      lhs.pres = loc (Node_Bin @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+  | Leaf
+      lhs.pres = loc (Node_Leaf @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+
+
+SEM Tree
+  | Bin
+      loc.pres = parsing $
+                   row [ text "Bin (", @left.pres, text ") (", @right.pres, text ")" ]
+  | Leaf
+      loc.pres = parsing $
+                   row [ text "Leaf" ]
 
 {-
 SEM Tree
   | Bin
-      lhs.pres = loc (Node_Bin @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row [ text "Bin (", @left.pres, text ") (", @right.pres, text ")" ]
-  | Leaf
-      lhs.pres = loc (Node_Leaf @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
-                   row [ text "Leaf" ]
--}
-
-SEM Tree
-  | Bin
-      lhs.pres = loc (Node_Bin @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                    row [ col [ vSpace 10, @left.pres]
                        , text "Bin"
                        , col [ vSpace 10, @right.pres ] 
                        ]
   | Leaf
-      lhs.pres = loc (Node_Leaf @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                    row [ text "Leaf" ]
+-}
