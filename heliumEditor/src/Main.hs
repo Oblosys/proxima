@@ -19,10 +19,12 @@ import Common.CommonTypes
 gain = main -- when typing during compilation GHCI replaces the first command line char by 'g'
 
 main = proxima PresentationAG.presentationSheet
-               ProxParser.recognizeRootEnr
+               ProxParser.recognizeEnrichedDoc
                ScannerSheet.scanner 
                -- sheet parameters (evaluation and reduction sheets are passed implicitly through
                -- instances of Evaluation/ReductionSheet classes)
                --
                (DocumentLevel HoleDocument NoPathD Clip_Nothing)   
                (EnrichedDocLevel HoleEnrichedDoc NoPathD HoleDocument)   
+
+-- Note: this file does not need to be changed when instantiating an editor.
