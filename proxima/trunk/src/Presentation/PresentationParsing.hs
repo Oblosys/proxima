@@ -59,8 +59,8 @@ reuse = Nothing
 set = Just
 
 
-parsePres recognizeRootEnr (TokenP _ (StructuralTk _ _ tokens _)) = 
-  let (enr,errs) = runParser recognizeRootEnr tokens
+parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ tokens _)) = 
+  let (enr,errs) = runParser recognizeEnrichedDoc tokens
   in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
      --             ++"\nhas result:"++show enr ) $
      if null errs then Just enr else Nothing
