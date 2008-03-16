@@ -83,10 +83,9 @@ pStrVerbose str = pStr' (text str)
 
 pStr' prs p = unfoldStructure  
      <$> pSym (StructuralTk 0 Nothing prs [] NoIDP)
- where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
-         let (res, errs) = runParser (addHoleParser p) (structTk : children) {- (p <|> hole/parseErr parser)-}
-             x = parseErr
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
+ where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
+         let (res, errs) = runParser (addHoleParser p) (structTk : tokens) {- (p <|> hole/parseErr parser)-}
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr tokens
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- The scoped type variable is necessary to get hole and holeNodeConstr of the same type a.
@@ -97,21 +96,19 @@ addHoleParser p =
 
 pStr'' nodeC hole p = unfoldStructure  
      <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
- where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
+ where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
          let pOrHole = p <|> hole <$ pStructural nodeC
-             (res, errs) = runParser pOrHole (structTk : children) {- (p <|> hole/parseErr parser)-}
-             x = parseErr
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
+             (res, errs) = runParser pOrHole (structTk : tokens) {- (p <|> hole/parseErr parser)-}
+         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr tokens
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 
 
 pStrAlt ndf p = unfoldStructure  
      <$> pSym (StructuralTk 0 (Just nd) (text $ show nd) [] NoIDP)
- where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
-         let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-             x = parseErr
-          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
+ where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
+         let (res, errs) = runParser p (structTk : tokens) {- (p <|> hole/parseErr parser)-}
+          in if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr tokens
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
        
        nd = applyDummyParameters ndf
@@ -140,22 +137,25 @@ pStrDirty p = pStrExtra Dirty p
 
 -- pStrExtra is a variant of pStr that allows an extra parser result to be returned in a tuple.
 -- extraDefault is a default value for this type in case of a parse error.
-pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
+pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
+              b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
      <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
- where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
-         let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
-             x = parseErr
-         in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) (parseErr pr,extraDefault)
+ where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
+         let (res, errs) = runParser p (structTk : tokens) {- (p <|> hole/parseErr parser)-}
+         in  if null errs 
+             then res 
+             else debug Err ("ERROR: Parse error in structural parser:"++(show errs))
+                        (parseErr pr tokens,extraDefault)
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- TODO: why do we need the 's in Editable?
 pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk empty [] NoIDP)
- where unfoldStructure presTk@(ParsingTk pr children _) = 
-         let (res, errs) = runParser p children
-         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr pr
+ where unfoldStructure presTk@(ParsingTk pr tokens _) = 
+         let (res, errs) = runParser p tokens
+         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr pr tokens
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- Does parseErr need a location? It used to be NoNode anyway.

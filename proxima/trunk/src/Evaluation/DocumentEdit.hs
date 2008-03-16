@@ -19,7 +19,7 @@ class Editable a doc node clip token | a -> doc node clip token where
   paste :: Path -> clip -> a -> a
   alternatives :: a -> [ (String, clip) ]
   arity :: a -> Int
-  parseErr :: Presentation doc node clip token -> a
+  parseErr :: Presentation doc node clip token -> [Token doc node clip token] -> a
   hole :: a
   holeNodeConstr :: (a -> Path -> node) -- for automatic hole parsing in PresentationParsing.pStr
   isList :: a -> Bool
