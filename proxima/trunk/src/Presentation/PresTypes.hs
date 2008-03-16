@@ -63,92 +63,96 @@ data EditPresentation documentLevel doc node clip token =
   | PasteDocPres
   | DeleteDocPres deriving Show
 
-
+type Position = Int
 
 data Token doc node clip token = 
-               UserTk token String (Maybe node) IDP
-             | StructuralTk (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
-             | ParsingTk (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
-             | GraphTk Dirty [(Int, Int)] (Maybe node) IDP
-             | VertexTk Int (Int, Int) (Maybe node) IDP
-             | ErrorTk String -- for storing scanner errors
+               UserTk       Position token String (Maybe node) IDP
+             | StructuralTk Position (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
+             | ParsingTk        (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
+             | GraphTk          Dirty [(Int, Int)] (Maybe node) IDP
+             | VertexTk         Int (Int, Int) (Maybe node) IDP
+             | ErrorTk      Position String -- for storing scanner errors
 -- the IDP field is used during the scanning and parsing phase
 
+-- The Position field in UserTk StructuralTk and ErrorTk contains its position in the list of scanned tokens
+-- The other tokens are not produced by the scanner, and therefore do not need this field.
+-- The position is only used for children of ParsingTk. StructuralTk children of a StructuralTk all have
+-- position 0
 instance (Show node, Show token) => Show (Token doc node clip token) where
-  show (UserTk u s _ id)         = "<\""++show u++"\":"++show s++":"++show id++">"
-  show (StructuralTk Nothing _ tks id) = "<structural:Nothing:"++show id++">" 
-  show (StructuralTk (Just node) _ tks id) = 
+  show (UserTk nr u s _ id)         = "<"++show nr ++":"++"\""++show u++"\":"++show s++":"++show id++">"
+  show (StructuralTk nr Nothing _ tks id) = "<"++show nr ++":"++"structural:Nothing:"++show id++">" 
+  show (StructuralTk nr (Just node) _ tks id) = 
     let showNode = show node -- not the nicest way of showing the constructor. Maybe include this in the node class
         nodeStr = if "Node_" `isPrefixOf` showNode
                   then drop (length "Node_") showNode
                   else nodeStr
-    in  "<structural:"++nodeStr++":"++show id++">" 
+    in  "<"++show nr ++":"++"structural:"++nodeStr++":"++show id++">" 
   show (ParsingTk _ tks _)       = "<parsing>" 
   show (GraphTk _ edges _ _)     = "<graph:"++show edges++">"
   show (VertexTk id pos _ _)     = "<vertex: "++show id++">"
-  show (ErrorTk str)             = "<error: "++show str++">"
+  show (ErrorTk nr str)             = "<"++show nr ++":"++"error: "++show str++">"
 
 instance (Eq node, Eq token) => Eq (Token doc node clip token) where
-  UserTk u1 _ _ _     == UserTk u2 _ _ _     = u1 == u2
-  StructuralTk Nothing _ _ _    == StructuralTk _ _ _ _ = True       -- StructuralTks with no node always match
-  StructuralTk _ _ _ _          == StructuralTk Nothing _ _ _ = True -- StructuralTks with no node always match
-  StructuralTk (Just nd1) _ _ _ == StructuralTk (Just nd2) _ _ _ = nd1 == nd2
+  UserTk _ u1 _ _ _     == UserTk _ u2 _ _ _     = u1 == u2
+  StructuralTk _ Nothing _ _ _    == StructuralTk _ _ _ _ _ = True       -- StructuralTks with no node always match
+  StructuralTk _ _ _ _ _          == StructuralTk _ Nothing _ _ _ = True -- StructuralTks with no node always match
+  StructuralTk _ (Just nd1) _ _ _ == StructuralTk _(Just nd2) _ _ _ = nd1 == nd2
   ParsingTk _ _ _    == ParsingTk _ _ _ = True   
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
                                               -- identifier will be added, which will be involved in eq. check
-  ErrorTk _  == ErrorTk _              = True
+  ErrorTk _ _  == ErrorTk _ _              = True
   _              == _                  = False
 
 instance (Ord node, Ord token) => Ord (Token doc node clip token) where
-  UserTk u1 _ _ _      <= UserTk u2 _ _ _    = u1 <= u2
-  StructuralTk Nothing _ _ _    <= StructuralTk _ _ _ _ = True     
-  StructuralTk _ _ _ _          <= StructuralTk Nothing _ _ _ = True
-  StructuralTk (Just nd1) _ _ _ <= StructuralTk (Just nd2) _ _ _ = nd1 <= nd2
-  StructuralTk _ _ _ _ <= UserTk _ _ _ _  = True
+  UserTk _ u1 _ _ _      <= UserTk _ u2 _ _ _    = u1 <= u2
+  StructuralTk _ Nothing _ _ _    <= StructuralTk _ _ _ _ _ = True     
+  StructuralTk _ _ _ _ _          <= StructuralTk _ Nothing _ _ _ = True
+  StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2
+  StructuralTk _ _ _ _ _ <= UserTk _ _ _ _ _  = True
   ParsingTk _ _ _ <= ParsingTk _ _ _      = True
-  ParsingTk _ _ _ <= StructuralTk _ _ _ _ = True
-  ParsingTk _ _ _ <= UserTk _ _ _ _       = True
+  ParsingTk _ _ _ <= StructuralTk _ _ _ _ _ = True
+  ParsingTk _ _ _ <= UserTk _ _ _ _ _       = True
   GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
   GraphTk _ _ _ _ <= ParsingTk _ _ _      = True
-  GraphTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  GraphTk _ _ _ _ <= UserTk _ _ _ _       = True
+  GraphTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
+  GraphTk _ _ _ _ <= UserTk _ _ _ _ _       = True
   VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
   VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
   VertexTk _ _ _ _ <= ParsingTk _ _ _      = True
-  VertexTk _ _ _ _ <= StructuralTk _ _ _ _ = True
-  VertexTk _ _ _ _ <= UserTk _ _ _ _       = True 
-  ErrorTk _        <= ErrorTk _            = True
-  ErrorTk _        <= VertexTk _ _ _ _     = True
-  ErrorTk _        <= GraphTk _ _ _ _      = True
-  ErrorTk _        <= ParsingTk _ _ _      = True
-  ErrorTk _        <= StructuralTk _ _ _ _ = True
-  ErrorTk _        <= UserTk _ _ _ _       = True
+  VertexTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
+  VertexTk _ _ _ _ <= UserTk _ _ _ _ _       = True 
+  ErrorTk _ _        <= ErrorTk _ _            = True
+  ErrorTk _ _        <= VertexTk _ _ _ _     = True
+  ErrorTk _ _        <= GraphTk _ _ _ _      = True
+  ErrorTk _ _        <= ParsingTk _ _ _      = True
+  ErrorTk _ _        <= StructuralTk _ _ _ _ _ = True
+  ErrorTk _ _        <= UserTk _ _ _ _ _       = True
   _                <= _           = False
 
 tokenString :: Token doc node clip token -> String                  
-tokenString (UserTk _ s n id)      = s
-tokenString (StructuralTk n _ _ id) = "<structural token>"
+tokenString (UserTk _ _ s n id)      = s
+tokenString (StructuralTk _ n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
-tokenString (ErrorTk str)       = "<error token>"
+tokenString (ErrorTk _ str)       = "<error token>"
                              
 tokenNode :: Token doc node clip token -> Maybe node                 
-tokenNode (StructuralTk n _ _ id) = n
+tokenNode (StructuralTk _ n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
-tokenNode (UserTk u s n id)   = n
-tokenNode (ErrorTk str)       = error $ "tokenNode called on error token: " ++ str
+tokenNode (UserTk _ u s n id)   = n
+tokenNode (ErrorTk _ str)       = error $ "tokenNode called on error token: " ++ str
 
 tokenIDP :: Token doc node clip token -> IDP       
-tokenIDP (UserTk u s n id) = id
-tokenIDP (StructuralTk n _ _ id)  = id
+tokenIDP (UserTk _ u s n id) = id
+tokenIDP (StructuralTk _ n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
 tokenIDP (VertexTk i p n id) = id
-tokenIDP (ErrorTk str)       = error $ "tokenIDP called on error token: " ++ str
+tokenIDP (ErrorTk _ str)       = error $ "tokenIDP called on error token: " ++ str
 
 deepShowTks i tok = case tok of
-                      (StructuralTk _ _ cs _) -> indent i ++ show tok ++ "\n"
+                      (StructuralTk _ _ _ cs _) -> indent i ++ show tok ++ "\n"
                                                ++ indent (i+1)++"[\n"
                                                ++ concatMap (deepShowTks (i+1)) cs 
                                                ++ indent (i+1)++" ]\n"

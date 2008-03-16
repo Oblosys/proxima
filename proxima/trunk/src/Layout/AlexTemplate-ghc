@@ -21,7 +21,7 @@ type AlexInput  = (Char, [ScanChar_])
 
 scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap, WhitespaceFocus)
 scanner idPCounter scs = 
-  let (mTokens, (idPCounter', whitespaceMap, lastWhitespaceFocus)) = alexScanTokens initScannerState scs
+  let (mTokens, (tokenPos, idPCounter', whitespaceMap, lastWhitespaceFocus)) = alexScanTokens initScannerState scs
   in  (catMaybes mTokens, idPCounter', whitespaceMap, lastWhitespaceFocus)
  where initScannerState :: ScannerState
        initScannerState = (0, idPCounter, empty,initWhitespaceFocus)
@@ -32,11 +32,11 @@ alexScanTokens :: ScannerState -> [ScanChar_] ->
                    ([Maybe (Token Document Node ClipDoc UserToken)], ScannerState)
 alexScanTokens initState scs = go initState ('\n',scs)
   where go :: ScannerState -> (Char, [ScanChar_]) -> ([Maybe (Token Document Node ClipDoc UserToken)], ScannerState)
-        go state inp@(_,str) =
+        go state@(pos, _, _, _) inp@(_,str) =
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
-		AlexError (_,remaining) -> ( [Just $ ErrorTk $ "lexical error at " ++ 
-		                                               show (take 10 $ stringFromScanChars remaining) ]
+		AlexError (_,remaining) -> ( [Just $ ErrorTk pos $ "lexical error at " ++ 
+		                                                   show (take 10 $ stringFromScanChars remaining) ]
 		                           , state)
 		AlexSkip  inp' len     -> go state inp'
 		AlexToken inp' len act -> let (mToken, state') = act state (take len str)

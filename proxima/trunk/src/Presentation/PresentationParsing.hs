@@ -59,9 +59,9 @@ reuse = Nothing
 set = Just
 
 
-parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ tokens _)) = 
+parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ _ tokens _)) = 
   let (enr,errs) = runParser recognizeEnrichedDoc tokens
-  in -- debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens)  
+  in debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $ 
      --             ++"\nhas result:"++show enr ) $
      if null errs then Just enr else Nothing
 
@@ -69,7 +69,7 @@ parsePres _ _    = error "parsePres: scanned presentation has wrong format"
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
-pStructural nd = pSym (StructuralTk (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
+pStructural nd = pSym (StructuralTk 0 (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
 
 
 applyDummyParameters nd = nd (error "This should not have happened") [] 
@@ -82,8 +82,8 @@ pStr = pStr' empty
 pStrVerbose str = pStr' (text str)
 
 pStr' prs p = unfoldStructure  
-     <$> pSym (StructuralTk Nothing prs [] NoIDP)
- where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+     <$> pSym (StructuralTk 0 Nothing prs [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
          let (res, errs) = runParser (addHoleParser p) (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
@@ -96,8 +96,8 @@ addHoleParser p =
   
 
 pStr'' nodeC hole p = unfoldStructure  
-     <$> pSym (StructuralTk Nothing empty [] NoIDP)
- where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+     <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
          let pOrHole = p <|> hole <$ pStructural nodeC
              (res, errs) = runParser pOrHole (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
@@ -107,8 +107,8 @@ pStr'' nodeC hole p = unfoldStructure
 
 
 pStrAlt ndf p = unfoldStructure  
-     <$> pSym (StructuralTk (Just nd) (text $ show nd) [] NoIDP)
- where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+     <$> pSym (StructuralTk 0 (Just nd) (text $ show nd) [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
           in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr pr
@@ -142,8 +142,8 @@ pStrDirty p = pStrExtra Dirty p
 -- extraDefault is a default value for this type in case of a parse error.
 pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
-     <$> pSym (StructuralTk Nothing empty [] NoIDP)
- where unfoldStructure structTk@(StructuralTk nd pr children _) = 
+     <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
+ where unfoldStructure structTk@(StructuralTk _ nd pr children _) = 
          let (res, errs) = runParser p (structTk : children) {- (p <|> hole/parseErr parser)-}
              x = parseErr
          in  if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) (parseErr pr,extraDefault)
@@ -228,12 +228,12 @@ runParser (pp) inp =
 -- parser for token
 pToken :: (DocNode node, Ord token, Show token) =>
           token -> ListParser doc node clip token (Token doc node clip token)
-pToken token = pSym $ UserTk token (show token) Nothing (IDP (-1))
+pToken token = pSym $ UserTk 0 token (show token) Nothing (IDP (-1))
 
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
 pStruct :: (DocNode node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
-pStruct = pCSym 4 (StructuralTk Nothing empty [] NoIDP)
+pStruct = pCSym 4 (StructuralTk 0 Nothing empty [] NoIDP)
 
 
 -- pCostSym expects the parser twice
@@ -242,7 +242,7 @@ pCSym c p = pCostSym c p p
 
 
 
-strucTk   = StructuralTk Nothing empty [] (IDP (-1))
+strucTk   = StructuralTk 0 Nothing empty [] (IDP (-1))
 parsingTk = (ParsingTk empty [] NoIDP)
 graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
 vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty

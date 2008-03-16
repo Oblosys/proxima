@@ -23,9 +23,9 @@ testPres =
                ParsingP NoIDP LexInherited $
            RowP NoIDP 0 [  
                          RowP NoIDP 0 [ 
-                            TokenP (IDP 1) (UserTk () "een" Nothing NoIDP)
-                          , TokenP (IDP 2) (UserTk () "twee" Nothing NoIDP)
-                          , TokenP (IDP 3) (UserTk () "drie" Nothing NoIDP)
+                            TokenP (IDP 1) (UserTk 0 () "een" Nothing NoIDP)
+                          , TokenP (IDP 2) (UserTk 1 () "twee" Nothing NoIDP)
+                          , TokenP (IDP 3) (UserTk 2 () "drie" Nothing NoIDP)
                         ]
                         ]
                         
@@ -184,9 +184,9 @@ mapPath f (PathP p i) = PathP (f p) i
 
 addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [(Layout doc node clip, FocusPres)]
-addWhitespaceToken wm idp (UserTk _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
-addWhitespaceToken wm idp (StructuralTk _ pres _ _) = let (pres', f) = detokenize wm pres
-                                                      in  addWhitespace wm (Just f) idp pres'
+addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
+addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = let (pres', f) = detokenize wm pres
+                                                        in  addWhitespace wm (Just f) idp pres'
                                                       
 
 addWhitespace :: WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip -> [(Layout doc node clip, FocusPres)]
