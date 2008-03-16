@@ -1,4 +1,4 @@
-module ProxParser (recognizeRootEnr) where
+module ProxParser (recognizeEnrichedDoc) where
 
 import Common.CommonTypes
 import Presentation.PresLayerTypes
@@ -24,8 +24,8 @@ import DocUtils_Generated
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
 
-recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
-recognizeRootEnr = pStr $
+recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc = pStr $
           (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
       <$> pStructural Node_RootEnr
       <*> recognizeRootE
@@ -461,12 +461,12 @@ HOLE = 2;                                 copied from following token
 
 -- User token values that can be used to construct basic token parsers
 
-keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
-intTk     = UserTk IntTk "0" Nothing (IDP (-1))
-lIdentTk  = UserTk LIdentTk "ident" Nothing (IDP (-1))
-uIdentTk  = UserTk UIdentTk "Ident" Nothing (IDP (-1))
-opTk      = UserTk OpTk "" Nothing (IDP (-1))
-symTk     = UserTk SymTk "" Nothing (IDP (-1))
+keyTk str = UserTk 0 (KeyTk str) str Nothing (IDP (-1))
+intTk     = UserTk 0 IntTk "0" Nothing (IDP (-1))
+lIdentTk  = UserTk 0 LIdentTk "ident" Nothing (IDP (-1))
+uIdentTk  = UserTk 0 UIdentTk "Ident" Nothing (IDP (-1))
+opTk      = UserTk 0 OpTk "" Nothing (IDP (-1))
+symTk     = UserTk 0 SymTk "" Nothing (IDP (-1))
 -- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
 -- which is also required for copying of presentation subtrees (only if we use error correcting)
 
@@ -492,13 +492,13 @@ pInt :: DocNode node => ListParser doc node clip UserToken (Token doc node clip 
 pInt = pCSym 20 intTk
 
 lIdentVal :: DocNode node => Token doc node clip UserToken -> String
-lIdentVal (UserTk LIdentTk str _ _) = str
-lIdentVal tk                 = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
+lIdentVal (UserTk _ LIdentTk str _ _) = str
+lIdentVal tk                          = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
   
 intVal :: DocNode node => Token doc node clip UserToken -> Int
-intVal (UserTk IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
-intVal (UserTk IntTk str _ _) = read str
+intVal (UserTk _ IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
+intVal (UserTk _ IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
 
  
