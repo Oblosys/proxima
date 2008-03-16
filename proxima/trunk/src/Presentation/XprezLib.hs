@@ -240,14 +240,19 @@ percent a x = a * x `div` 100
 presHole focus typeStr nd pth = loc nd $
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
 
-presParseErr node pres tokens =
+presParseErr node pres (errorPos, str) tokens =
 --  loc node $ parsing $ pres `withbgColor` whiteSmoke
-  loc node $ parsing $ row $ map (TokenP NoIDP) tokens
+  loc node $ parsing $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
+                                 TokenP NoIDP token | (p,token) <- zip [0..] tokens ]
   
 presentFocus NoPathD     path pres = pres
 presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
 
 focusCol = lightBlue -- lightGrey
+
+squiggly :: Color -> Xprez doc node clip token -> Xprez doc node clip token
+squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
+-- png is the red one, only temporary
 
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token
 presentElementXML focusD node path tag children =

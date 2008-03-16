@@ -10,10 +10,6 @@ import Data.List
 
 import Arrangement.ArrTypes
 
-squiggly :: Color -> Xprez doc node clip token -> Xprez doc node clip token
-squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
--- png is the red one, only temporary
-
 ifFocusP NoFocusP           _   = NoFocusP
 ifFocusP (FocusP NoPathP _) _   = NoFocusP
 ifFocusP (FocusP _ NoPathP) _   = NoFocusP

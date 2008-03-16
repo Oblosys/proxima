@@ -36,6 +36,8 @@ type IDPCounter = Int                   -- Counter for generating new unique IDP
 initLayout :: WhitespaceMap
 initLayout = Map.fromList []
 
+type ParseError = (Int, String) 
+
 data EditPresentation' doc node clip token =
     SetPres' (PresentationLevel doc node clip token)
   | SkipPres' Int deriving Show
