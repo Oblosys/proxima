@@ -22,15 +22,15 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
   reductionSheetSimple state _ _ enrDoc =
     case enrDoc of 
       (RootEnr (RootE idp dcls idldcls) _) -> -- if oldEnr is not RootEnr, then just copy from dcls
-        (RootDoc (Root idp dcls),state, enrDoc )
-      (RootEnr (ParseErrRootE p) _) ->
-        (RootDoc (ParseErrRoot p),state, enrDoc )
+        (RootDoc (Root idp dcls), state, enrDoc )
+      (RootEnr (ParseErrRootE p ts) _) ->
+        (RootDoc (ParseErrRoot p ts), state, enrDoc )
       (RootEnr HoleRootE _) ->
-        (RootDoc HoleRoot,state, enrDoc )
+        (RootDoc HoleRoot, state, enrDoc )
       HoleEnrichedDoc ->
         (HoleDocument,state, enrDoc )
-      ParseErrEnrichedDoc prs ->
-        (ParseErrDocument prs,state, enrDoc )
+      ParseErrEnrichedDoc prs ts ->
+        (ParseErrDocument prs ts, state, enrDoc )
 
 
 -- simple implementation of Eq for Decls, to be used in reducer when comparing which decls list was edited
@@ -41,8 +41,8 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
 instance Eq List_Decl where
   (List_Decl decls1)    == (List_Decl decls2)    = decls1 == decls2
   HoleList_Decl         == HoleList_Decl         = True
-  (ParseErrList_Decl _) == _                     = True
-  _                     == (ParseErrList_Decl _) = True
+  (ParseErrList_Decl _ _) == _                     = True
+  _                     == (ParseErrList_Decl _ _) = True
   _                     == _                     = False
 
 
@@ -57,13 +57,13 @@ instance Eq Decl where
   (BoardDecl _ _ _)           == (BoardDecl _ _ _)           = True
   (PPPresentationDecl _ _ _)  == (PPPresentationDecl _ _ _)  = True
   HoleDecl                    == HoleDecl                    = True
-  (ParseErrDecl _)            == _                           = True
-  _                           == (ParseErrDecl _)            = True
+  (ParseErrDecl _ _)          == _                           = True
+  _                           == (ParseErrDecl _ _)            = True
   _                           == _                           = False        
 
 instance Eq Ident where
   (Ident _ _ str1)  == (Ident _ _ str2)  = str1 == str2
   HoleIdent         == HoleIdent         = True
-  (ParseErrIdent _) == _                 = True
-  _                 == (ParseErrIdent _) = True
+  (ParseErrIdent _ _) == _                 = True
+  _                 == (ParseErrIdent _ _) = True
   _                 == _                 = False        
