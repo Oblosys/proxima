@@ -110,7 +110,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   "SEM %1" <~ [typeName] :
   concatMap genSemPIDCProd prods ++
   [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-  , "  | ParseErr%1 lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
+  , "  | ParseErr%1 lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation @error @tokens"
   , ""
   ] <~ [typeName]
  where genSemPIDCProd (Prod _ cnstrName idpFields fields) =
@@ -140,7 +140,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
   , "  | HoleList_%1     lhs.press = []"
-  , "  | ParseErrList_%1 lhs.press = [ presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation ]"
+  , "  | ParseErrList_%1 lhs.press = [ presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation @error @tokens ]"
   , ""
   ] <~ [typeName]
 
@@ -182,7 +182,7 @@ genSemXMLBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
   ([ "  | Hole%1     lhs.presXML = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-   , "  | ParseErr%1 lhs.presXML = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
+   , "  | ParseErr%1 lhs.presXML = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation @error @tokens"
    , ""
    ] <~ [lhsTypeName])
  where genField (Field fieldName fieldType) = 
@@ -200,7 +200,7 @@ genSemXMLListDecl (Decl (LHSListType typeName) _) =
   , "                    col @elts.pressXML"
   , "  | ParseErrList_%1"
   , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                    presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation"
+  , "                    presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation @error @tokens"
   , "  | HoleList_%1"
   , "      lhs.presXML = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                    presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
@@ -229,7 +229,7 @@ genSemTreeBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =
   | Prod _ cnstrName idpFields fields <- prods
   ] ++
   ([ "  | Hole%1     lhs.presTree = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-   , "  | ParseErr%1 lhs.presTree = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation"
+   , "  | ParseErr%1 lhs.presTree = presParseErr (Node_ParseErr%1 @self @lhs.path) @presentation @error @tokens"
    , ""
    ] <~ [lhsTypeName])
  where genField (Field fieldName fieldType) = 
@@ -247,7 +247,7 @@ genSemTreeListDecl (Decl (LHSListType typeName) _) =
   , "                       col @elts.pressTree"
   , "  | ParseErrList_%1"
   , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
-  , "                       presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation"
+  , "                       presParseErr (Node_ParseErrList_%1 @self @lhs.path) @presentation @error @tokens"
   , "  | HoleList_%1"
   , "      lhs.presTree = loc (Node_List_%1 @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $"
   , "                       presHole @lhs.focusD \"List_%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
