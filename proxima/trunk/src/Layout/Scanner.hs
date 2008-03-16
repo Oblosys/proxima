@@ -197,7 +197,8 @@ alexGetChar (_, Structural _ _ _ _ _ _ : cs) = Just ('\255', ('\255', cs))
 
 alexInputPrevChar (c,_) = c
 
-type ScannerState = (Int, WhitespaceMap, WhitespaceFocus) -- (idP counter, whitespace map, (newlines, spaces))
+type ScannerState = (Integer,       Int,         WhitespaceMap,  WhitespaceFocus) 
+                 -- (token counter, idP counter, whitespace map, collected (newlines, spaces))
 
 mkToken = mkTokenEx id
 
@@ -210,7 +211,7 @@ initWhitespaceFocus = ((0,0),(Nothing,Nothing))
 -- the first strf is for manipulating the string that is stored in the token
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
            (Maybe (Token doc node clip userToken), ScannerState)
-mkTokenEx strf tokf (idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) scs = 
+mkTokenEx strf tokf (tokenNr, idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) scs = 
   let tokenLayout = TokenLayout collectedWhitespace
                                 whitespaceFocus
                                 (getFocusStartEnd scs)
@@ -225,12 +226,12 @@ mkTokenEx strf tokf (idPCounter, whitespaceMap, (collectedWhitespace, whitespace
                            -- it is already in the whitespaceMap, we also create a new one.                                                   
                                                    
   in  ( Just $ UserTk userToken str Nothing idp'
-      , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
+      , (tokenNr + 1, idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
       )
 
 
 mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe (Token doc node clip userToken), ScannerState)
-mkStructuralToken (idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) 
+mkStructuralToken (tokenNr, idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFocus)) 
                   scs@[Structural idp _ _ loc tokens lay] = 
   let tokenLayout = TokenLayout collectedWhitespace
                                 whitespaceFocus
@@ -239,18 +240,20 @@ mkStructuralToken (idPCounter, whitespaceMap, (collectedWhitespace, whitespaceFo
                                         _     -> (idp,            idPCounter    )
   in  debug Lay ("Structural " ++ show tokenLayout) $
       ( Just $ StructuralTk loc lay tokens idp'
-      , (idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus)
+      , (tokenNr + 1, idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus)
       )
 
 
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe a, ScannerState)
-collectWhitespace (idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd)) 
+collectWhitespace (tokenNr, idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd)) 
                   (sc@(Char _ _ _ c):scs) = -- will always be a Char
   let newWhitespace = case c of                                                
                         '\n' -> (newlines + 1 + length scs, 0                      ) -- newline resets spaces
                         ' '  -> (newlines                 , spaces + 1 + length scs)
-  in (Nothing, (idPCounter, whitespaceMap, ( newWhitespace
-                                           , updateFocusStartEnd (newlines+spaces) focusStartEnd (sc:scs) )))
+  in (Nothing, ( tokenNr, idPCounter, whitespaceMap, 
+                 (newWhitespace, updateFocusStartEnd (newlines+spaces) focusStartEnd  $ sc:scs)
+               )
+     )
        -- The preceding newlines and spaces are the offset for the focus
 
 -- TODO handle pattern match failures with internal errors

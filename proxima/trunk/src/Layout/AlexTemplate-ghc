@@ -24,7 +24,7 @@ scanner idPCounter scs =
   let (mTokens, (idPCounter', whitespaceMap, lastWhitespaceFocus)) = alexScanTokens initScannerState scs
   in  (catMaybes mTokens, idPCounter', whitespaceMap, lastWhitespaceFocus)
  where initScannerState :: ScannerState
-       initScannerState = (idPCounter, empty,initWhitespaceFocus)
+       initScannerState = (0, idPCounter, empty,initWhitespaceFocus)
 
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
