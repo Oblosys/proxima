@@ -29,7 +29,7 @@ INCLUDE "PresentationAG_Generated.ag"
 SEM EnrichedDoc
   | RootEnr
       loc.pres = structural $
-                   col [ text $ "Tree with depth "++show @tree.depth, @tree.pres ]
+                   col [ text $ "Tree with depth "++show @tree.depth, @tree.pres, text $ show $ @tree.self ]
 
 SEM Tree [ | | depth : Int ]
   | Bin  lhs.depth = @left.depth `max` @right.depth + 1
@@ -53,8 +53,9 @@ SEM Tree
       loc.pres = structural $
                    row [ col [ vSpace 10, @left.pres]
                        , text "Bin"
-                       , col [ vSpace 10, @right.pres ] 
+                       {-, col [ vSpace 10, @right.pres ] 
                        , col [ vSpace 10, @left.pres]
+                       -}
                        ]
   | Leaf
       loc.pres = structural $
