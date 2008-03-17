@@ -94,7 +94,7 @@ instance (Show node, Show token) => Show (Token doc node clip token) where
     let showNode = show node -- not the nicest way of showing the constructor. Maybe include this in the node class
         nodeStr = if "Node_" `isPrefixOf` showNode
                   then drop (length "Node_") showNode
-                  else nodeStr
+                  else showNode
     in  "<"++show nr ++":"++"structural:"++nodeStr++":"++show id++">" 
   show (ParsingTk _ tks _)       = "<parsing>" 
   show (GraphTk _ edges _ _)     = "<graph:"++show edges++">"
