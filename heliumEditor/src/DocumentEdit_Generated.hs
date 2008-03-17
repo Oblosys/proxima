@@ -1007,7 +1007,7 @@ instance Editable Int Document Node ClipDoc UserToken where
   alternatives _ = [ ("0", Clip_Int 0) ]
   
   arity _ = 0
-  parseErr _ _ _ = 0
+  parseErr _ = 0
 
   hole = 0
 
@@ -1027,7 +1027,7 @@ instance Editable Float Document Node ClipDoc UserToken where
   alternatives _ = [ ("0.0", Clip_Float 0.0) ]
   
   arity _ = 0
-  parseErr _ _ _ = 0
+  parseErr _ = 0
 
   hole = 0
 
@@ -1047,7 +1047,7 @@ instance Editable Bool Document Node ClipDoc UserToken where
                    , ("False", Clip_Bool False)      
                    ]    
   arity _ = 0                                          
-  parseErr _ _ _ = False
+  parseErr _ = False
 
   hole = False
 
@@ -1068,7 +1068,7 @@ instance Editable String Document Node ClipDoc UserToken where
                    ] 
  
   arity _ = 0
-  parseErr _ _ _ = "{ParseErr}"
+  parseErr _ = "{ParseErr}"
 
   hole = "{String}"
 
