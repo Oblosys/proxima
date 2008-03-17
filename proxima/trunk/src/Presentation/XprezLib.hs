@@ -240,8 +240,9 @@ percent a x = a * x `div` 100
 presHole focus typeStr nd pth = loc nd $
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
 
-presParseErr node pres (errorPos, str) tokens =
---  loc node $ parsing $ pres `withbgColor` whiteSmoke
+presParseErr node (StructuralParseErr pres) =
+  loc node $ parsing $ pres `withbgColor` whiteSmoke
+presParseErr node (ParsingParseErr (errorPos, str) tokens) =
   loc node $ parsing $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
                                  TokenP NoIDP token | (p,token) <- zip [0..] tokens ]
   
