@@ -25,8 +25,8 @@ import DocUtils_Generated
               
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeRootEnr :: ListParser Document Node ClipDoc UserToken EnrichedDoc
-recognizeRootEnr = pStr $ 
+recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc = pStr $ 
           (\str root-> reuseRootEnr [str] (Just root))
       <$> pStructural Node_RootEnr
       <*> recognizeRoot
