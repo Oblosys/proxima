@@ -28,12 +28,12 @@ INCLUDE "PresentationAG_Generated.ag"
 
 SEM EnrichedDoc
   | RootEnr
-      lhs.pres = loc (Node_RootEnr @self @lhs.path) $ structural $
+      loc.pres = structural $
                    @root.pres
 
 SEM Root
   | Root
-      lhs.pres = loc (Node_Root @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      (col $ [ @graph.pres
                             , row [ parsing $ text @title, empty `withHStretch` True ]
                                   `withFontSize_` (percent 160) 
@@ -51,7 +51,7 @@ divide n xs = let (h,t) = splitAt n xs
 SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Section
       loc.numberStr = show @sectionNr
-      lhs.pres = loc (Node_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title
                                         ] `withFontSize_` (percent 150)
@@ -72,7 +72,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
 SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr
-      lhs.pres = loc (Node_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
@@ -92,7 +92,7 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
 SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
-      lhs.pres = loc (Node_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      (col $ [ row [ text (@numberStr++".")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
@@ -137,13 +137,13 @@ SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
                     
 SEM Paragraph
   | Paragraph
-      lhs.pres = loc (Node_Paragraph @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = parsing $
                      ( formatter ( if null @words.press then [text ""] else @words.press ))
                        `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
        
   | SubgraphPara
-      lhs.pres = loc (Node_SubgraphPara @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      row [ @subgraph.pres, empty `withHStretch` True ]
                        `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
                                        , ("Add Graph", addSubgraphPara @lhs.path)
@@ -152,10 +152,10 @@ SEM Paragraph
 
 SEM Word [ || ]
   | Word
-      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = parsing $
                      row [ text @word, text " " ]
   | NodeRef
-      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = parsing $
                      row [ text "\\node{" `withColor` blue
                          , if @nodeName `notElem` @lhs.vertexNames
                            then squiggly red $ text @nodeName 
@@ -164,12 +164,12 @@ SEM Word [ || ]
                          , text " "
                          ]
   | Label
-      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = parsing $
                      row [ text ("\\label{" ++ @label++"}") `withColor` blue
                          , text " "
                          ]
   | LabelRef
-      lhs.pres = loc (Node_Word @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = parsing $
                    let mLabelNr = lookup @label @lhs.allLabels   
                    in row [ text "\\ref{" `withColor` blue
                           , case mLabelNr of
@@ -186,14 +186,14 @@ SEM Word [ || ]
   
 SEM Graph
   | Graph
-      lhs.pres = loc (Node_Graph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                      row [ text " "
                          , boxed $ graph 400 340 @edges.edges @vertices.press
                          ]
       
 SEM Vertex [ || ] 
   | Vertex
-      lhs.pres = let (nodePres,nodeOutline) =
+      loc.pres = let (nodePres,nodeOutline) =
                        case @shape.self of
                          Circle -> ( ellipse 18 18 Solid `withRef` (9,9) `withfColor` (200, 255, 255)
                                    , \a -> (round $ 9*cos a , round $ -9*sin a )
@@ -202,8 +202,8 @@ SEM Vertex [ || ]
                                    , squareOutline 9
                                    )
                       
-                 in  loc (Node_Vertex @self @lhs.path) $ structural $
-                     (vertex @id @x @y nodeOutline $
+                 in  structural $
+                       (vertex @id @x @y nodeOutline $
                        col [ rowR 1 [glue, hRefHalf $ nodePres, glue]
                            , vSpace 4 `withHStretch` True
                            , rowR 1 [glue, hRefHalf $ boxed 
@@ -236,10 +236,10 @@ squareOutline r a | a < pi / 4  || a >= 7 * pi / 4    = (r-1, round $ - tan a * 
 
 SEM Subgraph [||] 
   | Subgraph
-      lhs.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
+      loc.pres = let subVertices = filter (`elem` @lhs.vertexIDs) (fst . unzip $ @vertices.vertexIDNames)
                      -- only present vertices that are in the supergraph
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
-                 in  loc (Node_Subgraph @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                 in  structural $
                        (boxed $ graph 100 100 subEdges @vertices.press
                      `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
@@ -448,22 +448,19 @@ SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
   | Nil_Section      lhs.tocPress = []
 
-{- dummy presentations. We don't use the pres attribute for these nonterminals, but it is declared,
-   so to prevent warnings, we provide the definitions. 
--}
 
 SEM Edge [ || ] 
   | Edge       
-      lhs.pres = empty
+      loc.pres = empty
 
 SEM Shape [ || ] 
   | Circle       
-      lhs.pres = empty
+      loc.pres = empty
   | Square
-      lhs.pres = empty
+      loc.pres = empty
 
 SEM Dirty [ || ] 
   | Dirty
-      lhs.pres = empty
+      loc.pres = empty
   | Clean       
-      lhs.pres = empty
+      loc.pres = empty
