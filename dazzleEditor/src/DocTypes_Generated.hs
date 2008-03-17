@@ -22,38 +22,38 @@ data UserToken = KeyTk String
 
 data EnrichedDoc = RootEnr Root
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
+                 | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
                      deriving Show
 
 data Document = RootDoc Root
               | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
+              | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
 data Root = Root Graph String List_Section
           | HoleRoot
-          | ParseErrRoot (Presentation Document Node ClipDoc UserToken)
+          | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
               deriving Show
 
 data Section = Section String List_Paragraph List_Subsection
              | HoleSection
-             | ParseErrSection (Presentation Document Node ClipDoc UserToken)
+             | ParseErrSection (ParseError Document Node ClipDoc UserToken)
                  deriving Show
 
 data Subsection = Subsection String List_Paragraph List_Subsubsection
                 | HoleSubsection
-                | ParseErrSubsection (Presentation Document Node ClipDoc UserToken)
+                | ParseErrSubsection (ParseError Document Node ClipDoc UserToken)
                     deriving Show
 
 data Subsubsection = Subsubsection String List_Paragraph
                    | HoleSubsubsection
-                   | ParseErrSubsubsection (Presentation Document Node ClipDoc UserToken)
+                   | ParseErrSubsubsection (ParseError Document Node ClipDoc UserToken)
                        deriving Show
 
 data Paragraph = Paragraph List_Word
                | SubgraphPara Subgraph
                | HoleParagraph
-               | ParseErrParagraph (Presentation Document Node ClipDoc UserToken)
+               | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
                    deriving Show
 
 data Word = Word String
@@ -61,74 +61,74 @@ data Word = Word String
           | Label String
           | LabelRef String
           | HoleWord
-          | ParseErrWord (Presentation Document Node ClipDoc UserToken)
+          | ParseErrWord (ParseError Document Node ClipDoc UserToken)
               deriving Show
 
 data Graph = Graph Dirty List_Vertex List_Edge
            | HoleGraph
-           | ParseErrGraph (Presentation Document Node ClipDoc UserToken)
+           | ParseErrGraph (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
 data Vertex = Vertex String Shape Int Int Int
             | HoleVertex
-            | ParseErrVertex (Presentation Document Node ClipDoc UserToken)
+            | ParseErrVertex (ParseError Document Node ClipDoc UserToken)
                 deriving Show
 
 data Shape = Circle
            | Square
            | HoleShape
-           | ParseErrShape (Presentation Document Node ClipDoc UserToken)
+           | ParseErrShape (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
 data Edge = Edge Int Int
           | HoleEdge
-          | ParseErrEdge (Presentation Document Node ClipDoc UserToken)
+          | ParseErrEdge (ParseError Document Node ClipDoc UserToken)
               deriving Show
 
 data Subgraph = Subgraph Dirty List_Vertex List_Edge
               | HoleSubgraph
-              | ParseErrSubgraph (Presentation Document Node ClipDoc UserToken)
+              | ParseErrSubgraph (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
 data Dirty = Dirty
            | Clean
            | HoleDirty
-           | ParseErrDirty (Presentation Document Node ClipDoc UserToken)
+           | ParseErrDirty (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
 data List_Section = List_Section ConsList_Section
                   | HoleList_Section
-                  | ParseErrList_Section (Presentation Document Node ClipDoc UserToken)
+                  | ParseErrList_Section (ParseError Document Node ClipDoc UserToken)
                       deriving Show
 
 data List_Paragraph = List_Paragraph ConsList_Paragraph
                     | HoleList_Paragraph
-                    | ParseErrList_Paragraph (Presentation Document Node ClipDoc UserToken)
+                    | ParseErrList_Paragraph (ParseError Document Node ClipDoc UserToken)
                         deriving Show
 
 data List_Subsection = List_Subsection ConsList_Subsection
                      | HoleList_Subsection
-                     | ParseErrList_Subsection (Presentation Document Node ClipDoc UserToken)
+                     | ParseErrList_Subsection (ParseError Document Node ClipDoc UserToken)
                          deriving Show
 
 data List_Subsubsection = List_Subsubsection ConsList_Subsubsection
                         | HoleList_Subsubsection
-                        | ParseErrList_Subsubsection (Presentation Document Node ClipDoc UserToken)
+                        | ParseErrList_Subsubsection (ParseError Document Node ClipDoc UserToken)
                             deriving Show
 
 data List_Word = List_Word ConsList_Word
                | HoleList_Word
-               | ParseErrList_Word (Presentation Document Node ClipDoc UserToken)
+               | ParseErrList_Word (ParseError Document Node ClipDoc UserToken)
                    deriving Show
 
 data List_Vertex = List_Vertex ConsList_Vertex
                  | HoleList_Vertex
-                 | ParseErrList_Vertex (Presentation Document Node ClipDoc UserToken)
+                 | ParseErrList_Vertex (ParseError Document Node ClipDoc UserToken)
                      deriving Show
 
 data List_Edge = List_Edge ConsList_Edge
                | HoleList_Edge
-               | ParseErrList_Edge (Presentation Document Node ClipDoc UserToken)
+               | ParseErrList_Edge (ParseError Document Node ClipDoc UserToken)
                    deriving Show
 
 data ConsList_Section = Cons_Section Section ConsList_Section

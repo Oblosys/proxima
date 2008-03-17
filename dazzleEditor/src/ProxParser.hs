@@ -1,4 +1,4 @@
-module ProxParser (recognizeRootEnr) where
+module ProxParser (recognizeEnrichedDoc) where
 
 import Common.CommonTypes hiding (Dirty (..))
 import qualified Common.CommonTypes
@@ -194,30 +194,8 @@ pText = tokenString <$> pWord
 
 
 
--- (IDP (-1)) means inserted token. This should be handled by some kind of 'fresh' attribute
--- which is also required for copying of presentation subtrees
-keyTk str = UserTk (KeyTk str) str Nothing (IDP (-1))
-wordTk    = UserTk WordTk "word" Nothing (IDP (-1))
-nodeRefTk = UserTk NodeRefTk "nodeRef" Nothing (IDP (-1))
-labelTk   = UserTk LabelTk "labelRef" Nothing (IDP (-1))
-labelRefTk = UserTk LabelRefTk "labelRef" Nothing (IDP (-1))
-
--- Basic parsers
-
-pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKey str = pSym (keyTk str)
-
-pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKeyC c str = pCSym c (keyTk str)
-
-pWord :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pWord = pSym wordTk
-
-pNodeRef :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pNodeRef = pSym nodeRefTk
-
-pLabelRef :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pLabelRef = pSym labelRefTk
-
-pLabel :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pLabel = pSym labelTk
+pKey str  = pToken (KeyTk str)
+pWord     = pToken WordTk
+pNodeRef  = pToken NodeRefTk
+pLabel    = pToken LabelTk
+pLabelRef = pToken LabelRefTk

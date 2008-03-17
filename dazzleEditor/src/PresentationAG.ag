@@ -132,7 +132,7 @@ SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
   | HoleList_Paragraph
       lhs.pres = presHole @lhs.focusD "List_Paragraph" (Node_HoleList_Paragraph @self []) []
   | ParseErrList_Paragraph
-      lhs.pres = presParseErr (Node_List_Paragraph @self @lhs.path) @presentation
+      lhs.pres = presParseErr (Node_List_Paragraph @self @lhs.path) @error
       
                     
 SEM Paragraph
@@ -432,7 +432,7 @@ SEM Root
 
 SEM Section
   | HoleSection     lhs.tocPres = presHole @lhs.focusD "Section" (Node_HoleSection @self @lhs.path) @lhs.path
-  | ParseErrSection lhs.tocPres = presParseErr (Node_Section @self @lhs.path) @presentation
+  | ParseErrSection lhs.tocPres = presParseErr (Node_Section @self @lhs.path) @error
 
 
 SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
@@ -442,7 +442,7 @@ SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
                       @elts.tocPress
                       -- parent is reponsible for setting parsing/structural
   | HoleList_Section     lhs.tocPress = []
-  | ParseErrList_Section lhs.tocPress = [ presParseErr (Node_List_Section @self @lhs.path) @presentation ]
+  | ParseErrList_Section lhs.tocPress = [ presParseErr (Node_List_Section @self @lhs.path) @error ]
 
 SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
