@@ -64,7 +64,7 @@ parseTree =
       <$> pToken LeafToken
 
 recognize :: Token Document Node ClipDoc UserToken -> ClipDoc
-recognize (StructuralTk (Just node) _ childTokens _) = 
+recognize (StructuralTk _ (Just node) _ childTokens _) = 
   let thisPath = pathNode node
       parsedChildren = map recognize childTokens
       result = construct node parsedChildren
@@ -72,7 +72,7 @@ recognize (StructuralTk (Just node) _ childTokens _) =
       result
 
 
-tokenPath (StructuralTk (Just node) _ _ _) = pathNode node
+tokenPath (StructuralTk _ (Just node) _ _ _) = pathNode node
 -- ParsingTk does not have a node! We have to add it.
 
 construct (Node_Bin _ _) = construct_Tree_Bin 

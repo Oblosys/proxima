@@ -17,18 +17,18 @@ data UserToken = BinToken | LeafToken | SymToken String deriving (Show, Eq, Ord)
 
 data EnrichedDoc = RootEnr Tree
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (Presentation Document Node ClipDoc UserToken)
+                 | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
                      deriving Show
 
 data Document = RootDoc Tree
               | HoleDocument
-              | ParseErrDocument (Presentation Document Node ClipDoc UserToken)
+              | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
 data Tree = Bin Tree Tree
           | Leaf
           | HoleTree
-          | ParseErrTree (Presentation Document Node ClipDoc UserToken)
+          | ParseErrTree (ParseError Document Node ClipDoc UserToken)
               deriving Show
 
 

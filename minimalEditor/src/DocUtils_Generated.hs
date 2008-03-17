@@ -61,14 +61,14 @@ instance DocNode Node where
 
 toXMLEnrichedDoc (RootEnr tree) = Elt "RootEnr" [] $ [toXMLTree tree]
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
-toXMLEnrichedDoc (ParseErrEnrichedDoc presentation) = Elt "ParseErrEnrichedDoc" [] []
+toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
 toXMLDocument (RootDoc tree) = Elt "RootDoc" [] $ [toXMLTree tree]
 toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
-toXMLDocument (ParseErrDocument presentation) = Elt "ParseErrDocument" [] []
+toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
 toXMLTree (Bin left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right]
 toXMLTree (Leaf) = Elt "Leaf" [] $ []
 toXMLTree (HoleTree) = Elt "HoleTree" [] $ []
-toXMLTree (ParseErrTree presentation) = Elt "ParseErrTree" [] []
+toXMLTree (ParseErrTree error) = Elt "ParseErrTree" [] []
 
 
 
