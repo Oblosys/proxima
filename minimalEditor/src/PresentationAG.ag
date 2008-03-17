@@ -43,7 +43,7 @@ SEM Tree
   | Leaf
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
 
-
+{-
 SEM Tree
   | Bin
       loc.pres = parsing $
@@ -52,15 +52,15 @@ SEM Tree
       loc.pres = parsing $
                    row [ text "Leaf" ]
 
-{-
+-}
 SEM Tree
   | Bin
       loc.pres = structural $
                    row [ col [ vSpace 10, @left.pres]
                        , text "Bin"
                        , col [ vSpace 10, @right.pres ] 
+                       , col [ vSpace 10, @left.pres]
                        ]
   | Leaf
       loc.pres = structural $
                    row [ text "Leaf" ]
--}
