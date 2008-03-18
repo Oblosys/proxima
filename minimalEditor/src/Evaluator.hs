@@ -7,6 +7,6 @@ import Evaluation.EvalLayerUtils
 import DocTypes_Generated
 
 instance EvaluationSheet Document EnrichedDoc ClipDoc where
-  evaluationSheetSimplest (RootDoc root)        = RootEnr root
+  evaluationSheetSimplest (RootDoc root tree)        = RootEnr root tree
   evaluationSheetSimplest HoleDocument          = HoleEnrichedDoc
   evaluationSheetSimplest (ParseErrDocument pr) = ParseErrEnrichedDoc pr 

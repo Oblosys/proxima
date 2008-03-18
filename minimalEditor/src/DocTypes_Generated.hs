@@ -7,7 +7,7 @@ import Presentation.PresTypes
 import List
 import Char
 
-data UserToken = BinToken | LeafToken | SymToken String deriving (Show, Eq, Ord)
+data UserToken = BinToken | LeafToken | IntToken | SymToken String deriving (Show, Eq, Ord)
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -15,21 +15,30 @@ data UserToken = BinToken | LeafToken | SymToken String deriving (Show, Eq, Ord)
 -- Proxima data type                                                    --
 --------------------------------------------------------------------------
 
-data EnrichedDoc = RootEnr Tree
+data EnrichedDoc = RootEnr List_Tree List_Tree
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
                      deriving Show
 
-data Document = RootDoc Tree
+data Document = RootDoc List_Tree List_Tree
               | HoleDocument
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
 data Tree = Bin Tree Tree
-          | Leaf
+          | Leaf Int
           | HoleTree
           | ParseErrTree (ParseError Document Node ClipDoc UserToken)
               deriving Show
+
+data List_Tree = List_Tree ConsList_Tree
+               | HoleList_Tree
+               | ParseErrList_Tree (ParseError Document Node ClipDoc UserToken)
+                   deriving Show
+
+data ConsList_Tree = Cons_Tree Tree ConsList_Tree
+                   | Nil_Tree
+                       deriving Show
 
 
 
@@ -41,6 +50,7 @@ data Tree = Bin Tree Tree
 data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Document Document
              | Clip_Tree Tree
+             | Clip_List_Tree List_Tree
              | Clip_Bool Bool
              | Clip_Int Int
              | Clip_String String
@@ -64,6 +74,9 @@ data Node = NoNode
           | Node_Leaf Tree Path
           | Node_HoleTree Tree Path
           | Node_ParseErrTree Tree Path
+          | Node_List_Tree List_Tree Path
+          | Node_HoleList_Tree List_Tree Path
+          | Node_ParseErrList_Tree List_Tree Path
 
 
 
@@ -83,5 +96,8 @@ instance Show Node where
   show (Node_Leaf _ _) = "Node_Leaf" 
   show (Node_HoleTree _ _) = "Node_HoleTree" 
   show (Node_ParseErrTree _ _) = "Node_ParseErrTree" 
+  show (Node_List_Tree _ _) = "Node_List_Tree" 
+  show (Node_HoleList_Tree _ _) = "Node_HoleList_Tree" 
+  show (Node_ParseErrList_Tree _ _) = "Node_ParseErrList_Tree" 
 
 

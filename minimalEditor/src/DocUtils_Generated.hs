@@ -12,7 +12,7 @@ import Text.ParserCombinators.Parsec
 import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
-initialDocument = return (RootDoc Leaf)
+initialDocument = return (RootDoc (toList_Tree [Bin (Leaf 0) (Leaf 1)]) (toList_Tree [Leaf 100,Leaf 200]))
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -32,6 +32,9 @@ rankNode (Node_Bin _ _) = 7
 rankNode (Node_Leaf _ _) = 8
 rankNode (Node_HoleTree _ _) = 9
 rankNode (Node_ParseErrTree _ _) = 10
+rankNode (Node_List_Tree _ _) = 11
+rankNode (Node_HoleList_Tree _ _) = 12
+rankNode (Node_ParseErrList_Tree _ _) = 13
 
 
 
@@ -52,6 +55,9 @@ instance DocNode Node where
   pathNode (Node_Leaf _ pth) = PathD pth
   pathNode (Node_HoleTree _ pth) = PathD pth
   pathNode (Node_ParseErrTree _ pth) = PathD pth
+  pathNode (Node_List_Tree _ pth) = PathD pth
+  pathNode (Node_HoleList_Tree _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Tree _ pth) = PathD pth
 
 
 
@@ -59,16 +65,21 @@ instance DocNode Node where
 -- toXML functions                                                      --
 --------------------------------------------------------------------------
 
-toXMLEnrichedDoc (RootEnr tree) = Elt "RootEnr" [] $ [toXMLTree tree]
+toXMLEnrichedDoc (RootEnr trees trees2) = Elt "RootEnr" [] $ toXMLList_Tree trees ++ toXMLList_Tree trees2
 toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
 toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
-toXMLDocument (RootDoc tree) = Elt "RootDoc" [] $ [toXMLTree tree]
+toXMLDocument (RootDoc trees trees2) = Elt "RootDoc" [] $ toXMLList_Tree trees ++ toXMLList_Tree trees2
 toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
 toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
 toXMLTree (Bin left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right]
-toXMLTree (Leaf) = Elt "Leaf" [] $ []
+toXMLTree (Leaf int) = Elt "Leaf" [] $ [toXMLInt int]
 toXMLTree (HoleTree) = Elt "HoleTree" [] $ []
 toXMLTree (ParseErrTree error) = Elt "ParseErrTree" [] []
+toXMLList_Tree (List_Tree xs) = toXMLConsList_Tree xs
+toXMLList_Tree HoleList_Tree = []
+toXMLList_Tree (ParseErrList_Tree _) = []
+toXMLConsList_Tree (Cons_Tree x xs) = toXMLTree x : toXMLConsList_Tree xs
+toXMLConsList_Tree Nil_Tree             = []
 
 
 
@@ -77,18 +88,42 @@ toXMLTree (ParseErrTree error) = Elt "ParseErrTree" [] []
 --------------------------------------------------------------------------
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
-parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Tree<* endTag "RootEnr"
+parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_List_Tree <*> parseXML_List_Tree<* endTag "RootEnr"
 parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
-parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Tree<* endTag "RootDoc"
+parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_List_Tree <*> parseXML_List_Tree<* endTag "RootDoc"
 parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf <?|> parseHoleAndParseErr "Tree" HoleTree
 parseXMLCns_Bin = Bin <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree<* endTag "Bin"
-parseXMLCns_Leaf = Leaf <$ emptyTag "Leaf"
+parseXMLCns_Leaf = Leaf <$ startTag "Leaf" <*> parseXML_Int<* endTag "Leaf"
+parseXML_List_Tree = mkList List_Tree Cons_Tree Nil_Tree <$> many parseXML_Tree
 
 
 
 --------------------------------------------------------------------------
 -- List utility functions                                               --
 --------------------------------------------------------------------------
+
+toList_Tree vs = List_Tree (toConsList_Tree vs)
+
+fromList_Tree (List_Tree vs) = fromConsList_Tree vs
+fromList_Tree _ = []
+
+toConsList_Tree [] = Nil_Tree
+toConsList_Tree (x:xs) = Cons_Tree x (toConsList_Tree xs)
+
+fromConsList_Tree Nil_Tree = []
+fromConsList_Tree (Cons_Tree x xs) = x: fromConsList_Tree xs
+
+replaceList_Tree _ x Nil_Tree = Nil_Tree  -- replace beyond end of list
+replaceList_Tree 0 x (Cons_Tree cx cxs) = Cons_Tree x cxs
+replaceList_Tree n x (Cons_Tree cx cxs) = Cons_Tree cx (replaceList_Tree (n-1) x cxs)
+
+insertList_Tree 0 x cxs = Cons_Tree x cxs
+insertList_Tree _ x Nil_Tree  = Nil_Tree  -- insert beyond end of list
+insertList_Tree n x (Cons_Tree cx cxs) = Cons_Tree cx (insertList_Tree (n-1) x cxs)
+
+removeList_Tree _ Nil_Tree  = Nil_Tree  -- remove beyond end of list
+removeList_Tree 0 (Cons_Tree cx cxs) = cxs
+removeList_Tree n (Cons_Tree cx cxs) = Cons_Tree cx (removeList_Tree (n-1) cxs)
 
 
 

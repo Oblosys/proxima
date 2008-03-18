@@ -35,15 +35,24 @@ EnrichedDoc  [ focusD : FocusDoc path : Path
 --------------------------------------------------------------------------
 
 DATA EnrichedDoc
-  | RootEnr tree:Tree
+  | RootEnr trees:List_Tree trees2:List_Tree
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tree
   | Bin left:Tree right:Tree
-  | Leaf
+  | Leaf int:Int
   | HoleTree
   | ParseErrTree error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA List_Tree
+  | List_Tree elts:ConsList_Tree
+  | HoleList_Tree
+  | ParseErrList_Tree error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA ConsList_Tree
+  | Cons_Tree head:Tree tail:ConsList_Tree
+  | Nil_Tree
 
 
 
@@ -52,14 +61,23 @@ DATA Tree
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Tree
+ATTR EnrichedDoc Tree List_Tree ConsList_Tree
      [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
 ATTR EnrichedDoc Tree
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR Tree
+ATTR Tree List_Tree
      [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+
+ATTR List_Tree ConsList_Tree
+     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
+
+ATTR Tree ConsList_Tree
+     [ ix : Int | | ]
+
+ATTR ConsList_Tree
+     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
 
 
 
@@ -70,9 +88,11 @@ ATTR Tree
 
 SEM EnrichedDoc
   | RootEnr 
-      tree.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @tree.pIdC
-      tree.path  = @lhs.path++[0]
+      trees.pIdC = @lhs.pIdC + 0
+      trees2.pIdC = @trees.pIdC
+      lhs.pIdC = @trees2.pIdC
+      trees.path  = @lhs.path++[0]
+      trees2.path  = @lhs.path++[1]
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
   | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
@@ -94,6 +114,30 @@ SEM Tree
   | HoleTree     lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
   | ParseErrTree lhs.pres = presParseErr (Node_ParseErrTree @self @lhs.path) @error
 
+SEM List_Tree
+  | List_Tree
+      lhs.press = map ( loc (Node_List_Tree @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Tree     lhs.press = []
+  | ParseErrList_Tree lhs.press = [ presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error ]
+
+SEM ConsList_Tree
+  | Cons_Tree
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_Tree      lhs.press = []
+
 
 
 
@@ -104,6 +148,9 @@ SEM Tree
 SEM Tree
   | Bin lhs.path = @lhs.path
   | Leaf lhs.path = @lhs.path
+
+SEM List_Tree
+  | List_Tree lhs.path = @lhs.path
 
 
 
@@ -116,9 +163,20 @@ SEM Tree
   | Bin
       lhs.presXML = presentElementXML @lhs.focusD (Node_Bin @self @lhs.path) @lhs.path "Bin" [ @left.presXML, @right.presXML ] 
   | Leaf
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [  ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [ presentPrimXMLInt @int ] 
   | HoleTree     lhs.presXML = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
   | ParseErrTree lhs.presXML = presParseErr (Node_ParseErrTree @self @lhs.path) @error
+
+SEM List_Tree
+  | List_Tree
+      lhs.presXML = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Tree
+      lhs.presXML = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+  | HoleList_Tree
+      lhs.presXML = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
 
 
@@ -131,9 +189,20 @@ SEM Tree
   | Bin
       lhs.presTree = presentElementTree @lhs.focusD (Node_Bin @self @lhs.path) @lhs.path "Bin" [ @left.presTree, @right.presTree ] 
   | Leaf
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [  ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Leaf @self @lhs.path) @lhs.path "Leaf" [ presentPrimXMLInt @int ] 
   | HoleTree     lhs.presTree = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
   | ParseErrTree lhs.presTree = presParseErr (Node_ParseErrTree @self @lhs.path) @error
+
+SEM List_Tree
+  | List_Tree
+      lhs.presTree = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Tree
+      lhs.presTree = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+  | HoleList_Tree
+      lhs.presTree = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
 
 

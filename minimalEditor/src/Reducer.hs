@@ -11,6 +11,6 @@ import DocumentEdit_Generated
 
 
 instance ReductionSheet Document EnrichedDoc ClipDoc where
-  reductionSheetSimplest (RootEnr root)            = RootDoc root
+  reductionSheetSimplest (RootEnr root tree)            = RootDoc root tree
   reductionSheetSimplest HoleEnrichedDoc           = HoleDocument
   reductionSheetSimplest (ParseErrEnrichedDoc prs) = ParseErrDocument prs

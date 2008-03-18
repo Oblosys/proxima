@@ -20,7 +20,7 @@ import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
 
-
+import ProxParser   
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -29,14 +29,37 @@ INCLUDE "PresentationAG_Generated.ag"
 SEM EnrichedDoc
   | RootEnr
       loc.pres = structural $
-                   col [ text $ "Tree with depth "++show @tree.depth, @tree.pres, text $ show $ @tree.self ]
+                   col $ [ text $ "Tree with depth "++show @trees.depths
+                         , @trees.pres
+                         , text "more trees"
+                         , @trees2.pres
+                         , text $ show $ @trees.self 
+                         ]
 
+ATTR List_Tree ConsList_Tree [ | | depths : {[Int]} ]
+SEM List_Tree
+  | HoleList_Tree lhs.depths = []
+  | ParseErrList_Tree lhs.depths = []
+
+SEM ConsList_Tree
+  | Cons_Tree lhs.depths = @head.depth : @tail.depths
+  | Nil_Tree  lhs.depths = []
+  
 SEM Tree [ | | depth : Int ]
   | Bin  lhs.depth = @left.depth `max` @right.depth + 1
   | Leaf lhs.depth = 1
   | HoleTree ParseErrTree
       lhs.depth = 0
-      
+
+SEM List_Tree [ | | pres : Presentation_Doc_Node_Clip_Token ]
+  | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
+                           structural $ row $ intersperse (vLine) @elts.press
+  | ParseErrList_Tree
+      lhs.pres = loc (Node_ParseErrList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+  | HoleList_Tree
+      lhs.pres = loc (Node_HoleList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
 {-
 SEM Tree
@@ -44,7 +67,7 @@ SEM Tree
       loc.pres = parsing $
                    row [ text "Bin (", @left.pres, text ") (", @right.pres, text ")" ]
   | Leaf
-      loc.pres = parsing $
+      loc.pres = loc NoNode $ parsing $
                    row [ text "Leaf" ]
 
 -}
@@ -53,10 +76,8 @@ SEM Tree
       loc.pres = structural $
                    row [ col [ vSpace 10, @left.pres]
                        , text "Bin"
-                       {-, col [ vSpace 10, @right.pres ] 
-                       , col [ vSpace 10, @left.pres]
-                       -}
+                       , col [ vSpace 10, @right.pres ] 
                        ]
   | Leaf
-      loc.pres = structural $
-                   row [ text "Leaf" ]
+      loc.pres = ParsingP NoIDP (Just leafParser) LexInherited $ 
+                   row [ text $ "Leaf" ++ show @int ]

@@ -19,6 +19,7 @@ instance Clip ClipDoc where
   arityClip (Clip_EnrichedDoc x) = arity x
   arityClip (Clip_Document x) = arity x
   arityClip (Clip_Tree x) = arity x
+  arityClip (Clip_List_Tree x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
   arityClip (Clip_String x) = arity x
@@ -28,6 +29,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_EnrichedDoc x) = alternatives x
   alternativesClip (Clip_Document x) = alternatives x
   alternativesClip (Clip_Tree x) = alternatives x
+  alternativesClip (Clip_List_Tree x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
@@ -37,6 +39,7 @@ instance Clip ClipDoc where
   holeClip (Clip_EnrichedDoc x) = Clip_EnrichedDoc hole
   holeClip (Clip_Document x) = Clip_Document hole
   holeClip (Clip_Tree x) = Clip_Tree hole
+  holeClip (Clip_List_Tree x) = Clip_List_Tree hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_String x) = Clip_String hole
@@ -46,6 +49,7 @@ instance Clip ClipDoc where
   isListClip (Clip_EnrichedDoc x) = isList x
   isListClip (Clip_Document x) = isList x
   isListClip (Clip_Tree x) = isList x
+  isListClip (Clip_List_Tree x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
   isListClip (Clip_String x) = isList x
@@ -55,6 +59,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_EnrichedDoc x) = insertList i c x
   insertListClip i c (Clip_Document x) = insertList i c x
   insertListClip i c (Clip_Tree x) = insertList i c x
+  insertListClip i c (Clip_List_Tree x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
@@ -64,6 +69,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_EnrichedDoc x) = removeList i x
   removeListClip i (Clip_Document x) = removeList i x
   removeListClip i (Clip_Tree x) = removeList i x
+  removeListClip i (Clip_List_Tree x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
@@ -78,19 +84,21 @@ instance Clip ClipDoc where
 
 instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
-  select (0:p) (RootEnr x0) = select p x0
+  select (0:p) (RootEnr x0 x1) = select p x0
+  select (1:p) (RootEnr x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_EnrichedDoc c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on EnrichedDoc") x
-  paste (0:p) c (RootEnr x0) = RootEnr (paste p c x0)
+  paste (0:p) c (RootEnr x0 x1) = RootEnr (paste p c x0) x1
+  paste (1:p) c (RootEnr x0 x1) = RootEnr x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("RootEnr {Tree} "  , Clip_EnrichedDoc $ RootEnr hole)
+  alternatives _ = [ ("RootEnr {List_Tree} {List_Tree} "  , Clip_EnrichedDoc $ RootEnr hole hole)
                    ,("{EnrichedDoc}", Clip_EnrichedDoc hole)
                    ]
 
-  arity (RootEnr x0) = 1
+  arity (RootEnr x0 x1) = 2
   arity _                        = 0
 
   parseErr = ParseErrEnrichedDoc
@@ -105,19 +113,21 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
 
 instance Editable Document Document Node ClipDoc UserToken where
   select [] x = Clip_Document x
-  select (0:p) (RootDoc x0) = select p x0
+  select (0:p) (RootDoc x0 x1) = select p x0
+  select (1:p) (RootDoc x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Document c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Document") x
-  paste (0:p) c (RootDoc x0) = RootDoc (paste p c x0)
+  paste (0:p) c (RootDoc x0 x1) = RootDoc (paste p c x0) x1
+  paste (1:p) c (RootDoc x0 x1) = RootDoc x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("RootDoc {Tree} "  , Clip_Document $ RootDoc hole)
+  alternatives _ = [ ("RootDoc {List_Tree} {List_Tree} "  , Clip_Document $ RootDoc hole hole)
                    ,("{Document}", Clip_Document hole)
                    ]
 
-  arity (RootDoc x0) = 1
+  arity (RootDoc x0 x1) = 2
   arity _                        = 0
 
   parseErr = ParseErrDocument
@@ -134,21 +144,23 @@ instance Editable Tree Document Node ClipDoc UserToken where
   select [] x = Clip_Tree x
   select (0:p) (Bin x0 x1) = select p x0
   select (1:p) (Bin x0 x1) = select p x1
+  select (0:p) (Leaf x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Tree c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Tree") x
   paste (0:p) c (Bin x0 x1) = Bin (paste p c x0) x1
   paste (1:p) c (Bin x0 x1) = Bin x0 (paste p c x1)
+  paste (0:p) c (Leaf x0) = Leaf (paste p c x0)
   paste _ _ x = x
 
   alternatives _ = [ ("Bin {Tree} {Tree} "  , Clip_Tree $ Bin hole hole)
-                   , ("Leaf "  , Clip_Tree $ Leaf)
+                   , ("Leaf {Int} "  , Clip_Tree $ Leaf hole)
                    ,("{Tree}", Clip_Tree hole)
                    ]
 
   arity (Bin x0 x1) = 2
-  arity (Leaf) = 0
+  arity (Leaf x0) = 1
   arity _                        = 0
 
   parseErr = ParseErrTree
@@ -160,6 +172,47 @@ instance Editable Tree Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+
+instance Editable List_Tree Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Tree x
+  select (n:p) (List_Tree cxs) =
+    let xs = fromConsList_Tree cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Tree c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Tree")   x
+  paste (n:p) c (List_Tree cxs) =
+    let xs = fromConsList_Tree cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Tree (replaceList_Tree n x' cxs)
+        else List_Tree cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Tree}", Clip_List_Tree hole)
+                   ]
+
+  arity (List_Tree x1) = length (fromConsList_Tree x1)
+  arity _ = 0
+
+  parseErr = ParseErrList_Tree
+
+  hole = List_Tree Nil_Tree
+
+  holeNodeConstr = Node_HoleList_Tree
+
+  isList _ = True
+
+  insertList n (Clip_Tree c) (List_Tree cxs) = Clip_List_Tree $ List_Tree (insertList_Tree n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Tree xs
+  insertList _ c xs = Clip_List_Tree xs
+
+  removeList n (List_Tree cxs) = Clip_List_Tree $ List_Tree (removeList_Tree n cxs)
+  removeList _ xs = Clip_List_Tree $ xs
 
 
 

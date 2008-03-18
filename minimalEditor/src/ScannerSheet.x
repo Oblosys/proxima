@@ -17,6 +17,7 @@ tokens :-
 
   Leaf                            { mkToken $ \s -> LeafToken }
   Bin                             { mkToken $ \s -> BinToken }
+  [0-9]+                          { mkToken $ \s -> IntToken }
   [\(\)]                          { mkToken $ \s -> SymToken s }
 
 {

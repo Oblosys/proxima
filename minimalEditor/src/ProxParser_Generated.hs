@@ -15,16 +15,16 @@ import DocTypes_Generated
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
-reuseRootEnr :: [Token doc Node clip token] -> Maybe Tree -> EnrichedDoc
-reuseRootEnr nodes ma0
+reuseRootEnr :: [Token doc Node clip token] -> Maybe List_Tree -> Maybe List_Tree -> EnrichedDoc
+reuseRootEnr nodes ma0 ma1
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
-           (RootEnr a0) -> genericReuse1 RootEnr a0 ma0
+           (RootEnr a0 a1) -> genericReuse2 RootEnr a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
-reuseRootDoc :: [Token doc Node clip token] -> Maybe Tree -> Document
-reuseRootDoc nodes ma0
+reuseRootDoc :: [Token doc Node clip token] -> Maybe List_Tree -> Maybe List_Tree -> Document
+reuseRootDoc nodes ma0 ma1
   = case extractFromTokens extractRootDoc defaultRootDoc nodes of
-           (RootDoc a0) -> genericReuse1 RootDoc a0 ma0
+           (RootDoc a0 a1) -> genericReuse2 RootDoc a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
 
 reuseBin :: [Token doc Node clip token] -> Maybe Tree -> Maybe Tree -> Tree
@@ -33,11 +33,17 @@ reuseBin nodes ma0 ma1
            (Bin a0 a1) -> genericReuse2 Bin a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseBin"
 
-reuseLeaf :: [Token doc Node clip token] -> Tree
-reuseLeaf nodes
+reuseLeaf :: [Token doc Node clip token] -> Maybe Int -> Tree
+reuseLeaf nodes ma0
   = case extractFromTokens extractLeaf defaultLeaf nodes of
-           (Leaf) -> genericReuse0 Leaf
+           (Leaf a0) -> genericReuse1 Leaf a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseLeaf"
+
+reuseList_Tree :: [Token doc Node clip token] -> Maybe ConsList_Tree -> List_Tree
+reuseList_Tree nodes ma0
+  = case extractFromTokens extractList_Tree defaultList_Tree nodes of
+           (List_Tree a0) -> genericReuse1 List_Tree a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Tree"
 
 
 
@@ -47,11 +53,11 @@ reuseLeaf nodes
 --------------------------------------------------------------------------
 
 extractRootEnr :: Maybe Node -> Maybe EnrichedDoc
-extractRootEnr (Just (Node_RootEnr x@(RootEnr _) _)) = Just x
+extractRootEnr (Just (Node_RootEnr x@(RootEnr _ _) _)) = Just x
 extractRootEnr _ = Nothing
 
 extractRootDoc :: Maybe Node -> Maybe Document
-extractRootDoc (Just (Node_RootDoc x@(RootDoc _) _)) = Just x
+extractRootDoc (Just (Node_RootDoc x@(RootDoc _ _) _)) = Just x
 extractRootDoc _ = Nothing
 
 extractBin :: Maybe Node -> Maybe Tree
@@ -59,8 +65,12 @@ extractBin (Just (Node_Bin x@(Bin _ _) _)) = Just x
 extractBin _ = Nothing
 
 extractLeaf :: Maybe Node -> Maybe Tree
-extractLeaf (Just (Node_Leaf x@(Leaf) _)) = Just x
+extractLeaf (Just (Node_Leaf x@(Leaf _) _)) = Just x
 extractLeaf _ = Nothing
+
+extractList_Tree :: Maybe Node -> Maybe List_Tree
+extractList_Tree (Just (Node_List_Tree x@(List_Tree _) _)) = Just x
+extractList_Tree _ = Nothing
 
 
 
@@ -70,16 +80,19 @@ extractLeaf _ = Nothing
 --------------------------------------------------------------------------
 
 defaultRootEnr :: EnrichedDoc
-defaultRootEnr = RootEnr hole
+defaultRootEnr = RootEnr hole hole
 
 defaultRootDoc :: Document
-defaultRootDoc = RootDoc hole
+defaultRootDoc = RootDoc hole hole
 
 defaultBin :: Tree
 defaultBin = Bin hole hole
 
 defaultLeaf :: Tree
-defaultLeaf = Leaf
+defaultLeaf = Leaf hole
+
+defaultList_Tree :: List_Tree
+defaultList_Tree = List_Tree Nil_Tree
 
 
 
