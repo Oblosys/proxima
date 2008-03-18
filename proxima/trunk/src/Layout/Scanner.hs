@@ -30,10 +30,23 @@ bug
 
 Challenges/todo:
 
-Lexical errors create one big token, which discards structural children and ruins the presentation.
-  we need to do something about layout
 
-whitespace for error tokens?
+Split module into Scanner and ScannerLib (imported by Alex)
+
+Lexical errors create one big token, which discards structural children and ruins the presentation.
+  after lexical error, just split remaining input into error tokens and structural tokens
+  and represent all whitespace in the error tokens. Layout should make sure that whitespace in 
+  error tokens is converted to breaks and spaces.
+  Probably also the whitespace in the state before the error occurred should be put in the error token.
+
+  check layout what Layouter does now with whitespace for error tokens
+
+  Instead of using Alex for structurals, we could call Alex several times for the string parts of the
+  layout. This way, we keep the structurals out of the user specified scanner. The whitespace in the
+  state can be put into the structural token.
+  
+Store trailing whitespace. Maybe Alex can emit whitespace tokens which are put in the whitespace map
+after the whole layout has been scanned. 
 
 passing several Alex scanners (probably solved by Alex itself)
 
