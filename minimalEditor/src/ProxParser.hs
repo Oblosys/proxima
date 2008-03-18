@@ -158,16 +158,4 @@ addChildToken childTokenGroups (nr, childToken) =
     (left, group:right) -> left ++ (group ++ [childToken]) : right
     _                   -> error $ "addChildToken: encountered child with number larger than parent's arity: nr="++show nr ++ " token="++show childToken 
 
-      
-
-
-
-parsingWithParser parser pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
-
-mkClipParser p = 
- \tokens ->
-         let (res, errs) = runParser p tokens
-         in  toClip $ if null errs then res 
-                      else debug Err ("ERROR: Parse error"++(show errs)) $ 
-                             parseErr (ParsingParseErr (mkErr errs) tokens)
-
+     
