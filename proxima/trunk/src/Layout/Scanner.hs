@@ -69,8 +69,8 @@ and we cannot tokenize any structural token children.
 
 
 tokenizeLay :: (DocNode node, Show token) =>
-               ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip ->
-               PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip)
+               ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
+               PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip token)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing (castLayToPres lay) tokens NoIDP)) (whitespaceMap,idPCounter')
@@ -100,11 +100,11 @@ synthesized attribute pres: the tokenized presentation   (constructed at every c
                       
 -}
 scanStructural :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
-                  Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip ->
+                  Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip token ->
                   ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanStructural sheet foc lx loc pth idpc wm presentation =
   case presentation of
-    ParsingP idP lx' pres'      -> scanPresentation sheet foc lx loc (pth++[0]) idpc wm idP lx' pres'
+    ParsingP idP p lx' pres'    -> scanPresentation sheet foc lx loc (pth++[0]) idpc wm idP p lx' pres'
     EmptyP idd                  -> ([], idpc, wm)
     StringP idd str             -> ([], idpc, wm)
     ImageP idd istr st          -> ([], idpc, wm)
@@ -130,7 +130,7 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
 scanStructuralList :: (DocNode node, Show token) => 
                       ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
                       Maybe node -> Path ->
-                      IDPCounter -> WhitespaceMap -> [Layout doc node clip] ->
+                      IDPCounter -> WhitespaceMap -> [Layout doc node clip token] ->
                       ([Token doc node clip token], IDPCounter, WhitespaceMap)
 scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' sheet foc lx loc pth idpc wm 0 press
  where scanStructuralList' sheet foc lx loc pth idpc wm i []           = ([], idpc, wm)
@@ -143,9 +143,10 @@ scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' shee
 
 scanPresentation :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
-                    IDP -> Lexer -> Layout doc node clip ->
+                    IDP -> Maybe (ClipParser doc node clip token) -> Lexer -> Layout doc node clip token ->
                     ([Token doc node clip token], IDPCounter, WhitespaceMap)
-scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP presentationLex lay =
+scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP
+                 parser presentationLex lay =
  let --lay = parsing (row [ structural (row [ text "<", parsing (text "blaa"), text ">"]), text "   " ])
      lex = case  presentationLex of
              LexInherited -> inheritedLex
@@ -162,7 +163,7 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP pre
  in  --debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
-     ( [ParsingTk (castLayToPres lay) tokens idP]
+     ( [ParsingTk parser loc (castLayToPres lay) tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
 
 -- when there are no tokens, no whitespace is saved

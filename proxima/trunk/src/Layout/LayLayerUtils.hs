@@ -10,14 +10,14 @@ import Common.CommonUtils
 import Layout.LayUtils
 
 
-castLayToPres :: Layout doc node clip -> Presentation doc node clip token
+castLayToPres :: Layout doc node clip token -> Presentation doc node clip token
 castLayToPres = cast
 
-castPresToLay :: Presentation doc node clip token -> Layout doc node clip
+castPresToLay :: Presentation doc node clip token -> Layout doc node clip token
 castPresToLay (TokenP _ _) = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
 castPresToLay pres         = cast pres
 
-cast :: Presentation doc node clip token -> Presentation doc node clip token'
+cast :: PresentationBase doc node clip token token' -> PresentationBase doc node clip token token''
 cast (EmptyP id)                = EmptyP id
 cast (StringP id str)           = StringP id str
 cast (ImageP id str st)         = ImageP id str st
@@ -28,7 +28,7 @@ cast (RowP id rf press)         = RowP id rf $ map cast press
 cast (ColP id rf f press)       = ColP id rf f $ map cast press
 cast (OverlayP id press)        = OverlayP id $ map cast press
 cast (WithP ar pres)            = WithP ar $ cast pres
-cast (ParsingP id l pres)       = ParsingP id l $ cast pres
+cast (ParsingP id p l pres)     = ParsingP id p l $ cast pres
 cast (StructuralP id pres)      = StructuralP id $ cast pres
 cast (LocatorP l pres)          = LocatorP l $ cast pres
 cast (GraphP id d w h es press) = GraphP id d w h es $ map cast press

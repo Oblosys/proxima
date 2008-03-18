@@ -27,7 +27,7 @@ throw: *** Exception: Prelude.(!!): index too large
 
 -- cut = delete
 -- copy should not do anything when nofocus. 
-copyTree :: DocNode node => FocusPres -> Layout doc node clip -> Layout doc node clip -> Layout doc node clip
+copyTree :: (DocNode node, Show token) => FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Layout doc node clip token
 copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
 copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
@@ -47,7 +47,7 @@ deleteTree focus pres =
 
 
 
-normalizePresentation :: DocNode node => Layout doc node clip -> FocusPres -> (Layout doc node clip, FocusPres)
+normalizePresentation :: (DocNode node, Show token) => Layout doc node clip token -> FocusPres -> (Layout doc node clip token, FocusPres)
 normalizePresentation pres NoFocusP = (normalizeTreePres pres, NoFocusP)
 normalizePresentation pres focus = 
   let fxy   = xyFromPath (fromP focus) pres
@@ -75,16 +75,16 @@ splitRowTree path@(PathP pth ix) pres =
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 
 
-normalizeTreePres :: DocNode node => Layout doc node clip -> Layout doc node clip
+normalizeTreePres :: (DocNode node, Show token) => Layout doc node clip token -> Layout doc node clip token
 normalizeTreePres pres = normalizePres pres
 
-navigateLeftTreePres :: DocNode node => PathPres -> Layout doc node clip -> FocusPres
+navigateLeftTreePres :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> FocusPres
 navigateLeftTreePres NoPathP pres = NoFocusP
 navigateLeftTreePres path pres =
   let path' = leftNavigatePath path pres
   in  FocusP path' path'
   
-navigateRightTreePres :: DocNode node => PathPres -> Layout doc node clip -> FocusPres
+navigateRightTreePres :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> FocusPres
 navigateRightTreePres NoPathP pres = NoFocusP
 navigateRightTreePres path pres =
   let path' = rightNavigatePath path pres
@@ -115,8 +115,8 @@ deleteGraphPres' (0:ps) (WithP ar pres)            = case deleteGraphPres' ps pr
 deleteGraphPres' (0:ps) (StructuralP id pres)      = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ StructuralP id pres'
                                                        Nothing    -> Nothing
-deleteGraphPres' (0:ps) (ParsingP id l pres)      = case deleteGraphPres' ps pres of
-                                                       Just pres' -> Just $ ParsingP id l pres'
+deleteGraphPres' (0:ps) (ParsingP id pr l pres)      = case deleteGraphPres' ps pres of
+                                                       Just pres' -> Just $ ParsingP id pr l pres'
                                                        Nothing    -> Nothing
 deleteGraphPres' (0:ps) (LocatorP l pres)          = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ LocatorP l pres'
@@ -144,7 +144,7 @@ addVertexPres' (p:ps) vertex (ColP id rf f press)       = ColP id rf f $ replace
 addVertexPres' (p:ps) vertex (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
 addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
-addVertexPres' (0:ps) vertex (ParsingP id l pres)         = ParsingP id l (addVertexPres' ps vertex pres)
+addVertexPres' (0:ps) vertex (ParsingP id p l pres)         = ParsingP id p l (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (LocatorP l pres)          = LocatorP l (addVertexPres' ps vertex pres)
 addVertexPres' []     vertex (GraphP id d w h es press) = 
   GraphP id Dirty w h es $ press ++ [vertex] -- by adding the vertex at the end, the edges are left intact
@@ -165,7 +165,7 @@ addEdgePres' (p:ps) edge (ColP id rf f press)       = ColP id rf f $ replace "Tr
 addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
-addEdgePres' (0:ps) edge (ParsingP id l pres)         = ParsingP id l (addEdgePres' ps edge pres)
+addEdgePres' (0:ps) edge (ParsingP id p l pres)         = ParsingP id p l (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (LocatorP l pres)          = LocatorP l (addEdgePres' ps edge pres)
 addEdgePres' []     edge (GraphP id d w h es press) = GraphP id Dirty w h (edge:es) press
 addEdgePres' (0:ps) edge (VertexP id v x y ol pres) = VertexP id v x y ol (addEdgePres' ps edge pres)
@@ -181,7 +181,7 @@ getVertexGraphPath' graphPath pth (p:ps) (ColP id rf _ press)       = getVertexG
 getVertexGraphPath' graphPath pth (p:ps) (OverlayP id press)        = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (0:ps) (WithP ar pres)            = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (StructuralP id pres)      = getVertexGraphPath' graphPath (pth++[0]) ps pres
-getVertexGraphPath' graphPath pth (0:ps) (ParsingP id l pres)         = getVertexGraphPath' graphPath (pth++[0]) ps pres
+getVertexGraphPath' graphPath pth (0:ps) (ParsingP id pr l pres)         = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (LocatorP l pres)          = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (p:ps) (GraphP id d w h es press) = getVertexGraphPath' (Just pth) (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (0:ps) (VertexP id v x y ol pres) = getVertexGraphPath' graphPath (pth++[0]) ps pres
@@ -194,19 +194,19 @@ getVertexIDs pth pres =
 
 getVertexID (LocatorP _ pres)     = getVertexID pres
 getVertexID (StructuralP _ pres)  = getVertexID pres
-getVertexID (ParsingP _ _ pres)     = getVertexID pres
+getVertexID (ParsingP _ _ _ pres)     = getVertexID pres
 getVertexID (WithP _ pres)        = getVertexID pres
 getVertexID (VertexP _ i _ _ _ _) = i
 getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
 
 
-moveVertexPres :: DocNode node => [Int] -> (Int,Int) -> Layout doc node clip -> Layout doc node clip                                      
+moveVertexPres :: (DocNode node, Show token) => [Int] -> (Int,Int) -> Layout doc node clip token -> Layout doc node clip token                                     
 moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
-moveVertexPres (0:ps) pt (ParsingP id l pres)         = ParsingP id l (moveVertexPres ps pt pres)
+moveVertexPres (0:ps) pt (ParsingP id pr l pres)    = ParsingP id pr l (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (LocatorP l pres)          = LocatorP l (moveVertexPres ps pt pres)
 moveVertexPres (p:ps) pt pr@(GraphP id d w h es press)   = 
   if p < length press 
@@ -262,7 +262,7 @@ deleteTreePres editable p (FocusP st en) (ColP id rf f press) = let press' = del
 deleteTreePres editable p focus  (OverlayP id (pres:press)) = OverlayP id (deleteTreePres editable (p++[0]) focus pres:press)
 deleteTreePres editable p focus          (WithP ar pres)    = WithP ar (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id (deleteTreePres False (p++[0]) focus pres)
-deleteTreePres editable p focus          (ParsingP id l pres)  = ParsingP id l (deleteTreePres True (p++[0]) focus pres)
+deleteTreePres editable p focus          (ParsingP id pr l pres)  = ParsingP id pr l (deleteTreePres True (p++[0]) focus pres)
 deleteTreePres editable p focus          (LocatorP l pres)  = LocatorP l (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
   let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ drop (length p) focusPath 
@@ -379,7 +379,7 @@ deleteTreePresF editable updp p (FocusP st en) (ColP id rf _ press) = deleteTree
 deleteTreePresF editable updp p focus  (OverlayP id (pres:press)) = deleteTreePresF editable  (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (WithP ar pres)    = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (StructuralP id pres)  = deleteTreePresF False (updp++[0]) (p++[0]) focus pres
-deleteTreePresF editable updp p focus          (ParsingP id l pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
+deleteTreePresF editable updp p focus          (ParsingP id pr l pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (LocatorP l pres)  = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus@(FocusP (PathP focusPath _) en) (GraphP id d w h es press) =
   let editedVertexNr = head' "TreeEditPres.deleteTreePres" $ drop (length p) focusPath 
@@ -443,7 +443,7 @@ pasteTreePres editable p path clip (ColP id rf f press) = ColP id rf f (pasteTre
 pasteTreePres editable p path clip (OverlayP id (pres:press)) = OverlayP id (pasteTreePres editable (p++[0]) path clip pres : press)
 pasteTreePres editable p path clip (WithP ar pres) = WithP ar (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p path clip (StructuralP id pres) = StructuralP  id (pasteTreePres False (p++[0]) path clip pres)
-pasteTreePres editable p path clip (ParsingP id l pres) = ParsingP  id l (pasteTreePres True (p++[0]) path clip pres)
+pasteTreePres editable p path clip (ParsingP id pr l pres) = ParsingP  id pr l (pasteTreePres True (p++[0]) path clip pres)
 pasteTreePres editable p path clip (LocatorP l pres) = LocatorP  l (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p path clip (GraphP id d w h es press) = GraphP id d w h es (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p path clip (VertexP id vid x y ol pres) = VertexP id vid x y ol (pasteTreePres editable (p++[0]) path clip pres)
@@ -476,7 +476,7 @@ pasteTreePresF NoPathP          _    pres = NoFocusP
 
 -- nicer to give focus of clip and let calling function decide on after paste focus left or right of clip
 
-copyTreePres :: DocNode node => Path -> FocusPres -> Layout doc node clip -> Layout doc node clip 
+copyTreePres :: (DocNode node, Show token) => Path -> FocusPres -> Layout doc node clip token -> Layout doc node clip token
 copyTreePres p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   let st = if  stp < p then 0 else sti
       en = if  enp > p then length str else eni               
@@ -490,11 +490,11 @@ copyTreePres p (FocusP st en) (FormatterP id press) = let press' = copyTreePresL
 copyTreePres p focus (OverlayP id (pres:press)) = OverlayP id (copyTreePres (p++[0]) focus pres : press) 
 copyTreePres p focus          (WithP ar pres) = {- WithP ar -} (copyTreePres (p++[0]) focus pres) 
 copyTreePres p focus          (StructuralP id pres) = (copyTreePres (p++[0]) focus pres)
-copyTreePres p focus          (ParsingP id l pres) = (copyTreePres (p++[0]) focus pres)
+copyTreePres p focus          (ParsingP id _ l pres) = (copyTreePres (p++[0]) focus pres)
 copyTreePres p focus          (LocatorP l pres) = LocatorP l (copyTreePres (p++[0]) focus pres)
 copyTreePres p f pr = debug Err("TreeEditPres.copyTreePres: can't handle "++show f++" "++ show pr) $ text "<ERROR>"
 
-copyTreePresList :: DocNode node => Path -> Int -> FocusPres -> [Layout doc node clip] -> [Layout doc node clip] 
+copyTreePresList :: (DocNode node, Show token) => Path -> Int -> FocusPres -> [Layout doc node clip token] -> [Layout doc node clip token] 
 copyTreePresList p i _ [] = []
 copyTreePresList p i focus@(FocusP (PathP stp sti) (PathP enp eni)) (pres:press) = 
                            if   enp < (p++[i])-- take (length p+1) enp < p++[i]
@@ -551,12 +551,12 @@ splitRowTreePres editable p path           (StructuralP id pres) =
                      then Left (StructuralP id p1, StructuralP id p2)
                      else Right $ StructuralP id pres
      Right p      -> Right $ StructuralP id p
-splitRowTreePres editable p path           (ParsingP id l pres) =
+splitRowTreePres editable p path           (ParsingP id pr l pres) =
   case(splitRowTreePres True (p++[0]) path pres) of
      Left (p1,p2) -> if editable
-                     then Left (ParsingP id l p1, ParsingP id l p2)
-                     else Right $ ParsingP id l pres
-     Right p      -> Right $ ParsingP id l p
+                     then Left (ParsingP id pr l p1, ParsingP id pr l p2)
+                     else Right $ ParsingP id pr l pres
+     Right p      -> Right $ ParsingP id pr l p
 splitRowTreePres editable p path           (LocatorP l pres) =
   case(splitRowTreePres editable (p++[0]) path pres) of
      Left (p1,p2) -> if editable
@@ -614,7 +614,7 @@ splitRowTreePresPth editable (p:path) (StructuralP id pres) =
   case splitRowTreePresPth False path pres of
     Left pth  -> if editable then  Left $ 0:pth else Right $ p:pth
     Right pth -> Right $ 0:pth
-splitRowTreePresPth editable (p:path) (ParsingP id l pres) =
+splitRowTreePresPth editable (p:path) (ParsingP id pr l pres) =
   case splitRowTreePresPth True path pres of
     Left pth  -> if editable then  Left $ 0:pth else Right $ p:pth
     Right pth -> Right $ 0:pth

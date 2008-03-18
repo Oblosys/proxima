@@ -26,7 +26,7 @@ defaultTextColor = black
 defaultFont = CommonTypes.defaultFont
 
 arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
-                       DiffTree -> Layout doc node clip -> IO (Arrangement node, LocalStateArr)
+                       DiffTree -> Layout doc node clip token -> IO (Arrangement node, LocalStateArr)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
  do { viewedArea <- readIORef $ getViewedAreaRef state
@@ -50,9 +50,9 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     ; return (attrTree, state')
     }
 
-fixed :: Show node => FontMetricsRef -> FocusPres -> Layout doc node clip -> Layout doc node clip -> Rectangle -> Rectangle -> 
+fixed :: Show node => FontMetricsRef -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Integer)
-fixed fontMetricsRef focus (pres :: Layout doc node clip) (unprunedPres :: Layout doc node clip) viewedArea oldViewedArea oldArrangement = 
+fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, maxFDepth) <- f (fontMetrics,arrangement, maxFDepth)
     ; return (arrangement, maxFDepth)
     }

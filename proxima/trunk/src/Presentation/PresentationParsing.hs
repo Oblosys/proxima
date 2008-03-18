@@ -152,8 +152,8 @@ pStrExtra extraDefault p = unfoldStructure
 -- TODO: why do we need the 's in Editable?
 pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
-     <$> pSym (ParsingTk empty [] NoIDP)
- where unfoldStructure presTk@(ParsingTk pr tokens _) = 
+     <$> pSym (ParsingTk Nothing Nothing empty [] NoIDP)
+ where unfoldStructure presTk@(ParsingTk _ _ pr tokens _) = 
          let (res, errs) = runParser p tokens
          in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens)
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
@@ -265,7 +265,7 @@ pCSym c p = pCostSym c p p
 
 
 strucTk   = StructuralTk 0 Nothing empty [] (IDP (-1))
-parsingTk = (ParsingTk empty [] NoIDP)
+parsingTk = (ParsingTk Nothing Nothing empty [] NoIDP)
 graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
 vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
 

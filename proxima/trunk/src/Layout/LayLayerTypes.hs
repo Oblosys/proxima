@@ -7,7 +7,7 @@ import Common.CommonTypes
 import Layout.LayTypes
 
 
-type LayerStateLay doc node clip = Layout doc node clip -- clipboard
+type LayerStateLay doc node clip token = Layout doc node clip token -- clipboard
 -- is this  layer local state, instead of level local state? It is focus related, so probably, it should be 
 -- local to LayoutLevel, just like the focus
 

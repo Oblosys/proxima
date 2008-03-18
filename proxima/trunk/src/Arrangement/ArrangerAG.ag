@@ -94,9 +94,9 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root doc node clip = Root (Layout doc node clip)
+data Root doc node clip token = Root (Layout doc node clip token)
 
-type PresentationList doc node clip = [Layout doc node clip]
+type PresentationList doc node clip token = [Layout doc node clip token]
                       
 -- We don't want AG to generate the Presentation data types, so data type generation is turned off.
 -- However, we do need Root and PresentationList
@@ -121,7 +121,7 @@ DATA Presentation
   | FormatterP  id : IDP presentationList : PresentationList
   | WithP       attrRule : AttrRule  child : Presentation
   | StructuralP id : IDP child : Presentation
-  | ParsingP    id : IDP lexer : Lexer child : Presentation
+  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : Presentation
   | LocatorP location : {node} child : Presentation
   | ArrangedP
 

@@ -34,7 +34,7 @@ DATA Layout
   | FormatterP  id : IDP presentationList : LayoutList
   | WithP       attrRule : AttrRule  child : Layout
   | StructuralP id : IDP child : Layout
-  | ParsingP    id : IDP lexer : Lexer child : Layout
+  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : Layout
   | LocatorP location : {node} child : Layout
   | ArrangedP
 

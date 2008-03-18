@@ -22,7 +22,7 @@ import System.IO.Unsafe
 import Data.IORef
 
 -- for automatic popup menus, allow these imports
-import DocTypes_Generated (Document, ClipDoc, Node (..))
+import DocTypes_Generated (Document, ClipDoc, Node (..), UserToken)
 import Evaluation.DocumentEdit (menuD)
 import DocumentEdit_Generated
 -----
@@ -77,7 +77,7 @@ mkPopupMenuXY :: DocNode node => Layout doc node clip -> Scale -> Arrangement no
                  IORef (RenderingLevel (DocumentLevel doc clip)) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
 -}
-mkPopupMenuXY :: Layout Document Node ClipDoc -> Scale -> Arrangement Node ->
+mkPopupMenuXY :: Layout Document Node ClipDoc UserToken -> Scale -> Arrangement Node ->
                  ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
                  IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
                  IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->

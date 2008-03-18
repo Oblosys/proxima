@@ -8,10 +8,10 @@ import Layout.LayTypes
 data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
-data ArrangementLevel doc node clip = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip) deriving Show
+data ArrangementLevel doc node clip token = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip token) deriving Show
 
-data EditArrangement' doc node clip =
-    SetArr' (ArrangementLevel doc node clip)
+data EditArrangement' doc node clip token =
+    SetArr' (ArrangementLevel doc node clip token)
   | SkipArr' Int deriving Show
 
 data EditArrangement documentLevel =
