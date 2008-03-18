@@ -51,15 +51,26 @@ SEM Tree [ | | depth : Int ]
   | HoleTree ParseErrTree
       lhs.depth = 0
 
-SEM List_Tree [ | | pres : Presentation_Doc_Node_Clip_Token ]
-  | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $
-                           structural $ row $ intersperse (vLine) @elts.press
-  | ParseErrList_Tree
-      lhs.pres = loc (Node_ParseErrList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
-                   presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
-  | HoleList_Tree
-      lhs.pres = loc (Node_HoleList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
-                   presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
+
+
+SEM List_Tree
+ | List_Tree
+      loc.pres = structural $ 
+                   row $ intersperse vLine @elts.press
+SEM Tree
+  | Bin
+      loc.pres = structural $
+                   row [ col [ vSpace 10, @left.pres]
+                       , text "Bin"
+                       , col [ vSpace 10, @right.pres ] 
+                       ]
+  | Leaf
+      loc.pres = parsingWithParser leafParser $ 
+                   row [ text $ "Leaf" ++ show @int ]
+
+
+
+
 
 {-
 SEM Tree
@@ -71,13 +82,12 @@ SEM Tree
                    row [ text "Leaf" ]
 
 -}
-SEM Tree
-  | Bin
-      loc.pres = structural $
-                   row [ col [ vSpace 10, @left.pres]
-                       , text "Bin"
-                       , col [ vSpace 10, @right.pres ] 
-                       ]
-  | Leaf
-      loc.pres = ParsingP NoIDP (Just $ mkClipParser $ leafParser) LexInherited $ 
-                   row [ text $ "Leaf" ++ show @int ]
+SEM List_Tree [ | | pres : Presentation_Doc_Node_Clip_Token ]
+  | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                          
+  | ParseErrList_Tree
+      lhs.pres = loc (Node_ParseErrList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+  | HoleList_Tree
+      lhs.pres = loc (Node_HoleList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path

@@ -35,17 +35,11 @@ recognizeEnrichedDoc = pStr $
 -}
 
 
+leafParser =
+          (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))
+      <$> pToken LeafToken
+      <*> pToken IntToken
 
-
-
-
-recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
-recognizeEnrichedDoc =  
-          (\str -> let clip = recognize str
-                       in  case fromClip clip of 
-                              Just enr -> enr
-                              Nothing   -> error $ "Error"++show clip )
-      <$> pStructural Node_RootEnr
      
 
 recognizeList_Tree :: ListParser Document Node ClipDoc UserToken List_Tree
@@ -78,20 +72,19 @@ parseTree =
       <$> pToken LeafToken
 
 
-leafParser = mkClipParser $
-          (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))
-      <$> pToken LeafToken
-      <*> pToken IntToken
 
-mkClipParser p = 
- \tokens ->
-         let (res, errs) = runParser p tokens
-         in  toClip $ if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens)
+
+recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc =  
+          (\str -> let clip = recognize str
+                       in  case fromClip clip of 
+                              Just enr -> enr
+                              Nothing   -> error $ "Error"++show clip )
+      <$> pStructural Node_RootEnr
 
 {-
 TODO
-handle parsing add not to parsingTk and add parser too (parser to clip?)
-typeArg: more info
+type error in retrieveArg: more info
 
 what about parseerr hole for constr? will they occur?
 what about String etc.?
@@ -166,59 +159,15 @@ addChildToken childTokenGroups (nr, childToken) =
     _                   -> error $ "addChildToken: encountered child with number larger than parent's arity: nr="++show nr ++ " token="++show childToken 
 
       
--- if the argument is nothing, return nothing (reuse), otherwise apply fromClip to the clip
-retrieveArg :: Clipable a => Maybe ClipDoc -> Maybe a
-retrieveArg (Just clip) = case fromClip clip of
-                  Just x  -> Just x
-                  Nothing -> error "retrieveArg: Type error"
-retrieveArg Nothing     = Nothing
-
--- lazy pattern is necessary because recognize uses arityClip on the result
-construct_EnrichedDoc_RootEnr :: Token Document Node ClipDoc UserToken -> [ Maybe ClipDoc ] -> ClipDoc
-construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg mclip1)  (retrieveArg mclip2)
-
-construct_Tree_Bin :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_Tree_Bin  tk ~(clip1: clip2:_) = Clip_Tree $ reuseBin [tk] (retrieveArg clip1) (retrieveArg clip2)
-construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg clip1)
-  
-construct_List_Tree :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_List_Tree tk clips = 
-  Clip_List_Tree $ toList_Tree 
-                                 [ x | clip <- clips, let Just x = retrieveArg clip]
 
 
 
-class Construct doc node clip token where
-  construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
+parsingWithParser parser pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
 
-instance Construct Document Node ClipDoc UserToken where
-  construct (Node_Bin _ _) = construct_Tree_Bin 
-  construct (Node_Leaf _ _) = construct_Tree_Leaf
-  construct (Node_RootEnr _ _) = construct_EnrichedDoc_RootEnr
-  construct (Node_List_Tree _ _) = construct_List_Tree
-  construct x = error $ "Construct"++show x
+mkClipParser p = 
+ \tokens ->
+         let (res, errs) = runParser p tokens
+         in  toClip $ if null errs then res 
+                      else debug Err ("ERROR: Parse error"++(show errs)) $ 
+                             parseErr (ParsingParseErr (mkErr errs) tokens)
 
-class Clipable a where 
-  toClip :: a -> ClipDoc
-  fromClip :: ClipDoc -> Maybe a
-  
-instance Clipable Tree where
-  toClip t = Clip_Tree t
-  fromClip (Clip_Tree t) = Just t
-  fromClip _             = Nothing
-
-instance Clipable Int where
-  toClip t = Clip_Int t
-  fromClip (Clip_Int t) = Just t
-  fromClip _             = Nothing
-
-
-instance Clipable List_Tree where
-  toClip t = Clip_List_Tree t
-  fromClip (Clip_List_Tree t) = Just t
-  fromClip _             = Nothing
-  
-instance Clipable EnrichedDoc where
-  toClip t = Clip_EnrichedDoc t
-  fromClip (Clip_EnrichedDoc t) = Just t
-  fromClip _             = Nothing

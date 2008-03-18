@@ -101,6 +101,11 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   arity (RootEnr x0 x1) = 2
   arity _                        = 0
 
+  toClip t = Clip_EnrichedDoc t
+
+  fromClip (Clip_EnrichedDoc t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrEnrichedDoc
 
   hole = HoleEnrichedDoc
@@ -129,6 +134,11 @@ instance Editable Document Document Node ClipDoc UserToken where
 
   arity (RootDoc x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_Document t
+
+  fromClip (Clip_Document t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrDocument
 
@@ -162,6 +172,11 @@ instance Editable Tree Document Node ClipDoc UserToken where
   arity (Bin x0 x1) = 2
   arity (Leaf x0) = 1
   arity _                        = 0
+
+  toClip t = Clip_Tree t
+
+  fromClip (Clip_Tree t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrTree
 
@@ -199,6 +214,11 @@ instance Editable List_Tree Document Node ClipDoc UserToken where
   arity (List_Tree x1) = length (fromConsList_Tree x1)
   arity _ = 0
 
+  toClip t = Clip_List_Tree t
+
+  fromClip (Clip_List_Tree t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Tree
 
   hole = List_Tree Nil_Tree
@@ -231,6 +251,12 @@ instance Editable Int Document Node ClipDoc UserToken where
   alternatives _ = [ ("0", Clip_Int 0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Int t
+
+  fromClip (Clip_Int t) = Just t
+  fromClip _            = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -251,6 +277,12 @@ instance Editable Float Document Node ClipDoc UserToken where
   alternatives _ = [ ("0.0", Clip_Float 0.0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Float t
+
+  fromClip (Clip_Float t) = Just t
+  fromClip _              = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -271,6 +303,12 @@ instance Editable Bool Document Node ClipDoc UserToken where
                    , ("False", Clip_Bool False)      
                    ]    
   arity _ = 0                                          
+
+  toClip t = Clip_Bool t
+
+  fromClip (Clip_Bool t) = Just t
+  fromClip _             = Nothing
+
   parseErr _ = False
 
   hole = False
@@ -292,6 +330,12 @@ instance Editable String Document Node ClipDoc UserToken where
                    ] 
  
   arity _ = 0
+
+  toClip t = Clip_String t
+
+  fromClip (Clip_String t) = Just t
+  fromClip _               = Nothing
+
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"
