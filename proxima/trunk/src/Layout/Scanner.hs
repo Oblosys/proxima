@@ -30,6 +30,11 @@ bug
 
 Challenges/todo:
 
+Lexical errors create one big token, which discards structural children and ruins the presentation.
+  we need to do something about layout
+
+whitespace for error tokens?
+
 passing several Alex scanners (probably solved by Alex itself)
 
 focus for parse errors?
