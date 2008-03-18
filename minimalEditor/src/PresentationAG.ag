@@ -79,5 +79,5 @@ SEM Tree
                        , col [ vSpace 10, @right.pres ] 
                        ]
   | Leaf
-      loc.pres = ParsingP NoIDP (Just leafParser) LexInherited $ 
+      loc.pres = ParsingP NoIDP (Just $ mkClipParser $ leafParser) LexInherited $ 
                    row [ text $ "Leaf" ++ show @int ]
