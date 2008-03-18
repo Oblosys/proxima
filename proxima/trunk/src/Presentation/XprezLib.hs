@@ -242,7 +242,7 @@ presHole focus typeStr nd pth = loc nd $
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
 
 presParseErr node (StructuralParseErr pres) =
-  loc node $ parsing $ pres `withbgColor` whiteSmoke
+  loc node $ structural $ pres `withbgColor` whiteSmoke
 presParseErr node (ParsingParseErr (errorPos, str) tokens parser) =
   loc node $ ParsingP NoIDP (Just parser) LexInherited $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
                                  TokenP NoIDP token | (p,token) <- zip [0..] tokens ]
