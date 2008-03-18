@@ -38,13 +38,13 @@ type IDPCounter = Int                   -- Counter for generating new unique IDP
 initLayout :: WhitespaceMap
 initLayout = Map.fromList []
 
-data ParseError doc node clip token = ParsingParseErr (Int, String) [Token doc node clip token]
+data ParseError doc node clip token = ParsingParseErr (Int, String) [Token doc node clip token] (ClipParser doc node clip token)
                                     | StructuralParseErr (Presentation doc node clip token)
 -- only for Parse errors in the parsing presentations, we keep track of the parse error.
 -- structural parse errors cannot be represented with a list of tokens.
 
 instance Show (ParseError doc node clip token) where
-  show (ParsingParseErr _ _) = "ParsingParseErr"
+  show (ParsingParseErr _ _ _) = "ParsingParseErr"
   show (StructuralParseErr _) = "StructuralParseErr"
   
 data EditPresentation' doc node clip token =

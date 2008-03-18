@@ -4,7 +4,6 @@ import Common.CommonTypes
 import Presentation.PresTypes
 import Presentation.PresLayerTypes
 import Evaluation.DocumentEdit
-import Presentation.XprezLib
 
 import Common.UU_Parsing hiding (Exp, parse, parseIO)
 import qualified Common.UU_Parsing as UU_Parsing
@@ -69,7 +68,7 @@ parsePres _ _    = error "parsePres: scanned presentation has wrong format"
 
 pMaybe parser = Just <$> parser `opt` Nothing
 
-pStructural nd = pSym (StructuralTk 0 (Just $ nd (error "This should not have happened") []) empty [] NoIDP)
+pStructural nd = pSym (StructuralTk 0 (Just $ nd (error "This should not have happened") []) (EmptyP NoIDP) [] NoIDP)
 
 
 applyDummyParameters nd = nd (error "This should not have happened") [] 
@@ -77,9 +76,9 @@ applyDummyParameters nd = nd (error "This should not have happened") []
 -- of the children, so reuse can be used on it just like in the normal parsers
 --pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
 --         ListParser doc node clip token a -> ListParser doc node clip token a
-pStr = pStr' empty
+pStr = pStr' (EmptyP NoIDP)
 
-pStrVerbose str = pStr' (text str)
+pStrVerbose str = pStr' (StringP NoIDP str)
 
 pStr' prs p = unfoldStructure  
      <$> pSym (StructuralTk 0 Nothing prs [] NoIDP)
@@ -95,7 +94,7 @@ addHoleParser p =
   
 
 pStr'' nodeC hole p = unfoldStructure  
-     <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
+     <$> pSym (StructuralTk 0 Nothing (EmptyP NoIDP) [] NoIDP)
  where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
          let pOrHole = p <|> hole <$ pStructural nodeC
              (res, errs) = runParser pOrHole (structTk : tokens) {- (p <|> hole/parseErr parser)-}
@@ -105,7 +104,7 @@ pStr'' nodeC hole p = unfoldStructure
 
 
 pStrAlt ndf p = unfoldStructure  
-     <$> pSym (StructuralTk 0 (Just nd) (text $ show nd) [] NoIDP)
+     <$> pSym (StructuralTk 0 (Just nd) (StringP NoIDP $ show nd) [] NoIDP)
  where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
          let (res, errs) = runParser p (structTk : tokens) {- (p <|> hole/parseErr parser)-}
           in if null errs then res else debug Err ("ERROR: Parse error in structural parser:"++(show errs)) parseErr (StructuralParseErr pr)
@@ -140,7 +139,7 @@ pStrDirty p = pStrExtra Dirty p
 pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
               b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
-     <$> pSym (StructuralTk 0 Nothing empty [] NoIDP)
+     <$> pSym (StructuralTk 0 Nothing (EmptyP NoIDP) [] NoIDP)
  where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
          let (res, errs) = runParser p (structTk : tokens) {- (p <|> hole/parseErr parser)-}
          in  if null errs 
@@ -152,10 +151,10 @@ pStrExtra extraDefault p = unfoldStructure
 -- TODO: why do we need the 's in Editable?
 pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
-     <$> pSym (ParsingTk Nothing Nothing empty [] NoIDP)
+     <$> pSym (ParsingTk Nothing Nothing (EmptyP NoIDP) [] NoIDP)
  where unfoldStructure presTk@(ParsingTk _ _ pr tokens _) = 
          let (res, errs) = runParser p tokens
-         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens)
+         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 mkErr :: (DocNode node, Ord token, Show token) => [Message (Token doc node clip token)] -> (Int, String)
@@ -255,7 +254,7 @@ pToken token = pSym $ UserTk 0 token (show token) Nothing (IDP (-1))
 
 -- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
 pStruct :: (DocNode node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
-pStruct = pCSym 4 (StructuralTk 0 Nothing empty [] NoIDP)
+pStruct = pCSym 4 (StructuralTk 0 Nothing (EmptyP NoIDP) [] NoIDP)
 
 
 -- pCostSym expects the parser twice
@@ -264,8 +263,8 @@ pCSym c p = pCostSym c p p
 
 
 
-strucTk   = StructuralTk 0 Nothing empty [] (IDP (-1))
-parsingTk = (ParsingTk Nothing Nothing empty [] NoIDP)
+strucTk   = StructuralTk 0 Nothing (EmptyP NoIDP) [] (IDP (-1))
+parsingTk = (ParsingTk Nothing Nothing (EmptyP NoIDP) [] NoIDP)
 graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
 vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
 
@@ -278,6 +277,14 @@ class Construct doc node clip token where
   construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
 
 
+mkClipParser p = 
+ let clipParser = 
+       \tokens ->
+         let (res, errs) = runParser p tokens
+         in  toClip $ if null errs then res 
+                      else debug Err ("ERROR: Parse error"++(show errs)) $ 
+                             parseErr (ParsingParseErr (mkErr errs) tokens clipParser)
+ in  clipParser
 
 
 

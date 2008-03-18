@@ -3,7 +3,7 @@ module Presentation.XprezLib where
 import Common.CommonTypes
 import Evaluation.DocTypes
 import Presentation.PresTypes
-
+import Presentation.PresentationParsing
 import Maybe
 
 -- switch href and vref href is y and vref is x, so (vref, href) is more logical
@@ -48,6 +48,7 @@ with_ xp f = WithP f xp
 structural xp = StructuralP NoIDP xp
 parsing xp = ParsingP NoIDP Nothing LexInherited xp
 parsing' l xp = ParsingP NoIDP Nothing l xp
+parsingWithParser parser pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
 loc l xp  = LocatorP l xp
 
 graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip token] -> Xprez doc node clip token
@@ -242,10 +243,11 @@ presHole focus typeStr nd pth = loc nd $
 
 presParseErr node (StructuralParseErr pres) =
   loc node $ parsing $ pres `withbgColor` whiteSmoke
-presParseErr node (ParsingParseErr (errorPos, str) tokens) =
-  loc node $ parsing $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
+presParseErr node (ParsingParseErr (errorPos, str) tokens parser) =
+  loc node $ ParsingP NoIDP (Just parser) LexInherited $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
                                  TokenP NoIDP token | (p,token) <- zip [0..] tokens ]
-  
+-- probably we need the lexer also in ParseErr
+
 presentFocus NoPathD     path pres = pres
 presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
 
