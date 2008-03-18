@@ -187,7 +187,7 @@ addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Toke
 addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
 addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = let (pres', f) = detokenize wm pres
                                                         in  addWhitespace wm (Just f) idp pres'
-                                                      
+addWhitespaceToken wm idp (ErrorTk _ str)             = addWhitespace wm Nothing idp (StringP idp str)
 
 addWhitespace :: WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip token -> [(Layout doc node clip token, FocusPres)]
 addWhitespace wm mStrFocus NoIDP pres = [(pres,noFocus)]
