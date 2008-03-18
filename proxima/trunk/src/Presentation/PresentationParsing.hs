@@ -272,5 +272,15 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 
 
 
+--- Automatic structure recognizer
+
+class Construct doc node clip token where
+  construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
+
+
+
+
+
+
 
 
