@@ -35,8 +35,7 @@ alexScanTokens initState scs = go initState ('\n',scs)
         go state@(pos, _, _, _) inp@(_,str) =
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
-		AlexError (_,remaining) -> ( [Just $ ErrorTk pos $ "lexical error at " ++ 
-		                                                   show (take 10 $ stringFromScanChars remaining) ]
+		AlexError (_,remaining) -> ( [Just $ ErrorTk pos $ stringFromScanChars str ]
 		                           , state)
 		AlexSkip  inp' len     -> go state inp'
 		AlexToken inp' len act -> let (mToken, state') = act state (take len str)
