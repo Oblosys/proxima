@@ -78,7 +78,7 @@ type Position = Int
 
 type ListParser doc node clip token a = AnaParser [] Pair  (Token doc node clip token) a 
 
-type ClipParser doc node clip token = ListParser doc node clip token clip
+type ClipParser doc node clip token = [Token doc node clip token] -> clip
 
 data Token doc node clip token = 
                UserTk       Position token String (Maybe node) IDP
@@ -94,7 +94,7 @@ data Token doc node clip token =
 -- The position is only used for children of ParsingTk. StructuralTk children of a StructuralTk all have
 -- position 0
 instance (Show node, Show token) => Show (Token doc node clip token) where
-  show (UserTk nr u s _ id)         = "<"++show nr ++":"++"UserTk \""++show u++"\":"++show s++":"++show id++">"
+  show (UserTk nr u s _ id)         = "<"++show nr ++":"++"UserTk "++show u++":"++show s++":"++show id++">"
   show (StructuralTk nr Nothing _ tks id) = "<"++show nr ++":"++"structural:Nothing:"++show id++">" 
   show (StructuralTk nr (Just node) _ tks id) = 
     let showNode = show node -- not the nicest way of showing the constructor. Maybe include this in the node class
