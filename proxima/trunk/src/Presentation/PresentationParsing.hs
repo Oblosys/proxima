@@ -278,15 +278,18 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 
 {-
 TODO
-error handling in pStructuralEx
-what do we do with non-Proxima types?
-what happens when we edit inside a structural that is in a parsing presentation? Will recognize handle this
-right? The path in the structural token will not be correct.
+- what do we do with non-Proxima types?
+- what happens when we edit inside a structural that is in a parsing presentation? Will recognize handle this
+  right? The path in the structural token will not be correct.
 
-duplicates!
-maybe pStructural should fail if wrong type is present?
-maybe enforce structural and parsing in AG by using a local attribute presType?
-This way, we could also automatically supply the @self attribute for guaranteeing correct parser type.
+Design:
+- maybe pStructural should fail if wrong type is present?
+- maybe we should enforce structural and parsing in AG by using a local attribute presType?
+    This way, we could also automatically supply the @self attribute for guaranteeing correct parser type.
+
+
+Longer term
+- When we have dirty bits in the presentation, duplicates can be handled automatically.
 -}
 
 
