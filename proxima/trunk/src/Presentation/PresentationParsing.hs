@@ -276,10 +276,9 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 
 {-
 TODO
-type error in retrieveArg: more info
 error handling in pStructuralEx
+what do we do with non-Proxima types?
 
-what about parseerr for constr? will they occur?
 duplicates!
 maybe pStructural should fail if wrong type is present?
 maybe enforce structural and parsing in AG by using a local attribute presType?
