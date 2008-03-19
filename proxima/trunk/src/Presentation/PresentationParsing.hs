@@ -73,6 +73,8 @@ pStructuralTk nd = pSym (StructuralTk 0 (Just $ nd (error "This should not have 
 
 
 applyDummyParameters nd = nd (error "This should not have happened") [] 
+
+
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
 --pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
@@ -309,12 +311,14 @@ mkClipParser parser =
 {- recognize parses a structural token and recognizes its structure. The parser will succeed
    on any structural token.
 -}
-
 pStructural :: (Editable a doc node clip token, Clip clip, Construct doc node clip token,
               DocNode node, Ord token, Show token, Show clip) =>
              ListParser doc node clip token a
 pStructural = pStructuralEx Nothing
 
+{- pStructuralConstr only succeeds on a structural node with the constructor specified by nodeConstr
+-}
+pStructuralConstr nodeConstr = pStructuralEx (Just nodeConstr)
 
 {- recognizeEx parses a structural token and reconizes its structure. The argument can be
    Nothing, in which case any structural token is matched, or it can be a Just node constructor,
