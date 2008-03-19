@@ -8,6 +8,7 @@ import Evaluation.DocumentEdit
 import Common.UU_Parsing hiding (Exp, parse, parseIO)
 import qualified Common.UU_Parsing as UU_Parsing
 import Char
+import Data.Maybe
 
 import Debug.Trace
 
@@ -273,22 +274,6 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 
 --- Automatic structure recognizer
 
-class Construct doc node clip token where
-  construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
-
-
-mkClipParser p = 
- let clipParser = 
-       \tokens ->
-         let (res, errs) = runParser p tokens
-         in  toClip $ if null errs then res 
-                      else debug Err ("ERROR: Parse error"++(show errs)) $ 
-                             parseErr (ParsingParseErr (mkErr errs) tokens clipParser)
- in  clipParser
-
-
-
-
 {-
 TODO
 type error in retrieveArg: more info
@@ -297,12 +282,33 @@ error handling in pStructuralEx
 what about parseerr for constr? will they occur?
 duplicates!
 maybe pStructural should fail if wrong type is present?
+maybe enforce structural and parsing in AG by using a local attribute presType?
+This way, we could also automatically supply the @self attribute for guaranteeing correct parser type.
 -}
 
+
+
+
+class Construct doc node clip token where
+  construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
+
+
+-- used by Xprez.parsingWithParser. Converts a parser to a ClipParser
+mkClipParser :: (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
+                ListParser doc node clip token a -> ClipParser doc node clip token
+mkClipParser parser = 
+ let clipParser = 
+       \tokens ->
+         let (res, errs) = runParser parser tokens
+         in  toClip $ if null errs then res 
+                      else debug Prs ("Parse error\n"++(show errs)) $ 
+                             parseErr (ParsingParseErr (mkErr errs) tokens clipParser)
+ in  clipParser
 
 {- recognize parses a structural token and recognizes its structure. The parser will succeed
    on any structural token.
 -}
+
 pStructural :: (Editable a doc node clip token, Clip clip, Construct doc node clip token,
               DocNode node, Ord token, Show token, Show clip) =>
              ListParser doc node clip token a
@@ -317,7 +323,8 @@ pStructuralEx :: (Editable a doc node clip token, Clip clip, Construct doc node 
                 DocNode node, Ord token, Show token, Show clip) =>
                 Maybe (a -> Path -> node) -> ListParser doc node clip token a
 pStructuralEx mNodeConstr =  
-          (\str -> let clip = recognizeClip str
+          (\structuralToken -> debug Prs ("pStructural on\n"++deepShowTks 0 structuralToken) $
+                   let clip = recognizeClip structuralToken
                    in  case fromClip clip of 
                          Just enr -> enr
                          Nothing  -> error $ "Error"++show clip )
@@ -330,6 +337,7 @@ pStructuralEx mNodeConstr =
 recognizeClip :: (Clip clip, Construct doc node clip token, DocNode node, Show token, Ord token) =>
              Token doc node clip token -> clip
 recognizeClip strTk@(StructuralTk _ (Just node) _ childTokens _) = 
+  debug Prs ("Recognize on "++show node++" with children"++show childTokens) $
   if isListClip (construct node strTk []) 
   then 
   let thisPath = case pathNode node of
@@ -392,12 +400,22 @@ addChildTokens childTokenGroups (childToken: childTokens) =
            _                   -> error $ "addChildToken: encountered child with number larger than parent's arity: nr="++show nr ++ " token="++show childToken 
 
      
--- if the argument is nothing, return nothing (for reuse), otherwise apply fromClip to the
--- clip
-retrieveArg :: (Editable a doc node clip token, Show clip) => String -> Maybe clip -> Maybe a
-retrieveArg parentCnstr (Just clip) =
+-- If the argument is nothing, return Nothing (for reuse), otherwise apply fromClip to the
+-- argument.
+retrieveArg :: (Editable a doc node clip token, Show clip) => 
+               String -> String -> Maybe clip -> Maybe a
+retrieveArg parentCnstrName expectedTypeName (Just clip) =
   case fromClip clip of
     Just x  -> Just x
-    Nothing -> debug Err ("\n\n\nCritical structural parse error: retrieveArg: Type error in "++show parentCnstr++
-                          ". Encountered a " ++ show clip ) $ Nothing
-retrieveArg parentCnstr Nothing     = Nothing
+    Nothing -> debug Err ("\n\n\nCritical structural parse error: retrieveArg: Type error in "++parentCnstrName++
+                          ". Encountered " ++ show clip ++ " while expecting "++expectedTypeName) $
+                 Nothing
+retrieveArg _ _ Nothing     = Nothing
+-- retrieveArg fails if the ClipParser for a child produced a clip of the wrong type.
+-- Because parsingWithParser @self guarantees the parser has the correct type, this
+-- error should not occur. (For structural presentations, the type is taken from the node
+-- that is put in the presentation automatically with the loc application in lhs.pres
+
+
+genericConstruct_List typeName toList clips =
+  toClip $ toList $ catMaybes $ map (retrieveArg ("List_"++typeName) typeName) clips
