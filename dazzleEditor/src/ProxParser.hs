@@ -28,14 +28,14 @@ import DocUtils_Generated
 recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStr $ 
           (\str root-> reuseRootEnr [str] (Just root))
-      <$> pStructural Node_RootEnr
+      <$> pStructuralTk Node_RootEnr
       <*> recognizeRoot
 
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
          (\str graph title sections ->
           reuseRoot [str] (Just graph) (Just title) (Just (toList_Section sections)))
-      <$> pStructural Node_Root
+      <$> pStructuralTk Node_Root
       <*> recognizeGraph
       <*> pPrs pLine 
       <*> pList recognizeSection 
@@ -44,7 +44,7 @@ recognizeRoot = pStr $
           (\str ->
           reuseRoot [str] Nothing Nothing Nothing 
                                             Nothing )
-      <$> pStructural Node_Root
+      <$> pStructuralTk Node_Root
       <*  (pPrs $ Word (String_ "")
       <$
           pList (pKey " ")
@@ -54,7 +54,7 @@ recognizeRoot = pStr $
 recognizeSection :: ListParser Document Node ClipDoc UserToken Section
 recognizeSection = pStrAlt Node_Section $
           (\str t ps ss -> reuseSection [str] (Just t) (Just ps) (Just $ toList_Subsection ss))
-      <$> pStructural Node_Section
+      <$> pStructuralTk Node_Section
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsection
@@ -63,7 +63,7 @@ recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt Node_Subsection $
           (\str t ps sss -> reuseSubsection [str] (Just t) (Just ps) (Just $ toList_Subsubsection sss))
-      <$> pStructural Node_Subsection
+      <$> pStructuralTk Node_Subsection
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
       <*> pList recognizeSubsubsection
@@ -73,7 +73,7 @@ recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsecti
 recognizeSubsubsection =
   pStrAlt Node_Subsubsection $
           (\str t ps -> reuseSubsubsection [str] (Just t) (Just ps))
-      <$> pStructural Node_Subsubsection
+      <$> pStructuralTk Node_Subsubsection
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
 
@@ -89,7 +89,7 @@ recognizeGraph = pStrVerbose "Graph" $
                                    [ Edge f t |  (f,t) <- getGraphTkEdges gt]))
                         
                                           
-      <$> pStructural Node_Graph
+      <$> pStructuralTk Node_Graph
       <*> pSym graphTk
       <*> pList recognizeVertex
 
@@ -99,12 +99,12 @@ recognizeVertex :: ListParser Document Node ClipDoc UserToken Vertex
 recognizeVertex = pStrVerbose "Vertex" $
           (\str vt lab -> reuseVertex [str] (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
-      <$> pStructural Node_Vertex
+      <$> pStructuralTk Node_Vertex
       <*> pSym vertexTk
       <*> pPrs pText
   <|>     (\str vt -> reuseVertex [str] (Just "<new>") (Just Circle)
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
-      <$> pStructural (\_ _ -> NoNode)
+      <$> pStructuralTk (\_ _ -> NoNode)
       <*> pSym vertexTk
           
 recognizeSubgraph :: ListParser Document Node ClipDoc UserToken Subgraph
@@ -114,7 +114,7 @@ recognizeSubgraph = pStrVerbose "Subgraph" $
                                      (Just $ List_Edge $ toConsList_Edge $ 
                                      [ Edge f t |  (f,t) <- getGraphTkEdges gt])
                       )
-      <$> pStructural Node_Subgraph
+      <$> pStructuralTk Node_Subgraph
       <*> pSym graphTk
       <*> pList recognizeVertex
 
@@ -156,7 +156,7 @@ parseParagraph =
   <|>
       (   pStrAlt Node_SubgraphPara $
           (\str sg -> reuseSubgraphPara [str] (Just sg))
-      <$> pStructural Node_SubgraphPara
+      <$> pStructuralTk Node_SubgraphPara
       <*> recognizeSubgraph
       )
 

@@ -201,6 +201,11 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   arity (RootEnr x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_EnrichedDoc t
+
+  fromClip (Clip_EnrichedDoc t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrEnrichedDoc
 
   hole = HoleEnrichedDoc
@@ -227,6 +232,11 @@ instance Editable Document Document Node ClipDoc UserToken where
 
   arity (RootDoc x0) = 1
   arity _                        = 0
+
+  toClip t = Clip_Document t
+
+  fromClip (Clip_Document t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrDocument
 
@@ -259,6 +269,11 @@ instance Editable Root Document Node ClipDoc UserToken where
   arity (Root x0 x1 x2) = 3
   arity _                        = 0
 
+  toClip t = Clip_Root t
+
+  fromClip (Clip_Root t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrRoot
 
   hole = HoleRoot
@@ -289,6 +304,11 @@ instance Editable Section Document Node ClipDoc UserToken where
 
   arity (Section x0 x1 x2) = 3
   arity _                        = 0
+
+  toClip t = Clip_Section t
+
+  fromClip (Clip_Section t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrSection
 
@@ -321,6 +341,11 @@ instance Editable Subsection Document Node ClipDoc UserToken where
   arity (Subsection x0 x1 x2) = 3
   arity _                        = 0
 
+  toClip t = Clip_Subsection t
+
+  fromClip (Clip_Subsection t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrSubsection
 
   hole = HoleSubsection
@@ -349,6 +374,11 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
 
   arity (Subsubsection x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_Subsubsection t
+
+  fromClip (Clip_Subsubsection t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrSubsubsection
 
@@ -380,6 +410,11 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
   arity (Paragraph x0) = 1
   arity (SubgraphPara x0) = 1
   arity _                        = 0
+
+  toClip t = Clip_Paragraph t
+
+  fromClip (Clip_Paragraph t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrParagraph
 
@@ -420,6 +455,11 @@ instance Editable Word Document Node ClipDoc UserToken where
   arity (LabelRef x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_Word t
+
+  fromClip (Clip_Word t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrWord
 
   hole = HoleWord
@@ -450,6 +490,11 @@ instance Editable Graph Document Node ClipDoc UserToken where
 
   arity (Graph x0 x1 x2) = 3
   arity _                        = 0
+
+  toClip t = Clip_Graph t
+
+  fromClip (Clip_Graph t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrGraph
 
@@ -486,6 +531,11 @@ instance Editable Vertex Document Node ClipDoc UserToken where
   arity (Vertex x0 x1 x2 x3 x4) = 5
   arity _                        = 0
 
+  toClip t = Clip_Vertex t
+
+  fromClip (Clip_Vertex t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrVertex
 
   hole = HoleVertex
@@ -512,6 +562,11 @@ instance Editable Shape Document Node ClipDoc UserToken where
   arity (Circle) = 0
   arity (Square) = 0
   arity _                        = 0
+
+  toClip t = Clip_Shape t
+
+  fromClip (Clip_Shape t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrShape
 
@@ -541,6 +596,11 @@ instance Editable Edge Document Node ClipDoc UserToken where
 
   arity (Edge x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_Edge t
+
+  fromClip (Clip_Edge t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrEdge
 
@@ -573,6 +633,11 @@ instance Editable Subgraph Document Node ClipDoc UserToken where
   arity (Subgraph x0 x1 x2) = 3
   arity _                        = 0
 
+  toClip t = Clip_Subgraph t
+
+  fromClip (Clip_Subgraph t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrSubgraph
 
   hole = HoleSubgraph
@@ -599,6 +664,11 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   arity (Dirty) = 0
   arity (Clean) = 0
   arity _                        = 0
+
+  toClip t = Clip_Dirty t
+
+  fromClip (Clip_Dirty t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrDirty
 
@@ -635,6 +705,11 @@ instance Editable List_Section Document Node ClipDoc UserToken where
 
   arity (List_Section x1) = length (fromConsList_Section x1)
   arity _ = 0
+
+  toClip t = Clip_List_Section t
+
+  fromClip (Clip_List_Section t) = Just t
+  fromClip _ = Nothing
 
   parseErr = ParseErrList_Section
 
@@ -677,6 +752,11 @@ instance Editable List_Paragraph Document Node ClipDoc UserToken where
   arity (List_Paragraph x1) = length (fromConsList_Paragraph x1)
   arity _ = 0
 
+  toClip t = Clip_List_Paragraph t
+
+  fromClip (Clip_List_Paragraph t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Paragraph
 
   hole = List_Paragraph Nil_Paragraph
@@ -717,6 +797,11 @@ instance Editable List_Subsection Document Node ClipDoc UserToken where
 
   arity (List_Subsection x1) = length (fromConsList_Subsection x1)
   arity _ = 0
+
+  toClip t = Clip_List_Subsection t
+
+  fromClip (Clip_List_Subsection t) = Just t
+  fromClip _ = Nothing
 
   parseErr = ParseErrList_Subsection
 
@@ -759,6 +844,11 @@ instance Editable List_Subsubsection Document Node ClipDoc UserToken where
   arity (List_Subsubsection x1) = length (fromConsList_Subsubsection x1)
   arity _ = 0
 
+  toClip t = Clip_List_Subsubsection t
+
+  fromClip (Clip_List_Subsubsection t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Subsubsection
 
   hole = List_Subsubsection Nil_Subsubsection
@@ -799,6 +889,11 @@ instance Editable List_Word Document Node ClipDoc UserToken where
 
   arity (List_Word x1) = length (fromConsList_Word x1)
   arity _ = 0
+
+  toClip t = Clip_List_Word t
+
+  fromClip (Clip_List_Word t) = Just t
+  fromClip _ = Nothing
 
   parseErr = ParseErrList_Word
 
@@ -841,6 +936,11 @@ instance Editable List_Vertex Document Node ClipDoc UserToken where
   arity (List_Vertex x1) = length (fromConsList_Vertex x1)
   arity _ = 0
 
+  toClip t = Clip_List_Vertex t
+
+  fromClip (Clip_List_Vertex t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Vertex
 
   hole = List_Vertex Nil_Vertex
@@ -882,6 +982,11 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
   arity (List_Edge x1) = length (fromConsList_Edge x1)
   arity _ = 0
 
+  toClip t = Clip_List_Edge t
+
+  fromClip (Clip_List_Edge t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Edge
 
   hole = List_Edge Nil_Edge
@@ -914,6 +1019,12 @@ instance Editable Int Document Node ClipDoc UserToken where
   alternatives _ = [ ("0", Clip_Int 0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Int t
+
+  fromClip (Clip_Int t) = Just t
+  fromClip _            = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -934,6 +1045,12 @@ instance Editable Float Document Node ClipDoc UserToken where
   alternatives _ = [ ("0.0", Clip_Float 0.0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Float t
+
+  fromClip (Clip_Float t) = Just t
+  fromClip _              = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -954,6 +1071,12 @@ instance Editable Bool Document Node ClipDoc UserToken where
                    , ("False", Clip_Bool False)      
                    ]    
   arity _ = 0                                          
+
+  toClip t = Clip_Bool t
+
+  fromClip (Clip_Bool t) = Just t
+  fromClip _             = Nothing
+
   parseErr _ = False
 
   hole = False
@@ -975,6 +1098,12 @@ instance Editable String Document Node ClipDoc UserToken where
                    ] 
  
   arity _ = 0
+
+  toClip t = Clip_String t
+
+  fromClip (Clip_String t) = Just t
+  fromClip _               = Nothing
+
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"
