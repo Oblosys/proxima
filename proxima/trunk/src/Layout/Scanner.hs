@@ -139,7 +139,7 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
                                    in  (VertexTk v (x,y) loc id : tokens, idpc', wm')
     WithP ar pres               -> scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
     StructuralP id pres         -> let (tokens, idpc', wm') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
-                                   in  ([StructuralTk 0 loc (castLayToPres presentation) tokens id], idpc', wm')
+                                   in  ([StructuralTk 0 loc (castLayToPres pres) tokens id], idpc', wm')
                                                       -- position is not used, so set to 0
     LocatorP newLoc pres        -> scanStructural sheet foc lx (Just newLoc) (pth++[0]) idpc wm pres
     pr -> debug Err ("Scanner.scanStructural: can't handle "++ show pr) ([], idpc, wm)
