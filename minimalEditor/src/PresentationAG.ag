@@ -65,7 +65,7 @@ SEM Tree
                        , col [ vSpace 10, @right.pres ] 
                        ]
   | Leaf
-      loc.pres = parsingWithParser leafParser $ 
+      loc.pres = parsingWithParser intParser $ 
                    row [ text $ "Leaf" ++ show @int ]
 
 

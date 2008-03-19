@@ -37,6 +37,8 @@ recognizeEnrichedDoc = pStr $
 recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
 
+intParser :: ListParser Document Node ClipDoc UserToken Int
+intParser = 0 <$ pToken IntToken
 
 leafParser =
           (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))

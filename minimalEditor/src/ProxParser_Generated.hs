@@ -10,14 +10,7 @@ import DocUtils_Generated
 import Evaluation.DocTypes
 import DocTypes_Generated
 import Presentation.PresentationParsing
-
--- if the argument is nothing, return nothing (for reuse), otherwise apply fromClip to the
--- clip
-retrieveArg :: Editable a doc node clip token => Maybe clip -> Maybe a
-retrieveArg (Just clip) = case fromClip clip of
-                  Just x  -> Just x
-                  Nothing -> error "retrieveArg: Type error"
-retrieveArg Nothing     = Nothing
+import Data.Maybe
 
 instance Construct Document Node ClipDoc UserToken where
   construct (Node_Bin _ _) = construct_Tree_Bin 
@@ -25,23 +18,23 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_HoleTree _ _) = construct_Tree_HoleTree
   construct (Node_RootEnr _ _) = construct_EnrichedDoc_RootEnr
   construct (Node_List_Tree _ _) = construct_List_Tree
-  construct x = error $ "Construct"++show x
+  construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
+  -- does not occur, since nodes are added automatically
 
 
 -- lazy pattern is necessary because recognize uses arityClip on the result
 construct_EnrichedDoc_RootEnr :: Token Document Node ClipDoc UserToken -> [ Maybe ClipDoc ] -> ClipDoc
-construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg mclip1)  (retrieveArg mclip2)
+construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg "RootEnr" mclip1)  (retrieveArg "RootEnr" mclip2)
 
 construct_Tree_Bin :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_Tree_Bin  tk ~(clip1: clip2:_) = Clip_Tree $ reuseBin [tk] (retrieveArg clip1) (retrieveArg clip2)
-construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg clip1)
+construct_Tree_Bin  tk ~(clip1: clip2:_) = Clip_Tree $ reuseBin [tk] (retrieveArg "Bin" clip1) (retrieveArg "Bin" clip2)
+construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg "Leaf" clip1)
 construct_Tree_HoleTree tk ~[] = Clip_Tree $ hole
   
 construct_List_Tree :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
 construct_List_Tree tk clips = 
-  Clip_List_Tree $ toList_Tree 
-                                 [ x | clip <- clips, let Just x = retrieveArg clip]
-
+  Clip_List_Tree $ toList_Tree $ catMaybes $ map (retrieveArg "List_Tree") clips
+                                 
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
