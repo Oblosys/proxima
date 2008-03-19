@@ -249,8 +249,12 @@ presHole focus typeStr nd pth = loc nd $
 presParseErr node (StructuralParseErr pres) =
   loc node $ structural $ pres `withbgColor` whiteSmoke
 presParseErr node (ParsingParseErr (errorPos, str) tokens parser) =
-  loc node $ ParsingP NoIDP (Just parser) LexInherited $ row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
-                                 TokenP NoIDP token | (p,token) <- zip [0..] tokens ]
+  loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
+     row $ [ (if p == errorPos then \p -> p `withbgColor` whiteSmoke else id) $
+               case token of 
+                 StructuralTk _ (Just node) pres _ _ -> loc node $ structural $ pres
+                 _                          -> TokenP NoIDP token 
+           | (p,token) <- zip [0..] tokens ]
 -- probably we need the lexer also in ParseErr
 
 presentFocus NoPathD     path pres = pres
