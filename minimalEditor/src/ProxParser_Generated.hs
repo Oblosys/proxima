@@ -16,26 +16,28 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Bin _ _) = construct_Tree_Bin 
   construct (Node_Leaf _ _) = construct_Tree_Leaf
   construct (Node_HoleTree _ _) = construct_Tree_HoleTree
+  construct (Node_ParseErrTree _ _) = construct_Tree_ParseErrTree
   construct (Node_RootEnr _ _) = construct_EnrichedDoc_RootEnr
   construct (Node_List_Tree _ _) = construct_List_Tree
+  construct (Node_HoleList_Tree _ _) = construct_HoleList_Tree
   construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
   -- does not occur, since nodes are added automatically
 
 
 -- lazy pattern is necessary because recognize uses arityClip on the result
 construct_EnrichedDoc_RootEnr :: Token Document Node ClipDoc UserToken -> [ Maybe ClipDoc ] -> ClipDoc
-construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg "RootEnr" mclip1)  (retrieveArg "RootEnr" mclip2)
+construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg "RootEnr" "Tree" mclip1)  (retrieveArg "RootEnr" "Tree" mclip2)
 
 construct_Tree_Bin :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_Tree_Bin  tk ~(clip1: clip2:_) = Clip_Tree $ reuseBin [tk] (retrieveArg "Bin" clip1) (retrieveArg "Bin" clip2)
-construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg "Leaf" clip1)
+construct_Tree_Bin  tk ~[clip1,clip2] = Clip_Tree $ reuseBin [tk] (retrieveArg "Bin" "Tree" clip1) (retrieveArg "Bin" "Tree" clip2)
+construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg "Leaf" "Int" clip1)
 construct_Tree_HoleTree tk ~[] = Clip_Tree $ hole
+construct_Tree_ParseErrTree (StructuralTk _ _ pres _ _) ~[] = Clip_Tree $ parseErr (StructuralParseErr pres)
   
 construct_List_Tree :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_List_Tree tk clips = 
-  Clip_List_Tree $ toList_Tree $ catMaybes $ map (retrieveArg "List_Tree") clips
+construct_List_Tree tk clips = genericConstruct_List "Tree" toList_Tree clips
                                  
-
+construct_HoleList_Tree tk ~[] = Clip_List_Tree $ hole
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 

@@ -178,6 +178,10 @@ SEM List_Tree
       lhs.presXML = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
+SEM ConsList_Tree
+  | Cons_Tree lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Tree  lhs.pressXML  = []
+
 
 
 
@@ -203,6 +207,10 @@ SEM List_Tree
   | HoleList_Tree
       lhs.presTree = loc (Node_List_Tree @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
+
+SEM ConsList_Tree
+  | Cons_Tree lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Tree  lhs.pressTree  = []
 
 
 

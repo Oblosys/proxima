@@ -59,15 +59,27 @@ SEM List_Tree
                    row $ intersperse vLine @elts.press
 SEM Tree
   | Bin
+      loc.pres = parsingWithParser pBin @self $
+                   row [ text "Bin("
+                       , @left.pres
+                       , text ")("
+                       , @right.pres
+                       , text ")"
+                       ]
+{-
       loc.pres = structural $
                    row [ col [ vSpace 10, @left.pres]
                        , text "Bin"
                        , col [ vSpace 10, @right.pres ] 
                        ]
+-}
   | Leaf
-      loc.pres = parsingWithParser intParser $ 
+      loc.pres = structural $ 
                    row [ text $ "Leaf" ++ show @int ]
-
+{-
+      loc.pres = parsingWithParser pLeaf @self $ 
+                   row [ text $ "Leaf" ++ show @int ]
+-}
 
 
 

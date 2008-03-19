@@ -38,20 +38,37 @@ recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
 
 intParser :: ListParser Document Node ClipDoc UserToken Int
-intParser = 0 <$ pToken IntToken
+intParser = 0 
+      <$ pToken LeafToken
+      <* pToken IntToken
 
-leafParser =
+
+pTree = pLeaf <|> pBin
+
+pLeaf = pStructural {-
           (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))
       <$> pToken LeafToken
       <*> pToken IntToken
-
+-}
      
+pBin :: ListParser Document Node ClipDoc UserToken Tree
+pBin = 
+          (\token left right -> reuseBin [token] (Just left) (Just right))
+      <$> pToken BinToken
+      <*  pToken (SymToken "(")
+      <*> pTree
+      <*  pToken (SymToken ")")      
+      <*  pToken (SymToken "(")
+      <*> pTree
+      <*  pToken (SymToken ")")      
+
 
 recognizeList_Tree :: ListParser Document Node ClipDoc UserToken List_Tree
 recognizeList_Tree = pStr $
           (\str trees -> reuseList_Tree [str] (Just $ toConsList_Tree trees))
       <$> pStructuralTk Node_List_Tree
       <*> pList recognizeTree
+
 
 recognizeTree :: ListParser Document Node ClipDoc UserToken Tree
 recognizeTree = pStr $
@@ -62,17 +79,3 @@ recognizeTree = pStr $
 --      <*  recognizeTree
   <|>     (\str -> reuseLeaf [str] Nothing)
       <$> pStructuralTk Node_Leaf
-
-parseTree :: ListParser Document Node ClipDoc UserToken Tree
-parseTree = 
-          (\token left right -> reuseBin [token] (Just left) (Just right))
-      <$> pToken BinToken
-      <*  pToken (SymToken "(")
-      <*> parseTree
-      <*  pToken (SymToken ")")      
-      <*  pToken (SymToken "(")
-      <*> parseTree
-      <*  pToken (SymToken ")")      
-  <|>     (\str -> reuseLeaf [str] Nothing)
-      <$> pToken LeafToken
-
