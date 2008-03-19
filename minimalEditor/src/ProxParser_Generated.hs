@@ -11,7 +11,8 @@ import Evaluation.DocTypes
 import DocTypes_Generated
 import Presentation.PresentationParsing
 
--- if the argument is nothing, return nothing (reuse), otherwise apply fromClip to the clip
+-- if the argument is nothing, return nothing (for reuse), otherwise apply fromClip to the
+-- clip
 retrieveArg :: Editable a doc node clip token => Maybe clip -> Maybe a
 retrieveArg (Just clip) = case fromClip clip of
                   Just x  -> Just x

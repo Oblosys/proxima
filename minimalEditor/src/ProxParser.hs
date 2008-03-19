@@ -34,6 +34,9 @@ recognizeEnrichedDoc = pStr $
 --      <*> pPrs parseTree
 -}
 
+recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc = pStructural
+
 
 leafParser =
           (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))
@@ -45,18 +48,18 @@ leafParser =
 recognizeList_Tree :: ListParser Document Node ClipDoc UserToken List_Tree
 recognizeList_Tree = pStr $
           (\str trees -> reuseList_Tree [str] (Just $ toConsList_Tree trees))
-      <$> pStructural Node_List_Tree
+      <$> pStructuralTk Node_List_Tree
       <*> pList recognizeTree
 
 recognizeTree :: ListParser Document Node ClipDoc UserToken Tree
 recognizeTree = pStr $
           (\str left right -> reuseBin [str] (Just left) (Just right))
-      <$> pStructural Node_Bin
+      <$> pStructuralTk Node_Bin
       <*> recognizeTree
       <*> recognizeTree
 --      <*  recognizeTree
   <|>     (\str -> reuseLeaf [str] Nothing)
-      <$> pStructural Node_Leaf
+      <$> pStructuralTk Node_Leaf
 
 parseTree :: ListParser Document Node ClipDoc UserToken Tree
 parseTree = 
@@ -71,91 +74,3 @@ parseTree =
   <|>     (\str -> reuseLeaf [str] Nothing)
       <$> pToken LeafToken
 
-
-
-
-recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
-recognizeEnrichedDoc =  
-          (\str -> let clip = recognize str
-                       in  case fromClip clip of 
-                              Just enr -> enr
-                              Nothing   -> error $ "Error"++show clip )
-      <$> pStructural Node_RootEnr
-
-{-
-TODO
-type error in retrieveArg: more info
-
-what about parseerr hole for constr? will they occur?
-what about String etc.?
-duplicates!
--}
-
-{- recognize groups the children according to their paths. 
--}
-recognize :: (Clip clip, Construct doc node clip token, DocNode node, Show token, Ord token) =>
-             Token doc node clip token -> clip
-recognize strTk@(StructuralTk _ (Just node) _ childTokens _) = 
-  if isListClip (construct node strTk []) 
-  then 
-  let thisPath = case pathNode node of
-                   PathD path -> path
-                   NoPathD    -> error $ "recognize: Encountered StructuralTk that has node without path:" ++ show strTk
-      eltTokens = map (snd . tokenPath thisPath) childTokens -- we do the checks, but discard the numbers
-      eltClips = map (Just. recognize) eltTokens
-      result = construct node strTk eltClips -- for lists construct does not call reuse
-  in  result
-  else    
-  let thisPath = case pathNode node of
-                   PathD path -> path
-                   NoPathD    -> error $ "recognize: Encountered StructuralTk that has node without path:" ++ show strTk
-      numberedChildTokens = map (tokenPath thisPath) childTokens
-      constructorArity = arityClip result -- no problem, since the constructor can be evaluated lazily
-      initChildTokenGroups = replicate constructorArity []
-      childTokenGroups = addChildTokens initChildTokenGroups numberedChildTokens 
-      clipGroups       = map (map recognize) childTokenGroups
-      reuseArgs = [ case group of
-                      (clip:_) -> Just clip -- cannot handle multiple occurrences yet. Now we just take
-                                            -- the first, in the future, use dirty bits to take the updated one
-                      []       -> Nothing
-                  | group <- clipGroups
-                  ]
-      parsedChildren = map recognize childTokens
-      result = construct node strTk reuseArgs
-  in  debug Prs ("\nThis path"++ show thisPath ++"\nChildren (max "++show constructorArity++"):\n"++show numberedChildTokens++"\n" ++ show childTokenGroups) $
-      result
-recognize tk@(StructuralTk _ Nothing _ childTokens _) =
-  error $ "recognize: Encountered StructuralTk without node: " ++ show tk
-recognize tk@(ParsingTk (Just parser) _ _ childTokens _) = 
-  parser childTokens
-recognize tk@(ParsingTk Nothing _ _ childTokens _) = 
-  error $ "recognize: Encountered ParsingTk without parser: " ++ show tk
-
-
-tokenPath :: (Construct doc node clip token, DocNode node, Show token) => Path -> Token doc node clip token -> (Int, Token doc node clip token)
-tokenPath parentPath tk =
-  let node = case tk of 
-               (StructuralTk _ (Just node) _ _ _) -> node
-               (StructuralTk _ Nothing _ _ _)     -> error $ "tokenPath: childToken without node" ++ show tk
-               (ParsingTk _ (Just node) _ _ _) -> node
-               (ParsingTk _ Nothing _ _ _)     -> error $ "tokenPath: childToken without node" ++ show tk
-  in case pathNode node of
-       PathD path -> if parentPath `isPrefixOf` path 
-                     then case drop (length parentPath) path of
-                            [childNr] -> (childNr, tk)
-                            _ -> error $ "encountered token that is not a child: tokenPath=" ++show path ++ 
-                                         " parentPath=" ++ show parentPath ++ " token=" ++ show tk
-                     else error $ "encountered token that is not a child: tokenPath=" ++show path ++ 
-                                  " parentPath=" ++ show parentPath ++ " token=" ++ show tk
-       NoPathD    -> error $ "tokenPath: childToken has node without path: " ++ show tk
-
-addChildTokens childTokenGroups []  = childTokenGroups
-addChildTokens childTokenGroups (childToken: childTokens) =
-  addChildTokens (addChildToken childTokenGroups childToken) childTokens
-
-addChildToken childTokenGroups (nr, childToken) =
-  case splitAt nr childTokenGroups of
-    (left, group:right) -> left ++ (group ++ [childToken]) : right
-    _                   -> error $ "addChildToken: encountered child with number larger than parent's arity: nr="++show nr ++ " token="++show childToken 
-
-     
