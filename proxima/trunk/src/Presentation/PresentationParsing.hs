@@ -278,6 +278,8 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 TODO
 error handling in pStructuralEx
 what do we do with non-Proxima types?
+what happens when we edit inside a structural that is in a parsing presentation? Will recognize handle this
+right? The path in the structural token will not be correct.
 
 duplicates!
 maybe pStructural should fail if wrong type is present?
@@ -300,7 +302,7 @@ mkClipParser parser =
        \tokens ->
          let (res, errs) = runParser parser tokens
          in  toClip $ if null errs then res 
-                      else debug Prs ("Parse error\n"++(show errs)) $ 
+                      else debug Prs ("Presentation parser:\n"++(show errs)) $ 
                              parseErr (ParsingParseErr (mkErr errs) tokens clipParser)
  in  clipParser
 
