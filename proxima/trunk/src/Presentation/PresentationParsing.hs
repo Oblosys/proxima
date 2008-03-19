@@ -392,7 +392,12 @@ addChildTokens childTokenGroups (childToken: childTokens) =
            _                   -> error $ "addChildToken: encountered child with number larger than parent's arity: nr="++show nr ++ " token="++show childToken 
 
      
-
-
-
-
+-- if the argument is nothing, return nothing (for reuse), otherwise apply fromClip to the
+-- clip
+retrieveArg :: (Editable a doc node clip token, Show clip) => String -> Maybe clip -> Maybe a
+retrieveArg parentCnstr (Just clip) =
+  case fromClip clip of
+    Just x  -> Just x
+    Nothing -> debug Err ("\n\n\nCritical structural parse error: retrieveArg: Type error in "++show parentCnstr++
+                          ". Encountered a " ++ show clip ) $ Nothing
+retrieveArg parentCnstr Nothing     = Nothing
