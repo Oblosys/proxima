@@ -11,35 +11,43 @@ import Evaluation.DocTypes
 import DocTypes_Generated
 import Presentation.PresentationParsing
 import Data.Maybe
+                                   
+----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
+
+--------------------------------------------------------------------------
+-- Construct instance                                                   --
+--------------------------------------------------------------------------
 
 instance Construct Document Node ClipDoc UserToken where
-  construct (Node_Bin _ _) = construct_Tree_Bin 
-  construct (Node_Leaf _ _) = construct_Tree_Leaf
-  construct (Node_HoleTree _ _) = construct_Tree_HoleTree
-  construct (Node_ParseErrTree _ _) = construct_Tree_ParseErrTree
-  construct (Node_RootEnr _ _) = construct_EnrichedDoc_RootEnr
+  construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
+  construct (Node_RootEnr _ _) = construct_RootEnr
+  construct (Node_HoleEnrichedDoc _ _) = construct_HoleEnrichedDoc
+  construct (Node_ParseErrEnrichedDoc _ _) = construct_ParseErrEnrichedDoc
+  construct (Node_RootDoc _ _) = construct_RootDoc
+  construct (Node_HoleDocument _ _) = construct_HoleDocument
+  construct (Node_ParseErrDocument _ _) = construct_ParseErrDocument
+  construct (Node_Bin _ _) = construct_Bin
+  construct (Node_Leaf _ _) = construct_Leaf
+  construct (Node_HoleTree _ _) = construct_HoleTree
+  construct (Node_ParseErrTree _ _) = construct_ParseErrTree
   construct (Node_List_Tree _ _) = construct_List_Tree
   construct (Node_HoleList_Tree _ _) = construct_HoleList_Tree
-  construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
-  -- does not occur, since nodes are added automatically
-
-
--- lazy pattern is necessary because recognize uses arityClip on the result
-construct_EnrichedDoc_RootEnr :: Token Document Node ClipDoc UserToken -> [ Maybe ClipDoc ] -> ClipDoc
-construct_EnrichedDoc_RootEnr tk ~[mclip1, mclip2] = Clip_EnrichedDoc $ reuseRootEnr [tk] (retrieveArg "RootEnr" "Tree" mclip1)  (retrieveArg "RootEnr" "Tree" mclip2)
-
-construct_Tree_Bin :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_Tree_Bin  tk ~[clip1,clip2] = Clip_Tree $ reuseBin [tk] (retrieveArg "Bin" "Tree" clip1) (retrieveArg "Bin" "Tree" clip2)
-construct_Tree_Leaf tk ~[clip1] = Clip_Tree $ reuseLeaf [tk] (retrieveArg "Leaf" "Int" clip1)
-construct_Tree_HoleTree tk ~[] = Clip_Tree $ hole
-construct_Tree_ParseErrTree (StructuralTk _ _ pres _ _) ~[] = Clip_Tree $ parseErr (StructuralParseErr pres)
-  
-construct_List_Tree :: Token Document Node ClipDoc UserToken -> [Maybe ClipDoc ] -> ClipDoc
-construct_List_Tree tk clips = genericConstruct_List "Tree" toList_Tree clips
-                                 
+  construct (Node_ParseErrList_Tree _ _) = construct_ParseErrList_Tree
+construct_RootEnr tk ~[mClip0,mClip1] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "trees::List_Tree" mClip0) (retrieveArg "RootEnr" "trees2::List_Tree" mClip1)
+construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
+construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
+construct_RootDoc tk ~[mClip0,mClip1] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "trees::List_Tree" mClip0) (retrieveArg "RootDoc" "trees2::List_Tree" mClip1)
+construct_HoleDocument tk ~[] = Clip_Document $ hole
+construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
+construct_Bin tk ~[mClip0,mClip1] = Clip_Tree $ reuseBin [tk]  (retrieveArg "Bin" "left::Tree" mClip0) (retrieveArg "Bin" "right::Tree" mClip1)
+construct_Leaf tk ~[mClip0] = Clip_Tree $ reuseLeaf [tk]  (retrieveArg "Leaf" "int::Int" mClip0)
+construct_HoleTree tk ~[] = Clip_Tree $ hole
+construct_ParseErrTree (StructuralTk _ _ pres _ _) ~[] = Clip_Tree $ parseErr (StructuralParseErr pres)
+construct_List_Tree tk mClips = genericConstruct_List "Tree" toList_Tree mClips
 construct_HoleList_Tree tk ~[] = Clip_List_Tree $ hole
+construct_ParseErrList_Tree (StructuralTk _ _ pres _ _) ~[] = Clip_List_Tree $ parseErr (StructuralParseErr pres)
 
------ GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
+
 
 --------------------------------------------------------------------------
 -- reuse functions                                                      --
