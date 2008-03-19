@@ -27,14 +27,14 @@ import DocUtils_Generated
 recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStr $
           (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
-      <$> pStructural Node_RootEnr
+      <$> pStructuralTk Node_RootEnr
       <*> recognizeRootE
 
 recognizeRootE :: ListParser Document Node ClipDoc UserToken RootE
 recognizeRootE = pStr $ 
           (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls))
-      <$> pStructural Node_RootE
-      <*> parseIDListList_Decl {- <* (pStr' $ pStructural Node_List_Decl) -}  <*> recognizeList_Decl
+      <$> pStructuralTk Node_RootE
+      <*> parseIDListList_Decl {- <* (pStr' $ pStructuralTk Node_List_Decl) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 
 parseIDListList_Decl :: ListParser Document Node ClipDoc UserToken List_Decl
@@ -45,12 +45,12 @@ parseIDListList_Decl = pPrs $
 recognizeIDListDecl :: ListParser Document Node ClipDoc UserToken Decl
 recognizeIDListDecl = pStr $
           (\str ident -> reuseDecl [str] Nothing Nothing Nothing Nothing Nothing Nothing (Just ident) Nothing)
-      <$> pStructural Node_Decl
+      <$> pStructuralTk Node_Decl
       <*> parseIdListIdent
   <|>     (\str -> reuseBoardDecl [str] Nothing Nothing Nothing)
-      <$> pStructural Node_BoardDecl
+      <$> pStructuralTk Node_BoardDecl
   <|>     (\str -> reusePPPresentationDecl [str] Nothing Nothing Nothing)
-      <$> pStructural Node_PPPresentationDecl
+      <$> pStructuralTk Node_PPPresentationDecl
      {- <|>  
                       (\str -> HoleDecl
                   <$> pSym declHoleTk
@@ -66,7 +66,7 @@ parseIdListIdent =  pPrs $
 parseBoard = 
       ((\_ -> initBoard) <$> pKey "board")
   <|>     (\str -> reuseBoard [str] Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing) 
-      <$> pStructural Node_Board -- don't descend into structure, so no pres edit
+      <$> pStructuralTk Node_Board -- don't descend into structure, so no pres edit
 
 
 -------------------- Powerpoint parser:
@@ -77,48 +77,48 @@ parsePPPresentation =
 
 recognizePPPresentation = pStr $                       -- viewTp
          (\str list_slide -> reusePPPresentation [str] Nothing (Just list_slide))
-     <$> pStructural Node_PPPresentation
+     <$> pStructuralTk Node_PPPresentation
      <*> recognizeList_Slide
  
 recognizeList_Slide = pStr $
          (\str slides -> reuseList_Slide [str] (Just $ toConsList_Slide slides)) 
-     <$> pStructural Node_List_Slide
+     <$> pStructuralTk Node_List_Slide
      <*> pList recognizeSlide
   
         -- maybe make a recognizeConsList_Slide?
 
 recognizeSlide =  pStr $
          (\str title itemList -> reuseSlide [str] (Just $ tokenString title) (Just itemList))
-     <$> pStructural Node_Slide
+     <$> pStructuralTk Node_Slide
      <*> pLIdent <*> recognizeItemList
 
 recognizeItemList = pStr $                         -- ListType
          (\str listType list_item -> reuseItemList [str] (Just listType) (Just list_item))
-     <$> pStructural Node_ItemList
+     <$> pStructuralTk Node_ItemList
      <*> recognizeListType <*> recognizeList_Item
 
 recognizeListType = pStr $
          (\str -> reuseBullet [str])
-     <$> pStructural Node_Bullet
+     <$> pStructuralTk Node_Bullet
   <|>    (\str -> reuseNumber [str])
-     <$> pStructural Node_Number
+     <$> pStructuralTk Node_Number
   <|>    (\str -> reuseAlpha [str])
-     <$> pStructural Node_Alpha
+     <$> pStructuralTk Node_Alpha
 
 recognizeList_Item = pStr $
          (\str items -> reuseList_Item [str] (Just $ toConsList_Item items)) 
-     <$> pStructural Node_List_Item
+     <$> pStructuralTk Node_List_Item
      <*> pList recognizeItem
 
 recognizeItem = pStr $ 
          (\str string_ -> reuseStringItem [str] (Just $ tokenString string_))
-     <$> pStructural Node_StringItem
+     <$> pStructuralTk Node_StringItem
      <*> pLIdent
   <|>    (\str helium -> reuseHeliumItem [str] (Just helium))
-     <$> pStructural Node_HeliumItem
+     <$> pStructuralTk Node_HeliumItem
      <*> recognizeExp
   <|>    (\str helium -> reuseListItem [str] (Just helium))
-     <$> pStructural Node_ListItem
+     <$> pStructuralTk Node_ListItem
      <*> recognizeItemList
 
 
@@ -129,15 +129,15 @@ recognizeExp =
 
 recognizeExp' = pStr $
          (\str e1 e2 -> reuseDivExp [str] (Just $ tokenIDP str) (Just e1) (Just e2))
-     <$> pStructural Node_DivExp
+     <$> pStructuralTk Node_DivExp
      <*> recognizeExp
      <*> recognizeExp
   <|>    (\str e1 e2 -> reusePowerExp [str] (Just $ tokenIDP str) (Just e1) (Just e2))
-     <$> pStructural Node_PowerExp
+     <$> pStructuralTk Node_PowerExp
      <*> recognizeExp
      <*> recognizeExp
   <|>    HoleExp
-     <$ pStructural Node_HoleExp
+     <$ pStructuralTk Node_HoleExp
 
 -------------------- Helium parser:
 
@@ -153,10 +153,10 @@ parseList_Decl =
 
 parseDecl  =                                                              -- IDD  "="                   ";"                       type sig              not used  expanded    auto-layout
           (\sig ident tk1 exp tk2 -> reuseDecl [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just True) Nothing (Just ident) (Just exp))
-      <$> pMaybe (pStructural Node_Decl) -- type sig/value
+      <$> pMaybe (pStructuralTk Node_Decl) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
   <|>     (\sig ident tk1 tk2 -> reuseDecl [tk1, tk2] (Just $ tokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
-      <$> pMaybe (pStructural Node_Decl) -- type sig/value
+      <$> pMaybe (pStructuralTk Node_Decl) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> pKey "..." -- bit weird what happens when typing ... maybe this must be done with a structural presentation (wasn't possible before with structural parser that was too general)
  <|>      (\tk board ->  BoardDecl (tokenIDP tk) NoIDP board) 
       <$> pKey "Chess" <* pKey ":" <*> parseBoard        
@@ -324,14 +324,14 @@ parseString_ = pPrs $
 --           (\strTk -> reuseString_ [] (Just $ tokenString strTk)) 
           mkString_
      <$>  pLIdent     
-     <|> (HoleString_ <$ pStructural Node_HoleString_)
+     <|> (HoleString_ <$ pStructuralTk Node_HoleString_)
 
 
 parseInt_ = pStr $
 --           (\strTk -> reuseString_ [] (Just $ tokenString strTk)) 
           mkInt_
      <$>  pInt
-     <|> (HoleInt_ <$ pStructural Node_HoleInt_)
+     <|> (HoleInt_ <$ pStructuralTk Node_HoleInt_)
 -- bit hacky
 
 
@@ -339,7 +339,7 @@ parseBool_ = pStr $
 --           (\strTk -> reuseString_ [] (Just $ tokenString strTk)) 
          mkBool_
      <$> (True <$ pTrue <|> False <$ pFalse)
-     <|> (HoleBool_ <$ pStructural Node_HoleBool_)
+     <|> (HoleBool_ <$ pStructuralTk Node_HoleBool_)
 -}
 
 parseIntExp =

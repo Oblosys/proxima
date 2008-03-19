@@ -208,6 +208,11 @@ instance Editable Document Document Node ClipDoc UserToken where
   arity (RootDoc x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_Document t
+
+  fromClip (Clip_Document t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrDocument
 
   hole = HoleDocument
@@ -234,6 +239,11 @@ instance Editable Root Document Node ClipDoc UserToken where
 
   arity (Root _ x0) = 1
   arity _                        = 0
+
+  toClip t = Clip_Root t
+
+  fromClip (Clip_Root t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrRoot
 
@@ -264,6 +274,11 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   arity (RootEnr x0 x1) = 2
   arity _                        = 0
 
+  toClip t = Clip_EnrichedDoc t
+
+  fromClip (Clip_EnrichedDoc t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrEnrichedDoc
 
   hole = HoleEnrichedDoc
@@ -292,6 +307,11 @@ instance Editable RootE Document Node ClipDoc UserToken where
 
   arity (RootE _ x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_RootE t
+
+  fromClip (Clip_RootE t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrRootE
 
@@ -334,6 +354,11 @@ instance Editable Decl Document Node ClipDoc UserToken where
   arity (PPPresentationDecl _ _ x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_Decl t
+
+  fromClip (Clip_Decl t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrDecl
 
   hole = HoleDecl
@@ -360,6 +385,11 @@ instance Editable Ident Document Node ClipDoc UserToken where
 
   arity (Ident _ _ x0) = 1
   arity _                        = 0
+
+  toClip t = Clip_Ident t
+
+  fromClip (Clip_Ident t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrIdent
 
@@ -464,6 +494,11 @@ instance Editable Exp Document Node ClipDoc UserToken where
   arity (ProductExp _ _ _ x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_Exp t
+
+  fromClip (Clip_Exp t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrExp
 
   hole = HoleExp
@@ -492,6 +527,11 @@ instance Editable Alt Document Node ClipDoc UserToken where
 
   arity (Alt _ _ x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_Alt t
+
+  fromClip (Clip_Alt t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrAlt
 
@@ -534,6 +574,11 @@ instance Editable Board Document Node ClipDoc UserToken where
   arity (Board x0 x1 x2 x3 x4 x5 x6 x7) = 8
   arity _                        = 0
 
+  toClip t = Clip_Board t
+
+  fromClip (Clip_Board t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrBoard
 
   hole = HoleBoard
@@ -574,6 +619,11 @@ instance Editable BoardRow Document Node ClipDoc UserToken where
 
   arity (BoardRow x0 x1 x2 x3 x4 x5 x6 x7) = 8
   arity _                        = 0
+
+  toClip t = Clip_BoardRow t
+
+  fromClip (Clip_BoardRow t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrBoardRow
 
@@ -624,6 +674,11 @@ instance Editable BoardSquare Document Node ClipDoc UserToken where
   arity (Empty) = 0
   arity _                        = 0
 
+  toClip t = Clip_BoardSquare t
+
+  fromClip (Clip_BoardSquare t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrBoardSquare
 
   hole = HoleBoardSquare
@@ -652,6 +707,11 @@ instance Editable PPPresentation Document Node ClipDoc UserToken where
 
   arity (PPPresentation x0 x1) = 2
   arity _                        = 0
+
+  toClip t = Clip_PPPresentation t
+
+  fromClip (Clip_PPPresentation t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrPPPresentation
 
@@ -682,6 +742,11 @@ instance Editable Slide Document Node ClipDoc UserToken where
   arity (Slide x0 x1) = 2
   arity _                        = 0
 
+  toClip t = Clip_Slide t
+
+  fromClip (Clip_Slide t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrSlide
 
   hole = HoleSlide
@@ -711,6 +776,11 @@ instance Editable ItemList Document Node ClipDoc UserToken where
   arity (ItemList x0 x1) = 2
   arity _                        = 0
 
+  toClip t = Clip_ItemList t
+
+  fromClip (Clip_ItemList t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrItemList
 
   hole = HoleItemList
@@ -739,6 +809,11 @@ instance Editable ListType Document Node ClipDoc UserToken where
   arity (Number) = 0
   arity (Alpha) = 0
   arity _                        = 0
+
+  toClip t = Clip_ListType t
+
+  fromClip (Clip_ListType t) = Just t
+  fromClip _             = Nothing
 
   parseErr = ParseErrListType
 
@@ -775,6 +850,11 @@ instance Editable Item Document Node ClipDoc UserToken where
   arity (ListItem x0) = 1
   arity _                        = 0
 
+  toClip t = Clip_Item t
+
+  fromClip (Clip_Item t) = Just t
+  fromClip _             = Nothing
+
   parseErr = ParseErrItem
 
   hole = HoleItem
@@ -810,6 +890,11 @@ instance Editable List_Decl Document Node ClipDoc UserToken where
 
   arity (List_Decl x1) = length (fromConsList_Decl x1)
   arity _ = 0
+
+  toClip t = Clip_List_Decl t
+
+  fromClip (Clip_List_Decl t) = Just t
+  fromClip _ = Nothing
 
   parseErr = ParseErrList_Decl
 
@@ -852,6 +937,11 @@ instance Editable List_Alt Document Node ClipDoc UserToken where
   arity (List_Alt x1) = length (fromConsList_Alt x1)
   arity _ = 0
 
+  toClip t = Clip_List_Alt t
+
+  fromClip (Clip_List_Alt t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Alt
 
   hole = List_Alt Nil_Alt
@@ -892,6 +982,11 @@ instance Editable List_Exp Document Node ClipDoc UserToken where
 
   arity (List_Exp x1) = length (fromConsList_Exp x1)
   arity _ = 0
+
+  toClip t = Clip_List_Exp t
+
+  fromClip (Clip_List_Exp t) = Just t
+  fromClip _ = Nothing
 
   parseErr = ParseErrList_Exp
 
@@ -934,6 +1029,11 @@ instance Editable List_Slide Document Node ClipDoc UserToken where
   arity (List_Slide x1) = length (fromConsList_Slide x1)
   arity _ = 0
 
+  toClip t = Clip_List_Slide t
+
+  fromClip (Clip_List_Slide t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Slide
 
   hole = List_Slide Nil_Slide
@@ -975,6 +1075,11 @@ instance Editable List_Item Document Node ClipDoc UserToken where
   arity (List_Item x1) = length (fromConsList_Item x1)
   arity _ = 0
 
+  toClip t = Clip_List_Item t
+
+  fromClip (Clip_List_Item t) = Just t
+  fromClip _ = Nothing
+
   parseErr = ParseErrList_Item
 
   hole = List_Item Nil_Item
@@ -1007,6 +1112,12 @@ instance Editable Int Document Node ClipDoc UserToken where
   alternatives _ = [ ("0", Clip_Int 0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Int t
+
+  fromClip (Clip_Int t) = Just t
+  fromClip _            = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -1027,6 +1138,12 @@ instance Editable Float Document Node ClipDoc UserToken where
   alternatives _ = [ ("0.0", Clip_Float 0.0) ]
   
   arity _ = 0
+
+  toClip t = Clip_Float t
+
+  fromClip (Clip_Float t) = Just t
+  fromClip _              = Nothing
+
   parseErr _ = 0
 
   hole = 0
@@ -1047,6 +1164,12 @@ instance Editable Bool Document Node ClipDoc UserToken where
                    , ("False", Clip_Bool False)      
                    ]    
   arity _ = 0                                          
+
+  toClip t = Clip_Bool t
+
+  fromClip (Clip_Bool t) = Just t
+  fromClip _             = Nothing
+
   parseErr _ = False
 
   hole = False
@@ -1068,6 +1191,12 @@ instance Editable String Document Node ClipDoc UserToken where
                    ] 
  
   arity _ = 0
+
+  toClip t = Clip_String t
+
+  fromClip (Clip_String t) = Just t
+  fromClip _               = Nothing
+
   parseErr _ = "{ParseErr}"
 
   hole = "{String}"

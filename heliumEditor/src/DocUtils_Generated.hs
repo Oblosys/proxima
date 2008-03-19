@@ -17,11 +17,16 @@ initialDocument =
     ; dir <- getCurrentDirectory
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
-    ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl (StructuralParseErr (ColP NoIDP 0 NF . map (StringP NoIDP). lines' $ fileContents)))
+    ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl 
+                                       (ParsingParseErr (0,"")
+                                       [ ErrorTk 0 fileContents ] 
+                                       (error "DocUtils.generated.initialDocument: No clipparser specified")))
     }
     -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
     -- the proxima parser is used when the presented document is parsed.
-
+    -- we can specify the parser when we start using pStructural for the Helium editor.
+    -- (although this will cause a cycle)
+    
 -- HeliumTypeInfo is not a ProximaType, so we need to declare toXML and parseXML
 toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
