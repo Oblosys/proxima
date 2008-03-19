@@ -19,9 +19,10 @@ generate docType = genPresentationSheet
                 ++ genAttr (removeDocumentDecl (addEnrichedDocDecl docType))
                 ++ genSem (addConsListDecls docTypeWithLists)
                 ++ genSemSynthesizedPath (docTypeWithoutEnrWithLists)
-                ++ genSemXML (addConsListDecls docTypeWithoutEnrWithLists)
-                ++ genSemTree (addConsListDecls docTypeWithoutEnrWithLists)
-  where docTypeWithoutEnrWithLists = removeEnrichedDocDecl (addListDecls (removeDocumentDecl (addEnrichedDocDecl docType)))
+                ++ genSemXML docTypeWithoutEnrWithListsAndConsLists
+                ++ genSemTree docTypeWithoutEnrWithListsAndConsLists
+  where docTypeWithoutEnrWithListsAndConsLists = removeEnrichedDocDecl (addConsListDecls (addListDecls (removeDocumentDecl (addEnrichedDocDecl docType))))
+        docTypeWithoutEnrWithLists = removeEnrichedDocDecl (addListDecls (removeDocumentDecl (addEnrichedDocDecl docType)))
         docTypeWithLists = addListDecls (removeDocumentDecl (addEnrichedDocDecl docType))
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
