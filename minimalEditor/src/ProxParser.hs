@@ -45,7 +45,8 @@ intParser = 0
 
 pTree = pLeaf <|> pBin
 
-pLeaf = pStructural {-
+pLeaf = pStructural
+{-
           (\str t -> reuseLeaf [str] (Just $ read $ tokenString t))
       <$> pToken LeafToken
       <*> pToken IntToken
