@@ -19,12 +19,12 @@ TODO:
 
 -}
 generate :: DocumentType -> [String]
-generate docType = genClip (docTypeWithLists ++ primTypeDecls) ++ -- with Document
-                   genEditable docTypeWithLists ++
-                   genEditableDocEnrichedDocAndPrims
+generate docType = genClip (docTypeWithLists ++ primTypeDecls) -- with Document
+                ++ genEditable docTypeWithLists 
+                ++ genEditableDocEnrichedDocAndPrims
  where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
 
-
+  
 genClip decls = genBanner "Clip instance" $
     "instance Clip ClipDoc where" : 
   [ "  arityClip Clip_Nothing = -1" ] ++

@@ -14,14 +14,47 @@ module Gen_ProxParser where
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genReuse   docTypeWithLists
+generate docType = genConstruct (addHolesParseErrs docTypeWithLists)
+                ++ genReuse   docTypeWithLists
                 ++ genExtract docTypeWithLists
                 ++ genDefault docTypeWithLists
                 ++ genExtractFromTokens 
                 ++ genGenericReuse docTypeWithLists
   where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
   
+
+genConstruct decls = genBanner "Construct instance" $
+  [ "instance Construct Document Node ClipDoc UserToken where"
+  ,   "  construct NoNode = error $ \"ProxParser_Generated.construct not defined on NoNode\""
+  ] ++
+  [ "  construct (Node_%1 _ _) = construct_%1" <~ [cnstrName] 
+  | cnstrName <-  getAllConstructorNames decls
+  ] ++
+  concatMap genConstructDecl decls
+                                   
   
+genConstructDecl (Decl lhsType prods) = 
+  [ case prodKind of
+      HoleProd     -> "construct_Hole%1 tk ~[] = Clip_%1 $ hole" <~ [ genTypeName lhsType ]
+      ParseErrProd -> "construct_ParseErr%1 (StructuralTk _ _ pres _ _) ~[] = Clip_%1 $ parseErr (StructuralParseErr pres)" <~ [ genTypeName lhsType ]
+      _            -> 
+        case lhsType of 
+          (LHSListType lhsTypeName) ->
+            "construct_List_%1 tk mClips = genericConstruct_List \"%1\" toList_%1 mClips" <~ [ lhsTypeName ]
+          (LHSBasicType lhsTypeName) ->
+            "construct_%1 tk ~[%2] = Clip_%3 $ reuse%1 [tk] %4"
+            <~ [ cnstrName
+               , separateBy "," ["mClip"++show i | i <- [0..length fields - 1]]
+               , lhsTypeName 
+               , concat [ " (retrieveArg \"%1\" \"%2\" mClip%3)" <~ [ cnstrName
+                                                                   , fieldName ++ "::" ++ genType fieldType
+                                                                   , show i ] 
+                        | (i, Field fieldName fieldType) <- zip [0..] fields 
+                        ]
+               ]
+  | (Prod prodKind cnstrName _ fields) <- prods
+  ]
+
 genReuse decls = genBanner "reuse functions" $ concat
   [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"

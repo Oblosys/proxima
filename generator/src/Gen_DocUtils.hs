@@ -37,8 +37,9 @@ genDocNode decls = genBanner "DocNode instance for Node" $
   , "  noNode = NoNode"
   , "  pathNode NoNode            = NoPathD" 
   ] ++
-  map genPathNodeCnstr (getAllConstructorNames decls)
-  where genPathNodeCnstr cnstrName = "  pathNode (Node_%1 _ pth) = PathD pth" <~ [cnstrName]
+  [ "  pathNode (Node_%1 _ pth) = PathD pth" <~ [cnstrName] 
+  | cnstrName <-  getAllConstructorNames decls 
+  ]
 
 genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 
