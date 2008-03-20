@@ -3,13 +3,161 @@ module ProxParser_Generated where
 import Common.CommonTypes hiding (Dirty (..))
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils
-
+import Presentation.PresentationParsing
 import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import Evaluation.DocTypes
 import DocTypes_Generated
+import DocUtils_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
+
+--------------------------------------------------------------------------
+-- Construct instance                                                   --
+--------------------------------------------------------------------------
+
+instance Construct Document Node ClipDoc UserToken where
+  construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
+  construct (Node_RootEnr _ _) = construct_RootEnr
+  construct (Node_HoleEnrichedDoc _ _) = construct_HoleEnrichedDoc
+  construct (Node_ParseErrEnrichedDoc _ _) = construct_ParseErrEnrichedDoc
+  construct (Node_RootDoc _ _) = construct_RootDoc
+  construct (Node_HoleDocument _ _) = construct_HoleDocument
+  construct (Node_ParseErrDocument _ _) = construct_ParseErrDocument
+  construct (Node_Root _ _) = construct_Root
+  construct (Node_HoleRoot _ _) = construct_HoleRoot
+  construct (Node_ParseErrRoot _ _) = construct_ParseErrRoot
+  construct (Node_Section _ _) = construct_Section
+  construct (Node_HoleSection _ _) = construct_HoleSection
+  construct (Node_ParseErrSection _ _) = construct_ParseErrSection
+  construct (Node_Subsection _ _) = construct_Subsection
+  construct (Node_HoleSubsection _ _) = construct_HoleSubsection
+  construct (Node_ParseErrSubsection _ _) = construct_ParseErrSubsection
+  construct (Node_Subsubsection _ _) = construct_Subsubsection
+  construct (Node_HoleSubsubsection _ _) = construct_HoleSubsubsection
+  construct (Node_ParseErrSubsubsection _ _) = construct_ParseErrSubsubsection
+  construct (Node_Paragraph _ _) = construct_Paragraph
+  construct (Node_SubgraphPara _ _) = construct_SubgraphPara
+  construct (Node_HoleParagraph _ _) = construct_HoleParagraph
+  construct (Node_ParseErrParagraph _ _) = construct_ParseErrParagraph
+  construct (Node_Word _ _) = construct_Word
+  construct (Node_NodeRef _ _) = construct_NodeRef
+  construct (Node_Label _ _) = construct_Label
+  construct (Node_LabelRef _ _) = construct_LabelRef
+  construct (Node_HoleWord _ _) = construct_HoleWord
+  construct (Node_ParseErrWord _ _) = construct_ParseErrWord
+  construct (Node_Graph _ _) = construct_Graph
+  construct (Node_HoleGraph _ _) = construct_HoleGraph
+  construct (Node_ParseErrGraph _ _) = construct_ParseErrGraph
+  construct (Node_Vertex _ _) = construct_Vertex
+  construct (Node_HoleVertex _ _) = construct_HoleVertex
+  construct (Node_ParseErrVertex _ _) = construct_ParseErrVertex
+  construct (Node_Circle _ _) = construct_Circle
+  construct (Node_Square _ _) = construct_Square
+  construct (Node_HoleShape _ _) = construct_HoleShape
+  construct (Node_ParseErrShape _ _) = construct_ParseErrShape
+  construct (Node_Edge _ _) = construct_Edge
+  construct (Node_HoleEdge _ _) = construct_HoleEdge
+  construct (Node_ParseErrEdge _ _) = construct_ParseErrEdge
+  construct (Node_Subgraph _ _) = construct_Subgraph
+  construct (Node_HoleSubgraph _ _) = construct_HoleSubgraph
+  construct (Node_ParseErrSubgraph _ _) = construct_ParseErrSubgraph
+  construct (Node_Dirty _ _) = construct_Dirty
+  construct (Node_Clean _ _) = construct_Clean
+  construct (Node_HoleDirty _ _) = construct_HoleDirty
+  construct (Node_ParseErrDirty _ _) = construct_ParseErrDirty
+  construct (Node_List_Section _ _) = construct_List_Section
+  construct (Node_HoleList_Section _ _) = construct_HoleList_Section
+  construct (Node_ParseErrList_Section _ _) = construct_ParseErrList_Section
+  construct (Node_List_Paragraph _ _) = construct_List_Paragraph
+  construct (Node_HoleList_Paragraph _ _) = construct_HoleList_Paragraph
+  construct (Node_ParseErrList_Paragraph _ _) = construct_ParseErrList_Paragraph
+  construct (Node_List_Subsection _ _) = construct_List_Subsection
+  construct (Node_HoleList_Subsection _ _) = construct_HoleList_Subsection
+  construct (Node_ParseErrList_Subsection _ _) = construct_ParseErrList_Subsection
+  construct (Node_List_Subsubsection _ _) = construct_List_Subsubsection
+  construct (Node_HoleList_Subsubsection _ _) = construct_HoleList_Subsubsection
+  construct (Node_ParseErrList_Subsubsection _ _) = construct_ParseErrList_Subsubsection
+  construct (Node_List_Word _ _) = construct_List_Word
+  construct (Node_HoleList_Word _ _) = construct_HoleList_Word
+  construct (Node_ParseErrList_Word _ _) = construct_ParseErrList_Word
+  construct (Node_List_Vertex _ _) = construct_List_Vertex
+  construct (Node_HoleList_Vertex _ _) = construct_HoleList_Vertex
+  construct (Node_ParseErrList_Vertex _ _) = construct_ParseErrList_Vertex
+  construct (Node_List_Edge _ _) = construct_List_Edge
+  construct (Node_HoleList_Edge _ _) = construct_HoleList_Edge
+  construct (Node_ParseErrList_Edge _ _) = construct_ParseErrList_Edge
+construct_RootEnr tk ~[mClip0] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "root::Root" mClip0)
+construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
+construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
+construct_RootDoc tk ~[mClip0] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "root::Root" mClip0)
+construct_HoleDocument tk ~[] = Clip_Document $ hole
+construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
+construct_Root tk ~[mClip0,mClip1,mClip2] = Clip_Root $ reuseRoot [tk]  (retrieveArg "Root" "graph::Graph" mClip0) (retrieveArg "Root" "title::String" mClip1) (retrieveArg "Root" "sections::List_Section" mClip2)
+construct_HoleRoot tk ~[] = Clip_Root $ hole
+construct_ParseErrRoot (StructuralTk _ _ pres _ _) ~[] = Clip_Root $ parseErr (StructuralParseErr pres)
+construct_Section tk ~[mClip0,mClip1,mClip2] = Clip_Section $ reuseSection [tk]  (retrieveArg "Section" "title::String" mClip0) (retrieveArg "Section" "paragraphs::List_Paragraph" mClip1) (retrieveArg "Section" "subsections::List_Subsection" mClip2)
+construct_HoleSection tk ~[] = Clip_Section $ hole
+construct_ParseErrSection (StructuralTk _ _ pres _ _) ~[] = Clip_Section $ parseErr (StructuralParseErr pres)
+construct_Subsection tk ~[mClip0,mClip1,mClip2] = Clip_Subsection $ reuseSubsection [tk]  (retrieveArg "Subsection" "title::String" mClip0) (retrieveArg "Subsection" "paragraphs::List_Paragraph" mClip1) (retrieveArg "Subsection" "subsubsections::List_Subsubsection" mClip2)
+construct_HoleSubsection tk ~[] = Clip_Subsection $ hole
+construct_ParseErrSubsection (StructuralTk _ _ pres _ _) ~[] = Clip_Subsection $ parseErr (StructuralParseErr pres)
+construct_Subsubsection tk ~[mClip0,mClip1] = Clip_Subsubsection $ reuseSubsubsection [tk]  (retrieveArg "Subsubsection" "title::String" mClip0) (retrieveArg "Subsubsection" "paragraphs::List_Paragraph" mClip1)
+construct_HoleSubsubsection tk ~[] = Clip_Subsubsection $ hole
+construct_ParseErrSubsubsection (StructuralTk _ _ pres _ _) ~[] = Clip_Subsubsection $ parseErr (StructuralParseErr pres)
+construct_Paragraph tk ~[mClip0] = Clip_Paragraph $ reuseParagraph [tk]  (retrieveArg "Paragraph" "words::List_Word" mClip0)
+construct_SubgraphPara tk ~[mClip0] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0)
+construct_HoleParagraph tk ~[] = Clip_Paragraph $ hole
+construct_ParseErrParagraph (StructuralTk _ _ pres _ _) ~[] = Clip_Paragraph $ parseErr (StructuralParseErr pres)
+construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  (retrieveArg "Word" "word::String" mClip0)
+construct_NodeRef tk ~[mClip0] = Clip_Word $ reuseNodeRef [tk]  (retrieveArg "NodeRef" "nodeName::String" mClip0)
+construct_Label tk ~[mClip0] = Clip_Word $ reuseLabel [tk]  (retrieveArg "Label" "label::String" mClip0)
+construct_LabelRef tk ~[mClip0] = Clip_Word $ reuseLabelRef [tk]  (retrieveArg "LabelRef" "label::String" mClip0)
+construct_HoleWord tk ~[] = Clip_Word $ hole
+construct_ParseErrWord (StructuralTk _ _ pres _ _) ~[] = Clip_Word $ parseErr (StructuralParseErr pres)
+construct_Graph tk ~[mClip0,mClip1,mClip2] = Clip_Graph $ reuseGraph [tk]  (retrieveArg "Graph" "dirty::Dirty" mClip0) (retrieveArg "Graph" "vertices::List_Vertex" mClip1) (retrieveArg "Graph" "edges::List_Edge" mClip2)
+construct_HoleGraph tk ~[] = Clip_Graph $ hole
+construct_ParseErrGraph (StructuralTk _ _ pres _ _) ~[] = Clip_Graph $ parseErr (StructuralParseErr pres)
+construct_Vertex tk ~[mClip0,mClip1,mClip2,mClip3,mClip4] = Clip_Vertex $ reuseVertex [tk]  (retrieveArg "Vertex" "name::String" mClip0) (retrieveArg "Vertex" "shape::Shape" mClip1) (retrieveArg "Vertex" "id::Int" mClip2) (retrieveArg "Vertex" "x::Int" mClip3) (retrieveArg "Vertex" "y::Int" mClip4)
+construct_HoleVertex tk ~[] = Clip_Vertex $ hole
+construct_ParseErrVertex (StructuralTk _ _ pres _ _) ~[] = Clip_Vertex $ parseErr (StructuralParseErr pres)
+construct_Circle tk ~[] = Clip_Shape $ reuseCircle [tk] 
+construct_Square tk ~[] = Clip_Shape $ reuseSquare [tk] 
+construct_HoleShape tk ~[] = Clip_Shape $ hole
+construct_ParseErrShape (StructuralTk _ _ pres _ _) ~[] = Clip_Shape $ parseErr (StructuralParseErr pres)
+construct_Edge tk ~[mClip0,mClip1] = Clip_Edge $ reuseEdge [tk]  (retrieveArg "Edge" "from::Int" mClip0) (retrieveArg "Edge" "to::Int" mClip1)
+construct_HoleEdge tk ~[] = Clip_Edge $ hole
+construct_ParseErrEdge (StructuralTk _ _ pres _ _) ~[] = Clip_Edge $ parseErr (StructuralParseErr pres)
+construct_Subgraph tk ~[mClip0,mClip1,mClip2] = Clip_Subgraph $ reuseSubgraph [tk]  (retrieveArg "Subgraph" "dirty::Dirty" mClip0) (retrieveArg "Subgraph" "vertices::List_Vertex" mClip1) (retrieveArg "Subgraph" "edges::List_Edge" mClip2)
+construct_HoleSubgraph tk ~[] = Clip_Subgraph $ hole
+construct_ParseErrSubgraph (StructuralTk _ _ pres _ _) ~[] = Clip_Subgraph $ parseErr (StructuralParseErr pres)
+construct_Dirty tk ~[] = Clip_Dirty $ reuseDirty [tk] 
+construct_Clean tk ~[] = Clip_Dirty $ reuseClean [tk] 
+construct_HoleDirty tk ~[] = Clip_Dirty $ hole
+construct_ParseErrDirty (StructuralTk _ _ pres _ _) ~[] = Clip_Dirty $ parseErr (StructuralParseErr pres)
+construct_List_Section tk mClips = genericConstruct_List "Section" toList_Section mClips
+construct_HoleList_Section tk ~[] = Clip_List_Section $ hole
+construct_ParseErrList_Section (StructuralTk _ _ pres _ _) ~[] = Clip_List_Section $ parseErr (StructuralParseErr pres)
+construct_List_Paragraph tk mClips = genericConstruct_List "Paragraph" toList_Paragraph mClips
+construct_HoleList_Paragraph tk ~[] = Clip_List_Paragraph $ hole
+construct_ParseErrList_Paragraph (StructuralTk _ _ pres _ _) ~[] = Clip_List_Paragraph $ parseErr (StructuralParseErr pres)
+construct_List_Subsection tk mClips = genericConstruct_List "Subsection" toList_Subsection mClips
+construct_HoleList_Subsection tk ~[] = Clip_List_Subsection $ hole
+construct_ParseErrList_Subsection (StructuralTk _ _ pres _ _) ~[] = Clip_List_Subsection $ parseErr (StructuralParseErr pres)
+construct_List_Subsubsection tk mClips = genericConstruct_List "Subsubsection" toList_Subsubsection mClips
+construct_HoleList_Subsubsection tk ~[] = Clip_List_Subsubsection $ hole
+construct_ParseErrList_Subsubsection (StructuralTk _ _ pres _ _) ~[] = Clip_List_Subsubsection $ parseErr (StructuralParseErr pres)
+construct_List_Word tk mClips = genericConstruct_List "Word" toList_Word mClips
+construct_HoleList_Word tk ~[] = Clip_List_Word $ hole
+construct_ParseErrList_Word (StructuralTk _ _ pres _ _) ~[] = Clip_List_Word $ parseErr (StructuralParseErr pres)
+construct_List_Vertex tk mClips = genericConstruct_List "Vertex" toList_Vertex mClips
+construct_HoleList_Vertex tk ~[] = Clip_List_Vertex $ hole
+construct_ParseErrList_Vertex (StructuralTk _ _ pres _ _) ~[] = Clip_List_Vertex $ parseErr (StructuralParseErr pres)
+construct_List_Edge tk mClips = genericConstruct_List "Edge" toList_Edge mClips
+construct_HoleList_Edge tk ~[] = Clip_List_Edge $ hole
+construct_ParseErrList_Edge (StructuralTk _ _ pres _ _) ~[] = Clip_List_Edge $ parseErr (StructuralParseErr pres)
+
+
 
 --------------------------------------------------------------------------
 -- reuse functions                                                      --

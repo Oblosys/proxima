@@ -39,7 +39,7 @@ SEM Root
                                   `withFontSize_` (percent 160) 
                                   `addPopupItems`
                                 [ ("Add Section", insertAtHeadSection @sections.path) ]  
-                            , col @sections.press 
+                            , @sections.pres 
                             ]) `withFontSize` 12  `withWidth` 800
 {
 divide n [] = []
@@ -47,7 +47,10 @@ divide n xs = let (h,t) = splitAt n xs
               in  h : divide n t
 }
                            
-           
+SEM List_Section
+  | List_Section
+      loc.pres = structural $ col @elts.press
+      
 SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Section
       loc.numberStr = show @sectionNr
@@ -60,7 +63,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                                   , @paragraphs.pres
                                   ] `addPopupItems`
                                     [ ("Add Subsection", insertAtHeadSubsection @subsections.path) ]  
-                            , col @subsections.press `withHStretch` True -- withStretch is necessary when subsections == []
+                            , @subsections.pres `withHStretch` True -- withStretch is necessary when subsections == []
                             ])
                      `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
                                      , ("Add Section", addSection @lhs.path) ]
@@ -68,6 +71,9 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                       row [text (@numberStr++"."), parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
 
+SEM List_Subsection
+  | List_Subsection
+      loc.pres = structural $ col @elts.press
 
 SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
   | Subsection
@@ -80,13 +86,17 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                                   , @paragraphs.pres
                                   ] `addPopupItems`
                                     [ ("Add Subsubsection", insertAtHeadSubsubsection @subsubsections.path) ]  
-                            , col @subsubsections.press `withHStretch` True -- withStretch is necessary when subsubsections == []
+                            , @subsubsections.pres `withHStretch` True -- withStretch is necessary when subsubsections == []
                             ])
                      `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
                                      , ("Add Subsection", addSubsection @lhs.path) ]
       --lhs.tocPres = loc (Node_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (@numberStr++"."), parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
+
+SEM List_Subsubsection
+  | List_Subsubsection
+      loc.pres = structural $ col @elts.press
 
 
 SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
@@ -123,22 +133,17 @@ SEM Subsubsection [ || ]
   | Subsubsection
       loc.subsubsectionNr = @lhs.ix + 1
 
-SEM List_Paragraph [ || pres:Presentation_Doc_Node_Clip_Token ]
+SEM List_Paragraph
   | List_Paragraph
-      lhs.pres = loc (Node_List_Paragraph @self @lhs.path) $ parsing' LexFreeText $
-                     col $ if null (fromList_Paragraph @self) then [formatter [text ""]] else @elts.press
-                     -- if paragraph list is empty, we add a dummy text "" to prevent the presentation from getting height 0
-                     -- this dummy is parsed as an empty paragraph
-  | HoleList_Paragraph
-      lhs.pres = presHole @lhs.focusD "List_Paragraph" (Node_HoleList_Paragraph @self []) []
-  | ParseErrList_Paragraph
-      lhs.pres = presParseErr (Node_List_Paragraph @self @lhs.path) @error
-      
-                    
+      loc.pres = parsing' LexFreeText $
+                   col $ if null (fromList_Paragraph @self) then [formatter [text ""]] else @elts.press
+                   -- if paragraph list is empty, we add a dummy text "" to prevent the presentation from getting height 0
+                   -- this dummy is parsed as an empty paragraph
+                          
 SEM Paragraph
   | Paragraph
       loc.pres = parsing $
-                     ( formatter ( if null @words.press then [text ""] else @words.press ))
+                   @words.pres
                        `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
        
@@ -148,7 +153,10 @@ SEM Paragraph
                        `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
                                        , ("Add Graph", addSubgraphPara @lhs.path)
                                        , ("Add Paragraph", addParagraph @lhs.path) ]
-                           
+SEM List_Word
+  | List_Word
+     loc.pres = parsing $
+                  formatter (if null @elts.press then [text ""] else @elts.press )
 
 SEM Word [ || ]
   | Word
@@ -449,18 +457,26 @@ SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
   | Nil_Section      lhs.tocPress = []
 
 
-SEM Edge [ || ] 
+SEM Edge
   | Edge       
       loc.pres = empty
 
-SEM Shape [ || ] 
+SEM Shape
   | Circle       
       loc.pres = empty
   | Square
       loc.pres = empty
 
-SEM Dirty [ || ] 
+SEM Dirty
   | Dirty
       loc.pres = empty
   | Clean       
+      loc.pres = empty
+      
+SEM List_Edge
+  | List_Edge
+      loc.pres = empty
+
+SEM List_Vertex
+  | List_Vertex
       loc.pres = empty
