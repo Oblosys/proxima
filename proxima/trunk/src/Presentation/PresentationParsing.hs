@@ -214,14 +214,6 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 
 
 
-{-
-
-Because tokens are not part of the Presentation type yet, we preprocess the the 
-StringP values and make a list of tokens. This is closely linked to the scanning
-process and should be done in the layout layer.
--}
-
-
 
 
 
@@ -277,11 +269,15 @@ vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is
 --- Automatic structure recognizer
 
 {-
+
 TODO
 - what do we do with non-Proxima types?
 - what happens when we edit inside a structural that is in a parsing presentation? Will recognize handle this
   right? The path in the structural token will not be correct.
-
+- Automatic structure recognizing does not work for unboxed strings in structural presentations.
+   can we do something about that?
+- using the press attribute for lists also causes problems if no loc and structural/parsing is added  
+   maybe we should not support this attribute? It also does not handle parse errors well.
 Design:
 - maybe pStructural should fail if wrong type is present?
 - maybe we should enforce structural and parsing in AG by using a local attribute presType?
