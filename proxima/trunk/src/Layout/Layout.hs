@@ -38,8 +38,7 @@ emptyTokenLayout = TokenLayout { whitespace = (0,0)
                                , tokenFocus = (Nothing,Nothing)
                                }
 
--- maybe split whitespacefocus
--- detokenize ignores Lexer information, since alle tokens can be treated the same when layouting.
+-- detokenize ignores Lexer information, since all tokens can be treated the same when layouting.
 detokenizer wm pres = {- let (l',focusp) = detokenize testWM testPres
                       in  debug Lay ("\n\n\n\ndetokenize test\n"++show (l',focusp)++"\nfocus is on "++case fromP focusp of
                                                                                           NoPathP    -> ""
@@ -195,8 +194,13 @@ addWhitespace wm mStrFocus idp pres =
   case Map.lookup idp wm  of
     Nothing -> [(pres, noFocus)]
     Just tLayout@(TokenLayout (breaks, spaces) wsFocus  tFocus)  ->
-      let rows =  replicate breaks (StringP NoIDP "") 
-                  ++ [row [StringP NoIDP (replicate spaces ' '), pres]]
+      let rows =  if breaks ==  0 
+                  then [row [pres, StringP NoIDP (replicate spaces ' ')]]
+                  else [row [pres, StringP NoIDP "" ]] -- we add this row, so focus can be put after pres 
+                                                       -- without needing the length of pres
+                    ++ replicate (breaks-1) (StringP NoIDP "")
+                    ++ [StringP NoIDP (replicate spaces ' ')]
+                  
           focuss = mkFocuss tLayout (case mStrFocus of Just strFocus -> strFocus
                                                        Nothing       -> noFocus)
       in zip rows focuss
@@ -207,21 +211,30 @@ mkFocuss (TokenLayout (breaks, spaces) (wsStartFocus,wsEndFocus) (tStartFocus,tE
       (mkStartOrEndFocuss (breaks, spaces) wsEndFocus   tEndFocus (toP strFocus))
 
 -- because these focuses are either both start or both end focus, we know that only one can be a (Just i)
-mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus inside structural token
-  let breaksFocuss = case wFocus of 
-                       Just i  -> take breaks $ (replicate i NoPathP) ++ [PathP [] 0] ++ repeat NoPathP
-                       Nothing -> take breaks $ repeat NoPathP
-      rowFocus     = case wFocus of 
-                       Just i -> if i >= breaks -- then focus is in the spaces
-                                 then PathP [0] (i-breaks)
-                                 else NoPathP
-                       Nothing -> case tFocus of 
-                                    Just i  -> PathP [1] i   -- [1] for selecting the second elt of the added row
-                                    Nothing -> mapPath (1:) sFocus
-                                    -- if nothing else has focus, use the structural focus
-  in breaksFocuss ++ [rowFocus]
---instance (Show a, Show b, Show c, Show d, Show e, Show f) => Show (a,b,c,d,e,f) where -- why isn't this a standard instance?
---  show (a,b,c,d,e,f) = "("++show a++","++show b++","++show c++","++show d++","++show e++","++show f++")"
+mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus inside the structural token
+  if breaks == 0 
+  then let rowFocus = case wFocus of 
+                            Just i -> PathP [1] (i) -- no breaks, so focus is in spaces
+                            Nothing -> case tFocus of 
+                                        Just i  -> PathP [0] i   -- [1] for selecting the first elt of the added row
+                                        Nothing -> mapPath (0:) sFocus
+                                        -- if nothing else has focus, use the structural focus
+       in  [rowFocus]
+  else let tokenFocus = case wFocus of 
+                          Just i -> if i == 0 then PathP [1] 0 else NoPathP  
+                          Nothing -> case tFocus of
+                                       Just i -> PathP [0] i
+                                       Nothing -> mapPath (0:) sFocus
+           breaksFocuss = case wFocus of 
+                            Just i  -> take (breaks-1) $ (replicate (i-1) NoPathP) ++ [PathP [] 0] ++ repeat NoPathP
+                            Nothing -> take (breaks-1) $ repeat NoPathP
+           spacesFocus     = case wFocus of 
+                              Just i -> if i >= breaks -- then focus is in the spaces
+                                      then PathP [0] (i-breaks)
+                                      else NoPathP
+                              Nothing -> NoPathP
+                                        -- if nothing else has focus, use the structural focus
+       in [tokenFocus] ++ breaksFocuss ++ [spacesFocus]
 
 -- row and column mappings get lost in a parsing structure. What are the consequences? And can we do something
 -- about it?
@@ -229,9 +242,4 @@ mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus in
 -- !!(Look further at this:)last bit of layout in an empty token? for now we put it in an empty string token. 
 
 
--- white space in front of images not correct now
 
--- new anonymous character in front of token, leads to anonymous token. Maybe take idp from the first non anonymous
--- character.
-
--- structurals should have whitespace

@@ -23,8 +23,8 @@ type FocusStartEnd = (Maybe Int, Maybe Int)
 type WhitespaceFocus = ((Int,Int), FocusStartEnd)
 
 data TokenLayout = TokenLayout { whitespace :: Whitespace
-                               , whitespaceFocus :: FocusStartEnd -- preceding whitespace & focus
-                               , tokenFocus :: FocusStartEnd        -- focus in token 
+                               , whitespaceFocus :: FocusStartEnd -- trailing whitespace & focus
+                               , tokenFocus :: FocusStartEnd      -- focus in token 
                                } deriving Show
 
 type WhitespaceMap = Map IDP TokenLayout   -- Whitespace information for each element in Presentation

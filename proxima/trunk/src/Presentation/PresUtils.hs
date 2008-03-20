@@ -716,7 +716,7 @@ leafLength pres = debug Err ("PresUtils.leafLength: non string leaf"++show pres)
 
 -- tricky, in one row [text "12|", text "34"] right navigation must be row [text "12", text "3|4"]
 --         but if there is a column, we want col [text "12", text "|34"]
-rightNavigatePath (PathP path offset) pres = debug Prs ("pres is "++show pres)$
+rightNavigatePath (PathP path offset) pres =
   if offset < leafLength (selectTree path pres) 
   then PathP path (offset+1)
   else case rightNearestLeafPath  path pres of

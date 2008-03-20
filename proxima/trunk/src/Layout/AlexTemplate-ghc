@@ -18,29 +18,26 @@ type ScanChar_ = ScanChar Document Node ClipDoc UserToken
 
 type AlexInput  = (Char, [ScanChar_])
 
-
-scanner :: IDPCounter -> [ScanChar_] -> ([Token Document Node ClipDoc UserToken], IDPCounter, WhitespaceMap, WhitespaceFocus)
-scanner idPCounter scs = 
-  let (mTokens, (tokenPos, idPCounter', whitespaceMap, lastWhitespaceFocus)) = alexScanTokens initScannerState scs
-  in  (catMaybes mTokens, idPCounter', whitespaceMap, lastWhitespaceFocus)
- where initScannerState :: ScannerState
-       initScannerState = (0, idPCounter, empty,initWhitespaceFocus)
+scanner :: [ScanChar_] -> [ScannedToken Document Node ClipDoc UserToken]
+scanner scs = let (scannedTokens, pos) = alexScanTokens initScannerState scs
+              in  scannedTokens
 
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
 alexScanTokens :: ScannerState -> [ScanChar_] -> 
-                   ([Maybe (Token Document Node ClipDoc UserToken)], ScannerState)
+                  ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
 alexScanTokens initState scs = go initState ('\n',scs)
-  where go :: ScannerState -> (Char, [ScanChar_]) -> ([Maybe (Token Document Node ClipDoc UserToken)], ScannerState)
-        go state@(pos, _, _, _) inp@(_,str) =
+  where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
+        go state inp@(_,str) =
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
-		AlexError (_,remaining) -> ( [Just $ ErrorTk pos $ stringFromScanChars str ]
-		                           , state)
+		AlexError (_,remaining) -> ( [ScannedToken (getFocusStartEnd remaining)
+		                                           (ErrorTk state $ stringFromScanChars str) ]
+		                           , state)              -- state is current position
 		AlexSkip  inp' len     -> go state inp'
-		AlexToken inp' len act -> let (mToken, state') = act state (take len str)
-		                              (mTokens, state'') = go state' inp'
-		                          in  (mToken : mTokens, state'')  
+		AlexToken inp' len act -> let (scannedToken, state') = act state (take len str)
+		                              (scannedTokens, state'') = go state' inp'
+		                          in  (scannedToken : scannedTokens, state'')  
  
  
  
