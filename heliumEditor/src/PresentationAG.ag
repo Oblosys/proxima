@@ -238,7 +238,7 @@ SEM Decl
                               [ @ident.pres, key (mkIDP @idP0 @lhs.pIdC 0) "="]
                            ++ (if @expanded then
                                  [ @exp.pres,  sep (mkIDP @idP1 @lhs.pIdC 1) ";"
-                                 ] else [text " ", box (text "...") `withColor` black `withbgColor` yellow
+                                 ] else [text " ", {- box -} (text "...") `withColor` black `withbgColor` yellow
                                                                     `withMouseDown` expand @lhs.path @self])
 
                           ) `addPopupItems`  [ if @expanded
