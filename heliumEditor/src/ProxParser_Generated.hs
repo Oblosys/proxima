@@ -3,7 +3,7 @@ module ProxParser_Generated where
 import Common.CommonTypes
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils
-
+import Presentation.PresentationParsing
 import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import Evaluation.DocTypes
@@ -11,6 +11,193 @@ import DocTypes_Generated
 import DocUtils_Generated
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
+
+--------------------------------------------------------------------------
+-- Construct instance                                                   --
+--------------------------------------------------------------------------
+
+instance Construct Document Node ClipDoc UserToken where
+  construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
+  construct (Node_RootDoc _ _) = construct_RootDoc
+  construct (Node_HoleDocument _ _) = construct_HoleDocument
+  construct (Node_ParseErrDocument _ _) = construct_ParseErrDocument
+  construct (Node_Root _ _) = construct_Root
+  construct (Node_HoleRoot _ _) = construct_HoleRoot
+  construct (Node_ParseErrRoot _ _) = construct_ParseErrRoot
+  construct (Node_RootEnr _ _) = construct_RootEnr
+  construct (Node_HoleEnrichedDoc _ _) = construct_HoleEnrichedDoc
+  construct (Node_ParseErrEnrichedDoc _ _) = construct_ParseErrEnrichedDoc
+  construct (Node_RootE _ _) = construct_RootE
+  construct (Node_HoleRootE _ _) = construct_HoleRootE
+  construct (Node_ParseErrRootE _ _) = construct_ParseErrRootE
+  construct (Node_Decl _ _) = construct_Decl
+  construct (Node_BoardDecl _ _) = construct_BoardDecl
+  construct (Node_PPPresentationDecl _ _) = construct_PPPresentationDecl
+  construct (Node_HoleDecl _ _) = construct_HoleDecl
+  construct (Node_ParseErrDecl _ _) = construct_ParseErrDecl
+  construct (Node_Ident _ _) = construct_Ident
+  construct (Node_HoleIdent _ _) = construct_HoleIdent
+  construct (Node_ParseErrIdent _ _) = construct_ParseErrIdent
+  construct (Node_PlusExp _ _) = construct_PlusExp
+  construct (Node_TimesExp _ _) = construct_TimesExp
+  construct (Node_DivExp _ _) = construct_DivExp
+  construct (Node_PowerExp _ _) = construct_PowerExp
+  construct (Node_BoolExp _ _) = construct_BoolExp
+  construct (Node_IntExp _ _) = construct_IntExp
+  construct (Node_LamExp _ _) = construct_LamExp
+  construct (Node_AppExp _ _) = construct_AppExp
+  construct (Node_CaseExp _ _) = construct_CaseExp
+  construct (Node_LetExp _ _) = construct_LetExp
+  construct (Node_IdentExp _ _) = construct_IdentExp
+  construct (Node_IfExp _ _) = construct_IfExp
+  construct (Node_ParenExp _ _) = construct_ParenExp
+  construct (Node_ListExp _ _) = construct_ListExp
+  construct (Node_ProductExp _ _) = construct_ProductExp
+  construct (Node_HoleExp _ _) = construct_HoleExp
+  construct (Node_ParseErrExp _ _) = construct_ParseErrExp
+  construct (Node_Alt _ _) = construct_Alt
+  construct (Node_HoleAlt _ _) = construct_HoleAlt
+  construct (Node_ParseErrAlt _ _) = construct_ParseErrAlt
+  construct (Node_Board _ _) = construct_Board
+  construct (Node_HoleBoard _ _) = construct_HoleBoard
+  construct (Node_ParseErrBoard _ _) = construct_ParseErrBoard
+  construct (Node_BoardRow _ _) = construct_BoardRow
+  construct (Node_HoleBoardRow _ _) = construct_HoleBoardRow
+  construct (Node_ParseErrBoardRow _ _) = construct_ParseErrBoardRow
+  construct (Node_Queen _ _) = construct_Queen
+  construct (Node_King _ _) = construct_King
+  construct (Node_Bishop _ _) = construct_Bishop
+  construct (Node_Knight _ _) = construct_Knight
+  construct (Node_Rook _ _) = construct_Rook
+  construct (Node_Pawn _ _) = construct_Pawn
+  construct (Node_Empty _ _) = construct_Empty
+  construct (Node_HoleBoardSquare _ _) = construct_HoleBoardSquare
+  construct (Node_ParseErrBoardSquare _ _) = construct_ParseErrBoardSquare
+  construct (Node_PPPresentation _ _) = construct_PPPresentation
+  construct (Node_HolePPPresentation _ _) = construct_HolePPPresentation
+  construct (Node_ParseErrPPPresentation _ _) = construct_ParseErrPPPresentation
+  construct (Node_Slide _ _) = construct_Slide
+  construct (Node_HoleSlide _ _) = construct_HoleSlide
+  construct (Node_ParseErrSlide _ _) = construct_ParseErrSlide
+  construct (Node_ItemList _ _) = construct_ItemList
+  construct (Node_HoleItemList _ _) = construct_HoleItemList
+  construct (Node_ParseErrItemList _ _) = construct_ParseErrItemList
+  construct (Node_Bullet _ _) = construct_Bullet
+  construct (Node_Number _ _) = construct_Number
+  construct (Node_Alpha _ _) = construct_Alpha
+  construct (Node_HoleListType _ _) = construct_HoleListType
+  construct (Node_ParseErrListType _ _) = construct_ParseErrListType
+  construct (Node_StringItem _ _) = construct_StringItem
+  construct (Node_HeliumItem _ _) = construct_HeliumItem
+  construct (Node_ListItem _ _) = construct_ListItem
+  construct (Node_HoleItem _ _) = construct_HoleItem
+  construct (Node_ParseErrItem _ _) = construct_ParseErrItem
+  construct (Node_List_Decl _ _) = construct_List_Decl
+  construct (Node_HoleList_Decl _ _) = construct_HoleList_Decl
+  construct (Node_ParseErrList_Decl _ _) = construct_ParseErrList_Decl
+  construct (Node_List_Alt _ _) = construct_List_Alt
+  construct (Node_HoleList_Alt _ _) = construct_HoleList_Alt
+  construct (Node_ParseErrList_Alt _ _) = construct_ParseErrList_Alt
+  construct (Node_List_Exp _ _) = construct_List_Exp
+  construct (Node_HoleList_Exp _ _) = construct_HoleList_Exp
+  construct (Node_ParseErrList_Exp _ _) = construct_ParseErrList_Exp
+  construct (Node_List_Slide _ _) = construct_List_Slide
+  construct (Node_HoleList_Slide _ _) = construct_HoleList_Slide
+  construct (Node_ParseErrList_Slide _ _) = construct_ParseErrList_Slide
+  construct (Node_List_Item _ _) = construct_List_Item
+  construct (Node_HoleList_Item _ _) = construct_HoleList_Item
+  construct (Node_ParseErrList_Item _ _) = construct_ParseErrList_Item
+construct_RootDoc tk ~[mClip0] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "root::Root" mClip0)
+construct_HoleDocument tk ~[] = Clip_Document $ hole
+construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
+construct_Root tk ~[mClip0] = Clip_Root $ reuseRoot [tk]  Nothing (retrieveArg "Root" "decls::List_Decl" mClip0)
+construct_HoleRoot tk ~[] = Clip_Root $ hole
+construct_ParseErrRoot (StructuralTk _ _ pres _ _) ~[] = Clip_Root $ parseErr (StructuralParseErr pres)
+construct_RootEnr tk ~[mClip0,mClip1] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "root::RootE" mClip0) (retrieveArg "RootEnr" "heliumTypeInfo::HeliumTypeInfo" mClip1)
+construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
+construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
+construct_RootE tk ~[mClip0,mClip1] = Clip_RootE $ reuseRootE [tk]  Nothing (retrieveArg "RootE" "decls::List_Decl" mClip0) (retrieveArg "RootE" "idListDecls::List_Decl" mClip1)
+construct_HoleRootE tk ~[] = Clip_RootE $ hole
+construct_ParseErrRootE (StructuralTk _ _ pres _ _) ~[] = Clip_RootE $ parseErr (StructuralParseErr pres)
+construct_Decl tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Decl $ reuseDecl [tk]  Nothing Nothing Nothing Nothing (retrieveArg "Decl" "expanded::Bool" mClip0) (retrieveArg "Decl" "autoLayout::Bool" mClip1) (retrieveArg "Decl" "ident::Ident" mClip2) (retrieveArg "Decl" "exp::Exp" mClip3)
+construct_BoardDecl tk ~[mClip0] = Clip_Decl $ reuseBoardDecl [tk]  Nothing Nothing (retrieveArg "BoardDecl" "board::Board" mClip0)
+construct_PPPresentationDecl tk ~[mClip0] = Clip_Decl $ reusePPPresentationDecl [tk]  Nothing Nothing (retrieveArg "PPPresentationDecl" "pPPresentation::PPPresentation" mClip0)
+construct_HoleDecl tk ~[] = Clip_Decl $ hole
+construct_ParseErrDecl (StructuralTk _ _ pres _ _) ~[] = Clip_Decl $ parseErr (StructuralParseErr pres)
+construct_Ident tk ~[mClip0] = Clip_Ident $ reuseIdent [tk]  Nothing Nothing (retrieveArg "Ident" "string::String" mClip0)
+construct_HoleIdent tk ~[] = Clip_Ident $ hole
+construct_ParseErrIdent (StructuralTk _ _ pres _ _) ~[] = Clip_Ident $ parseErr (StructuralParseErr pres)
+construct_PlusExp tk ~[mClip0,mClip1] = Clip_Exp $ reusePlusExp [tk]  Nothing (retrieveArg "PlusExp" "exp1::Exp" mClip0) (retrieveArg "PlusExp" "exp2::Exp" mClip1)
+construct_TimesExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseTimesExp [tk]  Nothing (retrieveArg "TimesExp" "exp1::Exp" mClip0) (retrieveArg "TimesExp" "exp2::Exp" mClip1)
+construct_DivExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseDivExp [tk]  Nothing (retrieveArg "DivExp" "exp1::Exp" mClip0) (retrieveArg "DivExp" "exp2::Exp" mClip1)
+construct_PowerExp tk ~[mClip0,mClip1] = Clip_Exp $ reusePowerExp [tk]  Nothing (retrieveArg "PowerExp" "exp1::Exp" mClip0) (retrieveArg "PowerExp" "exp2::Exp" mClip1)
+construct_BoolExp tk ~[mClip0] = Clip_Exp $ reuseBoolExp [tk]  Nothing (retrieveArg "BoolExp" "bool::Bool" mClip0)
+construct_IntExp tk ~[mClip0] = Clip_Exp $ reuseIntExp [tk]  Nothing (retrieveArg "IntExp" "int::Int" mClip0)
+construct_LamExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseLamExp [tk]  Nothing Nothing (retrieveArg "LamExp" "ident::Ident" mClip0) (retrieveArg "LamExp" "exp::Exp" mClip1)
+construct_AppExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseAppExp [tk]  (retrieveArg "AppExp" "exp1::Exp" mClip0) (retrieveArg "AppExp" "exp2::Exp" mClip1)
+construct_CaseExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseCaseExp [tk]  Nothing Nothing (retrieveArg "CaseExp" "exp::Exp" mClip0) (retrieveArg "CaseExp" "alts::List_Alt" mClip1)
+construct_LetExp tk ~[mClip0,mClip1] = Clip_Exp $ reuseLetExp [tk]  Nothing Nothing (retrieveArg "LetExp" "decls::List_Decl" mClip0) (retrieveArg "LetExp" "exp::Exp" mClip1)
+construct_IdentExp tk ~[mClip0] = Clip_Exp $ reuseIdentExp [tk]  (retrieveArg "IdentExp" "ident::Ident" mClip0)
+construct_IfExp tk ~[mClip0,mClip1,mClip2] = Clip_Exp $ reuseIfExp [tk]  Nothing Nothing Nothing (retrieveArg "IfExp" "exp1::Exp" mClip0) (retrieveArg "IfExp" "exp2::Exp" mClip1) (retrieveArg "IfExp" "exp3::Exp" mClip2)
+construct_ParenExp tk ~[mClip0] = Clip_Exp $ reuseParenExp [tk]  Nothing Nothing (retrieveArg "ParenExp" "exp::Exp" mClip0)
+construct_ListExp tk ~[mClip0] = Clip_Exp $ reuseListExp [tk]  Nothing Nothing Nothing (retrieveArg "ListExp" "exps::List_Exp" mClip0)
+construct_ProductExp tk ~[mClip0] = Clip_Exp $ reuseProductExp [tk]  Nothing Nothing Nothing (retrieveArg "ProductExp" "exps::List_Exp" mClip0)
+construct_HoleExp tk ~[] = Clip_Exp $ hole
+construct_ParseErrExp (StructuralTk _ _ pres _ _) ~[] = Clip_Exp $ parseErr (StructuralParseErr pres)
+construct_Alt tk ~[mClip0,mClip1] = Clip_Alt $ reuseAlt [tk]  Nothing Nothing (retrieveArg "Alt" "ident::Ident" mClip0) (retrieveArg "Alt" "exp::Exp" mClip1)
+construct_HoleAlt tk ~[] = Clip_Alt $ hole
+construct_ParseErrAlt (StructuralTk _ _ pres _ _) ~[] = Clip_Alt $ parseErr (StructuralParseErr pres)
+construct_Board tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5,mClip6,mClip7] = Clip_Board $ reuseBoard [tk]  (retrieveArg "Board" "r1::BoardRow" mClip0) (retrieveArg "Board" "r2::BoardRow" mClip1) (retrieveArg "Board" "r3::BoardRow" mClip2) (retrieveArg "Board" "r4::BoardRow" mClip3) (retrieveArg "Board" "r5::BoardRow" mClip4) (retrieveArg "Board" "r6::BoardRow" mClip5) (retrieveArg "Board" "r7::BoardRow" mClip6) (retrieveArg "Board" "r8::BoardRow" mClip7)
+construct_HoleBoard tk ~[] = Clip_Board $ hole
+construct_ParseErrBoard (StructuralTk _ _ pres _ _) ~[] = Clip_Board $ parseErr (StructuralParseErr pres)
+construct_BoardRow tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5,mClip6,mClip7] = Clip_BoardRow $ reuseBoardRow [tk]  (retrieveArg "BoardRow" "ca::BoardSquare" mClip0) (retrieveArg "BoardRow" "cb::BoardSquare" mClip1) (retrieveArg "BoardRow" "cc::BoardSquare" mClip2) (retrieveArg "BoardRow" "cd::BoardSquare" mClip3) (retrieveArg "BoardRow" "ce::BoardSquare" mClip4) (retrieveArg "BoardRow" "cf::BoardSquare" mClip5) (retrieveArg "BoardRow" "cg::BoardSquare" mClip6) (retrieveArg "BoardRow" "ch::BoardSquare" mClip7)
+construct_HoleBoardRow tk ~[] = Clip_BoardRow $ hole
+construct_ParseErrBoardRow (StructuralTk _ _ pres _ _) ~[] = Clip_BoardRow $ parseErr (StructuralParseErr pres)
+construct_Queen tk ~[mClip0] = Clip_BoardSquare $ reuseQueen [tk]  (retrieveArg "Queen" "color::Bool" mClip0)
+construct_King tk ~[mClip0] = Clip_BoardSquare $ reuseKing [tk]  (retrieveArg "King" "color::Bool" mClip0)
+construct_Bishop tk ~[mClip0] = Clip_BoardSquare $ reuseBishop [tk]  (retrieveArg "Bishop" "color::Bool" mClip0)
+construct_Knight tk ~[mClip0] = Clip_BoardSquare $ reuseKnight [tk]  (retrieveArg "Knight" "color::Bool" mClip0)
+construct_Rook tk ~[mClip0] = Clip_BoardSquare $ reuseRook [tk]  (retrieveArg "Rook" "color::Bool" mClip0)
+construct_Pawn tk ~[mClip0] = Clip_BoardSquare $ reusePawn [tk]  (retrieveArg "Pawn" "color::Bool" mClip0)
+construct_Empty tk ~[] = Clip_BoardSquare $ reuseEmpty [tk] 
+construct_HoleBoardSquare tk ~[] = Clip_BoardSquare $ hole
+construct_ParseErrBoardSquare (StructuralTk _ _ pres _ _) ~[] = Clip_BoardSquare $ parseErr (StructuralParseErr pres)
+construct_PPPresentation tk ~[mClip0,mClip1] = Clip_PPPresentation $ reusePPPresentation [tk]  (retrieveArg "PPPresentation" "viewType::Bool" mClip0) (retrieveArg "PPPresentation" "slides::List_Slide" mClip1)
+construct_HolePPPresentation tk ~[] = Clip_PPPresentation $ hole
+construct_ParseErrPPPresentation (StructuralTk _ _ pres _ _) ~[] = Clip_PPPresentation $ parseErr (StructuralParseErr pres)
+construct_Slide tk ~[mClip0,mClip1] = Clip_Slide $ reuseSlide [tk]  (retrieveArg "Slide" "title::String" mClip0) (retrieveArg "Slide" "itemList::ItemList" mClip1)
+construct_HoleSlide tk ~[] = Clip_Slide $ hole
+construct_ParseErrSlide (StructuralTk _ _ pres _ _) ~[] = Clip_Slide $ parseErr (StructuralParseErr pres)
+construct_ItemList tk ~[mClip0,mClip1] = Clip_ItemList $ reuseItemList [tk]  (retrieveArg "ItemList" "listType::ListType" mClip0) (retrieveArg "ItemList" "items::List_Item" mClip1)
+construct_HoleItemList tk ~[] = Clip_ItemList $ hole
+construct_ParseErrItemList (StructuralTk _ _ pres _ _) ~[] = Clip_ItemList $ parseErr (StructuralParseErr pres)
+construct_Bullet tk ~[] = Clip_ListType $ reuseBullet [tk] 
+construct_Number tk ~[] = Clip_ListType $ reuseNumber [tk] 
+construct_Alpha tk ~[] = Clip_ListType $ reuseAlpha [tk] 
+construct_HoleListType tk ~[] = Clip_ListType $ hole
+construct_ParseErrListType (StructuralTk _ _ pres _ _) ~[] = Clip_ListType $ parseErr (StructuralParseErr pres)
+construct_StringItem tk ~[mClip0] = Clip_Item $ reuseStringItem [tk]  (retrieveArg "StringItem" "string::String" mClip0)
+construct_HeliumItem tk ~[mClip0] = Clip_Item $ reuseHeliumItem [tk]  (retrieveArg "HeliumItem" "exp::Exp" mClip0)
+construct_ListItem tk ~[mClip0] = Clip_Item $ reuseListItem [tk]  (retrieveArg "ListItem" "itemList::ItemList" mClip0)
+construct_HoleItem tk ~[] = Clip_Item $ hole
+construct_ParseErrItem (StructuralTk _ _ pres _ _) ~[] = Clip_Item $ parseErr (StructuralParseErr pres)
+construct_List_Decl tk mClips = genericConstruct_List "Decl" toList_Decl mClips
+construct_HoleList_Decl tk ~[] = Clip_List_Decl $ hole
+construct_ParseErrList_Decl (StructuralTk _ _ pres _ _) ~[] = Clip_List_Decl $ parseErr (StructuralParseErr pres)
+construct_List_Alt tk mClips = genericConstruct_List "Alt" toList_Alt mClips
+construct_HoleList_Alt tk ~[] = Clip_List_Alt $ hole
+construct_ParseErrList_Alt (StructuralTk _ _ pres _ _) ~[] = Clip_List_Alt $ parseErr (StructuralParseErr pres)
+construct_List_Exp tk mClips = genericConstruct_List "Exp" toList_Exp mClips
+construct_HoleList_Exp tk ~[] = Clip_List_Exp $ hole
+construct_ParseErrList_Exp (StructuralTk _ _ pres _ _) ~[] = Clip_List_Exp $ parseErr (StructuralParseErr pres)
+construct_List_Slide tk mClips = genericConstruct_List "Slide" toList_Slide mClips
+construct_HoleList_Slide tk ~[] = Clip_List_Slide $ hole
+construct_ParseErrList_Slide (StructuralTk _ _ pres _ _) ~[] = Clip_List_Slide $ parseErr (StructuralParseErr pres)
+construct_List_Item tk mClips = genericConstruct_List "Item" toList_Item mClips
+construct_HoleList_Item tk ~[] = Clip_List_Item $ hole
+construct_ParseErrList_Item (StructuralTk _ _ pres _ _) ~[] = Clip_List_Item $ parseErr (StructuralParseErr pres)
+
+
 
 --------------------------------------------------------------------------
 -- reuse functions                                                      --

@@ -186,16 +186,10 @@ errColor = red
 
 }
 
-SEM List_Decl [ || pres : Presentation_Doc_Node_Clip_Token ]
+SEM List_Decl
   | List_Decl
-      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ parsing' LexHaskell $
+      loc.pres = parsing' LexHaskell $
                    row @elts.press
-  | ParseErrList_Decl
-      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ parsing' LexHaskell $
-                   presParseErr (Node_ParseErrList_Decl @self @lhs.path) @error
-  | HoleList_Decl
-      lhs.pres = loc (Node_List_Decl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ parsing' LexHaskell $
-                   presHole @lhs.focusD "Decls" (Node_HoleList_Decl @self @lhs.path) @lhs.path
 
 {-
 SEM List_Decl
@@ -325,13 +319,13 @@ SEM Exp
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "case"
                         , @exp.pres
                         , key (mkIDP @idP1 @lhs.pIdC 1) "of"
-                        , loc (Node_List_Alt @alts.self @alts.path) $ parsing $ presentFocus @lhs.focusD @alts.path $ row @alts.press
+                        , @alts.pres
                         ]
   | LetExp
       loc.pres = parsing $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                    row [ key (mkIDP @idP0 @lhs.pIdC 0) "let"
-                        , loc (Node_List_Decl @decls.self @decls.path) $ parsing $ presentFocus @lhs.focusD @decls.path $ row @decls.press
+                        , @decls.pres
                         , key (mkIDP @idP1 @lhs.pIdC 1) "in", @exp.pres ]
 
 
@@ -366,24 +360,31 @@ SEM Exp
   | ListExp
       loc.pres = parsing $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row $    [sep (mkIDP @idP0 @lhs.pIdC 0) "["]
-                          ++ let xps = @exps.press
-                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )
-                             in (if null xps
-                                 then []
-                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)])
-                          ++ [sep (mkIDP @idP1 @lhs.pIdC 1) "]"]
+                   row $    [ sep (mkIDP @idP0 @lhs.pIdC 0) "["
+                            , @exps.pres
+                            , sep (mkIDP @idP1 @lhs.pIdC 1) "]"]
+      exps.ids = @ids
   | ProductExp
       loc.pres = parsing $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   row $    [sep (mkIDP @idP0 @lhs.pIdC 0) "("]
-                          ++ let xps = @exps.press
-                                 sps = map (\id -> sep id ",") (@ids++ map IDP [@lhs.pIdC .. ] )
-                             in  if null xps
-                                 then []
-                                 else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
-                          ++ [sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
-
+                   row $    [sep (mkIDP @idP0 @lhs.pIdC 0) "("
+                            , @exps.pres
+                            , sep (mkIDP @idP1 @lhs.pIdC 1) ")"]
+      exps.ids = @ids
+      
+SEM List_Exp [ ids:{[IDP]} | | ]
+  | List_Exp
+      loc.pres = parsing $
+                   let xps = @elts.press
+                       sps = map (\id -> sep id ",") (@lhs.ids++ map IDP [@lhs.pIdC .. ] )
+                   in  row $ if null xps
+                             then []
+                             else head xps : concat [ [s,e] | (s,e) <- zip sps (tail xps)]
+      
+SEM List_Alt
+  | List_Alt
+      loc.pres = parsing $ row @elts.press
+      
 SEM Alt
   | Alt
       loc.pres = parsing $
@@ -1196,17 +1197,10 @@ SEM PPPresentation
 --                                          [ row [ text "pres ",key NoIDP "=",text " Presentation ", text " $"]
 --                                          , row [ text "         ", @slides.pres]
 
--- seems like parse err and hole are wrong
-SEM List_Slide [ || pres : Presentation_Doc_Node_Clip_Token ]
+SEM List_Slide
   | List_Slide
-      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                    presentList @elts.press
-  | ParseErrList_Slide
-      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr (Node_ParseErrList_Slide @self @lhs.path) @error
-  | HoleList_Slide -- remove this line?
-      lhs.pres = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path
 
 
 {
@@ -1242,17 +1236,11 @@ SEM ItemList
                           col [ row [ text "ItemList ", @listType.pres, text " $"]
                                , @items.pres
                             ] -}
--- seems like parse err and hole are wrong
-SEM List_Item [ || pres : Presentation_Doc_Node_Clip_Token ]
+
+SEM List_Item
   | List_Item
-      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+      loc.pres = structural $
                    presentList @elts.press
-  | ParseErrList_Item
-      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr (Node_ParseErrList_Item @self @lhs.path) @error
-  | HoleList_Item
-      lhs.pres = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path
 
 
 SEM ListType
@@ -1423,74 +1411,3 @@ SEM List_Item
 SEM Item
   | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (Node_HoleItem @self @lhs.path) @lhs.path
   | ParseErrItem lhs.pres2 = presParseErr (Node_ParseErrItem @self @lhs.path) @error
-
-
-
-
-
-
-
-
-{-
-SEM List_Exp
-  | List_Exp elts.path  = @lhs.path -- ++ [0]
-
-SEM List_Exp
-  | List_Exp
-      lhs.press = map (  loc (Node_List_Exp @self @lhs.path)
-                      -- . parsing -- if press is used, the parent is reponsible for setting parsing/structural
-                       . presentFocus @lhs.focusD @lhs.path )
-                      @elts.press
-  | ParseErrList_Exp
-      lhs.press = []
-  | HoleList_Exp
-      lhs.press = []
-
-
-SEM ConsList_Exp
-  | Cons_Exp head.path  = @lhs.path++[@lhs.ix]
-             tail.path = @lhs.path
-  | Cons_Exp     lhs.press = @head.pres : @tail.press
-  | Nil_Exp      lhs.press = []
-
-SEM ConsList_Exp [ ix : Int | | ]
-  | Cons_Exp     tail.ix  = @lhs.ix + 1
-
-SEM List_Exp
-  | List_Exp elts.ix = 0
-
-
-SEM List_Exp
-  | List_Exp elts.pIdC = @lhs.pIdC + 1
-             lhs.pIdC = @elts.pIdC
-
-SEM ConsList_Exp
-  | Cons_Exp head.pIdC = @lhs.pIdC + 2
-             tail.pIdC = @head.pIdC
-             lhs.pIdC = @tail.pIdC
-
-
-
-
-List & ConsList
-ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
-       [ path : {[Int]} | | ]
-
-List & ConsList
-
-ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
-       [ |  pIdC : Int  | ]
-
-List & ConsList
-ATTR  EnrichedDoc Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ Decls Alts Exps Slides Items
-       [ focusD : FocusDoc | | ]
-
-List & ConsList
-ATTR  Decls Alts Exps Slides Items [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
-
-ATTR  EnrichedDoc Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ | | pres : Presentation_Doc_Node_Clip_Token ]
-
-
-ATTR  Decl Ident Exp Alt List_Exp Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item String_ [ ix : Int || ]
-
--}
