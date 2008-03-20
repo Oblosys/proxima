@@ -64,7 +64,7 @@ DATA ConsList_Tree
 ATTR EnrichedDoc Tree List_Tree ConsList_Tree
      [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc Tree
+ATTR EnrichedDoc Tree List_Tree
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
 ATTR Tree List_Tree
@@ -126,6 +126,13 @@ SEM List_Tree
       elts.ix = 0
   | HoleList_Tree     lhs.press = []
   | ParseErrList_Tree lhs.press = [ presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error ]
+  | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+  | ParseErrList_Tree
+      lhs.pres = loc (Node_ParseErrList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+  | HoleList_Tree
+      lhs.pres = loc (Node_HoleList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
+                   presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
 SEM ConsList_Tree
   | Cons_Tree
