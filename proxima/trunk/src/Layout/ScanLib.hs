@@ -29,7 +29,7 @@ import Data.Map as Map hiding (mapMaybe, (!))
 import Maybe
 
 alexGetChar (_, [])   = Nothing
-alexGetChar (_, Char _ _ _ c : cs) = Just (c, (c,cs))
+alexGetChar (_, Char _ _ _ _ c : cs) = Just (c, (c,cs))
 alexGetChar (_, Structural _ _ _ _ _ _ : cs) = Just ('\255', ('\255', cs))
 
 alexInputPrevChar (c,_) = c
@@ -54,6 +54,7 @@ mkTokenEx strf tokf (tokenPos, idPCounter, whitespaceMap, (collectedWhitespace, 
                                 (getFocusStartEnd scs)
       str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
+      loc = locFromScanChars scs
       userToken = tokf str
       (idp', idPCounter') = case idp of NoIDP -> (IDP idPCounter, idPCounter + 1)
                                         _     -> case Map.lookup idp whitespaceMap of
@@ -62,7 +63,7 @@ mkTokenEx strf tokf (tokenPos, idPCounter, whitespaceMap, (collectedWhitespace, 
                            -- if there is no idp, we create a new one. If there is an idp, but
                            -- it is already in the whitespaceMap, we also create a new one.                                                   
                                                    
-  in  ( Just $ UserTk tokenPos userToken str Nothing idp'
+  in  ( Just $ UserTk tokenPos userToken str loc idp'
       , (tokenPos + 1, idPCounter', Map.insert idp' tokenLayout whitespaceMap, initWhitespaceFocus) 
       )
 
@@ -83,7 +84,7 @@ mkStructuralToken (tokenPos, idPCounter, whitespaceMap, (collectedWhitespace, wh
 
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> (Maybe a, ScannerState)
 collectWhitespace (tokenPos, idPCounter, whitespaceMap, ((newlines, spaces), focusStartEnd)) 
-                  (sc@(Char _ _ _ c):scs) = -- will always be a Char
+                  (sc@(Char _ _ _ _ c):scs) = -- will always be a Char
   let newWhitespace = case c of                                                
                         '\n' -> (newlines + 1 + length scs, 0                      ) -- newline resets spaces
                         ' '  -> (newlines                 , spaces + 1 + length scs)

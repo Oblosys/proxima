@@ -20,12 +20,19 @@ import Maybe
 import Layout.ScannerAG
 
 {-
-bug 
+
+The scanner converts the Layout level to: TokenP (StructuralTk [..])
+
+locators for tokens are taken from its string. The first character that has a locator determines
+the locator for the entire string.
+
+Same thing for idps
+
+
+Unclear:
+what happens if  string has no idp? What is the problem if idp's are created new?
 
 Challenges/todo:
-
-
-Split module into Scanner and ScannerLib (imported by Alex)
 
 Lexical errors create one big token, which discards structural children and ruins the presentation.
   after lexical error, just split remaining input into error tokens and structural tokens
@@ -48,7 +55,6 @@ focus for parse errors?
 
 what to do with columns and formatters containing tokens?
 
-recover locators for parsing presentations
 
 if formatters have linebreak whitespace, layouter will probably go wrong.
 
@@ -61,8 +67,6 @@ we could put an extra token there, which is parsed automatically.
 
 problem with structurals. focus in auto type sig is not recognized properly
 
-make sure that pres args to ParsingTk and StructuralTk are lazy
-!! and should these pres args include the ParsingP/StructuralP  nodes? (seems that they should)
 
 
 If we allow autowhitespace for strings and structural presentations
@@ -73,6 +77,11 @@ This is related to the error pres in the tokens. This is now not processed (so i
 a presentation). Processing it recursively is not a problem for Structural presentations, but
 for parsing presentations the lexer can fail on a lexer error, in which case no information is returned
 and we cannot tokenize any structural token children.
+
+
+Longer term: 
+  recover locators for parsing presentations. This way, a presentation may contain extra state not in
+  the presentation. It is tricky however when this information can be recovered.
 
 -}
 

@@ -16,6 +16,7 @@ type ScannerSheet doc node clip token =
       
 data ScanChar doc node clip token = 
        Char         { idp :: IDP, startFocusMark :: FocusMark, endFocusMark :: FocusMark
+                    , locator :: (Maybe node)
                     , char :: Char
                     }
      | Structural   { idp :: IDP, startFocusMark :: FocusMark, endFocusMark :: FocusMark

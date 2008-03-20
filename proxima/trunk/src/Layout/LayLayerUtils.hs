@@ -37,17 +37,24 @@ cast (FormatterP id press)      = FormatterP id $ map cast press
 
 stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars scs = 
-  [ case sc of Char _ _ _ c           -> c
+  [ case sc of Char _ _ _ _ c           -> c
                Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
   | sc <- scs
   ]
 
 idPFromScanChars :: [ScanChar doc node clip token] -> IDP
 idPFromScanChars [] = NoIDP
-idPFromScanChars (Char (IDP idp) _ _ _ : scs) = IDP idp
-idPFromScanChars (Char NoIDP     _ _ _ : scs) = idPFromScanChars scs
-idPFromScanChars (Structural (IDP idp) _ _ _ _ _ : scs) = IDP idp
-idPFromScanChars (Structural NoIDP     _ _ _ _ _ : scs) = idPFromScanChars scs
+idPFromScanChars (Char (IDP idp) _ _ _ _ : scs) = IDP idp
+idPFromScanChars (Char NoIDP     _ _ _ _ : scs) = idPFromScanChars scs
+idPFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "idPFromScanChars called on Structural" $ 
+                                                    idPFromScanChars scs
+
+locFromScanChars :: [ScanChar doc node clip token] -> Maybe node
+locFromScanChars [] = Nothing
+locFromScanChars (Char _ _ _ (Just loc) _ : scs) = Just loc
+locFromScanChars (Char _ _ _ Nothing    _ : scs) = locFromScanChars scs
+locFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "locFromScanChars called on Structural" $ 
+                                                    locFromScanChars scs
 
 markFocusStart scanChar = scanChar { startFocusMark = FocusMark }
 

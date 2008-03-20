@@ -131,12 +131,12 @@ ATTR Layout [ | | scanChars : {[ScanChar]} ]
 
 SEM Layout
   | StringP
-      lhs.scanChars = map (Char @id NoFocusMark NoFocusMark) @text
+      lhs.scanChars = map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
 
   | RowP
       lhs.scanChars = concat @presentationList.scanCharss
   | ColP
-      lhs.scanChars = concat $ intersperse [Char NoIDP NoFocusMark NoFocusMark '\n'] @presentationList.scanCharss
+      lhs.scanChars = concat $ intersperse [Char NoIDP NoFocusMark NoFocusMark Nothing '\n'] @presentationList.scanCharss
   | OverlayP
       lhs.scanChars = head' "ScannerAG.OverlayP.lhs.scanChars" @presentationList.scanCharss
   | FormatterP
