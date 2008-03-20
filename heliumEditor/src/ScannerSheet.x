@@ -13,8 +13,7 @@ $alpha = [$lower $upper]        -- alphabetic characters
 tokens :-
     
 
-  \n+              { collectWhitespace }
-  \ +              { collectWhitespace }
+  [\n \ ]+        { collectWhitespace }
   \255             { mkStructuralToken }
   module           { mkToken $ \s -> KeyTk s }
   let              { mkToken $ \s -> KeyTk s }
