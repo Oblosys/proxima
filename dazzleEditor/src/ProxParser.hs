@@ -33,13 +33,18 @@ recognizeEnrichedDoc = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
-         (\str graph title sections ->
-          reuseRoot [str] (Just graph) (Just title) (Just (toList_Section sections)))
+          (\str graph title sections ->
+          reuseRoot [str] (Just graph) (Just title) (Just sections))
       <$> pStructuralTk Node_Root
       <*> recognizeGraph
       <*> pPrs pLine 
-      <*> pList recognizeSection 
+      <*> recognizeList_Section
 
+recognizeList_Section = pStr $ 
+          (\str lst -> List_Section (toConsList_Section lst))
+      <$> pStructuralTk Node_List_Section
+      <*> pList recognizeSection
+      
 {- -- for presentation that only contains a parsing formatter
           (\str ->
           reuseRoot [str] Nothing Nothing Nothing 
@@ -53,21 +58,30 @@ recognizeRoot = pStr $
   
 recognizeSection :: ListParser Document Node ClipDoc UserToken Section
 recognizeSection = pStrAlt Node_Section $
-          (\str t ps ss -> reuseSection [str] (Just t) (Just ps) (Just $ toList_Subsection ss))
+          (\str t ps ss -> reuseSection [str] (Just t) (Just ps) (Just ss))
       <$> pStructuralTk Node_Section
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
-      <*> pList recognizeSubsection
+      <*> recognizeList_Subsection
           
+recognizeList_Subsection = pStr $ 
+          (\str lst -> List_Subsection (toConsList_Subsection lst))
+      <$> pStructuralTk Node_List_Subsection
+      <*> pList recognizeSubsection
+
 recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt Node_Subsection $
-          (\str t ps sss -> reuseSubsection [str] (Just t) (Just ps) (Just $ toList_Subsubsection sss))
+          (\str t ps sss -> reuseSubsection [str] (Just t) (Just ps) (Just sss))
       <$> pStructuralTk Node_Subsection
       <*> pPrs pLine 
       <*> pPrs parseParagraphs
-      <*> pList recognizeSubsubsection
+      <*> recognizeList_Subsubsection
       
+recognizeList_Subsubsection = pStr $ 
+          (\str lst -> List_Subsubsection (toConsList_Subsubsection lst))
+      <$> pStructuralTk Node_List_Subsubsection
+      <*> pList recognizeSubsubsection
 
 recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
