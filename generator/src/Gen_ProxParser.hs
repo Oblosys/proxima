@@ -42,17 +42,18 @@ genConstructDecl (Decl lhsType prods) =
           (LHSListType lhsTypeName) ->
             "construct_List_%1 tk mClips = genericConstruct_List \"%1\" toList_%1 mClips" <~ [ lhsTypeName ]
           (LHSBasicType lhsTypeName) ->
-            "construct_%1 tk ~[%2] = Clip_%3 $ reuse%1 [tk] %4"
+            "construct_%1 tk ~[%2] = Clip_%3 $ reuse%1 [tk] %4%5"
             <~ [ cnstrName
                , separateBy "," ["mClip"++show i | i <- [0..length fields - 1]]
                , lhsTypeName 
+               , concat $ replicate (length idpFields) " Nothing"
                , concat [ " (retrieveArg \"%1\" \"%2\" mClip%3)" <~ [ cnstrName
                                                                    , fieldName ++ "::" ++ genType fieldType
                                                                    , show i ] 
                         | (i, Field fieldName fieldType) <- zip [0..] fields 
                         ]
                ]
-  | (Prod prodKind cnstrName _ fields) <- prods
+  | (Prod prodKind cnstrName idpFields fields) <- prods
   ]
 
 genReuse decls = genBanner "reuse functions" $ concat
