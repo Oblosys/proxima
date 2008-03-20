@@ -152,17 +152,6 @@ splitAtWoks seg [c]          = [seg++[c]]
 splitAtWoks seg ('^':'o':cs) = seg : splitAtWoks [] cs
 splitAtWoks seg (c:cs)       = splitAtWoks (seg++[c]) cs
 
-slide title body = overlay [
-                 move 0 30 $
-                  col [ hAlignCenter $ title `withColor` white
-                                                    `withFont'` ("cmr10", 20)
-                      , row [ hSpace 20, body `withbgColor` myBlue ]
-                      ] `withHStretch` True
-
-                , rect 500 300 Solid `withfColor` myBlue `withColor` myBlue
-                ] `withColor` yellow `withbgColor` myBlue `withFont'` ("Arial", 15)
-  where myBlue = (0,0,192)
-
 
 
 trroot  = mkTreeNode True  True  (text "food") [trnode1, trnode2, trleaf6]
