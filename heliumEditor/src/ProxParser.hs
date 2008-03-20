@@ -88,9 +88,9 @@ recognizeList_Slide = pStr $
         -- maybe make a recognizeConsList_Slide?
 
 recognizeSlide =  pStr $
-         (\str title itemList -> reuseSlide [str] (Just $ tokenString title) (Just itemList))
+         (\str title itemList -> reuseSlide [str] (Just title) (Just itemList))
      <$> pStructuralTk Node_Slide
-     <*> pLIdent <*> recognizeItemList
+     <*> (pPrs $ tokenString <$> pLIdent) <*> recognizeItemList
 
 recognizeItemList = pStr $                         -- ListType
          (\str listType list_item -> reuseItemList [str] (Just listType) (Just list_item))
@@ -111,9 +111,9 @@ recognizeList_Item = pStr $
      <*> pList recognizeItem
 
 recognizeItem = pStr $ 
-         (\str string_ -> reuseStringItem [str] (Just $ tokenString string_))
+         (\str string -> reuseStringItem [str] (Just string))
      <$> pStructuralTk Node_StringItem
-     <*> pLIdent
+     <*> (pPrs $ tokenString <$> pLIdent)
   <|>    (\str helium -> reuseHeliumItem [str] (Just helium))
      <$> pStructuralTk Node_HeliumItem
      <*> recognizeExp

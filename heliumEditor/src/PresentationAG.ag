@@ -1214,7 +1214,7 @@ presentList ps = row [ text "  ", col ps ]
 
 SEM Slide
   | Slide loc.pres = structural $
-                       col [ row [ text "<slide>", row [ text "<title>", text @title `withColor` darkViolet , text "</title>"
+                       col [ row [ text "<slide>", row [ text "<title>", parsing $ text @title `withColor` darkViolet , text "</title>"
                                                                   ]]
                             , row [ text "  ", @itemList.pres ]
                             , text "</slide>"
@@ -1253,7 +1253,7 @@ SEM ListType
 
 SEM Item
   | StringItem     loc.pres = structural $
-                                 row [ text "<stringItem>", text @string `withColor` darkViolet, text "</stringItem>" ]
+                                 row [ text "<stringItem>", parsing $ text @string `withColor` darkViolet, text "</stringItem>" ]
   | HeliumItem     loc.pres = structural $
                                 col [ text "<heliumItem>"
                                      , row [text "  ", @exp.pres]
