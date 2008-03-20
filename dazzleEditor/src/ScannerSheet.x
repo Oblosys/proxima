@@ -2,7 +2,7 @@
 module ScannerSheet where
 
 import DocTypes_Generated
-import Layout.Scanner
+import Layout.ScanLib
 }
 
 $char = .#[\n\ \255]  -- we need to exclude the proxima specific stuff (can be reduced to only \255)
