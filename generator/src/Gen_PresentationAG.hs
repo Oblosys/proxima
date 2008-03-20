@@ -146,14 +146,12 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
   , "  | HoleList_%1     lhs.press = []"
-  , "  | ParseErrList_%1 lhs.press = [ presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error ]"
+  , "  | ParseErrList_%1 lhs.press = []"
   , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
   , "  | ParseErrList_%1"
-  , "      lhs.pres = loc (Node_ParseErrList_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $"
-  , "                   presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
+  , "      lhs.pres = presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
   , "  | HoleList_%1"
-  , "      lhs.pres = loc (Node_HoleList_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $"
-  , "                   presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
+  , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
   ] <~ [typeName]
 
