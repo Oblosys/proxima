@@ -50,6 +50,7 @@ tokens :-
   \;               { mkToken $ \s -> KeyTk s }
   \\               { mkToken $ \s -> KeyTk s }
   \=               { mkToken $ \s -> KeyTk s }
+  \.\.\.           { mkToken $ \s -> KeyTk s }
 -- Old helium scanner seemed to have only keywords, no symbols
 
   $digit+          { mkToken $ \s -> IntTk }
