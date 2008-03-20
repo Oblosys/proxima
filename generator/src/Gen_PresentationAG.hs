@@ -91,7 +91,7 @@ genAttr decls = genBanner "Attr declarations" $
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
   ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
-        , separateBy " " $ getAllDeclaredTypeNames decls
+        , separateBy " " $ getAllDeclaredTypeNames (addListDecls decls)
         , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
         , separateBy " " $ listNames ++ consListNames
         , separateBy " " $ listTypeNames ++ consListNames
@@ -147,6 +147,13 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      elts.ix = 0"
   , "  | HoleList_%1     lhs.press = []"
   , "  | ParseErrList_%1 lhs.press = [ presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error ]"
+  , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
+  , "  | ParseErrList_%1"
+  , "      lhs.pres = loc (Node_ParseErrList_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $"
+  , "                   presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
+  , "  | HoleList_%1"
+  , "      lhs.pres = loc (Node_HoleList_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $"
+  , "                   presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
   ] <~ [typeName]
 
