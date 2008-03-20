@@ -29,8 +29,21 @@ the locator for the entire string.
 Same thing for idps
 
 
+
 Unclear:
 what happens if  string has no idp? What is the problem if idp's are created new?
+
+The layouter adds whitespace according to whitespace map.
+Only the tokens of a PresentationTk.
+  These are put in (possibly nested) rows, since we don't want another attribute tokens.
+  Now we can use the presentation.
+  
+  Non tokens:
+  StringP?
+  If an overlay is used ?
+  Column?
+  Formatter?
+
 
 Challenges/todo:
 
