@@ -5,7 +5,7 @@ import Common.CommonUtils
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
 
-import Layout.Scanner hiding (empty)
+import Layout.Scanner
 
 import Layout.TreeEditPres
 
