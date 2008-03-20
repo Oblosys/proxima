@@ -1219,12 +1219,6 @@ SEM Slide
                             , row [ text "  ", @itemList.pres ]
                             , text "</slide>"
                             ]
-{-| Slide loc.pres = structural $
-                       col [ row [ text "Slide ", row [ text "\"", @title.pres, text "\""
-                                                                  ] `withColor` darkViolet  , text " $"]
-                            , row [ text "  ", @itemList.pres ]
-                            ]
--}
 
 SEM ItemList
   | ItemList loc.pres = structural $
@@ -1232,10 +1226,6 @@ SEM ItemList
                                , @items.pres
                                , text "</itemList>"
                             ]
-{-  | ItemList loc.pres = structural $
-                          col [ row [ text "ItemList ", @listType.pres, text " $"]
-                               , @items.pres
-                            ] -}
 
 SEM List_Item
   | List_Item
@@ -1264,20 +1254,6 @@ SEM Item
                                      , row [text "  ", @itemList.pres]
                                      , text "</listItem>"
                                      ]
-{-| StringItem     loc.pres = structural $
-                                 row [ text "StringItem "
-                                      , row [ text "\""
-                                             , @string.pres
-                                             , text "\""
-                                             ] `withColor` darkViolet ]
-  | HeliumItem     loc.pres = structural $
-                                col [ text "HeliumItem $"
-                                     , row [text "  ", @exp.pres]
-                                     ]
-  | ListItem       loc.pres = structural $
-                                col [ text "ListItem $"
-                                     , row [text "  ", @itemList.pres]
-                                     ]     -}
 
 {
 -- many Document refs may be doc when editPasteD is fixed
@@ -1289,7 +1265,20 @@ toggleViewType pth (PPPresentation viewtp slides) =
                                             )
     in  (DocumentLevel d' path cl)
 
+
+
+slide title body = overlay [
+                 move 0 30 $
+                  col [ hAlignCenter $ parsing $ title `withColor` white
+                                                    `withFont'` ("cmr10", 20)
+                      , row [ hSpace 20, body `withbgColor` myBlue ]
+                      ] `withHStretch` True
+
+                , rect 500 300 Solid `withfColor` myBlue `withColor` myBlue
+                ] `withColor` yellow `withbgColor` myBlue `withFont'` ("Arial", 15)
+  where myBlue = (0,0,192)
 }
+
 
 ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
 ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_Doc_Node_Clip_Token]} ]
@@ -1300,11 +1289,9 @@ SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip_Token ]
       lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col $ intersperse (col [vSpace 4, hLine, vSpace 4]) @elts.press2
   | ParseErrList_Slide
-      lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr (Node_ParseErrList_Slide @self @lhs.path) @error
+      lhs.pres2 = presParseErr (Node_ParseErrList_Slide @self @lhs.path) @error
   | HoleList_Slide
-      lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path
+      lhs.pres2 = presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path
 
 
 SEM Slide
@@ -1344,17 +1331,15 @@ SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
       lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col @elts.press2
   | ParseErrList_Item
-      lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presParseErr (Node_ParseErrList_Item @self @lhs.path) @error
+      lhs.pres2 = presParseErr (Node_ParseErrList_Item @self @lhs.path) @error
   | HoleList_Item
-      lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                   presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path
+      lhs.pres2 = presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path
 
 
 
 SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ||  ]
   | StringItem     lhs.pres2 = loc (Node_StringItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                                 row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, text @string]
+                                 row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, parsing $ text @string]
   | HeliumItem     lhs.pres2 = loc (Node_HeliumItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, @exp.pres
                                                                            `withColor` black
@@ -1389,8 +1374,8 @@ SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_T
   | Nil_Item  lhs.press2 = []
 
 SEM List_Slide
-  | HoleList_Slide     lhs.press2 = [presHole @lhs.focusD "Slides" (Node_HoleList_Slide @self @lhs.path) @lhs.path]
-  | ParseErrList_Slide lhs.press2 = [presParseErr (Node_ParseErrList_Slide @self @lhs.path) @error]
+  | HoleList_Slide     lhs.press2 = []
+  | ParseErrList_Slide lhs.press2 = []
 
 SEM Slide
   | HoleSlide     lhs.pres2 = presHole @lhs.focusD "Slide" (Node_HoleSlide @self @lhs.path) @lhs.path
@@ -1405,8 +1390,8 @@ SEM ListType
   | ParseErrListType lhs.pres2 = presParseErr (Node_ParseErrListType @self @lhs.path) @error
 
 SEM List_Item
-  | HoleList_Item     lhs.press2 = [presHole @lhs.focusD "Items" (Node_HoleList_Item @self @lhs.path) @lhs.path]
-  | ParseErrList_Item lhs.press2 = [presParseErr (Node_ParseErrList_Item @self @lhs.path) @error]
+  | HoleList_Item     lhs.press2 = []
+  | ParseErrList_Item lhs.press2 = []
 
 SEM Item
   | HoleItem     lhs.pres2 = presHole @lhs.focusD "Item" (Node_HoleItem @self @lhs.path) @lhs.path

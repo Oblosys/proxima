@@ -277,20 +277,6 @@ parseIdent =
      <$> pLIdent
 
 
--- primitive, what to do with idp?
-
--- maybe make a primIDP ? that takes the idp out of the string_? Then string has an idp field,
--- but it is not used on presentation. (maybe it can be hidden from the user)
-
-
---pString_ = 
---         (\string -> reuseString_ [string] (Just $ tokenIDP string) (Just $ lIdentVal string))
---     <$> pLIdent
--- parser that ignores idp, we want to specify this at the parent level!
---pString__ = 
---         (\string -> reuseString_ [string] Nothing (Just $ lIdentVal string))
---     <$> pLIdent
-
 
 -------------------- Keyword parsers, remember to keep these consistent with keywords
 
