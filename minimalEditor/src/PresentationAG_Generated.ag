@@ -125,14 +125,12 @@ SEM List_Tree
       elts.path = @lhs.path
       elts.ix = 0
   | HoleList_Tree     lhs.press = []
-  | ParseErrList_Tree lhs.press = [ presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error ]
+  | ParseErrList_Tree lhs.press = []
   | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
   | ParseErrList_Tree
-      lhs.pres = loc (Node_ParseErrList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
-                   presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+      lhs.pres = presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
   | HoleList_Tree
-      lhs.pres = loc (Node_HoleList_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ structural $
-                   presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
+      lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
 SEM ConsList_Tree
   | Cons_Tree
