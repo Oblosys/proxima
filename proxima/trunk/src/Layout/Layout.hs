@@ -85,25 +85,23 @@ detokenizeList wm i (pres:press) = let (pres',  f1) = detokenize wm pres
 
 detokenizeParsing wm (ParsingP idp pr l pres) =
   let rows = detokenize' wm False pres
-      presss = map (map fst) $ rows -- [ (pres', prependToFocus i f') | (i,(pres',f')) <- zip [0..] $ detokenize' wm False pres ]
+      presss = map (map fst) $ rows
       focusss = [ prependToFocus y $ prependToFocus x $ focus
                 | (y,row) <- zip [0..] rows, (x,(_,focus)) <- zip [0..] row
                 ]
       f = foldl combineFocus  noFocus focusss
   in -- debug Lay ("focusses:"++show fs) $
-     if null presss 
-     then debug Err ("Layout.detokenize empty token list") 
-          ( StringP NoIDP "", noFocus)
-     else ( ParsingP idp pr l $ ColP NoIDP 0 NF $ (map (RowP NoIDP 0)) presss
-          , prependToFocus 0 $ f
-          )
+     ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
+                                             then [RowP NoIDP 0 [StringP NoIDP ""]]
+                                             else (map (RowP NoIDP 0)) presss
+     , prependToFocus 0 $ f
+     )
           
 
                                      
 -- for overlay, we descend into the first element, and make an overlay with the first element of the first
 -- row of the result of the detokenization (which may be recursively detokenized).
--- find out semantics of this one        What about Refs?
--- incomplete, only for strings
+
 detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
                [[(Layout doc node clip token, FocusPres)]]
 detokenize' wm t (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
@@ -119,7 +117,7 @@ detokenize' wm t (PolyP idp pts w st)        = [[(PolyP idp pts w st, noFocus)]]
 detokenize' wm t (RectangleP idp w h lw st)  = [[(RectangleP idp w h lw st, noFocus)]]
 detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocus)]]
 
-detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t 0 press -- ref gets lost
+detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
 --detokenize' wm t (ColP idp rf fm press)      = let (press',f) = detokenizeList' wm t 0 press
 --                                               in  ([ColP idp rf fm press'], f)
 detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
@@ -134,30 +132,13 @@ detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP 
 detokenize' wm t pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ show pr) [[(castPresToLay pr, noFocus)]]
 
 
-
-
-{-
-detokenizeList' wm t i []           = []
-detokenizeList' wm t i (pres:press) = let (press',  f1) = detokenize' wm  t pres 
-                                          (presss', f2) = detokenizeList' wm t (i+length press') press
-                                      in  (press' ++ presss', combineFocus f1 f2)
--}
-
--- recursive rows cause problems. we cannot add to the path for every row (only the topmost), but if deeper rows
--- cause the creation of more rows in the result, then this should be taken into account at the top-level.
--- in order to do so, we would need some threaded attribute, which will complicate the code even more.
-
-detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Int -> [Presentation doc node clip token] -> 
+detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> [Presentation doc node clip token] -> 
                   [[(Layout doc node clip token, FocusPres)]]
-detokenizeRow' wm t i [] = []
-detokenizeRow' wm t i (pres:press) =
-   combine (detokenize' wm True pres) (detokenizeRow' wm t i press)
-  -- the last and first lines are merged, so if press' has more than 0 lines, we decrement i with 1
+detokenizeRow' wm t [] = []
+detokenizeRow' wm t (pres:press) =
+   combine (detokenize' wm True pres) (detokenizeRow' wm t press)
   
 
-singleton []       = debug Err ("Layout.detokenize': graph child without singleton token (add row to presentation)") $ EmptyP NoIDP
-singleton [pres]   = pres
-singleton (pres:_) = debug Err ("Layout.detokenize': graph child without singleton token (add row to presentation)") $ pres
 
 combine :: [[(Layout doc node clip token,FocusPres)]] -> [[(Layout doc node clip token,FocusPres)]] ->
            [[(Layout doc node clip token, FocusPres)]]
