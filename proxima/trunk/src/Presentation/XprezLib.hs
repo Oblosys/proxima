@@ -63,6 +63,15 @@ graph width height edges vertexPress =
 vertex :: Int -> Int -> Int -> Outline -> Xprez doc node clip token -> Xprez doc node clip token
 vertex id x y outline pres = VertexP NoIDP id x y outline pres
 
+
+-- used for putting structural presentations inside parsing presentations
+structuralToken idp pres = TokenP idp (StructuralTk 0 Nothing (StructuralP idp pres) [] NoIDP)
+-- we duplicate the idp: TokenP needs it, so detokenize can add the correct whitespace
+-- And since TokenP and StructuralTk are removed by the layouter, we need it in the StructuralP
+-- as well, so it can be recovered by the scanner
+-- It is not added to StructuralTk, whose idp field is only used during scanning.
+
+
 leftXp `beside` rightXp = row [leftXp, rightXp]
 
 topXp `above` bottomXp = col [topXp, bottomXp]
