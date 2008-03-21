@@ -160,14 +160,14 @@ pPrs p = unfoldStructure
          in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
-mkErr :: (DocNode node, Ord token, Show token) => [Message (Token doc node clip token)] -> (Int, String)
+mkErr :: (DocNode node, Ord token, Show token) => [Message (Token doc node clip token)] -> (Maybe Int, String) 
 mkErr msgs =
  let messageText = show msgs
  in  ( case retrieveTokenPosition "Parse Error : before <" messageText of
-         Just pos -> pos
+         Just pos -> Just pos
          Nothing  -> case retrieveTokenPosition "Repaired by : deleting symbol <" messageText of
-                       Just pos -> pos
-                       Nothing  -> 0
+                       Just pos -> Just pos
+                       Nothing  -> Nothing
      ,  messageText
      )
 
