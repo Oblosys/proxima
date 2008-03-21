@@ -71,6 +71,29 @@ structuralToken idp pres = TokenP idp (StructuralTk 0 Nothing (StructuralP idp p
 -- as well, so it can be recovered by the scanner
 -- It is not added to StructuralTk, whose idp field is only used during scanning.
 
+presHole focus typeStr nd pth = loc nd $
+  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
+
+presParseErr node (StructuralParseErr pres) =
+  loc node $ structural $ pres `withbgColor` whiteSmoke
+presParseErr node (ParsingParseErr (mErrorPos, errorMessage) tokens parser) =
+  loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
+     row $ [ (if Just p == mErrorPos 
+              then markError errorMessage 
+              else id) $ case token of 
+                           StructuralTk _ (Just node) pres _ idp -> structuralToken idp $ pres
+                           _                                     -> TokenP (tokenIDP token) token 
+           | (p,token) <- zip [0..] tokens ]
+           ++ case mErrorPos of Just _  -> []
+                                Nothing -> [markError errorMessage $ row [StringP NoIDP "" `withWidth` 8 ] ]
+ where markError str pres = squiggly red pres `addPopupItems` [(str,id)] -- use popup until we have tooltips
+-- probably we need the lexer also in ParseErr
+
+
+
+
+
+
 
 leftXp `beside` rightXp = row [leftXp, rightXp]
 
@@ -252,21 +275,6 @@ boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
 percent :: Int -> Int -> Int
 percent a x = a * x `div` 100
 
-presHole focus typeStr nd pth = loc nd $
-  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
-
-presParseErr node (StructuralParseErr pres) =
-  loc node $ structural $ pres `withbgColor` whiteSmoke
-presParseErr node (ParsingParseErr (mErrorPos, str) tokens parser) =
-  loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
-     row $ [ (if Just p == mErrorPos then \pres -> squiggly red pres else id) $
-               case token of 
-                 StructuralTk _ (Just node) pres _ _ -> loc node $ structural $ pres
-                 _                          -> TokenP NoIDP token 
-           | (p,token) <- zip [0..] tokens ]
-           ++ case mErrorPos of Just _  -> []
-                                Nothing -> [squiggly red $ row [StringP NoIDP "" `withWidth` 8 ] ]
--- probably we need the lexer also in ParseErr
 
 presentFocus NoPathD     path pres = pres
 presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusCol else pres
