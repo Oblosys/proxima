@@ -476,8 +476,6 @@ typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used fo
 
 token idp str = TokenP idp (UserTk 0 (KeyTk str) str Nothing idp)
 
-structuralToken idp pres = TokenP idp (StructuralTk 0 Nothing (structural pres) [] idp)
-
 opCol = black
 keyCol = blue
 sepCol = brown
