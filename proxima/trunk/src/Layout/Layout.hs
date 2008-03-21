@@ -100,7 +100,8 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
           
 
                                      
-
+-- for overlay, we descend into the first element, and make an overlay with the first element of the first
+-- row of the result of the detokenization (which may be recursively detokenized).
 -- find out semantics of this one        What about Refs?
 -- incomplete, only for strings
 detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
@@ -121,8 +122,9 @@ detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocu
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t 0 press -- ref gets lost
 --detokenize' wm t (ColP idp rf fm press)      = let (press',f) = detokenizeList' wm t 0 press
 --                                               in  ([ColP idp rf fm press'], f)
---detokenize' wm t (OverlayP idp (pres:press)) = let (press',f) = detokenize' wm t pres -- cast is safe, no tokens in press
---                                              in  ([ OverlayP idp (pres' : map castPresToLay press) | pres' <- press' ], f)
+detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
+                                               in  ((OverlayP idp $ pres': map castPresToLay press, f):row)
+                                                   : rows
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (ParsingP idp pr l pres)    =map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm t pres)
@@ -191,7 +193,8 @@ mapPath f (PathP p i) = PathP (f p) i
 addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [[(Layout doc node clip token, FocusPres)]]
 addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
-addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = let (pres', f) = detokenize wm pres
+addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to structural "++show idp) $
+                                                        let (pres', f) = detokenize wm pres
                                                         in  addWhitespace wm (Just f) idp pres'
 addWhitespaceToken wm idp (ErrorTk _ str)             = addWhitespace wm Nothing idp (StringP idp str)
 
