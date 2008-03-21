@@ -126,7 +126,7 @@ detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = deto
                                                in  ((OverlayP idp $ pres': map castPresToLay press, f):row)
                                                    : rows
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
-detokenize' wm t (ParsingP idp pr l pres)    =map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
+detokenize' wm t (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm t pres)
 --detokenize' wm t (FormatterP idp press)      = let (press', f) = detokenizeList' wm p t 0 press
 --                                              in  ([FormatterP idp press'], f)
@@ -192,31 +192,38 @@ mapPath f (PathP p i) = PathP (f p) i
 
 addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [[(Layout doc node clip token, FocusPres)]]
-addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace wm Nothing idp (StringP idp str)
+addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace False wm Nothing idp (StringP idp str)
 addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to structural "++show idp) $
                                                         let (pres', f) = detokenize wm pres
-                                                        in  addWhitespace wm (Just f) idp pres'
-addWhitespaceToken wm idp (ErrorTk _ str)             = addWhitespace wm Nothing idp (StringP idp str)
+                                                        in  addWhitespace True wm (Just f) idp pres'
+addWhitespaceToken wm idp (ErrorTk _ str)             = addWhitespace False wm Nothing idp (StringP idp str)
 
-addWhitespace :: Show node => WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip token -> [[(Layout doc node clip token, FocusPres)]]
-addWhitespace wm mStrFocus NoIDP pres = [[(pres,noFocus)]]
-addWhitespace wm mStrFocus idp pres = 
+-- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
+-- if it is the last token and there is no whitespace behind it)                   
+addWhitespace :: Show node => Bool -> WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip token -> [[(Layout doc node clip token, FocusPres)]]
+addWhitespace isStructural wm mStrFocus NoIDP pres = [surroundWithEmpties isStructural noFocus noFocus $ (pres,noFocus)]
+addWhitespace isStructural wm mStrFocus idp pres = 
   case Map.lookup idp wm  of
-    Nothing -> [[(pres, noFocus)]]
+    Nothing -> [surroundWithEmpties isStructural noFocus noFocus $ (pres,noFocus)]
     Just tLayout@(TokenLayout (breaks, spaces) wsFocus  tFocus)  ->
-      let rows =  if breaks ==  0 
-                  then [[(pres,tokenFocus), (StringP NoIDP (replicate spaces ' '), spacesFocus)]]
-                  else [[(pres,tokenFocus), (StringP NoIDP "",firstBreakFocus) ]] -- we add this row, so focus can be put after pres 
-                                                       -- without needing the length of pres
+      let surroundedPres = surroundWithEmpties isStructural beforeTokenFocus afterTokenFocus (pres,tokenFocus) 
+          rows =  if breaks ==  0 
+                  then [ surroundedPres ++ [(StringP NoIDP (replicate spaces ' '), spacesFocus)]]
+                  else [ surroundedPres ++ [(StringP NoIDP "", firstBreakFocus)]]
                     ++ map (\x -> [x]) (zip (replicate (breaks-1) (StringP NoIDP "")) breaksFocuss)
                     ++ [[(StringP NoIDP (replicate spaces ' '), spacesFocus)]]
                   
-          (tokenFocus, firstBreakFocus, breaksFocuss, spacesFocus) =
-            mkFocuss tLayout (case mStrFocus of Just strFocus -> strFocus
-                                                Nothing       -> noFocus)
-      in debug Lay ("Whitespace for "++show pres++"\n"++show rows) $
+          -- take care that before and afterTokenFocus are not used if pres is not structural
+          (beforeTokenFocus, tokenFocus, afterTokenFocus,firstBreakFocus, breaksFocuss, spacesFocus) =
+            mkFocuss isStructural tLayout (case mStrFocus of Just strFocus -> strFocus
+                                                             Nothing       -> noFocus)
+      in debug Lay ("Whitespace for "++shallowShowPres pres++"\n"++show (map (map (\(p,f) -> "("++shallowShowPres p++","++show f++")")) rows)
+                   ) $
            rows 
            
+surroundWithEmpties False _ _ presAndFocus = [presAndFocus]
+surroundWithEmpties True beforeFocus afterFocus presAndFocus = 
+  [(StringP NoIDP "", beforeFocus), presAndFocus, (StringP NoIDP "", afterFocus)]
            
            
 {-
@@ -237,15 +244,23 @@ breaks > 0:
 
 
 -}
-mkFocuss (TokenLayout (breaks, spaces) (wsStartFocus,wsEndFocus) (tStartFocus,tEndFocus)) strFocus = 
-  let (tsf, fbsf, bsfs, ssf) = (mkStartOrEndFocuss (breaks, spaces) wsStartFocus tStartFocus (fromP strFocus))
-      (tef, fbef, befs, sef) = (mkStartOrEndFocuss (breaks, spaces) wsEndFocus   tEndFocus   (toP strFocus))
-  in (FocusP tsf tef, FocusP fbsf fbef,zipWith FocusP bsfs befs, FocusP ssf sef)
+mkFocuss isStructural (TokenLayout (breaks, spaces) (wsStartFocus,wsEndFocus) (tStartFocus,tEndFocus)) strFocus = 
+  let (btsf, tsf, atsf, fbsf, bsfs, ssf) = mkStartOrEndFocuss isStructural (breaks, spaces) wsStartFocus tStartFocus (fromP strFocus)
+      (btef, tef, atef, fbef, befs, sef) = mkStartOrEndFocuss isStructural (breaks, spaces) wsEndFocus   tEndFocus   (toP strFocus)
+  in (FocusP btsf btef, FocusP tsf tef, FocusP atsf atef, FocusP fbsf fbef, zipWith FocusP bsfs befs, FocusP ssf sef)
 -- because these focuses are either both start or both end focus, we know that only one can be a (Just i)
-mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus inside the structural token
-       let tokenFocus = case tFocus of
-                          Just i  -> PathP [] i
+mkStartOrEndFocuss isStructural (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus inside the structural token
+       let beforeTokenFocus = case tFocus of   -- only used for structural, so isStructural check is not necessary
+                                Just 0 -> PathP [] 0
+                                _      -> NoPathP
+           tokenFocus = case tFocus of  
+                          Just i  -> if isStructural -- structural leaves focus to before/afterTokenFocus
+                                     then NoPathP
+                                     else PathP [] i
                           Nothing -> sFocus 
+           afterTokenFocus = case tFocus of -- check not necessary, see above
+                               Just 1 -> PathP [] 0
+                               _      -> NoPathP
            firstBreakFocus = case wFocus of
                                Just i -> if i == 0 then PathP [] 0 else NoPathP
                                Nothing -> NoPathP
@@ -256,10 +271,10 @@ mkStartOrEndFocuss (breaks, spaces) wFocus tFocus sFocus = -- sFocus is focus in
                                  Nothing -> take (breaks-1) $ repeat NoPathP
            spacesFocus     = case wFocus of 
                               Just i -> if i >= breaks -- then focus is in the spaces
-                                      then PathP [0] (i-breaks)
+                                      then PathP [] (i-breaks)
                                       else NoPathP
                               Nothing -> NoPathP
-       in (tokenFocus, firstBreakFocus, breaksFocuss, spacesFocus)
+       in (beforeTokenFocus, tokenFocus, afterTokenFocus, firstBreakFocus, breaksFocuss, spacesFocus)
   
 
 -- !!(Look further at this:)last bit of layout in an empty token? for now we put it in an empty string token. 
