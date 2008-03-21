@@ -18,7 +18,7 @@ initialDocument =
     ; debugLnIO Prs $ "InitDoc: opening file: "++"Proxima.hs"++ " at " ++dir  
     ; fileContents <- readFile filePath
     ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl 
-                                       (ParsingParseErr (0,"")
+                                       (ParsingParseErr (Nothing,"")
                                        [ ErrorTk 0 fileContents ] 
                                        (error "DocUtils.generated.initialDocument: No clipparser specified")))
     }
