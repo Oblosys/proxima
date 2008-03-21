@@ -19,7 +19,7 @@ initialDocument =
     ; fileContents <- readFile filePath
     ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl 
                                        (ParsingParseErr (Nothing,"")
-                                       [ ErrorTk 0 fileContents ] 
+                                       [ ErrorTk 0 fileContents NoIDP ] 
                                        (error "DocUtils.generated.initialDocument: No clipparser specified")))
     }
     -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
