@@ -83,7 +83,7 @@ type ClipParser doc node clip token = [Token doc node clip token] -> clip
 data Token doc node clip token = 
                UserTk       Position token String (Maybe node) IDP
              | StructuralTk Position (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
-             | ParsingTk    (Maybe (ClipParser doc node clip token)) (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
+             | ParsingTk    (Maybe (ClipParser doc node clip token)) (Maybe node)  [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk               Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk              Int (Int, Int) (Maybe node) IDP
              | ErrorTk      Position String IDP -- for storing scanner errors
@@ -102,7 +102,7 @@ instance (Show node, Show token) => Show (Token doc node clip token) where
                   then drop (length "Node_") showNode
                   else showNode
     in  "<"++show nr ++":StructuralTk:"++nodeStr++":"++show id++">" 
-  show (ParsingTk _ _ _ tks _)       = "<ParsingTk>" 
+  show (ParsingTk _ _ tks _)       = "<ParsingTk>" 
   show (GraphTk _ edges _ _)     = "<GraphTk:"++show edges++">"
   show (VertexTk id pos _ _)     = "<VertexTk: "++show id++">"
   show (ErrorTk nr str id)             = "<"++show nr ++":"++"ErrorTk: "++show str++":"++show id++">"
@@ -112,7 +112,7 @@ instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   StructuralTk _ Nothing _ _ _    == StructuralTk _ _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _ _          == StructuralTk _ Nothing _ _ _ = True -- StructuralTks with no node always match
   StructuralTk _ (Just nd1) _ _ _ == StructuralTk _(Just nd2) _ _ _ = nd1 == nd2
-  ParsingTk _ _ _ _ _    == ParsingTk _ _ _ _ _ = True   
+  ParsingTk _ _ _ _   == ParsingTk _ _ _ _ = True   
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
                                               -- identifier will be added, which will be involved in eq. check
@@ -125,22 +125,22 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   StructuralTk _ _ _ _ _          <= StructuralTk _ Nothing _ _ _ = True
   StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2
   StructuralTk _ _ _ _ _ <= UserTk _ _ _ _ _  = True
-  ParsingTk _ _ _ _ _ <= ParsingTk _ _ _ _ _      = True
-  ParsingTk _ _ _ _ _ <= StructuralTk _ _ _ _ _ = True
-  ParsingTk _ _ _ _ _ <= UserTk _ _ _ _ _       = True
+  ParsingTk _ _ _ _ <= ParsingTk _ _ _ _      = True
+  ParsingTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
+  ParsingTk _ _ _ _ <= UserTk _ _ _ _ _       = True
   GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
-  GraphTk _ _ _ _ <= ParsingTk _ _ _ _ _      = True
+  GraphTk _ _ _ _ <= ParsingTk _ _ _ _      = True
   GraphTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   GraphTk _ _ _ _ <= UserTk _ _ _ _ _       = True
   VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
   VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
-  VertexTk _ _ _ _ <= ParsingTk _ _ _ _ _      = True
+  VertexTk _ _ _ _ <= ParsingTk _ _ _ _      = True
   VertexTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   VertexTk _ _ _ _ <= UserTk _ _ _ _ _       = True 
   ErrorTk _ _ _        <= ErrorTk _ _ _            = True
   ErrorTk _ _ _        <= VertexTk _ _ _ _     = True
   ErrorTk _ _ _        <= GraphTk _ _ _ _      = True
-  ErrorTk _ _ _        <= ParsingTk _ _ _ _ _      = True
+  ErrorTk _ _ _        <= ParsingTk _ _ _ _      = True
   ErrorTk _ _ _        <= StructuralTk _ _ _ _ _ = True
   ErrorTk _ _ _        <= UserTk _ _ _ _ _       = True
   _                <= _           = False
@@ -171,7 +171,7 @@ deepShowTks i tok = case tok of
                                                ++ indent (i+1)++"[\n"
                                                ++ concatMap (deepShowTks (i+1)) cs 
                                                ++ indent (i+1)++" ]\n"
-                      (ParsingTk _ _ _ cs _) -> indent i ++ show tok ++ "\n"
+                      (ParsingTk _ _ cs _) -> indent i ++ show tok ++ "\n"
                                                ++ indent (i+1)++"[\n"
                                                ++ concatMap (deepShowTks (i+1)) cs 
                                                ++ indent (i+1)++" ]\n"

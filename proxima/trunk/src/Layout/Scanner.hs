@@ -215,7 +215,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      debug Lay (showScannedTokens scannedTokensIDPs) $
      
-     ( [ParsingTk parser mNode (castLayToPres lay) tokens idP]
+     ( [ParsingTk parser mNode tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )

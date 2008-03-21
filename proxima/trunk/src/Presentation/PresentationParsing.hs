@@ -154,8 +154,8 @@ pStrExtra extraDefault p = unfoldStructure
 -- TODO: why do we need the 's in Editable?
 pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
-     <$> pSym (ParsingTk Nothing Nothing (EmptyP NoIDP) [] NoIDP)
- where unfoldStructure presTk@(ParsingTk _ _ pr tokens _) = 
+     <$> pSym (ParsingTk Nothing Nothing [] NoIDP)
+ where unfoldStructure presTk@(ParsingTk _ _ tokens _) = 
          let (res, errs) = runParser p tokens
          in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
@@ -259,7 +259,7 @@ pCSym c p = pCostSym c p p
 
 
 strucTk   = StructuralTk 0 Nothing (EmptyP NoIDP) [] (IDP (-1))
-parsingTk = (ParsingTk Nothing Nothing (EmptyP NoIDP) [] NoIDP)
+parsingTk = (ParsingTk Nothing Nothing [] NoIDP)
 graphTk   = GraphTk Dirty [] Nothing (IDP (-1)) -- probably a graph will never be inserted by
 vertexTk  = VertexTk (-1) (0,0) Nothing  (IDP (-1))  -- the parser, but if it is, it should be dirty
 
@@ -371,9 +371,9 @@ recognizeClip strTk@(StructuralTk _ (Just node) _ childTokens _) =
       result
 recognizeClip tk@(StructuralTk _ Nothing _ childTokens _) =
   error $ "recognize: Encountered StructuralTk without node: " ++ show tk
-recognizeClip tk@(ParsingTk (Just parser) _ _ childTokens _) = 
+recognizeClip tk@(ParsingTk (Just parser) _ childTokens _) = 
   parser childTokens
-recognizeClip tk@(ParsingTk Nothing _ _ childTokens _) = 
+recognizeClip tk@(ParsingTk Nothing _ childTokens _) = 
   error $ "recognize: Encountered ParsingTk without parser: " ++ show tk
 recognizeClip tk =
   error $ "recognize: Encountered token other than StructuralTk or ParsingTk: " ++ show tk
@@ -383,8 +383,8 @@ tokenPath parentPath tk =
   let node = case tk of 
                (StructuralTk _ (Just node) _ _ _) -> node
                (StructuralTk _ Nothing _ _ _)     -> error $ "tokenPath: childToken without node" ++ show tk
-               (ParsingTk _ (Just node) _ _ _) -> node
-               (ParsingTk _ Nothing _ _ _)     -> error $ "tokenPath: childToken without node" ++ show tk
+               (ParsingTk _ (Just node) _ _) -> node
+               (ParsingTk _ Nothing _ _)     -> error $ "tokenPath: childToken without node" ++ show tk
   in case pathNode node of
        PathD path -> if parentPath `isPrefixOf` path 
                      then case drop (length parentPath) path of
