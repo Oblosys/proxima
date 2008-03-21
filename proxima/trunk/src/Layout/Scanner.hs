@@ -32,6 +32,7 @@ Same thing for idps
 
 Unclear:
 what happens if  string has no idp? What is the problem if idp's are created new?
+what happens if token has different string than scanned (eg 0123 -> 123) how does this affect focus?
 
 The layouter adds whitespace according to whitespace map.
 Only the tokens of a PresentationTk.
@@ -189,25 +190,45 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP
              _            -> presentationLex
      (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
-     afterLastCharFocusStart = focusAfterLastChar scanChars scannedFocusStart
-     afterLastCharFocusEnd   = focusAfterLastChar scanChars scannedFocusEnd
      focusedScanChars = markFocus markFocusStart scannedFocusStart $
                         markFocus markFocusEnd   scannedFocusEnd 
                                   scanChars 
-     scannedTokens = sheet focusedScanChars
+     scannedTokens = addLastCharFocus updateFocusStart scanChars scannedFocusStart $
+                     addLastCharFocus updateFocusEnd scanChars scannedFocusEnd $
+                     sheet focusedScanChars
      (scannedTokensIDPs, idPCounter'') = addIDPs idPCounter' scannedTokens
      scannedWhitespaceMap = retrieveTokenWhitespace Map.empty scannedTokensIDPs
      tokens = catMaybes $ map f scannedTokensIDPs
                 where f (ScannedToken _ t) = Just t
                       f _                = Nothing
- in  --debug Lay ("Last whitespaceFocus':" ++ show lastWhitespaceFocus') $
-     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+     --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
+     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser loc (castLayToPres lay) tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
 
+updateFocusStart :: Int -> FocusStartEnd -> FocusStartEnd
+updateFocusStart p (_, focusEnd) = (Just p, focusEnd)
+
+updateFocusEnd :: Int -> FocusStartEnd -> FocusStartEnd
+updateFocusEnd p (focusStart, _) = (focusStart, Just p)
+
+addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
+  if focusAfterLastChar scanChars scannedFocus
+  then case tokens of
+         [] -> []
+         (_:_) -> init tokens ++ [updateFocus (last tokens)]
+  else tokens
+  where updateFocus (ScannedWhitespace focusStartEnd ws@(bs,sps)) = 
+                     ScannedWhitespace (updateStartOrEnd (bs+sps) focusStartEnd) ws
+        updateFocus (ScannedToken focusStartEnd (UserTk tokenPos userToken str loc idp)) = 
+                     ScannedToken (updateStartOrEnd (length str) focusStartEnd) (UserTk tokenPos userToken str loc idp)
+        updateFocus (ScannedToken focusStartEnd strTk@(StructuralTk _ _ _ _ _)) = 
+                     ScannedToken (updateStartOrEnd 1 focusStartEnd) strTk
+
+-- TODO error token?
 {-
 scan string to ScannedToken/Whitespace
 For each scannedToken, if no idp or existing idp, assign a new one from idp counter
