@@ -86,8 +86,8 @@ data Token doc node clip token =
              | ParsingTk    (Maybe (ClipParser doc node clip token)) (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk               Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk              Int (Int, Int) (Maybe node) IDP
-             | ErrorTk      Position String -- for storing scanner errors
--- the IDP field is used during the scanning and parsing phase
+             | ErrorTk      Position String IDP -- for storing scanner errors
+-- the IDP field is used during the scanning and parsing phase.
 
 -- The Position field in UserTk StructuralTk and ErrorTk contains its position in the list of scanned tokens
 -- The other tokens are not produced by the scanner, and therefore do not need this field.
@@ -105,7 +105,7 @@ instance (Show node, Show token) => Show (Token doc node clip token) where
   show (ParsingTk _ _ _ tks _)       = "<ParsingTk>" 
   show (GraphTk _ edges _ _)     = "<GraphTk:"++show edges++">"
   show (VertexTk id pos _ _)     = "<VertexTk: "++show id++">"
-  show (ErrorTk nr str)             = "<"++show nr ++":"++"ErrorTk: "++show str++">"
+  show (ErrorTk nr str id)             = "<"++show nr ++":"++"ErrorTk: "++show str++":"++show id++">"
 
 instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   UserTk _ u1 _ _ _     == UserTk _ u2 _ _ _     = u1 == u2
@@ -116,7 +116,7 @@ instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
                                               -- identifier will be added, which will be involved in eq. check
-  ErrorTk _ _  == ErrorTk _ _              = True
+  ErrorTk _ _ _ == ErrorTk _ _ _             = True
   _              == _                  = False
 
 instance (Ord node, Ord token) => Ord (Token doc node clip token) where
@@ -137,12 +137,12 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   VertexTk _ _ _ _ <= ParsingTk _ _ _ _ _      = True
   VertexTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   VertexTk _ _ _ _ <= UserTk _ _ _ _ _       = True 
-  ErrorTk _ _        <= ErrorTk _ _            = True
-  ErrorTk _ _        <= VertexTk _ _ _ _     = True
-  ErrorTk _ _        <= GraphTk _ _ _ _      = True
-  ErrorTk _ _        <= ParsingTk _ _ _ _ _      = True
-  ErrorTk _ _        <= StructuralTk _ _ _ _ _ = True
-  ErrorTk _ _        <= UserTk _ _ _ _ _       = True
+  ErrorTk _ _ _        <= ErrorTk _ _ _            = True
+  ErrorTk _ _ _        <= VertexTk _ _ _ _     = True
+  ErrorTk _ _ _        <= GraphTk _ _ _ _      = True
+  ErrorTk _ _ _        <= ParsingTk _ _ _ _ _      = True
+  ErrorTk _ _ _        <= StructuralTk _ _ _ _ _ = True
+  ErrorTk _ _ _        <= UserTk _ _ _ _ _       = True
   _                <= _           = False
 
 tokenString :: Token doc node clip token -> String                  
@@ -150,21 +150,21 @@ tokenString (UserTk _ _ s n id)      = s
 tokenString (StructuralTk _ n _ _ id) = "<structural token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
-tokenString (ErrorTk _ str)       = "<error token>"
+tokenString (ErrorTk _ str _)       = str
                              
 tokenNode :: Token doc node clip token -> Maybe node                 
 tokenNode (StructuralTk _ n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk _ u s n id)   = n
-tokenNode (ErrorTk _ str)       = error $ "tokenNode called on error token: " ++ str
+tokenNode (ErrorTk _ str _)       = error $ "tokenNode called on error token: " ++ str
 
 tokenIDP :: Token doc node clip token -> IDP       
 tokenIDP (UserTk _ u s n id) = id
 tokenIDP (StructuralTk _ n _ _ id)  = id
 tokenIDP (GraphTk d es n id) = id
 tokenIDP (VertexTk i p n id) = id
-tokenIDP (ErrorTk _ str)       = error $ "tokenIDP called on error token: " ++ str
+tokenIDP (ErrorTk _ str id)  = id
 
 deepShowTks i tok = case tok of
                       (StructuralTk _ _ _ cs _) -> indent i ++ show tok ++ "\n"

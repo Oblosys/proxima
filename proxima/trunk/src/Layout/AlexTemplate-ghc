@@ -32,7 +32,7 @@ alexScanTokens initState scs = go initState ('\n',scs)
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
 		AlexError (_,remaining) -> ( [ScannedToken (getFocusStartEnd remaining)
-		                                           (ErrorTk state $ stringFromScanChars str) ]
+		                                           (ErrorTk state (stringFromScanChars str) NoIDP) ]
 		                           , state)              -- state is current position
 		AlexSkip  inp' len     -> go state inp'
 		AlexToken inp' len act -> let (scannedToken, state') = act state (take len str)

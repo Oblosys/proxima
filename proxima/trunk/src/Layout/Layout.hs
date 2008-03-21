@@ -177,7 +177,7 @@ addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace False wm N
 addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to structural "++show idp) $
                                                         let (pres', f) = detokenize wm pres
                                                         in  addWhitespace True wm (Just f) idp pres'
-addWhitespaceToken wm idp (ErrorTk _ str)             = addWhitespace False wm Nothing idp (StringP idp str)
+addWhitespaceToken wm idp (ErrorTk _ str _)             = addWhitespace False wm Nothing idp (StringP idp str)
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
 -- if it is the last token and there is no whitespace behind it)                   
