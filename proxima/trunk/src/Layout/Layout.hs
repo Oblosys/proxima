@@ -90,7 +90,7 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
                 | (y,row) <- zip [0..] rows, (x,(_,focus)) <- zip [0..] row
                 ]
       f = foldl combineFocus  noFocus focusss
-  in -- debug Lay ("focusses:"++show fs) $
+  in debug Lay ("\n\n\ndetokenizeParsingP: "++show pres++" yields "++show presss) $
      ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
                                              then [RowP NoIDP 0 [StringP NoIDP ""]]
                                              else (map (RowP NoIDP 0)) presss
@@ -102,6 +102,9 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
 -- for overlay, we descend into the first element, and make an overlay with the first element of the first
 -- row of the result of the detokenization (which may be recursively detokenized).
 
+-- for col, we do the same as for row. This is because a col may be present in a structuralTk coming
+-- from a presented parse error
+-- TODO: is this ok?
 detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
                [[(Layout doc node clip token, FocusPres)]]
 detokenize' wm t (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
@@ -118,8 +121,7 @@ detokenize' wm t (RectangleP idp w h lw st)  = [[(RectangleP idp w h lw st, noFo
 detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocus)]]
 
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
---detokenize' wm t (ColP idp rf fm press)      = let (press',f) = detokenizeList' wm t 0 press
---                                               in  ([ColP idp rf fm press'], f)
+detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
 detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
                                                in  ((OverlayP idp $ pres': map castPresToLay press, f):row)
                                                    : rows
