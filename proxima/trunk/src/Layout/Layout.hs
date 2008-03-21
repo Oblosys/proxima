@@ -121,7 +121,7 @@ detokenize' wm t (RectangleP idp w h lw st)  = [[(RectangleP idp w h lw st, noFo
 detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocus)]]
 
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
-detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
+--detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
 detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
                                                in  ((OverlayP idp $ pres': map castPresToLay press, f):row)
                                                    : rows

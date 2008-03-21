@@ -107,8 +107,8 @@ tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
                PresentationLevel doc node clip token -> (EditPresentation docLvl doc node clip token , state, LayoutLevel doc node clip token)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
- let (tokens, idPCounter', whitespaceMap) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
-     presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing (castLayToPres lay) tokens NoIDP)) (whitespaceMap,idPCounter')
+ let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
+     presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,idPCounter')
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
      ) 
@@ -133,62 +133,71 @@ inherited attribute   sheet the scanner sheet            (simply copied down)
                       pth: the current path              (parent adds child nr to path)
 inh & synthesized     idP: the presentation id counter   (threaded)
                       wm: the whitespace map             (threaded)
-synthesized attribute pres: the tokenized presentation   (constructed at every case because of cast from Layout to Presentation)
+synthesized attribute tokens: the list of tokens         (constructed at every case because of cast from Layout to Presentation)
+                      pres: the presentation in which parsing parts are tokenized (put in the presentation field of StructuralTk, which is used in parse errors
+                                                                                   if we simply used the presentation, then whitespace/focus for inner parsing
+                                                                                   parts could not be reused.)
                       
 -}
 scanStructural :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
                   Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip token ->
-                  ([Token doc node clip token], IDPCounter, WhitespaceMap)
+                  ([Token doc node clip token], IDPCounter, WhitespaceMap, Presentation doc node clip token)
 scanStructural sheet foc lx loc pth idpc wm presentation =
   case presentation of
     ParsingP idP p lx' pres'    -> scanPresentation sheet foc lx loc (pth++[0]) idpc wm idP p lx' pres'
-    EmptyP idd                  -> ([], idpc, wm)
-    StringP idd str             -> ([], idpc, wm)
-    ImageP idd istr st          -> ([], idpc, wm)
-    PolyP idd pts w st          -> ([], idpc, wm)
-    RectangleP idd w h lw st    -> ([], idpc, wm)
-    EllipseP idd w h lw st      -> ([], idpc, wm)
-    RowP id rf press            -> scanStructuralList sheet foc lx loc pth idpc wm press
-    ColP id rf f press          -> scanStructuralList sheet foc lx loc pth idpc wm press
-    OverlayP id press           -> scanStructuralList sheet foc lx loc pth idpc wm press
-    FormatterP id press         -> scanStructuralList sheet foc lx loc pth idpc wm press
-    GraphP id d w h edges press -> let (tokens, idpc', wm') = scanStructuralList sheet foc lx loc pth idpc wm press
-                                   in  (GraphTk d edges loc id : tokens, idpc', wm')
-    VertexP id v x y o pres     -> let (tokens, idpc', wm') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
-                                   in  (VertexTk v (x,y) loc id : tokens, idpc', wm')
-    WithP ar pres               -> scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
-    StructuralP id pres         -> let (tokens, idpc', wm') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
-                                   in  ([StructuralTk 0 loc (castLayToPres pres) tokens id], idpc', wm')
+    EmptyP idd                  -> ([], idpc, wm, EmptyP idd)
+    StringP idd str             -> ([], idpc, wm, StringP idd str)
+    ImageP idd istr st          -> ([], idpc, wm, ImageP idd istr st)
+    PolyP idd pts w st          -> ([], idpc, wm, PolyP idd pts w st)
+    RectangleP idd w h lw st    -> ([], idpc, wm, RectangleP idd w h lw st)
+    EllipseP idd w h lw st      -> ([], idpc, wm, EllipseP idd w h lw st)
+    RowP id rf press            -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (tokens, idpc', wm', RowP id rf press')
+    ColP id rf f press          -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (tokens, idpc', wm', ColP id rf f press')
+    OverlayP id press           -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (tokens, idpc', wm', OverlayP id press')
+    FormatterP id press         -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (tokens, idpc', wm', FormatterP id press')
+    GraphP id d w h edges press -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (GraphTk d edges loc id : tokens, idpc', wm', GraphP id d w h edges press')
+    VertexP id v x y o pres     -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
+                                   in  (VertexTk v (x,y) loc id : tokens, idpc', wm', VertexP id v x y o pres')
+    WithP ar pres               -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
+                                   in  (tokens, idpc', wm', WithP ar pres')
+    StructuralP id pres         -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
+                                   in  ([StructuralTk 0 loc pres' tokens id], idpc', wm', StructuralP id pres')
                                                       -- position is not used, so set to 0
-    LocatorP newLoc pres        -> scanStructural sheet foc lx (Just newLoc) (pth++[0]) idpc wm pres
-    pr -> debug Err ("Scanner.scanStructural: can't handle "++ show pr) ([], idpc, wm)
+    LocatorP newLoc pres        -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx (Just newLoc) (pth++[0]) idpc wm pres
+                                   in  (tokens, idpc', wm', LocatorP newLoc pres')
+    pr -> debug Err ("Scanner.scanStructural: can't handle "++ show pr) ([], idpc, wm, castLayToPres pr)
 
 
 scanStructuralList :: (DocNode node, Show token) => 
                       ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
                       Maybe node -> Path ->
                       IDPCounter -> WhitespaceMap -> [Layout doc node clip token] ->
-                      ([Token doc node clip token], IDPCounter, WhitespaceMap)
+                      ([Token doc node clip token], IDPCounter, WhitespaceMap, [Presentation doc node clip token])
 scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' sheet foc lx loc pth idpc wm 0 press
- where scanStructuralList' sheet foc lx loc pth idpc wm i []           = ([], idpc, wm)
+ where scanStructuralList' sheet foc lx loc pth idpc wm i []           = ([], idpc, wm, [])
        scanStructuralList' sheet foc lx loc pth idpc wm i (pres:press) = 
-         let (tokens,  idpc',  wm')  = scanStructural sheet foc lx loc (pth++[i]) idpc wm pres
-             (tokenss, idpc'', wm'') = scanStructuralList' sheet foc lx loc pth idpc' wm' (i+1) press
-         in  (tokens ++ tokenss, idpc'', wm'')
+         let (tokens,  idpc',  wm', pres')  = scanStructural sheet foc lx loc (pth++[i]) idpc wm pres
+             (tokenss, idpc'', wm'', press') = scanStructuralList' sheet foc lx loc pth idpc' wm' (i+1) press
+         in  (tokens ++ tokenss, idpc'', wm'', pres':press')
 
 
 
 scanPresentation :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
                     IDP -> Maybe (ClipParser doc node clip token) -> Lexer -> Layout doc node clip token ->
-                    ([Token doc node clip token], IDPCounter, WhitespaceMap)
-scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP
+                    ([Token doc node clip token], IDPCounter, WhitespaceMap, Presentation doc node clip token)
+scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                  parser presentationLex lay =
  let --lay = parsing (row [ structural (row [ text "<", parsing (text "blaa"), text ">"]), text "   " ])
      lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex loc pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
+     (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex mNode pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
      focusedScanChars = markFocus markFocusStart scannedFocusStart $
                         markFocus markFocusEnd   scannedFocusEnd 
@@ -206,8 +215,10 @@ scanPresentation sheet foc inheritedLex loc pth idPCounter whitespaceMap idP
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      debug Lay (showScannedTokens scannedTokensIDPs) $
      
-     ( [ParsingTk parser loc (castLayToPres lay) tokens idP]
-     , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap')
+     ( [ParsingTk parser mNode (castLayToPres lay) tokens idP]
+     , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
+     , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
+     )
 
 updateFocusStart :: Int -> FocusStartEnd -> FocusStartEnd
 updateFocusStart p (_, focusEnd) = (Just p, focusEnd)

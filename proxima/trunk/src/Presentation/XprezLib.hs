@@ -80,9 +80,7 @@ presParseErr node (ParsingParseErr (mErrorPos, errorMessage) tokens parser) =
   loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
      row $ [ (if Just p == mErrorPos 
               then markError errorMessage 
-              else id) $ case token of                     -- probably the old loc won't do any harm
-                           StructuralTk _ (Just node) pres _ idp -> loc noNode $ structuralToken idp $ pres
-                           _                                     -> TokenP (tokenIDP token) token 
+              else id) $ presFromToken token
            | (p,token) <- zip [0..] tokens ]
            ++ case mErrorPos of Just _  -> []
                                 Nothing -> [markError errorMessage $ row [StringP NoIDP "" `withWidth` 8 ] ]
@@ -90,7 +88,8 @@ presParseErr node (ParsingParseErr (mErrorPos, errorMessage) tokens parser) =
 -- probably we need the lexer also in ParseErr
 
 
-
+presFromToken (StructuralTk _ (Just node) pres _ idp) = loc node $ structuralToken idp $ pres
+presFromToken token                                   = TokenP (tokenIDP token) token 
 
 
 

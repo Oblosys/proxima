@@ -149,10 +149,10 @@ SEM Layout
       lhs.scanChars = @child.scanChars
   | StructuralP
       (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
-        let (tokens, idPCounter, whitespaceMap) = 
+        let (tokens, idPCounter, whitespaceMap, pres) = 
               @lhs.scanStructural @lhs.focus @lhs.lexer @lhs.lloc (@lhs.path++[0]) @lhs.idPCounter 
                                   @lhs.whitespaceMap @child.self
-        in  ( [Structural @id NoFocusMark NoFocusMark @lhs.lloc tokens (castLayToPres @child.self)]
+        in  ( [Structural @id NoFocusMark NoFocusMark @lhs.lloc tokens pres]
             , idPCounter, whitespaceMap
             )
   | EmptyP 
