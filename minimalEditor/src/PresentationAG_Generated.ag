@@ -40,8 +40,8 @@ DATA EnrichedDoc
   | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tree
-  | Bin left:Tree right:Tree
-  | Leaf int:Int
+  | Bin idp0:IDP idp1:IDP idp2:IDP idp3:IDP idp4:IDP left:Tree right:Tree
+  | Leaf idp0:IDP idp1:IDP int:Int
   | HoleTree
   | ParseErrTree error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -100,13 +100,13 @@ SEM EnrichedDoc
 
 SEM Tree
   | Bin 
-      left.pIdC = @lhs.pIdC + 0
+      left.pIdC = @lhs.pIdC + 5
       right.pIdC = @left.pIdC
       lhs.pIdC = @right.pIdC
       left.path  = @lhs.path++[0]
       right.path  = @lhs.path++[1]
   | Leaf 
-      lhs.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @lhs.pIdC + 2
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
   | Leaf

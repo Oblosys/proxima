@@ -51,6 +51,10 @@ SEM Tree [ | | depth : Int ]
   | HoleTree ParseErrTree
       lhs.depth = 0
 
+{
+token idp str = TokenP idp (UserTk 0 (SymToken str) str Nothing idp)
+
+}
 
 
 SEM List_Tree
@@ -60,11 +64,13 @@ SEM List_Tree
 SEM Tree
   | Bin
       loc.pres = parsingWithParser pBin @self $
-                   row [ text "Bin("
+                   row [ token @idp0 "Bin"
+                       , token @idp1 "("
                        , @left.pres
-                       , text ")("
+                       , token @idp2 ")"
+                       , token @idp3 "("
                        , @right.pres
-                       , text ")"
+                       , token @idp4 ")"
                        ]
 {-
       loc.pres = structural $
@@ -75,7 +81,9 @@ SEM Tree
 -}
   | Leaf
       loc.pres = structural $ 
-                   row [ text $ "Leaf" ++ show @int ]
+                   row [ token @idp0 "Leaf"
+                       , token @idp1 $ show @int 
+                       ]
 {-
       loc.pres = parsingWithParser pLeaf @self $ 
                    row [ text $ "Leaf" ++ show @int ]

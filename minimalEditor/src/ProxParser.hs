@@ -54,14 +54,15 @@ pLeaf = pStructuralConstr Node_Leaf
      
 pBin :: ListParser Document Node ClipDoc UserToken Tree
 pBin = 
-          (\token left right -> reuseBin [token] (Just left) (Just right))
+          (\bin open1 left close1 open2 right close2 -> 
+              reuseBin [bin] (Just $ tokenIDP bin) (Just $ tokenIDP open1) (Just $ tokenIDP close1) (Just $ tokenIDP open2) (Just $ tokenIDP close2) (Just left) (Just right))
       <$> pToken BinToken
-      <*  pToken (SymToken "(")
+      <*> pToken (SymToken "(")
       <*> pTree
-      <*  pToken (SymToken ")")      
-      <*  pToken (SymToken "(")
+      <*> pToken (SymToken ")")      
+      <*> pToken (SymToken "(")
       <*> pTree
-      <*  pToken (SymToken ")")      
+      <*> pToken (SymToken ")")      
 
 
 recognizeList_Tree :: ListParser Document Node ClipDoc UserToken List_Tree
@@ -73,10 +74,10 @@ recognizeList_Tree = pStr $
 
 recognizeTree :: ListParser Document Node ClipDoc UserToken Tree
 recognizeTree = pStr $
-          (\str left right -> reuseBin [str] (Just left) (Just right))
+          (\str left right -> reuseBin [str] Nothing Nothing Nothing Nothing Nothing (Just left) (Just right))
       <$> pStructuralTk Node_Bin
       <*> recognizeTree
       <*> recognizeTree
 --      <*  recognizeTree
-  <|>     (\str -> reuseLeaf [str] Nothing)
+  <|>     (\str -> reuseLeaf [str] Nothing Nothing Nothing)
       <$> pStructuralTk Node_Leaf

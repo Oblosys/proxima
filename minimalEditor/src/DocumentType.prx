@@ -1,4 +1,4 @@
 data Document = RootDoc trees:[Tree]  trees2:[Tree]
 
-data Tree = Bin left : Tree right : Tree
-          | Leaf int : Int
+data Tree = Bin left : Tree right : Tree { idp0:IDP idp1:IDP idp2:IDP idp3:IDP idp4:IDP }
+          | Leaf int : Int               { idp0:IDP idp1:IDP }

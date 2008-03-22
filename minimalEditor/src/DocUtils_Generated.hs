@@ -12,7 +12,9 @@ import Text.ParserCombinators.Parsec
 import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
-initialDocument = return (RootDoc (toList_Tree [Bin (Leaf 0) (Leaf 1)]) (toList_Tree [Leaf 100,Leaf 200]))
+initialDocument = return (RootDoc (toList_Tree [Bin NoIDP NoIDP NoIDP NoIDP NoIDP 
+                                                  (Leaf NoIDP NoIDP 0) (Leaf NoIDP NoIDP 1)]) 
+                                  (toList_Tree [Leaf NoIDP NoIDP 100,Leaf NoIDP NoIDP 200]))
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -71,8 +73,8 @@ toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
 toXMLDocument (RootDoc trees trees2) = Elt "RootDoc" [] $ toXMLList_Tree trees ++ toXMLList_Tree trees2
 toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
 toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
-toXMLTree (Bin left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right]
-toXMLTree (Leaf int) = Elt "Leaf" [] $ [toXMLInt int]
+toXMLTree (Bin _ _ _ _ _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right]
+toXMLTree (Leaf _ _ int) = Elt "Leaf" [] $ [toXMLInt int]
 toXMLTree (HoleTree) = Elt "HoleTree" [] $ []
 toXMLTree (ParseErrTree error) = Elt "ParseErrTree" [] []
 toXMLList_Tree (List_Tree xs) = toXMLConsList_Tree xs
@@ -92,8 +94,8 @@ parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_List_Tree <*> p
 parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_List_Tree <*> parseXML_List_Tree<* endTag "RootDoc"
 parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf <?|> parseHoleAndParseErr "Tree" HoleTree
-parseXMLCns_Bin = Bin <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree<* endTag "Bin"
-parseXMLCns_Leaf = Leaf <$ startTag "Leaf" <*> parseXML_Int<* endTag "Leaf"
+parseXMLCns_Bin = Bin NoIDP NoIDP NoIDP NoIDP NoIDP <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree<* endTag "Bin"
+parseXMLCns_Leaf = Leaf NoIDP NoIDP <$ startTag "Leaf" <*> parseXML_Int<* endTag "Leaf"
 parseXML_List_Tree = mkList List_Tree Cons_Tree Nil_Tree <$> many parseXML_Tree
 
 

@@ -25,8 +25,8 @@ data Document = RootDoc List_Tree List_Tree
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
-data Tree = Bin Tree Tree
-          | Leaf Int
+data Tree = Bin IDP IDP IDP IDP IDP Tree Tree
+          | Leaf IDP IDP Int
           | HoleTree
           | ParseErrTree (ParseError Document Node ClipDoc UserToken)
               deriving Show

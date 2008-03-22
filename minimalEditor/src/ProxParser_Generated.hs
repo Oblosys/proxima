@@ -39,8 +39,8 @@ construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc
 construct_RootDoc tk ~[mClip0,mClip1] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "trees::List_Tree" mClip0) (retrieveArg "RootDoc" "trees2::List_Tree" mClip1)
 construct_HoleDocument tk ~[] = Clip_Document $ hole
 construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
-construct_Bin tk ~[mClip0,mClip1] = Clip_Tree $ reuseBin [tk]  (retrieveArg "Bin" "left::Tree" mClip0) (retrieveArg "Bin" "right::Tree" mClip1)
-construct_Leaf tk ~[mClip0] = Clip_Tree $ reuseLeaf [tk]  (retrieveArg "Leaf" "int::Int" mClip0)
+construct_Bin tk ~[mClip0,mClip1] = Clip_Tree $ reuseBin [tk]  Nothing Nothing Nothing Nothing Nothing (retrieveArg "Bin" "left::Tree" mClip0) (retrieveArg "Bin" "right::Tree" mClip1)
+construct_Leaf tk ~[mClip0] = Clip_Tree $ reuseLeaf [tk]  Nothing Nothing (retrieveArg "Leaf" "int::Int" mClip0)
 construct_HoleTree tk ~[] = Clip_Tree $ hole
 construct_ParseErrTree (StructuralTk _ _ pres _ _) ~[] = Clip_Tree $ parseErr (StructuralParseErr pres)
 construct_List_Tree tk mClips = genericConstruct_List "Tree" toList_Tree mClips
@@ -65,16 +65,16 @@ reuseRootDoc nodes ma0 ma1
            (RootDoc a0 a1) -> genericReuse2 RootDoc a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
 
-reuseBin :: [Token doc Node clip token] -> Maybe Tree -> Maybe Tree -> Tree
-reuseBin nodes ma0 ma1
+reuseBin :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe IDP -> Maybe Tree -> Maybe Tree -> Tree
+reuseBin nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6
   = case extractFromTokens extractBin defaultBin nodes of
-           (Bin a0 a1) -> genericReuse2 Bin a0 a1 ma0 ma1
+           (Bin a0 a1 a2 a3 a4 a5 a6) -> genericReuse7 Bin a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6
            _ -> error "Internal error:ProxParser_Generated.reuseBin"
 
-reuseLeaf :: [Token doc Node clip token] -> Maybe Int -> Tree
-reuseLeaf nodes ma0
+reuseLeaf :: [Token doc Node clip token] -> Maybe IDP -> Maybe IDP -> Maybe Int -> Tree
+reuseLeaf nodes ma0 ma1 ma2
   = case extractFromTokens extractLeaf defaultLeaf nodes of
-           (Leaf a0) -> genericReuse1 Leaf a0 ma0
+           (Leaf a0 a1 a2) -> genericReuse3 Leaf a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseLeaf"
 
 reuseList_Tree :: [Token doc Node clip token] -> Maybe ConsList_Tree -> List_Tree
@@ -99,11 +99,11 @@ extractRootDoc (Just (Node_RootDoc x@(RootDoc _ _) _)) = Just x
 extractRootDoc _ = Nothing
 
 extractBin :: Maybe Node -> Maybe Tree
-extractBin (Just (Node_Bin x@(Bin _ _) _)) = Just x
+extractBin (Just (Node_Bin x@(Bin _ _ _ _ _ _ _) _)) = Just x
 extractBin _ = Nothing
 
 extractLeaf :: Maybe Node -> Maybe Tree
-extractLeaf (Just (Node_Leaf x@(Leaf _) _)) = Just x
+extractLeaf (Just (Node_Leaf x@(Leaf _ _ _) _)) = Just x
 extractLeaf _ = Nothing
 
 extractList_Tree :: Maybe Node -> Maybe List_Tree
@@ -124,10 +124,10 @@ defaultRootDoc :: Document
 defaultRootDoc = RootDoc hole hole
 
 defaultBin :: Tree
-defaultBin = Bin hole hole
+defaultBin = Bin NoIDP NoIDP NoIDP NoIDP NoIDP hole hole
 
 defaultLeaf :: Tree
-defaultLeaf = Leaf hole
+defaultLeaf = Leaf NoIDP NoIDP hole
 
 defaultList_Tree :: List_Tree
 defaultList_Tree = List_Tree Nil_Tree
@@ -167,6 +167,36 @@ genericReuse2 :: (a0 -> a1 -> r) ->
                  Maybe a0 -> Maybe a1 -> r
 genericReuse2 f a0 a1 ma0 ma1 =
   f (maybe a0 id ma0) (maybe a1 id ma1)
+
+genericReuse3 :: (a0 -> a1 -> a2 -> r) ->
+                 a0 -> a1 -> a2 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> r
+genericReuse3 f a0 a1 a2 ma0 ma1 ma2 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2)
+
+genericReuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
+genericReuse4 f a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3)
+
+genericReuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
+genericReuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4)
+
+genericReuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
+genericReuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5)
+
+genericReuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> r
+genericReuse7 f a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6)
 
 
 
