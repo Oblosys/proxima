@@ -31,7 +31,7 @@ extra-lib-dirs:
 includes:
 install-includes:
 include-dirs:
-hs-source-dirs: src ../uuagc/src
+hs-source-dirs: src
 other-modules: Gen_DocTypes Gen_DocUtils Gen_DocumentEdit
                Gen_PresentationAG Gen_ProxParser Main Parser TypesUtils
 ghc-prof-options:
