@@ -38,7 +38,14 @@ type IDPCounter = Int                   -- Counter for generating new unique IDP
 initLayout :: WhitespaceMap
 initLayout = Map.fromList []
 
-data ParseError doc node clip token = ParsingParseErr (Maybe Int, String) [Token doc node clip token] (ClipParser doc node clip token)
+type ParseErrorMessage = (Maybe Int, String)
+
+getErrorMessage (ParsingParseErr msg _ _) = msg
+getErrorMessage _                         = (Nothing, "Structural parse error")
+-- structural parse errors should not occur and therefore do not need to be 
+-- accessible in the presentation AG (other than this string).
+
+data ParseError doc node clip token = ParsingParseErr ParseErrorMessage [Token doc node clip token] (ClipParser doc node clip token)
                                     | StructuralParseErr (Presentation doc node clip token)
 -- only for Parse errors in the parsing presentations, we keep track of the parse error.
 -- structural parse errors cannot be represented with a list of tokens.
