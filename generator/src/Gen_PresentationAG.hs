@@ -110,6 +110,7 @@ genSem decls = genBanner "General sem functions" $
 genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) = 
   "SEM %1" <~ [typeName] :
   concatMap genSemPIDCProd prods ++
+  concatMap genSemIxProd prods ++ 
   concatMap genSemPresProd prods ++
   [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
   , "  | ParseErr%1 lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
@@ -129,11 +130,24 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
                  )
         where addPlus (l:ls) = (l++ " + " ++ show (length idpFields)) : ls
               -- this computation goes wrong when there are lists of idps (but it will be obsolete in a future version)
+       genSemIxProd (Prod _ cnstrName idpFields fields) =
+         if null childIxRules 
+         then []
+         else [ "  | %1" <~ [cnstrName] ] ++ concat childIxRules
+        where
+         childIxRules = 
+           [ if not (isListType fieldType) &&
+                TypesUtils.typeName fieldType `elem` typeNamesAppearingInLists 
+             then ["    %1.ix = %2" <~ [fieldName, show i]]
+             else []
+           | (Field fieldName fieldType, i) <- zip fields [0..]
+           ]
+         typeNamesAppearingInLists =  map TypesUtils.typeName $ getAllUsedListTypes decls
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
          ] <~ [cnstrName]
-        
+              
 genSemListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
