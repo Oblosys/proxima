@@ -60,29 +60,27 @@ Lexical errors create one big token, which discards structural children and ruin
   layout. This way, we keep the structurals out of the user specified scanner. The whitespace in the
   state can be put into the structural token.
   
-Store trailing whitespace. Maybe Alex can emit whitespace tokens which are put in the whitespace map
-after the whole layout has been scanned. 
 
 passing several Alex scanners (probably solved by Alex itself)
 
-focus for parse errors?
 
 what to do with columns and formatters containing tokens?
 
 
 if formatters have linebreak whitespace, layouter will probably go wrong.
 
-whitespace if no tokens are present? (example: decl* with empty pres)
+whitespace in front of first token?
+can be solved by having optional preceding whitespace, but this does not work if there are no
+tokens at all. If parser fails, it is okay, the id's are kept by the parseErr, but if empty pres
+is accepted then we need an initial token.
 
 scanner duplicates idp's
 
-handle focus at the right of the last char (and whitespace to the right of the last char)
-we could put an extra token there, which is parsed automatically.
 
 problem with structurals. focus in auto type sig is not recognized properly
 
 
-
+- following two seem to be fixed now.
 If we allow autowhitespace for strings and structural presentations
 then Layout.hs adds too much whitespace in case of a parseErr presentation
 However, enforcing the use of tokens in the presentationAG is tricky.
