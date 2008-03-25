@@ -38,7 +38,7 @@ data Field = Field { fieldName :: FieldName, fieldType :: Type } deriving Show
 
 data Type = BasicType     { typeName :: TypeName }
           | ListType      { typeName :: TypeName }
-          | CompositeType { typeName :: TypeName } deriving (Show, Eq)
+          | CompositeType { typeName :: TypeName } deriving (Show, Eq, Ord)
           
 data LHSType = LHSBasicType    { lhsTypeName :: TypeName }
              | LHSListType     { lhsTypeName :: TypeName }

@@ -16,6 +16,9 @@ import qualified Text.ParserCombinators.Parsec.Token as P
 import Text.ParserCombinators.Parsec.Language( haskellDef )
 import Char
 import Control.Monad (liftM)
+import qualified Data.Map as Map
+import Data.List ((\\), nub)
+import Data.Maybe (isNothing)
 
 import TypesUtils
 
@@ -65,12 +68,32 @@ pDecl =
 pProd = 
  do { constructorName <- ucIdentifier
     ; fields <- choice [ liftM concat $ try $ braces $ pRecord `sepBy1` reservedOp "," -- gerbo: added records
-                       , many pField
+                       , pFields
                        ] 
                        -- order is important, otherwise records aren't parsed
     ; idpFields <- pIDPFields
     ; return $ Prod ExplicitProd constructorName idpFields fields
     }
+
+-- generate only indexes for types that:
+--   * don't have a name yet, and
+--   * occur more than once in the field
+pFields = 
+ do { flds <- many pField
+    ; let unnamedTys = map snd $ filter (isNothing . fst) flds -- all types without a field name
+    ; let duplicates = Map.fromList $ zip (unnamedTys \\ nub unnamedTys) (repeat 0) -- all duplicates, with count 0
+    ; return $ makeNames flds duplicates
+    }
+  where 
+    makeNames ((fld,tpe):xs) cnts = Field fieldName tpe : makeNames xs counts
+      where (fieldName,counts) = case fld of
+                Just fn -> (fn, cnts)
+                Nothing -> (fieldNameFromType tpe ++ (maybe "" show $ Map.lookup tpe counts')
+                           , counts'
+                           )
+            counts'   = Map.adjust (+1) tpe cnts
+    makeNames [] _ = []
+
 
 
 pField =
@@ -79,12 +102,7 @@ pField =
                                         ; return $ Just fieldName
                                         }
     ; tpe <- pType
-    
-    ; fieldName <- case mFieldName of
-                     Nothing        -> return $ fieldNameFromType tpe
-                     Just fieldName -> return fieldName
-                 
-    ; return $ Field fieldName tpe
+    ; return $ (mFieldName, tpe)
     }
     
 pRecord = -- gerbo 
@@ -94,7 +112,7 @@ pRecord = -- gerbo
     ; return $ map (\fn -> Field fn tpe) fieldNames      -- to ``[Field foo Zwoink,Field bar Zwoink]''
     }
 
-pIDPFields = option [] $ braces $ many $ pField
+pIDPFields = option [] $ braces pFields
 
 pType = choice
   [ do { typeName <- ucIdentifier
