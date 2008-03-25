@@ -76,15 +76,23 @@ presHole focus typeStr nd pth = loc nd $
 
 presParseErr node (StructuralParseErr pres) =
   loc node $ structural $ pres `withbgColor` whiteSmoke
-presParseErr node (ParsingParseErr (mErrorPos, errorMessage) tokens parser) =
+presParseErr node (ParsingParseErr parseErrs tokens parser) =
   loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
-     row $ [ (if Just p == mErrorPos 
-              then markError errorMessage 
-              else id) $ presFromToken token
-           | (p,token) <- zip [0..] tokens ]
-           ++ case mErrorPos of Just _  -> []
-                                Nothing -> [markError errorMessage $ row [StringP NoIDP "" `withWidth` 8 ] ]
+     row $ [ (case lookup i positionsAndErrors of
+               Nothing -> id
+               Just msg -> markError msg 
+             )  $ presFromToken token
+           | (i,token) <- zip [0..] tokens ]
+           ++ if null finalErrors
+              then []
+              else [markError (unlines finalErrors) $ row [StringP NoIDP "" `withWidth` 8 ] ]
  where markError str pres = squiggly red pres `addPopupItems` [(str,id)] -- use popup until we have tooltips
+       positionsAndErrors = catMaybes [ case mPos of
+                                          Just p -> Just (p, msg)
+                                          Nothing -> Nothing
+                                      | (mPos, msg) <- parseErrs 
+                                      ]
+       finalErrors = map snd $ filter (isNothing . fst) parseErrs 
 -- probably we need the lexer also in ParseErr
 
 

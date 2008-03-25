@@ -4,9 +4,8 @@ import Common.CommonTypes
 import Presentation.PresTypes
 import Presentation.PresLayerTypes
 import Evaluation.DocumentEdit
+import UU.Parsing
 
-import Common.UU_Parsing hiding (Exp, parse, parseIO)
-import qualified Common.UU_Parsing as UU_Parsing
 import Char
 import Data.Maybe
 
@@ -160,16 +159,20 @@ pPrs p = unfoldStructure
          in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
-mkErr :: (DocNode node, Ord token, Show token) => [Message (Token doc node clip token)] -> (Maybe Int, String) 
-mkErr msgs =
- let messageText = show msgs
- in  ( case retrieveTokenPosition "Parse Error : before <" messageText of
-         Just pos -> Just pos
-         Nothing  -> case retrieveTokenPosition "Repaired by : deleting symbol <" messageText of
-                       Just pos -> Just pos
-                       Nothing  -> Nothing
-     ,  messageText
-     )
+mkErr :: (DocNode node, Ord token, Show token) =>
+         [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] -> 
+         [ParseErrorMessage]
+mkErr msgs  = 
+ [( case pos of
+         Just (UserTk p _ _ _ _) -> Just p
+         Just (StructuralTk p _ _ _ _) -> Just p
+         Just (ErrorTk p _ _) -> Just p
+         Just _ -> Nothing
+         Nothing -> Nothing
+     ,  show msg)
+ | msg@(Msg _ pos msgs) <- msgs
+ ]
+
 
 retrieveTokenPosition errStr messageText =
   case drop' errStr messageText of
@@ -234,7 +237,7 @@ newtype ParsePres doc node clip token a b c = ParsePres (Presentation doc node c
 instance (DocNode node, Ord token, Show token) => Symbol (Token doc node clip token) where
 
 runParser (pp) inp =
-      let res = UU_Parsing.parse pp inp
+      let res = parse pp inp
           (Pair v final) = evalSteps (res) 
           errs = getMsgs (res) 
       in  (v, errs)

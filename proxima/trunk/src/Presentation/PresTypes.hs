@@ -7,8 +7,8 @@ import Common.CommonUtils
 
 import qualified Data.Map as Map
 import Data.Map (Map)
-import Common.UU_Parsing
 
+import UU.Parsing
 
 data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
@@ -40,12 +40,12 @@ initLayout = Map.fromList []
 
 type ParseErrorMessage = (Maybe Int, String)
 
-getErrorMessage (ParsingParseErr msg _ _) = msg
-getErrorMessage _                         = (Nothing, "Structural parse error")
+getErrorMessages (ParsingParseErr msgs _ _) = msgs
+getErrorMessages _                          = [(Nothing, "Structural parse error")]
 -- structural parse errors should not occur and therefore do not need to be 
 -- accessible in the presentation AG (other than this string).
 
-data ParseError doc node clip token = ParsingParseErr ParseErrorMessage [Token doc node clip token] (ClipParser doc node clip token)
+data ParseError doc node clip token = ParsingParseErr [ParseErrorMessage] [Token doc node clip token] (ClipParser doc node clip token)
                                     | StructuralParseErr (Presentation doc node clip token)
 -- only for Parse errors in the parsing presentations, we keep track of the parse error.
 -- structural parse errors cannot be represented with a list of tokens.
@@ -83,7 +83,7 @@ data EditPresentation documentLevel doc node clip token =
 
 type Position = Int
 
-type ListParser doc node clip token a = AnaParser [] Pair  (Token doc node clip token) a 
+type ListParser doc node clip token a = Parser (Token doc node clip token) a 
 
 type ClipParser doc node clip token = [Token doc node clip token] -> clip
 
