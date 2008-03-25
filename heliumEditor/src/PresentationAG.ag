@@ -74,22 +74,6 @@ SEM Root
 
 --------------------------------------------------------------
 --
--- Parse errors
---
---------------------------------------------------------------
-
-SEM List_Decl [ | | parseErrs : {[String]} ]
-  | ParseErrList_Decl
-      lhs.parseErrs = []  --- NOT RIGHT!
-  | HoleList_Decl
-      lhs.parseErrs = []
-
-SEM ConsList_Decl [ | | parseErrs : {[String]} ]
-  | Cons_Decl     lhs.parseErrs = []
-  | Nil_Decl      lhs.parseErrs = []
-
---------------------------------------------------------------
---
 -- Document Presentation
 --
 --------------------------------------------------------------
@@ -154,7 +138,7 @@ SEM RootE
                        , vSpace 10
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez
-                       , let errs = if null @decls.parseErrs then @lhs.errs else map toMessage @decls.parseErrs
+                       , let errs = if null @decls.parseErrors then @lhs.errs else map toMessage @decls.parseErrors
                          in  col (map presMessage errs ++ [empty]) `withFontSize` 12
                        , vSpace 10
                        , hLine
@@ -172,7 +156,7 @@ pthFrmMsg :: HeliumMessage -> ([PathDoc], [PathDoc], [PathDoc])
 pthFrmMsg (HError _ ps1 ps2 ps3) = (ps1, ps2, ps3)
 pthFrmMsg _ = ([],[],[])
 
-toMessage str = HError (lines str) [] [] []
+toMessage (_,str) = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
 presMessage :: HeliumMessage -> Presentation doc Node clip token
