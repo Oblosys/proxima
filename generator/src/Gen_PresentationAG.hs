@@ -120,7 +120,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   , "      lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
   ] <~ [typeName] ++
   (if typeName /= "EnrichedDoc"
-   then ["      lhs.parseErrors = [getErrorMessage @error]"]
+   then ["      lhs.parseErrors = getErrorMessages @error"]
    else []) ++ 
   [ ""
   ]
@@ -166,7 +166,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
   , "  | ParseErrList_%1"
   , "      lhs.pres = presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
-  , "      lhs.parseErrors = [getErrorMessage @error]"
+  , "      lhs.parseErrors = getErrorMessages @error"
   , "  | HoleList_%1"
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
