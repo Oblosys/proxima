@@ -15,14 +15,15 @@ import TypesUtils
 
 generate :: DocumentType -> [String]
 generate docType = genPresentationSheet
-                ++ genDataType (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genAttr (removeDocumentDecl (addEnrichedDocDecl docType))
-                ++ genSem (addConsListDecls docTypeWithLists)
-                ++ genSemSynthesizedPath (docTypeWithoutEnrWithLists)
-                ++ genSemXML docTypeWithoutEnrWithListsAndConsLists
-                ++ genSemTree docTypeWithoutEnrWithListsAndConsLists
-  where docTypeWithoutEnrWithListsAndConsLists = removeEnrichedDocDecl (addConsListDecls (addListDecls (removeDocumentDecl (addEnrichedDocDecl docType))))
-        docTypeWithoutEnrWithLists = removeEnrichedDocDecl (addListDecls (removeDocumentDecl (addEnrichedDocDecl docType)))
+                ++ genDataType (addHolesParseErrs docTypeWithListsAndConsLists)
+                ++ genAttr     (removeDocumentDecl (addEnrichedDocDecl docType))
+                ++ genSem                docTypeWithListsAndConsLists
+                ++ genSemSynthesizedPath docTypeWithoutEnrWithLists
+                ++ genSemXML             docTypeWithoutEnrWithListsAndConsLists
+                ++ genSemTree            docTypeWithoutEnrWithListsAndConsLists
+  where docTypeWithoutEnrWithListsAndConsLists = removeEnrichedDocDecl docTypeWithListsAndConsLists
+        docTypeWithoutEnrWithLists             = removeEnrichedDocDecl docTypeWithLists
+        docTypeWithListsAndConsLists           = addConsListDecls docTypeWithLists
         docTypeWithLists = addListDecls (removeDocumentDecl (addEnrichedDocDecl docType))
 -- the behavior for holes and parse errors is too different, therefore we do not add them to the type
 -- but just generate code for them in the gen functions.
@@ -66,7 +67,9 @@ genDataType decls = genBanner "AG data type" $
                                              map genField fields)
                       
        genIDPField (Field fieldName fieldType) = fieldName ++ ":" ++ genIDPTypeAG  fieldType
-       genField    (Field fieldName fieldType) = fieldName ++ ":" ++ genTypeAG fieldType
+       genField    (Field fieldName fieldType) = fieldName ++ ":" ++ if isDeclaredType decls fieldType
+                                                                     then genTypeAG fieldType
+                                                                     else genNotDeclaredTypeAG fieldType
 
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
@@ -138,6 +141,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
+--         , "      loc.pres = empty" --gerbo HACK! for testing
          ] <~ [cnstrName]
               
 genSemListDecl (Decl (LHSListType typeName) _) = 
@@ -151,6 +155,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      lhs.pIdC = @elts.pIdC"
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
+--  , "      loc.pres = empty" --gerbo HACK! for testing
   , "  | HoleList_%1     lhs.press = []"
   , "  | ParseErrList_%1 lhs.press = []"
   , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
@@ -278,4 +283,3 @@ genSemTreeConsListDecl (Decl (LHSConsListType typeName) _) =
   , ""
   ] <~ [typeName]
 
-  

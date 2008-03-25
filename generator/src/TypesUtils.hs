@@ -69,7 +69,7 @@ getAllUsedTypes decls = nub
 
 -- return the list types appearing in right-hand sides
 getAllUsedListTypes :: DocumentType -> [Type]
-getAllUsedListTypes decls = filter isListType $ getAllUsedTypes decls
+getAllUsedListTypes decls = filter (\x -> isListType x && isDeclaredType decls x) $ getAllUsedTypes decls
 
 getAllProductions :: DocumentType -> [Prod]
 getAllProductions decls = [ prod | Decl _ prods <- decls, prod <- prods ]
@@ -87,7 +87,7 @@ fieldNameFromType tpe = case typeName tpe of
 
 -- return whether the type was declared (explicitly or implicitly as a list or a primitive)
 isDeclaredType :: DocumentType -> Type -> Bool
-isDeclaredType decls (ListType _) = True -- no check, since for all lists, a declaration is generated
+-- isDeclaredType decls (ListType tn) = True -- no check, since for all lists, a declaration is generated
 isDeclaredType decls tpe = typeName tpe `elem` getAllDeclaredTypeNames decls
 
 genIDPType (BasicType typeName)     = typeName
@@ -105,6 +105,9 @@ genType (CompositeType typeName) = "("++typeName++")"
 genTypeAG (BasicType typeName)     = typeName
 genTypeAG (ListType typeName)      = "List_"++typeName
 genTypeAG (CompositeType typeName) = "{("++typeName++")}"
+
+genNotDeclaredTypeAG tpe@(ListType typeName) = "{["++typeName++"]}"
+genNotDeclaredTypeAG tpe = genTypeAG tpe
 
 genTypeName (LHSBasicType typeName)    = typeName
 genTypeName (LHSListType typeName)     = "List_"++typeName
