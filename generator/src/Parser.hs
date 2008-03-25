@@ -15,6 +15,7 @@ import Text.ParserCombinators.Parsec
 import qualified Text.ParserCombinators.Parsec.Token as P
 import Text.ParserCombinators.Parsec.Language( haskellDef )
 import Char
+import Control.Monad (liftM)
 
 import TypesUtils
 
@@ -63,7 +64,10 @@ pDecl =
 
 pProd = 
  do { constructorName <- ucIdentifier
-    ; fields <- many pField
+    ; fields <- choice [ liftM concat $ try $ braces $ pRecord `sepBy1` reservedOp "," -- gerbo: added records
+                       , many pField
+                       ] 
+                       -- order is important, otherwise records aren't parsed
     ; idpFields <- pIDPFields
     ; return $ Prod ExplicitProd constructorName idpFields fields
     }
@@ -83,7 +87,12 @@ pField =
     ; return $ Field fieldName tpe
     }
     
-
+pRecord = -- gerbo 
+ do { fieldNames <- lcIdentifier `sepBy1` reservedOp "," -- ``foo, bar
+    ; reservedOp "::"                                    --   ::
+    ; tpe <- pType                                       --     Zwoink''
+    ; return $ map (\fn -> Field fn tpe) fieldNames      -- to ``[Field foo Zwoink,Field bar Zwoink]''
+    }
 
 pIDPFields = option [] $ braces $ many $ pField
 
@@ -113,3 +122,4 @@ ucIdentifier = try $
                  else fail "Upper case identifier expected"
         []     -> return str -- does not occur
     }
+
