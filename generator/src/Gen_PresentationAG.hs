@@ -81,7 +81,7 @@ genAttr decls = genBanner "Attr declarations" $
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
   [ "ATTR %3"  -- all types except EnrichedDoc, including lists and conslists
-  , "     [ ix : Int | | ]"
+  , "     [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]"
   , ""
   , "ATTR %4" -- all types except EnrichedDoc, including lists
   , "     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
@@ -115,10 +115,15 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   concatMap genSemPIDCProd prods ++
   concatMap genSemIxProd prods ++ 
   concatMap genSemPresProd prods ++
-  [ "  | Hole%1     lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-  , "  | ParseErr%1 lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
-  , ""
-  ] <~ [typeName]
+  [ "  | Hole%1 lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
+  , "  | ParseErr%1"
+  , "      lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
+  ] <~ [typeName] ++
+  (if typeName /= "EnrichedDoc"
+   then ["      lhs.parseErrors = [getErrorMessage @error]"]
+   else []) ++ 
+  [ ""
+  ]
  where genSemPIDCProd (Prod _ cnstrName idpFields fields) =
          let agFields = filter (isDeclaredType decls . fieldType) fields
              -- only take into account fields that have AG types (instead of prim or other composite)
@@ -161,6 +166,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
   , "  | ParseErrList_%1"
   , "      lhs.pres = presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
+  , "      lhs.parseErrors = [getErrorMessage @error]"
   , "  | HoleList_%1"
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
   , ""
