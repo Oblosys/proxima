@@ -6,7 +6,7 @@ import Presentation.PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
 import Presentation.PresentationParsing
 import Presentation.XprezLib
 
-import Common.UU_Parsing hiding (Exp, parse)
+import UU.Parsing
 
 import List hiding (delete)
 
@@ -14,7 +14,6 @@ import List hiding (delete)
 import ProxParser_Generated
 import Evaluation.DocumentEdit
 
-import qualified Common.UU_Parsing as UU_Parsing
 import Char
 
 import DocTypes_Generated
