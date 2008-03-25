@@ -70,31 +70,31 @@ genDataType decls = genBanner "AG data type" $
 
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
- ([ "ATTR %1" -- all types including lists and conslists
+ ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
   , "     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
-  [ "ATTR %3" -- all types except EnrichedDoc including lists
-  , "     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
+  [ "ATTR %3"  -- all types except EnrichedDoc, including lists and conslists
+  , "     [ ix : Int | | ]"
+  , ""
+  , "ATTR %4" -- all types except EnrichedDoc, including lists
+  , "     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null listTypeNames then [] else
-  [ "ATTR %4" -- all lists and conslists
+  [ "ATTR %5" -- all lists and conslists
   , "     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
-  , ""
-  , "ATTR %5"  -- all conslists and all types appearing in lists
-  , "     [ ix : Int | | ]"
   , ""
   , "ATTR %6"  -- all conslists
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
   ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
         , separateBy " " $ getAllDeclaredTypeNames (addListDecls decls)
+        , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addConsListDecls (addListDecls decls)))
         , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
         , separateBy " " $ listNames ++ consListNames
-        , separateBy " " $ listTypeNames ++ consListNames
         , separateBy " " $ consListNames
         ]
  where listTypeNames = map typeName $ getAllUsedListTypes decls
@@ -131,18 +131,10 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
         where addPlus (l:ls) = (l++ " + " ++ show (length idpFields)) : ls
               -- this computation goes wrong when there are lists of idps (but it will be obsolete in a future version)
        genSemIxProd (Prod _ cnstrName idpFields fields) =
-         if null childIxRules 
-         then []
-         else [ "  | %1" <~ [cnstrName] ] ++ concat childIxRules
-        where
-         childIxRules = 
-           [ if not (isListType fieldType) &&
-                TypesUtils.typeName fieldType `elem` typeNamesAppearingInLists 
-             then ["    %1.ix = %2" <~ [fieldName, show i]]
-             else []
-           | (Field fieldName fieldType, i) <- zip fields [0..]
-           ]
-         typeNamesAppearingInLists =  map TypesUtils.typeName $ getAllUsedListTypes decls
+         [ "  | %1" <~ [cnstrName] ] ++
+         [ "    %1.ix = %2" <~ [fieldName, show i]
+         | (i,Field fieldName fieldType) <- zip [0..] fields, isDeclaredType decls $ fieldType
+         ]
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
