@@ -48,7 +48,7 @@ other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
                Evaluation.EvalLayerUtils Evaluation.EvalPresent
                Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils
                Layout.LayPresent Layout.LayTranslate Layout.LayTypes
-               Layout.LayUtils Layout.Layout Layout.Scanner Layout.ScannerAG
+               Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner Layout.ScannerAG
                Layout.TreeEditPres Presentation.PresLayerTypes
                Presentation.PresLayerUtils Presentation.PresPresent
                Presentation.PresTranslate Presentation.PresTypes
