@@ -44,10 +44,10 @@ orderFocusP NoFocusP         = NoFocusP
 markUnparsed p           =  p
 markUnparsedF _           f = f
 
-xyFromPath :: (DocNode node, Show token) => PathPres -> PresentationBase doc node clip ptoken token -> (Int,Int, Bool)
+xyFromPath :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> (Int,Int, Bool)
 xyFromPath path pres = xyFromPathPres 0 0 path pres
 
-pathFromXY :: (DocNode node, Show token) => (Int,Int,Bool) -> PresentationBase doc node clip ptoken token -> PathPres
+pathFromXY :: (DocNode node, Show token) => (Int,Int,Bool) -> Layout doc node clip token -> PathPres
 pathFromXY xy pres = pathFromXYPres xy pres
 
 
@@ -374,7 +374,6 @@ isEditableTreePres' editable pth      pr                         = debug Err ("*
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 xyFromPathPres x y (PathP p i)     (EmptyP _)                = (x, y, i==0)  -- should not occur
 xyFromPathPres x y (PathP p i)     (StringP _ str)           = (x+i, y, i==0 && length str /= 0 )
-xyFromPathPres x y (PathP p i)     (TokenP _ t)              = (x+i, y, i==0 && length (tokenString t) /= 0 )
 xyFromPathPres x y (PathP p i)     (ImageP _ _ _)            = (x, y, i==0)
 xyFromPathPres x y (PathP p i)     (PolyP _ _ _ _)           = (x, y, i==0)
 xyFromPathPres x y path           pr@(RowP id rf press)      = xyFromPathRow (x) (y+topHeightPres pr) path press
@@ -422,9 +421,9 @@ leftWidthPres (ParsingP _ _ _ pres)         = leftWidthPres pres
 leftWidthPres (LocatorP _ pres)         = leftWidthPres pres
 leftWidthPres pr                        = debug Err ("PresUtils.leftWidthPres: can't handle "++ show pr) 0
 
+rightWidthPres :: Show node => Layout doc node clip token -> Int
 rightWidthPres (EmptyP _)                = 0
 rightWidthPres (StringP _ str)           = length str
-rightWidthPres (TokenP _ t)              = length (tokenString t)
 rightWidthPres (ImageP _ _ _)            = 1
 rightWidthPres (PolyP _ _ _ _)           = 1
 rightWidthPres (RowP _ rf [])            = 0
@@ -471,14 +470,11 @@ bottomHeightPres (LocatorP _ pres)         = bottomHeightPres pres
 bottomHeightPres pr                        = debug Err ("PresUtils.bottomHeightPres: can't handle "++ show pr) 0
 
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
+pathFromXYPres :: Show node => (Int, Int, Bool) -> Layout doc node clip token -> PathPres
 pathFromXYPres (x,0,b) (EmptyP _)    = PathP [] x 
 pathFromXYPres (x,0,b) (StringP _ txt)   = if x > length txt 
                                          then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
                                          else PathP [] x
-pathFromXYPres (x,0,b) (TokenP _ t)   = let txt = tokenString t
-                                        in  if x > length txt 
-                                            then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
-                                            else PathP [] x
 pathFromXYPres (x,0,b) (ImageP _ _ _)  = PathP [] x 
 pathFromXYPres (x,0,b) (PolyP _ _ _ _)   = PathP [] x 
 pathFromXYPres (x,y,b) pr@(RowP id rf press) = pathFromXYRow 0 (x,y-topHeightPres pr,b) press
@@ -710,12 +706,13 @@ leftNearestLeafPath path pres =
                                 Just leafPth -> Just $ pth ++ leafPth
   
 
+leafLength :: Show node => Layout doc node clip token -> Int
 leafLength (StringP _ str) = length str
-leafLength (TokenP _ t) = length (tokenString t)
 leafLength pres = debug Err ("PresUtils.leafLength: non string leaf"++show pres) 0
 
 -- tricky, in one row [text "12|", text "34"] right navigation must be row [text "12", text "3|4"]
 --         but if there is a column, we want col [text "12", text "|34"]
+rightNavigatePath :: DocNode node => PathPres -> Layout doc node clip token -> PathPres
 rightNavigatePath (PathP path offset) pres =
   if offset < leafLength (selectTree path pres) 
   then PathP path (offset+1)

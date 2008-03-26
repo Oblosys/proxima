@@ -59,9 +59,9 @@ present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres 
  
 
 -- goes wrong if focus is in empty string on left side of column
-saveFocus :: (DocNode node, Show token) => FocusPres -> Presentation doc node clip token -> ((Int, Int, Bool), (Int, Int, Bool))
+saveFocus :: (DocNode node, Show token) => FocusPres -> Layout doc node clip token -> ((Int, Int, Bool), (Int, Int, Bool))
 saveFocus NoFocusP _  = ((1,0,True),(1,0,True))
 saveFocus focus pres = debug Err "AFOCUS" (xyFromPath (fromP focus) pres, xyFromPath (toP focus) pres)
 
-restoreFocus :: (DocNode node, Show token) => ((Int, Int, Bool), (Int, Int, Bool)) -> Presentation doc node clip token -> FocusPres
+restoreFocus :: (DocNode node, Show token) => ((Int, Int, Bool), (Int, Int, Bool)) -> Layout doc node clip token -> FocusPres
 restoreFocus (fxy,txy) pres = FocusP (pathFromXY fxy pres) (pathFromXY fxy pres) 

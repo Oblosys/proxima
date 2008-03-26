@@ -186,25 +186,26 @@ deepShowTks i tok = case tok of
  where indent i = take i (repeat ' ')
 
 
-type Presentation doc node clip token = PresentationBase doc node clip token token
+type Presentation doc node clip token = 
+       PresentationBase doc node clip token (Token doc node clip token)
 
-data PresentationBase doc node clip parserToken token = EmptyP !IDP
+data PresentationBase doc node clip userToken tokenParam = EmptyP !IDP
            | StringP !IDP !String
-           | TokenP !IDP !(Token doc node clip token)
+           | TokenP !IDP !tokenParam
            | ImageP !IDP !String !ImgStyle
            | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
            | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
            | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
-           | RowP !IDP !Int ![PresentationBase doc node clip parserToken token]    -- vRefNr 
-           | ColP !IDP !Int !Formatted ![PresentationBase doc node clip parserToken token]    -- hRefNr
-           | OverlayP !IDP ![ (PresentationBase doc node clip parserToken token) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc clip) !(PresentationBase doc node clip parserToken token)         -- do these last two have ids?
-           | StructuralP !IDP !(PresentationBase doc node clip parserToken token)       -- IDP?
-           | ParsingP !IDP !(Maybe (ClipParser doc node clip parserToken)) !Lexer !(PresentationBase doc node clip parserToken token)         -- IDP?
-           | LocatorP node !(PresentationBase doc node clip parserToken token) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![PresentationBase doc node clip parserToken token] -- width height edges 
-           | VertexP !IDP !Int !Int !Int Outline !(PresentationBase doc node clip parserToken token) -- vertexID x y outline       see note below
-           | FormatterP !IDP ![PresentationBase doc node clip parserToken token]
+           | RowP !IDP !Int ![PresentationBase doc node clip userToken tokenParam]    -- vRefNr 
+           | ColP !IDP !Int !Formatted ![PresentationBase doc node clip userToken tokenParam]    -- hRefNr
+           | OverlayP !IDP ![ (PresentationBase doc node clip userToken tokenParam) ] -- 1st elt is in front of 2nd, etc.
+           | WithP !(AttrRule doc clip) !(PresentationBase doc node clip userToken tokenParam)         -- do these last two have ids?
+           | StructuralP !IDP !(PresentationBase doc node clip userToken tokenParam)       -- IDP?
+           | ParsingP !IDP !(Maybe (ClipParser doc node clip userToken)) !Lexer !(PresentationBase doc node clip userToken tokenParam)         -- IDP?
+           | LocatorP node !(PresentationBase doc node clip userToken tokenParam) -- deriving Show -- do we want a ! for location  ? 
+           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![PresentationBase doc node clip userToken tokenParam] -- width height edges 
+           | VertexP !IDP !Int !Int !Int Outline !(PresentationBase doc node clip userToken tokenParam) -- vertexID x y outline       see note below
+           | FormatterP !IDP ![PresentationBase doc node clip userToken tokenParam]
 
 {-         | Matrix [[ (PresentationBase doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
            | Formatter [ (PresentationBase doc node clip) ]
