@@ -36,7 +36,9 @@ includes:
 install-includes:
 include-dirs:
 hs-source-dirs: src/uuagc/src/ src/proxima/src src
-other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
+other-modules: UU.Parsing UU.Parsing.Derived
+               UU.Parsing.Interface UU.Parsing.Machine UU.Parsing.MachineInterface
+               Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
                Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
@@ -55,7 +57,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer UU.Parsing Chess
+               Rendering.RenUtils Rendering.Renderer Chess
                DocTypes_Generated DocUtils_Generated DocumentEdit_Generated
                EvaluateTypesStubs Evaluator Main PresentationAG ProxParser
                ProxParser_Generated Reducer ScannerSheet
