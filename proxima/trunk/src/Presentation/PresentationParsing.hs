@@ -156,39 +156,42 @@ pPrs p = unfoldStructure
      <$> pSym (ParsingTk Nothing Nothing [] NoIDP)
  where unfoldStructure presTk@(ParsingTk _ _ tokens _) = 
          let (res, errs) = runParser p tokens
-         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErr errs) tokens (mkClipParser p))
+         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErrs errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
-mkErr :: (DocNode node, Ord token, Show token) =>
+mkErrs :: (DocNode node, Ord token, Show token) =>
          [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] -> 
          [ParseErrorMessage]
-mkErr msgs  = 
- [( case pos of
-         Just (UserTk p _ _ _ _) -> Just p
-         Just (StructuralTk p _ _ _ _) -> Just p
-         Just (ErrorTk p _ _) -> Just p
-         Just _ -> Nothing
-         Nothing -> Nothing
-     ,  showMessage msg)
- | msg@(Msg _ pos msgs) <- msgs
- ]
-
+mkErrs []                        = []
+mkErrs (msg@(Msg _ pos _):msgs)  = 
+  case pos of
+    Just t@(ErrorTk _ _ _) ->  [(getTokenPosition t, showMessage msg)]
+    Just t ->                  (getTokenPosition t, showMessage msg) : mkErrs msgs
+    Nothing ->                 (Nothing, showMessage msg)            : mkErrs msgs
+     
+   
+getTokenPosition (UserTk p _ _ _ _)       = Just p
+getTokenPosition (StructuralTk p _ _ _ _) = Just p
+getTokenPosition (ErrorTk p _ _)          = Just p
+getTokenPosition _                        = Nothing
 
 -- since show for message uses show on symbol, we define a special showMessage
 -- (we don't want full tokens in the error message, and a user-friendly Show Token is awkward
 -- for development)
 showMessage :: (DocNode node, Ord token, Show token) =>
                  Message (Token doc node clip token) (Maybe (Token doc node clip token)) -> String
+showMessage (Msg expecting (Just (ErrorTk _ (c:_) _)) action) = "Lexical error at character "++show c
+    -- there will always be at least one offending character
 showMessage (Msg expecting position action)  
-   =  "Error      : " ++ showPosition position ++ "\n" ++
-      "Expecting  : " ++ showExpecting expecting ++ "\n" ++
+   =  "Parse error at " ++ showPosition position ++ "\n" ++
+      "Expecting:   " ++ showExpecting expecting ++ "\n" ++
       "Repaired by: "  ++ showAction action ++"\n"
 
 
 showPosition :: (DocNode node, Ord token, Show token) =>
                 Maybe (Token doc node clip token) -> String
-showPosition Nothing = "At end of input"
-showPosition (Just t) = "At " ++ showToken t
+showPosition Nothing = "end of input"
+showPosition (Just t) = showToken t
 
 showExpecting :: (DocNode node, Ord token, Show token) =>
                  Expecting (Token doc node clip token) -> String
@@ -212,6 +215,10 @@ showToken (UserTk p _ str _ _) = show str
 showToken (StructuralTk p _ _ _ _) = "Structural token"
 showToken (ErrorTk p _ _) = "Error token"
 showToken t               = "Internal error: wrong token: "++show t
+
+-- TODO:
+-- StructuralTk, we could add a description string to StructuralTk, which is set in the parser and
+-- shown here.
 
 retrieveTokenPosition errStr messageText =
   case drop' errStr messageText of
@@ -342,7 +349,7 @@ mkClipParser parser =
          let (res, errs) = runParser parser tokens
          in  toClip $ if null errs then res 
                       else debug Prs ("Presentation parser:\n"++(show errs)) $ 
-                             parseErr (ParsingParseErr (mkErr errs) tokens clipParser)
+                             parseErr (ParsingParseErr (mkErrs errs) tokens clipParser)
  in  clipParser
 
 {- recognize parses a structural token and recognizes its structure. The parser will succeed
