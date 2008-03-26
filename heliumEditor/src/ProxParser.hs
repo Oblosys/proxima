@@ -470,11 +470,11 @@ pKeyC c str = pCSym c (keyTk str)
 
 -- expensive, because we want holes to be inserted, not strings
 pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pLIdent = pCSym 20 lIdentTk
+pLIdent = pSym lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
 pInt :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
-pInt = pCSym 20 intTk
+pInt = pSym  intTk
 
 lIdentVal :: DocNode node => Token doc node clip UserToken -> String
 lIdentVal (UserTk _ LIdentTk str _ _) = str
