@@ -3,11 +3,9 @@ module ProxParser where
 import Common.CommonTypes hiding (Dirty (..))
 import qualified Common.CommonTypes
 import Presentation.PresLayerTypes
-import Presentation.PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
+import Presentation.PresLayerUtils
 import Presentation.PresentationParsing
 import Presentation.XprezLib
-
-import Common.UU_Parsing hiding (Exp, parse)
 
 import List hiding (delete)
 
@@ -16,7 +14,6 @@ import ProxParser_Generated
 import Evaluation.DocumentEdit
 import DocUtils_Generated
 
-import qualified Common.UU_Parsing as UU_Parsing
 import Char
 
 import DocTypes_Generated

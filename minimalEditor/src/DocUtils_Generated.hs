@@ -7,7 +7,9 @@ import Evaluation.DocumentEdit
 import Presentation.PresTypes
 import Presentation.XprezLib
 import Common.DebugLevels
-import Text.ParserCombinators.Parsec
+
+import UU.Parsing
+import UU.Parsing.CharParser
 
 import Common.CommonTypes hiding (Clean, Dirty)
 
@@ -89,14 +91,14 @@ toXMLConsList_Tree Nil_Tree             = []
 -- parseXML functions                                                   --
 --------------------------------------------------------------------------
 
-parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
+parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_List_Tree <*> parseXML_List_Tree<* endTag "RootEnr"
-parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
+parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_List_Tree <*> parseXML_List_Tree<* endTag "RootDoc"
-parseXML_Tree = parseXMLCns_Bin <?|> parseXMLCns_Leaf <?|> parseHoleAndParseErr "Tree" HoleTree
+parseXML_Tree = parseXMLCns_Bin <|> parseXMLCns_Leaf <|> parseHoleAndParseErr "Tree" HoleTree
 parseXMLCns_Bin = Bin NoIDP NoIDP NoIDP NoIDP NoIDP <$ startTag "Bin" <*> parseXML_Tree <*> parseXML_Tree<* endTag "Bin"
 parseXMLCns_Leaf = Leaf NoIDP NoIDP <$ startTag "Leaf" <*> parseXML_Int<* endTag "Leaf"
-parseXML_List_Tree = mkList List_Tree Cons_Tree Nil_Tree <$> many parseXML_Tree
+parseXML_List_Tree = mkList List_Tree Cons_Tree Nil_Tree <$> pList_ng parseXML_Tree
 
 
 
@@ -164,41 +166,37 @@ toXMLString str = Elt "String" [] [PCData str]
 
 -- parseXML for primitive types
 
-parseXML_Int :: Parser Int
+parseXML_Int :: CharParser Int
 parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Integer val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Float :: Parser Float
+parseXML_Float :: CharParser Float
 parseXML_Float  =
- do { spaces
-    ; string "<Float val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Float val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
+parseXML_Bool :: CharParser Bool
+parseXML_Bool  =
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Bool val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
+parseXML_String :: CharParser String
+parseXML_String  =
+      id
+  <$  pCharSpaces
+  <*  pCharString "<String>"
+  <*> pList (pExcept ('\0','\255','x') "<") 
+  <*  pCharString "</String>"
  
 
 -- Xprez XML presentation for primitive types

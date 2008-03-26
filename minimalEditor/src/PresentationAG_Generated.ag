@@ -67,14 +67,14 @@ ATTR EnrichedDoc Tree List_Tree ConsList_Tree
 ATTR EnrichedDoc Tree List_Tree
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
+ATTR Tree List_Tree ConsList_Tree
+     [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
+
 ATTR Tree List_Tree
-     [ | | path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Tree ConsList_Tree
      [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
-
-ATTR Tree ConsList_Tree
-     [ ix : Int | | ]
 
 ATTR ConsList_Tree
      [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
@@ -94,9 +94,13 @@ SEM EnrichedDoc
       trees.path  = @lhs.path++[0]
       trees2.path  = @lhs.path++[1]
   | RootEnr
+    trees.ix = 0
+    trees2.ix = 1
+  | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-  | HoleEnrichedDoc     lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
-  | ParseErrEnrichedDoc lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @error
+  | HoleEnrichedDoc lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
+  | ParseErrEnrichedDoc
+      lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @error
 
 SEM Tree
   | Bin 
@@ -108,11 +112,17 @@ SEM Tree
   | Leaf 
       lhs.pIdC = @lhs.pIdC + 2
   | Bin
+    left.ix = 0
+    right.ix = 1
+  | Leaf
+  | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
   | Leaf
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-  | HoleTree     lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
-  | ParseErrTree lhs.pres = presParseErr (Node_ParseErrTree @self @lhs.path) @error
+  | HoleTree lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+  | ParseErrTree
+      lhs.pres = presParseErr (Node_ParseErrTree @self @lhs.path) @error
+      lhs.parseErrors = getErrorMessages @error
 
 SEM List_Tree
   | List_Tree
@@ -129,6 +139,7 @@ SEM List_Tree
   | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
   | ParseErrList_Tree
       lhs.pres = presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+      lhs.parseErrors = getErrorMessages @error
   | HoleList_Tree
       lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
 
