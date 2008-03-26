@@ -5,7 +5,7 @@ import Presentation.PresLayerTypes
 
 import Presentation.PresLayerUtils
 
-import Presentation.PresentationParsing
+import Presentation.PresentationParsing hiding (parse, parseIO)
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (DocNode node, Ord token, Show token, Show enr) =>

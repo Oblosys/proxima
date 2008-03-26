@@ -5,7 +5,7 @@ import Common.CommonTypes
 
 import List
 import Char
-import Text.ParserCombinators.Parsec
+import UU.Parsing.CharParser
 
 type FocusDoc = PathDoc  -- just a simple path focus for now
 
@@ -14,7 +14,7 @@ data DocumentLevel doc clip = DocumentLevel doc FocusDoc clip
 class Show doc => Doc doc where
   initialDoc :: IO doc
   toXML :: doc -> XML
-  parseXML :: Parser doc
+  parseXML :: CharParser doc
   
 data EditDocument' doc clip =
     SetDoc' (DocumentLevel doc clip)

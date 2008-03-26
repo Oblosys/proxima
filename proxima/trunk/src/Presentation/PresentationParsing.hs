@@ -1,4 +1,6 @@
-module Presentation.PresentationParsing where
+module Presentation.PresentationParsing ( module Presentation.PresentationParsing
+                                        , module UU.Parsing 
+                                        ) where
 
 import Common.CommonTypes
 import Presentation.PresTypes

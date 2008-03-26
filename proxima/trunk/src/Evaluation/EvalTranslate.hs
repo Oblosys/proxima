@@ -5,8 +5,8 @@ import Evaluation.EvalLayerTypes
 
 import Evaluation.DocUtils
 import Evaluation.DocumentEdit
-import Text.ParserCombinators.Parsec
-
+import UU.Parsing.CharParser
+import UU.Parsing
 
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
@@ -67,14 +67,21 @@ initDoc = initialDoc
 openFile :: Doc doc => String -> IO (Maybe doc)
 openFile fileName =
  do { debugLnIO Prs $ "Opening file: "++fileName
-    ; result <- parseFromFile parseXML fileName
+    ; xmlStr <- readFile fileName 
+    ; let result = parseEither parseXML xmlStr
     ; case result of
         Right res -> return $ Just res
-        Left err -> do { debugLnIO Err "Parse error"
-                       ; debugLnIO Err $ show err
+        Left errs -> do { debugLnIO Err "Parse error"
+                       ; debugLnIO Err $ show $ take 2 errs
                        ; return $ Nothing
                        }
     } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return Nothing }
+
+parseEither pp inp =
+      let res = parseString pp inp
+          (Pair v final) = evalSteps (res) 
+          errs = getMsgs (res) 
+      in  if null errs then Right v else Left errs
 
 saveFile :: Doc doc => FilePath -> doc -> IO ()
 saveFile filePath doc =

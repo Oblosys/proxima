@@ -3,7 +3,9 @@ module Evaluation.DocUtils where
 
 import Evaluation.DocTypes
 import Presentation.PresTypes
-import Text.ParserCombinators.Parsec
+
+import UU.Parsing
+import UU.Parsing.CharParser
 
 import Common.CommonTypes
 
@@ -57,26 +59,15 @@ parseHoleAndParseErr typeStr holeConstructor =
   <|> holeConstructor <$ emptyTag ("ParseErr"++typeStr)
 
      
-infixl 4 <*>, <$>, <$, <*
+startTag eltName = pCharSpaces *> (pCharString $ "<"++eltName++">") 
+endTag   eltName = pCharSpaces *> (pCharString $ "</"++eltName++">")
+emptyTag eltName = pCharSpaces *> (pCharString $ "<"++eltName++"/>")
 
-(<*>) :: Parser (a -> b) -> Parser a -> Parser b
-p1 <*> p2 = do { f <- p1; a <- p2; return $ f a }
+pCharSpaces = pList (pSym ' ' <|> pSym '\n' <|> pSym '\r')
 
-(<*) :: Parser a -> Parser b -> Parser a
-p1 <* p2 = do { a <- p1; p2; return a }
-
-(<$>) :: (a -> b) -> Parser a -> Parser b
-(<$>) = fmap
-    
-(<$) :: b -> Parser a -> Parser b
-b <$ p = do { p; return b } 
-
--- binary choice with try
-(<?|>) :: Parser a -> Parser a -> Parser a
-p1 <?|> p2 = choice [p1, p2] 
-
-startTag eltName = try $ do { spaces; string $ "<"++eltName++">"}
-endTag   eltName = do { spaces; string $ "</"++eltName++">"}
-emptyTag eltName = try $ do { spaces; string $ "<"++eltName++"/>"}
-
+pCharString :: String -> CharParser String
+pCharString str = pToks' str <?> str
+ where pToks' :: (IsParser p s) => [s] -> p [s]
+       pToks' []     = pSucceed []
+       pToks' (a:as) = (:) <$> (pSym a <?> str) <*> pToks' as
 
