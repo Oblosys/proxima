@@ -169,10 +169,49 @@ mkErr msgs  =
          Just (ErrorTk p _ _) -> Just p
          Just _ -> Nothing
          Nothing -> Nothing
-     ,  show msg)
+     ,  showMessage msg)
  | msg@(Msg _ pos msgs) <- msgs
  ]
 
+
+-- since show for message uses show on symbol, we define a special showMessage
+-- (we don't want full tokens in the error message, and a user-friendly Show Token is awkward
+-- for development)
+showMessage :: (DocNode node, Ord token, Show token) =>
+                 Message (Token doc node clip token) (Maybe (Token doc node clip token)) -> String
+showMessage (Msg expecting position action)  
+   =  "Error      : " ++ showPosition position ++ "\n" ++
+      "Expecting  : " ++ showExpecting expecting ++ "\n" ++
+      "Repaired by: "  ++ showAction action ++"\n"
+
+
+showPosition :: (DocNode node, Ord token, Show token) =>
+                Maybe (Token doc node clip token) -> String
+showPosition Nothing = "At end of input"
+showPosition (Just t) = "At " ++ showToken t
+
+showExpecting :: (DocNode node, Ord token, Show token) =>
+                 Expecting (Token doc node clip token) -> String
+showExpecting (ESym t)      = showRange t
+showExpecting (EStr str)    = str
+showExpecting (EOr  [])     = "Nothing expected "
+showExpecting (EOr  [t])    = showExpecting t
+showExpecting (EOr  (t:ts)) = showExpecting t ++ " or " ++ showExpecting (EOr ts)
+showExpecting (ESeq exps)   = concat (map showExpecting exps)
+
+showRange EmptyR      = "the empty range"
+showRange (Range a b) = if a == b then showToken a else showToken a ++ ".." ++ showToken b
+
+showAction :: (DocNode node, Ord token, Show token) =>
+              Action (Token doc node clip token) -> String
+showAction (Insert t) = "inserting: " ++ showToken t 
+showAction (Delete t) = "deleting: "  ++ showToken t 
+showAction (Other t)  = t 
+
+showToken (UserTk p _ str _ _) = show str
+showToken (StructuralTk p _ _ _ _) = "Structural token"
+showToken (ErrorTk p _ _) = "Error token"
+showToken t               = "Internal error: wrong token: "++show t
 
 retrieveTokenPosition errStr messageText =
   case drop' errStr messageText of
@@ -249,10 +288,6 @@ pToken :: (DocNode node, Ord token, Show token) =>
           token -> ListParser doc node clip token (Token doc node clip token)
 pToken token = pSym $ UserTk 0 token (show token) Nothing (IDP (-1))
 
-
--- holes are cheap. actually only holes should be cheap, but presently structurals are all the same
-pStruct :: (DocNode node, Ord token, Show token) => ListParser doc node clip token (Token doc node clip token)
-pStruct = pCSym 4 (StructuralTk 0 Nothing (EmptyP NoIDP) [] NoIDP)
 
 
 -- pCostSym expects the parser twice
