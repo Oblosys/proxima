@@ -36,8 +36,8 @@ includes:
 install-includes:
 include-dirs:
 hs-source-dirs: src/uuagc/src/ src/proxima/src src
-other-modules: UU.Parsing UU.Parsing.Derived
-               UU.Parsing.Interface UU.Parsing.Machine UU.Parsing.MachineInterface
+other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
+               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing.CharParser
                Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger

@@ -4,12 +4,14 @@ import Evaluation.DocTypes
 import DocTypes_Generated
 import Evaluation.DocumentEdit
 import Presentation.PresTypes
-import Text.ParserCombinators.Parsec
 import Evaluation.DocUtils
 import Common.CommonTypes
 import Common.CommonUtils
 import System.Directory
 import Presentation.XprezLib
+
+import UU.Parsing
+import UU.Parsing.CharParser
 
 initialDocument :: IO Document
 initialDocument = 
@@ -414,21 +416,21 @@ toXMLConsList_Item Nil_Item             = []
 -- parseXML functions                                                   --
 --------------------------------------------------------------------------
 
-parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
+parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Root<* endTag "RootDoc"
-parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
+parseXML_Root = parseXMLCns_Root <|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root NoIDP <$ startTag "Root" <*> parseXML_List_Decl<* endTag "Root"
-parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
+parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_RootE <*> parseXML_HeliumTypeInfo<* endTag "RootEnr"
-parseXML_RootE = parseXMLCns_RootE <?|> parseHoleAndParseErr "RootE" HoleRootE
+parseXML_RootE = parseXMLCns_RootE <|> parseHoleAndParseErr "RootE" HoleRootE
 parseXMLCns_RootE = RootE NoIDP <$ startTag "RootE" <*> parseXML_List_Decl <*> parseXML_List_Decl<* endTag "RootE"
-parseXML_Decl = parseXMLCns_Decl <?|> parseXMLCns_BoardDecl <?|> parseXMLCns_PPPresentationDecl <?|> parseHoleAndParseErr "Decl" HoleDecl
+parseXML_Decl = parseXMLCns_Decl <|> parseXMLCns_BoardDecl <|> parseXMLCns_PPPresentationDecl <|> parseHoleAndParseErr "Decl" HoleDecl
 parseXMLCns_Decl = Decl NoIDP NoIDP NoIDP NoIDP <$ startTag "Decl" <*> parseXML_Bool <*> parseXML_Bool <*> parseXML_Ident <*> parseXML_Exp<* endTag "Decl"
 parseXMLCns_BoardDecl = BoardDecl NoIDP NoIDP <$ startTag "BoardDecl" <*> parseXML_Board<* endTag "BoardDecl"
 parseXMLCns_PPPresentationDecl = PPPresentationDecl NoIDP NoIDP <$ startTag "PPPresentationDecl" <*> parseXML_PPPresentation<* endTag "PPPresentationDecl"
-parseXML_Ident = parseXMLCns_Ident <?|> parseHoleAndParseErr "Ident" HoleIdent
+parseXML_Ident = parseXMLCns_Ident <|> parseHoleAndParseErr "Ident" HoleIdent
 parseXMLCns_Ident = Ident NoIDP NoIDP <$ startTag "Ident" <*> parseXML_String<* endTag "Ident"
-parseXML_Exp = parseXMLCns_PlusExp <?|> parseXMLCns_TimesExp <?|> parseXMLCns_DivExp <?|> parseXMLCns_PowerExp <?|> parseXMLCns_BoolExp <?|> parseXMLCns_IntExp <?|> parseXMLCns_LamExp <?|> parseXMLCns_AppExp <?|> parseXMLCns_CaseExp <?|> parseXMLCns_LetExp <?|> parseXMLCns_IdentExp <?|> parseXMLCns_IfExp <?|> parseXMLCns_ParenExp <?|> parseXMLCns_ListExp <?|> parseXMLCns_ProductExp <?|> parseHoleAndParseErr "Exp" HoleExp
+parseXML_Exp = parseXMLCns_PlusExp <|> parseXMLCns_TimesExp <|> parseXMLCns_DivExp <|> parseXMLCns_PowerExp <|> parseXMLCns_BoolExp <|> parseXMLCns_IntExp <|> parseXMLCns_LamExp <|> parseXMLCns_AppExp <|> parseXMLCns_CaseExp <|> parseXMLCns_LetExp <|> parseXMLCns_IdentExp <|> parseXMLCns_IfExp <|> parseXMLCns_ParenExp <|> parseXMLCns_ListExp <|> parseXMLCns_ProductExp <|> parseHoleAndParseErr "Exp" HoleExp
 parseXMLCns_PlusExp = PlusExp NoIDP <$ startTag "PlusExp" <*> parseXML_Exp <*> parseXML_Exp<* endTag "PlusExp"
 parseXMLCns_TimesExp = TimesExp NoIDP <$ startTag "TimesExp" <*> parseXML_Exp <*> parseXML_Exp<* endTag "TimesExp"
 parseXMLCns_DivExp = DivExp NoIDP <$ startTag "DivExp" <*> parseXML_Exp <*> parseXML_Exp<* endTag "DivExp"
@@ -444,13 +446,13 @@ parseXMLCns_IfExp = IfExp NoIDP NoIDP NoIDP <$ startTag "IfExp" <*> parseXML_Exp
 parseXMLCns_ParenExp = ParenExp NoIDP NoIDP <$ startTag "ParenExp" <*> parseXML_Exp<* endTag "ParenExp"
 parseXMLCns_ListExp = ListExp NoIDP NoIDP [] <$ startTag "ListExp" <*> parseXML_List_Exp<* endTag "ListExp"
 parseXMLCns_ProductExp = ProductExp NoIDP NoIDP [] <$ startTag "ProductExp" <*> parseXML_List_Exp<* endTag "ProductExp"
-parseXML_Alt = parseXMLCns_Alt <?|> parseHoleAndParseErr "Alt" HoleAlt
+parseXML_Alt = parseXMLCns_Alt <|> parseHoleAndParseErr "Alt" HoleAlt
 parseXMLCns_Alt = Alt NoIDP NoIDP <$ startTag "Alt" <*> parseXML_Ident <*> parseXML_Exp<* endTag "Alt"
-parseXML_Board = parseXMLCns_Board <?|> parseHoleAndParseErr "Board" HoleBoard
+parseXML_Board = parseXMLCns_Board <|> parseHoleAndParseErr "Board" HoleBoard
 parseXMLCns_Board = Board <$ startTag "Board" <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow <*> parseXML_BoardRow<* endTag "Board"
-parseXML_BoardRow = parseXMLCns_BoardRow <?|> parseHoleAndParseErr "BoardRow" HoleBoardRow
+parseXML_BoardRow = parseXMLCns_BoardRow <|> parseHoleAndParseErr "BoardRow" HoleBoardRow
 parseXMLCns_BoardRow = BoardRow <$ startTag "BoardRow" <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare <*> parseXML_BoardSquare<* endTag "BoardRow"
-parseXML_BoardSquare = parseXMLCns_Queen <?|> parseXMLCns_King <?|> parseXMLCns_Bishop <?|> parseXMLCns_Knight <?|> parseXMLCns_Rook <?|> parseXMLCns_Pawn <?|> parseXMLCns_Empty <?|> parseHoleAndParseErr "BoardSquare" HoleBoardSquare
+parseXML_BoardSquare = parseXMLCns_Queen <|> parseXMLCns_King <|> parseXMLCns_Bishop <|> parseXMLCns_Knight <|> parseXMLCns_Rook <|> parseXMLCns_Pawn <|> parseXMLCns_Empty <|> parseHoleAndParseErr "BoardSquare" HoleBoardSquare
 parseXMLCns_Queen = Queen <$ startTag "Queen" <*> parseXML_Bool<* endTag "Queen"
 parseXMLCns_King = King <$ startTag "King" <*> parseXML_Bool<* endTag "King"
 parseXMLCns_Bishop = Bishop <$ startTag "Bishop" <*> parseXML_Bool<* endTag "Bishop"
@@ -458,25 +460,25 @@ parseXMLCns_Knight = Knight <$ startTag "Knight" <*> parseXML_Bool<* endTag "Kni
 parseXMLCns_Rook = Rook <$ startTag "Rook" <*> parseXML_Bool<* endTag "Rook"
 parseXMLCns_Pawn = Pawn <$ startTag "Pawn" <*> parseXML_Bool<* endTag "Pawn"
 parseXMLCns_Empty = Empty <$ emptyTag "Empty"
-parseXML_PPPresentation = parseXMLCns_PPPresentation <?|> parseHoleAndParseErr "PPPresentation" HolePPPresentation
+parseXML_PPPresentation = parseXMLCns_PPPresentation <|> parseHoleAndParseErr "PPPresentation" HolePPPresentation
 parseXMLCns_PPPresentation = PPPresentation <$ startTag "PPPresentation" <*> parseXML_Bool <*> parseXML_List_Slide<* endTag "PPPresentation"
-parseXML_Slide = parseXMLCns_Slide <?|> parseHoleAndParseErr "Slide" HoleSlide
+parseXML_Slide = parseXMLCns_Slide <|> parseHoleAndParseErr "Slide" HoleSlide
 parseXMLCns_Slide = Slide <$ startTag "Slide" <*> parseXML_String <*> parseXML_ItemList<* endTag "Slide"
-parseXML_ItemList = parseXMLCns_ItemList <?|> parseHoleAndParseErr "ItemList" HoleItemList
+parseXML_ItemList = parseXMLCns_ItemList <|> parseHoleAndParseErr "ItemList" HoleItemList
 parseXMLCns_ItemList = ItemList <$ startTag "ItemList" <*> parseXML_ListType <*> parseXML_List_Item<* endTag "ItemList"
-parseXML_ListType = parseXMLCns_Bullet <?|> parseXMLCns_Number <?|> parseXMLCns_Alpha <?|> parseHoleAndParseErr "ListType" HoleListType
+parseXML_ListType = parseXMLCns_Bullet <|> parseXMLCns_Number <|> parseXMLCns_Alpha <|> parseHoleAndParseErr "ListType" HoleListType
 parseXMLCns_Bullet = Bullet <$ emptyTag "Bullet"
 parseXMLCns_Number = Number <$ emptyTag "Number"
 parseXMLCns_Alpha = Alpha <$ emptyTag "Alpha"
-parseXML_Item = parseXMLCns_StringItem <?|> parseXMLCns_HeliumItem <?|> parseXMLCns_ListItem <?|> parseHoleAndParseErr "Item" HoleItem
+parseXML_Item = parseXMLCns_StringItem <|> parseXMLCns_HeliumItem <|> parseXMLCns_ListItem <|> parseHoleAndParseErr "Item" HoleItem
 parseXMLCns_StringItem = StringItem <$ startTag "StringItem" <*> parseXML_String<* endTag "StringItem"
 parseXMLCns_HeliumItem = HeliumItem <$ startTag "HeliumItem" <*> parseXML_Exp<* endTag "HeliumItem"
 parseXMLCns_ListItem = ListItem <$ startTag "ListItem" <*> parseXML_ItemList<* endTag "ListItem"
-parseXML_List_Decl = mkList List_Decl Cons_Decl Nil_Decl <$> many parseXML_Decl
-parseXML_List_Alt = mkList List_Alt Cons_Alt Nil_Alt <$> many parseXML_Alt
-parseXML_List_Exp = mkList List_Exp Cons_Exp Nil_Exp <$> many parseXML_Exp
-parseXML_List_Slide = mkList List_Slide Cons_Slide Nil_Slide <$> many parseXML_Slide
-parseXML_List_Item = mkList List_Item Cons_Item Nil_Item <$> many parseXML_Item
+parseXML_List_Decl = mkList List_Decl Cons_Decl Nil_Decl <$> pList_ng parseXML_Decl
+parseXML_List_Alt = mkList List_Alt Cons_Alt Nil_Alt <$> pList_ng parseXML_Alt
+parseXML_List_Exp = mkList List_Exp Cons_Exp Nil_Exp <$> pList_ng parseXML_Exp
+parseXML_List_Slide = mkList List_Slide Cons_Slide Nil_Slide <$> pList_ng parseXML_Slide
+parseXML_List_Item = mkList List_Item Cons_Item Nil_Item <$> pList_ng parseXML_Item
 
 
 
@@ -636,41 +638,37 @@ toXMLString str = Elt "String" [] [PCData str]
 
 -- parseXML for primitive types
 
-parseXML_Int :: Parser Int
+parseXML_Int :: CharParser Int
 parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Integer val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Float :: Parser Float
+parseXML_Float :: CharParser Float
 parseXML_Float  =
- do { spaces
-    ; string "<Float val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Float val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
+parseXML_Bool :: CharParser Bool
+parseXML_Bool  =
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Bool val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
+parseXML_String :: CharParser String
+parseXML_String  =
+      id
+  <$  pCharSpaces
+  <*  pCharString "<String>"
+  <*> pList (pExcept ('\0','\255','x') "<") 
+  <*  pCharString "</String>"
  
 
 -- Xprez XML presentation for primitive types

@@ -2,7 +2,7 @@ module ProxParser (recognizeEnrichedDoc) where
 
 import Common.CommonTypes
 import Presentation.PresLayerTypes
-import Presentation.PresLayerUtils hiding ((<*),(<*>),(<$),(<$>))
+import Presentation.PresLayerUtils
 import Presentation.PresentationParsing
 import Presentation.XprezLib
 
