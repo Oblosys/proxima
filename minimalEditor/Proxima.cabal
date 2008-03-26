@@ -35,12 +35,14 @@ extra-lib-dirs: .
 includes:
 install-includes:
 include-dirs:
-hs-source-dirs: src/proxima/src src
-other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
+hs-source-dirs: src/uuagc/src/ src/proxima/src src
+other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
+               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing.CharParser
+               Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
                Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
-               Common.CommonUtils Common.DebugLevels Common.UU_Parsing
+               Common.CommonUtils Common.DebugLevels
                Evaluation.DocTypes Evaluation.DocUtils Evaluation.DocumentEdit
                Evaluation.EnrTypes Evaluation.EnrUtils Evaluation.EvalLayerTypes
                Evaluation.EvalLayerUtils Evaluation.EvalPresent
