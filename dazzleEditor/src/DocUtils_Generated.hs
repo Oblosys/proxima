@@ -7,7 +7,8 @@ import Evaluation.DocumentEdit
 import Presentation.PresTypes
 import Presentation.XprezLib
 import Common.DebugLevels
-import Text.ParserCombinators.Parsec
+import UU.Parsing
+import UU.Parsing.CharParser
 
 import Common.CommonTypes hiding (Clean, Dirty)
 
@@ -269,47 +270,47 @@ toXMLConsList_Edge Nil_Edge             = []
 -- parseXML functions                                                   --
 --------------------------------------------------------------------------
 
-parseXML_EnrichedDoc = parseXMLCns_RootEnr <?|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
+parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root<* endTag "RootEnr"
-parseXML_Document = parseXMLCns_RootDoc <?|> parseHoleAndParseErr "Document" HoleDocument
+parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Root<* endTag "RootDoc"
-parseXML_Root = parseXMLCns_Root <?|> parseHoleAndParseErr "Root" HoleRoot
+parseXML_Root = parseXMLCns_Root <|> parseHoleAndParseErr "Root" HoleRoot
 parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
-parseXML_Section = parseXMLCns_Section <?|> parseHoleAndParseErr "Section" HoleSection
+parseXML_Section = parseXMLCns_Section <|> parseHoleAndParseErr "Section" HoleSection
 parseXMLCns_Section = Section <$ startTag "Section" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsection<* endTag "Section"
-parseXML_Subsection = parseXMLCns_Subsection <?|> parseHoleAndParseErr "Subsection" HoleSubsection
+parseXML_Subsection = parseXMLCns_Subsection <|> parseHoleAndParseErr "Subsection" HoleSubsection
 parseXMLCns_Subsection = Subsection <$ startTag "Subsection" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsubsection<* endTag "Subsection"
-parseXML_Subsubsection = parseXMLCns_Subsubsection <?|> parseHoleAndParseErr "Subsubsection" HoleSubsubsection
+parseXML_Subsubsection = parseXMLCns_Subsubsection <|> parseHoleAndParseErr "Subsubsection" HoleSubsubsection
 parseXMLCns_Subsubsection = Subsubsection <$ startTag "Subsubsection" <*> parseXML_String <*> parseXML_List_Paragraph<* endTag "Subsubsection"
-parseXML_Paragraph = parseXMLCns_Paragraph <?|> parseXMLCns_SubgraphPara <?|> parseHoleAndParseErr "Paragraph" HoleParagraph
+parseXML_Paragraph = parseXMLCns_Paragraph <|> parseXMLCns_SubgraphPara <|> parseHoleAndParseErr "Paragraph" HoleParagraph
 parseXMLCns_Paragraph = Paragraph <$ startTag "Paragraph" <*> parseXML_List_Word<* endTag "Paragraph"
 parseXMLCns_SubgraphPara = SubgraphPara <$ startTag "SubgraphPara" <*> parseXML_Subgraph<* endTag "SubgraphPara"
-parseXML_Word = parseXMLCns_Word <?|> parseXMLCns_NodeRef <?|> parseXMLCns_Label <?|> parseXMLCns_LabelRef <?|> parseHoleAndParseErr "Word" HoleWord
+parseXML_Word = parseXMLCns_Word <|> parseXMLCns_NodeRef <|> parseXMLCns_Label <|> parseXMLCns_LabelRef <|> parseHoleAndParseErr "Word" HoleWord
 parseXMLCns_Word = Word <$ startTag "Word" <*> parseXML_String<* endTag "Word"
 parseXMLCns_NodeRef = NodeRef <$ startTag "NodeRef" <*> parseXML_String<* endTag "NodeRef"
 parseXMLCns_Label = Label <$ startTag "Label" <*> parseXML_String<* endTag "Label"
 parseXMLCns_LabelRef = LabelRef <$ startTag "LabelRef" <*> parseXML_String<* endTag "LabelRef"
-parseXML_Graph = parseXMLCns_Graph <?|> parseHoleAndParseErr "Graph" HoleGraph
+parseXML_Graph = parseXMLCns_Graph <|> parseHoleAndParseErr "Graph" HoleGraph
 parseXMLCns_Graph = Graph <$ startTag "Graph" <*> parseXML_Dirty <*> parseXML_List_Vertex <*> parseXML_List_Edge<* endTag "Graph"
-parseXML_Vertex = parseXMLCns_Vertex <?|> parseHoleAndParseErr "Vertex" HoleVertex
+parseXML_Vertex = parseXMLCns_Vertex <|> parseHoleAndParseErr "Vertex" HoleVertex
 parseXMLCns_Vertex = Vertex <$ startTag "Vertex" <*> parseXML_String <*> parseXML_Shape <*> parseXML_Int <*> parseXML_Int <*> parseXML_Int<* endTag "Vertex"
-parseXML_Shape = parseXMLCns_Circle <?|> parseXMLCns_Square <?|> parseHoleAndParseErr "Shape" HoleShape
+parseXML_Shape = parseXMLCns_Circle <|> parseXMLCns_Square <|> parseHoleAndParseErr "Shape" HoleShape
 parseXMLCns_Circle = Circle <$ emptyTag "Circle"
 parseXMLCns_Square = Square <$ emptyTag "Square"
-parseXML_Edge = parseXMLCns_Edge <?|> parseHoleAndParseErr "Edge" HoleEdge
+parseXML_Edge = parseXMLCns_Edge <|> parseHoleAndParseErr "Edge" HoleEdge
 parseXMLCns_Edge = Edge <$ startTag "Edge" <*> parseXML_Int <*> parseXML_Int<* endTag "Edge"
-parseXML_Subgraph = parseXMLCns_Subgraph <?|> parseHoleAndParseErr "Subgraph" HoleSubgraph
+parseXML_Subgraph = parseXMLCns_Subgraph <|> parseHoleAndParseErr "Subgraph" HoleSubgraph
 parseXMLCns_Subgraph = Subgraph <$ startTag "Subgraph" <*> parseXML_Dirty <*> parseXML_List_Vertex <*> parseXML_List_Edge<* endTag "Subgraph"
-parseXML_Dirty = parseXMLCns_Dirty <?|> parseXMLCns_Clean <?|> parseHoleAndParseErr "Dirty" HoleDirty
+parseXML_Dirty = parseXMLCns_Dirty <|> parseXMLCns_Clean <|> parseHoleAndParseErr "Dirty" HoleDirty
 parseXMLCns_Dirty = Dirty <$ emptyTag "Dirty"
 parseXMLCns_Clean = Clean <$ emptyTag "Clean"
-parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> many parseXML_Section
-parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> many parseXML_Paragraph
-parseXML_List_Subsection = mkList List_Subsection Cons_Subsection Nil_Subsection <$> many parseXML_Subsection
-parseXML_List_Subsubsection = mkList List_Subsubsection Cons_Subsubsection Nil_Subsubsection <$> many parseXML_Subsubsection
-parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> many parseXML_Word
-parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> many parseXML_Vertex
-parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> many parseXML_Edge
+parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> pList_ng parseXML_Section
+parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> pList_ng parseXML_Paragraph
+parseXML_List_Subsection = mkList List_Subsection Cons_Subsection Nil_Subsection <$> pList_ng parseXML_Subsection
+parseXML_List_Subsubsection = mkList List_Subsubsection Cons_Subsubsection Nil_Subsubsection <$> pList_ng parseXML_Subsubsection
+parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> pList_ng parseXML_Word
+parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> pList_ng parseXML_Vertex
+parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> pList_ng parseXML_Edge
 
 
 
@@ -515,41 +516,37 @@ toXMLString str = Elt "String" [] [PCData str]
 
 -- parseXML for primitive types
 
-parseXML_Int :: Parser Int
+parseXML_Int :: CharParser Int
 parseXML_Int  =
- do { spaces
-    ; string "<Integer val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Integer val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Float :: Parser Float
+parseXML_Float :: CharParser Float
 parseXML_Float  =
- do { spaces
-    ; string "<Float val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    } 
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Float val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_Bool :: Parser Bool
-parseXML_Bool =
- do { spaces
-    ; string "<Bool val=\""
-    ; str <- many (satisfy (/='"')) 
-    ; string "\"/>"
-    ; return $ read str
-    }
+parseXML_Bool :: CharParser Bool
+parseXML_Bool  =
+      read 
+  <$  pCharSpaces
+  <*  pCharString "<Bool val=\""
+  <*> pList (pExcept ('\0','\255','x') "\"") 
+  <*  pCharString "\"/>"
 
-parseXML_String :: Parser String
-parseXML_String =
- do { spaces
-    ; string "<String>"
-    ; str <- many (satisfy (/='<')) 
-    ; string "</String>"
-    ; return str
-    }
+parseXML_String :: CharParser String
+parseXML_String  =
+      id
+  <$  pCharSpaces
+  <*  pCharString "<String>"
+  <*> pList (pExcept ('\0','\255','x') "<") 
+  <*  pCharString "</String>"
  
 
 -- Xprez XML presentation for primitive types
