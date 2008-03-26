@@ -43,7 +43,7 @@ other-modules: UU.Parsing UU.Parsing.Derived
                Common.CommonUtils Common.DebugLevels Evaluation.DocTypes Evaluation.DocUtils Evaluation.DocumentEdit
                Evaluation.EnrTypes Evaluation.EnrUtils Evaluation.EvalLayerTypes Evaluation.EvalLayerUtils Evaluation.EvalPresent
                Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils Layout.LayPresent Layout.LayTranslate
-               Layout.LayTypes Layout.LayUtils Layout.Layout Layout.Scanner Layout.ScannerAG Layout.TreeEditPres
+               Layout.LayTypes Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner Layout.ScannerAG Layout.TreeEditPres
                Proxima.Architecture Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Presentation.PresLayerTypes
                Presentation.PresLayerUtils Presentation.PresPresent Presentation.PresTranslate Presentation.PresTypes Presentation.PresUtils
                Presentation.PresentationParsing Presentation.XLatex Presentation.XprezLib Rendering.RenLayerTypes Rendering.RenLayerUtils
