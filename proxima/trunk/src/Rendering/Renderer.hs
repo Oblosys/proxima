@@ -173,7 +173,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     OverlayA _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
-                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> do {putStrLn"\n\n\nGraph clean dirty kids" ; renderChildren x' y' arrs}
+                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     VertexA  _ x' y' _ _ _ _ _ _ arr  -> renderChildren x' y' [arr]
                     StructuralA _ arr           -> renderChildren 0 0 [arr]
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
@@ -208,7 +208,6 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; let ascnt = round $ ascent metrics    
            
               ; gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
-                        
                         
               ; pangoItems <- pangoItemize context str 
                                 [ AttrFontDescription 0 (length str) fontDescription
@@ -536,9 +535,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         
 
   ; when arrDb $
-       do { renderID (wi,dw,gc) scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)
-          }
-
+      renderID (wi,dw,gc) scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
   }
 
 drawFilledRectangle :: DrawableClass drawWindow => drawWindow -> GC -> Rectangle -> Graphics.UI.Gtk.Color -> Graphics.UI.Gtk.Color -> IO ()
@@ -554,9 +551,8 @@ drawFilledRectangle dw gc (Rectangle x y w h) lineColor fillColor =
 -- usage: for basic Arrangements, render after image so id is visible
 --        for composites,         render before, so stacking order of arrangement is represented correctly
 
---renderID _          scale x y NoIDA = return ()   -- use this case to disable NoIDA renderings
 renderID (wi,dw,gc) scale x y id  = 
- do { let idStr = case id of NoIDA -> " "
+ do { let idStr = case id of NoIDA -> ""
                              IDA i -> show i
 
     ; context <- widgetCreatePangoContext wi
@@ -572,7 +568,7 @@ renderID (wi,dw,gc) scale x y id  =
                           ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
                           ; drawGlyphs dw gc (x+1) (y+1 - round y') glyphItem
                           }
-        pangoItem:_ -> debug Err ("Renderer.renderID: incorrect nr of pango items") $ return ()
+        _ -> debug Err ("Renderer.renderID: incorrect nr of pango items") $ return ()
     }
 
 
