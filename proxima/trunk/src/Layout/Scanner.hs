@@ -33,7 +33,7 @@ Same thing for idps
 
 
 Unclear:
-what happens if  string has no idp? What is the problem if idp's are created new?
+What is the problem if idp's are created new?
 what happens if token has different string than scanned (eg 0123 -> 123) how does this affect focus?
 
 The layouter adds whitespace according to whitespace map.
@@ -50,13 +50,25 @@ Only the tokens of a PresentationTk.
 
 Challenges/todo:
 
+TODO: 
+- clear IDPS in pastePres
+- add special handling of error token in Layout, so it adds the correct whitespace.
+- put scanchars in error token, so idp's and locators are not cleared on a lexical error.
+- take structurals out of scanner (otherwise lexical error kills them)
+   (make sure that the list of new idps is used in all segments when we split at structurals)
+- use tokenIDP from presTypes
+- In LayPresent: enable fall back when focus was not scanned (disabled for testing)
+
+- Maybe we can store structural focus too.
+
+
+
 Lexical errors create one big token, which discards structural children and ruins the presentation.
   after lexical error, just split remaining input into error tokens and structural tokens
   and represent all whitespace in the error tokens. Layout should make sure that whitespace in 
   error tokens is converted to breaks and spaces.
   Probably also the whitespace in the state before the error occurred should be put in the error token.
 
-  check layout what Layouter does now with whitespace for error tokens
 
   Instead of using Alex for structurals, we could call Alex several times for the string parts of the
   layout. This way, we keep the structurals out of the user specified scanner. The whitespace in the
@@ -76,26 +88,22 @@ can be solved by having optional preceding whitespace, but this does not work if
 tokens at all. If parser fails, it is okay, the id's are kept by the parseErr, but if empty pres
 is accepted then we need an initial token.
 
-scanner duplicates idp's
 
 
 problem with structurals. focus in auto type sig is not recognized properly
 
 
-- following two seem to be fixed now.
 If we allow autowhitespace for strings and structural presentations
 then Layout.hs adds too much whitespace in case of a parseErr presentation
+ (is this still the case after all the changes to presParseErr?)
 However, enforcing the use of tokens in the presentationAG is tricky.
 
+-- unclear whether this comment still holds.
 This is related to the error pres in the tokens. This is now not processed (so it is a layout instead of 
 a presentation). Processing it recursively is not a problem for Structural presentations, but
 for parsing presentations the lexer can fail on a lexer error, in which case no information is returned
 and we cannot tokenize any structural token children.
 
-
-Longer term: 
-  recover locators for parsing presentations. This way, a presentation may contain extra state not in
-  the presentation. It is tricky however when this information can be recovered.
 
 -}
 
@@ -219,30 +227,15 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                       f _                = Nothing
      -- finally, remove all whitespace tokens.
      
- in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
-     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     --debug Lay (showScannedTokens scannedTokensIDPs) $
+     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
+     debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )
-
-
-{-
-TODO: 
-- clear IDPS in pastePres
-- bug in error token focus
-- add special handling of error token in Layout, so it adds the correct whitespace.
-- take structurals out of scanner (otherwise lexical error kills them)
-   (make sure that the list of new idps is used in all segments when we split at structurals)
-- use tokenIDP from presTypes
-- In LayPresent: enable fall back when focus was not scanned (disabled for testing)
-
-- Maybe we can store structural focus too.
--}
-
 
 -- If the focus is after last char, we cannot encode it in the scanChars. In this case, it is added
 -- to the scanned tokens by addLastCharFocusStartAndEnd.

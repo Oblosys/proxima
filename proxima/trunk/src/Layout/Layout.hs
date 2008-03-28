@@ -124,7 +124,7 @@ detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
 --detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
 detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
                                                in  (( OverlayP idp $ pres' : map castPresToLay press
-                                                    , f -- prependToFocus 0 f
+                                                    , prependToFocus 0 f
                                                     ):row)
                                                    : rows
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
@@ -183,7 +183,7 @@ addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding white
                                                         let (pres', f) = detokenize wm pres
                                                         in  addWhitespace True wm (Just f) idp pres'
 addWhitespaceToken wm idp (ErrorTk _ str _)           = debug Lay ("Adding whitespace to ErrorTk "++show idp) $
-                                                        addWhitespace False wm Nothing idp (StringP idp str)
+                                                          addWhitespaceErrorToken wm idp str
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
 -- if it is the last token and there is no whitespace behind it)                   
@@ -263,7 +263,36 @@ mkStartOrEndFocuss isStructural (breaks, spaces) wFocus tFocus sFocus = -- sFocu
        in (beforeTokenFocus, tokenFocus, afterTokenFocus, firstBreakFocus, breaksFocuss, spacesFocus)
   
 
--- !!(Look further at this:)last bit of layout in an empty token? for now we put it in an empty string token. 
 
+-- an error token is treated specially, since its whitespace is stored in the string (the scanner stops
+-- producing whitespace tokens after a lexical error). Hence there will not be any trailing whitespace, but
+-- we do need the whitespacemap for the focus. 
+addWhitespaceErrorToken :: Show node => WhitespaceMap -> IDP -> String ->
+                           [[(Layout doc node clip token, FocusPres)]]
+addWhitespaceErrorToken wm idp str = 
+  let lines =  splitAtNewlines str
+      focuss = case Map.lookup idp wm  of
+                     Nothing -> repeat noFocus
+                     Just tLayout@(TokenLayout _ _ (focusStart, focusEnd))  ->
+                        debug Lay ("There is a focus: "++show (focusStart,focusEnd)) $
+                        zipWith FocusP (mkLineFocus focusStart lines) (mkLineFocus focusEnd lines)
+  in  [ [(StringP NoIDP ln,f)] | (ln,f) <- zip lines focuss ]
 
+ 
+-- this is almost Prelude.lines, but it doesn't remove the last '\n'. (And returns [""] for "", but it
+-- will never be called on "".
+splitAtNewlines []        = [[]]
+splitAtNewlines ('\n':cs) = [] : splitAtNewlines cs
+splitAtNewlines (c:cs)    = let (line:lines) = splitAtNewlines cs -- safe: result is always at least a singleton
+                            in  (c:line):lines
 
+-- produ
+mkLineFocus Nothing lines  = repeat NoPathP
+mkLineFocus (Just f) lines = mkLineFocus' 0 f lines
+
+mkLineFocus' currentLineNr f lines = 
+ case lines of (line:lines) -> if f <= length line
+                               then PathP [] f : repeat NoPathP 
+                               else NoPathP : mkLineFocus' (currentLineNr+1) (f-length line-1) lines
+               []           -> if f < 0 then []
+                               else debug Err "Layout.mkLineFocus: focus index too large" []
