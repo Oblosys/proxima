@@ -18,15 +18,11 @@ type ScanChar_ = ScanChar Document Node ClipDoc UserToken
 
 type AlexInput  = (Char, [ScanChar_])
 
-scanner :: [ScanChar_] -> [ScannedToken Document Node ClipDoc UserToken]
-scanner scs = let (scannedTokens, pos) = alexScanTokens initScannerState scs
-              in  scannedTokens
-
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
-alexScanTokens :: ScannerState -> [ScanChar_] -> 
+scanner :: ScannerState -> [ScanChar_] -> 
                   ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
-alexScanTokens initState scs = go initState ('\n',scs)
+scanner initState scs = go initState ('\n',scs)
   where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
         go state inp@(_,str) =
 	  case alexScan inp 0 of

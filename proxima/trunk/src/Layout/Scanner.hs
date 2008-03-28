@@ -52,7 +52,7 @@ Challenges/todo:
 
 TODO: 
 - clear IDPS in pastePres
-- add special handling of error token in Layout, so it adds the correct whitespace.
+- let error token handle it's own squiggly, then we don't need the overlay case in Layout.
 - put scanchars in error token, so idp's and locators are not cleared on a lexical error.
 - take structurals out of scanner (otherwise lexical error kills them)
    (make sure that the list of new idps is used in all segments when we split at structurals)
@@ -212,11 +212,18 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars 
      -- first, we store the focus in the scanned characters (except if focus is after last char)
 
-     scannedTokens = addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd $
-                     sheet focusedScanChars
-     -- scan the characters, and in the resulting tokens, store 
+     groupedScanChars = groupScanChars focusedScanChars
+     -- group the scanned characters in lists of either characters or structurals    
+     
+     scannedTokens = scanGroups sheet groupedScanChars
+     -- scan all groups
+      
+     scannedTokensWithLastFocus = addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd $
+                                  scannedTokens
+     
+     -- store any last char focus in the last token
                      
-     (scannedTokensIDPs, addedIdPs, idPCounter'') = addIdPs (IntSet.empty,idPCounter') scannedTokens
+     (scannedTokensIDPs, addedIdPs, idPCounter'') = addIdPs (IntSet.empty,idPCounter') scannedTokensWithLastFocus
      -- the scanned tokens may have double or missing idp's. addIdPs creates idps for all tokens.
      
      scannedWhitespaceMap = retrieveTokenWhitespace Map.empty scannedTokensIDPs
@@ -227,15 +234,24 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                       f _                = Nothing
      -- finally, remove all whitespace tokens.
      
- in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
+     --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
+     --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     debug Lay (showScannedTokens scannedTokensIDPs) $
+     --debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )
+
+-- group the scanchars in lists of either chars or structurals
+showFocusedScanChars [] = ""
+showFocusedScanChars (Char _ _ _ _ c:scanchars) = "Char: '"++[c]++"'\n"++showFocusedScanChars scanchars     
+showFocusedScanChars (Structural _ _ _ mn _ _:scanchars) = "Structural: '"++show mn++"'\n"++showFocusedScanChars scanchars     
+groupScanChars scanChars = groupCharScanChars scanChars
+
 
 -- If the focus is after last char, we cannot encode it in the scanChars. In this case, it is added
 -- to the scanned tokens by addLastCharFocusStartAndEnd.
@@ -258,6 +274,38 @@ markFocus setFocusStartOrEnd focus@(Just pos) scs =
 
 focusAfterLastChar scs Nothing    = False
 focusAfterLastChar scs (Just pos) = pos == length scs
+
+groupCharScanChars []        = []
+groupCharScanChars scanChars = 
+  case span isCharScanChar scanChars of
+    ([],    structurals) -> groupStructuralScanChars structurals -- prevent empty groups
+    (chars, structurals) -> chars : groupStructuralScanChars structurals
+
+
+groupStructuralScanChars []        = []
+groupStructuralScanChars scanChars =
+  case span isStructuralScanChar scanChars of
+    ([],          chars) -> groupCharScanChars chars -- prevent empty groups
+    (structurals, chars) -> structurals : groupCharScanChars chars
+
+-- scan each group either with the scanner sheet or by creating structural tokens
+scanGroups sheet groupedScanChars = fst $ scanCharsOrStructurals sheet 0 groupedScanChars
+
+scanCharsOrStructurals sheet pos [] = ([],pos)
+scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is never empty
+  let (scannedTokens, pos') = if isCharScanChar scanChar 
+                              then sheet pos group
+                              else scanStructurals pos group
+      (scannedTokens', pos'') = scanCharsOrStructurals sheet pos' groups
+  in  (scannedTokens++scannedTokens', pos'')
+scanCharsOrStructurals sheet pos (group:groups) = debug Lay ("error"++show group) ([],pos)
+ 
+scanStructurals pos [] = ([], pos)
+scanStructurals pos (structural@(Structural idp _ _ loc tokens lay) : structuralScanChars) = 
+  let scannedToken = ScannedToken (getFocusStartEnd [structural]) $ StructuralTk pos loc lay tokens idp
+      (scannedTokens, pos') = scanStructurals (pos + 1) structuralScanChars
+  in  (scannedToken:scannedTokens, pos')
+
 
 -- If ScannedFocusStart or ScannedFocusEnd is after the last character, it was not recorded in the
 -- scanChars. This function adds it directly to the scanned tokens.

@@ -68,3 +68,16 @@ hasFocusStartMark scanChar = startFocusMark scanChar == FocusMark
 
 hasFocusEndMark scanChar = endFocusMark scanChar == FocusMark
 
+-- TODO handle pattern match failures with internal errors
+
+getFocusStartEnd scs = updateFocusStartEnd 0 (Nothing, Nothing) scs
+
+updateFocusStartEnd :: Int -> FocusStartEnd -> [ScanChar doc node clip userToken] -> FocusStartEnd
+updateFocusStartEnd i (oldFocusStart, oldFocusEnd) cs =
+  (getFocusStart i oldFocusStart cs, getFocusEnd i oldFocusEnd cs) 
+  
+getFocusStart i oldFocusStart []     = Nothing
+getFocusStart i oldFocusStart (c:cs) = if hasFocusStartMark c then Just i else getFocusStart (i+1) oldFocusStart cs
+
+getFocusEnd i oldFocusEnd []     = Nothing
+getFocusEnd i oldFocusEnd (c:cs) = if hasFocusEndMark c then Just i else getFocusEnd (i+1) oldFocusEnd cs

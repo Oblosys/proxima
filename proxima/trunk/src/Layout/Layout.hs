@@ -177,12 +177,12 @@ mapPath f (PathP p i) = PathP (f p) i
 
 addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [[(Layout doc node clip token, FocusPres)]]
-addWhitespaceToken wm idp (UserTk _ _ str _ _)        = debug Lay ("Adding whitespace to UserTk "++show idp++":"++show str) $
+addWhitespaceToken wm idp (UserTk _ _ str _ _)        = --debug Lay ("Adding whitespace to UserTk "++show idp++":"++show str) $
                                                         addWhitespace False wm Nothing idp (StringP idp str)
-addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to StructuralTk "++show idp) $
+addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = --debug Lay ("Adding whitespace to StructuralTk "++show idp) $
                                                         let (pres', f) = detokenize wm pres
                                                         in  addWhitespace True wm (Just f) idp pres'
-addWhitespaceToken wm idp (ErrorTk _ str _)           = debug Lay ("Adding whitespace to ErrorTk "++show idp) $
+addWhitespaceToken wm idp (ErrorTk _ str _)           = --debug Lay ("Adding whitespace to ErrorTk "++show idp) $
                                                           addWhitespaceErrorToken wm idp str
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
@@ -274,7 +274,6 @@ addWhitespaceErrorToken wm idp str =
       focuss = case Map.lookup idp wm  of
                      Nothing -> repeat noFocus
                      Just tLayout@(TokenLayout _ _ (focusStart, focusEnd))  ->
-                        debug Lay ("There is a focus: "++show (focusStart,focusEnd)) $
                         zipWith FocusP (mkLineFocus focusStart lines) (mkLineFocus focusEnd lines)
   in  [ [(StringP NoIDP ln,f)] | (ln,f) <- zip lines focuss ]
 
@@ -286,13 +285,12 @@ splitAtNewlines ('\n':cs) = [] : splitAtNewlines cs
 splitAtNewlines (c:cs)    = let (line:lines) = splitAtNewlines cs -- safe: result is always at least a singleton
                             in  (c:line):lines
 
--- produ
 mkLineFocus Nothing lines  = repeat NoPathP
-mkLineFocus (Just f) lines = mkLineFocus' 0 f lines
+mkLineFocus (Just f) lines = mkLineFocus' f lines
 
-mkLineFocus' currentLineNr f lines = 
+mkLineFocus' f lines = 
  case lines of (line:lines) -> if f <= length line
                                then PathP [] f : repeat NoPathP 
-                               else NoPathP : mkLineFocus' (currentLineNr+1) (f-length line-1) lines
+                               else NoPathP : mkLineFocus' (f-length line-1) lines
                []           -> if f < 0 then []
                                else debug Err "Layout.mkLineFocus: focus index too large" []

@@ -37,9 +37,6 @@ alexInputPrevChar (c,_) = c
 type ScannerState = Position
                  -- token position
 
-initScannerState :: ScannerState
-initScannerState = 0
-
 mkToken = mkTokenEx id
 
 -- the first strf is for manipulating the string that is stored in the token
@@ -55,15 +52,6 @@ mkTokenEx strf tokf tokenPos scs =
       , tokenPos + 1
       )
 
-
-mkStructuralToken :: ScannerState -> [ScanChar doc node clip userToken] -> 
-                     (ScannedToken doc node clip userToken, ScannerState)
-mkStructuralToken tokenPos
-                  scs@[Structural idp _ _ loc tokens lay] = 
-      ( ScannedToken (getFocusStartEnd scs) $ StructuralTk tokenPos loc lay tokens idp
-      , tokenPos + 1
-      )
-
 collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> 
                      (ScannedToken doc node clip userToken, ScannerState)
 collectWhitespace tokenPos scs =
@@ -76,17 +64,3 @@ collectWhitespace tokenPos scs =
       )
 
                          
--- TODO handle pattern match failures with internal errors
-
-
-getFocusStartEnd scs = updateFocusStartEnd 0 (Nothing, Nothing) scs
-
-updateFocusStartEnd :: Int -> FocusStartEnd -> [ScanChar doc node clip userToken] -> FocusStartEnd
-updateFocusStartEnd i (oldFocusStart, oldFocusEnd) cs =
-  (getFocusStart i oldFocusStart cs, getFocusEnd i oldFocusEnd cs) 
-  
-getFocusStart i oldFocusStart []     = Nothing
-getFocusStart i oldFocusStart (c:cs) = if hasFocusStartMark c then Just i else getFocusStart (i+1) oldFocusStart cs
-
-getFocusEnd i oldFocusEnd []     = Nothing
-getFocusEnd i oldFocusEnd (c:cs) = if hasFocusEndMark c then Just i else getFocusEnd (i+1) oldFocusEnd cs
