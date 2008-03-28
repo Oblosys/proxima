@@ -52,7 +52,7 @@ pLeaf = pStructuralConstr Node_Leaf
 pBin :: ListParser Document Node ClipDoc UserToken Tree
 pBin = 
           (\bin open1 left close1 open2 right close2 -> 
-              reuseBin [bin] (Just $ tokenIDP bin) (Just $ tokenIDP open1) (Just $ tokenIDP close1) (Just $ tokenIDP open2) (Just $ tokenIDP close2) (Just left) (Just right))
+              reuseBin [bin] (Just $ getTokenIDP bin) (Just $ getTokenIDP open1) (Just $ getTokenIDP close1) (Just $ getTokenIDP open2) (Just $ getTokenIDP close2) (Just left) (Just right))
       <$> pToken BinToken
       <*> pToken (SymToken "(")
       <*> pTree
