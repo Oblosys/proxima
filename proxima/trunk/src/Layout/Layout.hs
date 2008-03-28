@@ -123,7 +123,9 @@ detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocu
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
 --detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
 detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
-                                               in  ((OverlayP idp $ pres': map castPresToLay press, f):row)
+                                               in  (( OverlayP idp $ pres' : map castPresToLay press
+                                                    , f -- prependToFocus 0 f
+                                                    ):row)
                                                    : rows
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
