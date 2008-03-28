@@ -127,11 +127,11 @@ recognizeExp =
          
 
 recognizeExp' = pStr $
-         (\str e1 e2 -> reuseDivExp [str] (Just $ tokenIDP str) (Just e1) (Just e2))
+         (\str e1 e2 -> reuseDivExp [str] (Just $ getTokenIDP str) (Just e1) (Just e2))
      <$> pStructuralTk Node_DivExp
      <*> recognizeExp
      <*> recognizeExp
-  <|>    (\str e1 e2 -> reusePowerExp [str] (Just $ tokenIDP str) (Just e1) (Just e2))
+  <|>    (\str e1 e2 -> reusePowerExp [str] (Just $ getTokenIDP str) (Just e1) (Just e2))
      <$> pStructuralTk Node_PowerExp
      <*> recognizeExp
      <*> recognizeExp
@@ -151,18 +151,18 @@ parseList_Decl =
       <$> pList parseDecl
 
 parseDecl  =                                                              -- IDD  "="                   ";"                       type sig              not used  expanded    auto-layout
-          (\sig ident tk1 exp tk2 -> reuseDecl [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just True) Nothing (Just ident) (Just exp))
+          (\sig ident tk1 exp tk2 -> reuseDecl [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (typeSigTokenIDP sig) Nothing (Just True) Nothing (Just ident) (Just exp))
       <$> pMaybe (pStructuralTk Node_Decl) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> parseExp  <*> pKeyC 1 ";"
-  <|>     (\sig ident tk1 tk2 -> reuseDecl [tk1, tk2] (Just $ tokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
+  <|>     (\sig ident tk1 tk2 -> reuseDecl [tk1, tk2] (Just $ getTokenIDP tk1) Nothing (typeSigTokenIDP sig) Nothing Nothing Nothing (Just ident) Nothing)--makeDecl' mtk0 tk1 tk2 ident) 
       <$> pMaybe (pStructuralTk Node_Decl) -- type sig/value
       <*> parseIdent <*> pKey "=" <*> pKey "..." -- bit weird what happens when typing ... maybe this must be done with a structural presentation (wasn't possible before with structural parser that was too general)
- <|>      (\tk board ->  BoardDecl (tokenIDP tk) NoIDP board) 
+ <|>      (\tk board ->  BoardDecl (getTokenIDP tk) NoIDP board) 
       <$> pKey "Chess" <* pKey ":" <*> parseBoard        
- <|>      (\tk slides ->  PPPresentationDecl (tokenIDP tk) NoIDP slides)
+ <|>      (\tk slides ->  PPPresentationDecl (getTokenIDP tk) NoIDP slides)
       <$> pKey "Slides" <* pKey ":" <*> parsePPPresentation
  where typeSigTokenIDP Nothing   = Nothing
-       typeSigTokenIDP (Just tk) = Just (tokenIDP tk)
+       typeSigTokenIDP (Just tk) = Just (getTokenIDP tk)
 
 -- List_Alt, Alt
 
@@ -171,7 +171,7 @@ parseList_Alt =
      <$> pList parseAlt
 
 parseAlt  = 
-         (\ident tk1 exp tk2 -> reuseAlt [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just ident) (Just exp))
+         (\ident tk1 exp tk2 -> reuseAlt [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just ident) (Just exp))
      <$> parseIdent <*> pArrow <*> parseExp  <*> pKeyC 4 ";"
 
 
@@ -182,33 +182,33 @@ parseIdentExp =
      <$> parseIdent
 
 parseIfExp = 
-         (\tk1 c tk2 th tk3 el -> reuseIfExp [tk1, tk2,tk3] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just $ tokenIDP tk3) (Just c) (Just th) (Just el))
+         (\tk1 c tk2 th tk3 el -> reuseIfExp [tk1, tk2,tk3] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just $ getTokenIDP tk3) (Just c) (Just th) (Just el))
      <$> pIf <*> parseExp <*> pThen <*> parseExp <*> pElse <*> parseExp
 
 parseLamExp = 
-         (\tk1 a tk2 b -> reuseLamExp [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just a) (Just b))
+         (\tk1 a tk2 b -> reuseLamExp [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just a) (Just b))
      <$> pLambda <*> parseIdent <*> pArrow <*> parseExp
             
 parseCaseExp =
-         (\tk1 a tk2 b -> reuseCaseExp [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just a) (Just b))
+         (\tk1 a tk2 b -> reuseCaseExp [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just a) (Just b))
      <$> pCase <*> parseExp <*> pOf <*> parseList_Alt
 
 parseLetExp =
-         (\tk1 a tk2 b -> reuseLetExp [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just a) (Just b))
+         (\tk1 a tk2 b -> reuseLetExp [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just a) (Just b))
      <$> pLet <*> parseList_Decl <*> pIn <*> parseExp
 
       
 -- lists with separators are still a bit awkward
 parseListExp = 
-         (\tk1 (tks, list_Exp) tk2 -> reuseListExp ([tk1, tk2]++tks) (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just $ map tokenIDP tks) (Just $ list_Exp))
+         (\tk1 (tks, list_Exp) tk2 -> reuseListExp ([tk1, tk2]++tks) (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just $ map getTokenIDP tks) (Just $ list_Exp))
      <$> pKey "[" <*> parseList_Exp <*> pKey "]"
 
 -- same here
 parseParenExp = -- maybe we don't want to build a list for (exp), because now we have to remove it
          (\tk1 (tks, list_Exp) tk2 -> if arity list_Exp == 1 
                                       then let Clip_Exp exp = select [0] list_Exp -- unsafe match, but will never fail due to check
-                                           in  reuseParenExp [tk1, tk2] (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just $ exp)
-                                      else reuseProductExp ([tk1, tk2]++tks) (Just $ tokenIDP tk1) (Just $ tokenIDP tk2) (Just $ map tokenIDP tks) (Just $ list_Exp))
+                                           in  reuseParenExp [tk1, tk2] (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just $ exp)
+                                      else reuseProductExp ([tk1, tk2]++tks) (Just $ getTokenIDP tk1) (Just $ getTokenIDP tk2) (Just $ map getTokenIDP tks) (Just $ list_Exp))
      <$> pKey "(" <*> parseList_Exp <*> pKey ")"
 
 
@@ -228,29 +228,29 @@ parseList_Exp =
     
 parseExp = -- use chain!!  and fix associativity of application!
           parseExp'   -- e and t are flipped in lambda for <??>
-     <??> (    (\tk e t-> reusePlusExp [tk] (Just $ tokenIDP tk) (Just t) (Just e))
+     <??> (    (\tk e t-> reusePlusExp [tk] (Just $ getTokenIDP tk) (Just t) (Just e))
            <$> pKey "+" <*> parseExp 
           )
           
 parseExp' = 
            parseTerm   -- e and t are flipped in lambda for <??>
-      <??> (    (\tk e t->  reuseDivExp [tk] (Just $ tokenIDP tk) (Just t) (Just e))
+      <??> (    (\tk e t->  reuseDivExp [tk] (Just $ getTokenIDP tk) (Just t) (Just e))
             <$> pKey "%" <*> parseExp' 
            )
            
 parseTerm   = 
            parseFactor
-      <??> (      (\tk t f-> reuseTimesExp [tk] (Just $ tokenIDP tk) (Just f) (Just t))
+      <??> (      (\tk t f-> reuseTimesExp [tk] (Just $ getTokenIDP tk) (Just f) (Just t))
               <$> pKey "*" 
               <*> parseTerm
-           <|>    (\tk t f-> reuseDivExp [tk] (Just $ tokenIDP tk) (Just f) (Just t))
+           <|>    (\tk t f-> reuseDivExp [tk] (Just $ getTokenIDP tk) (Just f) (Just t))
               <$> pKey "/"
               <*> parseTerm
            )
 
 parseFactor = 
            parseFactor'
-      <??> (    (\tk f f' -> reusePowerExp [tk] (Just $ tokenIDP tk) (Just f') (Just f))
+      <??> (    (\tk f f' -> reusePowerExp [tk] (Just $ getTokenIDP tk) (Just f') (Just f))
             <$> pKey "^" <*> parseFactor
            )
 
@@ -272,7 +272,7 @@ parseFactor'' =
   <|> recognizeExp'
      
 parseIdent = 
-         (\strTk -> reuseIdent [strTk] (Just $ tokenIDP strTk) Nothing (Just $ tokenString strTk))
+         (\strTk -> reuseIdent [strTk] (Just $ getTokenIDP strTk) Nothing (Just $ tokenString strTk))
      <$> pLIdent
 
 
@@ -328,13 +328,13 @@ parseBool_ = pStr $
 -}
 
 parseIntExp =
-         (\tk -> reuseIntExp [tk] (Just $ tokenIDP tk) (Just $ read (tokenString tk)))
+         (\tk -> reuseIntExp [tk] (Just $ getTokenIDP tk) (Just $ read (tokenString tk)))
      <$> pInt
 
 parseBoolExp = 
-         (\tk -> reuseBoolExp [tk] (Just $ tokenIDP tk) (Just True))
+         (\tk -> reuseBoolExp [tk] (Just $ getTokenIDP tk) (Just True))
      <$> pTrue
-  <|>    (\tk -> reuseBoolExp [tk] (Just $ tokenIDP tk) (Just False))
+  <|>    (\tk -> reuseBoolExp [tk] (Just $ getTokenIDP tk) (Just False))
      <$> pFalse
 
   
