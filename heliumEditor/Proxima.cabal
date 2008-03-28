@@ -36,9 +36,7 @@ includes:
 install-includes:
 include-dirs:
 hs-source-dirs: src/uuagc/src/ src/proxima/src src
-other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
-               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing.CharParser
-               Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
+other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
                Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
@@ -57,10 +55,12 @@ other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer Chess
-               DocTypes_Generated DocUtils_Generated DocumentEdit_Generated
-               EvaluateTypesStubs Evaluator Main PresentationAG ProxParser
-               ProxParser_Generated Reducer ScannerSheet
+               Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
+               UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
+               UU.Parsing.MachineInterface UU.Parsing Chess DocTypes_Generated
+               DocUtils_Generated DocumentEdit_Generated EvaluateTypesStubs
+               Evaluator Main PresentationAG ProxParser ProxParser_Generated
+               Reducer ScannerSheet
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
