@@ -141,6 +141,7 @@ render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
     --; putStrLn $ "DiffTree is " ++ show diffTree
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     ; let focusArrList = arrangeFocus focus arrangement
+    ; debugLnIO Ren ("Focus: "++show focus ++ "\nArrangement:\n"++show focusArrList)
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     ; renderArr clipRegion
@@ -595,7 +596,7 @@ arrangeFocus (FocusA from to) arrangement = {- scaleFocusArrList scale $-} {-deb
 arrangeFocus (NoFocusA) _ = []
 
 
--- caret at end rendered 1 pixel to the left because of poor man's incrementality algorithm
+-- caret at end rendered 1 pixel to the left because of incrementality algorithm
 
 -- ref lines not used, because caret is not incrementally rendered
 mkFocus :: Show node => FocusArr -> Arrangement node -> [Arrangement node]
@@ -608,7 +609,7 @@ mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _ _) = []
 mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ _ cxs') = 
   let cxs = init cxs' ++ [last cxs'-1]
       st = if length stp < length p || stp < p then 0 else index "Renderer.mkFocus'" cxs sti
-      en = if  enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
+      en = if length stp < length p || enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
   in  mkBoxCaret (x'+x+st) (y'+y) (en-st + 1) h
 mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' focus          (PolyA _ x y w h _ _ _ _ _ _ _ _)    = mkBoxCaret (x'+x) (y'+y) w h
