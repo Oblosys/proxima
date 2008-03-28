@@ -261,7 +261,7 @@ pointDoc :: Show node => Int -> Int -> Arrangement node -> Maybe node
 pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heightA arr-1) y') [] (error "point: no root locator") arr
 
 -- point only recurses in children that may have the focus
--- Stretching rows do not lead to correct pointing.
+-- Stretching rows lead to incorrect pointing.
 
 -- precondition: x' y' falls inside the arrangement. (Except for GraphA and EdgeA)
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
@@ -285,7 +285,7 @@ point' x' y' pth loc p@(VertexA _ x y w h _ _ _ outline arr) =
      else
        if (x' > x) && (x' < x+w) &&       -- otherwise, if it is inside the Vertex, we continue on its children
              (y' >= y) && (y' < y+h) 
-          then debug Arr "inside Vertex pres" $ point' (x'-x) (y'-y) (pth++[0]) loc arr 
+          then point' (x'-x) (y'-y) (pth++[0]) loc arr 
           else Nothing
 point' x' y' pth loc p@(EdgeA _ x1 y1 x2 y2 _ _ _ _) =
   if distanceSegmentPoint (x1,y1) (x2,y2) (x',y') < edgeClickDistance
@@ -296,17 +296,21 @@ point' x' y' _ _   arr                                 = debug Err ("ArrTypes.po
 -- precondition: x' y' falls inside the arrangement width
 pointRowList :: Show node => Int -> Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
 pointRowList i x' y' pth loc []         = debug Err "ArrTypes.pointRowList: empty Row list" $ Nothing
-pointRowList i x' y' pth loc (arr:arrs) = if x' >= xA arr + widthA arr 
-                                      then pointRowList (i+1) x' y' pth loc arrs
-                                      else point' x' (clip 0 (heightA arr-1) y') 
-                                                  (pth++[i]) loc arr
+pointRowList i x' y' pth loc (arr:arrs) = 
+  --debug Arr ("pointRowList on "++show i++":"++shallowShowArr arr) $
+  if x' >= xA arr + widthA arr 
+  then pointRowList (i+1) x' y' pth loc arrs
+  else point' x' (clip 0 (heightA arr-1) y') 
+                 (pth++[i]) loc arr
 
 pointColList :: Show node => Int -> Int -> Int -> [Int] -> node -> [Arrangement node] -> Maybe ([Int], node)
 pointColList i x' y' pth loc [] = debug Err "ArrTypes.pointRowList: empty Row list" $ Nothing
-pointColList i x' y' pth loc (arr:arrs) = if y' >= yA arr + heightA arr 
-                                      then pointColList (i+1) x' y' pth loc arrs
-                                      else point' (clip 0 (widthA arr-1) x') y' 
-                                                  (pth++[i]) loc arr
+pointColList i x' y' pth loc (arr:arrs) =
+  --debug Arr ("pointColList on "++show i++":"++shallowShowArr arr) $
+  if y' >= yA arr + heightA arr 
+  then pointColList (i+1) x' y' pth loc arrs
+  else point' (clip 0 (widthA arr-1) x') y' 
+              (pth++[i]) loc arr
 
 -- Graphs let the pointing be handled by child arrangements. This is safe, because they must be
 -- VertexA's or EdgeA's
