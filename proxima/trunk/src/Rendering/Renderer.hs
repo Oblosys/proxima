@@ -568,7 +568,7 @@ renderID (wi,dw,gc) scale x y id  =
                           ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
                           ; drawGlyphs dw gc (x+1) (y+1 - round y') glyphItem
                           }
-        _ -> debug Err ("Renderer.renderID: incorrect nr of pango items") $ return ()
+        _ -> return ()
     }
 
 
