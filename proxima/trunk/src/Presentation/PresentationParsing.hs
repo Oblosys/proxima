@@ -121,15 +121,6 @@ pPrs p = unfoldStructure
                   parseErr (ParsingParseErr (mkErrs errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
-
-setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
-setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
-setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
-setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
-setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
-setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
-
-
 {-
 {-
 Experimental function that adds inserted tokens.

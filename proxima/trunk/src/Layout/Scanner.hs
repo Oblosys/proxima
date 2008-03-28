@@ -305,6 +305,16 @@ setTokenIDP idp (UserTk po ut  s l _) = (UserTk po ut  s l idp)
 setTokenIDP idp (StructuralTk po l pr ts _) = (StructuralTk po l pr ts idp)
 setTokenIDP idp tk                         = debug Err ("Scanner.setTokenIDP called on wrong token "++show tk) $ tk
       
+      
+{-
+setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
+setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
+setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
+setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
+setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
+setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
+
+-}
 retrieveTokenWhitespace whitespaceMap scannedTokens = 
   case scannedTokens of 
     [] -> 
