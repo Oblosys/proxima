@@ -6,15 +6,11 @@ import DocTypes_Generated
 import Layout.ScanLib
 }
 
-$char = .#[\n\ \255]  -- we need to exclude the proxima specific stuff (can be reduced to only \255)
+$char = .#[\n\ ]
 
 tokens :-
-  \255                            { mkStructuralToken }
   \n+                             { collectWhitespace }
   \ +                             { collectWhitespace }
-  
--- These three rules are required by Proxima and should not be removed in most cases
-
   Leaf                            { mkToken $ \s -> LeafToken }
   Bin                             { mkToken $ \s -> BinToken }
   [0-9]+                          { mkToken $ \s -> IntToken }
