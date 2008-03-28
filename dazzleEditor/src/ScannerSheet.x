@@ -5,11 +5,10 @@ import DocTypes_Generated
 import Layout.ScanLib
 }
 
-$char = .#[\n\ \255]  -- we need to exclude the proxima specific stuff (can be reduced to only \255)
+$char = .#[\n\ ]
 $nobrace = .#[\{]
 
 tokens :-
-  \255                            { mkStructuralToken }
   \n                              { mkToken $ \s -> KeyTk s }
   \                               { mkToken $ \s -> KeyTk s }
   \\graph                         { mkToken $ \s -> KeyTk s }
