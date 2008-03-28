@@ -199,20 +199,29 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
              _            -> presentationLex
      (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex mNode pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
        -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
-     focusedScanChars = markFocus markFocusStart scannedFocusStart $
-                        markFocus markFocusEnd   scannedFocusEnd 
-                                  scanChars 
-     scannedTokens = addLastCharFocus updateFocusStart scanChars scannedFocusStart $
-                     addLastCharFocus updateFocusEnd scanChars scannedFocusEnd $
+
+
+     focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars 
+     -- first, we store the focus in the scanned characters (except if focus is after last char)
+
+     scannedTokens = addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd $
                      sheet focusedScanChars
+     -- scan the characters, and in the resulting tokens, store 
+                     
      (scannedTokensIDPs, addedIdPs, idPCounter'') = addIdPs (IntSet.empty,idPCounter') scannedTokens
+     -- the scanned tokens may have double or missing idp's. addIdPs creates idps for all tokens.
+     
      scannedWhitespaceMap = retrieveTokenWhitespace Map.empty scannedTokensIDPs
+     -- retrieve whitespace and focus info from each token and store it in the WhitespaceMap
+     
      tokens = catMaybes $ map f scannedTokensIDPs
                 where f (ScannedToken _ t) = Just t
                       f _                = Nothing
+     -- finally, remove all whitespace tokens.
+     
  in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
-     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
+     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
      --debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP]
@@ -220,12 +229,61 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )
 
-updateFocusStart :: Int -> FocusStartEnd -> FocusStartEnd
-updateFocusStart p (_, focusEnd) = (Just p, focusEnd)
 
-updateFocusEnd :: Int -> FocusStartEnd -> FocusStartEnd
-updateFocusEnd p (focusStart, _) = (focusStart, Just p)
+{-
+TODO: 
+- clear IDPS in pastePres
+- bug in error token focus
+- add special handling of error token in Layout, so it adds the correct whitespace.
+- take structurals out of scanner (otherwise lexical error kills them)
+   (make sure that the list of new idps is used in all segments when we split at structurals)
+- use tokenIDP from presTypes
+- In LayPresent: enable fall back when focus was not scanned (disabled for testing)
 
+- Maybe we can store structural focus too.
+-}
+
+
+-- If the focus is after last char, we cannot encode it in the scanChars. In this case, it is added
+-- to the scanned tokens by addLastCharFocusStartAndEnd.
+markFocusStartAndEnd :: (Maybe Int) -> (Maybe Int) -> [ScanChar doc node clip token] -> [ScanChar doc node clip token]
+markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars =
+  markFocus markFocusStart scannedFocusStart $
+  markFocus markFocusEnd   scannedFocusEnd 
+  scanChars
+
+-- markFocus is parameterized with a function that marks either the focus start or the end in a ScanChar.
+markFocus :: (ScanChar doc node clip token -> ScanChar doc node clip token) -> (Maybe Int) ->
+             [ScanChar doc node clip token] -> [ScanChar doc node clip token]
+markFocus setFocusStartOrEnd Nothing          scs = scs
+markFocus setFocusStartOrEnd focus@(Just pos) scs = 
+  if not $ focusAfterLastChar scs focus 
+  then case splitAt pos scs of
+         (left, focusedChar:right) -> left ++ setFocusStartOrEnd focusedChar : right
+         _                         -> debug Err "PresentationParsing.markFocus: incorrect position" scs
+  else scs
+
+focusAfterLastChar scs Nothing    = False
+focusAfterLastChar scs (Just pos) = pos == length scs
+
+-- If ScannedFocusStart or ScannedFocusEnd is after the last character, it was not recorded in the
+-- scanChars. This function adds it directly to the scanned tokens.
+addLastCharFocusStartAndEnd :: [ScanChar doc node clip token] -> Maybe Int ->  Maybe Int ->
+                               [ ScannedToken doc node clip token ]  -> [ ScannedToken doc node clip token ] 
+addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd tokens =
+  addLastCharFocus updateFocusStart scanChars scannedFocusStart $
+  addLastCharFocus updateFocusEnd scanChars scannedFocusEnd $
+  tokens
+ where updateFocusStart :: Int -> FocusStartEnd -> FocusStartEnd
+       updateFocusStart p (_, focusEnd) = (Just p, focusEnd)
+
+       updateFocusEnd :: Int -> FocusStartEnd -> FocusStartEnd
+       updateFocusEnd p (focusStart, _) = (focusStart, Just p)
+ 
+-- addLastCharFocus is parameterized with a function updateStartOrEnd, which takes a focus position and
+-- updates either the start or the end field in FocusStartEnd.
+addLastCharFocus :: (Int -> FocusStartEnd -> FocusStartEnd) -> [ScanChar doc node clip token] -> Maybe Int ->
+                    [ ScannedToken doc node clip token ] -> [ ScannedToken doc node clip token ] 
 addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
   if focusAfterLastChar scanChars scannedFocus
   then case tokens of
@@ -234,35 +292,19 @@ addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
   else tokens
   where updateFocus (ScannedWhitespace focusStartEnd ws@(bs,sps)) = 
                      ScannedWhitespace (updateStartOrEnd (bs+sps) focusStartEnd) ws
-        updateFocus (ScannedToken focusStartEnd (UserTk tokenPos userToken str loc idp)) = 
-                     ScannedToken (updateStartOrEnd (length str) focusStartEnd) (UserTk tokenPos userToken str loc idp)
-        updateFocus (ScannedToken focusStartEnd strTk@(StructuralTk _ _ _ _ _)) = 
-                     ScannedToken (updateStartOrEnd 1 focusStartEnd) strTk
+        updateFocus (ScannedToken focusStartEnd token) =
+          case token of
+            UserTk tokenPos userToken str loc idp -> 
+                     ScannedToken (updateStartOrEnd (length str) focusStartEnd) token
+            StructuralTk _ _ _ _ _ -> 
+                     ScannedToken (updateStartOrEnd 1 focusStartEnd) token
+            ErrorTk _ str _ -> 
+                     ScannedToken (updateStartOrEnd (length str) focusStartEnd) token
+            
 
--- TODO error token?
-{-
-scan string to ScannedToken/Whitespace
-For each scannedToken, if no idp or existing idp, assign a new one from idp counter
-  awkward to do during scanning, since prestoken does not insert in Whitespace map, so we don't know about duplicates
-
-check focus in error token
-check why errortoken may not have idp (is never necessary)
-
-TODO: check for duplicates in addIDP!!
-  we could make sure that copy clears the idps, then idps may only be duplicated locally.
-  (make sure that the list of new idps is used in all segments when we split at structurals)
-use tokenIDP from presTypes
-In LayPresent: enable fall back when focus was not scanned (disabled for testing)
-
-Maybe we can store structural focus too.
-
-initWhitespaceFocus :: WhitespaceFocus
-initWhitespaceFocus = ((0,0),(Nothing,Nothing))
-
--}
 
 {-
-addIdPs sets the IdP field for tokens that have NoIdP, and removes duplicats.
+addIdPs sets the IdP field for tokens that have NoIdP, and removes duplicates.
 
 Scanned tokens may have the same IdP if they arise from splitting a token. To guarantee
 uniqueness, we keep a list of idPs that were encountered in the new tokens, and create
@@ -300,13 +342,9 @@ addIdPs (addedIdPs,idPCounter) (st: sts) =
 -- we already have tokenIDP
 getTokenIDP (UserTk _ _ _ _ idp) = idp
 getTokenIDP (StructuralTk _ _ _ _ idp) = idp
+getTokenIDP (ErrorTk _ _ idp) = idp
 getTokenIDP tk                         = debug Err ("Scanner.getTokenIDP called on wrong token "++show tk) $ NoIDP
-setTokenIDP idp (UserTk po ut  s l _) = (UserTk po ut  s l idp)
-setTokenIDP idp (StructuralTk po l pr ts _) = (StructuralTk po l pr ts idp)
-setTokenIDP idp tk                         = debug Err ("Scanner.setTokenIDP called on wrong token "++show tk) $ tk
-      
-      
-{-
+
 setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
 setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
 setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
@@ -314,48 +352,21 @@ setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
 setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
 setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
 
--}
+-- For each scannedToken, store its focus and its trailing whitespace and whitespacefocus in the 
+-- WhitespaceMap.
 retrieveTokenWhitespace whitespaceMap scannedTokens = 
   case scannedTokens of 
     [] -> 
       whitespaceMap
-    (ScannedToken f t: ScannedWhitespace wf ws : sts) ->  -- token with trailing ws
+    (ScannedToken f t: ScannedWhitespace wf ws : sts) ->  -- token with trailing whitespace
       let tokenLayout = TokenLayout ws wf f
           whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
       in  retrieveTokenWhitespace whitespaceMap' sts
-    (ScannedToken f t: sts) ->                            -- token without trailing ws
+    (ScannedToken f t: sts) ->                            -- token without trailing whitespace
       let tokenLayout = TokenLayout (0,0) (Nothing,Nothing) f
           whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
       in  retrieveTokenWhitespace whitespaceMap' sts
     (ScannedWhitespace _ _ : sts) ->            
-      retrieveTokenWhitespace whitespaceMap sts           -- leading ws (or ws after ws, which does not happen)
-    
--- if the focus is after last char, we cannot encode it in the scanChars (it is handled separately) 
-markFocus f Nothing          scs = scs
-markFocus f focus@(Just pos) scs = if not $ focusAfterLastChar scs focus 
-                                   then case splitAt pos scs of
-                                          (left, focusedChar:right) -> left ++ f focusedChar : right
-                                          _                         -> debug Err "markFocus: problem, cannot record focus" scs
-                                                                             else scs
-
-focusAfterLastChar scs Nothing    = False
-focusAfterLastChar scs (Just pos) = pos == length scs
-
-{-
-     lastWhitespaceFocus' = markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd lastWhitespaceFocus
-
--- when there are no tokens, no whitespace is saved
-updateScannedWhitespaceMap []     lastWhitespaceFocus scannedWhitespaceMap = scannedWhitespaceMap
-updateScannedWhitespaceMap tokens lastWhitespaceFocus scannedWhitespaceMap =
-  let f = Map.update (\a -> Just a) (tokenIDP (last tokens)) scannedWhitespaceMap
-  in undefined
-
-
--}
-
-
-markFocusInLastWhitespaceFocus afterLastCharFocusStart afterLastCharFocusEnd 
-                               ((newlines, spaces), (focusStart, focusEnd)) =
-  let focusStart' = if afterLastCharFocusStart then Just (newlines+spaces) else focusStart
-      focusEnd'   = if afterLastCharFocusEnd   then Just (newlines+spaces) else focusEnd
-  in  ((newlines, spaces), (focusStart', focusEnd'))
+      retrieveTokenWhitespace whitespaceMap sts -- leading whitespace of token list (or whitespace 
+                                                -- after whitespace, but the scanner does not produce this)
+    -- currently, we ignore this one.

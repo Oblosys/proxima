@@ -42,6 +42,8 @@ stringFromScanChars scs =
   | sc <- scs
   ]
 
+-- Retrieve the idp from a list of ScanChars. The returned idp is the idp of the first character that
+-- has an idp, or NoIDP if no character has an idp.
 idPFromScanChars :: [ScanChar doc node clip token] -> IDP
 idPFromScanChars [] = NoIDP
 idPFromScanChars (Char (IDP idp) _ _ _ _ : scs) = IDP idp
@@ -49,6 +51,8 @@ idPFromScanChars (Char NoIDP     _ _ _ _ : scs) = idPFromScanChars scs
 idPFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "idPFromScanChars called on Structural" $ 
                                                     idPFromScanChars scs
 
+-- Retrieve the first locator node from a list of scanChars. The returned locator is the locator of the first
+-- character that has one, or Nothing if no character has a locator.
 locFromScanChars :: [ScanChar doc node clip token] -> Maybe node
 locFromScanChars [] = Nothing
 locFromScanChars (Char _ _ _ (Just loc) _ : scs) = Just loc
