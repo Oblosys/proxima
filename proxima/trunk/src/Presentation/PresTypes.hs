@@ -166,12 +166,19 @@ tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk _ u s n id)   = n
 tokenNode (ErrorTk _ str _)       = error $ "tokenNode called on error token: " ++ str
 
-tokenIDP :: Token doc node clip token -> IDP       
-tokenIDP (UserTk _ u s n id) = id
-tokenIDP (StructuralTk _ n _ _ id)  = id
-tokenIDP (GraphTk d es n id) = id
-tokenIDP (VertexTk i p n id) = id
-tokenIDP (ErrorTk _ str id)  = id
+getTokenIDP :: Token doc node clip token -> IDP       
+getTokenIDP (UserTk _ u s n id) = id
+getTokenIDP (StructuralTk _ n _ _ id)  = id
+getTokenIDP (GraphTk d es n id) = id
+getTokenIDP (VertexTk i p n id) = id
+getTokenIDP (ErrorTk _ str id)  = id
+
+setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
+setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
+setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
+setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
+setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
+setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
 
 deepShowTks i tok = case tok of
                       (StructuralTk _ _ _ cs _) -> indent i ++ show tok ++ "\n"

@@ -338,19 +338,7 @@ addIdPs (addedIdPs,idPCounter) (st: sts) =
       (sts', addedIdPs'', idPCounter'') = addIdPs (addedIdPs',idPCounter') sts 
   in  (st':sts', addedIdPs'', idPCounter'') 
 
--- add ErrorTk and maybe merge the two
--- we already have tokenIDP
-getTokenIDP (UserTk _ _ _ _ idp) = idp
-getTokenIDP (StructuralTk _ _ _ _ idp) = idp
-getTokenIDP (ErrorTk _ _ idp) = idp
-getTokenIDP tk                         = debug Err ("Scanner.getTokenIDP called on wrong token "++show tk) $ NoIDP
 
-setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
-setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
-setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
-setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
-setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
-setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
 
 -- For each scannedToken, store its focus and its trailing whitespace and whitespacefocus in the 
 -- WhitespaceMap.

@@ -97,7 +97,7 @@ presParseErr node (ParsingParseErr parseErrs tokens parser) =
 
 
 presFromToken (StructuralTk _ (Just node) pres _ idp) = loc node $ structuralToken idp $ pres
-presFromToken token                                   = TokenP (tokenIDP token) token 
+presFromToken token                                   = TokenP (getTokenIDP token) token 
 
 
 
