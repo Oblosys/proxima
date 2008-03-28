@@ -13,49 +13,6 @@ import Data.Maybe
 
 import Debug.Trace
 
-{-
-
-
-Design issues with parsing and structure recognizing (choose different name? recognizer is usually parser with Bool result)
-
-Structural parser should take into account the type of the structure it contains. That way an ident hole will not be
-mistaken for a decl hole.
-Maybe this can be implemented without much effort, the structural token contains a ref to the node.
-It will be a bit hacky though.
-
-
-What about tokenizing structurals as
-
-StructuralToken
-
-StructuralToken      -- Child 0
-EndStructuralToken --
-
-StructuralToken      -- Child 1
-EndStructuralToken --
-
-etc
-
-
-EndStructuralToken
-
-The Scanner ensures correct nesting, so even when presentation is not correct, Endstructurals need no parameter
-Parsing children can be surrounded by ParsingToken EndParsingTokens in a similar way
-
-Now structure recognizing can be done with a parser
-recognize =  parse structural of appropriateType
-                   parse children
-                   parse endStructural
-                   build result
-
-It's just like a parser, but with a very strict structure.
-
-PROBLEM: When several structural presentations for one type exist, we need a way to determine which recognizer to use.
-For example tree node with children or without. A parser would use the keyword "+" or "-", but in the recognizer
-we somehow have to look at the boolean expansion value of the recognized node since parsing an image of + or - is not
-an option.
--}
-
 reuse = Nothing
 set = Just
 
@@ -158,9 +115,51 @@ pPrs p = unfoldStructure
      <$> pSym (ParsingTk Nothing Nothing [] NoIDP)
  where unfoldStructure presTk@(ParsingTk _ _ tokens _) = 
          let (res, errs) = runParser p tokens
-         in  if null errs then res else debug Err ("ERROR: Parse error"++(show errs)) $ parseErr (ParsingParseErr (mkErrs errs) tokens (mkClipParser p))
+         in  if null errs 
+             then res 
+             else debug Err ("ERROR: Parse error"++(show errs)) $
+                  parseErr (ParsingParseErr (mkErrs errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
+
+setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
+setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
+setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
+setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
+setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
+setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
+
+
+{-
+{-
+Experimental function that adds inserted tokens.
+This is quite tricky. The whitespace usually gets wrong, and we need a way to ignore the
+inserted tokens on scanning. With a -666 idp, the scanner can ignore the token, but
+what happens when it is edited? We don't want to ignore it then anymore, so the -666
+tokens should get normal idps as soon as they are edited. This is not easy at the moment.
+-}
+
+tricky: we have to use
+addInserted :: (DocNode node, Ord token, Show token) =>
+               [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] ->
+               [Token doc node clip token] -> [Token doc node clip token]
+addInserted messages tokens = foldl  insertAt tokens inserts
+ where inserts = catMaybes [ case act of 
+                               Insert t -> 
+                                 let insertedT = setTokenIDP (IDP (-666)) t
+                                 in  case pos of
+                                       Just postoken -> Just (getTokenPosition postoken, insertedT)
+                                       Nothing       -> Just (Nothing, insertedT)
+                               _        -> Nothing
+                               
+                           | (Msg _ pos act) <- messages ]
+       insertAt ts     (Nothing,token) = ts ++ [token]
+       insertAt []     (Just p,token)  = debug Err ("PresentationParsing.addInserted: incorrect position in token "++show token) $ []
+       insertAt (t:ts) (Just p,token)  = if getTokenPosition t == Just p 
+                                         then token : t : ts 
+                                         else t : insertAt ts (Just p,token)
+-}
+                                       
 mkErrs :: (DocNode node, Ord token, Show token) =>
          [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] -> 
          [ParseErrorMessage]
