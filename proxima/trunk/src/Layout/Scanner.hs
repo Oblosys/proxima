@@ -14,7 +14,9 @@ module Layout.Scanner where
 import Common.CommonTypes
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils hiding (empty)
-import qualified Data.Map as Map hiding (mapMaybe, (!))
+import qualified Data.Map as Map
+import qualified Data.IntSet as IntSet
+import Data.IntSet (IntSet)
 import Maybe
 
 import Layout.ScannerAG
@@ -203,15 +205,15 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      scannedTokens = addLastCharFocus updateFocusStart scanChars scannedFocusStart $
                      addLastCharFocus updateFocusEnd scanChars scannedFocusEnd $
                      sheet focusedScanChars
-     (scannedTokensIDPs, idPCounter'') = addIDPs idPCounter' scannedTokens
+     (scannedTokensIDPs, addedIdPs, idPCounter'') = addIdPs (IntSet.empty,idPCounter') scannedTokens
      scannedWhitespaceMap = retrieveTokenWhitespace Map.empty scannedTokensIDPs
      tokens = catMaybes $ map f scannedTokensIDPs
                 where f (ScannedToken _ t) = Just t
                       f _                = Nothing
- in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
-     debug Lay (showScannedTokens scannedTokensIDPs) $
+     --debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP]
      , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
@@ -258,17 +260,43 @@ initWhitespaceFocus :: WhitespaceFocus
 initWhitespaceFocus = ((0,0),(Nothing,Nothing))
 
 -}
-addIDPs idPCounter [] = ([], idPCounter)
-addIDPs idPCounter (st: sts) = 
-  let (st', idPCounter') = case st of
-                             (ScannedWhitespace _ _) -> (st, idPCounter)
+
+{-
+addIdPs sets the IdP field for tokens that have NoIdP, and removes duplicats.
+
+Scanned tokens may have the same IdP if they arise from splitting a token. To guarantee
+uniqueness, we keep a list of idPs that were encountered in the new tokens, and create
+new ones if not unique. Newly generated idP's themselves will always be unique, so they
+are not kept in the list. Furthermore, since paste operations clear all idP's we only
+need to take into account the idP's of one parsing presentation (rather than the global
+set of idP's)
+-}
+addIdPs :: (Show node, Show token) => (IntSet, Int) -> [ScannedToken doc node clip token] ->
+           ([ScannedToken doc node clip token], IntSet, Int)
+addIdPs (addedIdPs,idPCounter) [] = ([], addedIdPs, idPCounter)
+addIdPs (addedIdPs,idPCounter) (st: sts) = 
+  let (st', addedIdPs', idPCounter') = case st of
+                             (ScannedWhitespace _ _) -> (st, addedIdPs, idPCounter)
                              (ScannedToken f tk) -> 
                                 case getTokenIDP tk of
-                                  NoIDP -> (ScannedToken f (setTokenIDP (IDP idPCounter) tk), idPCounter+1)
-                                  IDP idp -> (ScannedToken f tk, idPCounter)
-      (sts', idPCounter'') = addIDPs idPCounter' sts 
-  in  (st':sts', idPCounter'') 
+                                  NoIDP -> ( ScannedToken f (setTokenIDP (IDP idPCounter) tk)
+                                           , addedIdPs -- new idP is unique, no need to add
+                                           , idPCounter+1
+                                           )
+                                  IDP idP -> 
+                                    if idP `IntSet.member` addedIdPs
+                                    then ( ScannedToken f (setTokenIDP (IDP idPCounter) tk)
+                                         , addedIdPs -- new idP is unique, no need to add
+                                         , idPCounter+1
+                                         )
+                                    else ( ScannedToken f tk
+                                         , IntSet.insert idP addedIdPs -- first time encountering idP, so add
+                                         , idPCounter
+                                         )
+      (sts', addedIdPs'', idPCounter'') = addIdPs (addedIdPs',idPCounter') sts 
+  in  (st':sts', addedIdPs'', idPCounter'') 
 
+-- add ErrorTk and maybe merge the two
 -- we already have tokenIDP
 getTokenIDP (UserTk _ _ _ _ idp) = idp
 getTokenIDP (StructuralTk _ _ _ _ idp) = idp
@@ -277,18 +305,21 @@ setTokenIDP idp (UserTk po ut  s l _) = (UserTk po ut  s l idp)
 setTokenIDP idp (StructuralTk po l pr ts _) = (StructuralTk po l pr ts idp)
 setTokenIDP idp tk                         = debug Err ("Scanner.setTokenIDP called on wrong token "++show tk) $ tk
       
-retrieveTokenWhitespace whitespaceMap [] = whitespaceMap
-retrieveTokenWhitespace whitespaceMap (ScannedWhitespace _ _ : sts)  = retrieveTokenWhitespace whitespaceMap sts -- ignore first one
-retrieveTokenWhitespace whitespaceMap (ScannedToken f t:
-                                       ScannedWhitespace wf ws : sts) =
-  let tokenLayout = TokenLayout ws wf f
-      whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
-  in  retrieveTokenWhitespace whitespaceMap' sts
-retrieveTokenWhitespace whitespaceMap (ScannedToken f t: sts) =
-  let tokenLayout = TokenLayout (0,0) (Nothing,Nothing) f
-      whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
-  in  retrieveTokenWhitespace whitespaceMap' sts
-
+retrieveTokenWhitespace whitespaceMap scannedTokens = 
+  case scannedTokens of 
+    [] -> 
+      whitespaceMap
+    (ScannedToken f t: ScannedWhitespace wf ws : sts) ->  -- token with trailing ws
+      let tokenLayout = TokenLayout ws wf f
+          whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
+      in  retrieveTokenWhitespace whitespaceMap' sts
+    (ScannedToken f t: sts) ->                            -- token without trailing ws
+      let tokenLayout = TokenLayout (0,0) (Nothing,Nothing) f
+          whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
+      in  retrieveTokenWhitespace whitespaceMap' sts
+    (ScannedWhitespace _ _ : sts) ->            
+      retrieveTokenWhitespace whitespaceMap sts           -- leading ws (or ws after ws, which does not happen)
+    
 -- if the focus is after last char, we cannot encode it in the scanChars (it is handled separately) 
 markFocus f Nothing          scs = scs
 markFocus f focus@(Just pos) scs = if not $ focusAfterLastChar scs focus 

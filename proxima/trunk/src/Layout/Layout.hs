@@ -90,7 +90,7 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
                 | (y,row) <- zip [0..] rows, (x,(_,focus)) <- zip [0..] row
                 ]
       f = foldl combineFocus  noFocus focusss
-  in debug Lay ("\n\n\ndetokenizeParsingP: "++show pres++" yields "++show presss) $
+  in -- debug Lay ("\n\n\ndetokenizeParsingP: "++show pres++" yields "++show presss) $
      ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
                                              then [RowP NoIDP 0 [StringP NoIDP ""]]
                                              else (map (RowP NoIDP 0)) presss
@@ -175,11 +175,13 @@ mapPath f (PathP p i) = PathP (f p) i
 
 addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
                       [[(Layout doc node clip token, FocusPres)]]
-addWhitespaceToken wm idp (UserTk _ _ str _ _)        = addWhitespace False wm Nothing idp (StringP idp str)
-addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to structural "++show idp) $
+addWhitespaceToken wm idp (UserTk _ _ str _ _)        = debug Lay ("Adding whitespace to UserTk "++show idp++":"++show str) $
+                                                        addWhitespace False wm Nothing idp (StringP idp str)
+addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = debug Lay ("Adding whitespace to StructuralTk "++show idp) $
                                                         let (pres', f) = detokenize wm pres
                                                         in  addWhitespace True wm (Just f) idp pres'
-addWhitespaceToken wm idp (ErrorTk _ str _)             = addWhitespace False wm Nothing idp (StringP idp str)
+addWhitespaceToken wm idp (ErrorTk _ str _)           = debug Lay ("Adding whitespace to ErrorTk "++show idp) $
+                                                        addWhitespace False wm Nothing idp (StringP idp str)
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
 -- if it is the last token and there is no whitespace behind it)                   
@@ -200,8 +202,7 @@ addWhitespace isStructural wm mStrFocus idp pres =
           (beforeTokenFocus, tokenFocus, afterTokenFocus,firstBreakFocus, breaksFocuss, spacesFocus) =
             mkFocuss isStructural tLayout (case mStrFocus of Just strFocus -> strFocus
                                                              Nothing       -> noFocus)
-      in debug Lay ("Whitespace for "++shallowShowPres pres++"\n"++show (map (map (\(p,f) -> "("++shallowShowPres p++","++show f++")")) rows)
-                   ) $
+      in -- debug Lay ("Whitespace for "++shallowShowPres pres++"\n"++show (map (map (\(p,f) -> "("++shallowShowPres p++","++show f++")")) rows)) $
            rows 
            
 surroundWithEmpties False _ _ presAndFocus = [presAndFocus]
