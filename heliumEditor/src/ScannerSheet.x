@@ -14,7 +14,6 @@ tokens :-
     
 
   [\n \ ]+        { collectWhitespace }
-  \255             { mkStructuralToken }
   module           { mkToken $ \s -> KeyTk s }
   let              { mkToken $ \s -> KeyTk s }
   in               { mkToken $ \s -> KeyTk s }
