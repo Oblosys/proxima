@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+export IFS=$'\n';
+# for spaces in dir names
+
+# note that the extension appears twice
+for image in $(/usr/bin/find images/ -type f -iname '*.png' |sed 's!\.png$!!');
+do 
+echo converting "$image.png" to "$image.eps"
+/c/data/bin/ImageMagick/convert "$image.png" "$image.eps";
+done
+
+for image in $(/usr/bin/find images/ -type f -iname '*.jpg' |sed 's!\.jpg$!!');
+do 
+echo converting "$image.png" to "$image.eps"
+/c/data/bin/ImageMagick/convert "$image.png" "$image.eps";
+done
