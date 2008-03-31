@@ -18,27 +18,27 @@ import List
 import Char
 import qualified Data.Map as Map
 }
-
-DATA Layout
+ 
+DATA Layout doc node clip token
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
   | ImageP      id : IDP src : String style : ImgStyle
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : Style
   | RectangleP  id : IDP w, h : Int lineWidth : Int style : Style
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
-  | RowP        id : IDP hRefNr : Int                       presentationList : LayoutList
-  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : LayoutList
-  | OverlayP    id : IDP                                    presentationList : LayoutList
-  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : LayoutList 
-  | VertexP     id : IDP i,x,y: Int outline : Outline child : Layout
-  | FormatterP  id : IDP presentationList : LayoutList
-  | WithP       attrRule : AttrRule  child : Layout
-  | StructuralP id : IDP child : Layout
-  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : Layout
-  | LocatorP location : {node} child : Layout
+  | RowP        id : IDP hRefNr : Int                       presentationList : (LayoutList {doc} {node} {clip} {token})
+  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {node} {clip} {token})
+  | OverlayP    id : IDP                                    presentationList : (LayoutList {doc} {node} {clip} {token})
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {node} {clip} {token}) 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
+  | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})
+  | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
+  | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
+  | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
   | ArrangedP
 
-TYPE LayoutList = [Layout]
+TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
 
 ATTR Layout LayoutList 
   [ scanStructural : { () {- type sig is not used, the type is Scanner.tokenizeLay -} } | | ]
@@ -127,7 +127,7 @@ SEM Layout
                           
 ATTR Layout LayoutList [ | idPCounter : IDPCounter whitespaceMap : WhitespaceMap | ]
 
-ATTR Layout [ | | scanChars : {[ScanChar]} ]
+ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
 
 SEM Layout
   | StringP
@@ -162,7 +162,7 @@ SEM Layout
   | ArrangedP 
       lhs.scanChars = [] -- will not occur
       
-ATTR LayoutList [ | | scanCharss : {[[ScanChar]]} ]
+ATTR LayoutList [ | | scanCharss : {[[ScanChar @doc @node @clip @token]]} ]
 
 SEM LayoutList
   | Nil
