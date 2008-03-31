@@ -58,14 +58,13 @@ $(GEN): always
 
 agc: $(AGC)
 
-# the always phony target is because we don't want to put all the ag compiler sources here
+# the phony target always is because we don't want to put all the ag compiler sources here
 $(AGC): always
 	@echo ghc: compiling uuagc compiler with -O2
 	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -i$(UUAGCDERIVEDDIR) -fglasgow-exts -O2 -package mtl
 
 
 # The arranger AG
-
 
 arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
