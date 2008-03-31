@@ -425,3 +425,5 @@ instance Show Layout_
 instance Eq Layout_
 
 type Layout doc node clip token = PresentationBase doc node clip token Layout_
+
+type LayoutList doc node clip token = [Layout doc node clip token]
