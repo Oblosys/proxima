@@ -34,16 +34,21 @@ DATA Layout doc node clip token
   | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})
   | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
   | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
-  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
   | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
   | ArrangedP
 
 TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
 
-ATTR Layout LayoutList 
-  [ scanStructural : { () {- type sig is not used, the type is Scanner.tokenizeLay -} } | | ]
+ATTR DocNode {node}, Show {token} => Layout LayoutList 
+  [ scanStructural : { ((Path,Int),(Path,Int)) ->
+                       Lexer -> Maybe @node -> Path -> IDPCounter -> WhitespaceMap -> Layout @doc @node @clip @token ->
+                       ([Token @doc @node @clip @token], IDPCounter, WhitespaceMap, Presentation @doc @node @clip @token)
+                     }
+  | | ]
 -- the we pass this function as an argument, since either it has to be defined in this module, which
 -- is awkward during development, or a module cycle has to be resolved, complicating the build process
+-- Note that the sheet parameter has already been applied.
 
 ATTR Layout LayoutList 
   [ lexer : Lexer | | ]
@@ -52,7 +57,7 @@ ATTR Layout LayoutList
 
 -- loc is an AG keyword.
 
-ATTR Layout LayoutList [ lloc : {Maybe node} | | ]
+ATTR Layout LayoutList [ lloc : {Maybe @node} | | ]
 
 SEM Layout
   | LocatorP
