@@ -25,7 +25,7 @@ defaultLineColor = black
 defaultTextColor = black
 defaultFont = CommonTypes.defaultFont
 
-arrangePresentation :: Show node => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
+arrangePresentation :: (Show node, Show token) => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Layout doc node clip token -> IO (Arrangement node, LocalStateArr)
 arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 
@@ -50,14 +50,14 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
     ; return (attrTree, state')
     }
 
-fixed :: Show node => FontMetricsRef -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
-         Arrangement node -> IO (Arrangement node, Integer)
+fixed :: (Show node, Show token) => FontMetricsRef -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
+         Arrangement node -> IO (Arrangement node, Int)
 fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, maxFDepth) <- f (fontMetrics,arrangement, maxFDepth)
     ; return (arrangement, maxFDepth)
     }
- where f :: (FontMetrics, Arrangement node, Integer) ->
-            IO (FontMetrics, Arrangement node, Integer) -- doc and node are scoped type variables
+ where f :: (FontMetrics, Arrangement node, Int) ->
+            IO (FontMetrics, Arrangement node, Int) -- doc and node are scoped type variables
        f (fontMetrics,_, _) = 
          do { let (allFonts, arrangement, maxFDepth,_) = -- _ is the self attribute
                     sem_Root (Root pres) [defaultFont]

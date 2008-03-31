@@ -72,11 +72,9 @@ arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
-	@$(AGC) -cfp --Wmax=12 --genlinepragmas --self --Werrors \
+	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag --module=Arrangement.ArrangerAG -P $(ARRANGEMENTDIR)
 #	--visit --case --strictdata --strictwrap --unbox\
-
-# no type sigs, because parameterized types are not supported by AG
 
 
 # The scanner AG
@@ -88,8 +86,6 @@ $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(LAYOUTDIR)/ScannerAG.ag --module=Layout.ScannerAG -P $(LAYOUTDIR)
-
-# no type sigs, because parameterized types are not supported by AG
 
 
 # Cleaning

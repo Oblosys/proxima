@@ -95,40 +95,38 @@ assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
 data Root doc node clip token = Root (Layout doc node clip token)
-
-type PresentationList doc node clip token = [Layout doc node clip token]
                       
--- We don't want AG to generate the Presentation data types, so data type generation is turned off.
--- However, we do need Root and PresentationList
+-- We don't want AG to generate the Layout data types, so data type generation is turned off.
+-- However, we do need Root
 }
 
-DATA Root 
-  | Root presentation : Presentation 
+DATA Root doc node clip token
+  | Root presentation : (Layout {doc} {node} {clip} {token}) 
 
 
-DATA Presentation
+DATA Layout doc node clip token
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
   | ImageP      id : IDP src : String style : ImgStyle
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : Style
   | RectangleP  id : IDP w,h : Int lineWidth : Int style : Style
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
-  | RowP        id : IDP hRefNr : Int presentationList : PresentationList
-  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : PresentationList
-  | OverlayP    id : IDP              presentationList : PresentationList
-  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : PresentationList 
-  | VertexP     id : IDP i,x,y: Int outline : Outline child : Presentation
-  | FormatterP  id : IDP presentationList : PresentationList
-  | WithP       attrRule : AttrRule  child : Presentation
-  | StructuralP id : IDP child : Presentation
-  | ParsingP    id : IDP parser : {ClipParser doc node clip token} lexer : Lexer child : Presentation
-  | LocatorP location : {node} child : Presentation
+  | RowP        id : IDP hRefNr : Int presentationList : (LayoutList {doc} {node} {clip} {token})
+  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {node} {clip} {token})
+  | OverlayP    id : IDP              presentationList : (LayoutList {doc} {node} {clip} {token})
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {node} {clip} {token}) 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
+  | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})
+  | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
+  | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
+  | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
   | ArrangedP
 
 --  | TestPresentation id : IDP  area : Int color : Color
---  | MatrixPresentation id : IDP  m, n : Int presentationList : PresentationList
---  | LayedOutRowP id : IDP  presentationList : PresentationList w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
---  | AlternativePresentation id : IDP  presentationList : PresentationList
+--  | MatrixPresentation id : IDP  m, n : Int presentationList : (LayoutList {doc} {node} {clip} {token})
+--  | LayedOutRowP id : IDP  presentationList : (LayoutList {doc} {node} {clip} {token}) w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
+--  | AlternativePresentation id : IDP  presentationList : (LayoutList {doc} {node} {clip} {token})
 
 {-
 structure of presentation tree: no children/one child/list of children
@@ -139,7 +137,7 @@ structure of presentation tree: no children/one child/list of children
   | RowP ColP OverlayP GraphP FormatterP
       @presentationList.
 
-all Presentation attributes:
+all Layout attributes:
 
 minWidth
 minHeight
@@ -164,9 +162,9 @@ unprunedPres
  -- add attributed tree definition
 
 
-TYPE PresentationList = [Presentation]
+TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
 
-SEM PresentationList [ || nrOfChildren : Int ]
+SEM LayoutList [ || nrOfChildren : Int ]
   | Nil
       lhs.nrOfChildren = 0
   | Cons 
@@ -175,22 +173,22 @@ SEM PresentationList [ || nrOfChildren : Int ]
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
             focus : FocusPres
             mouseDown : {Maybe (UpdateDoc doc clip)}
-            popupMenuItems : {[ PopupMenuItem ]}
-          || maxFormatterDepth : Int arrangement : {Arrangement node} ]
+            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
+          || maxFormatterDepth : Int arrangement : {Arrangement @node} ]
 SEM Root
   | Root
       lhs.maxFormatterDepth = @presentation.maxFormatterDepth
       lhs.arrangement   = @presentation.arrangement
 
 
--- Presentation Attribute Propagation in Presentation Tree
+-- Presentation Attribute Propagation in Layout Tree
 -- Root: copy rule
 
 -- Optimize: maybe we only want to update the attrs that are set by the with rule? Or won't that improve much?
 
-SEM Presentation [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
-            mouseDown : {Maybe (UpdateDoc doc clip)}
-            popupMenuItems : {[ PopupMenuItem ]}
+SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
+            mouseDown : {Maybe (UpdateDoc @doc @clip)}
+            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
             | | ]
   | WithP
       loc.newAttrs   = @attrRule ( Inh @lhs.font 
@@ -227,8 +225,8 @@ SEM Presentation [ font : Font textColor, lineColor, fillColor, backgroundColor 
 
 -- rest is taken care of by copy rule
 
-ATTR PresentationList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
-                 mouseDown : {Maybe (UpdateDoc doc clip)} popupMenuItems : {[ PopupMenuItem ]} | | ]
+ATTR LayoutList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
+                 mouseDown : {Maybe (UpdateDoc doc clip)} popupMenuItems : {[ PopupMenuItem @doc @clip ]} | | ]
 
 
 
@@ -241,7 +239,7 @@ ATTR PresentationList [  font : Font textColor, lineColor, fillColor, background
 ATTR Root [ | allFonts : {[Font]} | ]
 -- copy rule
 
-SEM Presentation [ | allFonts : {[Font]} | ]
+SEM Layout [ | allFonts : {[Font]} | ]
   | WithP
       child.allFonts = let syn = @newSyn
                        in  font syn : @lhs.allFonts
@@ -251,18 +249,18 @@ SEM Presentation [ | allFonts : {[Font]} | ]
       
 -- these are nubbed later. Maybe they should only be added if not present?
 
-ATTR PresentationList [ | allFonts : {[Font]} | ] 
+ATTR LayoutList [ | allFonts : {[Font]} | ] 
 
 ATTR Root [ fontMetrics : FontMetrics | | ]
 
-ATTR Presentation [ fontMetrics : FontMetrics | | ]
+ATTR Layout [ fontMetrics : FontMetrics | | ]
   
-ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
+ATTR LayoutList [ fontMetrics : FontMetrics | | ]  -- copy Rule
 
 
 
 -- Focus
---ATTR Presentation [ focus : FocusPres | | ]
+--ATTR Layout [ focus : FocusPres | | ]
 -- need some way to represent focus in arrangement.
 -- putting in overlays changes paths, and may have many consequences
 -- probably best to have a focus attribute in each arr node, but this involves
@@ -274,8 +272,8 @@ ATTR PresentationList [ fontMetrics : FontMetrics | | ]  -- copy Rule
 
 -- formatterDepth and maxFormatterDepth definitions   
 
-ATTR Presentation [ | | maxFormatterDepth : Int ]
-SEM Presentation
+ATTR Layout [ | | maxFormatterDepth : Int ]
+SEM Layout
   | EmptyP StringP RectangleP EllipseP ImageP PolyP
       lhs.maxFormatterDepth = 0
   | RowP ColP OverlayP GraphP
@@ -299,8 +297,8 @@ SEM Presentation
 -- | ParsingP    copy
 -- | LocatorP    copy
 
-ATTR PresentationList [ | | maxFormatterDepthList : {[Int]} ]
-SEM PresentationList
+ATTR LayoutList [ | | maxFormatterDepthList : {[Int]} ]
+SEM LayoutList
   | Nil 
       lhs.maxFormatterDepthList = [0] -- so we get no maximum []
   | Cons 
@@ -308,9 +306,9 @@ SEM PresentationList
 
 
 -- Unfolding formatters
-SEM Presentation
+SEM Layout
   | FormatterP
-      inst.unfoldedFormatter : Presentation
+      inst.unfoldedFormatter : (Layout {doc} {node} {clip} {token})
       inst.unfoldedFormatter = unfoldFormatter @lhs.assignedWidth @presentationList.minWidthList @presentationList.self
 
 -- char width not ok for more complicated (overlapping) glyphs like ff ligature in tex. 
@@ -325,7 +323,7 @@ SEM Presentation
 
 -- ref and size as ag aspects:
 
-SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, hRef : Int ]
+SEM Layout [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, hRef : Int ]
   | *
       loc.minWidth : Int
       loc.minHeight : Int
@@ -465,9 +463,9 @@ SEM Presentation [ || minWidth, minHeight : Int hStretch, vStretch : Bool vRef, 
       loc.vRef = 
       loc.hRef = 
 -}
-ATTR PresentationList [  | |  minWidthList, minHeightList : {[Int]} vRefList, hRefList : {[Int]}
+ATTR LayoutList [  | |  minWidthList, minHeightList : {[Int]} vRefList, hRefList : {[Int]}
                        hStretchList, vStretchList : {[Bool]} ]
-SEM PresentationList
+SEM LayoutList
   | Nil
       lhs.minWidthList = []
       lhs.minHeightList = []
@@ -497,7 +495,7 @@ SEM Root
       presentation.assignedVRef = @presentation.vRef -- is ignored anyway 
       presentation.assignedHRef = @presentation.hRef 
 
-SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : Int | | ]
+SEM Layout [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : Int | | ]
   | RowP
       loc.assignedWidths = if @presentationList.hStretchList!! @hRefNr -- if Ref Object is stretch, all children get
                                  then assign @presentationList.hStretchList -- equal space           +1, because refobj is stretch too
@@ -641,22 +639,22 @@ SEM Presentation [ assignedWidth, assignedHeight, assignedVRef, assignedHRef : I
 -}
 --  | WithP
 
-SEM PresentationList [ assignedWidthList, assignedHeightList, assignedVRefList, assignedHRefList : {[Int]} | | ]
+SEM LayoutList [ assignedWidthList, assignedHeightList, assignedVRefList, assignedHRefList : {[Int]} | | ]
   | Cons 
-      hd.assignedWidth = head' "ArrangerAG.PresentationList.hd.assignedWidth" @lhs.assignedWidthList
+      hd.assignedWidth = head' "ArrangerAG.LayoutList.hd.assignedWidth" @lhs.assignedWidthList
       tl.assignedWidthList = tail @lhs.assignedWidthList
-      hd.assignedHeight = head' "ArrangerAG.PresentationList.hd.assignedHeight" @lhs.assignedHeightList
+      hd.assignedHeight = head' "ArrangerAG.LayoutList.hd.assignedHeight" @lhs.assignedHeightList
       tl.assignedHeightList = tail @lhs.assignedHeightList
-      hd.assignedVRef = head' "ArrangerAG.PresentationList.assignedVRef" @lhs.assignedVRefList
+      hd.assignedVRef = head' "ArrangerAG.LayoutList.assignedVRef" @lhs.assignedVRefList
       tl.assignedVRefList = tail @lhs.assignedVRefList
-      hd.assignedHRef = head' "ArrangerAG.PresentationList.assignedHRef" @lhs.assignedHRefList
+      hd.assignedHRef = head' "ArrangerAG.LayoutList.assignedHRef" @lhs.assignedHRefList
       tl.assignedHRefList = tail @lhs.assignedHRefList
 
 
 -- why do presentations need this value themselves? Poly & rect need it for scaling.
 -- instead of sending back, maybe row and col can keep a local copy? or will this interfere
 -- with top/bottom/etc-aligning? 
-SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
+SEM Layout [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
   | *
       loc.finalWidth  : Int
       loc.finalHeight : Int
@@ -767,8 +765,8 @@ SEM Presentation [ || finalHeight, finalWidth, finalVRef, finalHRef : Int ]
 -}
 
 
-ATTR PresentationList [  | |  finalWidthList, finalHeightList, finalVRefList, finalHRefList : {[Int]} ]
-SEM PresentationList
+ATTR LayoutList [  | |  finalWidthList, finalHeightList, finalVRefList, finalHRefList : {[Int]} ]
+SEM LayoutList
   | Nil
       lhs.finalWidthList  = []
       lhs.finalHeightList = []
@@ -784,7 +782,7 @@ SEM PresentationList
 -- Viewed Area
 
 -- propagated with copy rules
-ATTR Root Presentation PresentationList [ viewedArea, oldViewedArea : Rectangle | | ]
+ATTR Root Layout LayoutList [ viewedArea, oldViewedArea : Rectangle | | ]
 
 
 -- Upper left corner of the arrangement. Used for determining whether arrangement is in view.
@@ -793,16 +791,16 @@ ATTR Root Presentation PresentationList [ viewedArea, oldViewedArea : Rectangle 
 -- width and height to (lux,luy) to get its own upper left corner.
 -- Also note that for vertices (absx,absy) is not position of the vertex, since for vertices
 -- xList and yList are lists of 0's. 
-ATTR Presentation PresentationList [ absx, absy : Int | | ]
+ATTR Layout LayoutList [ absx, absy : Int | | ]
 SEM Root
   | Root 
       presentation.absx = 0
       presentation.absy = 0
       
-SEM PresentationList
+SEM LayoutList
   | Cons 
-      hd.absx = @lhs.absx + head' "ArrangerAG.PresentationList.hd.absx" @lhs.xList
-      hd.absy = @lhs.absy + head' "ArrangerAG.PresentationList.hd.absy" @lhs.yList
+      hd.absx = @lhs.absx + head' "ArrangerAG.LayoutList.hd.absx" @lhs.xList
+      hd.absy = @lhs.absy + head' "ArrangerAG.LayoutList.hd.absy" @lhs.yList
 
       
 -- lu attributes for all the other situations are handled by copy rules
@@ -814,8 +812,8 @@ SEM Root
       presentation.x = 0
       presentation.y = 0
 
-ATTR Presentation [ x, y : Int | | ]
-SEM Presentation
+ATTR Layout [ x, y : Int | | ]
+SEM Layout
   | RowP
       presentationList.xList    = init.scanl (+) 0 $ @presentationList.finalWidthList
       presentationList.yList    = [ @finalVRef - cvRef | cvRef <- @presentationList.finalVRefList ]
@@ -852,11 +850,11 @@ SEM Presentation
       presentationList.yList    = repeat 0
 -}
 
-ATTR PresentationList [ xList, yList : {[Int]} | | ]
-SEM PresentationList
+ATTR LayoutList [ xList, yList : {[Int]} | | ]
+SEM LayoutList
   | Cons 
-      hd.x = head' "ArrangerAG.PresentationList.hd.x" @lhs.xList
-      hd.y = head' "ArrangerAG.PresentationList.hd.y" @lhs.yList
+      hd.x = head' "ArrangerAG.LayoutList.hd.x" @lhs.xList
+      hd.y = head' "ArrangerAG.LayoutList.hd.y" @lhs.yList
       tl.xList = tail @lhs.xList
       tl.yList = tail @lhs.yList
 
@@ -876,8 +874,8 @@ SEM PresentationList
 -- for a child in a composite are not the same as the  @finalVRef @finalHRef at the with nodes
 -- however in such a case we probably can't do it incrementally anyway
 
-ATTR Presentation [  | | arrangement : {Arrangement node} ]
-SEM Presentation
+ATTR Layout [  | | arrangement : {Arrangement @node} ]
+SEM Layout
   | EmptyP
       lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           EmptyA (idAFromP @id)  @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor
@@ -994,7 +992,7 @@ SEM Presentation
                                 -- do we need to set width and height? These should not have changed
                                 -- the last one seems wrong for sure 
   | ArrangedP
-      inst.unprunedPresHO : Presentation
+      inst.unprunedPresHO : (Layout {doc} {node} {clip} {token})
       inst.unprunedPresHO = case @lhs.oldArr of
                               Just oldArr -> 
                                 if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
@@ -1057,8 +1055,8 @@ SEM Presentation
                        Nothing     -> @unprunedPresHO.vertex
   
                                    
-ATTR Presentation [ || vertex : {(Int,Int,Int,Outline)} ]
-SEM Presentation
+ATTR Layout [ || vertex : {(Int,Int,Int,Outline)} ]
+SEM Layout
   | VertexP
       lhs.vertex = (@i,@x,@y,@outline)
   | EmptyP
@@ -1087,15 +1085,17 @@ SEM Presentation
       lhs.vertex = debug Err "Warning: graph presentation with non-vertex child:" (0,0,0,\_->(0,0))
 
 
-SEM PresentationList [ || vertices : {[(Int,Int,Outline)]} ]
+SEM LayoutList [ || vertices : {[(Int,Int,Int,Outline)]} ]
   | Nil
       lhs.vertices = []
   | Cons 
       lhs.vertices = @hd.vertex : @tl.vertices
       
-ATTR Root [ unprunedPres : {Presentation doc node clip} | | ]
+ATTR Show {node}, Show {token} =>
+     Root [ unprunedPres : {Layout @doc @node @clip @token} | | ]
 
-SEM Presentation [ unprunedPres : {Presentation doc node clip} | | ]
+SEM Show {node}, Show {token} =>
+    Layout [ unprunedPres : {Layout @doc @node @clip @token} | | ]
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
   | RowP OverlayP GraphP FormatterP
       presentationList.unprunedPresList = {- debug Arr ("Lengths "++show (length (getChildrenP @lhs.unprunedPres))
@@ -1131,12 +1131,13 @@ SEM Presentation [ unprunedPres : {Presentation doc node clip} | | ]
 
 -- The unprunedPres for @inst.unfoldedFormatter HO attribute is copied directly from its FormatterP parent
        
-SEM PresentationList [ unprunedPresList : {[Presentation doc node clip]} | | ]
+SEM Show {node}, Show {token} =>
+    LayoutList [ unprunedPresList : {[Layout @doc @node @clip @token]} | | ]
   | Cons 
-      hd.unprunedPres     = head' "ArrangerAG.PresentationList.hd.unPrunedPres" @lhs.unprunedPresList
+      hd.unprunedPres     = head' "ArrangerAG.LayoutList.hd.unPrunedPres" @lhs.unprunedPresList
       tl.unprunedPresList = tail @lhs.unprunedPresList
 
-ATTR Root         [ oldArr : {Maybe (Arrangement node)}  | | ]
+ATTR Root         [ oldArr : {Maybe (Arrangement @node)}  | | ]
 
 
 {-
@@ -1160,7 +1161,7 @@ encountering an unarranged row.
 TODO rewrite with getChildrenA etc.
 TODO linesFromBreaks produces an extra empty line, when given list of nrs of elts. Is this a problem?
 -}
-SEM Presentation  [ oldArr : {Maybe (Arrangement node)}   | | ]
+SEM Layout  [ oldArr : {Maybe (Arrangement node)}   | | ]
   | RowP 
       presentationList.oldArrList = case @lhs.oldArr of 
                                       Just (RowA idp _ _ _ _ _ _ _ arrs) -> -- debug Err ("ArrRow "++show idp++" has "++show (length arrs) ++" arr kids and "++ show @presentationList.nrOfChildren++ "kids") $ 
@@ -1242,14 +1243,14 @@ makeDummyRows (maybeRow:maybeRows) =
 -}
 }
 
-SEM PresentationList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
+SEM LayoutList [  oldArrList : {[Maybe (Arrangement node)]} | | ]
   | Cons 
-      hd.oldArr     = head'  "ArrangerAG.PresentationList.hd.oldArr" @lhs.oldArrList
+      hd.oldArr     = head'  "ArrangerAG.LayoutList.hd.oldArr" @lhs.oldArrList
       tl.oldArrList = tail @lhs.oldArrList
  
 
-ATTR PresentationList [  | |  arrangementList : {[Arrangement node]} ]
-SEM PresentationList
+ATTR LayoutList [  | |  arrangementList : {[Arrangement node]} ]
+SEM LayoutList
   | Nil
       lhs.arrangementList = []
   | Cons 
