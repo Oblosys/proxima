@@ -61,7 +61,7 @@ allchars = col [line i (i+31) | i <- [32,64..224]]
 frac e1 e2 = let numerator   = hAlignCenter (shrink e1)
                  bar         = hLine
                  denominator = hAlignCenter (shrink e2)
-             in centerline $ row [ hSpace 2, colR 1 [ numerator, bar, denominator] `withHStretch` False
+             in move 0 (-2) $ centerline $ row [ hSpace 2, colR 1 [ numerator, bar, denominator] `withHStretch` False
                                  , hSpace 2 ]
 
 equals e1 e2 = row [ e1, hSpace 4, eqSym, hSpace 4, e2]
@@ -72,7 +72,7 @@ dif e1 e2 = row [ e1, hSpace 4, minusSym, hSpace 4, e2]
 
 prod e1 e2 = row [ e1, hSpace 4, multiplySym, hSpace 4, e2]
 
-power xp exp = row [ xp, move 0 (-12) $ shrink exp
+power xp exp = row [ xp, move 0 (-7) $ shrink exp
                                ]
 subscript exp sup = row [ exp, hSpace 1, move 0 5 $ shrink $ sup ]
 --  where subHRef i = - (fontSize i * 1 `div` 6)
@@ -103,7 +103,7 @@ summation from to exp = row [ subsuperscript sigmaSym from to, hSpace 4, exp]
 
 sqRoot xp = rootSym `beside` colR 2 [hLine, empty `withHeight` 2, empty `withWidth` 2 `beside` xp]
 
-shrink e = e `withFontSize_` (\fs -> round(fromIntegral fs*0.7) `max` 5)
+shrink e = e `withFontSize_` (\fs -> round(fromIntegral fs*0.8) `max` 5)
 
 
 scaleFont xp percentage = xp `withFontSize_` (\fs -> fs * percentage `div` 100)
