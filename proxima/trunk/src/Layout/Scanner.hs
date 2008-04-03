@@ -51,31 +51,17 @@ Only the tokens of a PresentationTk.
 Challenges/todo:
 
 TODO: 
+- reorder params in Token
+- is clipparser really a maybe?
 - clear IDPS in pastePres
 - let error token handle it's own squiggly, then we don't need the overlay case in Layout.
 - put scanchars in error token, so idp's and locators are not cleared on a lexical error.
-- take structurals out of scanner (otherwise lexical error kills them)
-   (make sure that the list of new idps is used in all segments when we split at structurals)
 - use tokenIDP from presTypes
 - In LayPresent: enable fall back when focus was not scanned (disabled for testing)
 
 - Maybe we can store structural focus too.
-
-
-
-Lexical errors create one big token, which discards structural children and ruins the presentation.
-  after lexical error, just split remaining input into error tokens and structural tokens
-  and represent all whitespace in the error tokens. Layout should make sure that whitespace in 
-  error tokens is converted to breaks and spaces.
-  Probably also the whitespace in the state before the error occurred should be put in the error token.
-
-
-  Instead of using Alex for structurals, we could call Alex several times for the string parts of the
-  layout. This way, we keep the structurals out of the user specified scanner. The whitespace in the
-  state can be put into the structural token.
   
-
-passing several Alex scanners (probably solved by Alex itself)
+using more than one scanners (alex has support for this)
 
 
 what to do with columns and formatters containing tokens?
