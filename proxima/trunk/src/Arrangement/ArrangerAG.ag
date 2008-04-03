@@ -1091,10 +1091,10 @@ SEM LayoutList [ || vertices : {[(Int,Int,Int,Outline)]} ]
   | Cons 
       lhs.vertices = @hd.vertex : @tl.vertices
       
-ATTR Show {node} =>
+ATTR Show {node}, Show {token} =>
      Root [ unprunedLay : {Layout @doc @node @clip @token} | | ]
 
-SEM Show {node} =>
+SEM Show {node}, Show {token} =>
     Layout [ unprunedLay : {Layout @doc @node @clip @token} | | ]
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
   | RowP OverlayP GraphP FormatterP
@@ -1131,7 +1131,7 @@ SEM Show {node} =>
 
 -- The unprunedLay for @inst.unfoldedFormatter HO attribute is copied directly from its FormatterP parent
        
-SEM Show {node} =>
+SEM Show {node}, Show {token} =>
     LayoutList [ unprunedLayList : {[Layout @doc @node @clip @token]} | | ]
   | Cons 
       hd.unprunedLay     = head' "ArrangerAG.LayoutList.hd.unPrunedPres" @lhs.unprunedLayList

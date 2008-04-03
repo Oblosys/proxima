@@ -193,16 +193,21 @@ deepShowTks i tok = case tok of
  where indent i = take i (repeat ' ')
 
 
+data Pres_ 
+instance Show Pres_
+instance Eq Pres_
+
+
 type Presentation doc node clip token = 
-       PresentationBase doc node clip token (Token doc node clip token)
+       PresentationBase doc node clip token Pres_
 
 data PresentationBase doc node clip userToken tokenParam where
        EmptyP  :: !IDP -> 
                   PresentationBase doc node clip userToken tokenParam 
        StringP :: !IDP -> !String  -> 
                   PresentationBase doc node clip userToken tokenParam 
-       TokenP  :: !IDP -> !tokenParam ->
-                  PresentationBase doc node clip userToken tokenParam 
+       TokenP  :: !IDP -> !(Token doc node clip userToken) ->
+                  PresentationBase doc node clip userToken Pres_ 
        ImageP  :: !IDP -> !String -> !ImgStyle ->
                   PresentationBase doc node clip userToken tokenParam 
        PolyP   :: !IDP -> ![Point] -> !LineWidth -> !Style ->
@@ -227,7 +232,7 @@ data PresentationBase doc node clip userToken tokenParam where
                    PresentationBase doc node clip userToken tokenParam 
        GraphP   :: !IDP -> !Dirty -> !Width -> !Height -> ![Edge] -> ![PresentationBase doc node clip userToken tokenParam] ->
                    PresentationBase doc node clip userToken tokenParam 
-       VertexP  :: !IDP -> !VertexID -> !X -> !Y -> Outline -> !(PresentationBase doc node clip userToken tokenParam) ->
+       VertexP  :: !IDP -> !VertexID -> !XCoord -> !YCoord -> Outline -> !(PresentationBase doc node clip userToken tokenParam) ->
                    PresentationBase doc node clip userToken tokenParam 
        FormatterP :: !IDP -> ![PresentationBase doc node clip userToken tokenParam] ->
                      PresentationBase doc node clip userToken tokenParam 
@@ -242,13 +247,8 @@ data PresentationBase doc node clip userToken tokenParam where
 
 
 type Point = (Float, Float) -- point coordinates are >= 0 and <= 1
-type Width = Int
-type Height = Int
-type LineWidth = Int
 type HRefNr = Int
 type VRefNr = Int
-type X = Int
-type Y = Int
 type VertexID = Int
 type Edge = (VertexID, VertexID)
 
@@ -264,7 +264,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance (Show node, Show token') => Show (PresentationBase doc node clip token token') where
+instance (Show node, Show token) => Show (PresentationBase doc node clip token token') where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (TokenP id t)         = "{"++show id++":"++show t++"}"
@@ -288,7 +288,7 @@ instance (Show node, Show token') => Show (PresentationBase doc node clip token 
 
 -- shallow presentation, showing only toplevel presentation
 
-
+shallowShowPres :: (Show node, Show token) => PresentationBase doc node clip token p -> String
 shallowShowPres (EmptyP id)           = "{"++show id++":Empty}"
 shallowShowPres (StringP id str)      = "{"++show id++":StringP "++show str++"}"
 shallowShowPres (TokenP id t)         = "{"++show id++":TokenP "++show t++"}"
@@ -309,6 +309,7 @@ shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
 shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
 shallowShowPres _                     = "<<<presentation without show>>>"
 
+getChildrenP :: (Show node, Show token) => PresentationBase doc node clip token p -> [PresentationBase doc node clip token p]
 getChildrenP (EmptyP id)           = []
 getChildrenP (StringP id str)      = []
 getChildrenP (TokenP id str)      = []
@@ -329,10 +330,12 @@ getChildrenP (LocatorP loc pres)   = [pres]
 getChildrenP (ArrangedP)           = []
 getChildrenP pres                  = debug Err ("PresTypes.getChildren: unhandled presentation: "++shallowShowPres pres) []
 
+getChildP :: (Show node, Show token) => PresentationBase doc node clip token p -> PresentationBase doc node clip token p
 getChildP pres = case getChildrenP pres of
                   [child] -> child
                   _       -> debug Err ("PresTypes.getChild: not a single-child presentation: "++shallowShowPres pres) $ EmptyP NoIDP
 
+setChildrenP :: (Show node, Show token) => [PresentationBase doc node clip token p] -> PresentationBase doc node clip token p -> PresentationBase doc node clip token p
 setChildrenP [] pres@(EmptyP id)           = pres
 setChildrenP [] pres@(StringP id str)      = pres
 setChildrenP [] pres@(TokenP id str)      = pres

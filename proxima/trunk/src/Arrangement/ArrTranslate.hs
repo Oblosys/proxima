@@ -16,7 +16,7 @@ translate state low high editLow =
   in (editHigh, state', low')
 
 
-unArrange :: DocNode node => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
+unArrange :: (DocNode node, Show token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement (DocumentLevel doc clip) ->
              (EditLayout (DocumentLevel doc clip) doc node clip token, LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
@@ -93,7 +93,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   
   
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: DocNode node  => state -> ArrangementLevel doc node clip token ->
+mouseDownDoc :: (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc node clip token, state, ArrangementLevel doc node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
@@ -110,7 +110,7 @@ mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -
 mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
 
-isGraphEdit :: Show node => Int -> Int -> Arrangement node -> Layout doc node clip token ->
+isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc node clip token ->
                Maybe (EditLayout docLvl doc node clip token)
 isGraphEdit x y arr pres =
       case navigateFocus x y arr of 

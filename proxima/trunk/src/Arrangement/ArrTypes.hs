@@ -75,18 +75,6 @@ unarrangedA x y w h hrf vrf =
   PolyA (IDA (-10)) x y w h hrf vrf [(0,0),(w',0),(w',h'),(0,h'),(0,0),(w',h'),(w',0),(0,h')] 1 Transparent black white transparent
  where (h',w') = ((h-1) `max` 0, (w-1) `max` 0)
 
-type XCoord = Int
-type YCoord = Int
-type Width = Int
-type Height = Int
-type VRef = Int
-type HRef = Int
-type LineColor = Color
-type FillColor = Color
-type FGColor = Color
-type BGColor = Color
-type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
-
 
 -- empty will have size when it is stretched. But maybe empty should be ignored in the arrangement,
 -- although it might have a background color. Check out what desired focus behaviour is when navigating

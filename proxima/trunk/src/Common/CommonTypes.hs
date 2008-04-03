@@ -36,6 +36,19 @@ class (Eq node, Ord node, Show node) => DocNode node where
 class PopupMenuHack node doc where
   mkDocNode :: doc -> node
 
+type XCoord = Int
+type YCoord = Int
+type Width = Int
+type Height = Int
+type VRef = Int
+type HRef = Int
+type LineWidth = Int
+type LineColor = Color
+type FillColor = Color
+type FGColor = Color
+type BGColor = Color
+type NrOfVertices = Int -- easier for the algorithms than having a separate list for the edge arrangements
+
 type Color = (Int,Int,Int)
 
 type Rectangle = ((Int,Int),(Int,Int))

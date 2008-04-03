@@ -11,7 +11,7 @@ import Rendering.RenLayerUtils
 
 import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
 --import Presentation.PresTypes hiding (font) -- For Locations
-import Layout.LayTypes 
+import Layout.LayTypes hiding (Point)
 
 import Evaluation.DocTypes (DocumentLevel)
 import Proxima.GUI
