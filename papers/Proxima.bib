@@ -444,19 +444,6 @@ put Editors in Author field
 }
 
 
--- 
-inproceedings{leijen04wxHaskell,
- author    = {Daan Leijen},
- title     = {{wxHaskell}},
- booktitle = {{ACM} Sigplan 2004 {Haskell} Workshop},
- year      = {2004},
- month     = sep,
- publisher = {ACM Press},
- address   = {{Snowbird, Utah, USA}},
- pubcat    = {workshop},
-}
-
-
 
 
 @Book{knuth84tex,
@@ -514,8 +501,10 @@ inproceedings{leijen04wxHaskell,
     title = "Attribute Grammar System",
     organization = "Utrecht University, The Netherlands",
     year = "2004",
-    address = {\url|http://www.cs.uu.nl/groups/ST/Center/AttributeGrammarSystem|}
+    url = "http://www.cs.uu.nl/groups/ST/Center/AttributeGrammarSystem"
 }
+
+
 
 @inproceedings{swierstra01parsers,
   author    = {S. Doaitse Swierstra},
@@ -707,7 +696,7 @@ EDITORS
     title = "The languages of {Thot}",
     institution = "INRIA",
     year = "1997",
-    address = {\url|http://www.inrialpes.fr/opera/Thot/Doc/languages.html|}
+    url = {"http://www.inrialpes.fr/opera/Thot/Doc/languages.html"}
 }
 
 @article{Bahlke86PSG,
@@ -1530,6 +1519,10 @@ loop { doc = deltadoc doc; deltarendering = ..deltadoc ..; rendering = deltarend
 ?
 
 
+
+
+------------------ SPE
+
 @book{Jensen2001BayesianNetworks,
   author = "F.V. Jensen",
   title =  "{Bayesian Networks and Decision Graphs}",
@@ -1537,3 +1530,53 @@ loop { doc = deltadoc doc; deltarendering = ..deltadoc ..; rendering = deltarend
   publisher = "Springer",
   year = "2001"
   }
+
+
+
+
+------------------ SBLP 2008
+
+@TECHREPORT{leijen08parsec,
+author      = {Daan Leijen and Erik Meijer},
+title       = {Parsec: Direct Style Monadic Parser Combinators for the Real World},
+institution = {Department of Computer Science, Universiteit Utrecht},
+number      = {UU-CS-2001-27},
+year        = 2001
+}
+
+
+@manual{swierstra08ag,
+    author = "S. Doaitse Swierstra and Arie Middelkoop and Arthur Baars",
+    title = "Attribute Grammar System",
+    organization = "Utrecht University, The Netherlands",
+    year = "2008",
+    url = "http://www.cs.uu.nl/wiki/bin/view/HUT/AttributeGrammarSystem"
+}
+
+@manual{swierstra08parserCombinators,
+    author = "S. Doaitse Swierstra",
+    title = "Attribute Grammar System",
+    organization = "Utrecht University, The Netherlands",
+    year = "2008",
+    url = "http://www.cs.uu.nl/wiki/HUT/ParserCombinators"
+}
+
+@inproceedings{swierstra03polishParsers,
+ author = {R. John M. Hughes and S. Doaitse Swierstra},
+ title = {Polish parsers, step by step},
+ booktitle = {ICFP '03: Proceedings of the eighth ACM SIGPLAN international conference on Functional programming},
+ year = {2003},
+ isbn = {1-58113-756-7},
+ pages = {239--248},
+ location = {Uppsala, Sweden},
+ doi = {http://doi.acm.org/10.1145/944705.944727},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@manual{marlow07alex,
+    author = "Simon Marlow",
+    title = "Alex: A lexical analyser generator for Haskell",
+    year = "2007",
+    url = "http://www.haskell.org/alex/"
+}
