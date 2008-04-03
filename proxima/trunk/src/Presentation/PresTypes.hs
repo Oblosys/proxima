@@ -196,32 +196,61 @@ deepShowTks i tok = case tok of
 type Presentation doc node clip token = 
        PresentationBase doc node clip token (Token doc node clip token)
 
-data PresentationBase doc node clip userToken tokenParam = EmptyP !IDP
-           | StringP !IDP !String
-           | TokenP !IDP !tokenParam
-           | ImageP !IDP !String !ImgStyle
-           | PolyP !IDP ![ (Float, Float) ] !Int !Style -- pointList (0.0-1.0) lineWidth
-           | RectangleP !IDP !Int !Int !Int !Style      -- width height lineWidth
-           | EllipseP !IDP !Int !Int !Int !Style      -- width height lineWidth
-           | RowP !IDP !Int ![PresentationBase doc node clip userToken tokenParam]    -- vRefNr 
-           | ColP !IDP !Int !Formatted ![PresentationBase doc node clip userToken tokenParam]    -- hRefNr
-           | OverlayP !IDP ![ (PresentationBase doc node clip userToken tokenParam) ] -- 1st elt is in front of 2nd, etc.
-           | WithP !(AttrRule doc clip) !(PresentationBase doc node clip userToken tokenParam)         -- do these last two have ids?
-           | StructuralP !IDP !(PresentationBase doc node clip userToken tokenParam)       -- IDP?
-           | ParsingP !IDP !(Maybe (ClipParser doc node clip userToken)) !Lexer !(PresentationBase doc node clip userToken tokenParam)         -- IDP?
-           | LocatorP node !(PresentationBase doc node clip userToken tokenParam) -- deriving Show -- do we want a ! for location  ? 
-           | GraphP !IDP !Dirty !Int !Int ![(Int,Int)] ![PresentationBase doc node clip userToken tokenParam] -- width height edges 
-           | VertexP !IDP !Int !Int !Int Outline !(PresentationBase doc node clip userToken tokenParam) -- vertexID x y outline       see note below
-           | FormatterP !IDP ![PresentationBase doc node clip userToken tokenParam]
+data PresentationBase doc node clip userToken tokenParam where
+       EmptyP  :: !IDP -> 
+                  PresentationBase doc node clip userToken tokenParam 
+       StringP :: !IDP -> !String  -> 
+                  PresentationBase doc node clip userToken tokenParam 
+       TokenP  :: !IDP -> !tokenParam ->
+                  PresentationBase doc node clip userToken tokenParam 
+       ImageP  :: !IDP -> !String -> !ImgStyle ->
+                  PresentationBase doc node clip userToken tokenParam 
+       PolyP   :: !IDP -> ![Point] -> !LineWidth -> !Style ->
+                  PresentationBase doc node clip userToken tokenParam 
+       RectangleP :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
+                     PresentationBase doc node clip userToken tokenParam 
+       EllipseP   :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
+                     PresentationBase doc node clip userToken tokenParam 
+       RowP     :: !IDP -> !HRefNr -> ![PresentationBase doc node clip userToken tokenParam] ->
+                   PresentationBase doc node clip userToken tokenParam 
+       ColP     :: !IDP -> !VRefNr -> !Formatted -> ![PresentationBase doc node clip userToken tokenParam] ->
+                   PresentationBase doc node clip userToken tokenParam 
+       OverlayP :: !IDP -> ![ (PresentationBase doc node clip userToken tokenParam) ] ->
+                   PresentationBase doc node clip userToken tokenParam 
+       WithP    :: !(AttrRule doc clip) -> !(PresentationBase doc node clip userToken tokenParam) ->
+                   PresentationBase doc node clip userToken tokenParam 
+       StructuralP :: !IDP -> !(PresentationBase doc node clip userToken tokenParam) ->
+                   PresentationBase doc node clip userToken tokenParam 
+       ParsingP :: !IDP -> !(Maybe (ClipParser doc node clip userToken)) -> !Lexer -> !(PresentationBase doc node clip userToken tokenParam) ->
+                   PresentationBase doc node clip userToken tokenParam 
+       LocatorP :: node -> !(PresentationBase doc node clip userToken tokenParam) ->
+                   PresentationBase doc node clip userToken tokenParam 
+       GraphP   :: !IDP -> !Dirty -> !Width -> !Height -> ![Edge] -> ![PresentationBase doc node clip userToken tokenParam] ->
+                   PresentationBase doc node clip userToken tokenParam 
+       VertexP  :: !IDP -> !VertexID -> !X -> !Y -> Outline -> !(PresentationBase doc node clip userToken tokenParam) ->
+                   PresentationBase doc node clip userToken tokenParam 
+       FormatterP :: !IDP -> ![PresentationBase doc node clip userToken tokenParam] ->
+                     PresentationBase doc node clip userToken tokenParam 
+                     
+-- some of these !'s do not make sense (and it's probably time to factorize this thing)
 
-{-         | Matrix [[ (PresentationBase doc node clip) ]]       -- Stream is not a list because tree is easier in presentation.
-           | Formatter [ (PresentationBase doc node clip) ]
-           | Alternative [ (PresentationBase doc node clip) ]
--} -- are the !'s in the right place like this?
-           | ArrangedP -- experimental for incrementality.
+       ArrangedP :: PresentationBase doc node clip userToken tokenParam 
+ 
+        -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
                            -- this node. For these subtrees, old arrangement is used
 
+
+type Point = (Float, Float) -- point coordinates are >= 0 and <= 1
+type Width = Int
+type Height = Int
+type LineWidth = Int
+type HRefNr = Int
+type VRefNr = Int
+type X = Int
+type Y = Int
+type VertexID = Int
+type Edge = (VertexID, VertexID)
 
 -- This datatype will be in the non-generic part of Proxima in the future. (when an extensible scanner is available)
 -- LexInherited can be used if higher in the presentation tree the lexer is already defined.
