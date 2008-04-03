@@ -8,7 +8,7 @@
 \usepackage{implementation}     
 \sloppy
 
-\title{The Implementation of Proxima \\{\small \version}}
+\title{Beyond ASCII, parsing programs with graphical presentations \\{\small \version}}
 
 \author{Martijn M. Schrage\inst{1}}
 
@@ -23,7 +23,12 @@
 \maketitle
 
 \begin{abstract}
+% 15 lines
+Proxima is generic editor. although it has wp facilities, graphs, very suitable for programming languages. Structural and presentation-edit.
 
+Pres may be graphical: fraction. When edited, need to parse this.
+
+Solution that uses combinator parsers for simple stuff. Also automatic whitespace handling
 \end{abstract}
      
 \bc
@@ -68,8 +73,9 @@ Conclusions (1/2)
 
 \bl
 \o what is Proxima~\cite{schrage04Proxima}.
+\o Generic editor for variety of documents, but very suitable for editors programming language.
 \o modeless combination of structure editing and free editing in the presentation
-\o nothing is primitive
+\o nothing is primitive, hence very customizable
 \o example applications
 \o Editor for Baysian networks
 \o Generic editor as IDE
@@ -78,14 +84,19 @@ Conclusions (1/2)
 \o Implementation of Proxima
 \o overview of paper 
 \el
+\bl
+\o contribution: algorithm for parsing mix of graphical and textual presentations.
 
+\el
+
+\bc
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/screenshots/BayesDocEditor}
 \caption{The Bayesian network documentation editor}
 \label{fig:bayesEditor}
 \end{figure}
-
+\ec
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -95,15 +106,14 @@ Conclusions (1/2)
 
 The core architecture of Proxima consists of a number of layers, which only communicate with their direct neighbors. This layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto an intermediate data structure. This intermediate data structure is mapped onto another intermediate data structure, until the last intermediate data structure is mapped onto the rendering.
 
-As we mentioned in Chapter~\ref{chap:introduction}, the positions at which the document, the rendering, and the intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{proxlayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
+..  the positions at which the document, the rendering, and the intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=4cm]{images/LevelLayerNames}
-\caption{The Bayesian network documentation editor}
-\label{fig:bayesEditor}
+\caption{The levels and Layers of Proxima.}
+\label{fig:levelsAndLayers}
 \end{figure}
-
 
 A data level in Proxima is not just an intermediate value in the presentation computation, but an entity in its own right. Together, the data levels constitute the state of the editor. The six data levels of Proxima are:
 
@@ -126,16 +136,22 @@ A data level in Proxima is not just an intermediate value in the presentation co
 
 \bl
 \o explain why layered
-\o overview of layers
-\o explain choice of layers
-\o explain where actual editing takes place
-\o and skipping of layers
+\o briefly explain both components of each layer
+\o Editing takes place either at the document, or at the layout level.
+\o mapping from doc to ren
+\o explain layers may be skipped skipping of layers
 \o implementation: layer combinators.
 \o sometimes awkward, because we have to conform to the layers.
 \o but this has advantages: new GUI lib in a matter of days.
 \el
 
-
+\bl
+\o Presentation sheet
+\o Parsing sheet
+\o Scanner sheet
+\o (evaluation/reduction sheets)
+\el
+In this paper, we focus mainly on the presentation layer and layout layer, and more specifically on the scanner and parser in these layers.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -149,56 +165,72 @@ A data level in Proxima is not just an intermediate value in the presentation co
 \o Haskell types, no parameters
 \o fields to store token id's for handling whitespace and focus
 \o holes and parse errors added to each nonterminal
+\o holes are for structure editing.
 \el
 
+\begin{verbatim}
+data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
+         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
+\end{verbatim}
 
+\section{The presentation process}
 
+Before discussing the scanner and parser components, we briefly discuss the presentation process. Presentation component, there is a specification (presentation rules) that map the document (more precisely the enriched document) to presentation target language, which is a Haskell combinator language Xprez. The rules are an attribute grammar.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{The {\Xprez} presentation language} \label{sect:xpreztarget}
+\subsection{The {\Xprez} presentation language} \label{sect:xprez}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\Xprez is a combinator library for specifying graphical presentations with support for stretching and alignment. For this paper, a short overview of the language suffices. A more complete description can be found in~\cite{schrage04Proxima}.
+
+The basic building blocks of \Xprez are strings, tokens and graphical elements such as lines, circles, or images. 
 
 
+
+\bl
+\o basic \p{text} 
+\o mention a \p{token}
+\o composite \p{row}, \p{col}, \p{overlay}
+\o alignment.
+\o modification of attributes: with
+\o also popup menus.
+\o locators that denote path and node of a presentation tree.
+\el
+
+An Xprez example:
+
+\begin{footnotesize}
+\begin{verbatim}
+pad xp = row [ hSpace 2, xp, hSpace 2 ]
+shrink e = e `withFontSize_` (\fs -> (70 `percent` fs) `max` 10)
+frac e1 e2 = let numerator   = hAlignCenter (pad (shrink e1) )
+                 denominator = hAlignCenter (pad (shrink e2) )
+             in  colR 2 [ numerator, vSpace 2, hLine
+                        , vSpace 2, denominator ] `withHStretch` False
+\end{verbatim}
+\end{footnotesize}
+
+The non-primitive library function \p{hAlignCenter} centers its argument horizontally.
+
+
+\bc
 %																
 \subsection{{\Xprez} presentation model}
 
 Similar to the document formatting languages \TeX ~and Lout~\cite{kingston93lout}, {\Xprez} is a box language with support for flow layout. A presentation is a value of the abstract type \p{Xprez}, and is either an atomic box containing a text or a graphical object, or a composite box that contains a list of child presentation boxes.  We construct \p{Xprez} values in the functional language Haskell, using a number of primitive functions that are described in Section~\ref{sect:primitives}.
 
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{small}
-\begin{verbatim}
-data Inh = Inh { fontFamily :: String, fontSize :: Int,
-                 textColor, lineColor, fillColor, bgColor :: Color } 
-data Syn = Syn { hRef, vRef, minWidth, minHeight :: Int,
-                 hStretch, vStretch :: Bool}
-\end{verbatim}
-\end{small}
-\caption{The {\Xprez} presentation attributes}\label{xprezattributes} 
-\end{center}
-\end{small}
-\end{figure}
 
-
-A presentation box (from now on called presentation) has a number of attributes that determine its size and its appearance: 
-
-\begin{center}
-\includegraphics[width=2in]{images/PresentationBox}
-\end{center}
-
-A presentation tree in {Xprez} represents an attribute grammar with inherited and synthesized attributes. Presentation attributes that are typically specified for an entire subpresentation, such as color and font size, are inherited attributes.  \bc (going downward in the tree)\ec On the other hand, presentation attributes that are set by a child and used by its parent, such as  reference lines and size information, are synthesized attributes. Figure~\ref{xprezattributes} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the inherited and synthesized presentation attributes. The figure also shows the type of each attribute. 
+A presentation tree in {Xprez} represents an attribute grammar with inherited and synthesized attributes. Presentation attributes that are typically specified for an entire subpresentation, such as color and font size, are inherited attributes.  \b\c (going downward in the tree)\e\c On the other hand, presentation attributes that are set by a child and used by its parent, such as  reference lines and size information, are synthesized attributes. Figure~\ref{xprezattributes} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the inherited and synthesized presentation attributes. The figure also shows the type of each attribute. 
 
 The \p{hRef} and \p{vRef} attributes specify the reference lines that are used for aligning boxes horizontally and vertically when combined in composite presentations. Note that the vertical-reference line is in fact a horizontal line and vice versa. The term vertical-reference line stems from the fact that it is used for vertical alignment; modifying the vertical-reference line affects the vertical position of the presentation. 
 
 The boolean attributes \p{hStretch} and \p{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The remaining attributes are self-explanatory: \p{fontFamily}, \p{fontSize}, \p{textColor}, \p{lineColor}, \p{fillColor}, and \p{bgColor}. In the future, this set will be extended with other attributes such as line and font style, and attributes for modeling edit behavior (e.g.\ \p{onMouseClick~::~EditCommand}).
  
-\bc
+\b\c
 The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \p{Inh} for inherited properties, and \p{Syn} for synthesized properties.
-\ec
+\e\c
 
 %																
 \subsection{{\Xprez} primitives} \label{sect:primitives}
@@ -208,9 +240,9 @@ The first five combinators in Figure~\ref{xprezprim} specify atomic presentation
 Except for \p{text}, the reference lines of an atomic presentation both have coordinate 0 (i.e.\ the north-west corner). For \p{text},  the vertical-reference line is the baseline of the text and the horizontal-reference line is at 0. By default, a  simple presentation does not stretch.
 
 \begin{figure}
-\begin{small}
+\begin{footnotesize}
 \begin{center}
-\begin{small}
+\begin{footnotesize}
 \begin{verbatim}
 empty             :: Xprez
 text              :: String -> Xprez             
@@ -222,10 +254,10 @@ rowR, colR        :: Int -> [ Xprez ] -> Xprez
 matrix            :: [[ Xprez ]] -> Xprez
 format            :: [ Xprez ] -> Xprez
 \end{verbatim}
-\end{small}
+\end{footnotesize}
 \caption{The {\Xprez} primitives} \label{xprezprim} 
 \end{center}
-\end{small}
+\end{footnotesize}
 \end{figure}
 
 The remaining primitives in Figure~\ref{xprezprim} specify composite presentations. The behavior of columns (\p{col}) is equal to that of rows (\p{row}) with the horizontal and vertical directions swapped. Hence, we only discuss the \p{row} primitive. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical-reference lines aligned. Horizontal-reference lines have no effect on the positioning in a row.
@@ -238,192 +270,260 @@ The bounding box of a row is the smallest rectangle that encloses all elements o
 
 By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. The defaults may be overridden by setting the stretch attributes with the method that is  shown in the next section. 
 
-The \p{matrix} combinator can be used to describe a table layout, in which elements are aligned with elements to their left and right as well as with elements above and below them. 
 
 Because \p{row}, \p{column} and \p{matrix} do not allow their children to overlap, we need a special combinator for overlapping presentations. The \p{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical-reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \p{overlayR} combinator is needed.
 
 A flow layout can be achieved with the \p{format} combinator for paragraph formatting. The combinator takes a list of presentations as argument and splits this list into rows based on the available horizontal space. The resulting rows are placed in a column.  Because \p{Xprez} does not yet have a page model, only horizontal formatting is supported. 
+\ec
 
-Here is an example {\Xprez} presentation that illustrates alignment and stretching in a row:
+\subsection{Document presentation}
 
-\begin{small}
-\begin{verbatim}
-let cross     = poly [(0,0),(1,0),(1,1),(0,1),(0,0),(1,1),(0,1),(1,0)]
-    greycross = cross `withStretch` True `withbgColor` grey
-in  row [ text "Big" `withFontSize` 200
-        , colR 2 [ cross, cross, text "small", greycross, greycross ] ] 
-\end{verbatim}
-\end{small}
+For the presentation of the document, as well as for the computation of derived values and structures, Proxima uses the attribute grammar formalism (or AG). The presentation sheet is file with an AG definition, which is compiled to a Haskell program by the Utrecht University AG compiler~\cite{swierstra08ag}.
 
-The code produces the following image (the dashed line has been added to show vertical-reference line of the presentation):
+For each non-terminal, the AG defines a synthesized attribute \p{pres} of type \p{Presentation}.\todo{params} In the rule for \p{pres}, the presentations of child fields can be used. Besides the presentation, arbitrary synthesized and inherited attributes can be defined on the document tree. This way it is easy to specify static checks or for example the computation of all variables in scope at a certain document location. Moreover, external Haskell modules can be called, allowing for complex computations, such as type checking.
 
-\begin{center}
-\includegraphics[width=1in]{images/align}
-\end{center}
+% also possible edit operations specific to the nonterminal.
 
-The second element in the row is a column that takes the vertical-reference line from its third child. Therefore, the word ``Big'' is aligned with the word ``small''. The \p{cross} object is a line figure in the form of a rectangle with a cross. The \p{greycross} is a \p{cross}, which is made stretchable in both directions by \p{withStretch}, and which has a grey background.
- 
-Because the column contains presentations that stretch vertically, the column itself also stretches vertically. The column is created with a \p{colR} combinator with argument \p{2}, which causes the third child (\p{text "small"}) to be the object from which the reference lines of the column are taken.  The two stretching objects above the reference object are each assigned equal amounts of the remaining space above the vertical-reference line, and likewise, the objects underneath the reference object are assigned the remaining space below the reference line. If, on the other hand, the reference object itself is allowed to stretch, then the total amount of available space is distributed equally over all stretching objects. In this case, the reference object is not aligned. 
+A presentation may be either {\em structural} or {\em parsing}, with the difference that parsing presentations may be edited at the presentation level whereas structural presentation may not (although they may have parsing descendents that will be editable). 
 
-%																
-\subsection{Modifying presentation attributes}
-
-The presentation attributes of a presentation can be modified using the \p{with\symbol{95}} combinator. (The name has an underscore because ``\p{with}'' is a reserved word in Haskell.)
-
-\begin{small}
-\begin{verbatim}
-with_ :: Xprez -> ((Inh, Syn) -> (Inh, Syn)) -> Xprez
-\end{verbatim}
-\end{small}
-
-The combinator takes a single child presentation as argument, together with a function from attributes to attributes. The function is applied to the inherited attributes coming from the parent, and the synthesized attributes coming from the child. From the result of this application, the inherited attributes are passed to the child, whereas the synthesized attributes are passed to the parent. Thus, the \p{with\symbol{95}} combinator can be used to modify the inherited and synthesized attributes of a presentation.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=6cm]{images/with}
-\caption{Data flow for \p{with\symbol{95}}.}\label{withDataFlow} 
-\end{center}
-\end{figure}
-
-
-Figure~\ref{withDataFlow} shows the data flow for the attributes of \p{pres} and \p{pres `with\symbol{95}` f}. Because \p{f} may be an arbitrary function, the combinator may introduce cycles in the attribution. It is up to the designer of the presentation to ensure safety.
-
-Because the inherited and synthesized attributes are modeled as Haskell records, we use the Haskell record syntax for  accessing and updating presentation attribute values. Hence, for a record of inherited attributes \p{inh~::~Inh}, the expression \p{fontSize inh} denotes the value of the \p{fontSize} attribute in \p{inh}. Furthermore, \p{inh $\{$ fontSize = 10 $\}$} denotes a copy of \p{inh} in which the \p{fontSize} field is updated to 10. Thus, we can define a  \p{withFontSize} combinator: 
-
-\begin{small}
-\begin{verbatim}
-withFontSize :: Xprez -> Int -> Xprez
-withFontSize xp fs = xp `with_` \(inh, syn) -> (inh {fontSize = fs}, syn)
-\end{verbatim}
-\end{small}
-
-The function argument to \p{with\symbol{95}} introduces a considerable syntactic overhead to the presentation code. To reduce this overhead, we can define a library of combinators, such as \p{withFontSize}, for frequent applications of  \p{with\symbol{95}}. Thus, most of the explicit applications of \p{with\symbol{95}} may be avoided.
-
-Besides combinators that set an attribute value absolutely, we can also define combinators that take into account the original value of an attribute when setting its value. Consider the combinator \p{withFontSize\symbol{95}} defined below. Instead of an integer, it takes a function (\p{ffs~::~Int~->~Int}) as argument. Given the inherited font size, the function \p{ffs} specifies its new value.
-
-\begin{small}
-\begin{verbatim}
-withFontSize_ :: Xprez -> (Int -> Int) -> Xprez
-withFontSize_ xp ffs = 
-  xp `with_` \(inh, syn) -> (inh { fontSize = ffs (fontSize inh) }, syn)
-\end{verbatim}
-\end{small}
-
-With \p{pres `withFontSize\symbol{95}` (\symbol{92}fs -> 2*fs)} we specify that \p{pres} gets a doubled font size. An application of \p{withFontSize\symbol{95}} has a function argument, but the function is considerably simpler than the function argument of \p{with\symbol{95}}. 
-
-The font-size combinators show how abstraction is used to meet the {\em proportional effort} requirement. For simple changes of the font size, the simple \p{withFontSize} combinator can be used, and only if more control is desired, it is necessary to use the more complicated \p{withFontSize\symbol{95}} or \p{with\symbol{95}} combinators.
-
-A future version of {\Xprez} will support a domain-specific special syntax for \p{with\symbol{95}}. Thus, in order to specify that  a presentation \p{pres} gets twice the font size of its parent, a red background color, and a height that is twice the height of the letter `x' in the current font, we will be able to write something in the line of: 
-
-\begin{small}
-\p{pres\{ child.fontSize = 2*parent.fontSize, child.color = red, height = 1ex \}}
-\end{small}%\nonote{niet duidelijk of ex voor ouderlijk of huidig font is}
-
-%																
-\subsection{Advanced examples} \label{sect:xprezFrac}
-
-Because a presentation in {\Xprez} is a first-class value, it is possible to manipulate a child presentation (e.g.\ change its position or modify the font size) at the level of its parent.  This is illustrated in the presentation for a mathematical fraction: 
-
-
-\begin{small}
-\begin{verbatim}
-frac e1 e2 = let numerator   = hAlignCenter (pad (shrink e1) )
-                 bar         = hLine
-                 denominator = hAlignCenter (pad (shrink e2) )
-             in  colR 2 [ numerator, vSpace 2, bar
-                        , vSpace 2, denominator ] `withHStretch` False
-
-pad xp = row [ hSpace 2, xp, hSpace 2 ]
-
-shrink e = e `withFontSize_` (\fs -> (70 `percent` fs) `max` 10)
-\end{verbatim}
-\end{small}
-
-The non-primitive library function \p{hAlignCenter} centers its argument horizontally, and the \p{shrink} function reduces the font size to 70\%, with a minimum of 10. The result of \p{(text "x" `frac` text "2") `frac` text "1 + y"} is:
-
-\begin{center}
-\includegraphics[width=0.5cm]{images/frac}
-\end{center}
-
-The \p{pad} and \p{shrink} functions illustrate the {\em first-class} and {\em abstraction} requirements. Because a presentation is a first-class value, the presentations of the numerator and the denominator can be resized and positioned in the presentation of the fraction itself. Furthermore, we can abstract over positioning and resizing by using the functions \p{pad} and \p{shrink}. 
-
-In contrast, child presentations in both P or PSL cannot be addressed at parent level. Hence, the numerator, the denominator, and even the fraction bar, each have to specify their own size and relative position. As a result, it is difficult to reuse parts of a presentation in another presentation, since all parts refer to each other. Furthermore, the manipulations on the appearance are harder to read, because no abstraction can be used. 
-
-The second example is a pair of combinators that can be used to create tree-browser presentations:
-
-\begin{center}
-\includegraphics[width=1in]{images/tree}
-\end{center}
-
-
-The image has been created with the \p{mkTreeLeaf} and \p{mkTreeNode} combinators, shown in Figure~\ref{treeCombinators}. Both combinators take an \p{Xprez} argument that is the presentation of the label, and the tree node also takes a list of child presentations (which should be either nodes or leaves for a correct tree). A label is not restricted to text, but can be an arbitrary {\Xprez} presentation, as shown by the case statement at the bottom of the tree. The tree example shows that a complex and graphical presentation can be specified with relatively little effort. \todo{tree and frac in one figure, don't show tree code just say it's possible}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Presentation}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\bl 
-\o Ag for presentation and computing derived values/structures
-\o each parsing parts specifies its parser, structural is automatic
-\o example
+A parsing presentation consists of a sequence of tokens, which may be strings or structural presentations. It is provided with a parser that is applied to the sequence of tokens when it has been edited. \todo{only top level if it is an immediate child of a structural}
+\bl % or maybe near example
+\o row is now used for making token sequence tokens.
+\o we can enforce that only \p{token}s appear with a GADT!
 \el
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Scanning}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Since a structural presentation may not be edited at the pres,  be edited at the presentation level.
+On the other hand, a parsing presentation consists of tokens (either strings or structural presentations) and is provided with a parser in the presentation sheet. Parsing presentations may be edited at the presentation level, after which the parser is applied to obtain the updated subtree.
+
+
+\begin{footnotesize}
+\begin{verbatim}
+SEM Exp
+  | IfExp loc.pres = parsing $ row  $ [ key @idP0 "if",   @exp1.pres
+                                      , key @idP1 "then", @exp2.pres
+                                      , key @idP2 "else", @exp3.pres ]
+  | DivExp
+      loc.pres = structuralID @idP0 $ frac @exp1.pres @exp2.pres
+                  
+key str = token str `withColor` blue 
+\end{verbatim}%$
+\end{footnotesize} % put this in a figure?
 
 \bl
-\o What the scanner does:
-\o on structural parts, put stuff in structural tokens, and recognize children
-\o on parsing parts use scanner sheet to create tokens
-\o result is Structural [.. [PresentationTk]..]
-\o presentation is stored in these tokens
-\o Alex
-\o Example 
-\o Automatic whitespace handling
+\o add structural example without id
 \el
+
+\p{frac} is the function defined in Section~\ref{sect:xprez}
+
+In each presentation rule there need to be a number of default function applications, for example to handle the display of focus, and to mark the document location in the presentation tree. Such functions may be applied by the writer of the presentation sheet, but this is awkward and error prone. Hence, rather than the definitions of synthesized attributes \p{pres} for each nonterminal, the presentation sheet contains definitions of a local attribute \p{pres}. An automatically generated rule for the synthesized \p{pres} then uses the local \p{pres} and adds the default functionality to it.
+
+\subsection{Document layout}
+
+The layouter is currently not parameterized by any sheet
 \bl
-\o Explain layout layer somewhere
 \o it adds layout explicitly, by looking it up in the map, and also restores the focus
 \o if focus restore fails, focus is set on old coordinates (usually okay, explain when not)
 \el
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\section{Scanner}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The basic function of the scanner is to map strings containing characters to tokens, which are specified by the user in the scanner sheet. But in Proxima, the scanner also performs several other functions. Any structural presentations that appear in the stream of tokens are put in special tokens. Such structural presentations may contain other structural presentations, or again parsing presentations, which are recursively scanned. Apart from this scanner also handles graph presentations. 
+
+
+\bl
+\o result is Structural [.. [PresentationTk]..]
+\el
+
+\subsection{The \p{Token} type}
+
+Figure~\ref{fig:tokenType} shows a simplified version of the \p{Token} data type. A number of type parameters that are not important for this discussion are hidden, as well as the constructors that have to do with Proxima's support for graph presentations. 
+\begin{figure}
+\begin{center}
+\begin{tabbedCode}
+data Token Location userToken\\ 
+~~\= =  StructuralTk \= Position \= IDP Location Presentation \\
+  \>                \> [Token node userToken]\\
+  \> | ParsingTk    \>          \> IDP Location (Parser userToken)\\
+  \>                \> [Token node userToken]\\
+  \> | UserTk       \> Position IDP Location userToken String \\
+  \> | ErrorTk      \> Position IDP String \\
+\end{tabbedCode}
+\caption{The \p{Token} data type} \label{xprezprim} 
+\end{center}
+\end{figure}
+
+All constructors have an \p{IDP} field. used to associate the token with whitespace/focus. The \p{Position} only for elts that are actually parsed, not for \p{ParsingTk}.\todo{maybe idp also not necessary}.  \p{Maybe node} is document location
+The \p{Location} field refers to the node in the document tree from which the token originated. It is used when parsing structural presentations.\todo{ref to section?}
+
+The last constructor \p{ErrorTk}, is used to represent lexical errors. It's use is explained in Section~\ref{sect:parseScanErrors}
+
+\bl
+\o parsing has a parser associated
+\o location in usertoken is for reuse (talk about this here?)
+\o location in structural and parsing is for auto structurals
+\o for structurals also for restoring fields that are note presented
+\o lists of tokens are children.
+\el
+
+% Not shown: Presentation in StructuralTk
+
+\subsection{The scanner sheet}
+
+The lexical analysis of textual tokens is based on the Haskell lexical analyser generator Alex~\cite{marlow07alex}. Alex is a tool that generates an efficient lexical analyser based on a description of the tokens to be recognized in the form of regular expressions. It is comparable to the lex and flex tools for C and C++.
+
+An editor designer has to define the data type \p{UserToken} and provide an Alex specification that defines the tokens. Figure~\ref{fig:scannerSheet} shows an example \p{UserToken} and scanner sheet. The Alex specification consists of a a number of macro definitions followed by a set of rules, each defining a token. A rule is a regular expression together with an action that constructs the token.
+
+\begin{figure}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+data UserToken = Ident String | Op String | Int Int
+
+$lower = [a-z]
+$upper = [A-Z]
+$alpha = [$lower $upper]
+$digit = 0-9		
+$symChar = [\+ \- \= ]
+tokens :-
+ $digit+                       { mkToken $ \s -> Int (read s) }
+ $symChar+                     { mkToken $ \s -> Sym s }
+ $lower [$alpha $digit \_ \']* { mkToken $ \s -> Ident s }
+\end{verbatim} %$
+\end{footnotesize}
+\caption{Example \p{UserToken} and scanner sheet} \label{fig:scannerSheet} 
+\end{center}
+\end{figure}
+
+The only difference between a normal Alex description and a Proxima scanner sheet is that each action needs to be preceded by a \p{mkToken} application. The \p{mkToken} application takes care of passing the internal scanner state, and constructs a \p{UserTk} alternative of type \p{Token}. \todo{mention it assigns IDP}
+
+
+
+\subsection{Scanning the presentation}
+
+Scanner based on structural/parser
+
+% How the tokenizer works:
+\head{Structural presentation}
+
+A structural presentation of a document node is an Xprez tree that may contain presentations of child nodes. The scanner traverses the presentation tree and makes a recursive call on each child presentation that is encountered. It also stores the presentation in case of a parse error (recursively scanned). Yielding a StructuralTk.
+
+\head{Parsing presentation}
+
+A parsing presentation only consists of a column of rows, which contain either strings or structural presentations. scanner creates sequences of characters . Structurals are put in Structural tokens. the sequences of characters are converted to tokens by applying the Alex scanner.
+
+
+\subsection{Handling whitespace}
+
+% Whitespace
+In order to use the automatic whitespace recognition, the following rule must be added to scanner sheet:
+
+\begin{footnotesize}
+\begin{verbatim}
+  [\n \ ]+        { collectWhitespace }
+\end{verbatim} %$
+\end{footnotesize}
+
+The result is that the scanner will also put whitespace tokens in the result of the If enabled, the final list of tokens will contain whitespace tokens. These are associated with the id of the preceding token's (may be structural).
+
+% first token whitespace
+
+\subsection{An example}
+
+To clarify the previous discussion, we give an example of a scanned presentation. So this partially graphically presented function:
+\begin{center}
+\includegraphics[width=1in]{images/fraction}
+\end{center}
+\todo{add some whitespace}
+
+leads to the following tokens:\todo{maybe add locators and paths}
+\begin{tabbedCode}
+ParsingTk \= \\
+~~ \= [ UserTk$_0$ (Ident "f") \\
+      \> , UserTk$_1$ (Op "=") \\
+      \> , StructuralTk$_2$ (DivExp (IntExp 1) (PlusExp ...))\\
+      \> ~~ ~~ \= [ ParsingTk [ UserTk$_3$ (Int 1)] \\
+      \>            \>  , ParsingTk  \= [ StructParsingTk$_4$ (PowerExp (IntExp 3) (IntExp 2))\\
+      \>            \>                 \> ~~~~ \= [ ParsingTk [ UserTk$_5$ (Int 3) ] \\
+      \>            \>                 \>           \>  , ParsingTk [ UserTk$_6$ (Int 2) ] \\
+      \>            \>                 \>           \> ] \\
+      \>            \>                 \> , UserTk$_7$ (Op "+") \\
+      \>            \>                 \> , UserTk$_8$ (Int 5) \\
+      \>            \>                 \> ] \\
+      \>            \> ] \\
+      \> , UserTk$_9$ (Op "+") \\
+      \> , UserTk$_{10}$ (Int 1) \\
+      \> ] \\
+\end{tabbedCode}
+
+maybe: explain that all tokens in a parsingTk contain refs to their originating nonterminal in the document. In case of incomplete presentation, we reuse the fields from that node. Fragile. Copy/paste, retyping, it may get lost. So only for non-essential things. 
+
+and a map containing the whitespace (and focus)
+
+\begin{tabbedCode}
+Whitespace = [ 0 -> (0,1), 1-> (0,1), 1 -> (1,0) ]
+\end{tabbedCode}
+
+Also put document node and path
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Parsing}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\bl
-\o structural vs parsing
-\el
+Unlike normal parsers, which take a list of tokens to produce a value, the Proxima parser is a function that takes only one token as input. This token can be either a structural token or a parsing token. In case of a structural token, the value is constructed automatically from the list of child tokens. If the token is a parsing token, its list of children is fed into the parser that was specified in the presentation sheet.
 
-\bl
-\o Structural: automatic
-\o all information is encoded in the tree
-\el
+\subsection{Structural presentations}
 
+A structural token corresponds to the presentation of a certain document node and contains a list of tokens that correspond to child-presentations that were part of the presentation of that document node. Each child may be presented multiple times, or even not at all. Furthermore, the order in which the child presentations appear may not correspond to the order of the children in their parent node.
+
+Maybe an example? 
+Nevertheless, we can parse a structural token automatically, since all tokens contain a \p{Locator} reference to the document node from which they were presented. \todo{Not destroyed because structurals not edited.}  By calling the parser recursively on the list of tokens, we obtain the document nodes for each child. .. The child tokens (either structural or parsing) contain document locators from which we can derive the child number.
+
+
+Each token has ref to parent/path (cannot be broken in structural)
+
+recognizeStructural
+has a list of tokens, either structural or parsing. Each has information on origin as a path. so group them with their index in the parent.
+
+Now recursively recognize each child. Either structural (this function), or Parsing (section ..). 
+
+For any children that were not part of the presentation, we take the previous value from the locator of the StructuralTk that is currently parsed. And for doubles, at the moment, we take the first. But as soon as we keep track of dirty bits in the presentation, we take the edited child. If more edited either signal error, or take one. This can be prohibited by enforcing a parse cycle if we start editing another child.
+
+\todo{untyped, but safe}
+
+\subsection{Parsing presentations}
+
+A \p{ParsingTk} token contains a parser that returns a value of .  a  we 
 \bl
-\o combinator parser
+\o convert list of \p{Token} to document structure.
+\o combinator parser with error recovery~\cite{swierstra03polishParsers, swierstra08parserCombinators}
 \o because of extra state (hidden presentations), and presentation ids, little bit extra info is kept
+\o only when needed
+\o mention that holes need to be explicitly parsed?
+\o in fact other module that parses tokens to document nodes can be used. Parsec~\cite{leijen08parsec}
 \o Example
 \el
 
+\section{Parse errors} \label{sect:parseScanErrors}
 
-\bl
-\o in case of parse error
-\el
+On a parse error, we don't get a tree, so tricky to present. Parse and present should be identity (with squiggly for error). Won't appear in structural presentations, unless something is wrong in the presentation. In this case error is signaled. Problem for editor builder. In parsing presentations. Parse errors are normal, during programming most of the time not syntactically correct.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-\section{Incrementality(?)}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Approach: all nonterminals have a parseErr constructor. Insteafd of a value of type T, we get ParseErr\_T (is a value of type T). The parse error alternative has error loc + message and a list of tokens.
+
+On presentation, the tokens are presented, and the location of the error gets a squiggly. Whitespace is added by the layouter as for any other token. Message is available as an attribute.
+
+% lexical errors
+Lexical errors pose a problem, since Alex stops at the character of the lexical error. Hence any following whitespace is not recorded. However, we do want the presentation of the lexical error to stay the same. Hence, an error token \todo{annoying that we haven't explained parse errors yet} is treated specially and expands its whitespace into spaces and line breaks.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -455,6 +555,8 @@ Because of the orientation towards code editing, word-processing editors will be
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bl
+\o more static checks are possible
+\o easy ways to increase speed after change management
 \o dtd pres and parser give simple environment
 \o use ag to add static/type checks
 \el
