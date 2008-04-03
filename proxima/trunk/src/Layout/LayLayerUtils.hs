@@ -17,7 +17,7 @@ castPresToLay :: Presentation doc node clip token -> Layout doc node clip token
 castPresToLay (TokenP _ _) = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
 castPresToLay pres         = cast pres
 
-cast :: PresentationBase doc node clip token token' -> PresentationBase doc node clip token token''
+cast :: PresentationBase doc node clip token level -> PresentationBase doc node clip token level'
 cast (EmptyP id)                = EmptyP id
 cast (StringP id str)           = StringP id str
 cast (ImageP id str st)         = ImageP id str st

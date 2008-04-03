@@ -277,7 +277,7 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 
 -- slightly less verbose show for presentation, without doc refs
 
-instance (Show node, Show token) => Show (PresentationBase doc node clip token token') where
+instance (Show node, Show token) => Show (PresentationBase doc node clip token level) where
   show (EmptyP id)           = "{"++show id++":Empty}"
   show (StringP id str)      = "{"++show id++":"++show str++"}"
   show (TokenP id t)         = "{"++show id++":"++show t++"}"
@@ -301,7 +301,7 @@ instance (Show node, Show token) => Show (PresentationBase doc node clip token t
 
 -- shallow presentation, showing only toplevel presentation
 
-shallowShowPres :: (Show node, Show token) => PresentationBase doc node clip token p -> String
+shallowShowPres :: (Show node, Show token) => PresentationBase doc node clip token level -> String
 shallowShowPres (EmptyP id)           = "{"++show id++":Empty}"
 shallowShowPres (StringP id str)      = "{"++show id++":StringP "++show str++"}"
 shallowShowPres (TokenP id t)         = "{"++show id++":TokenP "++show t++"}"
@@ -322,7 +322,7 @@ shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
 shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
 shallowShowPres _                     = "<<<presentation without show>>>"
 
-getChildrenP :: (Show node, Show token) => PresentationBase doc node clip token p -> [PresentationBase doc node clip token p]
+getChildrenP :: (Show node, Show token) => PresentationBase doc node clip token level -> [PresentationBase doc node clip token level]
 getChildrenP (EmptyP id)           = []
 getChildrenP (StringP id str)      = []
 getChildrenP (TokenP id str)      = []
@@ -343,12 +343,12 @@ getChildrenP (LocatorP loc pres)   = [pres]
 getChildrenP (ArrangedP)           = []
 getChildrenP pres                  = debug Err ("PresTypes.getChildren: unhandled presentation: "++shallowShowPres pres) []
 
-getChildP :: (Show node, Show token) => PresentationBase doc node clip token p -> PresentationBase doc node clip token p
+getChildP :: (Show node, Show token) => PresentationBase doc node clip token level -> PresentationBase doc node clip token level
 getChildP pres = case getChildrenP pres of
                   [child] -> child
                   _       -> debug Err ("PresTypes.getChild: not a single-child presentation: "++shallowShowPres pres) $ EmptyP NoIDP
 
-setChildrenP :: (Show node, Show token) => [PresentationBase doc node clip token p] -> PresentationBase doc node clip token p -> PresentationBase doc node clip token p
+setChildrenP :: (Show node, Show token) => [PresentationBase doc node clip token level] -> PresentationBase doc node clip token level -> PresentationBase doc node clip token level
 setChildrenP [] pres@(EmptyP id)           = pres
 setChildrenP [] pres@(StringP id str)      = pres
 setChildrenP [] pres@(TokenP id str)      = pres
