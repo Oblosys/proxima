@@ -59,14 +59,11 @@ data EditLayout documentLevel doc node clip token =
   | DeleteDocLay deriving Show
 
 
-
-
--- because StructuralTk and PresentationTk contain the Layout in case of parse errors, we need
--- to declare the Layout type here in PresTypes.hs instead of LayTypes.hs.
-
-data Layout_   -- type without constructor to use as token parameter, so values of Layout
-               -- are guaranteed not to have a TokenP case.
+data Layout_
 
 type Layout doc node clip token = PresentationBase doc node clip token Layout_
+
+-- this guarantees that values containing a TokenP are not of type Layout (see
+-- definition of Presentation.PresTypes.PresentationBase for more information.
 
 type LayoutList doc node clip token = [Layout doc node clip token]
