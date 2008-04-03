@@ -458,14 +458,3 @@ focusP _ _                             = NoFocusP
 -- TODO: add style to rectangles and images in presentation.
 -- returns the document update function associated with the presentation at path
 
-
-
--- because StructuralTk and PresentationTk contain the Layout in case of parse errors, we need
--- to declare the Layout type here in PresTypes.hs instead of LayTypes.hs.
-
-data Layout_   -- type without constructor to use as token parameter, so values of Layout
-               -- are guaranteed not to have a TokenP case.
-
-type Layout doc node clip token = PresentationBase doc node clip token Layout_
-
-type LayoutList doc node clip token = [Layout doc node clip token]

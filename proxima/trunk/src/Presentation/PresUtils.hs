@@ -2,6 +2,7 @@ module Presentation.PresUtils (module Presentation.XprezLib, module Presentation
 
 import Common.CommonTypes
 import Presentation.PresTypes
+import Layout.LayTypes
 import Common.CommonUtils
  
 import Presentation.XprezLib
