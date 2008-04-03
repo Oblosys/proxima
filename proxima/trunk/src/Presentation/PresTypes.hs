@@ -193,53 +193,66 @@ deepShowTks i tok = case tok of
  where indent i = take i (repeat ' ')
 
 
-data Pres_ 
-instance Show Pres_
-instance Eq Pres_
 
+data Pres_ 
 
 type Presentation doc node clip token = 
        PresentationBase doc node clip token Pres_
 
-data PresentationBase doc node clip userToken tokenParam where
+
+{-
+The level parameter is used to enforce that there are no tokens on the layout layer.
+Any presentation containing a TokenP will have type PresentationBase .. Pres_, which
+does not match the Layout type (which is PresentationBase doc node clip token Lay_).
+
+This also prevents functions on Layout to be applied to values of type Presentation,
+while it is still possible to apply a function on the entire type (PresentationBase ... x)
+to a values of type Layout, even if the function has a TokenP case. Note that this holds
+only for functions on PresentaionBase .. x, so (f:: Presentation -> a) (x :: Layout) does
+not work.
+
+Moreover, any function that has a TokenP case will get inferred type Pres_, so if it needs
+to work on Layout as well, it should be given an explicit PresentationBase ... x type signature.
+-}
+data PresentationBase doc node clip userToken level where
        EmptyP  :: !IDP -> 
-                  PresentationBase doc node clip userToken tokenParam 
+                  PresentationBase doc node clip userToken level 
        StringP :: !IDP -> !String  -> 
-                  PresentationBase doc node clip userToken tokenParam 
+                  PresentationBase doc node clip userToken level 
        TokenP  :: !IDP -> !(Token doc node clip userToken) ->
                   PresentationBase doc node clip userToken Pres_ 
        ImageP  :: !IDP -> !String -> !ImgStyle ->
-                  PresentationBase doc node clip userToken tokenParam 
+                  PresentationBase doc node clip userToken level 
        PolyP   :: !IDP -> ![Point] -> !LineWidth -> !Style ->
-                  PresentationBase doc node clip userToken tokenParam 
+                  PresentationBase doc node clip userToken level 
        RectangleP :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
-                     PresentationBase doc node clip userToken tokenParam 
+                     PresentationBase doc node clip userToken level 
        EllipseP   :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
-                     PresentationBase doc node clip userToken tokenParam 
-       RowP     :: !IDP -> !HRefNr -> ![PresentationBase doc node clip userToken tokenParam] ->
-                   PresentationBase doc node clip userToken tokenParam 
-       ColP     :: !IDP -> !VRefNr -> !Formatted -> ![PresentationBase doc node clip userToken tokenParam] ->
-                   PresentationBase doc node clip userToken tokenParam 
-       OverlayP :: !IDP -> ![ (PresentationBase doc node clip userToken tokenParam) ] ->
-                   PresentationBase doc node clip userToken tokenParam 
-       WithP    :: !(AttrRule doc clip) -> !(PresentationBase doc node clip userToken tokenParam) ->
-                   PresentationBase doc node clip userToken tokenParam 
-       StructuralP :: !IDP -> !(PresentationBase doc node clip userToken tokenParam) ->
-                   PresentationBase doc node clip userToken tokenParam 
-       ParsingP :: !IDP -> !(Maybe (ClipParser doc node clip userToken)) -> !Lexer -> !(PresentationBase doc node clip userToken tokenParam) ->
-                   PresentationBase doc node clip userToken tokenParam 
-       LocatorP :: node -> !(PresentationBase doc node clip userToken tokenParam) ->
-                   PresentationBase doc node clip userToken tokenParam 
-       GraphP   :: !IDP -> !Dirty -> !Width -> !Height -> ![Edge] -> ![PresentationBase doc node clip userToken tokenParam] ->
-                   PresentationBase doc node clip userToken tokenParam 
-       VertexP  :: !IDP -> !VertexID -> !XCoord -> !YCoord -> Outline -> !(PresentationBase doc node clip userToken tokenParam) ->
-                   PresentationBase doc node clip userToken tokenParam 
-       FormatterP :: !IDP -> ![PresentationBase doc node clip userToken tokenParam] ->
-                     PresentationBase doc node clip userToken tokenParam 
+                     PresentationBase doc node clip userToken level 
+       RowP     :: !IDP -> !HRefNr -> ![PresentationBase doc node clip userToken level] ->
+                   PresentationBase doc node clip userToken level 
+       ColP     :: !IDP -> !VRefNr -> !Formatted -> ![PresentationBase doc node clip userToken level] ->
+                   PresentationBase doc node clip userToken level 
+       OverlayP :: !IDP -> ![ (PresentationBase doc node clip userToken level) ] ->
+                   PresentationBase doc node clip userToken level 
+       WithP    :: !(AttrRule doc clip) -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+       StructuralP :: !IDP -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+       ParsingP :: !IDP -> !(Maybe (ClipParser doc node clip userToken)) -> !Lexer -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+       LocatorP :: node -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+       GraphP   :: !IDP -> !Dirty -> !Width -> !Height -> ![Edge] -> ![PresentationBase doc node clip userToken level] ->
+                   PresentationBase doc node clip userToken level 
+       VertexP  :: !IDP -> !VertexID -> !XCoord -> !YCoord -> Outline -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+       FormatterP :: !IDP -> ![PresentationBase doc node clip userToken level] ->
+                     PresentationBase doc node clip userToken level 
                      
 -- some of these !'s do not make sense (and it's probably time to factorize this thing)
 
-       ArrangedP :: PresentationBase doc node clip userToken tokenParam 
+       ArrangedP :: PresentationBase doc node clip userToken level 
  
         -- experimental for incrementality.
                            -- arranger gets Presentation in which unchanged subtrees are replaced by
@@ -452,9 +465,6 @@ focusP _ _                             = NoFocusP
 
 data Layout_   -- type without constructor to use as token parameter, so values of Layout
                -- are guaranteed not to have a TokenP case.
-instance Show Layout_
-
-instance Eq Layout_
 
 type Layout doc node clip token = PresentationBase doc node clip token Layout_
 
