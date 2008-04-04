@@ -249,14 +249,13 @@ data PresentationBase doc node clip userToken level where
                    PresentationBase doc node clip userToken level 
        FormatterP :: !IDP -> ![PresentationBase doc node clip userToken level] ->
                      PresentationBase doc node clip userToken level 
-                     
--- some of these !'s do not make sense (and it's probably time to factorize this thing)
-
        ArrangedP :: PresentationBase doc node clip userToken level 
+       -- some of these !'s do not make sense (and it's probably time to factorize this thing)
+
  
-        -- experimental for incrementality.
-                           -- arranger gets Presentation in which unchanged subtrees are replaced by
-                           -- this node. For these subtrees, old arrangement is used
+       -- ArrangedP is experimental for incrementality.
+       -- arranger gets Presentation in which unchanged subtrees are replaced by
+       -- this node. For these subtrees, old arrangement is used
 
 
 type Point = (Float, Float) -- point coordinates are >= 0 and <= 1
