@@ -82,13 +82,12 @@ Conclusions (1/2)
 \o by giving type, pres, and parser, we get an environment almost for free
 \o Helium editor
 \o Implementation of Proxima
-\o overview of paper 
 \el
 \bl
 \o contribution: algorithm for parsing mix of graphical and textual presentations.
-
 \el
 
+overview of paper 
 \bc
 \begin{figure}[ht]
 \centering
@@ -106,7 +105,7 @@ Conclusions (1/2)
 
 The core architecture of Proxima consists of a number of layers, which only communicate with their direct neighbors. This layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto an intermediate data structure. This intermediate data structure is mapped onto another intermediate data structure, until the last intermediate data structure is mapped onto the rendering.
 
-..  the positions at which the document, the rendering, and the intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
+The positions at which the document, the rendering, and the intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.\todo{name individual components and add sheets}
 
 \begin{figure}[ht]
 \centering
@@ -125,33 +124,39 @@ A data level in Proxima is not just an intermediate value in the presentation co
 
 \item[Presentation:] A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line/page breaking).
 
-\item[Layout:]  Presentation with explicit whitespace.
+\item[Layout:]  Presentation with explicit whitespace.\todo{and comments?}
 
 \item[Arrangement:] Formatted presentation with absolute size and position information.
 
 \item[Rendering:] A collection of user interface commands for drawing the absolutely positioned and sized arrangement.
 \end{description}
 
+Between each pair of adjacent levels is a layer that implements the mapping between the levels. We briefly discuss each of the five layers.
 
+\head{\small Evaluation layer}
+\noindent The evaluation layer takes care of computing derived structures and values over the document, and of mapping updates on these derived structures back to document updates. It is parameterized by an {\em evaluation sheet} and a {\em reduction sheet}, which specify the mappings. 
 
-\bl
-\o explain why layered
-\o briefly explain both components of each layer
-\o Editing takes place either at the document, or at the layout level.
-\o mapping from doc to ren
-\o explain layers may be skipped skipping of layers
-\o implementation: layer combinators.
-\o sometimes awkward, because we have to conform to the layers.
-\o but this has advantages: new GUI lib in a matter of days.
-\el
+\head{\small Presentation layer}
+\noindent The presentation layer consists of the presenter and the parser. The presenter takes an enriched document tree, and computes a presentation for it according to the {\em presentation sheet}. Its counterpart, the parser, maps a presentation tree on the enriched document and is parameterized by a {\em parsing sheet}.
 
-\bl
-\o Presentation sheet
-\o Parsing sheet
-\o Scanner sheet
-\o (evaluation/reduction sheets)
-\el
-In this paper, we focus mainly on the presentation layer and layout layer, and more specifically on the scanner and parser in these layers.
+\head{\small Layout layer}
+\noindent The layout layer handles automatic whitespace. The layouter maps implicit whitespace, associated with tokens to actual linebreaks and spaces. The scanner recognizes tokens in the layout tree based on regular expressions specified in the {\em scanner sheet}. Since mapping tokens to strings is straightforward, the layouter does not need sheet parameter.
+
+\head{\small Arrangement layer}
+\noindent In the presentation direction, the arrangement layer computes the exacts sizes and positions for each element in the presentation. It also handles line breaking. In the interpretation direction, the only thing that needs to be done is to map absolute coordinates in edit commands to positions in the presentation tree. The arrangement level is not editables, so it need not be mapped back onto the layout level.
+
+\head{\small Rendering layer}
+\noindent The renderer creates a bitmap for the arrangement. Its counterpart maps edit gestures onto edit operations.
+
+%\bl
+%\o implementation: layer combinators.
+%\o sometimes awkward, because we have to conform to the layers.
+%\o but this has advantages: new GUI lib in a matter of days.
+%\el
+
+The two levels at which edit operations can take place are the document level and the layout level. After an edit operation on the document, all levels from document to rendering are updated to reflect the update. After an edit operation on the layout level, the modified layout is scanned, parsed and reduced, to obtain the corresponding document update, from which an updated rendering is computed. \todo{skipping layers}
+
+In this paper, we focus mainly on the presentation layer and layout layer, and, more specifically, on the scanner and parser in these layers.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,18 +165,24 @@ In this paper, we focus mainly on the presentation layer and layout layer, and m
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 \bl
-\o Document is main data type
+\o Document is main data type. Mapped to enriched, but left out of discussion, so equal.
 \o Haskell types, no parameters
+\el
+\begin{footnotesize}
+\begin{verbatim}
+data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
+         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
+\end{verbatim}
+\end{footnotesize}
+
+\bl
 \o fields to store token id's for handling whitespace and focus
 \o holes and parse errors added to each nonterminal
 \o holes are for structure editing.
 \el
 
-\begin{verbatim}
-data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
-         | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
-\end{verbatim}
 
 \section{The presentation process}
 
@@ -185,21 +196,32 @@ Before discussing the scanner and parser components, we briefly discuss the pres
 
 \Xprez is a combinator library for specifying graphical presentations with support for stretching and alignment. For this paper, a short overview of the language suffices. A more complete description can be found in~\cite{schrage04Proxima}.
 
-The basic building blocks of \Xprez are strings, tokens and graphical elements such as lines, circles, or images. 
+\begin{figure}
+\begin{footnotesize}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+empty             :: Xprez
+text              :: String -> Xprez             
+circle            :: Xprez                       
+img               :: String -> Xprez             
+poly              :: [(Float, Float)] -> Xprez 
+row, col, overlay :: [Xprez]        -> Xprez          
+rowR, colR        :: Int -> [Xprez] -> Xprez   
+format            :: [Xprez]        -> Xprez
+\end{verbatim}
+\end{footnotesize}
+\caption{The {\Xprez} primitives} \label{fig:xprezPrim} 
+\end{center}
+\end{footnotesize}
+\end{figure}
+
+Figure~\ref{fig:xprezPrim} contains the \Xprez primitives. The basic building blocks of \Xprez are strings (\p{text}), tokens (\p{token}) and graphical elements such as polygons, circles, or images (\p{poly}, \p{circle}, \p{img}). With the combinators \p{row} and \p{col} presentations can be combined into rows and columns. The elements of a row or column are aligned according horizontal and vertical reference lines of their children, and do not overlap. If presentations need to overlap (for example in order to put a squiggly line under a string just below the baseline), the \p{overlay} combinator can be used. The \p{format} combinator produces a flow layout, creating rows for its children, based on available horizontal space.
+
+Each presentation has a number of presentation attributes (e.g.\ color, font size, reference lines) that influence its appearance. Several functions are available for modifying presentation attributes. Examples are \p{withColor :: Color -> Xprez -> Xprez} and \p{withFontsize :: Int -> Xprez -> Xprez}. \todo{mention \p{with}?}
 
 
-
-\bl
-\o basic \p{text} 
-\o mention a \p{token}
-\o composite \p{row}, \p{col}, \p{overlay}
-\o alignment.
-\o modification of attributes: with
-\o also popup menus.
-\o locators that denote path and node of a presentation tree.
-\el
-
-An Xprez example:
+As an example, we show some \Xprez code that creates a graphical presentation of a fraction:
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -212,69 +234,13 @@ frac e1 e2 = let numerator   = hAlignCenter (pad (shrink e1) )
 \end{verbatim}
 \end{footnotesize}
 
-The non-primitive library function \p{hAlignCenter} centers its argument horizontally.
+The non-primitive library function \p{hAlignCenter} centers its argument horizontally. For shrinking presentations, we use the combinator \p{withFontSize\_ :: (Int -> Int) -> Xprez -> Xprez}, which takes a function argument that computes the new font size, given its previous value.
 
+The result of \p{row [text "fraction = ", frac (text "1") (text "1+x")]}\\ 
+is~~\includegraphics[width=3cm]{images/fracExample}
 
-\bc
-%																
-\subsection{{\Xprez} presentation model}
+Besides the combinators that produce presentations, \Xprez also has a combinator for specifying edit operations in context menus, reactions to mouse clicks, and keeping track of document locations in the presentation. \todo{unclear}
 
-Similar to the document formatting languages \TeX ~and Lout~\cite{kingston93lout}, {\Xprez} is a box language with support for flow layout. A presentation is a value of the abstract type \p{Xprez}, and is either an atomic box containing a text or a graphical object, or a composite box that contains a list of child presentation boxes.  We construct \p{Xprez} values in the functional language Haskell, using a number of primitive functions that are described in Section~\ref{sect:primitives}.
-
-
-A presentation tree in {Xprez} represents an attribute grammar with inherited and synthesized attributes. Presentation attributes that are typically specified for an entire subpresentation, such as color and font size, are inherited attributes.  \b\c (going downward in the tree)\e\c On the other hand, presentation attributes that are set by a child and used by its parent, such as  reference lines and size information, are synthesized attributes. Figure~\ref{xprezattributes} shows the two Haskell records  \p{Inh} and \p{Syn} that are used to model the inherited and synthesized presentation attributes. The figure also shows the type of each attribute. 
-
-The \p{hRef} and \p{vRef} attributes specify the reference lines that are used for aligning boxes horizontally and vertically when combined in composite presentations. Note that the vertical-reference line is in fact a horizontal line and vice versa. The term vertical-reference line stems from the fact that it is used for vertical alignment; modifying the vertical-reference line affects the vertical position of the presentation. 
-
-The boolean attributes \p{hStretch} and \p{vStretch} specify whether or not the presentation is allowed to stretch in horizontal or vertical direction. The remaining attributes are self-explanatory: \p{fontFamily}, \p{fontSize}, \p{textColor}, \p{lineColor}, \p{fillColor}, and \p{bgColor}. In the future, this set will be extended with other attributes such as line and font style, and attributes for modeling edit behavior (e.g.\ \p{onMouseClick~::~EditCommand}).
- 
-\b\c
-The presentation tree is transformed into an attribute grammar in which the font, style, and color properties are inherited attributes that go down in the tree, and alignment and stretch properties are synthesized attributes that go up in the tree. In the Haskell types, this division is visible in the fact that the properties are modeled using two records: \p{Inh} for inherited properties, and \p{Syn} for synthesized properties.
-\e\c
-
-%																
-\subsection{{\Xprez} primitives} \label{sect:primitives}
-
-The first five combinators in Figure~\ref{xprezprim} specify atomic presentations. The \p{empty} combinator has a presentation that is invisible and takes up no space; it is the neutral element for various presentation compositions. A string is presented with combinator \p{text}, and a rectangle with combinator \p{rect}. The \p{poly} combinator takes a list of relative coordinates between (0.0, 0.0) and (1.0, 1.0) and produces a line figure that connects these points. The coordinates are relative because the final coordinates depend on the size of the \p{poly} presentation. Finally, \p{img} can be used to display external images. The argument is a string that contains the path to the image file. In a future version, an \p{img} term may also contain a reference to an image that is encoded as part of the document.
-
-Except for \p{text}, the reference lines of an atomic presentation both have coordinate 0 (i.e.\ the north-west corner). For \p{text},  the vertical-reference line is the baseline of the text and the horizontal-reference line is at 0. By default, a  simple presentation does not stretch.
-
-\begin{figure}
-\begin{footnotesize}
-\begin{center}
-\begin{footnotesize}
-\begin{verbatim}
-empty             :: Xprez
-text              :: String -> Xprez             
-rect              :: Xprez                       
-img               :: String -> Xprez             
-poly              :: [ (Float, Float) ] -> Xprez 
-row, col, overlay :: [ Xprez ] -> Xprez          
-rowR, colR        :: Int -> [ Xprez ] -> Xprez   
-matrix            :: [[ Xprez ]] -> Xprez
-format            :: [ Xprez ] -> Xprez
-\end{verbatim}
-\end{footnotesize}
-\caption{The {\Xprez} primitives} \label{xprezprim} 
-\end{center}
-\end{footnotesize}
-\end{figure}
-
-The remaining primitives in Figure~\ref{xprezprim} specify composite presentations. The behavior of columns (\p{col}) is equal to that of rows (\p{row}) with the horizontal and vertical directions swapped. Hence, we only discuss the \p{row} primitive. In a row, each child presentation is placed immediately to the right of its predecessor, with their vertical-reference lines aligned. Horizontal-reference lines have no effect on the positioning in a row.
-
-\begin{center}
-\includegraphics[width=3.2in]{images/row}
-\end{center}
-
-The bounding box of a row is the smallest rectangle that encloses all elements of the row. The vertical-reference line of the row is equal to the aligned reference lines of the children, whereas the horizontal-reference line is taken from the first child. In order to use the horizontal-reference line from one of the other children, we can use the \p{rowR} combinator. The integer argument of \p{rowR} specifies which child determines the horizontal-reference line for the row, with 0 denoting the first child. 
-
-By default, a row stretches in horizontal direction if one of its children does, and it stretches in vertical direction if all children stretch vertically. The defaults may be overridden by setting the stretch attributes with the method that is  shown in the next section. 
-
-
-Because \p{row}, \p{column} and \p{matrix} do not allow their children to overlap, we need a special combinator for overlapping presentations. The \p{overlay} combinator places its children in front of each other, while aligning both the horizontal and vertical-reference lines. It can be used to create underlined text, for example. Because alignment takes place on both reference lines and hence all child reference lines overlap, no special \p{overlayR} combinator is needed.
-
-A flow layout can be achieved with the \p{format} combinator for paragraph formatting. The combinator takes a list of presentations as argument and splits this list into rows based on the available horizontal space. The resulting rows are placed in a column.  Because \p{Xprez} does not yet have a page model, only horizontal formatting is supported. 
-\ec
 
 \subsection{Document presentation}
 
@@ -408,14 +374,15 @@ The only difference between a normal Alex description and a Proxima scanner shee
 
 Scanner based on structural/parser
 
+
 % How the tokenizer works:
-\head{Structural presentation}
+\head{\small Structural presentation} 
 
-A structural presentation of a document node is an Xprez tree that may contain presentations of child nodes. The scanner traverses the presentation tree and makes a recursive call on each child presentation that is encountered. It also stores the presentation in case of a parse error (recursively scanned). Yielding a StructuralTk.
+\noindent A structural presentation of a document node is an Xprez tree that may contain presentations of child nodes. The scanner traverses the presentation tree and makes a recursive call on each child presentation that is encountered. It also stores the presentation in case of a parse error (recursively scanned). Yielding a StructuralTk.
 
-\head{Parsing presentation}
+\head{\small Parsing presentation}
 
-A parsing presentation only consists of a column of rows, which contain either strings or structural presentations. scanner creates sequences of characters . Structurals are put in Structural tokens. the sequences of characters are converted to tokens by applying the Alex scanner.
+\noindent A parsing presentation only consists of a column of rows, which contain either strings or structural presentations. scanner creates sequences of characters . Structurals are put in Structural tokens. the sequences of characters are converted to tokens by applying the Alex scanner.
 
 
 \subsection{Handling whitespace}
@@ -534,15 +501,15 @@ Lexical errors pose a problem, since Alex stops at the character of the lexical 
 
 \todo{more?}
 
-\head{Eclipse}
+\head{\small Eclipse}
 
-Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
+\noindent Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
 
 Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. Unfortunately, building a code editor similar to the Java editor for a different language, requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
 
-\head{Barista, Citrus}
+\head{\small Barista, Citrus}
 
-Barista~\cite{KoMyers06Barista} is a powerful framework for building code editors. It is built on top of Citrus~\cite{KoMyers05Citrus}, which is a UI toolkit together with an object-oriented language. Although Barista is targeted at code editors, the presentation of the code can be visual, for example allowing for images to appear in comments, or having graphical presentations of code. The editors created with Barista are syntax directed, but presentation-oriented editing is available. 
+\noindent Barista~\cite{KoMyers06Barista} is a powerful framework for building code editors. It is built on top of Citrus~\cite{KoMyers05Citrus}, which is a UI toolkit together with an object-oriented language. Although Barista is targeted at code editors, the presentation of the code can be visual, for example allowing for images to appear in comments, or having graphical presentations of code. The editors created with Barista are syntax directed, but presentation-oriented editing is available. 
 
 Because of the orientation towards code editing, word-processing editors will be harder to specify in Barista. The same holds for editors for which the structure of the presentation does not follow the structure of the document. Barista has no special support for derived values in the presentation or for editable derived structures.
 
