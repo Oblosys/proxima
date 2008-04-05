@@ -132,6 +132,10 @@ In this paper, we focus mainly on the presentation layer and layout layer, and, 
 
 The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is the (partial) definition for a type \p{Exp} that has two constructors: one for fractions and one for if expressions.
 
+\bl
+\o give example value
+\el
+
 \begin{footnotesize}
 \begin{verbatim}
 data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
@@ -140,13 +144,11 @@ data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
 \end{verbatim}
 \end{footnotesize}
 
-
 \bl
 \o fields to store token id's for handling whitespace and focus
 \o holes and parse errors added to each nonterminal
 \o holes are for structure editing.
 \el
-
 
 \bl
 \o Mapped to enriched, but left out of discussion, so equal.
