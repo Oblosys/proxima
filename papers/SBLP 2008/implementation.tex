@@ -31,45 +31,10 @@ Pres may be graphical: fraction. When edited, need to parse this.
 Solution that uses combinator parsers for simple stuff. Also automatic whitespace handling
 \end{abstract}
      
-\bc
-
-Introduction (2)
-
-Proxima's layered architecture (2)
-- explanantion of presentation/interpretation processes
-- overview of levels and layers
-  (much can be taken from thesis chapter)
-  
-Presentation process
-  
-  Xprez (2)
-  - short version of thesis chapter
-  Presentation (2)
-  - explanation of AG system
-  - structural vs parsing
-  - examples
-   
-Interpretation process 
-  Scanner (2)
-  - regular expression for specifying tokens
-  - example
- 
-  Parser  (2)
-   - structural vs parsing
-   - uuag parser with only a few extra things
-   - example
-  Error handling in parser and scanner
- 
-Related work (1/2)
-- synthesizer generator
-- eclipse
-- barista
-
-Conclusions (1/2)
-
-\ec
-
 \section{Introduction}
+
+Proxima is a generic structure editor suitable for a range of different kinds of documents. A key feature of Proxima is that it combines structural editing with editing the presentation of the document. 
+
 
 \bl
 \o what is Proxima~\cite{schrage04Proxima}.
@@ -92,14 +57,14 @@ overview of paper
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{images/screenshots/BayesDocEditor}
-\caption{The Bayesian network documentation editor}
+\caption{The Bayesian network documentation editor.}
 \label{fig:bayesEditor}
 \end{figure}
 \ec
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Proxima's layered architecture} \label{sec:architecture}
+\section{Proxima's layered architecture} \label{sect:tarchitecture}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -161,21 +126,20 @@ In this paper, we focus mainly on the presentation layer and layout layer, and, 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{The document structure}
+\section{The document structure}\label{sect:document}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is the (partial) definition for a type \p{Exp} that has two constructors: one for fractions and one for if expressions.
 
-\bl
-\o Document is main data type. Mapped to enriched, but left out of discussion, so equal.
-\o Haskell types, no parameters
-\el
 \begin{footnotesize}
 \begin{verbatim}
 data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
          | IfExp exp1:Exp exp2:Exp exp3:Exp              { idP0:IDP idP1:IDP idP2:IDP }
+         | IntExp val:Int
 \end{verbatim}
 \end{footnotesize}
+
 
 \bl
 \o fields to store token id's for handling whitespace and focus
@@ -183,6 +147,10 @@ data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
 \o holes are for structure editing.
 \el
 
+
+\bl
+\o Mapped to enriched, but left out of discussion, so equal.
+\el
 
 \section{The presentation process}
 
@@ -211,7 +179,7 @@ rowR, colR        :: Int -> [Xprez] -> Xprez
 format            :: [Xprez]        -> Xprez
 \end{verbatim}
 \end{footnotesize}
-\caption{The {\Xprez} primitives} \label{fig:xprezPrim} 
+\caption{The {\Xprez} primitives.} \label{fig:xprezPrim} 
 \end{center}
 \end{footnotesize}
 \end{figure}
@@ -252,17 +220,19 @@ For each non-terminal, the AG defines a synthesized attribute \p{pres} of type \
 
 A presentation may be either {\em structural} or {\em parsing}, with the difference that parsing presentations may be edited at the presentation level whereas structural presentation may not (although they may have parsing descendents that will be editable). 
 
-A parsing presentation consists of a sequence of tokens, which may be strings or structural presentations. It is provided with a parser that is applied to the sequence of tokens when it has been edited. \todo{only top level if it is an immediate child of a structural}
-\bl % or maybe near example
-\o row is now used for making token sequence tokens.
-\o we can enforce that only \p{token}s appear with a GADT!
+A parsing presentation consists of a sequence of tokens, which may be strings or structural presentations. In the presentation sheet, the top-most element of the parsing presentation (which is an immediate child of a structural presentation) must specify a parser. This parser is applied to the sequence after it has been edited.
+
+Since a structural presentation may not be edited at presentation level\todo{actually this is layout level}, it is straightforward to map a structural presentation back onto the document level. Hence, no parser needs to be specified in the presentation sheet.
+
+Figure~\ref{fig:presentationSheet}\todo{add structural example without id (slide?)} shows two presentation rules for the type \p{Exp} from Section~\ref{sect:document}. Tokens are put in a list using the \p{row} combinator. The Haskell type system enforces that a parsing presentations consists only of rows and tokens. 
+
+\bl
+\o explain @idp
+\o explain structuralToken and mention frac
 \el
 
-
-Since a structural presentation may not be edited at the pres,  be edited at the presentation level.
-On the other hand, a parsing presentation consists of tokens (either strings or structural presentations) and is provided with a parser in the presentation sheet. Parsing presentations may be edited at the presentation level, after which the parser is applied to obtain the updated subtree.
-
-
+\begin{figure}
+\begin{center}
 \begin{footnotesize}
 \begin{verbatim}
 SEM Exp
@@ -270,23 +240,22 @@ SEM Exp
                                       , key @idP1 "then", @exp2.pres
                                       , key @idP2 "else", @exp3.pres ]
   | DivExp
-      loc.pres = structuralID @idP0 $ frac @exp1.pres @exp2.pres
+      loc.pres = structuralToken @idP0 $ frac @exp1.pres @exp2.pres
                   
-key str = token str `withColor` blue 
+key idp str = token idp str `withColor` blue 
 \end{verbatim}%$
-\end{footnotesize} % put this in a figure?
+\end{footnotesize}
+\caption{Presentation sheet fragment.} \label{fig:presentationSheet} 
+\end{center}
+\end{figure}
 
-\bl
-\o add structural example without id
-\el
-
-\p{frac} is the function defined in Section~\ref{sect:xprez}
 
 In each presentation rule there need to be a number of default function applications, for example to handle the display of focus, and to mark the document location in the presentation tree. Such functions may be applied by the writer of the presentation sheet, but this is awkward and error prone. Hence, rather than the definitions of synthesized attributes \p{pres} for each nonterminal, the presentation sheet contains definitions of a local attribute \p{pres}. An automatically generated rule for the synthesized \p{pres} then uses the local \p{pres} and adds the default functionality to it.
 
 \subsection{Document layout}
 
-The layouter is currently not parameterized by any sheet
+% maybe get rid of this one
+The layouter is not parameterized by any sheet
 \bl
 \o it adds layout explicitly, by looking it up in the map, and also restores the focus
 \o if focus restore fails, focus is set on old coordinates (usually okay, explain when not)
@@ -320,7 +289,7 @@ data Token Location userToken\\
   \> | UserTk       \> Position IDP Location userToken String \\
   \> | ErrorTk      \> Position IDP String \\
 \end{tabbedCode}
-\caption{The \p{Token} data type} \label{xprezprim} 
+\caption{The \p{Token} data type.} \label{fig:tokenType} 
 \end{center}
 \end{figure}
 
@@ -362,7 +331,7 @@ tokens :-
  $lower [$alpha $digit \_ \']* { mkToken $ \s -> Ident s }
 \end{verbatim} %$
 \end{footnotesize}
-\caption{Example \p{UserToken} and scanner sheet} \label{fig:scannerSheet} 
+\caption{Example \p{UserToken} and scanner sheet.} \label{fig:scannerSheet} 
 \end{center}
 \end{figure}
 
