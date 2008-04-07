@@ -8,7 +8,7 @@
 \usepackage{implementation}     
 \sloppy
 
-\title{Beyond ASCII, parsing programs with graphical presentations \\{\small \version}}
+\title{Beyond ASCII -- parsing programs with graphical presentations \\{\small \version}}
 
 \author{Martijn M. Schrage\inst{1}}
 
@@ -23,17 +23,23 @@
 \maketitle
 
 \begin{abstract}
+
 % 15 lines
-Proxima is generic editor. although it has wp facilities, graphs, very suitable for programming languages. Structural and presentation-edit.
+Proxima is generic structure editor suitable for a wide range of documents. Proxima combines editing on the document structure as well with edit operations on its presentation (free-text editing). Applications of Proxima include word-processor and spread-sheet editors, but system is also very suitable for implementing source editors for programming languages.
 
-Pres may be graphical: fraction. When edited, need to parse this.
+Edit operations on the presentation require that a modified presentation can be parsed to yield an updated document. This is complicated by the fact that presentations in Proxima are not restricted to text, but may contain graphical elements. For example, a power operator may be presented as $3^2$. Such graphical presentations may not be edited at the presentation level, but they may contain textual children that may be edited (e.g.\ the 3 and the 2 in $3^2$). 
 
-Solution that uses combinator parsers for simple stuff. Also automatic whitespace handling
+This paper shows the scanning and parsing process that is employed by Proxima to parse presentations that are combination of text and graphical elements. The scanner takes a regular-expression specification of the tokens. The parsers for textual parts of the presentation are specified using Haskell combinator parsers. Whitespace in the presentation can be handled automatically if desired.
+
 \end{abstract}
      
 \section{Introduction}
 
-Proxima is a generic structure editor suitable for a range of different kinds of documents. A key feature of Proxima is that it combines structural editing with editing the presentation of the document. 
+Proxima is a generic structure editor suitable for a range of different kinds of documents. A key feature of Proxima is that it combines structural editing with editing on the presentation of the document. For a source code editor, a structural edit operation is based on the abstract syntax. For example means that a program source can be edited based on its abstract syntax(e.g.\ element in a list, causing freely edited textually if 
+
+A Proxima not only text, but graphical. text processing, graph editor.
+
+An editor
 
 
 \bl
@@ -130,11 +136,8 @@ In this paper, we focus mainly on the presentation layer and layout layer, and, 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is the (partial) definition for a type \p{Exp} that has two constructors: one for fractions and one for if expressions.
+The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is the (partial) definition for a type \p{Exp} that has two constructors: one for fractions and one for if expressions. 
 
-\bl
-\o give example value
-\el
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -144,25 +147,24 @@ data Exp = DivExp exp1:Exp exp2:Exp                      { idP0:IDP }
 \end{verbatim}
 \end{footnotesize}
 
-\bl
-\o fields to store token id's for handling whitespace and focus
-\o holes and parse errors added to each nonterminal
-\o holes are for structure editing.
-\el
+The named fields between braces, to the right of each constructor are used to keep track of the tokens used in the presentation. This information is more appropriate in the presentation sheet, but the current implementation does not yet analyse the presentation sheet in order to create the document type. A future version will remedy this situation.
 
-\bl
-\o Mapped to enriched, but left out of discussion, so equal.
-\el
+Two special alternatives are added to each data type by Proxima: a {\em hole} and a {\em parse error} alternative. Hole alternatives are used during structural edits of the document tree. The parse error nodes make it possible to have a document tree even if its presentation contains a parse error.
 
+Normally, the document is mapped onto an enriched document by the evaluator. However, since we leave the evaluator out of the discussion, the document and enriched document will be the same everywhere. Hence, we will sometimes speak of the document where in the actual architecture this will be the enriched document.
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 \section{The presentation process}
-
-Before discussing the scanner and parser components, we briefly discuss the presentation process. Presentation component, there is a specification (presentation rules) that map the document (more precisely the enriched document) to presentation target language, which is a Haskell combinator language Xprez. The rules are an attribute grammar.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Before discussing the scanner and parser components, we briefly discuss their counterparts in the presentation direction: the presenter and layout components. The presenter component maps a document (or more precisely, an enriched document) onto the presentation level, according to rules in the presentation sheet. The presentation sheet is specified by means of an attribute grammar, and values of the presentation level are constructed with the presentation language \Xprez. Subsequently, the presentation is mapped onto the layout level by the layout component. In the next three sections, we introduce the language \Xprez, the attribute grammar formalism for the presentation sheet, and the layout component.
+
 \subsection{The {\Xprez} presentation language} \label{sect:xprez}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \Xprez is a combinator library for specifying graphical presentations with support for stretching and alignment. For this paper, a short overview of the language suffices. A more complete description can be found in~\cite{schrage04Proxima}.
 
@@ -191,7 +193,7 @@ Figure~\ref{fig:xprezPrim} contains the \Xprez primitives. The basic building bl
 Each presentation has a number of presentation attributes (e.g.\ color, font size, reference lines) that influence its appearance. Several functions are available for modifying presentation attributes. Examples are \p{withColor :: Color -> Xprez -> Xprez} and \p{withFontsize :: Int -> Xprez -> Xprez}. \todo{mention \p{with}?}
 
 
-As an example, we show some \Xprez code that creates a graphical presentation of a fraction:
+As an example, we show the \Xprez code that creates a graphical presentation of a fraction:
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -226,12 +228,8 @@ A parsing presentation consists of a sequence of tokens, which may be strings or
 
 Since a structural presentation may not be edited at presentation level\todo{actually this is layout level}, it is straightforward to map a structural presentation back onto the document level. Hence, no parser needs to be specified in the presentation sheet.
 
-Figure~\ref{fig:presentationSheet}\todo{add structural example without id (slide?)} shows two presentation rules for the type \p{Exp} from Section~\ref{sect:document}. Tokens are put in a list using the \p{row} combinator. The Haskell type system enforces that a parsing presentations consists only of rows and tokens. 
+Figure~\ref{fig:presentationSheet}\todo{add structural example without id (slide?)} shows two presentation rules for the type \p{Exp} from Section~\ref{sect:document}. Tokens are put in a list using the \p{row} combinator. The Haskell type system enforces that a parsing presentations consists only of rows and tokens. Two functions are available for creating tokens: \p{token} and \p{structuralToken}. The first parameter of both \p{token} and \p{structuralToken} is a presentation id, which is one of the p{IDP} fields that is declared in the data type. The function \p{frac} in the rule for \p{DivExp} is the function defined in Section~\ref{sect:xprez}.
 
-\bl
-\o explain @idp
-\o explain structuralToken and mention frac
-\el
 
 \begin{figure}
 \begin{center}
@@ -251,17 +249,17 @@ key idp str = token idp str `withColor` blue
 \end{center}
 \end{figure}
 
-
 In each presentation rule there need to be a number of default function applications, for example to handle the display of focus, and to mark the document location in the presentation tree. Such functions may be applied by the writer of the presentation sheet, but this is awkward and error prone. Hence, rather than the definitions of synthesized attributes \p{pres} for each nonterminal, the presentation sheet contains definitions of a local attribute \p{pres}. An automatically generated rule for the synthesized \p{pres} then uses the local \p{pres} and adds the default functionality to it.
 
 \subsection{Document layout}
 
 % maybe get rid of this one
-The layouter is not parameterized by any sheet
-\bl
-\o it adds layout explicitly, by looking it up in the map, and also restores the focus
-\o if focus restore fails, focus is set on old coordinates (usually okay, explain when not)
-\el
+The main function of the scanner is to restore the implicit whitespace and presentation focus\todo{is this one introduced somewhere?} that has been recorded for each token in a parsing presentation. Whitespace is restored by looking up the token's whitespace in a white space map, which is kept at the presentation level, and inserting extra rows in the presentation for recorded linebreaks and strings of spaces for recorded spaces. 
+
+Besides the whitespace, also the presentation focus is stored in the whitespace map. The scanner restores the presentation focus, so it will point to the tokens that had the focus during scanner. If automatic whitespace functionality is not used, the presentation focus is not recorded. In this case, the scanner will restore it by using its absolute coordinates in the presentation.
+
+The layouter is not parameterized by a sheet parameter. The reason is that although we need a specification in order to create tokens from a string, the reverse process is quite easy since each token contains its string representation.  
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -273,40 +271,42 @@ The layouter is not parameterized by any sheet
 The basic function of the scanner is to map strings containing characters to tokens, which are specified by the user in the scanner sheet. But in Proxima, the scanner also performs several other functions. Any structural presentations that appear in the stream of tokens are put in special tokens. Such structural presentations may contain other structural presentations, or again parsing presentations, which are recursively scanned. Apart from this scanner also handles graph presentations. 
 
 
-\bl
-\o result is Structural [.. [PresentationTk]..]
-\el
+%\bl
+%\o result is Structural [.. [PresentationTk]..]
+%\el
 
 \subsection{The \p{Token} type}
 
 Figure~\ref{fig:tokenType} shows a simplified version of the \p{Token} data type. A number of type parameters that are not important for this discussion are hidden, as well as the constructors that have to do with Proxima's support for graph presentations. 
+
 \begin{figure}
 \begin{center}
 \begin{tabbedCode}
 data Token Location userToken\\ 
-~~\= =  StructuralTk \= Position \= IDP Location Presentation \\
-  \>                \> [Token node userToken]\\
-  \> | ParsingTk    \>          \> IDP Location (Parser userToken)\\
-  \>                \> [Token node userToken]\\
-  \> | UserTk       \> Position IDP Location userToken String \\
-  \> | ErrorTk      \> Position IDP String \\
+~~\= =  StructuralTk \= IDP Location Presentation \\
+  \>                 \> [Token node userToken]\\
+  \> | ParsingTk     \> IDP Location (Parser userToken)\\
+  \>                 \> [Token node userToken]\\
+  \> | UserTk        \> IDP Location userToken String \\
+  \> | ErrorTk       \> IDP String \\
 \end{tabbedCode}
 \caption{The \p{Token} data type.} \label{fig:tokenType} 
 \end{center}
 \end{figure}
 
-All constructors have an \p{IDP} field. used to associate the token with whitespace/focus. The \p{Position} only for elts that are actually parsed, not for \p{ParsingTk}.\todo{maybe idp also not necessary}.  \p{Maybe node} is document location
-The \p{Location} field refers to the node in the document tree from which the token originated. It is used when parsing structural presentations.\todo{ref to section?}
+% Position is not shown ID has enough information
+% Location
 
-The last constructor \p{ErrorTk}, is used to represent lexical errors. It's use is explained in Section~\ref{sect:parseScanErrors}
+All constructors have an \p{IDP} field that is used to associate the token with whitespace and focus information, which is stored in a separate map. All tokens except \p{ErrorTk} have a \p{Location} field that refers to the node in the document tree from which the token originated. It is used when parsing structural presentations.\todo{ref to section?} 
 
-\bl
-\o parsing has a parser associated
-\o location in usertoken is for reuse (talk about this here?)
-\o location in structural and parsing is for auto structurals
-\o for structurals also for restoring fields that are note presented
-\o lists of tokens are children.
-\el
+\begin{description}
+\item[\p{StructuralTk}:] represents a structural presentation and has a list of tokens for its child presentations. The \p{Presentation} field contains the structural presentation itself and is presented in case of a parse error \todo{maybe get rid of it} \todo{mention that hidden children are token from Location?} \\
+\item[\p{ParsingTk}:] The field \p{Parsing userToken} is the associated parser that is used to parse the child tokens. It has no \p{Presentation} field, since in case of a parse error, the tokens are used to create the presentation. Note that a child presentation that is itself also parsing does not give rise to an extra \p{ParsingTk} token. Instead, tokens from all parsing descendents are collected and put in one list. This means that only \p{StructuralTk}, \p{UserTk}, and \p{ErrorTk} may appear in the child list. \\
+\item[\p{UserTk}:] Represents a string token. \todo{Explain Location and reuse? Or just remove it?} \\
+\item[\p{ErrorTk}:] This constructor is used to represent lexical errors. Section~\ref{sect:parseScanErrors} explains its use. \\
+\end{description}
+
+
 
 % Not shown: Presentation in StructuralTk
 
@@ -343,17 +343,17 @@ The only difference between a normal Alex description and a Proxima scanner shee
 
 \subsection{Scanning the presentation}
 
-Scanner based on structural/parser
+The scanner traverses the layout tree and creates a tree of structural and parsing tokens that matches the structure of the presentation. The behavior of the scanner is determined by the kind of presentation on which it is called.
 
 
 % How the tokenizer works:
 \head{\small Structural presentation} 
 
-\noindent A structural presentation of a document node is an Xprez tree that may contain presentations of child nodes. The scanner traverses the presentation tree and makes a recursive call on each child presentation that is encountered. It also stores the presentation in case of a parse error (recursively scanned). Yielding a StructuralTk.
+\noindent A structural presentation of a document node is an Xprez tree that may contain presentations of child nodes. The scanner traverses the presentation tree and makes a recursive call on each child presentation that is encountered. Together with the entire presentation\p{recursively scanned?}, this list of child tokens is put in a \p{StructuralTk} and returned as the result of the scanner.
 
 \head{\small Parsing presentation}
 
-\noindent A parsing presentation only consists of a column of rows, which contain either strings or structural presentations. scanner creates sequences of characters . Structurals are put in Structural tokens. the sequences of characters are converted to tokens by applying the Alex scanner.
+\noindent A parsing presentation consists of a column of rows, which contain either strings or structural presentations. Each structural presentation is mapped onto a structural token by recursively scanning it. The sequences of strings between the structural tokens are first extended with newline characters to mark the transitions between rows. The resulting lists of characters are mapped onto lists of \p{UserTk} tokens by applying the Alex scanner. The final list of child tokens is the result of merging the structural tokens with the user tokens.
 
 
 \subsection{Handling whitespace}
@@ -367,47 +367,48 @@ In order to use the automatic whitespace recognition, the following rule must be
 \end{verbatim} %$
 \end{footnotesize}
 
-The result is that the scanner will also put whitespace tokens in the result of the If enabled, the final list of tokens will contain whitespace tokens. These are associated with the id of the preceding token's (may be structural).
+As a result, the scanner will emit special tokens for sequences of whitespace. A post processing phase removes these whitespace tokens, and creates an entry in the whitespace map for the whitespace and the presentation id of the preceding token in the list. \todo{focus}
 
 % first token whitespace
 
 \subsection{An example}
 
-To clarify the previous discussion, we give an example of a scanned presentation. So this partially graphically presented function:
-\begin{center}
-\includegraphics[width=1in]{images/fraction}
-\end{center}
-\todo{add some whitespace}
+To further clarify the previous discussion, we give an example of a layout that is scanned with the scanner sheet in~\ref{fig:scannerSheet}.
+% The presentation originates from a declaration of a value \p{x}:
 
-leads to the following tokens:\todo{maybe add locators and paths}
+\begin{center}
+\includegraphics[width=1in]{images/scanFrac}\
+\end{center}
+\todo{rename f}
+
+The presentation contains two structural presentations, one for the fraction, and one for the power. The scanner will return the following token structure: \todo{maybe add paths}
 \begin{tabbedCode}
 ParsingTk \= \\
 ~~ \= [ UserTk$_0$ (Ident "f") \\
-      \> , UserTk$_1$ (Op "=") \\
-      \> , StructuralTk$_2$ (DivExp (IntExp 1) (PlusExp ...))\\
-      \> ~~ ~~ \= [ ParsingTk [ UserTk$_3$ (Int 1)] \\
-      \>            \>  , ParsingTk  \= [ StructParsingTk$_4$ (PowerExp (IntExp 3) (IntExp 2))\\
-      \>            \>                 \> ~~~~ \= [ ParsingTk [ UserTk$_5$ (Int 3) ] \\
-      \>            \>                 \>           \>  , ParsingTk [ UserTk$_6$ (Int 2) ] \\
-      \>            \>                 \>           \> ] \\
-      \>            \>                 \> , UserTk$_7$ (Op "+") \\
-      \>            \>                 \> , UserTk$_8$ (Int 5) \\
-      \>            \>                 \> ] \\
-      \>            \> ] \\
-      \> , UserTk$_9$ (Op "+") \\
-      \> , UserTk$_{10}$ (Int 1) \\
-      \> ] \\
+   \> , UserTk$_1$ (Op "=") \\
+   \> , StructuralTk$_2$ (DivExp (IntExp 1) (PlusExp ...))\\
+   \> ~~~~ \= [ ParsingTk [ UserTk$_3$ (Int 1)] \\
+   \>      \> , ParsingTk  \= [ StructParsingTk$_4$ (PowerExp (IntExp 3) (IntExp 2))\\
+   \>      \>              \> ~~~~ \= [ ParsingTk [ UserTk$_5$ (Int 3) ] \\
+   \>      \>              \>      \> , ParsingTk [ UserTk$_6$ (Int 2) ] \\
+   \>      \>              \>      \> ] \\
+   \>      \>              \> , UserTk$_7$ (Op "+") \\
+   \>      \>              \> , UserTk$_8$ (Int 5) \\
+   \>      \>              \> ] \\
+   \>      \> ] \\
+   \> , UserTk$_9$ (Op "+") \\
+   \> , UserTk$_{10}$ (Int 1) \\
+   \> ] \\
 \end{tabbedCode}
 
-maybe: explain that all tokens in a parsingTk contain refs to their originating nonterminal in the document. In case of incomplete presentation, we reuse the fields from that node. Fragile. Copy/paste, retyping, it may get lost. So only for non-essential things. 
+\todo{explain that all tokens in a parsingTk contain refs to their originating nonterminal in the document?}
+% In case of incomplete presentation, we reuse the fields from that node. Fragile. Copy/paste, retyping, it may get lost. So only for non-essential things. 
 
-and a map containing the whitespace (and focus)
+Together with the token structure, a whitespace map is returned. Each tuple encodes the number of trailing linebreaks and the number of trailing spaces. \todo{no good for spaces followed by linebreaks}
 
-\begin{tabbedCode}
-Whitespace = [ 0 -> (0,1), 1-> (0,1), 1 -> (1,0) ]
-\end{tabbedCode}
-
-Also put document node and path
+\noindent \begin{math}
+\p{Whitespace}: =[ 0 \mapsto (0,1), 1 \mapsto (0,1), 2 \mapsto (0,1), 9 \mapsto (0,1), 10 \mapsto (1,0) ]
+\end{math}
 
 
 
@@ -418,43 +419,39 @@ Also put document node and path
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Unlike normal parsers, which take a list of tokens to produce a value, the Proxima parser is a function that takes only one token as input. This token can be either a structural token or a parsing token. In case of a structural token, the value is constructed automatically from the list of child tokens. If the token is a parsing token, its list of children is fed into the parser that was specified in the presentation sheet.
+Unlike ordinary parsers, which take a list of tokens to produce a value, the Proxima parser is a function that takes only one token as input. This token can be either a structural token or a parsing token. In case of a structural token, the value is constructed automatically from the list of child tokens. If the token is a parsing token, its list of children is fed into the parser that was specified in the presentation sheet.
 
 \subsection{Structural presentations}
 
 A structural token corresponds to the presentation of a certain document node and contains a list of tokens that correspond to child-presentations that were part of the presentation of that document node. Each child may be presented multiple times, or even not at all. Furthermore, the order in which the child presentations appear may not correspond to the order of the children in their parent node.
 
-Maybe an example? 
-Nevertheless, we can parse a structural token automatically, since all tokens contain a \p{Locator} reference to the document node from which they were presented. \todo{Not destroyed because structurals not edited.}  By calling the parser recursively on the list of tokens, we obtain the document nodes for each child. .. The child tokens (either structural or parsing) contain document locators from which we can derive the child number.
+Nevertheless, we can parse a structural token automatically, since all tokens contain a \p{Location} reference to the document node and path from which they were presented. Hence, we can deduce for each token the number of the child for which it is a presentation. Because structural presentations are not edited at the presentation level, this information will still be valid after presentation editing. 
 
+For child$_i$ of the nonterminal, the scanner takes the list of tokens that contain presentations of that child. If this list is empty, the presentation does not contain the a presentation for the child, and we use its previous value, which is stored in the structural token. If the list is not empty, a presentation that has been edited is selected and it is recursively parsed to yield a value for child$_i$. In case no presentation has been edited, the child value is reused from the structural token.
 
-Each token has ref to parent/path (cannot be broken in structural)
-
-recognizeStructural
-has a list of tokens, either structural or parsing. Each has information on origin as a path. so group them with their index in the parent.
-
-Now recursively recognize each child. Either structural (this function), or Parsing (section ..). 
-
-For any children that were not part of the presentation, we take the previous value from the locator of the StructuralTk that is currently parsed. And for doubles, at the moment, we take the first. But as soon as we keep track of dirty bits in the presentation, we take the edited child. If more edited either signal error, or take one. This can be prohibited by enforcing a parse cycle if we start editing another child.
+There will not be multiple edited presentations, since Proxima does not allow editing another presentation until a successful parse cycle is achieved.
 
 \todo{untyped, but safe}
 
 \subsection{Parsing presentations}
 
-A \p{ParsingTk} token contains a parser that returns a value of .  a  we 
-\bl
-\o convert list of \p{Token} to document structure.
-\o combinator parser with error recovery~\cite{swierstra03polishParsers, swierstra08parserCombinators}
-\o because of extra state (hidden presentations), and presentation ids, little bit extra info is kept
-\o only when needed
-\o mention that holes need to be explicitly parsed?
-\o in fact other module that parses tokens to document nodes can be used. Parsec~\cite{leijen08parsec}
-\o Example
-\el
+A parsing not auto. instead it is spec'd in the presentation sheet. The parser simply applies the parser stored in the token to it's children.
+
+Parsers are combinator parser with error recovery~\cite{swierstra03polishParsers, swierstra08parserCombinators}.
+because of extra state (hidden presentations), and presentation ids, little bit extra info is kept
+only when needed. Parser will be very similar to parser in a compiler.
+
+
+In line with. we give the parser for expressions:\todo{mention that holes need to be explicitly parsed?}
+
+Connection with parser is not fixed. in fact other module that parses tokens to document nodes can be used. Parsec~\cite{leijen08parsec}.
+
+
 
 \section{Parse errors} \label{sect:parseScanErrors}
 
-On a parse error, we don't get a tree, so tricky to present. Parse and present should be identity (with squiggly for error). Won't appear in structural presentations, unless something is wrong in the presentation. In this case error is signaled. Problem for editor builder. In parsing presentations. Parse errors are normal, during programming most of the time not syntactically correct.
+On a parse error, the parser does not return a document tree
+we don't get a tree, so tricky to present. Parse and present should be identity (with squiggly for error). Won't appear in structural presentations, unless something is wrong in the presentation. In this case error is signaled. Problem for editor builder. In parsing presentations. Parse errors are normal, during programming most of the time not syntactically correct.
 
 Approach: all nonterminals have a parseErr constructor. Insteafd of a value of type T, we get ParseErr\_T (is a value of type T). The parse error alternative has error loc + message and a list of tokens.
 
@@ -472,11 +469,11 @@ Lexical errors pose a problem, since Alex stops at the character of the lexical 
 
 \todo{more?}
 
-\head{\small Eclipse}
+%\head{\small Eclipse}
 
-\noindent Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
+%\noindent Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
 
-Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. Unfortunately, building a code editor similar to the Java editor for a different language, requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
+%Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. Unfortunately, building a code editor similar to the Java editor for a different language, requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
 
 \head{\small Barista, Citrus}
 
