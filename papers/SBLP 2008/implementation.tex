@@ -9,13 +9,14 @@
 \sloppy
 
 \title{Beyond ASCII -- parsing programs with graphical presentations \\{\small \version}}
+% using combinator parsers to pase programs with graphical presentations
 
-\author{Martijn M. Schrage\inst{1}}
+\author{Martijn M. Schrage\inst{1}, S. Doaitse Swierstra\inst{1}}
 
 
 \address{Institute of Information and Computing Sciences\\ Utrecht University\\
     Utrecht, The Netherlands
-  \email{martijn@cs.uu.nl}
+  \email{\{martijn,doaitse\}@cs.uu.nl}
 }
 
 \begin{document} 
@@ -24,53 +25,55 @@
 
 \begin{abstract}
 
-% 15 lines
-Proxima is generic structure editor suitable for a wide range of documents. Proxima combines editing on the document structure as well with edit operations on its presentation (free-text editing). Applications of Proxima include word-processor and spread-sheet editors, but system is also very suitable for implementing source editors for programming languages.
+% max 15 lines
+Proxima is generic structure editor suitable for a wide range of document types. It allows edit operations on the document structure as well as on its presentation (free-text editing). To do so, the system maintains a bidirectional mapping between the document structure and its presentation. Applications of Proxima include word-processor and spread-sheet editors. The system, however, is also very suitable for implementing source editors for programming languages.
 
-Edit operations on the presentation require that a modified presentation can be parsed to yield an updated document. This is complicated by the fact that presentations in Proxima are not restricted to text, but may contain graphical elements. For example, a power operator may be presented as $3^2$. Such graphical presentations may not be edited at the presentation level, but they may contain textual children that may be edited (e.g.\ the 3 and the 2 in $3^2$). 
+Presentation-oriented edit operations require that an edited presentation can be parsed to yield an updated document structure. However, conventional parsing techniques cannot readily be applied, since presentations in Proxima are not restricted to text but may contain graphical elements. For example, a power operator may be presented as $3^2$. Such graphical presentations may not be edited at the presentation level, but they may contain textual children that are editable (e.g.\ the 3 and the 2 in $3^2$). 
 
-This paper shows the scanning and parsing process that is employed by Proxima to parse presentations that are combination of text and graphical elements. The scanner takes a regular-expression specification of the tokens. The parsers for textual parts of the presentation are specified using Haskell combinator parsers. Whitespace in the presentation can be handled automatically if desired.
-
+This paper explains the scanning and parsing process for presentations that are combination of text and graphical elements. For textual parts of the presentation, a Haskell combinator parser needs to be provided. The parser for graphical parts, on the other hand, is constructed by Proxima, based on information in the presentation. Whitespace in the presentation can be handled automatically, if desired. 
 \end{abstract}
-     
+
+
 \section{Introduction}
 
-Proxima is a generic structure editor suitable for a range of different kinds of documents. A key feature of Proxima is that it combines structural editing with editing on the presentation of the document. For a source code editor, a structural edit operation is based on the abstract syntax. For example means that a program source can be edited based on its abstract syntax(e.g.\ element in a list, causing freely edited textually if 
+% what is Proxima
+Proxima~\cite{schrage04Proxima} is a generic structure editor suitable for a range of different kinds of documents. A key feature of Proxima is that it combines structural editing with editing on the presentation of the document without switching modes. 
+% nothing is primitive, hence very customizable
 
-A Proxima not only text, but graphical. text processing, graph editor.
 
-An editor
+% example of structural and presentation oriented editing
+For a source code editor, a structural edit operation is based on the abstract syntax. For example means that a program source can be edited based on its abstract syntax(e.g.\ element in a list, causing freely edited textually if 
 
+$(1+2) \times (3+4)$. Deleting the middle part $(1+\framebox{$\,2) \times ($}\,3+4)$ yields $(1+3+4)$ and is a presentation-oriented edit operation that does not directly correspond to a 
+
+% mapping between doc and pres, specified in number of sheets
+In order to support editing on both the document and the presentation, Proxima maintains a bidirectional mapping between these two
+
+% examples of Proxima
+Helium + Bayes editor
+
+% presentations are textual, or graphical (call it structural). Cannot edit this one. children can be
 
 \bl
-\o what is Proxima~\cite{schrage04Proxima}.
-\o Generic editor for variety of documents, but very suitable for editors programming language.
-\o modeless combination of structure editing and free editing in the presentation
-\o nothing is primitive, hence very customizable
-\o example applications
-\o Editor for Baysian networks
 \o Generic editor as IDE
 \o by giving type, pres, and parser, we get an environment almost for free
-\o Helium editor
-\o Implementation of Proxima
 \el
+
 \bl
+\o parsing is not simply text. mix.
 \o contribution: algorithm for parsing mix of graphical and textual presentations.
 \el
 
-overview of paper 
-\bc
-\begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{images/screenshots/BayesDocEditor}
-\caption{The Bayesian network documentation editor.}
-\label{fig:bayesEditor}
-\end{figure}
-\ec
+The rest of the paper is organized as follows. First, we give a brief overview of the architecture of Proxima (Section~\ref{sect:architecture}) and the kind of document types that can be defined (Section~\ref{sect:documentStructure}). Then we explain the components and data types involved in presenting a document in Section~\ref{sect:presentationProcess}. The Proxima scanning and parsing algorithms are explained in sections~\ref{sect:scanner} and~\ref{sect:parser}. Section~\ref{sect:relatedWork} describes related work, and Section~\ref{sect:conclusion} concludes.
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Proxima's layered architecture} \label{sect:tarchitecture}
+\section{Proxima's layered architecture} \label{sect:architecture}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -130,6 +133,8 @@ The two levels at which edit operations can take place are the document level an
 In this paper, we focus mainly on the presentation layer and layout layer, and, more specifically, on the scanner and parser in these layers.
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{The document structure}\label{sect:document}
@@ -156,9 +161,11 @@ Normally, the document is mapped onto an enriched document by the evaluator. How
 
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{The presentation process}
+\section{The presentation process}\label{sect:presentationProcess}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -258,13 +265,15 @@ The main function of the scanner is to restore the implicit whitespace and prese
 
 Besides the whitespace, also the presentation focus is stored in the whitespace map. The scanner restores the presentation focus, so it will point to the tokens that had the focus during scanner. If automatic whitespace functionality is not used, the presentation focus is not recorded. In this case, the scanner will restore it by using its absolute coordinates in the presentation.
 
-The layouter is not parameterized by a sheet parameter. The reason is that although we need a specification in order to create tokens from a string, the reverse process is quite easy since each token contains its string representation.  
+The layouter is not parameterized by a sheet. The reason is that although we need a specification in order to create tokens from a string, the reverse process is quite easy since each token contains its string representation.  
+
+
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Scanner}
+\section{Scanning}\label{sect:scanner}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -281,15 +290,13 @@ Figure~\ref{fig:tokenType} shows a simplified version of the \p{Token} data type
 
 \begin{figure}
 \begin{center}
-\begin{tabbedCode}
-data Token Location userToken\\ 
-~~\= =  StructuralTk \= IDP Location Presentation \\
-  \>                 \> [Token node userToken]\\
-  \> | ParsingTk     \> IDP Location (Parser userToken)\\
-  \>                 \> [Token node userToken]\\
-  \> | UserTk        \> IDP Location userToken String \\
-  \> | ErrorTk       \> IDP String \\
-\end{tabbedCode}
+\begin{verbatim}
+data Token Location userToken 
+  = ParsingTk    IDP Location (Parser userToken) [Token node userToken]
+  | StructuralTk IDP Location                    [Token node userToken]
+  | UserTk       IDP userToken String 
+  | ErrorTk      IDP String 
+\end{verbatim}
 \caption{The \p{Token} data type.} \label{fig:tokenType} 
 \end{center}
 \end{figure}
@@ -297,12 +304,12 @@ data Token Location userToken\\
 % Position is not shown ID has enough information
 % Location
 
-All constructors have an \p{IDP} field that is used to associate the token with whitespace and focus information, which is stored in a separate map. All tokens except \p{ErrorTk} have a \p{Location} field that refers to the node in the document tree from which the token originated. It is used when parsing structural presentations.\todo{ref to section?} 
+All constructors have an \p{IDP} field that is used to associate the token with whitespace and focus information, which is stored in a separate map. All tokens except \p{ErrorTk} have a \p{Location} field that refers to the node in the document tree from which the token originated. It is used when parsing structural presentations (which is explained in Section~\ref{subsect:parsingStructural}.)
 
 \begin{description}
-\item[\p{StructuralTk}:] represents a structural presentation and has a list of tokens for its child presentations. The \p{Presentation} field contains the structural presentation itself and is presented in case of a parse error \todo{maybe get rid of it} \todo{mention that hidden children are token from Location?} \\
 \item[\p{ParsingTk}:] The field \p{Parsing userToken} is the associated parser that is used to parse the child tokens. It has no \p{Presentation} field, since in case of a parse error, the tokens are used to create the presentation. Note that a child presentation that is itself also parsing does not give rise to an extra \p{ParsingTk} token. Instead, tokens from all parsing descendents are collected and put in one list. This means that only \p{StructuralTk}, \p{UserTk}, and \p{ErrorTk} may appear in the child list. \\
-\item[\p{UserTk}:] Represents a string token. \todo{Explain Location and reuse? Or just remove it?} \\
+\item[\p{StructuralTk}:] represents a structural presentation and has a list of tokens for its child presentations. The \p{Location} argument is also used to access the values of children that are not presented. \todo{Presentation arg has been removed, structurals are assumed not to have parse errors}
+\item[\p{UserTk}:] Represents a string token. \todo{Also has Location, not shown here} \\
 \item[\p{ErrorTk}:] This constructor is used to represent lexical errors. Section~\ref{sect:parseScanErrors} explains its use. \\
 \end{description}
 
@@ -413,60 +420,79 @@ Together with the token structure, a whitespace map is returned. Each tuple enco
 
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Parsing}
+\section{Parsing}\label{sect:parser}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Unlike ordinary parsers, which take a list of tokens to produce a value, the Proxima parser is a function that takes only one token as input. This token can be either a structural token or a parsing token. In case of a structural token, the value is constructed automatically from the list of child tokens. If the token is a parsing token, its list of children is fed into the parser that was specified in the presentation sheet.
 
-\subsection{Structural presentations}
+\subsection{Structural presentations}\label{subsect:parsingStructural}
 
 A structural token corresponds to the presentation of a certain document node and contains a list of tokens that correspond to child-presentations that were part of the presentation of that document node. Each child may be presented multiple times, or even not at all. Furthermore, the order in which the child presentations appear may not correspond to the order of the children in their parent node.
 
-Nevertheless, we can parse a structural token automatically, since all tokens contain a \p{Location} reference to the document node and path from which they were presented. Hence, we can deduce for each token the number of the child for which it is a presentation. Because structural presentations are not edited at the presentation level, this information will still be valid after presentation editing. 
+Nevertheless, we can parse a structural token automatically, since all tokens contain a \p{Location} reference to the document node and path from which they were presented. Hence, we can deduce for each token the number of the child for which it is a presentation. Because structural presentations are not edited at the presentation level, this information will still be valid after the presentation has been edited. 
 
-For child$_i$ of the nonterminal, the scanner takes the list of tokens that contain presentations of that child. If this list is empty, the presentation does not contain the a presentation for the child, and we use its previous value, which is stored in the structural token. If the list is not empty, a presentation that has been edited is selected and it is recursively parsed to yield a value for child$_i$. In case no presentation has been edited, the child value is reused from the structural token.
-
-There will not be multiple edited presentations, since Proxima does not allow editing another presentation until a successful parse cycle is achieved.
+For child$_i$ of the nonterminal, the scanner takes the list of tokens that contain presentations of that child. If this list is empty, the presentation does not contain the a presentation for the child, and we use its previous value, which is stored in the structural token. If the list is not empty, a presentation that has been edited is selected and it is recursively parsed to yield a value for child$_i$. In case no presentation has been edited, the child value is also reused from the structural token, for efficiency. There will be at most oneedited presentation, since Proxima does not allow editing another presentation until a successful parse cycle is achieved. \todo{say differently}
 
 \todo{untyped, but safe}
 
+
+
 \subsection{Parsing presentations}
 
-A parsing not auto. instead it is spec'd in the presentation sheet. The parser simply applies the parser stored in the token to it's children.
+The parser for a parsing presentation cannot be constructed automatically from the presentation. Instead, we use the parser that was specified in the presentation sheet, which is stored in the \p{ParsingTk} value. These parsers are specified using the UU Parsing library~\cite{swierstra03polishParsers, swierstra08parserCombinators}. This is a library for creating fast error correcting parsers with support for user-friendly error messages. The error recovery aspect means that several parse errors can be shown simultaneously.
 
-Parsers are combinator parser with error recovery~\cite{swierstra03polishParsers, swierstra08parserCombinators}.
-because of extra state (hidden presentations), and presentation ids, little bit extra info is kept
-only when needed. Parser will be very similar to parser in a compiler.
+A Proxima parser is very similar to a regular parser specified with a combinator parser library. The only difference is that, in order to let the scanner handle whitespace, the presentation id's of the parsed tokens need to be stored in the appropriate fields of the document node. 
+
+The list of tokens to which the parser is applied will all be either \p{UserTk}, \p{StructuralTk}, or \p{ErrorTk} tokens, since nested \p{ParsingTk} tokens are not created by the scanner. Primitive parsers are available for user tokens and structural tokens. No primitive parser is offered for error tokens, since these signal a lexical error by the scanner, which should always lead to a parse error.
+
+In line with the previous examples, we show part of a parser for expressions. The parser does not take into account priorities.\todo{mention that holes need to be explicitly parsed?}
+
+\begin{footnotesize}
+\begin{verbatim}
+parseExp :: Parser Exp
+parseExp =
+      (\tk e1 e2 -> PlusExp (getIDP tk) e1 e2)
+    <$> pToken (Op "+") <*> parseExp <*> parseExp
+  <|> pStructural Node_Div
+  <|> pStructural Node_Power
+\end{verbatim}%$
+\end{footnotesize}
+
+The \p{pToken} parser is a primitive parser that succeeds on the user token that is passed as an argument. The \p{Structural} parser succeeds on the structural token for a value of the type that is denoted with its argument. The argument is of type \p{Token} which is a generated union of all constructors in the document.\todo{not the type, but the constructor} 
+
+Although Proxima currently uses the UU Parsing library, this connection is not fixed. In fact, any  parser library that allows a user-defined token type as input and produces Haskell values is suitable. Hence, a binding with for example the Parsec library~\cite{leijen08parsec} is also possible. The only thing that needs to be done in order to use a different library is to define a primitive parser \p{pStructural} for the new library.
 
 
-In line with. we give the parser for expressions:\todo{mention that holes need to be explicitly parsed?}
+\subsection{Parse errors} \label{sect:parseScanErrors}
 
-Connection with parser is not fixed. in fact other module that parses tokens to document nodes can be used. Parsec~\cite{leijen08parsec}.
+On a parse error, a parser does not return a document tree, which means that the document cannot be presented. To account for this, the parser can return a special parse error value, for which a constructor is added to each type in the document. It has the following type:
 
+\begin{footnotesize}
+\begin{tabbedCode}
+data T =
+  ...
+  | ParseErr\_$<Type>$ [ErrorMessages [Token node usedToken] 
+\end{tabbedCode}
+\end{footnotesize}
 
+When a parse error is encountered, the parser constructs a \p{ParseErr} value and supplies it with a list of error messages and the list of tokens that it tried to parse. The presenter uses the list of tokens when the parse error node is presented. In addition, squiggly lines are put at the presentation of tokens that are referenced in the \p{ErrorMessages} list. Each nonterminal in the document has a generated synthesized attribute \p{parseErrors}, which is the collection of all parse errors in the nonterminal or its descendents. This attribute can be used to show a list of parse errors in the presentation. The whitespace for the tokens in the parse error node was already handled by scanner, and is restored by the layouter in the same way as it is for tokens from ordinary presentation.
 
-\section{Parse errors} \label{sect:parseScanErrors}
-
-On a parse error, the parser does not return a document tree
-we don't get a tree, so tricky to present. Parse and present should be identity (with squiggly for error). Won't appear in structural presentations, unless something is wrong in the presentation. In this case error is signaled. Problem for editor builder. In parsing presentations. Parse errors are normal, during programming most of the time not syntactically correct.
-
-Approach: all nonterminals have a parseErr constructor. Insteafd of a value of type T, we get ParseErr\_T (is a value of type T). The parse error alternative has error loc + message and a list of tokens.
-
-On presentation, the tokens are presented, and the location of the error gets a squiggly. Whitespace is added by the layouter as for any other token. Message is available as an attribute.
 
 % lexical errors
-Lexical errors pose a problem, since Alex stops at the character of the lexical error. Hence any following whitespace is not recorded. However, we do want the presentation of the lexical error to stay the same. Hence, an error token \todo{annoying that we haven't explained parse errors yet} is treated specially and expands its whitespace into spaces and line breaks.
-
+Lexical errors require a special treatment. When Alex encounters a lexical error, it stops at the offending character. The offending character and the remainder of the input are put in an \p{ErrotTk} token, which will always cause a parse error since no primitive parser is offered that accepts it. However, any whitespace after the offending character will be recorded in the string, rather than stored in the whitespace map. The layouter, therefore, treats error tokens specially, and expands whitespace that is encoded in the string. \todo{interpretation extra state in parsing will require storing ScanChars rather than chars}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Related work}
+\section{Related work}\label{sect:relatedWork}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\bc
 \todo{more?}
 
 %\head{\small Eclipse}
@@ -481,13 +507,21 @@ Lexical errors pose a problem, since Alex stops at the character of the lexical 
 
 Because of the orientation towards code editing, word-processing editors will be harder to specify in Barista. The same holds for editors for which the structure of the presentation does not follow the structure of the document. Barista has no special support for derived values in the presentation or for editable derived structures.
 
+\ec
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-\section{Conclusion} 
+\section{Conclusion}\label{sect:conclusion}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\bc
+\bl
+\o document extra state in parsing presentations not shown here.
+\el
 
 \bl
 \o more static checks are possible
@@ -495,6 +529,9 @@ Because of the orientation towards code editing, word-processing editors will be
 \o dtd pres and parser give simple environment
 \o use ag to add static/type checks
 \el
+
+\ec
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
