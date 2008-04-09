@@ -13,3 +13,7 @@
 \rmfamily
 \end{footnotesize}
 }
+
+%% kopje met skip ervoor en geen pagebreak erna
+%% \head from Utils.sty uses bigskip which is too large in sblp style
+\renewcommand{\head}[1]{\smallskip\noindent{\small\sffamily\bfseries #1}\nopagebreak[4]}
