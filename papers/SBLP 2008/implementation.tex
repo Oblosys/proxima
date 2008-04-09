@@ -42,22 +42,27 @@ Proxima~\cite{schrage04Proxima} is a generic structure editor suitable for a ran
 
 
 % example of structural and presentation oriented editing
-For a source code editor, a structural edit operation is based on the abstract syntax. For example means that a program source can be edited based on its abstract syntax(e.g.\ element in a list, causing freely edited textually if 
+For a source code editor, a structural edit operation is based on the abstract syntax. This means that entire functions or procedures can easily be selected or moved, and also that operations on lists of elements automatically insert and delete separators.
 
-$(1+2) \times (3+4)$. Deleting the middle part $(1+\framebox{$\,2) \times ($}\,3+4)$ yields $(1+3+4)$ and is a presentation-oriented edit operation that does not directly correspond to a 
+Presentation-oriented edit operations, on the other hand, do not necessarily correspond to meaningful operations on the document. For example, if the middle part of the expression $(1+\framebox{$\,2) \times ($}\,3+4)$ is deleted, we get a correct expression $(1+3+4)$. This edit operation cannot intuitively be expressed by means of document-oriented edit operations.
+
 
 % mapping between doc and pres, specified in number of sheets
-In order to support editing on both the document and the presentation, Proxima maintains a bidirectional mapping between these two
+In order to support editing on both the document and the presentation, Proxima maintains a bidirectional mapping between these two data structures. This mapping is implemented in a number of steps, several of which are parameterized by so called {\em sheets}. Together with a document type definition, these sheets are the instantiation of an editor.
 
-% examples of Proxima
-Helium + Bayes editor
-
+\todo{mention Bayes?}
 % presentations are textual, or graphical (call it structural). Cannot edit this one. children can be
 
-\bl
-\o Generic editor as IDE
-\o by giving type, pres, and parser, we get an environment almost for free
-\el
+A generic editor is very suitable for building developing programming language environments. By supplying a document type, a presentation sheet, and a scanner and parser, a syntax-aware editor is constructed with little effort. The editor can easily be extended with static checks,
+An editor for a subset of the functional language Helium~\cite{heeren03helium} has been implemented with Proxima. Figure~\ref{fig:heliumEditor} contains a screenshot of this editor. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{images/HeliumEditor}
+\caption{An editor for Helium.}
+\label{fig:heliumEditor}
+\end{figure}
+
 
 \bl
 \o parsing is not simply text. mix.
@@ -518,6 +523,7 @@ Because of the orientation towards code editing, word-processing editors will be
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+
 \bc
 \bl
 \o document extra state in parsing presentations not shown here.
@@ -526,10 +532,9 @@ Because of the orientation towards code editing, word-processing editors will be
 \bl
 \o more static checks are possible
 \o easy ways to increase speed after change management
-\o dtd pres and parser give simple environment
+\o Proxima allows building IDE with only little effort.
 \o use ag to add static/type checks
 \el
-
 \ec
 
 
