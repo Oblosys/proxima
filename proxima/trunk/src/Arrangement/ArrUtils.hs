@@ -265,7 +265,7 @@ pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heigh
 
 -- precondition: x' y' falls inside the arrangement. (Except for GraphA and EdgeA)
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
---point' x' y' pth loc p@(EmptyA _)                     = Nothing -- does not occur at the moment
+point' x' y' pth loc p@(EmptyA _ x y w h _ _ _)           = Just (pth, loc)
 point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _ _)  = Just (pth, loc)
 point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ __ _ _ _) = Just (pth, loc)
 point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _ _)   = Just (pth, loc)

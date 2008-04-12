@@ -51,6 +51,8 @@ Only the tokens of a PresentationTk.
 Challenges/todo:
 
 TODO: 
+- parse error for no tokens, restore whitespace and focus. (we can store the no token idp
+  that is a problem for other presentations simply in the parseError node)
 - reorder params in Token
 - is clipparser really a maybe?
 - clear IDPS in pastePres
