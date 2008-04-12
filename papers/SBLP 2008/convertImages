@@ -22,7 +22,11 @@ done
 
 for image in $(/usr/bin/find images/ -type f -iname '*.jpg' |sed 's!\.jpg$!!');
 do 
-echo converting "$image.png" to "$image.eps"
-/c/data/bin/ImageMagick/convert "$image.png" "$image.eps";
+echo converting "$image.jpg" to "$image.eps"
+/c/data/bin/ImageMagick/convert "$image.jpg" "$image.eps";
 done
 
+# Note: if the source is a pdf (e.g. for Visio diagrams). Set it to read-only, and create a .eps
+# by converting a saved .png with imageMagick/convert. Afterwards, delete the .png so pdfLatex does
+# not use it (instead of the pdf). The pdf needs to be write protected, so the automatic .eps -> .pdf
+# conversion does not destroy it.

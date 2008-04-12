@@ -3,10 +3,12 @@
 \usepackage{sbc-template}
 \usepackage{graphicx,url}
 \usepackage[latin1]{inputenc}  
-
 \usepackage{../Utils}
 \usepackage{implementation}     
 \sloppy
+
+%include polycode.fmt
+
 
 \title{Beyond ASCII -- Parsing Programs with Graphical Presentations \\{\small \version}}
 
@@ -15,7 +17,7 @@
 
 \address{Institute of Information and Computing Sciences\\ Utrecht University\\
     Utrecht, The Netherlands
-  \email{\{martijn,doaitse\}@cs.uu.nl}
+  \email{\{martijn,doaitse\}@@cs.uu.nl}
 }
 
 \begin{document} 
@@ -25,8 +27,14 @@
 \begin{abstract}
 
 
+\bc onduidelijk commentaar Doaitse
+Verwarring met later. 
+
+Although the user has the illusion that all editing is done on the presentation, many editing actions implicitly change the document structure too. The question which arises is how to map changes in the presentation, stemming from editing actions, onto changes in the structured document. Changes in the presentation both include ... \ec
+
+
 % max 15 lines
-Proxima is generic structure editor suitable for a wide range of document types. It allows edit operations on the document structure as well as on its screen representation (i.e.\ free-text editing) without the need to switch between modes. The system maintains a bidirectional mapping between the document structure and its presentation. Besides obvious applications, such as word-processor and spread-sheet editors, the system, is also well-suited for implementing source editors for programming languages.
+Proxima is generic structure editor suitable for a wide range of document types. It allows edit operations on the document structure as well as on its presentation (free-text editing). The system maintains a bidirectional mapping between the document structure and its presentation. Besides obvious applications, such as word-processor and spread-sheet editors, the system, is also well-suited for implementing source editors for programming languages.
 
 Presentation-oriented edit operations require that an edited presentation can be parsed to yield an updated document structure. However, conventional parsing techniques cannot readily be applied, since presentations in Proxima are not restricted to text but may contain graphical elements. For example, an expression like $3^2$ cannot be directly edited at the presentation level, altough some of its components can. So instead of simply parsing the changed representation, we have to take the existing structure into account. 
 
@@ -37,7 +45,7 @@ This paper explains the scanning and parsing process for presentations that are 
 \section{Introduction}
 
 % what is Proxima
-Proxima~\cite{schrage04Proxima} is a generic structure editor, suitable for a range of different kinds of documents. The key feature of Proxima is the combination of structural editing and presentation editing it provides. Figure~\ref{fig:heliumEditor} is a screenshot of Proxima at work, showing an editor for the functional programming language Helium~\cite{heeren03helium}. The editor provides automatically inferred type signatures as well as type information of identifiers in scope. Furthermore, graphical presentations of the source are supported, as the declaration of \p{f} illustrates.
+Proxima~\cite{schrage04Proxima} is a generic structure editor, suitable for a range of different kinds of documents. The key feature of Proxima is the combination of structural editing and presentation editing it provides. Figure~\ref{fig:heliumEditor} is a screenshot of Proxima at work, showing an editor for the programming language Helium~\cite{heeren03helium}, which is a subset of Haskell.
 
 
 \begin{figure}[ht]
@@ -48,77 +56,23 @@ Proxima~\cite{schrage04Proxima} is a generic structure editor, suitable for a ra
 \end{figure}
 
 
-When editing program code, a structure-based view of the text often comes in handy. One might want to select a complete  function, or a subexpression, by a simple gesture, being assisted by the editor which knows the structure of the document. We refer to such edit operations as {\em structural} edit operations.
+% nothing is primitive, hence very customizable
 
-On the other hand, {\em presentation-oriented} edit operations, do not necessarily correspond to meaningful operations on the document. For example, if the middle part of the expression $(1+\framebox{$\,2) \times ($}\,3+4)$ is deleted, we get a correct expression $(1+3+4)$. This edit operation cannot intuitively be expressed by means of a structural edit operation.
+For a source code editor, a structural edit operation is based on the abstract syntax. This means that entire functions or procedures can easily be selected or moved, and also that operations on lists of elements automatically insert and delete separators.
+
+Presentation-oriented edit operations, on the other hand, do not necessarily correspond to meaningful operations on the document. For example, if the middle part of the expression $(1+\framebox{$\,2) \times ($}\,3+4)$ is deleted, we get a correct expression $(1+3+4)$. This edit operation cannot intuitively be expressed by means of document-oriented edit operations.
 
 
-In order to support editing on both the document and the presentation, Proxima maintains a bidirectional mapping between two data structures: the structural description of the document, and its actual presentation on the screen. This mapping is described as a composition of a number of smaller mappings, several of which are parameterized by so called {\em sheets}. Together with a document type definition, these sheets form the instantiation of an editor. By supplying a document type, a presentation sheet, and a scanner and parser, a syntax-aware editor may be constructed with little effort.
-
-
+% mapping between doc and pres, specified in number of sheets
+In order to support editing on both the document and the presentation, Proxima maintains a bidirectional mapping between two data structures: the structural description of the document, and its actual presentation on the screen. This mapping is described as a composition of a number of smaller mappings, several of which are parameterized by so called {\em sheets}. Together with a document type definition, these sheets form the instantiation of an editor. By supplying a document type, a presentation sheet, and a scanner and parser, a syntax-aware editor may be constructed with little effort. \bc The editor can easily be extended with static checks.\ec 
 % example of structural and presentation oriented editing
-% define terms
-% nesting
-
-To illustrate the scanning and parsing process, we focus on a small example. Figure~\ref{fig:images/scanFrac} shows a declaration that has a combined textual and graphical presentation. The fraction and the power both have a graphical presentation, which we will refer to these as a {\em structural} presentation. Textual presentations are denoted by the term {\em parsing} presentations. 
-
-The figure shows that a parsing presentation may contain structural presentations (e.g.\ the parsing presentation of the declaration contains a structural fraction). Vice versa, structural presentations may also contain parsing presentations. The fraction, for example, has parsing presentations for the numerator and the denominator (with the latter one containing a structural presentation for the power expression again).
 
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=1in]{images/scanFrac}\
-\end{center}
-\caption{A graphically presented declaration.} \label{fig:graphicalDecl} 
-\end{figure}
 
 % presentations are textual, or graphical (call it structural). Cannot edit this one. children can be
+As can be seen in Figure~\ref{fig:heliumEditor}, the presentation is not plain text, but may contain graphical presentations for certain parts of the document tree (e.g.\ the fractions and powers in the program source). We will refer to them as {\em structural} presentations. Textual presentations (which are not textual in the strict sense, since they may contain structural presentations) are denoted by the term {\em parsing} presentations. Just as parsing presentations may contain structural presentations, structural presentations may have children that have a parsing presentation, as we see in the  case of the numerator and the denominator of the fraction. Because of the complexity of parsing structural presentations and defining a meaningful subset of edit operations, Proxima disallows editing on structural presentations. The parsing children of a structural presentation, however, are editable again.
 
-Because of the complexity of parsing a structural presentation and defining a meaningful subset of edit operations, Proxima disallows editing on structural presentations. Any parsing subpresentations (such as the numerator and denominator in the fraction), however, are editable again. Hence, in Figure~\ref{fig:graphicalDecl} we can type \p{+1} next to the \p{1} in the numerator, but we cannot delete the horizontal line.
-
-After the presentation of a document has been edited, the modified presentation must be parsed to get an unpdate on the document structure. However, due to the mix of structural and parsing presentations, traditional parsing methods cannot readily be used. In this paper, we present the way the scanner and parser layers of Proxima co-operate in scanning and parsing graphical presentations. 
-
-Figure~\ref{fig:scanResult} shows the result of the Proxima scanner when it is applied to the presentation in Figure~\ref{fig:scanFrac}. It consists of a nested structure of \p{ParsingTk} tokens and \p{StructuralTk} tokens. Textual tokens are represented by \p{UserTk} tokens. All tokens have a subscript that denotes the presentation identity, which is a unique number that is used to associate the token with its whitespace. Together with the token structure, the scanner produces a whitespace map. Each tuple encodes the number of trailing linebreaks and the number of trailing spaces. \todo{mention this is no good for spaces followed by linebreaks?}
-
-
-Parsing the token data structure in Figure~\ref{fig:scanResult} is relatively straightforward. For the parsing parts, we use combinator parser that has a special primitive for structural tokens. For each parsing presentation, the presentation sheet specifies the corresponding parser. The structural parts, on the other hand contain enough information to be parsed without the need to specify a parser.
-
-\begin{figure}
-\begin{footnotesize}
-\begin{center}
-\begin{tabbedCode}
-ParsingTk$_0$ \= \\
-~~ \= [ UserTk$_1$ (Ident "x") \\
-   \> , UserTk$_2$ (Op "=") \\
-   \> , StructuralTk$_3$ (DivExp (IntExp 1) (PlusExp ...))\\
-   \> ~~~~ \= [ ParsingTk$_4$ [ UserTk$_5$ (Int 1)] \\
-   \>      \> , ParsingTk$_6$ \= [ StructuralTk$_7$ (PowerExp (IntExp 3) (IntExp 2))\\
-   \>      \>              \> ~~~~ \= [ ParsingTk$_8$    \= [ UserTk$_9$ \= (Int 3) ] \\
-   \>      \>              \>      \> , ParsingTk$_{10}$ \> [ UserTk$_{11}$  \> (Int 2) ] \\
-   \>      \>              \>      \> ] \\
-   \>      \>              \> , UserTk$_{12}$ (Op "+") \\
-   \>      \>              \> , UserTk$_{13}$ (Int 5) \\
-   \>      \>              \> ] \\
-   \>      \> ] \\
-   \> , UserTk$_{14}$ (Op "+") \\
-   \> , UserTk$_{15}$ (Int 1) \\
-   \> ] \\
-\end{tabbedCode}
-\end{center}
-{\bf whitespace map:} $[ 0 \mapsto (0,1), 1 \mapsto (0,1), 2 \mapsto (0,1), 9 \mapsto (0,1), 10 \mapsto (1,0) ]$
-\end{footnotesize}
-\caption{A scanned declaration.} \label{fig:scanResult} 
-\end{figure}
-
-
-%\todo{explain that all tokens in a parsingTk contain refs to their originating nonterminal in the document?}
-% In case of incomplete presentation, we reuse the fields from that node. Fragile. Copy/paste, retyping, it may get lost. So only for non-essential things. 
-
-
-
-
-
-
+After the presentation of a document has been edited, the modified presentation must be parsed to get an unpdate on the document structure. Traditional parsing methods cannot readily be used because the presentation may be partly structural. Instead, the Proxima scanner creates special tokens for structural presentations, which can then be parsed with an ordinary combinator parser. The structural presentation itself is recursively parsed. In this paper, we present the way the scanner and parser layers of Proxima co-operate in scanning and parsing graphical presentations.
 
 The paper is organized as follows. We start by providing a brief overview of Proxima's architecture (Section~\ref{sect:architecture}) and the kind of document types that can be defined (Section~\ref{sect:documentStructure}). Then we explain the components and data types involved in presenting a document in Section~\ref{sect:presentationProcess}. The Proxima scanning and parsing algorithms are explained in sections~\ref{sect:scanner} and~\ref{sect:parser}, which form the core technical content of this paper. Section~\ref{sect:relatedWork} describes related work, and Section~\ref{sect:conclusion} concludes.
 
@@ -133,9 +87,9 @@ The paper is organized as follows. We start by providing a brief overview of Pro
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The core architecture of Proxima consists of a number of layers, each communicating only with its direct neighbors. The layered structure is based on the staged nature of the presentation process.
+The core architecture of Proxima consists of a number of layers, which only communicate with their direct neighbors. The layered structure is based on the staged nature of the presentation process. Instead of mapping a document directly onto its final rendering, it is first mapped onto a nbumber of intermediate data structures.
 
-The positions at which the document, the rendering, and the intermediate data structures reside are called {\em levels}. Between each pair of levels we have a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
+The positions at which the document, the rendering, and the intermediate data structures reside are called {\em data levels}. Between each pair of levels is a {\em layer}, which is a component that maintains the mappings between the levels. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. Only two data levels are visible to each layer: a higher and a lower level.
 
 \begin{figure}[ht]
 \centering
@@ -150,7 +104,7 @@ A data level in Proxima is not just an intermediate value in the presentation co
 \begin{description}
 \item[Document:] The document structure.
 
-\item[Enriched Document:] The document enriched with derived values and structures, such as a type of a function or a table of contents, typically computed by an attribute grammar~\cite{reps84synGen}.
+\item[Enriched Document:] The document enriched with derived values and structures, such as a type of a function or a table of contents.
 
 \item[Presentation:] A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line/page breaking).
 
@@ -161,19 +115,19 @@ A data level in Proxima is not just an intermediate value in the presentation co
 \item[Rendering:] A collection of user interface commands for drawing the absolutely positioned and sized arrangement.
 \end{description}
 
-We briefly discuss each of the five layers.
+Between each pair of adjacent levels is a layer that implements the mapping between the levels. We briefly discuss each of the five layers.
 
 \head{Evaluation layer}\\
-The evaluation layer takes care of computing derived structures and values over the document, and of mapping updates on these derived structures back to document updates. In this layer, for example, type inferencing takes place. The layer is parameterized by an {\em evaluation sheet} and a {\em reduction sheet}, which specify the mappings. 
+The evaluation layer takes care of computing derived structures and values over the document, and of mapping updates on these derived structures back to document updates. It is parameterized by an {\em evaluation sheet} and a {\em reduction sheet}, which specify the mappings. 
 
 \head{Presentation layer}\\
-The presentation layer consists of the presenter and the parser. The presenter takes an enriched document tree, and computes a presentation for it according to the {\em presentation sheet}. Its counterpart, the parser, maps a presentation tree back to an enriched document and is parameterized by a {\em parsing sheet}.
+The presentation layer consists of the presenter and the parser. The presenter takes an enriched document tree, and computes a presentation for it according to the {\em presentation sheet}. Its counterpart, the parser, maps a presentation tree on the enriched document and is parameterized by a {\em parsing sheet}.
 
 \head{Layout layer}\\
-The layout layer handles automatic whitespace, which is kept in a map that associates a token's presentation id with its trailing whitespace. For each token, the layout component looks up the whitespace and inserts actual line breaks and spaces in the presentation. The scanner recognizes tokens in the layout level, based on regular expressions specified in the {\em scanner sheet}. It also stores whitespace in the {\em whitespace map}. Because mapping tokens to strings is straightforward, the layout component does not need sheet parameter.
+The layout layer handles automatic whitespace, which is kept in a map that associates a token's presentation id with its trailing whitespace. For each token, the layout component looks up the whitespace and inserts actual line breaks and spaces in the presentation. The scanner recognizes tokens in the layout level, based on regular expressions specified in the {\em scanner sheet}. It also stores whitespace in the whitespace map. Because mapping tokens to strings is straightforward, the layout component does not need sheet parameter.
 
 \head{Arrangement layer}\\
-In the presentation direction, the arrangement layer computes the precise position and size for each element in the layout level. It also handles line breaking. In the interpretation direction, the only thing that needs to be done is to map absolute coordinates in edit commands to positions in the presentation tree. The arrangement level is not editable, so it need not be mapped back onto the layout level.
+In the presentation direction, the arrangement layer computes the exacts sizes and positions for each element in the layout level. It also handles line breaking. In the interpretation direction, the only thing that needs to be done is to map absolute coordinates in edit commands to positions in the presentation tree. The arrangement level is not editable, so it need not be mapped back onto the layout level.
 
 \head{Rendering layer}\\
 The renderer creates a bitmap for the arrangement. In the other direction is the gesture interpreter, which maps edit gestures onto edit operations designated for the higher layers.
@@ -184,7 +138,7 @@ The renderer creates a bitmap for the arrangement. In the other direction is the
 %\o but this has advantages: new GUI lib in a matter of days.
 %\el
 
-The two levels at which edit operations can have an effect are the document level and the layout level. After an edit operation on the document, all levels from document to rendering are updated to reflect the update. After an edit operation on the layout level, the modified layout is scanned, parsed and reduced, to obtain the corresponding updated document, from which an updated rendering is computed.
+The two levels at which edit operations can take place are the document level and the layout level. After an edit operation on the document, all levels from document to rendering are updated to reflect the update. After an edit operation on the layout level, the modified layout is scanned, parsed and reduced, to obtain the corresponding updated document, from which an updated rendering is computed.
 
 In this paper, we focus mainly on the presentation layer and layout layer, and, more specifically, on the scanner and parser in these layers.
 
@@ -196,7 +150,7 @@ In this paper, we focus mainly on the presentation layer and layout layer, and, 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is a (partial) definition for a type \p{Exp} that has three constructors. It can represent fractions, conditional expressions, and integers.
+The document type in Proxima is a monomorphic (i.e.\ parameter free) Haskell data type together with the list type. Below is a (partial) definition for a type \p{Exp} that has three constructors. It can represent fractions, if expressions, and integers.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -275,7 +229,7 @@ Besides the combinators that produce presentations, \Xprez\ also has combinators
 
 \subsection{Document presentation}
 
-For the presentation of the document, as well as for the computation of derived values and structures, Proxima uses the attribute grammar formalism. The presentation sheet is a file with an attribute grammar definition, which is compiled to a Haskell program by the Utrecht University AG compiler~\cite{swierstra08ag}.
+For the presentation of the document, as well as for the computation of derived values and structures, Proxima uses the attribute grammar formalism. The presentation sheet is file with an attribute grammar definition, which is compiled to a Haskell program by the Utrecht University AG compiler~\cite{swierstra08ag}.
 
 For each non-terminal, the presentation sheet defines a synthesized attribute \p{pres} of type \p{Presentation}.\todo{explain params?} In the rule for \p{pres}, the presentations of child fields can be used. Besides the presentation, arbitrary synthesized and inherited attributes can be defined on the document tree. This way it is easy to specify static checks or for example the computation of all variables in scope at a certain document location. Moreover, external Haskell modules can be called, allowing for complex computations, such as type checking.
 
@@ -429,12 +383,46 @@ In order to use the automatic whitespace recognition, the following rule must be
 
 As a result, the scanner will emit special tokens for sequences of whitespace. A post processing phase removes these whitespace tokens, and creates an entry in the whitespace map for the whitespace and the presentation id of the preceding token in the list. \todo{say more about focus?}
 
-\bl
-\o leading whitespace is added to first token. If non empty, then always be a first token, or a parse error, which takes care. So expression no problem. however list of decl, extra IDP field and on top-level parser variant of parsing that records the idp.
-\el
 % first token whitespace
 
+\subsection{An example}
 
+To further clarify the previous discussion, we give an example of a layout that is scanned with the scanner sheet in Figure~\ref{fig:scannerSheet}:
+% The presentation originates from a declaration of a value \p{x}:
+
+\begin{center}
+\includegraphics[width=1in]{images/scanFrac}\
+\end{center}
+\todo{rename f to x}
+
+The sample layout contains two structural presentations, one for the fraction, and one for the power. The scanner will return the following token structure: (presentation id's are shown with subscripts)\todo{maybe add paths}
+\begin{tabbedCode}
+ParsingTk \= \\
+~~ \= [ UserTk$_0$ (Ident "f") \\
+   \> , UserTk$_1$ (Op "=") \\
+   \> , StructuralTk$_2$ (DivExp (IntExp 1) (PlusExp ...))\\
+   \> ~~~~ \= [ ParsingTk [ UserTk$_3$ (Int 1)] \\
+   \>      \> , ParsingTk  \= [ StructParsingTk$_4$ (PowerExp (IntExp 3) (IntExp 2))\\
+   \>      \>              \> ~~~~ \= [ ParsingTk [ UserTk$_5$ (Int 3) ] \\
+   \>      \>              \>      \> , ParsingTk [ UserTk$_6$ (Int 2) ] \\
+   \>      \>              \>      \> ] \\
+   \>      \>              \> , UserTk$_7$ (Op "+") \\
+   \>      \>              \> , UserTk$_8$ (Int 5) \\
+   \>      \>              \> ] \\
+   \>      \> ] \\
+   \> , UserTk$_9$ (Op "+") \\
+   \> , UserTk$_{10}$ (Int 1) \\
+   \> ] \\
+\end{tabbedCode}
+
+%\todo{explain that all tokens in a parsingTk contain refs to their originating nonterminal in the document?}
+% In case of incomplete presentation, we reuse the fields from that node. Fragile. Copy/paste, retyping, it may get lost. So only for non-essential things. 
+
+Together with the token structure, a whitespace map is returned. Each tuple encodes the number of trailing linebreaks and the number of trailing spaces. \todo{mention this is no good for spaces followed by linebreaks?}
+
+\noindent \begin{math}
+\p{Whitespace}: =[ 0 \mapsto (0,1), 1 \mapsto (0,1), 2 \mapsto (0,1), 9 \mapsto (0,1), 10 \mapsto (1,0) ]
+\end{math}
 
 
 
@@ -471,16 +459,14 @@ The list of tokens to which the parser is applied will all be either \p{UserTk},
 
 In line with the previous examples, we show part of a parser for expressions. The parser does not take into account priorities.\todo{mention that holes need to be explicitly parsed?}
 
-\begin{footnotesize}
-\begin{verbatim}
+\begin{code}
 parseExp :: Parser Exp
 parseExp =
       (\tk e1 e2 -> PlusExp (getIDP tk) e1 e2)
     <$> pToken (Op "+") <*> parseExp <*> parseExp
   <|> pStructural Node_Div
   <|> pStructural Node_Power
-\end{verbatim}%$
-\end{footnotesize}
+\end{code}
 
 The \p{pToken} parser is a primitive parser that succeeds on the \p{UserToken} value that is passed as an argument. The \p{pStructural} parser succeeds on a structural token for a value of the type that is denoted with its argument. The argument is of type \p{Token} which is a generated union of all constructors in the document.\todo{not the type, but the constructor} 
 
@@ -491,13 +477,11 @@ Although Proxima currently uses the UU Parsing library, this connection is not f
 
 On a parse error, a parser does not return a document tree, which means there will not be a document to present. To account for this, the parser can return a special parse error value, for which a constructor is added to each type in the document. For a document type $Type$, this constructor has the following form:
 
-\begin{footnotesize}
-\begin{tabbedCode}
+\begin{code}
 data $Type$ =
   ...
   | ParseErr\_$Type$ [ErrorMessage] [Token node userToken] 
-\end{tabbedCode}
-\end{footnotesize}
+\end{code}
 
 When a parse error is encountered, the parser constructs a \p{ParseErr} value and supplies it with a list of error messages and the list of tokens it tried to parse. The presenter uses the list of tokens when the parse error node is presented. In addition, squiggly lines are put at the presentation of tokens that are referenced in the \p{ErrorMessages} list. The whitespace for the tokens in the parse error node was already handled by scanner, and is restored by the layout component in the same way as it is for tokens from ordinary presentation.
 
@@ -507,32 +491,28 @@ Each nonterminal in the document has a generated synthesized attribute \p{parseE
 % lexical errors
 Lexical errors require a special treatment. When Alex encounters a lexical error, it stops at the offending character. The offending character and the remainder of the input are put in an \p{ErrorTk} token, which will always cause a parse error since no primitive parser is offered that accepts it. Since scanning the string stops at the offending character, all following whitespace  will be recorded in the string, rather than stored in the whitespace map. The layout component, therefore, treats error tokens specially, by expanding any whitespace that is encoded in the string. %\todo{interpretation extra state in parsing will require storing ScanChars rather than chars}
 
-
-
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 \section{Related work}\label{sect:relatedWork}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-Editors for mathematical formulas, such as AmayaMathematica~\cite{mathematica} However, these systems work for a fixed document type, which is not easily extensible. Eisenberg and Kiczales describe a presentation extension formalism for Eclipse, but their solution is based on the Java language.
-
-The Barista~\cite{KoMyers06Barista} framework has similarities to Proxima, although it is targeted mainly at code editors. The system allows graphical presentations for program structures, but these are expanded to the underlying textual presentation when the user 
 \bc
-older systems either had text only synthesizer generator, asfsdf. Or purely structural visual redwood + some other visual langs, but then no free text editing.
+Several structure editors with graphical presentations (visual programming), but most do not allow presentation-editing. Hence no parser for these needed.
+% mention Harmonia? Apparen
+\todo{more?}
 
-Many systems such as Mathematica, or amaya do support  but only on fixed type. More flexible Eisenberg Kiczales but still for Java. 
+%\head{Eclipse}
 
-More modern is Barista. Allows graphical views. However, when editing the view, it is expanded to its sequential representation. Good as an option, but in many cases unnecessary. 
+%\noindent Eclipse~\cite{eclipse2001} is a Java-based platform for building integrated development environments. The platform has an open architecture, and can be easily extended through a plug-in mechanism. Eclipse includes a syntax-recognizing Java editor, which supports in-place type information, refactoring, as well as document-oriented edit operations. 
 
+%Though it is not exactly a generic editor, Eclipse does have facilities for creating syntax-recognizing source editors. Unfortunately, building a code editor similar to the Java editor for a different language, requires a substantial amount of programming. Moreover, the presentation of the code is rather limited (lines of text), and there is no support for derived values appearing in the presentation.
 
+\head{Barista, Citrus}
 
 \noindent Barista~\cite{KoMyers06Barista} is a powerful framework for building code editors. It is built on top of Citrus~\cite{KoMyers05Citrus}, which is a UI toolkit together with an object-oriented language. Although Barista is targeted at code editors, the presentation of the code can be visual, for example allowing for images to appear in comments, or having graphical presentations of code. The editors created with Barista are syntax directed, but presentation-oriented editing is available. 
+
+Because of the orientation towards code editing, word-processing editors will be harder to specify in Barista. The same holds for editors for which the structure of the presentation does not follow the structure of the document. Barista has no special support for derived values in the presentation or for editable derived structures.
 
 \ec
 
