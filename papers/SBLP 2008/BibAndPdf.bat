@@ -1,5 +1,5 @@
-pdflatex implementation
+pdflatex -quiet implementation
 bibtex implementation
-pdflatex implementation
-pdflatex implementation
+pdflatex -quiet implementation
+pdflatex -quiet implementation
 pause
