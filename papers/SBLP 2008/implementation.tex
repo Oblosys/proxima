@@ -75,9 +75,10 @@ The figure shows that a parsing presentation may contain structural presentation
 
 % presentations are textual, or graphical (call it structural). Cannot edit this one. children can be
 
-Because of the complexity of parsing a structural presentation and defining a meaningful subset of edit operations, Proxima disallows presentation editing on structural presentations. Any parsing subpresentation (such as the numerator and denominator in the fraction), however, is editable again. Hence, in Figure~\ref{fig:graphicalDecl} we can type \p{+1} next to the \p{1} in the numerator, but we cannot delete the horizontal line. We can delete the entire fraction though, by putting the caret after it and pressing backspace. A fraction may be introduced using a menu, or by typing a `$/$' operator, which is replaced by a graphical fraction after the next successful parse. \todo{low priority: also say that / remains until parsing after which focus is restored?}
+Because of the complexity of parsing a structural presentation and defining a meaningful subset of edit operations, Proxima disallows presentation editing on structural presentations. Any parsing subpresentation (such as the numerator and denominator in the fraction), however, is editable again. Hence, in Figure~\ref{fig:graphicalDecl} we can type \p{+1} next to the \p{1} in the numerator, but we cannot delete the horizontal line. We can delete the entire fraction though, by putting the caret after it and pressing backspace. A fraction may be introduced using a menu, or by typing a `$/$' operator, which is replaced by a graphical fraction after the next successful parse. 
+%\todo{low priority: also say that / remains until parsing after which focus is restored?}
 
-Summarizing, we have two kinds of presentation:
+Summarizing, we have two kinds of presentations:
 
 \bl
 \o {\bf Parsing presentation} A presentation that contains consists of text and possible structural presentations. It supports structure editing as well as presentation editing.
