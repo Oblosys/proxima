@@ -46,7 +46,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
     MouseDownArr x y (Modifiers False False False) i ->
-          ( SetFocusLay (computeFocus x y)  
+          ( SetFocusLay (computeFocus arr pres x y)  
           , state { getLastMousePress = Just (x,y)}, arrLvl)
 -- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
@@ -91,23 +91,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     DocumentLoadedArr str -> (DocumentLoadedLay str, state, arrLvl) 
     _                     -> (SkipLay 0,             state, arrLvl) 
   
-  where computeFocus x y = -- if we focus on empty, add a navigate left/right, based
-                           -- on whether x is left or right of the middle
-                           -- not yet ideal, we want to have left/right depend on whether
-                           -- there is something focusable on the same level. 
-                           -- click at . in (.   1    /     2   )  should go right to |1
-          let focusA = focusAFromXY x y arr 
-              focusP = focusPFromFocusA focusA arr pres
-          in  case (focusA,focusP) of
-                (FocusA (PathA pth i) _,FocusP pathPres _) ->
-                  case selectTreeA pth arr of
-                    (x',_,EmptyA _ x'' _ width _ _ _ _) -> 
-                      if x-(x'+x'') < width `div` 2 
-                      then TreeEditPres.navigateLeftTreePres pathPres pres
-                      else TreeEditPres.navigateRightTreePres pathPres pres
-                    _ -> focusP
-            
-                _ -> focusP
+
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
@@ -137,3 +121,39 @@ isGraphEdit x y arr pres =
                            Just $ AddEdgeLay (pathPFromPathA' arr pres pth)
                          _                                             -> Nothing
         _ -> Nothing
+
+
+
+
+
+computeFocus arr pres x y = -- if we focus on empty, add a navigate left/right, based
+                           -- on whether x is left or right of the middle
+                           -- not yet ideal, we want to have left/right depend on whether
+                           -- there is something focusable on the same level. 
+                           -- click at . in (.   1    /     2   )  should go right to |1
+          let focusA = focusAFromXY x y arr 
+              focusP = focusPFromFocusA focusA arr pres
+          in  case (focusA,focusP) of
+                (FocusA (PathA pth i) _,FocusP pathPres _) ->
+                  case selectTreeA pth arr of
+                    (x',_,EmptyA _ x'' _ width _ _ _ _) -> 
+                      if x-(x'+x'') < width `div` 2 
+                      then TreeEditPres.navigateLeftTreePres pathPres pres
+                      else TreeEditPres.navigateRightTreePres pathPres pres
+                    _ -> focusP
+            
+                _ -> focusP
+
+{-
+isEditablePres ~> isParsingPres
+
+if isParsing ..
+else 
+  get nearestParentStructuralInParsing
+  
+
+
+in structural
+
+select while keep track of p/s
+-}
