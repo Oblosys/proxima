@@ -84,14 +84,17 @@ detokenizeList wm i (pres:press) = let (pres',  f1) = detokenize wm pres
 
 
 detokenizeParsing wm (ParsingP idp pr l pres) =
-  let rows = detokenize' wm False pres
+  let rows = detokenize' wm False $ RowP NoIDP 0 
+                                      [ TokenP idp $ UserTk undefined undefined "" undefined undefined
+                                      , pres] -- add a dummy token for leading whitespace
       presss = map (map fst) $ rows
       focusss = [ prependToFocus y $ prependToFocus x $ focus
                 | (y,row) <- zip [0..] rows, (x,(_,focus)) <- zip [0..] row
                 ]
       f = foldl combineFocus  noFocus focusss
   in -- debug Lay ("\n\n\ndetokenizeParsingP: "++show pres++" yields "++show presss) $
-     ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
+     debug Lay ("\n\n\ndetokenizeParsingP: "++show (Map.member idp wm)) $
+    ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
                                              then [RowP NoIDP 0 [StringP NoIDP ""]]
                                              else (map (RowP NoIDP 0)) presss
      , prependToFocus 0 $ f
