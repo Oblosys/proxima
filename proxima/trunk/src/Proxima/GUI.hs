@@ -340,8 +340,13 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; when markUpdatedRenderingArea $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
                   ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
-                  ; mapM_ (\((x,y),(w,h)) -> drawRectangle dw gc False x y (w-1) (h-1)) updRegions
-                  }                     -- outline rectangles are 1 px too large
+                  ; debugLnIO GUI $ "updated regions:" ++ show updRegions 
+                  ; mapM_ (\((x,y),(w,h)) -> 
+                             if w > 0 && h > 0 -- outline rectangles are 1 px too large  
+                             then drawRectangle dw gc False x y (w-1) (h-1)
+                             else return ()  -- but -1 is not zero width/height but infinity..
+                          ) updRegions
+                  }                     
                    
             ; when reducedViewedArea $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
