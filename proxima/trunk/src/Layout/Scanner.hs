@@ -221,8 +221,9 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      scannedWhitespaceMap = storeTokenWhitespace Map.empty scannedTokensIDPs
      -- retrieve whitespace and focus info from each token and store it in the WhitespaceMap
      
-     scannedWhitespaceMap' = storeLeadingWhitespace scannedWhitespaceMap idP' scannedTokensIDPs
-     -- leading whitespace is (for now) stored under idP'
+     scannedWhitespaceMap' = storeLeadingWhitespace scannedWhitespaceMap idP' 
+                               (scannedFocusStart,scannedFocusEnd) scannedTokensIDPs
+     -- leading whitespace is (for now) stored under idP', and, in case of empty token list, scanned focus
      
      tokens = catMaybes $ map f scannedTokensIDPs
                 where f (ScannedToken _ t) = Just t
@@ -230,10 +231,9 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      -- finally, remove all whitespace tokens.
      
  in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
-     --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
      --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
      --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
-     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $
+     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $
      --debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP']
@@ -396,9 +396,14 @@ storeTokenWhitespace whitespaceMap scannedTokens =
     -- we ignore this one, since it handled by the function below
 
 
--- Store leading whitespace under parsingTkIDP.
-storeLeadingWhitespace whitespaceMap parsingTkIDP (ScannedWhitespace wf ws :_) =
+-- Store leading whitespace under parsingTkIDP. When there are no tokens, the scanned focus
+-- is stored under parsingTkIDP.
+storeLeadingWhitespace whitespaceMap parsingTkIDP (scannedFocusStart,scannedFocusEnd) [] =
+  let tokenLayout = TokenLayout (0,0) (Nothing, Nothing) 
+                                (scannedFocusStart,scannedFocusEnd) -- will both be Nothing or Just 0
+  in  Map.insert parsingTkIDP tokenLayout whitespaceMap
+storeLeadingWhitespace whitespaceMap parsingTkIDP _ (ScannedWhitespace wf ws :_) =
   let tokenLayout = TokenLayout ws wf (Nothing,Nothing) -- no preceding token, so no token focus
   in  Map.insert parsingTkIDP tokenLayout whitespaceMap
-storeLeadingWhitespace whitespaceMap _ _ = whitespaceMap
+storeLeadingWhitespace whitespaceMap _ _ _ = whitespaceMap
 

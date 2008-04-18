@@ -93,8 +93,7 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
                 ]
       f = foldl combineFocus  noFocus focusss
   in -- debug Lay ("\n\n\ndetokenizeParsingP: "++show pres++" yields "++show presss) $
-     debug Lay ("\n\n\ndetokenizeParsingP: "++show (Map.member idp wm)) $
-    ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
+     ( ParsingP idp pr l $ ColP NoIDP 0 NF $ if null presss 
                                              then [RowP NoIDP 0 [StringP NoIDP ""]]
                                              else (map (RowP NoIDP 0)) presss
      , prependToFocus 0 $ f
