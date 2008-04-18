@@ -182,7 +182,6 @@ scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' shee
          in  (tokens ++ tokenss, idpc'', wm'', pres':press')
 
 
-
 scanPresentation :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
                     IDP -> Maybe (ClipParser doc node clip token) -> Lexer -> Layout doc node clip token ->
@@ -210,12 +209,20 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                                   scannedTokens
      
      -- store any last char focus in the last token
-                     
-     (scannedTokensIDPs, addedIdPs, idPCounter'') = addIdPs (IntSet.empty,idPCounter') scannedTokensWithLastFocus
+                  
+     (idP', idPCounter'') = case idP of
+                              NoIDP -> (IDP idPCounter', idPCounter' + 1)             
+                              _     -> (idP,             idPCounter'    )
+     -- Assign an idp for this parsingTk, if the ParsingP did not already have one.                              
+                              
+     (scannedTokensIDPs, addedIdPs, idPCounter''') = addIdPs (IntSet.empty,idPCounter'') scannedTokensWithLastFocus
      -- the scanned tokens may have double or missing idp's. addIdPs creates idps for all tokens.
      
-     scannedWhitespaceMap = retrieveTokenWhitespace Map.empty scannedTokensIDPs
+     scannedWhitespaceMap = storeTokenWhitespace Map.empty scannedTokensIDPs
      -- retrieve whitespace and focus info from each token and store it in the WhitespaceMap
+     
+     scannedWhitespaceMap' = storeLeadingWhitespace scannedWhitespaceMap idP' scannedTokensIDPs
+     -- leading whitespace is (for now) stored under idP'
      
      tokens = catMaybes $ map f scannedTokensIDPs
                 where f (ScannedToken _ t) = Just t
@@ -226,11 +233,11 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      --debug Lay ("Last whitespaceFocus':" ++ show (afterLastCharFocusStart)) $
      --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
      --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
-     --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap ) $
+     debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $
      --debug Lay (showScannedTokens scannedTokensIDPs) $
      
-     ( [ParsingTk parser mNode tokens idP]
-     , idPCounter'', scannedWhitespaceMap `Map.union` whitespaceMap'
+     ( [ParsingTk parser mNode tokens idP']
+     , idPCounter''', scannedWhitespaceMap' `Map.union` whitespaceMap'
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )
 
@@ -371,19 +378,27 @@ addIdPs (addedIdPs,idPCounter) (st: sts) =
 
 -- For each scannedToken, store its focus and its trailing whitespace and whitespacefocus in the 
 -- WhitespaceMap.
-retrieveTokenWhitespace whitespaceMap scannedTokens = 
+storeTokenWhitespace whitespaceMap scannedTokens = 
   case scannedTokens of 
     [] -> 
       whitespaceMap
     (ScannedToken f t: ScannedWhitespace wf ws : sts) ->  -- token with trailing whitespace
       let tokenLayout = TokenLayout ws wf f
           whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
-      in  retrieveTokenWhitespace whitespaceMap' sts
+      in  storeTokenWhitespace whitespaceMap' sts
     (ScannedToken f t: sts) ->                            -- token without trailing whitespace
       let tokenLayout = TokenLayout (0,0) (Nothing,Nothing) f
           whitespaceMap' = Map.insert (getTokenIDP t) tokenLayout whitespaceMap
-      in  retrieveTokenWhitespace whitespaceMap' sts
+      in  storeTokenWhitespace whitespaceMap' sts
     (ScannedWhitespace _ _ : sts) ->            
-      retrieveTokenWhitespace whitespaceMap sts -- leading whitespace of token list (or whitespace 
+      storeTokenWhitespace whitespaceMap sts -- leading whitespace of token list (or whitespace 
                                                 -- after whitespace, but the scanner does not produce this)
-    -- currently, we ignore this one.
+    -- we ignore this one, since it handled by the function below
+
+
+-- Store leading whitespace under parsingTkIDP.
+storeLeadingWhitespace whitespaceMap parsingTkIDP (ScannedWhitespace wf ws :_) =
+  let tokenLayout = TokenLayout ws wf (Nothing,Nothing) -- no preceding token, so no token focus
+  in  Map.insert parsingTkIDP tokenLayout whitespaceMap
+storeLeadingWhitespace whitespaceMap _ _ = whitespaceMap
+
