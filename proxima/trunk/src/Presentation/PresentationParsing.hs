@@ -113,12 +113,12 @@ pStrExtra extraDefault p = unfoldStructure
 pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk Nothing Nothing [] NoIDP)
- where unfoldStructure presTk@(ParsingTk _ _ tokens _) = 
+ where unfoldStructure presTk@(ParsingTk _ _ tokens idP) = 
          let (res, errs) = runParser p tokens
          in  if null errs 
              then res 
              else debug Err ("ERROR: Parse error"++(show errs)) $
-                  parseErr (ParsingParseErr (mkErrs errs) tokens (mkClipParser p))
+                  parseErr (ParsingParseErr idP (mkErrs errs) tokens (mkClipParser p))
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 {-
@@ -333,6 +333,7 @@ class Construct doc node clip token where
 
 
 -- used by Xprez.parsingWithParser. Converts a parser to a ClipParser
+-- does not take into account idP of parsingTk yet (for leading whitespace)
 mkClipParser :: (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
                 ListParser doc node clip token a -> ClipParser doc node clip token
 mkClipParser parser = 
@@ -341,7 +342,7 @@ mkClipParser parser =
          let (res, errs) = runParser parser tokens
          in  toClip $ if null errs then res 
                       else debug Prs ("Presentation parser:\n"++(show errs)) $ 
-                             parseErr (ParsingParseErr (mkErrs errs) tokens clipParser)
+                             parseErr (ParsingParseErr NoIDP (mkErrs errs) tokens clipParser)
  in  clipParser
 
 {- recognize parses a structural token and recognizes its structure. The parser will succeed

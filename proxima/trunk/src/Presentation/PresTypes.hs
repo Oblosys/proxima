@@ -40,18 +40,18 @@ initLayout = Map.fromList []
 
 type ParseErrorMessage = (Maybe Int, String)
 
-getErrorMessages (ParsingParseErr msgs _ _) = msgs
+getErrorMessages (ParsingParseErr _ msgs _ _) = msgs
 getErrorMessages _                          = [(Nothing, "Structural parse error")]
 -- structural parse errors should not occur and therefore do not need to be 
 -- accessible in the presentation AG (other than this string).
 
-data ParseError doc node clip token = ParsingParseErr [ParseErrorMessage] [Token doc node clip token] (ClipParser doc node clip token)
+data ParseError doc node clip token = ParsingParseErr IDP [ParseErrorMessage] [Token doc node clip token] (ClipParser doc node clip token)
                                     | StructuralParseErr (Presentation doc node clip token)
 -- only for Parse errors in the parsing presentations, we keep track of the parse error.
 -- structural parse errors cannot be represented with a list of tokens.
 
 instance Show (ParseError doc node clip token) where
-  show (ParsingParseErr _ _ _) = "ParsingParseErr"
+  show (ParsingParseErr _ _ _ _) = "ParsingParseErr"
   show (StructuralParseErr _) = "StructuralParseErr"
   
 data EditPresentation' doc node clip token =

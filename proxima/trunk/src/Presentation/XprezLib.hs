@@ -76,7 +76,7 @@ presHole focus typeStr nd pth = loc nd $
 
 presParseErr node (StructuralParseErr pres) =
   loc node $ structural $ pres `withbgColor` whiteSmoke
-presParseErr node (ParsingParseErr parseErrs tokens parser) =
+presParseErr node (ParsingParseErr idP parseErrs tokens parser) =
   loc node $ ParsingP NoIDP (Just parser) LexInherited $ 
      row $ [ (case lookup i positionsAndErrors of
                Nothing -> id
