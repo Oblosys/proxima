@@ -36,7 +36,13 @@ row = RowP NoIDP 0
 rowR r = RowP NoIDP r
 col = ColP NoIDP 0 NF
 colR r = ColP NoIDP r NF
-overlay = OverlayP NoIDP 
+overlay = OverlayP NoIDP HeadInFront
+overlayReverse= OverlayP NoIDP HeadAtBack
+-- overlayReverse puts the head of the list at the bottom of the stack. The head
+-- is still the element that is scanned and parsed though. Hence overlay [ image, text ] is
+-- different from overlayReverse [ text, image ]
+
+
 --matrix = Matrix 
 rect w h = RectangleP NoIDP w h 1
 ellipse w h = EllipseP NoIDP w h 1
@@ -289,7 +295,7 @@ presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusC
 focusCol = lightBlue -- lightGrey
 
 squiggly :: Color -> Xprez doc node clip token -> Xprez doc node clip token
-squiggly c xp = overlay [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c, empty]
+squiggly c xp = overlayReverse [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c]
 -- png is the red one, only temporary
 
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token

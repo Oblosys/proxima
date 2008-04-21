@@ -28,7 +28,7 @@ DATA Layout doc node clip token
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
   | RowP        id : IDP hRefNr : Int                       presentationList : (LayoutList {doc} {node} {clip} {token})
   | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {node} {clip} {token})
-  | OverlayP    id : IDP                                    presentationList : (LayoutList {doc} {node} {clip} {token})
+  | OverlayP    id : IDP direction : Direction              presentationList : (LayoutList {doc} {node} {clip} {token})
   | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {node} {clip} {token}) 
   | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
   | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})

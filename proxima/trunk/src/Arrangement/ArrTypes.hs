@@ -63,7 +63,7 @@ data Arrangement node =
   | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
   | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Formatted ![Arrangement node]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Direction ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
   | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !NrOfVertices ![Arrangement node]
@@ -158,7 +158,7 @@ shallowShowArr (RectangleA _ x y w h _ _ _ _ _ _ _) = "{RectangleA: x="++show x+
 shallowShowArr (EllipseA _ x y w h _ _ _ _ _ _ _)   = "{EllipseA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (RowA _ x y w h _ _ _ arrs)        = "{RowA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (ColA _ x y w h _ _ _ f arrs)        = "{ColA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", f="++show f++", children"++show (length arrs)++"}"
-shallowShowArr (OverlayA _ x y w h _ _ _ arrs)    = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
+shallowShowArr (OverlayA _ x y w h _ _ _ _ arrs)    = "{OverlayA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (GraphA _ x y w h _ _ _ _ arrs)    = "{GraphA: x="++show x++", y="++show y++", w="++show w++", h="++show h++", #children"++show (length arrs)++"}"
 shallowShowArr (VertexA _ x y w h _ _ _ _ _)      = "{VertexA: x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (EdgeA _ x y x' y' _ _ _ _)        = "{EdgeA: x="++show x++", y="++show y++", x'="++show x'++", y'="++show y'++"}"
@@ -176,7 +176,7 @@ xA (RectangleA _ x y w h _ _ _ _ _ _ _) = x
 xA (EllipseA _ x y w h _ _ _ _ _ _ _)   = x
 xA (RowA _ x y w h _ _ _ _)           = x
 xA (ColA _ x y w h _ _ _ _ _)         = x
-xA (OverlayA _ x y w h _ _ _ _)       = x
+xA (OverlayA _ x y w h _ _ _ _ _)       = x
 xA (GraphA _ x y w h _ _ _ _ _)         = x
 xA (VertexA _ x y w h _ _ _ _ _)        = x
 xA (EdgeA _ x y x' y' _ _ _ _)        = min x x'
@@ -193,7 +193,7 @@ yA (RectangleA _ x y w h _ _ _ _ _ _ _) = y
 yA (EllipseA _ x y w h _ _ _ _ _ _ _)   = y
 yA (RowA _ x y w h _ _ _ _)           = y
 yA (ColA _ x y w h _ _ _ _ _)         = y
-yA (OverlayA _ x y w h _ _ _ _)       = y
+yA (OverlayA _ x y w h _ _ _ _ _)       = y
 yA (GraphA _ x y w h _ _ _ _ _)         = y
 yA (VertexA _ x y w h _ _ _ _ _)        = y
 yA (EdgeA _ x y x' y' _ _ _ _)        = min y y'
@@ -210,7 +210,7 @@ widthA (RectangleA _ x y w h _ _ _ _ _ _ _) = w
 widthA (EllipseA _ x y w h _ _ _ _ _ _ _)   = w
 widthA (RowA _ x y w h _ _ _ _)           = w
 widthA (ColA _ x y w h _ _ _ _ _)         = w
-widthA (OverlayA _ x y w h _ _ _ _)       = w
+widthA (OverlayA _ x y w h _ _ _ _ _)       = w
 widthA (GraphA _ x y w h _ _ _ _ _)         = w
 widthA (VertexA _ x y w h _ _ _ _ _)        = w
 widthA (EdgeA _ x y x' y' _ _ _ _)        = max x x' - min x x'
@@ -227,7 +227,7 @@ heightA (RectangleA _ x y w h _ _ _ _ _ _ _) = h
 heightA (EllipseA _ x y w h _ _ _ _ _ _ _)   = h
 heightA (RowA _ x y w h _ _ _ _)           = h
 heightA (ColA _ x y w h _ _ _ _ _)         = h
-heightA (OverlayA _ x y w h _ _ _ _)       = h
+heightA (OverlayA _ x y w h _ _ _ _ _)       = h
 heightA (GraphA _ x y w h _ _ _ _ _)         = h
 heightA (VertexA _ x y w h _ _ _ _ _)        = h
 heightA (EdgeA _ x y x' y' _ _ _ _)        = max y y' - min y y'
@@ -244,7 +244,7 @@ hRefA (RectangleA _ x y w h hr vr _ _ _ _ _) = hr
 hRefA (EllipseA _ x y w h hr vr _ _ _ _ _)   = hr
 hRefA (RowA _ x y w h hr vr _ _)           = hr
 hRefA (ColA _ x y w h hr vr _ _ _)         = hr
-hRefA (OverlayA _ x y w h hr vr _ _)       = hr
+hRefA (OverlayA _ x y w h hr vr _ _ _)       = hr
 hRefA (GraphA _ x y w h hr vr _ _ _)       = hr
 hRefA (VertexA _ x y w h hr vr _ _ _)      = hr
 hRefA (EdgeA _ x y x' y' hr vr _ _)        = hr
@@ -261,7 +261,7 @@ vRefA (RectangleA _ x y w h hr vr _ _ _ _ _) = vr
 vRefA (EllipseA _ x y w h hr vr _ _ _ _ _)   = vr
 vRefA (RowA _ x y w h hr vr _ _)           = vr
 vRefA (ColA _ x y w h hr vr _ _ _)         = vr
-vRefA (OverlayA _ x y w h hr vr _ _)       = vr
+vRefA (OverlayA _ x y w h hr vr _ _ _)       = vr
 vRefA (GraphA _ x y w h hr vr _ _ _)       = vr
 vRefA (VertexA _ x y w h hr vr _ _ _)      = vr
 vRefA (EdgeA _ x y x' y' hr vr _ _)        = vr
@@ -282,7 +282,7 @@ idA (RectangleA id x y w h _ _ _ _ _ _ _) = id
 idA (EllipseA id x y w h _ _ _ _ _ _ _)   = id
 idA (RowA id x y w h _ _ _ _)           = id
 idA (ColA id x y w h _ _ _ _ _)         = id
-idA (OverlayA id x y w h _ _ _ _)       = id
+idA (OverlayA id x y w h _ _ _ _ _)       = id
 idA (GraphA id x y w h hr vr _ _ _)       = id
 idA (VertexA id x y w h hr vr _ _ _)      = id
 idA (EdgeA id x y x' y' _ _ _ _)        = id
@@ -293,7 +293,7 @@ idA arr                            = debug Err ("ArrTypes.idA: unhandled arrange
 
 getChildrenA (RowA     _ _ _ _ _ _ _ _ arrs)   = arrs
 getChildrenA (ColA     _ _ _ _ _ _ _ _ _ arrs) = arrs 
-getChildrenA (OverlayA _ _ _ _ _ _ _ _ arrs)   = arrs
+getChildrenA (OverlayA _ _ _ _ _ _ _ _ _ arrs)   = arrs
 getChildrenA (GraphA   _ _ _ _ _ _ _ _ _ arrs) = arrs
 getChildrenA (VertexA  _ _ _ _ _ _ _ _ _ arr)  = [arr]
 getChildrenA (StructuralA _ arr)               = [arr]
@@ -318,7 +318,7 @@ setXYWHA x y w h (RectangleA id _ _ _ _ hr vr  lw style lc fc bc) = RectangleA i
 setXYWHA x y w h (EllipseA id _ _ _ _ hr vr  lw style lc fc bc)   = EllipseA id x y w h hr vr lw style lc fc bc
 setXYWHA x y w h (RowA id _ _ _ _ hr vr  c arrs)               = RowA id x y w h hr vr c arrs                   
 setXYWHA x y w h (ColA id _ _ _ _ hr vr  c f arrs)               = ColA id x y w h hr vr c f arrs                   
-setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c arrs)           = OverlayA id x y w h hr vr c arrs               
+setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c d arrs)           = OverlayA id x y w h hr vr c d arrs               
 setXYWHA x y w h (GraphA id  _ _ _ _ hr vr c nvs arrs)            = GraphA id x y w h hr vr  c nvs arrs
 setXYWHA x y w h (VertexA id _ _ _ _ hr vr c ol arr)              = VertexA id x y w h hr vr  c ol arr
 setXYWHA x y w h (LocatorA location arr)                = LocatorA location $ setXYWHA x y w h arr
@@ -334,7 +334,7 @@ setBGColor bc (RectangleA id x y w h hr vr  lw style lc fc _) = RectangleA id x 
 setBGColor bc (EllipseA id x y w h hr vr  lw style lc fc _)   = EllipseA id x y w h hr vr lw style lc fc bc
 setBGColor bc (RowA id x y w h hr vr _ arrs)               = RowA id x y w h hr vr bc arrs                   
 setBGColor bc (ColA id x y w h hr vr _ f arrs)               = ColA id x y w h hr vr bc f arrs                   
-setBGColor bc (OverlayA id x y w h hr vr _ arrs)           = OverlayA id x y w h hr vr bc arrs               
+setBGColor bc (OverlayA id x y w h hr vr _ d arrs)           = OverlayA id x y w h hr vr bc d arrs               
 setBGColor bc (GraphA id  x y w h hr vr _ nvs arrs)            = GraphA id x y w h hr vr  bc nvs arrs
 setBGColor bc (VertexA id x y w h hr vr _ ol arr)              = VertexA id x y w h hr vr  bc ol arr
 setBGColor bc (LocatorA location arr)                = LocatorA location $ setBGColor bc arr

@@ -233,7 +233,7 @@ data PresentationBase doc node clip userToken level where
                    PresentationBase doc node clip userToken level 
        ColP     :: !IDP -> !VRefNr -> !Formatted -> ![PresentationBase doc node clip userToken level] ->
                    PresentationBase doc node clip userToken level 
-       OverlayP :: !IDP -> ![ (PresentationBase doc node clip userToken level) ] ->
+       OverlayP :: !IDP -> !Direction -> ![ (PresentationBase doc node clip userToken level) ] ->
                    PresentationBase doc node clip userToken level 
        WithP    :: !(AttrRule doc clip) -> !(PresentationBase doc node clip userToken level) ->
                    PresentationBase doc node clip userToken level 
@@ -270,11 +270,6 @@ data Lexer = LexFreeText | LexHaskell | LexInherited deriving Show
 -- Lexer info is not passed on to arrangement, since scanning takes place on the presentation datatype
 -- and does not involve the arrangement.
 
--- Note: An alternative and safer definition for GraphP is GraphP [Vertex], but this requires all functions that
--- traverse Presentation to have a separate function for traversing the Vertex type. This is too much of a hassle.
-
-
--- slightly less verbose show for presentation, without doc refs
 
 instance (Show node, Show token) => Show (PresentationBase doc node clip token level) where
   show (EmptyP id)           = "{"++show id++":Empty}"
@@ -286,7 +281,7 @@ instance (Show node, Show token) => Show (PresentationBase doc node clip token l
   show (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
   show (RowP id rf press)    = "RowP "++show rf++" ["++concat (intersperse ", " (map show press))++"]"
   show (ColP id rf f press)    = "ColP "++show rf++" "++show f++" ["++concat (intersperse ", " (map show press))++"]"
-  show (OverlayP  id press)  = "OverlayP ["++concat (intersperse ", " (map show press))++"]"
+  show (OverlayP d id press)  = "OverlayP "++show d++" ["++concat (intersperse ", " (map show press))++"]"
   show (WithP ar pres)       = "WithP <fn> "++show pres
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
   show (ParsingP id p l pres)    = "ParsingP "++show l++" "++show pres
@@ -310,7 +305,7 @@ shallowShowPres (RectangleP id _ _ _ _) = "{"++show id++":Rectangle}"
 shallowShowPres (EllipseP id _ _ _ _)   = "{"++show id++":Ellipse}"
 shallowShowPres (RowP id rf press)    = "{"++show id++":RowP, #children="++show (length press)++"}"
 shallowShowPres (ColP id rf f press)    = "{"++show id++":ColP, f= "++show f++", #children="++show (length press)++"}"
-shallowShowPres (OverlayP  id press)  = "{"++show id++":Overlay, #children="++show (length press)++"}"
+shallowShowPres (OverlayP d id press)  = "{"++show id++":Overlay, dir= "++show d++", #children="++show (length press)++"}"
 shallowShowPres (FormatterP  id press)  = "{"++show id++":Formatter, #children="++show (length press)++"}"
 shallowShowPres (GraphP id _ _ _ _ press)  = "{"++show id++":Graph, #children="++show (length press)++"}"
 shallowShowPres (VertexP _ _ x y _  pres)  = "{"++show id++":Vertex, x="++show x++",y="++show y++"}"
@@ -331,7 +326,7 @@ getChildrenP (RectangleP id _ _ _ _) = []
 getChildrenP (EllipseP id _ _ _ _)   = []
 getChildrenP (RowP id rf press)    = press
 getChildrenP (ColP id rf _ press)    = press
-getChildrenP (OverlayP  id press)  = press
+getChildrenP (OverlayP _  id press)  = press
 getChildrenP (FormatterP  id press) = press
 getChildrenP (GraphP id _ _ _ _ press) = press
 getChildrenP (VertexP _ _ x y _  pres) = [pres]
@@ -357,7 +352,7 @@ setChildrenP [] pres@(RectangleP id _ _ _ _) = pres
 setChildrenP [] pres@(EllipseP id _ _ _ _)   = pres
 setChildrenP press' (RowP id rf _)     = RowP id rf press'
 setChildrenP press' (ColP id rf f _)     = ColP id rf f press'
-setChildrenP press' (OverlayP  id _)   = OverlayP id press'
+setChildrenP press' (OverlayP  id d _)   = OverlayP id d press'
 setChildrenP press' (FormatterP  id _) = FormatterP id press'
 setChildrenP press' (GraphP id d w h es _) = GraphP id d w h es press'
 setChildrenP [pres'] (VertexP id vid x y ol _) = VertexP id vid x y ol pres'
@@ -418,7 +413,7 @@ idP (RectangleP id _ _ _ _) = id
 idP (EllipseP id _ _ _ _)   = id
 idP (RowP id _ _)         = id
 idP (ColP id _ _ _)       = id
-idP (OverlayP  id press)  = id
+idP (OverlayP id _ press)  = id
 idP (WithP ar pres)       = idP pres
 idP (StructuralP id pres) = id
 idP (ParsingP id p l pres)    = id

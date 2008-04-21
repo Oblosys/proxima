@@ -24,7 +24,7 @@ sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA 
 sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ _ cxs)   = (x' + x + (index "ArrUtils.sizeA'" cxs p), y'+y, (index "ArrUtils.sizeA'" cxs p+1)-(index "ArrUtils.sizeA'" cxs p+1), h)
 sizeA' x' y' (p:path) (RowA _ x y w h _ _ _ arrs)           = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (p:path) (ColA _ x y w h _ _ _ _ arrs)         = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
-sizeA' x' y' (0:path) (OverlayA _ x y w h _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path arr
+sizeA' x' y' (0:path) (OverlayA _ x y w h _ _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path arr
 sizeA' x' y' (p:path) (GraphA _ x y w h _ _ _ _ (arr:arrs)) = sizeA' (x'+x) (y'+y) path (index "ArrUtils.sizeA'" arrs p)
 sizeA' x' y' (0:path) (VertexA _ x y w h _ _ _ _ arr)       = sizeA' (x'+x) (y'+y) path arr
 sizeA' x' y' (0:path) (StructuralA _ arr)               = sizeA' x' y' path arr
@@ -44,7 +44,7 @@ walk (RectangleA _ x y w h hr vr _ _ c1 c2 c3) = x+y+w+h+hr+vr + walkC c1 + walk
 walk (EllipseA _ x y w h hr vr _ _ c1 c2 c3)   = x+y+w+h+hr+vr + walkC c1 + walkC c2 + walkC c3
 walk (RowA _ x y w h hr vr c1 arrs)         = x+y+w+h+hr+vr + walkC c1 +  walkList arrs
 walk (ColA _ x y w h hr vr c1 f arrs)         = x+y+w+h+hr+vr + walkC c1 + walkList arrs
-walk (OverlayA _ x y w h hr vr c1 arrs)     = x+y+w+h+hr+vr + walkC c1 + walkList arrs
+walk (OverlayA _ x y w h hr vr c1 _ arrs)     = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (GraphA _ x y w h hr vr c1 nvs arrs)   = x+y+w+h+hr+vr + walkC c1 + walkList arrs
 walk (VertexA _ x y w h hr vr c1 ol arr)    = x+y+w+h+hr+vr + walkC c1 + walk arr
 walk (EdgeA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
@@ -108,6 +108,8 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- this is necessary to be able to see at parent level that a direct child may have changed size
 -- (used for example in updatedRectArr)
 
+-- Does not take into account direction of Overlay
+
 --       new arrangement     old arrangement
 diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
@@ -145,7 +147,7 @@ diffArr (RowA id x y w h hr vr bc arrs) (RowA id' x' y' w' h' hr' vr' bc' arrs')
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (ColA id x y w h hr vr bc _ arrs) (ColA id' x' y' w' h' hr' vr' bc' _ arrs') = 
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (OverlayA id x y w h hr vr bc arrs) (OverlayA id' x' y' w' h' hr' vr' bc' arrs') =
+diffArr (OverlayA id x y w h hr vr bc d arrs) (OverlayA id' x' y' w' h' hr' vr' bc' d' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
@@ -154,7 +156,7 @@ diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc
     -- a graph is only clean when all children and the graph itself are clean
 diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
 diffArr arr@(ColA id x y w h hr vr bc _ arrs) _                          = DiffLeaf False 
-diffArr arr@(OverlayA id x y w h hr vr bc arrs) _                        = DiffLeaf False 
+diffArr arr@(OverlayA id x y w h hr vr bc _ arrs) _                        = DiffLeaf False 
 diffArr arr@(GraphA id x y w h hr vr bc nvs arrs) _                      = DiffLeaf False 
 diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
@@ -200,10 +202,9 @@ updatedRectArr' x' y' dt arr =
       (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (RowA id x y w h hr vr bc arrs)     -> updatedRectRow (x'+x) (y'+y) h dts arrs
       (ColA id x y w h hr vr bc f arrs)   -> updatedRectCol (x'+x) (y'+y) w dts arrs 
-      (OverlayA id x y w h hr vr bc arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
+      (OverlayA id x y w h hr vr bc _ arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (GraphA id x y w h hr vr bc nvs arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
       (VertexA id x y w h hr vr bc ol arr) -> if not (null dts) then updatedRectArr' (x'+x) (y'+y) (head' "ArrUtils.updatedRectArr'" dts) arr else problem
-      (OverlayA id x y w h hr vr bc arrs)  -> updatedRectArrs (x'+x) (y'+y) dts arrs
       _                                    -> problem
  where updatedRectArrs x' y' dts arrs = concat $ zipWith (updatedRectArr' x' y') dts arrs
        problem = debug Err ("ArrUtils.updatedRectArr: problem with "++ shallowShowArr arr) []
@@ -248,7 +249,7 @@ point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ __ _ _ _) = Just (pth, loc)
 point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _ _)   = Just (pth, loc)
 point' x' y' pth loc p@(RowA _ x y w h _ _ _ arrs)        = pointRowList 0 (x'-x) (y'-y) pth loc arrs
 point' x' y' pth loc p@(ColA _ x y w h _ _ _ _ arrs)      = pointColList 0 (x'-x) (y'-y) pth loc arrs
-point' x' y' pth loc p@(OverlayA _ x y w h _ _ _ arrs@(arr:_)) = point' (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
+point' x' y' pth loc p@(OverlayA _ x y w h _ _ _ _ arrs@(arr:_)) = point' (clip 0 (widthA arr-1) (x'-x)) -- TODO: why always take the first one?
                                                             (clip 0 (heightA arr-1) (y'-y)) (pth++[0]) loc arr
 point' x' y' pth loc p@(StructuralA _ child)              = point' x' y' (pth++[0]) loc child
 point' x' y' pth loc p@(ParsingA _ child)                 = point' x' y' (pth++[0]) loc child
@@ -310,7 +311,7 @@ selectTreeA' x' y' []       tr                                = (x', y', tr)
 selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.1" arrs p)
 selectTreeA' x' y' (p:path) (ColA _ x y _ _ _ _ _ _ arrs)         = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.2" arrs p)
 --selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path (last arrs)
-selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path arr
+selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path arr
 selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.3" arrs p)
 selectTreeA' x' y' (0:path) (VertexA _ x y _ _ _ _ _ _ arr)     = selectTreeA' (x'+x) (y'+y) path arr
 selectTreeA' x' y' (p:path) (StructuralA _ child)             = selectTreeA' x' y' path child
@@ -434,7 +435,7 @@ debugArrangement' xOffset yOffset (ColA id x y w h hr vr c f arrs)             =
       hOffset = sum hOffsets + pd + (length hOffsets - 1) * (pd -1)
   in  ( ColA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c f arrs'
       , wOffset ,hOffset )
-debugArrangement' xOffset yOffset (OverlayA id x y w h hr vr c arrs)              =
+debugArrangement' xOffset yOffset (OverlayA id x y w h hr vr c d arrs)              =
   let (arrs', wOffsets, hOffsets) = unzip3 [ debugArrangement' (hpd {-+wo-}) (hpd {-+ho-}) arr | 
                                              (arr,wo,ho) <- zip3' arrs 
                                                                   wOffsets --(map (\o -> (maximum wOffsets-o) `div`2) wOffsets)
@@ -442,7 +443,7 @@ debugArrangement' xOffset yOffset (OverlayA id x y w h hr vr c arrs)            
                                            ]
       wOffset = maximum (0:wOffsets) + pd 
       hOffset = maximum (0:hOffsets) + pd 
-  in  ( OverlayA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c arrs'
+  in  ( OverlayA id (x+xOffset) (y+yOffset) (w+wOffset) (h+hOffset) hr vr c d arrs'
       , wOffset ,hOffset )
 debugArrangement' xOffset yOffset (GraphA id x y w h hr vr c nvs arrs)              =
   let (arrs', wOffsets, hOffsets) = unzip3 [ debugArrangement' (hpd {-+wo-}) (hpd {-+ho-}) arr | 

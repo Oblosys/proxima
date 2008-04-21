@@ -106,8 +106,8 @@ deleteGraphPres' (p:ps) (RowP id rf press)         = case deleteGraphPres' ps (i
 deleteGraphPres' (p:ps) (ColP id rf f press)       = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
                                                        Just pres -> Just $ ColP id rf f $ replace "TreeEditPres.deleteGraphPres'" p press pres
                                                        Nothing    -> Nothing
-deleteGraphPres' (p:ps) (OverlayP id (pres:press)) = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
-                                                       Just pres -> Just $ OverlayP id $ replace "TreeEditPres.deleteGraphPres'" p press pres
+deleteGraphPres' (p:ps) (OverlayP id d (pres:press)) = case deleteGraphPres' ps (index "TreeEditPres.deleteGraphPres'" press p) of
+                                                       Just pres -> Just $ OverlayP id d $ replace "TreeEditPres.deleteGraphPres'" p press pres
                                                        Nothing    -> Nothing
 deleteGraphPres' (0:ps) (WithP ar pres)            = case deleteGraphPres' ps pres of
                                                        Just pres' -> Just $ WithP ar pres'
@@ -141,7 +141,7 @@ addVertexPres (PathP ps _) vertex pres = addVertexPres' ps vertex pres
                                       
 addVertexPres' (p:ps) vertex (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
 addVertexPres' (p:ps) vertex (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
-addVertexPres' (p:ps) vertex (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
+addVertexPres' (p:ps) vertex (OverlayP id d press)      = OverlayP id d $ replace "TreeEditPres.addVertexPres'" p press (addVertexPres' ps vertex (index "TreeEditPres.addVertexPres'" press p))
 addVertexPres' (0:ps) vertex (WithP ar pres)            = WithP ar (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (StructuralP id pres)      = StructuralP id (addVertexPres' ps vertex pres)
 addVertexPres' (0:ps) vertex (ParsingP id p l pres)         = ParsingP id p l (addVertexPres' ps vertex pres)
@@ -162,7 +162,7 @@ addEdgePres _                _              pres = pres
 
 addEdgePres' (p:ps) edge (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
 addEdgePres' (p:ps) edge (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
-addEdgePres' (p:ps) edge (OverlayP id (pres:press)) = OverlayP id $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
+addEdgePres' (p:ps) edge (OverlayP id d (pres:press)) = OverlayP id d $ replace "TreeEditPres.addEdgePres'" p press (addEdgePres' ps edge (index "TreeEditPres.addEdgePres'" press p))
 addEdgePres' (0:ps) edge (WithP ar pres)            = WithP ar (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (StructuralP id pres)      = StructuralP id (addEdgePres' ps edge pres)
 addEdgePres' (0:ps) edge (ParsingP id p l pres)         = ParsingP id p l (addEdgePres' ps edge pres)
@@ -178,7 +178,7 @@ getVertexGraphPath path pres = getVertexGraphPath' Nothing [] path pres
 getVertexGraphPath' graphPath pth [] pres                           = graphPath
 getVertexGraphPath' graphPath pth (p:ps) (RowP id rf press)         = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (p:ps) (ColP id rf _ press)       = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
-getVertexGraphPath' graphPath pth (p:ps) (OverlayP id press)        = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
+getVertexGraphPath' graphPath pth (p:ps) (OverlayP id d press)      = getVertexGraphPath' graphPath (pth++[p]) ps (index "TreeEditPres.getVertexGraphPath'" press p)
 getVertexGraphPath' graphPath pth (0:ps) (WithP ar pres)            = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (StructuralP id pres)      = getVertexGraphPath' graphPath (pth++[0]) ps pres
 getVertexGraphPath' graphPath pth (0:ps) (ParsingP id pr l pres)         = getVertexGraphPath' graphPath (pth++[0]) ps pres
@@ -203,7 +203,7 @@ getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph p
 moveVertexPres :: (DocNode node, Show token) => [Int] -> (Int,Int) -> Layout doc node clip token -> Layout doc node clip token                                     
 moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
-moveVertexPres (p:ps) pt (OverlayP id press)        = OverlayP id $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
+moveVertexPres (p:ps) pt (OverlayP id d press)      = OverlayP id d $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (0:ps) pt (WithP ar pres)            = WithP ar (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (StructuralP id pres)      = StructuralP id (moveVertexPres ps pt pres)
 moveVertexPres (0:ps) pt (ParsingP id pr l pres)    = ParsingP id pr l (moveVertexPres ps pt pres)
@@ -259,7 +259,7 @@ deleteTreePres editable p (FocusP st en) (RowP id rf press) = let press' = delet
                                                      in  RowP id (if rf < length press' then rf else length press' -1) press'
 deleteTreePres editable p (FocusP st en) (ColP id rf f press) = let press' = deleteTreeCol editable p 0 (FocusP st en) press
                                                      in  ColP id (if rf < length press' then rf else length press' -1) f press'
-deleteTreePres editable p focus  (OverlayP id (pres:press)) = OverlayP id (deleteTreePres editable (p++[0]) focus pres:press)
+deleteTreePres editable p focus  (OverlayP id d (pres:press)) = OverlayP id d (deleteTreePres editable (p++[0]) focus pres:press)
 deleteTreePres editable p focus          (WithP ar pres)    = WithP ar (deleteTreePres editable (p++[0]) focus pres)
 deleteTreePres editable p focus          (StructuralP id pres)  = StructuralP id (deleteTreePres False (p++[0]) focus pres)
 deleteTreePres editable p focus          (ParsingP id pr l pres)  = ParsingP id pr l (deleteTreePres True (p++[0]) focus pres)
@@ -376,7 +376,7 @@ deleteTreePresF editable updp p focus          (EmptyP id) = debug Err "problem"
 deleteTreePresF editable updp p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = updp 
 deleteTreePresF editable updp p (FocusP st en) (RowP id rf press) = deleteTreeRowF editable updp p 0 (FocusP st en) press
 deleteTreePresF editable updp p (FocusP st en) (ColP id rf _ press) = deleteTreeColF editable updp p 0 (FocusP st en) press
-deleteTreePresF editable updp p focus  (OverlayP id (pres:press)) = deleteTreePresF editable  (updp++[0]) (p++[0]) focus pres
+deleteTreePresF editable updp p focus  (OverlayP id d (pres:press)) = deleteTreePresF editable  (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (WithP ar pres)    = deleteTreePresF editable (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (StructuralP id pres)  = deleteTreePresF False (updp++[0]) (p++[0]) focus pres
 deleteTreePresF editable updp p focus          (ParsingP id pr l pres)  = deleteTreePresF True (updp++[0]) (p++[0]) focus pres
@@ -440,7 +440,7 @@ pasteTreePres editable p (PathP stp sti) clip (StringP id str) =
   else StringP id str
 pasteTreePres editable p path clip (RowP id rf press) = RowP id rf (pasteTreePresList editable p 0 path clip press)
 pasteTreePres editable p path clip (ColP id rf f press) = ColP id rf f (pasteTreePresList editable p 0 path clip press)
-pasteTreePres editable p path clip (OverlayP id (pres:press)) = OverlayP id (pasteTreePres editable (p++[0]) path clip pres : press)
+pasteTreePres editable p path clip (OverlayP id d (pres:press)) = OverlayP id d (pasteTreePres editable (p++[0]) path clip pres : press)
 pasteTreePres editable p path clip (WithP ar pres) = WithP ar (pasteTreePres editable (p++[0]) path clip pres)
 pasteTreePres editable p path clip (StructuralP id pres) = StructuralP  id (pasteTreePres False (p++[0]) path clip pres)
 pasteTreePres editable p path clip (ParsingP id pr l pres) = ParsingP  id pr l (pasteTreePres True (p++[0]) path clip pres)
@@ -487,7 +487,7 @@ copyTreePres p (FocusP st en) (ColP id rf f press) = let press' = copyTreePresLi
                                                      in  ColP id (if rf < length press' then rf else length press' -1) f press'
 copyTreePres p (FocusP st en) (FormatterP id press) = let press' = copyTreePresList p 0 (FocusP st en) press
                                                       in RowP id 0 press'
-copyTreePres p focus (OverlayP id (pres:press)) = OverlayP id (copyTreePres (p++[0]) focus pres : press) 
+copyTreePres p focus (OverlayP id d (pres:press)) = OverlayP id d (copyTreePres (p++[0]) focus pres : press) 
 copyTreePres p focus          (WithP ar pres) = {- WithP ar -} (copyTreePres (p++[0]) focus pres) 
 copyTreePres p focus          (StructuralP id pres) = (copyTreePres (p++[0]) focus pres)
 copyTreePres p focus          (ParsingP id _ l pres) = (copyTreePres (p++[0]) focus pres)
@@ -533,12 +533,12 @@ splitRowTreePres editable p path  (ColP id rf f press) =
                        then Right $ ColP id rf f (ps1++ps2)
                        else Right $ ColP id rf f press
     Right ps        -> Right $ ColP id rf f ps    
-splitRowTreePres editable p path  (OverlayP id (pres:press)) =
+splitRowTreePres editable p path  (OverlayP id d (pres:press)) =
   case(splitRowTreePres editable (p++[0]) path pres) of
      Left (p1,p2) -> if editable
-                     then Left (OverlayP id (p1:press), OverlayP id (p2:press))
-                     else Right $ OverlayP id (pres:press)
-     Right p      -> Right $ OverlayP id (p:press)
+                     then Left (OverlayP id d (p1:press), OverlayP id d (p2:press))
+                     else Right $ OverlayP id d (pres:press)
+     Right p      -> Right $ OverlayP id d (p:press)
 splitRowTreePres editable p path           (WithP ar pres) =
   case(splitRowTreePres editable (p++[0]) path pres) of
      Left (p1,p2) -> if editable
@@ -602,7 +602,7 @@ splitRowTreePresPth editable (p:path) (ColP id rf _ press) =
   case splitRowTreePresPth editable path (index "TreeEditPres.splitRowTreePresPth" press p) of
     Left pth -> if editable then  Right $ p+1:pth else Right $ p:pth
     Right pth -> Right $ p:pth
-splitRowTreePresPth editable (0:path) (OverlayP id (pres:press)) =  
+splitRowTreePresPth editable (0:path) (OverlayP id d (pres:press)) =  
   case splitRowTreePresPth editable path pres of
     Left pth  -> if editable then  Left $ 0:pth else Right $ 0:pth
     Right pth -> Right $ 0:pth

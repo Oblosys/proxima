@@ -151,8 +151,8 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
                                    in  (tokens, idpc', wm', RowP id rf press')
     ColP id rf f press          -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
                                    in  (tokens, idpc', wm', ColP id rf f press')
-    OverlayP id press           -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
-                                   in  (tokens, idpc', wm', OverlayP id press')
+    OverlayP id d press         -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
+                                   in  (tokens, idpc', wm', OverlayP id d press')
     FormatterP id press         -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press
                                    in  (tokens, idpc', wm', FormatterP id press')
     GraphP id d w h edges press -> let (tokens, idpc', wm', press') = scanStructuralList sheet foc lx loc pth idpc wm press

@@ -159,6 +159,7 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
                                 (widthA arrangement) (heightA arrangement) 
                                 0 0 transparent
+                          HeadInFront
                           focusArrList) 
    }
 
@@ -183,7 +184,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     ColA     _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
-                    OverlayA _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    OverlayA _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     GraphA   _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
                     VertexA  _ x' y' _ _ _ _ _ _ arr  -> renderChildren x' y' [arr]
                     StructuralA _ arr           -> renderChildren 0 0 [arr]
@@ -421,7 +422,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               }
         }
 
-    (OverlayA id x' y' w' h' _ _ bColor arrs) ->
+    (OverlayA id x' y' w' h' _ _ bColor direction arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -434,26 +435,20 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; gcSetValues gc $ newGCValues { foreground = overlayColor }
               ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
               -- outlined gtk rectangles are 1 pixel larger than filled ones
-              ; let (arrs',cdts') = if null arrs then (arrs,childDiffTrees)
-                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
-                                                                          _                -> unzip . reverse $ zip arrs childDiffTrees
-              
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea)  cdts' arrs'
               }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-               -- nasty workaround hack for overlay problem: if last elt of overlay is EmptyA,
-               -- the children are reversed. Squigglies are the only presentations for now that
-               -- need to be put in front of the overlay, but that should not get parsed.
-              ; let (arrs',cdts') = if null arrs then (arrs,childDiffTrees)
-                                                 else case (last arrs) of EmptyA _ _ _ _ _ _ _ _ -> (arrs, childDiffTrees)
-                                                                          _                -> unzip . reverse $ zip arrs childDiffTrees
-              -- until ovl is properly reversed
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) cdts' arrs'
+                    
               }
+        ; let order = case direction of
+                        HeadInFront -> reverse
+                        HeadAtBack  -> Prelude.id
+                              
+        ; sequence_ $ order $
+            zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         }
 
     (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
@@ -629,7 +624,7 @@ mkFocus' p x' y' focus          (RectangleA _ x y w h _ _ _ _ _ _ _) = mkBoxCare
 mkFocus' p x' y' focus          (EllipseA _ x y w h _ _ _ _ _ _ _)   = mkBoxCaret (x'+x) (y'+y) w h
 mkFocus' p x' y' (FocusA st en) (RowA _ x y w h _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' (FocusA st en) (ColA _ x y w h _ _ _ _ arrs) = mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
-mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
+mkFocus' p x' y' (FocusA st en) (OverlayA _ x y w h _ _ _ _ (arr:arrs)) = mkFocus' (p++[0]) (x'+x) (y'+y) (FocusA st en) arr
 mkFocus' p x' y' (FocusA st en) (GraphA _ x y w h _ _ _ _ arrs)     =  mkFocusList' p 0 (x'+x) (y'+y) (FocusA st en) arrs
 mkFocus' p x' y' focus@(FocusA (PathA pth _) en) (VertexA _ x y w h _ _ _ outline arr) =
   if p == pth then mkOutlineCaret (x'+x) (y'+y) w h outline

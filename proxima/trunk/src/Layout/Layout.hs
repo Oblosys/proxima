@@ -40,9 +40,9 @@ detokenize wm (RowP idp rf press)         = let (press', f) = detokenizeList wm 
                                             in  (RowP idp rf press', f)
 detokenize wm (ColP idp rf fm press)      = let (press', f) = detokenizeList wm 0 press
                                            in   (ColP idp rf fm press', f)
-detokenize wm (OverlayP idp (pres:press)) = let (pres', f) = detokenize wm pres
-                                            in  ( OverlayP idp (pres' : (map castPresToLay press))
-                                                , prependToFocus 0 f) -- cast is safe, no tokens in press
+detokenize wm (OverlayP idp d (pres:press)) = let (pres', f) = detokenize wm pres
+                                              in  ( OverlayP idp d (pres' : (map castPresToLay press))
+                                                  , prependToFocus 0 f) -- cast is safe, no tokens in press
 detokenize wm (WithP ar pres)            = let (pres', f) = detokenize wm pres
                                            in  (WithP ar pres', prependToFocus 0 f) 
 detokenize wm (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
@@ -104,9 +104,9 @@ detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocu
 
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
 --detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
-detokenize' wm t (OverlayP idp (pres:press)) = let (rowss) = detokenize' wm t pres -- cast is safe, no tokens in press
-                                                   addOverlay (p,f) = ( OverlayP idp $ p : map castPresToLay press
-                                                                     , prependToFocus 0 f )
+detokenize' wm t (OverlayP idp d (pres:press)) = let (rowss) = detokenize' wm t pres -- cast is safe, no tokens in press
+                                                     addOverlay (p,f) = ( OverlayP idp d $ p : map castPresToLay press
+                                                                        , prependToFocus 0 f )
                                                in  map (map addOverlay) rowss
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)

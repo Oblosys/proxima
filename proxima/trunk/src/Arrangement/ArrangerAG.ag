@@ -113,7 +113,7 @@ DATA Layout doc node clip token
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
   | RowP        id : IDP hRefNr : Int layoutList : (LayoutList {doc} {node} {clip} {token})
   | ColP        id : IDP vRefNr : Int formatted : Formatted layoutList : (LayoutList {doc} {node} {clip} {token})
-  | OverlayP    id : IDP              layoutList : (LayoutList {doc} {node} {clip} {token})
+  | OverlayP    id : IDP direction : Direction layoutList : (LayoutList {doc} {node} {clip} {token})
   | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} layoutList : (LayoutList {doc} {node} {clip} {token}) 
   | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
   | FormatterP  id : IDP layoutList : (LayoutList {doc} {node} {clip} {token})
@@ -928,7 +928,7 @@ SEM Layout
                           ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @layoutList.arrangementList 
   | OverlayP 
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @layoutList.arrangementList
+                          OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @direction @layoutList.arrangementList
   | GraphP 
       lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
@@ -1191,8 +1191,8 @@ SEM Layout  [ oldArr : {Maybe (Arrangement node)}   | | ]
                                       Nothing -> repeat Nothing
   | OverlayP 
       layoutList.oldArrList = case @lhs.oldArr of 
-                                      Just (OverlayA _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in OverlayP") Nothing)
-                                      arr                                  -> repeat Nothing
+                                      Just (OverlayA _ _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in OverlayP") Nothing)
+                                      arr                                    -> repeat Nothing
   | GraphP 
       layoutList.oldArrList = case @lhs.oldArr of
                                       Just (GraphA _ _ _ _ _ _ _ _ _ arrs) -> map Just arrs ++ repeat (debug Err ("ERROR:old arr list of differing length accessed in GraphP") Nothing)
