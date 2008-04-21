@@ -152,7 +152,7 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
  do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
     ; let focusArrList = arrangeFocus focus arrangement
-    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
+--    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
     ; renderArr clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
