@@ -83,7 +83,7 @@ scanner: $(LAYOUTDIR)/ScannerAG.hs
 $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
-	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
+	@$(AGC) --visit -scfp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(LAYOUTDIR)/ScannerAG.ag --module=Layout.ScannerAG -P $(LAYOUTDIR)
         
 #	--cycle --visit  \

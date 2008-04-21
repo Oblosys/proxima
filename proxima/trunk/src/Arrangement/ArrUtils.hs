@@ -189,10 +189,10 @@ updatedRectArr' x' y' dt arr =
     DiffNode True  _     _   -> []
     DiffLeaf False           -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  [((x, y), (widthA arr, heightA arr))]
+                                in  debug Arr (show arr) [((x, y), (widthA arr, heightA arr))]
     DiffNode False False dts -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  [((x, y), (widthA arr, heightA arr))]
+                                in  debug Arr "XX2XX" [((x, y), (widthA arr, heightA arr))]
     DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
       case arr of                      -- NOTE for overlay and graph, this should not occur
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
@@ -226,7 +226,7 @@ updatedRectCol x' y' w dts arrs =
          | (dt, arr) <- zip dts arrs ]
          
        
-
+{-
 -- mark the focus path as changed in the DiffTree
 -- should be done for old as well as new focus (in case of navigate without update)
 markFocusDirtyArr :: Arrangement node -> FocusArr -> DiffTree -> DiffTree
@@ -248,6 +248,8 @@ markDirty arr (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self
                                                take p dts
                                             ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (index "ArrUtils.markDirty" dts p)]
                                             ++ drop (p+1) dts
+
+-}
 
 
 edgeClickDistance = 4.0

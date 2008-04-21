@@ -31,22 +31,24 @@ render :: (HasPath node, Show node) =>
           EditArrangement' doc node clip ->
           (EditRendering' (DocumentLevel doc clip), LocalStateRen, ArrangementLevel doc node clip)
 -}
-render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ debugging updRegions lmd) (SkipArr' 0) = 
+render state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ _ debugging updRegions lmd) (SkipArr' 0) = 
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = DiffLeaf False
-       rendering   = render' scale debugging focus diffTree arr' 
+       rendering   = render' scale debugging diffTree arr' 
+       focusRendering = renderFocus scale debugging focus arr'
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arr arr'
        size        = (widthA arr', heightA arr')
-   in  ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
+   in  ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
 render state arrLvl ren (SkipArr' i) = (SkipRen' (i-1), state, arrLvl)
-render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ debugging updRegions lmd) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
+render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ _ debugging updRegions lmd) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
    let arr'        = if debugging then debugArrangement arr else arr
-       diffTree    = markFocusDirtyArr arr' focusOld (markFocusDirtyArr arr' focus (diffArr arr' arrOld)) -- incremental
+       diffTree    = diffArr arr' arrOld
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arrOld arr'
        rendering   = if rendererIncrementality 
-                     then render' scale debugging focus diffTree arr'
-                     else render' scale debugging focus (DiffLeaf False) arr'
+                     then render' scale debugging diffTree arr'
+                     else render' scale debugging (DiffLeaf False) arr'
+       focusRendering = renderFocus scale debugging focus arr'
        size        = (widthA arr', heightA arr')
    in  {-debug Arr ("\n\n\nRender: old/new size "++ show (widthA arrOld, heightA arrOld)++ show (widthA arr', heightA arr')
                   ++ "\nDiffTree: "++ show diffTree
@@ -54,6 +56,6 @@ render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ 
                   ) 
        
        $ -}
-       ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering size debugging updRegions' lmd)
+       ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
 

@@ -116,7 +116,7 @@ proxima presentationSheet parseSheet scannerSheet
               }
                       -- initial RenderingLevel 
     ; startGUI handler viewedAreaRef
-                       ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (0,0) False  
+                       ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (\_ _ -> return ()) (0,0) False  
                                             []
                                             False
                        , initEvent)

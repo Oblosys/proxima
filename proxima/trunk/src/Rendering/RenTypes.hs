@@ -9,8 +9,12 @@ import Common.CommonUtils
 
 import Evaluation.DocTypes
 
-data RenderingLevel documentLevel = RenderingLevel Scale (GUICommand documentLevel) Rendering Size Debugging UpdatedRegions LeftButtonDown
-
+data RenderingLevel documentLevel = 
+       RenderingLevel Scale (GUICommand documentLevel) 
+                      Rendering -- rendering
+                      Rendering -- focus rendering
+                      Size Debugging UpdatedRegions LeftButtonDown
+                  
 type LocalStateRen = ()
                                    
 
@@ -34,7 +38,7 @@ data EditRendering documentLevel =
 
 
 instance Show (RenderingLevel documentLevel) where
-  show (RenderingLevel scale _ _ size debugging updRegions leftButtonDown) =
+  show (RenderingLevel scale _ _ _ size debugging updRegions leftButtonDown) =
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}{leftButtonDown:"++show leftButtonDown++"}\n"
 

@@ -31,7 +31,7 @@ translate state low high editLow =
 interpret :: Show node => LocalStateRen -> RenderingLevel documentLevel ->
              ArrangementLevel doc node clip token -> EditRendering documentLevel ->
              (EditArrangement documentLevel, LocalStateRen, RenderingLevel documentLevel)
-interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
+interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     InitRen             -> (InitArr,       state, renLvl) 
@@ -44,9 +44,9 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
     KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (CopyDocArr,    state, renLvl) -- Ctrl-f
     KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (PasteDocArr,   state, renLvl) -- Ctrl-g
     KeySpecialRen (CharKey 's') (Modifiers False True False) -> (CutDocArr,     state, renLvl) -- Ctrl-d
-    KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r sz debugging ur lmd)
-    KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r sz debugging ur lmd)
-    KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r sz (not debugging) ur lmd)
+    KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
+    KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
+    KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
 
     KeySpecialRen UpKey (Modifiers False True False)    -> (NavUpDocArr, state, renLvl) -- Ctrl
     KeySpecialRen DownKey (Modifiers False True False)  -> (NavDownDocArr, state, renLvl) -- Ctrl
@@ -80,9 +80,9 @@ interpret state renLvl@(RenderingLevel scale c r sz debugging ur lmd)
 
     KeyCharRen c          -> (KeyCharArr c, state, renLvl)
     KeySpecialRen c ms    -> (KeySpecialArr c ms, state, renLvl)
-    MouseDownRen x y ms i -> (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, RenderingLevel scale c r sz debugging ur True)
+    MouseDownRen x y ms i -> (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, RenderingLevel scale c r fr sz debugging ur True)
     MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
-    MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c r sz debugging ur False)
+    MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c r fr sz debugging ur False)
     
     UpdateDocRen upd      -> (UpdateDocArr upd,      state, renLvl) 
     DocumentLoadedRen str -> (DocumentLoadedArr str, state, renLvl) 

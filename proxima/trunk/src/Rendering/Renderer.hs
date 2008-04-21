@@ -131,28 +131,38 @@ mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
 
 
 
--- debugged rendering also displays overlay for focus adding, but this has not been processed by debugArrangement
--- this makes it tricky to move the debuggedArrangement, since the Gest.Int. will not know about it
--- however, we don't want to debug the focus
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
-render' scale arrDb focus diffTree arrangement (wi,dw,gc) viewedArea =
+render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
     --; putStrLn $ "DiffTree is " ++ show diffTree
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
-    ; let focusArrList = arrangeFocus focus arrangement
-    --; debugLnIO Ren ("Focus: "++show focus ++ "\nArrangement:\n"++show focusArrList)
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     ; renderArr clipRegion
-                (wi,dw,gc) arrDb scale origin viewedArea
-                         (DiffNode False True $ diffTree : replicate (length focusArrList) (DiffLeaf False))
-                         
-                         (OverlayA NoIDA (xA arrangement) (yA arrangement)  (widthA arrangement) (heightA arrangement) 0 0 (255,255,255)
-                              (arrangement : focusArrList)) 
-  
+                (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     }
+
+
+-- old comment: debugged rendering also displays overlay for focus adding, but this has not been processed by debugArrangement
+-- this makes it tricky to move the debuggedArrangement, since the Gest.Int. will not know about it
+-- however, we don't want to debug the focus
     
+renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
+ do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
+
+    ; let focusArrList = arrangeFocus focus arrangement
+    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
+    ; renderArr clipRegion
+                (wi,dw,gc) arrDb scale origin viewedArea
+                (DiffLeaf False)
+                (OverlayA NoIDA (xA arrangement) (yA arrangement)  
+                                (widthA arrangement) (heightA arrangement) 
+                                0 0 transparent
+                          focusArrList) 
+   }
+
+
 renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
 renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
@@ -606,9 +616,8 @@ mkFocus focus arr = mkFocus' [] 0 0 (orderFocusA focus) arr
 
 -- precondition, node is only visited if it part of it is focused
 mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _ _) = []
-mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ _ cxs') = 
-  let cxs = init cxs' ++ [last cxs'-1]
-      st = if length stp < length p|| stp < p then 0 else index "Renderer.mkFocus'" cxs sti
+mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ _ cxs) = 
+  let st = if length stp < length p|| stp < p then 0 else index "Renderer.mkFocus'" cxs sti
       en = if length enp < length p || enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
   in  if length stp > length p || length enp > length p 
       then debug Err ("Renderer.mkFocus': focus path too long:") []

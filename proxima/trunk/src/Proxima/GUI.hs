@@ -140,7 +140,7 @@ onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (R
               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
 onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
- do { (RenderingLevel _ makePopupMenu _ _ _ _ _)  <- readIORef renderingLvlVar
+ do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer viewedAreaRef window vp canvas (round x) (round y)
     ; case mContextMenu of
        Just contextMenu ->
@@ -151,7 +151,7 @@ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Butto
        Nothing -> return False
     }
 onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
- do { (RenderingLevel _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
+ do { (RenderingLevel _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
     ; let editRendering = 
             case mouseEvt of 
               Button _ SingleClick _ x y mods LeftButton _ _   -> MouseDownRen (round x) (round y) (translateModifiers mods) 1
@@ -250,7 +250,7 @@ genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -
                IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
                Window -> Viewport -> DrawingArea -> EditRendering documentLevel -> IO ()
 genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
- do { renderingLvl@(RenderingLevel _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+ do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea vp
     
     ; writeIORef viewedAreaRef viewedArea
@@ -259,7 +259,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
     ; case editRendering of
         SkipRen' _ -> return () -- set the renderingLvlVar ??
          
-        SetRen' renderingLvl''@(RenderingLevel scale _ rendering' (newW,newH) _ updRegions _) -> 
+        SetRen' renderingLvl''@(RenderingLevel scale _ _ _ (newW,newH) _ updRegions _) -> 
          do { writeIORef renderingLvlVar renderingLvl''
             ; widgetSetSizeRequest canvas newW newH
   --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
@@ -276,23 +276,19 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             ; case maybePm of
                 Just pm -> drawRendering renderingLvlVar window vp pm
                 Nothing -> return () -- will not occur 
-            
-            ; updatedRegion <- regionNew
-            
-            ; mapM_ (\((x,y),(w,h))-> regionUnionWithRect updatedRegion (Rectangle x y w h)) updRegions
-            ; if not markUpdatedRenderingArea
-              then drawWindowInvalidateRegion dw updatedRegion False -- False: don't invalidate children
-              else drawWindowInvalidateRect dw (Rectangle 0 0 (max w newW) (max h newH))  False -- invalidate entire rendering
-            -- if updated areas are marked, we just invalidate the whole thing. Otherwise, we need
-            -- to invalidate the new position of the focus, the old position (for clearing the focus)
-            -- and the previous old position (for clearing the marker rectangle). 
+    
+
+
+            ; drawWindowInvalidateRect dw (Rectangle 0 0 (max w newW) (max h newH))  False -- invalidate entire rendering
+            -- we could use the updated areas, but drawing the entire bitmap is probably
+            -- not much more expensive than computing which subpart to draw.
             }
     }
   
 drawRendering :: DrawableClass d => 
-                 IORef (RenderingLevel documementLevel) -> Window -> Viewport -> d -> IO ()
+                 IORef (RenderingLevel documentLevel) -> Window -> Viewport -> d -> IO ()
 drawRendering renderingLvlVar wi vp pm = 
- do { RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
 --    ; putStrLn "Drawing rendering"
     ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
     ; gc <- gcNew pm
@@ -310,6 +306,12 @@ drawRendering renderingLvlVar wi vp pm =
                                         -- currently, it only prevents rendering edges out of view
     }
 
+drawFocus :: IORef (RenderingLevel documentLevel) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
+drawFocus renderingLvlVar wi dw gc vp = 
+ do { RenderingLevel scale mkPopupMenu rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+    ; viewedArea <- getViewedArea vp 
+    ; focusRendering (wi, dw ,gc) viewedArea
+    }
 
 onPaint :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> 
            IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle ->
@@ -333,14 +335,15 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
-
-          
+            ; drawFocus renderingLvlVar wi dw gc vp            
+            
               -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
             ; when markUpdatedRenderingArea $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
-                  ; RenderingLevel scale mkPopupMenu rendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+                  ; RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
                   ; debugLnIO GUI $ "updated regions:" ++ show updRegions 
+                  
                   ; mapM_ (\((x,y),(w,h)) -> 
                              if w > 0 && h > 0 -- outline rectangles are 1 px too large  
                              then drawRectangle dw gc False x y (w-1) (h-1)
@@ -357,7 +360,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             ; return True
             }
     }
-
+    
 getViewedArea :: Viewport -> IO (Point,Size)
 getViewedArea vp =
  do { vA <- viewportGetVAdjustment vp
