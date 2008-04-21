@@ -63,7 +63,8 @@ pStr'' nodeC hole p = unfoldStructure
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 
-
+-- version of pStr that gets a constructor from the data type Node, that specifies
+-- the type and constructor it should succeed on.
 pStrAlt ndf p = unfoldStructure  
      <$> pSym (StructuralTk 0 (Just nd) (StringP NoIDP $ show nd) [] NoIDP)
  where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
