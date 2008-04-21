@@ -619,7 +619,8 @@ mkFocus' p x' y' focus          (EmptyA _ _ _ _ _ _ _ _) = []
 mkFocus' p x' y' (FocusA (PathA stp sti) (PathA enp eni)) (StringA _  x y w h _ _ _ _ _ _ cxs) = 
   let st = if length stp < length p|| stp < p then 0 else index "Renderer.mkFocus'" cxs sti
       en = if length enp < length p || enp > p then last cxs else index "Renderer.mkFocus'" cxs eni                        
-  in  if length stp > length p || length enp > length p 
+  in  if length stp > length p && p `isPrefixOf` stp ||
+         length enp > length p && p `isPrefixOf` enp
       then debug Err ("Renderer.mkFocus': focus path too long:") []
       else mkBoxCaret (x'+x+st) (y'+y) (en-st + 1) h
 mkFocus' p x' y' focus          (ImageA _ x y w h _ _ _ _ _ _)       = mkBoxCaret (x'+x) (y'+y) w h
