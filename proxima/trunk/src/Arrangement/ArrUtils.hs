@@ -189,10 +189,10 @@ updatedRectArr' x' y' dt arr =
     DiffNode True  _     _   -> []
     DiffLeaf False           -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  debug Arr (show arr) [((x, y), (widthA arr, heightA arr))]
+                                in [((x, y), (widthA arr, heightA arr))]
     DiffNode False False dts -> let x = x' + xA arr
                                     y = y' + yA arr
-                                in  debug Arr "XX2XX" [((x, y), (widthA arr, heightA arr))]
+                                in [((x, y), (widthA arr, heightA arr))]
     DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
       case arr of                      -- NOTE for overlay and graph, this should not occur
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
@@ -224,32 +224,7 @@ updatedRectCol x' y' w dts arrs =
            then updatedRectArr' x' y' dt arr 
            else [((x', y'+yA arr),(w, heightA arr))] 
          | (dt, arr) <- zip dts arrs ]
-         
-       
-{-
--- mark the focus path as changed in the DiffTree
--- should be done for old as well as new focus (in case of navigate without update)
-markFocusDirtyArr :: Arrangement node -> FocusArr -> DiffTree -> DiffTree
-markFocusDirtyArr arr (FocusA (PathA fromPth _) (PathA toPth _)) dt = markDirty arr (commonPrefix fromPth toPth) dt
-markFocusDirtyArr _ arr dt = dt
-
-
--- mark all nodes on path as children dirty, when descending beyond clean leaf, add new clean nodes around dirty path
-markDirty :: Arrangement node -> [Int] -> DiffTree -> DiffTree
-markDirty _ [] _ = DiffLeaf False               -- entire subtree is marked dirty
-markDirty _ _ (DiffLeaf False) = DiffLeaf False -- subtree already dirty
--- When focus is in a graph, the entire graph is marked dirty.
-markDirty (GraphA _ _ _ _ _ _ _ _ _ _) _ dt = DiffLeaf False
-markDirty arr (p:pth) (DiffLeaf True) = DiffNode False True $  -- make self clean node with one dirty child on the path
-                                         replicate (p) (DiffLeaf True)
-                                      ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (DiffLeaf True)] -- do the same thing for the rest of the path
-                                      ++ replicate (length (getChildrenA arr) - p - 1) (DiffLeaf True)
-markDirty arr (p:pth) (DiffNode _ self dts) = DiffNode False self $ -- leaf self 
-                                               take p dts
-                                            ++ [markDirty (index "ArrUtils.markDirty" (getChildrenA arr) p) pth (index "ArrUtils.markDirty" dts p)]
-                                            ++ drop (p+1) dts
-
--}
+                
 
 
 edgeClickDistance = 4.0
