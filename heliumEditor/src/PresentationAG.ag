@@ -440,7 +440,7 @@ strFromIdent _               = ""
 idP0FromIdent (Ident idp0 _ str) = idp0
 idP0FromIdent _                    = NoIDP
 
-box xp = overlay [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] Transparent,empty]
+box xp = overlayReverse [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] Transparent]
 
 op :: IDP -> String -> Xprez doc node clip UserToken
 op idc str = token idc str `withColor` opCol
