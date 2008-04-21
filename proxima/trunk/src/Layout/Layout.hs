@@ -18,26 +18,6 @@ import Data.Map (Map)
 
 -- Local State is layout
 
-testPres :: Presentation doc node clip ()
-testPres =     
-               ParsingP NoIDP Nothing LexInherited $
-           RowP NoIDP 0 [  
-                         RowP NoIDP 0 [ 
-                            TokenP (IDP 1) (UserTk 0 () "een" Nothing NoIDP)
-                          , TokenP (IDP 2) (UserTk 1 () "twee" Nothing NoIDP)
-                          , TokenP (IDP 3) (UserTk 2 () "drie" Nothing NoIDP)
-                        ]
-                        ]
-                        
-testWM = Map.fromList [(IDP 1, emptyTokenLayout { whitespace = (1,0)} )
-                      ,(IDP 2, emptyTokenLayout { whitespace = (0,1)} )
-                      ,(IDP 3, emptyTokenLayout { whitespace = (0,1), tokenFocus = (Just 0, Just 0)} )
-                      ]
-emptyTokenLayout = TokenLayout { whitespace = (0,0)
-                               , whitespaceFocus = (Nothing,Nothing)
-                               , tokenFocus = (Nothing,Nothing)
-                               }
-
 -- detokenize ignores Lexer information, since all tokens can be treated the same when layouting.
 detokenizer wm pres = {- let (l',focusp) = detokenize testWM testPres
                       in  debug Lay ("\n\n\n\ndetokenize test\n"++show (l',focusp)++"\nfocus is on "++case fromP focusp of
@@ -124,11 +104,10 @@ detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocu
 
 detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
 --detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
-detokenize' wm t (OverlayP idp (pres:press)) = let (((pres',f):row):rows) = detokenize' wm t pres -- cast is safe, no tokens in press
-                                               in  (( OverlayP idp $ pres' : map castPresToLay press
-                                                    , prependToFocus 0 f
-                                                    ):row)
-                                                   : rows
+detokenize' wm t (OverlayP idp (pres:press)) = let (rowss) = detokenize' wm t pres -- cast is safe, no tokens in press
+                                                   addOverlay (p,f) = ( OverlayP idp $ p : map castPresToLay press
+                                                                     , prependToFocus 0 f )
+                                               in  map (map addOverlay) rowss
 detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
 detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm t pres)
