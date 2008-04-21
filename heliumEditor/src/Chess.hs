@@ -1,7 +1,7 @@
 module Chess where
 
 
-import Common.CommonTypes
+import Common.CommonTypes hiding (Direction)
 import qualified DocTypes_Generated as Prox
 import Evaluation.DocTypes
 import Evaluation.DocUtils
