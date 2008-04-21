@@ -265,8 +265,13 @@ SEM Exp
   | PowerExp
       loc.pres = parsing $
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
-                   structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ power @exp1.pres @exp2.pres
-
+                   row [ @exp1.pres
+                       , structuralToken (mkIDP @idP0 @lhs.pIdC 0) $ power empty @exp2.pres
+                       ]
+-- structuralToken gets its locator from the one surrounding this parsing presentation
+-- It seems to work. The reason for this combined presentation is that we don't want
+-- the mantissa to be in the structural presentation, since then, we cannot just remove
+-- the exponent to get rid of the exponential expression.
 
   | BoolExp     -- put the idP in an empty string before the bool presentation
       loc.pres = parsing $

@@ -126,17 +126,15 @@ recognizeExp =
   <|>    pPrs parseExp
          
 
-recognizeExp' = pStr $
+recognizeExp' = 
+         (pStrAlt Node_DivExp $
          (\str e1 e2 -> reuseDivExp [str] (Just $ getTokenIDP str) (Just e1) (Just e2))
      <$> pStructuralTk Node_DivExp
      <*> recognizeExp
-     <*> recognizeExp
-  <|>    (\str e1 e2 -> reusePowerExp [str] (Just $ getTokenIDP str) (Just e1) (Just e2))
-     <$> pStructuralTk Node_PowerExp
-     <*> recognizeExp
-     <*> recognizeExp
-  <|>    HoleExp
-     <$ pStructuralTk Node_HoleExp
+     <*> recognizeExp)
+  <|>    (pStrAlt Node_HoleExp $
+         HoleExp
+     <$ pStructuralTk Node_HoleExp)
 
 -------------------- Helium parser:
 
@@ -252,7 +250,15 @@ parseFactor =
            parseFactor'
       <??> (    (\tk f f' -> reusePowerExp [tk] (Just $ getTokenIDP tk) (Just f') (Just f))
             <$> pKey "^" <*> parseFactor
+           <|>
+                (\(PowerExp id _ e2) f' -> PowerExp id f' e2)
+            <$> parsePowerr
            )
+
+parsePowerr = (pStrAlt Node_PowerExp $
+         (\str e2 -> reusePowerExp [str] (Just $ getTokenIDP str) Nothing (Just e2))
+     <$> pStructuralTk Node_PowerExp
+     <*> recognizeExp) 
 
 parseFactor' =   
            parseFactor''
