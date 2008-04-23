@@ -3,7 +3,8 @@ rem collect sources so lines can be counted. Directories are specified so Helium
 rem don't want to recurse below one level, but this seems hard. Now old stuff and test are included
 echo Count is about 700 lines too high
 
-c:\apps\cygwin\bin\grep -R --exclude=*_OIO* --include=*.hs --include=*.ag --exclude=Arrangement/ArrangerAG.hs --exclude=Presentation/PresentationAG.hs '' Rendering Arrangement Layout  Presentation Evaluation Main Common | c:\apps\cygwin\bin\grep -c ''
+c:\apps\cygwin\bin\grep -R --include=*.hs --include=*.ag --exclude=ArrangerAG.hs --exclude=ScannerAG.hs '' Rendering Arrangement Layout  Presentation Evaluation Proxima Common > prrt 
+rem | c:\apps\cygwin\bin\grep -c ''
 pause
 
 rem add these to count Helium  helium root dir is not counted because of recursive dir behaviour of grep
