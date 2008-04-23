@@ -40,6 +40,7 @@ editDoc :: (Doc doc, Clip clip, Editable doc doc node clip token) =>
            LayerStateEval -> DocumentLevel doc clip -> EditDocument' doc clip ->
            (DocumentLevel doc clip, LayerStateEval)
 editDoc state doclvl                        (UpdateDoc' upd) = (upd doclvl, state)
+editDoc state (DocumentLevel doc pth clipD) (NavPathDoc' path) = ((DocumentLevel doc path clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavDownDoc'      = ((DocumentLevel doc (navigateDownD pth doc) clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavLeftDoc'      = ((DocumentLevel doc (navigateLeftD pth doc) clipD), state)

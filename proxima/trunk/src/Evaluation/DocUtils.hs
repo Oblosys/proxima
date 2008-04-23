@@ -13,6 +13,7 @@ redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})
 --redirect InitDoc         = (SetDoc' initDoc) -- is done in translate
 redirect (UpdateDoc upd) = UpdateDoc' upd
+redirect (NavPathDoc path) = NavPathDoc' path
 redirect NavUpDoc        = NavUpDoc'
 redirect NavDownDoc      = NavDownDoc'
 redirect NavLeftDoc      = NavLeftDoc'

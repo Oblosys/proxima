@@ -30,6 +30,7 @@ data EditEnrichedDoc documentLevel enr doc =
    | SaveFileEnr String
    | EvaluateDocEnr
    | UpdateDocEnr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
+   | NavPathDocEnr PathDoc
    | NavUpDocEnr
    | NavDownDocEnr
    | NavLeftDocEnr

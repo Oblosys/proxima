@@ -41,7 +41,8 @@ present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
   let -- focusXY = saveFocus focus lay
       (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
-      focus' = scannedFocus {- case (scannedFocus, focus) of
+      focus' = focus -- scannedFocus 
+               {- case (scannedFocus, focus) of
                  (NoFocusP,               focus       ) -> focus
                  (FocusP NoPathP NoPathP, FocusP fp tp) -> FocusP fp      tp
                  (FocusP NoPathP tp,      FocusP fp _ ) -> FocusP fp      tp

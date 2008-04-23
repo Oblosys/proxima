@@ -19,6 +19,7 @@ class Show doc => Doc doc where
 data EditDocument' doc clip =
     SetDoc' (DocumentLevel doc clip)
   | UpdateDoc' (DocumentLevel doc clip -> DocumentLevel doc clip)
+  | NavPathDoc' PathDoc
   | NavUpDoc'
   | NavDownDoc'
   | NavLeftDoc'
@@ -35,6 +36,7 @@ data EditDocument doc clip =
   | CloseDoc
   | SetDoc (DocumentLevel doc clip)
   | UpdateDoc (DocumentLevel doc clip -> DocumentLevel doc clip)
+  | NavPathDoc PathDoc
   | NavUpDoc
   | NavDownDoc
   | NavLeftDoc
@@ -51,6 +53,7 @@ instance Show (EditDocument doc clip) where
   show CloseDoc        = "CloseDoc"
   show (SetDoc doc )    = "(SetDoc {Document} {inserted&deleted} )"
   show (UpdateDoc upd) = "(UpdateDoc <function>)"
+  show (NavPathDoc path) = "NavPathDoc"++show path
   show NavUpDoc        = "NavUpDoc"
   show NavDownDoc      = "NavDownDoc"
   show NavLeftDoc      = "NavLeftDoc"
@@ -66,6 +69,7 @@ instance Show (EditDocument doc clip) where
 instance Show (EditDocument' doc clip) where
   show (SetDoc' doc )    = "(SetDoc' {Document})"
   show (UpdateDoc' upd) = "(UpdateDoc' <function>)"
+  show (NavPathDoc' path) = "NavPathDoc'"++show path
   show NavUpDoc'        = "NavUpDoc'"
   show NavDownDoc'      = "NavDownDoc'"
   show NavLeftDoc'      = "NavLeftDoc'"

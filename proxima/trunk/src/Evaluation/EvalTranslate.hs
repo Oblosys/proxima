@@ -50,6 +50,7 @@ reduce :: (Doc doc, ReductionSheet doc enr clip) =>
           EditEnrichedDoc (DocumentLevel doc clip) enr doc -> 
           (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
+reduce state enrLvl docLvl (NavPathDocEnr path) = (NavPathDoc path, state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)
 reduce state enrLvl docLvl NavLeftDocEnr = (NavLeftDoc, state, enrLvl)

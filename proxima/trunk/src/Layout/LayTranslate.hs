@@ -37,7 +37,9 @@ parseIO scannerSheet state layLvl prsLvl event = return $ parse scannerSheet sta
 
 parse :: (DocNode node, Show token, Eq token) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout documentLevel doc node clip token -> (EditPresentation documentLevel doc node clip token, LayerStateLay doc node clip token, LayoutLevel doc node clip token)
 parse _ state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay focus) = 
-  (SkipPres 0, state, LayoutLevel pres focus dt)
+  let pathDoc = pathDocFromFocusPres focus pres
+  in  debug Lay ("\n\n\nDocument focus: "++show pathDoc) $
+      ( NavPathDocPres pathDoc, state, LayoutLevel pres focus dt)
 parse _ state layLvl prsLvl (SkipLay i)   = (SkipPres (i+1), state, layLvl)
 parse _ state layLvl prsLvl InitLay       = (InitPres, state, layLvl)
 parse _ state layLvl prsLvl (InsertLay c) = editLay (editInsert c) state layLvl prsLvl
