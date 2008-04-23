@@ -13,8 +13,14 @@ go from Layout with two paths to Maybe Document path
 first take common prefix of paths and move upward to nearest surrounding parsing column of rows 
 select column of rows
 
-Tricky:
-- why does restore focus go wrong after a NavPath?
+Issues:
+
+Does not work for structural presentations yet. (this includes the numerator/denominator of a fraction)
+
+
+Problem: 
+When a NavPathDocPres is returned, the layout (with the extended focus) is not scanned.
+Hence, the whitespace map does not contain the right focus.
 -}
 
 pathDocFromFocusPres (FocusP pth1@(PathP _ _) pth2@(PathP _ _)) layout = pathDocFromPathPres pth1 pth2 layout
@@ -39,10 +45,10 @@ pathDocFromPathPres pth1 pth2 layout =
                               x:_ -> gatherDocPaths x
                               _   -> []
           sharedPaths'' =  sharedPaths' \\ rightBoundPaths -- remove paths appearing after
-      in  debug Lay ("SelectionPathss:\n"++showPathss selectionPaths) $
-          debug Lay ("SharedPaths:"++show sharedPaths) $
-          debug Lay ("LeftBoundPaths:"++show leftBoundPaths) $
-          debug Lay ("RightBoundPaths:"++show rightBoundPaths) $
+      in  --debug Lay ("SelectionPathss:\n"++showPathss selectionPaths) $
+          --debug Lay ("SharedPaths:"++show sharedPaths) $
+          --debug Lay ("LeftBoundPaths:"++show leftBoundPaths) $
+          --debug Lay ("RightBoundPaths:"++show rightBoundPaths) $
           case sort $ zip [0..] sharedPaths'' of  -- return the shortest, if any
           (_,path):_ -> debug Lay ("Shortest:"++show path) $
                           path
@@ -87,7 +93,7 @@ fixRight path selection suffix =
   else fixWS path (init selection) (last selection) suffix
   
 fixWS path left elt right =
-  debug Lay ("Twiddling "++show path ++ ":\n"++show elt) $
+  --debug Lay ("Twiddling "++show path ++ ":\n"++show elt) $
   case isWhitespaceLR path elt of
     (False,False) -> Nothing
     (False,True ) -> Just (left++[elt],right)
