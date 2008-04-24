@@ -393,7 +393,8 @@ presentation is as big as the presentation, it will always get the focus in that
 data Inherited doc clip = Inh { font :: Font
                      , textColor :: Color, lineColor :: Color, fillColor, backgroundColor :: Color
                      , mouseDown :: Maybe (UpdateDoc doc clip)
-                     , popupMenuItems :: [ PopupMenuItem doc clip ]
+                     , inheritablePopupMenuItems :: [ PopupMenuItem doc clip ]
+                     , localPopupMenuItems :: [ PopupMenuItem doc clip ]
 		     , assignedWidth, assignedHeight :: Int
 		     , assignedVRef, assignedHRef :: Int} deriving Show
 data Synthesized = Syn { vRef, hRef, minWidth, minHeight :: Int
@@ -425,7 +426,8 @@ idP (FormatterP id _)     = id
 idP pres              = debug Err ("PresTypes.idP: unhandled presentation "++show pres) NoIDP
 
 
-emptyAttrs = (Inh defaultFont black black black black Nothing [] 0 0 0 0, Syn 0 0 0 0 False False 0 0 0 0)
+emptyInh = Inh defaultFont black black black black Nothing [] [] 0 0 0 0
+emptySyn = Syn 0 0 0 0 False False 0 0 0 0
 
 type UpdateDoc doc clip = DocumentLevel doc clip -> DocumentLevel doc clip
 

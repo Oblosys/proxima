@@ -172,14 +172,24 @@ strikeOut xp = withFont_ xp (\f -> f { fStrikeOut = True })
 withMouseDown :: Xprez doc node clip token -> UpdateDoc doc clip -> Xprez doc node clip token
 withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just upd })
 
-withPopupMenuItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
-withPopupMenuItems xp mis = withInh xp (\i -> i { popupMenuItems = mis })
+-- this one deletes all inherited popup items
+withInheritablePopupMenuItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
+withInheritablePopupMenuItems xp mis = withInh xp (\i -> i { inheritablePopupMenuItems = mis })
 
-withPopupMenuItems_ :: Xprez doc node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc node clip token
-withPopupMenuItems_ xp fmis = withInh xp (\i -> i { popupMenuItems = fmis (popupMenuItems i) })
+withInheritablePopupMenuItems_ :: Xprez doc node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc node clip token
+withInheritablePopupMenuItems_ xp fmis = withInh xp (\i -> i { inheritablePopupMenuItems = fmis (inheritablePopupMenuItems i) })
 
 addPopupItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
-addPopupItems xp mis = withPopupMenuItems_ xp (\pmis -> mis++pmis) 
+addPopupItems xp mis = withInheritablePopupMenuItems_ xp (\pmis -> mis++pmis) 
+
+withLocalPopupMenuItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
+withLocalPopupMenuItems xp mis = withInh xp (\i -> i { localPopupMenuItems = mis })
+
+withLocalPopupMenuItems_ :: Xprez doc node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc node clip token
+withLocalPopupMenuItems_ xp fmis = withInh xp (\i -> i { localPopupMenuItems = fmis (localPopupMenuItems i) })
+
+addLocalPopupItems :: Xprez doc node clip token -> [PopupMenuItem doc clip] -> Xprez doc node clip token
+addLocalPopupItems xp mis = withLocalPopupMenuItems_ xp (\pmis -> mis++pmis) 
 
 withHRef :: Xprez doc node clip token -> Int -> Xprez doc node clip token
 withHRef xp h = withSyn xp (\s -> s { hRef = h })

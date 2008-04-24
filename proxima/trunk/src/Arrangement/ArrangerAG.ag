@@ -173,7 +173,8 @@ SEM LayoutList [ || nrOfChildren : Int ]
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
             focus : FocusPres
             mouseDown : {Maybe (UpdateDoc doc clip)}
-            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
+--            inheritablePopupMenuItems : {[ PopupMenuItem @doc @clip ]}
+--            localPopupMenuItems : {[ PopupMenuItem @doc @clip ]}
           || maxFormatterDepth : Int arrangement : {Arrangement @node} ]
 SEM Root
   | Root
@@ -188,12 +189,13 @@ SEM Root
 
 SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
             mouseDown : {Maybe (UpdateDoc @doc @clip)}
-            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
+--            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
             | | ]
-  | WithP
+  | WithP -- note popupItems are not propagated in the AG
+          -- they are extracted with PresUtils.popupMenuItemsPres
       loc.newAttrs   = @attrRule ( Inh @lhs.font 
                                       @lhs.textColor @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
-                                      @lhs.mouseDown @lhs.popupMenuItems
+                                      @lhs.mouseDown [] [] -- @lhs.popupMenuItems
 				      @lhs.assignedWidth @lhs.assignedHeight @lhs.assignedVRef @lhs.assignedHRef
 				, Syn @child.vRef @child.hRef @child.minWidth @child.minHeight
 				      @child.hStretch @child.vStretch
@@ -207,7 +209,7 @@ SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Colo
       child.fillColor = fillColor @newSyn
       child.backgroundColor = backgroundColor @newSyn     
       child.mouseDown = mouseDown @newSyn
-      child.popupMenuItems = popupMenuItems @newSyn
+--      child.popupMenuItems = popupMenuItems @newSyn
       child.assignedWidth = assignedWidth @newSyn
       child.assignedHeight = assignedHeight @newSyn
       child.assignedVRef = assignedVRef @newSyn
@@ -226,7 +228,9 @@ SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Colo
 -- rest is taken care of by copy rule
 
 ATTR LayoutList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
-                 mouseDown : {Maybe (UpdateDoc doc clip)} popupMenuItems : {[ PopupMenuItem @doc @clip ]} | | ]
+                 mouseDown : {Maybe (UpdateDoc doc clip)}
+--                 popupMenuItems : {[ PopupMenuItem @doc @clip ]} 
+                | | ]
 
 
 

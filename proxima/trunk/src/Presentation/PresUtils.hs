@@ -811,7 +811,7 @@ mouseDownDocPres' upd (p:path) (ColP _ _ _ press)          = mouseDownDocPres' u
 mouseDownDocPres' upd (0:path) (OverlayP _ _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
 mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ _ pres)  = mouseDownDocPres' upd path pres
-mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = ((fst emptyAttrs) {mouseDown = upd}, snd emptyAttrs)
+mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = (emptyInh {mouseDown = upd}, emptySyn)
                                                                                   (inh',syn') = w (inh,syn)
                                                                               in mouseDown inh') path pres
 mouseDownDocPres' upd (p:path) (StructuralP _ pres)      = mouseDownDocPres' upd path pres
@@ -823,22 +823,29 @@ mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes
 
 -- | Collect all popupMenuItems that are added by WithP nodes on path in pres 
 popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
-popupMenuItemsPres path pres = popupMenuItemsPres' [] path pres
+popupMenuItemsPres path pres = popupMenuItemsPres' ([],[]) path pres
 
-popupMenuItemsPres' :: (DocNode node, Show token) => [PopupMenuItem doc clip] -> [Int] -> PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
-popupMenuItemsPres' its []       tr                        = its
+popupMenuItemsPres' :: (DocNode node, Show token) => 
+                       ([PopupMenuItem doc clip],[PopupMenuItem doc clip]) -> [Int] ->
+                       PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
+popupMenuItemsPres' (local,inhtbl) []       tr                        = local++inhtbl
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (ColP _ _ _ press)        = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (0:path) (OverlayP _ _ press@(pres:_)) = popupMenuItemsPres' its path pres --(last press)
 popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ _ press)  = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ _ pres)  = popupMenuItemsPres' its path pres
-popupMenuItemsPres' its (p:path) (WithP w pres)            = popupMenuItemsPres' (let (inh,syn)   = ((fst emptyAttrs) {popupMenuItems = its}, snd emptyAttrs)
-                                                                                      (inh',syn') = w (inh,syn)
-                                                                                  in popupMenuItems inh') path pres
 popupMenuItemsPres' its (p:path) (StructuralP _ pres)      = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (ParsingP _ _ _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (LocatorP _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (FormatterP _ press)      = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
+popupMenuItemsPres' (local,inhtbl) (p:path) (WithP w pres) =
+  let (inh,syn)   = (emptyInh { inheritablePopupMenuItems = inhtbl
+                              , localPopupMenuItems = local
+                              }, emptySyn)
+      (inh',_) = w (inh,syn)
+      local' = localPopupMenuItems inh'
+      inhtbl' = inheritablePopupMenuItems inh'
+  in  popupMenuItemsPres' (inhtbl',local') path pres
 popupMenuItemsPres' its pth      pres                      = debug Err ("PresTypes.popupMenuItemsPres: can't handle "++show pth++" "++show pres) []
 
 
@@ -850,66 +857,6 @@ popupMenuItemsPres' its pth      pres                      = debug Err ("PresTyp
 
 
 
-
--- test xprez values
-
-
-prez = prez2' --fontChars
-prez1 = row [text "bla", img "img/squiggly.bmp" `withSize` (20,3),img "img/squiggly.bmp" `withSize` (20,3) ,text "Xxx",overlay [text "vout", img "img/squiggly.bmp" `withHeight` 3 `withColor` red], text "X"] `withHStretch` False
-prez2 =                             col [text "12345"
-    ,  structural $ bold $ rowR 1 [text "abcd",  rowR 1 [ text "ref", vLineW 2,text "ref", strikeOut $ text "ref"], text "noppes", text "bla"],
-                rowR 2 [text "ab",   text "cd", underline $ text "ref", text "noppes", text "bla"]
-                                            , text "678Y9"]
-prez2' = structural $                             col [text "12345"
-    , parsing' LexFreeText $ rowR 1 [text "abcd", structural $ rowR 1 [italic $ text "ref", vLineW 2,text "ref", strikeOut $ text "ref"], text "noppes", text "bla"],
-                rowR 2 [text "ab", parsing' LexFreeText $ bold $ text "cd", underline $ text "ref", text "noppes", text "bla"]
-                                            , text "678Y9"]
-
--- why the big speed difference between prez2 and prez2'?
-
--- BUG sometimes index > length while cutting in prez2
-
-prez5 = row [col [text "dasdasf", text "er"], col [text "dasdasf", text "er", text "fsfd"], col [text "gdsfgsdgf"]]
-
-prez3 = (row [ StringP (IDP 1) "123Y45", {-loc [1] $ -} col[StringP (IDP 3) "blaaa", row [text "x",col [text "11", text "22"] `withbgColor` grey ,text "y"]] `withbgColor` yellow,text "blabla"
-           , colR 1 [text "een",{- loc [2] $-} text"bloe", text "brr"]
-          
-           ,row [text "12345" `withFontSize` 10,text "x" `withFontSize` 3, text "xbloe"]
-           ] `withbgColor` (240,240,240) `withFont'` ("courier",12))
-
-prez4 = (col $ map text prez4Strs) `withFont'` ("courier new",8)
-prez6 = col [text "a", row [] `withVStretch` False , text "v"]
-fontChars = (col $ [ row $ text (show i++": ")  `withFontFam` "Arial": concat [ [text [chr j], text "," `withFontFam` "Arial"]  |j <- [i..i+15]] |  i <- [0,16..240]])
-            `withFont'` ("arial", 20)
-prez4Strs =
- [ "main =                                                               -- initial local state should not be here"
- , " do { let TransStep translate =           lift (wrap presentationLayer) (EmptyP NoIDP, error \"Empty document\")"
- , "                                `combine` lift (wrap arrangementLayer) ((),EmptyP NoIDP)"
- , "                                `combine` lift (wrap renderingLayer) (NoFocusA, EmptyA NoIDP) -- initLocalRendererState"
- , "    ; let doc = RootD NoID"
- , ""
- , "    ; stepRf <- newIORef (translate, error \"empty rendering\")"
- , "    "
- , "    ; let handler event =  -- tricky bit, assigment of rendering to local state must be same as in layers"
- , "           do { liftIO  (putStrLn $ show event)                           -- seems ok now"
- , ""
- , "              ; (translate, rendering) <- liftIO $ readIORef stepRf"
- , "              ; ((doc, docEdit), PresStep present) <- translate (rendering, event)"
- , "              "
- , "              ; liftIO  (putStrLn $ show docEdit)"
- , "              ; (rendering', translate') <-"
- , "                  do { ((rendering', renderingEdit') , TransStep translate') <- present (doc, (redirect docEdit))"
- , "                     ; case renderingEdit' of "
- , "                              SetRen' rendering' -> return (rendering', translate')"
- , "                              SkipRen' _         -> return (rendering, translate')"
- , "                     }"
- , "              ; liftIO $ writeIORef stepRf (translate', rendering')"
- , "              ; return rendering'"
- , "              }"
- , ""
- , "    ; startGUI handler"
- , "    }"
- ]
 
 
 {-TODO:

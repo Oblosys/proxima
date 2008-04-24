@@ -69,7 +69,6 @@ fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres ::
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                (Just oldArrangement)
                                                oldViewedArea
-                                               []       -- popupMenu : [String, (UpdateDoc doc clip)] 
                                                defaultTextColor
                                                unprunedPres
                                                viewedArea
