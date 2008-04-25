@@ -123,12 +123,9 @@ genMisc = genBanner "Miscellaneous" $
   , ""
   , "instance Eq Node where"
   , "  nd1 == nd2 = rankNode nd1 == rankNode nd2"
-  , "  "
+  , ""
   , "instance Ord Node where"
   , "  nd1 <= nd2 = rankNode nd1 <= rankNode nd2"
-  , ""
-  , "instance PopupMenuHack Node Document where" -- this one will disappear when popups are implemented in
-  , "  mkDocNode doc = Node_RootDoc doc []"      -- a better way
   , ""
   , ""
   , "-- toXML for primitive types"
