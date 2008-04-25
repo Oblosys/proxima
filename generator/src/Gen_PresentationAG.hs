@@ -35,13 +35,13 @@ genPresentationSheet = genBanner "presentationSheet" $
   , ""
   , "{"
   , "-- type PresentationSheet doc enr node clip token = "
-  , "--        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> "
+  , "--        enr -> doc -> FocusDoc -> WhitespaceMap -> IDPCounter -> "
   , "--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)"
   , ""
   , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
-  , "presentationSheet enrichedDoc focusD whitespaceMap pIdC = "
+  , "presentationSheet enrichedDoc document focusD whitespaceMap pIdC = "
   , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = "
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)"
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)"
   , "  in  (whitespaceMap', pIdC', pres)"
   , ""
   , "{- "
@@ -74,8 +74,8 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
  ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
-  , ""
+  , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
+  , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
@@ -115,9 +115,12 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   concatMap genSemPIDCProd prods ++
   concatMap genSemIxProd prods ++ 
   concatMap genSemPresProd prods ++
-  [ "  | Hole%1 lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
+  [ "  | Hole%1"
+  , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
+  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   , "  | ParseErr%1"
   , "      lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
+  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   ] <~ [typeName] ++
   (if typeName /= "EnrichedDoc"
    then ["      lhs.parseErrors = getErrorMessages @error"]
@@ -146,6 +149,8 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
+         , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+
 --         , "      loc.pres = empty" --gerbo HACK! for testing
          ] <~ [cnstrName]
               
@@ -163,12 +168,16 @@ genSemListDecl (Decl (LHSListType typeName) _) =
 --  , "      loc.pres = empty" --gerbo HACK! for testing
   , "  | HoleList_%1     lhs.press = []"
   , "  | ParseErrList_%1 lhs.press = []"
-  , "  | List_%1 lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
+  , "  | List_%1"
+  , "      lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
+  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   , "  | ParseErrList_%1"
   , "      lhs.pres = presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
+  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   , "      lhs.parseErrors = getErrorMessages @error"
   , "  | HoleList_%1"
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
+  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   , ""
   ] <~ [typeName]
 
