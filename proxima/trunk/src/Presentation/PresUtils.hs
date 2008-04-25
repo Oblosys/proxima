@@ -828,14 +828,14 @@ popupMenuItemsPres path pres = popupMenuItemsPres' ([],[]) path pres
 popupMenuItemsPres' :: (DocNode node, Show token) => 
                        ([PopupMenuItem doc clip],[PopupMenuItem doc clip]) -> [Int] ->
                        PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
-popupMenuItemsPres' (local,inhtbl) []       tr                        = local++inhtbl
+popupMenuItemsPres' (local,inhtbl) []       tr             = inhtbl++local
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (ColP _ _ _ press)        = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (0:path) (OverlayP _ _ press@(pres:_)) = popupMenuItemsPres' its path pres --(last press)
 popupMenuItemsPres' its (p:path) (GraphP _ _ _ _ _ press)  = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (VertexP _ _ _ _ _ pres)  = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (StructuralP _ pres)      = popupMenuItemsPres' its path pres
-popupMenuItemsPres' its (p:path) (ParsingP _ _ _ pres)         = popupMenuItemsPres' its path pres
+popupMenuItemsPres' its (p:path) (ParsingP _ _ _ pres)     = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (LocatorP _ pres)         = popupMenuItemsPres' its path pres
 popupMenuItemsPres' its (p:path) (FormatterP _ press)      = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' (local,inhtbl) (p:path) (WithP w pres) =
@@ -845,7 +845,7 @@ popupMenuItemsPres' (local,inhtbl) (p:path) (WithP w pres) =
       (inh',_) = w (inh,syn)
       local' = localPopupMenuItems inh'
       inhtbl' = inheritablePopupMenuItems inh'
-  in  popupMenuItemsPres' (inhtbl',local') path pres
+  in  popupMenuItemsPres' (local',inhtbl') path pres
 popupMenuItemsPres' its pth      pres                      = debug Err ("PresTypes.popupMenuItemsPres: can't handle "++show pth++" "++show pres) []
 
 
