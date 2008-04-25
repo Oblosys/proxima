@@ -21,10 +21,6 @@ import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
 import System.IO.Unsafe
 import Data.IORef
 
--- for automatic popup menus, allow these imports
-import DocTypes_Generated (Document, ClipDoc, Node (..), UserToken)
-import Evaluation.DocumentEdit (menuD)
-import DocumentEdit_Generated
 -----
 
 arrowHeadSize :: Double
@@ -62,74 +58,23 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
       (newW,newH) = (widthA arrangement, heightA arrangement)
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
      then [((0, 0),(max oldW newW, max oldH newH))]
-     else updatedRectArr diffTree arrangement
-          
-        
-rectBetween (x,y) (x',y') = ((x `min` x', y `min` y'), (abs $ x-x', abs $ y-y'))
-  
--- Automatic popups turned on: enable imports from editor
+     else updatedRectArr diffTree arrangement  
 
-
-{-
-mkPopupMenuXY :: DocNode node => Layout doc node clip -> Scale -> Arrangement node ->
+mkPopupMenuXY :: (DocNode node, Show token) => Layout doc node clip token -> Scale -> Arrangement node ->
                  ((RenderingLevel (DocumentLevel doc clip), EditRendering (DocumentLevel doc clip)) ->
                  IO (RenderingLevel (DocumentLevel doc clip), EditRendering' (DocumentLevel doc clip))) ->
                  IORef (RenderingLevel (DocumentLevel doc clip)) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
--}
-mkPopupMenuXY :: Layout Document Node ClipDoc UserToken -> Scale -> Arrangement Node ->
-                 ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
-                 IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
-                 IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
-                 IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr@(LocatorA (Node_RootDoc doc _) _) handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
+mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
               
-   ; case pointDoc x y arr of
-        Just node ->
-         do { let pathDoc = pathNode node
-                  alts = menuD pathDoc doc
-                  items = ctxtItems ++ alts
-            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
-                                    | (str, upd) <- items]
-            ; return $ Just contextMenu                                          
-            }            
-        Nothing -> return Nothing  
+    ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
+                            | (str, upd) <- ctxtItems]
+    ; return $ Just contextMenu                                          
     }
-mkPopupMenuXY _ _ _ _ _ _ _ _ _ _ x y = 
- do { debugLnIO Err "Arrangement root is no document locator" 
-    ; return Nothing
-    }
-
-{-
--- no automatic popups, document specific part separated from generic Proxima
-mkPopupMenuXY :: Presentation Document Node ClipDoc -> Scale -> Arrangement Node ->
-                 ((RenderingLevel (DocumentLevel Document ClipDoc), EditRendering (DocumentLevel Document ClipDoc)) ->
-                 IO (RenderingLevel (DocumentLevel Document ClipDoc), EditRendering' (DocumentLevel Document ClipDoc))) ->
-                 IORef (RenderingLevel (DocumentLevel Document ClipDoc)) ->
-                 Window -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr handler renderingLvlVar window canvas x' y'  =
- do { let (x,y) = (descaleInt scale x',descaleInt scale y')
-    ; let ctxtItems = case ArrLayerUtils.point x y arr of
-                        Nothing -> []
-                        Just pthA -> popupMenuItemsPres (pathAFromPathP' pthA prs) prs
-                                                        -- seems to be wrong
-   ; case pointDoc x y arr of
-        Just node ->
-         do { let pathDoc = pathNode node
-                  items = ctxtItems
-            ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar window canvas upd)
-                                    | (str, upd) <- items]
-            ; return $ Just contextMenu                                          
-            }            
-        Nothing -> return Nothing  
-    }
--}
-
-
 
 --render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
 render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =

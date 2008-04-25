@@ -40,19 +40,12 @@ present presentationSheet state (EnrichedDocLevel enr _ _) (PresentationLevel pr
       --  (pres'', focus'') = (pres',focus')--normalizePresentation pres focus
   in  (SetPres' (PresentationLevel pres' (layoutMap', idC')), state, enrlvl)
 
-presentEnr :: PopupMenuHack node doc =>
-              PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
+presentEnr :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
               WhitespaceMap -> IDPCounter ->
               (Presentation doc node clip token, WhitespaceMap, IDPCounter)
-presentEnr presentationSheet state (EnrichedDocLevel d focusD doc) layM idC = 
-      let (layM', idC', pres') = presentationSheet d focusD layM idC
-          pres'' = loc (mkDocNode doc) $ pres' 
-                   -- HACK!! top level loc needs to be a ref to the document
-                   -- it is used by mkPopupMenuXY in Renderer.
-                   -- A better implementation of popups will create the menu in
-                   -- the higher layers. Although it is still a bit unclear where
-                   
-                   -- The implementation should take care that popups are correct after parsing without evaluation
-                   -- Furthermore, the current implementation does not allow structural 
+presentEnr presentationSheet state (EnrichedDocLevel enr focusD doc) layM idC = 
+      let (layM', idC', pres') = presentationSheet enr doc focusD layM idC
+                   -- Bit of a hack, doc is passed to presentationSheet for automatic popups.
+                   -- Does not allow structural 
                    -- differences between doc and enriched doc (paths are enr paths)
-      in  (pres'', layM', idC')                      
+      in  (pres', layM', idC')                      
