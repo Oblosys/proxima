@@ -77,7 +77,11 @@ structuralToken idp pres = TokenP idp (StructuralTk 0 Nothing (StructuralP idp p
 -- as well, so it can be recovered by the scanner
 -- It is not added to StructuralTk, whose idp field is only used during scanning.
 
-presHole focus typeStr nd pth = loc nd $
+-- presHole and presParseErr take care of adding the loc. This is to make explicitly specifying
+-- .pres for hole and parse error alternatives a little less cumbersome
+
+-- TODO: add presentFocus
+presHole focus typeStr nd pth = loc nd $ 
   structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
 
 presParseErr node (StructuralParseErr pres) =
