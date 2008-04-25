@@ -7,8 +7,7 @@ import Presentation.PresLayerUtils
 import qualified Data.Map as Map
 import Data.Map (Map)
 
-presentIO :: PopupMenuHack node doc =>
-             PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
+presentIO :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
              PresentationLevel doc node clip token -> EditEnrichedDoc' enr doc ->
              IO (EditPresentation' doc node clip token, LayerStatePres, EnrichedDocLevel enr doc)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
@@ -24,8 +23,7 @@ presentIO presentationSheet state high low@(PresentationLevel pres layout) editH
 -- inserted and deleted are taken from setDoc' and put in PresentationLevelState
 -- on document edit, old inserted and deleted from level are reused
 
-present :: PopupMenuHack node doc =>
-           PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
+present :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
            PresentationLevel doc node clip token -> EditEnrichedDoc' enr doc ->
            (EditPresentation' doc node clip token, LayerStatePres, EnrichedDocLevel enr doc)
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
