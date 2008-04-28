@@ -79,6 +79,8 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     MouseUpArr x y ms     -> (ParseLay,            state { getLastMousePress = Nothing }, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
+    UndoDocArr            -> (UndoDocLay,            state, arrLvl) 
+    RedoDocArr            -> (RedoDocLay,            state, arrLvl) 
     UpdateDocArr upd      -> (UpdateDocLay upd,      state, arrLvl) 
     NavUpDocArr           -> (NavUpDocLay,           state, arrLvl) 
     NavDownDocArr         -> (NavDownDocLay,         state, arrLvl) 

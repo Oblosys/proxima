@@ -9,9 +9,9 @@ import UU.Parsing.CharParser
 import UU.Parsing
 
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
-               LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
+               LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
                EditEnrichedDoc (DocumentLevel doc clip) enr doc -> 
-               IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
+               IO (EditDocument doc clip, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
 translateIO state low high editLow = -- extra indirection for debugging purposes
   do { (editHigh, state', low') <- reduceIO state low high editLow
@@ -20,9 +20,9 @@ translateIO state low high editLow = -- extra indirection for debugging purposes
      }
 
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
-            LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
+            LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
             EditEnrichedDoc (DocumentLevel doc clip) enr doc -> 
-            IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
+            IO (EditDocument doc clip, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduceIO state enrLvl (DocumentLevel _ _ clip) (OpenFileEnr fpth) = 
  do { mDoc' <- openFile fpth 
 	; case mDoc' of
@@ -46,10 +46,12 @@ reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl do
 
 
 reduce :: (Doc doc, ReductionSheet doc enr clip) =>
-          LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
+          LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
           EditEnrichedDoc (DocumentLevel doc clip) enr doc -> 
-          (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
+          (EditDocument doc clip, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
+reduce state enrLvl docLvl UndoDocEnr = (UndoDoc, state, enrLvl)
+reduce state enrLvl docLvl RedoDocEnr = (RedoDoc, state, enrLvl)
 reduce state enrLvl docLvl (NavPathDocEnr path) = (NavPathDoc path, state, enrLvl)
 reduce state enrLvl docLvl NavUpDocEnr = (NavUpDoc, state, enrLvl)
 reduce state enrLvl docLvl NavDownDocEnr = (NavDownDoc, state, enrLvl)

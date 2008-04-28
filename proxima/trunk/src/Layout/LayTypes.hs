@@ -48,6 +48,8 @@ data EditLayout documentLevel doc node clip token =
   | ParseLay
   | Test2Lay
   
+  | UndoDocLay
+  | RedoDocLay
   | UpdateDocLay (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocLay
   | NavDownDocLay

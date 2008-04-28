@@ -73,6 +73,8 @@ parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state
 parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)
 
 
+parse _ state layLvl prsLvl UndoDocLay         = (UndoDocPres, state, layLvl)
+parse _ state layLvl prsLvl RedoDocLay         = (RedoDocPres, state, layLvl)
 parse _ state layLvl prsLvl (UpdateDocLay upd) = (UpdateDocPres upd, state, layLvl)
 parse _ state layLvl prsLvl NavUpDocLay        = (NavUpDocPres, state, layLvl)
 parse _ state layLvl prsLvl NavDownDocLay      = (NavDownDocPres, state, layLvl)

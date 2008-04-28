@@ -6,14 +6,14 @@ import Common.CommonTypes
 import Evaluation.EnrTypes 
 import Evaluation.DocTypes
 
-data LayerStateEval = LayerStateEval
+data LayerStateEval doc clip = LayerStateEval [DocumentLevel doc clip] [DocumentLevel doc clip]
 
 
 -- instantiating only one of these is enough
 class EvaluationSheet doc enr clip | doc -> clip where
   evaluationSheet ::
-                LayerStateEval -> DocumentLevel doc clip -> EnrichedDocLevel enr doc -> EditDocument' doc clip -> DocumentLevel doc clip -> 
-                IO (EditEnrichedDoc' enr doc, LayerStateEval, DocumentLevel doc clip)
+                LayerStateEval doc clip -> DocumentLevel doc clip -> EnrichedDocLevel enr doc -> EditDocument' doc clip -> DocumentLevel doc clip -> 
+                IO (EditEnrichedDoc' enr doc, LayerStateEval doc clip, DocumentLevel doc clip)
 -- The parameters to the sheet are the old document, the old enriched doc, and the new enriched doc.
 -- also the edit operation on the document is passed, but this has already been applied to old
 -- doc, yielding the new document. It is only present to implement special behavior for certain
@@ -21,8 +21,8 @@ class EvaluationSheet doc enr clip | doc -> clip where
 -- the result is an edit operation on the document, a new state, and a possibly updated enriched doc
 -- If necessary, the old enriched document could also be provided in an interface
      
-  evaluationSheetSimpleIO :: LayerStateEval -> doc -> enr -> doc -> IO (enr, LayerStateEval, doc)
-  evaluationSheetSimple   :: LayerStateEval -> doc -> enr -> doc -> (enr, LayerStateEval, doc)
+  evaluationSheetSimpleIO :: LayerStateEval doc clip -> doc -> enr -> doc -> IO (enr, LayerStateEval doc clip, doc)
+  evaluationSheetSimple   :: LayerStateEval doc clip -> doc -> enr -> doc -> (enr, LayerStateEval doc clip, doc)
   evaluationSheetSimplest :: doc -> enr
 
   evaluationSheet state (DocumentLevel oldDoc oldDocFocus oldClip) (EnrichedDocLevel oldEnr oldEnrFocus _)
@@ -39,15 +39,15 @@ class EvaluationSheet doc enr clip | doc -> clip where
        
 -- instantiating only one of these is enough
 class ReductionSheet doc enr clip | doc -> clip where
-  reductionSheet :: LayerStateEval -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
+  reductionSheet :: LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
                EnrichedDocLevel enr doc ->
-               IO (EditDocument doc clip, LayerStateEval, EnrichedDocLevel enr doc)
+               IO (EditDocument doc clip, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 -- The parameters to the sheet are the old enriched doc, the old document, and the new enriched doc.
 -- the result is an edit operation on the document, a new state, and a possibly updated enriched doc
 -- If necessary, the old enriched document could also be provided in an interface
 
-  reductionSheetSimpleIO :: LayerStateEval -> enr -> doc -> enr -> IO (doc, LayerStateEval, enr)
-  reductionSheetSimple   :: LayerStateEval -> enr -> doc -> enr -> (doc, LayerStateEval, enr)
+  reductionSheetSimpleIO :: LayerStateEval doc clip -> enr -> doc -> enr -> IO (doc, LayerStateEval doc clip, enr)
+  reductionSheetSimple   :: LayerStateEval doc clip -> enr -> doc -> enr -> (doc, LayerStateEval doc clip, enr)
   reductionSheetSimplest :: enr -> doc
 
   reductionSheet state (EnrichedDocLevel oldEnr oldEnrFocus _) (DocumentLevel oldDoc oldDocFocus oldClip)

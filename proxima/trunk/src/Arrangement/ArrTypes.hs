@@ -40,6 +40,8 @@ data EditArrangement documentLevel =
   | MouseUpArr Int Int Modifiers
   | OpenFileArr String
   | SaveFileArr String
+  | UndoDocArr
+  | RedoDocArr
   | UpdateDocArr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocArr
   | NavDownDocArr

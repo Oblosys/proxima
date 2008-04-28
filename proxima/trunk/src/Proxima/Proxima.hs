@@ -74,7 +74,7 @@ proxima presentationSheet parseSheet scannerSheet
     ; viewedAreaRef <- newIORef ((0,0),(0,0)) -- shared by GUI and extra state on Arrangement layer
     ; let layers = 
             proximaLayers presentationSheet parseSheet scannerSheet
-                          (LayerStateEval, initDoc)   
+                          (LayerStateEval [] [], initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   
                           (LocalStateArr fontMetricsRef Nothing viewedAreaRef ((0,0),(0,0)), LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))

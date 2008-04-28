@@ -44,6 +44,8 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (CopyDocArr,    state, renLvl) -- Ctrl-f
     KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (PasteDocArr,   state, renLvl) -- Ctrl-g
     KeySpecialRen (CharKey 's') (Modifiers False True False) -> (CutDocArr,     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (UndoDocArr,     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (RedoDocArr,     state, renLvl) -- Ctrl-d
     KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r fr sz (not debugging) ur lmd)

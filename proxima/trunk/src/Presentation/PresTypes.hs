@@ -71,6 +71,8 @@ data EditPresentation documentLevel doc node clip token =
   | OpenFilePres String
   | SaveFilePres String
    
+  | UndoDocPres
+  | RedoDocPres
   | UpdateDocPres (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
   | NavPathDocPres PathDoc
   | NavUpDocPres

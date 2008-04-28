@@ -12,6 +12,8 @@ import Common.CommonTypes
 redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})
 --redirect InitDoc         = (SetDoc' initDoc) -- is done in translate
+redirect UndoDoc         = UndoDoc'
+redirect RedoDoc         = RedoDoc'
 redirect (UpdateDoc upd) = UpdateDoc' upd
 redirect (NavPathDoc path) = NavPathDoc' path
 redirect NavUpDoc        = NavUpDoc'
