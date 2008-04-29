@@ -145,12 +145,9 @@ instance Doc Document where
 
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2
-  
+
 instance Ord Node where
   nd1 <= nd2 = rankNode nd1 <= rankNode nd2
-
-instance PopupMenuHack Node Document where
-  mkDocNode doc = Node_RootDoc doc []
 
 
 -- toXML for primitive types

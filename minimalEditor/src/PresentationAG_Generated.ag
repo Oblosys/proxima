@@ -8,13 +8,13 @@ WRAPPER Root
 
 {
 -- type PresentationSheet doc enr node clip token = 
---        enr -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
+--        enr -> doc -> FocusDoc -> WhitespaceMap -> IDPCounter -> 
 --        (WhitespaceMap, IDPCounter, Presentation doc node clip token)
 
 presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken
-presentationSheet enrichedDoc focusD whitespaceMap pIdC = 
+presentationSheet enrichedDoc document focusD whitespaceMap pIdC = 
   let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = 
-        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc focusD pIdC [] whitespaceMap)
+        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)
   in  (whitespaceMap', pIdC', pres)
 
 {- 
@@ -62,7 +62,7 @@ DATA ConsList_Tree
 --------------------------------------------------------------------------
 
 ATTR EnrichedDoc Tree List_Tree ConsList_Tree
-     [ focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
+     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
 ATTR EnrichedDoc Tree List_Tree
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
@@ -98,9 +98,13 @@ SEM EnrichedDoc
     trees2.ix = 1
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-  | HoleEnrichedDoc lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleEnrichedDoc
+      lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrEnrichedDoc
       lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
 SEM Tree
   | Bin 
@@ -117,11 +121,16 @@ SEM Tree
   | Leaf
   | Bin
       lhs.pres = loc (Node_Bin @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | Leaf
       lhs.pres = loc (Node_Leaf @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-  | HoleTree lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleTree
+      lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleTree @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrTree
       lhs.pres = presParseErr (Node_ParseErrTree @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
 SEM List_Tree
@@ -136,12 +145,16 @@ SEM List_Tree
       elts.ix = 0
   | HoleList_Tree     lhs.press = []
   | ParseErrList_Tree lhs.press = []
-  | List_Tree lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+  | List_Tree
+      lhs.pres = loc (Node_List_Tree @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrList_Tree
       lhs.pres = presParseErr (Node_ParseErrList_Tree @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Tree
       lhs.pres = presHole @lhs.focusD "Tree" (Node_HoleList_Tree @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
 SEM ConsList_Tree
   | Cons_Tree
