@@ -192,8 +192,28 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-     (idPCounter', pos, scanChars, scannedFocusEnd, scannedFocusStart, self, whitespaceMap') = sem_Layout lay foc idPCounter lex mNode pth 0 (scanStructural sheet) Nothing Nothing whitespaceMap
-       -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
+
+     inheritedAttrs = Inh_Layout { focus_Inh_Layout = foc
+                                 , idPCounter_Inh_Layout = idPCounter
+                                 , lexer_Inh_Layout = lex
+                                 , lloc_Inh_Layout =mNode
+                                 , path_Inh_Layout = pth
+                                 , pos_Inh_Layout = 0
+                                 , scanStructural_Inh_Layout = (scanStructural sheet)
+                                 , scannedFocusEnd_Inh_Layout = Nothing
+                                 , scannedFocusStart_Inh_Layout = Nothing
+                                 , whitespaceMap_Inh_Layout = whitespaceMap
+                                 }
+     -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
+
+     Syn_Layout { idPCounter_Syn_Layout = idPCounter'
+                , pos_Syn_Layout = pos
+                , scanChars_Syn_Layout = scanChars
+                , scannedFocusEnd_Syn_Layout = scannedFocusEnd
+                , scannedFocusStart_Syn_Layout = scannedFocusStart
+                , self_Syn_Layout = self
+                , whitespaceMap_Syn_Layout = whitespaceMap'
+                } = wrap_Layout (sem_Layout lay) inheritedAttrs
 
 
      focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars 

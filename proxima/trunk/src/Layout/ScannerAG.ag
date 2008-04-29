@@ -18,7 +18,9 @@ import List
 import Char
 import qualified Data.Map as Map
 }
- 
+
+WRAPPER Layout
+
 DATA Layout doc node clip token
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
