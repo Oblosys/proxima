@@ -3,7 +3,7 @@ module DocTypes_Generated where
 import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.DocTypes
 
-import Presentation.PresTypes
+import Presentation.PresTypes hiding (Edge)
 import List
 import Char
 

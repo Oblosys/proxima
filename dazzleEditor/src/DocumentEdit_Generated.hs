@@ -6,7 +6,7 @@ import DocTypes_Generated
 import DocUtils_Generated
 import Evaluation.DocumentEdit
 import Evaluation.DocUtils
-import Presentation.PresTypes
+import Presentation.PresTypes hiding (Edge)
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
