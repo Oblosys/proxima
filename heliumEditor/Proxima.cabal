@@ -52,7 +52,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Presentation.PresTranslate Presentation.PresTypes
                Presentation.PresUtils Presentation.PresentationParsing
                Presentation.XLatex Presentation.XprezLib Proxima.Architecture
-               Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima
+               Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
                Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
