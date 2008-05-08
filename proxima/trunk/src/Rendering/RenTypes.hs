@@ -21,6 +21,7 @@ type LocalStateRen = ()
 data EditRendering'_ wrapped docLevel doc enr node clip token =
     SetRen' (RenderingLevel_ wrapped docLevel doc enr node clip token)
   | SkipRen' Int
+  | FuckRen'
   | WrapRen' wrapped deriving Show
 
 data EditRendering_ wrapped docLevel doc enr node clip token =

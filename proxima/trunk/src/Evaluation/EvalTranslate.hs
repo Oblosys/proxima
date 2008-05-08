@@ -13,7 +13,7 @@ import UU.Parsing
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
                EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-               IO (EditDocument docLevel doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+               IO (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
 translateIO state low high editLow = -- extra indirection for debugging purposes
   do { (editHigh, state', low') <- reduceIO state low high editLow
@@ -24,7 +24,7 @@ translateIO state low high editLow = -- extra indirection for debugging purposes
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
             LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
             EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-            IO (EditDocument docLevel doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+            IO (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduceIO state enrLvl (DocumentLevel _ _ clip) (OpenFileEnr fpth) = 
  do { mDoc' <- openFile fpth 
 	; case mDoc' of
@@ -50,7 +50,7 @@ reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl do
 reduce :: (Doc doc, ReductionSheet doc enr clip) =>
           LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
           EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-          (EditDocument docLevel doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+          (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl UndoDocEnr = (UndoDoc, state, enrLvl)
 reduce state enrLvl docLvl RedoDocEnr = (RedoDoc, state, enrLvl)
@@ -64,6 +64,7 @@ reduce state enrLvl docLvl CopyDocEnr   = (CopyDoc, state, enrLvl)
 reduce state enrLvl docLvl PasteDocEnr  = (PasteDoc, state, enrLvl)
 reduce state enrLvl docLvl DeleteDocEnr = (DeleteDoc, state, enrLvl)
 reduce state enrLvl docLvl (UpdateDocEnr upd) = (UpdateDoc upd, state, enrLvl)
+reduce state enrLvl docLvl (WrapEnr wrapped) = (unwrap wrapped, state, enrLvl)
 reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)
 
 initDoc :: Doc doc => IO doc

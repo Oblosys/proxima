@@ -97,6 +97,7 @@ parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)
 --parse _ state layLvl prsLvl (MouseDownLay path ms i) = setUpd AllUpdated $ editMouseDown state layLvl prsLvl path -- Helium
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
+parse _ state layLvl prsLvl (WrapLay wrapped) = (unwrap wrapped,        state, layLvl)
 parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 
 

@@ -32,6 +32,7 @@ eval state docLvl@(DocumentLevel doc focusD clipD) enrLvl docEdit =
     SkipDoc' i -> return (SkipEnr' (i-1), state, docLvl)
     SetDoc' docLvl  -> evaluationSheet (recordEditAction docLvl state) docLvl enrLvl docEdit docLvl
     EvaluateDoc' -> evaluationSheet state docLvl enrLvl docEdit docLvl
+    WrapDoc' wrapped -> return (unwrap wrapped, state, docLvl)
     _ -> debug Eva ("DocNavigate"++show focusD) $
           do { let (doclvl', state') = editDoc state docLvl docEdit
              ; evaluationSheet state' docLvl enrLvl docEdit doclvl'

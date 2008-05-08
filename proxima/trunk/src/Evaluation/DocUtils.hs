@@ -3,6 +3,7 @@ module Evaluation.DocUtils where
 
 import Evaluation.DocTypes
 import Presentation.PresTypes
+import Proxima.Wrap
 
 import UU.Parsing
 import UU.Parsing.CharParser
@@ -10,8 +11,7 @@ import UU.Parsing.CharParser
 import Common.CommonTypes
 
 redirect (SkipDoc i)     = (SkipDoc' i)
-redirect (SetDoc doc {- inssdels -})    = (SetDoc' doc {- inssdels -})
---redirect InitDoc         = (SetDoc' initDoc) -- is done in translate
+redirect (SetDoc doc)    = (SetDoc' doc)
 redirect UndoDoc         = UndoDoc'
 redirect RedoDoc         = RedoDoc'
 redirect (UpdateDoc upd) = UpdateDoc' upd
@@ -25,6 +25,7 @@ redirect CopyDoc         = CopyDoc'
 redirect PasteDoc        = PasteDoc'
 redirect DeleteDoc       = DeleteDoc'
 redirect EvaluateDoc     = EvaluateDoc'
+redirect (WrapDoc wrapped) = unwrap wrapped
 redirect _               = (SkipDoc' 0)
 
 

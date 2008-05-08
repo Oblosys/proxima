@@ -3,6 +3,7 @@ module Rendering.RenPresent where
 import Common.CommonTypes
 import Rendering.RenLayerTypes
 import Rendering.RenLayerUtils -- for context menu hack
+import Proxima.Wrap
 
 --import RendererGTK
 import Rendering.Renderer
@@ -58,4 +59,4 @@ render state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ 
        $ -}
        ( SetRen' (RenderingLevel scale (mkPopupMenuXY prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
-
+render state arrLvl ren (WrapArr' wrapped) = (unwrap wrapped, state, arrLvl)

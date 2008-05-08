@@ -93,6 +93,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     PasteDocArr           -> (PasteDocLay,           state, arrLvl) 
     DeleteDocArr          -> (DeleteDocLay,          state, arrLvl) 
     DocumentLoadedArr str -> (DocumentLoadedLay str, state, arrLvl) 
+    WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
     _                     -> (SkipLay 0,             state, arrLvl) 
   
 

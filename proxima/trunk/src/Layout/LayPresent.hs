@@ -56,6 +56,7 @@ present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres 
       diffTree = diffPres lay' lay
   in  debug Lay ("old focus:    " ++ show focus ++ "\nScannedFocus: "++show scannedFocus)
       (SetLay' (LayoutLevel lay' focus' diffTree), state, hp) 
+present state pres lay (WrapPres' wrapped) = (unwrap wrapped, state, pres)
 
 
 

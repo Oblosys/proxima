@@ -67,6 +67,7 @@ parse _ state presLvl enrLvl PasteDocPres  = (PasteDocEnr, state, presLvl)
 parse _ state presLvl enrLvl DeleteDocPres = (DeleteDocEnr, state, presLvl)
 parse _ state presLvl enrLvl (UpdateDocPres upd) = (UpdateDocEnr upd, state, presLvl)
 parse _ state presLvl enrLvl Test2Pres     = (EvaluateDocEnr, state, presLvl)
+parse _ state presLvl enrLvl (WrapPres wrapped) = (unwrap wrapped, state, presLvl)
 parse _ state presLvl enrLvl _            = (SkipEnr 0, state, presLvl)
 
 
