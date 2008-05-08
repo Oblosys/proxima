@@ -15,10 +15,10 @@ import Evaluation.DocTypes
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (DocNode node, Show token, Eq token) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> [EditLayout doc enr node clip token]
             -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
-translateIO scannerSheet state low high editsLow = castRemainingEditOps editsLow $ \editLow ->
-  do { (editHigh, state', low') <- parseIO scannerSheet state low high editLow
+translateIO scannerSheet state low high editsLow = castRemainingEditOps' editsLow $ \editLow ->
+  do { (editsHigh, state', low') <- parseIO scannerSheet state low high editLow
      ; debugLnIO Lay $ "Edit Layout: "++show editLow
-     ; return (editHigh, state', low')
+     ; return (editsHigh, state', low')
      }
 
 
@@ -30,18 +30,24 @@ translateIO scannerSheet state low high editsLow = castRemainingEditOps editsLow
 
 
 -- split in monadic and non-monadic part
-parseIO :: (Eq token, Show token, DocNode node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> IO (EditPresentation doc enr node clip token, LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+parseIO :: (Eq token, Show token, DocNode node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
 --parseIO _ state layLvl prsLvl (OpenFileLay str) = openFile str state layLvl prsLvl
 --parseIO _ state layLvl prsLvl (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prsLvl str 
-parseIO _ state layLvl prsLvl (OpenFileLay str) = return (OpenFilePres str, state, layLvl)
-parseIO _ state layLvl prsLvl (SaveFileLay str) = return (SaveFilePres str, state, layLvl)
-parseIO scannerSheet state layLvl prsLvl event = return $ parse scannerSheet state layLvl prsLvl event
+parseIO _ state layLvl prsLvl (OpenFileLay str) = return ([OpenFilePres str], state, layLvl)
+parseIO _ state layLvl prsLvl (SaveFileLay str) = return ([SaveFilePres str], state, layLvl)
+parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay focus) = 
+  let pathDoc = pathDocFromFocusPres focus pres
+      (editHigh1, state', LayoutLevel pres' focus' dt' ) = tokenizeLay scannerSheet state 
+                                                             (LayoutLevel pres focus dt) prsLvl
+  in  debug Lay ("\n\n\nDocument focus: "++show pathDoc) $
+      return ( [ editHigh1
+               , cast (NavPathDoc' pathDoc :: EditDocument' doc enr node clip token)
+               ]
+             , state', LayoutLevel pres' focus' dt')
+parseIO scannerSheet state layLvl prsLvl event = let (editHigh, state', low') = parse scannerSheet state layLvl prsLvl event
+                                                 in  return ([editHigh], state', low')
 
 parse :: (DocNode node, Show token, Eq token) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> (EditPresentation doc enr node clip token, LayerStateLay doc node clip token, LayoutLevel doc node clip token)
-parse _ state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay focus) = 
-  let pathDoc = pathDocFromFocusPres focus pres
-  in  debug Lay ("\n\n\nDocument focus: "++show pathDoc) $
-      (cast (NavPathDoc' pathDoc :: EditDocument' doc enr node clip token), state, LayoutLevel pres focus dt)
 parse _ state layLvl prsLvl (SkipLay i)   = (SkipPres (i+1), state, layLvl)
 parse _ state layLvl prsLvl InitLay       = (InitPres, state, layLvl)
 parse _ state layLvl prsLvl (InsertLay c) = editLay (editInsert c) state layLvl prsLvl

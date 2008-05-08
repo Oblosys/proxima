@@ -167,6 +167,14 @@ castRemainingEditOps (editOp:editOps) presOrTrans =
     ; return (editOp' : map cast editOps, state, level)
     }
 
+castRemainingEditOps' :: ( Wrapable editOp doc enbr node clip token
+                        , Wrapable editOp' doc enbr node clip token ) =>
+                        [editOp] -> (editOp -> IO ([editOp'],state,level)) -> IO ([editOp'], state, level)
+castRemainingEditOps' (editOp:editOps) presOrTrans =
+ do { (editOps',state,level) <- presOrTrans editOp
+    ; return (editOps' ++ map cast editOps, state, level)
+    }
+
 castRemainingEditOpsRedirect :: ( Wrapable editOp doc enbr node clip token
                                 , Wrapable editOp' doc enbr node clip token ) =>
                                 [editOp] -> (editOp -> editOp') -> [editOp']
