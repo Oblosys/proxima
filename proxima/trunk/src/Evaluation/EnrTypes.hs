@@ -29,18 +29,5 @@ data EditEnrichedDoc_ wrapped docLevel doc enr node clip token =
    | SkipEnr Int
    | OpenFileEnr String
    | SaveFileEnr String
-   | EvaluateDocEnr
-   | UndoDocEnr
-   | RedoDocEnr
-   | UpdateDocEnr (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
-   | NavPathDocEnr PathDoc
-   | NavUpDocEnr
-   | NavDownDocEnr
-   | NavLeftDocEnr
-   | NavRightDocEnr
-   | CutDocEnr
-   | CopyDocEnr
-   | PasteDocEnr
-   | DeleteDocEnr
    | WrapEnr wrapped deriving Show
 

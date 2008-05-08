@@ -4,6 +4,7 @@ import Common.CommonTypes
 import Rendering.RenLayerTypes
 import Rendering.RenLayerUtils
 import Proxima.Wrap
+import Evaluation.DocTypes 
 
 import Char
 -- import IOExts
@@ -42,19 +43,19 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> (CopyArr,       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> (PasteArr,      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> (CutArr,        state, renLvl) -- Ctrl-x
-    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (CopyDocArr,    state, renLvl) -- Ctrl-f
-    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (PasteDocArr,   state, renLvl) -- Ctrl-g
-    KeySpecialRen (CharKey 's') (Modifiers False True False) -> (CutDocArr,     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (UndoDocArr,     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (RedoDocArr,     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (cast (CopyDoc' :: EditDocument' docLevel doc enr node clip token),    state, renLvl) -- Ctrl-f
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (cast (PasteDoc' :: EditDocument' docLevel doc enr node clip token),   state, renLvl) -- Ctrl-g
+    KeySpecialRen (CharKey 's') (Modifiers False True False) -> (cast (CutDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (cast (UndoDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (cast (RedoDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
     KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
 
-    KeySpecialRen UpKey (Modifiers False True False)    -> (NavUpDocArr, state, renLvl) -- Ctrl
-    KeySpecialRen DownKey (Modifiers False True False)  -> (NavDownDocArr, state, renLvl) -- Ctrl
-    KeySpecialRen LeftKey (Modifiers False True False)  -> (NavLeftDocArr, state, renLvl) -- Ctrl
-    KeySpecialRen RightKey (Modifiers False True False) -> (NavRightDocArr, state, renLvl) -- Ctrl
+    KeySpecialRen UpKey (Modifiers False True False)    -> (cast (NavUpDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen DownKey (Modifiers False True False)  -> (cast (NavDownDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen LeftKey (Modifiers False True False)  -> (cast (NavLeftDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen RightKey (Modifiers False True False) -> (cast (NavRightDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
     KeySpecialRen LeftKey (Modifiers True False False)  -> (EnlargeLeftArr, state, renLvl) -- Shift
     KeySpecialRen RightKey (Modifiers True False False) -> (EnlargeRightArr, state, renLvl) -- Shift
     
@@ -64,7 +65,8 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen LeftKey ms      -> (LeftArr, state, renLvl)
     KeySpecialRen RightKey ms     -> (RightArr, state, renLvl)
     KeySpecialRen F1Key ms        -> (ParseArr, state, renLvl)
-    KeySpecialRen F2Key ms        -> (Test2Arr, state, renLvl)
+    KeySpecialRen F2Key ms        -> ( cast (EvaluateDoc' :: EditDocument' docLevel doc enr node clip token)
+                                     , state, renLvl)
     KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
 
 
@@ -87,8 +89,6 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
     MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c r fr sz debugging ur False)
     
-    UpdateDocRen upd      -> (UpdateDocArr upd,      state, renLvl) 
-    DocumentLoadedRen str -> (DocumentLoadedArr str, state, renLvl) 
     OpenFileRen filePath  -> (OpenFileArr filePath,  state, renLvl) 
     SaveFileRen filePath  -> (SaveFileArr filePath,  state, renLvl) 
     WrapRen wrapped       -> (unwrap wrapped,        state, renLvl)

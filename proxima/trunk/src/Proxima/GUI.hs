@@ -20,6 +20,7 @@ import Rendering.RenTypes
 import Rendering.RenUtils
 import Common.CommonUtils
 import Proxima.Wrap
+import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Char
 import Maybe
 import IO
@@ -183,11 +184,12 @@ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ 
              }
     }
 
-popupMenuHandler :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
-                    IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
-                    (docLevel -> docLevel) -> IO ()
+popupMenuHandler :: forall doc enr clip node token .
+                    ((RenderingLevel (DocumentLevel doc clip) doc enr node clip token, EditRendering (DocumentLevel doc clip) doc enr node clip token) -> IO (RenderingLevel (DocumentLevel doc clip) doc enr node clip token, EditRendering' (DocumentLevel doc clip) doc enr node clip token)) ->
+                    IORef (RenderingLevel (DocumentLevel doc clip) doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+                    ((DocumentLevel doc clip) -> (DocumentLevel doc clip)) -> IO ()
 popupMenuHandler handler renderingLvlVar buffer viewedArea window vp canvas editDoc =
- do { let editRendering = (UpdateDocRen editDoc)
+ do { let editRendering = cast (UpdateDoc' editDoc :: EditDocument' (DocumentLevel doc clip) doc enr node clip token)
                                 
     ; genericHandler handler renderingLvlVar buffer viewedArea window vp canvas editRendering
     }

@@ -81,34 +81,26 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     MouseUpArr x y ms     -> (ParseLay,            state { getLastMousePress = Nothing }, arrLvl) 
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
-    UndoDocArr            -> (UndoDocLay,            state, arrLvl) 
-    RedoDocArr            -> (RedoDocLay,            state, arrLvl) 
-    UpdateDocArr upd      -> (UpdateDocLay upd,      state, arrLvl) 
-    NavUpDocArr           -> (NavUpDocLay,           state, arrLvl) 
-    NavDownDocArr         -> (NavDownDocLay,         state, arrLvl) 
-    NavLeftDocArr         -> (NavLeftDocLay,         state, arrLvl) 
-    NavRightDocArr        -> (NavRightDocLay,        state, arrLvl) 
-    CopyDocArr            -> (CopyDocLay,            state, arrLvl) 
-    CutDocArr             -> (CutDocLay,             state, arrLvl) 
-    PasteDocArr           -> (PasteDocLay,           state, arrLvl) 
-    DeleteDocArr          -> (DeleteDocLay,          state, arrLvl) 
-    DocumentLoadedArr str -> (DocumentLoadedLay str, state, arrLvl) 
     WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
     _                     -> (SkipLay 0,             state, arrLvl) 
   
 
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
+mouseDownDoc :: forall docLevel doc enr node clip token state .
+                (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
                 (EditLayout (DocumentLevel doc clip) doc enr node clip token, state, ArrangementLevel doc node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
   in  case mouseDownDocPres pthP layout of
-        Just upd -> debug UnA ("mouseDownDoc EVENT: Something") (UpdateDocLay upd, state, arrLvl)
+        Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
+                      ( cast (UpdateDoc' upd :: EditDocument' (DocumentLevel doc clip) doc enr node clip token)
+                      , state, arrLvl)
         Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)
                     $ case locateTreePres (PathP pthP 0) layout of -- set the document focus
                         Just node -> case pathNode node of
-                                       (PathD pth) -> ( UpdateDocLay (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
+                                       (PathD pth) -> ( cast ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
+                                                                :: EditDocument' (DocumentLevel doc clip) doc enr node clip token)
                                                       , state, arrLvl)
                                        _                -> (SkipLay 0, state, arrLvl) -- node has no path
                         _         -> (SkipLay 0, state, arrLvl) -- no locator

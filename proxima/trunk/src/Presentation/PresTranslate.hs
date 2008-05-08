@@ -54,19 +54,6 @@ parse state presLvl enr (DocumentLoadedPres str) =  setUpd AllUpdated $ setDocum
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
 
-parse _ state presLvl enrLvl UndoDocPres = (UndoDocEnr, state, presLvl)
-parse _ state presLvl enrLvl RedoDocPres = (RedoDocEnr, state, presLvl)
-parse _ state presLvl enrLvl (NavPathDocPres path) = (NavPathDocEnr path, state, presLvl)
-parse _ state presLvl enrLvl NavUpDocPres = (NavUpDocEnr, state, presLvl)
-parse _ state presLvl enrLvl NavDownDocPres = (NavDownDocEnr, state, presLvl)
-parse _ state presLvl enrLvl NavLeftDocPres = (NavLeftDocEnr, state, presLvl)
-parse _ state presLvl enrLvl NavRightDocPres = (NavRightDocEnr, state, presLvl)
-parse _ state presLvl enrLvl CutDocPres    = (CutDocEnr, state, presLvl)
-parse _ state presLvl enrLvl CopyDocPres   = (CopyDocEnr, state, presLvl)
-parse _ state presLvl enrLvl PasteDocPres  = (PasteDocEnr, state, presLvl)
-parse _ state presLvl enrLvl DeleteDocPres = (DeleteDocEnr, state, presLvl)
-parse _ state presLvl enrLvl (UpdateDocPres upd) = (UpdateDocEnr upd, state, presLvl)
-parse _ state presLvl enrLvl Test2Pres     = (EvaluateDocEnr, state, presLvl)
 parse _ state presLvl enrLvl (WrapPres wrapped) = (unwrap wrapped, state, presLvl)
 parse _ state presLvl enrLvl _            = (SkipEnr 0, state, presLvl)
 

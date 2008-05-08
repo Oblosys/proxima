@@ -72,18 +72,6 @@ data EditPresentation_ wrapped documentLevel doc enr node clip token =
   | OpenFilePres String
   | SaveFilePres String
    
-  | UndoDocPres
-  | RedoDocPres
-  | UpdateDocPres (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
-  | NavPathDocPres PathDoc
-  | NavUpDocPres
-  | NavDownDocPres
-  | NavLeftDocPres
-  | NavRightDocPres
-  | CutDocPres
-  | CopyDocPres
-  | PasteDocPres
-  | DeleteDocPres
   | WrapPres wrapped deriving Show
 
 type Position = Int

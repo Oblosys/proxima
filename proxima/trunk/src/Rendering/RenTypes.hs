@@ -21,7 +21,6 @@ type LocalStateRen = ()
 data EditRendering'_ wrapped docLevel doc enr node clip token =
     SetRen' (RenderingLevel_ wrapped docLevel doc enr node clip token)
   | SkipRen' Int
-  | FuckRen'
   | WrapRen' wrapped deriving Show
 
 data EditRendering_ wrapped docLevel doc enr node clip token =
@@ -33,10 +32,8 @@ data EditRendering_ wrapped docLevel doc enr node clip token =
   | MouseDownRen Int Int Modifiers Int -- x y modifiers nrOfClicks
   | MouseDragRen Int Int Modifiers
   | MouseUpRen Int Int Modifiers
-  | UpdateDocRen (docLevel -> docLevel)   -- TODO: don't really want this doc ref in rendering level
   | OpenFileRen String
   | SaveFileRen String
-  | DocumentLoadedRen String
   | WrapRen wrapped deriving Show
 
 

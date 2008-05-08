@@ -43,23 +43,11 @@ data EditLayout_ wrapped docLevel doc enr node clip token =
   | AddEdgeLay   [Int] -- path to to-vertex for new edge (from-vertex is assumed to be in focus)
   | MoveVertexLay [Int] (Int,Int) -- presentation path to the vertex
   | NormalizeLay
-  | DocumentLoadedLay String 
   | OpenFileLay String
   | SaveFileLay String
   | ParseLay
   | Test2Lay
   
-  | UndoDocLay
-  | RedoDocLay
-  | UpdateDocLay (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
-  | NavUpDocLay
-  | NavDownDocLay
-  | NavLeftDocLay
-  | NavRightDocLay
-  | CutDocLay
-  | CopyDocLay
-  | PasteDocLay
-  | DeleteDocLay
   | WrapLay wrapped deriving Show
 
 

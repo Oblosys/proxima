@@ -12,19 +12,6 @@ import Common.CommonTypes
 
 redirect (SkipDoc i)     = (SkipDoc' i)
 redirect (SetDoc doc)    = (SetDoc' doc)
-redirect UndoDoc         = UndoDoc'
-redirect RedoDoc         = RedoDoc'
-redirect (UpdateDoc upd) = UpdateDoc' upd
-redirect (NavPathDoc path) = NavPathDoc' path
-redirect NavUpDoc        = NavUpDoc'
-redirect NavDownDoc      = NavDownDoc'
-redirect NavLeftDoc      = NavLeftDoc'
-redirect NavRightDoc     = NavRightDoc'
-redirect CutDoc          = CutDoc'
-redirect CopyDoc         = CopyDoc'
-redirect PasteDoc        = PasteDoc'
-redirect DeleteDoc       = DeleteDoc'
-redirect EvaluateDoc     = EvaluateDoc'
 redirect (WrapDoc wrapped) = unwrap wrapped
 redirect _               = (SkipDoc' 0)
 

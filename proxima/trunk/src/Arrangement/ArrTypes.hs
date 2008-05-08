@@ -41,19 +41,6 @@ data EditArrangement_ wrapped docLevel doc enr node clip token =
   | MouseUpArr Int Int Modifiers
   | OpenFileArr String
   | SaveFileArr String
-  | UndoDocArr
-  | RedoDocArr
-  | UpdateDocArr (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
-  | NavUpDocArr
-  | NavDownDocArr
-  | NavLeftDocArr
-  | NavRightDocArr
-  | CutDocArr
-  | CopyDocArr
-  | PasteDocArr
-  | DeleteDocArr                                  --
-  | MouseDownDocArr PathArr Modifiers Int -- bit hacky, will disappear
-  | DocumentLoadedArr String
   | WrapArr wrapped deriving Show
 
 
