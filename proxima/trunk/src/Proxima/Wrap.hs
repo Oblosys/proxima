@@ -18,142 +18,142 @@ import Layout.LayTypes
 import Arrangement.ArrTypes
 import Rendering.RenTypes
 
-data Wrapped docLevel doc enr node clip token = 
-    WrappedDocEdit   (EditDocument     docLevel doc enr node clip token)
-  | WrappedEnrEdit   (EditEnrichedDoc  docLevel doc enr node clip token)
-  | WrappedPresEdit  (EditPresentation docLevel doc enr node clip token)
-  | WrappedLayEdit   (EditLayout docLevel doc enr node clip token)
-  | WrappedArrEdit   (EditArrangement docLevel doc enr node clip token)
-  | WrappedRenEdit   (EditRendering docLevel doc enr node clip token)
+data Wrapped doc enr node clip token = 
+    WrappedDocEdit   (EditDocument     doc enr node clip token)
+  | WrappedEnrEdit   (EditEnrichedDoc  doc enr node clip token)
+  | WrappedPresEdit  (EditPresentation doc enr node clip token)
+  | WrappedLayEdit   (EditLayout doc enr node clip token)
+  | WrappedArrEdit   (EditArrangement doc enr node clip token)
+  | WrappedRenEdit   (EditRendering doc enr node clip token)
 
-  | WrappedDocEdit'  (EditDocument' docLevel doc enr node clip token)
-  | WrappedEnrEdit'  (EditEnrichedDoc'  docLevel doc enr node clip token)
-  | WrappedPresEdit' (EditPresentation' docLevel doc enr node clip token)
-  | WrappedLayEdit'  (EditLayout' docLevel doc enr node clip token)
-  | WrappedArrEdit'  (EditArrangement' docLevel doc enr node clip token)
-  | WrappedRenEdit'  (EditRendering' docLevel doc enr node clip token)
+  | WrappedDocEdit'  (EditDocument' doc enr node clip token)
+  | WrappedEnrEdit'  (EditEnrichedDoc'  doc enr node clip token)
+  | WrappedPresEdit' (EditPresentation' doc enr node clip token)
+  | WrappedLayEdit'  (EditLayout' doc enr node clip token)
+  | WrappedArrEdit'  (EditArrangement' doc enr node clip token)
+  | WrappedRenEdit'  (EditRendering' doc enr node clip token)
 
 
-instance Show (Wrapped docLevel doc enr node clip token) where
+instance Show (Wrapped doc enr node clip token) where
   show w = "<Wrapped>"
     
-class Wrapable editOp docLevel doc enr node clip token | editOp -> docLevel doc enr node clip token where
-  wrap :: editOp -> Wrapped docLevel doc enr node clip token
-  unwrap :: Wrapped docLevel doc enr node clip token -> editOp
+class Wrapable editOp doc enr node clip token | editOp -> doc enr node clip token where
+  wrap :: editOp -> Wrapped doc enr node clip token
+  unwrap :: Wrapped doc enr node clip token -> editOp
 
 cast = unwrap . wrap
 
-instance Wrapable (EditDocument docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditDocument doc enr node clip token) doc enr node clip token where
   wrap (WrapDoc wrapped) = wrapped
   wrap e                 = WrappedDocEdit e
   unwrap (WrappedDocEdit e) = e
   unwrap wrapped            = WrapDoc wrapped
 
-instance Wrapable (EditEnrichedDoc docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditEnrichedDoc doc enr node clip token) doc enr node clip token where
   wrap (WrapEnr wrapped) = wrapped
   wrap e                 = WrappedEnrEdit e
   unwrap (WrappedEnrEdit e) = e
   unwrap wrapped            = WrapEnr wrapped
 
-instance Wrapable (EditPresentation  docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditPresentation  doc enr node clip token) doc enr node clip token where
   wrap (WrapPres wrapped) = wrapped
   wrap e                  = WrappedPresEdit e
   unwrap (WrappedPresEdit e) = e
   unwrap wrapped             = WrapPres wrapped
 
-instance Wrapable (EditLayout docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditLayout doc enr node clip token) doc enr node clip token where
   wrap (WrapLay wrapped) = wrapped
   wrap e                 = WrappedLayEdit e
   unwrap (WrappedLayEdit e) = e
   unwrap wrapped            = WrapLay wrapped
 
-instance Wrapable (EditArrangement docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditArrangement doc enr node clip token) doc enr node clip token where
   wrap (WrapArr wrapped) = wrapped
   wrap e                 = WrappedArrEdit e
   unwrap (WrappedArrEdit e) = e
   unwrap wrapped            = WrapArr wrapped
 
-instance Wrapable (EditRendering docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditRendering doc enr node clip token) doc enr node clip token where
   wrap (WrapRen wrapped) = wrapped
   wrap e                 = WrappedRenEdit e
   unwrap (WrappedRenEdit e) = e
   unwrap wrapped            = WrapRen wrapped
 
-instance Wrapable (EditDocument' docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditDocument' doc enr node clip token) doc enr node clip token where
   wrap (WrapDoc' wrapped) = wrapped
   wrap e                 = WrappedDocEdit' e
   unwrap (WrappedDocEdit' e) = e
   unwrap wrapped            = WrapDoc' wrapped
 
-instance Wrapable (EditEnrichedDoc' docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditEnrichedDoc' doc enr node clip token) doc enr node clip token where
   wrap (WrapEnr' wrapped) = wrapped
   wrap e                 = WrappedEnrEdit' e
   unwrap (WrappedEnrEdit' e) = e
   unwrap wrapped            = WrapEnr' wrapped
 
-instance Wrapable (EditPresentation'  docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditPresentation'  doc enr node clip token) doc enr node clip token where
   wrap (WrapPres' wrapped) = wrapped
   wrap e                  = WrappedPresEdit' e
   unwrap (WrappedPresEdit' e) = e
   unwrap wrapped             = WrapPres' wrapped
 
-instance Wrapable (EditLayout' docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditLayout' doc enr node clip token) doc enr node clip token where
   wrap (WrapLay' wrapped) = wrapped
   wrap e                 = WrappedLayEdit' e
   unwrap (WrappedLayEdit' e) = e
   unwrap wrapped            = WrapLay' wrapped
 
-instance Wrapable (EditArrangement' docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditArrangement' doc enr node clip token) doc enr node clip token where
   wrap (WrapArr' wrapped) = wrapped
   wrap e                 = WrappedArrEdit' e
   unwrap (WrappedArrEdit' e) = e
   unwrap wrapped            = WrapArr' wrapped
 
-instance Wrapable (EditRendering' docLevel doc enr node clip token) docLevel doc enr node clip token where
+instance Wrapable (EditRendering' doc enr node clip token) doc enr node clip token where
   wrap (WrapRen' wrapped) = wrapped
   wrap e                 = WrappedRenEdit' e
   unwrap (WrappedRenEdit' e) = e
   unwrap wrapped            = WrapRen' wrapped
 
-type EditDocument docLevel doc enr node clip token =
-       EditDocument_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditDocument doc enr node clip token =
+       EditDocument_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditDocument' docLevel doc enr node clip token =
-       EditDocument'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditDocument' doc enr node clip token =
+       EditDocument'_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditEnrichedDoc docLevel doc enr node clip token =
-       EditEnrichedDoc_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditEnrichedDoc doc enr node clip token =
+       EditEnrichedDoc_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditEnrichedDoc' docLevel doc enr node clip token =
-       EditEnrichedDoc'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditEnrichedDoc' doc enr node clip token =
+       EditEnrichedDoc'_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditPresentation docLevel doc enr node clip token =
-       EditPresentation_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditPresentation doc enr node clip token =
+       EditPresentation_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditPresentation' docLevel doc enr node clip token =
-       EditPresentation'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditPresentation' doc enr node clip token =
+       EditPresentation'_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditLayout docLevel doc enr node clip token =
-       EditLayout_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditLayout doc enr node clip token =
+       EditLayout_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditLayout' docLevel doc enr node clip token =
-       EditLayout'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditLayout' doc enr node clip token =
+       EditLayout'_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditArrangement docLevel doc enr node clip token =
-       EditArrangement_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditArrangement doc enr node clip token =
+       EditArrangement_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditArrangement' docLevel doc enr node clip token =
-       EditArrangement'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditArrangement' doc enr node clip token =
+       EditArrangement'_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditRendering docLevel doc enr node clip token =
-       EditRendering_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditRendering doc enr node clip token =
+       EditRendering_ (Wrapped doc enr node clip token) doc enr node clip token
 
-type EditRendering' docLevel doc enr node clip token =
-       EditRendering'_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type EditRendering' doc enr node clip token =
+       EditRendering'_ (Wrapped doc enr node clip token) doc enr node clip token
 
 
 -- The type RenderingLevel contains GUICommand, which contains EditRendering. Hence, RenderingLevel
 -- also gets all type parameters :-(
 
-type RenderingLevel docLevel doc enr node clip token =
-       RenderingLevel_ (Wrapped docLevel doc enr node clip token) docLevel doc enr node clip token
+type RenderingLevel doc enr node clip token =
+       RenderingLevel_ (Wrapped doc enr node clip token) doc enr node clip token

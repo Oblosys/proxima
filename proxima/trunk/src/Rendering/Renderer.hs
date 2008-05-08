@@ -62,9 +62,9 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
      else updatedRectArr diffTree arrangement  
 
 mkPopupMenuXY :: (DocNode node, Show token) => Layout doc node clip token -> Scale -> Arrangement node ->
-                 ((RenderingLevel (DocumentLevel doc clip) doc enr node clip token, EditRendering (DocumentLevel doc clip) doc enr node clip token) ->
-                 IO (RenderingLevel (DocumentLevel doc clip) doc enr node clip token, EditRendering' (DocumentLevel doc clip) doc enr node clip token)) ->
-                 IORef (RenderingLevel (DocumentLevel doc clip) doc enr node clip token) ->
+                 ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) ->
+                 IO (RenderingLevel doc enr node clip token, EditRendering' doc enr node clip token)) ->
+                 IORef (RenderingLevel doc enr node clip token) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
 mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')

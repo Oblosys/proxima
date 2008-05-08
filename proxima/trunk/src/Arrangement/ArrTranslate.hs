@@ -19,8 +19,8 @@ translate state low high editLow =
 
 
 unArrange :: (DocNode node, Show token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
-             EditArrangement (DocumentLevel doc clip) doc enr node clip token ->
-             (EditLayout (DocumentLevel doc clip) doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
+             EditArrangement doc enr node clip token ->
+             (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
@@ -86,21 +86,21 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
   
 
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
-mouseDownDoc :: forall docLevel doc enr node clip token state .
+mouseDownDoc :: forall doc enr node clip token state .
                 (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
-                (EditLayout (DocumentLevel doc clip) doc enr node clip token, state, ArrangementLevel doc node clip token)  
+                (EditLayout doc enr node clip token, state, ArrangementLevel doc node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
   in  case mouseDownDocPres pthP layout of
         Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
-                      ( cast (UpdateDoc' upd :: EditDocument' (DocumentLevel doc clip) doc enr node clip token)
+                      ( cast (UpdateDoc' upd :: EditDocument' doc enr node clip token)
                       , state, arrLvl)
         Nothing  -> debug UnA ("mouseDownDoc EVENT: Nothing:"++show pthP)
                     $ case locateTreePres (PathP pthP 0) layout of -- set the document focus
                         Just node -> case pathNode node of
                                        (PathD pth) -> ( cast ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
-                                                                :: EditDocument' (DocumentLevel doc clip) doc enr node clip token)
+                                                                :: EditDocument' doc enr node clip token)
                                                       , state, arrLvl)
                                        _                -> (SkipLay 0, state, arrLvl) -- node has no path
                         _         -> (SkipLay 0, state, arrLvl) -- no locator
@@ -108,7 +108,7 @@ mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
 
 isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc node clip token ->
-               Maybe (EditLayout docLvl doc enr node clip token)
+               Maybe (EditLayout doc enr node clip token)
 isGraphEdit x y arr pres =
       case navigateFocus x y arr of 
         PathA pth _ -> case selectTreeA pth arr of

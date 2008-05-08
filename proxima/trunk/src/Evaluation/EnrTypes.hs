@@ -18,12 +18,12 @@ data EnrichedDocLevel enr doc = EnrichedDocLevel enr FocusDoc doc deriving Show
 -- EnrichedDoc is defined in DocumentTypes_Generated because of node datatype dependency. 
 -- TODO figure out where node should go, and clean up
 
-data EditEnrichedDoc'_ wrapped docLevel doc enr node clip token =
+data EditEnrichedDoc'_ wrapped doc enr node clip token =
     SetEnr' (EnrichedDocLevel enr doc)
   | SkipEnr' Int
   | WrapEnr' wrapped deriving Show
 
-data EditEnrichedDoc_ wrapped docLevel doc enr node clip token =
+data EditEnrichedDoc_ wrapped doc enr node clip token =
      InitEnr
    | SetEnr (EnrichedDocLevel enr doc)
    | SkipEnr Int

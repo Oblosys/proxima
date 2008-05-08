@@ -10,12 +10,12 @@ data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                                                               -- ugly hack for popups, need pres to get items
 data ArrangementLevel doc node clip token = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip token) deriving Show
 
-data EditArrangement'_ wrapped docLevel doc enr node clip token =
+data EditArrangement'_ wrapped doc enr node clip token =
     SetArr' (ArrangementLevel doc node clip token)
   | SkipArr' Int
   | WrapArr' wrapped deriving Show
 
-data EditArrangement_ wrapped docLevel doc enr node clip token =
+data EditArrangement_ wrapped doc enr node clip token =
     SkipArr Int
   | SetFocusArr FocusArr
   | InitArr

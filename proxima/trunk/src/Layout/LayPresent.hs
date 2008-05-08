@@ -13,8 +13,8 @@ import Data.Map (Map)
 import Proxima.Wrap
 
 presentIO :: (DocNode node, Show token, Eq token) => LayerStateLay doc node clip token -> PresentationLevel doc node clip token -> LayoutLevel doc node clip token ->
-             EditPresentation' docLevel doc enr node clip token ->
-             IO (EditLayout' docLevel doc enr node clip token, LayerStateLay doc node clip token, PresentationLevel doc node clip token)
+             EditPresentation' doc enr node clip token ->
+             IO (EditLayout' doc enr node clip token, LayerStateLay doc node clip token, PresentationLevel doc node clip token)
 presentIO  state high low@(LayoutLevel pres focus _) editHigh = 
   let (editLow, state', high') = present state high low editHigh
   in do { -- debugLnIO Prs ("editLay':"++show editLow);
@@ -33,8 +33,8 @@ presentIO  state high low@(LayoutLevel pres focus _) editHigh =
 
 -- doc in pattern should be pres
 present :: (DocNode node, Show token, Eq token) => LayerStateLay doc node clip token -> PresentationLevel doc node clip token -> LayoutLevel doc node clip token ->
-           EditPresentation' docLevel doc enr node clip token ->
-           (EditLayout' docLevel doc enr node clip token, LayerStateLay doc node clip token, PresentationLevel doc node clip token)
+           EditPresentation' doc enr node clip token ->
+           (EditLayout' doc enr node clip token, LayerStateLay doc node clip token, PresentationLevel doc node clip token)
 present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
   let (lay', focus') = (,) {-normalizePresentation -} lay focus -- Normalize does not work in chess board, find out why
       diffTree = dt -- diffTree was created by translate

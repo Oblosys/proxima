@@ -100,12 +100,11 @@ and we cannot tokenize any structural token children.
 
 
 
-{-
+
 tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
                PresentationLevel doc node clip token -> 
-               (EditPresentation docLevel doc enr node clip token, state, LayoutLevel doc node clip token)
--}
+               (EditPresentation doc enr node clip token, state, LayoutLevel doc node clip token)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,idPCounter')

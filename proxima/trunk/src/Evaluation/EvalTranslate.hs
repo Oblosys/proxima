@@ -12,8 +12,8 @@ import UU.Parsing
 
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
-               EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-               IO (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+               EditEnrichedDoc doc enr node clip token -> 
+               IO (EditDocument doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
 translateIO state low high editLow = -- extra indirection for debugging purposes
   do { (editHigh, state', low') <- reduceIO state low high editLow
@@ -23,8 +23,8 @@ translateIO state low high editLow = -- extra indirection for debugging purposes
 
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>
             LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
-            EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-            IO (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+            EditEnrichedDoc doc enr node clip token -> 
+            IO (EditDocument doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduceIO state enrLvl (DocumentLevel _ _ clip) (OpenFileEnr fpth) = 
  do { mDoc' <- openFile fpth 
 	; case mDoc' of
@@ -48,8 +48,8 @@ reduceIO state enrLvl docLvl event             = return $ reduce state enrLvl do
 
 reduce :: (Doc doc, ReductionSheet doc enr clip) =>
           LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
-          EditEnrichedDoc (DocumentLevel doc clip) doc enr node clip token -> 
-          (EditDocument (DocumentLevel doc clip) doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+          EditEnrichedDoc doc enr node clip token -> 
+          (EditDocument doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
 reduce state enrLvl docLvl (SkipEnr i) = (SkipDoc (i+1), state, enrLvl)
 reduce state enrLvl docLvl (WrapEnr wrapped) = (unwrap wrapped, state, enrLvl)
 reduce state enrLvl docLvl _            = (SkipDoc 0, state, enrLvl)

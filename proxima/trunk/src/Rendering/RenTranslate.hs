@@ -30,9 +30,9 @@ translate state low high editLow =
 
 
 
-interpret :: Show node => LocalStateRen -> RenderingLevel docLevel doc enr node clip token ->
-             ArrangementLevel doc node clip token -> EditRendering docLevel doc enr node clip token ->
-             (EditArrangement docLevel doc enr node clip token, LocalStateRen, RenderingLevel docLevel doc enr node clip token)
+interpret :: Show node => LocalStateRen -> RenderingLevel doc enr node clip token ->
+             ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
+             (EditArrangement doc enr node clip token, LocalStateRen, RenderingLevel doc enr node clip token)
 interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
@@ -43,19 +43,19 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> (CopyArr,       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> (PasteArr,      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> (CutArr,        state, renLvl) -- Ctrl-x
-    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (cast (CopyDoc' :: EditDocument' docLevel doc enr node clip token),    state, renLvl) -- Ctrl-f
-    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (cast (PasteDoc' :: EditDocument' docLevel doc enr node clip token),   state, renLvl) -- Ctrl-g
-    KeySpecialRen (CharKey 's') (Modifiers False True False) -> (cast (CutDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (cast (UndoDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (cast (RedoDoc' :: EditDocument' docLevel doc enr node clip token),     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> (cast (CopyDoc' :: EditDocument' doc enr node clip token),    state, renLvl) -- Ctrl-f
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> (cast (PasteDoc' :: EditDocument' doc enr node clip token),   state, renLvl) -- Ctrl-g
+    KeySpecialRen (CharKey 's') (Modifiers False True False) -> (cast (CutDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (cast (UndoDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (cast (RedoDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
     KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
 
-    KeySpecialRen UpKey (Modifiers False True False)    -> (cast (NavUpDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
-    KeySpecialRen DownKey (Modifiers False True False)  -> (cast (NavDownDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
-    KeySpecialRen LeftKey (Modifiers False True False)  -> (cast (NavLeftDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
-    KeySpecialRen RightKey (Modifiers False True False) -> (cast (NavRightDoc' :: EditDocument' docLevel doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen UpKey (Modifiers False True False)    -> (cast (NavUpDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen DownKey (Modifiers False True False)  -> (cast (NavDownDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen LeftKey (Modifiers False True False)  -> (cast (NavLeftDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
+    KeySpecialRen RightKey (Modifiers False True False) -> (cast (NavRightDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
     KeySpecialRen LeftKey (Modifiers True False False)  -> (EnlargeLeftArr, state, renLvl) -- Shift
     KeySpecialRen RightKey (Modifiers True False False) -> (EnlargeRightArr, state, renLvl) -- Shift
     
@@ -65,7 +65,7 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen LeftKey ms      -> (LeftArr, state, renLvl)
     KeySpecialRen RightKey ms     -> (RightArr, state, renLvl)
     KeySpecialRen F1Key ms        -> (ParseArr, state, renLvl)
-    KeySpecialRen F2Key ms        -> ( cast (EvaluateDoc' :: EditDocument' docLevel doc enr node clip token)
+    KeySpecialRen F2Key ms        -> ( cast (EvaluateDoc' :: EditDocument' doc enr node clip token)
                                      , state, renLvl)
     KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
 

@@ -10,8 +10,8 @@ import Proxima.Wrap
 
 presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip) =>
              LayerStateEval doc clip -> DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
-             EditDocument' docLevel doc enr node clip token ->
-             IO (EditEnrichedDoc' docLevel doc enr node clip token, LayerStateEval doc clip, DocumentLevel doc clip)
+             EditDocument' doc enr node clip token ->
+             IO (EditEnrichedDoc' doc enr node clip token, LayerStateEval doc clip, DocumentLevel doc clip)
 presentIO state high low editHigh =
   do { (editLow, state', high') <- eval state high low editHigh
      
@@ -41,7 +41,7 @@ eval state docLvl@(DocumentLevel doc focusD clipD) enrLvl docEdit =
 
 -- TODO: make sure that document is parsed before doing these:
 editDoc :: (Doc doc, Clip clip, Editable doc doc node clip token) =>
-           LayerStateEval doc clip -> DocumentLevel doc clip -> EditDocument' docLevel doc enr node clip token ->
+           LayerStateEval doc clip -> DocumentLevel doc clip -> EditDocument' doc enr node clip token ->
            (DocumentLevel doc clip, LayerStateEval doc clip)
 editDoc state (DocumentLevel doc pth clipD) (NavPathDoc' path) = ((DocumentLevel doc path clipD), state)
 editDoc state (DocumentLevel doc pth clipD) NavUpDoc'        = ((DocumentLevel doc (navigateUpD pth doc) clipD), state)
