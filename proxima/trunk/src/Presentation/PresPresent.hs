@@ -1,6 +1,7 @@
 module Presentation.PresPresent where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils
 import Proxima.Wrap
@@ -9,9 +10,9 @@ import qualified Data.Map as Map
 import Data.Map (Map)
 
 presentIO :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-             PresentationLevel doc node clip token -> EditEnrichedDoc' doc enr node clip token ->
-             IO (EditPresentation' doc enr node clip token, LayerStatePres, EnrichedDocLevel enr doc)
-presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
+             PresentationLevel doc node clip token -> [EditEnrichedDoc' doc enr node clip token] ->
+             IO ([EditPresentation' doc enr node clip token], LayerStatePres, EnrichedDocLevel enr doc)
+presentIO presentationSheet state high low@(PresentationLevel pres layout) editsHigh = castRemainingEditOps editsHigh $ \editHigh ->
   let (editLow, state', high') = present presentationSheet state high low editHigh
   in do { -- debugLnIO Prs ("editEnr':"++show editHigh)
         --; debugLnIO Prs ("editPres':"++show editLow)

@@ -44,7 +44,7 @@ instance Show (RenderingLevel_ wrapped doc enr node clip token) where
 
 
 type Scale = Double
-type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, EditRendering'_ wrapped doc enr node clip token)) ->
+type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, [EditRendering'_ wrapped doc enr node clip token])) ->
                   IORef (RenderingLevel_ wrapped doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus

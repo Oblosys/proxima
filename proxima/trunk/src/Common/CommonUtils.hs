@@ -7,7 +7,6 @@ import Data.Time.Clock
 import Data.IORef
 -- is exported (and imported) by all ...Utils modules
 
-
 -- safer version of !! that can report the origin of the index call
 -- non-crashing functions are desirable, because at a crash in a program with a GUI, ghci crashes as well
 -- WARNING:: this version does not work with infinite lists!!!!

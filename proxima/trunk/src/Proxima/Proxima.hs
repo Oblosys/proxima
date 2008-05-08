@@ -9,6 +9,8 @@ import Proxima.Architecture
 --import GUIGTK
 import Proxima.GUI
 
+import Proxima.Wrap
+
 import Common.CommonTypes
 import Evaluation.DocTypes
 import Evaluation.DocUtils -- for redirect
@@ -100,23 +102,27 @@ proxima presentationSheet parseSheet scannerSheet
     ; stepRf <- newIORef translate
     
     ; let --handler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel))
-          handler (renderingLvl, SkipRen 0) = return $ (renderingLvl, SkipRen' 0) -- just so unimportant events don't flood debugging traces
+          handler (renderingLvl, SkipRen 0) = return $ (renderingLvl, [SkipRen' 0]) -- just so unimportant events don't flood debugging traces
           handler (renderingLvl, event) =
            do {
 --                debugLnIO Main $ "Rendering edit is "++show event
 
               ; translate <- readIORef stepRf
               
-              ; ((doc, docEdit), PresStep present) <- translate (renderingLvl, event)
-              
---              ; debugLnIO Main $ "Doc edit is "++show docEdit
-              ; ((renderingLvl', renderingEdit'), TransStep translate') <- present (doc, (redirect docEdit))
---              ; debugLnIO Main $ "RenderingLevel is "++show renderingLvl'
---              ; debugLnIO Main $ "RenderingEdit' is "++show renderingEdit'
+              ; (renderingLvl', renderingEdits, translate') <- 
+                   performEditCycles translate renderingLvl [event]             
               
               ; writeIORef stepRf translate'
-              ; return $ (renderingLvl', renderingEdit')
+              ; return $ (renderingLvl', renderingEdits)
               }
+           where performEditCycles translate renderingLvl [] = return (renderingLvl, [], translate)
+                 performEditCycles translate renderingLvl (event:events) =
+                  do {  ((doc, docEdits), PresStep present) <- translate (renderingLvl, [event])             
+                     ; ((renderingLvl', renderingEdit':newEvents), TransStep translate') <- present (doc, (redirect docEdits))
+                     ; (renderingLvl'', renderingEdits, translate'') <-
+                         performEditCycles translate' renderingLvl' (map cast newEvents ++ events)
+                     ; return (renderingLvl'', renderingEdit':renderingEdits, translate'')
+                     }
                       -- initial RenderingLevel 
     ; startGUI handler viewedAreaRef
                        ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (\_ _ -> return ()) (0,0) False  

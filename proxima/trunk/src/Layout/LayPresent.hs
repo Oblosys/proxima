@@ -1,6 +1,7 @@
 module Layout.LayPresent where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils
 
@@ -13,9 +14,9 @@ import Data.Map (Map)
 import Proxima.Wrap
 
 presentIO :: (DocNode node, Show token, Eq token) => LayerStateLay doc node clip token -> PresentationLevel doc node clip token -> LayoutLevel doc node clip token ->
-             EditPresentation' doc enr node clip token ->
-             IO (EditLayout' doc enr node clip token, LayerStateLay doc node clip token, PresentationLevel doc node clip token)
-presentIO  state high low@(LayoutLevel pres focus _) editHigh = 
+             [EditPresentation' doc enr node clip token] ->
+             IO ([EditLayout' doc enr node clip token], LayerStateLay doc node clip token, PresentationLevel doc node clip token)
+presentIO  state high low@(LayoutLevel pres focus _) editsHigh = castRemainingEditOps editsHigh $ \editHigh -> 
   let (editLow, state', high') = present state high low editHigh
   in do { -- debugLnIO Prs ("editLay':"++show editLow);
     --      case editLow of

@@ -9,7 +9,8 @@ import Evaluation.DocTypes
 import Char
 -- import IOExts
 
-translateIO state low high editLow = return $ interpret state low high editLow
+translateIO state low high editsLow =  castRemainingEditOps editsLow $ \editLow -> 
+  return $ interpret state low high editLow
 
 translate state low high editLow = 
   let (editHigh, state', low') = interpret state low high editLow

@@ -63,7 +63,7 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
 
 mkPopupMenuXY :: (DocNode node, Show token) => Layout doc node clip token -> Scale -> Arrangement node ->
                  ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) ->
-                 IO (RenderingLevel doc enr node clip token, EditRendering' doc enr node clip token)) ->
+                 IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                  IORef (RenderingLevel doc enr node clip token) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
 mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =

@@ -1,6 +1,8 @@
 module Evaluation.DocUtils where
 
 
+import Common.CommonUtils
+
 import Evaluation.DocTypes
 import Presentation.PresTypes
 import Proxima.Wrap
@@ -10,10 +12,12 @@ import UU.Parsing.CharParser
 
 import Common.CommonTypes
 
-redirect (SkipDoc i)     = (SkipDoc' i)
-redirect (SetDoc doc)    = (SetDoc' doc)
-redirect (WrapDoc wrapped) = unwrap wrapped
-redirect _               = (SkipDoc' 0)
+redirect editOps = castRemainingEditOpsRedirect editOps $ redirect'
+
+redirect' (SkipDoc i)     = (SkipDoc' i)
+redirect' (SetDoc doc)    = (SetDoc' doc)
+redirect' (WrapDoc wrapped) = unwrap wrapped
+redirect' _               = (SkipDoc' 0)
 
 
 

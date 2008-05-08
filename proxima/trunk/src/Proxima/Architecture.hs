@@ -38,41 +38,21 @@ type LayerFunction m horArgs vertArg horRess vertRes =
 
 -- The functions as they are defined in the layer modules
 
-data ProximaLayer m state doc pres editDoc editPres editDoc' editPres' =
-       ProximaLayer { translate' :: state -> pres -> doc -> editPres -> m (editDoc, state, pres)
-                    , present' ::   state -> doc -> pres -> editDoc' -> m (editPres', state, doc)
+data ProximaLayer m state doc pres editsDoc editsPres editsDoc' editsPres' =
+       ProximaLayer { translate' :: state -> pres -> doc -> editsPres -> m (editsDoc, state, pres)
+                    , present' ::   state -> doc -> pres -> editsDoc' -> m (editsPres', state, doc)
                     }
 
 
 -- The data type used by the combinators
 
-{-
-data Layer m state doc pres editDoc editPres editDoc' editPres' =
-       Layer { translate :: LayerFunction m (state, doc) (pres, editPres) (state, pres) (doc, editDoc)
-              , present ::   LayerFunction m (state, pres) (doc, editDoc') (state, doc) (pres, editPres')
-              }
--}
--- thesis version with better names
-data Layer m state high low editH editL editH' editL' =
-       Layer { translate :: LayerFunction m (state, high) (low, editL) (state, low) (high, editH)
-              , present ::   LayerFunction m (state, low) (high, editH') (state, high) (low, editL')
-              }
-
-{-
-(Monad m,
- ArchitectureLibM.Pack m step (pres, editPres) (doc, editDoc) step1,
- ArchitectureLibM.Pack m
-                       step1
-                       (doc, editDoc')
-                       (pres, editPres')
-                       step) =>
-Layer m state doc pres editDoc editPres editDoc' editPres'
--> (state, doc) -> step
--}
+data Layer m state high low editsH editsL editsH' editsL' =
+       Layer { translate :: LayerFunction m (state, high) (low, editsL) (state, low) (high, editsH)
+             , present ::   LayerFunction m (state, low) (high, editsH') (state, high) (low, editsL')
+             }
 
 
--- the edit ops may be of equal type, but for now we use two different types
-lift :: Monad m => Layer m state doc pres editDoc editPres editDoc' editPres' -> (state,doc) -> TransStep m (pres,editPres) (doc,editDoc) (doc, editDoc') (pres, editPres')
+lift :: Monad m => Layer m state doc pres editsDoc editsPres editsDoc' editsPres' -> (state,doc) -> TransStep m (pres,editsPres) (doc,editsDoc) (doc, editsDoc') (pres, editsPres')
 lift layer =
   fix $ liftStep (translate layer) 
       . liftStep (present layer) 
@@ -82,50 +62,19 @@ combine upr lwr =
   fix (combineStepUp . combineStepDown) upr lwr
 
 
--- 
-wrap :: Monad m => ProximaLayer m state doc pres editDoc editPres editDoc' editPres'
-                -> Layer m state doc pres editDoc editPres editDoc' editPres'
+ 
+wrap :: Monad m => ProximaLayer m state doc pres editsDoc editsPres editsDoc' editsPres'
+                -> Layer m state doc pres editsDoc editsPres editsDoc' editsPres'
 wrap (ProximaLayer translate' present') = 
-  Layer { translate = \(state, doc) (pres, editPres) ->
-                         do { (editDoc, state, pres) <- translate' state pres doc editPres
-                            ; return ((doc, editDoc), (state, pres))
+  Layer { translate = \(state, doc) (pres, editsPres) ->
+                         do { (editsDoc, state, pres) <- translate' state pres doc editsPres
+                            ; return ((doc, editsDoc), (state, pres))
                             }
-         , present   = \(state, pres) (doc, editDoc') ->
-                         do { (editPres', state, doc) <- present' state doc pres editDoc'
-                            ; return ((pres, editPres'), (state, doc))
+        , present   = \(state, pres) (doc, editsDoc') ->
+                         do { (editsPres', state, doc) <- present' state doc pres editsDoc'
+                            ; return ((pres, editsPres'), (state, doc))
                             }
-         }
-
-
-{-
--- The data type used by the combinators
-data Layer m state doc pres editDoc editPres editDoc' editPres' =
-       Layer { translate :: LayerFunction m (state, doc) (pres, editPres) (state, pres) (doc, editDoc)
-              , present ::   LayerFunction m (state, pres) (doc, editDoc') (state, doc) (pres, editPres')
-              }
-
-
--- 
-wrap :: Monad m => ProximaLayer m state doc pres editDoc editPres  editDoc' editPres'
-                -> Layer m state doc pres editDoc editPres editDoc' editPres'
-wrap (ProximaLayer translate' present') = 
-  Layer { translate = \(state, doc) (pres, editPres) ->
-                         do { (editDoc, state, pres) <- translate' state pres doc editPres
-                            ; return ((doc, editDoc), (state, pres))
-                            }
-         , present   = \(state, pres) (doc, editDoc') ->
-                         do { (editPres', state, doc) <- present' state doc pres editDoc'
-                            ; return ((pres, editPres'), (state, doc))
-                            }
-         }
-
-
-data ProximaLayer m state doc pres editDoc editPres editDoc' editPres' =
-       ProximaLayer { translate' :: state -> pres -> doc -> editPres -> m (editDoc, state, pres)
-                    , present' ::   state -> doc -> pres -> editDoc' -> m (editPres', state, doc)
-                    }
--}
-
+        }
 
 
 evaluationLayer   = ProximaLayer EvalTranslate.translateIO EvalPresent.presentIO

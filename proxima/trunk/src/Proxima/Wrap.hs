@@ -157,3 +157,17 @@ type EditRendering' doc enr node clip token =
 
 type RenderingLevel doc enr node clip token =
        RenderingLevel_ (Wrapped doc enr node clip token) doc enr node clip token
+       
+       
+castRemainingEditOps :: ( Wrapable editOp doc enbr node clip token
+                        , Wrapable editOp' doc enbr node clip token ) =>
+                        [editOp] -> (editOp -> IO (editOp',state,level)) -> IO ([editOp'], state, level)
+castRemainingEditOps (editOp:editOps) presOrTrans =
+ do { (editOp',state,level) <- presOrTrans editOp
+    ; return (editOp' : map cast editOps, state, level)
+    }
+
+castRemainingEditOpsRedirect :: ( Wrapable editOp doc enbr node clip token
+                                , Wrapable editOp' doc enbr node clip token ) =>
+                                [editOp] -> (editOp -> editOp') -> [editOp']
+castRemainingEditOpsRedirect (editOp:editOps) redirect = redirect editOp : map cast editOps

@@ -1,6 +1,7 @@
 module Evaluation.EvalTranslate where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Evaluation.EvalLayerTypes
 
 import Proxima.Wrap
@@ -12,10 +13,10 @@ import UU.Parsing
 
 translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
-               EditEnrichedDoc doc enr node clip token -> 
-               IO (EditDocument doc enr node clip token, LayerStateEval doc clip, EnrichedDocLevel enr doc)
+               [EditEnrichedDoc doc enr node clip token] -> 
+               IO ([EditDocument doc enr node clip token], LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
-translateIO state low high editLow = -- extra indirection for debugging purposes
+translateIO state low high editsLow = castRemainingEditOps editsLow $ \editLow ->
   do { (editHigh, state', low') <- reduceIO state low high editLow
 --     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
      ; return (editHigh, state', low')

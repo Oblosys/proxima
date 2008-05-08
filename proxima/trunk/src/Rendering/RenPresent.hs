@@ -10,7 +10,8 @@ import Rendering.Renderer
 
 import Evaluation.DocTypes (DocumentLevel)
 
-presentIO state high low editHigh = return $ present state high low editHigh
+presentIO state high low editsHigh =  castRemainingEditOps editsHigh $ \editHigh ->
+  return $ present state high low editHigh
 
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
 present state high low editHigh =

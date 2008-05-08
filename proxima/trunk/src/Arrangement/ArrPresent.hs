@@ -1,6 +1,7 @@
 module Arrangement.ArrPresent where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Arrangement.ArrLayerTypes
 import Arrangement.ArrLayerUtils
 import Proxima.Wrap
@@ -8,7 +9,7 @@ import Proxima.Wrap
 import Arrangement.Arranger
 
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
-presentIO state high low editHigh =
+presentIO state high low editsHigh = castRemainingEditOps editsHigh $ \editHigh ->
   do { (editLow, state', high') <- arrange state high low editHigh
      --; debugLnIO Arr $ "EditLayout':"++show editHigh
      --; debugLnIO Arr $ "EditArrangement':"++show editLow

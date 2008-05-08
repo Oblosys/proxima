@@ -1,6 +1,7 @@
 module Presentation.PresTranslate where
 
 import Common.CommonTypes
+import Common.CommonUtils
 import Presentation.PresLayerTypes
 
 import Presentation.PresLayerUtils
@@ -11,10 +12,10 @@ import Proxima.Wrap
 
 --translateIO :: LayerStatePres -> low -> high -> editLow -> IO (editHigh, state, low)
 translateIO :: (DocNode node, Ord token, Show token, Show enr) =>
-               ParseSheet doc enr node clip token -> LayerStatePres ->PresentationLevel doc node clip token ->
-               EnrichedDocLevel enr doc -> EditPresentation doc enr node clip token ->
-               IO (EditEnrichedDoc doc enr node clip token, LayerStatePres, PresentationLevel doc node clip token)
-translateIO parseSheet state low high editLow =
+               ParseSheet doc enr node clip token -> LayerStatePres -> PresentationLevel doc node clip token ->
+               EnrichedDocLevel enr doc -> [EditPresentation doc enr node clip token] ->
+               IO ([EditEnrichedDoc doc enr node clip token], LayerStatePres, PresentationLevel doc node clip token)
+translateIO parseSheet state low high editsLow = castRemainingEditOps editsLow $ \editLow ->
   do { (editHigh, state', low') <- parseIO parseSheet state low high editLow
 --     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
      ; return (editHigh, state', low')
