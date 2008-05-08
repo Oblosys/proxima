@@ -3,6 +3,7 @@ module Arrangement.ArrPresent where
 import Common.CommonTypes
 import Arrangement.ArrLayerTypes
 import Arrangement.ArrLayerUtils
+import Proxima.Wrap
 
 import Arrangement.Arranger
 
@@ -20,8 +21,8 @@ presentIO state high low editHigh =
 
 -- on a skipLay, the local arr state may have changed, so rearrange
 arrange :: (Show node, Show token) => LocalStateArr -> LayoutLevel doc node clip token -> ArrangementLevel doc node clip token ->
-           EditLayout' doc node clip token ->
-           IO (EditArrangement' doc node clip token, LocalStateArr, LayoutLevel doc node clip token)
+           EditLayout' docLevel doc enr node clip token ->
+           IO (EditArrangement' docLevel doc enr node clip token, LocalStateArr, LayoutLevel doc node clip token)
 arrange state layLvl@(LayoutLevel pres focus dt) arrLvl@(ArrangementLevel oldArrangement _ _) (SkipLay' 0) =
  do { (arr', state') <- arrangePresentation state (getFontMetricsRef state) focus oldArrangement dt pres -- DiffLeaf True? or can arr have changed
     ; return (SetArr' (ArrangementLevel arr' (focusAFromFocusP focus arr' pres) pres), state', layLvl)

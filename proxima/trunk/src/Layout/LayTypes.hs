@@ -15,11 +15,12 @@ import Evaluation.DocTypes -- for UpdateDocLay
 data LayoutLevel doc node clip token = 
   LayoutLevel (Layout doc node clip token) FocusPres DiffTree deriving Show
                                                     -- DiffTree is experimental for incrementality
-data EditLayout' doc node clip token =
+data EditLayout'_ wrapped docLevel doc enr node clip token =
     SetLay' (LayoutLevel doc node clip token)
-  | SkipLay' Int deriving Show
+  | SkipLay' Int 
+  | WrapLay' wrapped deriving Show
 
-data EditLayout documentLevel doc node clip token =
+data EditLayout_ wrapped docLevel doc enr node clip token =
     SkipLay Int
   | SetFocusLay FocusPres
   | SetLay (LayoutLevel doc node clip token)
@@ -50,7 +51,7 @@ data EditLayout documentLevel doc node clip token =
   
   | UndoDocLay
   | RedoDocLay
-  | UpdateDocLay (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
+  | UpdateDocLay (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocLay
   | NavDownDocLay
   | NavLeftDocLay
@@ -58,7 +59,8 @@ data EditLayout documentLevel doc node clip token =
   | CutDocLay
   | CopyDocLay
   | PasteDocLay
-  | DeleteDocLay deriving Show
+  | DeleteDocLay
+  | WrapLay wrapped deriving Show
 
 
 data Layout_

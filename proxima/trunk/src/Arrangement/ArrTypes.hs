@@ -10,11 +10,12 @@ data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
                                                               -- ugly hack for popups, need pres to get items
 data ArrangementLevel doc node clip token = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip token) deriving Show
 
-data EditArrangement' doc node clip token =
+data EditArrangement'_ wrapped docLevel doc enr node clip token =
     SetArr' (ArrangementLevel doc node clip token)
-  | SkipArr' Int deriving Show
+  | SkipArr' Int
+  | WrapArr' wrapped deriving Show
 
-data EditArrangement documentLevel =
+data EditArrangement_ wrapped docLevel doc enr node clip token =
     SkipArr Int
   | SetFocusArr FocusArr
   | InitArr
@@ -42,7 +43,7 @@ data EditArrangement documentLevel =
   | SaveFileArr String
   | UndoDocArr
   | RedoDocArr
-  | UpdateDocArr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
+  | UpdateDocArr (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
   | NavUpDocArr
   | NavDownDocArr
   | NavLeftDocArr
@@ -52,7 +53,8 @@ data EditArrangement documentLevel =
   | PasteDocArr
   | DeleteDocArr                                  --
   | MouseDownDocArr PathArr Modifiers Int -- bit hacky, will disappear
-  | DocumentLoadedArr String deriving Show
+  | DocumentLoadedArr String
+  | WrapArr wrapped deriving Show
 
 
 -- node is parameter for Node type

@@ -18,11 +18,12 @@ data EnrichedDocLevel enr doc = EnrichedDocLevel enr FocusDoc doc deriving Show
 -- EnrichedDoc is defined in DocumentTypes_Generated because of node datatype dependency. 
 -- TODO figure out where node should go, and clean up
 
-data EditEnrichedDoc' enr doc =
+data EditEnrichedDoc'_ wrapped docLevel doc enr node clip token =
     SetEnr' (EnrichedDocLevel enr doc)
-  | SkipEnr' Int deriving Show
+  | SkipEnr' Int
+  | WrapEnr' wrapped deriving Show
 
-data EditEnrichedDoc documentLevel enr doc =
+data EditEnrichedDoc_ wrapped docLevel doc enr node clip token =
      InitEnr
    | SetEnr (EnrichedDocLevel enr doc)
    | SkipEnr Int
@@ -31,7 +32,7 @@ data EditEnrichedDoc documentLevel enr doc =
    | EvaluateDocEnr
    | UndoDocEnr
    | RedoDocEnr
-   | UpdateDocEnr (documentLevel -> documentLevel) -- should encapsulate these so they automatically go to doc level
+   | UpdateDocEnr (docLevel -> docLevel) -- should encapsulate these so they automatically go to doc level
    | NavPathDocEnr PathDoc
    | NavUpDocEnr
    | NavDownDocEnr
@@ -40,5 +41,6 @@ data EditEnrichedDoc documentLevel enr doc =
    | CutDocEnr
    | CopyDocEnr
    | PasteDocEnr
-   | DeleteDocEnr deriving Show
+   | DeleteDocEnr
+   | WrapEnr wrapped deriving Show
 

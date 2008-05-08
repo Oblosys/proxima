@@ -3,13 +3,14 @@ module Presentation.PresPresent where
 import Common.CommonTypes
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils
+import Proxima.Wrap
 
 import qualified Data.Map as Map
 import Data.Map (Map)
 
 presentIO :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-             PresentationLevel doc node clip token -> EditEnrichedDoc' enr doc ->
-             IO (EditPresentation' doc node clip token, LayerStatePres, EnrichedDocLevel enr doc)
+             PresentationLevel doc node clip token -> EditEnrichedDoc' docLevel doc enr node clip token ->
+             IO (EditPresentation' docLevel doc enr node clip token, LayerStatePres, EnrichedDocLevel enr doc)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) editHigh =
   let (editLow, state', high') = present presentationSheet state high low editHigh
   in do { -- debugLnIO Prs ("editEnr':"++show editHigh)
@@ -24,8 +25,8 @@ presentIO presentationSheet state high low@(PresentationLevel pres layout) editH
 -- on document edit, old inserted and deleted from level are reused
 
 present :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-           PresentationLevel doc node clip token -> EditEnrichedDoc' enr doc ->
-           (EditPresentation' doc node clip token, LayerStatePres, EnrichedDocLevel enr doc)
+           PresentationLevel doc node clip token -> EditEnrichedDoc' docLevel doc enr node clip token ->
+           (EditPresentation' docLevel doc enr node clip token, LayerStatePres, EnrichedDocLevel enr doc)
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
 present _ state enrlvl pres                            (SkipEnr' i) = (SkipPres' (i-1), state, enrlvl)

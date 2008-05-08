@@ -3,6 +3,7 @@ module Rendering.RenTranslate where
 import Common.CommonTypes
 import Rendering.RenLayerTypes
 import Rendering.RenLayerUtils
+import Proxima.Wrap
 
 import Char
 -- import IOExts
@@ -28,9 +29,9 @@ translate state low high editLow =
 
 
 
-interpret :: Show node => LocalStateRen -> RenderingLevel documentLevel ->
-             ArrangementLevel doc node clip token -> EditRendering documentLevel ->
-             (EditArrangement documentLevel, LocalStateRen, RenderingLevel documentLevel)
+interpret :: Show node => LocalStateRen -> RenderingLevel docLevel doc enr node clip token ->
+             ArrangementLevel doc node clip token -> EditRendering docLevel doc enr node clip token ->
+             (EditArrangement docLevel doc enr node clip token, LocalStateRen, RenderingLevel docLevel doc enr node clip token)
 interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of

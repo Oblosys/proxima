@@ -54,11 +54,12 @@ instance Show (ParseError doc node clip token) where
   show (ParsingParseErr _ _ _ _) = "ParsingParseErr"
   show (StructuralParseErr _) = "StructuralParseErr"
   
-data EditPresentation' doc node clip token =
+data EditPresentation'_ wrapped documentLevel doc enr node clip token =
     SetPres' (PresentationLevel doc node clip token)
-  | SkipPres' Int deriving Show
+  | SkipPres' Int
+  | WrapPres' wrapped deriving Show
 
-data EditPresentation documentLevel doc node clip token =
+data EditPresentation_ wrapped documentLevel doc enr node clip token =
     SkipPres Int
   | SetFocusPres FocusPres
   | SetPres (PresentationLevel doc node clip token)
@@ -82,7 +83,8 @@ data EditPresentation documentLevel doc node clip token =
   | CutDocPres
   | CopyDocPres
   | PasteDocPres
-  | DeleteDocPres deriving Show
+  | DeleteDocPres
+  | WrapPres wrapped deriving Show
 
 type Position = Int
 

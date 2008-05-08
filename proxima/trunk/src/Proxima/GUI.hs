@@ -19,7 +19,7 @@ import qualified Common.CommonTypes as CommonTypes
 import Rendering.RenTypes
 import Rendering.RenUtils
 import Common.CommonUtils
-
+import Proxima.Wrap
 import Char
 import Maybe
 import IO
@@ -34,9 +34,9 @@ initialWindowSize = (1000, 900)
 documentFilename = "Document.xml"
 backupFilename = "BackupDocument.xml"
 
-startGUI :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
+startGUI :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
             IORef CommonTypes.Rectangle ->
-            (RenderingLevel documentLevel, EditRendering documentLevel) -> IO ()
+            (RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO ()
 startGUI handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { initGUI
     ; window <- windowNew
@@ -136,8 +136,8 @@ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canva
     }
  where performEditEvents = mapM_ (genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas)
     
-onMouse :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+onMouse :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
+              IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
 onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
  do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _)  <- readIORef renderingLvlVar
@@ -169,8 +169,8 @@ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
              }
     }
   
-onKeyboard :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-              IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+onKeyboard :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
+              IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
 onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
  do { let editRendering = translateKey keyName mKeyChar (translateModifiers mods)
@@ -183,17 +183,17 @@ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ 
              }
     }
 
-popupMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                    IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
-                    (documentLevel -> documentLevel) -> IO ()
+popupMenuHandler :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
+                    IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+                    (docLevel -> docLevel) -> IO ()
 popupMenuHandler handler renderingLvlVar buffer viewedArea window vp canvas editDoc =
  do { let editRendering = (UpdateDocRen editDoc)
                                 
     ; genericHandler handler renderingLvlVar buffer viewedArea window vp canvas editRendering
     }
 
-fileMenuHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-                       IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+fileMenuHandler :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
+                       IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
                        String -> IO ()
 fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas menuItem =
  do { editRendering <- 
@@ -246,9 +246,9 @@ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas me
 -- current EditLevel to genericHandler.
 -- If successful, the updated RenderingLevel is returned.
 
-genericHandler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) ->
-               IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
-               Window -> Viewport -> DrawingArea -> EditRendering documentLevel -> IO ()
+genericHandler :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) ->
+               IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
+               Window -> Viewport -> DrawingArea -> EditRendering docLevel doc enr node clip token -> IO ()
 genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea vp
@@ -286,7 +286,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
     }
   
 drawRendering :: DrawableClass d => 
-                 IORef (RenderingLevel documentLevel) -> Window -> Viewport -> d -> IO ()
+                 IORef (RenderingLevel docLevel doc enr node clip token) -> Window -> Viewport -> d -> IO ()
 drawRendering renderingLvlVar wi vp pm = 
  do { RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
 --    ; putStrLn "Drawing rendering"
@@ -305,16 +305,16 @@ drawRendering renderingLvlVar wi vp pm =
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
     }
-
-drawFocus :: IORef (RenderingLevel documentLevel) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
+          
+drawFocus :: IORef (RenderingLevel docLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
 drawFocus renderingLvlVar wi dw gc vp = 
  do { RenderingLevel scale mkPopupMenu rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea vp 
     ; focusRendering (wi, dw ,gc) viewedArea
     }
 
-onPaint :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel)) -> 
-           IORef (RenderingLevel documentLevel) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle ->
+onPaint :: ((RenderingLevel docLevel doc enr node clip token, EditRendering docLevel doc enr node clip token) -> IO (RenderingLevel docLevel doc enr node clip token, EditRendering' docLevel doc enr node clip token)) -> 
+           IORef (RenderingLevel docLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle ->
            Window -> Viewport -> DrawingArea -> Event -> IO Bool
 onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
@@ -382,7 +382,7 @@ resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
                    genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (SkipRen (-2))                  
     }
 
-translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering documentLevel
+translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering docLevel doc enr node clip token
 translateKey _ (Just ch) (CommonTypes.Modifiers False False False)  = KeyCharRen ch
 translateKey _ (Just ch) (CommonTypes.Modifiers True False False)  = KeyCharRen ch
 translateKey _ (Just ch) m  = KeySpecialRen (CommonTypes.CharKey ch) m

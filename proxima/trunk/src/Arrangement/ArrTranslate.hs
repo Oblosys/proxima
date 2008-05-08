@@ -4,6 +4,8 @@ import Common.CommonTypes
 import Arrangement.ArrLayerTypes
 import Arrangement.ArrLayerUtils
 
+import Proxima.Wrap
+
 import Evaluation.DocTypes
 import Evaluation.DocUtils
 import qualified Layout.TreeEditPres as TreeEditPres -- for mouse handling stuff
@@ -17,8 +19,8 @@ translate state low high editLow =
 
 
 unArrange :: (DocNode node, Show token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
-             EditArrangement (DocumentLevel doc clip) ->
-             (EditLayout (DocumentLevel doc clip) doc node clip token, LocalStateArr, ArrangementLevel doc node clip token)
+             EditArrangement (DocumentLevel doc clip) doc enr node clip token ->
+             (EditLayout (DocumentLevel doc clip) doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
@@ -97,7 +99,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
-                (EditLayout (DocumentLevel doc clip) doc node clip token, state, ArrangementLevel doc node clip token)  
+                (EditLayout (DocumentLevel doc clip) doc enr node clip token, state, ArrangementLevel doc node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
   in  case mouseDownDocPres pthP layout of
@@ -113,7 +115,7 @@ mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
 
 isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc node clip token ->
-               Maybe (EditLayout docLvl doc node clip token)
+               Maybe (EditLayout docLvl doc enr node clip token)
 isGraphEdit x y arr pres =
       case navigateFocus x y arr of 
         PathA pth _ -> case selectTreeA pth arr of

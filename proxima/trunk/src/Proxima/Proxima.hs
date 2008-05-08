@@ -16,7 +16,7 @@ import Evaluation.DocUtils -- for redirect
 import Presentation.PresPresent
 import Evaluation.EnrTypes
 --import Graphics.UI.WX.Types hiding (Size)
-import Graphics.UI.Gtk
+import Graphics.UI.Gtk hiding (Editable)
 
 import Presentation.PresTypes -- temporarily
 import Presentation.PresUtils -- temporarily
@@ -30,6 +30,7 @@ import Rendering.RenTypes -- temporarily
 import Arrangement.FontLib  -- for initial FontMetrics, the Init should take care of this.
 
 import Evaluation.EvalLayerTypes (EvaluationSheet, ReductionSheet (..))
+import Evaluation.DocumentEdit
 import Presentation.PresLayerTypes (PresentationSheet, ParseSheet)
 import Layout.LayLayerTypes (ScannerSheet)
 
@@ -62,12 +63,14 @@ import Data.Map (Map)
 
 -- initial system local state in Main is not nice
 
-{-
-proxima :: PresentationSheet doc enr node -> ParseSheet doc enr node ->
-           ScannerSheet doc node ->
-           DocumentLevel doc clip -> EnrichedDocLevel enr ->
+
+proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip
+           , EvaluationSheet doc enr clip, ReductionSheet doc enr clip
+           , Editable doc doc node clip token) =>
+           PresentationSheet doc enr node clip token -> ParseSheet doc enr node clip token ->
+           ScannerSheet doc node clip token ->
+           DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
            IO ()
--}
 proxima presentationSheet parseSheet scannerSheet
         initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
@@ -106,7 +109,7 @@ proxima presentationSheet parseSheet scannerSheet
               
               ; ((doc, docEdit), PresStep present) <- translate (renderingLvl, event)
               
-              ; debugLnIO Main $ "Doc edit is "++show docEdit
+--              ; debugLnIO Main $ "Doc edit is "++show docEdit
               ; ((renderingLvl', renderingEdit'), TransStep translate') <- present (doc, (redirect docEdit))
 --              ; debugLnIO Main $ "RenderingLevel is "++show renderingLvl'
 --              ; debugLnIO Main $ "RenderingEdit' is "++show renderingEdit'
