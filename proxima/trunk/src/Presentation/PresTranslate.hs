@@ -15,10 +15,10 @@ translateIO :: (DocNode node, Ord token, Show token, Show enr) =>
                ParseSheet doc enr node clip token -> LayerStatePres -> PresentationLevel doc node clip token ->
                EnrichedDocLevel enr doc -> [EditPresentation doc enr node clip token] ->
                IO ([EditEnrichedDoc doc enr node clip token], LayerStatePres, PresentationLevel doc node clip token)
-translateIO parseSheet state low high editsLow = castRemainingEditOps editsLow $ \editLow ->
+translateIO parseSheet state low high = castRemainingEditOps $ \editLow ->
   do { (editHigh, state', low') <- parseIO parseSheet state low high editLow
 --     ; debugLnIO Prs $ "Edit Enr:"++show editHigh
-     ; return (editHigh, state', low')
+     ; return ([editHigh], state', low')
      }
 
 

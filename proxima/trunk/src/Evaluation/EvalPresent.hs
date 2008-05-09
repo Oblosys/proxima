@@ -12,12 +12,12 @@ presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSh
              LayerStateEval doc clip -> DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
              [EditDocument' doc enr node clip token] ->
              IO ([EditEnrichedDoc' doc enr node clip token], LayerStateEval doc clip, DocumentLevel doc clip)
-presentIO state high low editsHigh = castRemainingEditOps editsHigh $ \editHigh ->
+presentIO state high low = castRemainingEditOps $ \editHigh ->
   do { (editLow, state', high') <- eval state high low editHigh
      
      --; debugLnIO Prs ("editDoc':"++show editHigh)
      --; debugLnIO Prs ("editEnr':"++show editLow)
-     ; return $ (editLow, state', high')
+     ; return $ ([editLow], state', high')
      }
 
 {-

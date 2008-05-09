@@ -9,11 +9,11 @@ import Proxima.Wrap
 import Arrangement.Arranger
 
 --present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
-presentIO state high low editsHigh = castRemainingEditOps editsHigh $ \editHigh ->
+presentIO state high low = castRemainingEditOps $ \editHigh ->
   do { (editLow, state', high') <- arrange state high low editHigh
      --; debugLnIO Arr $ "EditLayout':"++show editHigh
      --; debugLnIO Arr $ "EditArrangement':"++show editLow
-     ; return (editLow, state', high')
+     ; return ([editLow], state', high')
      }
 
 -- arrangement and focus are tricky. focus selection and focus arranging both need an arrangement without the focus

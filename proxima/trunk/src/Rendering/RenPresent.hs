@@ -10,22 +10,11 @@ import Rendering.Renderer
 
 import Evaluation.DocTypes (DocumentLevel)
 
-presentIO state high low editsHigh =  castRemainingEditOps editsHigh $ \editHigh ->
-  return $ present state high low editHigh
-
---present ::  state -> high -> low -> editHigh' -> (editLow', state, high)
-present state high low editHigh =
-  let (editLow, state', high') = render state high low editHigh
-  in  (editLow, state', high')
-
-
-
--- background rendering must be fixed. The boxes must be rendered behind the actual rendering elements,
--- and ideally, only when the background changes, the box is drawn.
-
-
-
-
+presentIO state high low =  castRemainingEditOps $ \editHigh ->
+ do { let (editLow, state', high') = render state high low editHigh
+    ; return ([editLow], state', high')
+    }
+    
 -- debug & scaling is now done directly. This should be done with a setRendering
 {-
 render :: (HasPath node, Show node) =>

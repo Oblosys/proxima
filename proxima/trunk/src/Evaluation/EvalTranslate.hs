@@ -16,10 +16,10 @@ translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
                [EditEnrichedDoc doc enr node clip token] -> 
                IO ([EditDocument doc enr node clip token], LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
-translateIO state low high editsLow = castRemainingEditOps editsLow $ \editLow ->
+translateIO state low high = castRemainingEditOps $ \editLow ->
   do { (editHigh, state', low') <- reduceIO state low high editLow
 --     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
-     ; return (editHigh, state', low')
+     ; return ([editHigh], state', low')
      }
 
 reduceIO :: (Doc doc, ReductionSheet doc enr clip) =>

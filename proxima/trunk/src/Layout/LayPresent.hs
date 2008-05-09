@@ -16,14 +16,14 @@ import Proxima.Wrap
 presentIO :: (DocNode node, Show token, Eq token) => LayerStateLay doc node clip token -> PresentationLevel doc node clip token -> LayoutLevel doc node clip token ->
              [EditPresentation' doc enr node clip token] ->
              IO ([EditLayout' doc enr node clip token], LayerStateLay doc node clip token, PresentationLevel doc node clip token)
-presentIO  state high low@(LayoutLevel pres focus _) editsHigh = castRemainingEditOps editsHigh $ \editHigh -> 
+presentIO  state high low@(LayoutLevel pres focus _) = castRemainingEditOps $ \editHigh -> 
   let (editLow, state', high') = present state high low editHigh
   in do { -- debugLnIO Prs ("editLay':"++show editLow);
     --      case editLow of
     --        SetLay' (LayoutLevel pres' _) -> debugLnIO Prs ("diffs: "++show (diffPres pres' pres))  
     --        _                                    -> return ()
 
-          return $ (editLow, state', high')
+          return $ ([editLow], state', high')
         }
 
 -- layout is old layout level, but on skip, the old one is the edited one that should be arranged again. The diff

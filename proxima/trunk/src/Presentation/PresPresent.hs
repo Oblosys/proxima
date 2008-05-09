@@ -12,11 +12,11 @@ import Data.Map (Map)
 presentIO :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
              PresentationLevel doc node clip token -> [EditEnrichedDoc' doc enr node clip token] ->
              IO ([EditPresentation' doc enr node clip token], LayerStatePres, EnrichedDocLevel enr doc)
-presentIO presentationSheet state high low@(PresentationLevel pres layout) editsHigh = castRemainingEditOps editsHigh $ \editHigh ->
+presentIO presentationSheet state high low@(PresentationLevel pres layout) = castRemainingEditOps $ \editHigh ->
   let (editLow, state', high') = present presentationSheet state high low editHigh
   in do { -- debugLnIO Prs ("editEnr':"++show editHigh)
         --; debugLnIO Prs ("editPres':"++show editLow)
-        ; return $ (editLow, state', high')
+        ; return $ ([editLow], state', high')
         }
 
 

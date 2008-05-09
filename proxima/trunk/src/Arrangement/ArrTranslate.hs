@@ -12,12 +12,11 @@ import Evaluation.DocUtils
 import qualified Layout.TreeEditPres as TreeEditPres -- for mouse handling stuff
 
 
-translateIO state low high editsLow =  castRemainingEditOps editsLow $ \editLow ->
-  return $ unArrange state low high editLow
+translateIO state low high =  castRemainingEditOps $ \editLow ->
+ do { let (editHigh, state', low') = unArrange state low high editLow
+    ; return ([editHigh], state', low')
+    }
 
-translate state low high editLow = 
-  let (editHigh, state', low') = unArrange state low high editLow
-  in (editHigh, state', low')
 
 
 unArrange :: (DocNode node, Show token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
