@@ -1,0 +1,21 @@
+Helium in Proxima
+- What is Proxima
+- What is Helium
+- Document type
+- Presentation
+   - Interesting fractions and powers
+   - Editable list of identifiers
+   - Identifiers in scope  
+- Parse errors and type errors with squigglies
+- Automatic layout
+
+
+Proxima Incrementality
+- What is Proxima
+- Presentation
+- Arrangement
+- Rendering
+- Render and Arrange only things in view
+- Arrange only new stuff
+- Problems that arise
+- Solutions 
