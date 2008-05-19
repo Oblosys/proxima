@@ -28,6 +28,17 @@ consPathP s _                = NoPathP
 orderFocusP (FocusP from to) = FocusP (min from to) (max from to)
 orderFocusP NoFocusP         = NoFocusP
 
+focusStartPathP (FocusP (PathP pth _) _) = pth
+focusStartPathP _                        = []
+
+showPathNodesP :: (Show node, Show token) => Path -> PresentationBase doc node clip token level -> String
+showPathNodesP []      pres = shallowShowPres pres
+showPathNodesP (p:pth) pres = shallowShowPres pres ++ "\n" ++
+                               let children = getChildrenP pres
+                               in  if p < length children
+                                   then showPathNodesP pth (index "PresUtils.showPathNodesP" children p)
+                                   else "PresUtils.showPathNodesP: index out of bounds"
+                            
 
 -- set background so user knows doc is unparsed
 -- if top node is With, don't do anything, so we won't pile up background with nodes.
