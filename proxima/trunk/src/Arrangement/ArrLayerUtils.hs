@@ -75,5 +75,5 @@ pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (c
       arr = case index "ArrLayerUtils.pathPFromPathAFormatter" rowArrs cIx of
               (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathPFromPathAFormatter, arr index" arrs rIx
               _                           -> debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
-  in  fIx : pathAFromPathP' arr (index "ArrLayerUtils.pathPFromPathAFormatter, pres index" press fIx) path
+  in  fIx : pathPFromPathA' arr (index "ArrLayerUtils.pathPFromPathAFormatter, pres index" press fIx) path
 pathPFromPathAFormatter _                           press path = debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no column") []
