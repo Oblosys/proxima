@@ -16,8 +16,20 @@ ifFocusA (FocusA _ _)       exp = exp
 ifPathA NoPathA _       = NoPathA
 ifPathA (PathA _ _) exp = exp
 
+focusStartPathA (FocusA (PathA pth _) _) = pth
+focusStartPathA _                        = []
+
 
 orderFocusA foc@(FocusA from to) = ifFocusA foc $ FocusA (min from to) (max from to)
+
+showPathNodesA :: Show node => Path -> Arrangement node -> String
+showPathNodesA []      arr = shallowShowArr arr
+showPathNodesA (p:pth) arr = shallowShowArr arr ++ "\n" ++
+                               let children = getChildrenA arr
+                               in  if p < length children
+                                   then showPathNodesA pth (index "ArrUtils.showPathNodesA" children p)
+                                   else "ArrUtils.showPathNodesA: index out of bounds"
+
 
 sizeA path arr = sizeA' 0 0 path arr
 sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA arr, widthA arr, heightA arr)
@@ -352,7 +364,7 @@ setFocus x y arr     = showDebug' GI "focus set to " $
 enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
 
 enlargeFocus (FocusA f@(PathA _ _) t) pth = showDebug Ren $ (FocusA f pth)
-enlargeFocus f                        pth = debug Err "GestureInterpreter.enlargeFocus: selection without focus set" $ (FocusA pth pth)
+enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
 
 -- this works but is it a general solution? No, can't go up from:                 col
 --                                                                        bla|bla col
