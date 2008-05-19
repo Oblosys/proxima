@@ -30,7 +30,17 @@ presentIO  state high low@(LayoutLevel pres focus _) = castRemainingEditOps $ \e
 -- is therefore done in LayTranslate after the layout is edited.
 
 -- for a set operation, the new layout from presentation can be diffed with the old layout
-
+{-
+{WithP}
+{LocatorP}
+{WithP}
+{NoIDP:ParsingP}
+{NoIDP:Formatter, #children=7}
+{LocatorP}
+{WithP}
+{NoIDP:ParsingP}
+{NoIDP:RowP, #children=2}
+{NoIDP:StringP "word3"}-}
 
 -- doc in pattern should be pres
 present :: (DocNode node, Show token, Eq token) => LayerStateLay doc node clip token -> PresentationLevel doc node clip token -> LayoutLevel doc node clip token ->
@@ -44,7 +54,7 @@ present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
   let -- focusXY = saveFocus focus lay
       (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
-      focus' = scannedFocus {-
+      focus' = focus {-
                  debug Lay ("Scanned focus is "++show scannedFocus) $
                case (scannedFocus, focus) of
                  (NoFocusP,               focus       ) -> focus
@@ -54,7 +64,10 @@ present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres 
                  (FocusP fp      tp,      _           ) -> FocusP fp      tp
                  -}
       diffTree = diffPres lay' lay
-  in  debug Lay ("old focus:    " ++ show focus ++ "\nScannedFocus: "++show scannedFocus)
+  in  debug Lay ("old focus:    " ++ show focus ++ "\nScannedFocus: "++show scannedFocus 
+                -- ++ case focus' of FocusP (PathP p _) _ -> "\nNodes on focus path:\n"++showPathNodes p lay
+                --                _ -> ""
+                )
       (SetLay' (LayoutLevel lay' focus' diffTree), state, hp) 
 present state pres lay (WrapPres' wrapped) = (unwrap wrapped, state, pres)
 
