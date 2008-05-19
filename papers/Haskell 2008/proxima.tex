@@ -6,22 +6,20 @@
 
 \begin{document}
 
-\conferenceinfo{Haskell Symposium '08}{Date, City.} 
+\conferenceinfo{Haskell Symposium '08}{September 25, 2008, Victoria, British Columbia, Canada.} 
 \copyrightyear{2008} 
 \copyrightdata{[to be supplied]} 
 
-%\titlebanner{banner above paper title}        % These are ignored unless
-%\preprintfooter{short description of paper}   % 'preprint' option specified.
+\titlebanner{Draft}        % These are ignored unless
+\preprintfooter{\version}   % 'preprint' option specified.
 
 \title{Proxima}
-\subtitle{Or something like that}
+%\subtitle{Or something like that}
 
 \authorinfo{Martijn M. Schrage}
-           {Department of Information and Computing Sciences\\
-         Utrecht University\\
-         Utrecht, The Netherlands}
-           {martijn,doaitse\}@cs.uu.nl}
-%\authorinfo{Name2\and Name3}
+           {Utrecht University}
+           {martijn@cs.uu.nl}
+%\authorinfo{S.\ Doaitse Swierstra}
 %           {Affiliation2/3}
 %           {Email2/3}
 
@@ -39,17 +37,93 @@ term1, term2
 \keywords
 keyword1, keyword2
 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bl
-\o Dazzle and problem with documentation
-\o Example of the documentation editor
+\o problem:
+\o Bayesian network with documentation
+\o Dazzle~\cite{schrage05Dazzle}
+\o consistency
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An editor for documenting Bayesian networks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Network graph editor
+\o import/export of network
+\o Views on main network
+\o free text editing
+\o refs to nodes
+\o chapters/sections/subsections and promoting/demoting
+\o probability table editing
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Proxima}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
 \o Proxima
+\o what is proxima
+\el
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{?}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Presentation
+\o Evaluation layer keeps graphs consistent
+\o AG for static checks
+\o prob tables?
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o no doc editor available
+\o why other systems cannot do this
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions and future work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
 \o Future work: extensions required
 \el
 
 %\acks
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{plainnat}
 
 \bibliography{../proxima}
