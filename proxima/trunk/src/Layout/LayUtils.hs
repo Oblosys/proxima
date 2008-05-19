@@ -129,12 +129,13 @@ nearestParsingColumn' colPth nearest (0:pth) (ParsingP _ _ _ column@(ColP _ _ _ 
   nearestParsingColumn' (colPth++[0]) (Just (column, colPth++[0])) pth column
 nearestParsingColumn' colPth nearest (p:pth) (RowP _ _ lays)        = nearestParsingColumn' (colPth++[p]) nearest pth (index "LayUtils.nearestParsingColumn'" lays p)
 nearestParsingColumn' colPth nearest (p:pth) (ColP _ _ _ lays)      = nearestParsingColumn' (colPth++[p]) nearest pth (index "LayUtils.nearestParsingColumn'" lays p)
+nearestParsingColumn' colPth nearest (p:pth) (FormatterP _ lays)    = nearestParsingColumn' (colPth++[p]) nearest pth (index "LayUtils.nearestParsingColumn'" lays p)
 nearestParsingColumn' colPth nearest (0:pth) (OverlayP _ _ (lay:_)) = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (WithP _ lay)          = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (StructuralP _ lay)    = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (ParsingP _ _ _ lay)   = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (LocatorP _ lay)       = nearestParsingColumn' (colPth++[0]) nearest pth lay
-nearestParsingColumn' colPth nearest pth lay                        = debug Err ("ArrUtils.nearestParsingColumn': can't handle "++show pth++" "++ show lay) $ Nothing
+nearestParsingColumn' colPth nearest pth lay                        = debug Err ("LayUtils.nearestParsingColumn': can't handle "++show pth++" "++ show lay) $ Nothing
                                                   
 
 
@@ -142,8 +143,8 @@ getColumnRows :: (Show node, Show token) =>
                  Layout doc node clip token -> [[Layout doc node clip token]]
 getColumnRows (ColP _ _ _ lays) = map getRowElts lays
  where getRowElts (RowP _ _ lays) = lays
-       getRowElts lay = debug Err ("ArrUtils.getColumnRows: not a row: "++ show lay) []
-getColumnRows lay = debug Err ("ArrUtils.getColumnRows: not a column: "++ show lay) []
+       getRowElts lay = debug Err ("LayUtils.getColumnRows: not a row: "++ show lay) []
+getColumnRows lay = debug Err ("LayUtils.getColumnRows: not a column: "++ show lay) []
 
 gatherDocPaths :: (DocNode node, Show token) => Layout doc node clip token -> [PathDoc]
 gatherDocPaths lay = gatherDocPaths' [] lay
@@ -157,7 +158,7 @@ gatherDocPaths' paths (WithP _ lay)             = gatherDocPaths' paths lay
 gatherDocPaths' paths (StructuralP _ lay)       = paths
 gatherDocPaths' paths (ParsingP _ _ _ lay)      = gatherDocPaths' paths lay
 gatherDocPaths' paths (LocatorP node lay)       = gatherDocPaths' (pathNode node:paths) lay
-gatherDocPaths' paths lay                       = debug Err ("ArrUtils.gatherDocPaths: can't handle "++ show lay) paths
+gatherDocPaths' paths lay                       = debug Err ("LayUtils.gatherDocPaths: can't handle "++ show lay) paths
 
 dropLeadingWhitespace lays = dropWhile isWhitespace lays
 
@@ -168,12 +169,13 @@ isWhitespace (ImageP _ _ _)            = False
 isWhitespace (PolyP _ _ _ _)           = False
 isWhitespace (RowP _ _ lays)           = all isWhitespace lays
 isWhitespace (ColP _ _ _ lays)         = all isWhitespace lays
+isWhitespace (FormatterP _ lays)         = all isWhitespace lays
 isWhitespace (OverlayP _ _ (lay:_))    = isWhitespace lay
 isWhitespace (WithP _ lay)             = isWhitespace lay
 isWhitespace (StructuralP _ lay)       = isWhitespace lay
 isWhitespace (ParsingP _ _ _ lay)      = isWhitespace lay
 isWhitespace (LocatorP _ lay)          = isWhitespace lay
-isWhitespace lay                        = debug Err ("ArrUtils.isWhitespace: can't handle "++ show lay) False
+isWhitespace lay                        = debug Err ("LayUtils.isWhitespace: can't handle "++ show lay) False
 
 isWhitespaceLR :: (Show node, Show token) => Path -> Layout doc node clip token -> (Bool,Bool)
 isWhitespaceLR [] (EmptyP _)             = (True,True)
@@ -194,4 +196,4 @@ isWhitespaceLR (0:pth) (WithP _ lay)          = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (StructuralP _ lay)    = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (ParsingP _ _ _ lay)   = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (LocatorP _ lay)       = isWhitespaceLR pth lay
-isWhitespaceLR pth     lay                    = debug Err ("ArrUtils.isWhitespaceLR: can't handle "++ show pth++" " ++show lay) (False,False)
+isWhitespaceLR pth     lay                    = debug Err ("LayUtils.isWhitespaceLR: can't handle "++ show pth++" " ++show lay) (False,False)
