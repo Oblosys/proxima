@@ -31,7 +31,7 @@ present :: PresentationSheet doc enr node clip token -> LayerStatePres -> Enrich
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
 present _ state enrLvl pres                            (SkipEnr' i) = (SkipPres' (i-1), state, enrLvl)
-present presentationSheet state (EnrichedDocLevel enr _ _) (PresentationLevel pres (layoutMap,idC)) (SetEnr' enrLvl)  =
+present presentationSheet state (EnrichedDocLevel _ _ _) (PresentationLevel pres (layoutMap,idC)) (SetEnr' enrLvl)  =
     
   let --focusXY             = saveFocus focus pres
       (pres', layoutMap', idC')      = presentEnr presentationSheet state enrLvl layoutMap idC
