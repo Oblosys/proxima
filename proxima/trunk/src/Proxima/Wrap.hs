@@ -18,6 +18,22 @@ import Layout.LayTypes
 import Arrangement.ArrTypes
 import Rendering.RenTypes
 
+{-
+Wrap implements wrapped editops
+
+
+
+instead of returning e.g. :: EditArrangement, return a wrap $ ..
+wrap :: edit op returns a wrapped editop.
+translate and present functions unwrap it, so it arrives at its destination.
+cast.
+
+each layer component takes edit op -> edit ops.
+
+
+
+-}
+
 data Wrapped doc enr node clip token = 
     WrappedDocEdit   (EditDocument     doc enr node clip token)
   | WrappedEnrEdit   (EditEnrichedDoc  doc enr node clip token)
