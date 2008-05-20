@@ -30,7 +30,7 @@ recognizeEnrichedDoc = pStr $
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
           (\str graph title sections ->
-          reuseRoot [str] (Just graph) (Just title) (Just sections))
+          reuseRoot [str] (Just graph) Nothing (Just title) (Just sections))
       <$> pStructuralTk Node_Root
       <*> recognizeGraph
       <*> pPrs pLine 
@@ -169,6 +169,12 @@ parseParagraph =
       <$> pStructuralTk Node_SubgraphPara
       <*> recognizeSubgraph
       )
+  <|>
+      (   pStrAlt Node_ProbtablePara $
+          (\str sg -> reuseProbtablePara [str] (Just sg))
+      <$> pStructuralTk Node_ProbtablePara
+      <*> recognizeProbtable
+      )
 
 
 parseWord = 
@@ -200,7 +206,16 @@ pSpaces = concat <$> pList (const " " <$> pKey " " <|> const "" <$> pKey "\n") -
 pText = tokenString <$> pWord
 
 
-
+recognizeProbtable :: ListParser Document Node ClipDoc UserToken Probtable
+recognizeProbtable = pStrVerbose "Probtable" $
+          (\str prob -> reuseProbtable [str] Nothing (Just prob))
+      <$> pStructuralTk Node_Probtable
+      <*> pPrs parseProbability
+      
+parseProbability :: ListParser Document Node ClipDoc UserToken Probability
+parseProbability = Probability . tokenString 
+      <$> pWord
+     
 
 
 
@@ -209,3 +224,4 @@ pWord     = pToken WordTk
 pNodeRef  = pToken NodeRefTk
 pLabel    = pToken LabelTk
 pLabelRef = pToken LabelRefTk
+pInt      = pToken IntTk

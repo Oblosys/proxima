@@ -14,6 +14,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
 initialDocument = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_Edge [])) 
+                                  (toList_Probtable [])
                                   "" 
                                   (toList_Section [])))
 
@@ -45,55 +46,65 @@ rankNode (Node_HoleSubsubsection _ _) = 17
 rankNode (Node_ParseErrSubsubsection _ _) = 18
 rankNode (Node_Paragraph _ _) = 19
 rankNode (Node_SubgraphPara _ _) = 20
-rankNode (Node_HoleParagraph _ _) = 21
-rankNode (Node_ParseErrParagraph _ _) = 22
-rankNode (Node_Word _ _) = 23
-rankNode (Node_NodeRef _ _) = 24
-rankNode (Node_Label _ _) = 25
-rankNode (Node_LabelRef _ _) = 26
-rankNode (Node_HoleWord _ _) = 27
-rankNode (Node_ParseErrWord _ _) = 28
-rankNode (Node_Graph _ _) = 29
-rankNode (Node_HoleGraph _ _) = 30
-rankNode (Node_ParseErrGraph _ _) = 31
-rankNode (Node_Vertex _ _) = 32
-rankNode (Node_HoleVertex _ _) = 33
-rankNode (Node_ParseErrVertex _ _) = 34
-rankNode (Node_Circle _ _) = 35
-rankNode (Node_Square _ _) = 36
-rankNode (Node_HoleShape _ _) = 37
-rankNode (Node_ParseErrShape _ _) = 38
-rankNode (Node_Edge _ _) = 39
-rankNode (Node_HoleEdge _ _) = 40
-rankNode (Node_ParseErrEdge _ _) = 41
-rankNode (Node_Subgraph _ _) = 42
-rankNode (Node_HoleSubgraph _ _) = 43
-rankNode (Node_ParseErrSubgraph _ _) = 44
-rankNode (Node_Dirty _ _) = 45
-rankNode (Node_Clean _ _) = 46
-rankNode (Node_HoleDirty _ _) = 47
-rankNode (Node_ParseErrDirty _ _) = 48
-rankNode (Node_List_Section _ _) = 49
-rankNode (Node_HoleList_Section _ _) = 50
-rankNode (Node_ParseErrList_Section _ _) = 51
-rankNode (Node_List_Paragraph _ _) = 52
-rankNode (Node_HoleList_Paragraph _ _) = 53
-rankNode (Node_ParseErrList_Paragraph _ _) = 54
-rankNode (Node_List_Subsection _ _) = 55
-rankNode (Node_HoleList_Subsection _ _) = 56
-rankNode (Node_ParseErrList_Subsection _ _) = 57
-rankNode (Node_List_Subsubsection _ _) = 58
-rankNode (Node_HoleList_Subsubsection _ _) = 59
-rankNode (Node_ParseErrList_Subsubsection _ _) = 60
-rankNode (Node_List_Word _ _) = 61
-rankNode (Node_HoleList_Word _ _) = 62
-rankNode (Node_ParseErrList_Word _ _) = 63
-rankNode (Node_List_Vertex _ _) = 64
-rankNode (Node_HoleList_Vertex _ _) = 65
-rankNode (Node_ParseErrList_Vertex _ _) = 66
-rankNode (Node_List_Edge _ _) = 67
-rankNode (Node_HoleList_Edge _ _) = 68
-rankNode (Node_ParseErrList_Edge _ _) = 69
+rankNode (Node_ProbtablePara _ _) = 21
+rankNode (Node_HoleParagraph _ _) = 22
+rankNode (Node_ParseErrParagraph _ _) = 23
+rankNode (Node_Word _ _) = 24
+rankNode (Node_NodeRef _ _) = 25
+rankNode (Node_Label _ _) = 26
+rankNode (Node_LabelRef _ _) = 27
+rankNode (Node_HoleWord _ _) = 28
+rankNode (Node_ParseErrWord _ _) = 29
+rankNode (Node_Graph _ _) = 30
+rankNode (Node_HoleGraph _ _) = 31
+rankNode (Node_ParseErrGraph _ _) = 32
+rankNode (Node_Vertex _ _) = 33
+rankNode (Node_HoleVertex _ _) = 34
+rankNode (Node_ParseErrVertex _ _) = 35
+rankNode (Node_Circle _ _) = 36
+rankNode (Node_Square _ _) = 37
+rankNode (Node_HoleShape _ _) = 38
+rankNode (Node_ParseErrShape _ _) = 39
+rankNode (Node_Edge _ _) = 40
+rankNode (Node_HoleEdge _ _) = 41
+rankNode (Node_ParseErrEdge _ _) = 42
+rankNode (Node_Subgraph _ _) = 43
+rankNode (Node_HoleSubgraph _ _) = 44
+rankNode (Node_ParseErrSubgraph _ _) = 45
+rankNode (Node_Dirty _ _) = 46
+rankNode (Node_Clean _ _) = 47
+rankNode (Node_HoleDirty _ _) = 48
+rankNode (Node_ParseErrDirty _ _) = 49
+rankNode (Node_Probtable _ _) = 50
+rankNode (Node_HoleProbtable _ _) = 51
+rankNode (Node_ParseErrProbtable _ _) = 52
+rankNode (Node_Probability _ _) = 53
+rankNode (Node_HoleProbability _ _) = 54
+rankNode (Node_ParseErrProbability _ _) = 55
+rankNode (Node_List_Probtable _ _) = 56
+rankNode (Node_HoleList_Probtable _ _) = 57
+rankNode (Node_ParseErrList_Probtable _ _) = 58
+rankNode (Node_List_Section _ _) = 59
+rankNode (Node_HoleList_Section _ _) = 60
+rankNode (Node_ParseErrList_Section _ _) = 61
+rankNode (Node_List_Paragraph _ _) = 62
+rankNode (Node_HoleList_Paragraph _ _) = 63
+rankNode (Node_ParseErrList_Paragraph _ _) = 64
+rankNode (Node_List_Subsection _ _) = 65
+rankNode (Node_HoleList_Subsection _ _) = 66
+rankNode (Node_ParseErrList_Subsection _ _) = 67
+rankNode (Node_List_Subsubsection _ _) = 68
+rankNode (Node_HoleList_Subsubsection _ _) = 69
+rankNode (Node_ParseErrList_Subsubsection _ _) = 70
+rankNode (Node_List_Word _ _) = 71
+rankNode (Node_HoleList_Word _ _) = 72
+rankNode (Node_ParseErrList_Word _ _) = 73
+rankNode (Node_List_Vertex _ _) = 74
+rankNode (Node_HoleList_Vertex _ _) = 75
+rankNode (Node_ParseErrList_Vertex _ _) = 76
+rankNode (Node_List_Edge _ _) = 77
+rankNode (Node_HoleList_Edge _ _) = 78
+rankNode (Node_ParseErrList_Edge _ _) = 79
 
 
 
@@ -124,6 +135,7 @@ instance DocNode Node where
   pathNode (Node_ParseErrSubsubsection _ pth) = PathD pth
   pathNode (Node_Paragraph _ pth) = PathD pth
   pathNode (Node_SubgraphPara _ pth) = PathD pth
+  pathNode (Node_ProbtablePara _ pth) = PathD pth
   pathNode (Node_HoleParagraph _ pth) = PathD pth
   pathNode (Node_ParseErrParagraph _ pth) = PathD pth
   pathNode (Node_Word _ pth) = PathD pth
@@ -152,6 +164,15 @@ instance DocNode Node where
   pathNode (Node_Clean _ pth) = PathD pth
   pathNode (Node_HoleDirty _ pth) = PathD pth
   pathNode (Node_ParseErrDirty _ pth) = PathD pth
+  pathNode (Node_Probtable _ pth) = PathD pth
+  pathNode (Node_HoleProbtable _ pth) = PathD pth
+  pathNode (Node_ParseErrProbtable _ pth) = PathD pth
+  pathNode (Node_Probability _ pth) = PathD pth
+  pathNode (Node_HoleProbability _ pth) = PathD pth
+  pathNode (Node_ParseErrProbability _ pth) = PathD pth
+  pathNode (Node_List_Probtable _ pth) = PathD pth
+  pathNode (Node_HoleList_Probtable _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Probtable _ pth) = PathD pth
   pathNode (Node_List_Section _ pth) = PathD pth
   pathNode (Node_HoleList_Section _ pth) = PathD pth
   pathNode (Node_ParseErrList_Section _ pth) = PathD pth
@@ -186,7 +207,7 @@ toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
 toXMLDocument (RootDoc root) = Elt "RootDoc" [] $ [toXMLRoot root]
 toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
 toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
-toXMLRoot (Root graph title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString title] ++ toXMLList_Section sections
+toXMLRoot (Root graph probtables title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ toXMLList_Probtable probtables ++ [toXMLString title] ++ toXMLList_Section sections
 toXMLRoot (HoleRoot) = Elt "HoleRoot" [] $ []
 toXMLRoot (ParseErrRoot error) = Elt "ParseErrRoot" [] []
 toXMLSection (Section title paragraphs subsections) = Elt "Section" [] $ [toXMLString title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections
@@ -200,6 +221,7 @@ toXMLSubsubsection (HoleSubsubsection) = Elt "HoleSubsubsection" [] $ []
 toXMLSubsubsection (ParseErrSubsubsection error) = Elt "ParseErrSubsubsection" [] []
 toXMLParagraph (Paragraph words) = Elt "Paragraph" [] $ toXMLList_Word words
 toXMLParagraph (SubgraphPara subgraph) = Elt "SubgraphPara" [] $ [toXMLSubgraph subgraph]
+toXMLParagraph (ProbtablePara probtable) = Elt "ProbtablePara" [] $ [toXMLProbtable probtable]
 toXMLParagraph (HoleParagraph) = Elt "HoleParagraph" [] $ []
 toXMLParagraph (ParseErrParagraph error) = Elt "ParseErrParagraph" [] []
 toXMLWord (Word word) = Elt "Word" [] $ [toXMLString word]
@@ -228,6 +250,15 @@ toXMLDirty (Dirty) = Elt "Dirty" [] $ []
 toXMLDirty (Clean) = Elt "Clean" [] $ []
 toXMLDirty (HoleDirty) = Elt "HoleDirty" [] $ []
 toXMLDirty (ParseErrDirty error) = Elt "ParseErrDirty" [] []
+toXMLProbtable (Probtable id probability) = Elt "Probtable" [] $ [toXMLInt id] ++ [toXMLProbability probability]
+toXMLProbtable (HoleProbtable) = Elt "HoleProbtable" [] $ []
+toXMLProbtable (ParseErrProbtable error) = Elt "ParseErrProbtable" [] []
+toXMLProbability (Probability prob) = Elt "Probability" [] $ [toXMLString prob]
+toXMLProbability (HoleProbability) = Elt "HoleProbability" [] $ []
+toXMLProbability (ParseErrProbability error) = Elt "ParseErrProbability" [] []
+toXMLList_Probtable (List_Probtable xs) = toXMLConsList_Probtable xs
+toXMLList_Probtable HoleList_Probtable = []
+toXMLList_Probtable (ParseErrList_Probtable _) = []
 toXMLList_Section (List_Section xs) = toXMLConsList_Section xs
 toXMLList_Section HoleList_Section = []
 toXMLList_Section (ParseErrList_Section _) = []
@@ -249,6 +280,8 @@ toXMLList_Vertex (ParseErrList_Vertex _) = []
 toXMLList_Edge (List_Edge xs) = toXMLConsList_Edge xs
 toXMLList_Edge HoleList_Edge = []
 toXMLList_Edge (ParseErrList_Edge _) = []
+toXMLConsList_Probtable (Cons_Probtable x xs) = toXMLProbtable x : toXMLConsList_Probtable xs
+toXMLConsList_Probtable Nil_Probtable             = []
 toXMLConsList_Section (Cons_Section x xs) = toXMLSection x : toXMLConsList_Section xs
 toXMLConsList_Section Nil_Section             = []
 toXMLConsList_Paragraph (Cons_Paragraph x xs) = toXMLParagraph x : toXMLConsList_Paragraph xs
@@ -275,16 +308,17 @@ parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root<* endTag "
 parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Root<* endTag "RootDoc"
 parseXML_Root = parseXMLCns_Root <|> parseHoleAndParseErr "Root" HoleRoot
-parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
+parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_List_Probtable <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
 parseXML_Section = parseXMLCns_Section <|> parseHoleAndParseErr "Section" HoleSection
 parseXMLCns_Section = Section <$ startTag "Section" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsection<* endTag "Section"
 parseXML_Subsection = parseXMLCns_Subsection <|> parseHoleAndParseErr "Subsection" HoleSubsection
 parseXMLCns_Subsection = Subsection <$ startTag "Subsection" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsubsection<* endTag "Subsection"
 parseXML_Subsubsection = parseXMLCns_Subsubsection <|> parseHoleAndParseErr "Subsubsection" HoleSubsubsection
 parseXMLCns_Subsubsection = Subsubsection <$ startTag "Subsubsection" <*> parseXML_String <*> parseXML_List_Paragraph<* endTag "Subsubsection"
-parseXML_Paragraph = parseXMLCns_Paragraph <|> parseXMLCns_SubgraphPara <|> parseHoleAndParseErr "Paragraph" HoleParagraph
+parseXML_Paragraph = parseXMLCns_Paragraph <|> parseXMLCns_SubgraphPara <|> parseXMLCns_ProbtablePara <|> parseHoleAndParseErr "Paragraph" HoleParagraph
 parseXMLCns_Paragraph = Paragraph <$ startTag "Paragraph" <*> parseXML_List_Word<* endTag "Paragraph"
 parseXMLCns_SubgraphPara = SubgraphPara <$ startTag "SubgraphPara" <*> parseXML_Subgraph<* endTag "SubgraphPara"
+parseXMLCns_ProbtablePara = ProbtablePara <$ startTag "ProbtablePara" <*> parseXML_Probtable<* endTag "ProbtablePara"
 parseXML_Word = parseXMLCns_Word <|> parseXMLCns_NodeRef <|> parseXMLCns_Label <|> parseXMLCns_LabelRef <|> parseHoleAndParseErr "Word" HoleWord
 parseXMLCns_Word = Word <$ startTag "Word" <*> parseXML_String<* endTag "Word"
 parseXMLCns_NodeRef = NodeRef <$ startTag "NodeRef" <*> parseXML_String<* endTag "NodeRef"
@@ -304,6 +338,11 @@ parseXMLCns_Subgraph = Subgraph <$ startTag "Subgraph" <*> parseXML_Dirty <*> pa
 parseXML_Dirty = parseXMLCns_Dirty <|> parseXMLCns_Clean <|> parseHoleAndParseErr "Dirty" HoleDirty
 parseXMLCns_Dirty = Dirty <$ emptyTag "Dirty"
 parseXMLCns_Clean = Clean <$ emptyTag "Clean"
+parseXML_Probtable = parseXMLCns_Probtable <|> parseHoleAndParseErr "Probtable" HoleProbtable
+parseXMLCns_Probtable = Probtable <$ startTag "Probtable" <*> parseXML_Int <*> parseXML_Probability<* endTag "Probtable"
+parseXML_Probability = parseXMLCns_Probability <|> parseHoleAndParseErr "Probability" HoleProbability
+parseXMLCns_Probability = Probability <$ startTag "Probability" <*> parseXML_String<* endTag "Probability"
+parseXML_List_Probtable = mkList List_Probtable Cons_Probtable Nil_Probtable <$> pList_ng parseXML_Probtable
 parseXML_List_Section = mkList List_Section Cons_Section Nil_Section <$> pList_ng parseXML_Section
 parseXML_List_Paragraph = mkList List_Paragraph Cons_Paragraph Nil_Paragraph <$> pList_ng parseXML_Paragraph
 parseXML_List_Subsection = mkList List_Subsection Cons_Subsection Nil_Subsection <$> pList_ng parseXML_Subsection
@@ -317,6 +356,29 @@ parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> pList_ng parseXML_E
 --------------------------------------------------------------------------
 -- List utility functions                                               --
 --------------------------------------------------------------------------
+
+toList_Probtable vs = List_Probtable (toConsList_Probtable vs)
+
+fromList_Probtable (List_Probtable vs) = fromConsList_Probtable vs
+fromList_Probtable _ = []
+
+toConsList_Probtable [] = Nil_Probtable
+toConsList_Probtable (x:xs) = Cons_Probtable x (toConsList_Probtable xs)
+
+fromConsList_Probtable Nil_Probtable = []
+fromConsList_Probtable (Cons_Probtable x xs) = x: fromConsList_Probtable xs
+
+replaceList_Probtable _ x Nil_Probtable = Nil_Probtable  -- replace beyond end of list
+replaceList_Probtable 0 x (Cons_Probtable cx cxs) = Cons_Probtable x cxs
+replaceList_Probtable n x (Cons_Probtable cx cxs) = Cons_Probtable cx (replaceList_Probtable (n-1) x cxs)
+
+insertList_Probtable 0 x cxs = Cons_Probtable x cxs
+insertList_Probtable _ x Nil_Probtable  = Nil_Probtable  -- insert beyond end of list
+insertList_Probtable n x (Cons_Probtable cx cxs) = Cons_Probtable cx (insertList_Probtable (n-1) x cxs)
+
+removeList_Probtable _ Nil_Probtable  = Nil_Probtable  -- remove beyond end of list
+removeList_Probtable 0 (Cons_Probtable cx cxs) = cxs
+removeList_Probtable n (Cons_Probtable cx cxs) = Cons_Probtable cx (removeList_Probtable (n-1) cxs)
 
 toList_Section vs = List_Section (toConsList_Section vs)
 
@@ -491,7 +553,7 @@ type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserT
 instance Doc Document where
   initialDoc = initialDocument
   toXML = toXMLDocument
-  parseXML = parseXML_Document
+  parseXML = parseXML_Document <* pCharSpaces
 
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2

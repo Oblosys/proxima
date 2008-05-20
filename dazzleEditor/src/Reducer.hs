@@ -15,10 +15,11 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
   reductionSheetSimplest HoleEnrichedDoc           = HoleDocument
   reductionSheetSimplest (ParseErrEnrichedDoc prs) = ParseErrDocument prs
 
-reduceRoot (Root graph title sections) =
+reduceRoot (Root graph probtables title sections) =
   let subgraphs = getSubgraphsSections sections
       (graph', subgraphs') = resolveSubgraphs graph subgraphs
-  in  Root graph' title (replaceSubgraphsSectionList subgraphs' sections)
+      probtables' = updateProbtablesList (mkProbtableMap (getProbtablesSectionList sections)) probtables
+  in  Root graph' probtables' title (replaceSubgraphsSectionList subgraphs' sections)
 reduceRoot r = r
 
 
@@ -44,7 +45,7 @@ getSubgraphsSubsubsections subsubsections = concatMap getSubsubgraphsSubsection 
 
 getSubgraphsParas [] = []
 getSubgraphsParas (SubgraphPara sg:paras) = sg:getSubgraphsParas paras 
-getSubgraphsParas (Paragraph _:paras)     = getSubgraphsParas paras 
+getSubgraphsParas (_:paras)               = getSubgraphsParas paras 
 
 replaceSubgraphsSectionList sgs sections = 
   let (sections', sgs') = replaceSubgraphsSections sgs $ fromList_Section sections
@@ -83,9 +84,9 @@ replaceSubgraphsSubsubsections sgs (Subsubsection title paras : subsubsections) 
 replaceSubgraphsParas sgs [] = ([], sgs)
 replaceSubgraphsParas (sg:sgs) (SubgraphPara _ :paras) = let (paras',sgs')= replaceSubgraphsParas sgs paras
                                                          in  (SubgraphPara sg : paras', sgs') 
-replaceSubgraphsParas sgs (para@(Paragraph _):paras)     = let (paras',sgs')= replaceSubgraphsParas sgs paras
-                                                             in  (para : paras', sgs')
-replaceSubgraphsParas [] (para:paras)                      = 
+replaceSubgraphsParas sgs      (para:paras)            = let (paras',sgs')= replaceSubgraphsParas sgs paras
+                                                         in  (para : paras', sgs')
+replaceSubgraphsParas [] (para:paras)                  = 
    debug Err "Reducer.replaceSubgraphSectionList: too few subgraphs" $
      (para: paras, []) -- internal error: no more subgraphs, so stop replacing
      
@@ -145,3 +146,36 @@ getTo_Edge (Edge _ toV) = toV
 
 getID_Vertex (Vertex _ _ id _ _) = id
 
+
+
+
+--- Probtables
+
+getProbtablesSectionList :: List_Section -> [Probtable]
+getProbtablesSectionList sections = 
+  getProbtablesSections $ fromList_Section sections
+
+getProbtablesSections []                                           = []
+getProbtablesSections (Section title paras subsections : sections) = 
+  getProbtablesParas (fromList_Paragraph paras) ++
+  getProbtablesSections sections     
+
+getProbtablesParas []                              = []
+getProbtablesParas (ProbtablePara probtable:paras) = probtable : getProbtablesParas paras
+getProbtablesParas (para:paras)                    = getProbtablesParas paras
+
+-- update probtables in the second list with information from the first
+updateProbtablesList :: ProbtableMap -> List_Probtable -> List_Probtable
+updateProbtablesList probtableMap = toList_Probtable . map (updateProbtable probtableMap) . fromList_Probtable
+
+updateProbtable :: ProbtableMap -> Probtable -> Probtable
+updateProbtable probtableMap probtable@(Probtable id prob) = 
+  case lookup id probtableMap of
+    Just probtable' -> probtable'
+    Nothing        -> probtable
+
+mkProbtableMap :: [Probtable] -> ProbtableMap
+mkProbtableMap probtables = map probtableMapEntry probtables
+ where probtableMapEntry probtable@(Probtable id _) = (id,probtable)
+
+type ProbtableMap = [(Int, Probtable)]

@@ -11,7 +11,8 @@ data UserToken = KeyTk String
                | WordTk 
                | NodeRefTk
                | LabelTk
-               | LabelRefTk deriving (Show, Eq, Ord)
+               | LabelRefTk
+               | IntTk deriving (Show, Eq, Ord)
 
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
@@ -30,7 +31,7 @@ data Document = RootDoc Root
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving Show
 
-data Root = Root Graph String List_Section
+data Root = Root Graph List_Probtable String List_Section
           | HoleRoot
           | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
               deriving Show
@@ -52,6 +53,7 @@ data Subsubsection = Subsubsection String List_Paragraph
 
 data Paragraph = Paragraph List_Word
                | SubgraphPara Subgraph
+               | ProbtablePara Probtable
                | HoleParagraph
                | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
                    deriving Show
@@ -96,6 +98,21 @@ data Dirty = Dirty
            | ParseErrDirty (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
+data Probtable = Probtable Int Probability
+               | HoleProbtable
+               | ParseErrProbtable (ParseError Document Node ClipDoc UserToken)
+                   deriving Show
+
+data Probability = Probability String
+                 | HoleProbability
+                 | ParseErrProbability (ParseError Document Node ClipDoc UserToken)
+                     deriving Show
+
+data List_Probtable = List_Probtable ConsList_Probtable
+                    | HoleList_Probtable
+                    | ParseErrList_Probtable (ParseError Document Node ClipDoc UserToken)
+                        deriving Show
+
 data List_Section = List_Section ConsList_Section
                   | HoleList_Section
                   | ParseErrList_Section (ParseError Document Node ClipDoc UserToken)
@@ -130,6 +147,10 @@ data List_Edge = List_Edge ConsList_Edge
                | HoleList_Edge
                | ParseErrList_Edge (ParseError Document Node ClipDoc UserToken)
                    deriving Show
+
+data ConsList_Probtable = Cons_Probtable Probtable ConsList_Probtable
+                        | Nil_Probtable
+                            deriving Show
 
 data ConsList_Section = Cons_Section Section ConsList_Section
                       | Nil_Section
@@ -180,6 +201,9 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Edge Edge
              | Clip_Subgraph Subgraph
              | Clip_Dirty Dirty
+             | Clip_Probtable Probtable
+             | Clip_Probability Probability
+             | Clip_List_Probtable List_Probtable
              | Clip_List_Section List_Section
              | Clip_List_Paragraph List_Paragraph
              | Clip_List_Subsection List_Subsection
@@ -220,6 +244,7 @@ data Node = NoNode
           | Node_ParseErrSubsubsection Subsubsection Path
           | Node_Paragraph Paragraph Path
           | Node_SubgraphPara Paragraph Path
+          | Node_ProbtablePara Paragraph Path
           | Node_HoleParagraph Paragraph Path
           | Node_ParseErrParagraph Paragraph Path
           | Node_Word Word Path
@@ -248,6 +273,15 @@ data Node = NoNode
           | Node_Clean Dirty Path
           | Node_HoleDirty Dirty Path
           | Node_ParseErrDirty Dirty Path
+          | Node_Probtable Probtable Path
+          | Node_HoleProbtable Probtable Path
+          | Node_ParseErrProbtable Probtable Path
+          | Node_Probability Probability Path
+          | Node_HoleProbability Probability Path
+          | Node_ParseErrProbability Probability Path
+          | Node_List_Probtable List_Probtable Path
+          | Node_HoleList_Probtable List_Probtable Path
+          | Node_ParseErrList_Probtable List_Probtable Path
           | Node_List_Section List_Section Path
           | Node_HoleList_Section List_Section Path
           | Node_ParseErrList_Section List_Section Path
@@ -298,6 +332,7 @@ instance Show Node where
   show (Node_ParseErrSubsubsection _ _) = "Node_ParseErrSubsubsection" 
   show (Node_Paragraph _ _) = "Node_Paragraph" 
   show (Node_SubgraphPara _ _) = "Node_SubgraphPara" 
+  show (Node_ProbtablePara _ _) = "Node_ProbtablePara" 
   show (Node_HoleParagraph _ _) = "Node_HoleParagraph" 
   show (Node_ParseErrParagraph _ _) = "Node_ParseErrParagraph" 
   show (Node_Word _ _) = "Node_Word" 
@@ -326,6 +361,15 @@ instance Show Node where
   show (Node_Clean _ _) = "Node_Clean" 
   show (Node_HoleDirty _ _) = "Node_HoleDirty" 
   show (Node_ParseErrDirty _ _) = "Node_ParseErrDirty" 
+  show (Node_Probtable _ _) = "Node_Probtable" 
+  show (Node_HoleProbtable _ _) = "Node_HoleProbtable" 
+  show (Node_ParseErrProbtable _ _) = "Node_ParseErrProbtable" 
+  show (Node_Probability _ _) = "Node_Probability" 
+  show (Node_HoleProbability _ _) = "Node_HoleProbability" 
+  show (Node_ParseErrProbability _ _) = "Node_ParseErrProbability" 
+  show (Node_List_Probtable _ _) = "Node_List_Probtable" 
+  show (Node_HoleList_Probtable _ _) = "Node_HoleList_Probtable" 
+  show (Node_ParseErrList_Probtable _ _) = "Node_ParseErrList_Probtable" 
   show (Node_List_Section _ _) = "Node_List_Section" 
   show (Node_HoleList_Section _ _) = "Node_HoleList_Section" 
   show (Node_ParseErrList_Section _ _) = "Node_ParseErrList_Section" 

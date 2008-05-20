@@ -30,6 +30,9 @@ instance Clip ClipDoc where
   arityClip (Clip_Edge x) = arity x
   arityClip (Clip_Subgraph x) = arity x
   arityClip (Clip_Dirty x) = arity x
+  arityClip (Clip_Probtable x) = arity x
+  arityClip (Clip_Probability x) = arity x
+  arityClip (Clip_List_Probtable x) = arity x
   arityClip (Clip_List_Section x) = arity x
   arityClip (Clip_List_Paragraph x) = arity x
   arityClip (Clip_List_Subsection x) = arity x
@@ -57,6 +60,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Edge x) = alternatives x
   alternativesClip (Clip_Subgraph x) = alternatives x
   alternativesClip (Clip_Dirty x) = alternatives x
+  alternativesClip (Clip_Probtable x) = alternatives x
+  alternativesClip (Clip_Probability x) = alternatives x
+  alternativesClip (Clip_List_Probtable x) = alternatives x
   alternativesClip (Clip_List_Section x) = alternatives x
   alternativesClip (Clip_List_Paragraph x) = alternatives x
   alternativesClip (Clip_List_Subsection x) = alternatives x
@@ -84,6 +90,9 @@ instance Clip ClipDoc where
   holeClip (Clip_Edge x) = Clip_Edge hole
   holeClip (Clip_Subgraph x) = Clip_Subgraph hole
   holeClip (Clip_Dirty x) = Clip_Dirty hole
+  holeClip (Clip_Probtable x) = Clip_Probtable hole
+  holeClip (Clip_Probability x) = Clip_Probability hole
+  holeClip (Clip_List_Probtable x) = Clip_List_Probtable hole
   holeClip (Clip_List_Section x) = Clip_List_Section hole
   holeClip (Clip_List_Paragraph x) = Clip_List_Paragraph hole
   holeClip (Clip_List_Subsection x) = Clip_List_Subsection hole
@@ -111,6 +120,9 @@ instance Clip ClipDoc where
   isListClip (Clip_Edge x) = isList x
   isListClip (Clip_Subgraph x) = isList x
   isListClip (Clip_Dirty x) = isList x
+  isListClip (Clip_Probtable x) = isList x
+  isListClip (Clip_Probability x) = isList x
+  isListClip (Clip_List_Probtable x) = isList x
   isListClip (Clip_List_Section x) = isList x
   isListClip (Clip_List_Paragraph x) = isList x
   isListClip (Clip_List_Subsection x) = isList x
@@ -138,6 +150,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Edge x) = insertList i c x
   insertListClip i c (Clip_Subgraph x) = insertList i c x
   insertListClip i c (Clip_Dirty x) = insertList i c x
+  insertListClip i c (Clip_Probtable x) = insertList i c x
+  insertListClip i c (Clip_Probability x) = insertList i c x
+  insertListClip i c (Clip_List_Probtable x) = insertList i c x
   insertListClip i c (Clip_List_Section x) = insertList i c x
   insertListClip i c (Clip_List_Paragraph x) = insertList i c x
   insertListClip i c (Clip_List_Subsection x) = insertList i c x
@@ -165,6 +180,9 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Edge x) = removeList i x
   removeListClip i (Clip_Subgraph x) = removeList i x
   removeListClip i (Clip_Dirty x) = removeList i x
+  removeListClip i (Clip_Probtable x) = removeList i x
+  removeListClip i (Clip_Probability x) = removeList i x
+  removeListClip i (Clip_List_Probtable x) = removeList i x
   removeListClip i (Clip_List_Section x) = removeList i x
   removeListClip i (Clip_List_Paragraph x) = removeList i x
   removeListClip i (Clip_List_Subsection x) = removeList i x
@@ -250,23 +268,25 @@ instance Editable Document Document Node ClipDoc UserToken where
 
 instance Editable Root Document Node ClipDoc UserToken where
   select [] x = Clip_Root x
-  select (0:p) (Root x0 x1 x2) = select p x0
-  select (1:p) (Root x0 x1 x2) = select p x1
-  select (2:p) (Root x0 x1 x2) = select p x2
+  select (0:p) (Root x0 x1 x2 x3) = select p x0
+  select (1:p) (Root x0 x1 x2 x3) = select p x1
+  select (2:p) (Root x0 x1 x2 x3) = select p x2
+  select (3:p) (Root x0 x1 x2 x3) = select p x3
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Root c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Root") x
-  paste (0:p) c (Root x0 x1 x2) = Root (paste p c x0) x1 x2
-  paste (1:p) c (Root x0 x1 x2) = Root x0 (paste p c x1) x2
-  paste (2:p) c (Root x0 x1 x2) = Root x0 x1 (paste p c x2)
+  paste (0:p) c (Root x0 x1 x2 x3) = Root (paste p c x0) x1 x2 x3
+  paste (1:p) c (Root x0 x1 x2 x3) = Root x0 (paste p c x1) x2 x3
+  paste (2:p) c (Root x0 x1 x2 x3) = Root x0 x1 (paste p c x2) x3
+  paste (3:p) c (Root x0 x1 x2 x3) = Root x0 x1 x2 (paste p c x3)
   paste _ _ x = x
 
-  alternatives _ = [ ("Root {Graph} {String} {List_Section} "  , Clip_Root $ Root hole hole hole)
+  alternatives _ = [ ("Root {Graph} {List_Probtable} {String} {List_Section} "  , Clip_Root $ Root hole hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root x0 x1 x2) = 3
+  arity (Root x0 x1 x2 x3) = 4
   arity _                        = 0
 
   toClip t = Clip_Root t
@@ -394,21 +414,25 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
   select [] x = Clip_Paragraph x
   select (0:p) (Paragraph x0) = select p x0
   select (0:p) (SubgraphPara x0) = select p x0
+  select (0:p) (ProbtablePara x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Paragraph c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Paragraph") x
   paste (0:p) c (Paragraph x0) = Paragraph (paste p c x0)
   paste (0:p) c (SubgraphPara x0) = SubgraphPara (paste p c x0)
+  paste (0:p) c (ProbtablePara x0) = ProbtablePara (paste p c x0)
   paste _ _ x = x
 
   alternatives _ = [ ("Paragraph {List_Word} "  , Clip_Paragraph $ Paragraph hole)
                    , ("SubgraphPara {Subgraph} "  , Clip_Paragraph $ SubgraphPara hole)
+                   , ("ProbtablePara {Probtable} "  , Clip_Paragraph $ ProbtablePara hole)
                    ,("{Paragraph}", Clip_Paragraph hole)
                    ]
 
   arity (Paragraph x0) = 1
   arity (SubgraphPara x0) = 1
+  arity (ProbtablePara x0) = 1
   arity _                        = 0
 
   toClip t = Clip_Paragraph t
@@ -679,6 +703,118 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   isList _ = False
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
+
+instance Editable Probtable Document Node ClipDoc UserToken where
+  select [] x = Clip_Probtable x
+  select (0:p) (Probtable x0 x1) = select p x0
+  select (1:p) (Probtable x0 x1) = select p x1
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Probtable c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Probtable") x
+  paste (0:p) c (Probtable x0 x1) = Probtable (paste p c x0) x1
+  paste (1:p) c (Probtable x0 x1) = Probtable x0 (paste p c x1)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Probtable {Int} {Probability} "  , Clip_Probtable $ Probtable hole hole)
+                   ,("{Probtable}", Clip_Probtable hole)
+                   ]
+
+  arity (Probtable x0 x1) = 2
+  arity _                        = 0
+
+  toClip t = Clip_Probtable t
+
+  fromClip (Clip_Probtable t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrProbtable
+
+  hole = HoleProbtable
+
+  holeNodeConstr = Node_HoleProbtable
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Probability Document Node ClipDoc UserToken where
+  select [] x = Clip_Probability x
+  select (0:p) (Probability x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Probability c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Probability") x
+  paste (0:p) c (Probability x0) = Probability (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Probability {String} "  , Clip_Probability $ Probability hole)
+                   ,("{Probability}", Clip_Probability hole)
+                   ]
+
+  arity (Probability x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_Probability t
+
+  fromClip (Clip_Probability t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrProbability
+
+  hole = HoleProbability
+
+  holeNodeConstr = Node_HoleProbability
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable List_Probtable Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Probtable x
+  select (n:p) (List_Probtable cxs) =
+    let xs = fromConsList_Probtable cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Probtable c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Probtable")   x
+  paste (n:p) c (List_Probtable cxs) =
+    let xs = fromConsList_Probtable cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Probtable (replaceList_Probtable n x' cxs)
+        else List_Probtable cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Probtable}", Clip_List_Probtable hole)
+                   ]
+
+  arity (List_Probtable x1) = length (fromConsList_Probtable x1)
+  arity _ = 0
+
+  toClip t = Clip_List_Probtable t
+
+  fromClip (Clip_List_Probtable t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_Probtable
+
+  hole = List_Probtable Nil_Probtable
+
+  holeNodeConstr = Node_HoleList_Probtable
+
+  isList _ = True
+
+  insertList n (Clip_Probtable c) (List_Probtable cxs) = Clip_List_Probtable $ List_Probtable (insertList_Probtable n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Probtable xs
+  insertList _ c xs = Clip_List_Probtable xs
+
+  removeList n (List_Probtable cxs) = Clip_List_Probtable $ List_Probtable (removeList_Probtable n cxs)
+  removeList _ xs = Clip_List_Probtable $ xs
 
 instance Editable List_Section Document Node ClipDoc UserToken where
   select [] x = Clip_List_Section x

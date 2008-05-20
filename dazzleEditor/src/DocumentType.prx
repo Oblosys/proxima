@@ -1,6 +1,6 @@
 data Document = RootDoc root:Root
 
-data Root = Root graph:Graph title:String sections:[Section]
+data Root = Root graph:Graph probtables:[Probtable] title:String sections:[Section]
 
 data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection]
 
@@ -10,6 +10,7 @@ data Subsubsection = Subsubsection title:String paragraphs:[Paragraph]
 
 data Paragraph = Paragraph words:[Word]
                | SubgraphPara subgraph:Subgraph
+               | ProbtablePara probtable:Probtable
                
 data Word = Word word:String
           | NodeRef nodeName:String
@@ -28,3 +29,7 @@ data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge]
             
 data Dirty = Dirty
            | Clean
+
+data Probtable = Probtable id:Int probability:Probability
+
+data Probability = Probability prob:String

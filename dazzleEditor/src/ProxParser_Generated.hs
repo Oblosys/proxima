@@ -38,6 +38,7 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_ParseErrSubsubsection _ _) = construct_ParseErrSubsubsection
   construct (Node_Paragraph _ _) = construct_Paragraph
   construct (Node_SubgraphPara _ _) = construct_SubgraphPara
+  construct (Node_ProbtablePara _ _) = construct_ProbtablePara
   construct (Node_HoleParagraph _ _) = construct_HoleParagraph
   construct (Node_ParseErrParagraph _ _) = construct_ParseErrParagraph
   construct (Node_Word _ _) = construct_Word
@@ -66,6 +67,15 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Clean _ _) = construct_Clean
   construct (Node_HoleDirty _ _) = construct_HoleDirty
   construct (Node_ParseErrDirty _ _) = construct_ParseErrDirty
+  construct (Node_Probtable _ _) = construct_Probtable
+  construct (Node_HoleProbtable _ _) = construct_HoleProbtable
+  construct (Node_ParseErrProbtable _ _) = construct_ParseErrProbtable
+  construct (Node_Probability _ _) = construct_Probability
+  construct (Node_HoleProbability _ _) = construct_HoleProbability
+  construct (Node_ParseErrProbability _ _) = construct_ParseErrProbability
+  construct (Node_List_Probtable _ _) = construct_List_Probtable
+  construct (Node_HoleList_Probtable _ _) = construct_HoleList_Probtable
+  construct (Node_ParseErrList_Probtable _ _) = construct_ParseErrList_Probtable
   construct (Node_List_Section _ _) = construct_List_Section
   construct (Node_HoleList_Section _ _) = construct_HoleList_Section
   construct (Node_ParseErrList_Section _ _) = construct_ParseErrList_Section
@@ -93,7 +103,7 @@ construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc
 construct_RootDoc tk ~[mClip0] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "root::Root" mClip0)
 construct_HoleDocument tk ~[] = Clip_Document $ hole
 construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
-construct_Root tk ~[mClip0,mClip1,mClip2] = Clip_Root $ reuseRoot [tk]  (retrieveArg "Root" "graph::Graph" mClip0) (retrieveArg "Root" "title::String" mClip1) (retrieveArg "Root" "sections::List_Section" mClip2)
+construct_Root tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Root $ reuseRoot [tk]  (retrieveArg "Root" "graph::Graph" mClip0) (retrieveArg "Root" "probtables::List_Probtable" mClip1) (retrieveArg "Root" "title::String" mClip2) (retrieveArg "Root" "sections::List_Section" mClip3)
 construct_HoleRoot tk ~[] = Clip_Root $ hole
 construct_ParseErrRoot (StructuralTk _ _ pres _ _) ~[] = Clip_Root $ parseErr (StructuralParseErr pres)
 construct_Section tk ~[mClip0,mClip1,mClip2] = Clip_Section $ reuseSection [tk]  (retrieveArg "Section" "title::String" mClip0) (retrieveArg "Section" "paragraphs::List_Paragraph" mClip1) (retrieveArg "Section" "subsections::List_Subsection" mClip2)
@@ -107,6 +117,7 @@ construct_HoleSubsubsection tk ~[] = Clip_Subsubsection $ hole
 construct_ParseErrSubsubsection (StructuralTk _ _ pres _ _) ~[] = Clip_Subsubsection $ parseErr (StructuralParseErr pres)
 construct_Paragraph tk ~[mClip0] = Clip_Paragraph $ reuseParagraph [tk]  (retrieveArg "Paragraph" "words::List_Word" mClip0)
 construct_SubgraphPara tk ~[mClip0] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0)
+construct_ProbtablePara tk ~[mClip0] = Clip_Paragraph $ reuseProbtablePara [tk]  (retrieveArg "ProbtablePara" "probtable::Probtable" mClip0)
 construct_HoleParagraph tk ~[] = Clip_Paragraph $ hole
 construct_ParseErrParagraph (StructuralTk _ _ pres _ _) ~[] = Clip_Paragraph $ parseErr (StructuralParseErr pres)
 construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  (retrieveArg "Word" "word::String" mClip0)
@@ -135,6 +146,15 @@ construct_Dirty tk ~[] = Clip_Dirty $ reuseDirty [tk]
 construct_Clean tk ~[] = Clip_Dirty $ reuseClean [tk] 
 construct_HoleDirty tk ~[] = Clip_Dirty $ hole
 construct_ParseErrDirty (StructuralTk _ _ pres _ _) ~[] = Clip_Dirty $ parseErr (StructuralParseErr pres)
+construct_Probtable tk ~[mClip0,mClip1] = Clip_Probtable $ reuseProbtable [tk]  (retrieveArg "Probtable" "id::Int" mClip0) (retrieveArg "Probtable" "probability::Probability" mClip1)
+construct_HoleProbtable tk ~[] = Clip_Probtable $ hole
+construct_ParseErrProbtable (StructuralTk _ _ pres _ _) ~[] = Clip_Probtable $ parseErr (StructuralParseErr pres)
+construct_Probability tk ~[mClip0] = Clip_Probability $ reuseProbability [tk]  (retrieveArg "Probability" "prob::String" mClip0)
+construct_HoleProbability tk ~[] = Clip_Probability $ hole
+construct_ParseErrProbability (StructuralTk _ _ pres _ _) ~[] = Clip_Probability $ parseErr (StructuralParseErr pres)
+construct_List_Probtable tk mClips = genericConstruct_List "Probtable" toList_Probtable mClips
+construct_HoleList_Probtable tk ~[] = Clip_List_Probtable $ hole
+construct_ParseErrList_Probtable (StructuralTk _ _ pres _ _) ~[] = Clip_List_Probtable $ parseErr (StructuralParseErr pres)
 construct_List_Section tk mClips = genericConstruct_List "Section" toList_Section mClips
 construct_HoleList_Section tk ~[] = Clip_List_Section $ hole
 construct_ParseErrList_Section (StructuralTk _ _ pres _ _) ~[] = Clip_List_Section $ parseErr (StructuralParseErr pres)
@@ -175,10 +195,10 @@ reuseRootDoc nodes ma0
            (RootDoc a0) -> genericReuse1 RootDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
 
-reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe List_Section -> Root
-reuseRoot nodes ma0 ma1 ma2
+reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe List_Probtable -> Maybe String -> Maybe List_Section -> Root
+reuseRoot nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractRoot defaultRoot nodes of
-           (Root a0 a1 a2) -> genericReuse3 Root a0 a1 a2 ma0 ma1 ma2
+           (Root a0 a1 a2 a3) -> genericReuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
 reuseSection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
@@ -210,6 +230,12 @@ reuseSubgraphPara nodes ma0
   = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
            (SubgraphPara a0) -> genericReuse1 SubgraphPara a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseSubgraphPara"
+
+reuseProbtablePara :: [Token doc Node clip token] -> Maybe Probtable -> Paragraph
+reuseProbtablePara nodes ma0
+  = case extractFromTokens extractProbtablePara defaultProbtablePara nodes of
+           (ProbtablePara a0) -> genericReuse1 ProbtablePara a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseProbtablePara"
 
 reuseWord :: [Token doc Node clip token] -> Maybe String -> Word
 reuseWord nodes ma0
@@ -283,6 +309,24 @@ reuseClean nodes
            (Clean) -> genericReuse0 Clean
            _ -> error "Internal error:ProxParser_Generated.reuseClean"
 
+reuseProbtable :: [Token doc Node clip token] -> Maybe Int -> Maybe Probability -> Probtable
+reuseProbtable nodes ma0 ma1
+  = case extractFromTokens extractProbtable defaultProbtable nodes of
+           (Probtable a0 a1) -> genericReuse2 Probtable a0 a1 ma0 ma1
+           _ -> error "Internal error:ProxParser_Generated.reuseProbtable"
+
+reuseProbability :: [Token doc Node clip token] -> Maybe String -> Probability
+reuseProbability nodes ma0
+  = case extractFromTokens extractProbability defaultProbability nodes of
+           (Probability a0) -> genericReuse1 Probability a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseProbability"
+
+reuseList_Probtable :: [Token doc Node clip token] -> Maybe ConsList_Probtable -> List_Probtable
+reuseList_Probtable nodes ma0
+  = case extractFromTokens extractList_Probtable defaultList_Probtable nodes of
+           (List_Probtable a0) -> genericReuse1 List_Probtable a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Probtable"
+
 reuseList_Section :: [Token doc Node clip token] -> Maybe ConsList_Section -> List_Section
 reuseList_Section nodes ma0
   = case extractFromTokens extractList_Section defaultList_Section nodes of
@@ -341,7 +385,7 @@ extractRootDoc (Just (Node_RootDoc x@(RootDoc _) _)) = Just x
 extractRootDoc _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (Node_Root x@(Root _ _ _) _)) = Just x
+extractRoot (Just (Node_Root x@(Root _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractSection :: Maybe Node -> Maybe Section
@@ -363,6 +407,10 @@ extractParagraph _ = Nothing
 extractSubgraphPara :: Maybe Node -> Maybe Paragraph
 extractSubgraphPara (Just (Node_SubgraphPara x@(SubgraphPara _) _)) = Just x
 extractSubgraphPara _ = Nothing
+
+extractProbtablePara :: Maybe Node -> Maybe Paragraph
+extractProbtablePara (Just (Node_ProbtablePara x@(ProbtablePara _) _)) = Just x
+extractProbtablePara _ = Nothing
 
 extractWord :: Maybe Node -> Maybe Word
 extractWord (Just (Node_Word x@(Word _) _)) = Just x
@@ -412,6 +460,18 @@ extractClean :: Maybe Node -> Maybe Dirty
 extractClean (Just (Node_Clean x@(Clean) _)) = Just x
 extractClean _ = Nothing
 
+extractProbtable :: Maybe Node -> Maybe Probtable
+extractProbtable (Just (Node_Probtable x@(Probtable _ _) _)) = Just x
+extractProbtable _ = Nothing
+
+extractProbability :: Maybe Node -> Maybe Probability
+extractProbability (Just (Node_Probability x@(Probability _) _)) = Just x
+extractProbability _ = Nothing
+
+extractList_Probtable :: Maybe Node -> Maybe List_Probtable
+extractList_Probtable (Just (Node_List_Probtable x@(List_Probtable _) _)) = Just x
+extractList_Probtable _ = Nothing
+
 extractList_Section :: Maybe Node -> Maybe List_Section
 extractList_Section (Just (Node_List_Section x@(List_Section _) _)) = Just x
 extractList_Section _ = Nothing
@@ -454,7 +514,7 @@ defaultRootDoc :: Document
 defaultRootDoc = RootDoc hole
 
 defaultRoot :: Root
-defaultRoot = Root hole hole hole
+defaultRoot = Root hole hole hole hole
 
 defaultSection :: Section
 defaultSection = Section hole hole hole
@@ -470,6 +530,9 @@ defaultParagraph = Paragraph hole
 
 defaultSubgraphPara :: Paragraph
 defaultSubgraphPara = SubgraphPara hole
+
+defaultProbtablePara :: Paragraph
+defaultProbtablePara = ProbtablePara hole
 
 defaultWord :: Word
 defaultWord = Word hole
@@ -506,6 +569,15 @@ defaultDirty = Dirty
 
 defaultClean :: Dirty
 defaultClean = Clean
+
+defaultProbtable :: Probtable
+defaultProbtable = Probtable hole hole
+
+defaultProbability :: Probability
+defaultProbability = Probability hole
+
+defaultList_Probtable :: List_Probtable
+defaultList_Probtable = List_Probtable Nil_Probtable
 
 defaultList_Section :: List_Section
 defaultList_Section = List_Section Nil_Section
