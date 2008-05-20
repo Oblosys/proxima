@@ -119,7 +119,7 @@ genMisc = genBanner "Miscellaneous" $
   , "instance Doc Document where"
   , "  initialDoc = initialDocument"
   , "  toXML = toXMLDocument"
-  , "  parseXML = parseXML_Document"
+  , "  parseXML = parseXML_Document <* pCharSpaces"
   , ""
   , "instance Eq Node where"
   , "  nd1 == nd2 = rankNode nd1 == rankNode nd2"
