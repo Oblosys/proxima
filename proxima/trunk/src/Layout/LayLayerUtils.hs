@@ -14,8 +14,7 @@ castLayToPres :: Layout doc node clip token -> Presentation doc node clip token
 castLayToPres = cast
 
 castPresToLay :: Presentation doc node clip token -> Layout doc node clip token
-castPresToLay (TokenP _ _) = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
-castPresToLay pres         = cast pres
+castPresToLay = cast
 
 cast :: PresentationBase doc node clip token level -> PresentationBase doc node clip token level'
 cast (EmptyP id)                = EmptyP id
@@ -34,6 +33,8 @@ cast (LocatorP l pres)          = LocatorP l $ cast pres
 cast (GraphP id d w h es press) = GraphP id d w h es $ map cast press
 cast (VertexP id v x y o pres)  = VertexP id v x y o $ cast pres
 cast (FormatterP id press)      = FormatterP id $ map cast press
+cast (TokenP _ _)               = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
+
 
 stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars scs = 
