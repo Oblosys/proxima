@@ -129,8 +129,8 @@ head' caller xs = case xs of
 
 -- Constants for switching on incrementality, background coloring, etc.
 
-rendererIncrementality = False --True
-arrangerIncrementality = False --True
+rendererIncrementality = True
+arrangerIncrementality = False
 
 -- use a smaller rectangle as viewed area to see what happens outside it
 reducedViewedArea = False            
