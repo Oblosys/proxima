@@ -50,7 +50,19 @@ data Wrapped doc enr node clip token =
   | WrappedRenEdit'  (EditRendering' doc enr node clip token)
 
 
-instance Show (Wrapped doc enr node clip token) where
+instance (Show doc, Show enr, Show node, Show token) => Show (Wrapped doc enr node clip token) where
+  show (WrappedDocEdit e)  = "<Wrapped:"++show e++">"
+  show (WrappedEnrEdit e)  = "<Wrapped:"++show e++">"
+  show (WrappedPresEdit e) = "<Wrapped:"++show e++">"
+  show (WrappedLayEdit e)  = "<Wrapped:"++show e++">"
+  show (WrappedArrEdit e)  = "<Wrapped:"++show e++">"
+  show (WrappedRenEdit e)  = "<Wrapped:"++show e++">"
+  show (WrappedDocEdit' e)  = "<Wrapped:"++show e++">"
+  show (WrappedEnrEdit' e)  = "<Wrapped:"++show e++">"
+  show (WrappedPresEdit' e) = "<Wrapped:"++show e++">"
+  show (WrappedLayEdit' e)  = "<Wrapped:"++show e++">"
+  show (WrappedArrEdit' e)  = "<Wrapped:"++show e++">"
+  show (WrappedRenEdit' e)  = "<Wrapped:"++show e++">"
   show w = "<Wrapped>"
     
 class Wrapable editOp doc enr node clip token | editOp -> doc enr node clip token where

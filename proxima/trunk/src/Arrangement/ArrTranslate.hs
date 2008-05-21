@@ -19,7 +19,7 @@ translateIO state low high =  castRemainingEditOps $ \editLow ->
 
 
 
-unArrange :: (DocNode node, Show token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
+unArrange :: (Show doc, Show enr, Show token, Show node, DocNode node) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement doc enr node clip token ->
              (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 

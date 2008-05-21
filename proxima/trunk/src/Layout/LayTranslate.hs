@@ -13,7 +13,7 @@ import Proxima.Wrap
 import Evaluation.DocTypes
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: (DocNode node, Show token, Eq token) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> [EditLayout doc enr node clip token]
+translateIO :: (DocNode node, Eq token, Show doc, Show enr, Show token, Show node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> [EditLayout doc enr node clip token]
             -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
 translateIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
   do { (editsHigh, state', low') <- parseIO scannerSheet state low high editLow

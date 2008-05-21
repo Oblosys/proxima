@@ -8,14 +8,15 @@ import Evaluation.DocumentEdit
 
 import Proxima.Wrap
 
-presentIO :: (Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip) =>
+presentIO :: ( Doc doc, Clip clip, Editable doc doc node clip token, EvaluationSheet doc enr clip
+             , Show doc, Show enr, Show token, Show node ) =>
              LayerStateEval doc clip -> DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
              [EditDocument' doc enr node clip token] ->
              IO ([EditEnrichedDoc' doc enr node clip token], LayerStateEval doc clip, DocumentLevel doc clip)
 presentIO state high low = castRemainingEditOps $ \editHigh ->
   do { (editLow, state', high') <- eval state high low editHigh
      
-     --; debugLnIO Prs ("editDoc':"++show editHigh)
+     ; debugLnIO Prs ("editDoc':"++show editHigh)
      --; debugLnIO Prs ("editEnr':"++show editLow)
      ; return $ ([editLow], state', high')
      }
@@ -33,14 +34,14 @@ eval state docLvl@(DocumentLevel doc focusD clipD) enrLvl docEdit =
     SetDoc' docLvl  -> evaluationSheet (recordEditAction docLvl state) docLvl enrLvl docEdit docLvl
     EvaluateDoc' -> evaluationSheet state docLvl enrLvl docEdit docLvl
     WrapDoc' wrapped -> return (unwrap wrapped, state, docLvl)
-    _ -> debug Eva ("DocNavigate"++show focusD) $
-          do { let (doclvl', state') = editDoc state docLvl docEdit
-             ; evaluationSheet state' docLvl enrLvl docEdit doclvl'
-             }
+    _ -> do { let (doclvl', state') = editDoc state docLvl docEdit
+            ; evaluationSheet state' docLvl enrLvl docEdit doclvl'
+            }
 
 
 -- TODO: make sure that document is parsed before doing these:
-editDoc :: (Doc doc, Clip clip, Editable doc doc node clip token) =>
+editDoc :: ( Doc doc, Clip clip, Editable doc doc node clip token,
+             Show doc, Show enr, Show token, Show node ) =>
            LayerStateEval doc clip -> DocumentLevel doc clip -> EditDocument' doc enr node clip token ->
            (DocumentLevel doc clip, LayerStateEval doc clip)
 editDoc state (DocumentLevel doc pth clipD) (NavPathDoc' path) = ((DocumentLevel doc path clipD), state)
