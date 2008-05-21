@@ -20,6 +20,7 @@ import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
 
+import Reducer
 
 }
 
@@ -266,12 +267,14 @@ SEM Subgraph [||]
 
 SEM Probtable
   | Probtable
-      loc.pres = structural $ row [ text $ "Probtable for " ++
+      loc.pres = structural $ col [ row [ text $ "Probtable for " ++
                                            (case lookup @id (zip @lhs.vertexIDs @lhs.vertexNames) of
                                              Nothing -> "nothing"
                                              Just name -> name
-                                            ) ++" is: "
-                                  , @probability.pres
+                                            ) ++" with values "
+                                        , @values.pres
+                                        ]
+                                  , @table.pres
                                   ] `addPopupItems`
                                   [ ( "Show probtable for "++show name
                                     , setProbtableID @lhs.path id @self)
@@ -280,17 +283,81 @@ SEM Probtable
 
 {
 setProbtableID :: Path -> Int -> Probtable -> UpdateDoc Document clip
-setProbtableID pth id (Probtable _ prob) =
+setProbtableID pth id (Probtable _ vals probs) =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Probtable (Probtable id prob))
+                                              (Clip_Probtable (Probtable id vals probs))
                                             )
     in  (DocumentLevel d' path cl)
 }
+
+SEM List_Value
+  | List_Value
+     loc.pres = structural $ row $ [text "[" `addPopupItems` [ ("Insert value"
+                                                            , reduceDoc .
+                                                              insertElementAtHead newValue (@lhs.path)
+                                                            ) ]] ++
+                                intersperse (text ",") @elts.press ++
+                                [text "]"]
+                             
+SEM Value
+  | Value
+      loc.pres = parsing $ text @val
+                   `addPopupItems` [ ("Delete value", reduceDoc . deleteAtPath @lhs.path)
+                                   , ("Insert value after", reduceDoc . addElementAfter newValue @lhs.path) 
+                                   ]
+
+SEM Table
+  | Table
+      loc.pres = let axesStrings = [ [ str | Value str <- fromList_Value list_Val ]
+                                   | Axis list_Val <- fromList_Axis @axes.self
+                                   ]
+                     rows = products axesStrings
+                 in  structural $ boxed $ row $ ( intersperse vSep $ 
+                                        [ (col $ intersperse hSep $ map (hPad . text) cl)
+                                          `withVRef` 0
+                                        | cl <- transpose rows ] ) ++
+                                        [ endVSep
+                                        , (col $ intersperse hSep @probs.press) `withVRef` 0 ]
+                                        
+{
+-- withVRef is due to arranger bug
+hPad pres = row [ hSpace 4, pres, hSpace 4 ]
+hSep = colR 1 [ vSpace 2, hLine, vSpace 2]
+
+vSep = rowR 0 [ vLine ]
+
+endVSep = row [ vLine, vLine ]
+
+-- | return a list of all cartesian products for a list of lists
+--   e.g. products [[1,2],[3,4]] = [[1,3],[1,4],[2,3],[2,4]]
+products :: [[a]] -> [[a]]
+products [] = [[]]
+products (xs:xss) = [ x:prod | x <- xs, prod <- products xss]
+}                             
 SEM Probability
   | Probability 
-      loc.pres = parsing $ text @prob
-                             
+      loc.pres = parsing $ hPad $ text @prob
+
+-- not used
+SEM List_Axis
+  | List_Axis
+      loc.pres = structural $ row $ [ text "[" ] ++
+                                    intersperse (text ",") @elts.press ++
+                                    [ text "]" ]
+
+-- not used                             
+SEM Axis
+  | Axis
+      loc.pres = structural $ @values.pres
+
+-- not used                             
+SEM List_Probability
+  | List_Probability
+     loc.pres = structural $ col [ hLine
+                                 , row $ [vLine] ++ intersperse vLine @elts.press ++ [vLine]
+                                 , hLine
+                                 ]
       
 {-
 Graph synthesizes vertexIDNames and edges. At Root, vertexIDNames is unzipped, and inherited attributes
@@ -349,8 +416,10 @@ newSubgraphPara = Clip_Paragraph $
                         (toList_Edge []) 
 
 newProbtablePara = Clip_Paragraph $
-                     ProbtablePara (Probtable (-1) (Probability "1"))
-
+                     ProbtablePara $
+                       Probtable (-1) (toList_Value []) $
+                         Table (toList_Axis []) (toList_Probability [])
+                       
 newSection = Clip_Section $
                Section
                  "<new section>"
@@ -367,6 +436,8 @@ newSubsubsection = Clip_Subsubsection $
                     Subsubsection
                       "<new subsubsection>"
                       (List_Paragraph Nil_Paragraph) 
+
+newValue = Clip_Value $ Value "new"
 
 addSubgraphPara path = addElementAfter newSubgraphPara path
 

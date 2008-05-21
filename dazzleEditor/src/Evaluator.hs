@@ -17,7 +17,7 @@ instance EvaluationSheet Document EnrichedDoc ClipDoc where
 evaluateRoot (Root graph probtables title sections) =
   Root graph probtables title (setProbtablesSectionList probtableMap sections)
  where probtableMap = map probtableMapEntry (fromList_Probtable probtables)
-       probtableMapEntry probtable@(Probtable id _) = (id,probtable)
+       probtableMapEntry probtable@(Probtable id _ _) = (id,probtable)
 
 type ProbtableMap = [(Int, Probtable)]
 
@@ -34,10 +34,11 @@ setProbtablesSections probtableMap (Section title paras subsections : sections) 
 
 
 setProbtablesParas probtableMap [] = []
-setProbtablesParas probtableMap (ProbtablePara (Probtable id _):paras) = 
+setProbtablesParas probtableMap (ProbtablePara (Probtable id _ _):paras) = 
   let probtable' = case lookup id probtableMap of
                      Just probtable -> probtable
-                     Nothing        -> (Probtable id (Probability "Nothing"))
+                     Nothing        -> Probtable id (toList_Value []) $
+                                         Table (toList_Axis []) (toList_Probability [])
   in  ProbtablePara probtable' : setProbtablesParas probtableMap paras
 setProbtablesParas probtableMap (para:paras)                    = 
   para : setProbtablesParas probtableMap paras

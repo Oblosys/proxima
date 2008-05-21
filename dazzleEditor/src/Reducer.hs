@@ -1,4 +1,4 @@
-module Reducer (reductionSheet) where
+module Reducer (reductionSheet, reduceDoc) where
 
 import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.EvalLayerTypes
@@ -18,8 +18,10 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
 reduceRoot (Root graph probtables title sections) =
   let subgraphs = getSubgraphsSections sections
       (graph', subgraphs') = resolveSubgraphs graph subgraphs
-      probtables' = updateProbtablesList (mkProbtableMap (getProbtablesSectionList sections)) probtables
-  in  Root graph' probtables' title (replaceSubgraphsSectionList subgraphs' sections)
+      probtables' = updateProbtables (mkProbtableMap (getProbtablesSectionList sections)) probtables
+      probtables'' = syncProbtables graph probtables'
+  in  Root graph' (toList_Probtable probtables'') title 
+           (replaceSubgraphsSectionList subgraphs' sections)
 reduceRoot r = r
 
 
@@ -165,17 +167,62 @@ getProbtablesParas (ProbtablePara probtable:paras) = probtable : getProbtablesPa
 getProbtablesParas (para:paras)                    = getProbtablesParas paras
 
 -- update probtables in the second list with information from the first
-updateProbtablesList :: ProbtableMap -> List_Probtable -> List_Probtable
-updateProbtablesList probtableMap = toList_Probtable . map (updateProbtable probtableMap) . fromList_Probtable
+updateProbtables probtableMap = map (updateProbtable probtableMap) . fromList_Probtable
 
 updateProbtable :: ProbtableMap -> Probtable -> Probtable
-updateProbtable probtableMap probtable@(Probtable id prob) = 
+updateProbtable probtableMap probtable@(Probtable id _ _) = 
   case lookup id probtableMap of
     Just probtable' -> probtable'
     Nothing        -> probtable
 
+
+{-
+resize table probs to 
+-}
+syncProbtables :: Graph -> [Probtable] -> [Probtable]
+syncProbtables (Graph _ _ list_Edge) probtables = 
+  map syncProbtable probtables
+ where edges = [(f,t) | Edge f t <- fromList_Edge list_Edge ]
+       getIncomingIDs node = map fst (filter (\(f,t) -> t==node) edges)
+       syncProbtable (Probtable id list_Val (Table oldList_Axis oldList_Prob)) = 
+         let axes = map (getValues probtables) (id:getIncomingIDs id)
+             list_Axis = toList_Axis $ [ Axis list_Val | list_Val <- axes ]
+             nrsOfValues = getAxesNrsOfValues list_Axis
+             nrOfProbs = product nrsOfValues
+         in  Probtable id list_Val $
+               Table list_Axis $ -- always refresh, in case values changed
+                 if nrsOfValues == getAxesNrsOfValues oldList_Axis
+                 then oldList_Prob
+                 else toList_Probability $ replicate nrOfProbs (Probability "0")
+         --(toList_Probability $ take (arity id) $ 
+         --      probs ++ repeat (Probability "dummy"))
+
+getAxesNrsOfValues :: List_Axis -> [Int]
+getAxesNrsOfValues list_Axis = [ length $ fromList_Value list_Val
+                               | Axis list_Val <- fromList_Axis list_Axis
+                               ]
+
+getValues :: [Probtable] -> Int -> List_Value
+getValues probtables id = 
+  case lookupProbtable id probtables of
+    Nothing -> toList_Value [Value "Err"]
+    Just (Probtable _ list_Val _) -> list_Val
+
+lookupProbtable _  [] = Nothing
+lookupProbtable id (probtable@(Probtable id' list_Val table):probtables) =
+  if id==id' then Just probtable else lookupProbtable id probtables
+
 mkProbtableMap :: [Probtable] -> ProbtableMap
 mkProbtableMap probtables = map probtableMapEntry probtables
- where probtableMapEntry probtable@(Probtable id _) = (id,probtable)
+ where probtableMapEntry probtable@(Probtable id _ _) = (id,probtable)
 
 type ProbtableMap = [(Int, Probtable)]
+
+
+
+
+---
+
+reduceDoc :: DocumentLevel Document ClipDoc -> DocumentLevel Document ClipDoc
+reduceDoc (DocumentLevel (RootDoc root) focus clip) = 
+  DocumentLevel (RootDoc (reduceRoot root)) focus clip

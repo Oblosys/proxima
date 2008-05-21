@@ -8,6 +8,8 @@ import Evaluation.DocumentEdit
 import Evaluation.DocUtils
 import Presentation.PresTypes hiding (Edge)
 
+instance Editable [Int] Document Node ClipDoc UserToken where
+
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -31,6 +33,9 @@ instance Clip ClipDoc where
   arityClip (Clip_Subgraph x) = arity x
   arityClip (Clip_Dirty x) = arity x
   arityClip (Clip_Probtable x) = arity x
+  arityClip (Clip_Value x) = arity x
+  arityClip (Clip_Table x) = arity x
+  arityClip (Clip_Axis x) = arity x
   arityClip (Clip_Probability x) = arity x
   arityClip (Clip_List_Probtable x) = arity x
   arityClip (Clip_List_Section x) = arity x
@@ -40,6 +45,9 @@ instance Clip ClipDoc where
   arityClip (Clip_List_Word x) = arity x
   arityClip (Clip_List_Vertex x) = arity x
   arityClip (Clip_List_Edge x) = arity x
+  arityClip (Clip_List_Value x) = arity x
+  arityClip (Clip_List_Axis x) = arity x
+  arityClip (Clip_List_Probability x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
   arityClip (Clip_String x) = arity x
@@ -61,6 +69,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Subgraph x) = alternatives x
   alternativesClip (Clip_Dirty x) = alternatives x
   alternativesClip (Clip_Probtable x) = alternatives x
+  alternativesClip (Clip_Value x) = alternatives x
+  alternativesClip (Clip_Table x) = alternatives x
+  alternativesClip (Clip_Axis x) = alternatives x
   alternativesClip (Clip_Probability x) = alternatives x
   alternativesClip (Clip_List_Probtable x) = alternatives x
   alternativesClip (Clip_List_Section x) = alternatives x
@@ -70,6 +81,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_List_Word x) = alternatives x
   alternativesClip (Clip_List_Vertex x) = alternatives x
   alternativesClip (Clip_List_Edge x) = alternatives x
+  alternativesClip (Clip_List_Value x) = alternatives x
+  alternativesClip (Clip_List_Axis x) = alternatives x
+  alternativesClip (Clip_List_Probability x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
@@ -91,6 +105,9 @@ instance Clip ClipDoc where
   holeClip (Clip_Subgraph x) = Clip_Subgraph hole
   holeClip (Clip_Dirty x) = Clip_Dirty hole
   holeClip (Clip_Probtable x) = Clip_Probtable hole
+  holeClip (Clip_Value x) = Clip_Value hole
+  holeClip (Clip_Table x) = Clip_Table hole
+  holeClip (Clip_Axis x) = Clip_Axis hole
   holeClip (Clip_Probability x) = Clip_Probability hole
   holeClip (Clip_List_Probtable x) = Clip_List_Probtable hole
   holeClip (Clip_List_Section x) = Clip_List_Section hole
@@ -100,6 +117,9 @@ instance Clip ClipDoc where
   holeClip (Clip_List_Word x) = Clip_List_Word hole
   holeClip (Clip_List_Vertex x) = Clip_List_Vertex hole
   holeClip (Clip_List_Edge x) = Clip_List_Edge hole
+  holeClip (Clip_List_Value x) = Clip_List_Value hole
+  holeClip (Clip_List_Axis x) = Clip_List_Axis hole
+  holeClip (Clip_List_Probability x) = Clip_List_Probability hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_String x) = Clip_String hole
@@ -121,6 +141,9 @@ instance Clip ClipDoc where
   isListClip (Clip_Subgraph x) = isList x
   isListClip (Clip_Dirty x) = isList x
   isListClip (Clip_Probtable x) = isList x
+  isListClip (Clip_Value x) = isList x
+  isListClip (Clip_Table x) = isList x
+  isListClip (Clip_Axis x) = isList x
   isListClip (Clip_Probability x) = isList x
   isListClip (Clip_List_Probtable x) = isList x
   isListClip (Clip_List_Section x) = isList x
@@ -130,6 +153,9 @@ instance Clip ClipDoc where
   isListClip (Clip_List_Word x) = isList x
   isListClip (Clip_List_Vertex x) = isList x
   isListClip (Clip_List_Edge x) = isList x
+  isListClip (Clip_List_Value x) = isList x
+  isListClip (Clip_List_Axis x) = isList x
+  isListClip (Clip_List_Probability x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
   isListClip (Clip_String x) = isList x
@@ -151,6 +177,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Subgraph x) = insertList i c x
   insertListClip i c (Clip_Dirty x) = insertList i c x
   insertListClip i c (Clip_Probtable x) = insertList i c x
+  insertListClip i c (Clip_Value x) = insertList i c x
+  insertListClip i c (Clip_Table x) = insertList i c x
+  insertListClip i c (Clip_Axis x) = insertList i c x
   insertListClip i c (Clip_Probability x) = insertList i c x
   insertListClip i c (Clip_List_Probtable x) = insertList i c x
   insertListClip i c (Clip_List_Section x) = insertList i c x
@@ -160,6 +189,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_List_Word x) = insertList i c x
   insertListClip i c (Clip_List_Vertex x) = insertList i c x
   insertListClip i c (Clip_List_Edge x) = insertList i c x
+  insertListClip i c (Clip_List_Value x) = insertList i c x
+  insertListClip i c (Clip_List_Axis x) = insertList i c x
+  insertListClip i c (Clip_List_Probability x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
@@ -181,6 +213,9 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Subgraph x) = removeList i x
   removeListClip i (Clip_Dirty x) = removeList i x
   removeListClip i (Clip_Probtable x) = removeList i x
+  removeListClip i (Clip_Value x) = removeList i x
+  removeListClip i (Clip_Table x) = removeList i x
+  removeListClip i (Clip_Axis x) = removeList i x
   removeListClip i (Clip_Probability x) = removeList i x
   removeListClip i (Clip_List_Probtable x) = removeList i x
   removeListClip i (Clip_List_Section x) = removeList i x
@@ -190,6 +225,9 @@ instance Clip ClipDoc where
   removeListClip i (Clip_List_Word x) = removeList i x
   removeListClip i (Clip_List_Vertex x) = removeList i x
   removeListClip i (Clip_List_Edge x) = removeList i x
+  removeListClip i (Clip_List_Value x) = removeList i x
+  removeListClip i (Clip_List_Axis x) = removeList i x
+  removeListClip i (Clip_List_Probability x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
@@ -706,21 +744,23 @@ instance Editable Dirty Document Node ClipDoc UserToken where
 
 instance Editable Probtable Document Node ClipDoc UserToken where
   select [] x = Clip_Probtable x
-  select (0:p) (Probtable x0 x1) = select p x0
-  select (1:p) (Probtable x0 x1) = select p x1
+  select (0:p) (Probtable x0 x1 x2) = select p x0
+  select (1:p) (Probtable x0 x1 x2) = select p x1
+  select (2:p) (Probtable x0 x1 x2) = select p x2
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Probtable c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Probtable") x
-  paste (0:p) c (Probtable x0 x1) = Probtable (paste p c x0) x1
-  paste (1:p) c (Probtable x0 x1) = Probtable x0 (paste p c x1)
+  paste (0:p) c (Probtable x0 x1 x2) = Probtable (paste p c x0) x1 x2
+  paste (1:p) c (Probtable x0 x1 x2) = Probtable x0 (paste p c x1) x2
+  paste (2:p) c (Probtable x0 x1 x2) = Probtable x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("Probtable {Int} {Probability} "  , Clip_Probtable $ Probtable hole hole)
+  alternatives _ = [ ("Probtable {Int} {List_Value} {Table} "  , Clip_Probtable $ Probtable hole hole hole)
                    ,("{Probtable}", Clip_Probtable hole)
                    ]
 
-  arity (Probtable x0 x1) = 2
+  arity (Probtable x0 x1 x2) = 3
   arity _                        = 0
 
   toClip t = Clip_Probtable t
@@ -733,6 +773,104 @@ instance Editable Probtable Document Node ClipDoc UserToken where
   hole = HoleProbtable
 
   holeNodeConstr = Node_HoleProbtable
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Value Document Node ClipDoc UserToken where
+  select [] x = Clip_Value x
+  select (0:p) (Value x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Value c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Value") x
+  paste (0:p) c (Value x0) = Value (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Value {String} "  , Clip_Value $ Value hole)
+                   ,("{Value}", Clip_Value hole)
+                   ]
+
+  arity (Value x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_Value t
+
+  fromClip (Clip_Value t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrValue
+
+  hole = HoleValue
+
+  holeNodeConstr = Node_HoleValue
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Table Document Node ClipDoc UserToken where
+  select [] x = Clip_Table x
+  select (0:p) (Table x0 x1) = select p x0
+  select (1:p) (Table x0 x1) = select p x1
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Table c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Table") x
+  paste (0:p) c (Table x0 x1) = Table (paste p c x0) x1
+  paste (1:p) c (Table x0 x1) = Table x0 (paste p c x1)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Table {List_Axis} {List_Probability} "  , Clip_Table $ Table hole hole)
+                   ,("{Table}", Clip_Table hole)
+                   ]
+
+  arity (Table x0 x1) = 2
+  arity _                        = 0
+
+  toClip t = Clip_Table t
+
+  fromClip (Clip_Table t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrTable
+
+  hole = HoleTable
+
+  holeNodeConstr = Node_HoleTable
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Axis Document Node ClipDoc UserToken where
+  select [] x = Clip_Axis x
+  select (0:p) (Axis x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Axis c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Axis") x
+  paste (0:p) c (Axis x0) = Axis (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Axis {List_Value} "  , Clip_Axis $ Axis hole)
+                   ,("{Axis}", Clip_Axis hole)
+                   ]
+
+  arity (Axis x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_Axis t
+
+  fromClip (Clip_Axis t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrAxis
+
+  hole = HoleAxis
+
+  holeNodeConstr = Node_HoleAxis
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -1137,6 +1275,144 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
 
   removeList n (List_Edge cxs) = Clip_List_Edge $ List_Edge (removeList_Edge n cxs)
   removeList _ xs = Clip_List_Edge $ xs
+
+instance Editable List_Value Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Value x
+  select (n:p) (List_Value cxs) =
+    let xs = fromConsList_Value cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Value c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Value")   x
+  paste (n:p) c (List_Value cxs) =
+    let xs = fromConsList_Value cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Value (replaceList_Value n x' cxs)
+        else List_Value cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Value}", Clip_List_Value hole)
+                   ]
+
+  arity (List_Value x1) = length (fromConsList_Value x1)
+  arity _ = 0
+
+  toClip t = Clip_List_Value t
+
+  fromClip (Clip_List_Value t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_Value
+
+  hole = List_Value Nil_Value
+
+  holeNodeConstr = Node_HoleList_Value
+
+  isList _ = True
+
+  insertList n (Clip_Value c) (List_Value cxs) = Clip_List_Value $ List_Value (insertList_Value n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Value xs
+  insertList _ c xs = Clip_List_Value xs
+
+  removeList n (List_Value cxs) = Clip_List_Value $ List_Value (removeList_Value n cxs)
+  removeList _ xs = Clip_List_Value $ xs
+
+instance Editable List_Axis Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Axis x
+  select (n:p) (List_Axis cxs) =
+    let xs = fromConsList_Axis cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Axis c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Axis")   x
+  paste (n:p) c (List_Axis cxs) =
+    let xs = fromConsList_Axis cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Axis (replaceList_Axis n x' cxs)
+        else List_Axis cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Axis}", Clip_List_Axis hole)
+                   ]
+
+  arity (List_Axis x1) = length (fromConsList_Axis x1)
+  arity _ = 0
+
+  toClip t = Clip_List_Axis t
+
+  fromClip (Clip_List_Axis t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_Axis
+
+  hole = List_Axis Nil_Axis
+
+  holeNodeConstr = Node_HoleList_Axis
+
+  isList _ = True
+
+  insertList n (Clip_Axis c) (List_Axis cxs) = Clip_List_Axis $ List_Axis (insertList_Axis n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Axis xs
+  insertList _ c xs = Clip_List_Axis xs
+
+  removeList n (List_Axis cxs) = Clip_List_Axis $ List_Axis (removeList_Axis n cxs)
+  removeList _ xs = Clip_List_Axis $ xs
+
+instance Editable List_Probability Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Probability x
+  select (n:p) (List_Probability cxs) =
+    let xs = fromConsList_Probability cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Probability c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Probability")   x
+  paste (n:p) c (List_Probability cxs) =
+    let xs = fromConsList_Probability cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Probability (replaceList_Probability n x' cxs)
+        else List_Probability cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Probability}", Clip_List_Probability hole)
+                   ]
+
+  arity (List_Probability x1) = length (fromConsList_Probability x1)
+  arity _ = 0
+
+  toClip t = Clip_List_Probability t
+
+  fromClip (Clip_List_Probability t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_Probability
+
+  hole = List_Probability Nil_Probability
+
+  holeNodeConstr = Node_HoleList_Probability
+
+  isList _ = True
+
+  insertList n (Clip_Probability c) (List_Probability cxs) = Clip_List_Probability $ List_Probability (insertList_Probability n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Probability xs
+  insertList _ c xs = Clip_List_Probability xs
+
+  removeList n (List_Probability cxs) = Clip_List_Probability $ List_Probability (removeList_Probability n cxs)
+  removeList _ xs = Clip_List_Probability $ xs
 
 
 

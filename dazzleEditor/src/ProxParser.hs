@@ -208,14 +208,34 @@ pText = tokenString <$> pWord
 
 recognizeProbtable :: ListParser Document Node ClipDoc UserToken Probtable
 recognizeProbtable = pStrVerbose "Probtable" $
-          (\str prob -> reuseProbtable [str] Nothing (Just prob))
+          (\str vals probs -> reuseProbtable [str] Nothing (Just vals) (Just probs))
       <$> pStructuralTk Node_Probtable
-      <*> pPrs parseProbability
+      <*> recognizeList_Value
+      <*> recognizeTable
+
+recognizeList_Value = pStr $ 
+          (\str lst -> List_Value (toConsList_Value lst))
+      <$> pStructuralTk Node_List_Value
+      <*> pList parseValue
       
+parseValue :: ListParser Document Node ClipDoc UserToken Value
+parseValue = pPrs $ Value . tokenString 
+      <$> pWord
+{-
+recognizeList_Probability = pStr $ 
+          (\str lst -> List_Probability (toConsList_Probability lst))
+      <$> pStructuralTk Node_List_Probability
+      <*> pList parseProbability
+-}    
 parseProbability :: ListParser Document Node ClipDoc UserToken Probability
-parseProbability = Probability . tokenString 
+parseProbability = pPrs $ Probability . tokenString 
       <$> pWord
      
+recognizeTable :: ListParser Document Node ClipDoc UserToken Table
+recognizeTable = pStr $ 
+          (\str probs -> reuseTable [str] Nothing (Just $ toList_Probability probs))
+      <$> pStructuralTk Node_Table
+      <*> pList parseProbability
 
 
 

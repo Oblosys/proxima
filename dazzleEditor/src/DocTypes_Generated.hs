@@ -14,6 +14,7 @@ data UserToken = KeyTk String
                | LabelRefTk
                | IntTk deriving (Show, Eq, Ord)
 
+type List_Int = [Int]
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -98,10 +99,25 @@ data Dirty = Dirty
            | ParseErrDirty (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
-data Probtable = Probtable Int Probability
+data Probtable = Probtable Int List_Value Table
                | HoleProbtable
                | ParseErrProbtable (ParseError Document Node ClipDoc UserToken)
                    deriving Show
+
+data Value = Value String
+           | HoleValue
+           | ParseErrValue (ParseError Document Node ClipDoc UserToken)
+               deriving Show
+
+data Table = Table List_Axis List_Probability
+           | HoleTable
+           | ParseErrTable (ParseError Document Node ClipDoc UserToken)
+               deriving Show
+
+data Axis = Axis List_Value
+          | HoleAxis
+          | ParseErrAxis (ParseError Document Node ClipDoc UserToken)
+              deriving Show
 
 data Probability = Probability String
                  | HoleProbability
@@ -148,6 +164,21 @@ data List_Edge = List_Edge ConsList_Edge
                | ParseErrList_Edge (ParseError Document Node ClipDoc UserToken)
                    deriving Show
 
+data List_Value = List_Value ConsList_Value
+                | HoleList_Value
+                | ParseErrList_Value (ParseError Document Node ClipDoc UserToken)
+                    deriving Show
+
+data List_Axis = List_Axis ConsList_Axis
+               | HoleList_Axis
+               | ParseErrList_Axis (ParseError Document Node ClipDoc UserToken)
+                   deriving Show
+
+data List_Probability = List_Probability ConsList_Probability
+                      | HoleList_Probability
+                      | ParseErrList_Probability (ParseError Document Node ClipDoc UserToken)
+                          deriving Show
+
 data ConsList_Probtable = Cons_Probtable Probtable ConsList_Probtable
                         | Nil_Probtable
                             deriving Show
@@ -180,6 +211,18 @@ data ConsList_Edge = Cons_Edge Edge ConsList_Edge
                    | Nil_Edge
                        deriving Show
 
+data ConsList_Value = Cons_Value Value ConsList_Value
+                    | Nil_Value
+                        deriving Show
+
+data ConsList_Axis = Cons_Axis Axis ConsList_Axis
+                   | Nil_Axis
+                       deriving Show
+
+data ConsList_Probability = Cons_Probability Probability ConsList_Probability
+                          | Nil_Probability
+                              deriving Show
+
 
 
 
@@ -202,6 +245,9 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Subgraph Subgraph
              | Clip_Dirty Dirty
              | Clip_Probtable Probtable
+             | Clip_Value Value
+             | Clip_Table Table
+             | Clip_Axis Axis
              | Clip_Probability Probability
              | Clip_List_Probtable List_Probtable
              | Clip_List_Section List_Section
@@ -211,6 +257,9 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_List_Word List_Word
              | Clip_List_Vertex List_Vertex
              | Clip_List_Edge List_Edge
+             | Clip_List_Value List_Value
+             | Clip_List_Axis List_Axis
+             | Clip_List_Probability List_Probability
              | Clip_Bool Bool
              | Clip_Int Int
              | Clip_String String
@@ -276,6 +325,15 @@ data Node = NoNode
           | Node_Probtable Probtable Path
           | Node_HoleProbtable Probtable Path
           | Node_ParseErrProbtable Probtable Path
+          | Node_Value Value Path
+          | Node_HoleValue Value Path
+          | Node_ParseErrValue Value Path
+          | Node_Table Table Path
+          | Node_HoleTable Table Path
+          | Node_ParseErrTable Table Path
+          | Node_Axis Axis Path
+          | Node_HoleAxis Axis Path
+          | Node_ParseErrAxis Axis Path
           | Node_Probability Probability Path
           | Node_HoleProbability Probability Path
           | Node_ParseErrProbability Probability Path
@@ -303,6 +361,15 @@ data Node = NoNode
           | Node_List_Edge List_Edge Path
           | Node_HoleList_Edge List_Edge Path
           | Node_ParseErrList_Edge List_Edge Path
+          | Node_List_Value List_Value Path
+          | Node_HoleList_Value List_Value Path
+          | Node_ParseErrList_Value List_Value Path
+          | Node_List_Axis List_Axis Path
+          | Node_HoleList_Axis List_Axis Path
+          | Node_ParseErrList_Axis List_Axis Path
+          | Node_List_Probability List_Probability Path
+          | Node_HoleList_Probability List_Probability Path
+          | Node_ParseErrList_Probability List_Probability Path
 
 
 
@@ -364,6 +431,15 @@ instance Show Node where
   show (Node_Probtable _ _) = "Node_Probtable" 
   show (Node_HoleProbtable _ _) = "Node_HoleProbtable" 
   show (Node_ParseErrProbtable _ _) = "Node_ParseErrProbtable" 
+  show (Node_Value _ _) = "Node_Value" 
+  show (Node_HoleValue _ _) = "Node_HoleValue" 
+  show (Node_ParseErrValue _ _) = "Node_ParseErrValue" 
+  show (Node_Table _ _) = "Node_Table" 
+  show (Node_HoleTable _ _) = "Node_HoleTable" 
+  show (Node_ParseErrTable _ _) = "Node_ParseErrTable" 
+  show (Node_Axis _ _) = "Node_Axis" 
+  show (Node_HoleAxis _ _) = "Node_HoleAxis" 
+  show (Node_ParseErrAxis _ _) = "Node_ParseErrAxis" 
   show (Node_Probability _ _) = "Node_Probability" 
   show (Node_HoleProbability _ _) = "Node_HoleProbability" 
   show (Node_ParseErrProbability _ _) = "Node_ParseErrProbability" 
@@ -391,5 +467,14 @@ instance Show Node where
   show (Node_List_Edge _ _) = "Node_List_Edge" 
   show (Node_HoleList_Edge _ _) = "Node_HoleList_Edge" 
   show (Node_ParseErrList_Edge _ _) = "Node_ParseErrList_Edge" 
+  show (Node_List_Value _ _) = "Node_List_Value" 
+  show (Node_HoleList_Value _ _) = "Node_HoleList_Value" 
+  show (Node_ParseErrList_Value _ _) = "Node_ParseErrList_Value" 
+  show (Node_List_Axis _ _) = "Node_List_Axis" 
+  show (Node_HoleList_Axis _ _) = "Node_HoleList_Axis" 
+  show (Node_ParseErrList_Axis _ _) = "Node_ParseErrList_Axis" 
+  show (Node_List_Probability _ _) = "Node_List_Probability" 
+  show (Node_HoleList_Probability _ _) = "Node_HoleList_Probability" 
+  show (Node_ParseErrList_Probability _ _) = "Node_ParseErrList_Probability" 
 
 

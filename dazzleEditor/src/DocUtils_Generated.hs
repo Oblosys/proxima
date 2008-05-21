@@ -18,6 +18,13 @@ initialDocument = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_
                                   "" 
                                   (toList_Section [])))
 
+parseXML_List_Int = pList_ng parseXML_Int
+toXMLList_Int = map toXMLInt
+
+presentPrimXMLList_Int x = error "DocUtils_Generated.presentPrimXMLInt not implemented"
+
+presentPrimTreeList_Int x = error "DocUtils_Generated.presentPrimTreeInt not implemented"
+
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -78,33 +85,51 @@ rankNode (Node_ParseErrDirty _ _) = 49
 rankNode (Node_Probtable _ _) = 50
 rankNode (Node_HoleProbtable _ _) = 51
 rankNode (Node_ParseErrProbtable _ _) = 52
-rankNode (Node_Probability _ _) = 53
-rankNode (Node_HoleProbability _ _) = 54
-rankNode (Node_ParseErrProbability _ _) = 55
-rankNode (Node_List_Probtable _ _) = 56
-rankNode (Node_HoleList_Probtable _ _) = 57
-rankNode (Node_ParseErrList_Probtable _ _) = 58
-rankNode (Node_List_Section _ _) = 59
-rankNode (Node_HoleList_Section _ _) = 60
-rankNode (Node_ParseErrList_Section _ _) = 61
-rankNode (Node_List_Paragraph _ _) = 62
-rankNode (Node_HoleList_Paragraph _ _) = 63
-rankNode (Node_ParseErrList_Paragraph _ _) = 64
-rankNode (Node_List_Subsection _ _) = 65
-rankNode (Node_HoleList_Subsection _ _) = 66
-rankNode (Node_ParseErrList_Subsection _ _) = 67
-rankNode (Node_List_Subsubsection _ _) = 68
-rankNode (Node_HoleList_Subsubsection _ _) = 69
-rankNode (Node_ParseErrList_Subsubsection _ _) = 70
-rankNode (Node_List_Word _ _) = 71
-rankNode (Node_HoleList_Word _ _) = 72
-rankNode (Node_ParseErrList_Word _ _) = 73
-rankNode (Node_List_Vertex _ _) = 74
-rankNode (Node_HoleList_Vertex _ _) = 75
-rankNode (Node_ParseErrList_Vertex _ _) = 76
-rankNode (Node_List_Edge _ _) = 77
-rankNode (Node_HoleList_Edge _ _) = 78
-rankNode (Node_ParseErrList_Edge _ _) = 79
+rankNode (Node_Value _ _) = 53
+rankNode (Node_HoleValue _ _) = 54
+rankNode (Node_ParseErrValue _ _) = 55
+rankNode (Node_Table _ _) = 56
+rankNode (Node_HoleTable _ _) = 57
+rankNode (Node_ParseErrTable _ _) = 58
+rankNode (Node_Axis _ _) = 59
+rankNode (Node_HoleAxis _ _) = 60
+rankNode (Node_ParseErrAxis _ _) = 61
+rankNode (Node_Probability _ _) = 62
+rankNode (Node_HoleProbability _ _) = 63
+rankNode (Node_ParseErrProbability _ _) = 64
+rankNode (Node_List_Probtable _ _) = 65
+rankNode (Node_HoleList_Probtable _ _) = 66
+rankNode (Node_ParseErrList_Probtable _ _) = 67
+rankNode (Node_List_Section _ _) = 68
+rankNode (Node_HoleList_Section _ _) = 69
+rankNode (Node_ParseErrList_Section _ _) = 70
+rankNode (Node_List_Paragraph _ _) = 71
+rankNode (Node_HoleList_Paragraph _ _) = 72
+rankNode (Node_ParseErrList_Paragraph _ _) = 73
+rankNode (Node_List_Subsection _ _) = 74
+rankNode (Node_HoleList_Subsection _ _) = 75
+rankNode (Node_ParseErrList_Subsection _ _) = 76
+rankNode (Node_List_Subsubsection _ _) = 77
+rankNode (Node_HoleList_Subsubsection _ _) = 78
+rankNode (Node_ParseErrList_Subsubsection _ _) = 79
+rankNode (Node_List_Word _ _) = 80
+rankNode (Node_HoleList_Word _ _) = 81
+rankNode (Node_ParseErrList_Word _ _) = 82
+rankNode (Node_List_Vertex _ _) = 83
+rankNode (Node_HoleList_Vertex _ _) = 84
+rankNode (Node_ParseErrList_Vertex _ _) = 85
+rankNode (Node_List_Edge _ _) = 86
+rankNode (Node_HoleList_Edge _ _) = 87
+rankNode (Node_ParseErrList_Edge _ _) = 88
+rankNode (Node_List_Value _ _) = 89
+rankNode (Node_HoleList_Value _ _) = 90
+rankNode (Node_ParseErrList_Value _ _) = 91
+rankNode (Node_List_Axis _ _) = 92
+rankNode (Node_HoleList_Axis _ _) = 93
+rankNode (Node_ParseErrList_Axis _ _) = 94
+rankNode (Node_List_Probability _ _) = 95
+rankNode (Node_HoleList_Probability _ _) = 96
+rankNode (Node_ParseErrList_Probability _ _) = 97
 
 
 
@@ -167,6 +192,15 @@ instance DocNode Node where
   pathNode (Node_Probtable _ pth) = PathD pth
   pathNode (Node_HoleProbtable _ pth) = PathD pth
   pathNode (Node_ParseErrProbtable _ pth) = PathD pth
+  pathNode (Node_Value _ pth) = PathD pth
+  pathNode (Node_HoleValue _ pth) = PathD pth
+  pathNode (Node_ParseErrValue _ pth) = PathD pth
+  pathNode (Node_Table _ pth) = PathD pth
+  pathNode (Node_HoleTable _ pth) = PathD pth
+  pathNode (Node_ParseErrTable _ pth) = PathD pth
+  pathNode (Node_Axis _ pth) = PathD pth
+  pathNode (Node_HoleAxis _ pth) = PathD pth
+  pathNode (Node_ParseErrAxis _ pth) = PathD pth
   pathNode (Node_Probability _ pth) = PathD pth
   pathNode (Node_HoleProbability _ pth) = PathD pth
   pathNode (Node_ParseErrProbability _ pth) = PathD pth
@@ -194,6 +228,15 @@ instance DocNode Node where
   pathNode (Node_List_Edge _ pth) = PathD pth
   pathNode (Node_HoleList_Edge _ pth) = PathD pth
   pathNode (Node_ParseErrList_Edge _ pth) = PathD pth
+  pathNode (Node_List_Value _ pth) = PathD pth
+  pathNode (Node_HoleList_Value _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Value _ pth) = PathD pth
+  pathNode (Node_List_Axis _ pth) = PathD pth
+  pathNode (Node_HoleList_Axis _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Axis _ pth) = PathD pth
+  pathNode (Node_List_Probability _ pth) = PathD pth
+  pathNode (Node_HoleList_Probability _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Probability _ pth) = PathD pth
 
 
 
@@ -250,9 +293,18 @@ toXMLDirty (Dirty) = Elt "Dirty" [] $ []
 toXMLDirty (Clean) = Elt "Clean" [] $ []
 toXMLDirty (HoleDirty) = Elt "HoleDirty" [] $ []
 toXMLDirty (ParseErrDirty error) = Elt "ParseErrDirty" [] []
-toXMLProbtable (Probtable id probability) = Elt "Probtable" [] $ [toXMLInt id] ++ [toXMLProbability probability]
+toXMLProbtable (Probtable id values table) = Elt "Probtable" [] $ [toXMLInt id] ++ toXMLList_Value values ++ [toXMLTable table]
 toXMLProbtable (HoleProbtable) = Elt "HoleProbtable" [] $ []
 toXMLProbtable (ParseErrProbtable error) = Elt "ParseErrProbtable" [] []
+toXMLValue (Value val) = Elt "Value" [] $ [toXMLString val]
+toXMLValue (HoleValue) = Elt "HoleValue" [] $ []
+toXMLValue (ParseErrValue error) = Elt "ParseErrValue" [] []
+toXMLTable (Table axes probs) = Elt "Table" [] $ toXMLList_Axis axes ++ toXMLList_Probability probs
+toXMLTable (HoleTable) = Elt "HoleTable" [] $ []
+toXMLTable (ParseErrTable error) = Elt "ParseErrTable" [] []
+toXMLAxis (Axis values) = Elt "Axis" [] $ toXMLList_Value values
+toXMLAxis (HoleAxis) = Elt "HoleAxis" [] $ []
+toXMLAxis (ParseErrAxis error) = Elt "ParseErrAxis" [] []
 toXMLProbability (Probability prob) = Elt "Probability" [] $ [toXMLString prob]
 toXMLProbability (HoleProbability) = Elt "HoleProbability" [] $ []
 toXMLProbability (ParseErrProbability error) = Elt "ParseErrProbability" [] []
@@ -280,6 +332,15 @@ toXMLList_Vertex (ParseErrList_Vertex _) = []
 toXMLList_Edge (List_Edge xs) = toXMLConsList_Edge xs
 toXMLList_Edge HoleList_Edge = []
 toXMLList_Edge (ParseErrList_Edge _) = []
+toXMLList_Value (List_Value xs) = toXMLConsList_Value xs
+toXMLList_Value HoleList_Value = []
+toXMLList_Value (ParseErrList_Value _) = []
+toXMLList_Axis (List_Axis xs) = toXMLConsList_Axis xs
+toXMLList_Axis HoleList_Axis = []
+toXMLList_Axis (ParseErrList_Axis _) = []
+toXMLList_Probability (List_Probability xs) = toXMLConsList_Probability xs
+toXMLList_Probability HoleList_Probability = []
+toXMLList_Probability (ParseErrList_Probability _) = []
 toXMLConsList_Probtable (Cons_Probtable x xs) = toXMLProbtable x : toXMLConsList_Probtable xs
 toXMLConsList_Probtable Nil_Probtable             = []
 toXMLConsList_Section (Cons_Section x xs) = toXMLSection x : toXMLConsList_Section xs
@@ -296,6 +357,12 @@ toXMLConsList_Vertex (Cons_Vertex x xs) = toXMLVertex x : toXMLConsList_Vertex x
 toXMLConsList_Vertex Nil_Vertex             = []
 toXMLConsList_Edge (Cons_Edge x xs) = toXMLEdge x : toXMLConsList_Edge xs
 toXMLConsList_Edge Nil_Edge             = []
+toXMLConsList_Value (Cons_Value x xs) = toXMLValue x : toXMLConsList_Value xs
+toXMLConsList_Value Nil_Value             = []
+toXMLConsList_Axis (Cons_Axis x xs) = toXMLAxis x : toXMLConsList_Axis xs
+toXMLConsList_Axis Nil_Axis             = []
+toXMLConsList_Probability (Cons_Probability x xs) = toXMLProbability x : toXMLConsList_Probability xs
+toXMLConsList_Probability Nil_Probability             = []
 
 
 
@@ -339,7 +406,13 @@ parseXML_Dirty = parseXMLCns_Dirty <|> parseXMLCns_Clean <|> parseHoleAndParseEr
 parseXMLCns_Dirty = Dirty <$ emptyTag "Dirty"
 parseXMLCns_Clean = Clean <$ emptyTag "Clean"
 parseXML_Probtable = parseXMLCns_Probtable <|> parseHoleAndParseErr "Probtable" HoleProbtable
-parseXMLCns_Probtable = Probtable <$ startTag "Probtable" <*> parseXML_Int <*> parseXML_Probability<* endTag "Probtable"
+parseXMLCns_Probtable = Probtable <$ startTag "Probtable" <*> parseXML_Int <*> parseXML_List_Value <*> parseXML_Table<* endTag "Probtable"
+parseXML_Value = parseXMLCns_Value <|> parseHoleAndParseErr "Value" HoleValue
+parseXMLCns_Value = Value <$ startTag "Value" <*> parseXML_String<* endTag "Value"
+parseXML_Table = parseXMLCns_Table <|> parseHoleAndParseErr "Table" HoleTable
+parseXMLCns_Table = Table <$ startTag "Table" <*> parseXML_List_Axis <*> parseXML_List_Probability<* endTag "Table"
+parseXML_Axis = parseXMLCns_Axis <|> parseHoleAndParseErr "Axis" HoleAxis
+parseXMLCns_Axis = Axis <$ startTag "Axis" <*> parseXML_List_Value<* endTag "Axis"
 parseXML_Probability = parseXMLCns_Probability <|> parseHoleAndParseErr "Probability" HoleProbability
 parseXMLCns_Probability = Probability <$ startTag "Probability" <*> parseXML_String<* endTag "Probability"
 parseXML_List_Probtable = mkList List_Probtable Cons_Probtable Nil_Probtable <$> pList_ng parseXML_Probtable
@@ -350,6 +423,9 @@ parseXML_List_Subsubsection = mkList List_Subsubsection Cons_Subsubsection Nil_S
 parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> pList_ng parseXML_Word
 parseXML_List_Vertex = mkList List_Vertex Cons_Vertex Nil_Vertex <$> pList_ng parseXML_Vertex
 parseXML_List_Edge = mkList List_Edge Cons_Edge Nil_Edge <$> pList_ng parseXML_Edge
+parseXML_List_Value = mkList List_Value Cons_Value Nil_Value <$> pList_ng parseXML_Value
+parseXML_List_Axis = mkList List_Axis Cons_Axis Nil_Axis <$> pList_ng parseXML_Axis
+parseXML_List_Probability = mkList List_Probability Cons_Probability Nil_Probability <$> pList_ng parseXML_Probability
 
 
 
@@ -540,6 +616,75 @@ insertList_Edge n x (Cons_Edge cx cxs) = Cons_Edge cx (insertList_Edge (n-1) x c
 removeList_Edge _ Nil_Edge  = Nil_Edge  -- remove beyond end of list
 removeList_Edge 0 (Cons_Edge cx cxs) = cxs
 removeList_Edge n (Cons_Edge cx cxs) = Cons_Edge cx (removeList_Edge (n-1) cxs)
+
+toList_Value vs = List_Value (toConsList_Value vs)
+
+fromList_Value (List_Value vs) = fromConsList_Value vs
+fromList_Value _ = []
+
+toConsList_Value [] = Nil_Value
+toConsList_Value (x:xs) = Cons_Value x (toConsList_Value xs)
+
+fromConsList_Value Nil_Value = []
+fromConsList_Value (Cons_Value x xs) = x: fromConsList_Value xs
+
+replaceList_Value _ x Nil_Value = Nil_Value  -- replace beyond end of list
+replaceList_Value 0 x (Cons_Value cx cxs) = Cons_Value x cxs
+replaceList_Value n x (Cons_Value cx cxs) = Cons_Value cx (replaceList_Value (n-1) x cxs)
+
+insertList_Value 0 x cxs = Cons_Value x cxs
+insertList_Value _ x Nil_Value  = Nil_Value  -- insert beyond end of list
+insertList_Value n x (Cons_Value cx cxs) = Cons_Value cx (insertList_Value (n-1) x cxs)
+
+removeList_Value _ Nil_Value  = Nil_Value  -- remove beyond end of list
+removeList_Value 0 (Cons_Value cx cxs) = cxs
+removeList_Value n (Cons_Value cx cxs) = Cons_Value cx (removeList_Value (n-1) cxs)
+
+toList_Axis vs = List_Axis (toConsList_Axis vs)
+
+fromList_Axis (List_Axis vs) = fromConsList_Axis vs
+fromList_Axis _ = []
+
+toConsList_Axis [] = Nil_Axis
+toConsList_Axis (x:xs) = Cons_Axis x (toConsList_Axis xs)
+
+fromConsList_Axis Nil_Axis = []
+fromConsList_Axis (Cons_Axis x xs) = x: fromConsList_Axis xs
+
+replaceList_Axis _ x Nil_Axis = Nil_Axis  -- replace beyond end of list
+replaceList_Axis 0 x (Cons_Axis cx cxs) = Cons_Axis x cxs
+replaceList_Axis n x (Cons_Axis cx cxs) = Cons_Axis cx (replaceList_Axis (n-1) x cxs)
+
+insertList_Axis 0 x cxs = Cons_Axis x cxs
+insertList_Axis _ x Nil_Axis  = Nil_Axis  -- insert beyond end of list
+insertList_Axis n x (Cons_Axis cx cxs) = Cons_Axis cx (insertList_Axis (n-1) x cxs)
+
+removeList_Axis _ Nil_Axis  = Nil_Axis  -- remove beyond end of list
+removeList_Axis 0 (Cons_Axis cx cxs) = cxs
+removeList_Axis n (Cons_Axis cx cxs) = Cons_Axis cx (removeList_Axis (n-1) cxs)
+
+toList_Probability vs = List_Probability (toConsList_Probability vs)
+
+fromList_Probability (List_Probability vs) = fromConsList_Probability vs
+fromList_Probability _ = []
+
+toConsList_Probability [] = Nil_Probability
+toConsList_Probability (x:xs) = Cons_Probability x (toConsList_Probability xs)
+
+fromConsList_Probability Nil_Probability = []
+fromConsList_Probability (Cons_Probability x xs) = x: fromConsList_Probability xs
+
+replaceList_Probability _ x Nil_Probability = Nil_Probability  -- replace beyond end of list
+replaceList_Probability 0 x (Cons_Probability cx cxs) = Cons_Probability x cxs
+replaceList_Probability n x (Cons_Probability cx cxs) = Cons_Probability cx (replaceList_Probability (n-1) x cxs)
+
+insertList_Probability 0 x cxs = Cons_Probability x cxs
+insertList_Probability _ x Nil_Probability  = Nil_Probability  -- insert beyond end of list
+insertList_Probability n x (Cons_Probability cx cxs) = Cons_Probability cx (insertList_Probability (n-1) x cxs)
+
+removeList_Probability _ Nil_Probability  = Nil_Probability  -- remove beyond end of list
+removeList_Probability 0 (Cons_Probability cx cxs) = cxs
+removeList_Probability n (Cons_Probability cx cxs) = Cons_Probability cx (removeList_Probability (n-1) cxs)
 
 
 

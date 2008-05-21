@@ -30,6 +30,12 @@ data Subgraph = Subgraph dirty:Dirty vertices:[Vertex] edges:[Edge]
 data Dirty = Dirty
            | Clean
 
-data Probtable = Probtable id:Int probability:Probability
+data Probtable = Probtable id:Int values:[Value] table:Table
+
+data Value = Value val:String
+
+data Table = Table axes:[Axis] probs:[Probability]
+
+data Axis = Axis [Value]
 
 data Probability = Probability prob:String

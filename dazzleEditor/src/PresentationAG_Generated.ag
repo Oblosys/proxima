@@ -107,9 +107,24 @@ DATA Dirty
   | ParseErrDirty error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Probtable
-  | Probtable id:Int probability:Probability
+  | Probtable id:Int values:List_Value table:Table
   | HoleProbtable
   | ParseErrProbtable error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Value
+  | Value val:String
+  | HoleValue
+  | ParseErrValue error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Table
+  | Table axes:List_Axis probs:List_Probability
+  | HoleTable
+  | ParseErrTable error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Axis
+  | Axis values:List_Value
+  | HoleAxis
+  | ParseErrAxis error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Probability
   | Probability prob:String
@@ -156,6 +171,21 @@ DATA List_Edge
   | HoleList_Edge
   | ParseErrList_Edge error:{(ParseError Document Node ClipDoc UserToken)}
 
+DATA List_Value
+  | List_Value elts:ConsList_Value
+  | HoleList_Value
+  | ParseErrList_Value error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA List_Axis
+  | List_Axis elts:ConsList_Axis
+  | HoleList_Axis
+  | ParseErrList_Axis error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA List_Probability
+  | List_Probability elts:ConsList_Probability
+  | HoleList_Probability
+  | ParseErrList_Probability error:{(ParseError Document Node ClipDoc UserToken)}
+
 DATA ConsList_Probtable
   | Cons_Probtable head:Probtable tail:ConsList_Probtable
   | Nil_Probtable
@@ -188,6 +218,18 @@ DATA ConsList_Edge
   | Cons_Edge head:Edge tail:ConsList_Edge
   | Nil_Edge
 
+DATA ConsList_Value
+  | Cons_Value head:Value tail:ConsList_Value
+  | Nil_Value
+
+DATA ConsList_Axis
+  | Cons_Axis head:Axis tail:ConsList_Axis
+  | Nil_Axis
+
+DATA ConsList_Probability
+  | Cons_Probability head:Probability tail:ConsList_Probability
+  | Nil_Probability
+
 
 
 
@@ -195,22 +237,22 @@ DATA ConsList_Edge
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge
+ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
 
-ATTR ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge
+ATTR ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
 
 
@@ -515,11 +557,14 @@ SEM Dirty
 
 SEM Probtable
   | Probtable 
-      probability.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @probability.pIdC
-      probability.path  = @lhs.path++[1]
+      values.pIdC = @lhs.pIdC + 0
+      table.pIdC = @values.pIdC
+      lhs.pIdC = @table.pIdC
+      values.path  = @lhs.path++[1]
+      table.path  = @lhs.path++[2]
   | Probtable
-    probability.ix = 1
+    values.ix = 1
+    table.ix = 2
   | Probtable
       lhs.pres = loc (Node_Probtable @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -528,6 +573,60 @@ SEM Probtable
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrProbtable
       lhs.pres = presParseErr (Node_ParseErrProbtable @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Value
+  | Value 
+      lhs.pIdC = @lhs.pIdC + 0
+  | Value
+  | Value
+      lhs.pres = loc (Node_Value @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleValue
+      lhs.pres = presHole @lhs.focusD "Value" (Node_HoleValue @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrValue
+      lhs.pres = presParseErr (Node_ParseErrValue @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Table
+  | Table 
+      axes.pIdC = @lhs.pIdC + 0
+      probs.pIdC = @axes.pIdC
+      lhs.pIdC = @probs.pIdC
+      axes.path  = @lhs.path++[0]
+      probs.path  = @lhs.path++[1]
+  | Table
+    axes.ix = 0
+    probs.ix = 1
+  | Table
+      lhs.pres = loc (Node_Table @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleTable
+      lhs.pres = presHole @lhs.focusD "Table" (Node_HoleTable @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrTable
+      lhs.pres = presParseErr (Node_ParseErrTable @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Axis
+  | Axis 
+      values.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @values.pIdC
+      values.path  = @lhs.path++[0]
+  | Axis
+    values.ix = 0
+  | Axis
+      lhs.pres = loc (Node_Axis @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleAxis
+      lhs.pres = presHole @lhs.focusD "Axis" (Node_HoleAxis @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrAxis
+      lhs.pres = presParseErr (Node_ParseErrAxis @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -730,6 +829,75 @@ SEM List_Edge
       lhs.pres = presHole @lhs.focusD "Edge" (Node_HoleList_Edge @self @lhs.path) @lhs.path
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
+SEM List_Value
+  | List_Value
+      lhs.press = map ( loc (Node_List_Value @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Value     lhs.press = []
+  | ParseErrList_Value lhs.press = []
+  | List_Value
+      lhs.pres = loc (Node_List_Value @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrList_Value
+      lhs.pres = presParseErr (Node_ParseErrList_Value @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+  | HoleList_Value
+      lhs.pres = presHole @lhs.focusD "Value" (Node_HoleList_Value @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
+SEM List_Axis
+  | List_Axis
+      lhs.press = map ( loc (Node_List_Axis @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Axis     lhs.press = []
+  | ParseErrList_Axis lhs.press = []
+  | List_Axis
+      lhs.pres = loc (Node_List_Axis @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrList_Axis
+      lhs.pres = presParseErr (Node_ParseErrList_Axis @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+  | HoleList_Axis
+      lhs.pres = presHole @lhs.focusD "Axis" (Node_HoleList_Axis @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
+SEM List_Probability
+  | List_Probability
+      lhs.press = map ( loc (Node_List_Probability @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Probability     lhs.press = []
+  | ParseErrList_Probability lhs.press = []
+  | List_Probability
+      lhs.pres = loc (Node_List_Probability @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrList_Probability
+      lhs.pres = presParseErr (Node_ParseErrList_Probability @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+  | HoleList_Probability
+      lhs.pres = presHole @lhs.focusD "Probability" (Node_HoleList_Probability @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
 SEM ConsList_Probtable
   | Cons_Probtable
       head.path  = @lhs.path++[@lhs.ix]
@@ -818,6 +986,39 @@ SEM ConsList_Edge
       tail.ix  = @lhs.ix + 1
   | Nil_Edge      lhs.press = []
 
+SEM ConsList_Value
+  | Cons_Value
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_Value      lhs.press = []
+
+SEM ConsList_Axis
+  | Cons_Axis
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_Axis      lhs.press = []
+
+SEM ConsList_Probability
+  | Cons_Probability
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_Probability      lhs.press = []
+
 
 
 
@@ -871,6 +1072,15 @@ SEM Dirty
 SEM Probtable
   | Probtable lhs.path = @lhs.path
 
+SEM Value
+  | Value lhs.path = @lhs.path
+
+SEM Table
+  | Table lhs.path = @lhs.path
+
+SEM Axis
+  | Axis lhs.path = @lhs.path
+
 SEM Probability
   | Probability lhs.path = @lhs.path
 
@@ -897,6 +1107,15 @@ SEM List_Vertex
 
 SEM List_Edge
   | List_Edge lhs.path = @lhs.path
+
+SEM List_Value
+  | List_Value lhs.path = @lhs.path
+
+SEM List_Axis
+  | List_Axis lhs.path = @lhs.path
+
+SEM List_Probability
+  | List_Probability lhs.path = @lhs.path
 
 
 
@@ -993,9 +1212,27 @@ SEM Dirty
 
 SEM Probtable
   | Probtable
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Probtable @self @lhs.path) @lhs.path "Probtable" [ presentPrimXMLInt @id, @probability.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Probtable @self @lhs.path) @lhs.path "Probtable" [ presentPrimXMLInt @id, @values.presXML, @table.presXML ] 
   | HoleProbtable     lhs.presXML = presHole @lhs.focusD "Probtable" (Node_HoleProbtable @self @lhs.path) @lhs.path
   | ParseErrProbtable lhs.presXML = presParseErr (Node_ParseErrProbtable @self @lhs.path) @error
+
+SEM Value
+  | Value
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Value @self @lhs.path) @lhs.path "Value" [ presentPrimXMLString @val ] 
+  | HoleValue     lhs.presXML = presHole @lhs.focusD "Value" (Node_HoleValue @self @lhs.path) @lhs.path
+  | ParseErrValue lhs.presXML = presParseErr (Node_ParseErrValue @self @lhs.path) @error
+
+SEM Table
+  | Table
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ @axes.presXML, @probs.presXML ] 
+  | HoleTable     lhs.presXML = presHole @lhs.focusD "Table" (Node_HoleTable @self @lhs.path) @lhs.path
+  | ParseErrTable lhs.presXML = presParseErr (Node_ParseErrTable @self @lhs.path) @error
+
+SEM Axis
+  | Axis
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Axis @self @lhs.path) @lhs.path "Axis" [ @values.presXML ] 
+  | HoleAxis     lhs.presXML = presHole @lhs.focusD "Axis" (Node_HoleAxis @self @lhs.path) @lhs.path
+  | ParseErrAxis lhs.presXML = presParseErr (Node_ParseErrAxis @self @lhs.path) @error
 
 SEM Probability
   | Probability
@@ -1091,6 +1328,39 @@ SEM List_Edge
       lhs.presXML = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Edge" (Node_HoleList_Edge @self @lhs.path) @lhs.path
 
+SEM List_Value
+  | List_Value
+      lhs.presXML = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Value
+      lhs.presXML = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Value @self @lhs.path) @error
+  | HoleList_Value
+      lhs.presXML = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Value" (Node_HoleList_Value @self @lhs.path) @lhs.path
+
+SEM List_Axis
+  | List_Axis
+      lhs.presXML = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Axis
+      lhs.presXML = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Axis @self @lhs.path) @error
+  | HoleList_Axis
+      lhs.presXML = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Axis" (Node_HoleList_Axis @self @lhs.path) @lhs.path
+
+SEM List_Probability
+  | List_Probability
+      lhs.presXML = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Probability
+      lhs.presXML = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Probability @self @lhs.path) @error
+  | HoleList_Probability
+      lhs.presXML = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Probability" (Node_HoleList_Probability @self @lhs.path) @lhs.path
+
 SEM ConsList_Probtable
   | Cons_Probtable lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Probtable  lhs.pressXML  = []
@@ -1122,6 +1392,18 @@ SEM ConsList_Vertex
 SEM ConsList_Edge
   | Cons_Edge lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Edge  lhs.pressXML  = []
+
+SEM ConsList_Value
+  | Cons_Value lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Value  lhs.pressXML  = []
+
+SEM ConsList_Axis
+  | Cons_Axis lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Axis  lhs.pressXML  = []
+
+SEM ConsList_Probability
+  | Cons_Probability lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Probability  lhs.pressXML  = []
 
 
 
@@ -1218,9 +1500,27 @@ SEM Dirty
 
 SEM Probtable
   | Probtable
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Probtable @self @lhs.path) @lhs.path "Probtable" [ presentPrimXMLInt @id, @probability.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Probtable @self @lhs.path) @lhs.path "Probtable" [ presentPrimXMLInt @id, @values.presTree, @table.presTree ] 
   | HoleProbtable     lhs.presTree = presHole @lhs.focusD "Probtable" (Node_HoleProbtable @self @lhs.path) @lhs.path
   | ParseErrProbtable lhs.presTree = presParseErr (Node_ParseErrProbtable @self @lhs.path) @error
+
+SEM Value
+  | Value
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Value @self @lhs.path) @lhs.path "Value" [ presentPrimXMLString @val ] 
+  | HoleValue     lhs.presTree = presHole @lhs.focusD "Value" (Node_HoleValue @self @lhs.path) @lhs.path
+  | ParseErrValue lhs.presTree = presParseErr (Node_ParseErrValue @self @lhs.path) @error
+
+SEM Table
+  | Table
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ @axes.presTree, @probs.presTree ] 
+  | HoleTable     lhs.presTree = presHole @lhs.focusD "Table" (Node_HoleTable @self @lhs.path) @lhs.path
+  | ParseErrTable lhs.presTree = presParseErr (Node_ParseErrTable @self @lhs.path) @error
+
+SEM Axis
+  | Axis
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Axis @self @lhs.path) @lhs.path "Axis" [ @values.presTree ] 
+  | HoleAxis     lhs.presTree = presHole @lhs.focusD "Axis" (Node_HoleAxis @self @lhs.path) @lhs.path
+  | ParseErrAxis lhs.presTree = presParseErr (Node_ParseErrAxis @self @lhs.path) @error
 
 SEM Probability
   | Probability
@@ -1316,6 +1616,39 @@ SEM List_Edge
       lhs.presTree = loc (Node_List_Edge @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Edge" (Node_HoleList_Edge @self @lhs.path) @lhs.path
 
+SEM List_Value
+  | List_Value
+      lhs.presTree = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Value
+      lhs.presTree = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Value @self @lhs.path) @error
+  | HoleList_Value
+      lhs.presTree = loc (Node_List_Value @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Value" (Node_HoleList_Value @self @lhs.path) @lhs.path
+
+SEM List_Axis
+  | List_Axis
+      lhs.presTree = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Axis
+      lhs.presTree = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Axis @self @lhs.path) @error
+  | HoleList_Axis
+      lhs.presTree = loc (Node_List_Axis @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Axis" (Node_HoleList_Axis @self @lhs.path) @lhs.path
+
+SEM List_Probability
+  | List_Probability
+      lhs.presTree = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Probability
+      lhs.presTree = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Probability @self @lhs.path) @error
+  | HoleList_Probability
+      lhs.presTree = loc (Node_List_Probability @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Probability" (Node_HoleList_Probability @self @lhs.path) @lhs.path
+
 SEM ConsList_Probtable
   | Cons_Probtable lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Probtable  lhs.pressTree  = []
@@ -1347,6 +1680,18 @@ SEM ConsList_Vertex
 SEM ConsList_Edge
   | Cons_Edge lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Edge  lhs.pressTree  = []
+
+SEM ConsList_Value
+  | Cons_Value lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Value  lhs.pressTree  = []
+
+SEM ConsList_Axis
+  | Cons_Axis lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Axis  lhs.pressTree  = []
+
+SEM ConsList_Probability
+  | Cons_Probability lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Probability  lhs.pressTree  = []
 
 
 

@@ -70,6 +70,15 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Probtable _ _) = construct_Probtable
   construct (Node_HoleProbtable _ _) = construct_HoleProbtable
   construct (Node_ParseErrProbtable _ _) = construct_ParseErrProbtable
+  construct (Node_Value _ _) = construct_Value
+  construct (Node_HoleValue _ _) = construct_HoleValue
+  construct (Node_ParseErrValue _ _) = construct_ParseErrValue
+  construct (Node_Table _ _) = construct_Table
+  construct (Node_HoleTable _ _) = construct_HoleTable
+  construct (Node_ParseErrTable _ _) = construct_ParseErrTable
+  construct (Node_Axis _ _) = construct_Axis
+  construct (Node_HoleAxis _ _) = construct_HoleAxis
+  construct (Node_ParseErrAxis _ _) = construct_ParseErrAxis
   construct (Node_Probability _ _) = construct_Probability
   construct (Node_HoleProbability _ _) = construct_HoleProbability
   construct (Node_ParseErrProbability _ _) = construct_ParseErrProbability
@@ -97,6 +106,15 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_List_Edge _ _) = construct_List_Edge
   construct (Node_HoleList_Edge _ _) = construct_HoleList_Edge
   construct (Node_ParseErrList_Edge _ _) = construct_ParseErrList_Edge
+  construct (Node_List_Value _ _) = construct_List_Value
+  construct (Node_HoleList_Value _ _) = construct_HoleList_Value
+  construct (Node_ParseErrList_Value _ _) = construct_ParseErrList_Value
+  construct (Node_List_Axis _ _) = construct_List_Axis
+  construct (Node_HoleList_Axis _ _) = construct_HoleList_Axis
+  construct (Node_ParseErrList_Axis _ _) = construct_ParseErrList_Axis
+  construct (Node_List_Probability _ _) = construct_List_Probability
+  construct (Node_HoleList_Probability _ _) = construct_HoleList_Probability
+  construct (Node_ParseErrList_Probability _ _) = construct_ParseErrList_Probability
 construct_RootEnr tk ~[mClip0] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "root::Root" mClip0)
 construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
 construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
@@ -146,9 +164,18 @@ construct_Dirty tk ~[] = Clip_Dirty $ reuseDirty [tk]
 construct_Clean tk ~[] = Clip_Dirty $ reuseClean [tk] 
 construct_HoleDirty tk ~[] = Clip_Dirty $ hole
 construct_ParseErrDirty (StructuralTk _ _ pres _ _) ~[] = Clip_Dirty $ parseErr (StructuralParseErr pres)
-construct_Probtable tk ~[mClip0,mClip1] = Clip_Probtable $ reuseProbtable [tk]  (retrieveArg "Probtable" "id::Int" mClip0) (retrieveArg "Probtable" "probability::Probability" mClip1)
+construct_Probtable tk ~[mClip0,mClip1,mClip2] = Clip_Probtable $ reuseProbtable [tk]  (retrieveArg "Probtable" "id::Int" mClip0) (retrieveArg "Probtable" "values::List_Value" mClip1) (retrieveArg "Probtable" "table::Table" mClip2)
 construct_HoleProbtable tk ~[] = Clip_Probtable $ hole
 construct_ParseErrProbtable (StructuralTk _ _ pres _ _) ~[] = Clip_Probtable $ parseErr (StructuralParseErr pres)
+construct_Value tk ~[mClip0] = Clip_Value $ reuseValue [tk]  (retrieveArg "Value" "val::String" mClip0)
+construct_HoleValue tk ~[] = Clip_Value $ hole
+construct_ParseErrValue (StructuralTk _ _ pres _ _) ~[] = Clip_Value $ parseErr (StructuralParseErr pres)
+construct_Table tk ~[mClip0,mClip1] = Clip_Table $ reuseTable [tk]  (retrieveArg "Table" "axes::List_Axis" mClip0) (retrieveArg "Table" "probs::List_Probability" mClip1)
+construct_HoleTable tk ~[] = Clip_Table $ hole
+construct_ParseErrTable (StructuralTk _ _ pres _ _) ~[] = Clip_Table $ parseErr (StructuralParseErr pres)
+construct_Axis tk ~[mClip0] = Clip_Axis $ reuseAxis [tk]  (retrieveArg "Axis" "values::List_Value" mClip0)
+construct_HoleAxis tk ~[] = Clip_Axis $ hole
+construct_ParseErrAxis (StructuralTk _ _ pres _ _) ~[] = Clip_Axis $ parseErr (StructuralParseErr pres)
 construct_Probability tk ~[mClip0] = Clip_Probability $ reuseProbability [tk]  (retrieveArg "Probability" "prob::String" mClip0)
 construct_HoleProbability tk ~[] = Clip_Probability $ hole
 construct_ParseErrProbability (StructuralTk _ _ pres _ _) ~[] = Clip_Probability $ parseErr (StructuralParseErr pres)
@@ -176,6 +203,15 @@ construct_ParseErrList_Vertex (StructuralTk _ _ pres _ _) ~[] = Clip_List_Vertex
 construct_List_Edge tk mClips = genericConstruct_List "Edge" toList_Edge mClips
 construct_HoleList_Edge tk ~[] = Clip_List_Edge $ hole
 construct_ParseErrList_Edge (StructuralTk _ _ pres _ _) ~[] = Clip_List_Edge $ parseErr (StructuralParseErr pres)
+construct_List_Value tk mClips = genericConstruct_List "Value" toList_Value mClips
+construct_HoleList_Value tk ~[] = Clip_List_Value $ hole
+construct_ParseErrList_Value (StructuralTk _ _ pres _ _) ~[] = Clip_List_Value $ parseErr (StructuralParseErr pres)
+construct_List_Axis tk mClips = genericConstruct_List "Axis" toList_Axis mClips
+construct_HoleList_Axis tk ~[] = Clip_List_Axis $ hole
+construct_ParseErrList_Axis (StructuralTk _ _ pres _ _) ~[] = Clip_List_Axis $ parseErr (StructuralParseErr pres)
+construct_List_Probability tk mClips = genericConstruct_List "Probability" toList_Probability mClips
+construct_HoleList_Probability tk ~[] = Clip_List_Probability $ hole
+construct_ParseErrList_Probability (StructuralTk _ _ pres _ _) ~[] = Clip_List_Probability $ parseErr (StructuralParseErr pres)
 
 
 
@@ -309,11 +345,29 @@ reuseClean nodes
            (Clean) -> genericReuse0 Clean
            _ -> error "Internal error:ProxParser_Generated.reuseClean"
 
-reuseProbtable :: [Token doc Node clip token] -> Maybe Int -> Maybe Probability -> Probtable
-reuseProbtable nodes ma0 ma1
+reuseProbtable :: [Token doc Node clip token] -> Maybe Int -> Maybe List_Value -> Maybe Table -> Probtable
+reuseProbtable nodes ma0 ma1 ma2
   = case extractFromTokens extractProbtable defaultProbtable nodes of
-           (Probtable a0 a1) -> genericReuse2 Probtable a0 a1 ma0 ma1
+           (Probtable a0 a1 a2) -> genericReuse3 Probtable a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseProbtable"
+
+reuseValue :: [Token doc Node clip token] -> Maybe String -> Value
+reuseValue nodes ma0
+  = case extractFromTokens extractValue defaultValue nodes of
+           (Value a0) -> genericReuse1 Value a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseValue"
+
+reuseTable :: [Token doc Node clip token] -> Maybe List_Axis -> Maybe List_Probability -> Table
+reuseTable nodes ma0 ma1
+  = case extractFromTokens extractTable defaultTable nodes of
+           (Table a0 a1) -> genericReuse2 Table a0 a1 ma0 ma1
+           _ -> error "Internal error:ProxParser_Generated.reuseTable"
+
+reuseAxis :: [Token doc Node clip token] -> Maybe List_Value -> Axis
+reuseAxis nodes ma0
+  = case extractFromTokens extractAxis defaultAxis nodes of
+           (Axis a0) -> genericReuse1 Axis a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseAxis"
 
 reuseProbability :: [Token doc Node clip token] -> Maybe String -> Probability
 reuseProbability nodes ma0
@@ -368,6 +422,24 @@ reuseList_Edge nodes ma0
   = case extractFromTokens extractList_Edge defaultList_Edge nodes of
            (List_Edge a0) -> genericReuse1 List_Edge a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Edge"
+
+reuseList_Value :: [Token doc Node clip token] -> Maybe ConsList_Value -> List_Value
+reuseList_Value nodes ma0
+  = case extractFromTokens extractList_Value defaultList_Value nodes of
+           (List_Value a0) -> genericReuse1 List_Value a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Value"
+
+reuseList_Axis :: [Token doc Node clip token] -> Maybe ConsList_Axis -> List_Axis
+reuseList_Axis nodes ma0
+  = case extractFromTokens extractList_Axis defaultList_Axis nodes of
+           (List_Axis a0) -> genericReuse1 List_Axis a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Axis"
+
+reuseList_Probability :: [Token doc Node clip token] -> Maybe ConsList_Probability -> List_Probability
+reuseList_Probability nodes ma0
+  = case extractFromTokens extractList_Probability defaultList_Probability nodes of
+           (List_Probability a0) -> genericReuse1 List_Probability a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Probability"
 
 
 
@@ -461,8 +533,20 @@ extractClean (Just (Node_Clean x@(Clean) _)) = Just x
 extractClean _ = Nothing
 
 extractProbtable :: Maybe Node -> Maybe Probtable
-extractProbtable (Just (Node_Probtable x@(Probtable _ _) _)) = Just x
+extractProbtable (Just (Node_Probtable x@(Probtable _ _ _) _)) = Just x
 extractProbtable _ = Nothing
+
+extractValue :: Maybe Node -> Maybe Value
+extractValue (Just (Node_Value x@(Value _) _)) = Just x
+extractValue _ = Nothing
+
+extractTable :: Maybe Node -> Maybe Table
+extractTable (Just (Node_Table x@(Table _ _) _)) = Just x
+extractTable _ = Nothing
+
+extractAxis :: Maybe Node -> Maybe Axis
+extractAxis (Just (Node_Axis x@(Axis _) _)) = Just x
+extractAxis _ = Nothing
 
 extractProbability :: Maybe Node -> Maybe Probability
 extractProbability (Just (Node_Probability x@(Probability _) _)) = Just x
@@ -499,6 +583,18 @@ extractList_Vertex _ = Nothing
 extractList_Edge :: Maybe Node -> Maybe List_Edge
 extractList_Edge (Just (Node_List_Edge x@(List_Edge _) _)) = Just x
 extractList_Edge _ = Nothing
+
+extractList_Value :: Maybe Node -> Maybe List_Value
+extractList_Value (Just (Node_List_Value x@(List_Value _) _)) = Just x
+extractList_Value _ = Nothing
+
+extractList_Axis :: Maybe Node -> Maybe List_Axis
+extractList_Axis (Just (Node_List_Axis x@(List_Axis _) _)) = Just x
+extractList_Axis _ = Nothing
+
+extractList_Probability :: Maybe Node -> Maybe List_Probability
+extractList_Probability (Just (Node_List_Probability x@(List_Probability _) _)) = Just x
+extractList_Probability _ = Nothing
 
 
 
@@ -571,7 +667,16 @@ defaultClean :: Dirty
 defaultClean = Clean
 
 defaultProbtable :: Probtable
-defaultProbtable = Probtable hole hole
+defaultProbtable = Probtable hole hole hole
+
+defaultValue :: Value
+defaultValue = Value hole
+
+defaultTable :: Table
+defaultTable = Table hole hole
+
+defaultAxis :: Axis
+defaultAxis = Axis hole
 
 defaultProbability :: Probability
 defaultProbability = Probability hole
@@ -599,6 +704,15 @@ defaultList_Vertex = List_Vertex Nil_Vertex
 
 defaultList_Edge :: List_Edge
 defaultList_Edge = List_Edge Nil_Edge
+
+defaultList_Value :: List_Value
+defaultList_Value = List_Value Nil_Value
+
+defaultList_Axis :: List_Axis
+defaultList_Axis = List_Axis Nil_Axis
+
+defaultList_Probability :: List_Probability
+defaultList_Probability = List_Probability Nil_Probability
 
 
 
