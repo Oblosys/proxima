@@ -36,6 +36,8 @@ parseIO :: (Eq token, Show token, DocNode node) => ScannerSheet doc node clip to
 parseIO _ state layLvl prsLvl (OpenFileLay str) = return ([OpenFilePres str], state, layLvl)
 parseIO _ state layLvl prsLvl (SaveFileLay str) = return ([SaveFilePres str], state, layLvl)
 parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay focus) = 
+  return ([SkipPres 0], state, LayoutLevel pres focus dt)
+{- auto doc focus turned off
   let pathDoc = pathDocFromFocusPres focus pres
       (editHigh1, state', LayoutLevel pres' focus' dt' ) = tokenizeLay scannerSheet state 
                                                              (LayoutLevel pres focus dt) prsLvl
@@ -44,6 +46,7 @@ parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay fo
                , cast (NavPathDoc' pathDoc :: EditDocument' doc enr node clip token)
                ]
              , state', LayoutLevel pres' focus' dt')
+-}
 parseIO scannerSheet state layLvl prsLvl event = let (editHigh, state', low') = parse scannerSheet state layLvl prsLvl event
                                                  in  return ([editHigh], state', low')
 
