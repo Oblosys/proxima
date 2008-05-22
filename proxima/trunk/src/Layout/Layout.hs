@@ -55,7 +55,7 @@ detokenize wm (VertexP idp v x y o pres)  = let (pres', f) = detokenize wm pres
                                            in  (VertexP idp v x y o pres', prependToFocus 0 f)
 detokenize wm (FormatterP idp press)      = let (press', f) = detokenizeList wm 0 press
                                            in  (FormatterP idp press', f)
-detokenize wm pr                         = debug Err ("Layout.detokenize: can't handle "++ show pr) $ (castPresToLay pr, noFocus)
+detokenize wm pr                         = debug Err ("Layout.detokenize: can't handle "++ shallowShowPres pr) $ (castPresToLay pr, noFocus)
 
 detokenizeList wm i []           = ([], noFocus)
 detokenizeList wm i (pres:press) = let (pres',  f1) = detokenize wm pres 
