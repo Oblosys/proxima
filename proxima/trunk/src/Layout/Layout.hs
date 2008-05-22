@@ -114,7 +114,7 @@ detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP 
 --detokenize' wm t (FormatterP idp press)      = let (press', f) = detokenizeList' wm p t 0 press
 --                                              in  ([FormatterP idp press'], f)
 -- graph and vertex are not assumed to be in parsing presentations
-detokenize' wm t pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ show pr) [[(castPresToLay pr, noFocus)]]
+detokenize' wm t pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ shallowShowPres pr) [[(castPresToLay pr, noFocus)]]
 
 
 detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> [Presentation doc node clip token] -> 
