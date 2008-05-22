@@ -28,12 +28,11 @@ showXML xml =
   ++ case xml of (Elt tg _ _) -> "<!DOCTYPE "++tg++" SYSTEM \""++tg++".dtd\" >\n"
                  _            -> ""
   ++ -} showXML' 0 xml
- where showXML' i (Elt tag ps []) = replicate i ' ' ++"<"++tag++showProperties ps++"/>\n"
-       showXML' i (Elt tag ps [PCData str]) = replicate i ' ' ++"<"++tag++showProperties ps++">"++str++"</"++tag++">\n" 
+ where showXML' i (Elt tag ps [PCData str]) = replicate i ' ' ++"<"++tag++showProperties ps++">"++str++"</"++tag++">\n" 
        showXML' i (Elt tag ps cs) = replicate i ' ' ++"<"++tag++showProperties ps++">\n"
                               ++ concatMap (showXML' (i+2)) cs
                               ++ replicate i ' ' ++"</"++tag++">\n" 
-       showXML' i (EmptyElt)     = replicate i ' ' ++"Empty\n"
+       showXML' i (EmptyElt tag ps) = replicate i ' ' ++"<"++tag++showProperties ps++"/>\n"
        showXML' i (PCData str)   = replicate i ' ' ++str++"\n"
        showProperties [] = ""
        showProperties ((p,v):ps) = " "++p++"="++show v++ showProperties ps

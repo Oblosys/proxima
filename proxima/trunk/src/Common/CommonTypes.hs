@@ -305,6 +305,10 @@ ivory = (255,255,240) :: (Int, Int, Int)
 -}
 
 
-data XML = Elt String [(String, String)] [XML] | PCData String | EmptyElt
+data XML = Elt String [Property] [XML]
+         | EmptyElt String [Property] -- There is an EmptyElt, because Elt may be accidentally
+         | PCData String              -- empty (with empty list children), which makes parsing awkward
+                                      -- if it is presented as <elt/>
 
+type Property = (String, String)
 
