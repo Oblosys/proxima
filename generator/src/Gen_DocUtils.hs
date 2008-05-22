@@ -44,9 +44,11 @@ genDocNode decls = genBanner "DocNode instance for Node" $
 genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 
          [ case prodKind of 
-             ParseErrProd -> "toXML%1 %2 = Elt \"%3\" [] []" <~ [typeName, genPattern prod, cnstrName] 
-             _            -> "toXML%1 %2 = Elt \"%3\" [] $ " <~ [typeName, genPattern prod, cnstrName] ++
-                                               genToXMLFields fields
+             ParseErrProd -> "toXML%1 %2 = EmptyElt \"%3\" []" <~ [typeName, genPattern prod, cnstrName] 
+             _            -> if null fields 
+                             then "toXML%1 %2 = EmptyElt \"%3\" [] " <~ [typeName, genPattern prod, cnstrName]
+                             else "toXML%1 %2 = Elt \"%3\" [] $ " <~ [typeName, genPattern prod, cnstrName]
+                                   ++ genToXMLFields fields
          | prod@(Prod prodKind cnstrName _ fields) <- prods 
          ]
         genToXMLDecl (Decl (LHSListType typeName) prods) = 
@@ -137,11 +139,11 @@ genMisc = genBanner "Miscellaneous" $
   , "                                 Elt \"Root\" [] [] -- this does not occur"
   , ""
  -}
-  , "toXMLInt i = Elt \"Integer\" [(\"val\", show i)] []"
+  , "toXMLInt i = EmptyElt \"Integer\" [(\"val\", show i)]"
   , ""
-  , "toXMLInt f = Elt \"Float\" [(\"val\", show f)] []"
+  , "toXMLInt f = EmptyElt \"Float\" [(\"val\", show f)]"
   , ""
-  , "toXMLBool b = Elt \"Bool\" [(\"val\", show b)] []"
+  , "toXMLBool b = EmptyElt \"Bool\" [(\"val\", show b)]"
   , ""
   , "toXMLString str = Elt \"String\" [] [PCData str] "
   , ""
