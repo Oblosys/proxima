@@ -309,9 +309,11 @@ presentFocus (PathD pth) path pres = if pth==path then pres `withbgColor` focusC
 focusCol = lightBlue -- lightGrey
 
 squiggly :: Color -> Xprez doc node clip token -> Xprez doc node clip token
-squiggly c xp = overlayReverse [xp, img "img/squiggly.png" `withHeight` 3 `withColor` c]
--- png is the red one, only temporary
-
+squiggly c xp = overlayReverse [xp, img imgFile `withHeight` 3 `withColor` c]
+ where imgFile | c == red    = "img/redSquiggly.png" -- HACK. setting colors for images
+               | c == green  = "img/greenSquiggly.png"  -- is a problem in gtk2HS
+               | otherwise   = "img/squiggly.bmp" 
+               
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token
 presentElementXML focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  
