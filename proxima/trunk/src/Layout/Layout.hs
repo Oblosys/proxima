@@ -64,9 +64,9 @@ detokenizeList wm i (pres:press) = let (pres',  f1) = detokenize wm pres
 
 
 detokenizeParsing wm (ParsingP idp pr l pres) =
-  let rows = detokenize' wm False $ RowP NoIDP 0 
-                                      [ TokenP idp $ UserTk undefined undefined "" undefined undefined
-                                      , pres] -- add a dummy token for leading whitespace
+  let rows = detokenize' wm $ RowP NoIDP 0 
+                                   [ TokenP idp $ UserTk undefined undefined "" undefined undefined
+                                   , pres] -- add a dummy token for leading whitespace
       presss = map (map fst) $ rows
       focusss = [ prependToFocus y $ prependToFocus x $ focus
                 | (y,row) <- zip [0..] rows, (x,(_,focus)) <- zip [0..] row
@@ -87,41 +87,41 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
 -- for col, we do the same as for row. This is because a col may be present in a structuralTk coming
 -- from a presented parse error
 -- TODO: is this ok?
-detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> Presentation doc node clip token -> 
+detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc node clip token -> 
                [[(Layout doc node clip token, FocusPres)]]
-detokenize' wm t (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
+detokenize' wm (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
                                             in  [[(StructuralP idp pres', prependToFocus 0 f)]]
-detokenize' wm t (EmptyP idp)                = [[(EmptyP idp, noFocus)]]
+detokenize' wm (EmptyP idp)                = [[(EmptyP idp, noFocus)]]
             
-detokenize' wm t (StringP idp str)           = [[(StringP idp str, noFocus)]]
-detokenize' wm t (TokenP idp token)          = let res = addWhitespaceToken wm idp token
+detokenize' wm (StringP idp str)           = [[(StringP idp str, noFocus)]]
+detokenize' wm (TokenP idp token)          = let res = addWhitespaceToken wm idp token
                                                in  -- debug Lay ("Token:"++show res ) $
                                                    res
-detokenize' wm t (ImageP idp str st)         = [[(ImageP idp str st, noFocus)]]
-detokenize' wm t (PolyP idp pts w st)        = [[(PolyP idp pts w st, noFocus)]]
-detokenize' wm t (RectangleP idp w h lw st)  = [[(RectangleP idp w h lw st, noFocus)]]
-detokenize' wm t (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocus)]]
+detokenize' wm (ImageP idp str st)         = [[(ImageP idp str st, noFocus)]]
+detokenize' wm (PolyP idp pts w st)        = [[(PolyP idp pts w st, noFocus)]]
+detokenize' wm (RectangleP idp w h lw st)  = [[(RectangleP idp w h lw st, noFocus)]]
+detokenize' wm (EllipseP idp w h lw st)    = [[(EllipseP idp w h lw st, noFocus)]]
 
-detokenize' wm t (RowP idp rf press)         = detokenizeRow' wm t press
---detokenize' wm t (ColP idp rf fm press)      = detokenizeRow' wm t press
-detokenize' wm t (OverlayP idp d (pres:press)) = let (rowss) = detokenize' wm t pres -- cast is safe, no tokens in press
-                                                     addOverlay (p,f) = ( OverlayP idp d $ p : map castPresToLay press
-                                                                        , prependToFocus 0 f )
+detokenize' wm (RowP idp rf press)         = detokenizeRow' wm press
+detokenize' wm (ColP idp rf fm press)      = concatMap (detokenize' wm) press
+detokenize' wm (OverlayP idp d (pres:press)) = let (rowss) = detokenize' wm pres -- cast is safe, no tokens in press
+                                                   addOverlay (p,f) = ( OverlayP idp d $ p : map castPresToLay press
+                                                                      , prependToFocus 0 f )
                                                in  map (map addOverlay) rowss
-detokenize' wm t (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm t pres)
-detokenize' wm t (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm t pres)
-detokenize' wm t (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm t pres)
---detokenize' wm t (FormatterP idp press)      = let (press', f) = detokenizeList' wm p t 0 press
+detokenize' wm (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm pres)
+detokenize' wm (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm pres)
+detokenize' wm (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm pres)
+--detokenize' wm (FormatterP idp press)      = let (press', f) = detokenizeList' wm p 0 press
 --                                              in  ([FormatterP idp press'], f)
 -- graph and vertex are not assumed to be in parsing presentations
-detokenize' wm t pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ shallowShowPres pr) [[(castPresToLay pr, noFocus)]]
+detokenize' wm pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ shallowShowPres pr) [[(castPresToLay pr, noFocus)]]
 
 
-detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> Bool -> [Presentation doc node clip token] -> 
+detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> [Presentation doc node clip token] -> 
                   [[(Layout doc node clip token, FocusPres)]]
-detokenizeRow' wm t [] = []
-detokenizeRow' wm t (pres:press) =
-   combine (detokenize' wm True pres) (detokenizeRow' wm t press)
+detokenizeRow' wm [] = []
+detokenizeRow' wm (pres:press) =
+   combine (detokenize' wm pres) (detokenizeRow' wm press)
   
 
 
