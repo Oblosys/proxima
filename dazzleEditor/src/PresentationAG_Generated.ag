@@ -117,7 +117,7 @@ DATA Value
   | ParseErrValue error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Table
-  | Table axes:List_Axis probs:List_Probability
+  | Table parents:{[Int]} axes:List_Axis probs:List_Probability
   | HoleTable
   | ParseErrTable error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -596,11 +596,11 @@ SEM Table
       axes.pIdC = @lhs.pIdC + 0
       probs.pIdC = @axes.pIdC
       lhs.pIdC = @probs.pIdC
-      axes.path  = @lhs.path++[0]
-      probs.path  = @lhs.path++[1]
+      axes.path  = @lhs.path++[1]
+      probs.path  = @lhs.path++[2]
   | Table
-    axes.ix = 0
-    probs.ix = 1
+    axes.ix = 1
+    probs.ix = 2
   | Table
       lhs.pres = loc (Node_Table @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -1224,7 +1224,7 @@ SEM Value
 
 SEM Table
   | Table
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ @axes.presXML, @probs.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ presentPrimXMLList_Int @parents, @axes.presXML, @probs.presXML ] 
   | HoleTable     lhs.presXML = presHole @lhs.focusD "Table" (Node_HoleTable @self @lhs.path) @lhs.path
   | ParseErrTable lhs.presXML = presParseErr (Node_ParseErrTable @self @lhs.path) @error
 
@@ -1512,7 +1512,7 @@ SEM Value
 
 SEM Table
   | Table
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ @axes.presTree, @probs.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Table @self @lhs.path) @lhs.path "Table" [ presentPrimXMLList_Int @parents, @axes.presTree, @probs.presTree ] 
   | HoleTable     lhs.presTree = presHole @lhs.focusD "Table" (Node_HoleTable @self @lhs.path) @lhs.path
   | ParseErrTable lhs.presTree = presParseErr (Node_ParseErrTable @self @lhs.path) @error
 

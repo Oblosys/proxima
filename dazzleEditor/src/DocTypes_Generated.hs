@@ -109,7 +109,7 @@ data Value = Value String
            | ParseErrValue (ParseError Document Node ClipDoc UserToken)
                deriving Show
 
-data Table = Table List_Axis List_Probability
+data Table = Table List_Int List_Axis List_Probability
            | HoleTable
            | ParseErrTable (ParseError Document Node ClipDoc UserToken)
                deriving Show

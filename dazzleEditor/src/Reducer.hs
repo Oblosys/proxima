@@ -184,13 +184,15 @@ syncProbtables (Graph _ _ list_Edge) probtables =
   map syncProbtable probtables
  where edges = [(f,t) | Edge f t <- fromList_Edge list_Edge ]
        getIncomingIDs node = map fst (filter (\(f,t) -> t==node) edges)
-       syncProbtable (Probtable id list_Val (Table oldList_Axis oldList_Prob)) = 
-         let axes = map (getValues probtables) (id:getIncomingIDs id)
+       syncProbtable (Probtable id list_Val (Table oldList_Int oldList_Axis oldList_Prob)) = 
+         let parents = getIncomingIDs id
+             axes = map (getValues probtables) (id:parents)
              list_Axis = toList_Axis $ [ Axis list_Val | list_Val <- axes ]
              nrsOfValues = getAxesNrsOfValues list_Axis
              nrOfProbs = product nrsOfValues
          in  Probtable id list_Val $
-               Table list_Axis $ -- always refresh, in case values changed
+               Table parents list_Axis $ -- always refresh, in case values changed (parents does not change, but is refreshed anyway)
+                    -- maybe a check on parents and each ones nr of values is prettier
                  if nrsOfValues == getAxesNrsOfValues oldList_Axis
                  then oldList_Prob
                  else toList_Probability $ replicate nrOfProbs (Probability "0")

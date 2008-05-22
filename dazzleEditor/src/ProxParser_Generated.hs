@@ -170,7 +170,7 @@ construct_ParseErrProbtable (StructuralTk _ _ pres _ _) ~[] = Clip_Probtable $ p
 construct_Value tk ~[mClip0] = Clip_Value $ reuseValue [tk]  (retrieveArg "Value" "val::String" mClip0)
 construct_HoleValue tk ~[] = Clip_Value $ hole
 construct_ParseErrValue (StructuralTk _ _ pres _ _) ~[] = Clip_Value $ parseErr (StructuralParseErr pres)
-construct_Table tk ~[mClip0,mClip1] = Clip_Table $ reuseTable [tk]  (retrieveArg "Table" "axes::List_Axis" mClip0) (retrieveArg "Table" "probs::List_Probability" mClip1)
+construct_Table tk ~[mClip0,mClip1,mClip2] = Clip_Table $ reuseTable [tk]  (retrieveArg "Table" "parents::List_Int" mClip0) (retrieveArg "Table" "axes::List_Axis" mClip1) (retrieveArg "Table" "probs::List_Probability" mClip2)
 construct_HoleTable tk ~[] = Clip_Table $ hole
 construct_ParseErrTable (StructuralTk _ _ pres _ _) ~[] = Clip_Table $ parseErr (StructuralParseErr pres)
 construct_Axis tk ~[mClip0] = Clip_Axis $ reuseAxis [tk]  (retrieveArg "Axis" "values::List_Value" mClip0)
@@ -357,10 +357,10 @@ reuseValue nodes ma0
            (Value a0) -> genericReuse1 Value a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseValue"
 
-reuseTable :: [Token doc Node clip token] -> Maybe List_Axis -> Maybe List_Probability -> Table
-reuseTable nodes ma0 ma1
+reuseTable :: [Token doc Node clip token] -> Maybe List_Int -> Maybe List_Axis -> Maybe List_Probability -> Table
+reuseTable nodes ma0 ma1 ma2
   = case extractFromTokens extractTable defaultTable nodes of
-           (Table a0 a1) -> genericReuse2 Table a0 a1 ma0 ma1
+           (Table a0 a1 a2) -> genericReuse3 Table a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseTable"
 
 reuseAxis :: [Token doc Node clip token] -> Maybe List_Value -> Axis
@@ -541,7 +541,7 @@ extractValue (Just (Node_Value x@(Value _) _)) = Just x
 extractValue _ = Nothing
 
 extractTable :: Maybe Node -> Maybe Table
-extractTable (Just (Node_Table x@(Table _ _) _)) = Just x
+extractTable (Just (Node_Table x@(Table _ _ _) _)) = Just x
 extractTable _ = Nothing
 
 extractAxis :: Maybe Node -> Maybe Axis
@@ -673,7 +673,7 @@ defaultValue :: Value
 defaultValue = Value hole
 
 defaultTable :: Table
-defaultTable = Table hole hole
+defaultTable = Table hole hole hole
 
 defaultAxis :: Axis
 defaultAxis = Axis hole

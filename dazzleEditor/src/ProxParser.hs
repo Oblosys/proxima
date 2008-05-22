@@ -233,7 +233,7 @@ parseProbability = pPrs $ Probability . tokenString
      
 recognizeTable :: ListParser Document Node ClipDoc UserToken Table
 recognizeTable = pStr $ 
-          (\str probs -> reuseTable [str] Nothing (Just $ toList_Probability probs))
+          (\str probs -> reuseTable [str] Nothing Nothing (Just $ toList_Probability probs))
       <$> pStructuralTk Node_Table
       <*> pList parseProbability
 

@@ -812,21 +812,23 @@ instance Editable Value Document Node ClipDoc UserToken where
 
 instance Editable Table Document Node ClipDoc UserToken where
   select [] x = Clip_Table x
-  select (0:p) (Table x0 x1) = select p x0
-  select (1:p) (Table x0 x1) = select p x1
+  select (0:p) (Table x0 x1 x2) = select p x0
+  select (1:p) (Table x0 x1 x2) = select p x1
+  select (2:p) (Table x0 x1 x2) = select p x2
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Table c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Table") x
-  paste (0:p) c (Table x0 x1) = Table (paste p c x0) x1
-  paste (1:p) c (Table x0 x1) = Table x0 (paste p c x1)
+  paste (0:p) c (Table x0 x1 x2) = Table (paste p c x0) x1 x2
+  paste (1:p) c (Table x0 x1 x2) = Table x0 (paste p c x1) x2
+  paste (2:p) c (Table x0 x1 x2) = Table x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("Table {List_Axis} {List_Probability} "  , Clip_Table $ Table hole hole)
+  alternatives _ = [ ("Table {List_Int} {List_Axis} {List_Probability} "  , Clip_Table $ Table hole hole hole)
                    ,("{Table}", Clip_Table hole)
                    ]
 
-  arity (Table x0 x1) = 2
+  arity (Table x0 x1 x2) = 3
   arity _                        = 0
 
   toClip t = Clip_Table t

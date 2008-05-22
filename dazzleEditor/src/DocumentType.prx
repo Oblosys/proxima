@@ -34,7 +34,7 @@ data Probtable = Probtable id:Int values:[Value] table:Table
 
 data Value = Value val:String
 
-data Table = Table axes:[Axis] probs:[Probability]
+data Table = Table parents:[Int] axes:[Axis] probs:[Probability]
 
 data Axis = Axis [Value]
 

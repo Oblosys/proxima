@@ -38,7 +38,7 @@ setProbtablesParas probtableMap (ProbtablePara (Probtable id _ _):paras) =
   let probtable' = case lookup id probtableMap of
                      Just probtable -> probtable
                      Nothing        -> Probtable id (toList_Value []) $
-                                         Table (toList_Axis []) (toList_Probability [])
+                                         Table [] (toList_Axis []) (toList_Probability [])
   in  ProbtablePara probtable' : setProbtablesParas probtableMap paras
 setProbtablesParas probtableMap (para:paras)                    = 
   para : setProbtablesParas probtableMap paras

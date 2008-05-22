@@ -13,7 +13,7 @@ import List
 import Maybe
 import qualified Data.Map as Map
 import Data.Map (Map)
-
+import Control.Monad
 
 import Evaluation.DocTypes (DocumentLevel (..))
 import DocTypes_Generated
@@ -236,13 +236,9 @@ SEM Vertex [ || ]
 
 {
 -- probably can do without self by using select
-setShape :: Path -> Shape -> Vertex -> UpdateDoc Document clip
-setShape pth shape (Vertex name _ id x y) =
-  \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Vertex (Vertex name shape id x y))
-                                            )
-    in  (DocumentLevel d' path cl)
+setShape :: Path -> Shape -> Vertex -> UpdateDoc Document ClipDoc
+setShape pth shape (Vertex name _ id x y) = pasteAt (Clip_Vertex (Vertex name shape id x y)) pth
+
 
 squareOutline :: Int -> Double -> (Int, Int)
 squareOutline r a | a < pi / 4  || a >= 7 * pi / 4    = (r-1, round $ - tan a * fromIntegral r)  
@@ -265,31 +261,134 @@ SEM Subgraph [||]
                                      ])
 
 
-SEM Probtable
+SEM Probtable [ | | ]
   | Probtable
+      loc.name = getVertexName @lhs.vertexIDs @lhs.vertexNames @id
       loc.pres = structural $ col [ row [ text $ "Probtable for " ++
-                                           (case lookup @id (zip @lhs.vertexIDs @lhs.vertexNames) of
-                                             Nothing -> "nothing"
-                                             Just name -> name
-                                            ) ++" with values "
+                                           @name ++" with values "
                                         , @values.pres
                                         ]
                                   , @table.pres
+                                  , text ""
                                   ] `addPopupItems`
                                   [ ( "Show probtable for "++show name
                                     , setProbtableID @lhs.path id @self)
                                   | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                   ]
-
+      table.nrOfValues = length $ fromList_Value @values.self
 {
-setProbtableID :: Path -> Int -> Probtable -> UpdateDoc Document clip
-setProbtableID pth id (Probtable _ vals probs) =
+getVertexName :: [Int] -> [String] -> Int -> String
+getVertexName ids names id =
+  case lookup id (zip ids names) of
+    Nothing   -> "not found"
+    Just name -> name
+                                            
+setProbtableID :: Path -> Int -> Probtable -> UpdateDoc Document ClipDoc
+setProbtableID pth id (Probtable _ vals probs) = pasteAt (Clip_Probtable $ Probtable id vals probs) pth
+
+pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+pasteAt clip pth =
   \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth)
-                                              (Clip_Probtable (Probtable id vals probs))
-                                            )
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
     in  (DocumentLevel d' path cl)
 }
+
+SEM Table [ name : String nrOfValues : Int | | ]
+  | Table
+      loc.groupSize = length @probs.press `div` (@lhs.nrOfValues `max` 1)
+                     
+      loc.pres = let axesStrings = [ [ str | Value str <- fromList_Value list_Val ]
+                                   | Axis list_Val <- fromList_Axis @axes.self
+                                   ]
+                     valueColsFields = transpose $ products axesStrings
+                     groupedValueColsFields = map (groups @groupSize) valueColsFields
+                     groupedProbsPress = groups @groupSize @probs.press
+                     
+                     headerRow = @lhs.name : map (getVertexName @lhs.vertexIDs @lhs.vertexNames) @parents
+                     valueCols = [ (col $ hPad (text header) :
+                                          hSepDouble :
+                                          (concat $ intersperse [hSepDouble] $ map 
+                                                     (\group -> intersperse hSep $ map (hPad . text) group)
+                                                     groups)
+                                   ) `withVRef` 0
+                                 | (header,groups) <- zip headerRow groupedValueColsFields ]
+                     probsCol = (col $ hPad (text "Expertschatting") :
+                                             hSepDouble :
+                                             (concat $ intersperse [hSepDouble] $ map 
+                                                     (\group -> intersperse hSep $ group)
+                                                     groupedProbsPress)
+                                ) `withVRef` 0 
+                 in  structural $ boxed $ row $ (intersperse vSep $ valueCols)
+                                                ++
+                                                [ vSepDouble
+                                                , probsCol
+                                                ]
+      probs.totals = concat . replicate @lhs.nrOfValues . transpose . groups @groupSize $
+                       @probs.mDoubleVals
+
+{
+hPad pres = row [ hSpace 4, pres, hSpace 4 ]
+hSep = col [ vSpace 2, hLine, vSpace 2]
+hSepDouble = col [ vSpace 2, hLine, vSpace 1, hLine, vSpace 2]
+
+vSep = row [ vLine ]
+vSepDouble = row [ vLine, vLine ]
+
+
+-- | return a list of all cartesian products for a list of lists
+--   e.g. products [[1,2],[3,4]] = [[1,3],[1,4],[2,3],[2,4]]
+products :: [[a]] -> [[a]]
+products [] = [[]]
+products (xs:xss) = [ x:prod | x <- xs, prod <- products xss]
+
+-- | groups splits a list into groups of given length. The
+--   last group might be shorter.
+--   Example: groups 3 [1..10] ==> [[1,2,3],[4,5,6],[7,8,9],[10]]
+groups :: Int -> [a] -> [[a]]
+groups _ [] = []
+groups n xs = let (col, rest) = splitAt n xs
+              in  col: groups n rest
+
+mReadDouble :: String -> Maybe Double
+mReadDouble str = case reads str of
+                    [(val,"")] -> Just val
+                    _          -> Nothing
+}
+ATTR List_Probability ConsList_Probability Probability
+     [ | | mDoubleVals USE {++} {[]} : {[Maybe Double]} ]
+
+SEM List_Probability [ totals : {[[Maybe Double]]} | | ]
+
+SEM ConsList_Probability [ totals : {[[Maybe Double]]} | | ]
+  | Cons_Probability
+      (head.total, tail.totals) = let (h:t) = @lhs.totals in (h,t)
+  | Nil_Probability
+      
+       
+SEM Probability [ total : {[Maybe Double]} | | ]
+  | Probability 
+      lhs.mDoubleVals = [@mDoubleVal]
+      loc.mDoubleVal = mReadDouble @prob
+      loc.pres = let totalIsOne mDoubles = case fmap sum $ sequence mDoubles of
+                                                             Nothing  -> False
+                                                             Just v  -> v > 0.9999 && v < 1.0001
+                                           -- True if no Nothings, and values add up to 1
+                     squiggle = case @mDoubleVal of
+                                  Nothing -> squiggly red -- Proxima parser should take care of this,
+                                                            -- but then we need special scanning for probs
+                                                            -- Alex scanner can handle this, but it hasn't been implemented
+                                  Just _  -> if totalIsOne @lhs.total 
+                                             then id
+                                             else squiggly green
+                 in  parsing $ hPad $ squiggle $ text @prob 
+                       `addPopupItems` case fmap sum $ sequence $ delete @mDoubleVal @lhs.total of
+                                          Nothing -> []
+                                          Just v -> if v <= 1.0 
+                                                    then [( "Fix probability"
+                                                          , reduceDoc .
+                                                            pasteAt (Clip_Probability $ Probability $ show $ 1-v) @lhs.path 
+                                                          )]
+                                                    else []
 
 SEM List_Value
   | List_Value
@@ -307,37 +406,6 @@ SEM Value
                                    , ("Insert value after", reduceDoc . addElementAfter newValue @lhs.path) 
                                    ]
 
-SEM Table
-  | Table
-      loc.pres = let axesStrings = [ [ str | Value str <- fromList_Value list_Val ]
-                                   | Axis list_Val <- fromList_Axis @axes.self
-                                   ]
-                     rows = products axesStrings
-                 in  structural $ boxed $ row $ ( intersperse vSep $ 
-                                        [ (col $ intersperse hSep $ map (hPad . text) cl)
-                                          `withVRef` 0
-                                        | cl <- transpose rows ] ) ++
-                                        [ endVSep
-                                        , (col $ intersperse hSep @probs.press) `withVRef` 0 ]
-                                        
-{
--- withVRef is due to arranger bug
-hPad pres = row [ hSpace 4, pres, hSpace 4 ]
-hSep = colR 1 [ vSpace 2, hLine, vSpace 2]
-
-vSep = rowR 0 [ vLine ]
-
-endVSep = row [ vLine, vLine ]
-
--- | return a list of all cartesian products for a list of lists
---   e.g. products [[1,2],[3,4]] = [[1,3],[1,4],[2,3],[2,4]]
-products :: [[a]] -> [[a]]
-products [] = [[]]
-products (xs:xss) = [ x:prod | x <- xs, prod <- products xss]
-}                             
-SEM Probability
-  | Probability 
-      loc.pres = parsing $ hPad $ text @prob
 
 -- not used
 SEM List_Axis
@@ -377,6 +445,7 @@ ATTR List_Section ConsList_Section Section
      List_Paragraph ConsList_Paragraph Paragraph
      List_Word ConsList_Word Word
      List_Probtable ConsList_Probtable Probtable
+     Table
      [ vertexIDs : {[Int]} vertexNames : {[String]} edges : {[(Int, Int)]} || ] 
 
 
@@ -418,7 +487,7 @@ newSubgraphPara = Clip_Paragraph $
 newProbtablePara = Clip_Paragraph $
                      ProbtablePara $
                        Probtable (-1) (toList_Value []) $
-                         Table (toList_Axis []) (toList_Probability [])
+                         Table [] (toList_Axis []) (toList_Probability [])
                        
 newSection = Clip_Section $
                Section
@@ -565,6 +634,7 @@ SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
   | HoleList_Section     lhs.tocPress = []
   | ParseErrList_Section lhs.tocPress = [ presParseErr (Node_List_Section @self @lhs.path) @error ]
 
+-- probably can use a USE here
 SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
   | Nil_Section      lhs.tocPress = []
