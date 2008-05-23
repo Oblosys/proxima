@@ -6,13 +6,14 @@ import Evaluation.DocTypes
 import Presentation.PresTypes hiding (Edge)
 import List
 import Char
+import Data.Generics
 
 data UserToken = KeyTk String
                | WordTk 
                | NodeRefTk
                | LabelTk
                | LabelRefTk
-               | IntTk deriving (Show, Eq, Ord)
+               | IntTk deriving (Show, Eq, Ord, Typeable)
 
 type List_Int = [Int]
 
@@ -25,39 +26,39 @@ type List_Int = [Int]
 data EnrichedDoc = RootEnr Root
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data Document = RootDoc Root
               | HoleDocument
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data Root = Root Graph List_Probtable String List_Section
           | HoleRoot
           | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data Section = Section String List_Paragraph List_Subsection
              | HoleSection
              | ParseErrSection (ParseError Document Node ClipDoc UserToken)
-                 deriving Show
+                 deriving (Show, Data, Typeable)
 
 data Subsection = Subsection String List_Paragraph List_Subsubsection
                 | HoleSubsection
                 | ParseErrSubsection (ParseError Document Node ClipDoc UserToken)
-                    deriving Show
+                    deriving (Show, Data, Typeable)
 
 data Subsubsection = Subsubsection String List_Paragraph
                    | HoleSubsubsection
                    | ParseErrSubsubsection (ParseError Document Node ClipDoc UserToken)
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 data Paragraph = Paragraph List_Word
                | SubgraphPara Subgraph
                | ProbtablePara Probtable
                | HoleParagraph
                | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data Word = Word String
           | NodeRef String
@@ -65,163 +66,163 @@ data Word = Word String
           | LabelRef String
           | HoleWord
           | ParseErrWord (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data Graph = Graph Dirty List_Vertex List_Edge
            | HoleGraph
            | ParseErrGraph (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Vertex = Vertex String Shape Int Int Int
             | HoleVertex
             | ParseErrVertex (ParseError Document Node ClipDoc UserToken)
-                deriving Show
+                deriving (Show, Data, Typeable)
 
 data Shape = Circle
            | Square
            | HoleShape
            | ParseErrShape (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Edge = Edge Int Int
           | HoleEdge
           | ParseErrEdge (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data Subgraph = Subgraph Dirty List_Vertex List_Edge
               | HoleSubgraph
               | ParseErrSubgraph (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data Dirty = Dirty
            | Clean
            | HoleDirty
            | ParseErrDirty (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Probtable = Probtable Int List_Value Table
                | HoleProbtable
                | ParseErrProbtable (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data Value = Value String
            | HoleValue
            | ParseErrValue (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Table = Table List_Int List_Axis List_Probability
            | HoleTable
            | ParseErrTable (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Axis = Axis List_Value
           | HoleAxis
           | ParseErrAxis (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data Probability = Probability String
                  | HoleProbability
                  | ParseErrProbability (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data List_Probtable = List_Probtable ConsList_Probtable
                     | HoleList_Probtable
                     | ParseErrList_Probtable (ParseError Document Node ClipDoc UserToken)
-                        deriving Show
+                        deriving (Show, Data, Typeable)
 
 data List_Section = List_Section ConsList_Section
                   | HoleList_Section
                   | ParseErrList_Section (ParseError Document Node ClipDoc UserToken)
-                      deriving Show
+                      deriving (Show, Data, Typeable)
 
 data List_Paragraph = List_Paragraph ConsList_Paragraph
                     | HoleList_Paragraph
                     | ParseErrList_Paragraph (ParseError Document Node ClipDoc UserToken)
-                        deriving Show
+                        deriving (Show, Data, Typeable)
 
 data List_Subsection = List_Subsection ConsList_Subsection
                      | HoleList_Subsection
                      | ParseErrList_Subsection (ParseError Document Node ClipDoc UserToken)
-                         deriving Show
+                         deriving (Show, Data, Typeable)
 
 data List_Subsubsection = List_Subsubsection ConsList_Subsubsection
                         | HoleList_Subsubsection
                         | ParseErrList_Subsubsection (ParseError Document Node ClipDoc UserToken)
-                            deriving Show
+                            deriving (Show, Data, Typeable)
 
 data List_Word = List_Word ConsList_Word
                | HoleList_Word
                | ParseErrList_Word (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data List_Vertex = List_Vertex ConsList_Vertex
                  | HoleList_Vertex
                  | ParseErrList_Vertex (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data List_Edge = List_Edge ConsList_Edge
                | HoleList_Edge
                | ParseErrList_Edge (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data List_Value = List_Value ConsList_Value
                 | HoleList_Value
                 | ParseErrList_Value (ParseError Document Node ClipDoc UserToken)
-                    deriving Show
+                    deriving (Show, Data, Typeable)
 
 data List_Axis = List_Axis ConsList_Axis
                | HoleList_Axis
                | ParseErrList_Axis (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data List_Probability = List_Probability ConsList_Probability
                       | HoleList_Probability
                       | ParseErrList_Probability (ParseError Document Node ClipDoc UserToken)
-                          deriving Show
+                          deriving (Show, Data, Typeable)
 
 data ConsList_Probtable = Cons_Probtable Probtable ConsList_Probtable
                         | Nil_Probtable
-                            deriving Show
+                            deriving (Show, Data, Typeable)
 
 data ConsList_Section = Cons_Section Section ConsList_Section
                       | Nil_Section
-                          deriving Show
+                          deriving (Show, Data, Typeable)
 
 data ConsList_Paragraph = Cons_Paragraph Paragraph ConsList_Paragraph
                         | Nil_Paragraph
-                            deriving Show
+                            deriving (Show, Data, Typeable)
 
 data ConsList_Subsection = Cons_Subsection Subsection ConsList_Subsection
                          | Nil_Subsection
-                             deriving Show
+                             deriving (Show, Data, Typeable)
 
 data ConsList_Subsubsection = Cons_Subsubsection Subsubsection ConsList_Subsubsection
                             | Nil_Subsubsection
-                                deriving Show
+                                deriving (Show, Data, Typeable)
 
 data ConsList_Word = Cons_Word Word ConsList_Word
                    | Nil_Word
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 data ConsList_Vertex = Cons_Vertex Vertex ConsList_Vertex
                      | Nil_Vertex
-                         deriving Show
+                         deriving (Show, Data, Typeable)
 
 data ConsList_Edge = Cons_Edge Edge ConsList_Edge
                    | Nil_Edge
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 data ConsList_Value = Cons_Value Value ConsList_Value
                     | Nil_Value
-                        deriving Show
+                        deriving (Show, Data, Typeable)
 
 data ConsList_Axis = Cons_Axis Axis ConsList_Axis
                    | Nil_Axis
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 data ConsList_Probability = Cons_Probability Probability ConsList_Probability
                           | Nil_Probability
-                              deriving Show
+                              deriving (Show, Data, Typeable)
 
 
 
@@ -264,7 +265,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Int Int
              | Clip_String String
              | Clip_Float Float
-             | Clip_Nothing deriving Show
+             | Clip_Nothing deriving (Show, Typeable)
 
 
 
@@ -370,6 +371,7 @@ data Node = NoNode
           | Node_List_Probability List_Probability Path
           | Node_HoleList_Probability List_Probability Path
           | Node_ParseErrList_Probability List_Probability Path
+            deriving Typeable
 
 
 
