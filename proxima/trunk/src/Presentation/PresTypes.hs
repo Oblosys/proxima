@@ -7,6 +7,7 @@ import Common.CommonUtils
 
 import qualified Data.Map as Map
 import Data.Map (Map)
+import Data.Generics
 
 import UU.Parsing
 
@@ -46,9 +47,12 @@ getErrorMessages _                          = [(Nothing, "Structural parse error
 -- accessible in the presentation AG (other than this string).
 
 data ParseError doc node clip token = ParsingParseErr IDP [ParseErrorMessage] [Token doc node clip token] (ClipParser doc node clip token)
-                                    | StructuralParseErr (Presentation doc node clip token)
+                                    | StructuralParseErr (Presentation doc node clip token) deriving Typeable
 -- only for Parse errors in the parsing presentations, we keep track of the parse error.
 -- structural parse errors cannot be represented with a list of tokens.
+
+instance (Typeable doc, Typeable node, Typeable clip, Typeable token) => 
+         Data (ParseError doc node clip token) where
 
 instance Show (ParseError doc node clip token) where
   show (ParsingParseErr _ _ _ _) = "ParsingParseErr"
