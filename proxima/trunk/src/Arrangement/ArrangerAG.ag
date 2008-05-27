@@ -905,51 +905,42 @@ SEM Layout
   | TestPresentation
       lhs.arrangement =  RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight 0 Solid @lhs.lineColor @lhs.fillColor
 
-{-
-err:
-colattrs:([40,1,100],[20,0,0],[40,1,100],[42,120,100],[20,0,0],[20,20,0])
-rowattrs:([40,1],[20,0],[40,1],[40,40],[20,0],[20,20])
-rowattrs:([1],[0],[1],[40],[0],[0])
-
-rowattrs:([40,1,100],[20,0,0],[40,1,100],[41,120,100],[20,0,0],[20,20,0])
-colattrs:([40,1],[20,0],[40,1],[40,40],[20,0],[20,20])
-colattrs:([1],[0],[1],[40],[0],[20])
--}
 
 -}
   | RowP 
-      lhs.arrangement = debug Arr ( "rowattrs:"++show 
+      lhs.arrangement = {-
+                        debug Arr ( "rowattrs:"++show 
                                                   (@layoutList.minWidthList
 						  , @layoutList.hRefList
 						  , @layoutList.finalWidthList 
                           , @layoutList.finalHeightList 
                           , @layoutList.finalHRefList 
                           , @layoutList.finalVRefList
-                        {-                        
+                                                
                           , @lhs.assignedWidth
 						  , @leftCorrection
 						  , @rightCorrection
 						  , @assignedWidths
-						-}
 						  ))$ 
-                        --debug Err ("Row in view with #children: "++ show @layoutList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @layoutList.finalWidthList) $
+                        -}
+						--debug Err ("Row in view with #children: "++ show @layoutList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @layoutList.finalWidthList) $
                           arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @layoutList.arrangementList
   | ColP 
-      lhs.arrangement = debug Arr ( "colattrs:"++show 
+      lhs.arrangement = {-
+						debug Arr ( "colattrs:"++show 
                           (@layoutList.minHeightList
 						  , @layoutList.vRefList
                           , @layoutList.finalHeightList 
 						  , @layoutList.finalWidthList 
                           , @layoutList.finalVRefList 
                           , @layoutList.finalHRefList 
-						{-
 						  , @layoutList.finalWidthList 
                           , @layoutList.finalHRefList 
                           , @lhs.assignedWidth
-                        -}
-					          ))$
-	                arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
+                              ))$
+	                    -}
+					    arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
                           ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @layoutList.arrangementList 
   | OverlayP 
       lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
