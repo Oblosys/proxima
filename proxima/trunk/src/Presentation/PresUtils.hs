@@ -73,10 +73,10 @@ pathFromXY xy pres = pathFromXYPres xy pres
 -- partially visible.
 
 -- a smarter diff for rows and columns may try to approach from both directions.
- 
+  
 -- skip WithP StructuralP ParsingP and LocatorP elts
 diffPres :: (DocNode node, Eq token, Show token) => PresentationBase doc node clip token level -> PresentationBase doc node clip token level -> DiffTree
-
+diffPres new old = let (dt, stretch) = diffPres' new old in dt
 -- WithP is not handled yet.
 -- Graph is not handled right yet!
 -- StructuralP ParsingP and LocatorP are ignored since they don't affect rendering
@@ -85,59 +85,73 @@ diffPres :: (DocNode node, Eq token, Show token) => PresentationBase doc node cl
 -- For graphs, doing compare does not work because pres and pres' are equal. Todo: Figure out why this is.
 --                                                                                 (is because the old pres coming from the left was already edited)
 -- Using the diffTree of the old pres does work. (but is not how we should do it)
-diffPres (WithP ar pres)       pres'                   = diffPres pres pres'
-diffPres pres                  (WithP ar' pres')       = diffPres pres pres'
-diffPres (StructuralP id pres) pres'                   = diffPres pres pres'
-diffPres pres                  (StructuralP id pres')  = diffPres pres pres'
-diffPres (ParsingP id _ _ pres)    pres'               = diffPres pres pres'
-diffPres pres                  (ParsingP id _ _ pres') = diffPres pres pres'
-diffPres (LocatorP l pres)     pres'               = diffPres pres pres'
-diffPres pres                  (LocatorP l pres')  = diffPres pres pres'
+diffPres' :: (DocNode node, Eq token, Show token) => PresentationBase doc node clip token level -> PresentationBase doc node clip token level -> (DiffTree, (Bool,Bool))
+diffPres' (WithP ar pres)       pres'                   = let (dt, (hs,vs)) = diffPres' pres pres'
+                                                              (_,syn) = ar (undefined, Syn { hStretch = hs, vStretch = vs })
+                                                          in  (dt, (hStretch syn,vStretch syn))
+                                                          
+diffPres' pres                  (WithP ar' pres')       = diffPres' pres pres'
+diffPres' (StructuralP id pres) pres'                   = diffPres' pres pres'
+diffPres' pres                  (StructuralP id pres')  = diffPres' pres pres'
+diffPres' (ParsingP id _ _ pres)    pres'               = diffPres' pres pres'
+diffPres' pres                  (ParsingP id _ _ pres') = diffPres' pres pres'
+diffPres' (LocatorP l pres)     pres'               = diffPres' pres pres'
+diffPres' pres                  (LocatorP l pres')  = diffPres' pres pres'
 
-diffPres (EmptyP id)            (EmptyP _)       = DiffLeaf True
-diffPres (EmptyP id)             _               = DiffLeaf False
-diffPres (StringP id str)       (StringP _ str') = DiffLeaf $ str == str'
-diffPres (StringP id str)       _                = DiffLeaf False
-diffPres (TokenP id t)          (TokenP _ t') = DiffLeaf $ t == t'
-diffPres (TokenP id t)          _                = DiffLeaf False
-diffPres (ImageP  id src style)       (ImageP  _ src' style') = DiffLeaf $ src == src' && style == style'
-diffPres (ImageP  id src _)       _                = DiffLeaf False
-diffPres (PolyP   id pts lw style)      (PolyP   _ pts' lw' style') = DiffLeaf $ lw==lw' && pts==pts' && style == style'
-diffPres (PolyP   id _ _ _)       _                       = DiffLeaf False
-diffPres (RectangleP id  w h lw style) (RectangleP _ w' h' lw' style')  = DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
-diffPres (RectangleP id  _ _ _ _) _                          = DiffLeaf False
-diffPres (EllipseP id  w h lw style) (EllipseP _ w' h' lw' style')  = DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
-diffPres (EllipseP id _ _ _ _) _                        = DiffLeaf False
-diffPres (RowP id rf press) (RowP id' rf' press')  = diffPress rf press rf' press'
-diffPres (ColP id rf _ press) (ColP id' rf' _ press')  = diffPress rf press rf' press'
-diffPres (OverlayP id d press) (OverlayP id' d' press') = diffPress d  press d'   press'
-  -- Note: we abuse the rf paramter of diffPress and give it the direction.
-diffPres (FormatterP id press) (FormatterP id' press')  = diffPress 0 press 0 press'
---diffPres (GraphP _ _ _ _ _ _) (GraphP _ dirty _ _ _ _) = DiffLeaf $ isClean dirty 
-diffPres g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = diffGraph g1 g2
-diffPres (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres pres pres'
-diffPres (RowP id rf press) _                      = DiffLeaf False
-diffPres (ColP id rf _ press) _                    = DiffLeaf False
-diffPres (FormatterP id press) _                   = DiffLeaf False
-diffPres (OverlayP id _ press) _                     = DiffLeaf False 
-diffPres (GraphP id _ _ _ _ press) _               = DiffLeaf False
-diffPres (VertexP id _ _ _ _ pres) _                 = DiffLeaf False
-diffPres pr                  _                     = debug Err ("PresUtils.diffPres: can't handle "++ show pr) DiffLeaf False
+diffPres' (EmptyP id)            (EmptyP _)       = noStr $ DiffLeaf True
+diffPres' (EmptyP id)             _               = noStr $ DiffLeaf False
+diffPres' (StringP id str)       (StringP _ str') = noStr $ DiffLeaf $ str == str'
+diffPres' (StringP id str)       _                = noStr $ DiffLeaf False
+diffPres' (TokenP id t)          (TokenP _ t') = noStr $ DiffLeaf $ t == t'
+diffPres' (TokenP id t)          _                = noStr $ DiffLeaf False
+diffPres' (ImageP  id src style)       (ImageP  _ src' style') = noStr $ DiffLeaf $ src == src' && style == style'
+diffPres' (ImageP  id src _)       _                = noStr $ DiffLeaf False
+diffPres' (PolyP   id pts lw style)      (PolyP   _ pts' lw' style') = noStr $ DiffLeaf $ lw==lw' && pts==pts' && style == style'
+diffPres' (PolyP   id _ _ _)       _                       = noStr $ DiffLeaf False
+diffPres' (RectangleP id  w h lw style) (RectangleP _ w' h' lw' style')  = noStr $ DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
+diffPres' (RectangleP id  _ _ _ _) _                          = noStr $ DiffLeaf False
+diffPres' (EllipseP id  w h lw style) (EllipseP _ w' h' lw' style')  = noStr $ DiffLeaf $ w==w' && h==h' && lw==lw' && style == style'
+diffPres' (EllipseP id _ _ _ _) _                        = noStr $ DiffLeaf False
+diffPres' (RowP id rf press) (RowP id' rf' press')  = let (dt, (hss,vss)) = diffPress rf press rf' press'
+                                                      in  (dt, (and hss, or vss))
+diffPres' (ColP id rf _ press) (ColP id' rf' _ press') = let (dt, (hss,vss)) = diffPress rf press rf' press'
+                                                         in  (dt, (or hss, and vss))
+diffPres' (OverlayP id d press) (OverlayP id' d' press') = let (dt, (hss,vss)) = diffPress d  press d'   press'
+                                                           in  (dt, (and hss, and vss))
+  -- Note: we abuse the rf paramter of diffPres's and give it the direction.
+diffPres' (FormatterP id press) (FormatterP id' press')  = let (dt, (hss,vss)) = diffPress 0 press 0 press'
+                                                           in  (dt, (True, False))
+--diffPres' (GraphP _ _ _ _ _ _) (GraphP _ dirty _ _ _ _) = DiffLeaf $ isClean dirty 
+diffPres' g1@(GraphP id _ _ _ _ press) g2@(GraphP id' _ _ _ _ press') = noStr $ diffGraph g1 g2
+diffPres' (VertexP id _ _ _ _ pres) (VertexP id' _ _ _ _ pres') = diffPres' pres pres'
+diffPres' (RowP id rf press) _                      = noStr $ DiffLeaf False
+diffPres' (ColP id rf _ press) _                    = noStr $ DiffLeaf False
+diffPres' (FormatterP id press) _                   = noStr $ DiffLeaf False
+diffPres' (OverlayP id _ press) _                     = noStr $ DiffLeaf False 
+diffPres' (GraphP id _ _ _ _ press) _               = noStr $ DiffLeaf False
+diffPres' (VertexP id _ _ _ _ pres) _                 = noStr $ DiffLeaf False
+diffPres' pr                  _                     = noStr $ debug Err ("PresUtils.diffPres': can't handle "++ show pr) DiffLeaf False
 
 diffGraph (GraphP _ d w h es vs) (GraphP _ d' w' h' es' vs') = -- Graph is all or nothing
   -- showDebug' Prs ("dirty bits are"++ show d ++ show d') $
-  DiffLeaf $ isClean d' && w == w' && h == h' && es == es' && isCleanDT (diffPress 0 vs 0 vs')
+  DiffLeaf $ isClean d' && w == w' && h == h' && es == es' && isCleanDT (fst $ diffPress 0 vs 0 vs')
+
+noStr d = (d, (False,False))
 
 diffPress rf press rf' press' =
   let nrOfPress   = length press
       nrOfPress'  = length press'
-      childDiffs  = zipWith diffPres press press'
+      (childDiffs,childStretches) = unzip $ zipWith diffPres' press press'
+      (childHStretches, childVStretches) = unzip childStretches
       childDiffs' = take nrOfPress $ childDiffs ++ repeat (DiffLeaf False)
       selfClean   = rf==rf' && nrOfPress==nrOfPress'
-  in  DiffNode (selfClean && all' (map isCleanDT childDiffs')) 
-               selfClean
-               childDiffs'
-
+  in  ( if or childHStretches || or childVStretches 
+        then DiffLeaf False
+        else DiffNode (selfClean && all' (map isCleanDT childDiffs')) 
+                      selfClean 
+                      childDiffs'
+      , unzip childStretches
+      )
 all' = foldl' (&&) True
 
 prunePresentation (_,oldSize) (_,newSize) diffTree pres =
