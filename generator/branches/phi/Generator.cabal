@@ -1,0 +1,41 @@
+name: Generator
+version: 0.1
+cabal-version: -any
+license: AllRightsReserved
+license-file: ""
+copyright:
+maintainer:
+build-depends: base -any, haskell98 -any, parsec ==2.0
+stability:
+homepage:
+package-url:
+synopsis:
+description:
+category:
+author:
+tested-with:
+data-files:
+extra-source-files:
+extra-tmp-files:
+ 
+executable: Generator
+main-is: Main.hs
+buildable: True
+cc-options:
+ld-options:
+frameworks:
+c-sources:
+extensions:
+extra-libraries:
+extra-lib-dirs:
+includes:
+install-includes:
+include-dirs:
+hs-source-dirs: src
+other-modules: Gen_DocTypes Gen_DocUtils Gen_DocumentEdit
+               Gen_PresentationAG Gen_ProxParser Main Parser TypesUtils
+ghc-prof-options:
+ghc-options: -fglasgow-exts
+hugs-options:
+nhc-options:
+jhc-options:
