@@ -48,9 +48,9 @@ genClip decls = genBanner "Clip instance" $
  where typeNames = getAllDeclaredTypeNames decls
 
 genEditable decls = genBanner "Editable instances" $
-  concatMap genEditableDecl decls
+  concatMap (genEditableDecl decls) decls
 
-genEditableDecl (Decl (LHSBasicType typeName) prods) = 
+genEditableDecl decls (Decl (LHSBasicType typeName) prods) = 
   ["instance Editable %1 Document Node ClipDoc UserToken where"
   , "  select [] x = Clip_%1 x" 
   ] <~ [typeName] ++
@@ -94,6 +94,7 @@ genEditableDecl (Decl (LHSBasicType typeName) prods) =
           [ "  select (%1:p) %2 = select p x%3"
             <~ [ show i, genXPattern prod, show $ i] 
           | i <- [ 0..length fields -1 ]]
+--          | (_,i) <- filter (isDeclaredType decls . fieldType . fst) $ zip fields [0..] ] -- gerbo ??
         genPaste prod@(Prod _ cnstrName idpFields fields) =
           [ "  paste (%1:p) c %2 = %3"
             <~ [ show i, genIXPattern prod
@@ -101,18 +102,23 @@ genEditableDecl (Decl (LHSBasicType typeName) prods) =
                    [ if j == i then " (paste p c x" ++ show j ++ ")" else " x"++show j | j <- [0..length fields-1] ]
                ] 
           | i <- [ 0..length fields -1 ]]
+--          | (_,i) <- filter (isDeclaredType decls . fieldType . fst) $ zip fields [0..] ] --gerbo ??
         genAlternatives prod@(Prod _ cnstrName idpFields fields) =
           " (\"%1%2 \"  , Clip_%3 $ %1%4%5)"
           <~ [ cnstrName
-             , surroundBy " {" "}" $ map (genType . fieldType) fields
+             , surroundBy " {" "}" $ map (genType . fieldType) fields -- can be getType', need decls
              , typeName
              , prefixBy " " $ map genNoIDP idpFields
-             , concat $ replicate (length fields) " hole"
+             --, concat $ replicate (length fields) " hole"
+             , concat $ map (\x -> if isDeclaredOrPrimType decls $ fieldType x 
+                                   then " hole"
+                                   else " (error \"docedit\")"
+                            ) fields
              ]
         genArity prod@(Prod _ cnstrName idpFields fields) = 
           "  arity %1 = %2" <~ [ genXPattern prod, show $ length fields ]
 
-genEditableDecl (Decl (LHSListType typeName) prods) = 
+genEditableDecl decls (Decl (LHSListType typeName) prods) = 
   [ "instance Editable List_%1 Document Node ClipDoc UserToken where"
   , "  select [] x = Clip_List_%1 x"
   , "  select (n:p) (List_%1 cxs) ="
@@ -154,7 +160,7 @@ genEditableDecl (Decl (LHSListType typeName) prods) =
   , ""
   , "  insertList n (Clip_%1 c) (List_%1 cxs) = Clip_List_%1 $ List_%1 (insertList_%1 n c cxs)"
   , "  insertList _ _ xs = debug Err \"Type error, no paste\" $ Clip_List_%1 xs"
-  , "  insertList _ c xs = Clip_List_%1 xs"
+--  , "  insertList _ c xs = Clip_List_%1 xs" 
   , ""
   , "  removeList n (List_%1 cxs) = Clip_List_%1 $ List_%1 (removeList_%1 n cxs)"
   , "  removeList _ xs = Clip_List_%1 $ xs"

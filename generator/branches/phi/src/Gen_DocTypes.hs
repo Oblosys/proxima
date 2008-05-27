@@ -22,7 +22,7 @@ generate docType = genDataType (addHolesParseErrs (addConsListDecls (docTypeWith
                 ++ genShowNode (addHolesParseErrs (docTypeWithLists))
   where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)  -- all are with Document
 
-                
+
 genDataType decls = genBanner "Proxima data type" $
   concatMap genDataDecl decls
  where genDataDecl (Decl lhsType prods) =
@@ -32,7 +32,7 @@ genDataType decls = genBanner "Proxima data type" $
              [ replicate (length typeName + 10) ' ' ++ "deriving (Show, Data, Typeable)", "" ]
        genProd (Prod _ cnstrName idpFields fields) = 
          cnstrName ++ (prefixBy " " $ map (genIDPType . fieldType) idpFields ++
-                                      map (genType . fieldType) fields)
+                                      map (genType' decls . fieldType) fields)
 
 genClipDoc decls = genBanner "ClipDoc" $
   zipWith (++) ("data ClipDoc = " : repeat "             | ")

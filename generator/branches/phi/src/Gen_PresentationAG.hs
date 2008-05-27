@@ -40,9 +40,12 @@ genPresentationSheet = genBanner "presentationSheet" $
   , ""
   , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
   , "presentationSheet enrichedDoc document focusD whitespaceMap pIdC = "
-  , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = "
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)"
-  , "  in  (whitespaceMap', pIdC', pres)"
+  , "  let (Syn_EnrichedDoc _ pIdC' pres _ self _ whitespaceMap' _) = "
+  -- , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = "
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] [] whitespaceMap initLayout)"
+  -- , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)"
+  , "  in  (whitespaceMap', pIdC', pres, self)"
+  -- , "  in  (whitespaceMap', pIdC', pres)"
   , ""
   , "{- "
   , "A type error here means that extra attributes were declared on EnrichedDoc"
@@ -53,6 +56,13 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc "
   , "             ]"
   , "-}"
+  , ""
+  , "-- Phi"
+  , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap)"
+  , "modifiedTree enrichedDoc = "
+  , "  let (Syn_EnrichedDoc _ _pIdC' _pres _ self _tokStr' _whitespaceMap' whitespaceMap2') ="
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc HoleDocument (PathD []) 0 [] [] initLayout initLayout) -- Map.empty) "
+  , "   in (self, whitespaceMap2')"
   , "}" 
   ]
 
@@ -74,10 +84,12 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
  ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
+  , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : {[Located Lexer.Token]} | ]" -- Phi
+  -- , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
-  , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
+  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WhitespaceMap, [Located Lexer.Token])} ]" -- Phi
+  -- , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
   [ "ATTR %3"  -- all types except EnrichedDoc, including lists and conslists
@@ -116,9 +128,13 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   concatMap genSemIxProd prods ++ 
   concatMap genSemPresProd prods ++
   [ "  | Hole%1"
+  , "      loc.noIdps = -1"
+  , "      loc.pres' = error \"loc.pres' in Hole%1\""
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
   , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   , "  | ParseErr%1"
+  , "      loc.noIdps = -1"
+  , "      loc.pres' = error \"loc.pres' in ParseErr%1\""
   , "      lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
   , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
   ] <~ [typeName] ++
@@ -130,28 +146,39 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
  where genSemPIDCProd (Prod _ cnstrName idpFields fields) =
          let agFields = filter (isDeclaredType decls . fieldType) fields
              -- only take into account fields that have AG types (instead of prim or other composite)
-         in  "  | %1 " <~ [cnstrName] : 
-             map ("      "++)  
-                 ((addPlus $ zipWith (\l r -> "%1.pIdC = @%2.pIdC" <~ [l,r])
+             pIdCs = 
+--               map ("      "++)  
+                 (addPlus $ zipWith (\l r -> "%1.pIdC = @%2.pIdC" <~ [l,r])
                                      ( map fieldName agFields ++ ["lhs"])
                                      ( "lhs" : map fieldName agFields))++
                   [ ("%1.path  = @lhs.path++["++show i++"]") <~ [fieldName field] 
                   | (i,field) <- zip [0..] fields, isDeclaredType decls $ fieldType field 
                   ] -- only generate for AG field types, but do include the others in the index computation
-                 )
-        where addPlus (l:ls) = (l++ " + " ++ show (length idpFields)) : ls
+               where addPlus (l:ls) = -- if not $ null idpFields
+                                      {-then-} (l++ " + @loc.noIdps") : ls -- Phi: [IDP]
+                                      -- then (l++ " + " ++ show (length idpFields)) : ls
+--                                      else ls
+             pres' = [ "(loc.pres, loc.idps, lhs.whitespaceMapCreated, lhs.tokStr, loc.noIdps)"
+                     , "  = let (pres, idps, wsMap, tokStr) = @loc.pres'"
+                     , "     in (pres, idps, wsMap, tokStr, length idps)"
+                     ]
+         in {- if not $ null pIdCs 
+            then "  | %1 " <~ [cnstrName] : pIdCs
+            else [] -}
+            "  | %1 " <~ [cnstrName] : map ("      "++) (pIdCs ++ pres')
               -- this computation goes wrong when there are lists of idps (but it will be obsolete in a future version)
        genSemIxProd (Prod _ cnstrName idpFields fields) =
-         [ "  | %1" <~ [cnstrName] ] ++
-         [ "    %1.ix = %2" <~ [fieldName, show i]
-         | (i,Field fieldName fieldType) <- zip [0..] fields, isDeclaredType decls $ fieldType
-         ]
+         let ixs = 
+               [ "    %1.ix = %2" <~ [fieldName, show i]
+               | (i,Field fieldName fieldType) <- zip [0..] fields, isDeclaredType decls $ fieldType
+               ]
+          in if not $ null ixs
+             then [ "  | %1" <~ [cnstrName] ] ++ ixs
+             else []
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
-         , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
-
---         , "      loc.pres = empty" --gerbo HACK! for testing
+         , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc" 
          ] <~ [cnstrName]
               
 genSemListDecl (Decl (LHSListType typeName) _) = 
@@ -165,9 +192,14 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "      lhs.pIdC = @elts.pIdC"
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
---  , "      loc.pres = empty" --gerbo HACK! for testing
-  , "  | HoleList_%1     lhs.press = []"
-  , "  | ParseErrList_%1 lhs.press = []"
+  , "  | HoleList_%1"
+  , "      lhs.press = []"
+  , "      loc.noIdps = 0"
+  , "      loc.pres' = error \"loc.pres' in List%1\""
+  , "  | ParseErrList_%1"
+  , "      lhs.press = []"
+  , "      loc.noIdps = 0"
+  , "      loc.pres' = error \"loc.pres' in List%1\""
   , "  | List_%1"
   , "      lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
   , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
@@ -227,7 +259,7 @@ genSemXMLBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =
           then "@%1.presXML"
           else if typeName fieldType `elem` primTypeNames
           then "presentPrimXML%2 @%1"
-          else "presentXML%2 @%1"
+          else "presentNonDeclaredXML \"%2\" @%1" --"presentXML%2 @%1" --gerbo
          ) <~ [ fieldName, genTypeAG fieldType]  
        
 genSemXMLListDecl (Decl (LHSListType typeName) _) = 
@@ -273,8 +305,8 @@ genSemTreeBasicDecl decls (Decl (LHSBasicType lhsTypeName) prods) =
          (if isDeclaredType decls fieldType
           then "@%1.presTree"
           else if typeName fieldType `elem` primTypeNames
-          then "presentPrimXML%2 @%1"
-          else "presentXML%2 @%1"
+          then "presentPrimTree%2 @%1"
+          else "presentNonDeclaredTree \"%2\" @%1"-- "presentXML%2 @%1" -- gerbo
          ) <~ [ fieldName, genTypeAG fieldType]  
 
 genSemTreeListDecl (Decl (LHSListType typeName) _) = 

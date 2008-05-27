@@ -69,7 +69,7 @@ getAllUsedTypes decls = nub
 
 -- return the list types appearing in right-hand sides
 getAllUsedListTypes :: DocumentType -> [Type]
-getAllUsedListTypes decls = filter (\x -> isListType x && isDeclaredType decls x) $ getAllUsedTypes decls
+getAllUsedListTypes decls = filter (\x -> isListType x && isDeclaredOrPrimType decls x) $ getAllUsedTypes decls
 
 getAllProductions :: DocumentType -> [Prod]
 getAllProductions decls = [ prod | Decl _ prods <- decls, prod <- prods ]
@@ -83,12 +83,23 @@ getArity (Prod _ _ idpFields fields) = length idpFields + length fields
 fieldNameFromType (CompositeType typeName) = [ if c == ' ' then '_' else c | c <- typeName ]
 fieldNameFromType tpe = case typeName tpe of
                           []     -> error "Types.genFieldName: empty typeName"
-                          (c:cs) -> toLower c : cs ++ if isListType tpe then "s" else ""
+                          (c:cs) -> fieldName ++ if fieldName `elem` haskellKeywords then "'" else ""
+                            where fieldName = toLower c : cs ++ if isListType tpe then "s" else ""
+
+haskellKeywords = ["as", "case", "of", "class", "data", "default", "deriving", "do"
+                  , "forall", "foreign", "hiding", "if", "then", "else", "import", "infix"
+                  , "infixl", "infixr", "instance", "let", "in", "mdo", "module", "newtype"
+                  , "qualified", "type", "where"
+                  ]
 
 -- return whether the type was declared (explicitly or implicitly as a list or a primitive)
-isDeclaredType :: DocumentType -> Type -> Bool
+isDeclaredType, isDeclaredOrPrimType :: DocumentType -> Type -> Bool
 -- isDeclaredType decls (ListType tn) = True -- no check, since for all lists, a declaration is generated
 isDeclaredType decls tpe = typeName tpe `elem` getAllDeclaredTypeNames decls
+
+isDeclaredOrPrimType decls tpe = isDeclaredType decls tpe
+                              || tpe `elem` (map BasicType primTypeNames)
+                              || tpe `elem` (map ListType primTypeNames)
 
 genIDPType (BasicType typeName)     = typeName
 genIDPType (ListType typeName)      = "["++typeName++"]"
@@ -101,7 +112,12 @@ genIDPTypeAG (CompositeType typeName) = "{"++typeName++"}"
 genType (BasicType typeName)     = typeName
 genType (ListType typeName)      = "List_"++typeName
 genType (CompositeType typeName) = "("++typeName++")"
- 
+
+genType' decls tpe@(ListType typeName) = if isDeclaredType decls tpe
+                                         then genType tpe
+                                         else '[' : typeName ++ "]"
+genType' _ tpe = genType tpe
+
 genTypeAG (BasicType typeName)     = typeName
 genTypeAG (ListType typeName)      = "List_"++typeName
 genTypeAG (CompositeType typeName) = "{("++typeName++")}"

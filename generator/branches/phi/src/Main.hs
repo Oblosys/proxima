@@ -7,6 +7,7 @@ import qualified Gen_DocUtils
 import qualified Gen_ProxParser
 import qualified Gen_PresentationAG
 import qualified Gen_DocumentEdit
+import qualified Gen_Phi --gerbo
 
 import System
 import List
@@ -26,18 +27,24 @@ TODO:
 main =
  do { args <- getArgs
     ; case args of
-        [srcPath, fname] -> generateFiles srcPath fname
+        [srcPath, fname] -> generateFiles srcPath fname False
+        [srcPath, fname, flag] -> generateFiles srcPath fname True -- gerbo
         _                -> 
           stop "Usage: generate <path to proxima instance dir> <document type definition>.prx"                           
     }
     
-generateFiles srcPath fileName =
+generateFiles srcPath fileName genPhi =
  do { docType <- parseDocumentType fileName
     ; generateFile srcPath "DocTypes_Generated.hs"       $ Gen_DocTypes.generate docType
     ; generateFile srcPath "DocUtils_Generated.hs"       $ Gen_DocUtils.generate docType
     ; generateFile srcPath "ProxParser_Generated.hs"     $ Gen_ProxParser.generate docType
     ; generateFile srcPath "PresentationAG_Generated.ag" $ Gen_PresentationAG.generate docType
     ; generateFile srcPath "DocumentEdit_Generated.hs"   $ Gen_DocumentEdit.generate docType
+    ; if genPhi
+      then do generateFile srcPath "Phi_Generated.hs" $ Gen_Phi.generate docType 
+              generateFile srcPath "DefaultPresentationAG_Generated-empty.ag" $ Gen_Phi.generateDefaultPres docType
+              generateFile srcPath "Phi_Editables.hs" $ Gen_Phi.generateEditables docType
+      else return ()
     }
     
 generateFile :: String -> String -> [String] -> IO ()

@@ -80,7 +80,7 @@ pProd =
 --   * occur more than once in the field
 pFields = 
  do { flds <- many pField
-    ; let unnamedTys = map snd $ filter (isNothing . fst) flds -- all types without a field name
+    ; let unnamedTys = [ x | (Nothing, x) <- flds ] -- all types without a field name
     ; let duplicates = Map.fromList $ zip (unnamedTys \\ nub unnamedTys) (repeat 0) -- all duplicates, with count 0
     ; return $ makeNames flds duplicates
     }
@@ -112,7 +112,8 @@ pRecord = -- gerbo
     ; return $ map (\fn -> Field fn tpe) fieldNames      -- to ``[Field foo Zwoink,Field bar Zwoink]''
     }
 
-pIDPFields = option [] $ braces pFields
+--pIDPFields = option [] $ braces pFields -- original
+pIDPFields = option [Field "idps" (ListType "IDP")] $ braces pFields -- gerbo: Phi version
 
 pType = choice
   [ do { typeName <- ucIdentifier
@@ -120,7 +121,7 @@ pType = choice
        }
   , do { typeName <- squares ucIdentifier 
        ; return $ ListType typeName
-       } 
+       }
   ]
 
 lcIdentifier = try $

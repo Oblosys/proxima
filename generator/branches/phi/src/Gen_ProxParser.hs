@@ -48,8 +48,8 @@ genConstructDecl (Decl lhsType prods) =
                , lhsTypeName 
                , concat $ replicate (length idpFields) " Nothing"
                , concat [ " (retrieveArg \"%1\" \"%2\" mClip%3)" <~ [ cnstrName
-                                                                   , fieldName ++ "::" ++ genType fieldType
-                                                                   , show i ] 
+                                                                    , fieldName ++ "::" ++ genType fieldType -- can be genType' (should be?), need decls
+                                                                    , show i ] 
                         | (i, Field fieldName fieldType) <- zip [0..] fields 
                         ]
                ]
@@ -65,7 +65,7 @@ genReuse decls = genBanner "reuse functions" $ concat
     , ""
     ] <~ [ cnstrName                                                         -- %1
          , prefixBy " -> Maybe " $ map (genIDPType . fieldType) idpFields ++   
-                                   map (genType . fieldType) fields          -- %2
+                                   map (genType' decls . fieldType) fields   -- %2
          , genTypeName lhsType                                               -- %3
          , prefixBy " m" $ cnstrArgs                                         -- %4
          , "("++cnstrName++ concatMap (" "++) cnstrArgs ++")"                -- %5
@@ -93,7 +93,11 @@ genDefault decls = genBanner "default functions" $ concat
       LHSBasicType typeName -> 
                [ "default%1 :: %2"
                , "default%1 = %1" ++ prefixBy " " (map genNoIDP idpFields) ++
-                                     concat (replicate (length fields) " hole")
+                                     -- concat (replicate (length fields) " hole")
+                                     (concat $ map (\x -> if isDeclaredOrPrimType decls $ fieldType x
+                                                          then " hole"
+                                                          else " (error \"proxparser\")"
+                                                   ) fields) --gerbo
                , ""
                ] <~ [ cnstrName, genTypeName lhsType ]
       LHSListType typeName -> 

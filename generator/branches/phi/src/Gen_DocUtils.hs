@@ -16,10 +16,10 @@ import List
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genRankNode (addHolesParseErrs (docTypeWithLists)) -- with Document
-                ++ genDocNode (addHolesParseErrs (docTypeWithLists)) -- with Document
+generate docType = genRankNode (addHolesParseErrs docTypeWithLists) -- with Document
+                ++ genDocNode  (addHolesParseErrs docTypeWithLists) -- with Document
                 ++ genToXML    (addHolesParseErrs (addConsListDecls docTypeWithLists))
-                ++ genParseXML  (docTypeWithLists)
+                ++ genParseXML  docTypeWithLists
                 ++ genListUtils docTypeWithLists
                 ++ genMisc
   where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
@@ -63,9 +63,14 @@ genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
      
         genToXMLFields [] = "[]"
         genToXMLFields fields = separateBy " ++ "
-          [ if isListType . fieldType $ field 
-            then "toXML%1 %2" <~ [genType (fieldType field), fieldName field] 
-            else "[toXML%1 %2]" <~ [genType (fieldType field), fieldName field] 
+          [ if (isDeclaredOrPrimType decls $ fieldType field)
+            then if isListType . fieldType $ field 
+                 then "toXML%1 %2" <~ [genType (fieldType field), fieldName field] -- can be genType'
+                 else "[toXML%1 %2]" <~ [{-genType-} typeName (fieldType field), fieldName field] -- can NOT be genType' --gerbo
+            else "[toXMLNonDeclared \"%1\" %2]" <~ [genType' decls (fieldType field), fieldName field]
+                   -- gerbo. Bit hacky, should be different
+                   -- Like: what happens with LFoo? Non declared? or some Located Foo?
+                   -- And: the list should be different
           | field <- fields ]
 
 genParseXML decls = genBanner "parseXML functions" $ concatMap genParseXMLType decls
@@ -84,8 +89,12 @@ genParseXML decls = genBanner "parseXML functions" $ concatMap genParseXMLType d
          ("parseXMLCns_%1 = %1%2 <$ " ++
           if null fields 
           then "emptyTag \"%1\""
-          else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genType . fieldType) fields ++ "<* endTag \"%1\""
+          -- else "startTag \"%1\"" ++  concatMap ((" <*> parseXML_"++) . genType . fieldType) fields ++ "<* endTag \"%1\""
+          else "startTag \"%1\"" ++  concatMap (addParseXML . fieldType) fields ++ " <* endTag \"%1\""
          ) <~ [cnstrName, prefixBy " " $ map genNoIDP idpFields ]
+           where addParseXML fld = if (isDeclaredOrPrimType decls fld) 
+                                   then ((" <*> parseXML_"++) . genType) fld -- can be genType'
+                                   else ((" <*> (parseXMLNonDeclared \""++) . genType) fld ++ "\")" -- can NOT be genType'.
 
 genListUtils decls = genBanner "List utility functions" $ concat
   [ [ "toList_%1 vs = List_%1 (toConsList_%1 vs)"
@@ -141,12 +150,13 @@ genMisc = genBanner "Miscellaneous" $
  -}
   , "toXMLInt i = EmptyElt \"Integer\" [(\"val\", show i)]"
   , ""
-  , "toXMLInt f = EmptyElt \"Float\" [(\"val\", show f)]"
+  , "toXMLFloat f = EmptyElt \"Float\" [(\"val\", show f)]"
   , ""
   , "toXMLBool b = EmptyElt \"Bool\" [(\"val\", show b)]"
   , ""
   , "toXMLString str = Elt \"String\" [] [PCData str] "
   , ""
+  , "toXMLNonDeclared s x = Elt s [] []" -- gerbo, barf could contain some data with 'show x'.
   , ""
   , "-- parseXML for primitive types"
   , ""
@@ -183,7 +193,15 @@ genMisc = genBanner "Miscellaneous" $
   , "  <*  pCharString \"<String>\""
   , "  <*> pList (pExcept ('\\0','\\255','x') \"<\") "
   , "  <*  pCharString \"</String>\""
-  , " "
+  , ""
+  , "parseXMLNonDeclared :: {- (Editable a Document Node ClipDoc UserToken) => -} String -> CharParser a"
+  , "parseXMLNonDeclared s ="
+  , "  (error \"docutils\") <$ emptyTag s" {-
+  , "      undefined" -- read" gerbo HACK Need read instances
+  , "  <$  pCharSpaces"
+  , "  <*  pCharString (\"<\" ++ s ++ \">\")"
+  , "  <*> pList (pExcept ('\\0','\\255','x') \"<\") "
+  , "  <*  pCharString (\"</\" ++ s ++ \">\")" -}
   , ""
   , "-- Xprez XML presentation for primitive types"
   , ""
@@ -199,6 +217,9 @@ genMisc = genBanner "Miscellaneous" $
   , "presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token"
   , "presentPrimXMLString x = text $ \"<String>\"++x++\"<String>\""
   , ""
+  , "presentNonDeclaredXML :: String -> a -> Presentation_Doc_Node_Clip_Token"
+  , "presentNonDeclaredXML s x = text $ \"<\"++s++\"/>\"" --gerbo
+--  , "presentNonDeclaredXML s x = text $ \"<\" ++ s ++ \">\" ++ {-show x-} ++ " ++ \"</\"++s++\">\"" -- gerbo
   , ""
   , "-- Xprez tree presentation for primitive types"
   , ""
@@ -213,4 +234,7 @@ genMisc = genBanner "Miscellaneous" $
   , ""
   , "presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token"
   , "presentPrimTreeString x =  mkTreeLeaf False $ text $ \"String: \"++x"
+  , ""
+  , "presentNonDeclaredTree :: String -> a -> Presentation_Doc_Node_Clip_Token"
+  , "presentNonDeclaredTree s x = mkTreeLeaf False $ text $ s" -- ++ \": \" ++ \"barf\"" --show x" --gerbo
   ]
