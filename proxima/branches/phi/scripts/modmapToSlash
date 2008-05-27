@@ -1,0 +1,4 @@
+#!/bin/sh
+# execute from scripts or test (or any doc/../*)
+mv ../doc/ModuleMap_Files/slide0001.htm ../doc/ModuleMap_Files/slide0001.htmWin
+sed -f sedToSlash  < ../doc/ModuleMap_Files/slide0001.htmWin > ../doc/ModuleMap_Files/slide0001.htm

@@ -1,0 +1,179 @@
+-----------------------------------------------------------------------------------------
+{-| Module      : ScannerAG.ag
+    Copyright   : (c) 2007 Martijn Schrage
+    License     : All Rights Reserved
+
+    Maintainer  : martijn@cs.uu.nl
+    Stability   : experimental
+    Portability : 
+-}
+-----------------------------------------------------------------------------------------
+{
+import Common.CommonTypes
+import Common.CommonUtils
+import Presentation.PresTypes
+import Layout.LayLayerTypes
+import Layout.LayLayerUtils
+import List
+import Char
+import qualified Data.Map as Map
+}
+
+WRAPPER Layout
+
+DATA Layout doc node clip token
+  | EmptyP      id : IDP
+  | StringP     id : IDP text : String
+  | ImageP      id : IDP src : String style : ImgStyle
+  | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : Style
+  | RectangleP  id : IDP w, h : Int lineWidth : Int style : Style
+  | EllipseP	id : IDP w, h : Int lineWidth : Int style : Style
+  | RowP        id : IDP hRefNr : Int                       presentationList : (LayoutList {doc} {node} {clip} {token})
+  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {node} {clip} {token})
+  | OverlayP    id : IDP direction : Direction              presentationList : (LayoutList {doc} {node} {clip} {token})
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {node} {clip} {token}) 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
+  | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})
+  | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
+  | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
+  | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
+  | ArrangedP
+
+TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
+
+ATTR DocNode {node}, Show {token} => Layout LayoutList 
+  [ scanStructural : { ((Path,Int),(Path,Int)) ->
+                       Lexer -> Maybe @node -> Path -> IDPCounter -> WhitespaceMap -> Layout @doc @node @clip @token ->
+                       ([Token @doc @node @clip @token], IDPCounter, WhitespaceMap, Presentation @doc @node @clip @token)
+                     }
+  | | ]
+-- the we pass this function as an argument, since either it has to be defined in this module, which
+-- is awkward during development, or a module cycle has to be resolved, complicating the build process
+-- Note that the sheet parameter has already been applied.
+
+ATTR Layout LayoutList 
+  [ lexer : Lexer | | ]
+
+-- TODO: what about parsing nodes declaring different lexers? give a warning?
+
+-- loc is an AG keyword.
+
+ATTR Layout LayoutList [ lloc : {Maybe @node} | | ]
+
+SEM Layout
+  | LocatorP
+      child.lloc = Just @location
+
+ATTR Layout [ focus : {((Path,Int),(Path,Int))} path : Path | | ]
+
+ATTR LayoutList [ focus : {((Path,Int),(Path,Int))} path : Path index : Int | | ]
+
+SEM Layout
+  | RowP ColP OverlayP FormatterP GraphP
+      presentationList.path = @lhs.path
+      presentationList.index = 0
+  | WithP ParsingP LocatorP StructuralP VertexP
+      child.path = @lhs.path ++ [0]
+      
+SEM LayoutList [ | | ]
+  | Cons
+      hd.path = @lhs.path++[@lhs.index]
+      tl.index = @lhs.index + 1
+
+
+-- pos denotes the position in the generated scanChar list
+
+ATTR Layout LayoutList [ | pos : Int | ]
+
+SEM Layout
+  | StringP
+      lhs.pos = @lhs.pos + length @text
+  | StructuralP
+      lhs.pos = @lhs.pos + 1
+
+-- we want to add a 1 between elements of a column, but not at the end.
+-- the posIncrement is needed because it should only be done for columns, not for rows etc.
+-- the isNil is needed because we don't want to end at the end.
+
+ATTR LayoutList [ posIncrement : Int | | isNil : Bool ]
+
+SEM Layout
+  | RowP OverlayP FormatterP GraphP
+      presentationList.posIncrement = 0
+  | ColP 
+      presentationList.posIncrement = 1
+      
+SEM LayoutList
+  | Cons
+      hd.pos = @lhs.pos
+      tl.pos = @hd.pos + if @tl.isNil then 0 else @lhs.posIncrement
+      lhs.pos = @tl.pos
+      lhs.isNil = False
+  | Nil
+      lhs.isNil = True
+
+
+-- keeping track of the scanChar position at which the focus starts and ends
+     
+ATTR Layout LayoutList [ | scannedFocusStart : {Maybe Int} scannedFocusEnd : {Maybe Int} | ]
+
+SEM Layout
+  | StringP
+      (lhs.scannedFocusStart,lhs.scannedFocusEnd) =
+        let ((startPth,startIndex),(endPth,endIndex)) = @lhs.focus
+        in  ( if startPth == @lhs.path then Just (@lhs.pos+startIndex) else @lhs.scannedFocusStart
+            , if endPth == @lhs.path then Just (@lhs.pos+endIndex) else @lhs.scannedFocusEnd
+            )
+  | StructuralP
+      lhs.scannedFocusStart = @lhs.scannedFocusStart
+      lhs.scannedFocusEnd   = @lhs.scannedFocusEnd
+
+
+-- generation of scanChar list
+                          
+ATTR Layout LayoutList [ | idPCounter : IDPCounter whitespaceMap : WhitespaceMap | ]
+
+ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
+
+SEM Layout
+  | StringP
+      lhs.scanChars = map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
+
+  | RowP
+      lhs.scanChars = concat @presentationList.scanCharss
+  | ColP
+      lhs.scanChars = concat $ intersperse [Char NoIDP NoFocusMark NoFocusMark Nothing '\n'] @presentationList.scanCharss
+  | OverlayP
+      lhs.scanChars = head' "ScannerAG.OverlayP.lhs.scanChars" @presentationList.scanCharss
+  | FormatterP
+      lhs.scanChars = concat @presentationList.scanCharss
+  | WithP
+      lhs.scanChars = @child.scanChars
+  | ParsingP
+      lhs.scanChars = @child.scanChars
+  | LocatorP
+      lhs.scanChars = @child.scanChars
+  | StructuralP
+      (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 
+        let (tokens, idPCounter, whitespaceMap, pres) = 
+              @lhs.scanStructural @lhs.focus @lhs.lexer @lhs.lloc (@lhs.path++[0]) @lhs.idPCounter 
+                                  @lhs.whitespaceMap @child.self
+        in  ( [Structural @id NoFocusMark NoFocusMark @lhs.lloc tokens pres]
+            , idPCounter, whitespaceMap
+            )
+  | EmptyP 
+      lhs.scanChars = []
+  | ImageP PolyP RectangleP EllipseP VertexP GraphP
+      lhs.scanChars = [] -- for now, we assume these will only appear in structural presentations
+  | ArrangedP 
+      lhs.scanChars = [] -- will not occur
+      
+ATTR LayoutList [ | | scanCharss : {[[ScanChar @doc @node @clip @token]]} ]
+
+SEM LayoutList
+  | Nil
+      lhs.scanCharss = []
+  | Cons
+      lhs.scanCharss = @hd.scanChars : @tl.scanCharss
+      

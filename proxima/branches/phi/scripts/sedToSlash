@@ -1,0 +1,9 @@
+# sed script to change Windows paths in ModuleMap_files/slide0001.html to unix paths
+# \\ is backslash \/ is slash
+s/..\\..\\src\\evaluation\\/..\/..\/src\/evaluation\//
+s/..\\..\\src\\presentation\\/..\/..\/src\/presentation\//
+s/..\\..\\src\\layout\\/..\/..\/src\/layout\//
+s/..\\..\\src\\arrangement\\/..\/..\/src\/arrangement\//
+s/..\\..\\src\\rendering\\/..\/..\/src\/rendering\//
+s/..\\..\\src\\main\\/..\/..\/src\/main\//
+s/..\\..\\src\\common\\/..\/..\/src\/common\//

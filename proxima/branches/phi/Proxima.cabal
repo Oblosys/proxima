@@ -1,0 +1,50 @@
+name: Proxima
+version: 0.1
+cabal-version: -any
+license: AllRightsReserved
+license-file: ""
+copyright:
+maintainer:
+build-depends: Cabal -any, base -any, haskell98 -any, wx >=0.9.4,
+               wxcore >=0.9.4
+stability:
+homepage:
+package-url:
+synopsis:
+description:
+category:
+author:
+tested-with:
+data-files:
+extra-source-files:
+extra-tmp-files:
+exposed-modules: DebugLevels
+buildable: True
+cc-options:
+ld-options:
+frameworks:
+c-sources:
+extensions:
+extra-libraries:
+extra-lib-dirs:
+includes:
+install-includes:
+include-dirs:
+hs-source-dirs: src/rendering src/presentation
+                src/main src/layout src/evaluation
+                src/common src/arrangement
+other-modules:  ArrLayerTypes ArrLayerUtils ArrPresent ArrTranslate
+               ArrTypes ArrUtils Arranger ArrangerAG FontLib CommonTypes
+               CommonUtils UU_Parsing DocTypes DocUtils DocumentEdit
+               EnrTypes EnrUtils EvalLayerTypes EvalLayerUtils EvalPresent
+               EvalTranslate LayLayerTypes LayLayerUtils LayPresent LayTranslate
+               LayTypes LayUtils Layout TreeEditPres Architecture ArchitectureLibM
+               GUI Proxima PresLayerTypes PresLayerUtils PresPresent PresTranslate
+               PresTypes PresUtils PresentationParsing XLatex XprezLib
+               RenLayerTypes RenLayerUtils RenPresent RenTranslate RenTypes
+               RenUtils Renderer               
+ghc-prof-options: -auto-all
+ghc-options: -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+hugs-options:
+nhc-options:
+jhc-options:

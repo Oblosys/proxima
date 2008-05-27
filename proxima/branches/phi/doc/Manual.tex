@@ -1,0 +1,190 @@
+\documentclass{article}
+\usepackage{a4wide}
+\begin{document}
+\title{Proxima Manual}
+\author{Martijn M. Schrage}
+\maketitle
+
+\section {Startup}
+
+The text file "HeliumFile.hs" contains the initial document. 
+
+Proxima has two different foci (focus == cursor/selection) that will be integrated in a future version. The {\em document focus} is shown with a light blue background, and the {\em presentation focus} is shown with dark blue rectangles. The presentation focus is similar to a cursor or selection in a regular text editor. When text is typed, it is inserted at the presentation focus.
+
+
+The available features depend on the level in which the document is recognized by the editor. There are three levels: not parsed, parsed, and parsed \& type checked. Edit operations on a level may only be performed when the document is recognized at that level. However, in the current prototype, illegal edit operations are not disallowed, but operate on the last version of that level.
+
+\section{Not parsed}
+
+The only available features in the unparsed document are presentation navigation ({\bf ArrowKeys} and {\bf LeftClick}), presentation focus enlargement ({\bf Shift-ArrowKeys} and {\bf Shift-LeftClick}), and presentation edit operations (typing text, {\bf Ctrl-x}, {\bf Ctrl-c}, and {\bf Ctrl-v}). Presentation navigation is still rather basic: it does not skip invisible empty elements, causing it to sometimes stay in the same place after a left or right move, and it does not handle lines containing elements of varying height well (eg. when a fraction is displayed on a line).
+
+{\bf Backspace} and {\bf Delete} can be used to delete presentation elements. However, both operations suffer from the same problem as the navigation operations, so sometimes they have to be performed repeatedly before anything happens. Deletion with the mouse is the easiest for now.
+
+\section{Parsed}
+
+The document can be parsed with {\bf F1}. If the parse fails, the background is colored grey and the parse errors are shown below the source. If the parse succeeds, the following edit commands are available.
+
+\bigskip 
+\noindent {\bf Structural navigation:}\\
+The document focus can be changed with {\bf Alt-LeftClick}, {\bf Ctrl-Arrowkeys} and {\bf $<$Select$>$} from the context menu ({\bf Ctrl-LeftClick}). Downward navigation selects the first child. When {\bf Alt-LeftClick} is overridden by the presentation, {\bf $<$Select$>$} from the context menu can be used.
+
+\bigskip
+\noindent {\bf Integrated structural edit: (nice in Helium lists and tuples)}\\
+Document editing has its own cut ({\bf Ctrl-d}), copy ({\bf Ctrl-f}) and paste ({\bf Ctrl-g}) operations, which are also available from the context menu ({\bf Ctrl-LeftClick}). 
+
+Below the {\bf $<$Select$>$} item in the context menu are replace items of the form {\bf "Constructor \{child\} ..."} that can be used to replace the document structure on which the {\bf Ctrl-LeftClick} was performed. Types appearing in braces are document holes.
+
+In list structures (\verb|Decls|, \verb|Alts|, or \verb|Exps|), {\bf "add"} items are present for inserting after the current item, as well as {\bf "$<$paste before$>$"} and {\bf "$<$paste after$>$"} items.
+
+\bigskip 
+\noindent {\bf Simple value computations:}\\
+A naive computation of the value of the function is shown in comment before its definition. It does not work for case statements and functions are shown as \verb|<function>|.
+
+\bigskip 
+\noindent {\bf List of variables in scope:}\\
+Below the source is a list of variables currently in scope. An {\bf Alt-LeftClick} in the list moves the document focus to the corresponding declaration. If the document is type correct, the types of the variables in scope are also shown in the list.
+
+\bigskip 
+\noindent {\bf Jump to declaration}\\
+The context menu ({\bf Ctrl-LeftClick:}) of an identifier in an expression has the {\bf "Jump to declaration"} item that sets the document focus to its declaration.
+
+\bigskip 
+\noindent {\bf Selective auto layout:}\\
+A top-level declaration has the context menu item {\bf "Enable auto-layout"}. When it is turned on, the whitespace is determined by a pretty printer and not freely editable anymore. When auto-layout is turned off, the layout of the pretty printed function can be adapted by normal presentation editing (typing and removing spaces and newlines).
+
+\bigskip 
+\noindent {\bf Collapsed functions:}\\
+Anywhere in declaration, the context menu has a {\bf "Collapse: name"} item that collapses the definition. Collapse may also be performed on declarations in let expressions. A collapsed definition can be expanded by performing an {\bf Alt-LeftClick} on the "\framebox{...}", or by selecting {\bf "Expand"} from the context menu.
+
+In the current prototype, the layout is lost if a collapsed function is parsed. To remedy this situation: turn on autolayout for the function.
+
+\section{Parsed \& type checked}
+The document is parsed and type checked after {\bf F2} has been pressed. Type checked does not necessarily mean type correct.
+ 
+\bigskip 
+\noindent {\bf Errors displayed in source:}\\
+Type errors appear below the program source. Squiglies in the source show the location of errors. 
+
+\bigskip 
+\noindent {\bf Jump to error:}\\
+An {\bf Alt-LeftClick} on an error message sets the document focus to the location of the error in the source.
+
+\bigskip 
+\noindent {\bf Derived type signatures:}\\
+Derived type signatures appear before each function definition. The derived signatures are not editable.
+
+\bigskip 
+\noindent {\bf Type of focused item:}\\
+The type of the program construct that is in document focus is shown at the top of the screen. When the type does not appear, the focus may be too far down in the tree (eg. on an {\tt Ident} instead of an {\tt IdentExp}). Moving the focus up will show the type. Declarations have no type.
+
+\section{Chess board}
+Type "\verb|Chess:|\textvisiblespace \verb|board|" (no semi-colon) between two top-level declarations to insert a chess board (or use the context menu on a declaration to either replace the declaration by a chess board or {\bf add} a chess board right behind it, note that in the latter case no whitespace is provided). Document selection of a piece ({\bf Alt-LeftClick}) shows its possible moves. {\bf Alt-LeftClick} on a possible move location performs the move. Normal document edit operations such as cut ({\bf Ctrl-d}) and paste ({\bf Ctrl-g}) are also available. The context menu ({\bf Ctrl-LeftClick}) may be used to create new pieces.
+
+\bigskip 
+\noindent {\bf *** WARNING ***:} Do not put pawns on the back row! The chess move generator can't handle this case and will cause the entire editor to crash.
+
+\section{Overview of edit commands}
+
+\begin{tabular}[t]{ll} 
+\multicolumn{2}{l}{\bf Arrangement editing:}\\
+Zoom in:    &  {\bf Alt-=}\\
+Zoom out:   &  {\bf Alt-{-}}  (zooming out to far causes a crash)\\
+Debug view: & {\bf F9}   (shows what's really going on)\\
+\hline
+
+\multicolumn{2}{l}{\bf Presentation editing:}\\
+navigate:    & {\bf ArrowKeys}\\
+             & {\bf LeftClick}\\        
+Extend focus:& {\bf Shift-ArrowKeys}\\
+            & {\bf  Shift-LeftClick}\\
+copy:       & {\bf Ctrl-c}\\
+cut:        & {\bf Ctrl-x}\\
+paste:      & {\bf  Ctrl-v}\\
+\hline
+
+\multicolumn{2}{l}{\bf Doc editing:}\\
+Select:      & {\bf Alt-LeftClick} (may be overridden)\\
+Navigate:    & {\bf Ctrl-ArrowKeys}\\
+Context menu:& {\bf Ctrl-LeftClick}\\
+Copy:        & {\bf Ctrl-d}\\
+Cut:         & {\bf Ctrl-f}\\
+Paste:       & {\bf Ctrl-g}\\
+\hline
+\multicolumn{2}{l}{\bf Other:}\\
+Parse:      & {\bf F1}\\
+Type check: & {\bf F2}\\
+Quit:       & {\bf Ctrl-q}\\
+\end{tabular}
+
+\bigskip
+\noindent The Save option in the file menu saves a simple XML representation of the edited document.
+
+\section{Document Type and Concrete Syntax}
+\begin{verbatim}
+data Document = RootDoc Decls          -- Decls
+
+
+data Decls = ConsDecls Decl Decls      -- Decl Decls
+           | NilDecls                  --
+
+
+data Decl = Decl Ident Exp             -- Ident "=" Exp ";"
+          | BoardDecl Board            -- "Chess:" Board
+
+data Ident = Ident String              -- String
+
+data Exps = ConsExps Exp Exps          -- Exp "," Exps  {not entirely: last has no ","}
+          | NilExps                    --
+
+data Alts = ConsAlts Alt Alts          -- Alt Alts
+          | NilAlts                    --
+
+
+data Exp = PlusExp    Exp   Exp        -- Exp "+" Exp
+         | TimesExp   Exp   Exp        -- Exp "*" Exp
+         | DivExp     Exp   Exp        -- Exp "%" Exp
+         | PowerExp   Exp   Exp        -- Exp "^" Exp
+         | BoolExp    Bool             -- "True" | "False"
+         | IntExp     Int              -- "0" | "1" | "2" | ...
+         | LamExpent  Exp              -- "\" Exp "->" Exp
+         | AppExp     Exp   Exp        -- Exp Exp
+         | CaseExp    Exp   Alts       -- "case" Exp "of" Alts
+         | LetExp     Decls Exp        -- "let" Decls "in" Exp
+         | IdentExp   Ident            -- Ident
+         | IfExp      Exp   Exp Exp    -- "if" Exp "then" Exp "else" Exp
+         | ParenExp   Exp              -- "(" Exp ")"
+         | ListExp    Exps             -- "[" Exps "]"
+         | ProductExp Exps             -- "(" Exps ")"
+
+data Alt = Alt Ident Exp               -- Ident "->" Exp ";"
+
+                 
+data Board       = Board BoardRow BoardRow BoardRow BoardRow 
+                   BoardRow BoardRow BoardRow BoardRow         -- "board"  
+                         
+data BoardRow    = BoardRow BoardSquare BoardSquare BoardSquare BoardSquare
+                            BoardSquare BoardSquare BoardSquare BoardSquare
+
+data BoardSquare = King   Bool | Queen Bool | Bishop Bool | 
+                   Knight Bool | Rook  Bool | Pawn   Bool | Empty
+\end{verbatim}
+
+\section{Bugs and issues}
+
+\noindent Some known bugs and problems of the editor are:
+
+\begin{itemize}
+\item Focus move doesn't skip presentation positions that have the same arrangement position.
+\item Focus gets lost often after parsing or structural edit
+\item Computations may not be recursive because this loops the simple evaluator (and Proxima)
+\item The right mouse button is not supported by ObjectIO (ObjectIO is the library used for rendering)
+\item Screen flickering cannot be fixed in ObjectIO without loss of speed.
+\item Parse errors create a newline at end of declarations 
+\item Poor display of parse errors.
+\item HoleDecls cannot be parsed.
+\item Integration between edit operations on different levels is not automatic yet
+\item The editor is rather slow
+\end{itemize}
+
+New rendering and parsing modules, together with an improved focus model and basic top level incrementality will solve most of these problems.
+\end{document}
