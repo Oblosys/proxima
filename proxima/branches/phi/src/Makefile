@@ -18,7 +18,8 @@ EXE = .exe
 
 SHELL = /bin/sh
 
-.PHONY: default all agc generator arranger scanner always
+#agc
+.PHONY: default all generator arranger scanner always
 
 PROXIMADIR = ../../proxima
 
@@ -28,7 +29,8 @@ UUAGCDIR = $(PROXIMADIR)/../uuagc/src
 UUAGCDERIVEDDIR = $(PROXIMADIR)/../uuagc/src-derived
 GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
-AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
+AGC             = uuagc
+# $(PROXIMABINDIR)/uuagc$(EXE)
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 # Proxima directories
@@ -37,14 +39,15 @@ ARRANGEMENTDIR  = $(PROXIMADIR)/src/Arrangement
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
 
-GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
+GENERATORDIRS = $(GENERATORSRCDIR) #:$(UUAGCDIR)
 
 
 # Rules:
 
 default: all
 
-all: agc generator arranger scanner
+#agc
+all:  generator arranger scanner
 
 # The Generator
 generator : $(GEN)
@@ -56,19 +59,20 @@ $(GEN): always
 
 # The AG compiler
 
-agc: $(AGC)
+# agc: $(AGC)
 
 # the phony target always is because we don't want to put all the ag compiler sources here
-$(AGC): always
-	@echo ghc: compiling uuagc compiler with -O2
-	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -i$(UUAGCDERIVEDDIR) -fglasgow-exts -O2 -package mtl
+#$(AGC): always
+#	@echo ghc: compiling uuagc compiler with -O2
+#	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -i$(UUAGCDERIVEDDIR) -fglasgow-exts -O2 -package mtl
 
 
 # The arranger AG
 
 arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
-$(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
+# $(AGC)
+$(ARRANGEMENTDIR)/ArrangerAG.hs : $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
@@ -80,7 +84,8 @@ $(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
 
 scanner: $(LAYOUTDIR)/ScannerAG.hs
 
-$(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
+#$(AGC)
+$(LAYOUTDIR)/ScannerAG.hs :  $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \

@@ -217,7 +217,7 @@ data PresentationBase doc node clip userToken level where
        StringP :: !IDP -> !String  -> 
                   PresentationBase doc node clip userToken level 
        TokenP  :: !IDP -> !(Token doc node clip userToken) ->
-                  PresentationBase doc node clip userToken Pres_ 
+                  PresentationBase doc node clip userToken level -- Pres_ instead of level
        ImageP  :: !IDP -> !String -> !ImgStyle ->
                   PresentationBase doc node clip userToken level 
        PolyP   :: !IDP -> ![Point] -> !LineWidth -> !Style ->

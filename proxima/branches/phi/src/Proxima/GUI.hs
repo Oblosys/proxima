@@ -30,7 +30,7 @@ import Data.Time.Clock
 import Control.Exception
 
 initialWindowSize :: (Int, Int)
-initialWindowSize = (1000, 900)
+initialWindowSize = (800, 400)
 
 documentFilename = "Document.xml"
 backupFilename = "BackupDocument.xml"
