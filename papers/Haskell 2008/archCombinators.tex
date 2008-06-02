@@ -109,7 +109,7 @@ Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor
 
 A layer consists of a pair of $\present_i$ and $\interpret_i$ functions, which we also refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we may also have horizontal data flow that stays within the layer. Horizontal data flow concerns results from a layer function that are passed to a layer function it the same layer, possibly in a next edit step.
 
-Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The $mapping$ result of $\present$ is passed to $\interpret$ and represents information about the presentation mapping. Furthermore, a $state$ parameter is passed to $\present$ as well as $\interpret$, and may be updated by $\interpret$. Note that the $state$ parameter of $\present$ is the result of $\interpret$ in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
+Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The $map$ result of $\present$ is passed to $\interpret$ and represents information about the presentation mapping. Furthermore, a $state$ parameter is passed to $\present$ as well as $\interpret$, and may be updated by $\interpret$. Note that the $state$ parameter of $\present$ is the result of $\interpret$ in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
 
 The editor can only support direct interpretation (see Section~\ref{sect:intrProcess}) because the value of the data level is not available at the interpretation step. This is not a realistic situation, but for our example it does not matter. The Proxima layer that will be explained in Section~\ref{sect:proxima} also supports indirect interpretation, because it keeps the value of the data level in the horizontal data flow.
 
@@ -125,7 +125,7 @@ If we look at the figure, we see that there are values that go from left to righ
 ******* Extra state verhaal nog even bekijken  niet 2 x ref formalSpec
 \head{\bf A single layer}
 
-Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is somewhat more complex than Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret}, because not all horizontal parameters to $interpret$ are results of $present$ \note{i.e.\ wg?} (i.e.\ $state$ is not a result of $present$). The data flow is a simplification of the data flow of the layered editor with extra state from ****Chapter~\ref{chap:formalSpec}. $present$ maps a high level data structure $doc$ to a low level data structure $pres$. The $state$ parameter contains state that is local to the layer, as described in ****Chapter~\ref{chap:formalSpec} \note{change to internal ref}. The $interpret$ function works in the opposite direction of $present$ and maps an edit operation ($gest$) on the $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure. Besides $pres$, $present$ also returns a value $mapping$. It is used to encode information that is required by $interpret$ in order to map $gest$ to $upd$. An example of such information is a table of pointing information, that relates objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit operation on the extra state, $interpret$ also has $state$ as a parameter. In that case, $state'$ is the result of performing the update on the extra state. In any other case, $state'$ is equal to $state$. 
+Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is somewhat more complex than Figure~\ref{simplelayers} \note{figure: dotted line between present and interpret}, because not all horizontal parameters to $interpret$ are results of $present$ \note{i.e.\ wg?} (i.e.\ $state$ is not a result of $present$). The data flow is a simplification of the data flow of the layered editor with extra state from ****Chapter~\ref{chap:formalSpec}. $present$ maps a high level data structure $doc$ to a low level data structure $pres$. The $state$ parameter contains state that is local to the layer, as described in ****Chapter~\ref{chap:formalSpec} \note{change to internal ref}. The $interpret$ function works in the opposite direction of $present$ and maps an edit operation ($gest$) on the $pres$ data structure to an edit operation ($upd$) on the $doc$ data structure. Besides $pres$, $present$ also returns a value $map$. It is used to encode information that is required by $interpret$ in order to map $gest$ to $upd$. An example of such information is a table of pointing information, that relates objects in $pres$ to their origin in $doc$. Because $gest$ may be an edit operation on the extra state, $interpret$ also has $state$ as a parameter. In that case, $state'$ is the result of performing the update on the extra state. In any other case, $state'$ is equal to $state$. 
 \ec
 
 \begin{figure}
@@ -162,7 +162,7 @@ Figure~\ref{simplesinglelayer} shows the data flow for a single layer. It is som
 \xymatrix @R=1pc{
 & & \dataa{$doc$}\ar[d] & & & \dataa{$upd$} & \\
 \dataa{$state$}\ar[rr] \ar `r[rd] `[rr] `[rrrr] `[rrrr] [rrrrr] & & \dimcomponent{5em}{2ex}{\present} \ar[ddd] \ar[r] &
-     \dataa{$mapping$}\ar[rr] & & \dimcomponent{6em}{2ex}{\interpret} \ar[u] \ar[r] & \dataa{$state$} \\
+     \dataa{$map$}\ar[rr] & & \dimcomponent{6em}{2ex}{\interpret} \ar[u] \ar[r] & \dataa{$state$} \\
 & & & & & \hspace{3.5em} &  \\
 & & & & & \hspace{3.5em} &  \\
 & & \dataa{$pres$} & & & \dataa{$gest$}\ar[uuu] & 
@@ -217,39 +217,38 @@ A layer function takes  horizontal as well as vertical arguments and returns bot
 %horizontal result is put second, because the   vertical result is what matters.
 % The horizontal result is just necessary to compute a following vertical result.
 
-%code from Haskell/DPPClass_Lib.hs
+%code Layers.hs
 \begin{small}
 \begin{verbatim}
-type LayerFunction horArg vertArg horRes vertRes =
-       horArg -> vertArg -> (horRes, vertRes)
+type LayerFn horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> (vertRes, horRess)
 \end{verbatim}
 \end{small}
 
 We model a layer with a record that contains the layer functions. For the example editor, we have the two layer functions: \p{present} and \p{interpret}. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}.  If we would put these functions directly in a record, we would get:
 
-\bc The names of the type and selector functions contain an apostrophe (\p{'}) because we also introduce a slightly different type \p{Simple}, which will be used in most of the rest of this paper. \note{overal Simple gebruiken?} \ec
-
-%code from Haskell/Layers.hs
+%code Layers.hs
 \begin{small}
 \begin{verbatim}
-data Simple state mapping doc pres gest upd =
-       Simple { present   :: LayerFunction state doc mapping pres
-              , interpret :: LayerFunction (mapping, state) gest state upd
+data Simple state map doc pres gest upd =
+       Simple { present   :: LayerFn state doc 
+                                     map pres
+              , interpret :: LayerFn (map,state) gest
+                                     state upd
               }
 \end{verbatim}
 \end{small}
 
 
-\bc ** beetje overbodig
-Strictly speaking, \p{Simple} is not a type but rather a type constructor, but since it is inconvenient to have to supply the type parameters every time the type is mentioned, we will denote the type with its constructor in the remainder of this text. More formally, when refering to a type \p{t}, where \p{t} is a type constructor with $n$ parameters, we mean the type \p{t a$_1$ \dots ~a$_n$} for fresh type variables \p{a$_i$}.
-\ec
 However, this is not entirely what we want. To simplify the horizontal connection between layer functions, we prefer a normalized data type in which the horizontal result type (\p{horRes}) of a layer function matches the horizontal argument type (\p{horArg}) of the next layer function. For our example, this implies that the horizontal result of \p{present} has the same type as the horizontal argument of \p{interpret} and vice versa (since the result of \p{interpret} is the argument of \p{present} in the next edit cycle). Figure~\ref{wrapped} shows the data flow for the layer functions in the normalized type \p{Simple}. Because the conversion to a normalized type is straightforward, we do not show it here. The definition of the normalized \p{Simple} is:
 
 \begin{small}
 \begin{verbatim}
-data Simple state mapping doc pres gest upd =
-       Simple { present ::   LayerFunction state doc (mapping, state) pres
-              , interpret :: LayerFunction (mapping, state) gest state upd
+data Simple state map doc pres gest upd =
+       Simple { present :: LayerFn state doc 
+                                   (map, state) pres
+              , interpret :: LayerFn (map, state) gest
+                                     state upd
               }
 \end{verbatim}
 \end{small}
@@ -276,7 +275,7 @@ Now that the building blocks have been established, we need a way to connect the
 \xymatrix@=0.6cm{
  & \dataa{$doc$}\ar[d]                    & & & \dataa{$upd$} & \\
  \dataa{$state$}\ar[r]                    & \dimcomponent{5em}{2ex}{present} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
-     \dataa{$mapping$}\ar@{.>}[r] & \dataa{$mapping$} \ar[r] & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
+     \dataa{$map$}\ar@{.>}[r] & \dataa{$map$} \ar[r] & \dimcomponent{6em}{2ex}{interpret} \ar[u] \ar[r] & \dataa{$state$} \\
  & & \dataa{$state$}\ar@{.>}[r] & \dataa{$state$} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
  & \dataa{$pres$}                          & & & \dataa{$gest$}\ar[uu] & 
  \save"2,2"."3,5"*+<2em>[F.]\frm{}\restore 
@@ -308,15 +307,15 @@ We give an example edit loop that explicitly connects three layers: \p{layer0}, 
 \xymatrix@=0.6cm{
  & \dataa{{\tt doc}} \ar[d] & & \dataa{{\tt update}} & \\
  \dataa{{\tt state0}}\ar[r]  & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
-     \dataa{{\tt mapping0}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state0'}} \\
+     \dataa{{\tt map0}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state0'}} \\
  & & \dataa{{\tt state0}} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
  & \dataa{{\tt pres1}} \ar[d] & & \dataa{{\tt gest1}}\ar[uu] & \\
  \dataa{{\tt state1}}\ar[r]  & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
-     \dataa{{\tt mapping1}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state1'}} \\
+     \dataa{{\tt map1}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state1'}} \\
  & & \dataa{{\tt state1}} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
  & \dataa{{\tt pres2}} \ar[d] & & \dataa{{\tt gest2}}\ar[uu] & \\
  \dataa{{\tt state2}}\ar[r]  & \dimcomponent{5em}{2ex}{{\tt present}} \ar[dd] \ar `r[d] `[dr] [dr] \ar[r] &
-     \dataa{{\tt mapping2}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state2'}} \\
+     \dataa{{\tt map2}} \ar[r] & \dimcomponent{6em}{2ex}{{\tt interpret}} \ar[u] \ar[r] & \dataa{{\tt state2'}} \\
  & & \dataa{{\tt state2}} \ar `r[u] `[ru] [ru] & \hspace{3.5em} &  \\
  & \dataa{{\tt pres3}} & & \dataa{{\tt gest3}}\ar[uu] & 
 \save"2,2"."3,4"*+<2em>[F.]\frm{}\restore 
@@ -330,27 +329,32 @@ We give an example edit loop that explicitly connects three layers: \p{layer0}, 
 \end{small}
 \end{figure}
 
-%code from Haskell/Explicit.hs
+%code from Explicit.hs
 \begin{small}
 \begin{verbatim}
-editLoop (layer0, layer1, layer2) states doc = loop states doc
- where loop (state0, state1, state2) doc = 
-        do { -- Presentation process:
-             let ((mapping0,state0'), pres1) = (present layer0) state0 doc
-           ; let ((mapping1,state1'), pres2) = (present layer1) state1 pres1
-           ; let ((mapping2,state2'), pres3) = (present layer2) state2 pres2
+editLoop (layer0, layer1, layer2) states doc = 
+  loop states doc where
+  loop (state0, state1, state2) doc = 
+   do { let (pres1,(map0,state0')) = 
+              present layer0 state0 doc
+      ; let (pres2,(map1,state1')) = 
+              present layer1 state1 pres1
+      ; let (pres3,(map2,state2')) = 
+              present layer2 state2 pres2
 
-           ; showRendering pres3
-           ; gest3 <- getGesture
- 
-             -- Interpretation process:
-           ; let (state2'', gest2)  = (interpret layer2) (mapping2, state2') gest3
-           ; let (state1'', gest1)  = (interpret layer1) (mapping1, state1') gest2
-           ; let (state0'', update) = (interpret layer0) (mapping0, state0') gest1
-       
-           ; let doc' = updateDocument update doc
-           ; loop (state0'', state1'', state2'') doc'
-           }
+      ; showRendering pres3
+      ; gest3 <- getGesture
+
+      ; let (gest2,state2'')  = 
+              interpret layer2 (map2, state2') gest3
+      ; let (gest1,state1'')  =
+              interpret layer1 (map1, state1') gest2
+      ; let (update,state0'') = 
+              interpret layer0 (map0, state0') gest1
+      
+      ; let doc' = updateDocument update doc
+      ; loop (state0'', state1'', state2'') doc'
+      }
 \end{verbatim}
 \end{small}
 
@@ -404,11 +408,11 @@ A disadvantage of the implementation of the edit loop sketched in this section i
 
 
 %\note{Ref to Doaitse Pablo?} 
-In this section we abstract from the horizontal and vertical data-flow patterns in the edit loop of the previous section, by using combinators for combining layers. In the main loop, we call the layer functions of the combined layer, rather than explicitly calling each layer function in the main loop. The combinators also make the data flow more explicit. The direction of the vertical parameter is apparent by the choice of combinator, and not by the way the argument is threaded through the function applications, as is the case in the previous section. 
+In this section we abstract from the horizontal and vertical data-flow patterns in the edit loop of the previous section, by using combinators for combining layers. In the main loop, we call the layer functions of the combined layer, rather than explicitly calling each layer function in the main loop. The combinators also make the data flow more explicit. The direction of the vertical parameter is apparent by the choice of   combinator, and not by the way the argument is threaded through the function applications, as is the case in the previous section. 
 
 Similar to the way in which the function composition operator $\oo$ can be used to compose functions {\em f} and {\em g} into $f \oo g$, we develop a \p{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are compositions of the layer functions in the layers that are combined.
 
-In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The composition combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \p{LayerFunction horArgC vertArg horResC vertRes}. The parameters \p{horArgC} and \p{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
+In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The composition combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \p{LayerFn horArgC vertArg horResC vertRes}. The parameters \p{horArgC} and \p{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
 
 Because the types of the horizontal parameters are typically not equal, the collections cannot be represented by lists. The same restriction holds for the horizontal results. Moreover, we wish to be able to determine at compile time whether the collection contains the right number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product consisting of only pairs to represent the horizontal parameters and results.
 
@@ -426,17 +430,19 @@ We first define two combinators for composing layer functions: an downward combi
 
 The combinator \p{composeDown} composes two layers \p{higher} and \p{lower} by feeding the intermediate vertical result of \p{h} into \p{l}. At the same time, the horizontal parameters for \p{higher} and \p{lower} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \p{higher} and \p{lower}. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %code from Haskell/NCP.hs
 \begin{small}
 \begin{verbatim}
-composeDown :: LayerFunction horArgH arg horResH interm ->
-               LayerFunction horArgL interm horResL res ->
-               LayerFunction (horArgH, horArgL) arg (horResH,horResL) res
-composeDown higher lower = 
-  \(horArgH, horArgL) arg ->                                           
-    let (horResH, interm) = higher horArgH arg
-        (horResL, res)    = lower horArgL interm
-    in  ((horResH,horResL), res)
+composeDown :: LayerFn horArgU arg horResU intr ->
+               LayerFn horArgL intr horResL res ->
+               LayerFn (horArgU, horArgL) arg 
+                             (horResU, horResL) res
+composeDown upper lower = 
+  \(horArgU, horArgL) arg ->                                           
+    let (interm, horResU) = upper horArgU arg
+        (res, horResL)    = lower horArgL interm            
+    in  (res, (horResU,horResL))
 \end{verbatim}
 \end{small}
 
@@ -488,13 +494,14 @@ composeDown higher lower =
 %Note that the combinator does not enforce a left-associative nesting of the horizontal parameters. The associativity is achieved by only using %the combinator in a left-associative way. 
 
 
-The definition of \p{composeUp} is analogous to \p{composeUp}. We only show its type here.
+The definition of \p{composeUp} is analogous to \p{composeUp}. Its type is:
 
 \begin{small}
 \begin{verbatim}
-composeUp :: LayerFunction horArgH interm horResH res ->
-             LayerFunction horArgL arg horResL interm ->
-             LayerFunction (horArgH, horArgL) arg (horResH,horResL) res
+composeUp :: LayerFn horArgU intr horResU res ->
+             LayerFn horArgL arg horResL intr ->
+             LayerFn (horArgU, horArgL) arg
+                     (horResU, horResL) res
 \end{verbatim}
 \end{small}
 
@@ -504,15 +511,17 @@ Using \p{composeUp} and \p{composeDown}, we can define a combinator to combine \
 \bc From now on, we use the type \p{Simple} instead of \p{Simple'} because the matching horizontal parameter types in \p{Simple} make the connection easier. \ec
 
 
-First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use the type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(mapping, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{mapping} and \p{state} tuples. 
+First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use the type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(map, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{map} and \p{state} tuples. 
 
-The type \p{LayerC} is a more general version of \p{Simple}. Because we cannot easily denote a nested pair structure in a Haskell type declaration, we leave the structure of the horizontal parameters unspecified. The parameter \p{states} represents the nested pair of \p{state} values, and the parameter \p{mappingsStates} represents the nested pair of \p{mapping} and \p{state} tuples.
+The type \p{LayerC} is a more general version of \p{Simple}. Because we cannot easily denote a nested pair structure in a Haskell type declaration, we leave the structure of the horizontal parameters unspecified. The parameter \p{states} represents the nested pair of \p{state} values, and the parameter \p{mapsStates} represents the nested pair of \p{map} and \p{state} tuples.
 
 \begin{small}
 \begin{verbatim}
-data LayerC states mappingsStates doc pres gest upd =
-       LayerC { presentC ::   LayerFunction states doc mappingsStates pres
-              , interpretC :: LayerFunction mappingsStates gest states upd
+data LayerC states mapsStates doc pres gest upd =
+       LayerC { presentC ::   
+                  LayerFn states doc mapsStates pres
+              , interpretC :: 
+                  LayerFn mapsStates gest states upd
               }
 \end{verbatim}
 \end{small}
@@ -535,9 +544,11 @@ The \p{combine} combinator is defined by using the appropriate \p{compose} combi
 \begin{verbatim}
 combine :: LayerC a b c d e f -> LayerC g h d i j e -> 
            LayerC (a,g) (b,h) c i j f
-combine higher lower =
-  LayerC { presentC = composeDown (presentC higher) (presentC lower)
-         , interpretC = composeUp (interpretC higher) (interpretC lower)
+combine upper lower =
+  LayerC { presentC = composeDown (presentC upper) 
+                                  (presentC lower)
+         , interpretC = composeUp (interpretC upper) 
+                                  (interpretC lower)
          }
 \end{verbatim}
 \end{small}
@@ -547,18 +558,18 @@ combine higher lower =
 
 The main editor loop from the previous section now reads:
  
- \begin{small}
- \begin{verbatim}
+\begin{small}
+\begin{verbatim}
 editLoop layers states doc = loop states doc
  where loop states doc = 
-        do { -- Presentation process:
-             let (mappingsStates, pres) = (presentC layers) states doc
+        do { let (pres, mapsStates) = 
+                   presentC layers states doc
            
            ; showRendering pres
            ; gest <- getGesture
  
-             -- Interpretation process:
-           ; let (states', update) = (interpretC layers) mappingsStates gest
+           ; let (update, states') = 
+                   interpretC layers mapsStates gest
        
            ; let doc' = updateDocument update doc
            ; loop states' doc'
@@ -574,7 +585,8 @@ The \p{main} function is almost the same as in the previous section, except that
 main layer0 layer1 layer2 = 
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
-    ; let layers = lift layer0 `combine` lift layer1 `combine` lift  layer2
+    ; let layers = lift layer0 `combine` lift layer1 
+                               `combine` lift  layer2
     ; editLoop layers ((state0, state1), state2) doc
     }
 \end{verbatim}
@@ -601,17 +613,17 @@ The nested pairs solution is more compositional than the approach of the previou
 In the previous section, the horizontal results that are computed on evaluation of a combined layer function are returned explicitly and passed as arguments to the next layer function. In this section we take an alternative approach, which we explain with an example.  Recall that with the nested pairs method, each combined layer function returns a collection of horizontal results together with its vertical result:
 
 \dots\\
-{\tt  let (mappingsStates, pres) = (presentC layers) states doc }\\
+{\tt  let (pres, mapsStates) = presentC layers states doc }\\
 \dots\\
-{\tt let (states', update) = (interpretC layers) mappingsStates gest}\\
+{\tt let (update, states') = interpretC layers mapsStates gest}\\
 \dots
 
 In contrast, the hidden parameter method does not return a collection of horizontal results, but a function that has already been partially applied to the horizontal results.
 
 \dots\\
-{\tt let (interpretStep, pres) = presentStep doc}\\
+{\tt let (pres, interpretStep) = presentStep doc}\\
 \dots\\
-{\tt let (presentStep, update) = interpretStep gest}\\
+{\tt let (update, presentStep) = interpretStep gest}\\
 \dots
 
 The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop.  As a consequence, the main editor loop becomes more transparent, and the type of a combined layer is simpler, since the type variables for the horizontal parameters are hidden.
@@ -622,8 +634,9 @@ The code that is shown is not entirely accurate, as it turns out that some patte
 \head{Type definitions}
 
 The type of the layer needs to have the following structure: 
-\p{(Doc -> (Gest -> (Doc -> (Gest -> ( \dots, Upd), Pres), Upd), Pres))}.  Unfortunately, we cannot use a type declaration: \p{type Layer = (Doc -> (Gest -> (Layer, Upd)), Pres)}, because Haskell does not allow recursive type synonyms. A \p{newtype} declaration must be used with the disadvantage that values of the type have to be wrapped with constructor functions.
+\p{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}.  Unfortunately, we cannot use a type declaration: \p{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))}, because Haskell does not allow recursive type synonyms. A \p{newtype} declaration must be used with the disadvantage that values of the type have to be wrapped with constructor functions.
 
+\bc
 We encode the type by dividing the computation in {\em steps}; one step for each layer function. The number of steps is equal to the number of layer functions. Hence, we will use the , the statement that a layer has $n$ layer functions, amounts to the same as that it is an $n$ step layer. From now on, we will use the term number of layer functions of a layer interchangebly with number of steps of a layer.
 
 For each step, we define a separate type. Together, the types are mutually recursive. The step types are parameterized with the types of the vertical parameters because the types of these parameters may be different for each layer. For \p{Simple}, we get:
@@ -632,7 +645,7 @@ For each step, we define a separate type. Together, the types are mutually recur
 \begin{small}
 \begin{verbatim}
 newtype PresStep doc pres gest upd = 
-          PresStep  (doc ->  (IntrStep gest upd doc pres, pres))
+          PresStep (doc ->  (IntrStep gest upd doc pres, pres))
 newtype IntrStep gest upd doc pres = 
           IntrStep (gest -> (PresStep doc pres gest upd, upd)) 
 
@@ -643,15 +656,22 @@ type Layer doc pres gest upd = PresStep doc pres gest upd
 Because the presentation is the first step, we define the \p{Layer} type to be equal to \p{PresStep}. In the next section, we will give a more abstract definition of the step types. For now, we will use the above definitions because they clearly show the mutually recursive structure of the types. %\note{mention order of params?}
 
 Instead of using a separate mutually-recursive type for each layer function, we could also define a single recursive \p{newtype}:
-
+\ec
 \begin{small}
 \begin{verbatim}
-newtype Layer' doc pres gest upd = 
-          Layer' (doc -> (gest -> (Layer' doc pres gest upd, upd),  pres))
+newtype Layer doc pres gest upd = 
+          Layer ( doc -> 
+                   ( pres, 
+                       ( gest -> 
+                           ( upd 
+                           , Layer doc pres gest upd))))
 \end{verbatim}
 \end{small}
 
+\bc
+
 However, with this definition, wrapping and unwrapping the newtype constructor does not need to be done at every step. Because of this asymmetry, the resulting combinators are not as elegant.
+\ec
 
 We define two combinators for constructing and combining \p{Layer} values: \p{lift} converts  a \p{Simple} layer to a hidden parameter layer of type \p{Layer}, and \p{combine} combines two layers of type \p{Layer}. Both combinators in this section are specific to the \p{Simple} type. In the next section, we define a library to construct \p{lift} and \p{combine} for arbitrary layers.
 
@@ -662,16 +682,18 @@ The combinator \p{lift} takes a layer of type \p{Simple} and returns a \p{Layer}
 
 \begin{small}
 \begin{verbatim}
-lift :: Simple state mapping doc pres gest upd ->
-         state -> Layer doc pres gest upd
+lift :: Simple state map doc pres gest upd ->
+        state -> Layer doc pres gest upd
 lift simple state = presStep state 
- where presStep state = PresStep $
-           \doc ->  let ((mapping,state), pres) = (present simple) state doc                                         
-                    in  (intrStep (mapping,state), pres)
-       intrStep (mapping,state) = IntrStep $
-           \gest -> let (state', upd) = (interpret simple) (mapping, state) gest                     
-                    in  (presStep state', upd)
-\end{verbatim}
+ where presStep state = Layer $
+         \doc ->  let (pres, (map,state)) = 
+                         present simple state doc                                         
+                  in  (pres, intrStep (map,state))
+       intrStep (map,state) =
+         \gest -> let (upd, state') = 
+                         interpret simple (map,state) gest                     
+                  in  (upd, presStep state')
+\end{verbatim}%$
 \end{small}
 
 Besides \p{layer}, \p{lift} gets a second parameter, \p{state}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. 
@@ -685,7 +707,8 @@ To combine layers, we define a combinator \p{combine}, which gets two layers as 
 
 \begin{small}
 \begin{verbatim}
-combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
+combine :: Layer high med emed ehigh -> 
+           Layer med low elow emed -> 
            Layer high low elow ehigh
 \end{verbatim}
 \end{small}
@@ -699,18 +722,16 @@ The implementation of combine is just plumbing to get the parameters at the righ
 
 \begin{small}
 \begin{verbatim}
-combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
-             Layer high low elow ehigh
 combine = presStep
- where presStep (PresStep hghr) (PresStep lwr) = PresStep $ 
-           \high -> let (hghrIntr, med) = hghr high
-                        (lwrIntr, low) = lwr med
-                    in  (intrStep hghrIntr lwrIntr, low)
-       intrStep (IntrStep hghr) (IntrStep lwr) = IntrStep $
-           \elow -> let (lwrPres, emed) = lwr elow
-                        (hghrPres, ehigh) = hghr emed
-                    in  (presStep hghrPres lwrPres, ehigh)
-\end{verbatim}
+ where presStep (Layer upr) (Layer lwr) = Layer $ 
+           \high -> let (med, uprIntr) = upr high
+                        (low, lwrIntr) = lwr med
+                    in  (low, intrStep uprIntr lwrIntr)
+       intrStep upr lwr = 
+           \elow -> let (emed, lwrPres) = lwr elow
+                        (ehigh, uprPres) = upr emed
+                    in  (ehigh, presStep uprPres lwrPres)
+\end{verbatim}%$
 \end{small}
 
 
@@ -720,15 +741,13 @@ The edit loop of the simple editor no longer contains references to the horizont
 
 \begin{small}
 \begin{verbatim}
-editLoop presentStep doc = 
- do { -- Presentation process:
-      let (IntrStep interpretStep, pres) = presentStep doc
-
+editLoop (Layer presentStep) doc = 
+ do { let (pres , interpretStep) = presentStep doc
+    
     ; showRendering pres
     ; gesture <- getGesture
     
-      -- Interpretation process:
-    ; let (PresStep presentStep', update) = interpretStep gesture
+    ; let (update, presentStep') = interpretStep gesture
     
     ; let doc' = updateDocument update doc
     
@@ -741,13 +760,13 @@ In the \p{main} function, the combined layer is created by lifting the layers to
 
 \begin{small}
 \begin{verbatim}
-main' layer0 layer1 layer2 =
+main layer0 layer1 layer2 =
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
-    ; let PresStep presentStep =           lift layer0 state0 
-                                 `combine` lift layer1 state1
-                                 `combine` lift layer2 state2
-    ; editLoop presentStep doc
+    ; let layers = lift layer0 state0 `combine` 
+                   lift layer1 state1 `combine`
+                   lift layer2 state2
+    ; editLoop layers doc
     }
 \end{verbatim}
 \end{small}
@@ -785,64 +804,9 @@ The method we use for the derivation of the meta combinators is to start with su
 %																
 \subsection{Type definitions} \label{subsecttypedef}
 
-%\note{put a b params at end. Then order is reverse to layer function order}
-In order to extend the hidden parameter method to layers with an arbitrary number of steps, we determine the general form of the data types for each step. 
-\bc
-It turns out that it is not possible to give a general type definition in Haskell that can be used for the step definitions for layers with arbitrary numbers of steps. The reason for this is that the number of type variables depends on the number of steps. However, we can give a simple method for defining the data types, given the number of steps in the layer.
-\ec
-If we take the two step data types for \p{Simple} from Section~\ref{sect:hidden} and rename the variables, we get:
-
-{\tt newtype Step$_{1,2}$ a b c d = Step$_{1,2}$ (a -> (Step$_{2,2}$ c d a b, b))}\\
-{\tt newtype Step$_{2,2}$ a b c d = Step$_{2,2}$ (a -> (Step$_{1,2}$ c d a b, b))}
-
-The first subscript represents the number of the step, and the second one is the total number of steps in the layer. We can capture the pattern on the right-hand side by a type synonym \p{Step$_2$}.
-
-{\tt type Step$_2$ nStep a b c d = (a -> (nStep c d a b, b))}
-
-
-Furthermore, we write the data type definitions as records, to get a selector function for each type. The selector functions will be used in the definition of \p{combine}.
-
-{\tt newtype Step$_{1,2}$ a b c d = Step$_{1,2}$ \{step$_{1,2}$}\verb| :: |{\tt Step$_2$ Step$_{2,2}$  a b c d\}}\\
-{\tt newtype Step$_{2,2}$ a b c d = Step$_{2,2}$ \{step$_{2,2}$}\verb| :: |{\tt Step$_2$ Step$_{1,2}$  a b c d\}}
-
-%also possible to leave next step as parameter. but then have to fix the datatype. Fixing requires recursion so newtype, no good.
-
-For a layer with three layer functions, and hence three steps, we need three mutually recursive step data types. Each step has six parameters.
-
-\begin{small}
-{\tt newtype Step$_{1,3}$ a b c d e f = Step$_{1,3}$ \{step$_{1,3}$}\verb| :: |{\tt a -> (Step$_{2,3}$ c d e f a b, b)\}}\\
-{\tt newtype Step$_{2,3}$ a b c d e f = Step$_{2,3}$ \{step$_{2,3}$}\verb| :: |{\tt a -> (Step$_{3,3}$ c d e f a b, b)\}}\\
-{\tt newtype Step$_{3,3}$ a b c d e f = Step$_{3,3}$ \{step$_{3,3}$}\verb| :: |{\tt a -> (Step$_{1,3}$ c d e f a b, b)\}}
-\end{small}
-
-Which can be simplified to:
-
-\begin{small}
-{\tt type Step$_3$ nStep a b c d e f = (a -> (nStep c d e f a b, b))}\\
-\\
-{\tt newtype Step$_{1,3}$ a b c d e f = Step$_{1,3}$ \{step$_{1,3}$}\verb| :: |{\tt Step$_3$ Step$_{2,3}$ a b c d e f\} }\\
-{\tt newtype Step$_{2,3}$ a b c d e f = Step$_{2,3}$ \{step$_{2,3}$}\verb| :: |{\tt Step$_3$ Step$_{3,3}$ a b c d e f\} }\\
-{\tt newtype Step$_{2,3}$ a b c d e f = Step$_{3,3}$ \{step$_{3,3}$}\verb| :: |{\tt Step$_3$ Step$_{1,3}$ a b c d e f\} }
-\end{small}
-
-Clearly, the type definitions for the two- and three-step layers are very similar. However, because the number of parameters for the type depends on the number of steps, it is not possible to define a general type synonym \p{Step} for an arbitrary number of staps. We will have to settle for a description of the construction of the type synonym. For a layer with $n$ layer functions, the type of \p{Step$_n$} has $2n$ parameters: \p{a$_1$ r$_1$ \dots ~a$_n$ r$_n$}. Type variable \p{a$_i$} is the type of the vertical argument in step $i$, whereas \p{r$_i$} is the type of its vertical result. 
-
-\begin{small}
-\begin{tabbing}
-{\tt type St}\={\tt ep nStep a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = (a$_1$ -$>$  (nStep a$_2$ r$_2$ \dots ~a$_n$ r$_n$ a$_1$ r$_1$, r$_1$)) }
-\end{tabbing}
-\end{small}
-
-The individual step data types are defined as:
-
-\begin{small}
-{\tt newtype Step$_1$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_1$ \{step$_1$}\verb| :: |{\tt Step Step$_2$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}\\
-{\tt newtype Step$_2$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_2$ \{step$_2$}\verb| :: |{\tt Step Step$_3$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}\\
-\dots\\
-{\tt newtype Step$_n$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ = Step$_n$ \{step$_n$}\verb| :: |{\tt Step Step$_1$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ )\}}
-\end{small}
-
-Because in Haskell a general \p{Step} type synonym cannot be defined, an implementor has to construct the appropriate \p{Step} type definition as well as the step data types. In a language with dependent types, such as Cayenne~\cite{augustsson98cayenne}, a general type \p{Step} could be defined.
+\bl
+\o Explain \verb|Step|, \verb|:.|, and \verb|Fix|
+\el
 
 
 %																
@@ -850,21 +814,21 @@ Because in Haskell a general \p{Step} type synonym cannot be defined, an impleme
 
 First we develop a meta combinator for the \p{lift} function. We start with the code for \p{lift} for a layer with two steps. This is the code from Section~\ref{sect:hidden} in which a few variables have been renamed to emphasize the data flow patterns in the definition.
 % instead of the meaning of the individual steps.
-\bc The local functions \p{presStep} and \p{intrStep} are renamed \p{step1} and \p{step2}. Furthermore, in \p{presStep}, \p{state} is renamed to \p{horArg}, and \p{(mapping, state)} is renamed to \p{horRes}. And similarly, in \p{intrStep}, \p{(mapping, state)} is renamed to \p{horArg} and \p{state'} is renamed to \p{horRes}. Finally, also the vertical parameters and results in both local functions are renamed to \p{vertArg} and \p{vertRes}. Because the derivation will not affect the type, we do not rename any type variables. The resulting function does not show its purpose as clear as the original does, but it makes clear that the data flow in both local functions is similar. \ec
+\bc The local functions \p{presStep} and \p{intrStep} are renamed \p{step1} and \p{step2}. Furthermore, in \p{presStep}, \p{state} is renamed to \p{horArg}, and \p{(map, state)} is renamed to \p{horRes}. And similarly, in \p{intrStep}, \p{(map, state)} is renamed to \p{horArg} and \p{state'} is renamed to \p{horRes}. Finally, also the vertical parameters and results in both local functions are renamed to \p{vertArg} and \p{vertRes}. Because the derivation will not affect the type, we do not rename any type variables. The resulting function does not show its purpose as clear as the original does, but it makes clear that the data flow in both local functions is similar. \ec
 
 
 % from DevelopLib.hs. (remove numbers of lift and combine in source file)
-\begin{small} %lift2
+\begin{small} %lift0
 \begin{verbatim}
-lift :: Simple state mapping doc pres gest upd ->
-         state -> Layer doc pres gest upd
-lift layer state = step1 state 
- where step1 horArg = PresStep $ 
-           \vertArg -> let (horRes, vertRes) = (present layer) horArg vertArg                                         
-                       in  (step2 horRes, vertRes)
-       step2 horArg = IntrStep $
-           \vertArg -> let (horRes, vertRes) = (interpret layer) horArg vertArg                     
-                       in  (step1 horRes, vertRes)
+lift simple state = presStep state 
+ where presStep state = Fix . Comp . Step $
+         \doc -> let (pres, (map,state)) = 
+                       present simple state doc                                         
+                 in  (pres, intrStep (map,state))
+       intrStep (map,state) = Step $
+         \gest -> let (upd, state') = 
+                        interpret simple (map,state) gest
+                  in  (upd, presStep  state')
 \end{verbatim}
 \end{small}
 
@@ -942,7 +906,7 @@ Now \p{step1} and \p{step2} are the same function, which we rename to \p{liftSte
 
 \begin{small} % lift6
 \begin{verbatim}
-lift :: Simple state mapping doc pres gest upd ->
+lift :: Simple state map doc pres gest upd ->
          state -> Layer doc pres gest upd
 lift layer = 
   fix $ liftStep PresStep (present layer) 
@@ -967,47 +931,11 @@ For an $n$-step layer, the definition of \p{lift} (using the method from Section
 \begin{tabbing}
 {\tt li}\={\tt ft l}\={\tt ayer= }\\
 \>{\tt fix \$ liftStep Step$_1$ (layerFn$_1$ layer) . \dots\ . liftStep Step$_n$ (layerFn$_n$ layer)}\\
-\end{tabbing}
+\end{tabbing}%$
 \end{small}
 
 Thus, we can use  \p{liftStep} to define the \p{lift} combinator for a layer with any number of layer functions.
 
-\bc
-\begin{tabbing}
-{\tt l}\={\tt ift layer state = (step$_1$ (step$_2$ \dots ~(step$_n$ (lift layer))\dots)) state}\\
-\>{\tt where \dots}
-\end{tabbing}
-
-We can now perform the same steps to the $n$-step \p{lift} as we did for the 2-step \p{lift}. We only sketch the process here. After renaming the variables, the explicit recursion is removed from the local function definitions, by passing the next step as a parameter, and \p{lift} will look like:
-
-
-which can be written as a composition:
-
-\begin{tabbing}
-{\tt l}\={\tt ift layer = (step$_1$ \dots ~step$_n$) lift layer}\\
-\>{\tt where \dots}
-\end{tabbing}
-
-And, after using \p{fix} to capture the recursion, becomes:
-
-\begin{tabbing}
-{\tt l}\={\tt ift layer = fix \$ step$_1$ \dots ~step$_n$}\\
-\>{\tt where \dots}
-\end{tabbing}
-
-
-
-Finally, the constructor and layer functions have to be passed as parameters to the local step functions and the calls to the local functions become calls to \p{liftStep}. If we assume that the $n$ constructors are \p{Step$_i$} and the $n$ layer functions are \p{layerFunction$_i$}, then the final definition of \p{lift} is:
-
-\begin{tabbing}
-{\tt li}\={\tt ft l}\={\tt ayer= }\\
-\>{\tt fix \$ liftStep Step$_1$ (layerFunction$_1$ layer)}\\
-\>\>{\tt . \dots}\\ 
-\>\>\verb|. lift|{\tt Step Step$_n$ (layerFunction$_n$ layer)}
-\end{tabbing}
-
-
-The \p{liftStep} metacombinator can therefore be used to create the \p{lift} combinator for a layer with an arbitrary number of layer functions. \ec
 
 %																
 \subsection{Derivation for \p{combine}} \label{subsubsectcombine}
@@ -1015,7 +943,6 @@ The \p{liftStep} metacombinator can therefore be used to create the \p{lift} com
 
 The derivation of the meta combinators for \p{combine} is largely similar to the derivation for \p{lift}. We start with the original definition of \p{combine} for layers with two steps (see Section~\ref{sect:hidden}), in which we have renamed several variables. 
 
-\bc The two local functions are renamed to \p{step1} and \p{step2}. Both \p{hghrIntr} and \p{hghrPres'} are renamed to \p{nextHghr}, and both \p{lwrIntr} and \p{lwrPres'} to \p{nextLwr}. The names of the vertical parameters and results in \p{presStep} (\p{low}, \p{med} and \p{high}) are already appropriate, so \p{elow}, \p{emed} and \p{ehigh} in \p{intrStep} are also renamed to \p{low}, \p{med} and \p{high}. \ec
 
 \begin{small} % combine1
 \begin{verbatim}
@@ -1062,7 +989,7 @@ combine = fix $ step1 . step2
            \low ->  let (nextLwr, med) = lwr low
                         (nextHghr, high) = hghr med
                     in  (nStep nextHghr nextLwr, high)
-\end{verbatim}
+\end{verbatim}%$
 \end{small}
 
 Because the local functions pattern match on the constructors, it is not as straightforward to factorize the constructors out of the definition. Since Haskell has no first-class labels, we cannot use a parameter for pattern matching. Thus, we pass a selector function \p{unpack} as an argument to the local function, and use the selector instead of pattern matching. For the right-hand side occurrences of the constructor, we do the same thing as for \p{lift}, and pass the constructor as a \p{pack} argument.
@@ -1086,7 +1013,7 @@ combine = fix $ step1 (PresStep,presStep,presStep)
            \low ->  let (nextLwr, med) = (unpackL lwr) low
                         (nextHghr, high) = (unpackH hghr) med
                     in  (nStep nextHghr nextLwr, high)
-\end{verbatim}
+\end{verbatim}%$
 \end{small}
 
 Unlike \p{lift}, the two step functions are not the same now, due to the different directions of the vertical parameters for \p{step1} and \p{step2}. Therefore, instead of one meta combinator, we get two: \p{combineStepUp} and \p{combineStepDown}. Because all step-specific information has been factorized out, the functions can be used for arbitrary steps.
@@ -1115,131 +1042,19 @@ combineStepUp (pack, unpackH, unpackL) nStep hghr lwr = pack $
     \low -> let (nextLwr, med) = (unpackL lwr) low
                 (nextHghr, high) = (unpackH hghr) med
             in  (nStep nextHghr nextLwr, high)
-\end{verbatim}
+\end{verbatim}%$
 \end{small}
 
 Similar to \p{liftStep}, \p{combineStepDown} and \p{combineStepUp} do not depend on the number of steps. Hence, they can be used to construct \p{combine} for layers with an arbitrary number of layer functions.
 
 %																
-\subsection{A type class for \p{pack} and \p{unpack}} \label{sect:typeClass}
+\subsection{A type class for unwrapping}
 
-
-\bc The previous subsections define meta combinators for the functions \p{lift} and \p{combine}. Because explicit constructor appearances have been removed from the meta combinators, both functions have a function argument that is used for packing the result, and \p{combine} has two function arguments to \p{unpack} its two layer arguments. Although the \p{unpack} function for both layer arguments is the same, it has to be passed twice because the function is used on arguments of different type. \ec
-
-In this section, we define a type class \p{Pack} that contains the \p{pack} and \p{unpack} functions for the step data types. For each step type, we define an appropriate instance of \p{Pack}, and in the definition of the meta combinators we use the member of the class, instead of \p{pack} and \p{unpack} parameters. Because a member function may be applied polymorphically, the double application of \p{unpack} is no longer a problem.
-
-First, we take a look at the types of the \p{pack} and \p{unpack} parameters of the meta combinators. Because the types of the \p{pack} and \p{unpack} functions have the same structure in each of the three combinators, it does not matter which one we look at, except that \p{liftStep} does not have an \p{unpack} parameter. Consider \p{combineStepDown}:
-
-\begin{small}
-\begin{verbatim}
-combineStepDown :: ( (h -> (nStepC, l)) -> stepC 
-                   , stepH -> h -> (nStepH, m)
-                   , stepL -> m -> (nStepL, l)) -> 
-                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
-combineStepDown (pack, unpackH, unpackL) nStep hghr lwr = pack $ ...
-\end{verbatim}
-\end{small}
-
-The type of \p{pack} is \p{(h -> (nStepC, l)) -> stepC}. We rename the type variables  to get the more transparent: \p{pack :: (arg -> (nStep, res)) -> step}. For the \p{unpack} function, we only look at \p{unpackH}, since the structure of both \p{unpack} functions is the same. After a similar rename, we get \p{unpack :: step -> arg -> (nStep, res)}.
-
-Thus, our first shot at a type class with \p{pack} and \p{unpack} is:
-
-\bc The result of the function (\p{stepC}) is a step type (\p{PresStep} or \p{IntrStep} in the \p{Simple} case) and its argument is a function from \p{h} to a tuple of \p{l} and the next step value (\p{nStepC}).  
-
-
- The type of \p{unpackH} is \p{stepH -> h -> (nStepH, m)}. The function takes a step value (\p{stepH}) and returns a function from type \p{h} to a tuple of \p{m} and the next step type (\p{nStepH}). 
-\ec
-
-
-% code from Haskell/DPPClass_Lib.hs (leaving out the functional dependency)
-\begin{small}
-\begin{verbatim}
-class Pack step arg res nStep where
-  pack :: (arg -> (nStep, res)) -> step
-  unpack :: step -> arg -> (nStep, res)
-\end{verbatim}
-\end{small}
-
-However, this definition is not yet complete. In order to see why, consider the type of a rewritten \p{combineStepDown} that uses \p{pack} and \p{unpack} from the type class:
-
-\begin{small}
-\begin{verbatim}
-combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepH h m nStepH
-                   , Pack stepL m l nStepL ) => 
-                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
-\end{verbatim}
-\end{small}
-
-The type is ambiguous, because type variables \p{h}, \p{m} and \p{l} appear in the constraint, but not in the actual type of the function. The type-inference algorithm cannot determine the types \p{h}, \p{m} and \p{l} in an application of \p{combineStepDown}. The problem only arises in the \p{combineStep} meta combinators, because in the type of \p{liftStep}, all variables in the constraint appear in the type as well.
-
-We resolve the ambiguity by adding a functional dependency~\cite{jones00fundep} to the class definition. With a functional dependency, we can state  that  the \p{step} type uniquely determines the \p{arg} and \p{res} types, and hence resolve the ambiguity. But before we add the dependency to the class definition, we first need to consider another case of ambiguity.
-
-\bc
-The meta combinators are used to build the \p{lift} and \p{combine} combinators, and therefore the constraints in the types of the meta combinators also have consequences for the types of the combinators. More precisely, because i
-\ec
-
-In the definition of \p{lift} and \p{combineStepUp$/$Down}, a meta combinator is applied to each step in the layer. Hence, the type of the combinator gets a constraint for each step. However, because the types of the combinators do not refer to these intermediate steps, these types are ambiguous. As an example, we can look at the type of \p{lift} for \p{Simple}:
-
-\begin{small}
-\begin{verbatim}
-lift :: (Pack step doc pres nstep, Pack nstep gest upd step) =>
-        Simple state mapping doc pres gest upd -> state -> step
-\end{verbatim}
-\end{small}
-
-The \p{Pack} constraints refer to \p{nstep}, which does not occur in the type of the function. The ambiguity in the types can be resolved by adding a dependency between \p{step} and \p{nstep}. Thus, the final functional dependency is: \p{step -> arg res nStep}. 
-
-% code from Haskell/DPPClass_Lib.hs
-\begin{small}
-\begin{verbatim} 
-class Pack step arg res nStep | step -> arg res nStep where
-  pack :: (arg -> (nStep, res)) -> step
-  unpack :: step -> arg -> (nStep, res)
-\end{verbatim}
-\end{small}
-
-It is straightforward to see that the functional dependencies hold. Instances of \p{Pack} are always of the following form: (for a given type constructor \p{TheStep} and its next step type \p{nStep}).
-
-{\tt instance Pack (TheStep a r \dots) a r (nStep \dots~a r) where \dots}
-
- The dependency states that given \p{(TheStep a b \dots)}, the types \p{a}, \p{r} and \p{(nStep \dots~ a r)} are uniquely determined. For \p{a} and \p{r}, this is true because \p{a} and \p{r} appear in \p{(TheStep a r \dots)}. Furthermore, because each step has a unique next step, and this next step has the same type variables as the step, the type \p{(nStep \dots~a r)} is also determined by \p{(TheStep a r \dots)}. 
- 
-% Therefore, instances of \p{Pack} will never conflict with the functional dependency.
-
-With the use of the type class, the meta combinators change slightly. We show the changes to the definition of \p{combineStepDown}. The other meta combinators undergo similar changes and are shown in the next section.
-
-In the definition of \p{combineStepDown}, we drop the  tuple of  \p{pack} and \p{unpack} functions and replace \p{unpackL} and \p{unpackH} by \p{unpack}. In addition, the type gets a constraint.
-
-% code from Haskell/DPPClass_Lib.hs
-\begin{small}
-\begin{verbatim}
-combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepH h m nStepH
-                   , Pack stepL m l nStepL ) => 
-                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
-combineStepDown nStep hghr lwr = pack $
-    \high -> let (nextHghr, med) = (unpack hghr) high
-                 (nextLwr, low) = (unpack lwr) med
-             in  (nStep nextHghr nextLwr, low)
-\end{verbatim} %$
-\end{small}
-
-\bc
-From the type constraint, we can see how the type class eliminates the need for a second \p{unpack} parameter. Three \p{Pack} constraints are present in the type. The last two state that parameter types \p{stepH} and \p{stepL} are instances of \p{Pack}, and the first constraint states that result type \p{stepC} is instance of \p{Pack}. From this we can see that the first two constraints arise from the use of \p{unpack} on the \p{hghr} and \p{lwr} arguments (of types \p{stepH} and \p{stepL}), whereas the last constraint comes from the use of \p{pack}. In the implementation, this means that three dictionaries are passed, and that the two occurrences of \p{unpack} come from different dictionaries. In other words, the type system takes care of passing the double \p{unpack} functions.
-\ec
-
-The type class does have a small drawback. Due to the monomorphism restriction, Haskell only allows a function to have an overloaded type if it has an explicit type signature, or if it is defined with parameters on the left-hand side of the definition (i.e.\ \p{f x$_1$~}\dots \p{~x$_n$ =} \dots, instead of \p{f = \symbol{92}x$_1$~}\dots \p{~x$_n$}\verb|-> |\dots). Because \p{combine} has no parameters on the left-hand side of the definition, we need to specify its type, or rewrite the definition.
-
-Because the type of \p{combine} can be complex, as the order of the parameters depends on the direction of the layer functions, it is inconvenient to have to give the type signature. Hence, we explicitly add the  higher and lower layer parameters to the definition. For \p{Simple}, this yields: 
-
-\begin{small}
-\begin{verbatim}
-combine higher lower = fix (combineStepDown . combineStepUp) higher lower
-\end{verbatim}
-\end{small}
-
-If a type signature in the architecture source is desired, the compiler can be asked for the type, which can then be pasted in the source. A more general description of how to construct \p{combine} is given in the next section.
+\bl
+\o Explain \p{Decompose}
+\o Explain that \p{lift} can be done with type class and how
+\o \p{combine} can't. Explain why and that it doesn't matter: arch is only specified once.
+\el
 
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
@@ -1254,7 +1069,7 @@ fix :: (a->a) -> a
 fix a = let fixa = a fixa
          in fixa
 
-type LayerFunction horArg vertArg horRes vertRes =
+type LayerFn horArg vertArg horRes vertRes =
        horArg -> vertArg -> (horRes, vertRes)
 
 class Pack step arg res nStep | step -> arg res nStep where
@@ -1293,7 +1108,7 @@ combineStepUp nStep hghr lwr = pack $
 \end{figure}
 
 
-Figure~\ref{metacombinators} contains the final definitions of the meta combinators together with the \p{Pack} type class, the \p{fix} combinator, and the \p{LayerFunction} type synonym. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
+Figure~\ref{metacombinators} contains the final definitions of the meta combinators together with the \p{Pack} type class, the \p{fix} combinator, and the \p{LayerFn} type synonym. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
 
 
 \head{General use}
@@ -1303,19 +1118,16 @@ Figure~\ref{metacombinators} contains the final definitions of the meta combinat
 
 The general case that we consider is a layer with $n$ layer functions. The record type \p{TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$} contains the layer functions. The \p{h$_i$} variables are the types that appear in the horizontal parameters of the layer, and the \p{a$_i$} and \p{r$_i$} are the types of the vertical arguments and results. 
 
-Because the types of the horizontal pararameters are not necessarily single \p{h$_i$} variables, but tuples of these variables, we denote the horizontal parameters by $horArgs_i$ and $horRess_i$. As an example, consider the type \p{Simple}. Its horizontal  type variables are \p{mapping} and \p{state}, but the types of the horizontal parameters are \p{state} and \p{(mapping, state)}. 
+Because the types of the horizontal pararameters are not necessarily single \p{h$_i$} variables, but tuples of these variables, we denote the horizontal parameters by $horArgs_i$ and $horRess_i$. As an example, consider the type \p{Simple}. Its horizontal  type variables are \p{map} and \p{state}, but the types of the horizontal parameters are \p{state} and \p{(map, state)}. 
 
 In general, the definition of \p{TheLayer} has this form:
-\bc
-The horizontal type variables need not be equal to the types of the horizontal parameters in the layer. See for example the type \p{Simple}. It has two horizontal type variables (\p{mapping} and \p{state}), but the horizontal parameters in the layer are \p{state} and \p{(mapping, state)}. As a result, the number of horizontal type variables ($m$) is not necessarily equal to the number of layer functions ($n$), and the types of the horizontal arguments and results in the \p{layerFunction} types below have to be denoted with \p{(\dots)}. Because the exact types of the horizontal pararameters horizontal do not play a role in the definition of the architecture combinators, we denote these types by $horArgs_i$ and $horRess_i$. Both are tuples of $h_i$ type variables.  
-\ec
-
+\
 \begin{small}
 \begin{tabbing}
 {\tt data Th}\={\tt eLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
-\> {\tt TheLayer~}\={\tt \{~layerFunction$_1$}\verb| :: |{\tt LayerFunction $horArgs_n$ a$_1$ $horRess_n$ r$_1$}\\
+\> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn $horArgs_n$ a$_1$ $horRess_n$ r$_1$}\\
 \>\> {\tt \dots }\\
-\>\> {\tt , layerFunction$_n$}\verb| :: |{\tt LayerFunction $horArgs_n$ a$_n$ $horRess_n$ r$_n$ \}}\\
+\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn $horArgs_n$ a$_n$ $horRess_n$ r$_n$ \}}\\
 \end{tabbing}
 \end{small}
 
@@ -1324,6 +1136,7 @@ $horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper fu
 
 \head{Type definitions}
 
+\bc
 First, we define the \p{Step} type synonym that captures the explicit function type and rotation of parameters in the subsequent data definitions:
 
 \begin{small}
@@ -1354,7 +1167,7 @@ Each \p{Step$_i$} type is made instance of \p{Pack}, yielding $n$ instance decla
 \>\> {\tt unpack = step$_i$}
 \end{tabbing}
 \end{small}
-
+\ec
 \head{Definition of \p{lift} and \p{combine}}
 
 The only thing left to do now, is to define the \p{lift} and \p{combine} combinators. For the lift combinator, we need to apply \p{liftStep} to each of the layer functions, compose the steps, and apply \p{fix} to the composition. 
@@ -1363,9 +1176,9 @@ The only thing left to do now, is to define the \p{lift} and \p{combine} combina
 \begin{tabbing}
 {\tt lift}\verb| :: |{\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ -> Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
 {\tt li}\={\tt ft t}\={\tt heLayer = }\\
-\>{\tt fix \$ liftStep (layerFunction$_1$ theLayer)}\\
+\>{\tt fix \$ liftStep (LayerFn$_1$ theLayer)}\\
 \>\>{\tt \dots}\\ 
-\>\>\verb|. lift|{\tt Step (layerFunction$_n$ theLayer)}
+\>\>\verb|. lift|{\tt Step (LayerFn$_n$ theLayer)}
 \end{tabbing}
 \end{small}%$
 
@@ -1395,9 +1208,7 @@ On the other hand, for a downward layer function, we have:
 {\tt  combine :: Layer \dots~h m \dots}\verb| -> |{\tt Layer \dots~m l \dots} \verb| -> |{\tt Layer \dots~h l \dots}
 \end{small}
 
-However, instead of determining the type by hand, the compiler can be asked for the type which can then be pasted in the source.
-
-In order to determine the right \p{Pack} instances for combined layers, the type checker needs at least one type signature for either \p{lift} or \p{combine}. However, this is not a problem because the type of \p{lift} is straightforward.
+However, instead of determining the type by hand, the compiler can be asked for the type, which can then be pasted in the source.
 
 \head{Simple editor}
 
@@ -1405,9 +1216,9 @@ As an example application of the library, we give the definitions  for implement
 
 \begin{small} %code from Haskell/Layers.hs
 \begin{verbatim}
-data Simple state mapping doc pres gest upd =
-       Simple { present ::   LayerFunction state doc (mapping, state) pres
-              , interpret :: LayerFunction (mapping, state) gest state upd
+data Simple state map doc pres gest upd =
+       Simple { present ::   LayerFn state doc (map, state) pres
+              , interpret :: LayerFn (map, state) gest state upd
               }
 \end{verbatim}
 \end{small}
@@ -1427,19 +1238,7 @@ type Layer doc pres gest upd = PresStep doc pres gest upd
 \end{verbatim}
 \end{small}
 
-Each pair of steps must be an instance of \p{Pack}: 
-
-\begin{small}
-\begin{verbatim}
-instance Pack (PresStep a b c d) a b (IntrStep c d a b) where
-  pack = PresStep
-  unpack = presStep
-
-instance Pack (IntrStep a b c d) a b (PresStep c d a b) where
-  pack = IntrStep
-  unpack = intrStep
-\end{verbatim}
-\end{small}
+% old pack stuff deleted
 
 The definitions of \p{lift} and \p{combine} are now rather trivial:
 
@@ -1451,7 +1250,7 @@ combine higher lower = (fix $ combineStepDown . combineStepUp) higher lower
 \end{verbatim}
 \end{small}
 
-The definitions of the \p{main} and \p{editLoop} functions are the same as in Section~\ref{sect:hidden}.
+The definitions of the \p{main} and \p{editLoop} functions are the same as in Section~\ref{sect:hidden}. \note{are they?}
 
 
 \subsection{Conclusions} 
@@ -1484,7 +1283,7 @@ A prototype of the Proxima editor has been implemented using a monadic version o
 
 \head{Monadic architecture combinators}
 
-Because a layer in Proxima may perform IO operations, we use a monadic version of library, which is a straightforward extension of the code in Figure~\ref{metacombinators}. In the monadic version, both \p{LayerFunction} and \p{Pack} get an extra parameter \p{m} for the monad type constructor, and each let expression of the  form:
+Because a layer in Proxima may perform IO operations, we use a monadic version of library, which is a straightforward extension of the code in Figure~\ref{metacombinators}. In the monadic version, both \p{LayerFn} and \p{Pack} get an extra parameter \p{m} for the monad type constructor, and each let expression of the  form:
 
 \p{\small let x$_1$ = $exp_1$; \dots ; x$_n$ = $exp_n$ in ($hRes$,$vRes$)}
 
@@ -1525,7 +1324,7 @@ At the top of the combined layers, the document and edit operation resulting fro
 \begin{small}
 \begin{center}
 \begin{center}
-%\epsfig{file=pics/eps/LayerDataFlow.eps, width=\textwidth} % visio: LayerDataFlow.vsd
+\epsfig{file=images/LayerDataFlow, width=\textwidth} % visio: LayerDataFlow.vsd
 \end{center}\caption{Data flow in a Proxima layer.} \label{proximaDataFlow}
 \end{center}
 \end{small}
@@ -1537,9 +1336,9 @@ The data flow in the figure is encoded in the type definition for a Proxima laye
 \begin{small}
 \begin{verbatim}
 data Layer m state high low editH editL editH' editL' =
-       Layer { interpret :: LayerFunction m (state, high) (low, editL)
+       Layer { interpret :: LayerFn m (state, high) (low, editL)
                                             (state, low) (high, editH)
-              , present ::   LayerFunction m (state, low) (high, editH')
+              , present ::   LayerFn m (state, low) (high, editH')
                                             (state, high) (low, editL')
               }
 \end{verbatim}
