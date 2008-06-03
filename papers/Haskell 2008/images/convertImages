@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+
+export IFS=$'\n';
+# for spaces in dir names
+
+# convert eps to pdf for pdf latex (unfortunately, this also converts the derived .eps versions of other images)
+
+# for architecture paper, no eps, so not necessary
+                                                                            # note that the extension appears twice
+#for image in $(/usr/bin/find . -type f -iname '*.eps' |sed 's!\.eps$!!');
+#do 
+#echo converting "$image.eps" to "$image.pdf"
+#epstopdf "$image.eps"
+#done
+
+# convert png and jpg to eps for dvi latex
+
+for image in $(/usr/bin/find . -type f -iname '*.png' |sed 's!\.png$!!');
+do 
+echo converting "$image.png" to "$image.eps"
+/c/data/bin/ImageMagick/convert "$image.png" "$image.eps";
+done
+
+for image in $(/usr/bin/find . -type f -iname '*.jpg' |sed 's!\.jpg$!!');
+do 
+echo converting "$image.jpg" to "$image.eps"
+/c/data/bin/ImageMagick/convert "$image.jpg" "$image.eps";
+done
+
+# Note: if the source is a pdf (e.g. for Visio diagrams). Set it to read-only, and create a .eps
+# by converting a saved .png with imageMagick/convert. Afterwards, delete the .png so pdfLatex does
+# not use it (instead of the pdf). The pdf needs to be write protected, so the automatic .eps -> .pdf
+# conversion does not destroy it.
