@@ -48,30 +48,19 @@ Puntjes
 
 doc/pres/gest/upd or high/low/ehigh/elow?
 
-opmerking: architecture is program, sometimes good, sometimes bad. ???? komt dit uit Medv&Taylor?
-
-voor verdediging: Meer lezen over ADL's
-
-
-mention that it's not Haskell98
-
-params for step Step ... a b = a->b or Step a b ... = a->b
-
 
 Order of hor and vert is not ideal.  
 f hor vert = (vert, hor) is most logical, but looks strange
 f vert hor = (vert, hor) looks better but doesn't make it logical to parameterize f with its hor arg
 f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert is more logical on the left
 
-
-Keertje uitzoeken of existential types dit allemaal mooier kunnen maken.
 \ec
 
 \section{Introduction}\label{sect:introduction}
 
-In this chapter we set of Haskell combinators for describing the layered architecture of Proxima, which was described in Chapter~\ref{chap:proxArch} and specified in the previous Chapter. Although designed with a layered editor in mind, the method is applicable to layered architectures in general. It has been successfully used not only for the implementation of the Proxima prototype, but also for a system that provides web-interfaces to databases. 
+In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, the method is applicable to layered architectures in general. The combinators have been successfully used for the implementation of the structured-document editor Proxima~\cite{Schrage04Proxima}, as well as for a system that provides web-interfaces to databases. 
 
-Haskell is a functional language with strong support for abstraction. Describing an architecture in an actual programming language not only makes it possible to verify the types of the components of the architecture, but also provides a framework for implementing the system that is described by the architecture. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
+Describing an architecture in an actual programming language not only makes it possible to verify the types of the components of the architecture, but also provides a framework for implementing the system that is described by the architecture. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
 In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Higher-order typed (HOT) functional programming languages, such as Haskell, Clean~\cite{plasmeijer01clean}, and ML~\cite{milner97ML} offer possibilies for describing the main components of an architecture, and treating all of these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
 
@@ -81,12 +70,13 @@ As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages o
 The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change. An architecture description, on the other hand, will typically be a small and rather static entity, because changes to the architecture involve changes to many components of the system. \note{is dit wel zo? misschien is concise syntax toch wel zo handig.} As a consequence, a concise syntax for combinator expressions is not of the highest importance.
 \ec
 
-\bc Another difference concerns the efficiency of the combinators.\ec 
 
 Often, a program that makes use of a DSEL, contains many applications of the combinators, and hence the evaluation of the combinators forms a substantial part of the running time. Consider, for example, parsers or pretty printers. In contrast, the combinators in an architecture description are just the glue that connects the main components of the system. Most of the running time of the system can be expected to be taken up by the components and not by the combinators. Therefore, efficiency of the combinators is not a major concern. Wrapping and unwrapping a few values in the combinators is not a problem if it improves the transparency of the architecture.
 
-In this chapter we give four implementation models for layered architectures. First, we introduce a simple example layered editor architecture and explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used in Section~\ref{sect:ncp} as a basis to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. Finally, in Section~\ref{sect:proxima}, we show how the architecture combinators are used to describe (and implement) the architecture of  the Proxima editor.%Section~\ref{sect:haskellconclusions} presents the conclusions.
-
+In this paper we give four implementation models for layered architectures. First, we introduce a simple example layered editor architecture and explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used in Section~\ref{sect:ncp} as a basis to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. 
+\bc
+Finally, in Section~\ref{sect:proxima}, we show how the architecture combinators are used to describe (and implement) the architecture of  the Proxima editor.%Section~\ref{sect:haskellconclusions} presents the conclusions.
+\ec
 
 
 %																
@@ -96,6 +86,11 @@ In this chapter we give four implementation models for layered architectures. Fi
 
 
 We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture discussed in Chapter~\ref{chap:proxArch}. In Section~\ref{sect:proxima} we will show how the architecture combinators are used in the implementation of Proxima.
+
+The system that is described by the architecture is an
+      editor in which the user can edit a presentation of a document. Although the
+      architecture of the editor is simple, it still contains the typical features of
+      the layered architectures discussed. 
 
 Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ components: $\mathit{present}_0 \dots \mathit{present}_{n-1}$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is then mapped onto a document update (\p{upd}) by $\mathit{interpret}_{n-1} \dots \mathit{interpret}_0$, after which it is performed on the document.
 
