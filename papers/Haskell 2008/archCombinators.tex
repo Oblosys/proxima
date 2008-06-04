@@ -13,7 +13,7 @@
 \titlebanner{Draft, to be submitted to Haskell Symposium '08}        % These are ignored unless
 \preprintfooter{\version}   % 'preprint' option specified.
 
-\title{Proxima}
+\title{Haskell as an ADL for layered architectures}
 %\subtitle{}
 
 \authorinfo{Martijn M. Schrage \and S. Doaitse Swierstra}
@@ -31,12 +31,12 @@ architecture description of a system is part of the implementation of the
 system, the implementation will always comply with the architecture.
 \end{abstract}
 
-\newcommand{\oo}{{\;\protect\raisebox{.3ex}{\tiny ${\circ}$}\;}}
-
-\category{CR-number}{subcategory}{third-level}
+\category{D.2.11} {Software Engineering}
+                  {Software Architectures}
+                  [Languages (e.g., description, interconnection, definition)]
 
 \terms
-Languages, Human Factors, Documentation
+Domain-specific languages, Architecture
 
 \keywords
 keyword1, keyword2
@@ -67,7 +67,7 @@ f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert
 Keertje uitzoeken of existential types dit allemaal mooier kunnen maken.
 \ec
 
-
+\section{Introduction}\label{sect:introduction}
 
 In this chapter we set of Haskell combinators for describing the layered architecture of Proxima, which was described in Chapter~\ref{chap:proxArch} and specified in the previous Chapter. Although designed with a layered editor in mind, the method is applicable to layered architectures in general. It has been successfully used not only for the implementation of the Proxima prototype, but also for a system that provides web-interfaces to databases. 
 
@@ -746,7 +746,7 @@ Capture the pattern in the local functions, including the \p{Step}
 
 \begin{small} % lift2
 \begin{verbatim}
-liftStp f next horArgs = Step $ 
+liftStep f next horArgs = Step $ 
   \vArg -> let (vertRes, horRes) = f horArgs vArg
            in  (vertRes, next horRes)
 \end{verbatim}%$
@@ -759,9 +759,9 @@ Rewrite \p{lift}:
 lift2 simple state =
   presStep (intrStep (lift2 simple)) state
  where presStep next hArg = Fix . Comp $
-           liftStp (present simple) next hArg
+           liftStep (present simple) next hArg
        intrStep next hArg =
-           liftStp (interpret simple) next hArg
+           liftStep (interpret simple) next hArg
 \end{verbatim}%$
 \end{small}
 
@@ -790,9 +790,9 @@ Thus, we get:
 \begin{verbatim}
 lift3 simple = fix $ presStep . intrStep
  where presStep next hArg = Fix . Comp $
-           liftStp (present simple) next hArg
+           liftStep (present simple) next hArg
        intrStep next hArg = 
-           liftStp (interpret simple) next hArg
+           liftStep (interpret simple) next hArg
 \end{verbatim}
 \end{small}
 
@@ -808,9 +808,9 @@ lfix f = fix f'
 \begin{verbatim} % lift4
 lift simple = lfix $ presStep . intrStep
  where presStep next hArg = Comp $
-           liftStp (present simple) next hArg
+           liftStep (present simple) next hArg
        intrStep next hArg = 
-           liftStp (interpret simple) next hArg
+           liftStep (interpret simple) next hArg
 \end{verbatim}
 \end{small}
 
@@ -827,9 +827,9 @@ lcomp f g = (\n s -> Comp $ f n s) . g
 \begin{verbatim}
 lift5 simple = lfix $ presStep `lcomp` intrStep
  where presStep next args = 
-           liftStp (present simple) next args
+           liftStep (present simple) next args
        intrStep next args = 
-           liftStp (interpret simple) next args
+           liftStep (interpret simple) next args
 \end{verbatim}%$
 \end{small}
 
@@ -838,8 +838,8 @@ lift5 simple = lfix $ presStep `lcomp` intrStep
 \begin{verbatim}
 lift :: Simple state map doc pres gest upd ->
         state -> Layer doc pres gest upd
-lift simple = lfix $  liftStp (present simple) 
-              `lcomp` liftStp (interpret simple) 
+lift simple = lfix $  liftStep (present simple) 
+              `lcomp` liftStep (interpret simple) 
 \end{verbatim}%$
 \end{small}
 
@@ -850,9 +850,9 @@ For an $n$-step layer, the definition of \p{lift} (using the method from Section
 
 \begin{small}
 \begin{tabbing}
-{\tt lift layer = fix} \= {\tt \$} \= {\tt liftStp (layerFn$_1$ layer)} \\
+{\tt lift layer = fix} \= {\tt \$} \= {\tt liftStep (layerFn$_1$ layer)} \\
                        \> .        \> \dots\ \\
-                       \> .        \> {\tt liftStp (layerFn$_n$ layer)}\\
+                       \> .        \> {\tt liftStep (layerFn$_n$ layer)}\\
 \end{tabbing}%$
 \end{small}
 
@@ -866,12 +866,12 @@ Thus, we can use  \p{liftStep} to define the \p{lift} combinator for a layer wit
 The derivation of the meta combinators for \p{combine} is largely similar to the derivation for \p{lift}. We start with the original definition of \p{combine} for layers with two steps (see Section~\ref{sect:hidden}), in which we have renamed several variables. 
 
 
-\begin{small} % combine1
-\begin{verbatim}%combine0
+\begin{small} % combine0
+\begin{verbatim}
 combine :: Layer high med emed ehigh -> 
            Layer med low elow emed -> 
            Layer high low elow ehigh
-combine0 upr lwr = presStep upr lwr
+combine upr lwr = presStep upr lwr
  where presStep (Fix (Comp (Step upr))) 
                 (Fix (Comp (Step lwr))) = 
          Fix . Comp . Step $ 
@@ -889,8 +889,8 @@ The explicit mutual recursion in the local functions is removed by passing the n
 
 Analogous to \p{lift}, we capture the explicit recursion with the \p{fix}.
 
-\begin{small}
-\begin{verbatim} %combine2
+\begin{small} %combine2
+\begin{verbatim}
 combine = fix $ (presStep . intrStep) 
  where presStep next (Fix (Comp (Step upr)))
                      (Fix (Comp (Step lwr))) =
@@ -926,8 +926,8 @@ combineUp next (Step upper) (Step lower) = Step $
 \end{verbatim}%$
 \end{small}
 
-\begin{small}
-\begin{verbatim}%combine3
+\begin{small}%combine3
+\begin{verbatim}
 combine = fix $ (presStep . intrStep) 
  where presStep next (Fix (Comp upr)) (Fix (Comp lwr)) =
          Fix . Comp  $ combineDown next upr lwr  
@@ -937,9 +937,9 @@ combine = fix $ (presStep . intrStep)
 
 Need to get rid of \p{Fix} and \p{Comp}. rewrite to see pattern of Fix:
 
-\begin{small}
+\begin{small}%combine4
 \begin{verbatim}
-combine4 = fix (\n (Fix u) (Fix l)-> Fix $
+combine = fix (\n (Fix u) (Fix l)-> Fix $
                    (presStep . intrStep) n u l) 
  where presStep next (Comp upr) (Comp lwr) = Comp $ 
           combineDown next upr lwr  
@@ -957,8 +957,8 @@ cfix  f = fix f'
 
 Which leaves us with:
 
-\begin{small}
-\begin{verbatim}%combine5
+\begin{small}%combine5
+\begin{verbatim}
 combine = cfix (presStep . intrStep)
  where presStep next (Comp upr) (Comp lwr) = Comp $ 
           combineDown next upr lwr  
@@ -977,8 +977,8 @@ ccomp f g = f' . g
 
 So we have
 
-\begin{small}
-\begin{verbatim}%combine6
+\begin{small}%combine6
+\begin{verbatim}
 combine6 = cfix $ presStep `ccomp` intrStep
  where presStep next upr lwr =  
           combineDown next upr lwr  
@@ -988,8 +988,8 @@ combine6 = cfix $ presStep `ccomp` intrStep
 
 Finally:
 
-\begin{small}
-\begin{verbatim}%combine
+\begin{small}%combine
+\begin{verbatim}
 combine :: Layer high med emed ehigh ->
            Layer med low elow emed -> 
            Layer high low elow ehigh
@@ -1017,48 +1017,54 @@ Similar to \p{liftStep}, \p{combineStepDown} and \p{combineStepUp} do not depend
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
 
-%from Haskell/DPPClass_Lib.hs:
+%from Derivation.hs & Layer.hs:
 \begin{figure}
 \begin{small}
 \begin{center}
 \begin{footnotesize}
 \begin{verbatim}
+type LayerFn horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> (vertRes, horRess)
+
+
+newtype Fix f = Fix (f (Fix f))
+
+newtype (:.:) f g ns  = Comp (f (g ns))
+
+newtype Step a b ns = Step (a -> (b, ns))
+
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
-         in fixa
+        in  fixa
 
-type LayerFn horArg vertArg horRes vertRes =
-       horArg -> vertArg -> (horRes, vertRes)
+lfix f = fix f' 
+ where f' n =  (Fix . f n) 
 
-class Pack step arg res nStep | step -> arg res nStep where
-  pack :: (arg -> (nStep, res)) -> step
-  unpack :: step -> arg -> (nStep, res)
+lcomp :: (b -> t -> (f (g ns))) -> 
+         (a->b) -> 
+         a -> t -> ((f :.: g) ns)
+lcomp f g = (\n s -> Comp $ f n s) . g
 
-liftStep :: Pack step vArg vRes nStep => 
-            (hArg -> vArg -> (hRes,vRes)) ->
-            (hRes -> nStep) ->
-            hArg -> step
-liftStep layerF next horArg = pack $
-    \vertArg -> let (horRes, vertRes) = layerF horArg vertArg
-                in  (next horRes, vertRes)                    
+liftStep f next horArgs = Step $ 
+  \vArg -> let (vertRes, horRes) = f horArgs vArg
+           in  (vertRes, next horRes)
 
-combineStepDown :: ( Pack stepC h l nStepC 
-                   , Pack stepH h m nStepH
-                   , Pack stepL m l nStepL ) => 
-                   (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
-combineStepDown nStep hghr lwr = pack $
-    \high -> let (nextHghr, med) = (unpack hghr) high
-                 (nextLwr, low) = (unpack lwr) med
-             in  (nStep nextHghr nextLwr, low)
 
-combineStepUp :: ( Pack stepC l h nStepC 
-                 , Pack stepH m h nStepH
-                 , Pack stepL l m nStepL ) => 
-                 (nStepH -> nStepL -> nStepC) -> stepH -> stepL -> stepC
-combineStepUp nStep hghr lwr = pack $
-    \low -> let (nextLwr, med) = (unpack lwr) low
-                (nextHghr, high) = (unpack hghr) med
-            in  (nStep nextHghr nextLwr, high)
+cfix  f = fix f' 
+  where f' n (Fix u) (Fix l) = Fix $ f n u l
+
+ccomp f g = f' . g
+ where f' m (Comp u) (Comp l) = Comp $ f m u l
+
+combineDown next (Step upper) (Step lower) = Step $
+  \h -> let (m ,upperf) = upper h
+            (l, lowerf) = lower m
+        in  (l, next upperf lowerf)   
+
+combineUp next (Step upper) (Step lower) = Step $ 
+  \l -> let (m, lowerf) = lower l
+            (h, upperf) = upper m
+        in  (h, next upperf lowerf)   
 \end{verbatim} %$
 \end{footnotesize}\caption{Final meta combinators for \p{lift} and \p{combine}}\label{metacombinators} 
 \end{center}
@@ -1084,128 +1090,78 @@ In general, the definition of \p{TheLayer} has this form:
 \begin{tabbing}
 {\tt da}\={\tt ta}\\
 \> {\tt Th}\={\tt eLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
-\> \> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn $horArgs_n$ a$_1$ $horRess_n$ r$_1$}\\
+\> \> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn~}\= {\tt $horArgs_1$ a$_1$}\\
+\> \>                \>                                             \> {\tt $horArgs_2$ r$_1$}\\
+\>\>\> {\tt , LayerFn$_2$}\verb| :: |{\tt LayerFn~}\={\tt $horArgs_2$ a$_n$}\\
+\> \>                \>                            \>{\tt $horArgs_3$ r$_n$ \}}\\
 \>\>\> {\tt \dots }\\
-\>\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn $horArgs_n$ a$_n$ $horRess_n$ r$_n$ \}}\\
+\>\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn~}\={\tt $horArgs_{n}$ a$_n$}\\
+\> \>                \>                            \>{\tt $horArgs_1$ r$_n$ \}}\\
 \end{tabbing}
 \end{small}
 
-We assume the layer is normalized, which means that $horArgs_{0} = horRess_n$ and 
-$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (also see Section~\ref{sect:layerInHaskell}).
+We assume the layer is normalized, which means that $horArgs_{1} = horRess_n$ and 
+$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (see Section~\ref{sect:layerInHaskell}).
 
 \head{Type definitions}
 
-\bc
-First, we define the \p{Step} type synonym that captures the explicit function type and rotation of parameters in the subsequent data definitions:
-
 \begin{small}
 \begin{tabbing}
-{\tt type St}\={\tt ep nStep a$_1$ r$_1$ \dots~a$_n$ r$_n$ = (a$_1$ -> (nStep a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$, r$_1$))}
+{\tt ty}\={\tt pe Layer a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ =}\\
+        \>{\tt Fix (Step a$_1$ r$_1$ :.: a$_2$ r$_2$ :.: \dots ~:.: Step a$_n$ r$_n$)}\\
 \end{tabbing}
 \end{small}
 
-Using \p{Step} the mutually recursive data definitions for each of the steps are straightforward. Each definition \p{Step$_i$} contains a reference to the next definition \p{Step$_{i+1}$}, except for \p{Step$_n$}, which contains a reference to the first step: \p{Step$_1$}. Because we define a step type as a record, we implicitly define a selector function {step$_i$} as well.
 
-\begin{small}
-{\tt newtype Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_1$ \{step$_1$}\verb| :: |{\tt Step Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
-{\tt newtype Step$_2$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_2$ \{step$_1$}\verb| :: |{\tt Step Step$_3$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}\\
-\dots \\
-{\tt newtype Step$_n$ a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_n$ \{step$_1$}\verb| :: |{\tt Step Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$\}}
-\end{small}
-
-For cosmetic reasons, we introduce a type synonym \p{Layer} for \p{Step$_1$}.
-
-{\tt type Layer a$_1$ r$_1$ \dots~a$_n$ r$_n$ = Step$_1$ a$_1$ r$_1$ \dots~a$_n$ r$_n$}
-
-Each \p{Step$_i$} type is made instance of \p{Pack}, yielding $n$ instance declarations:
-
-\begin{small}
-\begin{tabbing}
-{\tt i}\={\tt nstance Pack (Step$_i$ a$_1$ r$_1$ \dots~a$_n$  r$_n$) a$_1$ r$_1$ (Step$_{i+1}$ a$_2$ r$_2$ \dots~a$_n$ r$_n$ a$_1$ r$_1$)}\\
-\> {\tt where }\={\tt pack = Step$_i$}\\
-\>\> {\tt unpack = step$_i$}
-\end{tabbing}
-\end{small}
-\ec
 \head{Definition of \p{lift} and \p{combine}}
 
 The only thing left to do now, is to define the \p{lift} and \p{combine} combinators. For the lift combinator, we need to apply \p{liftStep} to each of the layer functions, compose the steps, and apply \p{fix} to the composition. 
 
 \begin{small}
 \begin{tabbing}
-{\tt lift}\verb| :: |{\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ -> Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
+{\tt lift}\verb| :: |\={\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ ->}\\
+                     \>{\tt Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
 {\tt li}\={\tt ft t}\={\tt heLayer = }\\
-\>{\tt fix \$ liftStep (LayerFn$_1$ theLayer)}\\
-\>\>{\tt \dots}\\ 
-\>\>\verb|. lift|{\tt Step (LayerFn$_n$ theLayer)}
+\>{\tt lfix \$ ~~~ liftStep (LayerFn$_1$ theLayer)}\\
+\>\verb|`lcompose` lift|{\tt Step (LayerFn$_2$ theLayer)}\\
+\>{\tt \dots}\\ 
+\>\verb|`lcompose` lift|{\tt Step (LayerFn$_n$ theLayer)}
 \end{tabbing}
 \end{small}%$
 
 
 The \p{combine} combinator is a composition of $n$ \p{combineStepUp$/$Down} meta combinators to which \p{fix} is applied. The direction of the vertical data flow determines the choice between \p{combineStepUp} and \p{combineStepDown} for each step. \bc Note that the \p{higher} and \p{lower} arguments are added because of the monomorphism restriction. \ec The exact type of \p{combine} depends on the direction of the meta combinators and is explained below. 
-
+\pagebreak
 \begin{small}
 \begin{tabbing}
 {\tt combine}\verb| :: |{\tt Layer \dots}\verb| -> |{\tt Layer \dots}\verb| -> |{\tt Layer \dots }\\
-{\tt co}\={\tt mbin}\={\tt e higher lower = }\\
-\>{\tt fix ( combineStepUp$/$Down}\\
-\>\>{\tt \dots}\\ 
-\>\>\verb|. combine|{\tt StepUp$/$Down}\\
-\>\>{\tt ) higher lower}
-\end{tabbing}
+{\tt co}\={\tt mbine}\={\tt ~= }\\
+\>{\tt cfix \$~ combineStepUp$/$Down}\\
+\>{\tt \dots}\\ 
+\>\verb|`ccomp` combine|{\tt StepUp$/$Down}\\
+\end{tabbing}%$
 \end{small}
 
 The type of \p{combine} depends on the direction of the vertical data flow in the layer. Consider the $i$-th pair of  type variables in \p{Layer a$_1$ r$_1$ \dots~a$_n$ r$_n$}. Variable \p{a$_i$} represents the vertical argument of layer function $i$, and \p{r$_i$} the vertical result. If step $i$ is an upward step, the variables at this position in the \p{Layer} types are related as follows in the type signature for \p{combine}:
 
 \begin{small}
-{\tt  combine :: Layer \dots~m h \dots}\verb| -> |{\tt Layer \dots~l m \dots} \verb| -> |{\tt Layer \dots~l h \dots}
+\begin{tabbing}
+{\tt  combine :: }\={\tt Layer \dots~m h \dots}\verb| -> |{\tt Layer \dots~l m \dots} \verb| ->|\\
+                  \>{\tt Layer \dots~l h \dots}\\
+\end{tabbing}
 \end{small}
 
 On the other hand, for a downward layer function, we have:
 
 \begin{small}
-{\tt  combine :: Layer \dots~h m \dots}\verb| -> |{\tt Layer \dots~m l \dots} \verb| -> |{\tt Layer \dots~h l \dots}
+\begin{tabbing}
+{\tt  combine :: }\={\tt Layer \dots~h m \dots}\verb| -> |{\tt Layer \dots~m l \dots} \verb| ->|\\
+                  \>{\tt Layer \dots~h l \dots}
+\end{tabbing}
 \end{small}
 
 However, instead of determining the type by hand, the compiler can be asked for the type, which can then be pasted in the source.
 
-\head{Simple editor}
-
-As an example application of the library, we give the definitions  for implementing the \p{Simple} editor architecture. Recall that the layer data type is:
-
-\begin{small} %Layers.hs
-\begin{verbatim}
-data Simple state map doc pres gest upd =
-       Simple { present   :: LayerFn state doc 
-                                     (map, state) pres
-              , interpret :: LayerFn (map, state) gest
-                                     state upd
-              }
-\end{verbatim}
-\end{small}
-
-Because the layer contains two layer functions, we need to define two step data types with corresponding \p{pack} and \p{unpack} functions. First we define the \p{Step} type synonym, the step data types, and the \p{Layer} synonym. Because the layer has two layer functions, the number of type variables is four.
-
-\begin{small} %code from Haskell/DPPClass_Main.hs
-\begin{verbatim}
-type Layer doc pres gest upd = 
-       Fix (Step doc pres :.: Step gest upd)
-\end{verbatim}
-\end{small}
-
-% old pack stuff deleted
-
-The definitions of \p{lift} and \p{combine} are now rather trivial:
-
-\begin{small}
-\begin{verbatim}
-lift layer = fix $ liftStep (present layer) . liftStep (interpret layer)
-
-combine higher lower = (fix $ combineStepDown . combineStepUp) higher lower
-\end{verbatim}
-\end{small}
-
-The definitions of the \p{main} and \p{editLoop} functions are the same as in Section~\ref{sect:hidden}. \todo{are they?}
 
 
 \subsection{Conclusions} 
@@ -1216,12 +1172,14 @@ For a specific architecture in which layers have $n$ layer functions, we need to
 
 The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class with  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
 
-
+\bl
+\o explain why this is very tricky
+\el
+\bc
 However, it turns out to be very complicated to define such a type class for layers with an arbitrary number of steps. The problem is that the kind of the type constructor for the step type depends on the number of steps, and Haskell does not allow variable kinded parameters in type classes. Furthermore, if we compare two subsequent step types, we see that the parameters are rotated two positions to the left. Such a rotation is hard to specify without explicitly mentioning all parameters, and thereby fixing the number of steps for the library. Because of these complexities, we choose the simpler explicit solution explained in this section.
-
+\ec
 
 \bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
-
 
 
 
@@ -1256,6 +1214,12 @@ liftStep layerF nStep horArg = pack $
     \vertArg -> do {(horRes, vertRes) <- layerF horArg vertArg
                    ; return (nStep horRes, vertRes)
                    }
+
+liftStep :: (hArg->vArg-> m (vRes, hRes)) -> (hRes->ns) ->
+            hArg -> Step vArg vRes ns
+liftStep f next horArgs = Step $ 
+  \vArg -> let (vertRes, horRes) = f horArgs vArg
+           in  (vertRes, next horRes)
 \end{verbatim}
 \end{small}%$
 
@@ -1309,39 +1273,20 @@ The architecture combinators enforce a a strict separation between the different
 The motivation for using Haskell to describe editor architectures has come from the Proxima project. Proxima is a generic incremental XML editor, which is being developed at Utrecht University. The editor is parameterized with a presentation sheet that specifies how a document is presented. Furthermore, it is parameterized with a computation sheet that specifies derived values, such as chapter numbers, or a table of contents. A user can only see and edit the final presentation of the document. Because the mapping of the document on the presentation is a stepwise process, and hence the interpretation*** from edit commands on the presentation to updates on the document as well, Proxima has a layered architecture.
 \ec
 
-\bc
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{small}
-\begin{tabular}{c}
-{\footnotesize Document}\vspace{1ex}\\
-\framebox[5cm][c]{Evaluation layer}\vspace{1ex}\\
-{\footnotesize Enriched document}\vspace{1ex}\\
-\framebox[5cm][c]{Presentation layer}\vspace{1ex}\\
-{\footnotesize Abstract presentation}\vspace{1ex}\\
-\framebox[5cm][c]{Arrangement layer}\vspace{1ex}\\
-{\footnotesize Arrangement}\vspace{1ex}\\
-\framebox[5cm][c]{Rendering layer}\vspace{1ex}\\
-{\footnotesize Rendering}
-\end{tabular}
-\end{small}\caption{ The layers of Proxima}\label{proxlayers} 
-\end{center}
-\end{small}
-\end{figure}
-
-Figure~\ref{proxlayers} schematically shows the layers of Proxima. The figure shows the layers (surrounded by rectangles) as well as the data values that arise in the process of mapping of the document on the presentation. Edit actions and incremental updates are not shown in the figure.
-
-The {\em document} at the top of the architecture is mapped on the {\em rendering} at the bottom, which is shown to the user. The {\em evaluator} takes the document and a computation sheet and produces the {\em enriched document}, which is the document together with all derived values. Similarly, the {\em presenter} takes the enriched document together with a presentation sheet, and computes the {\em abstract presentation}. Until this point, the presentation does not contain any absolute layout; all elements in the presentation are positioned relative to each other and do not yet have an absolute size.
-
-The absolute coordinates are computed by the {\em arranger}. It maps the abstract presentation on an {\em arrangement}, which is a absolute positioning of all elements of the presentation. The arranger also takes care of hyphenation, line and page breaking. Finally, the arrangement is rendered to an image by the {\em renderer}.
-\ec
 
 
 %																
 %																
 %																
-\section{Conclusions} \label{sect:haskellconclusions}
+\section{Related work} \label{sect:relatedWork}
+
+Why this is nicer than an architecture description language.
+
+
+%																
+%																
+%																
+\section{Conclusions} \label{sect:conclusions}
 
 The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way. With a small number of definitions, a layered architecture can be described. The combinators have been heap profiled to ensure that no memory leaks are present, and have been used to implement the Proxima prototype as well as a database web-interface system.
 
