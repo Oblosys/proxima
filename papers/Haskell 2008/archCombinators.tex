@@ -58,7 +58,7 @@ f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert
 
 \section{Introduction}\label{sect:introduction}
 
-In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, the method is applicable to layered architectures in general. The combinators have been successfully used for the implementation of the structured-document editor Proxima~\cite{Schrage04Proxima}, as well as for a system that provides web-interfaces to databases. 
+In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, the method is applicable to layered architectures in general. The combinators have been successfully used for the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system that provides web-interfaces to databases. 
 
 Describing an architecture in an actual programming language not only makes it possible to verify the types of the components of the architecture, but also provides a framework for implementing the system that is described by the architecture. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
@@ -85,27 +85,15 @@ Finally, in Section~\ref{sect:proxima}, we show how the architecture combinators
 \section{A simple editor}
 
 
-We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture discussed in Chapter~\ref{chap:proxArch}. In Section~\ref{sect:proxima} we will show how the architecture combinators are used in the implementation of Proxima.
+We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
 
-The system that is described by the architecture is an
-      editor in which the user can edit a presentation of a document. Although the
-      architecture of the editor is simple, it still contains the typical features of
-      the layered architectures discussed. 
 
-Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ components: $\mathit{present}_0 \dots \mathit{present}_{n-1}$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is then mapped onto a document update (\p{upd}) by $\mathit{interpret}_{n-1} \dots \mathit{interpret}_0$, after which it is performed on the document.
+Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ components: $\mathit{present}_1 \dots \mathit{present}_{n}$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is then mapped onto a document update (\p{upd}) by $\mathit{interpret}_{n} \dots \mathit{interpret}_1$, after which it is performed on the document.
 
-%\bl
-%\o ref to informal spec
-%\o not incremental. 
-%\o doc is kept at the top
-%\el
-%View is similar to Chapter~\ref{chap:proxArch} . 
 
 A layer consists of a pair of $\mathtt{present}_i$ and $\mathtt{interpret}_i$ functions, which we also refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we may also have horizontal data flow that stays within the layer. Horizontal data flow concerns results from a layer function that are passed to a layer function it the same layer, possibly in a next edit step.
 
 Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The \p{map} result of \p{present} is passed to \p{interpret} and represents information about the presentation mapping. Furthermore, a \p{state} parameter is passed to \p{present} as well as \p{interpret}, and may be updated by \p{interpret}. Note that the \p{state} parameter of \p{present} is the result of \p{interpret} in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
-
-The editor can only support direct interpretation (see Section~\ref{sect:intrProcess}) because the value of the data level is not available at the interpretation step. This is not a realistic situation, but for our example it does not matter. The Proxima layer that will be explained in Section~\ref{sect:proxima} also supports indirect interpretation, because it keeps the value of the data level in the horizontal data flow.
 
 %A more realistic example of horizontal data flow is the value of a data level.  is values of the levels, so vertical are just edit ops. This is %what is done in Proxima (see Section~\ref{sect:proxima})
 %We can find an example of horizontal dataflow in an incremental editor: the values for the data levels .  
@@ -213,7 +201,7 @@ data Simple state map doc pres gest upd =
 \end{small}
 
 
-Note that the field names in the record (\p{present}, \p{interpret}) are also the names of the field selection functions. Thus, for a layer \p{layer0 :: Simple} we denote the presentation function by \p{present layer0}. 
+Note that the field names in the record (\p{present}, \p{interpret}) are also the names of the field selection functions. Thus, for a layer \p{layer1 :: Simple} we denote the presentation function by \p{present layer1}. 
 
 %The \p{Simple'} type is parameterized with all the types that appear in the signatures of the layer functions.
 
@@ -238,7 +226,7 @@ Now that the building blocks have been established, we need a way to connect the
 
 Now that the layers have been modeled, we need to realize the data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. \bc The layers are records that contain functions, so  \ec The most straightforward way of tying everything together is to explicitly write the selection and application of each of the functions in each of the layers. 
 
-We give an example edit loop that explicitly connects three layers: \p{layer0}, \p{layer1}, and \p{layer2} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. The corresponding Haskell code for the edit loop is:
+We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. The corresponding Haskell code for the edit loop is:
 
 
 
@@ -250,28 +238,28 @@ We give an example edit loop that explicitly connects three layers: \p{layer0}, 
 %code from Explicit.hs
 \begin{small}
 \begin{verbatim}
-editLoop (layer0, layer1, layer2) states doc = 
+editLoop (layer1, layer2, layer3) states doc = 
   loop states doc where
-  loop (state0, state1, state2) doc = 
-   do { let (pres1,(map0,state0')) = 
-              present layer0 state0 doc
-      ; let (pres2,(map1,state1')) = 
-              present layer1 state1 pres1
-      ; let (pres3,(map2,state2')) = 
-              present layer2 state2 pres2
+  loop (state1, state2, state3) doc = 
+   do { let (pres1,(map1,state1')) = 
+              present layer1 state1 doc
+      ; let (pres2,(map2,state2')) = 
+              present layer2 state2 pres1
+      ; let (pres3,(map3,state3')) = 
+              present layer3 state3 pres2
 
       ; showRendering pres3
       ; gest3 <- getGesture
 
-      ; let (gest2,state2'')  = 
-              interpret layer2 (map2, state2') gest3
-      ; let (gest1,state1'')  =
-              interpret layer1 (map1, state1') gest2
-      ; let (update,state0'') = 
-              interpret layer0 (map0, state0') gest1
+      ; let (gest2,state3'')  = 
+              interpret layer3 (map3, state3') gest3
+      ; let (gest1,state2'')  =
+              interpret layer2 (map2, state2') gest2
+      ; let (update,state1'') = 
+              interpret layer1 (map1, state1') gest1
       
       ; let doc' = updateDocument update doc
-      ; loop (state0'', state1'', state2'') doc'
+      ; loop (state1'', state2'', state3'') doc'
       }
 \end{verbatim}
 \end{small}
@@ -286,10 +274,10 @@ The following function \p{main} calls \p{editLoop} with the correct parameters.
 %code from Haskell/Explicit.hs
 \begin{small}
 \begin{verbatim}
-main layer0 layer1 layer2 = 
+main layer1 layer2 layer3 = 
  do { states <- initStates
     ; doc <- initDoc 
-    ; editLoop (layer0, layer1, layer2) states doc
+    ; editLoop (layer1, layer2, layer3) states doc
     }
 \end{verbatim}
 \end{small}
@@ -321,14 +309,14 @@ In the method described in this section, each of the functions in the combined l
 
 Because the types of the horizontal parameters are typically not equal, the collections cannot be represented by lists. The same restriction holds for the horizontal results. Moreover, we wish to be able to determine at compile time whether the collection contains the right number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product consisting of only pairs to represent the horizontal parameters and results.
 
-Example of nested pairs are \p{((e$_0$,e$_1$),e$_2$)}, and \p{((e$_0$,e$_1$),(e$_2$, e$_3$))}. Although not enforced by the combinators, we only use left-associatively nested products in this section: 
-\p{(\dots((e$_0$,e$_1$),e$_2$), \dots, e$_n$)}. However, as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the exact structure does not matter.
+Example of nested pairs are \p{((e$_1$,e$_2$),e$_3$)}, and \p{((e$_1$,e$_2$),(e$_3$, e$_4$))}. Although not enforced by the combinators, we only use left-associatively nested products in this section: 
+\p{(\dots((e$_1$,e$_2$),e$_3$), \dots, e$_n$)}. However, as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the exact structure does not matter.
 
 
-\bc and \p{((e$_0$,e$_1$),(e$_2$,e$_3$))} are valid examples.\ec
+\bc and \p{((e$_1$,e$_2$),(e$_3$,e$_4$))} are valid examples.\ec
  \bc Two nested pairs are of equal type if and only if they have the same structure, and elements at equal positions have equal types. We can access the elements in the product in a compositional way by pattern matching on the top level product. For example: \p{f (firstElt, rest) = \dots} \ec
 
-\bc Because nested pairs with different structure are of different type, we use the combinators in this section only in a right-associative way, so all products are of the form \p{(e$_0$,(e$_1$,(e$_2$, (\dots, e$_n$)\dots)))}. 
+\bc Because nested pairs with different structure are of different type, we use the combinators in this section only in a right-associative way, so all products are of the form \p{(e$_1$,(e$_2$,(e$_3$, (\dots, e$_n$)\dots)))}. 
 \ec
 
 We first define two combinators for composing layer functions: an downward combinator (e.g.\ for \p{present}) and a upward combinator (for \p{interpret}). A downward vertical parameter passes through the higher layer first, whereas an upward vertical parameter passes through the lower layer first. The two combinators are \p{composeDown} and \p{composeUp}. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
@@ -449,12 +437,12 @@ The \p{main} function is almost the same as in the previous section, except that
 
 \begin{small}
 \begin{verbatim}
-main layer0 layer1 layer2 = 
- do { (state0, state1, state2) <- initStates
+main layer1 layer2 layer3 = 
+ do { (state1, state2, state3) <- initStates
     ; doc <- initDoc 
-    ; let layers = lift layer0 `combine` lift layer1 
-                               `combine` lift  layer2
-    ; editLoop layers ((state0, state1), state2) doc
+    ; let layers = lift layer1 `combine` lift layer2 
+                               `combine` lift  layer3
+    ; editLoop layers ((state1, state2), state3) doc
     }
 \end{verbatim}
 \end{small}
@@ -627,12 +615,12 @@ In the \p{main} function, the combined layer is created by lifting the layers to
 
 \begin{small}
 \begin{verbatim}
-main layer0 layer1 layer2 =
- do { (state0, state1, state2) <- initStates
+main layer1 layer2 layer3 =
+ do { (state1, state2, state3) <- initStates
     ; doc <- initDoc 
-    ; let layers = lift layer0 state0 `combine` 
-                   lift layer1 state1 `combine`
-                   lift layer2 state2
+    ; let layers = lift layer1 state1 `combine` 
+                   lift layer2 state2 `combine`
+                   lift layer3 state3
     ; editLoop layers doc
     }
 \end{verbatim}
@@ -672,7 +660,14 @@ The method we use for the derivation of the meta combinators is to start with su
 \subsection{Type definitions} \label{subsecttypedef}
 
 \bl
-\o Explain \verb|Step|, \verb|:.|, and \verb|Fix|
+\o Want to get rid of layer and step specific stuff.
+\o Layer is a problem, needs to add/remove constructor.
+\o use a different rep.
+\o steps.
+\o composing.
+\o fix the whole thing.
+\o need at least one newtype, but since type syns can't be partially parametrized.., all involved types need newtypes
+\o as we will see, combinators can take care of adding/removing the constructors.
 \el
 \begin{small}
 \begin{verbatim}
@@ -1287,11 +1282,10 @@ The combinators presented in this paper make it possible to specify layered edit
 
 Because the architecture description language is embedded in the implementation language, the architecture of a system forms part of the implementation of the system. We do not need to translate the architecture to an implementation, and hence, the implementation is guaranteed to comply with the architecture.
 
-According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture description language should describe the components of an architecture, the connectors, and the configuration. For the architecture combinators defined in this chapter, we can identify these aspects as follows: the layer functions are the components; \p{lift} and \p{combine} are the connectors; and the applications of \p{lift} and \p{combine} determine the configuration.
+According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture description language should describe the components of an architecture, the connectors, and the configuration. For the architecture combinators defined in this paper, we can identify these aspects as follows: the layer functions are the components; \p{lift} and \p{combine} are the connectors; and the applications of \p{lift} and \p{combine} determine the configuration.
 
-The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns how dynamic aspects of the architecture, such as the requirements of Chapter~\ref{chap:formalSpec}, can be described and, if possible, verified.
+The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
 
-%conclusions dependent types. ?? others?
 
 
 
