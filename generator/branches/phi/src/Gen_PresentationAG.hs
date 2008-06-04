@@ -42,7 +42,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "presentationSheet enrichedDoc document focusD whitespaceMap pIdC = "
   , "  let (Syn_EnrichedDoc _ pIdC' pres _ self _ whitespaceMap' _) = "
   -- , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = "
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] [] whitespaceMap initLayout)"
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document Map.empty focusD pIdC [] [] whitespaceMap initLayout)"
   -- , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)"
   , "  in  (whitespaceMap', pIdC', pres, self)"
   -- , "  in  (whitespaceMap', pIdC', pres)"
@@ -61,7 +61,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap)"
   , "modifiedTree enrichedDoc = "
   , "  let (Syn_EnrichedDoc _ _pIdC' _pres _ self _tokStr' _whitespaceMap' whitespaceMap2') ="
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc HoleDocument (PathD []) 0 [] [] initLayout initLayout) -- Map.empty) "
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc HoleDocument Map.empty (PathD []) 0 [] [] initLayout initLayout) -- Map.empty) "
   , "   in (self, whitespaceMap2')"
   , "}" 
   ]
@@ -84,7 +84,7 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
  ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : {[Located Lexer.Token]} | ]" -- Phi
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : {[Located Lexer.Token]} | ]" -- Phi
   -- , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
@@ -160,7 +160,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
 --                                      else ls
              pres' = [ "(loc.pres, loc.idps, lhs.whitespaceMapCreated, lhs.tokStr, loc.noIdps)"
                      , "  = let (pres, idps, wsMap, tokStr) = @loc.pres'"
-                     , "     in (pres, idps, wsMap, tokStr, length idps)"
+                     , "     in (addErr @lhs.errLocs @lhs.tokStr tokStr pres, idps, wsMap, tokStr, length idps)"
                      ]
          in {- if not $ null pIdCs 
             then "  | %1 " <~ [cnstrName] : pIdCs
@@ -188,6 +188,7 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "                      . presentFocus @lhs.focusD @lhs.path )"
   , "                      @elts.press"
   , "                      -- parent is reponsible for setting parsing/structural"
+-- gerbo TODO: fix that 100, make it @loc.noIdps
   , "      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def."
   , "      lhs.pIdC = @elts.pIdC"
   , "      elts.path = @lhs.path"
