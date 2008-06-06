@@ -928,7 +928,7 @@ class Decomp comp t decomp where
 instance Decomp f t (f t)  where
   decomp f = f
 
-instance Decomp f (g t) h  => Decomp (f :.: g) t h  where
+instance Decomp f (g t) h  => Decomp (f :.: g) t h where
   decomp (Comp f) = decomp f
 \end{verbatim}
 \end{small}
@@ -952,13 +952,16 @@ instance Decomp TNil t t where
 \end{verbatim}
 \end{small}
 
-Unfortunately, this introduces yet another newtype constructor, which clutters the code of the combinators, since there is no natural place to handle it. 
+Unfortunately, this introduces yet another newtype constructor. Worse still, there is no metacombinator that can be modified to handle this constructor, so a special nil step needs to be added to both \p{lift} and \p{combine}. Because of this, and the fact that the functional dependency adds extra complexity, we choose to keep the simpler representation and provide explicit type signatures.
+
+
 
 %																
 \subsection{Adding a monad}
 
 
-To allow a layer function to perform IO operations, we 
+The final modification we make to the library is to add a monad, in order to allow layer functions to perform IO operations. The type \p{LayerFn} is extended with an extra variable \p{m} for the monad.
+
 \begin{small}
 \begin{verbatim}
 type LayerFn m horArgs vertArg horRess vertRes =
@@ -966,7 +969,7 @@ type LayerFn m horArgs vertArg horRess vertRes =
 \end{verbatim}
 \end{small}
 
-Consequentially, the \p{Step} type is also modified to account for a monadic result:
+Consequentially, the \p{Step} type is also modified to account for the monadic result:
 
 \begin{small}
 \begin{verbatim}
@@ -1011,7 +1014,7 @@ liftStep f next horArgs = Step $
 \end{verbatim}
 \end{small}%$
 
-The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library.
+The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library. \todo{explain this more?}
 
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
@@ -1195,13 +1198,11 @@ The meta combinator library has the advantages of the hidden-parameter solution 
 
 The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class with  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
 
-
+For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{}).
+The problem in defining this type class is thIn fact for combine, this type class can be defined
 \bl
 \o explain why this is very tricky
 \el
-\bc
-However, it turns out to be very complicated to define such a type class for layers with an arbitrary number of steps. The problem is that the kind of the type constructor for the step type depends on the number of steps, and Haskell does not allow variable kinded parameters in type classes. Furthermore, if we compare two subsequent step types, we see that the parameters are rotated two positions to the left. Such a rotation is hard to specify without explicitly mentioning all parameters, and thereby fixing the number of steps for the library. Because of these complexities, we choose the simpler explicit solution explained in this section.
-\ec
 
 \bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
