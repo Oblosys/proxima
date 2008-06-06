@@ -909,16 +909,9 @@ editLoop (Fix (Comp presentStep)) doc =
 
 
 %																
-\subsection{A type class for unwrapping}
+\subsection{A type class for unwrapping} \label{sect:decompose}
 
-A minor problem with the version of \p{editLoop} from the previous section is the varying amount of \p{Comp} constructors, which depends on the number of layer functions. 
-
-\bl
-\o Explain \p{Decompose}
-\o Explain that \p{lift} can be done with type class and how
-\o \p{combine} can't. Explain why and that it doesn't matter: arch is only specified once.
-\el
-
+A minor problem with the version of \p{editLoop} from the previous section is the varying amount of \p{Comp} constructors, which depends on the number of layer functions. The problem is minor, since typically the pattern matches appear only in a single function where all layers are combined. Furthermore, the number of layer functions is not likely to change often during the development of a system. However, it is possible to define a type class that takes care of the pattern matching.
 
 \begin{small}
 \begin{verbatim}
@@ -1196,13 +1189,10 @@ On the other hand, for a downward layer function, we have:
 
 The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
 
-The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class with  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
+The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class that allows us to  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
 
-For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{}).
-The problem in defining this type class is thIn fact for combine, this type class can be defined
-\bl
-\o explain why this is very tricky
-\el
+For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{sect:decompose}). For \p{combine}, the situation is a lot more complicated due to the different data-flow directions in each of the steps. If we encode the data flow in the \p{Step} type (i.e.\ by using types \p{StepUp} and \p{StepDown}), it may be possible to define a type class for \p{combine}. Whether this is the case remains further research. \todo{Het lijkt er alleen op dat ik die klasse bijna gevonden heb, wat het hele paper in de war zou gooien..} However, it is questionable whether this is actually worth the effort. The code for the meta combinators would turn much more complex, whereas the gains of a single \p{lift} and \p{combine} function are not that much, given the fact that they only need to be defined once and will typically remain constant.
+
 
 \bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
@@ -1289,7 +1279,7 @@ Why this is nicer than an architecture description language.
 %																
 \section{Conclusions} \label{sect:conclusions}
 
-The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way. With a small number of definitions, a layered architecture can be described. The combinators have been heap profiled to ensure that no memory leaks are present, and have been used to implement the Proxima prototype as well as a database web-interface system.
+The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way, making the data flow within the layer. With a small number of definitions, a layered architecture can be described, clearly showing the data flow between the layers. The combinators have been heap profiled to ensure that no memory leaks are present, and have been used to implement the Proxima prototype as well as a database web-interface system.
 
 Because the architecture description language is embedded in the implementation language, the architecture of a system forms part of the implementation of the system. We do not need to translate the architecture to an implementation, and hence, the implementation is guaranteed to comply with the architecture.
 
