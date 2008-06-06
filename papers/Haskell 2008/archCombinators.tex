@@ -165,8 +165,6 @@ data Simple state map doc pres gest upd =
 \end{verbatim}
 \end{small}
 
-
-
 \begin{figure}
 \includegraphics[width=\columnwidth]{images/NormalizedLayer}
 \caption{Data flow in a normalized layer.}\label{wrapped} 
@@ -799,8 +797,7 @@ combine = fix $ step1 . step2
 \end{verbatim}%$
 \end{small}
 
-
-Two functions to capture data flow direction:
+Without the explicit recursive calls, we can capture the vertical data flow patterns with two functions \p{combineStepDown} and \p{combineStepUp}:
 
 \begin{small} % combine3
 \begin{verbatim}
@@ -831,8 +828,7 @@ combine = fix $ step1 . step2
 \end{verbatim}%$
 \end{small}
 
-second is just app. first has some constrs
-In order to get rid of the \p{Fix} application, we first rewrite \p{combine} to make the pattern more apparent:
+The second step is now simply a \p{combineStepUp}, but the first step still contains a number of constructors. In order to get rid of the \p{Fix} application, we first rewrite \p{combine} to make the pattern more apparent:
 
 \begin{small}%combine4
 \begin{verbatim}
@@ -862,8 +858,8 @@ combine = cfix $ step1 . combineStepUp
 \end{verbatim}%$
 \end{small}
 
+The \p{Comp} constructors can be handled by a slightly modified version of function composition:
 
-Composition that adds and removes \p{Comp}:
 \begin{small}
 \begin{verbatim}
 ccomp f g = f' . g
@@ -871,17 +867,7 @@ ccomp f g = f' . g
 \end{verbatim}%$
 \end{small}
 
-If we use \p{ccomp}, and drop the paramters to step1yielding a So we have
-
-\begin{small}%combine6
-\begin{verbatim}
-combine6 = cfix $ step1 `ccomp` combineStepUp
- where step1 next upr lwr =  
-          combineStepDown next upr lwr  
-\end{verbatim}%$
-\end{small}
-
-Finally:
+If we use \p{ccomp}, we can drop the parameters to \p{step1} and replace it by \p{combineStepDown}. Thus, the final version of \p{combine} reads
 
 \begin{small}%combine
 \begin{verbatim}
@@ -893,18 +879,39 @@ combine = cfix $ combineStepDown `ccomp` combineStepUp
 \end{small}
 
 
-Unlike \p{lift}, the two step functions are not the same now, due to the different directions of the vertical parameters for \p{step1} and \p{step2}. Therefore, instead of one meta combinator, we get two: \p{combineStepUp} and \p{combineStepDown}. Because all step-specific information has been factorized out, the functions can be used for arbitrary steps.
-
-
-
 Similar to \p{liftStep}, \p{combineStepDown} and \p{combineStepUp} do not depend on the number of steps. Hence, they can be used to construct \p{combine} for layers with an arbitrary number of layer functions.
 
 
 \head{Simple editor}
 
+The \p{main} function for the simple editor is the same as in Section~\ref{sect:hidden}. Only the \p{editLoop} function has a couple of changes to account for the new constructors. To make the code more symmetrical, we use a deconstructor function \p{unStep :: Step a b n -> (a -> (b, ns))} (which is the selector function of \p{Step}, when declared as a record.)
+
+\begin{small}
+\begin{verbatim}
+editLoop (Fix (Comp presentStep)) doc = 
+ do { let (pres , interpretStep) = 
+            unStep presentStep $ doc
+    
+    ; showRendering pres
+    ; gesture <- getGesture
+    
+    ; let (update, presentStep') =
+            unStep interpretStep $ gesture
+    
+    ; let doc' = updateDocument update doc
+    
+    ; editLoop presentStep' doc'
+    }
+\end{verbatim}%$
+\end{small}
+
+
+
 
 %																
 \subsection{A type class for unwrapping}
+
+A minor problem with the version of \p{editLoop} from the previous section is the varying amount of \p{Comp} constructors, which depends on the number of layer functions. 
 
 \bl
 \o Explain \p{Decompose}
@@ -926,19 +933,68 @@ instance Decomp f (g t) h  => Decomp (f :.: g) t h  where
 \end{verbatim}
 \end{small}
 
-Small problem. Need explicit types, otherwise tries instance that's too general.
-functional dependency \p{comp t -> decomp where} solves the problem but does not work with these instances, as the first instance also matches second and gives conflict between the fun dep. A solution is to use a base for the recursion. so  Nil :.: a :.: b. But this will clutter the defs of lift and combine since it will be yet another newtype with a constructor.
+A drawback of using this class is that all types must receive explicit signatures, because otherwise the type checker will require an instance that is too general and cannot be inferred. A functional dependency \p{comp t -> decomp} seems appropriate to alleviate this problem, but does not work with the two instances. The reason lies with the overlapping instances giving rise to conflicting types \p{decomp}. For example, for \p{t1 :.: t2} and \p{t}, the first instance declares \p{decomp} as \p{(t1 :.: t2) t}, whereas the second instance gives \p{t1 (t2 t)}.
+
+A solution to this problem is to declare an explicit base \p{TNil} for composed types. Thus, instead of \p{t1 :.: t2} we get \p{TNil :.: t1 :.: t2}. Because of the partial parameterization, \p{TNil} is a newtype:
+
+\begin{small}
+\begin{verbatim}
+newtype TNil t = TNil t
+\end{verbatim}
+\end{small}
+
+Now, instead of the overlapping instance \p{Decomp f t (f t)}, we can define an instance for \p{TNil} that does not overlap:
+
+\begin{small}
+\begin{verbatim}
+instance Decomp TNil t t where
+  decomp (TNil t) = t
+\end{verbatim}
+\end{small}
+
+Unfortunately, this introduces yet another newtype constructor, which clutters the code of the combinators, since there is no natural place to handle it. 
 
 %																
 \subsection{Adding a monad}
 
-\head{Monadic architecture combinators}
 
-Because a layer in Proxima may perform IO operations, we use a monadic version of library, which is a straightforward extension of the code in Figure~\ref{metacombinators}. In the monadic version, each let expression of the  form:
+To allow a layer function to perform IO operations, we 
+\begin{small}
+\begin{verbatim}
+type LayerFn m horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> m (vertRes, horRess)
+\end{verbatim}
+\end{small}
+
+Consequentially, the \p{Step} type is also modified to account for a monadic result:
+
+\begin{small}
+\begin{verbatim}
+newtype Step a b m ns = Step (a -> m (b, ns))
+\end{verbatim}
+\end{small}
+\begin{small}
+
+At composition, the monad is passed to both arguments:
+
+\begin{verbatim}
+newtype (:.:) f g m ns  = Comp (f m (g m ns))
+\end{verbatim}
+\end{small}
+
+And for the fix point, the monad is passed to its argument and to the recursive call.
+
+\begin{small}
+\begin{verbatim}
+newtype Fix m f = Fix (f m (Fix m f))
+\end{verbatim}
+\end{small}
+
+The monadic version of the other code is largely similar to the non-monadic version. Basically, each let expression of the form
 
 \p{\small let x$_1$ = $exp_1$; \dots ; x$_n$ = $exp_n$ in ($hRes$,$vRes$)}
 
-is replaced by a monadic statement:
+is replaced by a monadic statement
 
 \p{\small do \{ x$_1$ <- $exp_1$; \dots ; x$_n$ <- $exp_n$; return ($hRes$,$vRes$) \}}
 
@@ -955,7 +1011,7 @@ liftStep f next horArgs = Step $
 \end{verbatim}
 \end{small}%$
 
-The rest of the library is defined analoguosly. fix etc. are not affected. 
+The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library.
 
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
@@ -966,56 +1022,84 @@ The rest of the library is defined analoguosly. fix etc. are not affected.
 \begin{center}
 \begin{footnotesize}
 \begin{verbatim}
-type LayerFn horArgs vertArg horRess vertRes =
-       horArgs -> vertArg -> (vertRes, horRess)
-
-
-newtype Fix f = Fix (f (Fix f))
-
-newtype (:.:) f g ns  = Comp (f (g ns))
-
-newtype Step a b ns = Step (a -> (b, ns))
-
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
         in  fixa
 
-lfix f = fix f' 
- where f' n =  (Fix . f n) 
+type LayerFn m horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> m (vertRes, horRess)
 
-lcomp :: (b -> t -> (f (g ns))) -> 
-         (a->b) -> 
-         a -> t -> ((f :.: g) ns)
+newtype Fix m f = Fix (f m (Fix m f))
+
+newtype (:.:) f g m ns  = Comp (f m (g m ns))
+
+newtype Step a b m ns = Step { unStep :: (a -> m (b, ns)) }
+
+
+lfix f = fix f' 
+ where f' n =  Fix . f n
+
 lcomp f g = (\n s -> Comp $ f n s) . g
 
+liftStep :: Monad m => (hArg -> vArg-> m (vRes, hRes)) -> 
+            (hRes -> ns) -> hArg -> Step vArg vRes m ns
 liftStep f next horArgs = Step $ 
-  \vArg -> let (vertRes, horRes) = f horArgs vArg
-           in  (vertRes, next horRes)
+  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
+              ; return (vertRes, next horRes)
+              }
 
 
-cfix  f = fix f' 
+cfix f = fix f' 
   where f' n (Fix u) (Fix l) = Fix $ f n u l
 
 ccomp f g = f' . g
  where f' m (Comp u) (Comp l) = Comp $ f m u l
 
+combineStepDown :: Monad m => (nsU -> nsL -> nsC) ->
+                   Step h md m nsU -> Step md l m nsL ->
+                   Step h l m nsC
 combineStepDown next (Step upper) (Step lower) = Step $
-  \h -> let (m ,upperf) = upper h
-            (l, lowerf) = lower m
-        in  (l, next upperf lowerf)   
+  \h -> do { (m ,upperf) <- upper h
+           ; (l, lowerf) <- lower m
+           ; return (l, next upperf lowerf)   
+           }
 
+combineStepUp :: Monad m => (nsU -> nsL -> nsC) ->
+                 Step md h m nsU -> Step l md m nsL ->
+                 Step l h m nsC
 combineStepUp next (Step upper) (Step lower) = Step $ 
-  \l -> let (m, lowerf) = lower l
-            (h, upperf) = upper m
-        in  (h, next upperf lowerf)   
+  \l -> do { (m, lowerf) <- lower l
+           ; (h, upperf) <- upper m
+           ; return (h, next upperf lowerf)
+           }
+
+
+data Simple m state map doc pres gest upd =
+       Simple { present ::   LayerFn m state doc (map, state) pres
+              , interpret :: LayerFn m (map, state) gest state upd
+              }
+
+type Layer m doc pres gest upd = 
+       Fix m (Step doc pres :.: Step gest upd)
+
+lift :: Monad m =>
+        Simple m state map doc pres gest upd ->
+        state -> Layer m doc pres gest upd
+lift simple = lfix $  liftStep (present simple) 
+              `lcomp` liftStep (interpret simple) 
+
+
+combine :: Monad m => Layer m high med emed ehigh ->
+                      Layer m med low elow emed -> 
+                      Layer m high low elow ehigh
+combine = cfix $ combineStepDown `ccomp` combineStepUp
 \end{verbatim} %$
-\end{footnotesize}\caption{Final meta combinators for \p{lift} and \p{combine}}\label{metacombinators} 
+\end{footnotesize}\caption{Final meta combinator library}\label{fig:metacombinators} 
 \end{center}
 \end{small}
 \end{figure}
 
-\todo{wrong}
-Figure~\ref{metacombinators} contains the final definitions of the meta combinators together with the \p{Pack} type class, the \p{fix} combinator, and the \p{LayerFn} type synonym. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
+Figure~\ref{fig:metacombinators} contains the final monadic library. In order to describe and implement an architecture, a number of definitions are necessary that depend on the number of layer functions and hence cannot be included in the library. We give a general description of these definitions.
 
 
 \head{General use}
@@ -1058,22 +1142,22 @@ $horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper fu
 
 \head{Definition of \p{lift} and \p{combine}}
 
-The only thing left to do now, is to define the \p{lift} and \p{combine} combinators. For the lift combinator, we need to apply \p{liftStep} to each of the layer functions, compose the steps, and apply \p{fix} to the composition. 
+The definitions of \p{lift} and \p{combine} are straightforward. For \p{lift}, we need to apply \p{liftStep} to each of the layer functions, compose the steps with \p{lcomp}, and apply \p{lfix} to the composition. 
 
 \begin{small}
 \begin{tabbing}
 {\tt lift}\verb| :: |\={\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ ->}\\
                      \>{\tt Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
 {\tt li}\={\tt ft t}\={\tt heLayer = }\\
-\>{\tt lfix \$ ~~~ liftStep (LayerFn$_1$ theLayer)}\\
-\>\verb|`lcompose` lift|{\tt Step (LayerFn$_2$ theLayer)}\\
+\>{\tt lfix \$  liftStep (LayerFn$_1$ theLayer)}\\
+\>\verb|`lcomp` lift|{\tt Step (LayerFn$_2$ theLayer)}\\
 \>{\tt \dots}\\ 
-\>\verb|`lcompose` lift|{\tt Step (LayerFn$_n$ theLayer)}
+\>\verb|`lcomp` lift|{\tt Step (LayerFn$_n$ theLayer)}
 \end{tabbing}
 \end{small}%$
 
 
-The \p{combine} combinator is a composition of $n$ \p{combineStepUp$/$Down} meta combinators to which \p{fix} is applied. The direction of the vertical data flow determines the choice between \p{combineStepUp} and \p{combineStepDown} for each step. \bc Note that the \p{higher} and \p{lower} arguments are added because of the monomorphism restriction. \ec The exact type of \p{combine} depends on the direction of the meta combinators and is explained below. 
+The \p{combine} combinator consists of $n$ \p{combineStepUp$/$Down} meta combinators, composed with \p{ccomp}, after which \p{cfix} is applied. The direction of the vertical data flow determines the choice between \p{combineStepUp} and \p{combineStepDown} for each step.  The exact type of \p{combine} depends on the direction of the meta combinators and is explained below. 
 
 \begin{small}
 \begin{tabbing}
@@ -1103,17 +1187,14 @@ On the other hand, for a downward layer function, we have:
 \end{tabbing}
 \end{small}
 
-However, instead of determining the type by hand, the compiler can be asked for the type, which can then be pasted in the source.
-
-
+\todo{show final editor code again? (only very small difference because of monad)}
 
 \subsection{Conclusions} 
 
-The meta combinator library has the same advantages as the hidden-parameter solution of Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification.
-
-For a specific architecture in which layers have $n$ layer functions, we need to define a type synonym \p{Step}, and provide the $n$ newtype definitions \p{Step$_i$} for each step in the layer. A type synonym \p{Layer} may be provided for convenience. Furthermore, each type \p{Step$_i$} must be made a (trivial) instance of \p{Pack}, and finally, the \p{lift} and \p{combine} combinators need to be defined.
+The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
 
 The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class with  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
+
 
 \bl
 \o explain why this is very tricky
@@ -1198,6 +1279,8 @@ The motivation for using Haskell to describe editor architectures has come from 
 \section{Related work} \label{sect:relatedWork}
 
 Why this is nicer than an architecture description language.
+
+
 
 
 %																
