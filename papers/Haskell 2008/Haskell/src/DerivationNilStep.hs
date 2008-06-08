@@ -33,60 +33,54 @@ newtype Step a b ns = Step (a -> (b, ns))
 newtype NilStep t = NilStep t
 
 --------------------------------------------------------
-lift0, lift1, lift2, lift3, lift4, lift5, lift, lift'  
+lift0, lift1, lift2, lift4, lift5, lift, lift'  
       :: Simple state map doc pres gest upd -> state ->
          Fix (Step doc pres  :.: Step gest upd :.: NilStep)
 
 
 lift0 simple state = step1 state 
- where step1 hArg = Fix . Comp $ Step $
+ where step1 hArg = Fix . Comp . Step $
          \vArg -> let (pres, hRes) = 
                        present simple hArg vArg
                   in  (pres, step2 hRes)
        step2 hArg = Comp . Step $
          \vArg -> let (upd, hRes) = 
                         interpret simple hArg vArg
-                  in  (upd, nilStep hRes)
-       nilStep hRes = NilStep $ step1 hRes
+                  in  (upd, lNilStep hRes)
+       lNilStep hRes = NilStep $ step1 hRes
 
-lift1 simple state =   step1 (step2 (nilStep (lift1 simple))) state
+lift1 simple state =  
+  step1 (step2 (lNilStep (lift1 simple))) state
  where step1 next hArg = Fix . Comp $ Step $
          \vArg -> let (pres, hRes) = 
-                       present simple hArg vArg
+                        present simple hArg vArg
                   in  (pres, next hRes)
        step2 next hArg = Comp . Step $
          \vArg -> let (upd, hRes) = 
                         interpret simple hArg vArg
                   in  (upd, next  hRes)
 
-nilStep next hRes = NilStep $ next hRes
+lNilStep next hRes = NilStep $ next hRes
 
-
-lift2 simple state =  step1 (step2 (nilStep (lift1 simple))) state
- where step1 next hArg = Fix . Comp $ Step $
-         \vArg -> let (pres, hRes) = 
-                       present simple hArg vArg
-                  in  (pres, next hRes)
-       step2 next hArg = Comp . Step $
-         \vArg -> let (upd, hRes) = 
-                        interpret simple hArg vArg
-                  in  (upd, next  hRes)
-      
-                  
 liftStep :: LayerFn hArg vArg hRes vRes -> (hRes -> g ns) -> hArg -> (Step vArg vRes :.: g) ns
 liftStep f next horArgs = Comp . Step $ 
   \vArg -> let (vertRes, horRes) = f horArgs vArg
            in  (vertRes, next horRes)
 
-lift3 simple state =  step1 (step2 (nilStep (lift2 simple))) state
- where step1 next hArg = Fix $ liftStep (present simple)  next hArg
-       step2 next hArg =       liftStep (interpret simple) next hArg
+lift2 simple state =
+  step1 (step2 (lNilStep (lift2 simple))) state
+ where step1 next hArg = Fix $  
+         liftStep (present simple) next hArg
+       step2 next hArg =
+         liftStep `(interpret simple) next hArg 
+      
+lift4 simple = fix (step1 . step2 . lNilStep)
+ where step1 next hArg = Fix $
+         liftStep (present simple) next hArg
+       step2 next hArg =
+         liftStep (interpret simple) next hArg
 
-lift4 simple =  fix (step1 . step2 . nilStep)
- where step1 next hArg = Fix $ liftStep (present simple)  next hArg
-       step2 next hArg =       liftStep (interpret simple) next hArg
-
-lfix f = fix f'  where f' n =  (Fix . (f . nilStep) n) 
+lfix f = fix f'  where f' n =  (Fix . (f . lNilStep) n) 
 
 lift5 simple =  lfix (step1 . step2)
  where step1 next hArg = liftStep (present simple)  next hArg
@@ -98,14 +92,14 @@ lift simple =  lfix (liftStep (present simple) . liftStep (interpret simple))
 lift simple =  lfix $ liftStep (present simple) . liftStep (interpret simple)
 
 
--- or with a composition that removes left step. No need for liftStep's, but does need the nilStep
+-- or with a composition that removes left step. No need for liftStep's, but does need the lNilStep
 
 infixr 8 .:
 
 (.:) f g = liftStep f . g
 lfix' f = fix f'  where f' n =  (Fix . f n) 
 
-lift' simple =  lfix' $ present simple .: interpret simple .: nilStep
+lift' simple =  lfix' $ present simple .: interpret simple .: lNilStep
 
 combine0, combine1, combine2, combine3, combine5, combine::
   Layer2 high med emed ehigh ->
@@ -122,8 +116,8 @@ combine0 upr lwr = step1 upr lwr
        step2 (Comp (Step upr)) (Comp (Step lwr)) = Comp . Step $
          \low -> let (med, lwrPres) = lwr low
                      (high, uprPres) = upr med
-                 in  (high, nilStep uprPres lwrPres)
-       nilStep (NilStep u) (NilStep l) = NilStep $ step1 u l 
+                 in  (high, cNilStep uprPres lwrPres)
+       cNilStep (NilStep u) (NilStep l) = NilStep $ step1 u l 
 
 
 
