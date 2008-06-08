@@ -2,7 +2,23 @@
 module DPPMonad_Lib where
 
 import Layers hiding (LayerFn, Simple (..))
--- monads
+
+test :: Monad m => LayerFn m hArg vArg hRes vRes -> 
+            (hRes -> g m ns) -> hArg -> 
+            (Step vArg vRes :.: g) m ns
+test f next horArgs = Comp . Step $ 
+  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
+              ; return (vertRes, next horRes)
+              }
+
+
+
+data Simple m state map doc pres gest upd =
+       Simple { present ::   LayerFn m state doc (map, state) pres
+              , interpret :: LayerFn m (map, state) gest state upd
+              }
+
+
 
 fix :: (a->a) -> a
 fix a = let fixa = a fixa
@@ -10,6 +26,141 @@ fix a = let fixa = a fixa
 
 type LayerFn m horArgs vertArg horRess vertRes =
        horArgs -> vertArg -> m (vertRes, horRess)
+
+
+newtype Fix m f = Fix (f m (Fix m f))
+
+infixr :.:
+
+newtype (:.:) f g m ns  = Comp (f m (g m ns))
+
+newtype NilStep m t = NilStep t
+
+newtype Step a b m ns = Step (a -> m (b, ns))
+
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
+
+
+lfix f = fix f' where f' n = Fix . (f . lNilStep) n
+
+lNilStep next hRes = NilStep $ next hRes
+
+liftStep f next horArgs = Comp . Step $ 
+  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
+              ; return (vertRes, next horRes)
+              }
+              
+
+cfix f = fix f' 
+ where f' n (Fix u) (Fix l) = Fix $ (f . cNilStep) n u l
+
+cNilStep next (NilStep u) (NilStep l) = 
+  NilStep $ next u l
+
+combineStepDown next (Comp (Step upper)) 
+                     (Comp (Step lower)) = Comp . Step $
+  \h -> do { (m ,upperf) <- upper h
+           ; (l, lowerf) <- lower m
+           ; return (l, next upperf lowerf)   
+           }
+
+combineStepUp next (Comp (Step upper)) 
+                   (Comp (Step lower)) = Comp . Step $
+  \l -> do { (m, lowerf) <- lower l
+           ; (h, upperf) <- upper m
+           ; return (h, next upperf lowerf)
+           }
+
+-- types:
+
+combineStepDown :: Monad m => 
+                   (f m x -> g m y -> h m ns) ->
+                   (Step a b :.: f) m x -> 
+                   (Step b c :.: g) m y ->
+                   (Step a c :.: h) m ns
+
+combineStepUp :: Monad m => 
+                 (f m x -> g m y -> h m ns) ->
+                 (Step b c :.: f) m x ->
+                 (Step a b :.: g) m y ->
+                 (Step a c :.: h) m ns
+
+liftStep :: Monad m => LayerFn m hArg vArg hRes vRes -> 
+            (hRes -> g m ns) -> hArg -> 
+            (Step vArg vRes :.: g) m ns
+
+
+
+-- layer specific
+
+
+type Layer m doc pres gest upd = 
+  Fix m (Step doc pres  :.: Step gest upd :.: NilStep)
+
+
+lift simple = lfix $ liftStep (present simple) 
+                   . liftStep (interpret simple)
+
+combine = cfix (combineStepDown . combineStepUp)
+
+{-
+maybe say that def is
+layer1 = Simple { present = Module1.present
+                , interpret = Module2.interpret
+                }
+etc.
+-}
+
+main layer1 layer2 layer3 =
+ do { (state1, state2, state3) <- initStates
+    ; doc <- initDoc 
+
+    ; let layers = lift layer1 state1 `combine` 
+                   lift layer2 state2 `combine`
+                   lift layer3 state3
+
+    ; editLoop layers doc
+    }
+
+editLoop (Fix presentStep) doc = 
+ do { (pres , interpretStep) <-
+            unStep presentStep $ doc
+    
+    ; showRendering pres
+    ; gesture <- getGesture
+    
+    ; (update, presentStep') <-
+            unStep interpretStep $ gesture
+    
+    ; let doc' = updateDocument update doc
+    ; 
+    ; editLoop (unNil presentStep') doc'
+    }
+
+
+
+
+
+
+
+
+
+
+
+{-
+-- old monadic lib for left associative :.: without base
+fix :: (a->a) -> a
+fix a = let fixa = a fixa
+        in  fixa
+
+type LayerFn m horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> m (vertRes, horRess)
+
+
+
+
+
 
 newtype Fix m f = Fix (f m (Fix m f))
 
@@ -54,7 +205,6 @@ combineStepUp next (Step upper) (Step lower) = Step $
            ; (h, upperf) <- upper m
            ; return (h, next upperf lowerf)
            }
-
 
 data Simple m state map doc pres gest upd =
        Simple { present ::   LayerFn m state doc (map, state) pres
@@ -114,5 +264,4 @@ main layer0 layer1 layer2 =
     }
 
 
-
-
+-}
