@@ -804,17 +804,22 @@ Without the explicit recursive calls, we can capture the vertical data flow patt
 
 \begin{small} 
 \begin{verbatim}
-combineStepDown :: (f x -> g y -> h ns) -> (Step a b :.: f) x -> 
-                   (Step b c :.: g) y -> (Step a c :.: h) ns
-combineStepDown next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $
+combineStepDown :: (f x -> g y -> h ns) -> 
+                   (Step a b :.: f) x -> 
+                   (Step b c :.: g) y -> 
+                   (Step a c :.: h) ns
+combineStepDown next (Comp (Step upper)) 
+                     (Comp (Step lower)) = Comp . Step $
   \h -> let (m ,upperf) = upper h
             (l, lowerf) = lower m
         in  (l, next upperf lowerf)   
 
-
-combineStepUp :: (f x -> g y -> h ns) -> (Step b c :.: f) x ->
-                 (Step a b :.: g) y -> (Step a c :.: h) ns
-combineStepUp next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $ 
+combineStepUp :: (f x -> g y -> h ns) ->
+                 (Step b c :.: f) x ->
+                 (Step a b :.: g) y ->
+                 (Step a c :.: h) ns
+combineStepUp next (Comp (Step upper)) 
+                   (Comp (Step lower)) = Comp . Step $ 
   \l -> let (m, lowerf) = lower l
             (h, upperf) = upper m
         in  (h, next upperf lowerf)   
@@ -980,7 +985,7 @@ The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of th
 %																
 %																
 %																
-\section{Type class magic} \label{sect:typeClass}
+\subsection{Type-class magic} \label{sect:typeClass}
 
 Defs lift and combine are simple and depend completely on type. It turns out that we can define them automatically with a class
 
@@ -1248,7 +1253,7 @@ $horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper fu
 \end{small}
 
 
-\head{Definition of \p{lift} and \p{combine}}
+\head{Definition of \p{lift} and \p{combine}} \todo{account for monad}
 
 The definitions of \p{lift} and \p{combine} are straightforward. For \p{lift}, we need to apply \p{liftStep} to each of the layer functions, compose the steps with \p{lcomp}, and apply \p{lfix} to the composition. 
 
@@ -1257,10 +1262,10 @@ The definitions of \p{lift} and \p{combine} are straightforward. For \p{lift}, w
 {\tt lift}\verb| :: |\={\tt TheLayer h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ ->}\\
                      \>{\tt Layer a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
 {\tt li}\={\tt ft t}\={\tt heLayer = }\\
-\>{\tt lfix \$  liftStep (LayerFn$_1$ theLayer)}\\
-\>\verb|`lcomp` lift|{\tt Step (LayerFn$_2$ theLayer)}\\
-\>{\tt \dots}\\ 
-\>\verb|`lcomp` lift|{\tt Step (LayerFn$_n$ theLayer)}
+\>{\tt lfix \$ liftStep (LayerFn$_1$ theLayer)}\\
+\>\verb|     . lift|{\tt Step (LayerFn$_2$ theLayer)}\\
+\>{\tt ~~~~~\dots}\\ 
+\>\verb|     . lift|{\tt Step (LayerFn$_n$ theLayer)}
 \end{tabbing}
 \end{small}%$
 
@@ -1271,9 +1276,9 @@ The \p{combine} combinator consists of $n$ \p{combineStepUp$/$Down} meta combina
 \begin{tabbing}
 {\tt combine}\verb| :: |{\tt Layer \dots}\verb| -> |{\tt Layer \dots}\verb| -> |{\tt Layer \dots }\\
 {\tt co}\={\tt mbine}\={\tt ~= }\\
-\>{\tt cfix \$~ combineStepUp$/$Down}\\
-\>{\tt \dots}\\ 
-\>\verb|`ccomp` combine|{\tt StepUp$/$Down}\\
+\>{\tt cfix \$ combineStepUp$/$Down}\\
+\>{\tt ~~~~~\dots}\\ 
+\>\verb|     . combine|{\tt StepUp$/$Down}\\
 \end{tabbing}%$
 \end{small}
 

@@ -134,7 +134,8 @@ combine1 upr lwr = (step1 (step2 (cNilStep combine1))) upr lwr
          \high -> let (med, uprIntr) = upr high
                       (low, lwrIntr) = lwr med
                   in  (low, next uprIntr lwrIntr)
-       step2 next (Comp (Step upr)) (Comp ( Step lwr)) = Comp . Step $
+       step2 next (Comp (Step upr)) 
+                  (Comp ( Step lwr)) = Comp . Step $
          \low -> let (med, lwrPres) = lwr low
                      (high, uprPres) = upr med
                  in  (high, next uprPres lwrPres)
@@ -156,16 +157,22 @@ combine2 upr lwr = fix (step1 . step2 . cNilStep) upr lwr
 cNilStep next (NilStep u) (NilStep l) = 
   NilStep $ next u l
 
-combineStepDown :: (f x -> g y -> h ns) -> (Step a b :.: f) x -> 
-                   (Step b c :.: g) y -> (Step a c :.: h) ns
-combineStepDown next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $
+combineStepDown :: (f x -> g y -> h ns) -> 
+                   (Step a b :.: f) x -> 
+                   (Step b c :.: g) y -> 
+                   (Step a c :.: h) ns
+combineStepDown next (Comp (Step upper)) 
+                     (Comp (Step lower)) = Comp . Step $
   \h -> let (m ,upperf) = upper h
             (l, lowerf) = lower m
         in  (l, next upperf lowerf)   
 
-combineStepUp :: (f x -> g y -> h ns) -> (Step b c :.: f) x ->
-                 (Step a b :.: g) y -> (Step a c :.: h) ns
-combineStepUp next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $ 
+combineStepUp :: (f x -> g y -> h ns) ->
+                 (Step b c :.: f) x ->
+                 (Step a b :.: g) y ->
+                 (Step a c :.: h) ns
+combineStepUp next (Comp (Step upper)) 
+                   (Comp (Step lower)) = Comp . Step $ 
   \l -> let (m, lowerf) = lower l
             (h, upperf) = upper m
         in  (h, next upperf lowerf)   
