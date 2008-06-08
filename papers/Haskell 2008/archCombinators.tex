@@ -960,6 +960,137 @@ liftStep f next horArgs = Step $
 
 The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library. \todo{explain this more?}
 
+
+
+%																
+%																
+%																
+\section{Type class magic} \label{sect:typeClass}
+
+type Step changes
+
+\bc
+lift simple = lfix $ liftStep (present simple) 
+                   . liftStep (interpret simple)
+\ec
+
+generic lift = lfix \$  liftStep a1   . liftStep an
+% $
+multi parameter composition, application. 
+
+\begin{small}
+\begin{verbatim}
+class Comp (comp :: * -> *) r c | comp -> r c where
+  compose :: comp t -> r -> c
+
+instance Comp (NilStep) (b->res) (b->res)  where
+  compose comp r = r  
+
+instance forall g y res cmp f a b .
+         Comp g (a->res) cmp =>
+         Comp (f :.: g) (y->res) ((a->y) -> cmp) where
+  compose comp r = \atob -> compose (undefined :: g t')  (r . atob)
+\end{verbatim}
+\end{small}
+
+
+\begin{small}
+\begin{verbatim}
+class App (comp :: * -> *) f fx r | comp f -> fx r  where
+  app :: comp t -> f -> fx -> r
+
+instance App (NilStep) (a->b) a b  where
+  app comp f a = f a
+
+
+instance forall g y res cmp ff f a b c d e ar rs hArg vArg hRes vRes ns dr .
+         App g          (a->b)  d      e =>
+         App (Step dr ar rs :.: g) (a->b) (((hRes -> g ns) -> hArg -> (Step dr vArg vRes :.: g) ns) ->d) 
+                                         (LayerFn hArg vArg hRes vRes ->e) where
+  
+             app comp    f      fx = \x -> (app (undefined :: g t') f (fx (liftStep x))) 
+\end{verbatim}
+\end{small}
+
+need to have the result type, but varying nr of params: 
+\begin{small}
+\begin{verbatim}
+class ResType f res | f -> res where
+  resType :: f -> res
+  resType = undefined
+
+instance ResType (Fix ct) (ct t)
+  
+instance ResType f r => ResType (a -> f) r
+\end{verbatim}
+\end{small}
+
+
+\begin{small}
+\begin{verbatim}
+magicLift = app (resType magicLift) genericLift (compose (resType magicLift) id)
+\end{verbatim}
+\end{small}
+
+Combine is simpeler, also a composition, but no args, so no app needed.
+
+\begin{small}
+\begin{verbatim}
+class Combine (comp :: * -> *) t f | comp t -> f where
+  combineC :: comp t -> f
+
+instance Combine NilStep t ((x -> y -> t) -> (NilStep x) -> (NilStep y) -> NilStep t) where
+  combineC _ = \next (NilStep x) (NilStep y) ->  NilStep (next x y) 
+ 
+instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt-> h t)) =>
+         Combine (Step Down a r :.:  h) t 
+                 ((ft -> gt -> t) ->
+                  (Step Down a m :.: f) ft -> 
+                  (Step Down m r :.: g) gt -> 
+                  (Step Down a r :.: h) t) where
+  combineC _ = \next f g -> combineStepDown (combineC (undefined :: h t) next) f g
+
+instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt -> h t)) =>
+         Combine (Step Up a r :.:  h) t 
+                 ((ft -> gt -> t) -> 
+                  (Step Up m r :.: f) ft -> 
+                  (Step Up a m :.: g) gt -> 
+                  (Step Up a r :.: h) t) where
+  combineC _ = \next f g -> combineStepUp (combineC (undefined :: h t) next) f g
+\end{verbatim}
+\end{small}
+
+
+\begin{small}
+\begin{verbatim}
+magicCombine = cfix (combineC (resType magicCombine))
+\end{verbatim}
+\end{small}
+
+
+Now everything is in the library. Just give a type and a fix and it works. main looks like this now:
+\begin{small}
+\begin{verbatim}
+type Layer doc pres gest upd =
+  Fix (Step Down doc pres  :.: Step Up gest upd :.: NilStep)
+
+lift :: Simple state map doc pres gest upd ->
+               state -> Layer doc pres gest upd
+lift l = magicLift (present l) (interpret l)
+
+main layer1 layer2 layer3 =
+ do { (state1, state2, state3) <- initStates
+    ; doc <- initDoc 
+
+    ; let layers = lift layer1 state1 `magicCombine` 
+                   lift layer2 state2 `magicCombine`
+                   lift layer3 state3
+    ; editLoop layers doc
+    }
+\end{verbatim}
+\end{small}
+
+
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
 
@@ -1147,81 +1278,6 @@ For \p{lift}, this type class can be defined, although it does require the expli
 
 \bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
-
-
-%																
-%																
-%																
-\section{Type class magic} \label{sect:typeClass}
-
-\begin{small}
-\begin{verbatim}
-class Comp (comp :: * -> *) r c | comp -> r c where
-  compose :: comp t -> r -> c
-
-instance Comp (NilStep) (b->res) (b->res)  where
-  compose comp r = r  
-
-instance forall g y res cmp f a b .
-         Comp g (a->res) cmp =>
-         Comp (f :.: g) (y->res) ((a->y) -> cmp) where
-  compose comp r = \atob -> compose (undefined :: g t')  (r . atob)
-
-
-class App (comp :: * -> *) f fx r | comp f -> fx r  where
-  app :: comp t -> f -> fx -> r
-
-instance App (NilStep) (a->b) a b  where
-  app comp f a = f a
-
-
-instance forall g y res cmp ff f a b c d e ar rs hArg vArg hRes vRes ns dr .
-         App g          (a->b)  d      e =>
-         App (Step dr ar rs :.: g) (a->b) (((hRes -> g ns) -> hArg -> (Step dr vArg vRes :.: g) ns) ->d) 
-                                         (LayerFn hArg vArg hRes vRes ->e) where
-  
-             app comp    f      fx = \x -> (app (undefined :: g t') f (fx (liftStep x))) 
-
-
-class ResType f res | f -> res where
-  resType :: f -> res
-  resType = undefined
-
-instance ResType (Fix ct) (ct t)
-  
-instance ResType f r => ResType (a -> f) r
-
-
-magicLift = app (resType magicLift) genericLift (compose (resType magicLift) id)
-
-
--- combine
-
-class Combine (comp :: * -> *) t f | comp t -> f where
-  combineC :: comp t -> f
-
-instance Combine NilStep t ((x -> y -> t) -> (NilStep x) -> (NilStep y) -> NilStep t) where
-  combineC _ = \next (NilStep x) (NilStep y) ->  NilStep (next x y) 
- 
-instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt-> h t)) =>
-         Combine (Step Down a r :.:  h) t 
-                 ((ft -> gt -> t) ->
-                  (Step Down a m :.: f) ft -> 
-                  (Step Down m r :.: g) gt -> 
-                  (Step Down a r :.: h) t) where
-  combineC _ = \next f g -> combineStepDown (combineC (undefined :: h t) next) f g
-
-instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt -> h t)) =>
-         Combine (Step Up a r :.:  h) t 
-                 ((ft -> gt -> t) -> 
-                  (Step Up m r :.: f) ft -> 
-                  (Step Up a m :.: g) gt -> 
-                  (Step Up a r :.: h) t) where
-  combineC _ = \next f g -> combineStepUp (combineC (undefined :: h t) next) f g
-
-magicCombine = cfix (combineC (resType magicCombine))
-\end{verbatim}
-\end{small}
 
 
 
