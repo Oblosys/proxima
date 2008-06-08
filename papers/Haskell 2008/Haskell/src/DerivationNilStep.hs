@@ -51,7 +51,7 @@ lift0 simple state = step1 state
 
 lift1 simple state =  
   step1 (step2 (lNilStep (lift1 simple))) state
- where step1 next hArg = Fix . Comp $ Step $
+ where step1 next hArg = Fix . Comp . Step $
          \vArg -> let (pres, hRes) = 
                         present simple hArg vArg
                   in  (pres, next hRes)
@@ -204,7 +204,7 @@ combine = cfix (combineStepDown . combineStepUp)
 type Layer doc pres gest upd = 
   Fix (Step doc pres  :.: Step gest upd :.: NilStep)
 
-
+unStep :: (Step a r :.: g) t -> a -> (r, (g t))
 unStep (Comp (Step step)) = step
 unNil (NilStep step) = step
 
