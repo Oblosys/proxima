@@ -12,6 +12,8 @@
 
 module Magic where
 import Layers
+
+
 --- from lib
 
 fix :: (a->a) -> a
@@ -23,19 +25,16 @@ liftStep f next horArgs = Comp . Step $
   \vArg -> let (vertRes, horRes) = f horArgs vArg
            in  (vertRes, next horRes)
 
+lfix f = fix f' where f' n = Fix . (f . lNilStep) n
 
-lfix f = fix f'  where f' n =  (Fix . f n) 
+lNilStep next hRes = NilStep $ next hRes
 
-nilStep next hRes = NilStep $ next hRes
-
-genericLift f = lfix (f . nilStep)
 
 cfix  f = fix f' 
   where f' n (Fix u) (Fix l) = Fix $ f n u l
 
-
 combineStepDown :: (f x -> g y -> h ns) ->
-               (Step Down a b :.: f) x -> (Step Down b c :.: g) y -> (Step Down a c :.: h) ns
+                   (Step Down a b :.: f) x -> (Step Down b c :.: g) y -> (Step Down a c :.: h) ns
 combineStepDown next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $
   \h -> let (m ,upperf) = upper h
             (l, lowerf) = lower m
@@ -48,6 +47,8 @@ combineStepUp next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $
             (h, upperf) = upper m
         in  (h, next upperf lowerf)   
 
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
 
 
 
@@ -56,38 +57,42 @@ newtype Fix f = Fix (f (Fix f))
 infixr :.:
 newtype (:.:) f g ns  = Comp (f (g ns))
 
+newtype NilStep t = NilStep t
+
+--
+
+newtype Step dir a b ns = Step (a -> (b, ns))
 data Up 
 data Down 
-newtype Step d a b ns = Step (a -> (b, ns))
 
-newtype NilStep t = NilStep t
+
+class Comp (cmp :: * -> *) r c | cmp -> r c where
+  compose :: cmp t -> r -> c
+
+instance Comp (NilStep) (b->res) (b->res)  where
+  compose cmp r = r  
+
+instance Comp g (a->res) cmp =>
+         Comp (f :.: g) (y->res) ((a->y) -> cmp) where
+  compose cmp r = \ab -> compose (rightType cmp) (r.ab)
 
 rightType :: (f :.: g) t -> g t
 rightType = undefined
 
-class Comp (comp :: * -> *) r c | comp -> r c where
-  compose :: comp t -> r -> c
-
-instance Comp (NilStep) (b->res) (b->res)  where
-  compose comp r = r  
-
-instance forall g y res cmp f a b .
-         Comp g (a->res) cmp =>
-         Comp (f :.: g) (y->res) ((a->y) -> cmp) where
-  compose comp r = \atob -> compose (rightType comp)  (r . atob)
-
-
-class App (comp :: * -> *) f fx r | comp f -> fx r  where
-  app :: comp t -> f -> fx -> r
+class App (cmp :: * -> *) f fx r | cmp f -> fx r  where
+  app :: cmp t -> f -> fx -> r
 
 instance App (NilStep) (a->b) a b  where
-  app comp f a = f a
+  app cmp f a = f a
 
 instance App g (a->b) d e =>
-         App (Step dr ar rs :.: g) (a->b) (((hRes -> g ns) -> hArg -> (Step dr vArg vRes :.: g) ns) ->d) 
-                                         (LayerFn hArg vArg hRes vRes ->e) where
+         App (Step dr ar rs :.: g) (a->b) 
+              (((hRes -> g ns) -> hArg -> 
+                (Step dr vArg vRes :.: g) ns) ->d) 
+             (LayerFn hArg vArg hRes vRes ->e) where
   
-             app comp    f      fx = \x -> (app (rightType comp) f (fx (liftStep x))) 
+             app cmp f fx = \lf -> (app (rightType cmp) f
+                                        (fx (liftStep lf))) 
 
 
 class ResType f res | f -> res where
@@ -98,48 +103,56 @@ instance ResType (Fix ct) (ct t)
   
 instance ResType f r => ResType (a -> f) r
 
-{- -- derived sig is not accepted :-(
-magicLift :: ( ResType f (comp t), Comp comp (a1 -> a1) c
-             , App comp
-              (((a -> NilStep (Fix f1)) -> a -> f1 (Fix f1)) -> a -> Fix f1) c f) =>
-              f
+-- derived sig is not accepted :-(  
+{-
+genericLift :: ( ResType f (cmp t)
+               , Comp cmp (a1 -> a1) c
+               , App cmp
+                   (((a -> NilStep (Fix f1)) -> a -> f1 (Fix f1)) -> a -> Fix f1)
+                     c
+                     f) => f
 -}
-magicLift = app (resType magicLift) genericLift (compose (resType magicLift) id)
-
+genericLift = app (resType genericLift) lfix 
+                  (compose (resType genericLift) id)
 
 -- combine
+class Combine (cmp :: * -> *) t f | cmp t -> f where
+  combineC :: cmp t -> f
 
-class Combine (comp :: * -> *) t f | comp t -> f where
-  combineC :: comp t -> f
-
-instance Combine NilStep t ((x -> y -> t) -> (NilStep x) -> (NilStep y) -> NilStep t) where
-  combineC _ = \next (NilStep x) (NilStep y) ->  NilStep (next x y) 
+instance Combine NilStep t ((x -> y -> t) -> 
+          (NilStep x) -> (NilStep y) -> NilStep t) where
+  combineC _ = \next (NilStep x) (NilStep y) ->
+                 NilStep (next x y) 
  
-instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt-> h t)) =>
+instance (Combine h t ( (ft -> gt -> t) ->
+                        f ft -> g gt-> h t) ) =>
          Combine (Step Down a r :.:  h) t
                  ((ft -> gt -> t) ->
                   (Step Down a m :.: f) ft -> 
                   (Step Down m r :.: g) gt -> 
                   (Step Down a r :.: h) t) where
-  combineC comp = \next f g -> combineStepDown (combineC (rightType comp) next) f g
+  combineC cmp = \next f g ->
+    combineStepDown (combineC (rightType cmp) next) f g
+--------------------------------------------------------
 
-instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt -> h t)) =>
+instance (Combine h t ( (ft -> gt -> t) ->
+                        f ft -> g gt -> h t) ) =>
          Combine (Step Up a r :.:  h) t
                  ((ft -> gt -> t) -> 
                   (Step Up m r :.: f) ft -> 
                   (Step Up a m :.: g) gt -> 
                   (Step Up a r :.: h) t) where
-  combineC comp = \next f g -> combineStepUp (combineC (rightType comp) next) f g
+  combineC cmp = \next f g ->
+    combineStepUp (combineC (rightType cmp) next) f g
 
-{- -- derived sig is not accepted :-(
-magicCombine :: (Combine comp t ((Fix t1 -> Fix t2 -> Fix f)
-                                -> t1 (Fix t1)
-                                -> t2 (Fix t2)
-                                -> f (Fix f))
-                , ResType (Fix t1 -> Fix t2 -> Fix f) (comp t)) =>
-                Fix t1 -> Fix t2 -> Fix f
--}
-magicCombine = cfix (combineC (resType magicCombine))
+ -- derived sig is not accepted, but this one is: (replace comp by f)
+genericCombine :: (Combine f t ( (Fix t1 -> Fix t2 -> Fix f) ->
+                                 t1 (Fix t1) -> t2 (Fix t2) ->
+                                 f (Fix f))
+                  , ResType (Fix t1 -> Fix t2 -> Fix f) (f t)
+                  ) =>
+                  Fix t1 -> Fix t2 -> Fix f
+genericCombine = cfix (combineC (resType genericCombine))
 
 
 
@@ -149,8 +162,6 @@ magicCombine = cfix (combineC (resType magicCombine))
 
 -- testing
 
-unStep (Comp (Step step)) = step
-unNil (NilStep step) = step
 
 
 type Layer doc pres gest upd = 
@@ -159,14 +170,14 @@ type Layer doc pres gest upd =
                 
 lift :: Simple state map doc pres gest upd ->
                state -> Layer doc pres gest upd
-lift l = magicLift (present l) (interpret l)
+lift l = genericLift (present l) (interpret l)
 
 main layer1 layer2 layer3 =
  do { (state1, state2, state3) <- initStates
     ; doc <- initDoc 
 
-    ; let layers = lift layer1 state1 `magicCombine` 
-                   lift layer2 state2 `magicCombine`
+    ; let layers = lift layer1 state1 `genericCombine` 
+                   lift layer2 state2 `genericCombine`
                    lift layer3 state3
     ; editLoop layers doc
     }
@@ -195,11 +206,11 @@ combineTest =
     --; let doc = "DOC"
     ; let lift :: Simple state map doc pres gest upd ->
                   state -> Layer2 doc pres gest upd
-          lift l = magicLift (present l) (interpret l)
+          lift l = genericLift (present l) (interpret l)
     
     ; let layers =                lift layer0 state0 
-                   `magicCombine` lift layer1 state1
-                   `magicCombine` lift layer2 state2
+                   `genericCombine` lift layer1 state1
+                   `genericCombine` lift layer2 state2
                    :: Layer2 Document Rendering EditRendering EditDocument
                    -- :: Layer2 String String String String
     ; let (Fix (compPresentStep)) = layers
