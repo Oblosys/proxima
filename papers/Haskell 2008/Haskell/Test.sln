@@ -1,0 +1,18 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{C0AB5119-7A36-4E57-9FD6-C9DBBD6E8BCE}") = "Test", "Test.cabal", "{5373D109-13E4-4612-8026-71AE71F20E29}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{5373D109-13E4-4612-8026-71AE71F20E29}.Debug.ActiveCfg = Debug
+		{5373D109-13E4-4612-8026-71AE71F20E29}.Debug.Build.0 = Debug
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

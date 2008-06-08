@@ -1,0 +1,42 @@
+name: Test
+version: 0.1
+cabal-version: -any
+license: AllRightsReserved
+license-file: ""
+copyright:
+maintainer:
+build-depends: base -any, gtk ==0.9.11, haskell98 ==1.0, mtl ==1.0,
+               parsec ==2.0
+stability:
+homepage:
+package-url:
+synopsis:
+description:
+category:
+author:
+tested-with:
+data-files:
+extra-source-files:
+extra-tmp-files:
+ 
+executable: Test
+main-is: Main.hs
+buildable: True
+cc-options:
+ld-options:
+frameworks:
+c-sources:
+extensions:
+extra-libraries:
+extra-lib-dirs:
+includes:
+install-includes:
+include-dirs:
+hs-source-dirs: src
+other-modules: AutoLiftCombine DPP DPPMonad_Lib DPP_Lib DPP_Main
+               Derivation DerivationNilStep Explicit Layers Magic Main NCP
+ghc-prof-options:
+ghc-options: -fglasgow-exts
+hugs-options:
+nhc-options:
+jhc-options:
