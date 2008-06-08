@@ -149,7 +149,43 @@ magicCombine = cfix (combineC (resType magicCombine))
 
 -- testing
 
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
+
+
+type Layer doc pres gest upd = 
+  Fix (Step Down doc pres  :.: Step Up gest upd :.: NilStep)
+
                 
+lift :: Simple state map doc pres gest upd ->
+               state -> Layer doc pres gest upd
+lift l = magicLift (present l) (interpret l)
+
+main layer1 layer2 layer3 =
+ do { (state1, state2, state3) <- initStates
+    ; doc <- initDoc 
+
+    ; let layers = lift layer1 state1 `magicCombine` 
+                   lift layer2 state2 `magicCombine`
+                   lift layer3 state3
+    ; editLoop layers doc
+    }
+
+editLoop (Fix presentStep) doc = 
+ do { let (pres , interpretStep) = 
+            unStep presentStep $ doc
+    
+    ; showRendering pres
+    ; gesture <- getGesture
+    
+    ; let (update, presentStep') =
+            unStep interpretStep $ gesture
+    
+    ; let doc' = updateDocument update doc
+    ; 
+    ; editLoop (unNil presentStep') doc'
+    }
+
 type Layer2 a b a2 b2 = Fix (Step Down a b :.: Step Up a2 b2 :.: NilStep)
 
 combineTest =

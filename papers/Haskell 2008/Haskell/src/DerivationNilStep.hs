@@ -32,7 +32,6 @@ newtype Step a b ns = Step (a -> (b, ns))
 
 newtype NilStep t = NilStep t
 
-type Layer doc pres gest upd = Fix (Step doc pres  :.: Step gest upd :.: NilStep)
 --------------------------------------------------------
 lift0, lift1, lift2, lift4, lift5, lift, lift'  
       :: Simple state map doc pres gest upd -> state ->
@@ -201,6 +200,10 @@ combine = cfix (combineStepDown . combineStepUp)
 
 
 -- testing
+type Layer doc pres gest upd = 
+  Fix (Step doc pres  :.: Step gest upd :.: NilStep)
+
+
 unStep (Comp (Step step)) = step
 unNil (NilStep step) = step
 
@@ -218,6 +221,11 @@ editLoop (Fix presentStep) doc =
     ; 
     ; editLoop (unNil presentStep') doc'
     }
+
+
+
+
+
 
                 
 type Layer2 a b a2 b2 = Fix (Step a b :.: Step a2 b2 :.: NilStep)
