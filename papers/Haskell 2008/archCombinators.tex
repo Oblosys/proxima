@@ -1198,6 +1198,82 @@ For \p{lift}, this type class can be defined, although it does require the expli
 
 
 
+%																
+%																
+%																
+\section{Type class magic} \label{sect:typeClass}
+
+\begin{small}
+\begin{verbatim}
+class Comp (comp :: * -> *) r c | comp -> r c where
+  compose :: comp t -> r -> c
+
+instance Comp (NilStep) (b->res) (b->res)  where
+  compose comp r = r  
+
+instance forall g y res cmp f a b .
+         Comp g (a->res) cmp =>
+         Comp (f :.: g) (y->res) ((a->y) -> cmp) where
+  compose comp r = \atob -> compose (undefined :: g t')  (r . atob)
+
+
+class App (comp :: * -> *) f fx r | comp f -> fx r  where
+  app :: comp t -> f -> fx -> r
+
+instance App (NilStep) (a->b) a b  where
+  app comp f a = f a
+
+
+instance forall g y res cmp ff f a b c d e ar rs hArg vArg hRes vRes ns dr .
+         App g          (a->b)  d      e =>
+         App (Step dr ar rs :.: g) (a->b) (((hRes -> g ns) -> hArg -> (Step dr vArg vRes :.: g) ns) ->d) 
+                                         (LayerFn hArg vArg hRes vRes ->e) where
+  
+             app comp    f      fx = \x -> (app (undefined :: g t') f (fx (liftStep x))) 
+
+
+class ResType f res | f -> res where
+  resType :: f -> res
+  resType = undefined
+
+instance ResType (Fix ct) (ct t)
+  
+instance ResType f r => ResType (a -> f) r
+
+
+magicLift = app (resType magicLift) genericLift (compose (resType magicLift) id)
+
+
+-- combine
+
+class Combine (comp :: * -> *) t f | comp t -> f where
+  combineC :: comp t -> f
+
+instance Combine NilStep t ((x -> y -> t) -> (NilStep x) -> (NilStep y) -> NilStep t) where
+  combineC _ = \next (NilStep x) (NilStep y) ->  NilStep (next x y) 
+ 
+instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt-> h t)) =>
+         Combine (Step Down a r :.:  h) t 
+                 ((ft -> gt -> t) ->
+                  (Step Down a m :.: f) ft -> 
+                  (Step Down m r :.: g) gt -> 
+                  (Step Down a r :.: h) t) where
+  combineC _ = \next f g -> combineStepDown (combineC (undefined :: h t) next) f g
+
+instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt -> h t)) =>
+         Combine (Step Up a r :.:  h) t 
+                 ((ft -> gt -> t) -> 
+                  (Step Up m r :.: f) ft -> 
+                  (Step Up a m :.: g) gt -> 
+                  (Step Up a r :.: h) t) where
+  combineC _ = \next f g -> combineStepUp (combineC (undefined :: h t) next) f g
+
+magicCombine = cfix (combineC (resType magicCombine))
+\end{verbatim}
+\end{small}
+
+
+
 \bc
 
 %																
