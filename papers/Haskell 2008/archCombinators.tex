@@ -609,14 +609,15 @@ lift simple state = step1 state
          \vArg -> let (pres, hRes) = 
                        present simple hArg vArg
                   in  (pres, step2 hRes)
-       step2 hArg = Step $
+       step2 hArg = Comp . Step $
          \vArg -> let (upd, hRes) = 
                         interpret simple hArg vArg
-                  in  (upd, step1  hRes)
-\end{verbatim}
+                  in  (upd, lNilStep hRes)
+       lNilStep hRes = NilStep $ step1 hRes
+\end{verbatim}%$
 \end{small}
 
-The definitions of the local functions \p{step1} and \p{step2} contain mutually-recursive references. We eliminate the mutual recursion in the definitions by supplying the next step as a parameter to each function.
+The definitions of the local functions \p{step1} and \p{step2} contain mutually-recursive references. We eliminate the mutual recursion in the definitions by supplying the next step as a parameter to each function. \todo{nil}
 
 %first drop state
 %param now step1 gets step2 as param. but step2 has step1. instead of infinite
@@ -629,24 +630,28 @@ The definitions of the local functions \p{step1} and \p{step2} contain mutually-
       
 \begin{small} % lift1
 \begin{verbatim}
-lift simple state =
-  step1 (step2 (lift simple)) state
- where step1 next hArg = Fix . Comp . Step $
+lift :: Simple state map doc pres gest upd -> 
+        state -> Layer doc pres gest upd
+lift simple state =  
+  step1 (step2 (lNilStep (lift simple))) state
+ where step1 next hArg = Fix . Comp $ Step $
          \vArg -> let (pres, hRes) = 
-                       present simple hArg vArg
+                        present simple hArg vArg
                   in  (pres, next hRes)
-       step2 next hArg = Step $
+       step2 next hArg = Comp . Step $
          \vArg -> let (upd, hRes) = 
                         interpret simple hArg vArg
-                  in  (upd, next hRes)
+                  in  (upd, next  hRes)
+
+lNilStep next hRes = NilStep $ next hRes
 \end{verbatim}
 \end{small}
 
-Now, we can capture the \p{Step} constructor and the lambda expression with the function \p{liftStep}:
+Now, we can capture the \p{Step} constructor and the lambda expression with the function \p{liftStep}: \todo{also Comp}
 
 \begin{small} % lift2
 \begin{verbatim}
-liftStep f next horArgs = Step $ 
+liftStep f next horArgs = Comp . Step $ 
   \vArg -> let (vertRes, horRes) = f horArgs vArg
            in  (vertRes, next horRes)
 \end{verbatim}%$
@@ -656,12 +661,12 @@ which yields a new \p{lift}:
 
 \begin{small} % lift2
 \begin{verbatim}
-lift2 simple state =
-  step1 (step2 (lift2 simple)) state
- where step1 next hArg = Fix . Comp $
-           liftStep (present simple) next hArg
+lift simple state =
+  step1 (step2 (lNilStep (lift simple))) state
+ where step1 next hArg = 
+         Fix $ liftStep (present simple) next hArg
        step2 next hArg =
-           liftStep (interpret simple) next hArg
+         liftStep (interpret simple) next hArg 
 \end{verbatim}%$
 \end{small}
 
@@ -670,7 +675,7 @@ If we drop the \p{state} parameter on the first two lines and rewrite the functi
 \
 \begin{small}
 \begin{verbatim}
-lift layer = (step1.step2) (lift layer)
+lift layer = (step1 . step2 . lNilStep) (lift layer)
   ...
 \end{verbatim}
 \end{small}
@@ -686,44 +691,29 @@ fix a = let fixa = a fixa
 
 Thus, we get:
 
-\begin{small} % lift3
+\begin{small} % lift4
 \begin{verbatim}
-lift simple = fix $ step1 . step2
- where step1 next hArg = Fix . Comp $
-           liftStep (present simple) next hArg
-       step2 next hArg = 
-           liftStep (interpret simple) next hArg
+lift simple = fix (step1 . step2 . lNilStep)
+ where step1 next hArg = Fix $
+         liftStep (present simple) next hArg
+       step2 next hArg =
+         liftStep (interpret simple) next hArg
 \end{verbatim}
-\end{small}
+\end{small}%$
 
 
 Regardless the number of steps, there will only be one \p{Fix} constructor (in contrast to the number of \p{Comp} constructors, which depend on the number of steps). Hence, we can use a function \p{lfix} to add the constructor.
 
-\begin{small}
-\begin{verbatim}  % lift4
-lfix f = fix f' 
- where f' n =  Fix . f n
-
-lift simple = lfix $ step1 . step2
- where step1 next hArg = Comp $
-           liftStep (present simple) next hArg
-       step2 next hArg = 
-           liftStep (interpret simple) next hArg
-\end{verbatim}
-\end{small}
-
-In order to remove the \p{Comp} constructor, we observe that the number of \p{Comp} applications is one less than the number of steps, and corresponds to the number of function compositions on the first line of \p{lift}. Hence, we can define a composition function \p{lcomp}, which adds a \p{Comp} constructor to its first argument:
-
-\begin{small} % lift5
+\begin{small}% lift5
 \begin{verbatim}
-lcomp f g = (\n s -> Comp $ f n s) . g
+lfix f = fix f' where f' n = Fix . (f . lNilStep) n
 
-lift simple = lfix $ step1 `lcomp` step2
- where step1 next args = 
-           liftStep (present simple) next args
-       step2 next args = 
-           liftStep (interpret simple) next args
-\end{verbatim}%$
+lift simple = lfix (step1 . step2)
+ where step1 next hArg = 
+         liftStep (present simple) next hArg
+       step2 next hArg = 
+         liftStep (interpret simple) next hArg
+\end{verbatim}
 \end{small}
 
 Now we got rid of the all the constructors in the local step definitions, we can drop the \p{next} and \p{args} parameters and give a point-free definition:
@@ -732,8 +722,8 @@ Now we got rid of the all the constructors in the local step definitions, we can
 \begin{verbatim}
 lift :: Simple state map doc pres gest upd ->
         state -> Layer doc pres gest upd
-lift simple = lfix $  liftStep (present simple) 
-              `lcomp` liftStep (interpret simple) 
+lift simple = lfix $ liftStep (present simple) 
+                   . liftStep (interpret simple)
 \end{verbatim}%$
 \end{small}
 
@@ -744,9 +734,9 @@ For an $n$-step layer, the definition of \p{lift} (using the method from Section
 
 \begin{small}
 \begin{tabbing}
-{\tt lift layer = } \= {\tt lfix    liftStep (layerFn$_1$ layer)} \\
+{\tt lift layer = } \= {\tt lfix \$ liftStep (layerFn$_1$ layer)} \\
                     \>       \dots \\
-                    \> {\tt `lcomp` liftStep (layerFn$_n$ layer)}\\
+                    \> {\tt .~~~~~~liftStep (layerFn$_n$ layer)}\\
 \end{tabbing}%$
 \end{small}
 
@@ -762,68 +752,73 @@ The derivation of the meta combinators for \p{combine} is largely similar to the
 
 \begin{small} % combine0
 \begin{verbatim}
-combine :: Layer high med emed ehigh -> 
-           Layer med low elow emed -> 
-           Layer high low elow ehigh
 combine upr lwr = step1 upr lwr
  where step1 (Fix (Comp (Step upr))) 
-                (Fix (Comp (Step lwr))) = 
+             (Fix (Comp (Step lwr))) = 
          Fix . Comp . Step $ 
          \high -> let (med, uprIntr) = upr high
                       (low, lwrIntr) = lwr med
                   in  (low, step2 uprIntr lwrIntr)
-       step2 (Step upr) (Step lwr) = Step $
+       step2 (Comp (Step upr)) (Comp (Step lwr)) = 
+         Comp . Step $
          \low -> let (med, lwrPres) = lwr low
                      (high, uprPres) = upr med
-                 in  (high, step1 uprPres lwrPres)
+                 in  (high, cNilStep uprPres lwrPres)
+       cNilStep (NilStep u) (NilStep l) = 
+         NilStep $ step1 u l 
 \end{verbatim}
 \end{small}
 
-The explicit mutual recursion in the local functions is removed by passing the next step as a parameter, and rewriting the whole function as a fixed point.
+The explicit mutual recursion in the local functions is removed by passing the next step as a parameter, and rewriting the whole function as a fixed point. \todo{nil}
 
 \begin{small} %combine2
 \begin{verbatim}
-combine = fix $ step1 . step2 
- where step1 next (Fix (Comp (Step upr)))
-                     (Fix (Comp (Step lwr))) =
+combine upr lwr = fix (step1 . step2 . cNilStep) upr lwr
+ where step1 next (Fix (Comp (Step upr))) 
+                  (Fix (Comp (Step lwr))) = 
          Fix . Comp . Step $ 
          \high -> let (med, uprIntr) = upr high
                       (low, lwrIntr) = lwr med
                   in  (low, next uprIntr lwrIntr)
-       step2 next (Step upr) (Step lwr) = Step  $
+       step2 next (Comp (Step upr)) (Comp ( Step lwr)) = 
+         Comp . Step $
          \low -> let (med, lwrPres) = lwr low
                      (high, uprPres) = upr med
                  in  (high, next uprPres lwrPres)
+
+cNilStep next (NilStep u) (NilStep l) = 
+  NilStep $ next u l
 \end{verbatim}%$
 \end{small}
 
 Without the explicit recursive calls, we can capture the vertical data flow patterns with two functions \p{combineStepDown} and \p{combineStepUp}:
 
-\begin{small} % combine3
+\begin{small} 
 \begin{verbatim}
-combineStepDown :: (x -> y -> ns) ->
-               Step a b x -> Step b c y -> Step a c ns
-combineStepDown next (Step upper) (Step lower) = Step $
+combineStepDown :: (f x -> g y -> h ns) -> (Step a b :.: f) x -> 
+                   (Step b c :.: g) y -> (Step a c :.: h) ns
+combineStepDown next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $
   \h -> let (m ,upperf) = upper h
             (l, lowerf) = lower m
         in  (l, next upperf lowerf)   
 
-combineStepUp :: (x -> y -> ns) -> 
-             Step b c x -> Step a b y -> Step a c ns
-combineStepUp next (Step upper) (Step lower) = Step $ 
+
+combineStepUp :: (f x -> g y -> h ns) -> (Step b c :.: f) x ->
+                 (Step a b :.: g) y -> (Step a c :.: h) ns
+combineStepUp next (Comp (Step upper)) (Comp (Step lower)) = Comp . Step $ 
   \l -> let (m, lowerf) = lower l
             (h, upperf) = upper m
         in  (h, next upperf lowerf)   
 \end{verbatim}%$
 \end{small}
 
-rewrite .
+rewrite . drop params step2
 
 \begin{small}%combine3
 \begin{verbatim}
-combine = fix $ step1 . step2
- where step1 next (Fix (Comp upr)) (Fix (Comp lwr)) =
-         Fix . Comp  $ combineStepDown next upr lwr  
+combine upr lwr = fix (step1 . step2 . cNilStep) upr lwr
+ where step1 next (Fix upr) (Fix lwr) = 
+         Fix $ combineStepDown next upr lwr
        step2 = combineStepUp
 \end{verbatim}%$
 \end{small}
@@ -832,40 +827,32 @@ The second step is now simply a \p{combineStepUp}, but the first step still cont
 
 \begin{small}%combine4
 \begin{verbatim}
-combine = fix (\n (Fix u) (Fix l)-> Fix $
-                   (step1 . combineStepUp) n u l) 
- where step1 next (Comp upr) (Comp lwr) = Comp $ 
-          combineStepDown next upr lwr  
+combine = fix (\n (Fix u) (Fix l) -> 
+  Fix $ (step1 . combineStepUp . cNilStep) n u l) 
+ where step1 next upr lwr = 
+         combineStepDown next upr lwr
 \end{verbatim}
-\end{small}
+\end{small}%$
 
 Now we can define a function \p{cfix} that pattern matches on the arguments and adds a \p{Fix} to the result:
 
 \begin{small}
 \begin{verbatim}
-cfix  f = fix f' 
-  where f' n (Fix u) (Fix l) = Fix $ f n u l
+cfix f = fix f' 
+ where f' n (Fix u) (Fix l) = Fix $ (f . cNilStep) n u l
 \end{verbatim}%$
 \end{small}
 
 Which leaves us with:
-
-\begin{small}%combine5
+\begin{small}% combine5
 \begin{verbatim}
-combine = cfix $ step1 . combineStepUp
- where step1 next (Comp upr) (Comp lwr) = Comp $ 
-          combineStepDown next upr lwr  
-\end{verbatim}%$
+combine upr lwr = cfix (step1 . step2) upr lwr
+ where step1 next upr lwr = 
+         combineStepDown next upr lwr
+       step2 = combineStepUp
+\end{verbatim}
 \end{small}
 
-The \p{Comp} constructors can be handled by a slightly modified version of function composition:
-
-\begin{small}
-\begin{verbatim}
-ccomp f g = f' . g
- where f' m (Comp u) (Comp l) = Comp $ f m u l
-\end{verbatim}%$
-\end{small}
 
 If we use \p{ccomp}, we can drop the parameters to \p{step1} and replace it by \p{combineStepDown}. Thus, the final version of \p{combine} reads
 
@@ -874,8 +861,8 @@ If we use \p{ccomp}, we can drop the parameters to \p{step1} and replace it by \
 combine :: Layer high med emed ehigh ->
            Layer med low elow emed -> 
            Layer high low elow ehigh
-combine = cfix $ combineStepDown `ccomp` combineStepUp
-\end{verbatim}%$
+combine = cfix (combineStepDown . combineStepUp)
+\end{verbatim}
 \end{small}
 
 
@@ -888,7 +875,10 @@ The \p{main} function for the simple editor is the same as in Section~\ref{sect:
 
 \begin{small}
 \begin{verbatim}
-editLoop (Fix (Comp presentStep)) doc = 
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
+
+editLoop (Fix presentStep) doc = 
  do { let (pres , interpretStep) = 
             unStep presentStep $ doc
     
@@ -899,53 +889,14 @@ editLoop (Fix (Comp presentStep)) doc =
             unStep interpretStep $ gesture
     
     ; let doc' = updateDocument update doc
-    
-    ; editLoop presentStep' doc'
+    ; 
+    ; editLoop (unNil presentStep') doc'
     }
 \end{verbatim}%$
 \end{small}
 
 
 
-
-%																
-\subsection{A type class for unwrapping} \label{sect:decompose}
-
-A minor problem with the version of \p{editLoop} from the previous section is the varying amount of \p{Comp} constructors, which depends on the number of layer functions. The problem is minor, since typically the pattern matches appear only in a single function where all layers are combined. Furthermore, the number of layer functions is not likely to change often during the development of a system. However, it is possible to define a type class that takes care of the pattern matching.
-
-\begin{small}
-\begin{verbatim}
-class Decomp comp t decomp where 
-  decomp :: comp t -> decomp
-
-instance Decomp f t (f t)  where
-  decomp f = f
-
-instance Decomp f (g t) h  => Decomp (f :.: g) t h where
-  decomp (Comp f) = decomp f
-\end{verbatim}
-\end{small}
-
-A drawback of using this class is that all types must receive explicit signatures, because otherwise the type checker will require an instance that is too general and cannot be inferred. A functional dependency \p{comp t -> decomp} seems appropriate to alleviate this problem, but does not work with the two instances. The reason lies with the overlapping instances giving rise to conflicting types \p{decomp}. For example, for \p{t1 :.: t2} and \p{t}, the first instance declares \p{decomp} as \p{(t1 :.: t2) t}, whereas the second instance gives \p{t1 (t2 t)}.
-
-A solution to this problem is to declare an explicit base \p{TNil} for composed types. Thus, instead of \p{t1 :.: t2} we get \p{TNil :.: t1 :.: t2}. Because of the partial parameterization, \p{TNil} is a newtype:
-
-\begin{small}
-\begin{verbatim}
-newtype TNil t = TNil t
-\end{verbatim}
-\end{small}
-
-Now, instead of the overlapping instance \p{Decomp f t (f t)}, we can define an instance for \p{TNil} that does not overlap:
-
-\begin{small}
-\begin{verbatim}
-instance Decomp TNil t t where
-  decomp (TNil t) = t
-\end{verbatim}
-\end{small}
-
-Unfortunately, this introduces yet another newtype constructor. Worse still, there is no metacombinator that can be modified to handle this constructor, so a special nil step needs to be added to both \p{lift} and \p{combine}. Because of this, and the fact that the functional dependency adds extra complexity, we choose to keep the simpler representation and provide explicit type signatures.
 
 
 
