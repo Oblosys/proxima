@@ -62,7 +62,7 @@ newtype Step d a b ns = Step (a -> (b, ns))
 
 newtype NilStep t = NilStep t
 
-rightType :: (f :.: g) t -> g t'
+rightType :: (f :.: g) t -> g t
 rightType = undefined
 
 class Comp (comp :: * -> *) r c | comp -> r c where
@@ -98,7 +98,12 @@ instance ResType (Fix ct) (ct t)
   
 instance ResType f r => ResType (a -> f) r
 
-
+{- -- derived sig is not accepted :-(
+magicLift :: ( ResType f (comp t), Comp comp (a1 -> a1) c
+             , App comp
+              (((a -> NilStep (Fix f1)) -> a -> f1 (Fix f1)) -> a -> Fix f1) c f) =>
+              f
+-}
 magicLift = app (resType magicLift) genericLift (compose (resType magicLift) id)
 
 
@@ -124,8 +129,16 @@ instance (Combine h t ((ft -> gt -> t) -> f ft -> g gt -> h t)) =>
                   (Step Up m r :.: f) ft -> 
                   (Step Up a m :.: g) gt -> 
                   (Step Up a r :.: h) t) where
-  combineC _ = \next f g -> combineStepUp (combineC (undefined :: h t) next) f g
+  combineC comp = \next f g -> combineStepUp (combineC (rightType comp) next) f g
 
+{- -- derived sig is not accepted :-(
+magicCombine :: (Combine comp t ((Fix t1 -> Fix t2 -> Fix f)
+                                -> t1 (Fix t1)
+                                -> t2 (Fix t2)
+                                -> f (Fix f))
+                , ResType (Fix t1 -> Fix t2 -> Fix f) (comp t)) =>
+                Fix t1 -> Fix t2 -> Fix f
+-}
 magicCombine = cfix (combineC (resType magicCombine))
 
 
