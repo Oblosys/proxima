@@ -1094,7 +1094,7 @@ main layer1 layer2 layer3 =
 %																
 \subsection{Final Library and conclusions} \label{sect:libAndConclusions}
 
-%from Derivation.hs & Layer.hs:
+%from DPPMonad_Lib.hs
 \begin{figure}
 \begin{small}
 \begin{center}
@@ -1107,72 +1107,52 @@ fix a = let fixa = a fixa
 type LayerFn m horArgs vertArg horRess vertRes =
        horArgs -> vertArg -> m (vertRes, horRess)
 
+
 newtype Fix m f = Fix (f m (Fix m f))
+
+infixr :.:
 
 newtype (:.:) f g m ns  = Comp (f m (g m ns))
 
-newtype Step a b m ns = Step { unStep :: (a -> m (b, ns)) }
+newtype NilStep m t = NilStep t
+
+newtype Step a b m ns = Step (a -> m (b, ns))
+
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
 
 
-lfix f = fix f' 
- where f' n =  Fix . f n
+lfix f = fix f' where f' n = Fix . (f . lNilStep) n
 
-lcomp f g = (\n s -> Comp $ f n s) . g
+lNilStep next hRes = NilStep $ next hRes
 
-liftStep :: Monad m => (hArg -> vArg-> m (vRes, hRes)) -> 
-            (hRes -> ns) -> hArg -> Step vArg vRes m ns
-liftStep f next horArgs = Step $ 
+liftStep f next horArgs = Comp . Step $ 
   \vArg -> do { (vertRes, horRes) <- f horArgs vArg
               ; return (vertRes, next horRes)
               }
-
+              
 
 cfix f = fix f' 
-  where f' n (Fix u) (Fix l) = Fix $ f n u l
+ where f' n (Fix u) (Fix l) = Fix $ (f . cNilStep) n u l
 
-ccomp f g = f' . g
- where f' m (Comp u) (Comp l) = Comp $ f m u l
+cNilStep next (NilStep u) (NilStep l) = 
+  NilStep $ next u l
 
-combineStepDown :: Monad m => (nsU -> nsL -> nsC) ->
-                   Step h md m nsU -> Step md l m nsL ->
-                   Step h l m nsC
-combineStepDown next (Step upper) (Step lower) = Step $
+combineStepDown next (Comp (Step upper)) 
+                     (Comp (Step lower)) = Comp . Step $
   \h -> do { (m ,upperf) <- upper h
            ; (l, lowerf) <- lower m
            ; return (l, next upperf lowerf)   
            }
 
-combineStepUp :: Monad m => (nsU -> nsL -> nsC) ->
-                 Step md h m nsU -> Step l md m nsL ->
-                 Step l h m nsC
-combineStepUp next (Step upper) (Step lower) = Step $ 
+combineStepUp next (Comp (Step upper)) 
+                   (Comp (Step lower)) = Comp . Step $
   \l -> do { (m, lowerf) <- lower l
            ; (h, upperf) <- upper m
            ; return (h, next upperf lowerf)
            }
-
-
-data Simple m state map doc pres gest upd =
-       Simple { present ::   LayerFn m state doc (map, state) pres
-              , interpret :: LayerFn m (map, state) gest state upd
-              }
-
-type Layer m doc pres gest upd = 
-       Fix m (Step doc pres :.: Step gest upd)
-
-lift :: Monad m =>
-        Simple m state map doc pres gest upd ->
-        state -> Layer m doc pres gest upd
-lift simple = lfix $  liftStep (present simple) 
-              `lcomp` liftStep (interpret simple) 
-
-
-combine :: Monad m => Layer m high med emed ehigh ->
-                      Layer m med low elow emed -> 
-                      Layer m high low elow ehigh
-combine = cfix $ combineStepDown `ccomp` combineStepUp
 \end{verbatim} %$
-\end{footnotesize}\caption{Final meta combinator library}\label{fig:metacombinators} 
+\end{footnotesize}\caption{Final meta-combinator library}\label{fig:metacombinators} 
 \end{center}
 \end{small}
 \end{figure}
