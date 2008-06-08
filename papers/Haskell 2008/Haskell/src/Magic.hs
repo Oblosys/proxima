@@ -119,29 +119,28 @@ genericLift = app (resType genericLift) lfix
 class Combine (cmp :: * -> *) t f | cmp t -> f where
   combineC :: cmp t -> f
 
-instance Combine NilStep t ((x -> y -> t) -> 
-          (NilStep x) -> (NilStep y) -> NilStep t) where
-  combineC _ = \next (NilStep x) (NilStep y) ->
-                 NilStep (next x y) 
+instance Combine NilStep t ((u -> l -> c) -> 
+          (NilStep u) -> (NilStep l) -> NilStep c) where
+  combineC _ = \next (NilStep u) (NilStep l) ->
+                 NilStep (next u l) 
  
-instance (Combine h t ( (ft -> gt -> t) ->
-                        f ft -> g gt-> h t) ) =>
-         Combine (Step Down a r :.:  h) t
-                 ((ft -> gt -> t) ->
-                  (Step Down a m :.: f) ft -> 
-                  (Step Down m r :.: g) gt -> 
-                  (Step Down a r :.: h) t) where
-  combineC cmp = \next f g ->
-    combineStepDown (combineC (rightType cmp) next) f g
---------------------------------------------------------
+instance (Combine c ct ( (ut -> lt -> ct) ->
+                        u ut -> l lt-> c ct) ) =>
+         Combine (Step Down a r :.: c) ct
+                 ((ut -> lt -> ct) ->
+                  (Step Down a m :.: u) ut -> 
+                  (Step Down m r :.: l) lt -> 
+                  (Step Down a r :.: c) ct) where
+  combineC cmp = \next u l ->
+    combineStepDown (combineC (rightType cmp) next) u l
 
-instance (Combine h t ( (ft -> gt -> t) ->
-                        f ft -> g gt -> h t) ) =>
-         Combine (Step Up a r :.:  h) t
-                 ((ft -> gt -> t) -> 
-                  (Step Up m r :.: f) ft -> 
-                  (Step Up a m :.: g) gt -> 
-                  (Step Up a r :.: h) t) where
+instance (Combine c ct ( (ut -> lt -> ct) ->
+                        u ut -> l lt-> c ct) ) =>
+         Combine (Step Up a r :.: c) ct
+                 ((ut -> lt -> ct) -> 
+                  (Step Up m r :.: u) ut -> 
+                  (Step Up a m :.: l) lt -> 
+                  (Step Up a r :.: c) ct) where
   combineC cmp = \next f g ->
     combineStepUp (combineC (rightType cmp) next) f g
 
@@ -164,13 +163,13 @@ genericCombine = cfix (combineC (resType genericCombine))
 
 
 
-type Layer doc pres gest upd = 
-  Fix (Step Down doc pres  :.: Step Up gest upd :.: NilStep)
+type Layer dc prs gst upd = 
+  Fix (Step Down dc prs :.: Step Up gst upd :.: NilStep)
 
                 
 lift :: Simple state map doc pres gest upd ->
                state -> Layer doc pres gest upd
-lift l = genericLift (present l) (interpret l)
+lift smpl = genericLift (present smpl) (interpret smpl)
 
 main layer1 layer2 layer3 =
  do { (state1, state2, state3) <- initStates
