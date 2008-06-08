@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances -fno-monomorphism-restriction #-}
 -----------------------------------------------------------------------------------------
 {-| Module      : DerivationNilStep
     Copyright   : 
