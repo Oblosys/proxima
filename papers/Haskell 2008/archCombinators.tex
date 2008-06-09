@@ -39,7 +39,7 @@ system, the implementation will always comply with the architecture.
 Domain-specific languages, Architecture
 
 \keywords
-keyword1, keyword2
+keyword1, keyword2 \todo{specify keywords}
 
 
 
@@ -177,7 +177,7 @@ data Simple state map doc pres gest upd =
 %																
 \section{Method 1: Explicitly connecting the components} \label{sect:simple}
 
-Now that the layers have been modeled, we need to realize the data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write the selection and application of each of the functions in each of the layers. 
+Now that the layers have been modeled, we need to realize the data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write the selection and application of each of the functions in each of the layers. This will be the first approach, followed by gradually more abstract approaches in sections~\ref{sect:ncp} to \ref{sect:lib}.
 
 We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The corresponding Haskell code for the edit loop is:
 
@@ -987,10 +987,8 @@ The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of th
 %																
 \subsection{Type-class magic} \label{sect:typeClass}
 
-Defs lift and combine are simple and depend completely on type. It turns out that we can define them automatically with a class
+The definitions of \p{lift} and \p{combine} are almost uniquely determine by the layer type. This leads to the question whether we can use type classes to construct generic versions of these functions. It turns out to be possible, if we extend the Step type with a phantom-type variable to encode the direction of the step. 
 
-
-type Step changes
 \begin{small}
 \begin{verbatim}
 newtype Step dir a b ns = Step (a -> (b, ns))
@@ -1000,13 +998,49 @@ data Down
 \end{verbatim}
 \end{small}
 
+Defs lift and combine are simple and depend completely on type. It turns out that we can define them automatically with a class
+
+\head{Definition of \p{genericLift}}
+
+
 \begin{small}
 \begin{verbatim}
-generic lift = \a1 .. an -> lfix $ liftStep a1   . liftStep an
-generic lift = \a1 .. an -> lfix $ compose  a1 .. an
+genericLift :: 
+  lf1 -> .. -> lf2 ->
+  Fix (Step Up/Down <s1> :.: .. :.: Step Up/Down <sn>)
+genericLift = \a1 .. an -> 
+              lfix (liftStep lf1 . ..  . liftStep lfn)
 \end{verbatim}%$
 \end{small}
 
+We can identify a variable arg composition that that takes n lift steps and composes them after applying liftStep. call it compose <N> 
+
+\begin{small}
+\begin{verbatim}
+genericLift = \lf1 .. lfn -> 
+              lfix (compose <N> id lf1 .. lfn)
+\end{verbatim}%$
+\end{small}
+
+Now we need a function that given a function (compose), takes n arguments, applies them to the function and applies lfix to the result.
+
+\begin{small}
+\begin{verbatim}
+genericLift = app <N> lfix (compose <N> id)
+\end{verbatim}%$
+\end{small}
+
+Now we need to get a 
+We assume a function resType that given (a1 -> an -> Fix t) gives us the t.
+
+\begin{small}
+\begin{verbatim}
+genericLift = app (resType genericLift) lfix 
+                  (compose (resType genericLift) id)
+\end{verbatim}%$
+\end{small}
+
+Thanks to the power of Haskell's class system, it turns out to be possible to define \p{compose}, \p{app}, and \p{resType}. In fact, the definition above is the actual definition of \p{genericLift}. 
 
 First, we construct a class \p{Comp} that provides us with a variable argument composition, by recursion over the composition type:
 
@@ -1071,17 +1105,35 @@ genericLift = app (resType genericLift) lfix
 \end{verbatim}
 \end{small}
 
+\head{Definition of \p{genericCombine}}
 
-Combine is simpeler, also a composition, but no args, so no app needed.
+The situation for \p{genericCombine} is somewhat simpeler, since the function does not have a varying number of arguments. It does however, contain elements that differ based on the direction of the step. If we look at \p{genericCombine}, the general structure would be:
+
 \begin{small}
 \begin{verbatim}
+combine :: 
+  Fix (Step Up/Down .. :.: .. :.: Step Up/Down .. ) ->
+  Fix (Step Up/Down s1 :.: .. :.: Step Up/Down .. ) ->
+  Fix (Step Up/Down s1 :.: .. :.: Step Up/Down .. )
 combine = cfix \$ combineStepUp/Down . ... . combineStepUp/Down 
 \end{verbatim}%$
 \end{small}
 
+Similar to genericLift, we can assume a function that .
+
+
 \begin{small}
 \begin{verbatim}
--- combine
+genericCombine = cfix (combineC (resType genericCombine))
+\end{verbatim}%$
+\end{small}
+
+It is also possible to recurse over the layer argument.
+
+
+Actual type class:
+\begin{small}
+\begin{verbatim}
 class Combine (cmp :: * -> *) t f | cmp t -> f where
   combineC :: cmp t -> f
 
@@ -1113,11 +1165,8 @@ instance (Combine c ct ( (ut -> lt -> ct) ->
 \end{small}\todo{maybe not show Up instance?}
 
 
-\begin{small}
-\begin{verbatim}
-genericCombine = cfix (combineC (resType genericCombine))
-\end{verbatim}
-\end{small}
+
+\head{Simple editor}
 
 
 Now everything is in the library! Just give a type and a fix and it works. main looks like this now:
@@ -1143,7 +1192,8 @@ main layer1 layer2 layer3 =
 \end{verbatim}
 \end{small}
 
-The monadic version of the type classes is straightforward but even nastier to look at, so we will not present it here.
+The monadic version of the generic combinators is a straightforward extension, but looks even more unfriendly, so we will not present it here. 
+Drawback much complexity. If no type sig, type of combined layers is \p{a} with a whole lot of constraints. Certain type errors will be of the form \p{cannot deduce instance}. although still a lot are readable.
 
 
 %																
