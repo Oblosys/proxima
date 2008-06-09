@@ -9,6 +9,7 @@ import DPP_Main ()
 import Derivation (dppMain)
 import AutoLiftCombine
 import Magic ()
+import MagicMonad ()
 import DerivationNilStep ()
 {-
 lift :: Simple a b c d e f  -> a -> PresStep c d e f

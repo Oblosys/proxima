@@ -3,20 +3,12 @@ module DPPMonad_Lib where
 
 import Layers hiding (LayerFn, Simple (..))
 
-test :: Monad m => LayerFn m hArg vArg hRes vRes -> 
-            (hRes -> g m ns) -> hArg -> 
-            (Step vArg vRes :.: g) m ns
-test f next horArgs = Comp . Step $ 
-  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
-              ; return (vertRes, next horRes)
-              }
-
-
-
 data Simple m state map doc pres gest upd =
        Simple { present ::   LayerFn m state doc (map, state) pres
               , interpret :: LayerFn m (map, state) gest state upd
               }
+
+
 
 
 
@@ -32,7 +24,7 @@ newtype Fix m f = Fix (f m (Fix m f))
 
 infixr :.:
 
-newtype (:.:) f g m ns  = Comp (f m (g m ns))
+newtype (:.:) f g (m :: * -> *) ns  = Comp (f m (g m ns))
 
 newtype NilStep m t = NilStep t
 

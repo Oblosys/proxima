@@ -34,7 +34,8 @@ install-includes:
 include-dirs:
 hs-source-dirs: src
 other-modules: AutoLiftCombine DPP DPPMonad_Lib DPP_Lib DPP_Main
-               Derivation DerivationNilStep Explicit Layers Magic Main NCP
+               Derivation DerivationNilStep Explicit Layers Magic MagicMonad Main
+               NCP
 ghc-prof-options:
 ghc-options: -fglasgow-exts
 hugs-options:
