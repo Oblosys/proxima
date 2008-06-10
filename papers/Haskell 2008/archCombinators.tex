@@ -1,6 +1,3 @@
-hughes?
-
-
 \documentclass[preprint,natbib]{sigplanconf}
 
 \usepackage{amsmath}
@@ -66,7 +63,8 @@ Describing an architecture in an actual programming language not only makes it p
 
 In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Higher-order typed (HOT) functional programming languages, such as Haskell, Clean~\cite{plasmeijer01clean}, and ML~\cite{milner97ML} offer possibilies for describing the main components of an architecture, and treating all of these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
 
-As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. We give a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
+
+As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. \todo{also mention Hughes?} Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. We give a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
 
 \bc
 The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change. An architecture description, on the other hand, will typically be a small and rather static entity, because changes to the architecture involve changes to many components of the system. \note{is dit wel zo? misschien is concise syntax toch wel zo handig.} As a consequence, a concise syntax for combinator expressions is not of the highest importance.
@@ -1000,21 +998,24 @@ data Down
 \end{small}
 
 
+
 \head{Definition of \p{genericLift}}
 
-The structure of a generic version of \p{lift} in a pseudo-Haskell would read.
+A generic version of \p{lift} would take a variable number of layer functions, and return a layer type . The number of layer functions is determined by the number of steps in the result type (which is determined by the context in which it is used.)
+
+The structure of a generic version of \p{lift} in a pseudo-Haskell language would read:
 
 \begin{small}
 \begin{verbatim}
 genericLift :: 
   lf1 -> .. -> lfn ->
   Fix (Step Up/Down <s1> :.: .. :.: Step Up/Down <sn>)
-genericLift = \a1 .. an -> 
+genericLift = \lf1 .. lfn -> 
               lfix (liftStep lf1 . ..  . liftStep lfn)
 \end{verbatim}%$
 \end{small}
 
-We can identify a variable arg composition that that takes n lift steps and composes them after applyin. call it compose <N> 
+In this code, we can identify a composition function that takes a varying number of functions (\p{liftStep lf1} to \p{liftStep lfn}) and return a composition. If we assume a function \p{compose}, that takes a representation of the number of steps (denoted by \p{<N>}) and and neutral element for the composition, we can rewrite \p{genericLift} to:
 
 \begin{small}
 \begin{verbatim}
@@ -1049,17 +1050,19 @@ For the variable-argument composition, we declare a class \p{Comp} with a single
 \begin{small}
 \begin{verbatim}
 class Comp (cmp :: * -> *) r c | cmp -> r c where
-  compose :: cmp t -> r -> c
+  comp :: cmp t -> r -> c
 
 instance Comp (NilStep) (b->res) (b->res)  where
-  compose cmp r = r  
+  comp cmp r = r  
 
 instance Comp g (a->res) cmp =>
          Comp (f :.: g) (y->res) ((a->y) -> cmp) where
-  compose cmp r = \ab -> compose (rightType cmp) (r.ab)
+  comp cmp r = \ab -> comp (rightType cmp) (r.ab)
 
 rightType :: (f :.: g) t -> g t
 rightType = undefined
+
+compose c = comp c id
 \end{verbatim}
 \end{small}
 
