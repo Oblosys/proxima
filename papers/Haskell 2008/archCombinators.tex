@@ -92,7 +92,7 @@ Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor
 A layer consists of a pair of $\mathtt{present}_i$ and $\mathtt{interpret}_i$ functions, which we refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we may also have horizontal data flow that stays within the layer. Horizontal data flow is used to maintain state in a layer, and is passed along between all the computations taking place in a layer.
 
 
-Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The result \p{map} of the function \p{present} is passed on to \p{interpret} and represents information about the presentation mapping. Furthermore, a \p{state} parameter is passed to \p{present} as well as \p{interpret}, and may be updated by \p{interpret}. Note that the \p{state} parameter of \p{present} is the result of \p{interpret} in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
+Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The result \p{map} of the function \p{present} is passed on to \p{interpret} and represents information about where things are mapped on the screen. Furthermore, a \p{state} parameter is passed to \p{present} as well as \p{interpret}, and may be updated by \p{interpret}. Note that the \p{state} parameter of \p{present} is the result of \p{interpret} in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
 
 
 
@@ -227,9 +227,9 @@ main layer1 layer2 layer3 =
 \end{verbatim}
 \end{small}
 
-The functions \p{initStates} and \p{initDoc} provide the initial values for \p{states} and \p{doc}, and are left unspecified. The layers of the editor are arguments of the \p{main} function. An editor can now be instantiated by applying the function \p{main} to three \p{Simple} values that implement the different layers. The type system verifies that the implemented layer functions have the correct type signatures.
+The functions \p{initStates} and \p{initDoc} provide the initial values for \p{states} and \p{doc}, and are left unspecified. The layers of the editor are arguments of the \p{main} function. An editor can now be instantiated by applying the function \p{main} to three \p{Simple} values each implementing a different layer. The type system verifies that the implemented layer functions have the correct type signatures.
 
-A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the mapping parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, explicitly encoding the standard patterns for upward and downward vertical parameters, increases the chance of errors. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes. However, type checking will not detect two equally typed variables accidentally being swapped.
+A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the state parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, explicitly encoding the standard patterns for upward and downward vertical parameters, increases the chance of errors. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes. However, type checking will not detect two equally typed variables accidentally being swapped.
 
 
 %																
@@ -250,7 +250,7 @@ Similar to function composition ($f \cdot g$), we develop a \p{combine} combinat
 
 In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The \p{combine} combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \p{LayerFn horArgC vertArg horResC vertRes}. The parameters \p{horArgC} and \p{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
 
-Because the types of the horizontal parameters are typically not of the same type, we cannot use a list to represent the collections. Moreover, we wish to be able to determine at compile time whether the collection contains the right number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product consisting of only pairs to represent the horizontal parameters and results. 
+Because the types of the horizontal parameters are typically not of the same type, we cannot use a list to represent the collections. Moreover, we wish to be able to determine at compile time whether the collection contains the right number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product to represent the horizontal parameters and results. 
 
 Although it will not be enforced by the combinators, we only use left-associatively nested products in this section: 
 \p{(\dots((e$_1$,e$_2$),e$_3$), \dots, e$_n$)}. However, as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the exact structure does not matter.
@@ -299,9 +299,9 @@ composeUp :: LayerFn horArgU intr horResU res ->
 Using \p{composeUp} and \p{composeDown}, we can define a combinator to combine \p{Simple} layers. 
 
 
-First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use the type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(map, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{map} and \p{state} tuples. 
+First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(map, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{map} and \p{state} tuples. 
 
-The type \p{LayerC} is a more general version of \p{Simple}. Because we cannot easily denote a nested pair structure in a Haskell type declaration, we leave the structure of the horizontal parameters unspecified. The parameter \p{states} represents the nested pair of \p{state} values, and the parameter \p{mapsStates} represents the nested pair of \p{map} and \p{state} tuples.
+We introduce a type \p{LayerC} as a more general version of \p{Simple}. Because we cannot easily denote a nested pair structure in a Haskell type declaration, we leave the structure of the horizontal parameters unspecified. The parameter \p{states} represents the nested pair of \p{state} values, and the parameter \p{mapsStates} represents the nested pair of \p{map} and \p{state} tuples.
 
 \begin{small}
 \begin{verbatim}
@@ -381,7 +381,7 @@ main layer1 layer2 layer3 =
 
 \head{Conclusions}
 
-The nested pairs solution is more compositional than the approach of the previous section and much of the data flow is hidden from the main loop. However, the horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Moreover, the type of the composite layer is parameterized with the types appearing in the layers, leading to large type signatures.
+The nested pairs solution is more compositional than the approach of the previous section and most of the data flow is hidden from the main loop. However, the horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Moreover, the type of the composite layer is parameterized with all the types appearing in the layers, leading to large type signatures.
 
 
 
@@ -411,12 +411,12 @@ In contrast, the hidden-parameter method does not return a collection of horizon
 {\tt let (update, presentStep') = interpretStep gest}\\
 \dots
 
-The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop.  Thus, the main editor loop becomes more transparent and the type of a combined layer is simpler since the type variables for the horizontal parameters are hidden.
+The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop, the main editor loop becomes more transparent and the type of a combined layer is simpler since the types for the horizontal parameters are internalized.
 
 
 \head{Type definitions}
 
-The type of the layer needs to have the following structure: 
+The type of the layer is described by the following type: 
 \p{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}.  Unfortunately, we cannot use a type declaration: \p{type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))}, because Haskell does not allow recursive type synonyms. Hence, we need to use a \p{newtype} declaration, with the disadvantage that values of the type have to be wrapped with constructor functions.
 
 \begin{small}
@@ -430,7 +430,7 @@ newtype Layer doc pres gest upd =
 \end{verbatim}
 \end{small}
 
-We define two combinators for constructing and combining \p{Layer} values: \p{lift} converts  a \p{Simple} layer to a hidden-parameter layer of type \p{Layer}, and \p{combine} combines two layers of type \p{Layer}. Both combinators in this section are specific to the \p{Simple} type. In the next section, we define a library to construct \p{lift} and \p{combine} for arbitrary layers.
+We now define two combinators for constructing and combining \p{Layer} values: \p{lift} converts  a \p{Simple} layer to a hidden-parameter layer of type \p{Layer}, and \p{combine} combines two layers of type \p{Layer}. Both combinators in this section are specific to the \p{Simple} type. In the next section, we define a library to construct \p{lift} and \p{combine} for arbitrary layers.
 
 
 \head{Definition of \p{lift}}
@@ -453,7 +453,7 @@ lift simple state = presStep state
 \end{verbatim}%$
 \end{small}
 
-Besides \p{layer}, \p{lift} gets a second parameter, \p{state}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. 
+Besides \p{layer}, \p{lift} gets a second parameter, \p{state}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. \todo{is misschien niet helemaal duidelijk}
 
 
 \head{Definition of \p{combine}}
@@ -536,9 +536,9 @@ The hidden-parameter model hides the data flow of the horizontal parameters from
 %																
 \section{Developing a library for architecture descriptions} \label{sect:lib}
 
-In this section, we develop a small library for constructing \p{lift} and \p{combine} combinators for layered architectures with an arbitrary number of layer functions. We refer to these combinators as {\em meta combinators} because they are used to construct combinators.
+In this section, we develop a small library for constructing \p{lift} and \p{combine} combinators for layered architectures having an arbitrary number of layer functions. We refer to these combinators as {\em meta combinators} because they are used to construct combinators.
 
-The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two steps. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made. Therefore, instead of a general description for writing \p{lift} and \p{combine} by hand, it is desirable to have a small library of meta combinators for constucting these combinators. Another advantage of a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use a meta combinator whose name reflects the direction (similar to the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
+The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two steps. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made.\todo{hier had je kriebeltjes onder gezet} Therefore, instead of a general instruction on how to write \p{lift} and \p{combine} by hand, it is desirable to have a small library of meta combinators for constucting these combinators. Another advantage of a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use a meta combinator whose name reflects the direction (similar to the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
 
 Looking at the definitions of \p{lift} and \p{combine} in the previous section, we see that they both consist of two parts: one for each step in the layer. Both functions define a local function for each of the layer functions in the layer. In both \p{lift} and \p{combine} for the \p{Simple} layer type, these local functions are called \p{presStep} and \p{intrStep}. 
 
@@ -550,7 +550,8 @@ The method we use for the derivation of the meta combinators is to start with th
 %																
 \subsection{Type definitions} \label{subsecttypedef}
 
-The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this requires a user to provide an instance of this class, as well as complicate the types and introduce problems with the monomorphism restriction. Therefore, we introduce a compositional representation of the layer types that only makes use of types defined in the library.
+\todo{voor de eerste zin stond weer een kriebellijntje}
+The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this requires a user to provide an instance of this class, as well as complicate the types and introduce problems\todo{kriebellijntje} with the monomorphism restriction. Therefore, we introduce a compositional representation of the layer types that only makes use of types defined in the library.
 
 If we inspect the \p{Layer} type from the Section~\ref{sect:hidden}, we see it is made up of two steps of the form \p{vArg -> (vRes, ...)}. We can capture such a step with the following type:
 
