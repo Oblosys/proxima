@@ -73,17 +73,21 @@ data Down
 
 
 class Comp (cmp :: * -> *) r c | cmp -> r c where
-  compose :: cmp t -> r -> c
+  comp :: cmp t -> r -> c
 
 instance Comp (NilStep) (b->res) (b->res)  where
-  compose cmp r = r  
+  comp cmp r = r  
 
 instance Comp g (a->res) cmp =>
          Comp (f :.: g) (y->res) ((a->y) -> cmp) where
-  compose cmp r = \ab -> compose (rightType cmp) (r.ab)
+  comp cmp r = \ab -> comp (rightType cmp) (r.ab)
 
 rightType :: (f :.: g) t -> g t
 rightType = undefined
+
+compose c = comp c id
+
+
 
 class App (cmp :: * -> *) f fx r | cmp f -> fx r  where
   app :: cmp t -> f -> fx -> r
@@ -97,8 +101,8 @@ instance App g (a->b) d e =>
                 (Step dr vArg vRes :.: g) ns) ->d) 
              (LayerFn hArg vArg hRes vRes ->e) where
   
-             app cmp f fx = \lf -> (app (rightType cmp) f
-                                        (fx (liftStep lf))) 
+  app cmp f fx = \lf -> (app (rightType cmp) f
+                             (fx (liftStep lf))) 
 
 
 class ResType f res | f -> res where
@@ -118,8 +122,9 @@ genericLift :: ( ResType f (cmp t)
                      c
                      f) => f
 -}
-genericLift = app (resType genericLift) lfix 
-                  (compose (resType genericLift) id)
+genericLift' = app (resType genericLift) lfix 
+                  (compose (resType genericLift))
+
 
 -- combine
 class Combine (cmp :: * -> *) t f | cmp t -> f where
@@ -159,9 +164,49 @@ genericCombine :: (Combine f t ( (Fix t1 -> Fix t2 -> Fix f) ->
                   Fix t1 -> Fix t2 -> Fix f
 genericCombine = cfix (combineC (resType genericCombine))
 
+-- combine that uses first arg for recursion:
+{-
+class Combine (cmp :: * -> *) t f | cmp t -> f where
+  combineC :: cmp t -> f
 
+instance Combine NilStep u ((u -> l -> c) -> 
+          (NilStep u) -> (NilStep l) -> NilStep c) where
+  combineC _ = \next (NilStep u) (NilStep l) ->
+                 NilStep (next u l) 
+ 
+instance (Combine u ut ( (ut -> lt -> ct) ->
+                        u ut -> l lt-> c ct) ) =>
+         Combine (Step Down a m :.: u) ut
+                 ((ut -> lt -> ct) ->
+                  (Step Down a m :.: u) ut -> 
+                  (Step Down m r :.: l) lt -> 
+                  (Step Down a r :.: c) ct) where
+  combineC cmp = \next u l ->
+    combineStepDown (combineC (rightType cmp) next) u l
 
+instance (Combine u ut ( (ut -> lt -> ct) ->
+                        u ut -> l lt-> c ct) ) =>
+         Combine (Step Up m r :.: u) ut
+                 ((ut -> lt -> ct) -> 
+                  (Step Up m r :.: u) ut -> 
+                  (Step Up a m :.: l) lt -> 
+                  (Step Up a r :.: c) ct) where
+  combineC cmp = \next f g ->
+    combineStepUp (combineC (rightType cmp) next) f g
 
+ -- derived sig is not accepted, but this one is: (replace comp by f)
+
+genericCombine :: (Combine t1 (Fix t1) ( (Fix t1 -> Fix t2 -> Fix f) ->
+                                 t1 (Fix t1) -> t2 (Fix t2) ->
+                                 f (Fix f))
+                  ) =>
+                  Fix t1 -> Fix t2 -> Fix f
+
+genericCombine l1 l2 = cfix (combineC (unFix l1)) l1 l2
+
+unFix :: Fix f -> f (Fix f)
+unFix (Fix x) = x
+-}
 
 
 
@@ -205,7 +250,10 @@ editLoop (Fix presentStep) doc =
 type Layer2 a b a2 b2 = Fix (Step Down a b :.: Step Up a2 b2 :.: NilStep)
 
 combineTest =
- do { (state0, state1, state2) <- initStates
+ do { print testAppMap 
+    ; print testResMap
+    ; getChar
+    ; (state0, state1, state2) <- initStates
     ; doc <- initDoc
     --; let (state0, state1, state2) = (0, 10, 20)
     --; let doc = "DOC"
@@ -229,10 +277,46 @@ combineTest =
     ; let (update::EditDocument, next) = interpretStep $ gesture
     
 --    ; print update
-    ; getChar
     ; return ()
     } 
 
 
+{-
+isA 'a' = True
+isA _   = False
+
+testAppMap = (appMap two (\x y -> (x,y)) isA) 'a' 'b' 
+testResMap = (resMap two (\(x,y) -> (y,x)) (\x y -> (x,y))) 'a' 'b'
+
+genericLift = resMap (resType genericLift) lfix $
+               appMap (resType genericLift) liftStep $ 
+                  (compose (resType genericLift))
 
 
+class ResMap (cmp :: * -> *) f r r' | cmp f  ->  r' r  where
+  resMap :: cmp t -> f -> r -> r'
+
+instance ResMap (NilStep) (r->r') r r'  where
+  resMap cmp fm r = fm r
+
+instance ResMap g fm f f' =>
+         ResMap (s :.: g) fm (x -> f) (x -> f')  where
+  resMap cmp fm r = \x -> resMap (rightType cmp) fm (r x)
+
+
+class AppMap (cmp :: * -> *) f fm  r | cmp f -> fm r  where
+  appMap :: cmp t -> f -> fm -> r
+
+instance AppMap (NilStep) f fm f  where
+  appMap cmp f _ = f
+
+instance AppMap g f (t x->y) r =>
+         AppMap (s :.: g) 
+              (y -> f) (t x->y) (t x ->r) where
+  appMap cmp f fm = \x -> appMap (rightType cmp) (f (fm x)) fm
+                                     
+
+zero = undefined :: NilStep t
+one = undefined :: (Step Down a b :.: NilStep) t
+two = undefined :: (Step Down a b  :.: Step Down a b  :.: NilStep) t
+-}

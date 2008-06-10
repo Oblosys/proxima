@@ -2,15 +2,17 @@
 
 module Main where
 
-import Layers
-import DPPMonad_Lib ()
-import DPP_Lib 
+import Layers ()
+import DPPMonad_Lib hiding (main)
+import DPP_Lib () 
 import DPP_Main ()
 import Derivation (dppMain)
-import AutoLiftCombine
-import Magic ()
+import AutoLiftCombine () 
+import Magic (combineTest)
 import MagicMonad ()
 import DerivationNilStep ()
+
+--type Layer m a b c d = Fix m (Step a b :.: Step c d :.: NilStep)
 {-
 lift :: Simple a b c d e f  -> a -> PresStep c d e f
 lift simple =

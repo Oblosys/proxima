@@ -20,7 +20,9 @@ type LayerFn m horArgs vertArg horRess vertRes =
        horArgs -> vertArg -> m (vertRes, horRess)
 
 
-newtype Fix m f = Fix (f m (Fix m f))
+newtype Fix f = Fix (f (Fix f))
+
+type FixM m f = Fix (f m)
 
 infixr :.:
 
@@ -88,7 +90,7 @@ liftStep :: Monad m => LayerFn m hArg vArg hRes vRes ->
 
 
 type Layer m doc pres gest upd = 
-  Fix m (Step doc pres  :.: Step gest upd :.: NilStep)
+  FixM m (Step doc pres  :.: Step gest upd :.: NilStep)
 
 
 lift simple = lfix $ liftStep (present simple) 
