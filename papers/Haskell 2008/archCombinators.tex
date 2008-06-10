@@ -1015,37 +1015,35 @@ genericLift = \lf1 .. lfn ->
 \end{verbatim}%$
 \end{small}
 
-In this code, we can identify a composition function that takes a varying number of functions (\p{liftStep lf1} to \p{liftStep lfn}) and return a composition. If we assume a function \p{compose}, that takes a representation of the number of steps (denoted by \p{<N>}) and and neutral element for the composition, we can rewrite \p{genericLift} to:
+In this code, we can identify a composition function that takes a varying number of functions (\p{liftStep lf1} to \p{liftStep lfn}) and return a composition. If we assume a function \p{compose}, that takes a representation of the number of steps (denoted by \p{<n>}) followed by \p{n} functions, we can rewrite \p{genericLift} to:
 
 \begin{small}
 \begin{verbatim}
 genericLift = \lf1 .. lfn -> 
-              lfix (compose <N> id (liftStep lf1) .. (liftStep lfn))
+  lfix (compose <n> (liftStep lf1) .. (liftStep lfn))
 \end{verbatim}%$
 \end{small}
 
-Now we need a function that given a function f g  (compose), takes n arguments, applies them to the function and applies lfix to the result.
+Now, we can identify another pattern \p{\a1 an -> f (g (h a1) .. (h an))}. Because of the parentheses around \p{g} and its parameters, we cannot simply compose \p{f} and \p{g}. We assume a function \p{app}, which takes the representation of the steps \p{<n>}, and the two functions \p{f} and \p{g}. For \p{h}, \p{app} uses \p{liftStep}, which is not a parameter. If we take \p{f} to be \p{lfix}, and \p{g} to be \p{compose <n>}, we have a new version of \p{genericLift}:
 
 \begin{small}
 \begin{verbatim}
-genericLift = app <N> lfix (compose <N> id)
+genericLift = app <n> lfix (compose <n>)
 \end{verbatim}%$
 \end{small}
 
-Now we need to get a <N> the result is what we need, it contains many comp steps.  
-We assume a function resType that given (a1 -> an -> Fix t) gives us the t.
+The final non-Haskell part in the definition is the \p{<n>} expression. The number of steps is represented by the argument of the \p{Fix} type in the result of \p{genericLift}. Hence, we assume a function \p{resType}, which for functions of type \p{a1 .. an -> Fix (s1 :.: .. :.: sn)} returns \p{steps t} (note that \p{steps} has kind \p{* -> *}). With this last function, the definition of \p{genericLift} is no longer pseudo code, but actual Haskell:
 
 \begin{small}
 \begin{verbatim}
 genericLift = app (resType genericLift) lfix 
-                  (compose (resType genericLift) id)
+                  (compose (resType genericLift))
 \end{verbatim}%$
 \end{small}
 
-As the reader may have guessed, the last definition is no longer pseudo code, as \p{compose}, \p{app}, and \p{resType} can be defined withe type classes. Thanks to the power of Haskell's class system, it turns out to be possible to define . 
+Which leaves us the task of defining the type classes we need for \p{compose}, \p{app}, and \p{resType}.
 
-
-For the variable-argument composition, we declare a class \p{Comp} with a single method \p{compose}, which takes a composition type, and a neutral element, and returns a composition function that takes as many arguments as the composition type has steps.
+For the variable-argument composition \p{compose}, we declare a class \p{Comp} with a single method \p{comp}, which takes a composition type, and a neutral element, and returns a composition function that takes as many arguments as the composition type has steps. The function \p{compose} is simply \p{comp} with \p{id} for the neutral element.
 
 \begin{small}
 \begin{verbatim}
@@ -1086,7 +1084,7 @@ instance App g (a->b) d e =>
 \end{verbatim}
 \end{small}
 
-The code function \p{liftStep} is the same as in the previous section, since the phantom-type does not show up in the values. 
+The code for \p{liftStep} is the same as in the previous section. Its type is slightly different due to the direction type variable, but since this is a phantom type, it does not show up in the values. 
 
 The last problem we need to tackle is how to obtain the composition type over which \p{compose} and \p{app} recurse. For this we declare a class \p{ResType} with a method \p{resType}, which yields the result type of its function argument. Since the result of \p{genericLift} is always of type \p{Fix ct}, we can define a base instance for \p{Fix ct}, in which \p{restype} returns \p{ct t}, and a recursive instance for \p{a -> f}, in which \p{restype} returns the result type of \p{f}. Since no values are actually computed here, we can give the method a default implementation of \p{undefined}.
 
@@ -1102,7 +1100,6 @@ instance ResType (Fix ct) (ct t)
 instance ResType f r => ResType (a -> f) r
 \end{verbatim}
 \end{small}
-
 
 
 
@@ -1122,7 +1119,7 @@ combine = cfix \$ combineStepUp/Down
 \end{verbatim}%$
 \end{small}
 
-Similar to genericLift, we can assume a function creates a composition of n combineStepUp/Downs, based on the type. .
+We assume a function that creates a composition of \p{n} combine steps, where the choice for an upward or a downward step is based on the direction of the respective \p{Step} type in the composition type.
 
 
 \begin{small}
@@ -1131,10 +1128,8 @@ genericCombine = cfix (combineC (resType genericCombine))
 \end{verbatim}%$
 \end{small}
 
-It is also possible to recurse over the layer argument.
+The type class looks a bit unfriendly due to the presence of the \p{Step} type, which is necessary because of the dependence on the direcion.
 
-
-Actual type class:
 \begin{small}
 \begin{verbatim}
 class Combine (cmp :: * -> *) t f | cmp t -> f where
@@ -1155,7 +1150,8 @@ instance (Combine c ct ( (ut -> lt -> ct) ->
   combineC cmp = \next u l ->
     combineStepDown (combineC (rightType cmp) next) u l
 \end{verbatim}
-\end{small}\todo{maybe not show Up instance?}
+\end{small}
+
 \bc
 instance (Combine c ct ( (ut -> lt -> ct) ->
                         u ut -> l lt-> c ct) ) =>
@@ -1167,16 +1163,14 @@ instance (Combine c ct ( (ut -> lt -> ct) ->
   combineC cmp = \next f g ->
     combineStepUp (combineC (rightType cmp) next) f g
 \ec
-There is also an instance for \p{Step Up} but it is simply Down, with Down replaced by up, and the paramaters m r a m  replaced by a m m r. Hence we do not show it here.
+There is also an instance for \p{Step Up} but it is very similar to the instance for \p{Step Down}. The only difference is that \p{Down} is replaced by \p{up}, and that the parameter order for the upper and lower arguments  \p{a m} and \p{m r} is replaced by \p{m r} and \p{a m}. Hence we do not show it here.
 
 
 
 \head{Simple editor}
 
 
-With the two generic functions defined above, it is no longer necessary to manually define a \p{combine} function.
-
-Just give a type and a fix and it works. main looks like this now:
+With the two generic functions defined above, it is no longer necessary to manually define a \p{combine} function. For \p{lift}, it still makes sense to define a function that takes a layer as an argument and selects the functions from this layer to pass on to \p{genericLift}.
 
 The required definitions for the simple editor are:
 
@@ -1205,7 +1199,7 @@ main layer1 layer2 layer3 =
 The code for \p{editLoop} is the same as in Section~\ref{sect:lib}.
 
 The monadic version of the generic combinators is a straightforward extension, but looks even more unfriendly, so we will not present it here. 
-Drawback much complexity. If no type sig, type of combined layers is \p{a} with a whole lot of constraints. Certain type errors will be of the form \p{cannot deduce instance}. although still a lot are readable.
+A drawback of the Drawback much complexity. If no type sig, type of combined layers is \p{a} with a whole lot of constraints. Certain type errors will be of the form \p{cannot deduce instance}. although still a lot are readable.
 
 
 %																
