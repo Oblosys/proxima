@@ -122,8 +122,6 @@ genericLift :: ( ResType f (cmp t)
                      c
                      f) => f
 -}
-genericLift' = app (resType genericLift) lfix 
-                  (compose (resType genericLift))
 
 
 -- combine
@@ -215,11 +213,12 @@ unFix (Fix x) = x
 
 
 type Layer dc prs gst upd = 
-  Fix (Step Down dc prs :.: Step Up gst upd :.: NilStep)
+  Fix (Step Up dc prs :.: Step Down gst upd :.: NilStep)
 
                 
 lift :: Simple state map doc pres gest upd ->
                state -> Layer doc pres gest upd
+
 lift smpl = genericLift (present smpl) (interpret smpl)
 
 main layer1 layer2 layer3 =
@@ -229,6 +228,7 @@ main layer1 layer2 layer3 =
     ; let layers = lift layer1 state1 `genericCombine` 
                    lift layer2 state2 `genericCombine`
                    lift layer3 state3
+ --                  :: Layer Document Rendering EditRendering EditDocument
     ; editLoop layers doc
     }
 
@@ -281,16 +281,19 @@ combineTest =
     } 
 
 
-{-
+
 isA 'a' = True
 isA _   = False
 
-testAppMap = (appMap two (\x y -> (x,y)) isA) 'a' 'b' 
-testResMap = (resMap two (\(x,y) -> (y,x)) (\x y -> (x,y))) 'a' 'b'
+testAppMap = (appMap two (\x y -> (x,y)) (\x -> [x])) 'a' 'b' 
+testResMap = (resMap two (\(x,y) -> (y,x)) (\x y -> (x,y))) True 'b'
 
-genericLift = resMap (resType genericLift) lfix $
-               appMap (resType genericLift) liftStep $ 
+genericLift = app (resType genericLift) lfix 
                   (compose (resType genericLift))
+
+genericLift' = resMap (resType genericLift) lfix $
+               appMap (resType genericLift)  
+                  (compose (resType genericLift)) liftStep
 
 
 class ResMap (cmp :: * -> *) f r r' | cmp f  ->  r' r  where
@@ -310,13 +313,12 @@ class AppMap (cmp :: * -> *) f fm  r | cmp f -> fm r  where
 instance AppMap (NilStep) f fm f  where
   appMap cmp f _ = f
 
-instance AppMap g f (t x->y) r =>
+instance AppMap g f (x->y) r =>
          AppMap (s :.: g) 
-              (y -> f) (t x->y) (t x ->r) where
+              (y -> f) (x->y) (x ->r) where
   appMap cmp f fm = \x -> appMap (rightType cmp) (f (fm x)) fm
                                      
 
 zero = undefined :: NilStep t
 one = undefined :: (Step Down a b :.: NilStep) t
 two = undefined :: (Step Down a b  :.: Step Down a b  :.: NilStep) t
--}

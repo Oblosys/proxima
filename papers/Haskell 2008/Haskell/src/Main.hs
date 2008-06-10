@@ -2,13 +2,14 @@
 
 module Main where
 
-import Layers ()
-import DPPMonad_Lib hiding (main)
+import Layers 
+import DPPMonad_Lib ()
 import DPP_Lib () 
 import DPP_Main ()
 import Derivation (dppMain)
 import AutoLiftCombine () 
 import Magic (combineTest)
+import qualified Magic
 import MagicMonad ()
 import DerivationNilStep ()
 
@@ -38,7 +39,7 @@ editLoop present doc =
     ; editLoop present' doc'
     }
 -}
-main = combineTest
+main = Magic.main layer0 layer1 layer2 -- combineTest
 {-
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 
