@@ -12,7 +12,7 @@
 \titlebanner{Draft, to be submitted to Haskell Symposium '08}        % These are ignored unless
 \preprintfooter{\version}   % 'preprint' option specified.
 
-\title{Haskell as an ADL for layered architectures}
+\title{Haskell as an Architecture Description Language}
 %\subtitle{}
 
 \authorinfo{Martijn M. Schrage \and S. Doaitse Swierstra}
@@ -23,11 +23,11 @@
 
 \begin{abstract}
 We define a domain specific embedded language in Haskell for describing
-layered software architectures of editors. By using a typed programming
+layered software architectures which maintain bidirectional dependencies. By using a typed programming
 language to describe the architecture, the type correctness of its components
-is guaranteed by the type checker of the language. Because, contrary to the situation for most Architecture Description Languages, the
+is guaranteed by the type checker of the language. Because, contrary to the situation with typical Architecture Description Languages, the
 description is part of the implementation of the
-system, the implementation is guaranteed to comply with the architecture.
+system, the implementation is guaranteed to comply with the architecture, and the architecture is guaranteed to comply with the implementation.
 \end{abstract}
 
 \category{D.2.11} {Software Engineering}
@@ -57,39 +57,33 @@ f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert
 
 \section{Introduction}\label{sect:introduction}
 
-In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of layered architectures. The combinators have been successfully used for the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system providing web-interfaces to databases. \todo{was voor de scriptie van Jurre Laven}
+In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of layered architectures. The combinators have been successfully used in the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system providing web-interfaces to databases. \todo{was voor de scriptie van Jurre Laven}. 
 
-Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are composed, but also enables us to smoothly extend this description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
+Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are to be composed, but also enables us to smoothly extend this high-level description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
-In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Haskell offers possibilies for describing the main components of an architecture, and treating these components as first-class entities. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components. \todo{maybe mention that we do a kind of generic programming with the type classes?}
+In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Haskell offers possibilies for describing the main components of an architecture, while incorporating  these components as part of the program itself. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components. \todo{maybe mention that we do a kind of generic programming with the type classes?}
 
 
 As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. \todo{also mention Hughes?} Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. In this paper we develop a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
 
-\bc
-The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change. An architecture description, on the other hand, will typically be a small and rather static entity, because changes to the architecture involve changes to many components of the system. \note{is dit wel zo? misschien is concise syntax toch wel zo handig.} As a consequence, a concise syntax for combinator expressions is not of the highest importance.
-\ec
+
 
 
 In this paper we give four implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used in Section~\ref{sect:ncp} as a basis to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. 
 \bc
 Finally, in Section~\ref{sect:proxima}, we show how the architecture combinators are used to describe (and implement) the architecture of  the Proxima editor.%Section~\ref{sect:haskellconclusions} presents the conclusions.
 \ec
-
-
-%																
-%																
-%																
+			
 \section{A simple editor}\label{sect:simpleEditor}
 
 
 We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
 
 
-Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ steps: $\mathtt{present}_1 \dots \mathtt{present}_{n}$. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is mapped onto a document update (\p{upd}) by $\mathtt{interpret}_{n} \dots \mathtt{interpret}_1$, which is then performed on the document. In the next cycle, the updated document is presented again.
+Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ steps: $\mathtt{present}_1 \dots \mathtt{present}_{n}$, each step takes care of a specific subtask, such as computing a set of layout alternatives, computing minimal and maximal sizes, negotiation between objects to be displayed about the available screen space, keeping track of white space which was explicitly entered by the user but which does not play a role at the document level and keeping track of explicit representation choices --toggling visibility, alignment, unfolding status-- made by the user in the course of the editing process. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is mapped onto a document update (\p{upd}) by $\mathtt{interpret}_{n} \dots \mathtt{interpret}_1$, which is then applied to the document. In the next cycle, the updated document is presented again. Note that some of the editing gestures effectively turn out to be identity operations at the top level, since some of them will be handled at an intermediate level, and will result in an update of the state maintained at that level.
 
 
-A layer consists of a pair of $\mathtt{present}_i$ and $\mathtt{interpret}_i$ functions, which we refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we may also have horizontal data flow that stays within the layer. Horizontal data flow is used to maintain state in a layer, and is passed along between all the computations taking place in a layer.
+A layer consists of a pair of $\mathtt{present}_i$ and $\mathtt{interpret}_i$ functions, which we refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we thus may also have horizontal data flow that stays within the layer. Horizontal data flow is used to maintain state in a layer; this state component is passed along between all  computations taking place in a layer.
 
 
 Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The result \p{map} of the function \p{present} is passed on to \p{interpret} and represents information about where things are mapped on the screen. Furthermore, a \p{state} parameter is passed to \p{present} as well as \p{interpret}, and may be updated by \p{interpret}. Note that the \p{state} parameter of \p{present} is the result of \p{interpret} in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
@@ -119,7 +113,7 @@ Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two e
 %																
 \section{A layer in Haskell} \label{sect:layerInHaskell}
 
-In the coming sections, we explore the possibilities of implementing the layered architecture from the previous section in Haskell. There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. Before going into how to model the connections between the layers, we focus of the functions in the layer.
+In the coming sections, we explore the possibilities of describing the layered architecture from the previous section in Haskell. There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. Before discussing how to model the connections between the layers, we focus of the functions within a layer.
 
 A layer function takes  horizontal as well as vertical arguments and returns both  horizontal and vertical results. To make the difference between horizontal and vertical data explicit, we introduce a type synonym for layer functions.
 
@@ -135,7 +129,7 @@ type LayerFn horArgs vertArg horRess vertRes =
 
 
 
-Each layer will be represented by a record containing all the layer functions: in our case \p{present} and \p{interpret}. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}.  If we would put these functions directly in a record, we would get:
+Each layer is represented by a record containing all the layer functions: in our case \p{present} and \p{interpret}. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}.  If we  put these functions directly in a record, we  get:
 
 %code Layers.hs
 \begin{small}
@@ -168,16 +162,12 @@ data Simple state map doc pres gest upd =
 \caption{Data flow in a normalized layer.}\label{wrapped} 
 \end{figure}
 
-
-
-%																
-%																
-%																
+			
 \section{Method 1: Explicitly connecting the components} \label{sect:simple}
 
-Now that the layers have been modeled, we need to realize the data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write down the selection and application of each of the functions in each of the layers. This will be the first approach, followed by gradually more abstract approaches in sections~\ref{sect:ncp} to \ref{sect:lib}.
+Now that the layers have been modeled, we need to realize the vertical data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write down the selection and application of each of the functions in each of the layers. This will be the first approach, followed by gradually more abstract approaches in sections~\ref{sect:ncp} to \ref{sect:lib}.
 
-We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent in the code with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The Haskell code for the edit loop is: \todo{misschien nog niet helemaal duidelijk dat die functies niet in de figuur te zien zijn}
+We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. Note that we might look at the code below as a textual representation of this picture, and that vice versa we might compute such a picture out of the code. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent in the code with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The Haskell code for the edit loop is: \todo{misschien nog niet helemaal duidelijk dat die functies niet in de figuur te zien zijn}
 
 
 \begin{figure}
@@ -229,7 +219,7 @@ main layer1 layer2 layer3 =
 
 The functions \p{initStates} and \p{initDoc} provide the initial values for \p{states} and \p{doc}, and are left unspecified. The layers of the editor are arguments of the \p{main} function. An editor can now be instantiated by applying the function \p{main} to three \p{Simple} values each implementing a different layer. The type system verifies that the implemented layer functions have the correct type signatures.
 
-A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the state parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, explicitly encoding the standard patterns for upward and downward vertical parameters, increases the chance of errors. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes. However, type checking will not detect two equally typed variables accidentally being swapped.
+A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the state parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, explicitly encoding the standard patterns for upward and downward vertical parameters, increases the chance of errors. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes. However, type checking will not detect two equally typed variables accidentally being swapped. the goal of the coming sections is to gradually abstrcat from the current, very explicit description of the problem.
 
 
 %																
@@ -244,22 +234,23 @@ A disadvantage of the implementation of the edit loop sketched in this section i
 
 
 %\note{Ref to Doaitse Pablo?} 
-In this section we abstract from the horizontal and vertical data-flow patterns in the edit loop of the previous section, by using combinators for combining layers. In the main loop, we call the layer functions of the combined layer, rather than explicitly calling each layer function in the main loop. The combinators also make the data flow more explicit. The direction of the vertical parameter is apparent by the choice of combinator, rather than explicitly threading it through the function applications.
+In this section we abstract from the horizontal and vertical data-flow patterns in the edit loop of the previous section, by using combinators for combining layers. In the main loop, we call the layer functions of the combined layer, rather than explicitly calling each layer function in the main loop. The combinators also make the data flow more explicit. The direction of the vertical parameter is made apparent by the choice of combinator, rather than explicitly threading it through the function applications.
 
 Similar to function composition ($f \cdot g$), we develop a \p{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are compositions of the layer functions in the layers that are combined.
 
 In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The \p{combine} combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \p{LayerFn horArgC vertArg horResC vertRes}. The parameters \p{horArgC} and \p{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
 
-Because the types of the horizontal parameters are typically not of the same type, we cannot use a list to represent the collections. Moreover, we wish to be able to determine at compile time whether the collection contains the right number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product to represent the horizontal parameters and results. 
+Because the types of the horizontal parameters are typically not of the same type, we cannot use a list to represent the collections. Moreover, we wish to be able to determine at compile time whether the collection contains the required number of elements. A tuple or castesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product to represent the horizontal parameters and results. 
 
-Although it will not be enforced by the combinators, we only use left-associatively nested products in this section: 
-\p{(\dots((e$_1$,e$_2$),e$_3$), \dots, e$_n$)}. However, as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the exact structure does not matter.
+We only use left-associatively nested products in this section: 
+\p{(\dots((e$_1$,e$_2$),e$_3$), \dots ), e$_n$)}, lthough this will not be enforced by the combinators; as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the precise structure does not matter.
 
 
-We first define two combinators for composing layer functions: an downward combinator \p{composeDown} (for \p{present}) and a upward combinator \p{composeUp} (for \p{interpret}). A downward vertical parameter passes through the higher layer first, whereas an upward vertical parameter passes through the lower layer first. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
+We first define two combinators for composing layer functions: a downward combinator \p{composeDown} (for \p{present}) and a upward combinator \p{composeUp} (for \p{interpret}). A downward vertical parameter passes through the higher layer first, whereas an upward vertical parameter passes through the lower layer first. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
 
 The combinator \p{composeDown} composes two layers \p{higher} and \p{lower} by feeding the intermediate vertical result of \p{h} into \p{l}. At the same time, the horizontal parameters for \p{higher} and \p{lower} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \p{higher} and \p{lower}. 
 
+\newpage
 
 %code from NCP.hs
 \begin{small}
@@ -296,7 +287,7 @@ composeUp :: LayerFn horArgU intr horResU res ->
 
 \head{Combining layers}
 
-Using \p{composeUp} and \p{composeDown}, we can define a combinator to combine \p{Simple} layers. 
+Using \p{composeUp} and \p{composeDown}, we can now define a combinator to combine \p{Simple} layers. 
 
 
 First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(map, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{map} and \p{state} tuples. 
@@ -403,7 +394,7 @@ In the previous section, the horizontal results that are computed on evaluation 
 {\tt let (update, states') = interpretC layers mapsStates gest}\\
 \dots
 
-In contrast, the hidden-parameter method does not return a collection of horizontal results, but a function that has already been partially applied to the horizontal results.
+In contrast, the hidden-parameter method does not return a collection of horizontal results, but a function that has already been partially applied to the horizontal results; the state is stored in the closure which is thus formed.
 
 \dots\\
 {\tt let (pres, interpretStep) = presentStep doc}\\
@@ -411,7 +402,7 @@ In contrast, the hidden-parameter method does not return a collection of horizon
 {\tt let (update, presentStep') = interpretStep gest}\\
 \dots
 
-The code that is shown is not entirely accurate, as it turns out that some pattern matching is required, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop, the main editor loop becomes more transparent and the type of a combined layer is simpler since the types for the horizontal parameters are internalized.
+The code that is shown is not entirely accurate, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop, the main editor loop becomes more transparent and the type of a combined layer becomes simpler since the types for the horizontal parameters are internalized.
 
 
 \head{Type definitions}
@@ -441,7 +432,7 @@ The combinator \p{lift} takes a \p{Simple} layer and returns a \p{Layer}:
 \begin{verbatim}
 lift :: Simple state map doc pres gest upd ->
         state -> Layer doc pres gest upd
-lift simple state = presStep state 
+lift simple init = presStep init 
  where presStep state = Layer $
          \doc ->  let (pres, (map,state)) = 
                          present simple state doc                                         
@@ -452,8 +443,9 @@ lift simple state = presStep state
                   in  (upd, presStep state')
 \end{verbatim}%$
 \end{small}
+\marginpar{state -> init omgedoopt}
 
-Besides \p{layer}, \p{lift} gets a second parameter, \p{state}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters to and from the layer functions, and also to the next edit cycle. \todo{is misschien niet helemaal duidelijk}
+Besides \p{layer}, \p{lift} gets a second parameter, \p{init}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the initial horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters between the layer functions, and also to the next edit cycle. 
 
 
 \head{Definition of \p{combine}}
@@ -513,12 +505,12 @@ In the \p{main} function, the combined layer is created by lifting the layers to
 
 \begin{small}
 \begin{verbatim}
-main layer1 layer2 layer3 =
- do { (state1, state2, state3) <- initStates
+main layer1 layer2 layer3) =
+ do { (init1, init2, init3) <- initStates
     ; doc <- initDoc 
-    ; let layers = lift layer1 state1 `combine` 
-                   lift layer2 state2 `combine`
-                   lift layer3 state3
+    ; let layers = lift layer1 init1 `combine` 
+                   lift layer2 init2 `combine`
+                   lift layer3 init3
     ; editLoop layers doc
     }
 \end{verbatim}
@@ -1459,6 +1451,8 @@ The motivation for using Haskell to describe editor architectures has come from 
 
 Why this is nicer than an architecture description language. \todo{not finished yet (kind of an understatement)}
 
+The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change and frequent use. An architecture description, on the other hand, will typically be a smallel and rather static entity, because changes to the architecture involve changes to many components of the system. The first association many have with the term ``Architecture Description Language'' is a graphical design environment, in which one can sketch the architecture. Futere work thus incorporates the use of Proxima for bulding such editing environments: the use sees and manipuates a graphical representation, whereas the model is actually a Haskell program. In this research we will build upon work doen already in another context: the manipulation of Bayesean networks \cite{Dazzle}. 
+
 
 
 
@@ -1469,11 +1463,13 @@ Why this is nicer than an architecture description language. \todo{not finished 
 
 The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way, making the data flow within the layer. With a small number of definitions, a layered architecture can be described, clearly showing the data flow between the layers. The combinators have been heap profiled to ensure that no memory leaks are present, and have been used to implement the Proxima prototype as well as a database web-interface system.
 
-Because the architecture description language is embedded in the implementation language, the architecture of a system forms part of the implementation of the system. We do not need to translate the architecture to an implementation, and hence, the implementation is guaranteed to comply with the architecture.
+Because the architecture description language is embedded in the implementation language, the architecture of a system forms part of the implementation of the system. We do not need to translate the architecture to an implementation, and hence, the implementation is guaranteed to comply with the architecture and vice versa.
 
 According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture description language should describe the components of an architecture, the connectors, and the configuration. For the architecture combinators defined in this paper, we can identify these aspects as follows: the layer functions are the components; \p{lift} and \p{combine} are the connectors; and the applications of \p{lift} and \p{combine} determine the configuration.
 
-The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
+The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. For us the expriment to model the structure of the system using Haskell has been a succesful experience, and we hope that this paper will inspire others to pursue the approach for a different classes of architectures.  
+
+Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
 
 
 
