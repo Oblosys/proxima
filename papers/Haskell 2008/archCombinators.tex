@@ -530,11 +530,11 @@ The hidden-parameter model hides the data flow of the horizontal parameters from
 
 In this section, we develop a small library for constructing \p{lift} and \p{combine} combinators for layered architectures having an arbitrary number of layer functions. We refer to these combinators as {\em meta combinators} because they are used to construct combinators.
 
-The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two steps. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made.\todo{hier had je kriebeltjes onder gezet} Therefore, instead of a general instruction on how to write \p{lift} and \p{combine} by hand, it is desirable to have a small library of meta combinators for constucting these combinators. Another advantage of a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use a meta combinator whose name reflects the direction (similar to the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
+The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two {\em step}s. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made.\todo{hier had je kriebeltjes onder gezet; ja, ik vroeg me af of we hier nog iets explicieter moesten zijn.} Therefore, instead of a guideline on how to write \p{lift} and \p{combine} by hand, we prefer a small library of meta combinators for constucting these combinators. A further  advantage ofhaving  a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use the name of the meta combinator to reflect the direction in which the data flows (like with the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
 
 Looking at the definitions of \p{lift} and \p{combine} in the previous section, we see that they both consist of two parts: one for each step in the layer. Both functions define a local function for each of the layer functions in the layer. In both \p{lift} and \p{combine} for the \p{Simple} layer type, these local functions are called \p{presStep} and \p{intrStep}. 
 
-The method we use for the derivation of the meta combinators is to start with the combinators from the previous section and gradually factorize out all step-specific aspects. We end with a combinator that is constructed by using straightforward applications of simple building blocks (or meta combinators). 
+We derive the meta combinatorsby strating with the combinators from the previous section and gradually factoring out all step-specific aspects. We end with a combinator that is constructed out of a collection of simple building blocks (or meta combinators). 
 
 
 
@@ -542,14 +542,31 @@ The method we use for the derivation of the meta combinators is to start with th
 %																
 \subsection{Type definitions} \label{subsecttypedef}
 
-\todo{voor de eerste zin stond weer een kriebellijntje}
-The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this requires a user to provide an instance of this class, as well as complicate the types and introduce problems\todo{kriebellijntje} with the monomorphism restriction. Therefore, we introduce a compositional representation of the layer types that only makes use of types defined in the library.
+\todo{voor de eerste zin stond weer een kriebellijntje; ja, het type Layer heeft maar een constructor, en hier meb je het over "its constructors"; ik heb je oude paragraaf uitgecommentarieerd. Volgens mij bedoel je iets als:}
 
-If we inspect the \p{Layer} type from the Section~\ref{sect:hidden}, we see it is made up of two steps of the form \p{vArg -> (vRes, ...)}. We can capture such a step with the following type:
+
+
+In the \p{Layer} type introduced in the previous section the fact that we are dealing with two steps is explicitly encoded in the type. When dealing with more step-functions in a layer this type will get even more complicated. Since we do not want to ask from the user of the library to write  down such types explicitly, we start out by looking for a way of constructing such complicated types out of types which describe just a single step-function.
+
+
+\bc
+The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this requires a user to provide an instance of this class, as well as complicates the types and introducse problems\todo{kriebellijntje; ja, hier komt nog al wat op de lezer af} with the monomorphism restriction. Therefore, we introduce a compositional representation of the layer types that only makes use of types defined in the library.
+\ec
+
+If we inspect the \p{Layer} type from the Section~\ref{sect:hidden}, we see it is made up of two steps of the form \p{vArg -> (vRes, ...)}. We  capture this in the following type:
 
 \begin{small}
 \begin{verbatim}
 newtype Step a b ns = Step (a -> (b, ns))
+\end{verbatim}
+\end{small}
+
+Using GADT's one might even make the fact that a step functionshould be seen as function by using the following formulation:
+
+\begin{small}
+\begin{verbatim}
+newtype Step :: * -> * -> * where
+  Step :: (a -> (b, ns)) -> Step (a -> b) ns
 \end{verbatim}
 \end{small}
 
@@ -563,13 +580,14 @@ newtype (:.:) f g ns  = Comp (f (g ns))
 \end{verbatim}
 \end{small}
 
-We also define a \p{NilStep} that is the base case for a composition:
+We also define a \p{NilStep} as the starting point for a series of compositions:
 
 \begin{small}
 \begin{verbatim}
 newtype NilStep t = NilStep t
 \end{verbatim}
 \end{small}
+\marginpar{Is het nog een idee om NilStep Loop te noemen?}
 
 Now, for example, we can encode the type \p{Doc -> (Pres, Gest -> (Upd, next))} as
 \p{(Step Doc Pres :.: Step Gest Upd :.: NilStep) next}. To encode the feedback loop, we introduce a fixed-point type \p{Fix}:
@@ -580,7 +598,7 @@ newtype Fix f = Fix (f (Fix f))
 \end{verbatim}
 \end{small}
 
-With these types, we can give a compositional point-free definition for \p{Layer}:
+With these type combinators, we can now express \p{Layer} in a compositional and point-free way:
 
 \begin{small}
 \begin{verbatim}
@@ -589,7 +607,7 @@ type Layer doc pers gest upd =
 \end{verbatim}
 \end{small}
 
-Because \p{Step}, \p{NilStep}, and \p{:.:}  appear partially parameterized in the layer type, and \p{Fix} is recursive, all three types need to be newtypes. Hence, instead of one \p{Layer} constructor, \p{lift} and \p{combine} will be littered with constructors. This is not a problem, however, since the combinators we will derive in the next subsections take care of adding and removing these constructors.
+Because \p{Step}, \p{NilStep}, and \p{:.:}  appear partially parameterized in the layer type, and \p{Fix} is recursive, all three types need to be introduced using \p{newtype} definitions. Hence, instead of having a single \p{Layer} constructor, \p{lift} and \p{combine} will be littered with constructors. This is not a problem, however, since the combinators we will derive in the next subsections take care of adding and removing these constructors.
 
 The reason why we have an explicit \p{NilStep} with yet another constructor is that it causes the number of occurrences (\p{:.:}) to be the same as the number of steps, which will facilitate the removal of \p{Comp} constructors. Furthermore, as we will see in Section~\ref{sect:typeClass}, the \p{NilStep} will also provide a base for recursive instances, preventing overlapping instances.
 
@@ -616,7 +634,7 @@ lift simple state = step1 state
 \end{verbatim}%$
 \end{small}
 
-The definitions of the local functions \p{step1} and \p{step2} contain mutually-recursive references. We eliminate the mutual recursion in the definitions by supplying the next step as a parameter to each function. The \p{lNilStep} no longer needs to be a local function.
+The definitions of the local functions \p{step1} and \p{step2} contain mutually-recursive references, thus hard-coding their position in the sequence of steps. We eliminate this positional information in the definitions by supplying the next step as a parameter to each function. The \p{lNilStep} no longer needs to be a local function.
 
 %first drop state
 %param now step1 gets step2 as param. but step2 has step1. instead of infinite
@@ -646,7 +664,7 @@ lNilStep next hRes = NilStep $ next hRes
 \end{verbatim}%$
 \end{small}
 
-Now, we can capture the \p{Comp} and \p{Step} constructors and the lambda expression with the function \p{liftStep}. Here, it becomes apparent why composition is right associative, since each step has both a\p{Comp} constructor and a \p{Step} constructor. If composition were left-associative, the \p{Comp} constructors would end up between the \p{Fix} and \p{Step} constructors, and it would be harder to capture the pattern.
+Next we  capture the \p{Comp} and \p{Step} constructors and the lambda expression with the function \p{liftStep}. Here, it becomes apparent why composition is right associative, since each step has both a\p{Comp} constructor and a \p{Step} constructor. If composition were left-associative, the \p{Comp} constructors would end up between the \p{Fix} and \p{Step} constructors, and it would be harder to capture the pattern.
 
 \begin{small} % lift2
 \begin{verbatim}
@@ -656,7 +674,7 @@ liftStep f next horArgs = Comp . Step $
 \end{verbatim}%$
 \end{small}
 
-The new \p{lift} reads
+\noindent leading to the new definition of \p{lift}:
 
 \begin{small} % lift2
 \begin{verbatim}
@@ -680,7 +698,7 @@ lift layer = (step1 . step2 . lNilStep) (lift layer)
 \end{verbatim}
 \end{small}
 
-After which we can capture the recursion pattern with the \p{fix} combinator:
+\noindent Capturing the recursion pattern with the \p{fix} combinator:
 
 \begin{small}
 \begin{verbatim}
@@ -689,7 +707,7 @@ fix a = let fixa = a fixa
 \end{verbatim}
 \end{small}
 
-Thus, we get:
+we get our next version of \p{lift}:
 
 \begin{small} % lift4
 \begin{verbatim}
@@ -728,9 +746,10 @@ lift simple = lfix $ liftStep (present simple)
 \end{small}
 
 
+\todo{Dit ziet er in de layout nog een beetje vreemd uit}
 \head{\p{liftStep} works for layers with arbitrary numbers of steps}
 
-For an $n$-step layer, the definition of \p{lift} (using the method from Section~\ref{sect:hidden}) has $n$ local step functions, each one containing a reference to the next. \bc \note{mention that the last one refers to the first?} \ec For such a layer, we can perform exactly the same steps as for the 2-step \p{lift}. The resulting \p{lift} contains a composition of $n$ \p{liftStep} applications. If we denote the step type constructors by \p{Step$_i$} and the layer functions by \p{layerFn$_i$}, we have:
+For an $n$-step layer, the definition of \p{lift} (using the method from Section~\ref{sect:hidden}) has $n$ local step functions, each  containing a reference to the next. \bc \note{mention that the last one refers to the first?} \ec For such a layer, we can perform exactly the same steps as for the 2-step \p{lift}. The resulting \p{lift} contains a composition of $n$ \p{liftStep} applications. If we denote the step type constructors by \p{Step$_i$} and the layer functions by \p{layerFn$_i$}, we get:
 
 \begin{small}
 \begin{tabbing}
@@ -747,7 +766,7 @@ For an $n$-step layer, the definition of \p{lift} (using the method from Section
 \subsection{Derivation for \p{combine}} \label{subsubsectcombine}
 
 
-The derivation of the meta combinators for \p{combine} is largely similar to the derivation for \p{lift}. We again start with the original definition of \p{combine} for a two-step layer, and adapt to the new \p{Layer} type and rename several variables:
+The derivation of the meta combinators for \p{combine} is largely similar to the derivation for \p{lift}. We again start with the original definition of \p{combine} for a two-step layer, adapt it to the new \p{Layer} type and rename several variables:
 
 \begin{small} % combine0
 \begin{verbatim}
@@ -815,7 +834,7 @@ combineStepUp next (Comp (Step upper))
         in  (h, next upperf lowerf)   
 \end{verbatim}%$
 \end{small}
-
+\todo{Geldt ook combineStepUp next f g = combineStepDown (flip next) g f?}
 If we use these two functions, and drop the parameters to \p{step2}, we get:
 
 \begin{small}%combine3
@@ -876,7 +895,7 @@ Similar to \p{liftStep}, \p{combineStepDown} and \p{combineStepUp} do not depend
 
 \head{Simple editor}
 
-The \p{main} function for the simple editor is the same as in Section~\ref{sect:hidden}. Only the \p{editLoop} function has a couple of changes to account for the new constructors. To make the code more symmetrical, we define deconstructor functions \p{unStep :: (Step a r :.: g) t -> a -> (r, (g t))} and \p{unNil} (which is the selector function of \p{NilStep}, when declared as a record.)
+The \p{main} function for the simple editor is the same as in Section~\ref{sect:hidden}. Only the \p{editLoop} function has a couple of changes to account for the new constructors. To make the code more symmetric, we define deconstructor functions \p{unStep :: (Step a r :.: g) t -> a -> (r, (g t))} and \p{unNil} (which is the selector function of \p{NilStep}, when declared as a record.)
 
 \begin{small}
 \begin{verbatim}
@@ -906,7 +925,7 @@ editLoop (Fix presentStep) doc =
 \subsection{Adding a monad}
 
 
-The final modification we make to the library is to add a monad, in order to allow layer functions to perform IO operations. The type \p{LayerFn} is extended with an extra variable \p{m} for the monad.
+The final modification we make to the library is to add a monad, in order to allow layer functions to perform IO operations. The type \p{LayerFn} is extended with an extra type variable \p{m} for the monad.
 
 \begin{small}
 \begin{verbatim}
@@ -932,6 +951,7 @@ newtype (:.:) f g m ns  = Comp (f m (g m ns))
 \end{small}
 
 The \p{NilStep} does not actually use the monad argument, so here it is a phantom type~\cite{leijen99dsecs}.
+\todo{Ik zou de a in het type [a] voor de constrcutor [] geen phanton type noemen, maar gewoon een polymorphic value}
 
 \begin{small}
 \begin{verbatim}
@@ -968,7 +988,7 @@ liftStep f next horArgs = Step $
 \end{verbatim}
 \end{small}%$
 
-The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library. \todo{explain this more?}
+The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library. \todo{explain this more? Nee, lijkt mij niet nodig}
 
 
 
@@ -999,7 +1019,7 @@ data Down
 
 \head{Definition of \p{genericLift}}
 
-A generic version of \p{lift} would take a variable number of layer functions, and return a layer type . The number of layer functions is determined by the number of steps in the result type (which is determined by the context in which it is used.)
+A generic version of \p{lift} would take a variable number of layer functions, and returns a layer type . The number of layer functions is determined by the number of steps in the result type (which is determined by the context in which it is used.)
 
 The structure of a generic version of \p{lift} in a pseudo-Haskell language would read:
 
@@ -1023,7 +1043,7 @@ genericLift = \lf1 .. lfn ->
 \end{small}
 
 % this backslash somehow is not tt
-Now, we can identify another pattern \p{ $\mathtt{\backslash}$a1 an -> f (g (h a1) .. (h an))}. Because of the parentheses around \p{g} and its parameters, we cannot simply compose \p{f} and \p{g}. We assume a function \p{app}, which takes the representation of the steps \p{<n>}, and the two functions \p{f} and \p{g}. For \p{h}, \p{app} uses \p{liftStep}, which is not a parameter. If we take \p{f} to be \p{lfix}, and \p{g} to be \p{compose <n>}, we have a new version of \p{genericLift}:
+Now, we can identify another pattern \p{ $\mathtt{\backslash}$a1 an -> f (g (h a1) .. (h an))}. Because of the parentheses around \p{g} and its arguments, we cannot simply compose \p{f} and \p{g}. We assume a function \p{app}, which takes the representation of the steps \p{<n>}, and the two functions \p{f} and \p{g}. For \p{h}, \p{app} uses \p{liftStep}, which is not a parameter. If we take \p{f} to be \p{lfix}, and \p{g} to be \p{compose <n>}, we have a new version of \p{genericLift}:
 
 \begin{small}
 \begin{verbatim}
@@ -1040,7 +1060,7 @@ genericLift = app (resType genericLift) lfix
 \end{verbatim}%$
 \end{small}
 
-Which leaves us the task of defining the type classes we need for \p{compose}, \p{app}, and \p{resType}.
+Which leaves us the task of defining the type classes  for constructing the right instances for \p{compose}, \p{app}, and \p{resType}.
 
 For the variable-argument composition \p{compose}, we declare a class \p{Comp} with a single method \p{comp}, which takes a composition type, and a neutral element, and returns a composition function that takes as many arguments as the composition type has steps. The function \p{compose} is simply \p{comp} with \p{id} for the neutral element.
 
@@ -1083,7 +1103,7 @@ instance App g (a->b) d e =>
 \end{verbatim}
 \end{small}
 
-The code for \p{liftStep} is the same as in the previous section. Its type is slightly different due to the direction type variable, but since this is a phantom type, it does not show up in the values. 
+The code for \p{liftStep} is the same as in the previous section. Its type differs slightly due to the direction type variable, but since this is a phantom type, it does not show up in the values. 
 
 The last problem we need to tackle is how to obtain the composition type over which \p{compose} and \p{app} recurse. For this we declare a class \p{ResType} with a method \p{resType}, which yields the result type of its function argument. Since the result of \p{genericLift} is always of type \p{Fix ct}, we can define a base instance for \p{Fix ct}, in which \p{restype} returns \p{ct t}, and a recursive instance for \p{a -> f}, in which \p{restype} returns the result type of \p{f}. Since no values are actually computed here, we can give the method a default implementation of \p{undefined}.
 
@@ -1104,7 +1124,7 @@ instance ResType f r => ResType (a -> f) r
 
 \head{Definition of \p{genericCombine}}
 
-The situation for \p{genericCombine} is somewhat simpeler than for \p{genericLift}, since the function does not have a varying number of arguments. However, unlike \p{genericLift}, the step functions in \p{genericCombine}  (i.e.\ \p{combineStepUp} and \p{combineStepDown}) are based on the direction of the step. If we look at \p{genericCombine}, the general structure would be:
+The situation for \p{genericCombine} is somewhat simpler than for \p{genericLift}, since the function does not have a varying number of arguments. However, unlike \p{genericLift}, the step functions in \p{genericCombine}  (i.e.\ \p{combineStepUp} and \p{combineStepDown}) are based on the direction of the step. If we look at \p{genericCombine}, the general structure would be:
 
 \begin{small}
 \begin{verbatim}
@@ -1127,7 +1147,7 @@ genericCombine = cfix (combineC (resType genericCombine))
 \end{verbatim}%$
 \end{small}
 
-The type class looks a bit unfriendly due to the presence of the \p{Step} type, which is necessary because of the dependence on the direcion.
+The type class looks a bit unfriendly due to the presence of the \p{Step} type, which is necessary because of the dependence on the direction.
 
 \begin{small}
 \begin{verbatim}
@@ -1184,12 +1204,12 @@ lift :: Simple state map doc pres gest upd ->
 lift smpl = genericLift (present smpl) (interpret smpl)
 
 main layer1 layer2 layer3 =
- do { (state1, state2, state3) <- initStates
+ do { (init1, init2, init3) <- initStates
     ; doc <- initDoc 
 
-    ; let layers = lift layer1 state1 `genericCombine` 
-                   lift layer2 state2 `genericCombine`
-                   lift layer3 state3
+    ; let layers = lift layer1 init1 `genericCombine` 
+                   lift layer2 init2 `genericCombine`
+                   lift layer3 init3
     ; editLoop layers doc
     }
 \end{verbatim}
@@ -1288,8 +1308,8 @@ In general, the definition of \p{TheLayer} has this form:
 \> {\tt Th}\={\tt eLayer~m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
 \> \> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn~m~}\= {\tt $horArgs_1$ a$_1$}\\
 \> \>                \>                                             \> {\tt $horArgs_2$ r$_1$}\\
-\>\>\> {\tt , LayerFn$_2$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_2$ a$_n$}\\
-\> \>                \>                            \>{\tt $horArgs_3$ r$_n$ \}}\\
+\>\>\> {\tt , LayerFn$_2$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_2$ a$_2$}\\
+\> \>                \>                            \>{\tt $horArgs_3$ r$_2$ \}}\\
 \>\>\> {\tt \dots }\\
 \>\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_{n}$ a$_n$}\\
 \> \>                \>                            \>{\tt $horArgs_1$ r$_n$ \}}\\
@@ -1297,7 +1317,7 @@ In general, the definition of \p{TheLayer} has this form:
 \end{small}
 
 We assume the layer is normalized, which means that $horArgs_{1} = horRess_n$ and 
-$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (see Section~\ref{sect:layerInHaskell}). \p{if map is removed from horizontal args, this reference will be incorrect}
+$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (see Section~\ref{sect:layerInHaskell}). \todo{if map is removed from horizontal args, this reference will be incorrect; wat bedoel je met "reference"?}
 
 \head{Type definitions}
 
@@ -1368,20 +1388,21 @@ On the other hand, for a downward layer function, we have:
 
 The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
 
-The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class that allows us to  \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
+The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class that allows usto  define \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
 
-For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{sect:decompose}). For \p{combine}, the situation is a lot more complicated due to the different data-flow directions in each of the steps. If we encode the data flow in the \p{Step} type (i.e.\ by using types \p{StepUp} and \p{StepDown}), it may be possible to define a type class for \p{combine}. Whether this is the case remains further research. \todo{Het lijkt er alleen op dat ik die klasse bijna gevonden heb, wat het hele paper in de war zou gooien..} However, it is questionable whether this is actually worth the effort. The code for the meta combinators would turn much more complex, whereas the gains of a single \p{lift} and \p{combine} function are not that much, given the fact that they only need to be defined once and will typically remain constant.
-
-
-\bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. However, this means that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
+For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{sect:decompose}). For \p{combine}, the situation is a lot more complicated due to the different data-flow directions in each of the steps. If we encode the data flow in the \p{Step} type (i.e.\ by using types \p{StepUp} and \p{StepDown}), it may be possible to define a type class for \p{combine}. Whether this is the case remains further research. \todo{Het lijkt er alleen op dat ik die klasse bijna gevonden heb, wat het hele paper in de war zou gooien..; Tja, heb je nog door gepuzzled?} However, it is questionable whether this is actually worth the effort. The code for the meta combinators would turn much more complex, whereas the gains of a single \p{lift} and \p{combine} function are not that much, given the fact that they only need to be defined once and will typically remain constant.
 
 
+\bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. This implies that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
 
+
+\todo{?? zie ec bc}
+In the paper we have assumed that once we call a (combined) step function the information flows through all the layers. In a real editor this will not always be the case; if the user adds some extra white-space this might be recorded in the state at one of the intermediate levels, upon which the presentation process can be resumed. We can also envision a situation where information flows up and down a few times between two adjacent layers, until a situation is reached in which a change has to be propagated to yet another layer. Note that we actually only require that the upper protocol of a lower layer corresponds to the lower protocol of its upper layer; the updating of the document and providing the gesture at the bottom layer are examples of simple single-step protocols. We foersee however that we might use the type system to describe much more complicated protocols. An open question, and a matter of debate, is whether this should be done by exploiting the Haskell type system further, or whether one should move to more expressive type systems such as found in Agda \cite{norell:thesis}. Only exprrimenting and comparing solutions can give a definitive answer.
 \bc
-
-%																
-%																
+Ik heb geen tijd gehad om dit te bekijken, maar de abstrcat wijst misschien in onze richting
+http://portal.acm.org/citation.cfm?id=1035167.1035203&coll=ACM&dl=GUIDE&CFID=33547895&CFTOKEN=34186200
+\ec%																																
 %																
 \section{The Proxima editor} \label{sect:proxima}
 
@@ -1471,6 +1492,7 @@ The combinator language in this paper is tailored to a specific kind of architec
 
 Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
 
+\todo{Zie ec bc hieronder}
 
 
 
