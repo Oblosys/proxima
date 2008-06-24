@@ -63,7 +63,7 @@ In this paper we give three implementation models for layered architectures. Fir
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
-The architecture description combinators in this paper were originally designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. An example of this is white space, which is part of the presentation of a program source, but does not fit well in the abstract syntax tree. 
+The architecture description combinators in this paper have been designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. An example of this is white space, which is part of the presentation of a program source, but does not fit well in the abstract syntax tree. 
 
 Because of the complexity of the actual Proxima architecture, we introduce a simple layered architecture for a presentation-oriented editor to explain the architecture description methods in the next sections. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
 
@@ -1400,9 +1400,9 @@ Although type errors become somewhat more complicated because of the overloaded 
 \section{The Proxima editor} \label{sect:proxima}
 
 
-The Proxima editor uses the combinators from Section~\ref{sect:lib} for the description of its architecture. The module that contains the architecture description is an actual part of the implementation of the prototype. 
+The Proxima editor uses the combinators from Figure~\ref{fig:metacombinators}  for the description of its architecture. The module that contains the architecture description is an part of the implementation of the prototype. 
 
-Although the precise data flow of a Proxima layer is beyond the scope of this paper, we do show a general overview in Figure~\ref{proximaDataFlow}. The main difference with the \p{Simple} layer is that instead of mapping one data level onto another, the Proxima layer maps edit operations on a data level onto edit operations on the other level. Hence, each layer must also keep track of the actual data at each level. The edit operations are the deltas in the figure, whereas the data levels are the {\em high} and {\em low} values, which are threaded through the layer and switch between being vertical and horizontal parameters. 
+Although the precise data flow of a Proxima layer is beyond the scope of this paper, we show a general overview in Figure~\ref{proximaDataFlow}. The main difference with a \p{Simple} layer is that instead of mapping one data level onto another, a Proxima layer maps edit operations on a data level onto edit operations on the other level. Hence, each layer must also keep track of the actual data at each level. The edit operations are the deltas in the figure, whereas the data levels are the {\em high} and {\em low} values, which are threaded through the layer and switch between being vertical and horizontal parameters. 
 
 
 \begin{figure}
@@ -1439,7 +1439,7 @@ data Layer m state high low editH editL editH' editL' =
 \end{verbatim}
 \end{small}
 
-The \p{Layer} definition is part of the \p{Architecture} module, which imports the modules that define \p{interpret} and \p{present} for each layer. Except for the fact that \p{present} and \p{interpret} are swapped, the definitions for the layer type as well as for \p{lift} and \p{combine} are the same as in the simple editor. The Proxima main edit loop is also virtually the same, except that it consists of more layers than the simple editor.
+The \p{Layer} definition is part of the \p{Architecture} module, which imports the modules that define \p{interpret} and \p{present} for each layer. The definitions of the layer type as well as \p{lift} and \p{combine} for Proxima are the same as for the simple editor, except for the fact that \p{present} and \p{interpret} are swapped. The Proxima main edit loop is also virtually the same, except that it consists of more layers than the simple editor.
 
 
 \bc
