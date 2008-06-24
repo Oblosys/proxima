@@ -57,10 +57,16 @@ In their survey of architecture description languages (ADLs)~\cite{medvidovic00A
 
 As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. In this paper we develop a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
 
-In this paper we give five implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used as a basis in Section~\ref{sect:ncp} as a base to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. The combinators from this section require a two minimal function definitions when instantiated for a specific architecture. In Section~\ref{sect:typeClass}, we exploit the type system to automatically provide these definitions, based solely on the types of the layer interfaces. Section~\ref{sect:proxima} shows how the architecture combinators are used to describe (and implement) the architecture of the Proxima editor. And, finally, Section~\ref{sect:conclusions} discusses future work and concludes.
+In this paper we give five implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used as a basis in Section~\ref{sect:ncp} as a base to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. The combinators from this section require two minimal function definitions for instantiating a specific architecture. In Section~\ref{sect:typeClass}, we exploit the type system to automatically provide these definitions, based solely on the types of the layer interface. Section~\ref{sect:proxima} shows how the architecture combinators are used to describe (and implement) the architecture of the Proxima editor. And, finally, Section~\ref{sect:conclusions} discusses future work and concludes.
+			
+			
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
+\todo{introduce proxima}
+for proxima
+generic presentation-oriented editor for structured docs.
+proxima supports editing on the document structure but also on its presentation. Has a layered arch, in which layers sometimes have state that does not belong on other levels
 
 We introduce a simple layered architecture for a presentation-oriented editor, which is used in the next sections to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
 
@@ -142,7 +148,7 @@ data Simple state map doc pres gest upd =
 \end{verbatim}
 \end{small}
 
-\todo{eerst twee stappen, maar later meer}
+Although a \p{Simple} layer consists of two layer functions, the final combinator library presented in this paper abstracts over this number and can be used for layers with arbitrary numbers of layer functions.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{images/NormalizedLayer}
@@ -527,16 +533,16 @@ We derive the meta combinatorsby strating with the combinators from the previous
 %																
 \subsection{Type definitions} \label{subsecttypedef}
 
-\todo{voor de eerste zin stond weer een kriebellijntje; ja, het type Layer heeft maar een constructor, en hier meb je het over "its constructors"; ik heb je oude paragraaf uitgecommentarieerd. Volgens mij bedoel je iets als:}
+\bc
+oude todo{voor de eerste zin stond weer een kriebellijntje; ja, het type Layer heeft maar een constructor, en hier meb je het over "its constructors"; ik heb je oude paragraaf uitgecommentarieerd. Volgens mij bedoel je iets als:}
 
 
 
 In the \p{Layer} type introduced in the previous section, the fact that we are dealing with two steps is explicitly encoded in the type. When dealing with more step-functions in a layer this type will get even more complicated. Since we do not want to ask from the user of the library to write  down such types explicitly, we start out by looking for a way of constructing such complicated types out of types which describe just a single step-function.
-
-
-\bc
-The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this requires a user to provide an instance of this class, as well as complicates the types and introducse problems\todo{kriebellijntje; ja, hier komt nog al wat op de lezer af} with the monomorphism restriction. Therefore, we introduce a compositional representation of the layer types that only makes use of types defined in the library.
 \ec
+
+
+The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this complicates the types and requires a user to provide an instance of this class. Therefore, we introduce a compositional representation of a layer type that makes use of simple types defined in the library.
 
 If we inspect the \p{Layer} type from the Section~\ref{sect:hidden}, we see it is made up of two steps of the form \p{vArg -> (vRes, ...)}. We  capture this in the following type:
 
@@ -1374,8 +1380,7 @@ The code for \p{editLoop} is the same as in Section~\ref{sect:lib}.
 
 The monadic version of the generic combinators is a straightforward extension, but has even more daunting types, so we will not present it here. 
 
-Although type errors become somewhat more complicated because of the overloaded types, the type class solution turns out to be quite useful. The monadic version has been succesfully used to describe (and implement) the Proxima generic editor.
-
+Although type errors become somewhat more complicated because of the overloaded types, the type class solution turns out to be quite useful. The monadic version has been succesfully tested in the Proxima generic editor.
 
 
 
@@ -1384,12 +1389,7 @@ Although type errors become somewhat more complicated because of the overloaded 
 \section{The Proxima editor} \label{sect:proxima}
 
 
-A prototype of the Proxima editor has been implemented using a monadic version of the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
-
-
-\head{The Proxima architecture}
-
-The main difference between a Proxima layer and a \p{Simple} layer is that in Proxima, the data levels are part of the horizontal data flow. The vertical data flow consists of edit operations. Furthermore, the first step in a Proxima layer is \p{interpret} instead of \p{present}.
+The Proxima editor uses the combinators from Section~\ref{sect:lib} for the description of its architecture. The module that contains the architecture description is an actual part of the implementation of the prototype.
 
 
 \begin{figure}
@@ -1399,19 +1399,21 @@ The main difference between a Proxima layer and a \p{Simple} layer is that in Pr
 
 
 Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. 
+\todo{algemene beschrijving van data flow}
+
+\bc
+The main difference between a Proxima layer and a \p{Simple} layer is that in Proxima, the data levels are part of the horizontal data flow. The vertical data flow consists of edit operations. Furthermore, the first step in a Proxima layer is \p{interpret} instead of \p{present}.
 
 Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, \p{interpret} gets both levels and a $state$ argument (which is explained below). The result of \p{interpret} is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, \p{interpret} returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of \p{present} is symmetrical.
 
 The figure also shows how the higher level is updated by \p{interpret} of layer above, before coming back down as $high'$. Similarly, \p{present} of the layer below updates $low'$ to $low''$. 
 
-
-
 The $state$ parameter represents the local state for a layer. It should not be confused with extra state, which is part of the level. Local layer state is information that is needed by a layer, but belongs to the layer rather than to one of the adjacent levels. An example is a reference to a font metrics table in the arrangement layer.
 
 At the top of the combined layers, the document and edit operation resulting from interpretation are passed back as arguments to the presentation step. And at the bottom, an edit gesture from the user must be put into the combined layers combination, and an updated rendering is be shown to the user. 
- 
+\ec
 
-The data flow in the figure is encoded in the type definition for a Proxima layer. We denote the monad type constructor by \p{m} and the level types by \p{high} and \p{low}. For the edit operations (the $\delta$'s), we have distinct types for edit operations going up  (\p{editH} and \p{editL}) and edit operations going down (\p{editH'} and \p{editL'}). The reason for this distinction is that upward edit operations are often of a different nature than the downward ones.
+The data flow in the figure is encoded in the type definition for a Proxima layer. We denote the monad type constructor by \p{m} and the level types by \p{high} and \p{low}. For the edit operations (the $\delta$'s), we have distinct types for edit operations going up  (\p{editH} and \p{editL}) and edit operations going down (\p{editH'} and \p{editL'}). The reason for this distinction is that upward edit operations are often of a different nature than the downward ones. The code below is actual Proxima source code:
 
 \begin{small}
 \begin{verbatim}
@@ -1426,7 +1428,8 @@ data Layer m state high low editH editL editH' editL' =
 \end{verbatim}
 \end{small}
 
-Apart from the switched directions in \p{combine} and the fact that the monadic library is used, the definitions for the Proxima architecture are virtually the same as for \p{Simple}. Because of the similarity, we do not reproduce the entire architecture description here.
+one module that imports all modules
+Apart from the switched directions in \p{combine}, the definitions for the Proxima architecture are virtually the same as for \p{Simple}. Because of the similarity, we do not reproduce the entire architecture description here.
 
 
 
@@ -1470,9 +1473,9 @@ Because the architecture description language is embedded in the implementation 
 
 According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture description language should describe the components of an architecture, the connectors, and the configuration. For the architecture combinators defined in this paper, we can identify these aspects as follows: the layer functions are the components; \p{lift} and \p{combine} are the connectors; and the applications of \p{lift} and \p{combine} determine the configuration.
 
-The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. For us the expriment to model the structure of the system using Haskell has been a succesful experience, and we hope that this paper will inspire others to pursue the approach for a different classes of architectures.  
+In the paper we have assumed that once we call a (combined) step function the information flows through all the layers. In a real editor this will not always be the case; if the user adds some extra white-space this might be recorded in the state at one of the intermediate levels, upon which the presentation process can be resumed. We can also envision a situation where information flows up and down a few times between two adjacent layers, until a situation is reached in which a change has to be propagated to yet another layer. Note that we actually only require that the upper protocol of a lower layer corresponds to the lower protocol of its upper layer; the updating of the document and providing the gesture at the bottom layer are examples of simple single-step protocols. We foresee however that we might use the type system to describe much more complicated protocols. An open question, and a matter of debate, is whether this should be done by exploiting the Haskell type system further, or whether one should move to more expressive type systems such as found in Agda \cite{norell:thesis}. Only experimenting and comparing solutions can give a definitive answer. Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
 
-In the paper we have assumed that once we call a (combined) step function the information flows through all the layers. In a real editor this will not always be the case; if the user adds some extra white-space this might be recorded in the state at one of the intermediate levels, upon which the presentation process can be resumed. We can also envision a situation where information flows up and down a few times between two adjacent layers, until a situation is reached in which a change has to be propagated to yet another layer. Note that we actually only require that the upper protocol of a lower layer corresponds to the lower protocol of its upper layer; the updating of the document and providing the gesture at the bottom layer are examples of simple single-step protocols. We foersee however that we might use the type system to describe much more complicated protocols. An open question, and a matter of debate, is whether this should be done by exploiting the Haskell type system further, or whether one should move to more expressive type systems such as found in Agda \cite{norell:thesis}. Only experimenting and comparing solutions can give a definitive answer. Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
+The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. For us the experiment to model the structure of the system using Haskell has been a succesful experience, and we hope that this paper will inspire others to pursue the approach for a different classes of architectures.  
 
 \bc
 Ik heb geen tijd gehad om dit te bekijken, maar de abstrcat wijst misschien in onze richting
