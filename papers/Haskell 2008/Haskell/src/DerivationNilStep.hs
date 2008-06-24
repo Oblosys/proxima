@@ -171,12 +171,15 @@ combineStepUp :: (f x -> g y -> h ns) ->
                  (Step b c :.: f) x ->
                  (Step a b :.: g) y ->
                  (Step a c :.: h) ns
+combineStepUp next f g = combineStepDown (flip next) g f
+
+{-
 combineStepUp next (Comp (Step upper)) 
                    (Comp (Step lower)) = Comp . Step $ 
   \l -> let (m, lowerf) = lower l
             (h, upperf) = upper m
         in  (h, next upperf lowerf)   
-
+-}
 combine3 upr lwr = fix (step1 . step2 . cNilStep) upr lwr
  where step1 next (Fix upr) (Fix lwr) = 
          Fix $ combineStepDown next upr lwr
