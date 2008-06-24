@@ -63,8 +63,7 @@ In this paper we give three implementation models for layered architectures. Fir
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
-\todo{introduce proxima}
-The architecture description combinators in this paper were originally designed for the generic presentation-oriented structure editor Proxima. proxima supports editing on the document structure but also on its presentation. Has a layered arch, in which layers sometimes have state that does not belong on other levels
+The architecture description combinators in this paper were originally designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. An example of this is white space, which is part of the presentation of a program source, but does not fit well in the abstract syntax tree. 
 
 Because of the complexity of the actual Proxima architecture, we introduce a simple layered architecture for a presentation-oriented editor to explain the architecture description methods in the next sections. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
 
