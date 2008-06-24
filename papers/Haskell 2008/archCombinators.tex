@@ -38,26 +38,18 @@ system, the implementation is guaranteed to comply with the architecture, and th
 Domain-specific languages, Architecture
 
 \keywords
-keyword1, keyword2 \todo{specify keywords}
-
+Haskell, Layered architectures, Architecture descriptions, Type-level programming
 
 
 \bc
-Puntjes
-
-doc/pres/gest/upd or high/low/ehigh/elow?
-
-
-Order of hor and vert is not ideal.  
 f hor vert = (vert, hor) is most logical, but looks strange
 f vert hor = (vert, hor) looks better but doesn't make it logical to parameterize f with its hor arg
 f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert is more logical on the left
-
 \ec
 
 \section{Introduction}\label{sect:introduction}
 
-In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of layered architectures. The combinators have been successfully used in the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system providing web-interfaces to databases. \todo{was voor de scriptie van Jurre Laven}. 
+In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of layered architectures. The combinators have been successfully used in the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system providing web-interfaces to databases. 
 
 Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are to be composed, but also enables us to smoothly extend this high-level description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
@@ -249,8 +241,6 @@ We only use left-associatively nested products in this section:
 We first define two combinators for composing layer functions: a downward combinator \p{composeDown} (for \p{present}) and a upward combinator \p{composeUp} (for \p{interpret}). A downward vertical parameter passes through the higher layer first, whereas an upward vertical parameter passes through the lower layer first. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
 
 The combinator \p{composeDown} composes two layers \p{higher} and \p{lower} by feeding the intermediate vertical result of \p{h} into \p{l}. At the same time, the horizontal parameters for \p{higher} and \p{lower} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \p{higher} and \p{lower}. 
-
-\newpage
 
 %code from NCP.hs
 \begin{small}
@@ -988,7 +978,7 @@ liftStep f next horArgs = Step $
 \end{verbatim}
 \end{small}%$
 
-The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library. \todo{explain this more? Nee, lijkt mij niet nodig}
+The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library.
 
 
 
@@ -1388,21 +1378,12 @@ On the other hand, for a downward layer function, we have:
 
 The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
 
-The fact that we still need to write some code by hand leads to the question whether it is possible to define a type class that allows usto  define \p{lift} and \p{combine} as its member functions. With such a type class, and a layer type that contains an encoding of the direction of the vertical data flow, we would no longer need to explicitly define the combinators.
-
-For \p{lift}, this type class can be defined, although it does require the explicit base case \p{TNil} for type composition (see Section~\ref{sect:decompose}). For \p{combine}, the situation is a lot more complicated due to the different data-flow directions in each of the steps. If we encode the data flow in the \p{Step} type (i.e.\ by using types \p{StepUp} and \p{StepDown}), it may be possible to define a type class for \p{combine}. Whether this is the case remains further research. \todo{Het lijkt er alleen op dat ik die klasse bijna gevonden heb, wat het hele paper in de war zou gooien..; Tja, heb je nog door gepuzzled?} However, it is questionable whether this is actually worth the effort. The code for the meta combinators would turn much more complex, whereas the gains of a single \p{lift} and \p{combine} function are not that much, given the fact that they only need to be defined once and will typically remain constant.
 
 
 \bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. This implies that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
 
-
-\todo{?? zie ec bc}
-In the paper we have assumed that once we call a (combined) step function the information flows through all the layers. In a real editor this will not always be the case; if the user adds some extra white-space this might be recorded in the state at one of the intermediate levels, upon which the presentation process can be resumed. We can also envision a situation where information flows up and down a few times between two adjacent layers, until a situation is reached in which a change has to be propagated to yet another layer. Note that we actually only require that the upper protocol of a lower layer corresponds to the lower protocol of its upper layer; the updating of the document and providing the gesture at the bottom layer are examples of simple single-step protocols. We foersee however that we might use the type system to describe much more complicated protocols. An open question, and a matter of debate, is whether this should be done by exploiting the Haskell type system further, or whether one should move to more expressive type systems such as found in Agda \cite{norell:thesis}. Only exprrimenting and comparing solutions can give a definitive answer.
-\bc
-Ik heb geen tijd gehad om dit te bekijken, maar de abstrcat wijst misschien in onze richting
-http://portal.acm.org/citation.cfm?id=1035167.1035203&coll=ACM&dl=GUIDE&CFID=33547895&CFTOKEN=34186200
-\ec%																																
+							
 %																
 \section{The Proxima editor} \label{sect:proxima}
 
@@ -1417,13 +1398,17 @@ The main difference between a Proxima layer and a \p{Simple} layer is that in Pr
 
 In Section~\ref{sect:archProximaLayers}, we explained that a layer function updates its source level. Thus, each intermediate level can be updated by two different layers: on interpretation by the layer below, and on presentation by the layer below. Thus, a data level cannot stay exclusively in one layer, but has to alternate between two layers.
 
-bc
+\begin{figure}
+\includegraphics[width=\columnwidth]{images/LayerDataFlow}
+\caption{Data flow in a Proxima layer.} \label{proximaDataFlow}
+\end{figure}
 
-Figure  shows the data flow for a single Proxima layer. Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, $\interpret$ gets both levels and a $state$ argument (which is explained below). The result of $\interpret$ is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, $\interpret$ returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of $\present$ is symmetrical.
 
-The figure also shows how the higher level is updated by $\interpret$ of layer above, before coming back down as $high'$. Similarly, $\present$ of the layer below updates $low'$ to $low''$. 
+Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, \p{interpret} gets both levels and a $state$ argument (which is explained below). The result of \p{interpret} is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, \p{interpret} returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of \p{present} is symmetrical.
 
-ec
+The figure also shows how the higher level is updated by \p{interpret} of layer above, before coming back down as $high'$. Similarly, \p{present} of the layer below updates $low'$ to $low''$. 
+
+
 
 The $state$ parameter represents the local state for a layer. It should not be confused with extra state, which is part of the level. Local layer state is information that is needed by a layer, but belongs to the layer rather than to one of the adjacent levels. An example is a reference to a font metrics table in the arrangement layer.
 
@@ -1435,17 +1420,20 @@ The data flow in the figure is encoded in the type definition for a Proxima laye
 \begin{small}
 \begin{verbatim}
 data Layer m state high low editH editL editH' editL' =
-       Layer { interpret :: LayerFn m (state, high) (low, editL)
-                                            (state, low) (high, editH)
-              , present ::   LayerFn m (state, low) (high, editH')
-                                            (state, high) (low, editL')
-              }
+       Layer { interpret ::
+                 LayerFn m (state, high) (low, editL)
+                           (state, low) (high, editH)
+             , present ::
+                 LayerFn m (state, low) (high, editH')
+                           (state, high) (low, editL')
+             }
 \end{verbatim}
 \end{small}
 
+\todo{we do use the  monadic lib here}
 Apart from the switched directions in \p{combine} and the fact that the monadic library is used, the definitions for the Proxima architecture are virtually the same as for \p{Simple}. Moreover, the monad only affects the step type definitions and the type of the \p{lift} and \p{combine} combinators; the definitions of the combinators themselves are of the form that is described in Section~\ref{sect:libAndConclusions}. Because of the similarity, we do not reproduce the entire architecture description here.
 
-\ec
+
 
 \bc
 \bigskip
@@ -1472,7 +1460,7 @@ The motivation for using Haskell to describe editor architectures has come from 
 
 Why this is nicer than an architecture description language. \todo{not finished yet (kind of an understatement)}
 
-The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change and frequent use. An architecture description, on the other hand, will typically be a smallel and rather static entity, because changes to the architecture involve changes to many components of the system. The first association many have with the term ``Architecture Description Language'' is a graphical design environment, in which one can sketch the architecture. Futere work thus incorporates the use of Proxima for bulding such editing environments: the use sees and manipuates a graphical representation, whereas the model is actually a Haskell program. In this research we will build upon work doen already in another context: the manipulation of Bayesean networks \cite{Dazzle}. 
+The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change and frequent use. An architecture description, on the other hand, will typically be a smallel and rather static entity, because changes to the architecture involve changes to many components of the system. The first association many have with the term ``Architecture Description Language'' is a graphical design environment, in which one can sketch the architecture. Futere work thus incorporates the use of Proxima for bulding such editing environments: the use sees and manipuates a graphical representation, whereas the model is actually a Haskell program. In this research we will build upon work doen already in another context: the manipulation of Bayesean networks \cite{schrage05Dazzle}. 
 
 
 
@@ -1490,9 +1478,13 @@ According to Medvidovic and Taylor~\cite{medvidovic00ADLs}, an architecture desc
 
 The combinator language in this paper is tailored to a specific kind of architectures: those of layered editors. Although we use the term editor in a broad sense, also including spreadsheets, e-mail agents, etc., further research should explore the possibilities of using Haskell to describe other kinds of architectures. For us the expriment to model the structure of the system using Haskell has been a succesful experience, and we hope that this paper will inspire others to pursue the approach for a different classes of architectures.  
 
-Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
+In the paper we have assumed that once we call a (combined) step function the information flows through all the layers. In a real editor this will not always be the case; if the user adds some extra white-space this might be recorded in the state at one of the intermediate levels, upon which the presentation process can be resumed. We can also envision a situation where information flows up and down a few times between two adjacent layers, until a situation is reached in which a change has to be propagated to yet another layer. Note that we actually only require that the upper protocol of a lower layer corresponds to the lower protocol of its upper layer; the updating of the document and providing the gesture at the bottom layer are examples of simple single-step protocols. We foersee however that we might use the type system to describe much more complicated protocols. An open question, and a matter of debate, is whether this should be done by exploiting the Haskell type system further, or whether one should move to more expressive type systems such as found in Agda \cite{norell:thesis}. Only experimenting and comparing solutions can give a definitive answer. Another area of research concerns how dynamic aspects of the architecture, such as invariants and constraints on the data, can be described and, if possible, verified.
 
-\todo{Zie ec bc hieronder}
+\bc
+Ik heb geen tijd gehad om dit te bekijken, maar de abstrcat wijst misschien in onze richting
+http://portal.acm.org/citation.cfm?id=1035167.1035203&coll=ACM&dl=GUIDE&CFID=33547895&CFTOKEN=34186200
+\ec%																									
+
 
 
 
