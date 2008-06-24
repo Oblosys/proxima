@@ -53,18 +53,11 @@ In this paper we develop a set of Haskell combinators for describing architectur
 
 Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are to be composed, but also enables us to smoothly extend this high-level description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
 
-In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Haskell offers possibilies for describing the main components of an architecture, while incorporating  these components as part of the program itself. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components. \todo{maybe mention that we do a kind of generic programming with the type classes?}
+In their survey of architecture description languages (ADLs)~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate ADL's from, amongst others, programming languages. However, Haskell offers possibilies for describing the main components of an architecture, while incorporating  these components as part of the program itself. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
 
+As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. In this paper we develop a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
 
-As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. \todo{also mention Hughes?} Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. In this paper we develop a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
-
-
-
-
-In this paper we give four implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used in Section~\ref{sect:ncp} as a basis to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. 
-\bc
-Finally, in Section~\ref{sect:proxima}, we show how the architecture combinators are used to describe (and implement) the architecture of  the Proxima editor.%Section~\ref{sect:haskellconclusions} presents the conclusions.
-\ec
+In this paper we give five implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used as a basis in Section~\ref{sect:ncp} as a base to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. The combinators from this section require a two minimal function definitions when instantiated for a specific architecture. In Section~\ref{sect:typeClass}, we exploit the type system to automatically provide these definitions, based solely on the types of the layer interfaces. Section~\ref{sect:proxima} shows how the architecture combinators are used to describe (and implement) the architecture of the Proxima editor. And, finally, Section~\ref{sect:conclusions} discusses future work and concludes.
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
@@ -149,6 +142,8 @@ data Simple state map doc pres gest upd =
 \end{verbatim}
 \end{small}
 
+\todo{eerst twee stappen, maar later meer}
+
 \begin{figure}
 \includegraphics[width=\columnwidth]{images/NormalizedLayer}
 \caption{Data flow in a normalized layer.}\label{wrapped} 
@@ -159,7 +154,7 @@ data Simple state map doc pres gest upd =
 
 Now that the layers have been modeled, we need to realize the vertical data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write down the selection and application of each of the functions in each of the layers. This will be the first approach, followed by gradually more abstract approaches in sections~\ref{sect:ncp} to \ref{sect:lib}.
 
-We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. Note that we might look at the code below as a textual representation of this picture, and that vice versa we might compute such a picture out of the code. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent in the code with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The Haskell code for the edit loop is: \todo{misschien nog niet helemaal duidelijk dat die functies niet in de figuur te zien zijn}
+We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. Note that we might look at the code below as a textual representation of this picture, and that vice versa we might compute such a picture out of the code. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent in the code with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The Haskell code for the edit loop is:
 
 
 \begin{figure}
@@ -520,7 +515,7 @@ The hidden-parameter model hides the data flow of the horizontal parameters from
 
 In this section, we develop a small library for constructing \p{lift} and \p{combine} combinators for layered architectures having an arbitrary number of layer functions. We refer to these combinators as {\em meta combinators} because they are used to construct combinators.
 
-The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two {\em step}s. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made.\todo{hier had je kriebeltjes onder gezet; ja, ik vroeg me af of we hier nog iets explicieter moesten zijn.} Therefore, instead of a guideline on how to write \p{lift} and \p{combine} by hand, we prefer a small library of meta combinators for constucting these combinators. A further  advantage ofhaving  a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use the name of the meta combinator to reflect the direction in which the data flows (like with the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
+The \p{lift} and \p{combine} combinators from the previous section are just one case of a layered architecture: a layer with two layer functions and hence two {\em step}s. Even though the combinators are straightforward, some code is duplicated, and small errors are easily made. Therefore, instead of a guideline on how to write \p{lift} and \p{combine} by hand, we prefer a small library of meta combinators for constucting these combinators. A further  advantage ofhaving  a meta-combinator library is that instead of explicitly encoding the direction for each of the steps in the \p{combine} function, we can use the name of the meta combinator to reflect the direction in which the data flows (like with the \text{composeUp$/$Down} functions from the nested pairs method in Section~\ref{sect:ncp}).
 
 Looking at the definitions of \p{lift} and \p{combine} in the previous section, we see that they both consist of two parts: one for each step in the layer. Both functions define a local function for each of the layer functions in the layer. In both \p{lift} and \p{combine} for the \p{Simple} layer type, these local functions are called \p{presStep} and \p{intrStep}. 
 
@@ -536,7 +531,7 @@ We derive the meta combinatorsby strating with the combinators from the previous
 
 
 
-In the \p{Layer} type introduced in the previous section the fact that we are dealing with two steps is explicitly encoded in the type. When dealing with more step-functions in a layer this type will get even more complicated. Since we do not want to ask from the user of the library to write  down such types explicitly, we start out by looking for a way of constructing such complicated types out of types which describe just a single step-function.
+In the \p{Layer} type introduced in the previous section, the fact that we are dealing with two steps is explicitly encoded in the type. When dealing with more step-functions in a layer this type will get even more complicated. Since we do not want to ask from the user of the library to write  down such types explicitly, we start out by looking for a way of constructing such complicated types out of types which describe just a single step-function.
 
 
 \bc
@@ -736,8 +731,7 @@ lift simple = lfix $ liftStep (present simple)
 \end{small}
 
 
-\todo{Dit ziet er in de layout nog een beetje vreemd uit}
-\head{\p{liftStep} works for layers with arbitrary numbers of steps}
+\head{\p{liftStep} works for an arbitrary number of steps}
 
 For an $n$-step layer, the definition of \p{lift} (using the method from Section~\ref{sect:hidden}) has $n$ local step functions, each  containing a reference to the next. \bc \note{mention that the last one refers to the first?} \ec For such a layer, we can perform exactly the same steps as for the 2-step \p{lift}. The resulting \p{lift} contains a composition of $n$ \p{liftStep} applications. If we denote the step type constructors by \p{Step$_i$} and the layer functions by \p{layerFn$_i$}, we get:
 
@@ -824,7 +818,8 @@ combineStepUp next (Comp (Step upper))
         in  (h, next upperf lowerf)   
 \end{verbatim}%$
 \end{small}
-\todo{Geldt ook combineStepUp next f g = combineStepDown (flip next) g f?}
+
+%Geldt ook combineStepUp next f g = combineStepDown (flip next) g f?
 If we use these two functions, and drop the parameters to \p{step2}, we get:
 
 \begin{small}%combine3
@@ -940,8 +935,7 @@ newtype (:.:) f g m ns  = Comp (f m (g m ns))
 \end{verbatim}
 \end{small}
 
-The \p{NilStep} does not actually use the monad argument, so here it is a phantom type~\cite{leijen99dsecs}.
-\todo{Ik zou de a in het type [a] voor de constrcutor [] geen phanton type noemen, maar gewoon een polymorphic value}
+The \p{NilStep} does not actually use the monad argument:
 
 \begin{small}
 \begin{verbatim}
@@ -981,14 +975,185 @@ liftStep f next horArgs = Step $
 The functions \p{lfix}, \p{lcomp}, \p{cfix}, and \p{ccomp} are independent of the monad and are the same for both versions of the library.
 
 
+%																
+\subsection{Final Library and conclusions} \label{sect:libAndConclusions}
+
+%from DPPMonad_Lib.hs
+\begin{figure}
+\begin{small}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+fix :: (a->a) -> a
+fix a = let fixa = a fixa
+        in  fixa
+
+type LayerFn m horArgs vertArg horRess vertRes =
+       horArgs -> vertArg -> m (vertRes, horRess)
+
+
+newtype FixM m f = Fix (f m)
+
+infixr :.:
+
+newtype (:.:) f g m ns  = Comp (f m (g m ns))
+
+newtype NilStep m t = NilStep t
+
+newtype Step a b m ns = Step (a -> m (b, ns))
+
+unStep (Comp (Step step)) = step
+unNil (NilStep step) = step
+
+
+lfix f = fix f' where f' n = Fix . (f . lNilStep) n
+
+lNilStep next hRes = NilStep $ next hRes
+
+liftStep f next horArgs = Comp . Step $ 
+  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
+              ; return (vertRes, next horRes)
+              }
+              
+
+cfix f = fix f' 
+ where f' n (Fix u) (Fix l) = Fix $ (f . cNilStep) n u l
+
+cNilStep next (NilStep u) (NilStep l) = 
+  NilStep $ next u l
+
+combineStepDown next (Comp (Step upper)) 
+                     (Comp (Step lower)) = Comp . Step $
+  \h -> do { (m ,upperf) <- upper h
+           ; (l, lowerf) <- lower m
+           ; return (l, next upperf lowerf)   
+           }
+
+combineStepUp next (Comp (Step upper)) 
+                   (Comp (Step lower)) = Comp . Step $
+  \l -> do { (m, lowerf) <- lower l
+           ; (h, upperf) <- upper m
+           ; return (h, next upperf lowerf)
+           }
+\end{verbatim} %$
+\end{footnotesize}\caption{Final meta-combinator library}\label{fig:metacombinators} 
+\end{center}
+\end{small}
+\end{figure}
+
+Figure~\ref{fig:metacombinators} contains the final monadic library. In order to describe and implement an architecture, we need to provide a \p{Layer} type, and definitions of \p{lift} and \p{combine}. We give a general description of these definitions.
+
+
+\head{General use} 
+
+
+The general case that we consider is a layer with $n$ layer functions. The record type \p{TheLayer m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$} contains the layer functions. The variable \p{m} is the monad, variables \p{h$_i$} are the types that appear in the horizontal parameters of the layer, and the \p{a$_i$} and \p{r$_i$} are the types of the vertical arguments and results. 
+
+Because the types of the horizontal pararameters are not necessarily single \p{h$_i$} variables, but tuples of these variables, we denote the horizontal parameters by $horArgs_i$ and $horRess_i$. As an example, consider the type \p{Simple}. Its horizontal  type variables are \p{map} and \p{state}, but the types of the horizontal parameters are \p{state} and \p{(map, state)}. 
+
+In general, the definition of \p{TheLayer} has this form:
+
+\begin{small}
+\begin{tabbing}
+{\tt da}\={\tt ta}\\
+\> {\tt Th}\={\tt eLayer~m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
+\> \> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn~m~}\= {\tt $horArgs_1$ a$_1$}\\
+\> \>                \>                                             \> {\tt $horArgs_2$ r$_1$}\\
+\>\>\> {\tt , LayerFn$_2$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_2$ a$_2$}\\
+\> \>                \>                            \>{\tt $horArgs_3$ r$_2$ \}}\\
+\>\>\> {\tt \dots }\\
+\>\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_{n}$ a$_n$}\\
+\> \>                \>                            \>{\tt $horArgs_1$ r$_n$ \}}\\
+\end{tabbing}
+\end{small}
+
+We assume the layer is normalized, which means that $horArgs_{1} = horRess_n$ and 
+$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (see Section~\ref{sect:layerInHaskell}). 
+
+\head{Type definitions}
+
+For a layer record as defined above, the type definition for the \p{Layer} type used by the combinators is:
+
+\begin{small}
+\begin{tabbing}
+{\tt ty}\={\tt pe Layer m a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ =}\\
+        \>{\tt FixM m (Step a$_1$ r$_1$ :.: a$_2$ r$_2$ :.: \dots ~:.: Step a$_n$ r$_n$)}\\
+\end{tabbing}
+\end{small}
+
+
+\head{Definition of \p{lift} and \p{combine}} 
+
+The definitions of \p{lift} and \p{combine} are straightforward. For \p{lift}, we need to apply \p{liftStep} to each of the layer functions, compose the steps with \p{lcomp}, and apply \p{lfix} to the composition. 
+
+\begin{small}
+\begin{tabbing}
+{\tt lift}\verb| :: |\={\tt Monad m =>}\\
+                     \>{\tt TheLayer m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ ->}\\
+                     \>{\tt Layer m a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
+{\tt li}\={\tt ft t}\={\tt heLayer = }\\
+\>{\tt lfix \$ liftStep (LayerFn$_1$ theLayer)}\\
+\>\verb|     . lift|{\tt Step (LayerFn$_2$ theLayer)}\\
+\>{\tt ~~~~~\dots}\\ 
+\>\verb|     . lift|{\tt Step (LayerFn$_n$ theLayer)}
+\end{tabbing}
+\end{small}%$
+
+
+The \p{combine} combinator consists of $n$ \p{combineStepUp$/$Down} meta combinators, composed with \p{ccomp}, after which \p{cfix} is applied. The direction of the vertical data flow determines the choice between \p{combineStepUp} and \p{combineStepDown} for each step.  The exact type of \p{combine} depends on the direction of the meta combinators and is explained below. 
+
+\begin{small}
+\begin{tabbing}
+{\tt combine}\verb| :: |\={\tt Monad m =>}\\
+                        \>{\tt Layer m \dots}\verb| -> |{\tt Layer m \dots}\verb| -> |{\tt Layer m \dots }\\
+{\tt co}\={\tt mbine}\={\tt ~= }\\
+\>{\tt cfix \$ combineStepUp$/$Down}\\
+\>{\tt ~~~~~\dots}\\ 
+\>\verb|     . combine|{\tt StepUp$/$Down}\\
+\end{tabbing}%$
+\end{small}
+
+The type of \p{combine} depends on the direction of the vertical data flow in the layer. Consider the $i$-th pair of  type variables in \p{Layer a$_1$ r$_1$ \dots~a$_n$ r$_n$}. Variable \p{a$_i$} represents the vertical argument of layer function $i$, and \p{r$_i$} the vertical result. If step $i$ is an upward step, the variables at this position in the \p{Layer} types are related as follows in the type signature for \p{combine}:
+
+\begin{small}
+\begin{tabbing}
+{\tt  combine :: }\={\tt Monad m =>}\\
+                  \>{\tt Layer \dots~md h \dots}\verb| -> |{\tt Layer \dots~l~md \dots} \verb| ->|\\
+                  \>{\tt Layer \dots~l h \dots}\\
+\end{tabbing}
+\end{small}
+
+On the other hand, for a downward layer function, we have:
+
+\begin{small}
+\begin{tabbing}
+{\tt  combine :: }\={\tt Monad m =>}\\
+                  \>{\tt Layer \dots~h md \dots}\verb| -> |{\tt Layer \dots~md l \dots} \verb| ->|\\
+                  \>{\tt Layer \dots~h l \dots}
+\end{tabbing}
+\end{small}
+
+
+\subsection{Conclusions} 
+
+The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
+
+
+
+
+
+
+
+
 
 %																
 %																
 %																
-\subsection{Type-class magic} \label{sect:typeClass}
-\todo{misschien anders noemen?}
+\section{Type-class magic} \label{sect:typeClass}
 
-The definitions of \p{lift} and \p{combine} are almost uniquely determined by the layer type. This leads to the question whether we can use type classes to construct generic versions of these functions. Indeed, this turns out to be possible if we extend the \p{Step} type with a phantom-type variable to encode the direction of the step. 
+The definitions of \p{lift} and \p{combine} that have to be provided manually for each specific architecture are almost uniquely determined by the layer type, which leads to the question whether we can use type classes to construct generic versions of these functions. Indeed, this turns out to be possible if we encode the direction of each step in its type. In this section, we present the type classes and instances that do the job. For clarity, we use the non-monadic combinators from Section~\ref{sect:lib} as a base.
+
+To encode the direction of a step, we extend the \p{Step} type with a phantom-type variable~\cite{leijen99dsecs}.
 
 \begin{small}
 \begin{verbatim}
@@ -996,7 +1161,7 @@ newtype Step dir a b ns = Step (a -> (b, ns))
 \end{verbatim}
 \end{small}
 
-For encoding the direction, we introduce two constructorless types:
+Two constructorless types encode the direction.
 
 \begin{small}
 \begin{verbatim}
@@ -1212,182 +1377,12 @@ The monadic version of the generic combinators is a straightforward extension, b
 Although type errors become somewhat more complicated because of the overloaded types, the type class solution turns out to be quite useful. The monadic version has been succesfully used to describe (and implement) the Proxima generic editor.
 
 
-%																
-\subsection{Final Library and conclusions} \label{sect:libAndConclusions}
-
-%from DPPMonad_Lib.hs
-\begin{figure}
-\begin{small}
-\begin{center}
-\begin{footnotesize}
-\begin{verbatim}
-fix :: (a->a) -> a
-fix a = let fixa = a fixa
-        in  fixa
-
-type LayerFn m horArgs vertArg horRess vertRes =
-       horArgs -> vertArg -> m (vertRes, horRess)
-
-
-newtype FixM m f = Fix (f m)
-
-infixr :.:
-
-newtype (:.:) f g m ns  = Comp (f m (g m ns))
-
-newtype NilStep m t = NilStep t
-
-newtype Step a b m ns = Step (a -> m (b, ns))
-
-unStep (Comp (Step step)) = step
-unNil (NilStep step) = step
-
-
-lfix f = fix f' where f' n = Fix . (f . lNilStep) n
-
-lNilStep next hRes = NilStep $ next hRes
-
-liftStep f next horArgs = Comp . Step $ 
-  \vArg -> do { (vertRes, horRes) <- f horArgs vArg
-              ; return (vertRes, next horRes)
-              }
-              
-
-cfix f = fix f' 
- where f' n (Fix u) (Fix l) = Fix $ (f . cNilStep) n u l
-
-cNilStep next (NilStep u) (NilStep l) = 
-  NilStep $ next u l
-
-combineStepDown next (Comp (Step upper)) 
-                     (Comp (Step lower)) = Comp . Step $
-  \h -> do { (m ,upperf) <- upper h
-           ; (l, lowerf) <- lower m
-           ; return (l, next upperf lowerf)   
-           }
-
-combineStepUp next (Comp (Step upper)) 
-                   (Comp (Step lower)) = Comp . Step $
-  \l -> do { (m, lowerf) <- lower l
-           ; (h, upperf) <- upper m
-           ; return (h, next upperf lowerf)
-           }
-\end{verbatim} %$
-\end{footnotesize}\caption{Final meta-combinator library}\label{fig:metacombinators} 
-\end{center}
-\end{small}
-\end{figure}
-
-Figure~\ref{fig:metacombinators} contains the final monadic library. In order to describe and implement an architecture, we need to provide a \p{Layer} type, and definitions of \p{lift} and \p{combine}. We give a general description of these definitions.
-
-
-\head{General use} \todo{mag  naar voren verschoven worden}
-% we can define it without args or sig if -fno-mono..
-% however when using combine, things go wrong.
-
-
-The general case that we consider is a layer with $n$ layer functions. The record type \p{TheLayer m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$} contains the layer functions. The variable \p{m} is the monad, variables \p{h$_i$} are the types that appear in the horizontal parameters of the layer, and the \p{a$_i$} and \p{r$_i$} are the types of the vertical arguments and results. 
-
-Because the types of the horizontal pararameters are not necessarily single \p{h$_i$} variables, but tuples of these variables, we denote the horizontal parameters by $horArgs_i$ and $horRess_i$. As an example, consider the type \p{Simple}. Its horizontal  type variables are \p{map} and \p{state}, but the types of the horizontal parameters are \p{state} and \p{(map, state)}. 
-
-In general, the definition of \p{TheLayer} has this form:
-
-\begin{small}
-\begin{tabbing}
-{\tt da}\={\tt ta}\\
-\> {\tt Th}\={\tt eLayer~m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ = }\\
-\> \> {\tt TheLayer~}\={\tt \{~LayerFn$_1$}\verb| :: |{\tt LayerFn~m~}\= {\tt $horArgs_1$ a$_1$}\\
-\> \>                \>                                             \> {\tt $horArgs_2$ r$_1$}\\
-\>\>\> {\tt , LayerFn$_2$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_2$ a$_2$}\\
-\> \>                \>                            \>{\tt $horArgs_3$ r$_2$ \}}\\
-\>\>\> {\tt \dots }\\
-\>\>\> {\tt , LayerFn$_n$}\verb| :: |{\tt LayerFn~m~}\={\tt $horArgs_{n}$ a$_n$}\\
-\> \>                \>                            \>{\tt $horArgs_1$ r$_n$ \}}\\
-\end{tabbing}
-\end{small}
-
-We assume the layer is normalized, which means that $horArgs_{1} = horRess_n$ and 
-$horArgs_{i+1} = horRess_i$. If the layer is not normalized, a simple wrapper function can be defined to convert the layer to a normalized layer (see Section~\ref{sect:layerInHaskell}). \todo{if map is removed from horizontal args, this reference will be incorrect; wat bedoel je met "reference"?}
-
-\head{Type definitions}
-
-For a layer record as defined above,\todo{check if text above is moved upwards} the type definition for the \p{Layer} type used by the combinators is:
-
-\begin{small}
-\begin{tabbing}
-{\tt ty}\={\tt pe Layer m a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$ =}\\
-        \>{\tt FixM m (Step a$_1$ r$_1$ :.: a$_2$ r$_2$ :.: \dots ~:.: Step a$_n$ r$_n$)}\\
-\end{tabbing}
-\end{small}
-
-
-\head{Definition of \p{lift} and \p{combine}} 
-
-The definitions of \p{lift} and \p{combine} are straightforward. For \p{lift}, we need to apply \p{liftStep} to each of the layer functions, compose the steps with \p{lcomp}, and apply \p{lfix} to the composition. 
-
-\begin{small}
-\begin{tabbing}
-{\tt lift}\verb| :: |\={\tt Monad m =>}\\
-                     \>{\tt TheLayer m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ \dots ~a$_n$ r$_n$ ->}\\
-                     \>{\tt Layer m a$_1$ r$_1$ \dots ~a$_n$ r$_n$}\\
-{\tt li}\={\tt ft t}\={\tt heLayer = }\\
-\>{\tt lfix \$ liftStep (LayerFn$_1$ theLayer)}\\
-\>\verb|     . lift|{\tt Step (LayerFn$_2$ theLayer)}\\
-\>{\tt ~~~~~\dots}\\ 
-\>\verb|     . lift|{\tt Step (LayerFn$_n$ theLayer)}
-\end{tabbing}
-\end{small}%$
-
-
-The \p{combine} combinator consists of $n$ \p{combineStepUp$/$Down} meta combinators, composed with \p{ccomp}, after which \p{cfix} is applied. The direction of the vertical data flow determines the choice between \p{combineStepUp} and \p{combineStepDown} for each step.  The exact type of \p{combine} depends on the direction of the meta combinators and is explained below. 
-
-\begin{small}
-\begin{tabbing}
-{\tt combine}\verb| :: |\={\tt Monad m =>}\\
-                        \>{\tt Layer m \dots}\verb| -> |{\tt Layer m \dots}\verb| -> |{\tt Layer m \dots }\\
-{\tt co}\={\tt mbine}\={\tt ~= }\\
-\>{\tt cfix \$ combineStepUp$/$Down}\\
-\>{\tt ~~~~~\dots}\\ 
-\>\verb|     . combine|{\tt StepUp$/$Down}\\
-\end{tabbing}%$
-\end{small}
-
-The type of \p{combine} depends on the direction of the vertical data flow in the layer. Consider the $i$-th pair of  type variables in \p{Layer a$_1$ r$_1$ \dots~a$_n$ r$_n$}. Variable \p{a$_i$} represents the vertical argument of layer function $i$, and \p{r$_i$} the vertical result. If step $i$ is an upward step, the variables at this position in the \p{Layer} types are related as follows in the type signature for \p{combine}:
-
-\begin{small}
-\begin{tabbing}
-{\tt  combine :: }\={\tt Monad m =>}\\
-                  \>{\tt Layer \dots~md h \dots}\verb| -> |{\tt Layer \dots~l~md \dots} \verb| ->|\\
-                  \>{\tt Layer \dots~l h \dots}\\
-\end{tabbing}
-\end{small}
-
-On the other hand, for a downward layer function, we have:
-
-\begin{small}
-\begin{tabbing}
-{\tt  combine :: }\={\tt Monad m =>}\\
-                  \>{\tt Layer \dots~h md \dots}\verb| -> |{\tt Layer \dots~md l \dots} \verb| ->|\\
-                  \>{\tt Layer \dots~h l \dots}
-\end{tabbing}
-\end{small}
-
-\todo{show final editor code again? (only very small difference because of monad) Code is in DPPMonad\_Lib.hs}
-
-\subsection{Conclusions} 
-
-The meta combinator library has the advantages of the hidden-parameter solution from Section~\ref{sect:hidden}, but at the same time, it is much easier to describe a specific architecture. The use of meta combinators makes the data flow clearer and reduces the chance of errors in the specification. For a specific architecture, we only need to define a \p{Layer} type, and give simple definitions of \p{lift} and \p{combine}.
-
-
-
-\bc Although it is possible to define the type class, it turns out to be not very useful. The generic combinator takes an argument of a certain step type and contains a recursive call to itself on the next step type. Because of this recursive call, a type constraint on the step, for example that it is an instance of \p{Wrap}, must also hold for the next step. But since the recursive call generates a constraint for its next step too, the constraint must also hold for the step after the next step, and so on. As a result, in the type of the combinator we have to explicitly give the type constraints on each of the step types. This implies that the type of the combinator depends on the number of steps, and we do not want to encode the number of steps in the library. Therefore, we will use the simpler approach of constructing \p{lift} and \p{combine} explicitly. \ec
 
 
 							
 %																
 \section{The Proxima editor} \label{sect:proxima}
 
-%\todo{Check code in this section:  Swapped parameters, higher/upper , translate/interpret}
 
 A prototype of the Proxima editor has been implemented using a monadic version of the architecture combinators of the previous section. The module that contains the architecture description is an actual part of the implementation of the prototype.
 
@@ -1396,7 +1391,6 @@ A prototype of the Proxima editor has been implemented using a monadic version o
 
 The main difference between a Proxima layer and a \p{Simple} layer is that in Proxima, the data levels are part of the horizontal data flow. The vertical data flow consists of edit operations. Furthermore, the first step in a Proxima layer is \p{interpret} instead of \p{present}.
 
-In Section~\ref{sect:archProximaLayers}, we explained that a layer function updates its source level. Thus, each intermediate level can be updated by two different layers: on interpretation by the layer below, and on presentation by the layer below. Thus, a data level cannot stay exclusively in one layer, but has to alternate between two layers.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{images/LayerDataFlow}
@@ -1404,7 +1398,9 @@ In Section~\ref{sect:archProximaLayers}, we explained that a layer function upda
 \end{figure}
 
 
-Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, \p{interpret} gets both levels and a $state$ argument (which is explained below). The result of \p{interpret} is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, \p{interpret} returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of \p{present} is symmetrical.
+Figure~\ref{proximaDataFlow} shows the data flow for a single Proxima layer. 
+
+Note that the identifiers represent values, and not type variables. The dotted arrows outside the layer sketch the data flow of the higher and lower levels in the adjacent layers. Besides the lower-level edit operation $\delta_{Low}$, \p{interpret} gets both levels and a $state$ argument (which is explained below). The result of \p{interpret} is the higher level edit operation $\delta_{High}$, and a new $state'$. Moreover, \p{interpret} returns $low'$, which is the result of applying $\delta_{Low}$ to $Low$. The behavior of \p{present} is symmetrical.
 
 The figure also shows how the higher level is updated by \p{interpret} of layer above, before coming back down as $high'$. Similarly, \p{present} of the layer below updates $low'$ to $low''$. 
 
@@ -1430,8 +1426,7 @@ data Layer m state high low editH editL editH' editL' =
 \end{verbatim}
 \end{small}
 
-\todo{we do use the  monadic lib here}
-Apart from the switched directions in \p{combine} and the fact that the monadic library is used, the definitions for the Proxima architecture are virtually the same as for \p{Simple}. Moreover, the monad only affects the step type definitions and the type of the \p{lift} and \p{combine} combinators; the definitions of the combinators themselves are of the form that is described in Section~\ref{sect:libAndConclusions}. Because of the similarity, we do not reproduce the entire architecture description here.
+Apart from the switched directions in \p{combine} and the fact that the monadic library is used, the definitions for the Proxima architecture are virtually the same as for \p{Simple}. Because of the similarity, we do not reproduce the entire architecture description here.
 
 
 
@@ -1452,23 +1447,22 @@ The motivation for using Haskell to describe editor architectures has come from 
 \ec
 
 
-
+\bc
 %																
 %																
 %																
 \section{Related work} \label{sect:relatedWork}
 
-Why this is nicer than an architecture description language. \todo{not finished yet (kind of an understatement)}
 
-The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change and frequent use. An architecture description, on the other hand, will typically be a smallel and rather static entity, because changes to the architecture involve changes to many components of the system. The first association many have with the term ``Architecture Description Language'' is a graphical design environment, in which one can sketch the architecture. Futere work thus incorporates the use of Proxima for bulding such editing environments: the use sees and manipuates a graphical representation, whereas the model is actually a Haskell program. In this research we will build upon work doen already in another context: the manipulation of Bayesean networks \cite{schrage05Dazzle}. 
-
+The requirements for a DSEL for describing architectures are slightly different from the requirements for more familiar applications of DSELs, such as parsers, pretty printers, etc. The latter are used to write programs that contain many applications of the combinators and that are usually subject to frequent change and frequent use. An architecture description, on the other hand, will typically be a small and rather static entity, because changes to the architecture involve changes to many components of the system. The first association many have with the term ``Architecture Description Language'' is a graphical design environment, in which one can sketch the architecture. Futere work thus incorporates the use of Proxima for bulding such editing environments: the use sees and manipuates a graphical representation, whereas the model is actually a Haskell program. In this research we will build upon work done already in another context: the manipulation of Bayesian networks \cite{schrage05Dazzle}. 
+\ec
 
 
 
 %																
 %																
 %																
-\section{Conclusions} \label{sect:conclusions}
+\section{Conclusions and future work} \label{sect:conclusions}
 
 The combinators presented in this paper make it possible to specify layered editor architectures in a concise and transparent way, making the data flow within the layer. With a small number of definitions, a layered architecture can be described, clearly showing the data flow between the layers. The combinators have been heap profiled to ensure that no memory leaks are present, and have been used to implement the Proxima prototype as well as a database web-interface system.
 
