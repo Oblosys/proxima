@@ -10,7 +10,7 @@
 \copyrightdata{[to be supplied]} 
 
 \titlebanner{Draft, to be submitted to Haskell Symposium '08}        % These are ignored unless
-\preprintfooter{\version}   % 'preprint' option specified.
+\preprintfooter{}   % 'preprint' option specified.
 
 \title{Haskell as an Architecture Description Language}
 %\subtitle{}
@@ -195,6 +195,7 @@ editLoop (layer1, layer2, layer3) states doc =
 \end{small}
 
 The following function \p{main} calls \p{editLoop} with the correct parameters.
+\newpage
 
 %code from Explicit.hs
 \begin{small}
@@ -720,12 +721,17 @@ lift simple = fix (step1 . step2 . lNilStep)
 \end{small}%$
 
 
-Regardless the number of steps, there will only be one \p{Fix} constructor (in contrast to the number of \p{Comp} and \p{Step} constructors, which are equal to the number of steps). Hence, we can define a function \p{lfix} to add this constructor. The function \p{lfix} also composes the \p{lNilStep} to the steps. 
+Regardless the number of steps, there will only be one \p{Fix} constructor (in contrast to the number of \p{Comp} and \p{Step} constructors, which are equal to the number of steps). Hence, we can define a function \p{lfix} to add this constructor. The function \p{lfix} also composes the \p{lNilStep} with the steps. 
 
 \begin{small}% lift5
 \begin{verbatim}
 lfix f = fix f' where f' n = Fix . (f . lNilStep) n
+\end{verbatim}
+\end{small}
 
+
+\begin{small}% lift5
+\begin{verbatim}
 lift simple = lfix (step1 . step2)
  where step1 next hArg = 
          liftStep (present simple) next hArg
