@@ -160,7 +160,7 @@ A data level in Proxima is not simply an intermediate value in the presentation 
 
 \o{\bf Presentation:} A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line breaking).
 
-\o{\bf Layout:} A presentation with explicit white space that does not contain tokens.
+\o{\bf Layout:} A presentation with explicit white space, which does not contain tokens.
 
 \o{\bf Arrangement:} A formatted layout with absolute size and position information.
 
@@ -368,7 +368,7 @@ Tokens are represented by the type \p{Token}, of which a simplified version is s
 % Position is not shown ID has enough information
 % Location
 
-A {\bf\p{SequentialTk}} represents a sequential layout. The field \p{Parser userToken} is the parser that is used to parse the list of child tokens. This list contains no further \p{SequentialTk} tokens; tokens from all sequential descendents are collected and placed in the same list. On the other hand, a {\bf \p{StructuralTk}} represents a structural layout and has a list of tokens for each of its child layouts. Finally, a {\bf \p{UserTk}} represents a string token, and an {\bf \p{ErrorTk}} is used to represent lexical errors. % Section~\ref{sect:parseScanErrors} explains its use.
+A {\bf\p{SequentialTk}} represents a sequential layout. The \p{Parser userToken} field is the parser that is used to parse the list of child tokens. This list contains no further \p{SequentialTk} tokens; tokens from all sequential descendents are collected and placed in the same list. On the other hand, a {\bf \p{StructuralTk}} represents a structural layout and has a list of tokens for each of its child layouts. Finally, a {\bf \p{UserTk}} represents a string token, and an {\bf \p{ErrorTk}} is used to represent lexical errors. % Section~\ref{sect:parseScanErrors} explains its use.
 %\todo{userTk also has Location, not shown here} \\
 %\todo{Presentation arg has been removed, structurals are assumed not to have parse errors}
 
@@ -550,9 +550,10 @@ Lexical errors require a special treatment. When Alex encounters a lexical error
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Most structure editors can be categorized as either syntax-directed (deriving a presentation from the document structure) or syntax-recognizing (deriving the structure from the presentation). Syntax directed editors, such as the Synthesizer Generator~\cite{reps84synGen}, LRC~\cite{saraiva00lrc}, SbyS~\cite{magnusson90orm}, and Redwood~\cite{westphal04redwood} allow graphical presentations, but do not provide a parser for editing mixed presentations. On the other hand, syntax recognizing editors, such as Pan~\cite{ballance92pan} and Harmonia~\cite{boshernitsan01harmonia} support presentation-oriented editing, but do not allow mixed graphical presentations.
 
-Examples of systems that do support editing (and parsing) of mixed presentations are editors for mathematical formulas, such as Amaya~\cite{amaya08}, MathSPad~\cite{verhoeven00mathspad} and the commercial system Mathematica. However, these systems work for a fixed document type, and are not easily extensible. Somewhat more general, Eisenberg and Kiczales describe a presentation extension formalism~\cite{eisenberg07presExtension} for Eclipse, but their solution is targeted at extending Java only.
+We can distinguish two main classes of structure editors: {\em syntax-directed} editors (which derive a presentation from the document structure), and {\em syntax-recognizing} editors (which derive the structure from the presentation). Syntax directed editors, such as the Synthesizer Generator~\cite{reps84synGen}, LRC~\cite{saraiva00lrc}, SbyS~\cite{magnusson90orm}, and Redwood~\cite{westphal04redwood} allow graphical presentations, but do not provide a parser for editing mixed presentations. On the other hand, syntax recognizing editors, such as Pan~\cite{ballance92pan} and Harmonia~\cite{boshernitsan01harmonia} support presentation-oriented editing, but do not allow mixed graphical presentations.
+
+The mathematical editors Amaya~\cite{amaya08}, MathSPad~\cite{verhoeven00mathspad}, and the commercial system Mathematica are examples of systems that do offer support for editing (and parsing) mixed presentations. However, these systems work for a fixed document type, and are not easily extensible. Somewhat more general, Eisenberg and Kiczales describe a presentation extension formalism~\cite{eisenberg07presExtension} for Eclipse, but their solution is targeted at extending Java only.
 
 The Barista framework~\cite{KoMyers06Barista} has similarities to Proxima, although it is targeted mainly at code editors. The system allows graphical presentations for program structures, but these are expanded to the underlying textual presentation when edited. Although this is good to have as optional behavior, it is in many cases unnecessary.
 
