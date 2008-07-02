@@ -41,11 +41,8 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
   , "presentationSheet enrichedDoc document focusD whitespaceMap pIdC = "
   , "  let (Syn_EnrichedDoc _ pIdC' pres _ self _ whitespaceMap' _) = "
-  -- , "  let (Syn_EnrichedDoc pIdC' pres self whitespaceMap') = "
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document Map.empty focusD pIdC [] [] whitespaceMap initLayout)"
-  -- , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc document focusD pIdC [] whitespaceMap)"
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc undefined document Map.empty focusD pIdC [] emptyTokenStreamT whitespaceMap initLayout)"
   , "  in  (whitespaceMap', pIdC', pres, self)"
-  -- , "  in  (whitespaceMap', pIdC', pres)"
   , ""
   , "{- "
   , "A type error here means that extra attributes were declared on EnrichedDoc"
@@ -61,7 +58,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap)"
   , "modifiedTree enrichedDoc = "
   , "  let (Syn_EnrichedDoc _ _pIdC' _pres _ self _tokStr' _whitespaceMap' whitespaceMap2') ="
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc HoleDocument Map.empty (PathD []) 0 [] [] initLayout initLayout) -- Map.empty) "
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc undefined HoleDocument Map.empty (PathD []) 0 [] emptyTokenStreamT initLayout initLayout)"
   , "   in (self, whitespaceMap2')"
   , "}" 
   ]
@@ -84,11 +81,11 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
  ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : {[Located Lexer.Token]} | ]" -- Phi
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT | ]" -- Phi
   -- , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
-  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WhitespaceMap, [Located Lexer.Token])} ]" -- Phi
+  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WhitespaceMap, TokenStreamT)} ]" -- Phi
   -- , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
