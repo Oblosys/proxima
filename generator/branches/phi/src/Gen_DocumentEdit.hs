@@ -112,7 +112,7 @@ genEditableDecl decls (Decl (LHSBasicType typeName) prods) =
              --, concat $ replicate (length fields) " hole"
              , concat $ map (\x -> if isDeclaredOrPrimType decls $ fieldType x 
                                    then " hole"
-                                   else " (error \"docedit\")"
+                                   else " (error \"Editable " ++ fieldName x ++ "\")"
                             ) fields
              ]
         genArity prod@(Prod _ cnstrName idpFields fields) = 

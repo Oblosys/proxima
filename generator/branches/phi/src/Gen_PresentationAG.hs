@@ -158,9 +158,9 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
                                       {-then-} (l++ " + @loc.noIdps") : ls -- Phi: [IDP]
                                       -- then (l++ " + " ++ show (length idpFields)) : ls
 --                                      else ls
-             pres' = [ "(loc.pres, loc.idps, lhs.whitespaceMapCreated, lhs.tokStr, loc.noIdps)"
-                     , "  = let (pres, idps, wsMap, tokStr) = @loc.pres'"
-                     , "     in (addErr @lhs.errLocs @lhs.tokStr tokStr pres, idps, wsMap, tokStr, length idps)"
+             pres' = [ "__ADMINISTRATE" --(loc.pres, loc.idps, lhs.whitespaceMapCreated, lhs.tokStr, loc.noIdps)"
+                     --, "  = let (pres, idps, wsMap, tokStr) = @loc.pres'"
+                     -- , "     in (addErr @lhs.errLocs @lhs.tokStr tokStr pres, idps, wsMap, tokStr, length idps)"
                      ]
          in {- if not $ null pIdCs 
             then "  | %1 " <~ [cnstrName] : pIdCs
