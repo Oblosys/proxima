@@ -40,3 +40,4 @@ data ScannedToken doc node clip token =
 showScannedTokens scannedTokens = "Scanned tokens:\n" ++ concat [ "  " ++ show st ++ "\n" | st <- scannedTokens ]
    
 data FocusMark = FocusMark | NoFocusMark deriving (Eq, Show)
+

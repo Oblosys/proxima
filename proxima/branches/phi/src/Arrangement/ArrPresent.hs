@@ -34,3 +34,4 @@ arrange state layLvl arrLvl@(ArrangementLevel oldArrangement _ _) (SetLay' (Layo
     ; return (SetArr' (ArrangementLevel arrangement' (focusAFromFocusP focus' arrangement' pres') pres'), state', LayoutLevel pres' focus' dt)
     }
 arrange state layLvl arrLvl (WrapLay' wrapped) = return (unwrap wrapped, state, layLvl)
+

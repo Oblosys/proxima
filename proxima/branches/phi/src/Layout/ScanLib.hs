@@ -63,4 +63,3 @@ collectWhitespace tokenPos scs =
       , tokenPos
       )
 
-                         
