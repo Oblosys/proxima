@@ -62,7 +62,7 @@ externalTypeSynonyms = ["Kind","PostTcType"] -- ["CLabelString","DeprecTxt","Rul
 --------------- SHOWS -----------------------
 
 -- for GHC
-definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState"]
+definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState","RdrName","HsWrapper","Type","Name"]
 
 genShows tpes = genBanner "Show instances" $
   concatMap genShowTpe tpes
@@ -116,9 +116,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeNm) prods) =
 genSemListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
-  , "      loc.pres = row @elts.press"
-  , "      loc.pres' = undefined"
-  , "      loc.noIdps = undefined"
+  , "      loc.pres' = (row @elts.press, [], @elts.whitespaceMapCreated, @elts.tokStr)"
   ] <~ [typeName]
 
 

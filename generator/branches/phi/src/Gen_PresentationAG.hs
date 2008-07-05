@@ -97,10 +97,13 @@ genAttr decls = genBanner "Attr declarations" $
   , ""
   ] ++ if null listTypeNames then [] else
   [ "ATTR %5" -- all lists and conslists
-  , "     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
+  , "     [ || press : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
   , "ATTR %6"  -- all conslists
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
+  , ""
+  , "ATTR %7"  -- all lists, no conslists
+  , "     [ | | idps : {[IDP]} ]"
   , ""
   ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
         , separateBy " " $ getAllDeclaredTypeNames (addListDecls decls)
@@ -108,6 +111,7 @@ genAttr decls = genBanner "Attr declarations" $
         , separateBy " " $ getAllDeclaredTypeNames (removeEnrichedDocDecl (addListDecls decls))
         , separateBy " " $ listNames ++ consListNames
         , separateBy " " $ consListNames
+        , separateBy " " $ listNames
         ]
  where listTypeNames = map typeName $ getAllUsedListTypes decls
        listNames = map ("List_"++) listTypeNames
@@ -186,18 +190,21 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "                      @elts.press"
   , "                      -- parent is reponsible for setting parsing/structural"
 -- gerbo TODO: fix that 100, make it @loc.noIdps
-  , "      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def."
+  , "      elts.pIdC = @lhs.pIdC + @loc.noIdps" -- was + 100
   , "      lhs.pIdC = @elts.pIdC"
   , "      elts.path = @lhs.path"
   , "      elts.ix = 0"
+  , "      __ADMINISTRATE_LIST"
   , "  | HoleList_%1"
   , "      lhs.press = []"
   , "      loc.noIdps = 0"
   , "      loc.pres' = error \"loc.pres' in List%1\""
+  , "      lhs.idps = []"
   , "  | ParseErrList_%1"
   , "      lhs.press = []"
   , "      loc.noIdps = 0"
   , "      loc.pres' = error \"loc.pres' in List%1\""
+  , "      lhs.idps = []"
   , "  | List_%1"
   , "      lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
   , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
@@ -217,9 +224,9 @@ genSemConsListDecl (Decl (LHSConsListType typeName) _) =
   , "      head.path  = @lhs.path++[@lhs.ix]"
   , "      tail.path = @lhs.path"
   , "      lhs.press = @head.pres : @tail.press"
-  , "      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def."
-  , "      tail.pIdC = @head.pIdC"
-  , "      lhs.pIdC = @tail.pIdC"
+  -- , "      head.pIdC = @lhs.pIdC" -- + loc.noIdps" -- was + 30
+  -- , "      tail.pIdC = @head.pIdC"
+  -- , "      lhs.pIdC = @tail.pIdC" -- copyrules
   , "      tail.ix  = @lhs.ix + 1"
   , "  | Nil_%1      lhs.press = []"
   , ""
