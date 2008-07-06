@@ -62,7 +62,7 @@ externalTypeSynonyms = ["Kind","PostTcType"] -- ["CLabelString","DeprecTxt","Rul
 --------------- SHOWS -----------------------
 
 -- for GHC
-definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState","RdrName","HsWrapper","Type","Name"]
+definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState","RdrName","HsWrapper","Type","Name", "Range","Names", "Fixity"]
 
 genShows tpes = genBanner "Show instances" $
   concatMap genShowTpe tpes
