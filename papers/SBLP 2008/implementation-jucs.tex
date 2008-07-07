@@ -31,7 +31,7 @@ This paper explains the scanning and parsing process for presentations that are 
 \section{Introduction}\label{sect:introduction}
 
 % what is Proxima
-The generic structure editor Proxima~\cite{schrage04Proxima} is suitable for a wide range of structured document types. Its key feature is the modeless combination of structural editing and presentation editing. Figure~\ref{fig:heliumEditor} is a screenshot of Proxima at work, showing an editor for the functional programming language Helium~\cite{heeren03helium}. The editor shows inferred type signatures and provides a list with type information for the identifiers in scope. Note that various graphical presentations of code fragments are supported, as shown in the declaration of \p{f}.
+The generic structure editor Proxima~\cite{schrage04Proxima} is suitable for a wide range of structured document types. Its key feature is the modeless combination of structural editing and presentation editing. Figure~\ref{fig:heliumEditor} is a screenshot of Proxima at work, showing an editor for the functional programming language Helium~\cite{heeren03helium}. The editor shows inferred type signatures and provides a list with type information for the identifiers in scope. Note that various graphical presentations of code fragments are supported, as shown in the declaration.
 
 
 \begin{figure}[ht]
@@ -137,6 +137,7 @@ The paper is organized as follows. We start by providing a brief overview of Pro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The core architecture of Proxima consists of a number of layers, each communicating with its direct neighbors. The layered structure is based on the staged nature of the {\em presentation} process and its inverse, the {\em interpretation} process. The positions at which the document, the rendering, and the intermediate data structures reside are called {\em levels}. Between each pair of levels we have a {\em layer} that maintains the mappings between its adjacent levels. Each layer consists of a presentation component and an interpretation component and may be parameterized by a {\em sheet}. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. From a document type definition, a code generator generates a number of Haskell modules, which are compiled together with the sheets and the Proxima base modules to yield an editor. 
+\enlargethispage{\baselineskip}
 
 \begin{figure}[ht]
 \centering
@@ -162,7 +163,6 @@ A data level in Proxima is not simply an intermediate value in the presentation 
 \o{\bf Rendering:} A bitmap of the arrangement.
 \el
 
-\pagebreak
 
 \bc
 We briefly discuss each of the five layers.
@@ -296,7 +296,7 @@ The \p{colR} combinator takes an argument that denotes which of its children pro
 
 \subsection{Document presentation}
 
-For the presentation of the document, as well as for the computation of derived values and structures, Proxima uses the attribute grammar formalism. The presentation sheet is a file with an attribute grammar definition, which is compiled to a Haskell program by the Utrecht University AG compiler~\cite{swierstra08ag}.
+For the presentation of the document, as well as for the computation of derived values and structures, Proxima uses the attribute grammar formalism. The presentation sheet is a file with an attribute grammar definition, which is compiled to Haskell by the Utrecht University AG compiler~\cite{swierstra08ag}.
 
 For each type of node in the document, the presentation sheet defines a synthesized attribute \p{pres} of type \p{Xprez}. The definition of \p{pres} may refer to presentations of children of the document node. Besides the presentation, any number of attributes can be defined on the document tree. In this way we can easily add static checks or compute all variables in scope at some document location. Moreover, functions from external Haskell modules may be called, allowing for more complex computations, such as type checking.
 
@@ -491,11 +491,11 @@ The \p{pToken} parser is a primitive parser that succeeds on its argument \p{Use
 
 Note that we do not restore the presentation identity of the \p{SequentialTk} value itself in the \p{Exp} parser. The reason is that this is only necessary if the parser accepts an empty list of tokens. This is not true for the expression parser, so when only white space is present, a parse error is returned, which takes care of handling the white space. For a top-level parser that does accept an empty token list (e.g.\ a parser for a list of declarations), a special combinator is available that provides the parser with the presentation identity of the \p{SequentialTk} value.
 
-Although Proxima currently uses the UU Parsing library, this connection is not fixed. In fact, any  parser library that is parameterized with its input token type is suitable. Hence, a binding with, for example, the Parsec library~\cite{leijen08parsec} is also possible. The only thing that needs to be done in order to use a different library is to define a primitive parser \p{pStructural} and a combinator that applies a top-level parser and returns an error value in case of a parse error.
+Although Proxima currently uses the UU Parsing library, this connection is not fixed. In fact, any  parser library that is parameterized with its input token type is suitable. Hence, a binding with another library, such as, for example, Parsec~\cite{leijen08parsec}, is also possible. The only thing that needs to be done in order to use a different library is to define a primitive parser \p{pStructural} and a combinator that applies a top-level parser and returns an error value in case of a parse error.
 
 \subsection{Example} \label{sect:parseExample}
 
-As an example for the parser, we show the result of parsing the tokens in Figure~\ref{fig:scanResult} that were obtained from scanning ~\raisebox{-1.43ex}{\includegraphics[width=1in]{images/scanFrac}} 
+As an example for the parser, we show the result of parsing the tokens in Figure~\ref{fig:scanResult} that were obtained from scanning ~\raisebox{-1.54ex}{\includegraphics[width=0.85in]{images/scanFrac}} 
 
 Figure~\ref{fig:parseResult} contains the resulting document structure. The value is in fact the example from Section~\ref{sect:documentStructure} with the presentation identities shown as subscripts. The presentation identities correspond to the identities of the tokens in Figure~\ref{fig:scanResult}. The \p{Decl} node has two presentation identities: $2$ for the equals sign and $16$ for the semicolon. All other nodes have only one. 
 
@@ -546,9 +546,9 @@ Lexical errors require a special treatment. When Alex encounters a lexical error
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-We can distinguish two main classes of structure editors: {\em syntax-directed} editors (which derive a presentation from the document structure), and {\em syntax-recognizing} editors (which derive the structure from the presentation). Syntax directed editors, such as the Synthesizer Generator~\cite{reps84synGen}, LRC~\cite{saraiva00lrc}, SbyS~\cite{magnusson90orm}, and Redwood~\cite{westphal04redwood} allow graphical presentations, but do not provide a parser for editing mixed presentations. On the other hand, syntax recognizing editors, such as Pan~\cite{ballance92pan} and Harmonia~\cite{boshernitsan01harmonia} support presentation-oriented editing, but do not allow mixed graphical presentations.
+We can distinguish two main classes of structure editors: {\em syntax-directed} editors (which derive a presentation from the document structure), and {\em syntax-recognizing} editors (which derive the structure from the presentation). Syntax directed editors, such as the Synthesizer Generator~\cite{reps84synGen}, LRC~\cite{saraiva00lrc}, SbyS~\cite{magnusson90orm}, and the Redwood environment~\cite{westphal04redwood} allow graphical presentations, but do not have a parser for editing mixed presentations. On the other hand, syntax recognizing editors, such as Pan~\cite{ballance92pan} and Harmonia~\cite{boshernitsan01harmonia} support presentation-oriented editing, but do not allow mixed graphical presentations.
 
-The mathematical editors Amaya~\cite{amaya08}, MathSPad~\cite{verhoeven00mathspad}, and the commercial system Mathematica are examples of systems that do offer support for editing (and parsing) mixed presentations. However, these systems work for a fixed document type, and are not easily extensible. Somewhat more general, Eisenberg and Kiczales describe a presentation extension formalism~\cite{eisenberg07presExtension} for Eclipse, but their solution is targeted at extending Java only.
+Examples of systems that do support editing (and parsing) of mixed presentations are editors for mathematical formulas, such as MathSPad~\cite{verhoeven00mathspad},  Amaya~\cite{amaya08}, and the commercial system Mathematica. However, these systems work for a fixed document type, and are not easily extensible. Somewhat more general, Eisenberg and Kiczales describe a presentation extension formalism~\cite{eisenberg07presExtension} for Eclipse, but their solution is targeted at extending Java only.
 
 The Barista framework~\cite{KoMyers06Barista} has similarities to Proxima, although it is targeted mainly at code editors. The system allows graphical presentations for program structures, but these are expanded to the underlying textual presentation when edited. Although this is good to have as optional behavior, it is in many cases unnecessary.
 
