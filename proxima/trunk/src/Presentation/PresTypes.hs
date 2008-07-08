@@ -401,7 +401,7 @@ data Synthesized = Syn { vRef, hRef, minWidth, minHeight :: Int
 
 type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc clip, Synthesized)
 
-
+idP :: (Show node, Show token) => PresentationBase doc node clip token level -> IDP
 idP (EmptyP id)           = id
 idP (StringP id _)        = id
 idP (TokenP id _)        = id
