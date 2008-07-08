@@ -16,7 +16,8 @@ import Debug.Trace
 reuse = Nothing
 set = Just
 
-
+parsePres :: (DocNode node, Ord token, Show token) => 
+             ListParser doc node clip token a -> PresentationBase doc node clip token level -> Maybe a
 parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ _ tokens _)) = 
   let (enr,errs) = runParser recognizeEnrichedDoc tokens
   in --debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $ 
