@@ -55,11 +55,12 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
-               UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
-               UU.Parsing.MachineInterface UU.Parsing DocTypes_Generated
-               DocUtils_Generated DocumentEdit_Generated Evaluator Main
-               PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheet
+               Rendering.RenUtils Rendering.Renderer Settings
+               UU.Parsing.CharParser UU.Parsing.Derived UU.Parsing.Interface
+               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing
+               DocTypes_Generated DocUtils_Generated DocumentEdit_Generated
+               Evaluator Main PresentationAG ProxParser ProxParser_Generated
+               Reducer ScannerSheet
 ghc-prof-options:
 ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:

@@ -2,6 +2,7 @@ module Main where
 
 import Proxima.Proxima
 
+import Settings
 import Evaluator
 import Reducer
 import PresentationAG
@@ -18,7 +19,8 @@ import Common.CommonTypes
 
 gain = main -- when typing during compilation GHCI replaces the first command line char by 'g'
 
-main = proxima PresentationAG.presentationSheet
+main = proxima Settings.settings
+               PresentationAG.presentationSheet
                ProxParser.recognizeEnrichedDoc
                ScannerSheet.scanner 
                -- sheet parameters (evaluation and reduction sheets are passed implicitly through
