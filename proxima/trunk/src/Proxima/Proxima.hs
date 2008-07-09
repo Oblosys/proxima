@@ -5,6 +5,7 @@ import System
 import Control.Exception
 
 import Proxima.Architecture
+import Proxima.ArchitectureLibM
 
 --import GUIGTK
 import Proxima.GUI
@@ -89,7 +90,7 @@ proxima presentationSheet parseSheet scannerSheet
                           -- initial Rendering is given to startGUI.
                                
                                -- maybe better to do init stuff at handling of Init.. edit command in translate modules
-    ; let TransStep translate = layers
+    ; let  translate = layers
     ; let initEvent = InitRen
 {-                                    
     ; args <- getArgs
@@ -116,11 +117,11 @@ proxima presentationSheet parseSheet scannerSheet
               ; return $ (renderingLvl', renderingEdits)
               }
            where performEditCycles translate renderingLvl [] = return (renderingLvl, [], translate)
-                 performEditCycles translate renderingLvl (event:events) =
-                  do {  ((doc, docEdits), PresStep present) <- translate (renderingLvl, [event])             
-                     ; ((renderingLvl', renderingEdit':newEvents), TransStep translate') <- present (doc, (redirect docEdits))
+                 performEditCycles (Fix translate) renderingLvl (event:events) =
+                  do {((doc, docEdits), present) <- (unStep $ translate) (renderingLvl, [event])             
+                     ; ((renderingLvl', renderingEdit':newEvents), translate') <- (unStep $ present) (doc, (redirect docEdits))
                      ; (renderingLvl'', renderingEdits, translate'') <-
-                         performEditCycles translate' renderingLvl' (map cast newEvents ++ events)
+                         performEditCycles (unNil translate') renderingLvl' (map cast newEvents ++ events)
                      ; return (renderingLvl'', renderingEdit':renderingEdits, translate'')
                      }
                       -- initial RenderingLevel 
