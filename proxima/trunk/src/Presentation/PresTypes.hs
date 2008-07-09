@@ -11,7 +11,7 @@ import Data.Generics
 
 import UU.Parsing
 
-data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
+data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord, Data, Typeable)
 
 data PresentationLevel doc node clip token = PresentationLevel (Presentation doc node clip token) (PresentationLS doc node clip token) deriving Show
 
