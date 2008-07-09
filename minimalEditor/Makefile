@@ -11,6 +11,8 @@ FIND = /usr/bin/find
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
+UUSRCDIR = ../uuagc/src
+
 AGC  = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN  = $(PROXIMABINDIR)/generate$(EXE)
 
@@ -85,7 +87,7 @@ clean-proxima-all: clean
 #directories
 
 
-ALLSRCDIRS = src:$(PROXIMASRCDIR)
+ALLSRCDIRS = src:$(PROXIMASRCDIR):$(UUSRCDIR)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
 		-package parsec -package mtl \
