@@ -22,9 +22,6 @@ settings =
              -- use a smaller rectangle as viewed area to see what happens outside it
            , reducedViewedArea = False            
 
-             -- mark what parts of the arrangement were reused from the previous one
-           , markArrangementBackground = False
-
              -- updated parts of the rendering are surrounded by red rectangles
            , markUpdatedRenderingArea = False
            }
