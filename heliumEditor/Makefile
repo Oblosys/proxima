@@ -18,6 +18,8 @@ PROXIMADIR = src/proxima
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
+UUSRCDIR = ../uuagc/src
+
 AGC  = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN  = $(PROXIMABINDIR)/generate$(EXE)
 
@@ -108,7 +110,7 @@ TOPDIR        = ../Top/src/Top
 
 HELIUMDIRS	= $(LVMLIBDIR)/common:$(LVMLIBDIR)/common/ghc:$(LVMLIBDIR)/lvm:$(LVMLIBDIR)/asm:$(LVMLIBDIR)/core:$(HELIUMSRCDIR)/utils:$(PARSECDIR):$(HELIUMSRCDIR)/parser:$(HELIUMSRCDIR)/staticanalysis/miscellaneous:$(HELIUMSRCDIR)/staticanalysis/inferencers:$(HELIUMSRCDIR)/staticanalysis/directives:$(HELIUMSRCDIR)/staticanalysis/staticchecks:$(HELIUMSRCDIR)/staticanalysis/heuristics:$(HELIUMSRCDIR)/staticanalysis/messages:$(HELIUMSRCDIR)/syntax:$(HELIUMSRCDIR)/codegeneration:$(HELIUMSRCDIR)/main:$(HELIUMSRCDIR)/modulesystem:$(TOPDIR):$(TOPDIR)/..
 
-ALLSRCDIRS = src:$(PROXIMASRCDIR):$(HELIUMDIRS)
+ALLSRCDIRS = src:$(PROXIMASRCDIR):$(HELIUMDIRS):$(UUSRCDIR)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
 		-package gtk -package parsec -package mtl -package time\
