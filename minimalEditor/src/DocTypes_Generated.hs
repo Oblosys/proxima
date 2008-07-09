@@ -6,8 +6,9 @@ import Evaluation.DocTypes
 import Presentation.PresTypes
 import List
 import Char
+import Data.Generics
 
-data UserToken = BinToken | LeafToken | IntToken | SymToken String deriving (Show, Eq, Ord)
+data UserToken = BinToken | LeafToken | IntToken | SymToken String deriving (Show, Eq, Ord, Typeable)
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -18,27 +19,27 @@ data UserToken = BinToken | LeafToken | IntToken | SymToken String deriving (Sho
 data EnrichedDoc = RootEnr List_Tree List_Tree
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data Document = RootDoc List_Tree List_Tree
               | HoleDocument
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data Tree = Bin IDP IDP IDP IDP IDP Tree Tree
           | Leaf IDP IDP Int
           | HoleTree
           | ParseErrTree (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data List_Tree = List_Tree ConsList_Tree
                | HoleList_Tree
                | ParseErrList_Tree (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data ConsList_Tree = Cons_Tree Tree ConsList_Tree
                    | Nil_Tree
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 
 
@@ -55,7 +56,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Int Int
              | Clip_String String
              | Clip_Float Float
-             | Clip_Nothing deriving Show
+             | Clip_Nothing deriving (Show, Typeable)
 
 
 
@@ -77,6 +78,7 @@ data Node = NoNode
           | Node_List_Tree List_Tree Path
           | Node_HoleList_Tree List_Tree Path
           | Node_ParseErrList_Tree List_Tree Path
+            deriving Typeable
 
 
 

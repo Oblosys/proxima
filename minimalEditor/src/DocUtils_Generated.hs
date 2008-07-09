@@ -70,15 +70,15 @@ instance DocNode Node where
 --------------------------------------------------------------------------
 
 toXMLEnrichedDoc (RootEnr trees trees2) = Elt "RootEnr" [] $ toXMLList_Tree trees ++ toXMLList_Tree trees2
-toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
-toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
+toXMLEnrichedDoc (HoleEnrichedDoc) = EmptyElt "HoleEnrichedDoc" [] 
+toXMLEnrichedDoc (ParseErrEnrichedDoc error) = EmptyElt "ParseErrEnrichedDoc" []
 toXMLDocument (RootDoc trees trees2) = Elt "RootDoc" [] $ toXMLList_Tree trees ++ toXMLList_Tree trees2
-toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
-toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
+toXMLDocument (HoleDocument) = EmptyElt "HoleDocument" [] 
+toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
 toXMLTree (Bin _ _ _ _ _ left right) = Elt "Bin" [] $ [toXMLTree left] ++ [toXMLTree right]
 toXMLTree (Leaf _ _ int) = Elt "Leaf" [] $ [toXMLInt int]
-toXMLTree (HoleTree) = Elt "HoleTree" [] $ []
-toXMLTree (ParseErrTree error) = Elt "ParseErrTree" [] []
+toXMLTree (HoleTree) = EmptyElt "HoleTree" [] 
+toXMLTree (ParseErrTree error) = EmptyElt "ParseErrTree" []
 toXMLList_Tree (List_Tree xs) = toXMLConsList_Tree xs
 toXMLList_Tree HoleList_Tree = []
 toXMLList_Tree (ParseErrList_Tree _) = []
@@ -141,7 +141,7 @@ type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserT
 instance Doc Document where
   initialDoc = initialDocument
   toXML = toXMLDocument
-  parseXML = parseXML_Document
+  parseXML = parseXML_Document <* pCharSpaces
 
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2
@@ -152,11 +152,11 @@ instance Ord Node where
 
 -- toXML for primitive types
 
-toXMLInt i = Elt "Integer" [("val", show i)] []
+toXMLInt i = EmptyElt "Integer" [("val", show i)]
 
-toXMLInt f = Elt "Float" [("val", show f)] []
+toXMLInt f = EmptyElt "Float" [("val", show f)]
 
-toXMLBool b = Elt "Bool" [("val", show b)] []
+toXMLBool b = EmptyElt "Bool" [("val", show b)]
 
 toXMLString str = Elt "String" [] [PCData str] 
 
