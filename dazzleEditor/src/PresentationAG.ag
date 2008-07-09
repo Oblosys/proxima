@@ -26,22 +26,25 @@ import Reducer
 
 INCLUDE "PresentationAG_Generated.ag"
 
+{
+vLine'' = empty `withWidth` 2 `withVStretch` True `withbgColor` red
 
+}
 SEM EnrichedDoc
   | RootEnr
-      loc.pres = structural $
-                   @root.pres
-
+      loc.pres = structural $ @root.pres
 SEM Root
   | Root
       loc.pres = structural $
-                     (col $ [ @graph.pres
+                     (row [ text "   ", 
+                            col $ [ @graph.pres
                             , row [ parsing $ text @title, empty `withHStretch` True ]
                                   `withFontSize_` (percent 160) 
                                   `addPopupItems`
                                 [ ("Add Section", insertAtHeadSection @sections.path) ]  
-                            , @sections.pres 
-                            ]) `withFontSize` 12  `withWidth` 800
+                            , @sections.pres
+                                  ]
+                          ]) `withFontSize` 12  `withWidth` 800
 {
 divide n [] = []
 divide n xs = let (h,t) = splitAt n xs
@@ -85,7 +88,9 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                      (col $ [ col [ row [ text (@numberStr++".")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
-                                          `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
+                                          `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
+                                                          , ("Add Probtable", insertElementAtHead newProbtablePara @paragraphs.path) 
+                                                          ]  
                                   , @paragraphs.pres
                                   ] `addPopupItems`
                                     [ ("Add Subsubsection", insertAtHeadSubsubsection @subsubsections.path) ]  
@@ -109,7 +114,9 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                      (col $ [ row [ text (@numberStr++".")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
-                                    `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) ]  
+                                    `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
+                                                    , ("Add Probtable", insertElementAtHead newProbtablePara @paragraphs.path) 
+                                                    ]  
                             , @paragraphs.pres
                             ])
                      `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
@@ -147,7 +154,9 @@ SEM Paragraph
   | Paragraph
       loc.pres = parsing $
                    @words.pres
-                       `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path) ]
+                       `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
+                                       ]
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
        
   | SubgraphPara
@@ -155,12 +164,15 @@ SEM Paragraph
                      row [ @subgraph.pres, empty `withHStretch` True ]
                        `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
                                        , ("Add Graph", addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
                                        , ("Add Paragraph", addParagraph @lhs.path) ]
   | ProbtablePara
       loc.pres = structural $
                      row [ @probtable.pres, empty `withHStretch` True ]
-                       `addPopupItems` [ ("tralala", id)
-                                       ]
+                       `addPopupItems` [ ("Delete Probtable", deleteAtPath @lhs.path)
+                                       , ("Add Graph", addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
+                                       , ("Add Paragraph", addParagraph @lhs.path) ]
                     
 SEM List_Word
   | List_Word
@@ -264,13 +276,19 @@ SEM Subgraph [||]
 SEM Probtable [ | | ]
   | Probtable
       loc.name = getVertexName @lhs.vertexIDs @lhs.vertexNames @id
-      loc.pres = structural $ col [ row [ text $ "Probtable for " ++
-                                           @name ++" with values "
-                                        , @values.pres
-                                        ]
-                                  , @table.pres
-                                  , text ""
-                                  ] `addPopupItems`
+      loc.pres = structural $ case lookup @id (zip @lhs.vertexIDs @lhs.vertexNames) of
+                                Nothing   -> col [ row [text "Probability table for ", text "{select node}" `withbgColor` yellow]
+                                                 , text ""
+                                                 ]
+                                Just name -> 
+                                  col [ row [ text $ "Probability table for \"" ++
+                                                     @name ++"\" with values: "
+                                            , @values.pres
+                                            ]
+                                      , @table.pres
+                                      , text ""
+                                      ]
+                              `addPopupItems`
                                   [ ( "Show probtable for "++show name
                                     , setProbtableID @lhs.path id @self)
                                   | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
@@ -310,14 +328,14 @@ SEM Table [ name : String nrOfValues : Int | | ]
                                           (concat $ intersperse [hSepDouble] $ map 
                                                      (\group -> intersperse hSep $ map (hPad . text) group)
                                                      groups)
-                                   ) `withVRef` 0
+                                   )
                                  | (header,groups) <- zip headerRow groupedValueColsFields ]
                      probsCol = (col $ hPad (text "Expertschatting") :
                                              hSepDouble :
                                              (concat $ intersperse [hSepDouble] $ map 
                                                      (\group -> intersperse hSep $ group)
                                                      groupedProbsPress)
-                                ) `withVRef` 0 
+                                )
                  in  structural $ boxed $ row $ (intersperse vSep $ valueCols)
                                                 ++
                                                 [ vSepDouble
@@ -396,8 +414,13 @@ SEM List_Value
                                                             , reduceDoc .
                                                               insertElementAtHead newValue (@lhs.path)
                                                             ) ]] ++
-                                intersperse (text ",") @elts.press ++
+                                intersperse (text ",") (map incFail @elts.press) ++
                                 [text "]"]
+{
+incFail pres = pres {- col [ row [ text "x", empty `withHeight` 10 `withHStretch` True, text "x" ]
+                   , pres
+                   ] -}
+}
                              
 SEM Value
   | Value
