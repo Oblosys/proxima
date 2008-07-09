@@ -87,8 +87,6 @@ editParse :: (DocNode node, Ord token, Show token, Show enr) =>
 editParse parseSheet state presLvl@(PresentationLevel pres layout) (EnrichedDocLevel _ oldFocus doc) = 
   case parsePres parseSheet pres of
      Nothing        -> (SkipEnr 0, state, PresentationLevel (markUnparsed pres) layout)
-     Just (Nothing) -> (SkipEnr 0, state, PresentationLevel (markUnparsed pres) layout)
-     -- Just enr' -> (SetEnr (EnrichedDocLevel enr' oldFocus doc), state, presLvl)
-     Just (Just (enr',lay)) -> (SetEnr (EnrichedDocLevel enr' oldFocus doc), state, (PresentationLevel pres (lay, snd layout)))
+     Just (enr',lay) -> (SetEnr (EnrichedDocLevel enr' oldFocus doc), state, (PresentationLevel pres (lay, snd layout)))
 
 
