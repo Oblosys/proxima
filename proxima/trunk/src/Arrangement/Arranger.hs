@@ -25,16 +25,17 @@ defaultLineColor = black
 defaultTextColor = black
 defaultFont = CommonTypes.defaultFont
 
-arrangePresentation :: (Show node, Show token) => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
+arrangePresentation :: (Show node, Show token) => Settings ->
+                       LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Layout doc node clip token -> IO (Arrangement node, LocalStateArr)
-arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
+arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let oldViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
 --          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres -- old prune
 
-          prunedPres = if arrangerIncrementality 
+          prunedPres = if arrangerIncrementality settings 
                        then prunePresentation viewedArea oldViewedArea dt pres  -- uncomment this line for incremental arrangement
                        else prunePresentation viewedArea oldViewedArea (DiffLeaf False) pres -- and this one for non-incremental
           

@@ -14,7 +14,8 @@ TODO: fix wrong hRef (hSpaces are the problem)
 import Graphics.UI.Gtk hiding (Size)
 import Data.IORef
 
-import Common.CommonTypes (DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO)
+import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
+                          , Settings (..) )
 import qualified Common.CommonTypes as CommonTypes
 import Rendering.RenTypes
 import Rendering.RenUtils
@@ -35,14 +36,15 @@ initialWindowSize = (1000, 900)
 documentFilename = "Document.xml"
 backupFilename = "BackupDocument.xml"
 
-startGUI :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
+startGUI :: Settings ->
+            ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
             IORef CommonTypes.Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
-startGUI handler viewedAreaRef (initRenderingLvl, initEvent) = 
+startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { initGUI
     ; window <- windowNew
     ; onDestroy window mainQuit
-    ; set window [ windowTitle := "Proxima v0.3" ]
+    ; set window [ windowTitle := (applicationName settings) ]
     ; windowSetDefaultSize window (fst initialWindowSize) (snd initialWindowSize)
 
     ; canvas <- drawingAreaNew 
@@ -60,16 +62,16 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; buffer <- newIORef Nothing
     ; renderingLvlVar <- newIORef initRenderingLvl
 
-    ; onExpose canvas $ catchHandler $ onPaint handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onKeyPress canvas $ catchHandler $ onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onMotionNotify canvas False $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonPress canvas $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonRelease canvas $ catchHandler $ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonPress canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onButtonRelease canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onCheckResize window $ withCatch $ resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; onCheckResize window $ withCatch $ resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; fileMenu <- mkMenu
-        [ ("_Open", withCatch $ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
-        , ("_Save", withCatch $ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
+        [ ("_Open", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
+        , ("_Save", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
         , ("_Quit", mainQuit)
         ]
     
@@ -90,11 +92,11 @@ startGUI handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; widgetShowAll window
     
 --    ; putStrLn "Init"
-    ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
+    ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
     
 --    ; putStrLn "Open document"
-    ; withCatch $ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; withCatch $ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+    ; withCatch $ initializeDocument settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+    ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
     
 --    ; timeoutAdd (withCatch $ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
     -- about every half minute, save a backup of the document
@@ -119,7 +121,7 @@ withCatch io = io
 -- withCatch for handlers that take one argument
 catchHandler handler = \e -> withCatch $ handler e
  
-performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas = withCatch $
+performEditSequence settings handler renderingLvlVar buffer viewedAreaRef window vp canvas = withCatch $
  do { putStr "\n\n\n\n\nStarting test edit sequence"
     ; timer <- startTimer 
     ; performEditEvents [ MouseDownRen 100 300 (CommonTypes.Modifiers False False False) 1
@@ -135,12 +137,13 @@ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canva
     ; mainQuit
     ; return False
     }
- where performEditEvents = mapM_ (genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas)
+ where performEditEvents = mapM_ (genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas)
     
-onMouse :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
-              IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
-              Event -> IO Bool
-onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
+onMouse :: Settings ->
+           ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
+           IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+           Event -> IO Bool
+onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
  do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer viewedAreaRef window vp canvas (round x) (round y)
     ; case mContextMenu of
@@ -151,7 +154,7 @@ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Butto
            }
        Nothing -> return False
     }
-onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
+onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
  do { (RenderingLevel _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
     ; let editRendering = 
             case mouseEvt of 
@@ -165,39 +168,42 @@ onMouse handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
     ; case editRendering of 
         SkipRen _ -> return False
         _         ->
-          do { genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
+          do { genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
              ; return True
              }
     }
   
-onKeyboard :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
+onKeyboard :: Settings ->
+              ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
               IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
               Event -> IO Bool
-onKeyboard handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
+onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (Key _ _ _ mods _ _ _  _ keyName mKeyChar) = 
  do { let editRendering = translateKey keyName mKeyChar (translateModifiers mods)
 
     ; case editRendering of -- TODO: put this in genericHandler?
         SkipRen _ -> return False
         _         ->
-          do { genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
+          do { genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
              ; return True
              }
     }
 
 popupMenuHandler :: forall doc enr clip node token .
+                    Settings ->
                     ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                     IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
                     ((DocumentLevel doc clip) -> (DocumentLevel doc clip)) -> IO ()
-popupMenuHandler handler renderingLvlVar buffer viewedArea window vp canvas editDoc =
+popupMenuHandler settings handler renderingLvlVar buffer viewedArea window vp canvas editDoc =
  do { let editRendering = cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
                                 
-    ; genericHandler handler renderingLvlVar buffer viewedArea window vp canvas editRendering
+    ; genericHandler settings handler renderingLvlVar buffer viewedArea window vp canvas editRendering
     }
 
-fileMenuHandler :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
-                       IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
-                       String -> IO ()
-fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas menuItem =
+fileMenuHandler :: Settings ->
+                   ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
+                   IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
+                   String -> IO ()
+fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas menuItem =
  do { editRendering <- 
         case menuItem of
           "open" ->
@@ -238,7 +244,7 @@ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas me
               ; return editRendering
               }
           _      -> return $ SkipRen 0
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
+    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
     }
 
 
@@ -248,12 +254,13 @@ fileMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas me
 -- current EditLevel to genericHandler.
 -- If successful, the updated RenderingLevel is returned.
 
-genericHandler :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
+genericHandler :: Settings ->
+               ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
                Window -> Viewport -> DrawingArea -> EditRendering doc enr node clip token -> IO ()
-genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
+genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-    ; viewedArea <- getViewedArea vp
+    ; viewedArea <- getViewedArea settings vp
     
     ; writeIORef viewedAreaRef viewedArea
    
@@ -277,7 +284,7 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
             
             ; maybePm <- readIORef buffer
             ; case maybePm of
-                Just pm -> drawRendering renderingLvlVar window vp pm
+                Just pm -> drawRendering settings renderingLvlVar window vp pm
                 Nothing -> return () -- will not occur 
     
 
@@ -289,8 +296,9 @@ genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas evt
     
   
 drawRendering :: DrawableClass d => 
+                 Settings ->
                  IORef (RenderingLevel doc enr node clip token) -> Window -> Viewport -> d -> IO ()
-drawRendering renderingLvlVar wi vp pm = 
+drawRendering settings renderingLvlVar wi vp pm = 
  do { RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
 --    ; putStrLn "Drawing rendering"
     ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
@@ -302,24 +310,25 @@ drawRendering renderingLvlVar wi vp pm =
       -- clear background for updated regions
     ; mapM_ (\((x,y),(w,h)) -> drawRectangle pm gc True x y w h) updRegions
 
-    ; viewedArea <- getViewedArea vp 
+    ; viewedArea <- getViewedArea settings vp 
     -- ; putStrLn $ "The viewed area is" ++ show viewedArea
     ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
     }
           
-drawFocus :: IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
-drawFocus renderingLvlVar wi dw gc vp = 
+drawFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
+drawFocus settings renderingLvlVar wi dw gc vp = 
  do { RenderingLevel scale mkPopupMenu rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
-    ; viewedArea <- getViewedArea vp 
+    ; viewedArea <- getViewedArea settings vp 
     ; focusRendering (wi, dw ,gc) viewedArea
     }
 
-onPaint :: ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) -> 
+onPaint :: Settings ->
+           ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) -> 
            IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle ->
            Window -> Viewport -> DrawingArea -> Event -> IO Bool
-onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
+onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { eventArea=rect }) =
  do { maybePm <- readIORef buffer
 --    ; putStrLn "paint"
     ; case maybePm of 
@@ -327,22 +336,22 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
         Just pm ->
          do { -- putStrLn "buffer initialized"
             ; renderedViewedArea <- readIORef viewedAreaRef
-            ; viewedArea <- getViewedArea vp 
+            ; viewedArea <- getViewedArea settings vp 
             ; dw <- drawingAreaGetDrawWindow canvas
     
               -- if renderedViewedArea is different from viewedArea, we need to re-arrange
               -- SkipRen (-2) starts presenting at the arrangement layer
             ; when (renderedViewedArea /= viewedArea) $ 
-               genericHandler handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-2))
+               genericHandler settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (SkipRen (-2))
                  
             
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
-            ; drawFocus renderingLvlVar wi dw gc vp            
+            ; drawFocus settings renderingLvlVar wi dw gc vp            
             
               -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
-            ; when markUpdatedRenderingArea $
+            ; when (markUpdatedRenderingArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
                   ; RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
                   ; debugLnIO GUI $ "updated regions:" ++ show updRegions 
@@ -354,7 +363,7 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
                           ) updRegions
                   }                     
                    
-            ; when reducedViewedArea $
+            ; when (reducedViewedArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
                   ; let ((x,y),(w,h)) = viewedArea
                   ; drawRectangle dw gc False x y w h 
@@ -364,25 +373,25 @@ onPaint handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expose { even
             }
     }
     
-getViewedArea :: Viewport -> IO (Point,Size)
-getViewedArea vp =
+getViewedArea :: Settings -> Viewport -> IO (Point,Size)
+getViewedArea settings vp =
  do { vA <- viewportGetVAdjustment vp
     ; y <- adjustmentGetValue vA
     ; hA <- viewportGetHAdjustment vp
     ; x <- adjustmentGetValue hA
     ; (w,h) <- widgetGetSize vp
-    ; if reducedViewedArea -- return a smaller viewed area, for testing incrementality algorithms.
+    ; if (reducedViewedArea settings) -- return a smaller viewed area, for testing incrementality algorithms.
       then return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))
       else return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
            
     }
     
-resizeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas =
  do { maybePm <- readIORef buffer
     ; case maybePm of 
         Nothing -> return () -- buffer has not been initialized yet.
         _       -> -- SkipRen (-2) starts presenting at the arrangement layer
-                   genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (SkipRen (-2))                  
+                   genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (SkipRen (-2))                  
     }
 
 translateKey :: String -> Maybe Char -> CommonTypes.Modifiers -> EditRendering doc enr node clip token
@@ -416,7 +425,7 @@ translateModifiers ms = CommonTypes.Modifiers (Shift `elem` ms) (Control `elem` 
 
 
 
-initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+initializeDocument settings handler renderingLvlVar buffer viewedAreaRef window vp canvas =
  do { backupExists <- doesFileExist backupFilename
     ; filename <-
         if False -- backupExists 
@@ -429,15 +438,15 @@ initializeDocument handler renderingLvlVar buffer viewedAreaRef window vp canvas
                       }
             }
         else return documentFilename
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
+    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
     }
 
-backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+backupDocumentHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas =
  do { let editRendering = SaveFileRen backupFilename 
  
       -- Parse and save
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
-    ; genericHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
+    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False)))
+    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas editRendering
     ; return True
     }
          

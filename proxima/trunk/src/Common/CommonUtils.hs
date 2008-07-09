@@ -126,17 +126,13 @@ lines' s    = let (l,s') = break (\c->c=='\n' || c=='\r') s
 head' caller xs = case xs of
                     []  -> error $ caller ++ ": called head' []"
                     x:_ -> x 
-
--- Constants for switching on incrementality, background coloring, etc.
-
-rendererIncrementality = True
-arrangerIncrementality = False
-
--- use a smaller rectangle as viewed area to see what happens outside it
-reducedViewedArea = False            
-
+                
+                    
 -- mark what parts of the arrangement were reused from the previous one
+
+-- This setting is not part of Settings.settings, since it would add to the
+-- run-time cost of the arranger to pass the record around as an inherited attribute.
+
+markArrangementBackground :: Bool
 markArrangementBackground = False
 
--- updated parts of the rendering are surrounded by red rectangles
-markUpdatedRenderingArea = False

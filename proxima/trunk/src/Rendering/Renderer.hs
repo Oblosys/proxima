@@ -61,18 +61,19 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
      then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement  
 
-mkPopupMenuXY :: (DocNode node, Show token) => Layout doc node clip token -> Scale -> Arrangement node ->
+mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
+                 Layout doc node clip token -> Scale -> Arrangement node ->
                  ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) ->
                  IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                  IORef (RenderingLevel doc enr node clip token) ->
                  IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> Int -> Int -> IO (Maybe Menu)
-mkPopupMenuXY prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
+mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRef window vp canvas x' y'  =
  do { let (x,y) = (descaleInt scale x',descaleInt scale y')
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
               
-    ; contextMenu <- mkMenu [ (str, popupMenuHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
+    ; contextMenu <- mkMenu [ (str, popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
                             | (str, upd) <- ctxtItems]
     ; return $ Just contextMenu                                          
     }

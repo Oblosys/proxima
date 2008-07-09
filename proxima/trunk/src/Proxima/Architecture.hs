@@ -83,15 +83,17 @@ presentationLayer presentationSheet parseSheet = ProximaLayer
                                                    (PresPresent.presentIO presentationSheet)
 layoutLayer       scannerSheet = ProximaLayer 
                                    (LayTranslate.translateIO scannerSheet) LayPresent.presentIO
-arrangementLayer  = ProximaLayer ArrTranslate.translateIO ArrPresent.presentIO
-renderingLayer    = ProximaLayer RenTranslate.translateIO RenPresent.presentIO
+arrangementLayer  settings     = ProximaLayer 
+                                   ArrTranslate.translateIO (ArrPresent.presentIO settings)
+renderingLayer    settings     = ProximaLayer
+                                   RenTranslate.translateIO (RenPresent.presentIO settings)
 
 
-proximaLayers presentationSheet parseSheet scannerSheet
+proximaLayers settings presentationSheet parseSheet scannerSheet
               evaluationLS presentationLS layoutLS arrangementLS rendererLS =
             lift (wrap evaluationLayer)   evaluationLS
   `combine` lift (wrap (presentationLayer presentationSheet parseSheet)) presentationLS
   `combine` lift (wrap (layoutLayer scannerSheet))       layoutLS
-  `combine` lift (wrap arrangementLayer)  arrangementLS
-  `combine` lift (wrap renderingLayer)    rendererLS
+  `combine` lift (wrap (arrangementLayer settings))  arrangementLS
+  `combine` lift (wrap (renderingLayer settings))    rendererLS
 

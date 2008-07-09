@@ -69,16 +69,18 @@ import Data.Map (Map)
 proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip
            , EvaluationSheet doc enr clip, ReductionSheet doc enr clip
            , Editable doc doc node clip token) =>
+           Settings ->
            PresentationSheet doc enr node clip token -> ParseSheet doc enr node clip token ->
            ScannerSheet doc node clip token ->
            DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
            IO ()
-proxima presentationSheet parseSheet scannerSheet
+proxima settings presentationSheet parseSheet scannerSheet
         initDoc initEnr =
  do { fontMetricsRef <- initFontMetrics
     ; viewedAreaRef <- newIORef ((0,0),(0,0)) -- shared by GUI and extra state on Arrangement layer
     ; let layers = 
-            proximaLayers presentationSheet parseSheet scannerSheet
+            proximaLayers settings
+                          presentationSheet parseSheet scannerSheet
                           (LayerStateEval [] [], initDoc)   
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   
@@ -124,7 +126,7 @@ proxima presentationSheet parseSheet scannerSheet
                      ; return (renderingLvl'', renderingEdit':renderingEdits, translate'')
                      }
                       -- initial RenderingLevel 
-    ; startGUI handler viewedAreaRef
+    ; startGUI settings handler viewedAreaRef
                        ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> return ()) (\_ _ -> return ()) (0,0) False  
                                             []
                                             False
