@@ -36,20 +36,18 @@ includes:
 install-includes:
 include-dirs:
 hs-source-dirs: src/uuagc/src/ src/proxima/src src
-other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
-               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing.CharParser
-               Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
+other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
                Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
-               Common.CommonUtils Common.DebugLevels
-               Evaluation.DocTypes Evaluation.DocUtils Evaluation.DocumentEdit
-               Evaluation.EnrTypes Evaluation.EnrUtils Evaluation.EvalLayerTypes
+               Common.CommonUtils Common.DebugLevels Evaluation.DocTypes
+               Evaluation.DocUtils Evaluation.DocumentEdit Evaluation.EnrTypes
+               Evaluation.EnrUtils Evaluation.EvalLayerTypes
                Evaluation.EvalLayerUtils Evaluation.EvalPresent
                Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils
                Layout.LayPresent Layout.LayTranslate Layout.LayTypes
-               Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner Layout.ScannerAG
-               Layout.TreeEditPres Presentation.PresLayerTypes
+               Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner
+               Layout.ScannerAG Layout.TreeEditPres Presentation.PresLayerTypes
                Presentation.PresLayerUtils Presentation.PresPresent
                Presentation.PresTranslate Presentation.PresTypes
                Presentation.PresUtils Presentation.PresentationParsing
@@ -57,9 +55,12 @@ other-modules: UU.Parsing UU.Parsing.Derived UU.Parsing.Interface
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer DocTypes_Generated
+               Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
+               UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
+               UU.Parsing.MachineInterface UU.Parsing DocTypes_Generated
                DocUtils_Generated DocumentEdit_Generated Evaluator Main
                PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheet
+               Settings
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
