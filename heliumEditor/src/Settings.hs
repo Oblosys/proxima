@@ -13,15 +13,21 @@ module Settings (settings) where
 
 import Common.CommonTypes
 
--- Constants for switching on incrementality, background coloring, etc.
+-- Constants for switching on incrementality, special markings in the rendering, etc.
+
+-- Settings for the ArrangerAG are still defined in CommonUtils, since it would add to the
+-- run-time cost of the arranger to pass the record around as an inherited attribute.
+
                 
 settings =
-  Settings { rendererIncrementality = False
+  Settings { applicationName = "Dazzle documentation editor"
+
+           , rendererIncrementality = False
            , arrangerIncrementality = False
 
              -- use a smaller rectangle as viewed area to see what happens outside it
            , reducedViewedArea = False            
 
              -- updated parts of the rendering are surrounded by red rectangles
-           , markUpdatedRenderingArea = False
+           , markUpdatedRenderingArea = True
            }
