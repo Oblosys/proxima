@@ -311,25 +311,25 @@ instance DocNode Node where
 --------------------------------------------------------------------------
 
 toXMLDocument (RootDoc root) = Elt "RootDoc" [] $ [toXMLRoot root]
-toXMLDocument (HoleDocument) = Elt "HoleDocument" [] $ []
-toXMLDocument (ParseErrDocument error) = Elt "ParseErrDocument" [] []
+toXMLDocument (HoleDocument) = EmptyElt "HoleDocument" [] 
+toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
 toXMLRoot (Root _ decls) = Elt "Root" [] $ toXMLList_Decl decls
-toXMLRoot (HoleRoot) = Elt "HoleRoot" [] $ []
-toXMLRoot (ParseErrRoot error) = Elt "ParseErrRoot" [] []
+toXMLRoot (HoleRoot) = EmptyElt "HoleRoot" [] 
+toXMLRoot (ParseErrRoot error) = EmptyElt "ParseErrRoot" []
 toXMLEnrichedDoc (RootEnr root heliumTypeInfo) = Elt "RootEnr" [] $ [toXMLRootE root] ++ [toXMLHeliumTypeInfo heliumTypeInfo]
-toXMLEnrichedDoc (HoleEnrichedDoc) = Elt "HoleEnrichedDoc" [] $ []
-toXMLEnrichedDoc (ParseErrEnrichedDoc error) = Elt "ParseErrEnrichedDoc" [] []
+toXMLEnrichedDoc (HoleEnrichedDoc) = EmptyElt "HoleEnrichedDoc" [] 
+toXMLEnrichedDoc (ParseErrEnrichedDoc error) = EmptyElt "ParseErrEnrichedDoc" []
 toXMLRootE (RootE _ decls idListDecls) = Elt "RootE" [] $ toXMLList_Decl decls ++ toXMLList_Decl idListDecls
-toXMLRootE (HoleRootE) = Elt "HoleRootE" [] $ []
-toXMLRootE (ParseErrRootE error) = Elt "ParseErrRootE" [] []
+toXMLRootE (HoleRootE) = EmptyElt "HoleRootE" [] 
+toXMLRootE (ParseErrRootE error) = EmptyElt "ParseErrRootE" []
 toXMLDecl (Decl _ _ _ _ expanded autoLayout ident exp) = Elt "Decl" [] $ [toXMLBool expanded] ++ [toXMLBool autoLayout] ++ [toXMLIdent ident] ++ [toXMLExp exp]
 toXMLDecl (BoardDecl _ _ board) = Elt "BoardDecl" [] $ [toXMLBoard board]
 toXMLDecl (PPPresentationDecl _ _ pPPresentation) = Elt "PPPresentationDecl" [] $ [toXMLPPPresentation pPPresentation]
-toXMLDecl (HoleDecl) = Elt "HoleDecl" [] $ []
-toXMLDecl (ParseErrDecl error) = Elt "ParseErrDecl" [] []
+toXMLDecl (HoleDecl) = EmptyElt "HoleDecl" [] 
+toXMLDecl (ParseErrDecl error) = EmptyElt "ParseErrDecl" []
 toXMLIdent (Ident _ _ string) = Elt "Ident" [] $ [toXMLString string]
-toXMLIdent (HoleIdent) = Elt "HoleIdent" [] $ []
-toXMLIdent (ParseErrIdent error) = Elt "ParseErrIdent" [] []
+toXMLIdent (HoleIdent) = EmptyElt "HoleIdent" [] 
+toXMLIdent (ParseErrIdent error) = EmptyElt "ParseErrIdent" []
 toXMLExp (PlusExp _ exp1 exp2) = Elt "PlusExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2]
 toXMLExp (TimesExp _ exp1 exp2) = Elt "TimesExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2]
 toXMLExp (DivExp _ exp1 exp2) = Elt "DivExp" [] $ [toXMLExp exp1] ++ [toXMLExp exp2]
@@ -345,45 +345,45 @@ toXMLExp (IfExp _ _ _ exp1 exp2 exp3) = Elt "IfExp" [] $ [toXMLExp exp1] ++ [toX
 toXMLExp (ParenExp _ _ exp) = Elt "ParenExp" [] $ [toXMLExp exp]
 toXMLExp (ListExp _ _ _ exps) = Elt "ListExp" [] $ toXMLList_Exp exps
 toXMLExp (ProductExp _ _ _ exps) = Elt "ProductExp" [] $ toXMLList_Exp exps
-toXMLExp (HoleExp) = Elt "HoleExp" [] $ []
-toXMLExp (ParseErrExp error) = Elt "ParseErrExp" [] []
+toXMLExp (HoleExp) = EmptyElt "HoleExp" [] 
+toXMLExp (ParseErrExp error) = EmptyElt "ParseErrExp" []
 toXMLAlt (Alt _ _ ident exp) = Elt "Alt" [] $ [toXMLIdent ident] ++ [toXMLExp exp]
-toXMLAlt (HoleAlt) = Elt "HoleAlt" [] $ []
-toXMLAlt (ParseErrAlt error) = Elt "ParseErrAlt" [] []
+toXMLAlt (HoleAlt) = EmptyElt "HoleAlt" [] 
+toXMLAlt (ParseErrAlt error) = EmptyElt "ParseErrAlt" []
 toXMLBoard (Board r1 r2 r3 r4 r5 r6 r7 r8) = Elt "Board" [] $ [toXMLBoardRow r1] ++ [toXMLBoardRow r2] ++ [toXMLBoardRow r3] ++ [toXMLBoardRow r4] ++ [toXMLBoardRow r5] ++ [toXMLBoardRow r6] ++ [toXMLBoardRow r7] ++ [toXMLBoardRow r8]
-toXMLBoard (HoleBoard) = Elt "HoleBoard" [] $ []
-toXMLBoard (ParseErrBoard error) = Elt "ParseErrBoard" [] []
+toXMLBoard (HoleBoard) = EmptyElt "HoleBoard" [] 
+toXMLBoard (ParseErrBoard error) = EmptyElt "ParseErrBoard" []
 toXMLBoardRow (BoardRow ca cb cc cd ce cf cg ch) = Elt "BoardRow" [] $ [toXMLBoardSquare ca] ++ [toXMLBoardSquare cb] ++ [toXMLBoardSquare cc] ++ [toXMLBoardSquare cd] ++ [toXMLBoardSquare ce] ++ [toXMLBoardSquare cf] ++ [toXMLBoardSquare cg] ++ [toXMLBoardSquare ch]
-toXMLBoardRow (HoleBoardRow) = Elt "HoleBoardRow" [] $ []
-toXMLBoardRow (ParseErrBoardRow error) = Elt "ParseErrBoardRow" [] []
+toXMLBoardRow (HoleBoardRow) = EmptyElt "HoleBoardRow" [] 
+toXMLBoardRow (ParseErrBoardRow error) = EmptyElt "ParseErrBoardRow" []
 toXMLBoardSquare (Queen color) = Elt "Queen" [] $ [toXMLBool color]
 toXMLBoardSquare (King color) = Elt "King" [] $ [toXMLBool color]
 toXMLBoardSquare (Bishop color) = Elt "Bishop" [] $ [toXMLBool color]
 toXMLBoardSquare (Knight color) = Elt "Knight" [] $ [toXMLBool color]
 toXMLBoardSquare (Rook color) = Elt "Rook" [] $ [toXMLBool color]
 toXMLBoardSquare (Pawn color) = Elt "Pawn" [] $ [toXMLBool color]
-toXMLBoardSquare (Empty) = Elt "Empty" [] $ []
-toXMLBoardSquare (HoleBoardSquare) = Elt "HoleBoardSquare" [] $ []
-toXMLBoardSquare (ParseErrBoardSquare error) = Elt "ParseErrBoardSquare" [] []
+toXMLBoardSquare (Empty) = EmptyElt "Empty" [] 
+toXMLBoardSquare (HoleBoardSquare) = EmptyElt "HoleBoardSquare" [] 
+toXMLBoardSquare (ParseErrBoardSquare error) = EmptyElt "ParseErrBoardSquare" []
 toXMLPPPresentation (PPPresentation viewType slides) = Elt "PPPresentation" [] $ [toXMLBool viewType] ++ toXMLList_Slide slides
-toXMLPPPresentation (HolePPPresentation) = Elt "HolePPPresentation" [] $ []
-toXMLPPPresentation (ParseErrPPPresentation error) = Elt "ParseErrPPPresentation" [] []
+toXMLPPPresentation (HolePPPresentation) = EmptyElt "HolePPPresentation" [] 
+toXMLPPPresentation (ParseErrPPPresentation error) = EmptyElt "ParseErrPPPresentation" []
 toXMLSlide (Slide title itemList) = Elt "Slide" [] $ [toXMLString title] ++ [toXMLItemList itemList]
-toXMLSlide (HoleSlide) = Elt "HoleSlide" [] $ []
-toXMLSlide (ParseErrSlide error) = Elt "ParseErrSlide" [] []
+toXMLSlide (HoleSlide) = EmptyElt "HoleSlide" [] 
+toXMLSlide (ParseErrSlide error) = EmptyElt "ParseErrSlide" []
 toXMLItemList (ItemList listType items) = Elt "ItemList" [] $ [toXMLListType listType] ++ toXMLList_Item items
-toXMLItemList (HoleItemList) = Elt "HoleItemList" [] $ []
-toXMLItemList (ParseErrItemList error) = Elt "ParseErrItemList" [] []
-toXMLListType (Bullet) = Elt "Bullet" [] $ []
-toXMLListType (Number) = Elt "Number" [] $ []
-toXMLListType (Alpha) = Elt "Alpha" [] $ []
-toXMLListType (HoleListType) = Elt "HoleListType" [] $ []
-toXMLListType (ParseErrListType error) = Elt "ParseErrListType" [] []
+toXMLItemList (HoleItemList) = EmptyElt "HoleItemList" [] 
+toXMLItemList (ParseErrItemList error) = EmptyElt "ParseErrItemList" []
+toXMLListType (Bullet) = EmptyElt "Bullet" [] 
+toXMLListType (Number) = EmptyElt "Number" [] 
+toXMLListType (Alpha) = EmptyElt "Alpha" [] 
+toXMLListType (HoleListType) = EmptyElt "HoleListType" [] 
+toXMLListType (ParseErrListType error) = EmptyElt "ParseErrListType" []
 toXMLItem (StringItem string) = Elt "StringItem" [] $ [toXMLString string]
 toXMLItem (HeliumItem exp) = Elt "HeliumItem" [] $ [toXMLExp exp]
 toXMLItem (ListItem itemList) = Elt "ListItem" [] $ [toXMLItemList itemList]
-toXMLItem (HoleItem) = Elt "HoleItem" [] $ []
-toXMLItem (ParseErrItem error) = Elt "ParseErrItem" [] []
+toXMLItem (HoleItem) = EmptyElt "HoleItem" [] 
+toXMLItem (ParseErrItem error) = EmptyElt "ParseErrItem" []
 toXMLList_Decl (List_Decl xs) = toXMLConsList_Decl xs
 toXMLList_Decl HoleList_Decl = []
 toXMLList_Decl (ParseErrList_Decl _) = []
@@ -613,7 +613,7 @@ type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserT
 instance Doc Document where
   initialDoc = initialDocument
   toXML = toXMLDocument
-  parseXML = parseXML_Document
+  parseXML = parseXML_Document <* pCharSpaces
 
 instance Eq Node where
   nd1 == nd2 = rankNode nd1 == rankNode nd2
@@ -624,11 +624,11 @@ instance Ord Node where
 
 -- toXML for primitive types
 
-toXMLInt i = Elt "Integer" [("val", show i)] []
+toXMLInt i = EmptyElt "Integer" [("val", show i)]
 
-toXMLInt f = Elt "Float" [("val", show f)] []
+toXMLInt f = EmptyElt "Float" [("val", show f)]
 
-toXMLBool b = Elt "Bool" [("val", show b)] []
+toXMLBool b = EmptyElt "Bool" [("val", show b)]
 
 toXMLString str = Elt "String" [] [PCData str] 
 

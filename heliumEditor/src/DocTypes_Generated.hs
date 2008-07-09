@@ -6,15 +6,21 @@ import Evaluation.DocTypes
 import Presentation.PresTypes
 import List
 import Char
+import Data.Generics
 
 data UserToken = KeyTk String  -- StrTk is for keywords, so eq takes the string value into account
                | IntTk
                | LIdentTk
                | UIdentTk
                | OpTk
-               | SymTk deriving (Show, Eq, Ord)
+               | SymTk deriving (Show, Eq, Ord, Typeable)
 
 type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
+
+instance Data HeliumMessage
+instance Typeable HeliumMessage
+instance Data PathDoc
+instance Typeable PathDoc
                
 data HeliumMessage =
          HMessage [String] 
@@ -30,34 +36,34 @@ data HeliumMessage =
 data Document = RootDoc Root
               | HoleDocument
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data Root = Root IDP List_Decl
           | HoleRoot
           | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data EnrichedDoc = RootEnr RootE HeliumTypeInfo
                  | HoleEnrichedDoc
                  | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data RootE = RootE IDP List_Decl List_Decl
            | HoleRootE
            | ParseErrRootE (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Decl = Decl IDP IDP IDP IDP Bool Bool Ident Exp
           | BoardDecl IDP IDP Board
           | PPPresentationDecl IDP IDP PPPresentation
           | HoleDecl
           | ParseErrDecl (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data Ident = Ident IDP IDP String
            | HoleIdent
            | ParseErrIdent (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data Exp = PlusExp IDP Exp Exp
          | TimesExp IDP Exp Exp
@@ -76,22 +82,22 @@ data Exp = PlusExp IDP Exp Exp
          | ProductExp IDP IDP [IDP] List_Exp
          | HoleExp
          | ParseErrExp (ParseError Document Node ClipDoc UserToken)
-             deriving Show
+             deriving (Show, Data, Typeable)
 
 data Alt = Alt IDP IDP Ident Exp
          | HoleAlt
          | ParseErrAlt (ParseError Document Node ClipDoc UserToken)
-             deriving Show
+             deriving (Show, Data, Typeable)
 
 data Board = Board BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow
            | HoleBoard
            | ParseErrBoard (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data BoardRow = BoardRow BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare
               | HoleBoardRow
               | ParseErrBoardRow (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data BoardSquare = Queen Bool
                  | King Bool
@@ -102,81 +108,81 @@ data BoardSquare = Queen Bool
                  | Empty
                  | HoleBoardSquare
                  | ParseErrBoardSquare (ParseError Document Node ClipDoc UserToken)
-                     deriving Show
+                     deriving (Show, Data, Typeable)
 
 data PPPresentation = PPPresentation Bool List_Slide
                     | HolePPPresentation
                     | ParseErrPPPresentation (ParseError Document Node ClipDoc UserToken)
-                        deriving Show
+                        deriving (Show, Data, Typeable)
 
 data Slide = Slide String ItemList
            | HoleSlide
            | ParseErrSlide (ParseError Document Node ClipDoc UserToken)
-               deriving Show
+               deriving (Show, Data, Typeable)
 
 data ItemList = ItemList ListType List_Item
               | HoleItemList
               | ParseErrItemList (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data ListType = Bullet
               | Number
               | Alpha
               | HoleListType
               | ParseErrListType (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data Item = StringItem String
           | HeliumItem Exp
           | ListItem ItemList
           | HoleItem
           | ParseErrItem (ParseError Document Node ClipDoc UserToken)
-              deriving Show
+              deriving (Show, Data, Typeable)
 
 data List_Decl = List_Decl ConsList_Decl
                | HoleList_Decl
                | ParseErrList_Decl (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data List_Alt = List_Alt ConsList_Alt
               | HoleList_Alt
               | ParseErrList_Alt (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data List_Exp = List_Exp ConsList_Exp
               | HoleList_Exp
               | ParseErrList_Exp (ParseError Document Node ClipDoc UserToken)
-                  deriving Show
+                  deriving (Show, Data, Typeable)
 
 data List_Slide = List_Slide ConsList_Slide
                 | HoleList_Slide
                 | ParseErrList_Slide (ParseError Document Node ClipDoc UserToken)
-                    deriving Show
+                    deriving (Show, Data, Typeable)
 
 data List_Item = List_Item ConsList_Item
                | HoleList_Item
                | ParseErrList_Item (ParseError Document Node ClipDoc UserToken)
-                   deriving Show
+                   deriving (Show, Data, Typeable)
 
 data ConsList_Decl = Cons_Decl Decl ConsList_Decl
                    | Nil_Decl
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 data ConsList_Alt = Cons_Alt Alt ConsList_Alt
                   | Nil_Alt
-                      deriving Show
+                      deriving (Show, Data, Typeable)
 
 data ConsList_Exp = Cons_Exp Exp ConsList_Exp
                   | Nil_Exp
-                      deriving Show
+                      deriving (Show, Data, Typeable)
 
 data ConsList_Slide = Cons_Slide Slide ConsList_Slide
                     | Nil_Slide
-                        deriving Show
+                        deriving (Show, Data, Typeable)
 
 data ConsList_Item = Cons_Item Item ConsList_Item
                    | Nil_Item
-                       deriving Show
+                       deriving (Show, Data, Typeable)
 
 
 
@@ -210,7 +216,7 @@ data ClipDoc = Clip_Document Document
              | Clip_Int Int
              | Clip_String String
              | Clip_Float Float
-             | Clip_Nothing deriving Show
+             | Clip_Nothing deriving (Show, Typeable)
 
 
 
@@ -308,6 +314,7 @@ data Node = NoNode
           | Node_List_Item List_Item Path
           | Node_HoleList_Item List_Item Path
           | Node_ParseErrList_Item List_Item Path
+            deriving Typeable
 
 
 
