@@ -39,9 +39,24 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "--        (WhitespaceMap, IDPCounter, Presentation doc node clip token)"
   , ""
   , "presentationSheet :: PresentationSheet Document EnrichedDoc Node ClipDoc UserToken"
-  , "presentationSheet enrichedDoc document focusD whitespaceMap pIdC = "
-  , "  let (Syn_EnrichedDoc _ pIdC' pres _ self _ whitespaceMap' _) = "
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc undefined document Map.empty focusD pIdC [] emptyTokenStreamT whitespaceMap initLayout)"
+  , "presentationSheet enrichedDoc document focusD whitespaceMap commentMap pIdC = "
+  , "  let (Syn_EnrichedDoc { pIdC_Syn_EnrichedDoc = pIdC'"
+  , "                       , pres_Syn_EnrichedDoc = pres"
+  , "                       , self_Syn_EnrichedDoc = self"
+  , "                       , whitespaceMap_Syn_EnrichedDoc = whitespaceMap'"
+  , "                       }) = "
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc)"
+  , "          (Inh_EnrichedDoc { checkedModule_Inh_EnrichedDoc = undefined"
+  , "                           , doc_Inh_EnrichedDoc = document"
+  , "                           , errLocs_Inh_EnrichedDoc = Map.empty"
+  , "                           , focusD_Inh_EnrichedDoc = focusD"
+  , "                           , pIdC_Inh_EnrichedDoc = pIdC"
+  , "                           , path_Inh_EnrichedDoc = []"
+  , "                           , tokStr_Inh_EnrichedDoc = emptyTokenStreamT"
+  , "                           , whitespaceMap_Inh_EnrichedDoc = whitespaceMap"
+  , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
+  , "                           , commentMap_Inh_EnrichedDoc = commentMap"
+  , "                           })"
   , "  in  (whitespaceMap', pIdC', pres, self)"
   , ""
   , "{- "
@@ -55,11 +70,26 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "-}"
   , ""
   , "-- Phi"
-  , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap)"
+  , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap, CommentMap')"
   , "modifiedTree enrichedDoc = "
-  , "  let (Syn_EnrichedDoc _ _pIdC' _pres _ self _tokStr' _whitespaceMap' whitespaceMap2') ="
-  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc) (Inh_EnrichedDoc undefined HoleDocument Map.empty (PathD []) 0 [] emptyTokenStreamT initLayout initLayout)"
-  , "   in (self, whitespaceMap2')"
+  , "  let (Syn_EnrichedDoc { self_Syn_EnrichedDoc = self"
+  , "                       , whitespaceMapCreated_Syn_EnrichedDoc = whitespaceMap2'"
+  , "                       , commentMap_Syn_EnrichedDoc = commentMap'"
+  , "                       }) ="
+  , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc)"
+  , "          (Inh_EnrichedDoc { checkedModule_Inh_EnrichedDoc = undefined"
+  , "                           , doc_Inh_EnrichedDoc = HoleDocument"
+  , "                           , errLocs_Inh_EnrichedDoc = Map.empty"
+  , "                           , focusD_Inh_EnrichedDoc = PathD []"
+  , "                           , pIdC_Inh_EnrichedDoc = 0"
+  , "                           , path_Inh_EnrichedDoc = []"
+  , "                           , tokStr_Inh_EnrichedDoc = emptyTokenStreamT"
+  , "                           , whitespaceMap_Inh_EnrichedDoc = initLayout"
+  , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
+  , "                           , commentMap_Inh_EnrichedDoc = Map.empty"
+  , "                           })"
+  , "   in (self, whitespaceMap2', commentMap')"
+  , ""
   , "}" 
   ]
 
@@ -81,11 +111,11 @@ genDataType decls = genBanner "AG data type" $
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
  ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT | ]" -- Phi
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMap : CommentMap' | ]" -- Phi
   -- , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
-  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WhitespaceMap, TokenStreamT)} ]" -- Phi
+  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WsMap, TokenStreamT)} ]" -- Phi
   -- , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
@@ -155,13 +185,8 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
                   [ ("%1.path  = @lhs.path++["++show i++"]") <~ [fieldName field] 
                   | (i,field) <- zip [0..] fields, isDeclaredType decls $ fieldType field 
                   ] -- only generate for AG field types, but do include the others in the index computation
-               where addPlus (l:ls) = -- if not $ null idpFields
-                                      {-then-} (l++ " + @loc.noIdps") : ls -- Phi: [IDP]
-                                      -- then (l++ " + " ++ show (length idpFields)) : ls
---                                      else ls
-             pres' = [ "__ADMINISTRATE" --(loc.pres, loc.idps, lhs.whitespaceMapCreated, lhs.tokStr, loc.noIdps)"
-                     --, "  = let (pres, idps, wsMap, tokStr) = @loc.pres'"
-                     -- , "     in (addErr @lhs.errLocs @lhs.tokStr tokStr pres, idps, wsMap, tokStr, length idps)"
+               where addPlus (l:ls) = (l ++ " + @loc.noIdps") : ls -- Phi: [IDP]
+             pres' = [ "__ADMINISTRATE"
                      ]
          in {- if not $ null pIdCs 
             then "  | %1 " <~ [cnstrName] : pIdCs
@@ -189,7 +214,6 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "                      . presentFocus @lhs.focusD @lhs.path )"
   , "                      @elts.press"
   , "                      -- parent is reponsible for setting parsing/structural"
--- gerbo TODO: fix that 100, make it @loc.noIdps
   , "      elts.pIdC = @lhs.pIdC + @loc.noIdps" -- was + 100
   , "      lhs.pIdC = @elts.pIdC"
   , "      elts.path = @lhs.path"

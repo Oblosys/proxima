@@ -97,8 +97,9 @@ genSemBasicDecl decls (Decl (LHSBasicType typeNm) prods) =
   "SEM %1" <~ [typeNm] : concatMap genSemPresProd prods
     where 
        genSemPresProd (Prod _ cnstrName idpFields fields) =
-         [ "  | %1 {- " ++ concatMap (flip (++) " | " . myFieldName) fields ++ "-}"
-         , "      loc.pres' = (empty, [], @lhs.whitespaceMapCreated, @lhs.tokStr)"
+         -- [ "  | %1 {- " ++ concatMap (flip (++) " | " . myFieldName) fields ++ "-}"
+         [ "  | %1 {- " ++ concat (intersperse " | " $ map myFieldName fields) ++ " -}"
+         , "      loc.pres' = (empty, [], __WT_(lhs))"
          ] <~ [cnstrName]
        myFieldName fld = fldName ++ (if (fldTpNm `isPrefixOf` fldName')
                                      then ""
@@ -116,7 +117,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeNm) prods) =
 genSemListDecl (Decl (LHSListType typeName) _) = 
   [ "SEM List_%1"
   , "  | List_%1"
-  , "      loc.pres' = (row @elts.press, [], @elts.whitespaceMapCreated, @elts.tokStr)"
+  , "      loc.pres' = (row @elts.press, [], __WT_(elts))"
   ] <~ [typeName]
 
 
