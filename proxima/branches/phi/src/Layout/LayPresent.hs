@@ -40,7 +40,7 @@ present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
       diffTree = dt -- diffTree was created by translate
   in  (SetLay' (LayoutLevel lay' focus' diffTree), state, pres)  -- we should re present here because of local state
 present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
-present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
+present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,commentMap, idCounter)))  = 
   let -- focusXY = saveFocus focus lay
       (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
       focus' = focus {-

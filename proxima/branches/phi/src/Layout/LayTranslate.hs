@@ -116,7 +116,7 @@ parse _ state layLvl prsLvl _            = (SkipPres 0, state, layLvl)
 --            Layout doc node clip token -> Layout doc node clip token -> LayoutLevel doc node clip token -> FocusPres -> (EditPresentation doc enr node clip token, Layout doc node clip token, Layout doc node clip token)
 
 editLay editF state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = (SkipPres 0, state, layLvl)
-editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
+editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, commentMap, idCounter)) = 
  let (ll@(LayoutLevel pres' focus' dt), state') = editF state (LayoutLevel pres focus dt) -- this will be layLvl's own focus
      (pres'', focus'')             = (markUnparsed pres', markUnparsedF pres' focus')
    --  (pres''', layout', idCounter') = tokenize idCounter Nothing pres''

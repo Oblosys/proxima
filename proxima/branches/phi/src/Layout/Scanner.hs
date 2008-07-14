@@ -105,9 +105,9 @@ tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
                PresentationLevel doc node clip token -> 
                (EditPresentation doc enr node clip token, state, LayoutLevel doc node clip token)
-tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
+tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, _, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
-     presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,idPCounter')
+     presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,Map.empty,idPCounter')
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
      ) 

@@ -81,7 +81,7 @@ proxima presentationSheet parseSheet scannerSheet
             proximaLayers presentationSheet parseSheet scannerSheet
                           (LayerStateEval [] [], initDoc)   
                           ((),     initEnr)
-                          (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   
+                          (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,Map.empty,0))   
                           (LocalStateArr fontMetricsRef Nothing viewedAreaRef ((0,0),(0,0)), LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
                           ((), ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0 transparent) NoFocusA (EmptyP NoIDP)) 
                           -- (system (layer)local state,  initial higher level value)

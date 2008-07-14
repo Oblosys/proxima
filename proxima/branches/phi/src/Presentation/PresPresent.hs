@@ -31,20 +31,20 @@ present :: PresentationSheet doc enr node clip token -> LayerStatePres -> Enrich
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
 present _ state enrLvl pres                            (SkipEnr' i) = (SkipPres' (i-1), state, enrLvl)
-present presentationSheet state (EnrichedDocLevel _ _ _) (PresentationLevel pres (layoutMap,idC)) (SetEnr' enrLvl)  =
+present presentationSheet state (EnrichedDocLevel _ _ _) (PresentationLevel pres (layoutMap,commentMap,idC)) (SetEnr' enrLvl)  =
   let --focusXY             = saveFocus focus pres
-      (pres', layoutMap', idC', enrLvl')      = presentEnr presentationSheet state enrLvl layoutMap idC
+      (pres', layoutMap', idC', enrLvl')      = presentEnr presentationSheet state enrLvl layoutMap commentMap idC
       --focus'              = restoreFocus focusXY pres'
 
       --  (pres'', focus'') = (pres',focus')--normalizePresentation pres focus
-  in  (SetPres' (PresentationLevel pres' (layoutMap', idC')), state, enrLvl')
+  in  (SetPres' (PresentationLevel pres' (layoutMap', commentMap, idC')), state, enrLvl') -- gerbo
 present _ state enrLvl pres (WrapEnr' wrapped) = (unwrap wrapped, state, enrLvl)
 
 presentEnr :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-              WhitespaceMap -> IDPCounter ->
+              WhitespaceMap -> CommentMap doc node clip token -> IDPCounter ->
               (Presentation doc node clip token, WhitespaceMap, IDPCounter, EnrichedDocLevel enr doc)
-presentEnr presentationSheet state (EnrichedDocLevel enr focusD doc) layM idC = 
-      let (layM', idC', pres', enr') = presentationSheet enr doc focusD layM idC
+presentEnr presentationSheet state (EnrichedDocLevel enr focusD doc) layM cmtM idC = 
+      let (layM', idC', pres', enr') = presentationSheet enr doc focusD layM cmtM idC
                    -- Bit of a hack, doc is passed to presentationSheet for automatic popups.
                    -- Does not allow structural 
                    -- differences between doc and enriched doc (paths are enr paths)

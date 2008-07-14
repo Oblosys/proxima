@@ -15,7 +15,7 @@ data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
 
 data PresentationLevel doc node clip token = PresentationLevel (Presentation doc node clip token) (PresentationLS doc node clip token) deriving Show
 
-type PresentationLS doc node clip token = (WhitespaceMap, IDPCounter)
+type PresentationLS doc node clip token = (WhitespaceMap, CommentMap doc node clip token, IDPCounter)
 
 type Whitespace = (Int, Int) -- (line breaks, spaces)
 
@@ -27,6 +27,8 @@ data TokenLayout = TokenLayout { whitespace :: Whitespace
                                , whitespaceFocus :: FocusStartEnd -- trailing whitespace & focus
                                , tokenFocus :: FocusStartEnd      -- focus in token 
                                } deriving Show
+
+type CommentMap doc node clip token = Map IDP [(IDP, Presentation doc node clip token)]
 
 type WhitespaceMap = Map IDP TokenLayout   -- Whitespace information for each element in Presentation
 
