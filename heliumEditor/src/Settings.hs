@@ -20,7 +20,7 @@ import Common.CommonTypes
 
                 
 settings =
-  Settings { applicationName = "Dazzle documentation editor"
+  Settings { applicationName = "Helium editor"
 
            , rendererIncrementality = False
            , arrangerIncrementality = False
