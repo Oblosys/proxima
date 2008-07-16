@@ -100,11 +100,12 @@ pInc :: (DocNode node, Ord token, Show token) =>
 pInc p = pWrap f f' p
  where f'     state@(tk:_) steps k = (state, steps, k)
        f  brr state@(tk:_) steps k = 
-         case unchanged tk of
+         case getValIfUnchanged tk of
            Nothing -> (state, val (uncurry brr) steps, k)
            Just (v,nrOfToks) ->  (state, val (uncurry brr) (NoMoreSteps v), (\_ -> k (drop nrOfToks state)))
            
-unchanged = undefined
+getValIfUnchanged :: token -> Maybe (a, Int)
+getValIfUnchanged = undefined
            
 pSkip :: (DocNode node, Ord token, Show token) => Int -> ListParser doc node clip token ()
 pSkip n = pMap f f' (pSucceed ())
